@@ -6,7 +6,7 @@ class TryExpression extends Expression {
 		_reuseName: String?				= null
 		_unwrap: Boolean				= false
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Disabled {
 				@unwrap = true
@@ -20,8 +20,8 @@ class TryExpression extends Expression {
 			@defaultValue = $compile.expression(@data.defaultValue, this)
 			@defaultValue.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@argument.prepare()
 
 		if @unwrap && @argument.type().isInoperative() {
@@ -31,29 +31,29 @@ class TryExpression extends Expression {
 		if @defaultValue != null {
 			@defaultValue.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@argument.translate()
 
 		if @defaultValue != null {
 			@defaultValue.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
-	} // }}}
+	} # }}}
 	isComputed() => true
 	isConsumedError(error) => true
 	isUsingVariable(name) => @argument.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @argument.listNonLocalVariables(scope, variables)
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @reuseName != null {
 			@scope.releaseTempName(@reuseName)
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -81,8 +81,8 @@ class TryExpression extends Expression {
 
 			fragments.code(')')
 		}
-	} // }}}
-	toBooleanFragments(fragments, mode) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, mode) { # {{{
 		if @unwrap {
 			fragments.compileBoolean(@argument)
 		}
@@ -101,13 +101,13 @@ class TryExpression extends Expression {
 		else {
 			this.toFragments(fragments, mode)
 		}
-	} // }}}
-	toReusableFragments(fragments) { // {{{
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		fragments
 			.code(@reuseName, $equals)
 			.compile(this)
 
 		@reusable = true
-	} // }}}
+	} # }}}
 	type() => @argument.type()
 }

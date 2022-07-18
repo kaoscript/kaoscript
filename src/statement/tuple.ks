@@ -10,7 +10,7 @@ class TupleDeclaration extends Statement {
 		_type: NamedType<TupleType>
 		_variable: Variable
 	}
-	override initiate() { // {{{
+	override initiate() { # {{{
 		@name = @data.name.name
 
 		let named = false
@@ -47,8 +47,8 @@ class TupleDeclaration extends Statement {
 		@type = new NamedType(@name, @tuple)
 
 		@variable = @scope.define(@name, true, @type, this)
-	} // }}}
-	override analyse() { // {{{
+	} # }}}
+	override analyse() { # {{{
 		@function = new TupleFunction(@data, this, new BlockScope(@scope!?))
 
 		for const data in @data.fields {
@@ -60,8 +60,8 @@ class TupleDeclaration extends Statement {
 		}
 
 		@function.analyse()
-	} // }}}
-	override prepare() { // {{{
+	} # }}}
+	override prepare() { # {{{
 		if @extending {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
@@ -78,19 +78,19 @@ class TupleDeclaration extends Statement {
 		for const field in @fields {
 			@tuple.addField(field.type())
 		}
-	} // }}}
-	override translate() { // {{{
+	} # }}}
+	override translate() { # {{{
 		for const field in @fields {
 			field.translate()
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
+	} # }}}
 	fields() => @fields
 	isEnhancementExport() => true
 	isExtending() => @extending
-	toArrayFragments(fragments, mode) { // {{{
+	toArrayFragments(fragments, mode) { # {{{
 		if @extending {
 			let varname = '_'
 
@@ -121,8 +121,8 @@ class TupleDeclaration extends Statement {
 
 			line.code(']').done()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).tuple(`)
 
 		let ctrl = line.newControl(null, false, false).code(`function(`)
@@ -158,7 +158,7 @@ class TupleDeclaration extends Statement {
 		}
 
 		line.code(')').done()
-	} // }}}
+	} # }}}
 }
 
 class TupleFunction extends AbstractNode {
@@ -166,13 +166,13 @@ class TupleFunction extends AbstractNode {
 		_parameters: Array<Parameter>	= []
 		_type: FunctionType
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
 		@type = new FunctionType(@scope)
-	} // }}}
+	} # }}}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		let index = -1
 
 		if @parent.isExtending() {
@@ -204,7 +204,7 @@ class TupleFunction extends AbstractNode {
 
 			@type.addParameter(parameter.type())
 		}
-	} // }}}
+	} # }}}
 	translate()
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewTuple
@@ -224,7 +224,7 @@ class TupleFieldDeclaration extends AbstractNode {
 		_hasName: Boolean					= false
 		_parameter: TupleFieldParameter
 	}
-	constructor(data, parent) { // {{{
+	constructor(data, parent) { # {{{
 		super(data, parent)
 
 		if data.name? {
@@ -233,8 +233,8 @@ class TupleFieldDeclaration extends AbstractNode {
 		}
 
 		@parameter = new TupleFieldParameter(this, parent._function)
-	} // }}}
-	constructor(@type, parent) { // {{{
+	} # }}}
+	constructor(@type, parent) { # {{{
 		super({}, parent)
 
 		if @name ?= @type.name() {
@@ -245,9 +245,9 @@ class TupleFieldDeclaration extends AbstractNode {
 
 		@parameter = new TupleFieldParameter(this, parent._function)
 		@parameter.unflagValidation()
-	} // }}}
+	} # }}}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@parameter.analyse()
 		@parameter.prepare()
 
@@ -258,10 +258,10 @@ class TupleFieldDeclaration extends AbstractNode {
 				@type.flagNullable()
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@parameter.translate()
-	} // }}}
+	} # }}}
 	hasName() => @hasName
 	index() => @index
 	index(@index) => this
@@ -275,12 +275,12 @@ class TupleFieldParameter extends Parameter {
 		_field: TupleFieldDeclaration
 		_validation: Boolean			 = true
 	}
-	constructor(@field, parent) { // {{{
+	constructor(@field, parent) { # {{{
 		super(field._data, parent)
 
 		@data.modifiers = []
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @field.hasName() {
 			@name = new IdentifierParameter({name: @field.name()}, this, @scope)
 		}
@@ -294,14 +294,14 @@ class TupleFieldParameter extends Parameter {
 		for const name in @name.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
-	} // }}}
+	} # }}}
 	name() => @name
-	toValidationFragments(fragments) { // {{{
+	toValidationFragments(fragments) { # {{{
 		if @validation {
 			super(fragments)
 		}
-	} // }}}
-	unflagValidation() { // {{{
+	} # }}}
+	unflagValidation() { # {{{
 		@validation = false
-	} // }}}
+	} # }}}
 }

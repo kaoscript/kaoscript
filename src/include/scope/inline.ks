@@ -3,7 +3,7 @@ class InlineBlockScope extends BlockScope {
 		_tempParentNames	= {}
 		_upatedInferables	= {}
 	}
-	acquireTempName(declare: Boolean = true): String { // {{{
+	acquireTempName(declare: Boolean = true): String { # {{{
 		if const name = this.acquireUnusedTempName() {
 			return name
 		}
@@ -21,8 +21,8 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return name
-	} // }}}
-	acquireUnusedTempName(): String? { // {{{
+	} # }}}
+	acquireUnusedTempName(): String? { # {{{
 		for const _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
@@ -36,8 +36,8 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return null
-	} // }}}
-	private declareVariable(name: String, scope: Scope) { // {{{
+	} # }}}
+	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && this.hasBleedingVariable(name)) {
 			const newName = this.getNewName(name)
 
@@ -52,8 +52,8 @@ class InlineBlockScope extends BlockScope {
 
 			return null
 		}
-	} // }}}
-	getNewName(name: String): String { // {{{
+	} # }}}
+	getNewName(name: String): String { # {{{
 		let index = this.getRenamedIndex(name)
 		let newName = '__ks_' + name + '_' + (++index)
 
@@ -64,17 +64,17 @@ class InlineBlockScope extends BlockScope {
 		@renamedIndexes[name] = index
 
 		return newName
-	} // }}}
+	} # }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
-	getTempIndex() { // {{{
+	getTempIndex() { # {{{
 		if @tempIndex == -1 {
 			@tempIndex = @parent.getTempIndex()
 		}
 
 		return @tempIndex
-	} // }}}
+	} # }}}
 	hasBleedingVariable(name: String) => super(name) || @parent.hasBleedingVariable(name)
-	hasRenamedVariable(name: String): Boolean { // {{{
+	hasRenamedVariable(name: String): Boolean { # {{{
 		let parent = this
 		do {
 			if parent.hasDeclaredVariable(name) {
@@ -86,10 +86,10 @@ class InlineBlockScope extends BlockScope {
 		while parent.isInline()
 
 		return parent.hasDeclaredVariable(name)
-	} // }}}
+	} # }}}
 	isInline() => true
 	listUpdatedInferables() => @upatedInferables
-	releaseTempName(name) { // {{{
+	releaseTempName(name) { # {{{
 		if @tempParentNames[name] == true {
 			this.parent().releaseTempName(name)
 
@@ -98,8 +98,8 @@ class InlineBlockScope extends BlockScope {
 		else {
 			@tempNames[name] = true
 		}
-	} // }}}
-	rename(name) { // {{{
+	} # }}}
+	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
 		let parent = @parent
@@ -125,8 +125,8 @@ class InlineBlockScope extends BlockScope {
 		variable.renameAs(newName)
 
 		return newName
-	} // }}}
-	renameNext(name, line) { // {{{
+	} # }}}
+	renameNext(name, line) { # {{{
 		return if @renamedVariables[name] is String
 
 		const newName = this.declareVariable(name, this)
@@ -144,8 +144,8 @@ class InlineBlockScope extends BlockScope {
 		const variable: Variable = variables[i + 1]
 
 		variable.renameAs(newName)
-	} // }}}
-	replaceVariable(name: String, variable: Variable): Variable { // {{{
+	} # }}}
+	replaceVariable(name: String, variable: Variable): Variable { # {{{
 		variable = super.replaceVariable(name, variable)
 
 		if !@declarations[name] {
@@ -156,8 +156,8 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return variable
-	} // }}}
-	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
+	} # }}}
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
 		const variable = super.replaceVariable(name, type, downcast, absolute, node)
 
 		if !@declarations[name] {
@@ -168,11 +168,11 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return variable
-	} // }}}
+	} # }}}
 }
 
 class LaxInlineBlockScope extends InlineBlockScope {
-	private declareVariable(name: String, scope: Scope) { // {{{
+	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || this.hasRenamedVariable(name) {
 			const newName = this.getNewName(name)
 
@@ -187,6 +187,6 @@ class LaxInlineBlockScope extends InlineBlockScope {
 
 			return null
 		}
-	} // }}}
+	} # }}}
 	isBleeding() => true
 }

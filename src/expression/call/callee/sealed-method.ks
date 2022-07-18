@@ -6,19 +6,19 @@ class SealedMethodCallee extends Callee {
 		_property: String
 		_variable: NamedType<ClassType>
 	}
-	constructor(@data, @variable, @instance, @node) { // {{{
+	constructor(@data, @variable, @instance, @node) { # {{{
 		super(data)
 
 		@object = node._object
 		@property = node._property
 
 		@nullableProperty = data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@object.translate()
-	} // }}}
+	} # }}}
 	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		let class = @variable.type()
 
 		if @instance {
@@ -59,8 +59,8 @@ class SealedMethodCallee extends Callee {
 		}
 
 		return true
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
@@ -117,15 +117,15 @@ class SealedMethodCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isValue(')
 			.compile(@object)
 			.code(')')
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
-	} // }}}
+	} # }}}
 	type() => AnyType.NullableUnexplicit
 }

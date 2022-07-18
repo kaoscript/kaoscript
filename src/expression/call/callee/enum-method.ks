@@ -8,7 +8,7 @@ class EnumMethodCallee extends Callee {
 		_scope: ScopeKind
 		_type: Type
 	}
-	constructor(@data, @enum, @methodName, @methods, node) { // {{{
+	constructor(@data, @enum, @methodName, @methods, node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
@@ -35,12 +35,12 @@ class EnumMethodCallee extends Callee {
 		for method in methods {
 			this.validate(method, node)
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
-	} // }}}
+	} # }}}
 	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		if @methods? {
 			for const method in @methods {
 				if !method.isInitializingInstanceVariable(name) {
@@ -53,11 +53,11 @@ class EnumMethodCallee extends Callee {
 		else {
 			return false
 		}
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@expression.releaseReusable()
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			NotImplementedException.throw(node)
 		}
@@ -82,12 +82,12 @@ class EnumMethodCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		NotImplementedException.throw(node)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

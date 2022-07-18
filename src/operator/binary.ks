@@ -5,7 +5,7 @@ class BinaryOperatorExpression extends Expression {
 		_right
 		_tested: Boolean	= false
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
 
@@ -13,8 +13,8 @@ class BinaryOperatorExpression extends Expression {
 		@right.analyse()
 
 		@await = @left.isAwait() || @right.isAwait()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@left.prepare()
 
 		if @left.type().isInoperative() {
@@ -26,15 +26,15 @@ class BinaryOperatorExpression extends Expression {
 		if @right.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@left.translate()
 		@right.translate()
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@left.acquireReusable(false)
 		@right.acquireReusable(false)
-	} // }}}
+	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
 	isAwait() => @await
@@ -45,23 +45,23 @@ class BinaryOperatorExpression extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
 
 		return array
-	} // }}}
-	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+	} # }}}
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		@left.listNonLocalVariables(scope, variables)
 		@right.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@left.releaseReusable()
 		@right.releaseReusable()
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @await {
 			if @left.isAwaiting() {
 				return @left.toFragments(fragments, mode)
@@ -85,8 +85,8 @@ class BinaryOperatorExpression extends Expression {
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toNullableFragments(fragments) { // {{{
+	} # }}}
+	toNullableFragments(fragments) { # {{{
 		if !@tested {
 			if @left.isNullable() {
 				fragments.compileNullable(@left)
@@ -101,7 +101,7 @@ class BinaryOperatorExpression extends Expression {
 
 			@tested = true
 		}
-	} // }}}
+	} # }}}
 }
 
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
@@ -110,7 +110,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		_isNative: Boolean		= false
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
@@ -139,8 +139,8 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 				@type = @scope.reference('Number')
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		super()
 
 		if @isEnum {
@@ -163,25 +163,25 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 				@isNative = true
 			}
 		}
-	} // }}}
+	} # }}}
 	isAcceptingEnum() => false
 	isComputed() => @isNative
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toEnumFragments(fragments)
-	toNativeFragments(fragments) { // {{{
+	toNativeFragments(fragments) { # {{{
 		fragments.wrap(@left).code($space).code(this.symbol(), @data.operator).code($space).wrap(@right)
-	} // }}}
-	toOperandFragments(fragments, operator, type) { // {{{
+	} # }}}
+	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == this.operator() && type == OperandType::Number {
 			fragments.compile(@left).code($comma).compile(@right)
 		}
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
+	} # }}}
+	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
 			this.toEnumFragments(fragments)
 		}
@@ -196,7 +196,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 				.compile(@right)
 				.code(')')
 		}
-	} // }}}
+	} # }}}
 	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
 	type() => @type
 }
@@ -210,7 +210,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		_isString: Boolean			= false
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
@@ -270,14 +270,14 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
 			}
 		}
-	} // }}}
+	} # }}}
 	isComputed() => @isNative
-	override setExpectedType(type) { // {{{
+	override setExpectedType(type) { # {{{
 		if !type.isEnum() && (type.isNumber() || type.isString()) {
 			@expectingEnum = false
 		}
-	} // }}}
-	toOperandFragments(fragments, operator, type) { // {{{
+	} # }}}
+	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Addition {
 			if type == OperandType::Enum && (@isEnum || @isNumber) {
 				fragments.wrap(@left).code(' | ').wrap(@right)
@@ -292,8 +292,8 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
+	} # }}}
+	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
 			lateinit const operator: String
 
@@ -332,7 +332,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 
 			fragments.compile(@left).code($comma).compile(@right).code(')')
 		}
-	} // }}}
+	} # }}}
 	toQuote() => `\(@left.toQuote()) + \(@right.toQuote())`
 	type() => @type
 }
@@ -342,13 +342,13 @@ class BinaryOperatorBitwiseAnd extends NumericBinaryOperatorExpression {
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&'
-	toEnumFragments(fragments) { // {{{
+	toEnumFragments(fragments) { # {{{
 		fragments.code(@type.name(), '(')
 
 		this.toNativeFragments(fragments)
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorBitwiseLeftShift extends NumericBinaryOperatorExpression {
@@ -362,13 +362,13 @@ class BinaryOperatorBitwiseOr extends NumericBinaryOperatorExpression {
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|'
-	toEnumFragments(fragments) { // {{{
+	toEnumFragments(fragments) { # {{{
 		fragments.code(@type.name(), '(')
 
 		this.toNativeFragments(fragments)
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorBitwiseRightShift extends NumericBinaryOperatorExpression {
@@ -401,7 +401,7 @@ class BinaryOperatorMatch extends Expression {
 		_subject
 		_tested: Boolean			= false
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 
@@ -422,8 +422,8 @@ class BinaryOperatorMatch extends Expression {
 		else {
 			this.addOperand(@data.right)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {
@@ -449,15 +449,15 @@ class BinaryOperatorMatch extends Expression {
 				TypeException.throwInvalidOperand(operand, Operator::Match, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@subject.translate()
 
 		for const operand in @operands {
 			operand.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if @junctive && @subject.isComposite() {
 			@composite = true
 
@@ -469,8 +469,8 @@ class BinaryOperatorMatch extends Expression {
 		for const operand in @operands {
 			operand.acquireReusable(acquire)
 		}
-	} // }}}
-	private addOperand(data) { // {{{
+	} # }}}
+	private addOperand(data) { # {{{
 		const operand = $compile.expression(data, this)
 
 		operand.analyse()
@@ -480,11 +480,11 @@ class BinaryOperatorMatch extends Expression {
 		if operand.isAwait() {
 			@await = true
 		}
-	} // }}}
+	} # }}}
 	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => true
 	operator() => '!=='
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)
 		}
@@ -494,8 +494,8 @@ class BinaryOperatorMatch extends Expression {
 		for const operand in @operands {
 			operand.releaseReusable()
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @await {
 			NotSupportedException.throw(this)
 		}
@@ -536,8 +536,8 @@ class BinaryOperatorMatch extends Expression {
 		if test {
 			fragments.code(' : false')
 		}
-	} // }}}
-	toNullableFragments(fragments) { // {{{
+	} # }}}
+	toNullableFragments(fragments) { # {{{
 		if !@tested {
 			let nf = false
 
@@ -562,8 +562,8 @@ class BinaryOperatorMatch extends Expression {
 
 			@tested = true
 		}
-	} // }}}
-	toOperatorFragments(fragments, operand, assignable) { // {{{
+	} # }}}
+	toOperatorFragments(fragments, operand, assignable) { # {{{
 		const native = @isNative && operand.type().isNumber() && !operand.type().isNullable()
 		const operator = this.operator()
 
@@ -603,7 +603,7 @@ class BinaryOperatorMatch extends Expression {
 					.code(`) \(operator) 0n`)
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
@@ -627,7 +627,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		@left.acquireReusable(true)
@@ -641,15 +641,15 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		else {
 			@type = Type.union(@scope, leftType, @right.type())
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@left.acquireReusable(true)
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@left.releaseReusable()
-	} // }}}
+	} # }}}
 	inferTypes(inferables) => @left.inferTypes(inferables)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @left.isNullable() {
 			fragments.code('(')
 
@@ -672,7 +672,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			.compile(@left)
 			.code(' : ')
 			.compile(@right)
-	} // }}}}
+	} # }}}}
 	type() => @type
 }
 
@@ -680,9 +680,9 @@ class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
 	operator() => Operator::Quotient
 	runtime() => 'quotient'
 	symbol() => '/.'
-	toNativeFragments(fragments) { // {{{
+	toNativeFragments(fragments) { # {{{
 		fragments.code('Number.parseInt(').wrap(@left).code(' / ').wrap(@right).code(')')
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
@@ -690,7 +690,7 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 	operator() => Operator::Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
-	toOperandFragments(fragments, operator, type) { // {{{
+	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Subtraction {
 			if type == OperandType::Enum {
 				fragments.wrap(@left).code(' & ~').wrap(@right)
@@ -702,10 +702,10 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toEnumFragments(fragments) { // {{{
+	} # }}}
+	toEnumFragments(fragments) { # {{{
 		fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorTypeCasting extends Expression {
@@ -715,7 +715,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		_nullable: Boolean	= false
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
 
@@ -731,8 +731,8 @@ class BinaryOperatorTypeCasting extends Expression {
 				@type = @type.setNullable(true)
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@left.prepare()
 
 		const type = @left.type()
@@ -744,10 +744,10 @@ class BinaryOperatorTypeCasting extends Expression {
 		if !(type is ReferenceType || type is UnionType || type.isAny()) {
 			TypeException.throwInvalidCasting(this)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@left.translate()
-	} // }}}
+	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	isComputed() => false
@@ -756,7 +756,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
 			fragments.compile(@left)
 		}
@@ -773,7 +773,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		else {
 			TypeException.throwNotCastableTo(@left.type(), @type, this)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -783,11 +783,11 @@ class BinaryOperatorTypeEquality extends Expression {
 		_subject
 		_trueType: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {
@@ -837,12 +837,12 @@ class BinaryOperatorTypeEquality extends Expression {
 		if @subject.isInferable() {
 			@falseType = @subject.type().reduce(@trueType)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@subject.translate()
-	} // }}}
+	} # }}}
 	hasExceptions() => false
-	inferWhenTrueTypes(inferables) { // {{{
+	inferWhenTrueTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
 				isVariable: @subject is IdentifierLiteral
@@ -852,8 +852,8 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		return inferables
-	} // }}}
-	inferWhenFalseTypes(inferables) { // {{{
+	} # }}}
+	inferWhenFalseTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
 				isVariable: @subject is IdentifierLiteral
@@ -862,17 +862,17 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		return inferables
-	} // }}}
+	} # }}}
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
 	listAssignments(array) => @subject.listAssignments(array)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		@trueType.toPositiveTestFragments(fragments, @subject)
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
-	private validateType(variable: Variable) { // {{{
+	private validateType(variable: Variable) { # {{{
 		const type = variable.getRealType()
 
 		if @subject.type().isNull() {
@@ -894,7 +894,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		return type.reference()
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorTypeInequality extends Expression {
@@ -903,12 +903,12 @@ class BinaryOperatorTypeInequality extends Expression {
 		_subject
 		_trueType: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {
@@ -958,17 +958,17 @@ class BinaryOperatorTypeInequality extends Expression {
 		if @subject.isInferable() {
 			@trueType = @subject.type().reduce(@falseType)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@subject.translate()
-	} // }}}
+	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
-	inferWhenTrueTypes(inferables) { // {{{
+	inferWhenTrueTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
 				isVariable: @subject is IdentifierLiteral
@@ -978,8 +978,8 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		return inferables
-	} // }}}
-	inferWhenFalseTypes(inferables) { // {{{
+	} # }}}
+	inferWhenFalseTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
 				isVariable: @subject is IdentifierLiteral
@@ -988,13 +988,13 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		return inferables
-	} // }}}
+	} # }}}
 	listAssignments(array) => @subject.listAssignments(array)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		@falseType.toNegativeTestFragments(fragments, @subject)
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
-	private validateType(variable: Variable) { // {{{
+	private validateType(variable: Variable) { # {{{
 		const type = variable.getRealType()
 
 		if @subject.type().isNull() {
@@ -1021,5 +1021,5 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		return type.reference()
-	} // }}}
+	} # }}}
 }

@@ -8,7 +8,7 @@ class EnumCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	constructor(@data, match: CallMatch, @node) { // {{{
+	constructor(@data, match: CallMatch, @node) { # {{{
 		super(data)
 
 		@expression = $compile.expression(data.callee, node)
@@ -25,20 +25,20 @@ class EnumCallee extends Callee {
 		this.validate(@function, node)
 
 		@type = @function.getReturnType()
-	} // }}}
-	override hashCode() { // {{{
+	} # }}}
+	override hashCode() { # {{{
 		return `enum:\(@arguments)`
-	} // }}}
-	mergeWith(that: Callee) { // {{{
+	} # }}}
+	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		fragments.wrap(@expression, mode).code(`.__ks_from`).code('(')
 
 		Router.toArgumentsFragments(@arguments, node._arguments, @function, false, fragments, mode)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

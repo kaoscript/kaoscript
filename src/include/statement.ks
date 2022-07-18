@@ -5,31 +5,31 @@ abstract class Statement extends AbstractNode {
 		_attributeDatas			= {}
 		_line: Number
 	}
-	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, super.file())
 		@line = data.start.line
-	} // }}}
-	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
+	} # }}}
+	constructor(@data, @parent, scope: Scope, kind: ScopeType) { # {{{
 		super(data, parent, scope, kind)
 
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, super.file())
 		@line = data.start.line
-	} // }}}
-	addAssignments(variables) { // {{{
+	} # }}}
+	addAssignments(variables) { # {{{
 		@assignments.pushUniq(...variables)
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node) => @parent.addInitializableVariable(variable, this)
-	afterward(node) { // {{{
+	afterward(node) { # {{{
 		@afterwards.push(node)
-	} // }}}
-	assignTempVariables(scope: Scope) { // {{{
+	} # }}}
+	assignTempVariables(scope: Scope) { # {{{
 		scope.commitTempVariables(@assignments)
-	} // }}}
+	} # }}}
 	assignments() => @assignments
 	checkReturnType(type: Type)
-	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
 		for const name in names {
 			if const variable = scope.getVariable(name) {
 				if variable.isImmutable() {
@@ -47,16 +47,16 @@ abstract class Statement extends AbstractNode {
 				@scope.define(name, false, this)
 			}
 		}
-	} // }}}
-	defineVariables(left: AbstractNode, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
+	} # }}}
+	defineVariables(left: AbstractNode, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
 		this.defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
-	} // }}}
+	} # }}}
 	export(recipient)
-	export(recipient, enhancement: Boolean) { // {{{
+	export(recipient, enhancement: Boolean) { # {{{
 		if !enhancement {
 			this.export(recipient)
 		}
-	} // }}}
+	} # }}}
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	includePath() => @parent.includePath()
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
@@ -74,18 +74,18 @@ abstract class Statement extends AbstractNode {
 	isUsingStaticVariable(class, varname) => false
 	line() => @line
 	listNonLocalVariables(scope: Scope, variables: Array) => variables
-	setAttributeData(key: AttributeData, data) { // {{{
+	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
-	} // }}}
+	} # }}}
 	setExpectedType(type: Type): Void
 	statement() => this
 	target() => @options.target
-	toDeclarationFragments(variables, fragments) { // {{{
+	toDeclarationFragments(variables, fragments) { # {{{
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		const variables = this.assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
@@ -101,7 +101,7 @@ abstract class Statement extends AbstractNode {
 				afterward.toAfterwardFragments(fragments)
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 include {

@@ -30,7 +30,7 @@ class ForInStatement extends Statement {
 		_til
 		_to
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -145,8 +145,8 @@ class ForInStatement extends Statement {
 		if @descending && @fromDesc {
 			@descending = @fromDesc = false
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@expression.prepare()
 
 		const type = @expression.type()
@@ -278,8 +278,8 @@ class ForInStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
 
 		if @value? {
@@ -311,8 +311,8 @@ class ForInStatement extends Statement {
 		}
 
 		@body.translate()
-	} // }}}
-	checkForBreak(expression) { // {{{
+	} # }}}
+	checkForBreak(expression) { # {{{
 		if !@useBreak && @value != null {
 			for const variable in @value.listAssignments([]) until @useBreak {
 				if expression.isUsingVariable(variable) {
@@ -320,8 +320,8 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	checkForRenamedVariables(expression, variables: Array) { // {{{
+	} # }}}
+	checkForRenamedVariables(expression, variables: Array) { # {{{
 		if @index != null && expression.isUsingVariable(@data.index.name) {
 			if @declareIndex {
 				variables.pushUniq(@data.index.name)
@@ -343,13 +343,13 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) => // {{{
+	isUsingVariable(name) => # {{{
 			@expression.isUsingVariable(name)
 		||	@from?.isUsingVariable(name)
 		||	@til?.isUsingVariable(name)
@@ -359,8 +359,8 @@ class ForInStatement extends Statement {
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
 		||	@body.isUsingVariable(name)
-	// }}}
-	toBoundFragments(fragments) { // {{{
+	# }}}
+	toBoundFragments(fragments) { # {{{
 		if @descending {
 			if @from? {
 				if @from is NumberLiteral && @from.value() < 0 {
@@ -437,8 +437,8 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	toFromFragments(fragments) { // {{{
+	} # }}}
+	toFromFragments(fragments) { # {{{
 		if @descending {
 			if @til? {
 				if @til is NumberLiteral && @til.value() < 0 {
@@ -515,8 +515,8 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		let ctrl
 
 		if @index != null && !@declaration && !@declareIndex {
@@ -674,5 +674,5 @@ class ForInStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 }

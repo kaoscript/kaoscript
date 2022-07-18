@@ -1,7 +1,7 @@
 class OperationScope extends InlineBlockScope {
 	block() => @parent.block()
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable => @parent.define(name, immutable, type, initialized, node)
-	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
 		let variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
@@ -30,5 +30,5 @@ class OperationScope extends InlineBlockScope {
 		}
 
 		return variable
-	} // }}}
+	} # }}}
 }

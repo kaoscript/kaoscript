@@ -10,7 +10,7 @@ class SealedCallee extends Callee {
 		@type: Type
 		@variable: NamedType<ClassType>
 	}
-	constructor(@data, @variable, @instance, @methods, @node) { // {{{
+	constructor(@data, @variable, @instance, @methods, @node) { # {{{
 		super(data)
 
 		@object = node._object
@@ -27,9 +27,9 @@ class SealedCallee extends Callee {
 		}
 
 		@type = Type.union(node.scope(), ...types)
-	} // }}}
+	} # }}}
 	override hashCode() => `sealed`
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		for const method in @methods {
 			if !method.isInitializingInstanceVariable(name) {
 				return false
@@ -37,11 +37,11 @@ class SealedCallee extends Callee {
 		}
 
 		return true
-	} // }}}
-	mergeWith(that: Callee) { // {{{
+	} # }}}
+	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
@@ -98,16 +98,16 @@ class SealedCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isValue(')
 			.compile(@object)
 			.code(')')
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
-	} // }}}
+	} # }}}
 	translate()
 	type() => @type
 	type(@type) => this

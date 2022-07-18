@@ -9,12 +9,12 @@ class ClassMethodType extends FunctionType {
 		@overwrite: Array?						= null
 	}
 	static {
-		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
+		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
 			const scope = node.scope()
 
 			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
-		} // }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
+		} # }}}
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
 			const data = index
 			const type = new ClassMethodType(scope)
 
@@ -48,13 +48,13 @@ class ClassMethodType extends FunctionType {
 			type.updateParameters()
 
 			return type
-		} // }}}
+		} # }}}
 	}
 	access(@access) => this
-	addInitializingInstanceVariable(name: String) { // {{{
+	addInitializingInstanceVariable(name: String) { # {{{
 		@initVariables[name] = true
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const clone = new ClassMethodType(@scope)
 
 		FunctionType.clone(this, clone)
@@ -74,8 +74,8 @@ class ClassMethodType extends FunctionType {
 		}
 
 		return clone
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
 		const export = {
 			index: @index
 			access: @access
@@ -102,33 +102,33 @@ class ClassMethodType extends FunctionType {
 		}
 
 		return export
-	} // }}}
-	flagAbstract() { // {{{
+	} # }}}
+	flagAbstract() { # {{{
 		@abstract = true
-	} // }}}
-	flagForked(hidden: Boolean) { // {{{
+	} # }}}
+	flagForked(hidden: Boolean) { # {{{
 		@forked = true
 		@forkedIndex = @index
-	} // }}}
-	flagInstance() { // {{{
+	} # }}}
+	flagInstance() { # {{{
 		@instance = true
 
 		return this
-	} // }}}
+	} # }}}
 	getForkedIndex() => @forkedIndex
 	isAbstract() => @abstract
-	isExportable() { // {{{
+	isExportable() { # {{{
 		if !super() {
 			return false
 		}
 
 		return @access != Accessibility::Internal
-	} // }}}
+	} # }}}
 	isForked() => @forked
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isInstance() => @instance
 	isMethod() => true
-	isOverflowing(methods: Array<ClassMethodType>) { // {{{
+	isOverflowing(methods: Array<ClassMethodType>) { # {{{
 		const mode = MatchingMode::SimilarParameter + MatchingMode::MissingParameter + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
 
 		for const method in methods {
@@ -138,9 +138,9 @@ class ClassMethodType extends FunctionType {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isSealable() => true
-	isSubsetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
+	isSubsetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
 		for const method in methods {
 			if this.isSubsetOf(method, mode) {
 				return true
@@ -148,8 +148,8 @@ class ClassMethodType extends FunctionType {
 		}
 
 		return false
-	} // }}}
-	isSupersetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
+	} # }}}
+	isSupersetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
 		for const method in methods {
 			if method.isSubsetOf(this, mode) {
 				return true
@@ -157,10 +157,10 @@ class ClassMethodType extends FunctionType {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	overwrite() => @overwrite
 	overwrite(@overwrite)
-	private processModifiers(modifiers) { // {{{
+	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				@abstract = true
@@ -181,9 +181,9 @@ class ClassMethodType extends FunctionType {
 				@sealed = true
 			}
 		}
-	} // }}}
-	setForkedIndex(@forkedIndex): this { // {{{
+	} # }}}
+	setForkedIndex(@forkedIndex): this { # {{{
 		@forked = true
-	} // }}}
+	} # }}}
 	override setReturnType(@returnType): this
 }

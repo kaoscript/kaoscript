@@ -7,10 +7,10 @@ class NamespaceDeclaration extends Statement {
 		_type: NamedContainerType<NamespaceType>
 		_variable: Variable
 	}
-	constructor(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { # {{{
 		super(data, parent, new NamespaceScope(scope))
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		@name = @data.name.name
 		@type = new NamedContainerType(@name, new NamespaceType(@scope!?))
 
@@ -24,15 +24,15 @@ class NamespaceDeclaration extends Statement {
 
 			statement.initiate()
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for statement in @statements {
 			@scope.line(statement.line())
 
 			statement.analyse()
 		}
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
@@ -44,8 +44,8 @@ class NamespaceDeclaration extends Statement {
 
 			statement.export(this, true)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
@@ -57,47 +57,47 @@ class NamespaceDeclaration extends Statement {
 
 			statement.export(this, false)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
 		}
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
-	addTopNode(node) { // {{{
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
-	export(name: String, variable) { // {{{
+	} # }}}
+	export(name: String, variable) { # {{{
 		@type.addProperty(name, variable.getDeclaredType())
 
 		@exports[name] = variable
-	} // }}}
-	exportMacro(name, macro) { // {{{
+	} # }}}
+	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(`\(@name).\(name)`, macro)
-	} // }}}
+	} # }}}
 	includePath() => null
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if const var = @scope.getDefinedVariable(variable.name) {
 			var.setDeclaredType(variable.type)
 		}
-	} // }}}
+	} # }}}
 	name() => @name
-	publishMacro(name, macro) { // {{{
+	publishMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
 
 		@parent.registerMacro(`\(@name).\(name)`, macro)
-	} // }}}
+	} # }}}
 	recipient() => this
-	registerMacro(name, macro) { // {{{
+	registerMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
-	} // }}}
-	toExportFragements(fragments) { // {{{
+	} # }}}
+	toExportFragements(fragments) { # {{{
 		const line = fragments.newLine().code('return ')
 		const object = line.newObject()
 
@@ -107,8 +107,8 @@ class NamespaceDeclaration extends Statement {
 
 		object.done()
 		line.done()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		const block = line.newBlock()
 
@@ -124,6 +124,6 @@ class NamespaceDeclaration extends Statement {
 
 		block.done()
 		line.code(')').done()
-	} // }}}
+	} # }}}
 	type() => @type
 }

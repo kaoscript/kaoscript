@@ -2,7 +2,7 @@ class ImportScope extends BlockScope {
 	private {
 		_scopeRenames				= {}
 	}
-	addVariable(name: String, variable: Variable, node?) { // {{{
+	addVariable(name: String, variable: Variable, node?) { # {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -23,8 +23,8 @@ class ImportScope extends BlockScope {
 		}
 
 		@variables[name] = [@line, variable]
-	} // }}}
-	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { // {{{
+	} # }}}
+	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Renamed {
 			if const renames = @scopeRenames[name] {
 				for const rename in renames {
@@ -36,8 +36,8 @@ class ImportScope extends BlockScope {
 		}
 
 		return name == newName
-	} // }}}
-	rename(name: String, newName: String, scope: Scope) { // {{{
+	} # }}}
+	rename(name: String, newName: String, scope: Scope) { # {{{
 		if newName != name {
 			if const renames = @scopeRenames[name] {
 				renames.push({
@@ -52,9 +52,9 @@ class ImportScope extends BlockScope {
 				}]
 			}
 		}
-	} // }}}
+	} # }}}
 	resetReference(name: String)
-	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
 		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
@@ -62,5 +62,5 @@ class ImportScope extends BlockScope {
 		}
 
 		return @references[hash]
-	} // }}}
+	} # }}}
 }

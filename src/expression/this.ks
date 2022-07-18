@@ -16,7 +16,7 @@ class ThisExpression extends Expression {
 		_type: Type?				= null
 		_variableName: String?		= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@name = @data.name.name
 
 		let parent = @parent
@@ -64,8 +64,8 @@ class ThisExpression extends Expression {
 		if !?@class {
 			SyntaxException.throwUnexpectedAlias(@name, this)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		return unless @type == null
 
 		if @instance {
@@ -196,9 +196,9 @@ class ThisExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	translate()
-	declaration() { // {{{
+	declaration() { # {{{
 		if const node = @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
 				return node.parent().getInstanceVariable(@variableName)
@@ -206,13 +206,13 @@ class ThisExpression extends Expression {
 		}
 
 		return null
-	} // }}}
-	flagAssignable() { // {{{
+	} # }}}
+	flagAssignable() { # {{{
 		@assignable = true
-	} // }}}
+	} # }}}
 	fragment() => @fragment
 	getClass() => @class
-	getDeclaredType() { // {{{
+	getDeclaredType() { # {{{
 		if !@calling {
 			if @instance {
 				if variable ?= @class.type().getInstanceVariable(@name) {
@@ -228,17 +228,17 @@ class ThisExpression extends Expression {
 		}
 
 		return @type
-	} // }}}
-	getVariableDeclaration(class) { // {{{
+	} # }}}
+	getVariableDeclaration(class) { # {{{
 		return class.getInstanceVariable(@variableName)
-	} // }}}
+	} # }}}
 	getVariableName() => @variableName
-	getUnpreparedType() { // {{{
+	getUnpreparedType() { # {{{
 		this.prepare()
 
 		return @type
-	} // }}}
-	initializeVariables(type: Type, node: Expression) { // {{{
+	} # }}}
+	initializeVariables(type: Type, node: Expression) { # {{{
 		if @variableName != null {
 			node.initializeVariable(VariableBrief(
 				name: @variableName
@@ -247,7 +247,7 @@ class ThisExpression extends Expression {
 				immutable: @immutable
 			))
 		}
-	} // }}}
+	} # }}}
 	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
 	isExpectingType() => true
@@ -257,19 +257,19 @@ class ThisExpression extends Expression {
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		if @variableName != null {
 			array.push(@variableName)
 		}
 
 		return array
-	} // }}}
+	} # }}}
 	name() => @name
 	path() => @fragment
 	setAssignment(@assignment)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(@fragment)
-	} // }}}
+	} # }}}
 	toQuote() => `@\(@name)`
 	type() => @type
 }

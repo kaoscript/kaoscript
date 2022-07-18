@@ -1,14 +1,14 @@
 class NamespaceScope extends BlockScope {
-	constructor(@parent) { // {{{
+	constructor(@parent) { # {{{
 		super(parent)
 
 		@parent = parent.authority()
 		@authority = this
-	} // }}}
+	} # }}}
 }
 
 class NamespaceTypeScope extends BlockScope {
-	addVariable(name: String, variable: Variable) { // {{{
+	addVariable(name: String, variable: Variable) { # {{{
 		if $keywords[name] == true {
 			const newName = this.getNewName(name)
 
@@ -25,5 +25,5 @@ class NamespaceTypeScope extends BlockScope {
 		}
 
 		@variables[name] = [@line, variable]
-	} // }}}
+	} # }}}
 }

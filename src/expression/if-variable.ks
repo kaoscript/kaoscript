@@ -7,7 +7,7 @@ class IfVariableDeclarationExpression extends Expression {
 		_immutable: Boolean
 		_init
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@immutable = !@data.rebindable
 		@autotype = @immutable || @data.autotype
 		@await = @data.await
@@ -37,8 +37,8 @@ class IfVariableDeclarationExpression extends Expression {
 
 		@init = $compile.expression(@data.init, this)
 		@init.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@init.prepare()
 
 		if @autotype {
@@ -48,16 +48,16 @@ class IfVariableDeclarationExpression extends Expression {
 		for declarator in @declarators {
 			declarator.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@init.translate()
 
 		for declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
+	} # }}}
 	isImmutable() => @immutable
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @await {
 			throw new NotImplementedException(this)
 		}
@@ -69,5 +69,5 @@ class IfVariableDeclarationExpression extends Expression {
 				.compile(@init)
 				.code(')')
 		}
-	} // }}}
+	} # }}}
 }

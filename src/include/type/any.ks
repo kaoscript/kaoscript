@@ -9,22 +9,22 @@ class AnyType extends Type {
 		_explicit: Boolean	= true
 		_nullable: Boolean	= false
 	}
-	constructor() { // {{{
+	constructor() { # {{{
 		super(null)
-	} // }}}
-	constructor(@explicit, @nullable) { // {{{
+	} # }}}
+	constructor(@explicit, @nullable) { # {{{
 		super(null)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const that = new AnyType(@explicit, @nullable)
 
 		return that.copyFrom(this)
-	} // }}}
-	copyFrom(src: AnyType): this { // {{{
+	} # }}}
+	copyFrom(src: AnyType): this { # {{{
 		@alien = src._alien
 		@required = src._required
-	} // }}}
-	compareTo(value: Type) { // {{{
+	} # }}}
+	compareTo(value: Type) { # {{{
 		if value.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -39,8 +39,8 @@ class AnyType extends Type {
 		else {
 			return 1
 		}
-	} // }}}
-	compareToRef(value: AnyType) { // {{{
+	} # }}}
+	compareToRef(value: AnyType) { # {{{
 		if @nullable == value.isNullable() {
 			return 0
 		}
@@ -50,9 +50,9 @@ class AnyType extends Type {
 		else {
 			return -1
 		}
-	} // }}}
+	} # }}}
 	compareToRef(value: NullType) => -1
-	compareToRef(value: ReferenceType) { // {{{
+	compareToRef(value: ReferenceType) { # {{{
 		if value.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -67,9 +67,9 @@ class AnyType extends Type {
 		else {
 			return 1
 		}
-	} // }}}
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.toReference(references, indexDelta, mode, module)
-	flagAlien() { // {{{
+	flagAlien() { # {{{
 		if @alien {
 			return this
 		}
@@ -79,8 +79,8 @@ class AnyType extends Type {
 		type._alien = true
 
 		return type
-	} // }}}
-	flagRequired() { // {{{
+	} # }}}
+	flagRequired() { # {{{
 		if @required {
 			return this
 		}
@@ -90,13 +90,13 @@ class AnyType extends Type {
 		type._required = true
 
 		return type
-	} // }}}
+	} # }}}
 	getProperty(name) => AnyType.NullableUnexplicit
 	// TODO: merge methods
 	hashCode(): String => this.hashCode(false)
 	hashCode(fattenNull: Boolean): String => @nullable ? fattenNull ? `Any|Null` : `Any?` : `Any`
 	isAny() => true
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if anycast && !@explicit {
 			return true
 		}
@@ -111,13 +111,13 @@ class AnyType extends Type {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => false
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
-	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return false unless value.isAny()
 
@@ -134,11 +134,11 @@ class AnyType extends Type {
 		else {
 			return value.isAny() && (!@nullable || value.isNullable())
 		}
-	} // }}}
+	} # }}}
 	matchContentOf(value) => !@explicit || (value.isAny() && (@nullable -> value.isNullable()))
 	parameter() => AnyType.NullableUnexplicit
 	reference() => this
-	setNullable(nullable: Boolean): Type { // {{{
+	setNullable(nullable: Boolean): Type { # {{{
 		let type
 
 		if @nullable == nullable {
@@ -157,8 +157,8 @@ class AnyType extends Type {
 		else {
 			return type
 		}
-	} // }}}
-	split(types: Array) { // {{{
+	} # }}}
+	split(types: Array) { # {{{
 		types.pushUniq(@explicit ? AnyType.Explicit : AnyType.Unexplicit)
 
 		if @nullable {
@@ -166,38 +166,38 @@ class AnyType extends Type {
 		}
 
 		return types
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		fragments.code(@nullable ? `Any?` : `Any`)
-	} // }}}
+	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.toReference(references, indexDelta, mode, module)
 	toQuote(): String => @nullable ? `Any?` : `Any`
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @explicit {
 			return @nullable ? `Any!?` : `Any!`
 		}
 		else {
 			return @nullable ? `Any?` : `Any`
 		}
-	} // }}}
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		if @nullable {
 			fragments.code('false')
 		}
 		else {
 			fragments.code(`\($runtime.type(node)).isNull(`).compile(node).code(`)`)
 		}
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		if @nullable {
 			fragments.code('true')
 		}
 		else {
 			fragments.code(`\($runtime.type(node)).isValue(`).compile(node).code(`)`)
 		}
-	} // }}}
+	} # }}}
 	override toRouteTestFragments(fragments, node, junction) => this.toPositiveTestFragments(fragments, node, junction)
-	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { // {{{
+	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
 		const literal = new Literal(false, node, node.scope(), 'value')
@@ -215,8 +215,8 @@ class AnyType extends Type {
 		}
 
 		fragments.code(')')
-	} // }}}
-	override toTestFunctionFragments(fragments, node) { // {{{
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
 		if @nullable {
 			if node._options.format.functions == 'es5' {
 				fragments.code('function() { return true; }')
@@ -228,8 +228,8 @@ class AnyType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isValue`)
 		}
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('any', @explicit, @nullable)
-	} // }}}
+	} # }}}
 }

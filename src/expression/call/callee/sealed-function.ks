@@ -6,7 +6,7 @@ class SealedFunctionCallee extends Callee {
 		_type: Type
 		_variable: NamedType<NamespaceType>
 	}
-	constructor(@data, @variable, @function, @type, node) { // {{{
+	constructor(@data, @variable, @function, @type, node) { # {{{
 		super(data)
 
 		@object = node._object
@@ -15,10 +15,10 @@ class SealedFunctionCallee extends Callee {
 		@nullableProperty = node._object.isNullable()
 
 		this.validate(function, node)
-	} // }}}
+	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean => @function.isInitializingInstanceVariable(name)
-	toFragments(fragments, mode, node) { // {{{
+	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
@@ -53,12 +53,12 @@ class SealedFunctionCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		@type.toPositiveTestFragments(fragments, @object)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@object.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

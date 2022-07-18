@@ -4,7 +4,7 @@ class ArrayExpression extends Expression {
 		_type: Type
 		_values: Array		= []
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		const es5 = @options.format.spreads == 'es5'
 
 		for const data in @data.values {
@@ -18,8 +18,8 @@ class ArrayExpression extends Expression {
 
 			@values.push(value)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		let type = null
 
 		for const value, index in @values {
@@ -41,21 +41,21 @@ class ArrayExpression extends Expression {
 		else {
 			@type = Type.arrayOf(type, @scope)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for value in @values {
 			value.translate()
 		}
-	} // }}}
-	isMatchingType(type: Type) { // {{{
+	} # }}}
+	isMatchingType(type: Type) { # {{{
 		if @values.length == 0 {
 			return type.isAny() || type.isArray()
 		}
 		else {
 			return @type.matchContentOf(type)
 		}
-	} // }}}
-	isUsingVariable(name) { // {{{
+	} # }}}
+	isUsingVariable(name) { # {{{
 		for const value in @values {
 			if value.isUsingVariable(name) {
 				return true
@@ -63,15 +63,15 @@ class ArrayExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		for const value in @values {
 			value.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @flatten {
 			if @values.length == 1 {
 				fragments.code('[].concat(').compile(@values[0].argument()).code(')')
@@ -93,9 +93,9 @@ class ArrayExpression extends Expression {
 
 			fragments.code(']')
 		}
-	} // }}}
+	} # }}}
 	type() => @type
-	validateType(type: ReferenceType) { // {{{
+	validateType(type: ReferenceType) { # {{{
 		if type.hasParameters() {
 			const parameter = type.parameter(0)
 
@@ -103,7 +103,7 @@ class ArrayExpression extends Expression {
 				value.validateType(parameter)
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ArrayRange extends Expression {
@@ -113,7 +113,7 @@ class ArrayRange extends Expression {
 		_to
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@from = $compile.expression(@data.from ?? @data.then, this)
 		@from.analyse()
 
@@ -125,31 +125,31 @@ class ArrayRange extends Expression {
 			@by.analyse()
 		}
 
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@type = Type.arrayOf(@scope.reference('Number'), @scope)
 
 		@from.prepare()
 		@to.prepare()
 		@by.prepare() if @by?
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@from.translate()
 		@to.translate()
 
 		if @by != null {
 			@by.translate()
 		}
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @by?.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@from.listNonLocalVariables(scope, variables)
 		@to.listNonLocalVariables(scope, variables)
 		@by?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
 		fragments
@@ -166,6 +166,6 @@ class ArrayRange extends Expression {
 		}
 
 		fragments.code($comma, @data.from?, $comma, @data.to?, ')')
-	} // }}}
+	} # }}}
 	type() => @type
 }

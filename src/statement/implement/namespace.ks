@@ -7,16 +7,16 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		_namespace: NamespaceType
 		_variable: NamedType<NamespaceType>
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { # {{{
 		super(data, parent)
 
 		@namespace = @variable.type()
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 
 		const property = NamespacePropertyType.fromAST(@data.type, this)
@@ -30,13 +30,13 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		@namespace.addProperty(@data.name.name, property)
 
 		@type = property.type()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	getSharedName() => null
 	isMethod() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @namespace.isSealed() {
 			fragments
 				.newLine()
@@ -51,7 +51,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 				.compile(@value)
 				.done()
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -74,13 +74,13 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		_variable: NamedType<NamespaceType>
 		_topNodes: Array						= []
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Block)
 
 		@namespace = @variable.type()
 		@namespaceRef = @scope.reference(@variable)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@name = @data.name.name
 
 		for const data in @data.parameters {
@@ -90,8 +90,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 			@parameters.push(parameter)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const parameter in @parameters {
 			parameter.prepare()
 		}
@@ -125,8 +125,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const parameter in @parameters {
 			parameter.translate()
 		}
@@ -144,10 +144,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	getMatchingMode(): MatchingMode => MatchingMode::ExactParameter
 	getParameterOffset() => 0
@@ -161,14 +161,14 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	isOverridableFunction() => false
 	name() => @name
 	parameters() => @parameters
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		this.toMainFragments(fragments)
 
 		this.toStatementFragments(fragments, mode)
 
 		this.toRouterFragments(fragments)
-	} // }}}
-	toMainFragments(fragments) { // {{{
+	} # }}}
+	toMainFragments(fragments) { # {{{
 		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 
 		const line = fragments.newLine()
@@ -179,8 +179,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toRouterFragments(fragments) { // {{{
+	} # }}}
+	toRouterFragments(fragments) { # {{{
 		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 
 		const assessment = this.type().assessment(@name, this)
@@ -202,8 +202,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 		const line = fragments.newLine()
 
@@ -228,6 +228,6 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		line.done()
 
 
-	} // }}}
+	} # }}}
 	type() => @type
 }

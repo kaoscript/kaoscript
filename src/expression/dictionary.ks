@@ -8,10 +8,10 @@ class DictionaryExpression extends Expression {
 		_type: Type
 		_varname: String			= 'd'
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope, ScopeType::Hollow)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		const names = {}
 
 		let ref
@@ -57,8 +57,8 @@ class DictionaryExpression extends Expression {
 		}
 
 		@empty = @properties.length == 0
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@type = new DictionaryType(@scope)
 
 		for const property in @properties {
@@ -68,13 +68,13 @@ class DictionaryExpression extends Expression {
 				@type.addProperty(property.name(), property.type())
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for property in @properties {
 			property.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
@@ -82,18 +82,18 @@ class DictionaryExpression extends Expression {
 		for const property in @properties {
 			property.acquireReusable(acquire)
 		}
-	} // }}}
+	} # }}}
 	isComputed() => true
-	isMatchingType(type: Type) { // {{{
+	isMatchingType(type: Type) { # {{{
 		if @properties.length == 0 {
 			return type.isAny() || type.isDictionary()
 		}
 		else {
 			return @type.matchContentOf(type)
 		}
-	} // }}}
+	} # }}}
 	isSpread() => @spread
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		for const property in @properties {
 			if property.isUsingVariable(name) {
 				return true
@@ -101,16 +101,16 @@ class DictionaryExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		for const property in @properties {
 			property.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
+	} # }}}
 	reference() => @parent.reference()
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @reuseName != null {
 			@scope.releaseTempName(@reuseName)
 		}
@@ -118,8 +118,8 @@ class DictionaryExpression extends Expression {
 		for property in @properties {
 			property.releaseReusable()
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -211,16 +211,16 @@ class DictionaryExpression extends Expression {
 				fragments.code(')()')
 			}
 		}
-	} // }}}
-	toReusableFragments(fragments) { // {{{
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		fragments
 			.code(@reuseName, $equals)
 			.compile(this)
 
 		@reusable = true
-	} // }}}
+	} # }}}
 	type() => @type
-	validateType(type: DictionaryType) { // {{{
+	validateType(type: DictionaryType) { # {{{
 		for const property in @properties {
 			if property is DictionaryLiteralMember {
 				if const propertyType = type.getProperty(property.name()) {
@@ -228,8 +228,8 @@ class DictionaryExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	validateType(type: ReferenceType) { // {{{
+	} # }}}
+	validateType(type: ReferenceType) { # {{{
 		if type.hasParameters() {
 			const parameter = type.parameter(0)
 
@@ -239,7 +239,7 @@ class DictionaryExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	varname() => @varname
 }
 
@@ -253,7 +253,7 @@ class DictionaryLiteralMember extends Expression {
 		_value
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		if @data.name.kind == NodeKind::Identifier	{
@@ -284,21 +284,21 @@ class DictionaryLiteralMember extends Expression {
 		}
 
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 
 		@type = @value.type()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	name() => @name.value()
 	releaseReusable() => @value.releaseReusable()
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @parent.isSpread() {
 			fragments.compile(@name)
 
@@ -321,13 +321,13 @@ class DictionaryLiteralMember extends Expression {
 		else {
 			fragments.compile(@value)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
-	validateType(type: Type) { // {{{
+	validateType(type: Type) { # {{{
 		if @type.isEnum() && !type.isEnum() {
 			@enumCasting = true
 		}
-	} // }}}
+	} # }}}
 	value() => @value
 }
 
@@ -336,7 +336,7 @@ class DictionaryComputedMember extends Expression {
 		_name
 		_value
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		if @data.name.kind == NodeKind::ComputedPropertyName {
@@ -351,31 +351,31 @@ class DictionaryComputedMember extends Expression {
 
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@name.prepare()
 		@value.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@name.translate()
 		@value.translate()
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@name.acquireReusable(acquire)
 		@value.acquireReusable(acquire)
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@name.listNonLocalVariables(scope, variables)
 		@value.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@name.releaseReusable()
 		@value.releaseReusable()
-	} // }}}
-	toComputedFragments(fragments, name) { // {{{
+	} # }}}
+	toComputedFragments(fragments, name) { # {{{
 		fragments
 			.code(name)
 			.code('[')
@@ -384,10 +384,10 @@ class DictionaryComputedMember extends Expression {
 			.code($equals)
 			.compile(@value)
 			.code($comma)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.code(@parent.varname(), '[').compile(@name).code(']', $equals).compile(@value)
-	} // }}}
+	} # }}}
 	value() => @value
 }
 
@@ -396,36 +396,36 @@ class DictionaryThisMember extends Expression {
 		_name
 		_value
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@name = new Literal(@data.name.name, this, @scope:Scope, @data.name.name.name)
 
 		@value = $compile.expression(@data.name, this)
 		@value.analyse()
 
 		this.reference(`.\(@name.value())`)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
-	toComputedFragments(fragments, name) { // {{{
+	toComputedFragments(fragments, name) { # {{{
 		fragments
 			.code(name)
 			.code(@reference)
 			.code($equals)
 			.compile(@value)
 			.code($comma)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.compile(@name)
 			.code(': ')
 			.compile(@value)
-	} // }}}
+	} # }}}
 	value() => @value
 }
 
@@ -433,22 +433,22 @@ class DictionarySpreadMember extends Expression {
 	private {
 		_value
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@value)
-	} // }}}
+	} # }}}
 	value() => @value
 }

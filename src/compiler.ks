@@ -27,17 +27,17 @@ include {
 	'./include/error'
 }
 
-const $extensions = { // {{{
+const $extensions = { # {{{
 	binary: '.ksb',
 	exports: '.kse',
 	hash: '.ksh',
 	requirements: '.ksr',
 	source: '.ks'
-} // }}}
+} # }}}
 
 const $targetRegex = /^(\w+)-v((?:\d+)(?:\.\d+)?(?:\.\d+)?)$/
 
-const $typeofs = { // {{{
+const $typeofs = { # {{{
 	Array: true
 	Boolean: true
 	Class: true
@@ -52,10 +52,10 @@ const $typeofs = { // {{{
 	String: true
 	Struct: true
 	Tuple: true
-} // }}}
+} # }}}
 
 const $ast = {
-	block(data) { // {{{
+	block(data) { # {{{
 		if data.kind == NodeKind::Block {
 			return data
 		}
@@ -69,8 +69,8 @@ const $ast = {
 				end: data.end
 			}
 		}
-	} // }}}
-	body(data?) { // {{{
+	} # }}}
+	body(data?) { # {{{
 		if !?data.body {
 			return {
 				kind: NodeKind::Block
@@ -98,8 +98,8 @@ const $ast = {
 				end: data.body.end
 			}
 		}
-	} // }}}
-	identifier(name) { // {{{
+	} # }}}
+	identifier(name) { # {{{
 		if name is String {
 			return {
 				kind: NodeKind::Identifier
@@ -109,16 +109,16 @@ const $ast = {
 		else {
 			return name
 		}
-	} // }}}
+	} # }}}
 }
 
 const $runtime = {
-	dictionary(node) { // {{{
+	dictionary(node) { # {{{
 		node.module?().flag('Dictionary')
 
 		return node._options.runtime.dictionary.alias
-	} // }}}
-	getVariable(name, node) { // {{{
+	} # }}}
+	getVariable(name, node) { # {{{
 		if node._options.runtime.dictionary.alias == name || (node.isIncluded() && name == 'Dictionary') {
 			node.module?().flag('Dictionary')
 
@@ -137,34 +137,34 @@ const $runtime = {
 		else {
 			return null
 		}
-	} // }}}
-	helper(node) { // {{{
+	} # }}}
+	helper(node) { # {{{
 		node.module?().flag('Helper')
 
 		return node._options.runtime.helper.alias
-	} // }}}
-	immutableScope(node) { // {{{
+	} # }}}
+	immutableScope(node) { # {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'const '
-	} // }}}
-	initFlag(node) { // {{{
+	} # }}}
+	initFlag(node) { # {{{
 		node.module?().flag('initFlag')
 
 		return node._options.runtime.initFlag.alias
-	} // }}}
-	operator(node) { // {{{
+	} # }}}
+	operator(node) { # {{{
 		node.module?().flag('Operator')
 
 		return node._options.runtime.operator.alias
-	} // }}}
-	scope(node) { // {{{
+	} # }}}
+	scope(node) { # {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
-	} // }}}
-	type(node) { // {{{
+	} # }}}
+	type(node) { # {{{
 		node.module?().flag('Type')
 
 		return node._options.runtime.type.alias
-	} // }}}
-	typeof(type, node = null) { // {{{
+	} # }}}
+	typeof(type, node = null) { # {{{
 		if node? {
 			if $typeofs[type] {
 				return $runtime.type(node) + '.is' + type
@@ -176,7 +176,7 @@ const $runtime = {
 		else {
 			return $typeofs[type]
 		}
-	} // }}}
+	} # }}}
 }
 
 abstract class AbstractNode {
@@ -188,14 +188,14 @@ abstract class AbstractNode {
 		_scope: Scope?			= null
 	}
 	constructor()
-	constructor(@data, @parent, @scope = parent?.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent?.scope()) { # {{{
 		@options = parent._options
-	} // }}}
-	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
+	} # }}}
+	constructor(@data, @parent, scope: Scope, kind: ScopeType) { # {{{
 		@options = parent._options
 
 		@scope = this.newScope(scope, kind)
-	} // }}}
+	} # }}}
 	abstract analyse()
 	abstract prepare()
 	abstract translate()
@@ -209,7 +209,7 @@ abstract class AbstractNode {
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => this.file() != this.module().file()
 	module() => @parent.module()
-	newScope(scope: Scope, type: ScopeType) { // {{{
+	newScope(scope: Scope, type: ScopeType) { # {{{
 		switch type {
 			ScopeType::Bleeding => {
 				return new BleedingScope(scope)
@@ -235,19 +235,19 @@ abstract class AbstractNode {
 				return new OperationScope(scope)
 			}
 		}
-	} // }}}
+	} # }}}
 	parent() => @parent
-	printDebug() { // {{{
+	printDebug() { # {{{
 		console.log(`\(this.file()):\(@data.start.line)`)
-	} // }}}
-	reference() { // {{{
+	} # }}}
+	reference() { # {{{
 		if @parent?.reference()? {
 			return @parent.reference() + @reference
 		}
 		else {
 			return @reference
 		}
-	} // }}}
+	} # }}}
 	reference(@reference)
 	scope() => @scope
 	statement() => @parent?.statement()
@@ -273,7 +273,7 @@ include {
 
 const $compile = {
 	block(data, parent, scope = parent.scope()) => new Block($ast.block(data), parent, scope)
-	expression(data, parent, scope = parent.scope()) { // {{{
+	expression(data, parent, scope = parent.scope()) { # {{{
 		let expression
 
 		if const clazz = $expressions[data.kind] {
@@ -319,9 +319,9 @@ const $compile = {
 		}
 
 		return expression
-	} // }}}
+	} # }}}
 	function(data, parent, scope = parent.scope()) => new FunctionBlock($ast.block(data), parent, scope)
-	statement(data, parent, scope = parent.scope()) { // {{{
+	statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
 			const clazz = $statements[data.kind] ?? $statements.default
 
@@ -330,7 +330,7 @@ const $compile = {
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 }
 
 const $assignmentOperators = {
@@ -500,7 +500,7 @@ const $unaryOperators = {
 	`\(UnaryOperatorKind::Spread)`				: UnaryOperatorSpread
 }
 
-func $expandOptions(options) { // {{{
+func $expandOptions(options) { # {{{
 	const engine = $targets[options.target.name]
 	if !?engine {
 		throw new Error(`Undefined target '\(options.target.name)'`)
@@ -521,10 +521,10 @@ func $expandOptions(options) { // {{{
 
 		return Dictionary.defaults(options, engine[options.target.version])
 	}
-} // }}}
+} # }}}
 
 const $targets = {
-	ecma: { // {{{
+	ecma: { # {{{
 		'5': {
 			format: {
 				classes: 'es5'
@@ -545,15 +545,15 @@ const $targets = {
 				variables: 'es6'
 			}
 		}
-	} // }}}
-	v8(version, targets) { // {{{
+	} # }}}
+	v8(version, targets) { # {{{
 		if version[0] < 5 {
 			return targets.ecma['5']
 		}
 		else {
 			return targets.ecma['6']
 		}
-	} // }}}
+	} # }}}
 }
 
 export class Compiler {
@@ -568,18 +568,18 @@ export class Compiler {
 		_options: Dictionary
 	}
 	static {
-		registerTarget(target: String, fn: Function) { // {{{
+		registerTarget(target: String, fn: Function) { # {{{
 			$targets[target] = fn
-		} // }}}
-		registerTarget(target: String, options: Dictionary) { // {{{
+		} # }}}
+		registerTarget(target: String, options: Dictionary) { # {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
 
 			$targets[target[1]] ??= {}
 			$targets[target[1]][target[2]] = options
-		} // }}}
-		registerTargets(targets) { // {{{
+		} # }}}
+		registerTargets(targets) { # {{{
 			for const data, name of targets {
 				if data is String {
 					Compiler.registerTargetAlias(name, data)
@@ -588,8 +588,8 @@ export class Compiler {
 					Compiler.registerTarget(name, data)
 				}
 			}
-		} // }}}
-		registerTargetAlias(target: String, alias: String) { // {{{
+		} # }}}
+		registerTargetAlias(target: String, alias: String) { # {{{
 			if alias !?= $targetRegex.exec(alias) {
 				if !?$targets[alias] || $targets[alias] is not Function {
 					throw new Error(`Invalid target syntax: \(alias)`)
@@ -613,9 +613,9 @@ export class Compiler {
 				$targets[target[1]] ??= {}
 				$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
 			}
-		} // }}}
+		} # }}}
 	}
-	constructor(@file, options = null, @hashes = {}, @hierarchy = [@file]) { // {{{
+	constructor(@file, options = null, @hashes = {}, @hierarchy = [@file]) { # {{{
 		@options = Dictionary.merge({
 			target: 'ecma-v6'
 			register: true
@@ -682,40 +682,40 @@ export class Compiler {
 		}
 
 		@options = $expandOptions(@options)
-	} // }}}
-	initiate(data: String = null) { // {{{
+	} # }}}
+	initiate(data: String = null) { # {{{
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
 
 		@module.initiate()
 
 		return this
-	} // }}}
-	compile(data: String = null) { // {{{
+	} # }}}
+	compile(data: String = null) { # {{{
 		return this.initiate(data).finish()
-	} // }}}
-	createServant(file) { // {{{
+	} # }}}
+	createServant(file) { # {{{
 		return new Compiler(file, Dictionary.defaults(@options, {
 			register: false
 		}), @hashes, [...@hierarchy, file])
-	} // }}}
-	finish() { // {{{
+	} # }}}
+	finish() { # {{{
 		@module.finish()
 
 		@fragments = @module.toFragments()
 
 		return this
-	} // }}}
+	} # }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): @module
 	readFile() => fs.readFile(@file)
 	setArguments(arguments: Array, module: String = null, node: AbstractNode = null) => @module.setArguments(arguments, module, node)
-	sha256(file, data = null) { // {{{
+	sha256(file, data = null) { # {{{
 		return @hashes[file] ?? (@hashes[file] = fs.sha256(data ?? fs.readFile(file)))
-	} // }}}
+	} # }}}
 	toExports() => @module.toExports()
 	toHashes() => @module.toHashes()
 	toRequirements() => @module.toRequirements()
-	toSource() { // {{{
+	toSource() { # {{{
 		let source = ''
 
 		for fragment in @fragments {
@@ -728,10 +728,10 @@ export class Compiler {
 		else {
 			return source
 		}
-	} // }}}
+	} # }}}
 	toSourceMap() => @module.toSourceMap()
 	toVariationId() => @module.toVariationId()
-	writeFiles() { // {{{
+	writeFiles() { # {{{
 		fs.mkdir(path.dirname(@file))
 
 		if @module._binary {
@@ -740,15 +740,15 @@ export class Compiler {
 		else {
 			this.writeModuleFiles()
 		}
-	} // }}}
-	private writeBinaryFiles() { // {{{
+	} # }}}
+	private writeBinaryFiles() { # {{{
 		const variationId = @module.toVariationId()
 
 		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
 
 		this.writeHashFile(variationId)
-	} // }}}
-	private writeHashFile(variationId: String) { // {{{
+	} # }}}
+	private writeHashFile(variationId: String) { # {{{
 		const hashPath = getHashPath(@file)
 
 		let data
@@ -773,8 +773,8 @@ export class Compiler {
 		}
 
 		fs.writeFile(hashPath, JSON.stringify(data))
-	} // }}}
-	private writeModuleFiles() { // {{{
+	} # }}}
+	private writeModuleFiles() { # {{{
 		const variationId = @module.toVariationId()
 
 		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
@@ -784,8 +784,8 @@ export class Compiler {
 		fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(this.toExports(), fs.escapeJSON))
 
 		this.writeHashFile(variationId)
-	} // }}}
-	writeOutput() { // {{{
+	} # }}}
+	writeOutput() { # {{{
 		if @options.output is not String {
 			throw new Error('Undefined option: output')
 		}
@@ -797,14 +797,14 @@ export class Compiler {
 		fs.writeFile(filename, this.toSource())
 
 		return this
-	} // }}}
+	} # }}}
 }
 
-export func compileFile(file, options = null) { // {{{
+export func compileFile(file, options = null) { # {{{
 	let compiler = new Compiler(file, options)
 
 	return compiler.compile().toSource()
-} // }}}
+} # }}}
 
 export func getBinaryPath(file, variationId = null) => fs.hidden(file, variationId, $extensions.binary)
 
@@ -814,7 +814,7 @@ export func getHashPath(file) => fs.hidden(file, null, $extensions.hash)
 
 export func getRequirementsPath(file) => fs.hidden(file, null, $extensions.requirements)
 
-export func isUpToDate(file, variationId, source) { // {{{
+export func isUpToDate(file, variationId, source) { # {{{
 	let data
 	try {
 		data = JSON.parse(fs.readFile(getHashPath(file)))
@@ -839,7 +839,7 @@ export func isUpToDate(file, variationId, source) { // {{{
 	}
 
 	return true
-} // }}}
+} # }}}
 
 export $extensions => extensions
 

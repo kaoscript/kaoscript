@@ -25,7 +25,7 @@ export class Module {
 		_rewire
 		_variationId
 	}
-	constructor(data, @compiler, @file) { // {{{
+	constructor(data, @compiler, @file) { # {{{
 		@data = this.parse(data, file)
 
 		@directory = path.dirname(file)
@@ -52,16 +52,16 @@ export class Module {
 		}
 
 		@hashes['.'] = @compiler.sha256(file, data)
-	} // }}}
-	addAlien(name: String, type: Type): this { // {{{
+	} # }}}
+	addAlien(name: String, type: Type): this { # {{{
 		@aliens[name] = type
 
 		return this
-	} // }}}
-	addHash(file, hash) { // {{{
+	} # }}}
+	addHash(file, hash) { # {{{
 		@hashes[path.relative(@directory, file)] = hash
-	} // }}}
-	addHashes(file, hashes) { // {{{
+	} # }}}
+	addHashes(file, hashes) { # {{{
 		let root = path.dirname(file)
 
 		for const hash, name of hashes {
@@ -72,13 +72,13 @@ export class Module {
 				@hashes[path.relative(@directory, path.join(root, name))] = hash
 			}
 		}
-	} // }}}
-	addInclude(path) { // {{{
+	} # }}}
+	addInclude(path) { # {{{
 		if @includePaths[path] is not String {
 			@includePaths[path] = true
 		}
-	} // }}}
-	addInclude(path, modulePath, moduleVersion) { // {{{
+	} # }}}
+	addInclude(path, modulePath, moduleVersion) { # {{{
 		if @includePaths[path] == true || @includePaths[path] is not String {
 			@includePaths[path] = modulePath
 		}
@@ -93,8 +93,8 @@ export class Module {
 				versions: [moduleVersion]
 			}
 		}
-	} // }}}
-	addRequirement(requirement: Requirement) { // {{{
+	} # }}}
+	addRequirement(requirement: Requirement) { # {{{
 		if ?@requirementByNames[requirement.name()] {
 			return this
 		}
@@ -107,15 +107,15 @@ export class Module {
 		requirement.type().flagRequirement()
 
 		return this
-	} // }}}
-	compile() { // {{{
+	} # }}}
+	compile() { # {{{
 		this.initiate()
 
 		this.finish()
-	} // }}}
+	} # }}}
 	compiler() => @compiler
 	directory() => @directory
-	export(name: String, identifier: IdentifierLiteral) { // {{{
+	export(name: String, identifier: IdentifierLiteral) { # {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
@@ -128,8 +128,8 @@ export class Module {
 		}
 
 		type.flagExported(true).flagReferenced()
-	} // }}}
-	export(name: String, expression: Expression | ExportProperty) { // {{{
+	} # }}}
+	export(name: String, expression: Expression | ExportProperty) { # {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
@@ -142,8 +142,8 @@ export class Module {
 		}
 
 		type.flagExported(true).flagReferenced()
-	} // }}}
-	export(name: String, variable: Variable) { // {{{
+	} # }}}
+	export(name: String, variable: Variable) { # {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
@@ -156,8 +156,8 @@ export class Module {
 		}
 
 		type.flagExported(false).flagReferenced()
-	} // }}}
-	exportMacro(name: String, data: String) { // {{{
+	} # }}}
+	exportMacro(name: String, data: String) { # {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
@@ -168,12 +168,12 @@ export class Module {
 		else {
 			@exportedMacros[name] = [data]
 		}
-	} // }}}
-	exportMacro(name: String, macro: MacroDeclaration) { // {{{
+	} # }}}
+	exportMacro(name: String, macro: MacroDeclaration) { # {{{
 		@body.exportMacro(name, macro)
-	} // }}}
+	} # }}}
 	file() => @file
-	finish() { // {{{
+	finish() { # {{{
 		@body.analyse()
 
 		@body.enhance()
@@ -187,29 +187,29 @@ export class Module {
 				ReferenceException.throwNotExportable(name, @body)
 			}
 		}
-	} // }}}
-	flag(name) { // {{{
+	} # }}}
+	flag(name) { # {{{
 		@flags[name] = true
-	} // }}}
-	flagRegister() { // {{{
+	} # }}}
+	flagRegister() { # {{{
 		@register = true
-	} // }}}
+	} # }}}
 	getAlien(name: String) => @aliens[name]
 	getArgument(index: Number) => @arguments[index]
 	getRequirement(name: String) => @requirementByNames[name]
-	hasInclude(path) { // {{{
+	hasInclude(path) { # {{{
 		return @includePaths[path] == true || @includePaths[path] is String
-	} // }}}
-	import(name: String) { // {{{
+	} # }}}
+	import(name: String) { # {{{
 		@imports[name] = true
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		@body = new ModuleBlock(@data, this)
 
 		@body.initiate()
-	} // }}}
+	} # }}}
 	isBinary() => @binary
-	isUpToDate(file: String, source: String) { // {{{
+	isUpToDate(file: String, source: String) { # {{{
 		let data
 		try {
 			data = JSON.parse(fs.readFile(getHashPath(file)))
@@ -230,8 +230,8 @@ export class Module {
 		}
 
 		return data
-	} // }}}
-	isUpToDate(hashes): Boolean { // {{{
+	} # }}}
+	isUpToDate(hashes): Boolean { # {{{
 		for const hash, name of @hashes {
 			const h = hashes[name]
 			if h? {
@@ -245,8 +245,8 @@ export class Module {
 		}
 
 		return true
-	} // }}}
-	listIncludeVersions(path, modulePath) { // {{{
+	} # }}}
+	listIncludeVersions(path, modulePath) { # {{{
 		if @includeModules[modulePath] is Dictionary {
 			return @includeModules[modulePath].versions
 		}
@@ -256,8 +256,8 @@ export class Module {
 		else {
 			return null
 		}
-	} // }}}
-	parse(data, file) { // {{{
+	} # }}}
+	parse(data, file) { # {{{
 		try {
 			return Parser.parse(data)
 		}
@@ -267,8 +267,8 @@ export class Module {
 
 			throw error
 		}
-	} // }}}
-	path(x = null, name) { // {{{
+	} # }}}
+	path(x = null, name) { # {{{
 		if !?x || !?@output {
 			return name
 		}
@@ -290,9 +290,9 @@ export class Module {
 		}
 
 		return output
-	} // }}}
+	} # }}}
 	scope() => @body.scope()
-	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { // {{{
+	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { # {{{
 		const scope = @body.scope()
 
 		if arguments.length != 0 {
@@ -356,9 +356,9 @@ export class Module {
 				reset.resetReferences()
 			}
 		}
-	} // }}}
+	} # }}}
 	toHashes() => @hashes
-	toFragments() { // {{{
+	toFragments() { # {{{
 		const fragments = new FragmentBuilder(0)
 
 		if @options.header {
@@ -503,8 +503,8 @@ export class Module {
 		}
 
 		return fragments.toArray()
-	} // }}}
-	toExports() { // {{{
+	} # }}}
+	toExports() { # {{{
 		if @metaRequirements == null {
 			this.toRequirements()
 		}
@@ -537,8 +537,8 @@ export class Module {
 		}
 
 		return @metaExports
-	} // }}}
-	toRequirements() { // {{{
+	} # }}}
+	toRequirements() { # {{{
 		if @metaRequirements == null {
 			@metaRequirements = {
 				aliens: []
@@ -570,8 +570,8 @@ export class Module {
 		}
 
 		return @metaRequirements
-	} // }}}
-	toVariationId() { // {{{
+	} # }}}
+	toVariationId() { # {{{
 		if !?@variationId {
 			const variations = [@options.target.name, @options.target.version]
 
@@ -593,7 +593,7 @@ export class Module {
 		}
 
 		return @variationId
-	} // }}}
+	} # }}}
 }
 
 class ModuleBlock extends AbstractNode {
@@ -603,13 +603,13 @@ class ModuleBlock extends AbstractNode {
 		_statements: Array		= []
 		_topNodes: Array		= []
 	}
-	constructor(@data, @module) { // {{{
+	constructor(@data, @module) { # {{{
 		super()
 
 		@options = module._options
 		@scope = new ModuleScope()
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		for const statement in @data.body {
 			@scope.line(statement.start.line)
 
@@ -619,15 +619,15 @@ class ModuleBlock extends AbstractNode {
 				statement.initiate()
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
 			statement.analyse()
 		}
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
@@ -640,8 +640,8 @@ class ModuleBlock extends AbstractNode {
 
 			statement.export(recipient, true)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
@@ -668,26 +668,26 @@ class ModuleBlock extends AbstractNode {
 				TypeException.throwUnexpectedExportType(name, data.type, type, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
 		}
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
-	addTopNode(node) { // {{{
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	directory() => @module.directory()
-	exportMacro(name, macro) { // {{{
+	exportMacro(name, macro) { # {{{
 		@module.exportMacro(name, macro.toMetadata())
-	} // }}}
+	} # }}}
 	file() => @module.file()
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if variable.static {
 			const class = @scope.getVariable(variable.class).declaration()
 
@@ -698,9 +698,9 @@ class ModuleBlock extends AbstractNode {
 		else if const var = @scope.getDefinedVariable(variable.name) {
 			var.setDeclaredType(variable.type)
 		}
-	} // }}}
+	} # }}}
 	isConsumedError(error): Boolean => @module.isBinary()
-	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
 		const line = stmt.line()
 
 		for const statement in @statements while statement.line() < line && statement != stmt {
@@ -710,21 +710,21 @@ class ModuleBlock extends AbstractNode {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	includePath() => null
 	module() => @module
-	publishMacro(name, macro) { // {{{
+	publishMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
-	} // }}}
-	registerMacro(name, macro) { // {{{
+	} # }}}
+	registerMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
-	} // }}}
+	} # }}}
 	recipient() => @module
-	setAttributeData(key: AttributeData, data) { // {{{
+	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
-	} // }}}
+	} # }}}
 	target() => @options.target
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		for const node in @topNodes {
 			node.toAuthorityFragments(fragments)
 		}
@@ -741,5 +741,5 @@ class ModuleBlock extends AbstractNode {
 		if index != -1 {
 			item(@statements.slice(index + 1))
 		}
-	} // }}}
+	} # }}}
 }

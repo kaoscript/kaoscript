@@ -6,7 +6,7 @@ class AwaitExpression extends Expression {
 		_reuseName: String?		= null
 		_try
 	}
-	constructor(@data, @parent, @scope = null) { // {{{
+	constructor(@data, @parent, @scope = null) { # {{{
 		super(data, parent, scope)
 
 		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
@@ -23,24 +23,24 @@ class AwaitExpression extends Expression {
 		else if !this.module().isBinary() {
 			SyntaxException.throwInvalidAwait(this)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@operation = $compile.expression(@data.operation, this)
 		@operation.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@operation.prepare()
 
 		@reuseName = @scope.acquireTempName(false)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@operation.translate()
-	} // }}}
+	} # }}}
 	isAwait() => true
 	isAwaiting() => @awaiting
 	isUsingVariable(name) => @operation.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @operation.listNonLocalVariables(scope, variables)
-	toAwaitExpressionFragments(fragments, statements) { // {{{
+	toAwaitExpressionFragments(fragments, statements) { # {{{
 		fragments.code(`(__ks_e, \(@reuseName)) =>`)
 
 		const block = fragments.newBlock()
@@ -61,8 +61,8 @@ class AwaitExpression extends Expression {
 		block.done()
 
 		fragments.code(')').done()
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @awaiting {
 			if item ?= @operation.toFragments(fragments, Mode::Async) {
 				return item
@@ -84,6 +84,6 @@ class AwaitExpression extends Expression {
 		else {
 			fragments.code(@reuseName)
 		}
-	} // }}}
+	} # }}}
 	type() => @operation.type()
 }

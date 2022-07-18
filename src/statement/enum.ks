@@ -8,7 +8,7 @@ class EnumDeclaration extends Statement {
 		@variable: Variable
 		@variables: Dictionary			= {}
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		@name = @data.name.name
 
 		const type = Type.fromAST(@data.type, this)
@@ -37,8 +37,8 @@ class EnumDeclaration extends Statement {
 		@type = new NamedType(@name, @enum)
 
 		@variable = @scope.define(@name, true, @type, this)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		let declaration
 		for const data in @data.members {
 			switch data.kind {
@@ -61,8 +61,8 @@ class EnumDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
@@ -113,8 +113,8 @@ class EnumDeclaration extends Statement {
 				@enum.addStaticMethod(name, method.type())
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const variable of @variables {
 			variable.translate()
 		}
@@ -130,12 +130,12 @@ class EnumDeclaration extends Statement {
 				method.translate()
 			}
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
+	} # }}}
 	name() => @name
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
 		if @enum.isString() {
@@ -225,7 +225,7 @@ class EnumDeclaration extends Statement {
 			ctrl.done()
 			line.done()
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -239,14 +239,14 @@ class EnumVariableDeclaration extends AbstractNode {
 		@composite: Boolean				= false
 		@name: String
 	}
-	constructor(data, parent) { // {{{
+	constructor(data, parent) { # {{{
 		super(data, parent)
 
 		@name = data.name.name
 
 		parent._variables[@name] = this
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		const enum = @parent.type().type()
 		const value = @data.value
 
@@ -319,12 +319,12 @@ class EnumVariableDeclaration extends AbstractNode {
 				@type = @scope.reference('Number')
 			}
 		}
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
 	isComposite() => @composite
 	name() => @name
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		if @composite {
 			const name = @parent.name()
 			const line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
@@ -340,7 +340,7 @@ class EnumVariableDeclaration extends AbstractNode {
 		else {
 			fragments.line(@name, ': ', @value)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -360,7 +360,7 @@ class EnumMethodDeclaration extends Statement {
 		@parameters: Array<Parameter>	= []
 		@topNodes: Array				= []
 	}
-	constructor(data, parent) { // {{{
+	constructor(data, parent) { # {{{
 		super(data, parent, this.newScope(parent.scope(), ScopeType::Function))
 
 		@name = data.name.name
@@ -387,8 +387,8 @@ class EnumMethodDeclaration extends Statement {
 				parent._staticMethods[@name] = [this]
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const data in @data.parameters {
 			const parameter = new Parameter(data, this)
 
@@ -398,8 +398,8 @@ class EnumMethodDeclaration extends Statement {
 		}
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		const enumName = @parent.name()
 		const enumRef = @scope.reference(enumName)
 
@@ -429,8 +429,8 @@ class EnumMethodDeclaration extends Statement {
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @instance {
 			@internalName = `__ks_func_\(@name)_\(@type.index())`
 		}
@@ -460,8 +460,8 @@ class EnumMethodDeclaration extends Statement {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
-	addIndigentValue(value: Expression, parameters) { // {{{
+	} # }}}
+	addIndigentValue(value: Expression, parameters) { # {{{
 		const name = `__ks_default_\(@parent.type().type().incDefaultSequence())`
 
 		@indigentValues.push({
@@ -471,10 +471,10 @@ class EnumMethodDeclaration extends Statement {
 		})
 
 		return name
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	getOverridableVarname() => @parent.name()
 	getParameterOffset() => @instance ? 1 : 0
@@ -483,7 +483,7 @@ class EnumMethodDeclaration extends Statement {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isOverridableFunction() => true
 	parameters() => @parameters
-	toIndigentFragments(fragments) { // {{{
+	toIndigentFragments(fragments) { # {{{
 		for const {name, value, parameters} in @indigentValues {
 			const line = fragments.newLine()
 			const ctrl = line.newControl(null, false, false)
@@ -495,8 +495,8 @@ class EnumMethodDeclaration extends Statement {
 			ctrl.done()
 			line.done()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine()
 		const ctrl = line.newControl(null, false, false)
 
@@ -523,6 +523,6 @@ class EnumMethodDeclaration extends Statement {
 		line.done()
 
 		this.toIndigentFragments(fragments)
-	} // }}}
+	} # }}}
 	type() => @type
 }

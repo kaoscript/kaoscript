@@ -11,7 +11,7 @@ class StructDeclaration extends Statement {
 		_type: NamedType<StructType>
 		_variable: Variable
 	}
-	override initiate() { // {{{
+	override initiate() { # {{{
 		@name = @data.name.name
 
 		@struct = new StructType(@scope)
@@ -33,8 +33,8 @@ class StructDeclaration extends Statement {
 		@type = new NamedType(@name, @struct)
 
 		@variable = @scope.define(@name, true, @type, this)
-	} // }}}
-	override analyse() { // {{{
+	} # }}}
+	override analyse() { # {{{
 		@function = new StructFunction(@data, this, new BlockScope(@scope!?))
 
 		for const data in @data.fields {
@@ -46,8 +46,8 @@ class StructDeclaration extends Statement {
 		}
 
 		@function.analyse()
-	} // }}}
-	override prepare() { // {{{
+	} # }}}
+	override prepare() { # {{{
 		if @extending {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
@@ -64,19 +64,19 @@ class StructDeclaration extends Statement {
 		for const field in @fields {
 			@struct.addField(field.type())
 		}
-	} // }}}
-	override translate() { // {{{
+	} # }}}
+	override translate() { # {{{
 		for const field in @fields {
 			field.translate()
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
+	} # }}}
 	fields() => @fields
 	isEnhancementExport() => true
 	isExtending() => @extending
-	toObjectFragments(fragments, mode) { // {{{
+	toObjectFragments(fragments, mode) { # {{{
 		if !@extending && @fields.length == 0 {
 			fragments.line(`return new \($runtime.dictionary(this))`)
 		}
@@ -110,8 +110,8 @@ class StructDeclaration extends Statement {
 
 			fragments.line(`return \(varname)`)
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).struct(`)
 
 		let ctrl = line.newControl(null, false, false).code(`function(`)
@@ -147,7 +147,7 @@ class StructDeclaration extends Statement {
 		}
 
 		line.code(')').done()
-	} // }}}
+	} # }}}
 }
 
 class StructFunction extends AbstractNode {
@@ -155,13 +155,13 @@ class StructFunction extends AbstractNode {
 		_parameters: Array<Parameter>	= []
 		_type: FunctionType
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
 		@type = new FunctionType(@scope)
-	} // }}}
+	} # }}}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		let index = -1
 
 		if @parent.isExtending() {
@@ -193,7 +193,7 @@ class StructFunction extends AbstractNode {
 
 			@type.addParameter(parameter.type())
 		}
-	} // }}}
+	} # }}}
 	translate()
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewStruct
@@ -212,14 +212,14 @@ class StructFieldDeclaration extends AbstractNode {
 		_name: String
 		_parameter: StructFieldParameter
 	}
-	constructor(data, parent) { // {{{
+	constructor(data, parent) { # {{{
 		super(data, parent)
 
 		@name = data.name.name
 
 		@parameter = new StructFieldParameter(this, parent._function)
-	} // }}}
-	constructor(@type, parent) { // {{{
+	} # }}}
+	constructor(@type, parent) { # {{{
 		super({}, parent)
 
 		@name = @type.name()
@@ -227,9 +227,9 @@ class StructFieldDeclaration extends AbstractNode {
 
 		@parameter = new StructFieldParameter(this, parent._function)
 		@parameter.unflagValidation()
-	} // }}}
+	} # }}}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@parameter.analyse()
 		@parameter.prepare()
 
@@ -253,10 +253,10 @@ class StructFieldDeclaration extends AbstractNode {
 				@type.flagNullable()
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@parameter.translate()
-	} // }}}
+	} # }}}
 	index() => @index
 	index(@index) => this
 	name() => @name
@@ -269,12 +269,12 @@ class StructFieldParameter extends Parameter {
 		_field: StructFieldDeclaration
 		_validation: Boolean			 = true
 	}
-	constructor(@field, parent) { // {{{
+	constructor(@field, parent) { # {{{
 		super(field._data, parent)
 
 		@data.modifiers = []
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@name = new IdentifierParameter({
 			name: @field.name()
 		}, this, @scope)
@@ -285,14 +285,14 @@ class StructFieldParameter extends Parameter {
 		for const name in @name.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
-	} // }}}
+	} # }}}
 	name() => @name
-	toValidationFragments(fragments) { // {{{
+	toValidationFragments(fragments) { # {{{
 		if @validation {
 			super(fragments)
 		}
-	} // }}}
-	unflagValidation() { // {{{
+	} # }}}
+	unflagValidation() { # {{{
 		@validation = false
-	} // }}}
+	} # }}}
 }

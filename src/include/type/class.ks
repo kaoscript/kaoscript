@@ -62,7 +62,7 @@ class ClassType extends Type {
 		}
 	}
 	static {
-		getExternReference(...types?): Number? { // {{{
+		getExternReference(...types?): Number? { # {{{
 			for const type in types when ?type {
 				if type.isAlien() && !type.isRequirement() && type.referenceIndex() != -1 {
 					return type.referenceIndex()
@@ -79,8 +79,8 @@ class ClassType extends Type {
 			}
 
 			return null
-		} // }}}
-		getOriginReference(type: ClassType): Number? { // {{{
+		} # }}}
+		getOriginReference(type: ClassType): Number? { # {{{
 			if type.origin()? {
 				return type.referenceIndex()
 			}
@@ -91,8 +91,8 @@ class ClassType extends Type {
 			else {
 				return null
 			}
-		} // }}}
-		getRequireReference(type: ClassType): Number? { // {{{
+		} # }}}
+		getRequireReference(type: ClassType): Number? { # {{{
 			if type.isRequirement() && type.referenceIndex() != -1 {
 				return type.referenceIndex()
 			}
@@ -103,8 +103,8 @@ class ClassType extends Type {
 			else {
 				return null
 			}
-		} // }}}
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassType { // {{{
+		} # }}}
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassType { # {{{
 			const type = new ClassType(scope)
 
 			type._sequences.initializations = data.sequences[0]
@@ -219,8 +219,8 @@ class ClassType extends Type {
 			}
 
 			return type
-		} // }}}
-		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		} # }}}
+		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode) { # {{{
 			type.copyFrom(original)
 
 			if type.isAbstract() {
@@ -260,9 +260,9 @@ class ClassType extends Type {
 			}
 
 			type.setExhaustive(data.exhaustive)
-		} // }}}
+		} # }}}
 	}
-	addAbstractMethod(name: String, type: ClassMethodType): Number { // {{{
+	addAbstractMethod(name: String, type: ClassMethodType): Number { # {{{
 		const sequences = @sequences.instanceMethods
 		sequences[name] = sequences[name] ?? -1
 
@@ -290,8 +290,8 @@ class ClassType extends Type {
 		type.flagInstance()
 
 		return index
-	} // }}}
-	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	addClassMethod(name: String, type: ClassMethodType): Number? { # {{{
 		const root = this.ancestor()
 		const sequences = root._sequences.classMethods
 
@@ -324,8 +324,8 @@ class ClassType extends Type {
 		@alterations.classMethods[name][index] = true
 
 		return index
-	} // }}}
-	addClassVariable(name: String, type: ClassVariableType) { // {{{
+	} # }}}
+	addClassVariable(name: String, type: ClassVariableType) { # {{{
 		@classVariables[name] = type
 
 		if type.isSealed() {
@@ -333,8 +333,8 @@ class ClassType extends Type {
 		}
 
 		@alterations.classVariables[name] = true
-	} // }}}
-	addConstructor(type: ClassConstructorType) { // {{{
+	} # }}}
+	addConstructor(type: ClassConstructorType) { # {{{
 		let index = type.index()
 		if index == -1 {
 			index = ++@sequences.constructors
@@ -358,8 +358,8 @@ class ClassType extends Type {
 		@alterations.constructors[index] = true
 
 		return index
-	} // }}}
-	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	addInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
 		const root = this.ancestor()
 		const sequences = root._sequences.instanceMethods
 
@@ -393,8 +393,8 @@ class ClassType extends Type {
 		@alterations.instanceMethods[name][index] = true
 
 		return index
-	} // }}}
-	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
+	} # }}}
+	addInstanceVariable(name: String, type: ClassVariableType) { # {{{
 		@instanceVariables[name] = type
 
 		if @alien {
@@ -406,8 +406,8 @@ class ClassType extends Type {
 		}
 
 		@alterations.instanceVariables[name] = true
-	} // }}}
-	addPropertyFromAST(data, node) { // {{{
+	} # }}}
+	addPropertyFromAST(data, node) { # {{{
 		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		switch data.kind {
@@ -472,16 +472,16 @@ class ClassType extends Type {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
 		}
-	} // }}}
-	ancestor() { // {{{
+	} # }}}
+	ancestor() { # {{{
 		if @extending {
 			return @extends.type().ancestor()
 		}
 		else {
 			return this
 		}
-	} // }}}
-	checkVariablesInitializations(node) { // {{{
+	} # }}}
+	checkVariablesInitializations(node) { # {{{
 		return if @alien
 
 		for const variable, name of @instanceVariables {
@@ -493,8 +493,8 @@ class ClassType extends Type {
 		if @extending {
 			@extends.type().checkVariablesInitializations(node)
 		}
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const that = new ClassType(@scope)
 
 		that.copyFrom(this)
@@ -504,8 +504,8 @@ class ClassType extends Type {
 		}
 
 		return that
-	} // }}}
-	copyFrom(src: ClassType) { // {{{
+	} # }}}
+	copyFrom(src: ClassType) { # {{{
 		@abstract = src._abstract
 		@alien = src._alien
 		@extending = src._extending
@@ -546,8 +546,8 @@ class ClassType extends Type {
 		}
 
 		return this
-	} // }}}
-	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if const id = type.index() {
 			if @abstractMethods[name] is Array {
 				for const method in @abstractMethods[name] {
@@ -559,8 +559,8 @@ class ClassType extends Type {
 		}
 
 		return this.addAbstractMethod(name, type)
-	} // }}}
-	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	dedupClassMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if const id = type.index() {
 			if @classMethods[name] is Array {
 				for const method in @classMethods[name] {
@@ -585,8 +585,8 @@ class ClassType extends Type {
 		}
 
 		return this.addClassMethod(name, type)
-	} // }}}
-	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if const id = type.index() {
 			if @instanceMethods[name] is Array {
 				for const method in @instanceMethods[name] {
@@ -609,8 +609,8 @@ class ClassType extends Type {
 		}
 
 		return this.addInstanceMethod(name, type)
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 
 		const exhaustive = this.isExhaustive()
 
@@ -829,8 +829,8 @@ class ClassType extends Type {
 		}
 
 		return export
-	} // }}}
-	exportProperties(export, references, indexDelta, mode, module, overwritten) { // {{{
+	} # }}}
+	exportProperties(export, references, indexDelta, mode, module, overwritten) { # {{{
 		return unless @referenceIndex == -1
 
 		@majorOriginal?.exportProperties(export, references, indexDelta, mode, module, overwritten)
@@ -882,9 +882,9 @@ class ClassType extends Type {
 				export.classMethods[name] = exportedMethods
 			}
 		}
-	} // }}}
+	} # }}}
 	extends() => @extends
-	extends(@extends) { // {{{
+	extends(@extends) { # {{{
 		@extending = true
 
 		const type = @extends.type()
@@ -897,11 +897,11 @@ class ClassType extends Type {
 		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
 
 		@level = type.level():Number + 1
-	} // }}}
-	flagAbstract() { // {{{
+	} # }}}
+	flagAbstract() { # {{{
 		@abstract = true
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		if @exported && (@explicitlyExported || !explicitly) {
 			return this
 		}
@@ -938,8 +938,8 @@ class ClassType extends Type {
 		}
 
 		return this
-	} // }}}
-	filterAbstractMethods(abstractMethods) { // {{{
+	} # }}}
+	filterAbstractMethods(abstractMethods) { # {{{
 		if @extending {
 			@extends.type().filterAbstractMethods(abstractMethods)
 		}
@@ -968,26 +968,26 @@ class ClassType extends Type {
 				delete abstractMethods[name]
 			}
 		}
-	} // }}}
-	flagAltering(): this { // {{{
+	} # }}}
+	flagAltering(): this { # {{{
 		if ?@majorOriginal {
 			@altering = true
 		}
-	} // }}}
-	flagPredefined() { // {{{
+	} # }}}
+	flagPredefined() { # {{{
 		@predefined = true
-	} // }}}
-	flagRequirement(): this { // {{{
+	} # }}}
+	flagRequirement(): this { # {{{
 		super()
 
 		@majorOriginal?.unflagRequired()
-	} // }}}
-	flagSealed() { // {{{
+	} # }}}
+	flagSealed() { # {{{
 		@sealed = true
 
 		return this
-	} // }}}
-	forEachInstanceVariables(fn) { // {{{
+	} # }}}
+	forEachInstanceVariables(fn) { # {{{
 		for const variable, name of @instanceVariables {
 			fn(name, variable)
 		}
@@ -995,8 +995,8 @@ class ClassType extends Type {
 		if @extending {
 			@extends.type().forEachInstanceVariables(fn)
 		}
-	} // }}}
-	getAbstractMethod(name: String, type: Type) { // {{{
+	} # }}}
+	getAbstractMethod(name: String, type: Type) { # {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
 				if type.isMatching(method, MatchingMode::FunctionSignature) {
@@ -1011,8 +1011,8 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	getClassAssessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	getClassAssessment(name: String, node: AbstractNode) { # {{{
 		if @classMethods[name] is not Array {
 			if @extending {
 				return @extends.type().getClassAssessment(name, node)
@@ -1040,30 +1040,30 @@ class ClassType extends Type {
 		}
 
 		return @classAssessments[name]
-	} // }}}
-	getClassProperty(name: String): Type { // {{{
+	} # }}}
+	getClassProperty(name: String): Type { # {{{
 		if @classMethods[name] is Array {
 			return @scope.reference('Function')
 		}
 		else {
 			return @classVariables[name] ?? Type.Any
 		}
-	} // }}}
-	getClassVariable(name: String) { // {{{
+	} # }}}
+	getClassVariable(name: String) { # {{{
 		if const variable = @classVariables[name] {
 			return variable
 		}
 
 		return null
-	} // }}}
-	getClassWithInstanceMethod(name: String, that: NamedType): NamedType { // {{{
+	} # }}}
+	getClassWithInstanceMethod(name: String, that: NamedType): NamedType { # {{{
 		if @instanceMethods[name] is Array {
 			return that
 		}
 
 		return @extends.type().getClassWithInstanceMethod(name, @extends)
-	} // }}}
-	getConstructor(type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	getConstructor(type: FunctionType, mode: MatchingMode) { # {{{
 		if @constructors.length == 0 && @extending {
 			return @extends.type().getConstructor(type)
 		}
@@ -1082,8 +1082,8 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	getConstructorAssessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	getConstructorAssessment(name: String, node: AbstractNode) { # {{{
 		if @constructorAssessment == null {
 			const methods = this.listAccessibleConstructors()
 
@@ -1091,10 +1091,10 @@ class ClassType extends Type {
 		}
 
 		return @constructorAssessment
-	} // }}}
+	} # }}}
 	getConstructorCount() => @sequences.constructors + 1
 	getDestructorCount() => @sequences.destructors + 1
-	getHierarchy(name) { // {{{
+	getHierarchy(name) { # {{{
 		if @extending {
 			let class = this.extends()
 
@@ -1109,8 +1109,8 @@ class ClassType extends Type {
 		else {
 			return [name]
 		}
-	} // }}}
-	getHybridConstructor(namedClass: NamedType<ClassType>): NamedType<ClassType>? { // {{{
+	} # }}}
+	getHybridConstructor(namedClass: NamedType<ClassType>): NamedType<ClassType>? { # {{{
 		if @sealed {
 			if @seal.constructors {
 				return namedClass
@@ -1121,8 +1121,8 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getHybridMethod(name: String, namedClass: NamedType<ClassType>): NamedType<ClassType>? { // {{{
+	} # }}}
+	getHybridMethod(name: String, namedClass: NamedType<ClassType>): NamedType<ClassType>? { # {{{
 		if @sealed {
 			if @seal.instanceMethods[name] {
 				return namedClass
@@ -1133,8 +1133,8 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getInstanceProperty(name: String) { // {{{
+	} # }}}
+	getInstanceProperty(name: String) { # {{{
 		if @instanceMethods[name] is Array {
 			if @instanceMethods[name].length == 1 {
 				return @instanceMethods[name][0]
@@ -1151,8 +1151,8 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getInstanceVariable(name: String) { // {{{
+	} # }}}
+	getInstanceVariable(name: String) { # {{{
 		if @instanceVariables[name]? {
 			return @instanceVariables[name]
 		}
@@ -1161,8 +1161,8 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getInstantiableAssessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	getInstantiableAssessment(name: String, node: AbstractNode) { # {{{
 		if const assessment = @instanceAssessments[name] {
 			return assessment
 		}
@@ -1183,10 +1183,10 @@ class ClassType extends Type {
 		@instanceAssessments[name] = assessment
 
 		return assessment
-	} // }}}
+	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
 	getProperty(name: String) => this.getClassProperty(name)
-	getPropertyGetter(name: String) { // {{{
+	getPropertyGetter(name: String) { # {{{
 		if @instanceMethods[name] is Array {
 			for method in @instanceMethods[name] {
 				if method.min() == 0 && method.max() == 0 {
@@ -1199,8 +1199,8 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getPropertySetter(name: String) { // {{{
+	} # }}}
+	getPropertySetter(name: String) { # {{{
 		if @instanceMethods[name] is Array {
 			for method in @instanceMethods[name] {
 				if method.min() == 1 && method.max() == 1 {
@@ -1213,9 +1213,9 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
+	} # }}}
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
-	hasAbstractMethod(name) { // {{{
+	hasAbstractMethod(name) { # {{{
 		if @abstractMethods[name] is Array {
 			return true
 		}
@@ -1226,8 +1226,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasClassMethod(name) { // {{{
+	} # }}}
+	hasClassMethod(name) { # {{{
 		if @classMethods[name] is Array {
 			return true
 		}
@@ -1238,8 +1238,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasClassVariable(name) { // {{{
+	} # }}}
+	hasClassVariable(name) { # {{{
 		if @classVariables[name] is ClassVariableType {
 			return true
 		}
@@ -1250,10 +1250,10 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	hasConstructors() => @constructors.length != 0
 	hasDestructors() => @sequences.destructors != -1
-	hasExportableOriginals() { // {{{
+	hasExportableOriginals() { # {{{
 		if @minorOriginal? {
 			return true if @minorOriginal._referenceIndex != -1 || @minorOriginal.hasExportableOriginals()
 		}
@@ -1264,8 +1264,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasInstanceMethod(name) { // {{{
+	} # }}}
+	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
 		}
@@ -1276,8 +1276,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasInstanceVariable(name) { // {{{
+	} # }}}
+	hasInstanceVariable(name) { # {{{
 		if @instanceVariables[name] is ClassVariableType {
 			return true
 		}
@@ -1288,8 +1288,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasInstantiableMethod(name) { // {{{
+	} # }}}
+	hasInstantiableMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
 		}
@@ -1302,8 +1302,8 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @classMethods[name] is Array {
 			for const method in @classMethods[name] {
 				if method.isSubsetOf(type, mode) {
@@ -1317,8 +1317,8 @@ class ClassType extends Type {
 		}
 
 		return false
-	} // }}}
-	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { # {{{
 		if @constructors.length != 0 {
 			for const constructor in @constructors {
 				if constructor.isSubsetOf(type, mode) {
@@ -1328,8 +1328,8 @@ class ClassType extends Type {
 		}
 
 		return false
-	} // }}}
-	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
 			for const method in @instanceMethods[name] {
 				if method.isSubsetOf(type, mode) {
@@ -1351,9 +1351,9 @@ class ClassType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
-	hasSealedInstanceMethod(name) { // {{{
+	hasSealedInstanceMethod(name) { # {{{
 		if @seal.instanceMethods[name] {
 			return true
 		}
@@ -1364,17 +1364,17 @@ class ClassType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	incDefaultSequence() { // {{{
+	} # }}}
+	incDefaultSequence() { # {{{
 		return ++@sequences.defaults
-	} // }}}
-	incDestructorSequence() { // {{{
+	} # }}}
+	incDestructorSequence() { # {{{
 		return ++@sequences.destructors
-	} // }}}
-	incInitializationSequence() { // {{{
+	} # }}}
+	incInitializationSequence() { # {{{
 		return ++@sequences.initializations
-	} // }}}
-	incSharedMethod(name: String): Number { // {{{
+	} # }}}
+	incSharedMethod(name: String): Number { # {{{
 		if const value = @sharedMethods[name] {
 			@sharedMethods[name] = ++value
 		}
@@ -1383,10 +1383,10 @@ class ClassType extends Type {
 		}
 
 		return @sharedMethods[name]
-	} // }}}
+	} # }}}
 	isAbstract() => @abstract
 	isAltering() => @altering
-	isAsyncClassMethod(name) { // {{{
+	isAsyncClassMethod(name) { # {{{
 		if @classMethods[name] is Array {
 			return @classMethods[name][0].isAsync()
 		}
@@ -1396,8 +1396,8 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	isAsyncInstanceMethod(name) { // {{{
+	} # }}}
+	isAsyncInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name][0].isAsync()
 		}
@@ -1411,11 +1411,11 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
+	} # }}}
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
-	isExhaustive() { // {{{
+	isExhaustive() { # {{{
 		if @exhaustive {
 			return true
 		}
@@ -1430,10 +1430,10 @@ class ClassType extends Type {
 		else {
 			return super.isExhaustive()
 		}
-	} // }}}
+	} # }}}
 	isExhaustiveConstructor() => @exhaustiveness.constructor
 	isExhaustiveConstructor(node) => this.isExhaustive(node) && this.isExhaustiveConstructor()
-	isExhaustiveClassMethod(name) { // {{{
+	isExhaustiveClassMethod(name) { # {{{
 		if @exhaustiveness.classMethods[name]? {
 			return @exhaustiveness.classMethods[name]
 		}
@@ -1443,9 +1443,9 @@ class ClassType extends Type {
 		else {
 			return @exhaustive
 		}
-	} // }}}
+	} # }}}
 	isExhaustiveClassMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveClassMethod(name)
-	isExhaustiveInstanceMethod(name) { // {{{
+	isExhaustiveInstanceMethod(name) { # {{{
 		if @exhaustiveness.instanceMethods[name]? {
 			return @exhaustiveness.instanceMethods[name]
 		}
@@ -1458,7 +1458,7 @@ class ClassType extends Type {
 		else {
 			return @exhaustive
 		}
-	} // }}}
+	} # }}}
 	isExhaustiveInstanceMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveInstanceMethod(name)
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
@@ -1467,7 +1467,7 @@ class ClassType extends Type {
 	isHybrid() => @hybrid
 	isInitializing() => @sequences.initializations != -1
 	// TODO rename to `isSubclassOf`
-	isInstanceOf(value: ClassType) { // {{{
+	isInstanceOf(value: ClassType) { # {{{
 		if this == value {
 			return true
 		}
@@ -1477,13 +1477,13 @@ class ClassType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isInstanceOf(value: NamedType) => this.isInstanceOf(value.type())
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
 	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
-	isSubsetOf(value: ClassType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: ClassType, mode: MatchingMode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1540,10 +1540,10 @@ class ClassType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
-	listAccessibleConstructors() { // {{{
+	listAccessibleConstructors() { # {{{
 		if @constructors.length != 0 {
 			return @constructors
 		}
@@ -1553,15 +1553,15 @@ class ClassType extends Type {
 		else {
 			return []
 		}
-	} // }}}
-	listClassMethods(name: String) { // {{{
+	} # }}}
+	listClassMethods(name: String) { # {{{
 		if @classMethods[name] is Array {
 			return @classMethods[name]
 		}
 
 		return null
-	} // }}}
-	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { // {{{
+	} # }}}
+	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		const result = []
 
 		if const methods = @classMethods[name] {
@@ -1581,9 +1581,9 @@ class ClassType extends Type {
 		}
 
 		return result
-	} // }}}
+	} # }}}
 	listConstructors() => @constructors
-	listConstructors(type: FunctionType, mode: MatchingMode): Array { // {{{
+	listConstructors(type: FunctionType, mode: MatchingMode): Array { # {{{
 		const result = []
 
 		for const method in @constructors {
@@ -1601,15 +1601,15 @@ class ClassType extends Type {
 		}
 
 		return result
-	} // }}}
-	listInstanceMethods(name: String) { // {{{
+	} # }}}
+	listInstanceMethods(name: String) { # {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name]
 		}
 
 		return null
-	} // }}}
-	listInstantiableMethods(name: String) { // {{{
+	} # }}}
+	listInstantiableMethods(name: String) { # {{{
 		const methods = []
 
 		if const functions = @instanceMethods[name] {
@@ -1623,8 +1623,8 @@ class ClassType extends Type {
 		}
 
 		return methods
-	} // }}}
-	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { // {{{
+	} # }}}
+	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		const result = []
 
 		if const methods = @instanceMethods[name] {
@@ -1658,8 +1658,8 @@ class ClassType extends Type {
 		}
 
 		return result
-	} // }}}
-	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { # {{{
 		const results: Array = []
 
 		for const constructor in @constructors {
@@ -1669,8 +1669,8 @@ class ClassType extends Type {
 		}
 
 		return results
-	} // }}}
-	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
 		const results: Array = []
 
 		if @instanceMethods[name] is Array {
@@ -1690,8 +1690,8 @@ class ClassType extends Type {
 		}
 
 		return results
-	} // }}}
-	listMissingAbstractMethods() { // {{{
+	} # }}}
+	listMissingAbstractMethods() { # {{{
 		unless @extending {
 			return []
 		}
@@ -1718,9 +1718,9 @@ class ClassType extends Type {
 		}
 
 		return abstractMethods
-	} // }}}
+	} # }}}
 	majorOriginal() => @majorOriginal
-	matchArguments(arguments: Array<Type>, node: AbstractNode) { // {{{
+	matchArguments(arguments: Array<Type>, node: AbstractNode) { # {{{
 		if @constructors.length == 0 {
 			if @extending {
 				return @extends.type().matchArguments(arguments, node)
@@ -1738,8 +1738,8 @@ class ClassType extends Type {
 
 			return false
 		}
-	} // }}}
-	matchInstanceWith(object: DictionaryType, matchables) { // {{{
+	} # }}}
+	matchInstanceWith(object: DictionaryType, matchables) { # {{{
 		for const property, name of object._properties {
 			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode::Signature) {
 			}
@@ -1762,17 +1762,17 @@ class ClassType extends Type {
 		}
 
 		return true
-	} // }}}
-	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { // {{{
+	} # }}}
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { # {{{
 		if @predefined {
 			return name
 		}
 		else {
 			return [this.toMetadata(references, indexDelta, mode, module), name]
 		}
-	} // }}}
+	} # }}}
 	minorOriginal() => @minorOriginal ?? @majorOriginal
-	origin() { // {{{
+	origin() { # {{{
 		if @origin? {
 			return @origin
 		}
@@ -1782,11 +1782,11 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	originals(@majorOriginal, @minorOriginal = null): this { // {{{
+	} # }}}
+	originals(@majorOriginal, @minorOriginal = null): this { # {{{
 		@altering = true
-	} // }}}
-	overwriteConstructor(type, methods) { // {{{
+	} # }}}
+	overwriteConstructor(type, methods) { # {{{
 		@constructors.remove(...methods)
 
 		if const alterMethods = @majorOriginal?._constructors {
@@ -1801,8 +1801,8 @@ class ClassType extends Type {
 		}
 
 		return this.addConstructor(type)
-	} // }}}
-	overwriteInstanceMethod(name: String, type, methods) { // {{{
+	} # }}}
+	overwriteInstanceMethod(name: String, type, methods) { # {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
 		if const alterMethods = @majorOriginal?._instanceMethods[name] {
@@ -1817,9 +1817,9 @@ class ClassType extends Type {
 		}
 
 		return this.addInstanceMethod(name, type)
-	} // }}}
+	} # }}}
 	parameter() => AnyType.NullableUnexplicit
-	setExhaustive(@exhaustive) { // {{{
+	setExhaustive(@exhaustive) { # {{{
 		if @exhaustive {
 			if @extending {
 				const extends = @extends.type()
@@ -1864,9 +1864,9 @@ class ClassType extends Type {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	shallBeNamed() => true
-	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
 			return {
 				reference: @referenceIndex
@@ -1878,11 +1878,11 @@ class ClassType extends Type {
 		else {
 			return this.toReference(references, indexDelta, mode, module)
 		}
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
-	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode::Export {
 			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin::ExternOrRequire | TypeOrigin::RequireOrExtern {
 				const require = ClassType.getRequireReference(this)
@@ -1910,8 +1910,8 @@ class ClassType extends Type {
 		}
 
 		return super(references, indexDelta, mode, module)
-	} // }}}
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode::Alien {
 			if @minorOriginal? {
 				return @minorOriginal.toReference(references, indexDelta, mode, module)
@@ -1927,11 +1927,11 @@ class ClassType extends Type {
 		}
 
 		return super(references, indexDelta, mode, module)
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)
 
 		for const sequence, name of @sequences.classMethods {
@@ -1941,8 +1941,8 @@ class ClassType extends Type {
 		for const sequence, name of @sequences.instanceMethods {
 			variations.push(name, sequence)
 		}
-	} // }}}
-	unflagAltering(): this { // {{{
+	} # }}}
+	unflagAltering(): this { # {{{
 		for const methods of this._abstractMethods {
 			for const method in methods {
 				method.unflagAltering()
@@ -1967,19 +1967,19 @@ class ClassType extends Type {
 		}
 
 		@altering = false
-	} // }}}
-	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { // {{{
+	} # }}}
+	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { # {{{
 		const root = this.ancestor()
 		const index = ++root._sequences.instanceMethods[name]
 
 		type.setForkedIndex(index)
 
 		return index
-	} // }}}
+	} # }}}
 }
 
 class ClassMethodSetType extends OverloadedFunctionType {
-	constructor(@scope, @functions) { // {{{
+	constructor(@scope, @functions) { # {{{
 		super(scope)
 
 		for function in functions {
@@ -1988,6 +1988,6 @@ class ClassMethodSetType extends OverloadedFunctionType {
 				break
 			}
 		}
-	} // }}}
+	} # }}}
 	isMethod() => true
 }

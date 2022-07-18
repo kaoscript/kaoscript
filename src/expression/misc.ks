@@ -3,14 +3,14 @@ class TempReusableExpression extends Expression {
 		_count: Number			= 0
 		_value
 	}
-	constructor(@value, parent) { // {{{
+	constructor(@value, parent) { # {{{
 		super({}, parent)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	isComputed() => @count == 0 && @value.isComposite()
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @count == 0 && @value.isComposite() {
 			fragments.compileReusable(@value)
 		}
@@ -19,7 +19,7 @@ class TempReusableExpression extends Expression {
 		}
 
 		++@count
-	} // }}}
+	} # }}}
 }
 
 class TempMemberExpression extends Expression {
@@ -30,24 +30,24 @@ class TempMemberExpression extends Expression {
 		_reusable: Boolean		= false
 		_reuseName: String?		= null
 	}
-	constructor(@object, @property, @computed, @parent, @scope) { // {{{
+	constructor(@object, @property, @computed, @parent, @scope) { # {{{
 		super({}, parent, scope)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	acquireReusable(acquire) { // {{{
+	acquireReusable(acquire) { # {{{
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
-	} // }}}
+	} # }}}
 	isComposite() => true
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @reuseName? {
 			@scope.releaseTempName(@reuseName)
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -64,12 +64,12 @@ class TempMemberExpression extends Expression {
 				.code('.')
 				.compile(@property)
 		}
-	} // }}}
-	toReusableFragments(fragments) { // {{{
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		fragments
 			.code(@reuseName, $equals)
 			.compile(this)
 
 		@reusable = true
-	} // }}}
+	} # }}}
 }

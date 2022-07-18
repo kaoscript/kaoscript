@@ -1,6 +1,6 @@
 abstract class DependencyStatement extends Statement {
 	abstract applyFlags(type: Type)
-	define(declaration) { // {{{
+	define(declaration) { # {{{
 		const options = Attribute.configure(declaration, @options, AttributeTarget::Statement, @file())
 		const scope = @parent.scope()
 
@@ -174,14 +174,14 @@ abstract class DependencyStatement extends Statement {
 				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, this)
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ExternDeclaration extends DependencyStatement {
 	private {
 		_lines = []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		const module = this.module()
 
 		let variable
@@ -238,24 +238,24 @@ class ExternDeclaration extends DependencyStatement {
 
 			module.addAlien(variable.name(), variable.getDeclaredType())
 		}
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	override applyFlags(type) { // {{{
+	override applyFlags(type) { # {{{
 		return type
 			.flagAlien()
 			.flagRequired()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		for line in @lines {
 			fragments.line(line)
 		}
-	} // }}}
+	} # }}}
 }
 
 class RequireDeclaration extends DependencyStatement {
-	initiate() { // {{{
+	initiate() { # {{{
 		const module = this.module()
 
 		if module.isBinary() {
@@ -304,26 +304,26 @@ class RequireDeclaration extends DependencyStatement {
 				this.addRequirement(declaration)
 			}
 		}
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	addRequirement(declaration) { // {{{
+	addRequirement(declaration) { # {{{
 		const variable = this.define(declaration)
 		const requirement = new StaticRequirement(variable, this)
 
 		this.module().addRequirement(requirement)
-	} // }}}
-	override applyFlags(type) { // {{{
+	} # }}}
+	override applyFlags(type) { # {{{
 		return type
 			.flagRequirement()
 			.flagRequired()
-	} // }}}
+	} # }}}
 	toStatementFragments(fragments, mode)
 }
 
 class ExternOrRequireDeclaration extends DependencyStatement {
-	initiate() { // {{{
+	initiate() { # {{{
 		const module = this.module()
 
 		if module.isBinary() {
@@ -348,24 +348,24 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 				this.addRequirement(declaration)
 			}
 		}
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	addRequirement(declaration) { // {{{
+	addRequirement(declaration) { # {{{
 		const variable = this.define(declaration)
 		const requirement = new EORDynamicRequirement(variable, this)
 
 		this.module()
 			.addAlien(requirement.name(), requirement.type())
 			.addRequirement(requirement)
-	} // }}}
-	override applyFlags(type) { // {{{
+	} # }}}
+	override applyFlags(type) { # {{{
 		return type
 			.flagAlien()
 			.flagRequirement()
 			.origin(TypeOrigin::ExternOrRequire)
-	} // }}}
+	} # }}}
 	toStatementFragments(fragments, mode)
 }
 
@@ -373,7 +373,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 	private {
 		_requirements: Array<ROEDynamicRequirement>		= []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		const module = this.module()
 
 		if module.isBinary() {
@@ -397,24 +397,24 @@ class RequireOrExternDeclaration extends DependencyStatement {
 				this.addRequirement(data)
 			}
 		}
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	addRequirement(declaration) { // {{{
+	addRequirement(declaration) { # {{{
 		const variable = this.define(declaration)
 		const requirement = new ROEDynamicRequirement(variable, this)
 
 		this.module()
 			.addRequirement(requirement)
 			.addAlien(requirement.name(), requirement.type())
-	} // }}}
-	override applyFlags(type) { // {{{
+	} # }}}
+	override applyFlags(type) { # {{{
 		return type
 			.flagAlien()
 			.flagRequirement()
 			.origin(TypeOrigin::RequireOrExtern + TypeOrigin::Require + TypeOrigin::Extern)
-	} // }}}
+	} # }}}
 	toStatementFragments(fragments, mode)
 }
 
@@ -422,7 +422,7 @@ class RequireOrImportDeclaration extends Statement {
 	private {
 		_declarators = []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		if this.module().isBinary() {
 			SyntaxException.throwNotBinary('require|import', this)
 		}
@@ -434,34 +434,34 @@ class RequireOrImportDeclaration extends Statement {
 
 			@declarators.push(declarator)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for declarator in @declarators {
 			declarator.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for declarator in @declarators {
 			declarator.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		for const declarator in @declarators {
 			declarator.toStatementFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }
 
 class RequireOrImportDeclarator extends Importer {
 	private {
 		_requirements: Array	= []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		super()
 
 		const module = this.module()
@@ -511,10 +511,10 @@ class RequireOrImportDeclarator extends Importer {
 		if @alias != null {
 			throw new NotImplementedException(this)
 		}
-	} // }}}
+	} # }}}
 	flagForcefullyRebinded()
 	override mode() => ImportMode::RequireOrImport
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		const module = this.module()
 
 		if @requirements.length == 0 {
@@ -621,14 +621,14 @@ class RequireOrImportDeclarator extends Importer {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ExternOrImportDeclaration extends Statement {
 	private {
 		_declarators = []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		if this.module().isBinary() {
 			SyntaxException.throwNotBinary('extern|import', this)
 		}
@@ -640,34 +640,34 @@ class ExternOrImportDeclaration extends Statement {
 
 			@declarators.push(declarator)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for declarator in @declarators {
 			declarator.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const declarator in @declarators {
 			declarator.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		for const declarator in @declarators {
 			declarator.toStatementFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }
 
 class ExternOrImportDeclarator extends Importer {
 	private {
 		_requirements: Array	= []
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		const module = this.module()
@@ -702,10 +702,10 @@ class ExternOrImportDeclarator extends Importer {
 		if @alias != null {
 			throw new NotImplementedException(this)
 		}
-	} // }}}
+	} # }}}
 	flagForcefullyRebinded()
 	override mode() => ImportMode::ExternOrImport
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		if @requirements.length == 0 {
 			this.toImportFragments(fragments)
 		}
@@ -768,7 +768,7 @@ class ExternOrImportDeclarator extends Importer {
 
 			ctrl.done()
 		}
-	} // }}}
+	} # }}}
 }
 
 abstract class Requirement {
@@ -779,16 +779,16 @@ abstract class Requirement {
 		_node: AbstractNode
 		_type: Type
 	}
-	constructor(@name, @type, @node) { // {{{
+	constructor(@name, @type, @node) { # {{{
 		if @type.isSystemic() && @name == 'Dictionary' {
 			node.module().flag('Dictionary')
 		}
-	} // }}}
-	constructor(variable: Variable, @node) { // {{{
+	} # }}}
+	constructor(variable: Variable, @node) { # {{{
 		this(variable.name(), variable.getDeclaredType(), node)
-	} // }}}
+	} # }}}
 	alternative(): @alternative
-	flagAlternative(): this { // {{{
+	flagAlternative(): this { # {{{
 		let type = @type
 
 		while type.minorOriginal()? {
@@ -796,7 +796,7 @@ abstract class Requirement {
 		}
 
 		@alternative = type
-	} // }}}
+	} # }}}
 	getSealedName() => @type.getSealedName()
 	index() => @index
 	index(@index)
@@ -804,15 +804,15 @@ abstract class Requirement {
 	isSealed() => @type.isSealed()
 	isSystemic() => @type.isSystemic()
 	name() => @name
-	toNameFragments(fragments) { // {{{
+	toNameFragments(fragments) { # {{{
 		if @type.isSealed() {
 			fragments.code(@type.getSealedName())
 		}
 		else {
 			fragments.code(@name)
 		}
-	} // }}}
-	toRequiredMetadata() { // {{{
+	} # }}}
+	toRequiredMetadata() { # {{{
 		if @type.isRequired() {
 			return true
 		}
@@ -822,20 +822,20 @@ abstract class Requirement {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 	type(@type) => this
 }
 
 class StaticRequirement extends Requirement {
-	constructor(@name, @type, @node) { // {{{
+	constructor(@name, @type, @node) { # {{{
 		super(name, type, node)
-	} // }}}
-	constructor(variable: Variable, @node) { // {{{
+	} # }}}
+	constructor(variable: Variable, @node) { # {{{
 		super(variable, node)
-	} // }}}
+	} # }}}
 	toFragments(fragments)
-	toParameterFragments(fragments, comma) { // {{{
+	toParameterFragments(fragments, comma) { # {{{
 		const module = @node.module()
 		const argument = module.getArgument(@index)
 
@@ -874,13 +874,13 @@ class StaticRequirement extends Requirement {
 		else {
 			return comma
 		}
-	} // }}}
+	} # }}}
 }
 
 class ImportingRequirement extends StaticRequirement {
-	constructor(@name, @type, node) { // {{{
+	constructor(@name, @type, node) { # {{{
 		super(name, type, node)
-	} // }}}
+	} # }}}
 	isRequired() => false
 }
 
@@ -888,7 +888,7 @@ abstract class DynamicRequirement extends Requirement {
 	private lateinit {
 		_parameter: String
 	}
-	toParameterFragments(fragments, comma) { // {{{
+	toParameterFragments(fragments, comma) { # {{{
 		const module = @node.module()
 		const argument = module.getArgument(@index)
 
@@ -927,18 +927,18 @@ abstract class DynamicRequirement extends Requirement {
 		else {
 			return comma
 		}
-	} // }}}
+	} # }}}
 }
 
 class EORDynamicRequirement extends DynamicRequirement {
-	constructor(variable: Variable, @node) { // {{{
+	constructor(variable: Variable, @node) { # {{{
 		super(variable, node)
 
 		if !@type.isSystemic() {
 			@parameter = @node.module().scope().acquireTempName(false)
 		}
-	} // }}}
-	toFragments(fragments) { // {{{
+	} # }}}
+	toFragments(fragments) { # {{{
 		const module = @node.module()
 		const argument = module.getArgument(@index)
 
@@ -966,18 +966,18 @@ class EORDynamicRequirement extends DynamicRequirement {
 				ctrl.done()
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ROEDynamicRequirement extends DynamicRequirement {
-	constructor(variable: Variable, @node) { // {{{
+	constructor(variable: Variable, @node) { # {{{
 		super(variable, node)
 
 		if !@type.isSystemic() {
 			@parameter = @node.module().scope().acquireTempName(false)
 		}
-	} // }}}
-	toFragments(fragments) { // {{{
+	} # }}}
+	toFragments(fragments) { # {{{
 		const module = @node.module()
 		const argument = module.getArgument(@index)
 
@@ -1010,7 +1010,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 				fragments.line(`\($runtime.immutableScope(@node))\(@type.getSealedName()) = {}`)
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ROIDynamicRequirement extends StaticRequirement {
@@ -1018,14 +1018,14 @@ class ROIDynamicRequirement extends StaticRequirement {
 		_importer
 		_tempName: String
 	}
-	constructor(@name, @type, @node) { // {{{
+	constructor(@name, @type, @node) { # {{{
 		super(name, type, node)
-	} // }}}
-	constructor(variable: Variable, importer) { // {{{
+	} # }}}
+	constructor(variable: Variable, importer) { # {{{
 		super(variable, @importer = importer)
-	} // }}}
-	acquireTempName() { // {{{
+	} # }}}
+	acquireTempName() { # {{{
 		@tempName = @node.module().scope().acquireTempName(false)
-	} // }}}
+	} # }}}
 	tempName() => @tempName
 }

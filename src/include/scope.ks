@@ -1,4 +1,4 @@
-let $keywords = { // {{{
+let $keywords = { # {{{
 	abstract: true
 	arguments: true
 	boolean: true
@@ -67,7 +67,7 @@ let $keywords = { // {{{
 	volatile: true
 	while: true
 	with: true
-} // }}}
+} # }}}
 
 enum ScopeType {
 	Bleeding

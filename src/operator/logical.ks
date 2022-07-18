@@ -1,5 +1,5 @@
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
-	prepare() { // {{{
+	prepare() { # {{{
 		for operand in @operands {
 			operand.prepare()
 
@@ -15,8 +15,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				@scope.updateInferable(name, data, this)
 			}
 		}
-	} // }}}
-	inferTypes(inferables) { // {{{
+	} # }}}
+	inferTypes(inferables) { # {{{
 		const scope = this.statement().scope()
 
 		for const operand, index in @operands {
@@ -59,9 +59,9 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
+	} # }}}
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
-	inferWhenTrueTypes(inferables) { // {{{
+	inferWhenTrueTypes(inferables) { # {{{
 		for const operand in @operands {
 			for const data, name of operand.inferWhenTrueTypes({}) {
 				inferables[name] = data
@@ -69,8 +69,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		let nf = false
 
 		for const operand in @operands {
@@ -86,12 +86,12 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 			fragments.wrapBoolean(operand)
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorAnd extends PolyadicOperatorAnd {
-	analyse() { // {{{
+	analyse() { # {{{
 		for const data in [@data.left, @data.right] {
 			operand = $compile.expression(data, this)
 
@@ -99,11 +99,11 @@ class BinaryOperatorAnd extends PolyadicOperatorAnd {
 
 			@operands.push(operand)
 		}
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
-	prepare() { // {{{
+	prepare() { # {{{
 		const lastIndex = @operands.length - 1
 		const originals = {}
 
@@ -135,8 +135,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		for const data, name of originals {
 			@scope.updateInferable(name, data, this)
 		}
-	} // }}}
-	inferTypes(inferables) { // {{{
+	} # }}}
+	inferTypes(inferables) { # {{{
 		const scope = this.statement().scope()
 
 		for const operand, index in @operands {
@@ -179,8 +179,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
-	inferWhenFalseTypes(inferables) { // {{{
+	} # }}}
+	inferWhenFalseTypes(inferables) { # {{{
 		const scope = this.statement().scope()
 
 		for const operand, index in @operands {
@@ -223,8 +223,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
-	inferWhenTrueTypes(inferables) { // {{{
+	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
 		const scope = this.statement().scope()
 
 		const whenTrue = {}
@@ -287,8 +287,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		let nf = false
 
 		for const operand in @operands {
@@ -304,12 +304,12 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 			fragments.wrapBoolean(operand)
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorOr extends PolyadicOperatorOr {
-	analyse() { // {{{
+	analyse() { # {{{
 		for const data in [@data.left, @data.right] {
 			operand = $compile.expression(data, this)
 
@@ -317,11 +317,11 @@ class BinaryOperatorOr extends PolyadicOperatorOr {
 
 			@operands.push(operand)
 		}
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorImply extends PolyadicOperatorOr {
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		const l = @operands.length - 2
 		fragments.code('!('.repeat(l))
 
@@ -332,22 +332,22 @@ class PolyadicOperatorImply extends PolyadicOperatorOr {
 		}
 
 		fragments.code(' || ').wrapBoolean(@operands[@operands.length - 1])
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorImply extends BinaryOperatorOr {
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.code('!')
 			.wrapBoolean(@operands[0])
 			.code(' || ')
 			.wrapBoolean(@operands[1])
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorXor extends PolyadicOperatorAnd {
 	inferWhenFalseTypes(inferables) => this.inferWhenTrueTypes(inferables)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		const l = @operands.length - 2
 		fragments.code('('.repeat(l))
 
@@ -358,17 +358,17 @@ class PolyadicOperatorXor extends PolyadicOperatorAnd {
 		}
 
 		fragments.code(' !== ').wrapBoolean(@operands[@operands.length - 1])
-	} // }}}
+	} # }}}
 }
 
 class BinaryOperatorXor extends BinaryOperatorAnd {
 	inferWhenFalseTypes(inferables) => this.inferWhenTrueTypes(inferables)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.wrapBoolean(@operands[0])
 			.code($space)
 			.code('!==', @data.operator)
 			.code($space)
 			.wrapBoolean(@operands[1])
-	} // }}}
+	} # }}}
 }

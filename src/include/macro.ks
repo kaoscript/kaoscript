@@ -7,7 +7,7 @@ enum MacroVariableKind {
 
 const $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
-func $evaluate(source) { // {{{
+func $evaluate(source) { # {{{
 	// console.log('--> ', source)
 
 	const compiler = new Compiler('__ks__', {
@@ -20,7 +20,7 @@ func $evaluate(source) { // {{{
 	// console.log('<-- ', compiler.toSource())
 
 	return eval(`(function(__ks_marker) {\(compiler.toSource())})`)(MacroMarker)
-} // }}}
+} # }}}
 
 class MacroMarker {
 	public {
@@ -29,7 +29,7 @@ class MacroMarker {
 	constructor(@index)
 }
 
-func $reificate(macro, node, data, ast, reification = null, separator = null) { // {{{
+func $reificate(macro, node, data, ast, reification = null, separator = null) { # {{{
 	if ast {
 		return Generator.generate(data, {
 			transformers: {
@@ -77,9 +77,9 @@ func $reificate(macro, node, data, ast, reification = null, separator = null) { 
 			}
 		}
 	}
-} // }}}
+} # }}}
 
-func $serialize(macro, data, context) { // {{{
+func $serialize(macro, data, context) { # {{{
 	if data is Boolean {
 		context.data += JSON.stringify(data)
 	}
@@ -167,9 +167,9 @@ func $serialize(macro, data, context) { // {{{
 
 		context.data += '}'
 	}
-} // }}}
+} # }}}
 
-func $transformExpression(macro, node, data, writer) { // {{{
+func $transformExpression(macro, node, data, writer) { # {{{
 	switch data.kind {
 		NodeKind::EnumExpression => {
 			return macro.addMark(data)
@@ -200,7 +200,7 @@ func $transformExpression(macro, node, data, writer) { // {{{
 	}
 
 	return data
-} // }}}
+} # }}}
 
 class MacroDeclaration extends AbstractNode {
 	private {
@@ -213,7 +213,7 @@ class MacroDeclaration extends AbstractNode {
 		_referenceIndex: Number					= -1
 		_type: MacroType
 	}
-	constructor(@data, @parent, _: Scope?, @name = data.name.name) { // {{{
+	constructor(@data, @parent, _: Scope?, @name = data.name.name) { # {{{
 		super(data, parent, new MacroScope())
 
 		@type = MacroType.fromAST(data!?, this)
@@ -274,11 +274,11 @@ class MacroDeclaration extends AbstractNode {
 		@fn = $evaluate(source)
 
 		@parent.registerMacro(@name, this)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	addMark(data, kind = null) { // {{{
+	addMark(data, kind = null) { # {{{
 		const index = @marks.length
 
 		@marks.push(data, kind)
@@ -296,8 +296,8 @@ class MacroDeclaration extends AbstractNode {
 				}
 			]
 		}
-	} // }}}
-	addPropertyNameMark(data, kind = null) { // {{{
+	} # }}}
+	addPropertyNameMark(data, kind = null) { # {{{
 		const index = @marks.length
 
 		@marks.push(data, kind)
@@ -306,8 +306,8 @@ class MacroDeclaration extends AbstractNode {
 			kind: NodeKind::Identifier
 			name: `_ks_property_name_mark_\(index)`
 		}
-	} // }}}
-	execute(arguments: Array, parent) { // {{{
+	} # }}}
+	execute(arguments: Array, parent) { # {{{
 		// console.log(@fn.toString())
 		const module = this.module()
 		++@executeCount
@@ -328,11 +328,11 @@ class MacroDeclaration extends AbstractNode {
 		}
 
 		return data
-	} // }}}
-	export(recipient, name = @name) { // {{{
+	} # }}}
+	export(recipient, name = @name) { # {{{
 		recipient.exportMacro(name, this)
-	} // }}}
-	private filter(statement, data, fragments) { // {{{
+	} # }}}
+	private filter(statement, data, fragments) { # {{{
 		if data.kind == NodeKind::MacroExpression {
 			if statement {
 				fragments = fragments.newLine().code('__ks_src += ')
@@ -378,7 +378,7 @@ class MacroDeclaration extends AbstractNode {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	getMark(index) => @marks[index]
 	isEnhancementExport() => false
 	isExportable() => false
@@ -396,12 +396,12 @@ class MacroDeclaration extends AbstractNode {
 }
 
 class MacroType extends FunctionType {
-	static fromAST(data, node: AbstractNode): MacroType { // {{{
+	static fromAST(data, node: AbstractNode): MacroType { # {{{
 		const scope = node.scope()
 
 		return new MacroType([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
-	} // }}}
-	static import(data, references, scope: Scope, node: AbstractNode): MacroType { // {{{
+	} # }}}
+	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
 		const type = new MacroType(scope)
 
 		type._min = data.min
@@ -412,8 +412,8 @@ class MacroType extends FunctionType {
 		type.updateParameters()
 
 		return type
-	} // }}}
-	assessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	assessment(name: String, node: AbstractNode) { # {{{
 		if @assessment == null {
 			@assessment = Router.assess([this], name, node)
 
@@ -421,13 +421,13 @@ class MacroType extends FunctionType {
 		}
 
 		return @assessment
-	} // }}}
-	export() => { // {{{
+	} # }}}
+	export() => { # {{{
 		min: @min
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
-	} // }}}
-	matchContentOf(value: MacroType): Boolean { // {{{
+	} # }}}
+	matchContentOf(value: MacroType): Boolean { # {{{
 		if value.min() < @min || value.max() > @max {
 			return false
 		}
@@ -449,7 +449,7 @@ class MacroType extends FunctionType {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 }
 
 // TODO remove extended type
@@ -458,31 +458,31 @@ class MacroArgument extends Type {
 		_data
 	}
 	static build(arguments: Array) => [new MacroArgument(argument) for const argument in arguments]
-	constructor(@data) { // {{{
+	constructor(@data) { # {{{
 		super(null)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE) { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	toVariations(variations: Array<String>) { // {{{
+	} # }}}
+	toVariations(variations: Array<String>) { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	isAssignableToVariable(value: AnyType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+	} # }}}
+	isAssignableToVariable(value: AnyType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		return true
-	} // }}}
-	isAssignableToVariable(value: NullType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+	} # }}}
+	isAssignableToVariable(value: NullType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		return false
-	} // }}}
-	isAssignableToVariable(value: ReferenceType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+	} # }}}
+	isAssignableToVariable(value: ReferenceType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		if value.isAny() {
 			return true
 		}
@@ -512,8 +512,8 @@ class MacroArgument extends Type {
 		}
 
 		return false
-	} // }}}
-	isAssignableToVariable(value: UnionType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+	} # }}}
+	isAssignableToVariable(value: UnionType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		for const type in value.types() {
 			if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
 				return true
@@ -521,12 +521,12 @@ class MacroArgument extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSpread() => false
 	isUnion() => false
 }
 
-func $callMacroExpression(data, parent, scope) { // {{{
+func $callMacroExpression(data, parent, scope) { # {{{
 	const macro = scope.getMacro(data, parent)
 
 	const result = macro.execute(data.arguments, parent)
@@ -537,7 +537,7 @@ func $callMacroExpression(data, parent, scope) { // {{{
 	else {
 		throw new NotImplementedException(parent)
 	}
-} // }}}
+} # }}}
 
 class CallMacroStatement extends Statement {
 	private {
@@ -545,7 +545,7 @@ class CallMacroStatement extends Statement {
 		_offsetStart: Number	= 0
 		_statements: Array		= []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		const macro = @scope.getMacro(@data, this)
 
 		const data = macro.execute(@data.arguments, this)
@@ -574,8 +574,8 @@ class CallMacroStatement extends Statement {
 
 		@offsetEnd = offset + @scope.line() - @offsetStart
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
@@ -585,8 +585,8 @@ class CallMacroStatement extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
@@ -596,8 +596,8 @@ class CallMacroStatement extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
@@ -607,8 +607,8 @@ class CallMacroStatement extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
@@ -618,8 +618,8 @@ class CallMacroStatement extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	isAwait() { // {{{
+	} # }}}
+	isAwait() { # {{{
 		for statement in @statements {
 			if statement.isAwait() {
 				return true
@@ -627,8 +627,8 @@ class CallMacroStatement extends Statement {
 		}
 
 		return false
-	} // }}}
-	isExit() { // {{{
+	} # }}}
+	isExit() { # {{{
 		for statement in @statements {
 			if statement.isExit() {
 				return true
@@ -636,10 +636,10 @@ class CallMacroStatement extends Statement {
 		}
 
 		return false
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		for statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }

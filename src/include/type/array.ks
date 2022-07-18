@@ -2,13 +2,13 @@ class ArrayType extends Type {
 	private {
 		_elements: Array			= []
 	}
-	addElement(type: Type) { // {{{
+	addElement(type: Type) { # {{{
 		@elements.push(type)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const export = {
 			kind: TypeKind::Array
 		}
@@ -20,13 +20,13 @@ class ArrayType extends Type {
 		export.elements = [element.export(references, indexDelta, mode, module) for const element in @elements]
 
 		return export
-	} // }}}
+	} # }}}
 	getElement(index: Number): Type => index >= @elements.length ? AnyType.NullableUnexplicit : @elements[index]
 	isArray() => true
 	isMorePreciseThan(value) => true
 	isNullable() => false
 	isSealable() => true
-	isSubsetOf(value: ArrayType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		if this.length() != value.length() {
 			return false
 		}
@@ -42,15 +42,15 @@ class ArrayType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	length() => @elements.length
-	toFragments(fragments, node) { // {{{
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toTestFunctionFragments(fragments, node) { // {{{
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
 		if @elements.length == 0 {
 			fragments.code($runtime.type(node), '.isArray')
 		}
@@ -63,13 +63,13 @@ class ArrayType extends Type {
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value[\(index)]`))
 			}
 		}
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('array')
 
 		for const element in @elements {
 			element.toVariations(variations)
 		}
-	} // }}}
+	} # }}}
 	walk(fn)
 }

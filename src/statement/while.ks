@@ -8,7 +8,7 @@ class WhileStatement extends Statement {
 		_declared: Boolean					= false
 		_declaration: VariableDeclaration
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
@@ -18,8 +18,8 @@ class WhileStatement extends Statement {
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, true)
 			@declaration.initiate()
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @declared {
 			@declaration.analyse()
 
@@ -41,8 +41,8 @@ class WhileStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @declared {
 			@declaration.prepare()
 
@@ -81,8 +81,8 @@ class WhileStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @declared {
 			@declaration.translate()
 		}
@@ -91,14 +91,14 @@ class WhileStatement extends Statement {
 		}
 
 		@body.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isCascade() => @declared
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		if @declared {
 			if @declaration.isUsingVariable(name) {
 				return true
@@ -111,8 +111,8 @@ class WhileStatement extends Statement {
 		}
 
 		return @body.isUsingVariable(name)
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const ctrl = fragments.newControl().code('while(')
 
 		if @declared {
@@ -152,5 +152,5 @@ class WhileStatement extends Statement {
 		}
 
 		ctrl.code(')').step().compile(@body).done()
-	} // }}}
+	} # }}}
 }

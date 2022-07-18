@@ -2,12 +2,12 @@ class Literal extends Expression {
 	private {
 		_value
 	}
-	constructor(@value, @parent) { // {{{
+	constructor(@value, @parent) { # {{{
 		super(false, parent)
-	} // }}}
-	constructor(data, parent, scope, @value) { // {{{
+	} # }}}
+	constructor(data, parent, scope, @value) { # {{{
 		super(data, parent, scope)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
@@ -15,20 +15,20 @@ class Literal extends Expression {
 	isComposite() => false
 	listAssignments(array) => array
 	override listNonLocalVariables(scope, variables) => variables
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @data {
 			fragments.code(@value, @data)
 		}
 		else {
 			fragments.code(@value)
 		}
-	} // }}}
+	} # }}}
 	toQuote() => @value
-	validateType(type: ReferenceType) { // {{{
+	validateType(type: ReferenceType) { # {{{
 		if !@type().isAssignableToVariable(type, false) {
 			TypeException.throwInvalidAssignement(type, @type(), this)
 		}
-	} // }}}
+	} # }}}
 	value() => @value
 }
 
@@ -42,10 +42,10 @@ class IdentifierLiteral extends Literal {
 		_line: Number
 		_realType: Type
 	}
-	constructor(data, parent, scope = parent.scope()) { // {{{
+	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.name)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @assignment == AssignmentType::Neither {
 			if @scope.hasVariable(@value) {
 				@isVariable = true
@@ -70,8 +70,8 @@ class IdentifierLiteral extends Literal {
 			@isVariable = true
 			@line = @scope.line()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -99,26 +99,26 @@ class IdentifierLiteral extends Literal {
 			@declaredType = variable.getDeclaredType()
 			@realType = variable.getRealType()
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		recipient.export(@value, this)
-	} // }}}
-	flagAssignable() { // {{{
+	} # }}}
+	flagAssignable() { # {{{
 		@assignable = true
-	} // }}}
-	getVariableDeclaration(class) { // {{{
+	} # }}}
+	getVariableDeclaration(class) { # {{{
 		return class.getInstanceVariable(@value)
-	} // }}}
+	} # }}}
 	getDeclaredType() => @declaredType
-	getUnpreparedType() { // {{{
+	getUnpreparedType() { # {{{
 		if @isVariable {
 			return @scope.getVariable(@value, @line).getRealType()
 		}
 		else {
 			return @realType
 		}
-	} // }}}
-	initializeVariables(type: Type, node: Expression) { // {{{
+	} # }}}
+	initializeVariables(type: Type, node: Expression) { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -131,11 +131,11 @@ class IdentifierLiteral extends Literal {
 				))
 			}
 		}
-	} // }}}
+	} # }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
-	isExpectingType() { // {{{
+	isExpectingType() { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -144,12 +144,12 @@ class IdentifierLiteral extends Literal {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isMacro() => @isMacro
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isInferable() => true
-	override isUsingNonLocalVariables(scope) { // {{{
+	override isUsingNonLocalVariables(scope) { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -159,14 +159,14 @@ class IdentifierLiteral extends Literal {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @value == name
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		array.push(@name)
 
 		return array
-	} // }}}
-	override listLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listLocalVariables(scope, variables) { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -176,8 +176,8 @@ class IdentifierLiteral extends Literal {
 		}
 
 		return variables
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
@@ -187,50 +187,50 @@ class IdentifierLiteral extends Literal {
 		}
 
 		return variables
-	} // }}}
+	} # }}}
 	name() => @value
 	path() => @value
 	setAssignment(@assignment)
-	toAssignmentFragments(fragments, value) { // {{{
+	toAssignmentFragments(fragments, value) { # {{{
 		fragments.compile(this).code($equals).compile(value)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @isVariable {
 			fragments.compile(@scope.getVariable(@value, @line))
 		}
 		else {
 			fragments.code(@value, @data)
 		}
-	} // }}}
+	} # }}}
 	type() => @realType
-	type(type: Type, scope: Scope, node) { // {{{
+	type(type: Type, scope: Scope, node) { # {{{
 		if @isVariable {
 			@realType = scope.replaceVariable(@name, type, node).getRealType()
 		}
-	} // }}}
+	} # }}}
 	variable() => @scope.getVariable(@value, @line)
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		if @isVariable {
 			fn(@value, @realType)
 		}
 		else {
 			throw new NotSupportedException()
 		}
-	} // }}}
+	} # }}}
 }
 
 class NumberLiteral extends Literal {
-	constructor(data, parent, scope = parent.scope()) { // {{{
+	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.value)
-	} // }}}
+	} # }}}
 	getUnpreparedType() => this.type()
 	type() => @scope.reference('Number')
 }
 
 class StringLiteral extends Literal {
-	constructor(data, parent, scope = parent.scope()) { // {{{
+	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, $quote(data.value))
-	} // }}}
+	} # }}}
 	getUnpreparedType() => this.type()
 	type() => @scope.reference('String')
 }

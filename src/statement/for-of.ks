@@ -20,7 +20,7 @@ class ForOfStatement extends Statement {
 		_when
 		_while
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -95,8 +95,8 @@ class ForOfStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@expression.prepare()
 
 		const type = @expression.type()
@@ -197,8 +197,8 @@ class ForOfStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
 
 		@key.translate() if @key?
@@ -213,8 +213,8 @@ class ForOfStatement extends Statement {
 		@when.translate() if @when?
 
 		@body.translate()
-	} // }}}
-	checkForRenamedVariables(expression, variables: Array) { // {{{
+	} # }}}
+	checkForRenamedVariables(expression, variables: Array) { # {{{
 		if @key != null && expression.isUsingVariable(@data.key.name) {
 			if @defineKey {
 				variables.pushUniq(@data.key.name)
@@ -236,20 +236,20 @@ class ForOfStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) => // {{{
+	isUsingVariable(name) => # {{{
 			@expression.isUsingVariable(name)
 		||	@until?.isUsingVariable(name)
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
 		||	@body.isUsingVariable(name)
-	// }}}
-	toStatementFragments(fragments, mode) { // {{{
+	# }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @expressionName? {
 			if @bleeding {
 				fragments
@@ -277,8 +277,8 @@ class ForOfStatement extends Statement {
 		else {
 			this.toLoopFragments(fragments, mode)
 		}
-	} // }}}
-	toLoopFragments(fragments, mode) { // {{{
+	} # }}}
+	toLoopFragments(fragments, mode) { # {{{
 		let ctrl = fragments.newControl().code('for(')
 
 		if @key != null {
@@ -375,5 +375,5 @@ class ForOfStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 }

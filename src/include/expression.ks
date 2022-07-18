@@ -4,11 +4,11 @@ abstract class Expression extends AbstractNode {
 		@statement: Statement?		= null
 	}
 	acquireReusable(acquire)
-	flagAssignable() { // {{{
+	flagAssignable() { # {{{
 		if !this.isAssignable() {
 			ReferenceException.throwInvalidAssignment(this)
 		}
-	} // }}}
+	} # }}}
 	getDeclaredType() => this.type()
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
@@ -77,7 +77,7 @@ abstract class Expression extends AbstractNode {
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
 	setExpectedType(type: Type): Void
-	statement() { // {{{
+	statement() { # {{{
 		if !?@statement {
 			@leftMost = this
 
@@ -89,42 +89,42 @@ abstract class Expression extends AbstractNode {
 		}
 
 		return @statement
-	} // }}}
-	toArgumentFragments(fragments, mode = Mode::None) { // {{{
+	} # }}}
+	toArgumentFragments(fragments, mode = Mode::None) { # {{{
 		this.toFragments(fragments, mode)
-	} // }}}
-	toArgumentFragments(fragments, type: Type, mode = Mode::None) { // {{{
+	} # }}}
+	toArgumentFragments(fragments, type: Type, mode = Mode::None) { # {{{
 		this.toArgumentFragments(fragments, mode)
-	} // }}}
-	toBooleanFragments(fragments, mode = Mode::None) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, mode = Mode::None) { # {{{
 		this.toFragments(fragments, mode)
 
 		if !this.type().isBoolean() || this.type().isNullable() {
 			fragments.code(' === true')
 		}
-	} // }}}
-	toCastingFragments(fragments, mode) { // {{{
+	} # }}}
+	toCastingFragments(fragments, mode) { # {{{
 		fragments.code($runtime.helper(this), '.valueOf(')
 
 		this.toFragments(fragments, mode)
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode::None)
-	toQuote(): String { // {{{
+	toQuote(): String { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	toQuote(double: Boolean): String { // {{{
+	} # }}}
+	toQuote(double: Boolean): String { # {{{
 		if double {
 			return `"\(this.toQuote())"`
 		}
 		else {
 			return `'\(this.toQuote())'`
 		}
-	} // }}}
+	} # }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
-	toStringFragments(fragments) { // {{{
+	toStringFragments(fragments) { # {{{
 		const type = this.type()
 		if type.isReference() && type.type().isEnum() {
 			fragments.compile(this).code('.value')
@@ -132,7 +132,7 @@ abstract class Expression extends AbstractNode {
 		else {
 			fragments.wrap(this)
 		}
-	} // }}}
+	} # }}}
 	toTypeQuote() => this.type().toQuote()
 	type() => AnyType.NullableUnexplicit
 	validateType(type: Type)

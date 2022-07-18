@@ -6,7 +6,7 @@ class Block extends AbstractNode {
 		_statements: Array	= []
 		_type: Type?		= null
 	}
-	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, this.file())
@@ -16,8 +16,8 @@ class Block extends AbstractNode {
 		}
 
 		@empty = @data.statements.length == 0
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for statement in @data.statements {
 			@scope.line(statement.start.line)
 
@@ -30,8 +30,8 @@ class Block extends AbstractNode {
 				@awaiting = true
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @type != null && !@type.isAny() {
 			for const statement in @statements {
 				@scope.line(statement.line())
@@ -64,23 +64,23 @@ class Block extends AbstractNode {
 		}
 
 		this.checkExit()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
 		}
-	} // }}}
-	addInitializableVariable(variable, node) { // {{{
+	} # }}}
+	addInitializableVariable(variable, node) { # {{{
 		if !@scope.hasDeclaredVariable(variable.name()) {
 			@parent.addInitializableVariable(variable, this)
 		}
-	} // }}}
-	addStatement(statement) { // {{{
+	} # }}}
+	addStatement(statement) { # {{{
 		@data.statements.push(statement)
-	} // }}}
-	analyse(from: Number, to: Number = @data.statements.length + 1) { // {{{
+	} # }}}
+	analyse(from: Number, to: Number = @data.statements.length + 1) { # {{{
 		for statement in @data.statements from from to to {
 			@scope.line(statement.start.line)
 
@@ -93,8 +93,8 @@ class Block extends AbstractNode {
 				@awaiting = true
 			}
 		}
-	} // }}}
-	analyse(statements: Array<AbstractNode>) { // {{{
+	} # }}}
+	analyse(statements: Array<AbstractNode>) { # {{{
 		for statement in statements {
 			@statements.push(statement)
 
@@ -104,8 +104,8 @@ class Block extends AbstractNode {
 				@awaiting = true
 			}
 		}
-	} // }}}
-	checkExit() { // {{{
+	} # }}}
+	checkExit() { # {{{
 		if !@exit && @type != null && !@type.isVoid() {
 			if @type.isNever() {
 				TypeException.throwExpectedThrownError(this)
@@ -117,13 +117,13 @@ class Block extends AbstractNode {
 				TypeException.throwExpectedReturnedValue(@type, this)
 			}
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		for const statement in @statements {
 			statement.checkReturnType(type)
 		}
-	} // }}}
-	getUnpreparedType() { // {{{
+	} # }}}
+	getUnpreparedType() { # {{{
 		const types = []
 
 		for const statement in @statements {
@@ -138,8 +138,8 @@ class Block extends AbstractNode {
 		else {
 			return Type.union(@scope, ...types)
 		}
-	} // }}}
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+	} # }}}
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if !@scope.hasDeclaredVariable(variable.name) {
 			if variable.lateInit && !@parent.isLateInitializable() {
 				SyntaxException.throwInvalidLateInitAssignment(variable.name, this)
@@ -148,11 +148,11 @@ class Block extends AbstractNode {
 				@parent.initializeVariable(variable, expression, this)
 			}
 		}
-	} // }}}
+	} # }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
 	isExit() => @exit
-	isInitializingInstanceVariable(name) { // {{{
+	isInitializingInstanceVariable(name) { # {{{
 		for const statement in @statements {
 			if statement.isInitializingInstanceVariable(name) {
 				return true
@@ -160,10 +160,10 @@ class Block extends AbstractNode {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isJumpable() => @parent.isJumpable()
 	isLoop() => @parent.isLoop()
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		for const statement in @statements {
 			if statement.isUsingVariable(name) {
 				return true
@@ -171,8 +171,8 @@ class Block extends AbstractNode {
 		}
 
 		return false
-	} // }}}
-	isUsingInstanceVariableBefore(name: String, stmt: Statement): Boolean { // {{{
+	} # }}}
+	isUsingInstanceVariableBefore(name: String, stmt: Statement): Boolean { # {{{
 		const line = stmt.line()
 
 		for const statement in @statements while statement.line() < line && statement != stmt {
@@ -182,8 +182,8 @@ class Block extends AbstractNode {
 		}
 
 		return false
-	} // }}}
-	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+	} # }}}
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
 		const line = stmt.line()
 
 		for const statement in @statements while statement.line() < line && statement != stmt {
@@ -193,16 +193,16 @@ class Block extends AbstractNode {
 		}
 
 		return false
-	} // }}}
-	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+	} # }}}
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		for const statement in @statements {
 			statement.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
+	} # }}}
 	statements() => @data.statements
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @awaiting {
 			let index = -1
 			let item
@@ -222,13 +222,13 @@ class Block extends AbstractNode {
 				statement.toFragments(fragments, mode)
 			}
 		}
-	} // }}}
-	toRangeFragments(fragments, from: Number, to: Number = @statements.length + 1) { // {{{
+	} # }}}
+	toRangeFragments(fragments, from: Number, to: Number = @statements.length + 1) { # {{{
 		for statement in @statements from from to to {
 			statement.toFragments(fragments, Mode::None)
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @type == null {
 			if @exit {
 				const types = []
@@ -247,7 +247,7 @@ class Block extends AbstractNode {
 		}
 
 		return @type
-	} // }}}
+	} # }}}
 	type(@type) => this
 }
 
@@ -256,7 +256,7 @@ class FunctionBlock extends Block {
 		@return: Expression		= null
 	}
 	addReturn(@return)
-	override checkExit() { // {{{
+	override checkExit() { # {{{
 		if @return != null {
 			auto toAdd = false
 
@@ -278,7 +278,7 @@ class FunctionBlock extends Block {
 		}
 
 		super()
-	} // }}}
+	} # }}}
 	isInitializedVariable(name: String): Boolean => true
 }
 
@@ -286,7 +286,7 @@ class ConstructorBlock extends FunctionBlock {
 	private {
 		@initializedVariables: Dictionary<Boolean>		= {}
 	}
-	override initializeVariable(variable, expression, node) { // {{{
+	override initializeVariable(variable, expression, node) { # {{{
 		lateinit const name
 
 		if variable.instance {
@@ -306,9 +306,9 @@ class ConstructorBlock extends FunctionBlock {
 		else {
 			@initializedVariables[name] = true
 		}
-	} // }}}
+	} # }}}
 	isInitializedVariable(name: String): Boolean => @initializedVariables[name]
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		if @initializedVariables[`this.\(name)`] {
 			return true
 		}
@@ -320,16 +320,16 @@ class ConstructorBlock extends FunctionBlock {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 }
 
 class MethodBlock extends FunctionBlock {
-	override initializeVariable(variable, expression, node) { // {{{
+	override initializeVariable(variable, expression, node) { # {{{
 		if variable.instance {
 			 this.parent().type().addInitializingInstanceVariable(variable.name)
 		}
 		else {
 			super(variable, expression, node)
 		}
-	} // }}}
+	} # }}}
 }

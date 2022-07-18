@@ -7,6 +7,7 @@ comp:
 build:
 	time ./bin/kaoscript -c -t ecma-v6 -o lib src/compiler.ks
 	cp lib/compiler.js ../compiler-bin-js-es6
+	cp lib/compiler.js ../parser/node_modules/kaoscript/lib
 
 cls:
 	printf '\033[2J\033[3J\033[1;1H'

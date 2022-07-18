@@ -16,7 +16,7 @@ class IfStatement extends Statement {
 		_whenTrueExpression									= null
 		_whenTrueScope: Scope?								= null
 	}
-	override initiate() { // {{{
+	override initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
@@ -26,8 +26,8 @@ class IfStatement extends Statement {
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
 			@declaration.initiate()
 		}
-	} // }}}
-	override analyse() { // {{{
+	} # }}}
+	override analyse() { # {{{
 		@hasWhenFalse = @data.whenFalse?
 
 		if @declared {
@@ -68,8 +68,8 @@ class IfStatement extends Statement {
 				@whenFalseExpression.analyse()
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @declared {
 			@declaration.prepare()
 
@@ -277,8 +277,8 @@ class IfStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @declared {
 			@declaration.translate()
 		}
@@ -288,8 +288,8 @@ class IfStatement extends Statement {
 
 		@whenTrueExpression.translate()
 		@whenFalseExpression?.translate()
-	} // }}}
-	addAssignments(variables) { // {{{
+	} # }}}
+	addAssignments(variables) { # {{{
 		if @cascade {
 			@parent.addAssignments(variables)
 		}
@@ -303,8 +303,8 @@ class IfStatement extends Statement {
 		else {
 			@assignments.pushUniq(...variables)
 		}
-	} // }}}
-	addInitializableVariable(variable: Variable, node) { // {{{
+	} # }}}
+	addInitializableVariable(variable: Variable, node) { # {{{
 		const name = variable.name()
 		const whenTrue = node == @whenTrueExpression
 
@@ -339,8 +339,8 @@ class IfStatement extends Statement {
 		}
 
 		@parent.addInitializableVariable(variable, node)
-	} // }}}
-	addInitializableVariable(variable: Variable, whenTrue: Boolean, node) { // {{{
+	} # }}}
+	addInitializableVariable(variable: Variable, whenTrue: Boolean, node) { # {{{
 		const name = variable.name()
 
 		if const map = @lateInitVariables[name] {
@@ -364,22 +364,22 @@ class IfStatement extends Statement {
 		}
 
 		@parent.addInitializableVariable(variable, node)
-	} // }}}
-	assignments() { // {{{
+	} # }}}
+	assignments() { # {{{
 		if @whenFalseExpression is IfStatement {
 			return [].concat(@assignments, @whenFalseExpression.assignments())
 		}
 		else {
 			return @assignments
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@whenTrueExpression.checkReturnType(type)
 		@whenFalseExpression?.checkReturnType(type)
-	} // }}}
+	} # }}}
 	getWhenFalseScope(): @whenFalseScope
 	getWhenTrueScope(): @whenTrueScope
-	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { // {{{
+	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{
 		if const map = @lateInitVariables[name] {
 			map[whenTrue].type = type
 		}
@@ -387,8 +387,8 @@ class IfStatement extends Statement {
 			throw new NotSupportedException(this)
 
 		}
-	} // }}}
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+	} # }}}
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		const {name, type} = variable
 		const whenTrue = node == @whenTrueExpression
 
@@ -446,10 +446,10 @@ class IfStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
-	isInitializingInstanceVariable(name) { // {{{
+	isInitializingInstanceVariable(name) { # {{{
 		if @condition.isInitializingInstanceVariable(name) {
 			return true
 		}
@@ -460,8 +460,8 @@ class IfStatement extends Statement {
 		else {
 			return false
 		}
-	} // }}}
-	isInitializingStaticVariable(name) { // {{{
+	} # }}}
+	isInitializingStaticVariable(name) { # {{{
 		if @condition.isInitializingStaticVariable(name) {
 			return true
 		}
@@ -472,10 +472,10 @@ class IfStatement extends Statement {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		if @declared {
 			if @declaration.isUsingVariable(name) {
 				return true
@@ -492,9 +492,9 @@ class IfStatement extends Statement {
 		}
 
 		return @whenFalseExpression != null && @whenFalseExpression.isUsingVariable(name)
-	} // }}}
+	} # }}}
 	setCascade(@cascade)
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		if @declared && !@bindingDeclaration {
 			fragments.compile(@declaration)
 
@@ -511,8 +511,8 @@ class IfStatement extends Statement {
 
 			ctrl.done()
 		}
-	} // }}}
-	toIfFragments(fragments, mode) { // {{{
+	} # }}}
+	toIfFragments(fragments, mode) { # {{{
 		fragments.code('if(')
 
 		if @declared {
@@ -583,5 +583,5 @@ class IfStatement extends Statement {
 				fragments.compile(@whenFalseExpression, mode)
 			}
 		}
-	} // }}}
+	} # }}}
 }

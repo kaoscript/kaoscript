@@ -2,7 +2,7 @@ class FallthroughStatement extends Statement {
 	private lateinit {
 		_switch: SwitchStatement
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		let parent = @parent
 
 		unless parent.isJumpable() {
@@ -20,10 +20,10 @@ class FallthroughStatement extends Statement {
 		@switch = parent!!
 
 		@switch.flagUsingFallthrough()
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		@switch.toFallthroughFragments(fragments)
-	} // }}}
+	} # }}}
 }

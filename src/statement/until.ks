@@ -5,7 +5,7 @@ class UntilStatement extends Statement {
 		_bodyScope: Scope
 		_condition
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::Hollow)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -15,8 +15,8 @@ class UntilStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@condition.prepare()
 
 		unless @condition.type().canBeBoolean() {
@@ -34,18 +34,18 @@ class UntilStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@condition.translate()
 		@body.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()
 			.code('while(!')
@@ -54,5 +54,5 @@ class UntilStatement extends Statement {
 			.step()
 			.compile(@body)
 			.done()
-	} // }}}
+	} # }}}
 }

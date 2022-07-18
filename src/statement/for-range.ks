@@ -17,7 +17,7 @@ class ForRangeStatement extends Statement {
 		_when
 		_while
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -70,8 +70,8 @@ class ForRangeStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		unless @defineVariable {
 			@bindingScope.replaceVariable(@data.value.name, @bindingScope.reference('Number'), this)
 		}
@@ -121,8 +121,8 @@ class ForRangeStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
 		@from.translate()
 		@to.translate()
@@ -139,13 +139,13 @@ class ForRangeStatement extends Statement {
 		@when.translate() if @when?
 
 		@body.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) => // {{{
+	isUsingVariable(name) => # {{{
 			@from.isUsingVariable(name)
 		||	@to.isUsingVariable(name)
 		||	@by?.isUsingVariable(name)
@@ -153,8 +153,8 @@ class ForRangeStatement extends Statement {
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
 		||	@body.isUsingVariable(name)
-	// }}}
-	toStatementFragments(fragments, mode) { // {{{
+	# }}}
+	toStatementFragments(fragments, mode) { # {{{
 		let ctrl = fragments.newControl().code('for(')
 
 		if @defineVariable {
@@ -216,5 +216,5 @@ class ForRangeStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 }

@@ -34,7 +34,7 @@ class Parameter extends AbstractNode {
 			NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
 		}
 	}
-	static getUntilDifferentTypeIndex(parameters, index) { // {{{
+	static getUntilDifferentTypeIndex(parameters, index) { # {{{
 		const activeType = parameters[index].type().type().setNullable(false)
 
 		for const parameter, i in parameters from index + 1 {
@@ -55,11 +55,11 @@ class Parameter extends AbstractNode {
 		}
 
 		return parameters.length
-	} // }}}
-	static toFragments(node, fragments, mode, fn) { // {{{
+	} # }}}
+	static toFragments(node, fragments, mode, fn) { # {{{
 		return Parameter.toKSFragments(node, fragments, mode, fn)
-	} // }}}
-	static toKSFragments(node, fragments, mode: ParameterMode, fn) { // {{{
+	} # }}}
+	static toKSFragments(node, fragments, mode: ParameterMode, fn) { # {{{
 		const parameters = node.parameters()
 		const signature = node.type()
 
@@ -156,8 +156,8 @@ class Parameter extends AbstractNode {
 		}
 
 		return fragments
-	} // }}}
-	static toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { // {{{
+	} # }}}
+	static toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { # {{{
 		const offset = node.getParameterOffset()
 
 		let til = -1
@@ -189,8 +189,8 @@ class Parameter extends AbstractNode {
 		}
 
 		return parameters.length
-	} // }}}
-	static toAsyncHeaderParameterFragments(fragments, parameters, lastHeader) { // {{{
+	} # }}}
+	static toAsyncHeaderParameterFragments(fragments, parameters, lastHeader) { # {{{
 		if lastHeader == parameters.length {
 			fragments.code($comma) if lastHeader > 0
 
@@ -201,8 +201,8 @@ class Parameter extends AbstractNode {
 		else {
 			return false
 		}
-	} // }}}
-	static toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minRest, minAfter) { // {{{
+	} # }}}
+	static toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minRest, minAfter) { # {{{
 		if minBefore + minRest + minAfter != 0 {
 			if signature.isAsync() {
 				node.module().flag('Type')
@@ -288,8 +288,8 @@ class Parameter extends AbstractNode {
 					.done()
 			}
 		}
-	} // }}}
-	static toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { // {{{
+	} # }}}
+	static toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
 		parameter = parameters[restIndex]
 
 		const context = {
@@ -304,8 +304,8 @@ class Parameter extends AbstractNode {
 		for const parameter, i in parameters from restIndex + 1 {
 			parameter.toAfterRestFragments(fragments, context, i, wrongdoer)
 		}
-	} // }}}
-	static toRestParameterFragments(fragments, node, name, signature, parameters, declared, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer) { // {{{
+	} # }}}
+	static toRestParameterFragments(fragments, node, name, signature, parameters, declared, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer) { # {{{
 		const parameter = parameters[restIndex]
 
 		if parameter.type().isAny() {
@@ -538,8 +538,8 @@ class Parameter extends AbstractNode {
 				ctrl.done()
 			}
 		}
-	} // }}}
-	static toBeforeRestParameterFragments(fragments, name, signature, parameters, nextIndex, restIndex, context, wrongdoer) { // {{{
+	} # }}}
+	static toBeforeRestParameterFragments(fragments, name, signature, parameters, nextIndex, restIndex, context, wrongdoer) { # {{{
 		if restIndex == -1 {
 			for const parameter, i in parameters from nextIndex {
 				parameter.toBeforeRestFragments(fragments, context, i, false, wrongdoer)
@@ -550,8 +550,8 @@ class Parameter extends AbstractNode {
 				parameter.toBeforeRestFragments(fragments, context, i, true, wrongdoer)
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@anonymous = !?@data.name
 
 		if @anonymous {
@@ -570,8 +570,8 @@ class Parameter extends AbstractNode {
 				@scope.define(name, false, null, this)
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@name.prepare()
 
 		let type: Type? = @name.type()
@@ -670,20 +670,20 @@ class Parameter extends AbstractNode {
 		type = @type.getVariableType()
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@name.translate()
 
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 			@defaultValue.translate()
 		}
-	} // }}}
-	addAliasParameter(expression: ThisExpressionParameter) { // {{{
+	} # }}}
+	addAliasParameter(expression: ThisExpressionParameter) { # {{{
 		const alias = new AliasStatement(expression, this)
 
 		return @scope.reference(alias.type())
-	} // }}}
+	} # }}}
 	arity() => @arity
 	getReturnType() => @type.getReturnType()
 	hasDefaultValue() => @hasDefaultValue
@@ -696,27 +696,27 @@ class Parameter extends AbstractNode {
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
 	max() => @arity?.max ?? 1
 	min() => @arity?.min ?? 1
-	setDefaultValue(data) { // {{{
+	setDefaultValue(data) { # {{{
 		@defaultValue = $compile.expression(data, @parent)
 		@defaultValue.analyse()
 
 		@hasDefaultValue = true
 
 		@type.setDefaultValue(data)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@name)
-	} // }}}
-	toAfterRestFragments(fragments, context, index, wrongdoer) { // {{{
+	} # }}}
+	toAfterRestFragments(fragments, context, index, wrongdoer) { # {{{
 		@name.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
-	} // }}}
-	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { // {{{
+	} # }}}
+	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { # {{{
 		@name.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
-	} // }}}
-	toErrorFragments(fragments, async) { // {{{
+	} # }}}
+	toErrorFragments(fragments, async) { # {{{
 		@name.toErrorFragments(fragments, async)
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		@name.toParameterFragments(fragments)
 
 		if @maybeHeadedDefaultValue {
@@ -724,9 +724,9 @@ class Parameter extends AbstractNode {
 		}
 
 		@header = true
-	} // }}}
+	} # }}}
 	toQuote() => @type.toQuote()
-	toValidationFragments(fragments) { // {{{
+	toValidationFragments(fragments) { # {{{
 		if @rest {
 			if @hasDefaultValue {
 				const ctrl = fragments
@@ -749,9 +749,9 @@ class Parameter extends AbstractNode {
 		else {
 			@name.toValidationFragments(fragments, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 		}
-	} // }}}
+	} # }}}
 	type(): ParameterType => @type
-	type(@type) { // {{{
+	type(@type) { # {{{
 		if @type.hasDefaultValue() {
 			if @type.isComprehensive() {
 				@defaultValue = $compile.expression(@type.getDefaultValue(), @parent)
@@ -771,7 +771,7 @@ class Parameter extends AbstractNode {
 		const t = @type.getVariableType()
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
-	} // }}}
+	} # }}}
 }
 
 class AliasStatement extends Statement {
@@ -779,20 +779,20 @@ class AliasStatement extends Statement {
 		_expression: ThisExpressionParameter
 		_parameter: Parameter
 	}
-	constructor(@expression, @parameter) { // {{{
+	constructor(@expression, @parameter) { # {{{
 		const parent = parameter.parent()
 
 		super(expression.data(), parent)
 
 		parent.addAtThisParameter(this)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
 	path() => @expression.path()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		const variable = @scope.getVariable(@expression.name())
 
 		if @expression.isSealed() && !@parameter.parent().isConstructor() {
@@ -801,13 +801,13 @@ class AliasStatement extends Statement {
 		else {
 			fragments.newLine().code(@expression.fragment(), $equals).compile(variable).done()
 		}
-	} // }}}
+	} # }}}
 	type() => @expression.type()
 }
 
 class IdentifierParameter extends IdentifierLiteral {
 	static {
-		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { // {{{
+		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { # {{{
 			if arity != null {
 				const type = that.getDeclaredType().parameter()
 
@@ -1003,8 +1003,8 @@ class IdentifierParameter extends IdentifierLiteral {
 
 				context.increment = true
 			}
-		} // }}}
-		toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { // {{{
+		} # }}}
+		toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { # {{{
 			if arity != null {
 				context.required -= arity.min
 
@@ -1300,8 +1300,8 @@ class IdentifierParameter extends IdentifierLiteral {
 					--context.required
 				}
 			}
-		} // }}}
-		toValidationFragments(fragments, rest, defaultValue?, header, async, that) { // {{{
+		} # }}}
+		toValidationFragments(fragments, rest, defaultValue?, header, async, that) { # {{{
 			const declaredType = that.getDeclaredType()
 
 			let ctrl = null
@@ -1340,45 +1340,45 @@ class IdentifierParameter extends IdentifierLiteral {
 			if ctrl != null {
 				ctrl.done()
 			}
-		} // }}}
+		} # }}}
 	}
 	isBinding() => false
-	setDeclaredType(type, definitive) { // {{{
+	setDeclaredType(type, definitive) { # {{{
 		const variable = @scope.getVariable(@value)
 
 		variable.setDeclaredType(type).setRealType(type).setDefinitive(definitive)
 
 		@declaredType = @realType = type
-	} // }}}
-	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+	} # }}}
+	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
-	} // }}}
-	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+	} # }}}
+	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		fragments.compile(this)
-	} // }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+	} # }}}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toValidationFragments(fragments, rest, defaultValue, header, async, this)
-	} // }}}
+	} # }}}
 }
 
 class ArrayBindingParameter extends ArrayBinding {
 	private lateinit {
 		_tempName: Literal
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		super()
 
 		if @flatten {
 			@tempName = new Literal(@scope.acquireTempName(false), this)
 		}
-	} // }}}
+	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
-	setDeclaredType(type, definitive: Boolean = false) { // {{{
+	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for const element in @elements {
 				element.setDeclaredType(type, definitive)
@@ -1401,16 +1401,16 @@ class ArrayBindingParameter extends ArrayBinding {
 		else {
 			TypeException.throwInvalidBinding('Array', this)
 		}
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		if @flatten {
 			fragments.compile(@tempName)
 		}
 		else {
 			fragments.compile(this)
 		}
-	} // }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+	} # }}}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		if @flatten {
 			const ctrl = fragments
 				.newControl()
@@ -1440,32 +1440,32 @@ class ArrayBindingParameter extends ArrayBinding {
 
 			line.done()
 		}
-	} // }}}
+	} # }}}
 }
 
 class ArrayBindingParameterElement extends ArrayBindingElement {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
-	setDeclaredType(type, definitive) { // {{{
+	setDeclaredType(type, definitive) { # {{{
 		@name.setDeclaredType(type, definitive)
-	} // }}}
+	} # }}}
 }
 
 class ObjectBindingParameter extends ObjectBinding {
 	private lateinit {
 		_tempName: Literal
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		super()
 
 		if @flatten {
 			@tempName = new Literal(@scope.acquireTempName(false), this)
 		}
-	} // }}}
+	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
-	setDeclaredType(type, definitive: Boolean = false) { // {{{
+	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for const element in @elements {
 				element.setDeclaredType(type, definitive)
@@ -1488,16 +1488,16 @@ class ObjectBindingParameter extends ObjectBinding {
 		else if !type.isObject() {
 			TypeException.throwInvalidBinding('Object', this)
 		}
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		if @flatten {
 			fragments.compile(@tempName)
 		}
 		else {
 			fragments.compile(this)
 		}
-	} // }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+	} # }}}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		if @flatten {
 			const ctrl = fragments
 				.newControl()
@@ -1527,15 +1527,15 @@ class ObjectBindingParameter extends ObjectBinding {
 
 			line.done()
 		}
-	} // }}}
+	} # }}}
 }
 
 class ObjectBindingParameterElement extends ObjectBindingElement {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
-	setDeclaredType(type, definitive) { // {{{
+	setDeclaredType(type, definitive) { # {{{
 		@alias.setDeclaredType(type, definitive)
-	} // }}}
+	} # }}}
 }
 
 class AnonymousParameter extends AbstractNode {
@@ -1544,16 +1544,16 @@ class AnonymousParameter extends AbstractNode {
 		_type: Type
 	}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@name = @scope.acquireTempName(false)
-	} // }}}
+	} # }}}
 	translate()
 	name() => null
 	setDeclaredType(@type, definitive)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(@name)
-	} // }}}
-	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+	} # }}}
+	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		if arity != null {
 			throw new NotImplementedException(this)
 		}
@@ -1574,17 +1574,17 @@ class AnonymousParameter extends AbstractNode {
 
 			--context.required
 		}
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		fragments.compile(this)
-	} // }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
-	} // }}}
+	} # }}}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
+	} # }}}
 	type() => null
 }
 
 class ThisExpressionParameter extends ThisExpression {
-	override prepare() { // {{{
+	override prepare() { # {{{
 		super()
 
 		const method = this.statement()
@@ -1616,15 +1616,15 @@ class ThisExpressionParameter extends ThisExpression {
 		}
 
 		@parent.addAliasParameter(this)
-	} // }}}
+	} # }}}
 	getDeclaredType() => @type
 	isBinding() => false
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		array.push(@name)
 
 		return array
-	} // }}}
-	setDeclaredType(type, definitive) { // {{{
+	} # }}}
+	setDeclaredType(type, definitive) { # {{{
 		if !type.matchContentOf(@type) {
 			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
 		}
@@ -1632,21 +1632,21 @@ class ThisExpressionParameter extends ThisExpression {
 		const variable = @parent.scope().getVariable(@name)
 
 		variable.setDeclaredType(type).setDefinitive(definitive)
-	} // }}}
-	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+	} # }}}
+	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
-	} // }}}
-	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+	} # }}}
+	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@scope.getVariable(@name))
-	} // }}}
-	toParameterFragments(fragments) { // {{{
+	} # }}}
+	toParameterFragments(fragments) { # {{{
 		fragments.compile(@scope.getVariable(@name))
-	} // }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+	} # }}}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toValidationFragments(fragments, rest, defaultValue, header, async, this)
-	} // }}}
+	} # }}}
 	type(type)
 }

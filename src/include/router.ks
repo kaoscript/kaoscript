@@ -160,7 +160,7 @@ namespace Router {
 			NO_THROW
 		}
 
-		func assess(functions: Array<FunctionType>, name: String, node: AbstractNode): Assessement { // {{{
+		func assess(functions: Array<FunctionType>, name: String, node: AbstractNode): Assessement { # {{{
 			if functions.length == 0 {
 				return Assessement(
 					name
@@ -284,9 +284,9 @@ namespace Router {
 				macro: false
 				sealed
 			)
-		} // }}}
+		} # }}}
 
-		func matchArguments(assessment: Assessement, arguments: Array<Expression>, exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { // {{{
+		func matchArguments(assessment: Assessement, arguments: Array<Expression>, exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { # {{{
 			if assessment.trees.length == 0 && arguments.length == 0 {
 				return PreciseCallMatchResult([])
 			}
@@ -396,9 +396,9 @@ namespace Router {
 			else {
 				return matchArguments(assessment, types, [])
 			}
-		} // }}}
+		} # }}}
 
-		func toFragments(buildPath: FunctionPathBuilder, args!: String = 'args', assessment: Assessement, fragments: BlockBuilder, footerType: FooterType = FooterType::MUST_THROW, footer: Function = toDefaultFooter, node: AbstractNode): Void { // {{{
+		func toFragments(buildPath: FunctionPathBuilder, args!: String = 'args', assessment: Assessement, fragments: BlockBuilder, footerType: FooterType = FooterType::MUST_THROW, footer: Function = toDefaultFooter, node: AbstractNode): Void { # {{{
 			const mark = fragments.mark()
 			const helper = buildHelper(mark, args, node)
 			const fallback = footerType != FooterType::MUST_THROW
@@ -467,9 +467,9 @@ namespace Router {
 					}
 				}
 			}
-		} // }}}
+		} # }}}
 
-		func toArgumentsFragments(matchArguments: Array<CallMatchArgument>, expressions: Array<Expression>, function: FunctionType, hasContext: Boolean, fragments, mode) { // {{{
+		func toArgumentsFragments(matchArguments: Array<CallMatchArgument>, expressions: Array<Expression>, function: FunctionType, hasContext: Boolean, fragments, mode) { # {{{
 			const arguments = [...matchArguments]
 			for const argument in arguments desc while !?argument {
 				arguments.pop()
@@ -518,6 +518,6 @@ namespace Router {
 					}
 				}
 			}
-		} // }}}
+		} # }}}
 	}
 }

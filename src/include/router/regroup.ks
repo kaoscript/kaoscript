@@ -1,8 +1,8 @@
-func regroupTrees(trees: Array<Tree>, node: AbstractNode) { // {{{
+func regroupTrees(trees: Array<Tree>, node: AbstractNode) { # {{{
 	regroupTreesByArguments2(trees)
-} // }}}
+} # }}}
 
-func regroupTreesByArguments2(trees: Array<Tree>) { // {{{
+func regroupTreesByArguments2(trees: Array<Tree>) { # {{{
 	const last = trees.last()
 	const groups: Dictionary<Array<Tree>> = {}
 
@@ -20,9 +20,9 @@ func regroupTreesByArguments2(trees: Array<Tree>) { // {{{
 	for const group, key of groups when group.length > 1 {
 		regroupTreesByGroup(group, trees, last, [])
 	}
-} // }}}
+} # }}}
 
-func regroupTreesByGroup(group: Array<Tree>, trees: Array<Tree>, last: Tree, shadows: Array) { // {{{
+func regroupTreesByGroup(group: Array<Tree>, trees: Array<Tree>, last: Tree, shadows: Array) { # {{{
 	const tree = group.pop()
 	const max = tree.max
 
@@ -76,9 +76,9 @@ func regroupTreesByGroup(group: Array<Tree>, trees: Array<Tree>, last: Tree, sha
 	trees.remove(...group)
 
 	applyMin4(tree, first, mins, shadows)
-} // }}}
+} # }}}
 
-func isSameShadows(a: Array, b: Array) { // {{{
+func isSameShadows(a: Array, b: Array) { # {{{
 	return false unless a.length == b.length
 
 	for const i from 0 til a.length {
@@ -88,9 +88,9 @@ func isSameShadows(a: Array, b: Array) { // {{{
 	}
 
 	return true
-} // }}}
+} # }}}
 
-func getArgumentsHash4(tree: Tree) { // {{{
+func getArgumentsHash4(tree: Tree) { # {{{
 	if tree.order.length == 0 {
 		return `\(tree.function.index());`
 	}
@@ -103,8 +103,8 @@ func getArgumentsHash4(tree: Tree) { // {{{
 
 		return hash
 	}
-} // }}}
-func getArgumentsHash4(tree: TreeBranch) { // {{{
+} # }}}
+func getArgumentsHash4(tree: TreeBranch) { # {{{
 	let hash = ''
 
 	for const key in tree.order {
@@ -112,14 +112,14 @@ func getArgumentsHash4(tree: TreeBranch) { // {{{
 	}
 
 	return hash
-} // }}}
-func getArgumentsHash4(tree: TreeLeaf) { // {{{
+} # }}}
+func getArgumentsHash4(tree: TreeLeaf) { # {{{
 	const index = tree.function.index()
 
 	return `\(index);`
-} // }}}
+} # }}}
 
-func toSignature(tree: Tree) { // {{{
+func toSignature(tree: Tree) { # {{{
 	let s = ''
 
 	for const key, i in tree.order {
@@ -127,9 +127,9 @@ func toSignature(tree: Tree) { // {{{
 	}
 
 	return s
-} // }}}
+} # }}}
 
-func toSignature(tree: TreeBranch, prefix: String) { // {{{
+func toSignature(tree: TreeBranch, prefix: String) { # {{{
 	let s = `/\(prefix)=\(tree.index),\(tree.type.hashCode())(\(tree.min),\(tree.max))`
 
 	for const key, i in tree.order {
@@ -137,13 +137,13 @@ func toSignature(tree: TreeBranch, prefix: String) { // {{{
 	}
 
 	return s
-} // }}}
+} # }}}
 
-func toSignature(tree: TreeLeaf, prefix: String) { // {{{
+func toSignature(tree: TreeLeaf, prefix: String) { # {{{
 	return `/\(prefix)=\(tree.index),\(tree.type.hashCode())(\(tree.min),\(tree.max))`
-} // }}}
+} # }}}
 
-func applyMin4(tree: Tree, last: Tree, data: Array, shadows: Array) { // {{{
+func applyMin4(tree: Tree, last: Tree, data: Array, shadows: Array) { # {{{
 	tree.variadic = true
 
 	if last.min < tree.min {
@@ -154,17 +154,17 @@ func applyMin4(tree: Tree, last: Tree, data: Array, shadows: Array) { // {{{
 	for const key in tree.order {
 		applyMin4(tree.columns[key], tree.max, data, shadows, [])
 	}
-} // }}}
+} # }}}
 
-func applyMin4(tree: TreeBranch, max: Number, data: Array, shadows: Array, nodes: Array) { // {{{
+func applyMin4(tree: TreeBranch, max: Number, data: Array, shadows: Array, nodes: Array) { # {{{
 	nodes.unshift(tree)
 
 	for const key in tree.order {
 		applyMin4(tree.columns[key], max, data, shadows, nodes)
 	}
-} // }}}
+} # }}}
 
-func applyMin4(tree: TreeLeaf, max: Number, data: Array, shadows: Array, nodes: Array) { // {{{
+func applyMin4(tree: TreeLeaf, max: Number, data: Array, shadows: Array, nodes: Array) { # {{{
 	nodes.unshift(tree)
 
 	const i2p = {}
@@ -207,9 +207,9 @@ func applyMin4(tree: TreeLeaf, max: Number, data: Array, shadows: Array, nodes: 
 	}
 
 	nodes.clear()
-} // }}}
+} # }}}
 
-func buildMin4(tree: Tree) { // {{{
+func buildMin4(tree: Tree) { # {{{
 	const result = []
 
 	for const key in tree.order {
@@ -217,17 +217,17 @@ func buildMin4(tree: Tree) { // {{{
 	}
 
 	return result
-} // }}}
+} # }}}
 
-func buildMin4(tree: TreeBranch, result: Array, parameters: Array) { // {{{
+func buildMin4(tree: TreeBranch, result: Array, parameters: Array) { # {{{
 	parameters.unshift(tree.index, tree.type.hashCode(true), tree.min)
 
 	for const key in tree.order {
 		buildMin4(tree.columns[key], result, parameters)
 	}
-} // }}}
+} # }}}
 
-func buildMin4(tree: TreeLeaf, result: Array, parameters: Array) { // {{{
+func buildMin4(tree: TreeLeaf, result: Array, parameters: Array) { # {{{
 	parameters.unshift(tree.index, tree.type.hashCode(true), tree.min)
 
 	const mins = []
@@ -243,9 +243,9 @@ func buildMin4(tree: TreeLeaf, result: Array, parameters: Array) { // {{{
 	result.push(mins)
 
 	parameters.clear()
-} // }}}
+} # }}}
 
-func buildMax4(tree: Tree, last: Boolean) { // {{{
+func buildMax4(tree: Tree, last: Boolean) { # {{{
 	const result = []
 
 	for const key in tree.order {
@@ -253,9 +253,9 @@ func buildMax4(tree: Tree, last: Boolean) { // {{{
 	}
 
 	return result
-} // }}}
+} # }}}
 
-func buildMax4(tree: TreeBranch, last: Boolean, result: Array, nodes: Dictionary) { // {{{
+func buildMax4(tree: TreeBranch, last: Boolean, result: Array, nodes: Dictionary) { # {{{
 	nodes[tree.index] = {
 		index: tree.index
 		type: tree.type
@@ -267,9 +267,9 @@ func buildMax4(tree: TreeBranch, last: Boolean, result: Array, nodes: Dictionary
 	for const key in tree.order {
 		buildMax4(tree.columns[key], last, result, nodes)
 	}
-} // }}}
+} # }}}
 
-func buildMax4(tree: TreeLeaf, last: Boolean, result: Array, nodes: Dictionary) { // {{{
+func buildMax4(tree: TreeLeaf, last: Boolean, result: Array, nodes: Dictionary) { # {{{
 	nodes[tree.index] = {
 		index: tree.index
 		type: tree.type
@@ -287,7 +287,7 @@ func buildMax4(tree: TreeLeaf, last: Boolean, result: Array, nodes: Dictionary) 
 	}
 
 	result.push(parameters)
-} // }}}
+} # }}}
 
 enum ShadowKind {
 	None
@@ -295,7 +295,7 @@ enum ShadowKind {
 	Hard
 }
 
-func listShadows(tree: Tree, data: Array, ceiling: Number) { // {{{
+func listShadows(tree: Tree, data: Array, ceiling: Number) { # {{{
 	data = data.clone()
 
 	const results = [ShadowKind::None]
@@ -305,9 +305,9 @@ func listShadows(tree: Tree, data: Array, ceiling: Number) { // {{{
 	}
 
 	return results
-} // }}}
+} # }}}
 
-func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array) { // {{{
+func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array) { # {{{
 	nodes[tree.index] = {
 		type: tree.type
 		min: tree.min
@@ -317,9 +317,9 @@ func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, no
 	for const key in tree.order {
 		listShadows(tree.columns[key], max, ceiling, data, nodes, results)
 	}
-} // }}}
+} # }}}
 
-func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array) { // {{{
+func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array) { # {{{
 	nodes[tree.index] = {
 		type: tree.type
 		min: tree.min
@@ -446,9 +446,9 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 	if result[0] > results[0] {
 		results[0] = result[0]
 	}
-} // }}}
+} # }}}
 
-func setResult(result: Array, kind: ShadowKind, index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary) { // {{{
+func setResult(result: Array, kind: ShadowKind, index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary) { # {{{
 	index = getValidNode(index, data, parameters)
 	if kind == ShadowKind::Soft {
 		if const maximus = data[index] {
@@ -470,9 +470,9 @@ func setResult(result: Array, kind: ShadowKind, index: Number, max: Number, ceil
 			result[1] = index
 		}
 	}
-} // }}}
+} # }}}
 
-func getValidNodeLoop(index: Number, data: Dictionary, parameters: Dictionary) { // {{{
+func getValidNodeLoop(index: Number, data: Dictionary, parameters: Dictionary) { # {{{
 	if const maximus = data[index] {
 		if maximus.min != maximus.max || maximus.rest {
 			return index
@@ -494,8 +494,8 @@ func getValidNodeLoop(index: Number, data: Dictionary, parameters: Dictionary) {
 	else {
 		return null
 	}
-} // }}}
+} # }}}
 
-func getValidNode(index: Number, data: Dictionary, parameters: Dictionary) { // {{{
+func getValidNode(index: Number, data: Dictionary, parameters: Dictionary) { # {{{
 	return getValidNodeLoop(index, data, parameters) ?? index
-} // }}}
+} # }}}

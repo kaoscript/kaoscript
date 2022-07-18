@@ -11,7 +11,7 @@ class SealedPreciseMethodCallee extends Callee {
 		@type: Type
 		@variable: NamedType<ClassType>
 	}
-	constructor(@data, @object, @property, match: CallMatch, @variable, @node) { // {{{
+	constructor(@data, @object, @property, match: CallMatch, @variable, @node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
@@ -28,8 +28,8 @@ class SealedPreciseMethodCallee extends Callee {
 		this.validate(@function, node)
 
 		@type = @function.getReturnType()
-	} // }}}
-	getContextSubstitute(expression) { // {{{
+	} # }}}
+	getContextSubstitute(expression) { # {{{
 		if expression is IdentifierLiteral {
 			const variable = expression.variable()
 
@@ -39,12 +39,12 @@ class SealedPreciseMethodCallee extends Callee {
 		}
 
 		return null
-	} // }}}
+	} # }}}
 	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		return @function.isInitializingInstanceVariable(name)
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
@@ -110,8 +110,8 @@ class SealedPreciseMethodCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		if @nullable {
 			if @expression.isNullable() {
 				fragments
@@ -133,12 +133,12 @@ class SealedPreciseMethodCallee extends Callee {
 				.compileReusable(@expression)
 				.code(')')
 		}
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

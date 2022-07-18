@@ -1,14 +1,14 @@
-enum HelperTypeKind { // {{{
+enum HelperTypeKind { # {{{
 	Native
 	Referenced
 	Unreferenced
-} // }}}
+} # }}}
 
-enum TypeStatus { // {{{
+enum TypeStatus { # {{{
 	Native
 	Referenced
 	Unreferenced
-} // }}}
+} # }}}
 
 class ClassDeclaration extends Statement {
 	private lateinit {
@@ -43,15 +43,15 @@ class ClassDeclaration extends Statement {
 		_sealed: Boolean 					= false
 		_sharedMethods: Dictionary			= {}
 	}
-	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
+	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { # {{{
 		if method.max() == 0 && !method.isAsync() {
 			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this)')
 		}
 		else {
 			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this, ', argName, ')')
 		}
-	} // }}}
-	static isAssigningAlias(data, name, constructor, extending) { // {{{
+	} # }}}
+	static isAssigningAlias(data, name, constructor, extending) { # {{{
 		if data is Array {
 			for d in data {
 				if ClassDeclaration.isAssigningAlias(d, name, constructor, extending) {
@@ -89,8 +89,8 @@ class ClassDeclaration extends Statement {
 		}
 
 		return false
-	} // }}}
-	static toWrongDoingFragments(block, ctrl?, argName, async, returns) { // {{{
+	} # }}}
+	static toWrongDoingFragments(block, ctrl?, argName, async, returns) { # {{{
 		if ctrl == null {
 			if async {
 				throw new NotImplementedException()
@@ -132,16 +132,16 @@ class ClassDeclaration extends Statement {
 				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
 			}
 		}
-	} // }}}
-	constructor(data, parent, scope) { // {{{
+	} # }}}
+	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope)
 
 		@constructorScope = this.newScope(@scope, ScopeType::Function)
 		@destructorScope = this.newScope(@scope, ScopeType::Function)
 		@instanceVariableScope = this.newScope(@scope, ScopeType::Function)
 		@es5 = @options.format.classes == 'es5'
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		@name = @data.name.name
 		@class = new ClassType(@scope)
 		@type = new NamedType(@name, @class)
@@ -161,8 +161,8 @@ class ClassDeclaration extends Statement {
 		}
 
 		@variable.flagClassStatement()
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		let thisVariable = @constructorScope.define('this', true, @scope.reference(@name), true, this)
 
 		thisVariable.replaceCall = (data, arguments, node) => new CallThisConstructorSubstitude(data, arguments, @type, this)
@@ -243,8 +243,8 @@ class ClassDeclaration extends Statement {
 		if @inits {
 			@initsId = @class.incInitializationSequence()
 		}
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		if @extending {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
@@ -255,8 +255,8 @@ class ClassDeclaration extends Statement {
 
 			@class.extends(@extendsType)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @extending {
 			@constructorScope.flagExtending()
 			@instanceVariableScope.flagExtending()
@@ -465,8 +465,8 @@ class ClassDeclaration extends Statement {
 		if !@class.isHybrid() {
 			@class.setExhaustive(true)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const variable of @classVariables {
 			variable.translate()
 
@@ -537,8 +537,8 @@ class ClassDeclaration extends Statement {
 				method.translate()
 			}
 		}
-	} // }}}
-	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType, hidden: Boolean?) { // {{{
+	} # }}}
+	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType, hidden: Boolean?) { # {{{
 		const index = oldMethod.index()
 
 		@forkedMethods[name] ??= {}
@@ -554,26 +554,26 @@ class ClassDeclaration extends Statement {
 				hidden
 			}
 		}
-	} // }}}
-	addSharedMethod(name: String, sealedclass: NamedType): Void { // {{{
+	} # }}}
+	addSharedMethod(name: String, sealedclass: NamedType): Void { # {{{
 		if !?@sharedMethods[name] {
 			@sharedMethods[name] = {
 				class: sealedclass
 				index: sealedclass.type().incSharedMethod(name)
 			}
 		}
-	} // }}}
+	} # }}}
 	class() => @class
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
-	exportMacro(name, macro) { // {{{
+	} # }}}
+	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(`\(@name).\(name)`, macro)
-	} // }}}
+	} # }}}
 	extends() => @extendsType
-	flagForcefullyRebinded() { // {{{
+	flagForcefullyRebinded() { # {{{
 		@forcefullyRebinded = true
-	} // }}}
+	} # }}}
 	getClassVariable(name: String) => @classVariables[name]
 	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
@@ -583,7 +583,7 @@ class ClassDeclaration extends Statement {
 	isHybrid() => @hybrid
 	level() => @class.level()
 	name() => @name
-	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
+	newInstanceMethodScope(method: ClassMethodDeclaration) { # {{{
 		const scope = this.newScope(@scope, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
@@ -595,13 +595,13 @@ class ClassDeclaration extends Statement {
 		}
 
 		return scope
-	} // }}}
-	registerMacro(name, macro) { // {{{
+	} # }}}
+	registerMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
 
 		@parent.registerMacro(`\(@name).\(name)`, macro)
-	} // }}}
-	toContinousES6Fragments(fragments) { // {{{
+	} # }}}
+	toContinousES6Fragments(fragments) { # {{{
 		let root = fragments
 		let breakable = true
 
@@ -773,8 +773,8 @@ class ClassDeclaration extends Statement {
 		if @forcefullyRebinded {
 			root.done()
 		}
-	} // }}}
-	toHybridES6Fragments(fragments) { // {{{
+	} # }}}
+	toHybridES6Fragments(fragments) { # {{{
 		const clazz = fragments
 			.newControl()
 			.code('class ', @name, ' extends ', @extendsName)
@@ -954,8 +954,8 @@ class ClassDeclaration extends Statement {
 		}
 
 		clazz.done()
-	} // }}}
-	toSealedES6Fragments(fragments) { // {{{
+	} # }}}
+	toSealedES6Fragments(fragments) { # {{{
 		const clazz = fragments
 			.newControl()
 			.code('class ', @name)
@@ -1118,8 +1118,8 @@ class ClassDeclaration extends Statement {
 		}
 
 		clazz.done()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @sealed {
 			if @es5 {
 				TargetException.throwNotSupported(@options.target, this)
@@ -1176,9 +1176,9 @@ class ClassDeclaration extends Statement {
 				line.done()
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
-	updateConstructorScope() { // {{{
+	updateConstructorScope() { # {{{
 		const superVariable = @constructorScope.getVariable('super')
 
 		if @hybrid && !@es5 {
@@ -1200,8 +1200,8 @@ class ClassDeclaration extends Statement {
 		if @extendsType.isSealed() {
 			superVariable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
 		}
-	} // }}}
-	updateMethodScope(method) { // {{{
+	} # }}}
+	updateMethodScope(method) { # {{{
 		if @extending {
 			const variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
@@ -1217,10 +1217,10 @@ class ClassDeclaration extends Statement {
 				variable.replaceCall = (data, arguments, node) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
 			}
 		}
-	} // }}}
-	walk(fn) { // {{{
+	} # }}}
+	walk(fn) { # {{{
 		fn(@name, @type)
-	} // }}}
+	} # }}}
 }
 
 include {

@@ -4,7 +4,7 @@ class UnlessStatement extends Statement {
 		_bodyScope: Scope
 		_condition
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bodyScope = this.newScope(@scope, ScopeType::InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @scope)
@@ -12,8 +12,8 @@ class UnlessStatement extends Statement {
 
 		@body = $compile.block(@data.whenFalse, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@condition.prepare()
 
 		unless @condition.type().canBeBoolean() {
@@ -54,17 +54,17 @@ class UnlessStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@condition.translate()
 		@body.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()
 			.code('if(!')
@@ -73,5 +73,5 @@ class UnlessStatement extends Statement {
 			.step()
 			.compile(@body)
 			.done()
-	} // }}}
+	} # }}}
 }

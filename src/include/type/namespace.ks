@@ -7,7 +7,7 @@ class NamespaceType extends Type {
 		_sealProperties: Dictionary			= {}
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
 			const type = new NamespaceType(scope)
 
 			if data.exhaustive? {
@@ -42,12 +42,12 @@ class NamespaceType extends Type {
 			}
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	constructor(scope: Scope) { // {{{
+	constructor(scope: Scope) { # {{{
 		super(new NamespaceTypeScope(scope))
-	} // }}}
-	addFunction(name: String, type: FunctionType) { // {{{
+	} # }}}
+	addFunction(name: String, type: FunctionType) { # {{{
 		if const property = @properties[name] {
 			const propertyType = property.type()
 
@@ -74,8 +74,8 @@ class NamespaceType extends Type {
 		}
 
 		return type.index()
-	} // }}}
-	addProperty(name: String, property: Type) { // {{{
+	} # }}}
+	addProperty(name: String, property: Type) { # {{{
 		if property is not NamespacePropertyType {
 			property = new NamespacePropertyType(property.scope(), property)
 		}
@@ -93,8 +93,8 @@ class NamespaceType extends Type {
 		@alterations[name] = true
 
 		return variable.getDeclaredType()
-	} // }}}
-	addPropertyFromAST(data, node) { // {{{
+	} # }}}
+	addPropertyFromAST(data, node) { # {{{
 		let type = Type.fromAST(data, node)
 
 		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
@@ -115,8 +115,8 @@ class NamespaceType extends Type {
 		}
 
 		return this.addProperty(data.name.name, type)
-	} // }}}
-	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { // {{{
+	} # }}}
+	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { # {{{
 		const type = Type.import(data, metadata, references, alterations, queue, @scope, node)
 
 		if type._scope != @scope {
@@ -140,8 +140,8 @@ class NamespaceType extends Type {
 		}
 
 		return variable.getDeclaredType()
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const that = new NamespaceType(@scope:Scope)
 
 		that.copyFrom(this)
@@ -151,8 +151,8 @@ class NamespaceType extends Type {
 		}
 
 		return that
-	} // }}}
-	copyFrom(src: NamespaceType) { // {{{
+	} # }}}
+	copyFrom(src: NamespaceType) { # {{{
 		@alien = src._alien
 		@sealed = src._sealed
 		@systemic = src._systemic
@@ -167,8 +167,8 @@ class NamespaceType extends Type {
 		}
 
 		return this
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if ?@majorOriginal {
 			const export = {
 				kind: TypeKind::Namespace
@@ -200,8 +200,8 @@ class NamespaceType extends Type {
 
 			return export
 		}
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
 		}
@@ -214,16 +214,16 @@ class NamespaceType extends Type {
 		}
 
 		return this
-	} // }}}
-	getProperty(name: String): Type? { // {{{
+	} # }}}
+	getProperty(name: String): Type? { # {{{
 		if @properties[name] is Type {
 			return @properties[name].type()
 		}
 		else {
 			return null
 		}
-	} // }}}
-	hasMatchingFunction(name, type: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	hasMatchingFunction(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @properties[name] is FunctionType | OverloadedFunctionType {
 			if @properties[name].isMatching(type, mode) {
 				return true
@@ -231,10 +231,10 @@ class NamespaceType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	hasProperty(name: String): Boolean => @properties[name] is Type
 	isContainer() => true
-	isExhaustive() { // {{{
+	isExhaustive() { # {{{
 		if @exhaustive {
 			return true
 		}
@@ -244,13 +244,13 @@ class NamespaceType extends Type {
 		}
 
 		return super.isExhaustive()
-	} // }}}
+	} # }}}
 	isExtendable() => true
 	isFlexible() => @sealed
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
-	isSubsetOf(value: NamespaceType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: NamespaceType, mode: MatchingMode) { # {{{
 		for const property, name of value._properties {
 			if !@properties[name]?.isSubsetOf(property, mode) {
 				return false
@@ -258,26 +258,26 @@ class NamespaceType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	matchContentOf(value: Type) => value is ReferenceType && value.isNamespace()
-	originals(@majorOriginal): this { // {{{
+	originals(@majorOriginal): this { # {{{
 		@altering = true
-	} // }}}
-	setExhaustive(@exhaustive) { // {{{
+	} # }}}
+	setExhaustive(@exhaustive) { # {{{
 		for const property of @properties {
 			property.setExhaustive(@exhaustive)
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	shallBeNamed() => true
-	toFragments(fragments, node) { // {{{
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('namespace')
 
 		for const property, name of @properties {
@@ -285,12 +285,12 @@ class NamespaceType extends Type {
 
 			property.toVariations(variations)
 		}
-	} // }}}
-	walk(fn) { // {{{
+	} # }}}
+	walk(fn) { # {{{
 		for const type, name of @properties {
 			fn(name, type)
 		}
-	} // }}}
+	} # }}}
 }
 
 class NamespacePropertyType extends Type {
@@ -300,13 +300,13 @@ class NamespacePropertyType extends Type {
 	static {
 		fromAST(data, node) => new NamespacePropertyType(node.scope(), Type.fromAST(data, node))
 	}
-	constructor(@scope, @type) { // {{{
+	constructor(@scope, @type) { # {{{
 		super(scope)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		let export
 
 		if @type is ReferenceType {
@@ -325,39 +325,39 @@ class NamespacePropertyType extends Type {
 		export.sealed = this.isSealed()
 
 		return export
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		@type.flagExported(explicitly)
 
 		return this
-	} // }}}
-	flagReferenced() { // {{{
+	} # }}}
+	flagReferenced() { # {{{
 		@type.flagReferenced()
 
 		return this
-	} // }}}
-	flagSealed() { // {{{
+	} # }}}
+	flagSealed() { # {{{
 		@type = @type.flagSealed()
 
 		return this
-	} // }}}
+	} # }}}
 	isSealed() => @type.isSealed()
-	isSubsetOf(value: NamespacePropertyType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: NamespacePropertyType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode::Exact)
 		}
 		else {
 			return true
 		}
-	} // }}}
-	setExhaustive(exhaustive) { // {{{
+	} # }}}
+	setExhaustive(exhaustive) { # {{{
 		if !?@type.getExhaustive() {
 			@type.setExhaustive(exhaustive)
 		}
 
 		return this
-	} // }}}
-	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type.isSealable() {
 			return @type.toExportOrIndex(references, indexDelta, mode, module)
 		}
@@ -376,14 +376,14 @@ class NamespacePropertyType extends Type {
 		else {
 			return this.export(references, indexDelta, mode, module)
 		}
-	} // }}}
+	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	// TODO add alias
 	toQuote() => @type.toQuote()
 	toQuote(double) => @type.toQuote(double)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
-	override toVariations(variations) { // {{{
+	override toVariations(variations) { # {{{
 		@type.toVariations(variations)
-	} // }}}
+	} # }}}
 	type() => @type
 }

@@ -19,7 +19,7 @@ class TryStatement extends Statement {
 		_hasFinally: Boolean		= false
 		_state: TryState
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		let scope
 
 		if @data.catchClauses? {
@@ -74,8 +74,8 @@ class TryStatement extends Statement {
 			@finalizer = $compile.block(@data.finalizer, this)
 			@finalizer.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@hasCatch = @catchClauses.length != 0
 
 		for const clause in @catchClauses {
@@ -102,8 +102,8 @@ class TryStatement extends Statement {
 				@exit = true
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@block.translate()
 
 		for clause in @catchClauses {
@@ -113,8 +113,8 @@ class TryStatement extends Statement {
 
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@block.checkReturnType(type)
 
 		for const clause in @catchClauses {
@@ -123,17 +123,17 @@ class TryStatement extends Statement {
 
 		@catchClause?.checkReturnType(type)
 		@finalizer?.checkReturnType(type)
-	} // }}}
-	getErrorVarname() { // {{{
+	} # }}}
+	getErrorVarname() { # {{{
 		if @catchClauses.length == 0 && @data.catchClause?.binding? {
 			return @data.catchClause.binding.name
 		}
 		else {
 			return @scope.acquireTempName(false)
 		}
-	} // }}}
+	} # }}}
 	isAwait() => @await
-	isConsumedError(error): Boolean { // {{{
+	isConsumedError(error): Boolean { # {{{
 		if @catchClauses.length > 0 {
 			for clause in @catchClauses {
 				if error.matchInheritanceOf(clause.type.type()) {
@@ -146,10 +146,10 @@ class TryStatement extends Statement {
 		else {
 			return true
 		}
-	} // }}}
+	} # }}}
 	isExit() => @exit
 	isJumpable() => true
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		if @block.isUsingVariable(name) {
 			return true
 		}
@@ -165,8 +165,8 @@ class TryStatement extends Statement {
 		}
 
 		return @hasFinally && @finalizer.isUsingVariable(name)
-	} // }}}
-	toAwaitStatementFragments(fragments, statements) { // {{{
+	} # }}}
+	toAwaitStatementFragments(fragments, statements) { # {{{
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()
 
@@ -256,8 +256,8 @@ class TryStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
-	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
+	} # }}}
+	toAwaitExpressionFragments(fragments, parameters, statements) { # {{{
 		fragments.code('(__ks_e')
 
 		for parameter in parameters {
@@ -417,8 +417,8 @@ class TryStatement extends Statement {
 		block.done()
 
 		fragments.code(')').done()
-	} // }}}
-	toCatchFragments(fragments, error) { // {{{
+	} # }}}
+	toCatchFragments(fragments, error) { # {{{
 		let async = false
 
 		if @catchClauses.length != 0 {
@@ -485,11 +485,11 @@ class TryStatement extends Statement {
 		else if @continueVarname? {
 			fragments.line(`\(@continueVarname)()`)
 		}
-	} // }}}
-	toFinallyFragments(fragments) { // {{{
+	} # }}}
+	toFinallyFragments(fragments) { # {{{
 		fragments.code('finally').step().compile(@finalizer)
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @await {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
@@ -531,5 +531,5 @@ class TryStatement extends Statement {
 
 			ctrl.done()
 		}
-	} // }}}
+	} # }}}
 }

@@ -7,12 +7,12 @@ class ClassConstructorType extends FunctionType {
 		_overwrite: Array?						= null
 	}
 	static {
-		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
+		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{
 			const scope = node.scope()
 
 			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
-		} // }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
+		} # }}}
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
 			const data = index
 			const type = new ClassConstructorType(scope)
 
@@ -38,20 +38,20 @@ class ClassConstructorType extends FunctionType {
 			type.updateParameters()
 
 			return type
-		} // }}}
+		} # }}}
 	}
 	access(@access) => this
-	addInitializingInstanceVariable(name: String) { // {{{
+	addInitializingInstanceVariable(name: String) { # {{{
 		@initVariables[name] = true
-	} // }}}
-	checkVariablesInitializations(node: AbstractNode, class: ClassType = @class) { // {{{
+	} # }}}
+	checkVariablesInitializations(node: AbstractNode, class: ClassType = @class) { # {{{
 		class.forEachInstanceVariables((name, variable) => {
 			if variable.isRequiringInitialization() && !@initVariables[name] {
 				SyntaxException.throwNotInitializedField(name, node)
 			}
 		})
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const clone = new ClassConstructorType(@scope)
 
 		FunctionType.clone(this, clone)
@@ -67,8 +67,8 @@ class ClassConstructorType extends FunctionType {
 		}
 
 		return clone
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
 		const export = {
 			index: @index
 			access: @access
@@ -96,18 +96,18 @@ class ClassConstructorType extends FunctionType {
 		}
 
 		return export
-	} // }}}
-	flagDependent() { // {{{
+	} # }}}
+	flagDependent() { # {{{
 		@dependent = true
 
 		return this
-	} // }}}
+	} # }}}
 	isDependent() => @dependent
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isOverwritten() => @overwrite != null
 	overwrite() => @overwrite
 	overwrite(@overwrite)
-	private processModifiers(modifiers) { // {{{
+	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {
 				throw new NotImplementedException()
@@ -119,6 +119,6 @@ class ClassConstructorType extends FunctionType {
 				@access = Accessibility::Protected
 			}
 		}
-	} // }}}
+	} # }}}
 	setClass(@class): this
 }

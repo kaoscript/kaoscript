@@ -1,23 +1,23 @@
 class VoidType extends Type {
-	constructor() { // {{{
+	constructor() { # {{{
 		super(null)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Void'
 	hashCode() => `Void`
 	isExportable() => true
 	isSubsetOf(value: VoidType, mode: MatchingMode) => true
 	isVoid() => true
-	toFragments(fragments, node) { // {{{
+	toFragments(fragments, node) { # {{{
 		fragments.code('Void')
-	} // }}}
+	} # }}}
 	toQuote(): String => `Void`
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotSupportedException(node)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('void')
-	} // }}}
+	} # }}}
 }

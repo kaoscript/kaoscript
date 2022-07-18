@@ -5,7 +5,7 @@ class ConditionalExpression extends Expression {
 		_whenTrue
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 
@@ -14,8 +14,8 @@ class ConditionalExpression extends Expression {
 
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@condition.prepare()
 
 		for const data, name of @condition.inferTypes({}) {
@@ -40,28 +40,28 @@ class ConditionalExpression extends Expression {
 		else {
 			@type = Type.union(@scope, t, f)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@condition.translate()
 		@whenTrue.translate()
 		@whenFalse.translate()
-	} // }}}
+	} # }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@condition.listNonLocalVariables(scope, variables)
 		@whenTrue.listNonLocalVariables(scope, variables)
 		@whenFalse.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.wrapBoolean(@condition)
 			.code(' ? ')
 			.compile(@whenTrue)
 			.code(' : ')
 			.compile(@whenFalse)
-	} // }}}
+	} # }}}
 	type() => @type
 }

@@ -5,7 +5,7 @@ class IfExpression extends Expression {
 		_whenFalse
 		_whenTrue
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 
@@ -16,8 +16,8 @@ class IfExpression extends Expression {
 			@whenFalse = $compile.expression(@data.whenFalse, this)
 			@whenFalse.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@condition.prepare()
 
 		for const data, name of @condition.inferTypes({}) {
@@ -48,22 +48,22 @@ class IfExpression extends Expression {
 		else {
 			@type = @whenTrue.type()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@condition.translate()
 		@whenTrue.translate()
 		@whenFalse.translate() if @whenFalse?
-	} // }}}
+	} # }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse?.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@condition.listNonLocalVariables(scope, variables)
 		@whenTrue.listNonLocalVariables(scope, variables)
 		@whenFalse?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @whenFalse? {
 			fragments
 				.wrapBoolean(@condition)
@@ -79,8 +79,8 @@ class IfExpression extends Expression {
 				.compile(@whenTrue)
 				.code(' : null')
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		let ctrl = fragments.newControl()
 
 		ctrl.code('if(')
@@ -88,6 +88,6 @@ class IfExpression extends Expression {
 		ctrl.compileBoolean(@condition)
 
 		ctrl.code(')').step().line(@whenTrue).done()
-	} // }}}
+	} # }}}
 	type() => @type
 }

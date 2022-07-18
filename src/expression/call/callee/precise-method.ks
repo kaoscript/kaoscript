@@ -14,7 +14,7 @@ class PreciseMethodCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	constructor(@data, @object, @property, match: CallMatch, @reference, @node) { // {{{
+	constructor(@data, @object, @property, match: CallMatch, @reference, @node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
@@ -33,15 +33,15 @@ class PreciseMethodCallee extends Callee {
 		@instance = match.function.isInstance()
 		@arguments = match.arguments
 		@type = match.function.getReturnType()
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@flatten && @scope == ScopeKind::This)
-	} // }}}
+	} # }}}
 	functions() => @functions
-	override hashCode() { // {{{
+	override hashCode() { # {{{
 		return `method:\(@property):\(@index):\(@alien):\(@instance):\(@arguments)`
-	} // }}}
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	} # }}}
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		for const function in @functions {
 			if function.isInitializingInstanceVariable(name) {
 				return true
@@ -49,15 +49,15 @@ class PreciseMethodCallee extends Callee {
 		}
 
 		return false
-	} // }}}
-	mergeWith(that: Callee) { // {{{
+	} # }}}
+	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
 		@functions.push(...that.functions())
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@expression.releaseReusable()
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			switch @scope {
 				ScopeKind::Argument => {
@@ -108,8 +108,8 @@ class PreciseMethodCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toCurryFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toCurryFragments(fragments, mode, node) { # {{{
 		node.module().flag('Helper')
 
 		if @flatten {
@@ -142,8 +142,8 @@ class PreciseMethodCallee extends Callee {
 
 			Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], true, fragments, mode)
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		if @nullable {
 			if @expression.isNullable() {
 				fragments
@@ -165,13 +165,13 @@ class PreciseMethodCallee extends Callee {
 				.compileReusable(@expression)
 				.code(')')
 		}
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		@reference.toPositiveTestFragments(fragments, @object)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@object.translate()
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

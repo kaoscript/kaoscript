@@ -1,13 +1,13 @@
 abstract class TupleType extends Type {
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleType { # {{{
 			if data.named {
 				return NamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
 			}
 			else {
 				return UnnamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
 			}
-		} // }}}
+		} # }}}
 	}
 	private {
 		@assessment							= null
@@ -19,23 +19,23 @@ abstract class TupleType extends Type {
 		@function: FunctionType				= null
 	}
 	abstract addField(field: TupleFieldType): Void
-	assessment(reference: ReferenceType, node: AbstractNode) { // {{{
+	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
 			@assessment = Router.assess([this.function(reference, node)], reference.name(), node)
 		}
 
 		return @assessment
-	} // }}}
-	override clone() { // {{{
+	} # }}}
+	override clone() { # {{{
 		NotImplementedException.throw()
-	} // }}}
+	} # }}}
 	extends() => @extends
-	extends(@extends) { // {{{
+	extends(@extends) { # {{{
 		@extending = true
 
 		@extendedLength = @extends.type().length()
-	} // }}}
-	function(reference, node) { // {{{
+	} # }}}
+	function(reference, node) { # {{{
 		if @function == null {
 			const scope = node.scope()
 			@function = new FunctionType(scope)
@@ -53,8 +53,8 @@ abstract class TupleType extends Type {
 		}
 
 		return @function
-	} // }}}
-	getProperty(index: Number): Type? { // {{{
+	} # }}}
+	getProperty(index: Number): Type? { # {{{
 		if const field = @fieldsByIndex[index] {
 			return field
 		}
@@ -65,8 +65,8 @@ abstract class TupleType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	getProperty(name: String): Type? { // {{{
+	} # }}}
+	getProperty(name: String): Type? { # {{{
 		if const field = @fieldsByIndex[name] {
 			return field
 		}
@@ -77,11 +77,11 @@ abstract class TupleType extends Type {
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	isExtending() => @extending
 	override isTuple() => true
 	length(): Number => @extendedLength + @length
-	listAllFields(list = []) { // {{{
+	listAllFields(list = []) { # {{{
 		if @extending {
 			@extends.type().listAllFields(list)
 		}
@@ -91,23 +91,23 @@ abstract class TupleType extends Type {
 		}
 
 		return list
-	} // }}}
+	} # }}}
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [this.toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
-	override toFragments(fragments, node) { // {{{
+	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		NotImplementedException.throw(node)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('tuple', @length)
-	} // }}}
+	} # }}}
 }
 
 class NamedTupleType extends TupleType {
 	static {
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { // {{{
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { # {{{
 			const data = index
 			const value = new NamedTupleType(scope)
 
@@ -122,18 +122,18 @@ class NamedTupleType extends TupleType {
 			})
 
 			return value
-		} // }}}
+		} # }}}
 	}
 	private {
 		@fieldsByName: Dictionary<TupleFieldType>	= {}
 	}
-	override addField(field) { // {{{
+	override addField(field) { # {{{
 		@fieldsByName[field.name()] = field
 		@fieldsByIndex[field.index()] = field
 
 		++@length
-	} // }}}
-	override export(references, indexDelta, mode, module) { // {{{
+	} # }}}
+	override export(references, indexDelta, mode, module) { # {{{
 		const export = {
 			kind: TypeKind::Tuple
 			named: true
@@ -149,8 +149,8 @@ class NamedTupleType extends TupleType {
 		}
 
 		return export
-	} // }}}
-	getAllFieldsMap(list = {}) { // {{{
+	} # }}}
+	getAllFieldsMap(list = {}) { # {{{
 		if @extending {
 			@extends.type().getAllFieldsMap(list)
 		}
@@ -160,8 +160,8 @@ class NamedTupleType extends TupleType {
 		}
 
 		return list
-	} // }}}
-	getProperty(name: String): Type? { // {{{
+	} # }}}
+	getProperty(name: String): Type? { # {{{
 		if const field = @fieldsByName[name] {
 			return field
 		}
@@ -175,17 +175,17 @@ class NamedTupleType extends TupleType {
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
-	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Tuple' {
 			return true
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: UnionType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
 		for const type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
@@ -193,8 +193,8 @@ class NamedTupleType extends TupleType {
 		}
 
 		return false
-	} // }}}
-	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
+	} # }}}
+	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
 		const fields = this.getAllFieldsMap()
 		const count = this.length()
 
@@ -294,8 +294,8 @@ class NamedTupleType extends TupleType {
 		}
 
 		return true
-	} // }}}
-	sortArguments(arguments: Array, node) { // {{{
+	} # }}}
+	sortArguments(arguments: Array, node) { # {{{
 		const order = []
 
 		const fields = this.getAllFieldsMap()
@@ -407,12 +407,12 @@ class NamedTupleType extends TupleType {
 		}
 
 		return order
-	} // }}}
+	} # }}}
 }
 
 class UnnamedTupleType extends TupleType {
 	static {
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { // {{{
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { # {{{
 			const data = index
 			const value = new UnnamedTupleType(scope)
 
@@ -427,19 +427,19 @@ class UnnamedTupleType extends TupleType {
 			})
 
 			return value
-		} // }}}
+		} # }}}
 	}
 	private {
 		@fields: Array<TupleFieldType>	= []
 	}
-	addField(field) { // {{{
+	addField(field) { # {{{
 		@fieldsByIndex[field.index()] = field
 
 		@fields.push(field)
 
 		++@length
-	} // }}}
-	override export(references, indexDelta, mode, module) { // {{{
+	} # }}}
+	override export(references, indexDelta, mode, module) { # {{{
 		const export = {
 			kind: TypeKind::Tuple
 			named: false
@@ -455,18 +455,18 @@ class UnnamedTupleType extends TupleType {
 		}
 
 		return export
-	} // }}}
+	} # }}}
 	override isArray() => true
 	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
-	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Tuple' {
 			return true
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: UnionType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
 		for const type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
@@ -474,8 +474,8 @@ class UnnamedTupleType extends TupleType {
 		}
 
 		return false
-	} // }}}
-	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
+	} # }}}
+	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
 		const fields = this.listAllFields()
 
 		let required = 0
@@ -515,7 +515,7 @@ class UnnamedTupleType extends TupleType {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	sortArguments(arguments) => arguments
 }
 
@@ -526,42 +526,42 @@ class TupleFieldType extends Type {
 		@type: Type
 	}
 	static {
-		import(_name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { // {{{
+		import(_name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
 			const fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			// FIXME
 			const name: String? = _name!!
 
 			return new TupleFieldType(scope, name, data.index as Number, fieldType, data.required)
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, @name, @index, @type, @required) { // {{{
+	constructor(@scope, @name, @index, @type, @required) { # {{{
 		super(scope)
 
 		if !?name {
 			@name = `__ks_\(@index)`
 		}
-	} // }}}
-	override clone() { // {{{
+	} # }}}
+	override clone() { # {{{
 		NotImplementedException.throw()
-	} // }}}
+	} # }}}
 	discardVariable() => @type
-	override export(references, indexDelta, mode, module) => { // {{{
+	override export(references, indexDelta, mode, module) => { # {{{
 		index: @index
 		required: @required
 		type: @type.export(references, indexDelta, mode, module)
-	} // }}}
-	flagNullable() { // {{{
+	} # }}}
+	flagNullable() { # {{{
 		@type = @type.setNullable(true)
-	} // }}}
+	} # }}}
 	index() => @index
 	name() => @name
-	override toFragments(fragments, node) { // {{{
+	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
-	} // }}}
+	} # }}}
 	toQuote() => @type.toQuote()
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		NotImplementedException.throw(node)
-	} // }}}
+	} # }}}
 	override toVariations(variations)
 	type() => @type
 }

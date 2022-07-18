@@ -3,12 +3,12 @@ class ExclusionType extends Type {
 		_types: Array<Type>
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
 			const type = new ExclusionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for const item in data.types])
 
 			return type
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		} # }}}
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
 			const type = new ExclusionType(scope)
 
 			queue.push(() => {
@@ -18,25 +18,25 @@ class ExclusionType extends Type {
 			})
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, @types = []) { // {{{
+	constructor(@scope, @types = []) { # {{{
 		super(scope)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const that = new ExclusionType(@scope)
 
 		that._types = [...@types]
 
 		return that
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind::Exclusion
 			types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 		}
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
 		}
@@ -49,10 +49,10 @@ class ExclusionType extends Type {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	getMainType() => @types[0]
 	isExclusion() => true
-	isExportable() { // {{{
+	isExportable() { # {{{
 		for type in @types {
 			if !type.isExportable() {
 				return false
@@ -60,13 +60,13 @@ class ExclusionType extends Type {
 		}
 
 		return true
-	} // }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		console.error(value)
 		NotImplementedException.throw()
-	} // }}}
+	} # }}}
 	length() => @types.length
-	matchContentOf(value: Type?) { // {{{
+	matchContentOf(value: Type?) { # {{{
 		if !@types[0].matchContentOf(value) {
 			return false
 		}
@@ -78,13 +78,13 @@ class ExclusionType extends Type {
 		}
 
 		return true
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
+	} # }}}
 	toQuote() => [type.toQuote() for const type in @types].join('^')
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		if @types[0].isAny() {
@@ -107,8 +107,8 @@ class ExclusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	toTestFunctionFragments(fragments, node, junction) { // {{{
+	} # }}}
+	toTestFunctionFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		if @types[0].isAny() {
@@ -131,9 +131,9 @@ class ExclusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('exclusion')
-	} // }}}
+	} # }}}
 	types() => @types
 }

@@ -4,7 +4,7 @@ class IncludeDeclaration extends Statement {
 	private {
 		_declarators			= []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		let directory = this.directory()
 
 		let x
@@ -96,29 +96,29 @@ class IncludeDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const declarator in @declarators {
 			declarator.analyse()
 		}
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		for const declarator in @declarators {
 			declarator.enhance()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const declarator in @declarators {
 			declarator.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
+	} # }}}
 	canLoadLocalFile(file) => !this.module().hasInclude(file)
-	canLoadModuleFile(file, name, path, version) { // {{{
+	canLoadModuleFile(file, name, path, version) { # {{{
 		if versions ?= this.module().listIncludeVersions(file, path) {
 			if versions.length > 1 || versions[0] == version {
 				return false
@@ -130,14 +130,14 @@ class IncludeDeclaration extends Statement {
 		else {
 			return true
 		}
-	} // }}}
-	export(recipient, enhancement: Boolean = false) { // {{{
+	} # }}}
+	export(recipient, enhancement: Boolean = false) { # {{{
 		for const declarator in @declarators {
 			declarator.export(recipient, enhancement)
 		}
-	} // }}}
+	} # }}}
 	isExportable() => true
-	loadLocalFile(declaration, path) { // {{{
+	loadLocalFile(declaration, path) { # {{{
 		const module = this.module()
 
 		let data = fs.readFile(path)
@@ -161,8 +161,8 @@ class IncludeDeclaration extends Statement {
 		declarator.initiate()
 
 		@declarators.push(declarator)
-	} // }}}
-	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { // {{{
+	} # }}}
+	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { # {{{
 		const module = this.module()
 
 		let data = fs.readFile(path)
@@ -186,13 +186,13 @@ class IncludeDeclaration extends Statement {
 		declarator.initiate()
 
 		@declarators.push(declarator)
-	} // }}}
+	} # }}}
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		for const declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }
 
 class IncludeAgainDeclaration extends IncludeDeclaration {
@@ -209,7 +209,7 @@ class IncludeDeclarator extends Statement {
 		_offsetStart: Number	= 0
 		_statements				= []
 	}
-	constructor(declaration, @data, @file, moduleName: String = null, @parent) { // {{{
+	constructor(declaration, @data, @file, moduleName: String = null, @parent) { # {{{
 		super(data, parent)
 
 		@options = Attribute.configure(declaration, @options, AttributeTarget::Global, super.file(), true)
@@ -225,8 +225,8 @@ class IncludeDeclarator extends Statement {
 		else {
 			@includePath = path.join(parent.includePath(), moduleName)
 		}
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, this.file())
 
 		const offset = @scope.getLineOffset()
@@ -250,8 +250,8 @@ class IncludeDeclarator extends Statement {
 		@offsetEnd = offset + @scope.line() - @offsetStart
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for const statement in @statements {
@@ -261,8 +261,8 @@ class IncludeDeclarator extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for const statement in @statements {
@@ -272,8 +272,8 @@ class IncludeDeclarator extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for const statement in @statements {
@@ -283,8 +283,8 @@ class IncludeDeclarator extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for const statement in @statements {
@@ -294,16 +294,16 @@ class IncludeDeclarator extends Statement {
 		}
 
 		@scope.setLineOffset(@offsetEnd)
-	} // }}}
+	} # }}}
 	directory() => @directory
-	export(recipient, enhancement: Boolean = false) { // {{{
+	export(recipient, enhancement: Boolean = false) { # {{{
 		for const statement in @statements when statement.isExportable() {
 			statement.export(recipient, enhancement)
 		}
-	} // }}}
+	} # }}}
 	file() => @file
 	includePath() => @includePath
-	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
 		const line = stmt.line()
 
 		for const statement in @statements while statement.line() < line && statement != stmt {
@@ -313,12 +313,12 @@ class IncludeDeclarator extends Statement {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	recipient() => this.module()
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		for const statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }

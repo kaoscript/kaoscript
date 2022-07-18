@@ -12,7 +12,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 		@enumRef: ReferenceType
 		@name: String
 	}
-	constructor(data, parent, @enumName) { // {{{
+	constructor(data, parent, @enumName) { # {{{
 		super(data, parent)
 
 		@enum = @enumName.type()
@@ -20,8 +20,8 @@ class ImplementEnumFieldDeclaration extends Statement {
 
 		@name = data.name.name
 
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		const value = @data.value
 
 		switch @enum.kind() {
@@ -87,17 +87,17 @@ class ImplementEnumFieldDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@variable = @enum.addVariable(@name)
 
 		@variable.flagAlteration()
-	} // }}}
-	translate() { // {{{
-	} // }}}
+	} # }}}
+	translate() { # {{{
+	} # }}}
 	getSharedName() => null
 	isMethod() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		const name = @enumName.name()
 		const line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
 
@@ -113,7 +113,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 		}
 
 		line.code(')').done()
-	} // }}}
+	} # }}}
 }
 
 class ImplementEnumMethodDeclaration extends Statement {
@@ -133,13 +133,13 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@override: Boolean					= false
 		@topNodes: Array					= []
 	}
-	constructor(data, parent, @enumName) { // {{{
+	constructor(data, parent, @enumName) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
 
 		@enum = @enumName.type()
 		@enumRef = @scope.reference(@enumName)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.line(@data.start.line)
 
 		@name = @data.name.name
@@ -164,8 +164,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 
 		@block = $compile.function($ast.body(@data), this)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.line(@data.start.line)
 
 		if @instance {
@@ -252,8 +252,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -273,8 +273,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 
 		@block.translate()
-	} // }}}
-	addIndigentValue(value: Expression, parameters) { // {{{
+	} # }}}
+	addIndigentValue(value: Expression, parameters) { # {{{
 		const name = `__ks_default_\(@enum.incDefaultSequence())`
 
 		@indigentValues.push({
@@ -284,19 +284,19 @@ class ImplementEnumMethodDeclaration extends Statement {
 		})
 
 		return name
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
-	getMatchingMode(): MatchingMode { // {{{
+	getMatchingMode(): MatchingMode { # {{{
 		if @override {
 			return MatchingMode::ShiftableParameters
 		}
 		else {
 			return MatchingMode::ExactParameter
 		}
-	} // }}}
+	} # }}}
 	getOverridableVarname() => @enumName.name()
 	getParameterOffset() => @instance ? 1 : 0
 	getSharedName() => @override ? null : @instance ? `__ks_func_\(@name)` : @name
@@ -309,7 +309,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 	isOverridableFunction() => true
 	name() => @name
 	parameters() => @parameters
-	toIndigentFragments(fragments) { // {{{
+	toIndigentFragments(fragments) { # {{{
 		for const {name, value, parameters} in @indigentValues {
 			const line = fragments.newLine()
 			const ctrl = line.newControl(null, false, false)
@@ -321,8 +321,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 			ctrl.done()
 			line.done()
 		}
-	} // }}}
-	toSharedFragments(fragments, _) { // {{{
+	} # }}}
+	toSharedFragments(fragments, _) { # {{{
 		const name = @enumName.name()
 
 		if @instance {
@@ -371,8 +371,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 			ctrl.done()
 			line.done()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine()
 
 		if @instance {
@@ -398,6 +398,6 @@ class ImplementEnumMethodDeclaration extends Statement {
 		line.done()
 
 		this.toIndigentFragments(fragments)
-	} // }}}
+	} # }}}
 	type() => @type
 }

@@ -10,25 +10,25 @@ class CodeFragment extends Fragment {
 		end		= null
 		start	= null
 	}
-	constructor(@code) { // {{{
+	constructor(@code) { # {{{
 		super(code)
-	} // }}}
-	constructor(@code, @start, @end) { // {{{
+	} # }}}
+	constructor(@code, @start, @end) { # {{{
 		super(code)
-	} // }}}
+	} # }}}
 }
 
-func $code(code) { // {{{
+func $code(code) { # {{{
 	return new CodeFragment(code)
-} // }}}
+} # }}}
 
-func $const(node) { // {{{
+func $const(node) { # {{{
 	return node._options.format.variables == 'es5' ? 'var ' : 'const '
-} // }}}
+} # }}}
 
-func $quote(value) { // {{{
+func $quote(value) { # {{{
 	return '"' + value.replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
-} // }}}
+} # }}}
 
 const $comma = $code(', ')
 const $dot = $code('.')
@@ -36,7 +36,7 @@ const $equals = $code(' = ')
 const $space = $code(' ')
 
 class FragmentBuilder extends Writer {
-	constructor(@indent) { // {{{
+	constructor(@indent) { # {{{
 		super({
 			indent: {
 				level: indent
@@ -51,8 +51,8 @@ class FragmentBuilder extends Writer {
 				object: ObjectWriter
 			}
 		})
-	} // }}}
-	line(...args) { // {{{
+	} # }}}
+	line(...args) { # {{{
 		let line = this.newLine(@indent)
 
 		if args.length == 1 && args[0] is not Primitive {
@@ -65,11 +65,11 @@ class FragmentBuilder extends Writer {
 		line.done()
 
 		return this
-	} // }}}
+	} # }}}
 }
 
 class BlockBuilder extends BlockWriter {
-	compile(node, mode = Mode::None) { // {{{
+	compile(node, mode = Mode::None) { # {{{
 		if node is not Primitive {
 			node.toFragments(this, mode)
 		}
@@ -78,8 +78,8 @@ class BlockBuilder extends BlockWriter {
 		}
 
 		return this
-	} // }}}
-	line(...args) { // {{{
+	} # }}}
+	line(...args) { # {{{
 		let line = @writer.newLine(@indent + 1)
 
 		if args.length == 1 && args[0] is not Primitive {
@@ -92,34 +92,34 @@ class BlockBuilder extends BlockWriter {
 		line.done()
 
 		return this
-	} // }}}
+	} # }}}
 }
 
 class ControlBuilder extends ControlWriter {
-	block(): BlockBuilder? { // {{{
+	block(): BlockBuilder? { # {{{
 		if @step is BlockBuilder {
 			return @step
 		}
 		else {
 			return null
 		}
-	} // }}}
-	compile(node, mode = Mode::None) { // {{{
+	} # }}}
+	compile(node, mode = Mode::None) { # {{{
 		@step.compile(node, mode)
 
 		return this
-	} // }}}
-	compileBoolean(node) { // {{{
+	} # }}}
+	compileBoolean(node) { # {{{
 		@step.compileBoolean(node)
 
 		return this
-	} // }}}
-	compileNullable(node) { // {{{
+	} # }}}
+	compileNullable(node) { # {{{
 		@step.compileNullable(node)
 
 		return this
-	} // }}}
-	compileReusable(node) { // {{{
+	} # }}}
+	compileReusable(node) { # {{{
 		if node is not Primitive {
 			node.toReusableFragments(this)
 		}
@@ -128,26 +128,26 @@ class ControlBuilder extends ControlWriter {
 		}
 
 		return this
-	} // }}}
-	wrap(node, mode = null) { // {{{
+	} # }}}
+	wrap(node, mode = null) { # {{{
 		@step.wrap(node, mode)
 
 		return this
-	} // }}}
-	wrapBoolean(node) { // {{{
+	} # }}}
+	wrapBoolean(node) { # {{{
 		@step.wrapBoolean(node)
 
 		return this
-	} // }}}
-	wrapNullable(node) { // {{{
+	} # }}}
+	wrapNullable(node) { # {{{
 		@step.wrapNullable(node)
 
 		return this
-	} // }}}
+	} # }}}
 }
 
 class ExpressionBuilder extends ExpressionWriter {
-	code(...args) { // {{{
+	code(...args) { # {{{
 		let data
 
 		for arg, i in args {
@@ -175,8 +175,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	compile(node, mode = Mode::None) { // {{{
+	} # }}}
+	compile(node, mode = Mode::None) { # {{{
 		if node is not Primitive {
 			node.toFragments(this, mode)
 		}
@@ -185,8 +185,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	compileBoolean(node, mode = Mode::None) { // {{{
+	} # }}}
+	compileBoolean(node, mode = Mode::None) { # {{{
 		if node is not Primitive {
 			node.toBooleanFragments(this, mode)
 		}
@@ -195,8 +195,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	compileNullable(node) { // {{{
+	} # }}}
+	compileNullable(node) { # {{{
 		if node is not Primitive {
 			node.toNullableFragments(this)
 		}
@@ -205,8 +205,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	compileReusable(node) { // {{{
+	} # }}}
+	compileReusable(node) { # {{{
 		if node is not Primitive {
 			node.toReusableFragments(this)
 		}
@@ -215,8 +215,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	wrap(node, mode = Mode::None) { // {{{
+	} # }}}
+	wrap(node, mode = Mode::None) { # {{{
 		if node.isComputed() {
 			this.code('(')
 
@@ -229,8 +229,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	wrapBoolean(node, mode = Mode::None) { // {{{
+	} # }}}
+	wrapBoolean(node, mode = Mode::None) { # {{{
 		if node.isBooleanComputed() {
 			this.code('(')
 
@@ -243,8 +243,8 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
-	wrapNullable(node) { // {{{
+	} # }}}
+	wrapNullable(node) { # {{{
 		if node.isNullableComputed() {
 			this.code('(')
 
@@ -257,7 +257,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 }
 
 class LineBuilder extends ExpressionBuilder {
@@ -265,7 +265,7 @@ class LineBuilder extends ExpressionBuilder {
 		_whenDone: Function?	= null
 	}
 	block() => this.newBlock()
-	done() { // {{{
+	done() { # {{{
 		if @undone {
 			@writer.push(@writer.lineTerminator)
 
@@ -277,10 +277,10 @@ class LineBuilder extends ExpressionBuilder {
 				@whenDone = null
 			}
 		}
-	} // }}}
-	newControl(indent = @indent, initiator = true, terminator = true) { // {{{
+	} # }}}
+	newControl(indent = @indent, initiator = true, terminator = true) { # {{{
 		return @writer.newControl(indent, initiator, terminator)
-	} // }}}
+	} # }}}
 	newLine() => this
 	whenDone(@whenDone)
 }

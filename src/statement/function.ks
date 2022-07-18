@@ -1,5 +1,5 @@
 const $function = {
-	surround(node) { // {{{
+	surround(node) { # {{{
 		let parent = node._parent
 		while parent? && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
@@ -41,8 +41,8 @@ const $function = {
 				footer: ''
 			}
 		}
-	} // }}}
-	useThisVariable(data, node) { // {{{
+	} # }}}
+	useThisVariable(data, node) { # {{{
 		switch data.kind {
 			NodeKind::ArrayExpression => {
 				for value in data.values {
@@ -140,7 +140,7 @@ const $function = {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 }
 
 class FunctionDeclaration extends Statement {
@@ -152,7 +152,7 @@ class FunctionDeclaration extends Statement {
 		_oldVariableName: String
 		_variable: FunctionVariable
 	}
-	static toFlatWrongDoingFragments(block, ctrl?, argName, async, returns) { // {{{
+	static toFlatWrongDoingFragments(block, ctrl?, argName, async, returns) { # {{{
 		if ctrl == null {
 			if async {
 				throw new NotImplementedException()
@@ -179,8 +179,8 @@ class FunctionDeclaration extends Statement {
 				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
 			}
 		}
-	} // }}}
-	initiate() { // {{{
+	} # }}}
+	initiate() { # {{{
 		@name = @data.name.name
 
 		if @variable ?= @scope.getDefinedVariable(@name) {
@@ -228,8 +228,8 @@ class FunctionDeclaration extends Statement {
 
 			@scope.defineVariable(@variable, this)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @main {
 			if @continued {
 				const variable = @scope.getDefinedVariable(@name)
@@ -258,24 +258,24 @@ class FunctionDeclaration extends Statement {
 
 			declarator.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @main || @scope.processStash(@name) {
 			@variable.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @main {
 			@variable.translate()
 		}
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
+	} # }}}
 	initializeVariable(variable, expression, node)
 	name() => @name
-	toMainFragments(fragments) { // {{{
+	toMainFragments(fragments) { # {{{
 		const name = @variable.getSecureName()
 		const line = fragments.newLine()
 		const block = line.code(`function \(name)()`).newBlock()
@@ -284,8 +284,8 @@ class FunctionDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		return unless @main
 
 		if @continued {
@@ -319,8 +319,8 @@ class FunctionDeclaration extends Statement {
 
 			this.toRouterFragments(fragments)
 		}
-	} // }}}
-	toRouterFragments(fragments) { // {{{
+	} # }}}
+	toRouterFragments(fragments) { # {{{
 		const name = @variable.getSecureName()
 
 		const assessment = this.type().assessment(@variable.name(), this)
@@ -342,13 +342,13 @@ class FunctionDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
+	} # }}}
 	type() => @variable.getDeclaredType()
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		if @main {
 			fn(@name, @variable.getDeclaredType())
 		}
-	} // }}}
+	} # }}}
 }
 
 class FunctionDeclarator extends AbstractNode {
@@ -365,12 +365,12 @@ class FunctionDeclarator extends AbstractNode {
 		_topNodes: Array				= []
 		_type: FunctionType
 	}
-	constructor(@variable, @data, @parent) { // {{{
+	constructor(@variable, @data, @parent) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
 
 		variable.addDeclarator(this)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@offset = @scope.module().getLineOffset()
 
 		@scope.define('this', true, Type.Any, this)
@@ -382,8 +382,8 @@ class FunctionDeclarator extends AbstractNode {
 
 			@parameters.push(parameter)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.module().setLineOffset(@offset)
 
 		@scope.line(@data.start.line)
@@ -404,8 +404,8 @@ class FunctionDeclarator extends AbstractNode {
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@scope.module().setLineOffset(@offset)
 
 		@scope.line(@data.start.line)
@@ -427,11 +427,11 @@ class FunctionDeclarator extends AbstractNode {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
-	addTopNode(node) { // {{{
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
@@ -446,7 +446,7 @@ class FunctionDeclarator extends AbstractNode {
 	isJumpable() => false
 	isOverridableFunction() => false
 	parameters() => @parameters
-	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
+	toAwaitExpressionFragments(fragments, parameters, statements) { # {{{
 		fragments.code('(__ks_e')
 
 		for parameter in parameters {
@@ -484,8 +484,8 @@ class FunctionDeclarator extends AbstractNode {
 		block.done()
 
 		fragments.code(')').done()
-	} // }}}
-	toStatementFragments(fragments) { // {{{
+	} # }}}
+	toStatementFragments(fragments) { # {{{
 		const line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
 
 		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
@@ -505,7 +505,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		block.done()
 		line.done()
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -516,17 +516,17 @@ class FunctionVariable extends Variable {
 		_declarators: Array<FunctionDeclarator>		= []
 		_indexDelta: Number							 = 0
 	}
-	constructor(scope: Scope, @name, @extended, @indexDelta = 0) { // {{{
+	constructor(scope: Scope, @name, @extended, @indexDelta = 0) { # {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
 
 		@initialized = true
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for declarator in @declarators {
 			declarator.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @extended {
 			let type
 
@@ -577,23 +577,23 @@ class FunctionVariable extends Variable {
 				@declaredType.addFunction(type)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
-	addDeclarator(declarator: FunctionDeclarator) { // {{{
+	} # }}}
+	addDeclarator(declarator: FunctionDeclarator) { # {{{
 		declarator.index(@indexDelta + @declarators.length)
 
 		@declarators.push(declarator)
-	} // }}}
+	} # }}}
 	declarators() => @declarators
 	isAsync() => @declaredType.isAsync()
 	length() => @declarators.length
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		for const declarator, index in @declarators {
 			declarator.toStatementFragments(fragments, `__ks_\(@name)_\(index)`, mode)
 		}
-	} // }}}
+	} # }}}
 }

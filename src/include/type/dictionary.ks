@@ -3,7 +3,7 @@ class DictionaryType extends Type {
 		_properties: Dictionary			= {}
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
 			const type = new DictionaryType(scope)
 
 			if data.systemic {
@@ -20,15 +20,15 @@ class DictionaryType extends Type {
 			})
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	addProperty(name: String, type: Type) { // {{{
+	addProperty(name: String, type: Type) { # {{{
 		@properties[name] = type
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const export = {
 			kind: TypeKind::Dictionary
 		}
@@ -47,8 +47,8 @@ class DictionaryType extends Type {
 		}
 
 		return export
-	} // }}}
-	flagAlien() { // {{{
+	} # }}}
+	flagAlien() { # {{{
 		@alien = true
 
 		for const property of @properties {
@@ -56,10 +56,10 @@ class DictionaryType extends Type {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	getProperty(name: String): Type? => @properties[name]
 	hashCode() => this.toQuote()
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
 			if this.isNullable() {
 				return nullcast || value.isNullable()
@@ -84,20 +84,20 @@ class DictionaryType extends Type {
 		}
 
 		return false
-	} // }}}
-	isMorePreciseThan(value: Type) { // {{{
+	} # }}}
+	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return true
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isNullable() => false
 	isDictionary() => true
 	isExhaustive() => false
 	isExportable() => true
 	isSealable() => true
-	isSubsetOf(value: DictionaryType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
 		if this == value {
 			return true
 		}
@@ -118,8 +118,8 @@ class DictionaryType extends Type {
 		}
 
 		return true
-	} // }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isDictionary()
 
 		if value.hasParameters() {
@@ -133,9 +133,9 @@ class DictionaryType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isMatching(value: Type, mode: MatchingMode) => false
-	matchContentOf(value: Type) { // {{{
+	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isDictionary() {
 			return true
 		}
@@ -149,20 +149,20 @@ class DictionaryType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	parameter() => AnyType.NullableUnexplicit
 	properties() => @properties
-	setExhaustive(@exhaustive) { // {{{
+	setExhaustive(@exhaustive) { # {{{
 		for const property of @properties {
 			property.setExhaustive(exhaustive)
 		}
 
 		return this
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		auto str = '{'
 
 		let first = true
@@ -183,8 +183,8 @@ class DictionaryType extends Type {
 		else {
 			return str + '}'
 		}
-	} // }}}
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::AND
 
 		fragments.code('!', $runtime.type(node), '.isDictionary(').compile(node).code(')')
@@ -196,8 +196,8 @@ class DictionaryType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::AND
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		fragments.code($runtime.type(node), '.isDictionary(').compile(node).code(')')
@@ -209,8 +209,8 @@ class DictionaryType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	override toTestFunctionFragments(fragments, node) { // {{{
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
 		if Dictionary.isEmpty(@properties) {
 			fragments.code($runtime.type(node), '.isDictionary')
 		}
@@ -223,8 +223,8 @@ class DictionaryType extends Type {
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
 			}
 		}
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('dict')
 
 		for const type, name of @properties {
@@ -232,10 +232,10 @@ class DictionaryType extends Type {
 
 			type.toVariations(variations)
 		}
-	} // }}}
-	walk(fn) { // {{{
+	} # }}}
+	walk(fn) { # {{{
 		for const type, name of @properties {
 			fn(name, type)
 		}
-	} // }}}
+	} # }}}
 }

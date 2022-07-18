@@ -7,7 +7,7 @@ class ClassDestructorDeclaration extends Statement {
 	private {
 		_internalName: String
 	}
-	static toRouterFragments(node, fragments, variable) { // {{{
+	static toRouterFragments(node, fragments, variable) { # {{{
 		let ctrl = fragments.newControl()
 
 		if node._es5 {
@@ -28,15 +28,15 @@ class ClassDestructorDeclaration extends Statement {
 		}
 
 		ctrl.done() unless node._es5
-	} // }}}
-	constructor(data, parent) { // {{{
+	} # }}}
+	constructor(data, parent) { # {{{
 		super(data, parent, parent.newScope(parent._destructorScope, ScopeType::Block))
 
 		@internalName = `__ks_destroy_0`
 
 		parent._destructor = this
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		const parameter = new Parameter({
 			kind: NodeKind::Parameter
 			modifiers: []
@@ -46,21 +46,21 @@ class ClassDestructorDeclaration extends Statement {
 		parameter.analyse()
 
 		@parameters = [parameter]
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@parameters[0].prepare()
 
 		@type = new ClassDestructorType(@data, this)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 		@block.prepare()
 		@block.translate()
-	} // }}}
+	} # }}}
 	getFunctionNode() => this
 	getParameterOffset() => 0
-	isAbstract() { // {{{
+	isAbstract() { # {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				return true
@@ -68,14 +68,14 @@ class ClassDestructorDeclaration extends Statement {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isInstance() => false
 	isInstanceMethod() => true
 	isOverridableFunction() => false
 	parameters() => @parameters
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		let ctrl = fragments.newControl()
 
 		if @parent._es5 {
@@ -92,6 +92,6 @@ class ClassDestructorDeclaration extends Statement {
 		ctrl.compile(@block)
 
 		ctrl.done() unless @parent._es5
-	} // }}}
+	} # }}}
 	type() => @type
 }

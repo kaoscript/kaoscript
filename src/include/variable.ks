@@ -20,15 +20,15 @@ class Variable {
 		_secureName: String
 	}
 	static {
-		createPredefinedClass(name, scope) { // {{{
+		createPredefinedClass(name, scope) { # {{{
 			type = new ClassType(scope)
 			type.flagAlien()
 			type.flagPredefined()
 			type.flagSystemic()
 
 			return new Variable(name, true, true, type)
-		} // }}}
-		fromAST(data, scope) { // {{{
+		} # }}}
+		fromAST(data, scope) { # {{{
 			switch data.kind {
 				NodeKind::Identifier => {
 					return scope.getVariable(data.name)
@@ -38,10 +38,10 @@ class Variable {
 					throw new NotImplementedException()
 				}
 			}
-		} // }}}
+		} # }}}
 	}
 	constructor()
-	constructor(@name, @immutable, @predefined, declaredType: Type = null, initialized: Boolean = false) { // {{{
+	constructor(@name, @immutable, @predefined, declaredType: Type = null, initialized: Boolean = false) { # {{{
 		if declaredType == null {
 			@declaredType = Type.toNamedType(@name, Type.Any)
 
@@ -60,8 +60,8 @@ class Variable {
 		@definitive = @immutable
 		@secureName = @name
 		@module = @predefined
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const clone = new Variable()
 
 		clone._name = @name
@@ -75,31 +75,31 @@ class Variable {
 		clone._lateInit = @lateInit
 
 		return clone
-	} // }}}
+	} # }}}
 	declaration() => @declaration
 	declaration(@declaration) => this
-	flagClassStatement() { // {{{
+	flagClassStatement() { # {{{
 		@class = true
 
 		return this
-	} // }}}
-	flagDefinitive() { // {{{
+	} # }}}
+	flagDefinitive() { # {{{
 		@definitive = true
 
 		return this
-	} // }}}
-	flagLateInit() { // {{{
+	} # }}}
+	flagLateInit() { # {{{
 		@lateInit = true
 		@initialized = false
 		@definitive = false
 
 		return this
-	} // }}}
-	flagModule() { // {{{
+	} # }}}
+	flagModule() { # {{{
 		@module = true
 
 		return this
-	} // }}}
+	} # }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
@@ -114,16 +114,16 @@ class Variable {
 	isPredefined() => @predefined
 	isRenamed() => @name != @secureName
 	name() => @name
-	prepareAlteration() { // {{{
+	prepareAlteration() { # {{{
 		if (@declaredType.isRequired() || @declaredType.isAlien()) && !@altereable {
 			@declaredType = @declaredType.clone()
 			@realType = @declaredType
 			@altereable = true
 		}
-	} // }}}
+	} # }}}
 	renameAs(@secureName)
 	setComplete(@complete) => this
-	setDeclaredType(@declaredType, initialize: Boolean = true) { // {{{
+	setDeclaredType(@declaredType, initialize: Boolean = true) { # {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 
 		if initialize {
@@ -133,9 +133,9 @@ class Variable {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	setDefinitive(@definitive) => this
-	setRealType(type: Type) { // {{{
+	setRealType(type: Type) { # {{{
 		@initialized = true
 
 		if type.isMorePreciseThan(@declaredType) {
@@ -146,8 +146,8 @@ class Variable {
 		}
 
 		return this
-	} // }}}
-	setRealType(type: Type, absolute: Boolean, scope: Scope) { // {{{
+	} # }}}
+	setRealType(type: Type, absolute: Boolean, scope: Scope) { # {{{
 		if absolute {
 			@initialized = true
 
@@ -171,8 +171,8 @@ class Variable {
 		}
 
 		return this
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.code(@secureName)
-	} // }}}
+	} # }}}
 }

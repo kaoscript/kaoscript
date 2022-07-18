@@ -1,5 +1,5 @@
 class BreakStatement extends Statement {
-	analyse() { // {{{
+	analyse() { # {{{
 		let parent = @parent
 
 		unless parent.isJumpable() {
@@ -13,10 +13,10 @@ class BreakStatement extends Statement {
 				SyntaxException.throwIllegalStatement('break', this)
 			}
 		}
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		fragments.line('break', this._data)
-	} // }}}
+	} # }}}
 }

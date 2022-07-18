@@ -3,7 +3,7 @@ class ExportDeclaration extends Statement {
 		_declarations	= []
 		_statements		= []
 	}
-	override initiate() { // {{{
+	override initiate() { # {{{
 		let statement
 
 		if @parent.includePath() == null {
@@ -43,28 +43,28 @@ class ExportDeclaration extends Statement {
 				statement.initiate()
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const statement in @statements {
 			statement.analyse()
 		}
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		for const statement in @statements {
 			statement.enhance()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const statement in @statements {
 			statement.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const statement in @statements {
 			statement.translate()
 		}
-	} // }}}
-	export(recipient, enhancement: Boolean = false) { // {{{
+	} # }}}
+	export(recipient, enhancement: Boolean = false) { # {{{
 		if enhancement {
 			for const declaration in @declarations when declaration.isEnhancementExport() {
 				declaration.export(recipient)
@@ -75,24 +75,24 @@ class ExportDeclaration extends Statement {
 				declaration.export(recipient)
 			}
 		}
-	} // }}}
+	} # }}}
 	isExportable() => true
-	exportMacro(name, macro) { // {{{
+	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(name, macro)
-	} // }}}
-	registerMacro(name, macro) { // {{{
+	} # }}}
+	registerMacro(name, macro) { # {{{
 		@parent.publishMacro(name, macro)
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		for statement in @statements {
 			statement.toFragments(fragments, Mode::None)
 		}
-	} // }}}
-	walk(fn) { // {{{
+	} # }}}
+	walk(fn) { # {{{
 		for statement in @statements {
 			statement.walk(fn)
 		}
-	} // }}}
+	} # }}}
 }
 
 class ExportExclusionSpecifier extends AbstractNode {
@@ -102,13 +102,13 @@ class ExportExclusionSpecifier extends AbstractNode {
 	analyse()
 	prepare()
 	translate()
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		const exclusions = [exclusion.name for exclusion in @data.exclusions]
 
 		for const variable in @parent.parent().scope().listDefinedVariables() when exclusions.indexOf(variable.name()) == -1 {
 			recipient.export(variable.name(), variable)
 		}
-	} // }}}
+	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
@@ -118,7 +118,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
 
@@ -127,9 +127,9 @@ class ExportNamedSpecifier extends AbstractNode {
 				@parent.registerMacro(@data.exported.name, macro)
 			}
 		}
-	} // }}}
+	} # }}}
 	translate()
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		@expression.prepare()
 
 		if @expression.isMacro() {
@@ -150,14 +150,14 @@ class ExportNamedSpecifier extends AbstractNode {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		if !@expression.isMacro() {
 			fn(@data.exported.name, @expression.type())
 		}
-	} // }}}
+	} # }}}
 }
 
 class ExportPropertiesSpecifier extends AbstractNode {
@@ -165,18 +165,18 @@ class ExportPropertiesSpecifier extends AbstractNode {
 		_object
 	}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@object = $compile.expression(@data.object, @parent)
 		@object.analyse()
-	} // }}}
+	} # }}}
 	translate()
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		@object.prepare()
 
 		for property in @data.properties {
 			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
 		}
-	} // }}}
+	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
@@ -186,18 +186,18 @@ class ExportWildcardSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
-	} // }}}
+	} # }}}
 	translate()
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		@expression.prepare()
 
 		@expression.type().walk((name, _) => {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})
-	} // }}}
+	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
@@ -208,8 +208,8 @@ class ExportProperty {
 		_property: String
 	}
 	constructor(@object, @property)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@object).code(`.\(@property)`)
-	} // }}}
+	} # }}}
 	type() => @object.type().getProperty(@property)
 }

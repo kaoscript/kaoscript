@@ -16,7 +16,7 @@ class VariableDeclaration extends Statement {
 		_try						= null
 		_type: Type					= Type.Null
 	}
-	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
 		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
@@ -30,11 +30,11 @@ class VariableDeclaration extends Statement {
 		if parent? {
 			@function = parent
 		}
-	} // }}}
-	constructor(@data, @parent, @scope, @initScope, @cascade) { // {{{
+	} # }}}
+	constructor(@data, @parent, @scope, @initScope, @cascade) { # {{{
 		this(data, parent, scope)
-	} // }}}
-	override initiate() { // {{{
+	} # }}}
+	override initiate() { # {{{
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::AutoTyping {
 				@autotype = true
@@ -69,8 +69,8 @@ class VariableDeclaration extends Statement {
 
 			@declarators.push(declarator)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @data.init? {
 			@hasInit = true
 
@@ -102,8 +102,8 @@ class VariableDeclaration extends Statement {
 			}
 		}
 
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		const declarator = @declarators[0]
 
 		if @hasInit {
@@ -161,8 +161,8 @@ class VariableDeclaration extends Statement {
 		else {
 			@type = @declarators[0].variable().getRealType()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @hasInit {
 			@init.translate()
 		}
@@ -170,9 +170,9 @@ class VariableDeclaration extends Statement {
 		for declarator in @declarators {
 			declarator.translate()
 		}
-	} // }}}
+	} # }}}
 	declarator() => @declarators[0]
-	defineVariables(declarator) { // {{{
+	defineVariables(declarator) { # {{{
 		let alreadyDeclared
 
 		const assignments = []
@@ -201,25 +201,25 @@ class VariableDeclaration extends Statement {
 		if @cascade {
 			@parent.addAssignments(assignments)
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		for declarator in @declarators {
 			declarator.export(recipient)
 		}
-	} // }}}
+	} # }}}
 	hasInit() => @hasInit
-	getIdentifierVariable() { // {{{
+	getIdentifierVariable() { # {{{
 		if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
 			return @declarators[0]._variable
 		}
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	init() => @init
 	isAutoTyping() => @autotype
 	isAwait() => @await
-	isDeclararingVariable(name: String) { // {{{
+	isDeclararingVariable(name: String) { # {{{
 		for declarator in @declarators {
 			if declarator.isDeclararingVariable(name) {
 				return true
@@ -227,8 +227,8 @@ class VariableDeclaration extends Statement {
 		}
 
 		return false
-	} // }}}
-	isDuplicate(scope) { // {{{
+	} # }}}
+	isDuplicate(scope) { # {{{
 		for const declarator in @declarators {
 			if declarator.isDuplicate(scope) {
 				return true
@@ -236,21 +236,21 @@ class VariableDeclaration extends Statement {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isExpectingType() => @declarators[0].isStronglyTyped()
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @hasInit && @init.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @hasInit && @init.isUsingStaticVariable(class, varname)
-	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		if @hasInit {
 			@init.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
-	toAwaitStatementFragments(fragments, statements) { // {{{
+	} # }}}
+	toAwaitStatementFragments(fragments, statements) { # {{{
 		const line = fragments.newLine()
 
 		const item = @init.toFragments(line, Mode::None)
@@ -260,8 +260,8 @@ class VariableDeclaration extends Statement {
 		item(statements)
 
 		line.done()
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		const variables = this.assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
@@ -313,21 +313,21 @@ class VariableDeclaration extends Statement {
 
 			line.done()
 		}
-	} // }}}
-	toInlineFragments(fragments, mode) { // {{{
+	} # }}}
+	toInlineFragments(fragments, mode) { # {{{
 		if @init.isAwaiting() {
 			NotImplementedException.throw(this)
 		}
 		else {
 			@declarators[0].toAssignmentFragments(fragments, @init)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		for declarator in @declarators {
 			declarator.walk(fn)
 		}
-	} // }}}
+	} # }}}
 }
 
 class VariableBindingDeclarator extends AbstractNode {
@@ -335,7 +335,7 @@ class VariableBindingDeclarator extends AbstractNode {
 		_binding
 		_type: Type?						= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@binding = $compile.expression(@data.name, this)
 
 		@binding.setAssignment(AssignmentType::Declaration)
@@ -347,8 +347,8 @@ class VariableBindingDeclarator extends AbstractNode {
 		@binding.analyse()
 
 		@parent.defineVariables(@binding)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @data.type? {
 			this.setDeclaredType(Type.fromAST(@data.type, this))
 		}
@@ -357,22 +357,22 @@ class VariableBindingDeclarator extends AbstractNode {
 		}
 
 		@binding.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@binding.translate()
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		@binding.export(recipient)
-	} // }}}
+	} # }}}
 	flagDefinitive()
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
-	isDuplicate(scope) { // {{{
+	isDuplicate(scope) { # {{{
 		return false
-	} // }}}
+	} # }}}
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
 	isStronglyTyped() => true
-	setDeclaredType(@type) { // {{{
+	setDeclaredType(@type) { # {{{
 		if !@type.isAny() {
 			if @binding is ArrayBinding {
 				unless type.isArray() || type.isTuple() {
@@ -387,8 +387,8 @@ class VariableBindingDeclarator extends AbstractNode {
 
 			@binding.type(@type)
 		}
-	} // }}}
-	setRealType(type: Type) { // {{{
+	} # }}}
+	setRealType(type: Type) { # {{{
 		if !type.isAny() {
 			if @binding is ArrayBinding {
 				unless type.isArray() || type.isTuple() {
@@ -401,14 +401,14 @@ class VariableBindingDeclarator extends AbstractNode {
 				}
 			}
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@binding)
-	} // }}}
+	} # }}}
 	toAssignmentFragments(fragments, value) => @binding.toAssignmentFragments(fragments, value)
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		@binding.walk(fn)
-	} // }}}
+	} # }}}
 }
 
 class VariableIdentifierDeclarator extends AbstractNode {
@@ -419,7 +419,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		_type: Type?						= null
 		_variable: Variable
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@name = @data.name.name
 
 		@identifier = new IdentifierLiteral(@data.name, this, @scope)
@@ -434,8 +434,8 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		if @lateInit {
 			@variable.flagLateInit()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 
@@ -460,21 +460,21 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 
 		@identifier.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@identifier.translate()
 
 		if @lateInit && !@variable.isInitialized() {
 			SyntaxException.throwNotInitializedVariable(@name, this)
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
-	flagDefinitive() { // {{{
+	} # }}}
+	flagDefinitive() { # {{{
 		@variable.flagDefinitive()
-	} // }}}
-	isDuplicate(scope) { // {{{
+	} # }}}
+	isDuplicate(scope) { # {{{
 		if scope.hasDeclaredVariable(@name) {
 			return true
 		}
@@ -488,18 +488,18 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isDeclararingVariable(name: String) => @name == name
 	isRedeclared() => @scope.isRedeclaredVariable(@name)
 	isSplitAssignment() => false
 	isStronglyTyped() => @data.type?
 	name() => @name
-	setDeclaredType(type: Type) { // {{{
+	setDeclaredType(type: Type) { # {{{
 		if @type == null {
 			@variable.setDeclaredType(type)
 		}
-	} // }}}
-	setRealType(type: Type) { // {{{
+	} # }}}
+	setRealType(type: Type) { # {{{
 		if @type != null {
 			if !type.isAssignableToVariable(@type, false) {
 				TypeException.throwInvalidAssignement(@name, @type, type, this)
@@ -507,19 +507,19 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 
 		@variable.setRealType(type)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@identifier)
-	} // }}}
-	toAssignmentFragments(fragments, value) { // {{{
+	} # }}}
+	toAssignmentFragments(fragments, value) { # {{{
 		fragments
 			.compile(@identifier)
 			.code($equals)
 			.compile(value)
-	} // }}}
+	} # }}}
 	type() => @type
 	variable() => @variable
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		fn(@variable.getSecureName(), @variable.getRealType())
-	} // }}}
+	} # }}}
 }

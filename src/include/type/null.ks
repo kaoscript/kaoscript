@@ -6,15 +6,15 @@ class NullType extends Type {
 	private {
 		_explicit: Boolean	= false
 	}
-	constructor() { // {{{
+	constructor() { # {{{
 		super(null)
-	} // }}}
-	constructor(@explicit) { // {{{
+	} # }}}
+	constructor(@explicit) { # {{{
 		super(null)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
+	} # }}}
 	compareToRef(value: AnyType) => -value.compareToRef(this)
 	compareToRef(value: NullType) => 0
 	compareToRef(value: ReferenceType) => -value.compareToRef(this)
@@ -32,30 +32,30 @@ class NullType extends Type {
 	isSubsetOf(value: NullType, mode: MatchingMode) => true
 	isSubsetOf(value: Type, mode: MatchingMode) => value.isNullable()
 	matchContentOf(value: Type) => value.isNullable()
-	setNullable(nullable: Boolean) { // {{{
+	setNullable(nullable: Boolean) { # {{{
 		if nullable {
 			return this
 		}
 		else {
 			return AnyType.Unexplicit
 		}
-	} // }}}
-	split(types: Array) { // {{{
+	} # }}}
+	split(types: Array) { # {{{
 		types.pushUniq(this)
 
 		return types
-	} // }}}
+	} # }}}
 	toFragments(fragments, node)
 	toQuote() => 'Null'
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Null'
 	override toPositiveTestFragments(fragments, node, junction)
-	override toTestFunctionFragments(fragments, node) { // {{{
+	override toTestFunctionFragments(fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
-	} // }}}
-	override toTestFunctionFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toTestFunctionFragments(fragments, node, junction) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull(value)`)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('null')
-	} // }}}
+	} # }}}
 }

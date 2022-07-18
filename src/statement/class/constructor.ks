@@ -16,7 +16,7 @@ class ClassConstructorDeclaration extends Statement {
 		_overriding: Boolean					= false
 		_topNodes: Array						= []
 	}
-	static toCreatorFragments(class, constructor, fragments) { // {{{
+	static toCreatorFragments(class, constructor, fragments) { # {{{
 		const ctrl = fragments.newControl()
 
 		const args = constructor.max() == 0 ? '' : '...args'
@@ -29,8 +29,8 @@ class ClassConstructorDeclaration extends Statement {
 			.line('return o')
 
 		ctrl.done()
-	} // }}}
-	static toRouterFragments(node, fragments, variable, methods, scope: String?, header, footer) { // {{{
+	} # }}}
+	static toRouterFragments(node, fragments, variable, methods, scope: String?, header, footer) { # {{{
 		const name = variable.name()
 
 		const assessment = Router.assess(methods, 'constructor', node)
@@ -71,8 +71,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		footer(fragments)
-	} // }}}
-	constructor(data, parent) { // {{{
+	} # }}}
+	constructor(data, parent) { # {{{
 		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
 
 		@abstract = parent.isAbstract()
@@ -84,8 +84,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		parent._constructors.push(this)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
@@ -94,8 +94,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const parameter in @parameters {
 			parameter.prepare()
 		}
@@ -159,8 +159,8 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -174,13 +174,13 @@ class ClassConstructorDeclaration extends Statement {
 		@block.translate()
 
 		@internalName = `__ks_cons_\(@type.index())`
-	} // }}}
-	addAtThisParameter(statement: AliasStatement) { // {{{
+	} # }}}
+	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), true, @parent._extending) {
 			@aliases.push(statement)
 		}
-	} // }}}
-	private addCallToParentConstructor() { // {{{
+	} # }}}
+	private addCallToParentConstructor() { # {{{
 		// only add call if parent has an empty constructor
 		const extendsType = @parent.extends().type()
 
@@ -208,8 +208,8 @@ class ClassConstructorDeclaration extends Statement {
 		else {
 			SyntaxException.throwNoSuperCall(this)
 		}
-	} // }}}
-	addIndigentValue(value: Expression, parameters) { // {{{
+	} # }}}
+	addIndigentValue(value: Expression, parameters) { # {{{
 		const class = @parent.type().type()
 		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
 
@@ -220,20 +220,20 @@ class ClassConstructorDeclaration extends Statement {
 		})
 
 		return name
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
-	checkVariableInitialization(name) { // {{{
+	checkVariableInitialization(name) { # {{{
 		if @block.isInitializingInstanceVariable(name) {
 			@type.addInitializingInstanceVariable(name)
 		}
 		else if !@abstract {
 			SyntaxException.throwNotInitializedField(name, this)
 		}
-	} // }}}
-	private getConstructorIndex(body: Array) { // {{{
+	} # }}}
+	private getConstructorIndex(body: Array) { # {{{
 		for statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
 				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
@@ -248,11 +248,11 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		return -1
-	} // }}}
+	} # }}}
 	getFunctionNode() => this
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
-	private getSuperIndex(body: Array) { // {{{
+	private getSuperIndex(body: Array) { # {{{
 		for statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
 				if statement.callee.kind == NodeKind::Identifier && statement.callee.name == 'super' {
@@ -267,8 +267,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		return -1
-	} // }}}
-	isAbstract() { // {{{
+	} # }}}
+	isAbstract() { # {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				return true
@@ -276,7 +276,7 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -286,7 +286,7 @@ class ClassConstructorDeclaration extends Statement {
 	isOverridableFunction() => true
 	isRoutable() => true
 	parameters() => @parameters
-	toHybridConstructorFragments(fragments) { // {{{
+	toHybridConstructorFragments(fragments) { # {{{
 		let ctrl = fragments
 			.newControl()
 			.code('constructor(')
@@ -317,8 +317,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
-	toIndigentFragments(fragments) { // {{{
+	} # }}}
+	toIndigentFragments(fragments) { # {{{
 		for const {name, value, parameters} in @indigentValues {
 			const ctrl = fragments.newControl()
 
@@ -333,8 +333,8 @@ class ClassConstructorDeclaration extends Statement {
 
 			ctrl.done() unless @parent._es5
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if !@parent._es5 && @parent.isHybrid() {
 			const ctrl = fragments
 				.newLine()
@@ -386,10 +386,10 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		this.toIndigentFragments(fragments)
-	} // }}}
+	} # }}}
 	type() => @type
 	private {
-		getOveriddenConstructor(superclass: ClassType) { // {{{
+		getOveriddenConstructor(superclass: ClassType) { # {{{
 			let mode = MatchingMode::FunctionSignature
 
 			if !@override {
@@ -470,8 +470,8 @@ class ClassConstructorDeclaration extends Statement {
 			}
 
 			return null
-		} // }}}
-		listOverloadedConstructors(superclass: ClassType) { // {{{
+		} # }}}
+		listOverloadedConstructors(superclass: ClassType) { # {{{
 			if const methods = superclass.listConstructors() {
 				for const method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
@@ -481,6 +481,6 @@ class ClassConstructorDeclaration extends Statement {
 			}
 
 			return superclass.listConstructors(@type, MatchingMode::FunctionSignature + MatchingMode::SubsetParameter)
-		} // }}}
+		} # }}}
 	}
 }

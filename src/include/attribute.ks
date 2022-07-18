@@ -36,7 +36,7 @@ const $rules = {
 
 class Attribute {
 	static {
-		conditional(data, node) { // {{{
+		conditional(data, node) { # {{{
 			if data.attributes?.length > 0 {
 				for const attr in data.attributes {
 					if const attribute = Attribute.get(attr.declaration, AttributeTarget::Conditional) {
@@ -46,8 +46,8 @@ class Attribute {
 			}
 
 			return true
-		} // }}}
-		configure(data, options!?, mode, fileName, force = false) { // {{{
+		} # }}}
+		configure(data, options!?, mode, fileName, force = false) { # {{{
 			const clone = !force && options != null && AttributeTarget::Global !~ mode
 
 			if options == null {
@@ -84,8 +84,8 @@ class Attribute {
 			}
 
 			return options
-		} // }}}
-		get(data, targets) { // {{{
+		} # }}}
+		get(data, targets) { # {{{
 			let name = null
 
 			if data.kind == NodeKind::AttributeExpression {
@@ -101,8 +101,8 @@ class Attribute {
 			else {
 				return null
 			}
-		} // }}}
-		register(class: Class) { // {{{
+		} # }}}
+		register(class: Class) { # {{{
 			let name = class.name.toLowerCase()
 
 			if name.length > 9 && name.substr(-9) == 'attribute' {
@@ -110,7 +110,7 @@ class Attribute {
 			}
 
 			$attributes[name] = class
-		} // }}}
+		} # }}}
 	}
 }
 
@@ -120,14 +120,14 @@ class ElseAttribute extends Attribute {
 	}
 	constructor(data)
 	clone(options, cloned) => options
-	evaluate(node) { // {{{
+	evaluate(node) { # {{{
 		if const flag = node.getAttributeData(AttributeData::Conditional) {
 			return !flag
 		}
 		else {
 			SyntaxException.throwNoIfAttribute()
 		}
-	} // }}}
+	} # }}}
 }
 
 class ErrorAttribute extends Attribute {
@@ -138,7 +138,7 @@ class ErrorAttribute extends Attribute {
 		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) { // {{{
+	clone(options, cloned) { # {{{
 		if !?cloned.error {
 			options.error = Dictionary.clone(options.error)
 
@@ -146,8 +146,8 @@ class ErrorAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
-	configure(options, fileName, lineNumber) { // {{{
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
 			switch arg.kind {
 				NodeKind::AttributeExpression => {
@@ -171,7 +171,7 @@ class ErrorAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 class FormatAttribute extends Attribute {
@@ -182,7 +182,7 @@ class FormatAttribute extends Attribute {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) { // {{{
+	clone(options, cloned) { # {{{
 		if !?cloned.format {
 			options.format = Dictionary.clone(options.format)
 
@@ -190,8 +190,8 @@ class FormatAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
-	configure(options, fileName, lineNumber) { // {{{
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				options.format[arg.name.name] = arg.value.value
@@ -199,7 +199,7 @@ class FormatAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 class IfAttribute extends Attribute {
@@ -211,7 +211,7 @@ class IfAttribute extends Attribute {
 	}
 	constructor(@data)
 	clone(options, cloned) => options
-	compareVersion(a, b) { // {{{
+	compareVersion(a, b) { # {{{
 		a = a.split('.')
 		b = b.split('.')
 
@@ -237,8 +237,8 @@ class IfAttribute extends Attribute {
 				return 0
 			}
 		}
-	} // }}}
-	evaluate(node) { // {{{
+	} # }}}
+	evaluate(node) { # {{{
 		if @data.arguments.length != 1 {
 			SyntaxException.throwTooMuchAttributesForIfAttribute()
 		}
@@ -248,8 +248,8 @@ class IfAttribute extends Attribute {
 		node.setAttributeData(AttributeData::Conditional, flag)
 
 		return flag
-	} // }}}
-	evaluate(data, target) { // {{{
+	} # }}}
+	evaluate(data, target) { # {{{
 		if data.kind == NodeKind::AttributeExpression {
 			switch data.name.name {
 				'all' => {
@@ -355,7 +355,7 @@ class IfAttribute extends Attribute {
 				return false
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ParseAttribute extends Attribute {
@@ -366,7 +366,7 @@ class ParseAttribute extends Attribute {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) { // {{{
+	clone(options, cloned) { # {{{
 		if !?cloned.parse {
 			options.parse = Dictionary.clone(options.parse)
 
@@ -374,8 +374,8 @@ class ParseAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
-	configure(options, fileName, lineNumber) { // {{{
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				options.parse[arg.name.name] = arg.value.value
@@ -383,7 +383,7 @@ class ParseAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 class RulesAttribute extends Attribute {
@@ -394,7 +394,7 @@ class RulesAttribute extends Attribute {
 		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) { // {{{
+	clone(options, cloned) { # {{{
 		if !?cloned.rules {
 			options.rules = Dictionary.clone(options.rules)
 
@@ -402,8 +402,8 @@ class RulesAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
-	configure(options, fileName, lineNumber) { // {{{
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
 		for const argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
 				const name = argument.name.toLowerCase()
@@ -418,7 +418,7 @@ class RulesAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 class RuntimeAttribute extends Attribute {
@@ -429,7 +429,7 @@ class RuntimeAttribute extends Attribute {
 		target() => AttributeTarget::Global
 	}
 	constructor(@data)
-	configure(options, fileName, lineNumber) { // {{{
+	configure(options, fileName, lineNumber) { # {{{
 		for const arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				if arg.name.name == 'package' {
@@ -481,7 +481,7 @@ class RuntimeAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 class TargetAttribute extends Attribute {
@@ -492,7 +492,7 @@ class TargetAttribute extends Attribute {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) { // {{{
+	clone(options, cloned) { # {{{
 		if !?cloned.target {
 			options.target = Dictionary.clone(options.target)
 
@@ -510,8 +510,8 @@ class TargetAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
-	configure(options, fileName, lineNumber) { // {{{
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
 				if match !?= $targetRegex.exec(argument.name) {
@@ -528,7 +528,7 @@ class TargetAttribute extends Attribute {
 		}
 
 		return options
-	} // }}}
+	} # }}}
 }
 
 Attribute.register(ElseAttribute)

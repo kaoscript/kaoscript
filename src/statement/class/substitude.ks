@@ -9,7 +9,7 @@ class CallThisConstructorSubstitude extends Substitude {
 		_data
 		_result
 	}
-	constructor(@data, @arguments, @class, node) { // {{{
+	constructor(@data, @arguments, @class, node) { # {{{
 		super()
 
 		const assessement = class.type().getConstructorAssessment(class.name(), node)
@@ -20,8 +20,8 @@ class CallThisConstructorSubstitude extends Substitude {
 		else {
 			ReferenceException.throwNoMatchingConstructor(class.name(), @arguments, node)
 		}
-	} // }}}
-	isInitializingInstanceVariable(name) { // {{{
+	} # }}}
+	isInitializingInstanceVariable(name) { # {{{
 		if @result is not LenientCallMatchResult {
 			for const {function} in @result.matches {
 				if !function.isInitializingInstanceVariable(name) {
@@ -31,9 +31,9 @@ class CallThisConstructorSubstitude extends Substitude {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isNullable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @result is LenientCallMatchResult {
 			fragments.code(`\(@class.path()).prototype.__ks_cons_rt.call(null, this, [`)
 
@@ -57,12 +57,12 @@ class CallThisConstructorSubstitude extends Substitude {
 				throw new NotImplementedException()
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => Type.Void
 }
 
 class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitude {
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @result is LenientCallMatchResult {
 			fragments.code(`__ks_cons_rt([`)
 
@@ -86,7 +86,7 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 				throw new NotImplementedException()
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class CallSuperConstructorSubstitude extends Substitude {
@@ -97,7 +97,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		_result
 		_skippable: Boolean				= false
 	}
-	constructor(@data, @arguments, @class, node) { // {{{
+	constructor(@data, @arguments, @class, node) { # {{{
 		super()
 
 		const extends = @class.type().extends()
@@ -110,8 +110,8 @@ class CallSuperConstructorSubstitude extends Substitude {
 		else if extends.type().isExhaustiveConstructor(node) {
 			ReferenceException.throwNoMatchingConstructor(extends.name(), @arguments, node)
 		}
-	} // }}}
-	isInitializingInstanceVariable(name) { // {{{
+	} # }}}
+	isInitializingInstanceVariable(name) { # {{{
 		if !?@result {
 			return false
 		}
@@ -134,10 +134,10 @@ class CallSuperConstructorSubstitude extends Substitude {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isNullable() => false
 	isSkippable() => @skippable
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if !?@result || @result is LenientCallMatchResult {
 			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_rt.call(null, this, [`)
 
@@ -179,12 +179,12 @@ class CallSuperConstructorSubstitude extends Substitude {
 				throw new NotImplementedException()
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => Type.Void
 }
 
 class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubstitude {
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(`super(`)
 
 		for argument, index in @arguments {
@@ -194,7 +194,7 @@ class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubsti
 
 			fragments.compile(argument)
 		}
-	} // }}}
+	} # }}}
 }
 
 class CallSuperMethodES6Substitude extends Substitude {
@@ -210,7 +210,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 		_data
 		_method: ClassMethodDeclaration
 	}
-	constructor(@data, @arguments, @method, @class) { // {{{
+	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
 
 		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
@@ -233,9 +233,9 @@ class CallSuperMethodES6Substitude extends Substitude {
 		}
 
 		@extendsName = @class.type().extends().name()
-	} // }}}
+	} # }}}
 	isNullable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @precise {
 			fragments.code(`super.\(@name)(`)
 
@@ -258,8 +258,8 @@ class CallSuperMethodES6Substitude extends Substitude {
 
 			fragments.code(']')
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @result is PreciseCallMatchResult {
 			if @result.matches.length == 1 {
 				return @result.matches[0].function.getReturnType()
@@ -271,7 +271,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 		else {
 			return Type.union(@method.scope(), ...[fn.getReturnType() for const fn in @result.possibilities])
 		}
-	} // }}}
+	} # }}}
 }
 
 class CallSealedSuperMethodSubstitude extends Substitude {
@@ -284,7 +284,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 		_result: CallMatchResult
 		_sealed: Boolean					= false
 	}
-	constructor(@data, @arguments, @method, @class) { // {{{
+	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
 
 		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
@@ -306,9 +306,9 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 		else {
 			throw new NotImplementedException(@method)
 		}
-	} // }}}
+	} # }}}
 	isNullable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @sealed {
 			fragments.code(`\(@class.type().extends().getSealedPath()).\(@name).call(this`)
 
@@ -325,8 +325,8 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 				fragments.compile(argument)
 			}
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @result is PreciseCallMatchResult {
 			if @result.matches.length == 1 {
 				return @result.matches[0].function.getReturnType()
@@ -338,7 +338,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 		else {
 			return Type.union(@method.scope(), ...[fn.getReturnType() for const fn in @result.possibilities])
 		}
-	} // }}}
+	} # }}}
 }
 
 class MemberSealedSuperMethodSubstitude extends Substitude {
@@ -352,7 +352,7 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 		_property: String
 		_sealed: Boolean					= false
 	}
-	constructor(@property, @arguments, @class, node) { // {{{
+	constructor(@property, @arguments, @class, node) { # {{{
 		super()
 
 		@extendsType = @class.type().extends()
@@ -360,10 +360,10 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 		if const property = @extendsType.type().getInstanceProperty(@property) {
 			@sealed = property.isSealed()
 		}
-	} // }}}
+	} # }}}
 	isNullable() => false
 	setCallMatchResult(@result)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @sealed {
 			if const index = @extendsType.type().getSharedMethodIndex(@property) {
 				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@property)(this`)
@@ -387,8 +387,8 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 				fragments.compile(argument)
 			}
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @result is LenientCallMatchResult {
 			throw new NotImplementedException()
 		}
@@ -398,5 +398,5 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 		else {
 			throw new NotImplementedException()
 		}
-	} // }}}
+	} # }}}
 }

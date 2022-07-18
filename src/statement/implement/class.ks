@@ -16,7 +16,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		_value								= null
 		_variable: NamedType<ClassType>
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { # {{{
 		super(data, parent)
 
 		@class = @variable.type()
@@ -59,16 +59,16 @@ class ImplementClassFieldDeclaration extends Statement {
 				@name = @name.substr(1)
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @data.value? {
 			@defaultValue = true
 
 			@value = $compile.expression(@data.value, this)
 			@value.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@type = ClassVariableType.fromAST(@data!?, this)
 
 		@type.flagAltering()
@@ -98,16 +98,16 @@ class ImplementClassFieldDeclaration extends Statement {
 		else if !@lateInit && !@type.isNullable() {
 			SyntaxException.throwNotInitializedField(@name, this)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @defaultValue {
 			@value.translate()
 		}
-	} // }}}
+	} # }}}
 	getSharedName() => @defaultValue && @instance ? '__ks_init' : null
 	isMethod() => false
 	isInstance() => @instance
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		return unless @defaultValue
 
 		if @class.isSealed() {
@@ -157,8 +157,8 @@ class ImplementClassFieldDeclaration extends Statement {
 				fragments.newLine().code(`\(@variable.name()).\(@internalName) = `).compile(@value).done()
 			}
 		}
-	} // }}}
-	toDefaultFragments(fragments) { // {{{
+	} # }}}
+	toDefaultFragments(fragments) { # {{{
 		return unless @instance && @defaultValue
 
 		if @class.isSealed() {
@@ -167,8 +167,8 @@ class ImplementClassFieldDeclaration extends Statement {
 		else {
 			fragments.newLine().code(`this.\(@internalName) = `).compile(@value).done()
 		}
-	} // }}}
-	toSharedFragments(fragments, properties) { // {{{
+	} # }}}
+	toSharedFragments(fragments, properties) { # {{{
 		if properties.some((property, _, _) => property.isInstance()) {
 			if @class.isSealed() {
 				if @init > 0 {
@@ -213,7 +213,7 @@ class ImplementClassFieldDeclaration extends Statement {
 				line.done()
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -240,13 +240,13 @@ class ImplementClassMethodDeclaration extends Statement {
 		_variable: NamedType<ClassType>
 		_topNodes: Array					= []
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.line(@data.start.line)
 
 		@name = @data.name.name
@@ -273,8 +273,8 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		@block = $compile.function($ast.body(@data), this)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.line(@data.start.line)
 
 		for const parameter in @parameters {
@@ -450,8 +450,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 			@internalName = `__ks_func_\(@name)_\(@type.index())`
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -471,13 +471,13 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		@block.translate()
-	} // }}}
-	addAtThisParameter(statement: AliasStatement) { // {{{
+	} # }}}
+	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
-	} // }}}
-	addIndigentValue(value: Expression, parameters) { // {{{
+	} # }}}
+	addIndigentValue(value: Expression, parameters) { # {{{
 		const name = `__ks_default_\(@class.level())_\(@class.incDefaultSequence())`
 
 		@indigentValues.push({
@@ -487,16 +487,16 @@ class ImplementClassMethodDeclaration extends Statement {
 		})
 
 		return name
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
-	getMatchingMode(): MatchingMode { // {{{
+	getMatchingMode(): MatchingMode { # {{{
 		if @override {
 			return MatchingMode::ShiftableParameters
 		}
@@ -506,7 +506,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		else {
 			return MatchingMode::ExactParameter
 		}
-	} // }}}
+	} # }}}
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_sm_\(@name)`
@@ -518,7 +518,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	isOverridableFunction() => true
 	name() => @name
 	parameters() => @parameters
-	toIndigentFragments(fragments) { // {{{
+	toIndigentFragments(fragments) { # {{{
 		for const {name, value, parameters} in @indigentValues {
 			const line = fragments.newLine()
 			const ctrl = line.newControl(null, false, false)
@@ -535,8 +535,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			ctrl.done()
 			line.done()
 		}
-	} // }}}
-	toInstanceFragments(fragments) { // {{{
+	} # }}}
+	toInstanceFragments(fragments) { # {{{
 		const name = @variable.name()
 
 		const assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
@@ -570,8 +570,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 			line.done()
 		}
-	} // }}}
-	toStaticFragments(fragments) { // {{{
+	} # }}}
+	toStaticFragments(fragments) { # {{{
 		const name = @variable.name()
 
 		const assessment = Router.assess(@class.listClassMethods(@name), @name, this)
@@ -593,8 +593,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toSealedInstanceFragments(fragments) { // {{{
+	} # }}}
+	toSealedInstanceFragments(fragments) { # {{{
 		const name = @variable.name()
 		const sealedName = @variable.getSealedName()
 
@@ -646,8 +646,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toSealedStaticFragments(fragments) { // {{{
+	} # }}}
+	toSealedStaticFragments(fragments) { # {{{
 		const name = @variable.getSealedName()
 
 		const assessment = Router.assess(@class.listClassMethods(@name), @name, this)
@@ -681,8 +681,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toSharedFragments(fragments, _) { // {{{
+	} # }}}
+	toSharedFragments(fragments, _) { # {{{
 		return if @override
 
 		if @instance {
@@ -701,8 +701,8 @@ class ImplementClassMethodDeclaration extends Statement {
 				this.toStaticFragments(fragments)
 			}
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const line = fragments.newLine()
 
 		if @class.isSealed() {
@@ -733,10 +733,10 @@ class ImplementClassMethodDeclaration extends Statement {
 		line.done()
 
 		this.toIndigentFragments(fragments)
-	} // }}}
+	} # }}}
 	type() => @type
 	private {
-		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { // {{{
+		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
 			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if !@override {
@@ -860,8 +860,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 
 			return null
-		} // }}}
-		listOverloadedMethods(superclass: ClassType) { // {{{
+		} # }}}
+		listOverloadedMethods(superclass: ClassType) { # {{{
 			if const methods = superclass.listInstanceMethods(@name) {
 				for const method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
@@ -875,7 +875,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				@type
 				MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter
 			)
-		} // }}}
+		} # }}}
 	}
 }
 
@@ -896,7 +896,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		_variable: NamedType<ClassType>
 		_topNodes: Array				= []
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
 
 		@class = @variable.type()
@@ -905,8 +905,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 		if @class.isHybrid() {
 			NotSupportedException.throw(this)
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.line(@data.start.line)
 
 		for const modifier in @data.modifiers {
@@ -940,8 +940,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 
 		@block = new ConstructorBlock($ast.block(body), this, @scope)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@scope.line(@data.start.line)
 
 		for const parameter in @parameters {
@@ -1023,8 +1023,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -1037,13 +1037,13 @@ class ImplementClassConstructorDeclaration extends Statement {
 				this.checkVariableInitialization(name)
 			}
 		})
-	} // }}}
-	addAtThisParameter(statement: AliasStatement) { // {{{
+	} # }}}
+	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
-	} // }}}
-	private addCallToParentConstructor() { // {{{
+	} # }}}
+	private addCallToParentConstructor() { # {{{
 		// only add call if parent has an empty constructor
 		const extendedType = @class.extends().type()
 
@@ -1071,21 +1071,21 @@ class ImplementClassConstructorDeclaration extends Statement {
 		else {
 			SyntaxException.throwNoSuperCall(this)
 		}
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
-	checkVariableInitialization(name) { // {{{
+	checkVariableInitialization(name) { # {{{
 		if @block.isInitializingInstanceVariable(name) {
 			@type.addInitializingInstanceVariable(name)
 		}
 		else {
 			SyntaxException.throwNotInitializedField(name, this)
 		}
-	} // }}}
+	} # }}}
 	class() => @variable
-	private getConstructorIndex(body: Array) { // {{{
+	private getConstructorIndex(body: Array) { # {{{
 		for const statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
 				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
@@ -1100,15 +1100,15 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 
 		return -1
-	} // }}}
-	getMatchingMode(): MatchingMode { // {{{
+	} # }}}
+	getMatchingMode(): MatchingMode { # {{{
 		if @overwrite {
 			return MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters
 		}
 		else {
 			return MatchingMode::ExactParameter
 		}
-	} // }}}
+	} # }}}
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	getSharedName() => '__ks_cons'
@@ -1122,7 +1122,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	isOverridableFunction() => true
 	name() => 'constructor'
 	parameters() => @parameters
-	toCreatorFragments(fragments) { // {{{
+	toCreatorFragments(fragments) { # {{{
 		const classname = @variable.name()
 		const name = @class.isSealed() ? @variable.getSealedName() : @variable.name()
 		const args = @type.max() == 0 ? '' : '...args'
@@ -1148,8 +1148,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
-	toSharedFragments(fragments, _) { // {{{
+	} # }}}
+	toSharedFragments(fragments, _) { # {{{
 		const classname = @variable.name()
 
 		const line = fragments.newLine()
@@ -1213,8 +1213,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 
 		line.done()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		this.toCreatorFragments(fragments)
 
 		const line = fragments.newLine()
@@ -1244,7 +1244,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		block.done()
 		line.done()
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -1261,7 +1261,7 @@ class CallOverwrittenMethodSubstitude {
 		_name: String
 		_type: Type
 	}
-	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance, node: AbstractNode) { // {{{
+	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance, node: AbstractNode) { # {{{
 		const types = []
 
 		for const method in methods {
@@ -1273,10 +1273,10 @@ class CallOverwrittenMethodSubstitude {
 		}
 
 		@type = Type.union(@class.scope(), ...types)
-	} // }}}
+	} # }}}
 	isNullable() => false
 	isSkippable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @methods.length == 1 && @methods[0].isSealed() {
 			fragments.code(`\(@class.getSealedName()).__ks_\(@instance ? 'func' : 'sttc')_\(@name)_\(@methods[0].index())`)
 
@@ -1306,7 +1306,7 @@ class CallOverwrittenMethodSubstitude {
 				fragments.compile(argument)
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -1320,7 +1320,7 @@ class CallSealedConstructorSubstitude {
 	constructor(@data, @arguments, @class, @node)
 	isNullable() => false
 	isSkippable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(`var that = \(@class.getSealedName()).new(`)
 
 		for const argument, index in @arguments {
@@ -1334,7 +1334,7 @@ class CallSealedConstructorSubstitude {
 		if @class.type().isInitializing() {
 			fragments.whenDone($callSealedInitializer^^(fragments, @class, @node))
 		}
-	} // }}}
+	} # }}}
 	type() => Type.Void
 }
 
@@ -1348,7 +1348,7 @@ class CallOverwrittenConstructorSubstitude {
 	constructor(@data, @arguments, @class, @node)
 	isNullable() => false
 	isSkippable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(`const that = new \(@class.name())(`)
 
 		for const argument, index in @arguments {
@@ -1362,13 +1362,13 @@ class CallOverwrittenConstructorSubstitude {
 		if @class.isSealed() && @class.type().isInitializing() {
 			fragments.whenDone($callSealedInitializer^^(fragments, @class, @node))
 		}
-	} // }}}
+	} # }}}
 	type() => Type.Void
 }
 
-func $callSealedInitializer(fragments, type, node) { // {{{
+func $callSealedInitializer(fragments, type, node) { # {{{
 	const ctrl = fragments.newControl()
 	ctrl.code(`if(!that[\($runtime.initFlag(node))])`).step()
 	ctrl.line(`\(type.getSealedName()).__ks_init(that)`)
 	ctrl.done()
-} // }}}
+} # }}}

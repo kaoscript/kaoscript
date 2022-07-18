@@ -3,7 +3,7 @@ class PolyadicOperatorExpression extends Expression {
 		_operands			= []
 		_tested: Boolean	= false
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		for const data in @data.operands {
 			operand = $compile.expression(data, this)
 
@@ -11,8 +11,8 @@ class PolyadicOperatorExpression extends Expression {
 
 			@operands.push(operand)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const operand in @operands {
 			operand.prepare()
 
@@ -20,23 +20,23 @@ class PolyadicOperatorExpression extends Expression {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const operand in @operands {
 			operand.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		for const operand in @operands {
 			operand.acquireReusable(false)
 			operand.releaseReusable()
 		}
-	} // }}}
-	releaseReusable() { // {{{
-	} // }}}
+	} # }}}
+	releaseReusable() { # {{{
+	} # }}}
 	hasExceptions() => false
 	isComputed() => true
-	isNullable() { // {{{
+	isNullable() { # {{{
 		for operand in @operands {
 			if operand.isNullable() {
 				return true
@@ -44,8 +44,8 @@ class PolyadicOperatorExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	isUsingVariable(name) { // {{{
+	} # }}}
+	isUsingVariable(name) { # {{{
 		for const operand in @operands {
 			if operand.isUsingVariable(name) {
 				return true
@@ -53,15 +53,15 @@ class PolyadicOperatorExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	listAssignments(array) { // {{{
+	} # }}}
+	listAssignments(array) { # {{{
 		for const operand in @operands {
 			operand.listAssignments(array)
 		}
 
 		return array
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		const test = this.isNullable() && !@tested
 		if test {
 			fragments
@@ -74,8 +74,8 @@ class PolyadicOperatorExpression extends Expression {
 		if test {
 			fragments.code(' : false')
 		}
-	} // }}}
-	toNullableFragments(fragments) { // {{{
+	} # }}}
+	toNullableFragments(fragments) { # {{{
 		if !@tested {
 			let nf = false
 			for const operand in @operands {
@@ -93,7 +93,7 @@ class PolyadicOperatorExpression extends Expression {
 
 			@tested = true
 		}
-	} // }}}
+	} # }}}
 }
 
 abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
@@ -102,7 +102,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		_isNative: Boolean		= false
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if this.isAcceptingEnum() && @operands[0].type().isEnum() {
@@ -146,8 +146,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 
 			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		super()
 
 		if @isEnum {
@@ -170,14 +170,14 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 				@isNative = true
 			}
 		}
-	} // }}}
+	} # }}}
 	isAcceptingEnum() => false
 	isComputed() => @isNative
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toEnumFragments(fragments)
-	toNativeFragments(fragments) { // {{{
+	toNativeFragments(fragments) { # {{{
 		for const operand, index in @operands {
 			if index != 0 {
 				fragments.code($space).code(this.symbol(), @data.operator).code($space)
@@ -185,8 +185,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 
 			fragments.wrap(operand)
 		}
-	} // }}}
-	toOperandFragments(fragments, operator, type) { // {{{
+	} # }}}
+	toOperandFragments(fragments, operator, type) { # {{{
 		if @isEnum {
 			this.toEnumFragments(fragments)
 		}
@@ -202,8 +202,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
+	} # }}}
+	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
 			fragments.code(@type.name(), '(')
 
@@ -227,8 +227,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 
 			fragments.code(')')
 		}
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		let fragments = ''
 
 		for const operand, index in @operands {
@@ -240,7 +240,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 
 		return fragments
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -253,7 +253,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		_isString: Boolean			= false
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if @operands[0].type().isEnum() {
@@ -340,14 +340,14 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
 			}
 		}
-	} // }}}
+	} # }}}
 	isComputed() => @isNative
-	override setExpectedType(type) { // {{{
+	override setExpectedType(type) { # {{{
 		if !type.isEnum() && (type.isNumber() || type.isString()) {
 			@expectingEnum = false
 		}
-	} // }}}
-	toOperandFragments(fragments, operator, type) { // {{{
+	} # }}}
+	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Addition {
 			if type == OperandType::Enum && (@isEnum || @isNumber) {
 				for const operand, index in @operands {
@@ -374,8 +374,8 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
+	} # }}}
+	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
 			lateinit const operator: String
 
@@ -439,8 +439,8 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 
 			fragments.code(')')
 		}
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		let fragments = ''
 
 		for const operand, index in @operands {
@@ -452,7 +452,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 
 		return fragments
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -461,7 +461,7 @@ class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&'
-	toEnumFragments(fragments) { // {{{
+	toEnumFragments(fragments) { # {{{
 		for const operand, index in @operands {
 			if index != 0 {
 				fragments.code(' & ')
@@ -469,7 +469,7 @@ class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
 
 			fragments.wrap(operand)
 		}
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorBitwiseLeftShift extends NumericPolyadicOperatorExpression {
@@ -483,7 +483,7 @@ class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|'
-	toEnumFragments(fragments) { // {{{
+	toEnumFragments(fragments) { # {{{
 		for const operand, index in @operands {
 			if index != 0 {
 				fragments.code(' & ')
@@ -491,7 +491,7 @@ class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
 
 			fragments.wrap(operand)
 		}
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorBitwiseRightShift extends NumericPolyadicOperatorExpression {
@@ -528,15 +528,15 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@operands = []
 		for operand in @data.operands {
 			@operands.push(operand = $compile.expression(operand, this))
 
 			operand.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		const types = []
 		const last = @operands.length - 1
 
@@ -583,8 +583,8 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		else {
 			@type = Type.union(@scope, ...types)
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Type')
 
 		let l = @operands.length - 1
@@ -617,7 +617,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		}
 
 		fragments.compile(@operands[l])
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -625,7 +625,7 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 	operator() => Operator::Quotient
 	runtime() => 'quotient'
 	symbol() => '/.'
-	toNativeFragments(fragments) { // {{{
+	toNativeFragments(fragments) { # {{{
 		const l = @operands.length - 1
 		fragments.code('Number.parseInt('.repeat(l))
 
@@ -634,7 +634,7 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 		for const operand in @operands from 1 {
 			fragments.code(' / ').wrap(operand).code(')')
 		}
-	} // }}}
+	} # }}}
 }
 
 class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
@@ -642,7 +642,7 @@ class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 	operator() => Operator::Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
-	toOperandFragments(fragments, operator, type) { // {{{
+	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Subtraction {
 			if type == OperandType::Enum {
 				for const operand, index in @operands {
@@ -666,8 +666,8 @@ class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 		else {
 			this.toOperatorFragments(fragments)
 		}
-	} // }}}
-	toEnumFragments(fragments) { // {{{
+	} # }}}
+	toEnumFragments(fragments) { # {{{
 		for const operand, index in @operands {
 			if index != 0 {
 				fragments.code(' & ~')
@@ -675,5 +675,5 @@ class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 
 			fragments.wrap(operand)
 		}
-	} // }}}
+	} # }}}
 }

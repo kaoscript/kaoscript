@@ -9,7 +9,7 @@ class ReturnStatement extends Statement {
 		_temp: String?			= null
 		_type: Type				= Type.Any
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
 		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
@@ -19,11 +19,11 @@ class ReturnStatement extends Statement {
 		if parent? {
 			@function = parent
 		}
-	} // }}}
-	constructor(@value, @parent) { // {{{
+	} # }}}
+	constructor(@value, @parent) { # {{{
 		super(value.data(), parent, parent.scope())
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @data.value? {
 			@value = $compile.expression(@data.value, this)
 
@@ -32,8 +32,8 @@ class ReturnStatement extends Statement {
 			@await = @value.isAwait()
 			@exceptions = @value.hasExceptions()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @value != null {
 			@value.prepare()
 
@@ -52,18 +52,18 @@ class ReturnStatement extends Statement {
 		if @function? {
 			@async = @function.type().isAsync()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @value != null {
 			@value.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if @value != null {
 			@value.acquireReusable(acquire)
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		if ?@value {
 			if @value is UnaryOperatorForcedTypeCasting {
 				@type = type
@@ -102,10 +102,10 @@ class ReturnStatement extends Statement {
 				TypeException.throwUnexpectedReturnType(type, @type, this)
 			}
 		}
-	} // }}}
+	} # }}}
 	hasExceptions() => @exceptions
 	getUnpreparedType() => @value.getUnpreparedType()
-	initializeVariable(variable: VariableBrief, expression: Expression) { // {{{
+	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
 			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
 				ReferenceException.throwImmutableField(`\(variable.name)`, this)
@@ -123,25 +123,25 @@ class ReturnStatement extends Statement {
 		else {
 			@parent.initializeVariable(variable, expression, this)
 		}
-	} // }}}
+	} # }}}
 	isAwait() => @await
 	isExit() => true
 	isExpectingType() => true
 	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
-	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		if @value != null {
 			@value.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
+	} # }}}
 	reference() => @temp
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @value != null {
 			@value.releaseReusable()
 		}
-	} // }}}
-	override setExpectedType(type) { // {{{
+	} # }}}
+	override setExpectedType(type) { # {{{
 		if type.isNever() {
 			TypeException.throwUnexpectedReturnedValue(this)
 		}
@@ -158,8 +158,8 @@ class ReturnStatement extends Statement {
 				@value.setExpectedType(type)
 			}
 		}
-	} // }}}
-	toAwaitStatementFragments(fragments, statements) { // {{{
+	} # }}}
+	toAwaitStatementFragments(fragments, statements) { # {{{
 		const line = fragments.newLine()
 
 		const item = @value.toFragments(line, Mode::None)
@@ -167,16 +167,16 @@ class ReturnStatement extends Statement {
 		item([this])
 
 		line.done()
-	} // }}}
-	toCastingFragments(fragments, mode) { // {{{
+	} # }}}
+	toCastingFragments(fragments, mode) { # {{{
 		if @enumCasting {
 			@value.toCastingFragments(fragments, mode)
 		}
 		else {
 			fragments.compile(@value)
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @value == null {
 			if @async {
 				fragments.line('return __ks_cb()')
@@ -239,6 +239,6 @@ class ReturnStatement extends Statement {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }

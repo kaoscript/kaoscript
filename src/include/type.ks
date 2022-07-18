@@ -1,6 +1,6 @@
 const $importTypeModifiers = /^(\w+)(!)?(\?)?$/
 
-const $natives = { // {{{
+const $natives = { # {{{
 	Any: true
 	any: true
 	Array: true
@@ -38,9 +38,9 @@ const $natives = { // {{{
 	tuple: true
 	Void: true
 	void: true
-} // }}}
+} # }}}
 
-const $types = { // {{{
+const $types = { # {{{
 	any: 'Any'
 	array: 'Array'
 	bool: 'Boolean'
@@ -55,7 +55,7 @@ const $types = { // {{{
 	string: 'String'
 	struct: 'Struct'
 	void: 'Void'
-} // }}}
+} # }}}
 
 const $virtuals = {
 	Enum: true
@@ -202,7 +202,7 @@ abstract class Type {
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
 		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope(), true, node)
-		fromAST(data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
+		fromAST(data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
 			}
@@ -345,8 +345,8 @@ abstract class Type {
 
 			console.info(data)
 			throw new NotImplementedException(node)
-		} // }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { // {{{
+		} # }}}
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			const data = index is Number ? metadata[index] : index
 
 			// console.log('-- import --')
@@ -482,10 +482,10 @@ abstract class Type {
 
 			console.info(data)
 			throw new NotImplementedException(node)
-		} // }}}
+		} # }}}
 		isNative(name: String) => $natives[name] == true
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
-		toNamedType(name: String, type: Type): Type { // {{{
+		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
 
 			if type.isContainer() {
@@ -494,8 +494,8 @@ abstract class Type {
 			else {
 				return new NamedType(name, type)
 			}
-		} // }}}
-		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { // {{{
+		} # }}}
+		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { # {{{
 			return type unless type.shallBeNamed()
 
 			const namedType = type.isContainer() ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
@@ -503,8 +503,8 @@ abstract class Type {
 			scope.define(namedType.name(), true, namedType, node)
 
 			return namedType
-		} // }}}
-		union(scope: Scope, ...types) { // {{{
+		} # }}}
+		union(scope: Scope, ...types) { # {{{
 			if types.length == 1 {
 				return types[0]
 			}
@@ -516,7 +516,7 @@ abstract class Type {
 			}
 
 			return union.type()
-		} // }}}
+		} # }}}
 	}
 	constructor(@scope)
 	abstract clone(): Type
@@ -527,7 +527,7 @@ abstract class Type {
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
-	canBeVirtual(name: String) { // {{{
+	canBeVirtual(name: String) { # {{{
 		if this.isAny() {
 			return true
 		}
@@ -540,14 +540,14 @@ abstract class Type {
 		}
 
 		return false
-	} // }}}
-	clone(scope: Scope): Type { // {{{
+	} # }}}
+	clone(scope: Scope): Type { # {{{
 		const clone = this.clone()
 
 		clone._scope = scope
 
 		return clone
-	} // }}}
+	} # }}}
 	compareTo(value: Type) => false
 	discard(): Type? => this
 	discardAlias(): Type => this
@@ -556,42 +556,42 @@ abstract class Type {
 	discardSpread(): Type => this
 	discardVariable(): Type => this
 	equals(value?): Boolean => value? && this.isSubsetOf(value, MatchingMode::Exact)
-	flagAlien() { // {{{
+	flagAlien() { # {{{
 		@alien = true
 
 		return this
-	} // }}}
+	} # }}}
 	flagAltering(): this
-	flagExported(explicitly: Boolean) { // {{{
+	flagExported(explicitly: Boolean) { # {{{
 		@exported = true
 
 		return this
-	} // }}}
-	flagReferenced() { // {{{
+	} # }}}
+	flagReferenced() { # {{{
 		@referenced = true
 
 		return this
-	} // }}}
-	flagRequired() { // {{{
+	} # }}}
+	flagRequired() { # {{{
 		@required = true
 
 		return this
-	} // }}}
-	flagRequirement() { // {{{
+	} # }}}
+	flagRequirement() { # {{{
 		@requirement = true
 
 		return this
-	} // }}}
-	flagSealed() { // {{{
+	} # }}}
+	flagSealed() { # {{{
 		@sealed = true
 
 		return this
-	} // }}}
-	flagSystemic() { // {{{
+	} # }}}
+	flagSystemic() { # {{{
 		@systemic = true
 
 		return this.flagSealed()
-	} // }}}
+	} # }}}
 	getExhaustive() => @exhaustive
 	getProperty(name: String) => null
 	getMajorReferenceIndex() => @referenceIndex
@@ -606,7 +606,7 @@ abstract class Type {
 	isArray() => false
 	isAssignableToVariable(value: Type): Boolean => this.isAssignableToVariable(value, true, false, true)
 	isAssignableToVariable(value: Type, downcast: Boolean): Boolean => this.isAssignableToVariable(value, true, false, downcast)
-	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		if this == value {
 			return true
 		}
@@ -624,13 +624,13 @@ abstract class Type {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isBoolean() => false
 	isCloned() => false
 	isClass() => false
 	isClassInstance() => false
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
-	isContainedIn(types) { // {{{
+	isContainedIn(types) { # {{{
 		for type in types {
 			if this.equals(type) {
 				return true
@@ -638,19 +638,19 @@ abstract class Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isContainer() => false
 	isDictionary() => false
 	isEnum() => false
 	isExclusion() => false
-	isExhaustive() { // {{{
+	isExhaustive() { # {{{
 		if @exhaustive == null {
 			return !@alien && !@required
 		}
 		else {
 			return @exhaustive
 		}
-	} // }}}
+	} # }}}
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicit() => true
 	isExplicitlyExported() => @exported
@@ -705,23 +705,23 @@ abstract class Type {
 	reduce(type: Type) => this
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
-	resetReferences() { // {{{
+	resetReferences() { # {{{
 		@referenceIndex = -1
-	} // }}}
+	} # }}}
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
-	setNullable(type: Type): Type { // {{{
+	setNullable(type: Type): Type { # {{{
 		if !type.isNullable() {
 			return this.setNullable(false)
 		}
 		else {
 			return this
 		}
-	} // }}}
+	} # }}}
 	shallBeNamed() => false
 	sort() => this
-	split(types: Array): Array { // {{{
+	split(types: Array): Array { # {{{
 		if @isNullable() {
 			types.pushUniq(@setNullable(false), Type.Null)
 		}
@@ -730,8 +730,8 @@ abstract class Type {
 		}
 
 		return types
-	} // }}}
-	toExportFragment(fragments, name, variable) { // {{{
+	} # }}}
+	toExportFragment(fragments, name, variable) { # {{{
 		if !this.isVirtual() && !this.isSystemic() {
 			const varname = variable.name?()
 
@@ -753,8 +753,8 @@ abstract class Type {
 				fragments.line(`__ks_\(name): \(this.getSealedName())`)
 			}
 		}
-	} // }}}
-	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
@@ -764,8 +764,8 @@ abstract class Type {
 		else {
 			return this.export(references, indexDelta, mode, module)
 		}
-	} // }}}
-	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
@@ -777,8 +777,8 @@ abstract class Type {
 		else {
 			return this.export(references, indexDelta, mode, module)
 		}
-	} // }}}
-	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const reference = this.getMajorReferenceIndex()
 		if reference != -1 {
 			return {
@@ -793,8 +793,8 @@ abstract class Type {
 		else {
 			return this.export(references, indexDelta, mode, module)
 		}
-	} // }}}
-	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex == -1 {
 			const index = references.length
 
@@ -807,23 +807,23 @@ abstract class Type {
 		}
 
 		return @referenceIndex
-	} // }}}
+	} # }}}
 	toNegativeTestFragments(fragments, node, junction: Junction = Junction::NONE) => this.toPositiveTestFragments(fragments.code('!'), node, junction)
-	toQuote(): String { // {{{
+	toQuote(): String { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	toQuote(double: Boolean): String { // {{{
+	} # }}}
+	toQuote(double: Boolean): String { # {{{
 		if double {
 			return `"\(this.toQuote())"`
 		}
 		else {
 			return `'\(this.toQuote())'`
 		}
-	} // }}}
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { // {{{
+	} # }}}
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { # {{{
 		reference: this.toMetadata(references, indexDelta, mode, module)
-	} // }}}
-	toRequiredMetadata(requirements: Array<Requirement>) { // {{{
+	} # }}}
+	toRequiredMetadata(requirements: Array<Requirement>) { # {{{
 		if @required {
 			return true
 		}
@@ -835,14 +835,14 @@ abstract class Type {
 		}
 
 		return false
-	} // }}}
-	toRouteTestFragments(fragments, node, junction: Junction) { // {{{
+	} # }}}
+	toRouteTestFragments(fragments, node, junction: Junction) { # {{{
 		NotImplementedException.throw()
-	} // }}}
-	toRouteTestFragments(fragments, node, argName: String, from: Number, to: Number, default: Boolean, junction: Junction) { // {{{
+	} # }}}
+	toRouteTestFragments(fragments, node, argName: String, from: Number, to: Number, default: Boolean, junction: Junction) { # {{{
 		NotImplementedException.throw()
-	} // }}}
-	toTestFunctionFragments(fragments, node) { // {{{
+	} # }}}
+	toTestFunctionFragments(fragments, node) { # {{{
 		if node._options.format.functions == 'es5' {
 			fragments.code('function(value) { return ')
 		}
@@ -855,16 +855,16 @@ abstract class Type {
 		if node._options.format.functions == 'es5' {
 			fragments.code('; }')
 		}
-	} // }}}
-	toTestFunctionFragments(fragments, node, junction) { // {{{
+	} # }}}
+	toTestFunctionFragments(fragments, node, junction) { # {{{
 		NotImplementedException.throw()
-	} // }}}
+	} # }}}
 	toTypeQuote() => this.toQuote()
 	type() => this
 	unflagAltering(): this
-	unflagRequired(): this { // {{{
+	unflagRequired(): this { # {{{
 		@required = false
-	} // }}}
+	} # }}}
 }
 
 include {

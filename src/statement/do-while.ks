@@ -4,7 +4,7 @@ class DoWhileStatement extends Statement {
 		_bodyScope: Scope
 		_condition
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bodyScope = this.newScope(@scope, ScopeType::InlineBlock)
 
 		@body = $compile.block(@data.body, this, @bodyScope)
@@ -12,8 +12,8 @@ class DoWhileStatement extends Statement {
 
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@body.prepare()
 
 		for const inferable, name of @bodyScope.listUpdatedInferables() {
@@ -29,19 +29,19 @@ class DoWhileStatement extends Statement {
 		}
 
 		this.assignTempVariables(@scope)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@body.translate()
 		@condition.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()
 			.code('do')
@@ -52,5 +52,5 @@ class DoWhileStatement extends Statement {
 			.compileBoolean(@condition)
 			.code(')')
 			.done()
-	} // }}}
+	} # }}}
 }

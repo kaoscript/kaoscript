@@ -3,8 +3,8 @@ class RegularExpression extends Expression {
 	prepare()
 	translate()
 	isUsingVariable(name) => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(@data.value)
-	} // }}}
+	} # }}}
 	type() => @scope.reference('RegExp')
 }

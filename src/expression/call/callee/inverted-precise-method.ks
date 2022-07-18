@@ -8,7 +8,7 @@ class InvertedPreciseMethodCallee extends Callee {
 		_scope: ScopeKind
 		_type: Type
 	}
-	constructor(@data, @name, @property, match: CallMatch, node) { // {{{
+	constructor(@data, @name, @property, match: CallMatch, node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
@@ -24,12 +24,12 @@ class InvertedPreciseMethodCallee extends Callee {
 		this.validate(@function, node)
 
 		@type = @function.getReturnType()
-	} // }}}
+	} # }}}
 	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		return @function.isInitializingInstanceVariable(name)
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		switch @scope {
 			ScopeKind::Argument => {
 				throw new NotImplementedException(node)
@@ -52,9 +52,9 @@ class InvertedPreciseMethodCallee extends Callee {
 				Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

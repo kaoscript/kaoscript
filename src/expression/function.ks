@@ -9,10 +9,10 @@ class AnonymousFunctionExpression extends Expression {
 		_topNodes: Array				= []
 		_type: Type
 	}
-	constructor(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope, ScopeType::Function)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@scope.define('this', true, Type.Any, this)
 
 		@parameters = []
@@ -23,8 +23,8 @@ class AnonymousFunctionExpression extends Expression {
 		}
 
 		@isObjectMember = @parent.parent() is DictionaryExpression
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for parameter in @parameters {
 			parameter.prepare()
 		}
@@ -39,8 +39,8 @@ class AnonymousFunctionExpression extends Expression {
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -58,11 +58,11 @@ class AnonymousFunctionExpression extends Expression {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
-	addTopNode(node) { // {{{
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
@@ -75,7 +75,7 @@ class AnonymousFunctionExpression extends Expression {
 	isOverridableFunction() => false
 	isUsingVariable(name) => false
 	parameters() => @parameters
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		const assessment = this.type().assessment('__ks_rt', this)
 
 		const block = fragments.code('(() =>').newBlock()
@@ -124,7 +124,7 @@ class AnonymousFunctionExpression extends Expression {
 		block.done()
 
 		fragments.code(')()')
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -142,10 +142,10 @@ class ArrowFunctionExpression extends Expression {
 		_usingThis: Boolean				= false
 		_variables: Array<Variable>
 	}
-	constructor(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope, ScopeType::Block)
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@es5 = @options.format.functions == 'es5'
 		@block = $compile.function($ast.body(@data), this)
 
@@ -155,8 +155,8 @@ class ArrowFunctionExpression extends Expression {
 
 			parameter.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for parameter in @parameters {
 			parameter.prepare()
 		}
@@ -186,8 +186,8 @@ class ArrowFunctionExpression extends Expression {
 				authority.addTopNode(this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
@@ -205,17 +205,17 @@ class ArrowFunctionExpression extends Expression {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
+	} # }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
-	getParameterOffset() { // {{{
+	getParameterOffset() { # {{{
 		if @shiftToAuthority {
 			return @variables.length
 		}
 		else {
 			return 0
 		}
-	} // }}}
+	} # }}}
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -223,7 +223,7 @@ class ArrowFunctionExpression extends Expression {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isOverridableFunction() => false
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		for parameter in @parameters {
 			if parameter.isUsingVariable(name) {
 				return true
@@ -231,9 +231,9 @@ class ArrowFunctionExpression extends Expression {
 		}
 
 		return @block.isUsingVariable(name)
-	} // }}}
+	} # }}}
 	parameters() => @parameters
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @shiftToAuthority {
 			if @variables.length == 0 {
 				if @usingThis {
@@ -306,8 +306,8 @@ class ArrowFunctionExpression extends Expression {
 				fragments.code(')()')
 			}
 		}
-	} // }}}
-	toAuthorityFragments(fragments) { // {{{
+	} # }}}
+	toAuthorityFragments(fragments) { # {{{
 		const ctrl = fragments.newControl().code(`\($runtime.immutableScope(this))\(@name) = function(`)
 
 		for const variable, index in @variables {
@@ -329,6 +329,6 @@ class ArrowFunctionExpression extends Expression {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 	type() => @type
 }

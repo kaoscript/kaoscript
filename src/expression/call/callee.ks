@@ -4,13 +4,13 @@ abstract class Callee {
 		_nullable: Boolean			= false
 		_nullableProperty: Boolean	= false
 	}
-	constructor(@data) { // {{{
+	constructor(@data) { # {{{
 		for const modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Nullable {
 				@nullable = true
 			}
 		}
-	} // }}}
+	} # }}}
 	abstract hashCode(): String?
 	abstract toFragments(fragments, mode, node)
 	abstract translate()
@@ -19,13 +19,13 @@ abstract class Callee {
 	isNullable() => @nullable || @nullableProperty
 	isNullableComputed() => @nullable && @nullableProperty
 	isSkippable() => false
-	mergeWith(that: Callee) { // {{{
+	mergeWith(that: Callee) { # {{{
 		throw new NotSupportedException()
-	} // }}}
+	} # }}}
 	releaseReusable()
-	validate(type: FunctionType, node) { // {{{
+	validate(type: FunctionType, node) { # {{{
 		for const error in type.listErrors() {
 			Exception.validateReportedError(error.discardReference(), node)
 		}
-	} // }}}
+	} # }}}
 }

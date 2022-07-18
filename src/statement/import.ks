@@ -1,6 +1,6 @@
 extern process, require
 
-const $importExts = { // {{{
+const $importExts = { # {{{
 	data: {
 		json: true
 	}
@@ -10,9 +10,9 @@ const $importExts = { // {{{
 		ks: true
 		ts: true
 	}
-} // }}}
+} # }}}
 
-const $nodeModules = { // {{{
+const $nodeModules = { # {{{
 	assert: true
 	buffer: true
 	child_process: true
@@ -43,9 +43,9 @@ const $nodeModules = { // {{{
 	v8: true
 	vm: true
 	zlib: true
-} // }}}
+} # }}}
 
-func $nodeModulesPaths(start) { // {{{
+func $nodeModulesPaths(start) { # {{{
 	start = fs.resolve(start)
 
 	let prefix = '/'
@@ -74,7 +74,7 @@ func $nodeModulesPaths(start) { // {{{
 	}
 
 	return dirs
-} // }}}
+} # }}}
 
 struct ImportedVariable {
 	name: String
@@ -118,7 +118,7 @@ abstract class Importer extends Statement {
 		_worker: ImportWorker
 	}
 	abstract mode(): ImportMode
-	initiate() { // {{{
+	initiate() { # {{{
 		let x = @data.source.value
 		let y = this.directory()
 
@@ -260,8 +260,8 @@ abstract class Importer extends Statement {
 				@reuseName = @alias
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const argument in @arguments.values when !argument.required {
 			const variable = @scope.getVariable(argument.identifier)
 
@@ -269,10 +269,10 @@ abstract class Importer extends Statement {
 				SyntaxException.throwOnlyStaticImport(variable.name(), @data.source.value, this)
 			}
 		}
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	addArgument(data, autofill, arguments) { // {{{
+	addArgument(data, autofill, arguments) { # {{{
 		const argument = {
 			index: @isKSFile ? null : 0
 			isApproved: true
@@ -329,8 +329,8 @@ abstract class Importer extends Statement {
 		}
 
 		arguments.values.push(argument)
-	} // }}}
-	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { // {{{
+	} # }}}
+	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { # {{{
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
 
 		if newVariable {
@@ -349,8 +349,8 @@ abstract class Importer extends Statement {
 			newVariable
 			type
 		}
-	} // }}}
-	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { // {{{
+	} # }}}
+	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { # {{{
 		if (variable ?= @scope.getVariable(local)) && !variable.isPredefined() {
 			if @parent.includePath() != null {
 				// TODO: check & merge type
@@ -381,8 +381,8 @@ abstract class Importer extends Statement {
 			@variables[imported] = ImportedVariable(local)
 			++@count
 		}
-	} // }}}
-	buildArguments(metadata, arguments: Arguments = Arguments()): Arguments { // {{{
+	} # }}}
+	buildArguments(metadata, arguments: Arguments = Arguments()): Arguments { # {{{
 		@scope.line(this.line() - 1)
 
 		if @data.arguments?.length != 0 {
@@ -525,16 +525,16 @@ abstract class Importer extends Statement {
 		}
 
 		return arguments
-	} // }}}
+	} # }}}
 	getModuleName() => @moduleName
-	loadCoreModule(moduleName) { // {{{
+	loadCoreModule(moduleName) { # {{{
 		if $nodeModules[moduleName] == true {
 			return this.loadNodeFile(null, moduleName)
 		}
 
 		return false
-	} // }}}
-	loadDirectory(dir, moduleName = null) { // {{{
+	} # }}}
+	loadDirectory(dir, moduleName = null) { # {{{
 		let pkgfile = path.join(dir, 'package.json')
 		if fs.isFile(pkgfile) {
 			let pkg
@@ -567,8 +567,8 @@ abstract class Importer extends Statement {
 		}
 
 		return this.loadFile(path.join(dir, 'index'), 'index', moduleName)
-	} // }}}
-	loadFile(filename, pathAddendum, moduleName = null) { // {{{
+	} # }}}
+	loadFile(filename, pathAddendum, moduleName = null) { # {{{
 		if fs.isFile(filename) {
 			if filename.endsWith($extensions.source) {
 				return this.loadKSFile(filename, pathAddendum, null, moduleName)
@@ -590,8 +590,8 @@ abstract class Importer extends Statement {
 		}
 
 		return false
-	} // }}}
-	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', moduleName = null, metadataPath = null) { // {{{
+	} # }}}
+	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', moduleName = null, metadataPath = null) { # {{{
 		const module = this.module()
 
 		if moduleName == null {
@@ -702,8 +702,8 @@ abstract class Importer extends Statement {
 		@scope.line(this.line() - 1)
 
 		return true
-	} // }}}
-	loadMetadata() { // {{{
+	} # }}}
+	loadMetadata() { # {{{
 		const module = this.module()
 		const source = fs.readFile(@filename)
 		const target = @options.target
@@ -788,8 +788,8 @@ abstract class Importer extends Statement {
 		module.addHashes(@filename, compiler.toHashes())
 
 		@variationId = compiler.toVariationId()
-	} // }}}
-	loadNodeFile(filename = null, moduleName = null) { // {{{
+	} # }}}
+	loadNodeFile(filename = null, moduleName = null) { # {{{
 		const module = this.module()
 
 		let file = null
@@ -882,8 +882,8 @@ abstract class Importer extends Statement {
 		}
 
 		return true
-	} // }}}
-	loadNodeModule(moduleName, start) { // {{{
+	} # }}}
+	loadNodeModule(moduleName, start) { # {{{
 		let dirs = $nodeModulesPaths(start)
 
 		let file, metadata
@@ -896,27 +896,27 @@ abstract class Importer extends Statement {
 		}
 
 		return false
-	} // }}}
-	readMetadata(file) { // {{{
+	} # }}}
+	readMetadata(file) { # {{{
 		try {
 			return JSON.parse(fs.readFile(file), fs.unescapeJSON)
 		}
 		catch {
 			return null
 		}
-	} // }}}
-	registerMacro(name, macro) { // {{{
+	} # }}}
+	registerMacro(name, macro) { # {{{
 		@parent.registerMacro(name, macro)
-	} // }}}
-	toImportFragments(fragments, destructuring = true) { // {{{
+	} # }}}
+	toImportFragments(fragments, destructuring = true) { # {{{
 		if @isKSFile {
 			this.toKSFileFragments(fragments, destructuring)
 		}
 		else {
 			this.toNodeFileFragments(fragments, destructuring)
 		}
-	} // }}}
-	toKSFileFragments(fragments, destructuring) { // {{{
+	} # }}}
+	toKSFileFragments(fragments, destructuring) { # {{{
 		if @count == 0 {
 			if @alias != null {
 				const line = fragments
@@ -1073,8 +1073,8 @@ abstract class Importer extends Statement {
 				}
 			}
 		}
-	} // }}}
-	toNodeFileFragments(fragments, destructuring) { // {{{
+	} # }}}
+	toNodeFileFragments(fragments, destructuring) { # {{{
 		if @count == 0 {
 			if @alias != null {
 				const line = fragments
@@ -1168,8 +1168,8 @@ abstract class Importer extends Statement {
 				}
 			}
 		}
-	} // }}}
-	toRequireFragments(fragments) { // {{{
+	} # }}}
+	toRequireFragments(fragments) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -1239,8 +1239,8 @@ abstract class Importer extends Statement {
 
 			@reusable = true
 		}
-	} // }}}
-	private validateRequirement(required: Boolean | Number, name: String, metadata) { // {{{
+	} # }}}
+	private validateRequirement(required: Boolean | Number, name: String, metadata) { # {{{
 		if required {
 			SyntaxException.throwMissingRequirement(name, this)
 		}
@@ -1252,47 +1252,47 @@ abstract class Importer extends Statement {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class ImportDeclaration extends Statement {
 	private {
 		_declarators = []
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		for declarator in @data.declarations {
 			@declarators.push(declarator = new ImportDeclarator(declarator, this))
 
 			declarator.initiate()
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for declarator in @declarators {
 			declarator.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for declarator in @declarators {
 			declarator.prepare()
 		}
-	} // }}}
+	} # }}}
 	translate()
-	registerMacro(name, macro) { // {{{
+	registerMacro(name, macro) { # {{{
 		@parent.registerMacro(name, macro)
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		for declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
-	} // }}}
+	} # }}}
 }
 
 class ImportDeclarator extends Importer {
 	flagForcefullyRebinded()
 	override mode() => ImportMode::Import
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		this.toImportFragments(fragments)
-	} // }}}
+	} # }}}
 }
 
 class ImportWorker {
@@ -1302,12 +1302,12 @@ class ImportWorker {
 		_node
 		_scope: Scope
 	}
-	constructor(@metaRequirements, @metaExports, @node) { // {{{
+	constructor(@metaRequirements, @metaExports, @node) { # {{{
 		@scope = new ImportScope(node.scope())
-	} // }}}
+	} # }}}
 	hasType(name: String) => @scope.hasDefinedVariable(name)
 	getType(name: String) => @scope.getDefinedVariable(name).getDeclaredType()
-	prepare(arguments) { // {{{
+	prepare(arguments) { # {{{
 		const module = @node.module()
 		const references = {}
 		const queue = []
@@ -1520,6 +1520,6 @@ class ImportWorker {
 		while queue.length > 0 {
 			queue.shift()()
 		}
-	} // }}}
+	} # }}}
 	scope() => @scope
 }

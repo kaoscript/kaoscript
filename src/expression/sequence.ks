@@ -4,27 +4,27 @@ class SequenceExpression extends Expression {
 		_last: Number
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		for expression in @data.expressions {
 			@expressions.push(expression = $compile.expression(expression, this))
 
 			expression.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for expression in @expressions {
 			expression.prepare()
 		}
 
 		@last = @expressions.length - 1
 		@type = @expressions[@last].type()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for expression in @expressions {
 			expression.translate()
 		}
-	} // }}}
-	isUsingVariable(name) { // {{{
+	} # }}}
+	isUsingVariable(name) { # {{{
 		for const expression in @expressions {
 			if expression.isUsingVariable(name) {
 				return true
@@ -32,15 +32,15 @@ class SequenceExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		for const expression in @expressions {
 			expression.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.code('(')
 
 		for const expression, index in @expressions {
@@ -52,8 +52,8 @@ class SequenceExpression extends Expression {
 		}
 
 		fragments.code(')')
-	} // }}}
-	toBooleanFragments(fragments, mode) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, mode) { # {{{
 		fragments.code('(')
 
 		for const expression, index in @expressions til @last {
@@ -67,6 +67,6 @@ class SequenceExpression extends Expression {
 		fragments.code($comma).compileBoolean(@expressions[@last])
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	type() => @type
 }

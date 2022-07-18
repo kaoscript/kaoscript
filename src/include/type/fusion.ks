@@ -4,7 +4,7 @@ class FusionType extends Type {
 		_types: Array<Type>
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FusionType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
 			const fusion = new FusionType(scope)
 
 			queue.push(() => {
@@ -14,9 +14,9 @@ class FusionType extends Type {
 			})
 
 			return fusion
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, @types = []) { // {{{
+	constructor(@scope, @types = []) { # {{{
 		super(scope)
 
 		for const type in @types {
@@ -24,24 +24,24 @@ class FusionType extends Type {
 				@nullable = true
 			}
 		}
-	} // }}}
-	addType(type: Type) { // {{{
+	} # }}}
+	addType(type: Type) { # {{{
 		@types.push(type)
 
 		if type.isNullable() {
 			@nullable = true
 		}
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind::Fusion
 			types: [type.toExportOrReference(references, indexDelta, mode, module) for type in @types]
 		}
-	} // }}}
-	getProperty(name: String): Type? { // {{{
+	} # }}}
+	getProperty(name: String): Type? { # {{{
 		for const type in @types {
 			if const property = type.getProperty(name) {
 				return property
@@ -49,27 +49,27 @@ class FusionType extends Type {
 		}
 
 		return null
-	} // }}}
-	isArray() { // {{{
+	} # }}}
+	isArray() { # {{{
 		if @types.length != 0 {
 			return @types[0].isArray()
 		}
 		else {
 			return false
 		}
-	} // }}}
-	isDictionary() { // {{{
+	} # }}}
+	isDictionary() { # {{{
 		if @types.length != 0 {
 			return @types[0].isDictionary()
 		}
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable
-	isSubsetOf(value: FusionType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: FusionType, mode: MatchingMode) { # {{{
 		if @types.length != value._types.length {
 			return false
 		}
@@ -85,18 +85,18 @@ class FusionType extends Type {
 		}
 
 		return match == @types.length
-	} // }}}
-	parameter() { // {{{
+	} # }}}
+	parameter() { # {{{
 		for const type in @types when type.isArray() {
 			return type.parameter()
 		}
 
 		return AnyType.NullableUnexplicit
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		for type, i in @types {
@@ -108,8 +108,8 @@ class FusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		for type, i in @types {
@@ -121,15 +121,15 @@ class FusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('fusion', @nullable)
 
 		for const type in @types {
 			type.toVariations(variations)
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @types.length == 1 {
 			const type = @types[0]
 
@@ -143,5 +143,5 @@ class FusionType extends Type {
 		else {
 			return this
 		}
-	} // }}}
+	} # }}}
 }

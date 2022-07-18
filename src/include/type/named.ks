@@ -5,82 +5,82 @@ class NamedType extends Type {
 		_name: String
 		_type: Type
 	}
-	constructor(@name, @type) { // {{{
+	constructor(@name, @type) { # {{{
 		super(type.scope())
-	} // }}}
+	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
 	canBeNumber(any = true) => @type.canBeNumber(any)
 	canBeString(any = true) => @type.canBeString(any)
-	clone() { // {{{
+	clone() { # {{{
 		@cloned = true
 
 		return new NamedType(@name, @type.clone())
-	} // }}}
+	} # }}}
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
 	discardAlias() => this.isAlias() ? @type.discardAlias() : this
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
 		}
 		else {
 			return @type.export(references, indexDelta, mode, module)
 		}
-	} // }}}
-	flagAlien() { // {{{
+	} # }}}
+	flagAlien() { # {{{
 		@type.flagAlien()
 
 		return this
-	} // }}}
-	flagAltering(): this { // {{{
+	} # }}}
+	flagAltering(): this { # {{{
 		@type.flagAltering()
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		@type.flagExported(explicitly)
 
 		return this
-	} // }}}
-	flagReferenced() { // {{{
+	} # }}}
+	flagReferenced() { # {{{
 		@type.flagReferenced()
 
 		return this
-	} // }}}
-	flagRequired() { // {{{
+	} # }}}
+	flagRequired() { # {{{
 		@type.flagRequired()
 
 		return this
-	} // }}}
-	flagRequirement(): this { // {{{
+	} # }}}
+	flagRequirement(): this { # {{{
 		@type.flagRequirement()
-	} // }}}
-	flagSealed() { // {{{
+	} # }}}
+	flagSealed() { # {{{
 		@type.flagSealed()
 
 		return this
-	} // }}}
+	} # }}}
 	getAlterationReference() => @type.getAlterationReference()
-	getHierarchy() { // {{{
+	getHierarchy() { # {{{
 		if @type is ClassType {
 			return @type.getHierarchy(@name)
 		}
 		else {
 			return [@name]
 		}
-	} // }}}
+	} # }}}
 	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => `__ks_\(@name)`
-	getSealedPath() { // {{{
+	getSealedPath() { # {{{
 		if @container? {
 			return `\(@container.path()).\(this.getSealedName())`
 		}
 		else {
 			return this.getSealedName()
 		}
-	} // }}}
+	} # }}}
 	hasContainer() => ?@container
 	hashCode() => `&\(@name)`
 	hasProperty(name: String) => @type.hasProperty(name)
@@ -88,7 +88,7 @@ class NamedType extends Type {
 	isAlien() => @type.isAlien()
 	isAltering() => @type.isAltering()
 	isArray() => @type.isArray()
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if super(value, anycast, nullcast, downcast) {
 			return true
 		}
@@ -179,7 +179,7 @@ class NamedType extends Type {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
@@ -197,7 +197,7 @@ class NamedType extends Type {
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
-	isInheriting(superclass: NamedType) { // {{{
+	isInheriting(superclass: NamedType) { # {{{
 		let name = superclass.name()
 		let that = this
 
@@ -210,9 +210,9 @@ class NamedType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isInstanceOf(value: Type) => @type.isInstanceOf(value)
-	isMorePreciseThan(value: Type) { // {{{
+	isMorePreciseThan(value: Type) { # {{{
 		if value is NamedType {
 			if this.isClass() && value.isClass() {
 				return @name != value.name() && this.matchInheritanceOf(value)
@@ -232,7 +232,7 @@ class NamedType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isNamed() => true
 	isNamespace() => @type.isNamespace()
 	isNative() => $natives[@name] == true
@@ -248,7 +248,7 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
-	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if this == value {
 			return true
 		}
@@ -319,14 +319,14 @@ class NamedType extends Type {
 				return @type.isSubsetOf(value, mode)
 			}
 		}
-	} // }}}
+	} # }}}
 	isSystemic() => @type.isSystemic()
 	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => $virtuals[@name]
 	majorOriginal() => @type.majorOriginal()
-	matchClassName(that: Type?) { // {{{
+	matchClassName(that: Type?) { # {{{
 		if that == null {
 			return false
 		}
@@ -340,8 +340,8 @@ class NamedType extends Type {
 		}
 
 		return false
-	} // }}}
-	matchContentOf(value: Type?) { // {{{
+	} # }}}
+	matchContentOf(value: Type?) { # {{{
 		if value == null {
 			return false
 		}
@@ -430,8 +430,8 @@ class NamedType extends Type {
 		else {
 			return @type.matchContentOf(value)
 		}
-	} // }}}
-	matchInheritanceOf(base: Type) { // {{{
+	} # }}}
+	matchInheritanceOf(base: Type) { # {{{
 		const basename = base.name()
 
 		if @name == basename {
@@ -448,44 +448,44 @@ class NamedType extends Type {
 		}
 
 		return false
-	} // }}}
-	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType || @type is StructType || @type is TupleType {
 			return @type.metaReference(references, indexDelta, mode, module, @name)
 		}
 		else {
 			throw new NotSupportedException()
 		}
-	} // }}}
+	} # }}}
 	minorOriginal() => @type.minorOriginal()
 	name() => @name
 	name(@name) => this
 	origin() => @type.origin()
 	origin(origin) => @type.origin(origin)
-	originals(...originals): this { // {{{
+	originals(...originals): this { # {{{
 		@type.originals(...originals)
-	} // }}}
+	} # }}}
 	parameter() => @type.parameter()
-	path() { // {{{
+	path() { # {{{
 		if @container? {
 			return `\(@container.path()).\(@name)`
 		}
 		else {
 			return @name
 		}
-	} // }}}
-	reduce(type: Type) { // {{{
+	} # }}}
+	reduce(type: Type) { # {{{
 		if @type.isReducible() {
 			return @type.reduce(type)
 		}
 		else {
 			return this
 		}
-	} // }}}
+	} # }}}
 	referenceIndex() => @type.referenceIndex()
 	resetReferences() => @type.resetReferences()
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
-	split(types: Array) { // {{{
+	split(types: Array) { # {{{
 		if @type.isAlias() || @type.isUnion() {
 			@type.split(types)
 		}
@@ -497,79 +497,79 @@ class NamedType extends Type {
 		}
 
 		return types
-	} // }}}
-	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType {
 			return @type.toAlterationReference(references, indexDelta, mode, module)
 		}
 		else {
 			throw new NotSupportedException()
 		}
-	} // }}}
-	toCastFragments(fragments) { // {{{
+	} # }}}
+	toCastFragments(fragments) { # {{{
 		@type.toCastFragments(fragments)
-	} // }}}
-	toExportFragment(fragments, name, variable) { // {{{
+	} # }}}
+	toExportFragment(fragments, name, variable) { # {{{
 		if @type.isExportingFragment() {
 			super(fragments, name, variable)
 		}
-	} // }}}
+	} # }}}
 	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toExportOrIndex(references, indexDelta, mode, module)
 	toFragments(fragments, node)
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toMetadata(references, indexDelta, mode, module)
 	toQuote() => @name
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType && @type.isPredefined() {
 			return @name
 		}
 		else {
 			return @type.toReference(references, indexDelta, mode, module)
 		}
-	} // }}}
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		if const tof = $runtime.typeof(@name, node) {
 			fragments.code(`!\(tof)(`).compile(node).code(')')
 		}
 		else {
 			@type.toNegativeTestFragments(fragments, node, junction)
 		}
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		if const tof = $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
 			@type.toPositiveTestFragments(fragments, node, junction)
 		}
-	} // }}}
+	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)
-	override toVariations(variations) { // {{{
+	override toVariations(variations) { # {{{
 		variations.push('named', @name)
 
 		@type.toVariations(variations)
-	} // }}}
+	} # }}}
 	type() => @type
-	unflagAltering(): this { // {{{
+	unflagAltering(): this { # {{{
 		@type.unflagAltering()
-	} // }}}
-	walk(fn) { // {{{
+	} # }}}
+	walk(fn) { # {{{
 		if @type is DictionaryType || @type is NamespaceType {
 			@type.walk(fn)
 		}
 		else {
 			throw new NotSupportedException()
 		}
-	} // }}}
+	} # }}}
 }
 
 class NamedContainerType extends NamedType {
 	private {
 		_properties			= {}
 	}
-	constructor(@name, @type) { // {{{
+	constructor(@name, @type) { # {{{
 		super(name, type)
-	} // }}}
-	addProperty(name: String, property: Type) { // {{{
+	} # }}}
+	addProperty(name: String, property: Type) { # {{{
 		if property is NamedType {
 			property = property.duplicate().container(this)
 		}
@@ -577,8 +577,8 @@ class NamedContainerType extends NamedType {
 		@type.addProperty(name, property)
 
 		@properties[name] = property
-	} // }}}
-	getProperty(name: String): Type? { // {{{
+	} # }}}
+	getProperty(name: String): Type? { # {{{
 		if @properties[name] is Type {
 			return @properties[name]
 		}
@@ -594,9 +594,9 @@ class NamedContainerType extends NamedType {
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	hasProperty(name: String): Boolean => @type.hasProperty(name)
-	matchContentOf(value: Type?) { // {{{
+	matchContentOf(value: Type?) { # {{{
 		if value == null {
 			return false
 		}
@@ -636,5 +636,5 @@ class NamedContainerType extends NamedType {
 		else {
 			return @type.matchContentOf(value)
 		}
-	} // }}}
+	} # }}}
 }

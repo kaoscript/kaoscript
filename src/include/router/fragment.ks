@@ -1,4 +1,4 @@
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { // {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { # {{{
 	const allArgs = tree.min == 0 && tree.rest
 
 	lateinit const fragments
@@ -94,13 +94,13 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, n
 	}
 
 	return useAllArgs
-} // }}}
+} # }}}
 
-func isNeedingTestings(tree: TreeBranch): Boolean { // {{{
+func isNeedingTestings(tree: TreeBranch): Boolean { # {{{
 	return true
-} // }}}
+} # }}}
 
-func isNeedingTestings(tree: TreeLeaf): Boolean { // {{{
+func isNeedingTestings(tree: TreeLeaf): Boolean { # {{{
 	const parameters = tree.function.parameters()
 	const async = tree.function.isAsync()
 
@@ -115,9 +115,9 @@ func isNeedingTestings(tree: TreeLeaf): Boolean { // {{{
 	}
 
 	return true
-} // }}}
+} # }}}
 
-func hasAlternative(tree, index: Number): Boolean { // {{{
+func hasAlternative(tree, index: Number): Boolean { # {{{
 	if index + 1 == tree.order.length {
 		return false
 	}
@@ -133,9 +133,9 @@ func hasAlternative(tree, index: Number): Boolean { // {{{
 	}
 
 	return false
-} // }}}
+} # }}}
 
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, hasAlternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { // {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, hasAlternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
 	const type = leaf.type
 
 	const isTest = !((anyTested || type.isAny()) && type.isNullable() && (startIndex == -1 || leaf.max <= 0))
@@ -280,9 +280,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	}
 
 	return !isTest
-} // }}}
+} # }}}
 
-func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, fragments, node: AbstractNode): void { // {{{
+func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, fragments, node: AbstractNode): void { # {{{
 	const { function, arguments } = leaf
 	const async = function.isAsync()
 	const parameters = function.parameters()
@@ -456,9 +456,9 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	}
 
 	line.code(`)`).done()
-} // }}}
+} # }}}
 
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, branch: TreeBranch, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, alternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { // {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, branch: TreeBranch, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, alternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
 	const type = branch.type
 	let useAllArgs = false
 
@@ -598,9 +598,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 	}
 
 	return useAllArgs
-} // }}}
+} # }}}
 
-func isUsingTestings(branch: TreeBranch, startIndex: Number): Boolean { // {{{
+func isUsingTestings(branch: TreeBranch, startIndex: Number): Boolean { # {{{
 	if branch.order.length != 1 || startIndex != -1 {
 		return true
 	}
@@ -620,9 +620,9 @@ func isUsingTestings(branch: TreeBranch, startIndex: Number): Boolean { // {{{
 	else {
 		return true
 	}
-} // }}}
+} # }}}
 
-func isVarargs(assessement: Assessement) { // {{{
+func isVarargs(assessement: Assessement) { # {{{
 	for const tree in assessement.trees {
 		if tree.variadic {
 			return true
@@ -630,9 +630,9 @@ func isVarargs(assessement: Assessement) { // {{{
 	}
 
 	return false
-} // }}}
+} # }}}
 
-func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): string { // {{{
+func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): string { # {{{
 	const hash = type.hashCode(true)
 
 	if const name = this.testers[hash] {
@@ -654,13 +654,13 @@ func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): string { 
 	this.testers[hash] = name
 
 	return name
-} // }}}
+} # }}}
 
-func toDefaultFooter(fragments, node: AbstractNode) { // {{{
+func toDefaultFooter(fragments, node: AbstractNode) { # {{{
 	fragments.line(`throw \($runtime.helper(node)).badArgs()`)
-} // }}}
+} # }}}
 
-func buildHelper(fragments: MarkWriter, args: String, node: AbstractNode) { // {{{
+func buildHelper(fragments: MarkWriter, args: String, node: AbstractNode) { # {{{
 	const allArgsMark = fragments.mark()
 	const pointsMark = allArgsMark.mark()
 
@@ -694,4 +694,4 @@ func buildHelper(fragments: MarkWriter, args: String, node: AbstractNode) { // {
 		}
 		tester: getTester^$(context, fragments, node)
 	}
-} // }}}
+} # }}}

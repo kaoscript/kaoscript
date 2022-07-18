@@ -24,7 +24,7 @@ class ClassMethodDeclaration extends Statement {
 		_returnNull: Boolean				= false
 		_topNodes: Array					= []
 	}
-	static toClassRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
+	static toClassRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
 		const classname = variable.name()
 
 		const assessment = Router.assess(methods, name, node)
@@ -78,8 +78,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		footer(fragments)
-	} // }}}
-	static toInstanceHeadFragments(name, fragments) { // {{{
+	} # }}}
+	static toInstanceHeadFragments(name, fragments) { # {{{
 		const ctrl = fragments.newControl()
 
 		ctrl.code(`\(name)()`).step()
@@ -87,8 +87,8 @@ class ClassMethodDeclaration extends Statement {
 		ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this, arguments)`)
 
 		ctrl.done()
-	} // }}}
-	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
+	} # }}}
+	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
 		const classname = variable.name()
 
 		const assessment = Router.assess(methods, name, node)
@@ -159,8 +159,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		footer(fragments)
-	} // }}}
-	constructor(data, parent) { // {{{
+	} # }}}
+	constructor(data, parent) { # {{{
 		super(data, parent, parent.newInstanceMethodScope(this))
 
 		@name = data.name.name
@@ -211,8 +211,8 @@ class ClassMethodDeclaration extends Statement {
 				parent._classMethods[@name] = [this]
 			}
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 
@@ -224,8 +224,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		return if @analysed
 
 		@parent.updateMethodScope(this)
@@ -403,8 +403,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		@analysed = true
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		const index = @forked || (@overriding && @type.isForked()) ? @type.getForkedIndex() : @type.index()
 
 		if @instance {
@@ -440,13 +440,13 @@ class ClassMethodDeclaration extends Statement {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
-	} // }}}
-	addAtThisParameter(statement: AliasStatement) { // {{{
+	} # }}}
+	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
-	} // }}}
-	addIndigentValue(value: Expression, parameters) { // {{{
+	} # }}}
+	addIndigentValue(value: Expression, parameters) { # {{{
 		const class = @parent.type().type()
 		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
 
@@ -457,18 +457,18 @@ class ClassMethodDeclaration extends Statement {
 		})
 
 		return name
-	} // }}}
-	addTopNode(node) { // {{{
+	} # }}}
+	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} // }}}
+	} # }}}
 	authority() => this
-	flagForked(class: ClassType, @forks) { // {{{
+	flagForked(class: ClassType, @forks) { # {{{
 		@type.flagForked(false)
 
 		class.updateInstanceMethodIndex(@name, @type)
 
 		@forked = true
-	} // }}}
+	} # }}}
 	getFunctionNode() => this
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
@@ -486,7 +486,7 @@ class ClassMethodDeclaration extends Statement {
 	length() => @parameters.length
 	name() => @name
 	parameters() => @parameters
-	toForkFragments(fragments) { // {{{
+	toForkFragments(fragments) { # {{{
 		const ctrl = fragments.newControl()
 
 		ctrl.code(`__ks_func_\(@name)_\(@type.index())(`)
@@ -538,8 +538,8 @@ class ClassMethodDeclaration extends Statement {
 		ctrl.line(`return this.__ks_func_\(@name)_\(@type.getForkedIndex())(\(parameters))`)
 
 		ctrl.done()
-	} // }}}
-	toIndigentFragments(fragments) { // {{{
+	} # }}}
+	toIndigentFragments(fragments) { # {{{
 		for const {name, value, parameters} in @indigentValues {
 			const ctrl = fragments.newControl()
 
@@ -554,8 +554,8 @@ class ClassMethodDeclaration extends Statement {
 
 			ctrl.done() unless @parent._es5
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		const ctrl = fragments.newControl()
 
 		if @parent._es5 {
@@ -594,8 +594,8 @@ class ClassMethodDeclaration extends Statement {
 		ctrl.done() unless @parent._es5
 
 		this.toIndigentFragments(fragments)
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @analysed {
 			return @type
 		}
@@ -604,9 +604,9 @@ class ClassMethodDeclaration extends Statement {
 
 			return @type
 		}
-	} // }}}
+	} # }}}
 	private {
-		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { // {{{
+		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
 			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if !@override {
@@ -745,8 +745,8 @@ class ClassMethodDeclaration extends Statement {
 			}
 
 			return null
-		} // }}}
-		listOverloadedMethods(superclass: ClassType) { // {{{
+		} # }}}
+		listOverloadedMethods(superclass: ClassType) { # {{{
 			if @instance {
 				if const methods = superclass.listInstanceMethods(@name) {
 					for const method in methods {
@@ -777,6 +777,6 @@ class ClassMethodDeclaration extends Statement {
 					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::MissingReturn + MatchingMode::MissingError
 				)
 			}
-		} // }}}
+		} # }}}
 	}
 }

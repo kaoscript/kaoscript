@@ -1,12 +1,12 @@
-func expandUnboundeds(trees: Array<Tree>, node: AbstractNode) { // {{{
+func expandUnboundeds(trees: Array<Tree>, node: AbstractNode) { # {{{
 	for const tree in trees til -1 {
 		updateUnboundedTree(tree, false)
 	}
 
 	updateUnboundedTree(trees.last(), true)
-} // }}}
+} # }}}
 
-func getMaxMinAfter(tree: TreeBranch) { // {{{
+func getMaxMinAfter(tree: TreeBranch) { # {{{
 	let min = 0
 
 	for const column of tree.columns {
@@ -19,31 +19,31 @@ func getMaxMinAfter(tree: TreeBranch) { // {{{
 	}
 
 	return min
-} // }}}
+} # }}}
 
-func getMaxMinAfter(tree: TreeLeaf) { // {{{
+func getMaxMinAfter(tree: TreeLeaf) { # {{{
 	return tree.function.isAsync() ? 1 : 0
-} // }}}
+} # }}}
 
-func getMaxMinFromIndex(tree: TreeBranch) { // {{{
+func getMaxMinFromIndex(tree: TreeBranch) { # {{{
 	if tree.index < 0 {
 		return -tree.index
 	}
 	else {
 		return 0
 	}
-} // }}}
+} # }}}
 
-func getMaxMinFromIndex(tree: TreeLeaf) { // {{{
+func getMaxMinFromIndex(tree: TreeLeaf) { # {{{
 	if tree.index < 0 {
 		return -tree.index
 	}
 	else {
 		return tree.function.isAsync() ? 1 : 0
 	}
-} // }}}
+} # }}}
 
-func getMaxMinFromFunction(tree: TreeBranch) { // {{{
+func getMaxMinFromFunction(tree: TreeBranch) { # {{{
 	let min = 0
 
 	for const column of tree.columns {
@@ -51,13 +51,13 @@ func getMaxMinFromFunction(tree: TreeBranch) { // {{{
 	}
 
 	return min
-} // }}}
+} # }}}
 
-func getMaxMinFromFunction(tree: TreeLeaf) { // {{{
+func getMaxMinFromFunction(tree: TreeLeaf) { # {{{
 	return getMinAfter(tree.function)
-} // }}}
+} # }}}
 
-func getRowType(row, tree: TreeBranch | TreeLeaf) { // {{{
+func getRowType(row, tree: TreeBranch | TreeLeaf) { # {{{
 	for const type in row.types {
 		if type.index == tree.index {
 			return type
@@ -65,9 +65,9 @@ func getRowType(row, tree: TreeBranch | TreeLeaf) { // {{{
 	}
 
 	return null
-} // }}}
+} # }}}
 
-func reduceMinToZero(tree: TreeBranch | TreeLeaf) { // {{{
+func reduceMinToZero(tree: TreeBranch | TreeLeaf) { # {{{
 	if tree.min != 0 {
 		if tree.variadic {
 			tree.min = 0
@@ -82,9 +82,9 @@ func reduceMinToZero(tree: TreeBranch | TreeLeaf) { // {{{
 			reduceMinToZero(column)
 		}
 	}
-} // }}}
+} # }}}
 
-func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { // {{{
+func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { # {{{
 	if unlimited {
 		for const hash in tree.order {
 			if updateUnboundedTree4(tree, tree.columns[hash], true, 0, {}) {
@@ -99,9 +99,9 @@ func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { // {{{
 			updateUnboundedTree4(tree, tree.columns[hash], false, 0, {})
 		}
 	}
-} // }}}
+} # }}}
 
-func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { // {{{
+func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
 	let unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
 	min += node.min
@@ -113,9 +113,9 @@ func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min:
 	}
 
 	return unbounded
-} // }}}
+} # }}}
 
-func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { // {{{
+func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
 	const unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
 	const function = node.function.index()
@@ -216,18 +216,18 @@ func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: N
 	}
 
 	return unbounded
-} // }}}
+} # }}}
 
-func getMinAfter(function: FunctionType): Number { // {{{
+func getMinAfter(function: FunctionType): Number { # {{{
 	if function.isAsync() {
 		return function.getMinAfter() + 1
 	}
 	else {
 		return function.getMinAfter()
 	}
-} // }}}
+} # }}}
 
-func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { // {{{
+func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
 	const parameter = getRowType(tree.rows[0], tree).parameter
 	let unbounded = unlimited && tree.rest
 
@@ -288,4 +288,4 @@ func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: 
 	}
 
 	return unbounded
-} // }}}
+} # }}}

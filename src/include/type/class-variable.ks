@@ -7,7 +7,7 @@ class ClassVariableType extends Type {
 		_type: Type
 	}
 	static {
-		fromAST(data, node: AbstractNode): ClassVariableType { // {{{
+		fromAST(data, node: AbstractNode): ClassVariableType { # {{{
 			const scope = node.scope()
 
 			let type: ClassVariableType
@@ -47,8 +47,8 @@ class ClassVariableType extends Type {
 			}
 
 			return type
-		} // }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { // {{{
+		} # }}}
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
 			const data = index
 			const type = new ClassVariableType(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 
@@ -58,17 +58,17 @@ class ClassVariableType extends Type {
 			type._lateInit = data.lateInit
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, @type) { // {{{
+	constructor(@scope, @type) { # {{{
 		super(scope)
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
+	} # }}}
 	discardVariable() => @type
 	access(@access) => this
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const data = {
 			access: @access
 			type: @type.toReference(references, indexDelta, mode, module)
@@ -79,23 +79,23 @@ class ClassVariableType extends Type {
 		}
 
 		return data
-	} // }}}
-	flagNullable() { // {{{
+	} # }}}
+	flagNullable() { # {{{
 		@type = @type.setNullable(true)
-	} // }}}
+	} # }}}
 	hasDefaultValue() => @default
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
 	isNullable() => @type.isNullable()
 	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
-	isSubsetOf(value: ClassVariableType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: ClassVariableType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode::Exact)
 		}
 		else {
 			return true
 		}
-	} // }}}
+	} # }}}
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
 	toFragments(fragments, node) => @type.toFragments(fragments, node)

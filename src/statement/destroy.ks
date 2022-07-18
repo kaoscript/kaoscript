@@ -4,7 +4,7 @@ class DestroyStatement extends Statement {
 		_identifier: Boolean		= false
 		_type: Type
 	}
-	initiate() { // {{{
+	initiate() { # {{{
 		if @data.variable.kind == NodeKind::Identifier {
 			if !@scope.hasVariable(@data.variable.name) {
 				ReferenceException.throwNotDefined(@data.variable.name, this)
@@ -19,26 +19,26 @@ class DestroyStatement extends Statement {
 
 
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if !@identifier {
 			@expression.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @identifier {
 			@type = @scope.getVariable(@data.variable.name, @scope.line() - 1).getRealType()
 		}
 		else {
 			@expression.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if !@identifier {
 			@expression.translate()
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @identifier {
 			const variable = @scope.getVariable(@data.variable.name, @scope.line() - 1)
 			const type = @type.discardReference()
@@ -52,5 +52,5 @@ class DestroyStatement extends Statement {
 		else {
 			fragments.newLine().code('delete ').compile(@expression).done()
 		}
-	} // }}}
+	} # }}}
 }

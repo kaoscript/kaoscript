@@ -12,7 +12,7 @@ class ParameterType extends Type {
 	}
 	static {
 		fromAST(data, node: AbstractNode): ParameterType => ParameterType.fromAST(data, false, node.scope(), true, node)
-		fromAST(data, overridable: Boolean, scope: Scope, defined: Boolean, node: AbstractNode): ParameterType { // {{{
+		fromAST(data, overridable: Boolean, scope: Scope, defined: Boolean, node: AbstractNode): ParameterType { # {{{
 			let type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
 
 			auto default = false
@@ -58,8 +58,8 @@ class ParameterType extends Type {
 			}
 
 			return parameter
-		} // }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { // {{{
+		} # }}}
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
 			const data = index
 			const subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			const type = new ParameterType(scope, data.name, subtype, data.min, data.max, data.default)
@@ -75,9 +75,9 @@ class ParameterType extends Type {
 			}
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, @type, @min = 1, @max = 1, @default = false) { // {{{
+	constructor(@scope, @type, @min = 1, @max = 1, @default = false) { # {{{
 		super(scope)
 
 		@variableType = @type
@@ -86,8 +86,8 @@ class ParameterType extends Type {
 		if @nullableByDefault {
 			@type = @type.setNullable(true)
 		}
-	} // }}}
-	constructor(@scope, @name, @type, @min = 1, @max = 1, @default = false) { // {{{
+	} # }}}
+	constructor(@scope, @name, @type, @min = 1, @max = 1, @default = false) { # {{{
 		super(scope)
 
 		@variableType = @type
@@ -96,9 +96,9 @@ class ParameterType extends Type {
 		if @nullableByDefault {
 			@type = @type.setNullable(true)
 		}
-	} // }}}
+	} # }}}
 	clone() => new ParameterType(@scope, @name, @type, @min, @max, @default)
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const export = {}
 
 		if @name != null {
@@ -122,8 +122,8 @@ class ParameterType extends Type {
 		}
 
 		return export
-	} // }}}
-	getArgumentType(): Type { // {{{
+	} # }}}
+	getArgumentType(): Type { # {{{
 		if @type.isNullable() {
 			return @type
 		}
@@ -133,7 +133,7 @@ class ParameterType extends Type {
 		else {
 			return @type
 		}
-	} // }}}
+	} # }}}
 	getDefaultValue() => @defaultValue
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
@@ -144,7 +144,7 @@ class ParameterType extends Type {
 	isMorePreciseThan(value: Type) => @type.isMorePreciseThan(value)
 	isMissingType() => !@type.isExplicit()
 	isNullable() => @type.isNullable()
-	isSubsetOf(value: ParameterType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
 
 		if mode !~ MatchingMode::IgnoreName && @name != value.name() != null {
 			return false
@@ -172,11 +172,11 @@ class ParameterType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isVarargs() => @max > 1
 	matchContentOf(value: Type) => @type.matchContentOf(value)
 	matchContentOf(value: ParameterType) => @type.matchContentOf(value.type())
-	matchArgument(value: Expression) { // {{{
+	matchArgument(value: Expression) { # {{{
 		value.setCastingEnum(false)
 
 		const type = value.type()
@@ -191,19 +191,19 @@ class ParameterType extends Type {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 	matchArgument(value: Parameter) => this.matchArgument(value.type())
 	matchArgument(value: Type) => value.matchContentOf(@type)
 	max(): @max
 	min(): @min
 	name() => @name
-	setDefaultValue(@defaultValue, @comprehensive = true) { // {{{
+	setDefaultValue(@defaultValue, @comprehensive = true) { # {{{
 		@default = true
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		auto fragments = ''
 
 		if @max > 1 {
@@ -244,17 +244,17 @@ class ParameterType extends Type {
 		}
 
 		return fragments
-	} // }}}
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		@type.toNegativeTestFragments(fragments, node, junction)
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		@type.toPositiveTestFragments(fragments, node, junction)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('param', @name, @min, @max, @default)
 
 		@type.toVariations(variations)
-	} // }}}
+	} # }}}
 	type() => @type
 }

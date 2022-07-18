@@ -12,7 +12,7 @@ class ClassVariableDeclaration extends AbstractNode {
 		_name: String
 		_value						= null
 	}
-	constructor(data, parent) { // {{{
+	constructor(data, parent) { # {{{
 		super(data, parent)
 
 		@name = data.name.name
@@ -57,8 +57,8 @@ class ClassVariableDeclaration extends AbstractNode {
 		else {
 			parent._classVariables[@name] = this
 		}
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		if @data.value? {
 			@defaultValue = true
 			@lateInit = false
@@ -68,8 +68,8 @@ class ClassVariableDeclaration extends AbstractNode {
 				@value.analyse()
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @parent.isExtending() {
 			const type = @parent._extendsType.type()
 
@@ -105,8 +105,8 @@ class ClassVariableDeclaration extends AbstractNode {
 				@initialized = false
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @defaultValue {
 			@value.prepare()
 
@@ -116,9 +116,9 @@ class ClassVariableDeclaration extends AbstractNode {
 
 			@value.translate()
 		}
-	} // }}}
+	} # }}}
 	hasDefaultValue() => @defaultValue
-	initialize(type, node) { // {{{
+	initialize(type, node) { # {{{
 		if !@initialized {
 			@initialized = true
 
@@ -126,14 +126,14 @@ class ClassVariableDeclaration extends AbstractNode {
 				@type.type(type)
 			}
 		}
-	} // }}}
+	} # }}}
 	isImmutable() => @immutable
 	isInitialized() => @initialized
 	isInstance() => @instance
 	isLateInit() => @lateInit
 	isRequiringInitialization() => @type.isRequiringInitialization()
 	name() => @name
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		if @defaultValue {
 			if @instance {
 				fragments
@@ -150,6 +150,6 @@ class ClassVariableDeclaration extends AbstractNode {
 					.done()
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }

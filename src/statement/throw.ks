@@ -4,7 +4,7 @@ class ThrowStatement extends Statement {
 		_inSource: Boolean	= true
 		_value		= null
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
 		do {
@@ -27,12 +27,12 @@ class ThrowStatement extends Statement {
 			}
 		}
 		while parent ?= parent.parent()
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 
 		if type !?= @value.type().discardReference() {
@@ -47,13 +47,13 @@ class ThrowStatement extends Statement {
 		else if @inSource && !this.module().isBinary() {
 			SyntaxException.throwUnreportedError(this)
 		}
-	} // }}}
+	} # }}}
 	isExit() => true
 	isUsingVariable(name) => @value.isUsingVariable(name)
-	translate() { // {{{
+	translate() { # {{{
 		@value.translate()
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @function?.type().isAsync() {
 			fragments
 				.newLine()
@@ -69,5 +69,5 @@ class ThrowStatement extends Statement {
 				.compile(@value)
 				.done()
 		}
-	} // }}}
+	} # }}}
 }

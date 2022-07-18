@@ -9,7 +9,7 @@ class FunctionCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	constructor(@data, match: CallMatch, @node) { // {{{
+	constructor(@data, match: CallMatch, @node) { # {{{
 		super(data)
 
 		@expression = $compile.expression(data.callee, node)
@@ -26,22 +26,22 @@ class FunctionCallee extends Callee {
 		@index = match.function.getCallIndex()
 		@arguments = match.arguments
 		@type = match.function.getReturnType()
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@flatten)
-	} // }}}
-	override hashCode() { // {{{
+	} # }}}
+	override hashCode() { # {{{
 		return `function:\(@index):\(@arguments)`
-	} // }}}
+	} # }}}
 	isInitializingInstanceVariable(name: String): Boolean => false
-	mergeWith(that: Callee) { // {{{
+	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
 		@functions.push(...that.functions())
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@expression.releaseReusable()
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			if @scope == ScopeKind::Argument {
 				fragments
@@ -82,8 +82,8 @@ class FunctionCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toCurryFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toCurryFragments(fragments, mode, node) { # {{{
 		node.module().flag('Helper')
 
 		if @flatten {
@@ -144,9 +144,9 @@ class FunctionCallee extends Callee {
 
 			Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], true, fragments, mode)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 }

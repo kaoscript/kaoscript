@@ -17,15 +17,15 @@ class MemberExpression extends Expression {
 		_usingGetter: Boolean		= false
 		_usingSetter: Boolean		= false
 	}
-	constructor(@data, @parent, @scope) { // {{{
+	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
-	} // }}}
-	constructor(@data, @parent, @scope, @object) { // {{{
+	} # }}}
+	constructor(@data, @parent, @scope, @object) { # {{{
 		super(data, parent, scope)
 
 		@prepareObject = false
-	} // }}}
-	analyse() { // {{{
+	} # }}}
+	analyse() { # {{{
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Computed {
 				@computed = true
@@ -45,8 +45,8 @@ class MemberExpression extends Expression {
 				@property.analyse()
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @prepareObject {
 			@object.prepare()
 
@@ -221,15 +221,15 @@ class MemberExpression extends Expression {
 				TypeException.throwNotNullableExistential(@object, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@object.translate()
 
 		if @computed && !@stringProperty {
 			@property.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if @object.isCallable() {
 			@object.acquireReusable(@nullable || acquire)
 		}
@@ -237,9 +237,9 @@ class MemberExpression extends Expression {
 		if @computed && !@stringProperty && @property.isCallable() {
 			@property.acquireReusable(@nullable || acquire)
 		}
-	} // }}}
+	} # }}}
 	caller() => @object
-	declaration() { // {{{
+	declaration() { # {{{
 		return null if @computed
 
 		if const declaration = @object.variable()?.declaration() {
@@ -254,11 +254,11 @@ class MemberExpression extends Expression {
 		}
 
 		return null
-	} // }}}
-	flagAssignable() { // {{{
+	} # }}}
+	flagAssignable() { # {{{
 		@assignable = true
-	} // }}}
-	inferTypes(inferables) { // {{{
+	} # }}}
+	inferTypes(inferables) { # {{{
 		@object.inferTypes(inferables)
 
 		if @computed && !@stringProperty {
@@ -266,8 +266,8 @@ class MemberExpression extends Expression {
 		}
 
 		return inferables
-	} // }}}
-	initializeVariables(type: Type, node: Expression) { // {{{
+	} # }}}
+	initializeVariables(type: Type, node: Expression) { # {{{
 		return if @computed
 
 		if @object is IdentifierLiteral {
@@ -291,7 +291,7 @@ class MemberExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isComputedMember() => @computed
@@ -305,7 +305,7 @@ class MemberExpression extends Expression {
 	isUsingInstanceVariable(name) => @property == name && @object is IdentifierLiteral && @object.name() == 'this' && @object.type().discard().hasInstanceVariable(@property)
 	isUsingStaticVariable(class, varname) => @property == varname && @object is IdentifierLiteral && @object.name() == class
 	listAssignments(array) => array
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@object.listNonLocalVariables(scope, variables)
 
 		if @computed {
@@ -313,9 +313,9 @@ class MemberExpression extends Expression {
 		}
 
 		return variables
-	} // }}}
+	} # }}}
 	path() => @path
-	releaseReusable() { // {{{
+	releaseReusable() { # {{{
 		if @object.isCallable() {
 			@object.releaseReusable()
 		}
@@ -323,9 +323,9 @@ class MemberExpression extends Expression {
 		if @computed && !@stringProperty && @property.isCallable() {
 			@property.releaseReusable()
 		}
-	} // }}}
+	} # }}}
 	setAssignment(@assignment)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if this.isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
 
@@ -392,8 +392,8 @@ class MemberExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	toBooleanFragments(fragments, mode) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, mode) { # {{{
 		if this.isNullable() && !@tested {
 			if @computed {
 				fragments
@@ -438,8 +438,8 @@ class MemberExpression extends Expression {
 				fragments.code(' === true')
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments) { // {{{
+	} # }}}
+	toNullableFragments(fragments) { # {{{
 		if !@tested {
 			@tested = true
 
@@ -468,8 +468,8 @@ class MemberExpression extends Expression {
 				fragments.compileNullable(@property)
 			}
 		}
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		let fragments = @object.toQuote()
 
 		if @nullable {
@@ -489,8 +489,8 @@ class MemberExpression extends Expression {
 		}
 
 		return fragments
-	} // }}}
-	toReusableFragments(fragments) { // {{{
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		const objectCallable = @object.isCallable()
 
 		if objectCallable {
@@ -525,8 +525,8 @@ class MemberExpression extends Expression {
 		if objectCallable {
 			fragments.code(')')
 		}
-	} // }}}
-	toSetterFragments(fragments, value) { // {{{
+	} # }}}
+	toSetterFragments(fragments, value) { # {{{
 		if @sealed {
 			const name = @property[0] == '_' ? @property.substr(1) : @property
 
@@ -535,6 +535,6 @@ class MemberExpression extends Expression {
 		else {
 			NotImplementedException.throw(this)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }

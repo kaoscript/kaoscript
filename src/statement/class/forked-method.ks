@@ -6,7 +6,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		@name: String
 		@type: ClassMethodType
 	}
-	constructor(@name, @type, @forks, @hidden, parent) { // {{{
+	constructor(@name, @type, @forks, @hidden, parent) { # {{{
 		super(null, parent)
 
 		@instance = @type.isInstance()
@@ -17,13 +17,13 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		else {
 			parent._classMethods[@name].push(this)
 		}
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	isForked() => true
 	isRoutable() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if !@hidden && !@instance {
 			const ctrl = fragments.newControl()
 
@@ -33,8 +33,8 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 			ctrl.done()
 		}
-	} // }}}
-	toForkFragments(fragments) { // {{{
+	} # }}}
+	toForkFragments(fragments) { # {{{
 		const ctrl = fragments.newControl()
 
 		ctrl.code(`__ks_func_\(@name)_\(@type.index())(`)
@@ -172,6 +172,6 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 	type() => @type
 }

@@ -8,7 +8,7 @@ class MacroScope extends Scope {
 		_renamedVariables					= {}
 		_variables							= {}
 	}
-	constructor() { // {{{
+	constructor() { # {{{
 		super()
 
 		@predefined.__Array = Variable.createPredefinedClass('Array', this)
@@ -38,13 +38,13 @@ class MacroScope extends Scope {
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
 		@predefined.__Identifier = Variable.createPredefinedClass('Identifier', this)
-	} // }}}
-	acquireTempName(declare: Boolean = true) { // {{{
+	} # }}}
+	acquireTempName(declare: Boolean = true) { # {{{
 		throw new NotSupportedException()
-	} // }}}
+	} # }}}
 	authority() => this
 	block() => this
-	private declareVariable(name: String, scope: Scope) { // {{{
+	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
 			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
@@ -60,8 +60,8 @@ class MacroScope extends Scope {
 		else {
 			return null
 		}
-	} // }}}
-	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
+	} # }}}
+	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -71,8 +71,8 @@ class MacroScope extends Scope {
 		this.defineVariable(variable, node)
 
 		return variable
-	} // }}}
-	defineVariable(variable: Variable, node: AbstractNode) { // {{{
+	} # }}}
+	defineVariable(variable: Variable, node: AbstractNode) { # {{{
 		const name = variable.name()
 
 		if @variables[name] is Variable {
@@ -90,17 +90,17 @@ class MacroScope extends Scope {
 		if const reference = @references[name] {
 			reference.reset()
 		}
-	} // }}}
-	getDefinedVariable(name: String) { // {{{
+	} # }}}
+	getDefinedVariable(name: String) { # {{{
 		if @variables[name] is Variable {
 			return @variables[name]
 		}
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-	getVariable(name, line = -1): Variable? { // {{{
+	getVariable(name, line = -1): Variable? { # {{{
 		if @variables[name] is Variable {
 			return @variables[name]
 		}
@@ -110,11 +110,11 @@ class MacroScope extends Scope {
 		else {
 			return null
 		}
-	} // }}}
+	} # }}}
 	hasDeclaredVariable(name: String) => @variables[name] is Variable
 	hasDefinedVariable(name: String) => @variables[name] is Variable
 	hasVariable(name: String, line = -1) => @variables[name] is Variable
-	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
+	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
 		const hash = a.toQuote()
 
 		if const matches = @matchingTypes[hash] {
@@ -137,8 +137,8 @@ class MacroScope extends Scope {
 		@matchingTypes[hash][index - 1] = match
 
 		return match
-	} // }}}
-	reference(value) { // {{{
+	} # }}}
+	reference(value) { # {{{
 		switch value {
 			is AnyType => return this.resolveReference('Any')
 			is ClassVariableType => return this.reference(value.type())
@@ -157,11 +157,11 @@ class MacroScope extends Scope {
 				throw new NotImplementedException()
 			}
 		}
-	} // }}}
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) { // {{{
+	} # }}}
+	reference(value: String, nullable: Boolean = false, parameters: Array = []) { # {{{
 		return this.resolveReference(value, nullable, parameters)
-	} // }}}
-	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
+	} # }}}
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
 		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
@@ -169,5 +169,5 @@ class MacroScope extends Scope {
 		}
 
 		return @references[hash]
-	} // }}}
+	} # }}}
 }

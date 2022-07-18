@@ -7,7 +7,7 @@ class UnionType extends Type {
 		_types: Array<Type>			= []
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
 			const type = new UnionType(scope)
 
 			if data.nullable? {
@@ -22,9 +22,9 @@ class UnionType extends Type {
 			})
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope, types: Array = [], @explicit = true) { // {{{
+	constructor(@scope, types: Array = [], @explicit = true) { # {{{
 		super(scope)
 
 		for const type in types {
@@ -59,8 +59,8 @@ class UnionType extends Type {
 				}
 			}
 		}
-	} // }}}
-	addType(type: Type) { // {{{
+	} # }}}
+	addType(type: Type) { # {{{
 		if @any {
 			if !@nullable && type.isNullable() {
 				@types[0] = AnyType.NullableUnexplicit
@@ -130,8 +130,8 @@ class UnionType extends Type {
 		}
 
 		return this
-	} // }}}
-	canBeBoolean() { // {{{
+	} # }}}
+	canBeBoolean() { # {{{
 		for const type in @types {
 			if type.canBeBoolean() {
 				return true
@@ -139,8 +139,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	canBeNumber(any = true) { // {{{
+	} # }}}
+	canBeNumber(any = true) { # {{{
 		for const type in @types {
 			if type.canBeNumber(any) {
 				return true
@@ -148,8 +148,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	canBeString(any = true) { // {{{
+	} # }}}
+	canBeString(any = true) { # {{{
 		for const type in @types {
 			if type.canBeString(any) {
 				return true
@@ -157,8 +157,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	canBeVirtual(name: String) { // {{{
+	} # }}}
+	canBeVirtual(name: String) { # {{{
 		for const type in @types {
 			if type.canBeVirtual(name) {
 				return true
@@ -166,8 +166,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		const that = new UnionType(@scope)
 
 		that._any = @any
@@ -177,20 +177,20 @@ class UnionType extends Type {
 		that._types = [...@types]
 
 		return that
-	} // }}}
-	compareToRef(value: AnyType) { // {{{
+	} # }}}
+	compareToRef(value: AnyType) { # {{{
 		return -1
-	} // }}}
-	compareToRef(value: NullType) { // {{{
+	} # }}}
+	compareToRef(value: NullType) { # {{{
 		return -1
-	} // }}}
-	compareToRef(value: ReferenceType) { // {{{
+	} # }}}
+	compareToRef(value: ReferenceType) { # {{{
 		return 1
-	} // }}}
-	compareToRef(value: UnionType) { // {{{
+	} # }}}
+	compareToRef(value: UnionType) { # {{{
 		return 1
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @explicitNullity {
 			return {
 				kind: TypeKind::Union
@@ -204,8 +204,8 @@ class UnionType extends Type {
 				types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 			}
 		}
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
 		}
@@ -218,8 +218,8 @@ class UnionType extends Type {
 		}
 
 		return this
-	} // }}}
-	getProperty(name: String) { // {{{
+	} # }}}
+	getProperty(name: String) { # {{{
 		const types = []
 
 		for const type in @types {
@@ -240,13 +240,13 @@ class UnionType extends Type {
 		else {
 			return Type.union(@scope, ...types)
 		}
-	} // }}}
-	hashCode(): String { // {{{
+	} # }}}
+	hashCode(): String { # {{{
 		const elements = [type.hashCode() for type in @types]
 
 		return elements.join('|')
-	} // }}}
-	isArray() { // {{{
+	} # }}}
+	isArray() { # {{{
 		for const type in @types {
 			if !type.isArray() {
 				return false
@@ -254,8 +254,8 @@ class UnionType extends Type {
 		}
 
 		return true
-	} // }}}
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+	} # }}}
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
 			if this.isNullable() {
 				return nullcast || limited || value.isNullable()
@@ -282,8 +282,8 @@ class UnionType extends Type {
 
 			return true
 		}
-	} // }}}
-	isDictionary() { // {{{
+	} # }}}
+	isDictionary() { # {{{
 		for const type in @types {
 			if !type.isDictionary() {
 				return false
@@ -291,9 +291,9 @@ class UnionType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isExplicit() => @explicit
-	isExportable() { // {{{
+	isExportable() { # {{{
 		for type in @types {
 			if !type.isExportable() {
 				return false
@@ -301,8 +301,8 @@ class UnionType extends Type {
 		}
 
 		return true
-	} // }}}
-	isInstanceOf(target) { // {{{
+	} # }}}
+	isInstanceOf(target) { # {{{
 		for type in @types {
 			if type.isInstanceOf(target) {
 				return true
@@ -310,8 +310,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	isMatchingParameter(value) { // {{{
+	} # }}}
+	isMatchingParameter(value) { # {{{
 		for const type in @types {
 			if type.isMatchingParameter(value) {
 				return true
@@ -319,8 +319,8 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
-	isMorePreciseThan(value: Type) { // {{{
+	} # }}}
+	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return true
 		}
@@ -342,10 +342,10 @@ class UnionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isNullable() => @nullable
 	isReducible() => true
-	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
 			if value is not UnionType || @types.length != value.length() {
 				return false
@@ -372,10 +372,10 @@ class UnionType extends Type {
 
 			return true
 		}
-	} // }}}
+	} # }}}
 	isUnion() => true
 	length() => @types.length
-	matchContentOf(value: Type) { // {{{
+	matchContentOf(value: Type) { # {{{
 		for const type in @types {
 			if !type.matchContentOf(value) {
 				return false
@@ -383,13 +383,13 @@ class UnionType extends Type {
 		}
 
 		return true
-	} // }}}
-	parameter() { // {{{
+	} # }}}
+	parameter() { # {{{
 		const types = [type.parameter() for const type in @types]
 
 		return Type.union(@scope, ...types)
-	} // }}}
-	reduce(type: Type) { // {{{
+	} # }}}
+	reduce(type: Type) { # {{{
 		const types = [t for const t in @types when !t.matchContentOf(type)]
 
 		if types.length == 1 {
@@ -398,8 +398,8 @@ class UnionType extends Type {
 		else {
 			return Type.union(@scope, ...types)
 		}
-	} // }}}
-	setNullable(nullable: Boolean) { // {{{
+	} # }}}
+	setNullable(nullable: Boolean) { # {{{
 		if @nullable == nullable {
 			return this
 		}
@@ -418,8 +418,8 @@ class UnionType extends Type {
 		else {
 			NotImplementedException.throw()
 		}
-	} // }}}
-	sort(): UnionType { // {{{
+	} # }}}
+	sort(): UnionType { # {{{
 		@types.sort((a, b) => {
 			const index = a.compareToRef(b)
 			if index == 0 {
@@ -430,24 +430,24 @@ class UnionType extends Type {
 			}
 		})
 		return this
-	} // }}}
-	split(types: Array) { // {{{
+	} # }}}
+	split(types: Array) { # {{{
 		for const type in @types {
 			type.split(types)
 		}
 
 		return types
-	} // }}}
-	toCastFragments(fragments) { // {{{
+	} # }}}
+	toCastFragments(fragments) { # {{{
 		for const type in @types {
 			type.toCastFragments(fragments)
 		}
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
-	} // }}}
+	} # }}}
 	toQuote() => [type.toQuote() for const type in @types].join('|')
-	toQuote(double: Boolean): String { // {{{
+	toQuote(double: Boolean): String { # {{{
 		const elements = [type.toQuote() for type in @types]
 
 		lateinit const last
@@ -464,9 +464,9 @@ class UnionType extends Type {
 		else {
 			return `'\(elements.join(`', '`))' or '\(last)'`
 		}
-	} // }}}
+	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
-	override toNegativeTestFragments(fragments, node, junction) { // {{{
+	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 
 		for type, i in @types {
@@ -478,8 +478,8 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::AND
 
 		for type, i in @types {
@@ -491,8 +491,8 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::AND
-	} // }}}
-	override toRouteTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toRouteTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::AND
 
 		for type, i in @types {
@@ -504,8 +504,8 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::AND
-	} // }}}
-	toTestFunctionFragments(fragments, node, junction) { // {{{
+	} # }}}
+	toTestFunctionFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::AND
 
 		for const type, index in @types {
@@ -515,15 +515,15 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::AND
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('union')
 
 		for const type in @types {
 			type.toVariations(variations)
 		}
-	} // }}}
-	type() { // {{{
+	} # }}}
+	type() { # {{{
 		if @types.length == 1 {
 			const type = @types[0]
 
@@ -536,6 +536,6 @@ class UnionType extends Type {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 	types() => @types
 }

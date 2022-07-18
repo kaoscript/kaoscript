@@ -6,7 +6,7 @@ class ArrayBinding extends Expression {
 		_immutable: Boolean				= false
 		_type: Type?					= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for const data, index in @data.elements {
@@ -24,8 +24,8 @@ class ArrayBinding extends Expression {
 
 			@elements.push(element)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @type == null {
 			for const element in @elements {
 				element.prepare()
@@ -66,29 +66,29 @@ class ArrayBinding extends Expression {
 				element.prepare()
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const element in @elements {
 			element.translate()
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		for element in @elements {
 			element.export(recipient)
 		}
-	} // }}}
-	flagImmutable() { // {{{
+	} # }}}
+	flagImmutable() { # {{{
 		@immutable = true
-	} // }}}
-	initializeVariables(type: Type, node: Expression) { // {{{
+	} # }}}
+	initializeVariables(type: Type, node: Expression) { # {{{
 		for const element in @elements {
 			element.initializeVariables(type, node)
 		}
-	} // }}}
+	} # }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isImmutable() => @immutable
-	isDeclararingVariable(name: String) { // {{{
+	isDeclararingVariable(name: String) { # {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {
 				return true
@@ -96,8 +96,8 @@ class ArrayBinding extends Expression {
 		}
 
 		return false
-	} // }}}
-	isRedeclared() { // {{{
+	} # }}}
+	isRedeclared() { # {{{
 		for const element in @elements {
 			if element.isRedeclared() {
 				return true
@@ -105,19 +105,19 @@ class ArrayBinding extends Expression {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		for const element in @elements {
 			element.listAssignments(array)
 		}
 
 		return array
-	} // }}}
+	} # }}}
 	name() => null
 	newElement(data) => new ArrayBindingElement(data, this, @scope)
 	setAssignment(@assignment)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code('[')
 
 		for i from 0 til @elements.length {
@@ -127,8 +127,8 @@ class ArrayBinding extends Expression {
 		}
 
 		fragments.code(']')
-	} // }}}
-	toAssignmentFragments(fragments, value) { // {{{
+	} # }}}
+	toAssignmentFragments(fragments, value) { # {{{
 		if @flatten {
 			this.toFlatFragments(fragments, value)
 		}
@@ -138,8 +138,8 @@ class ArrayBinding extends Expression {
 				.code($equals)
 				.compile(value)
 		}
-	} // }}}
-	toFlatFragments(fragments, value) { // {{{
+	} # }}}
+	toFlatFragments(fragments, value) { # {{{
 		if @elements.length == 1 {
 			@elements[0].toFlatFragments(fragments, value)
 		}
@@ -158,15 +158,15 @@ class ArrayBinding extends Expression {
 				element.toFlatFragments(fragments, reusableValue)
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		for element in @elements {
 			element.walk(fn)
 		}
-	} // }}}
+	} # }}}
 }
 
 class ArrayBindingElement extends Expression {
@@ -181,7 +181,7 @@ class ArrayBindingElement extends Expression {
 		_thisAlias: Boolean				= false
 		_type: Type						= AnyType.NullableUnexplicit
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		if @data.name? {
 			@name = this.compileVariable(@data.name)
 			@name.setAssignment(@assignment)
@@ -204,8 +204,8 @@ class ArrayBindingElement extends Expression {
 				@rest = true
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 		}
@@ -235,8 +235,8 @@ class ArrayBindingElement extends Expression {
 		}
 
 		this.statement().assignTempVariables(@scope)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @named {
 			@name.translate()
 
@@ -244,15 +244,15 @@ class ArrayBindingElement extends Expression {
 				@defaultValue.translate()
 			}
 		}
-	} // }}}
+	} # }}}
 	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
-	initializeVariables(type: Type, node: Expression) { // {{{
+	initializeVariables(type: Type, node: Expression) { # {{{
 		if const name = @name.name() {
 			@name.initializeVariables(type.getProperty(name) ?? AnyType.NullableUnexplicit, node)
 		}
-	} // }}}
+	} # }}}
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
 	isAnonymous() => !@named
@@ -263,7 +263,7 @@ class ArrayBindingElement extends Expression {
 	max() => @rest ? Infinity : 1
 	min() => @rest ? 0 : 1
 	setAssignment(@assignment)
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		if @rest {
 			fragments.code('...')
 		}
@@ -275,8 +275,8 @@ class ArrayBindingElement extends Expression {
 				fragments.code(' = ').compile(@defaultValue)
 			}
 		}
-	} // }}}
-	toExistFragments(fragments, name) { // {{{
+	} # }}}
+	toExistFragments(fragments, name) { # {{{
 		if @rest {
 			fragments.code('...')
 		}
@@ -286,8 +286,8 @@ class ArrayBindingElement extends Expression {
 				fragments.code(' = ').compile(@defaultValue)
 			}
 		}
-	} // }}}
-	toFlatFragments(fragments, value) { // {{{
+	} # }}}
+	toFlatFragments(fragments, value) { # {{{
 		if @named {
 			if @name is ArrayBinding {
 				@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
@@ -300,14 +300,14 @@ class ArrayBindingElement extends Expression {
 					.code(`[\(@index)]`)
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 	type(@type) => this
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		if @named {
 			@name.walk(fn)
 		}
-	} // }}}
+	} # }}}
 }
 
 class FlatArrayBindingElement extends Expression {
@@ -315,20 +315,20 @@ class FlatArrayBindingElement extends Expression {
 		_array
 		_index
 	}
-	constructor(@array, @index, parent) { // {{{
+	constructor(@array, @index, parent) { # {{{
 		super({}, parent)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	isComposite() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.wrap(@array)
 			.code('[')
 			.compile(@index)
 			.code(']')
-	} // }}}
+	} # }}}
 }
 
 class FlatObjectBindingElement extends Expression {
@@ -336,38 +336,38 @@ class FlatObjectBindingElement extends Expression {
 		_item
 		_property
 	}
-	constructor(@item, @property, parent) { // {{{
+	constructor(@item, @property, parent) { # {{{
 		super({}, parent)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	isComposite() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.wrap(@item)
 			.code('.')
 			.compile(@property)
-	} // }}}
+	} # }}}
 }
 
 class FlatReusableBindingElement extends Expression {
 	private {
 		_value
 	}
-	constructor(@value, parent) { // {{{
+	constructor(@value, parent) { # {{{
 		super({}, parent)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
 	isComposite() => false
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.code('(')
 			.compileReusable(@value)
 			.code(')')
-	} // }}}
+	} # }}}
 }
 
 class ObjectBinding extends Expression {
@@ -378,7 +378,7 @@ class ObjectBinding extends Expression {
 		_immutable: Boolean				= false
 		_type: Type?					= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for const data in @data.elements {
@@ -394,8 +394,8 @@ class ObjectBinding extends Expression {
 
 			@elements.push(element)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @type == null {
 			for const element in @elements {
 				element.prepare()
@@ -442,29 +442,29 @@ class ObjectBinding extends Expression {
 				element.prepare()
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for element in @elements {
 			element.translate()
 		}
-	} // }}}
-	export(recipient) { // {{{
+	} # }}}
+	export(recipient) { # {{{
 		for element in @elements {
 			element.export(recipient)
 		}
-	} // }}}
-	flagImmutable() { // {{{
+	} # }}}
+	flagImmutable() { # {{{
 		@immutable = true
-	} // }}}
-	initializeVariables(type: Type, node: Expression) { // {{{
+	} # }}}
+	initializeVariables(type: Type, node: Expression) { # {{{
 		for const element in @elements {
 			element.initializeVariables(type, node)
 		}
-	} // }}}
+	} # }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isImmutable() => @immutable
-	isDeclararingVariable(name: String) { // {{{
+	isDeclararingVariable(name: String) { # {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {
 				return true
@@ -472,8 +472,8 @@ class ObjectBinding extends Expression {
 		}
 
 		return false
-	} // }}}
-	isRedeclared() { // {{{
+	} # }}}
+	isRedeclared() { # {{{
 		for const element in @elements {
 			if element.isRedeclared() {
 				return true
@@ -481,19 +481,19 @@ class ObjectBinding extends Expression {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array) { // {{{
+	listAssignments(array) { # {{{
 		for const element in @elements {
 			element.listAssignments(array)
 		}
 
 		return array
-	} // }}}
+	} # }}}
 	name() => null
 	newElement(data) => new ObjectBindingElement(data, this, @scope)
 	setAssignment(@assignment)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code('{')
 
 		for i from 0 til @elements.length {
@@ -503,8 +503,8 @@ class ObjectBinding extends Expression {
 		}
 
 		fragments.code('}')
-	} // }}}
-	toAssignmentFragments(fragments, value) { // {{{
+	} # }}}
+	toAssignmentFragments(fragments, value) { # {{{
 		if @flatten {
 			this.toFlatFragments(fragments, value)
 		}
@@ -522,8 +522,8 @@ class ObjectBinding extends Expression {
 				.compile(value)
 				.code(')')
 		}
-	} // }}}
-	toFlatFragments(fragments, value) { // {{{
+	} # }}}
+	toFlatFragments(fragments, value) { # {{{
 		if @elements.length == 1 {
 			@elements[0].toFlatFragments(fragments, value)
 		}
@@ -538,8 +538,8 @@ class ObjectBinding extends Expression {
 				element.toFlatFragments(fragments, reusableValue)
 			}
 		}
-	} // }}}
-	override toQuote() { // {{{
+	} # }}}
+	override toQuote() { # {{{
 		let fragments = '{'
 
 		for const element, index in @elements {
@@ -553,15 +553,15 @@ class ObjectBinding extends Expression {
 		fragments += '}'
 
 		return fragments
-	} // }}}
+	} # }}}
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		for element in @elements {
 			element.walk(fn)
 		}
-	} // }}}
+	} # }}}
 }
 
 class ObjectBindingElement extends Expression {
@@ -577,7 +577,7 @@ class ObjectBindingElement extends Expression {
 		_thisAlias: Boolean				= false
 		_type: Type						= AnyType.NullableUnexplicit
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Computed {
 				@computed = true
@@ -623,8 +623,8 @@ class ObjectBindingElement extends Expression {
 				@rest = true
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 		}
@@ -652,20 +652,20 @@ class ObjectBindingElement extends Expression {
 		}
 
 		this.statement().assignTempVariables(@scope)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@alias.translate()
 
 		if @hasDefaultValue {
 			@defaultValue.translate()
 		}
-	} // }}}
+	} # }}}
 	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @alias.export(recipient)
 	hasDefaultValue() => @hasDefaultValue
-	initializeVariables(type: Type, node: Expression) { // {{{
+	initializeVariables(type: Type, node: Expression) { # {{{
 		@alias.initializeVariables(type.getProperty(@name.name()) ?? AnyType.NullableUnexplicit, node)
-	} // }}}
+	} # }}}
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @alias.isDeclararingVariable(name)
 	isRedeclared() => @alias.isRedeclared()
@@ -674,7 +674,7 @@ class ObjectBindingElement extends Expression {
 	listAssignments(array) => @alias.listAssignments(array)
 	name(): String => @name.value()
 	setAssignment(@assignment)
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		if @rest {
 			fragments.code('...')
 		}
@@ -702,8 +702,8 @@ class ObjectBindingElement extends Expression {
 		if @hasDefaultValue {
 			fragments.code(' = ').compile(@defaultValue)
 		}
-	} // }}}
-	toExistFragments(fragments, name) { // {{{
+	} # }}}
+	toExistFragments(fragments, name) { # {{{
 		if @rest {
 			fragments.code('...')
 		}
@@ -728,8 +728,8 @@ class ObjectBindingElement extends Expression {
 		if @hasDefaultValue {
 			fragments.code(' = ').compile(@defaultValue)
 		}
-	} // }}}
-	toFlatFragments(fragments, value) { // {{{
+	} # }}}
+	toFlatFragments(fragments, value) { # {{{
 		if @alias is ObjectBinding {
 			@alias.toFlatFragments(fragments, new FlatObjectBindingElement(value, @name, this))
 		}
@@ -775,9 +775,9 @@ class ObjectBindingElement extends Expression {
 					.compile(@name)
 			}
 		}
-	} // }}}
+	} # }}}
 	type(@type) => this
-	walk(fn) { // {{{
+	walk(fn) { # {{{
 		@alias.walk(fn)
-	} // }}}
+	} # }}}
 }

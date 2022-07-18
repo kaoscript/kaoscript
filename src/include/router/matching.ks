@@ -11,7 +11,7 @@ struct ArgMatches {
 	arguments: Array<CallMatchArgument>	= []
 }
 
-func getCursor(index: Number, arguments: Array<Type>): ArgCursor { // {{{
+func getCursor(index: Number, arguments: Array<Type>): ArgCursor { # {{{
 	if index >= arguments.length {
 		return ArgCursor(
 			argument: Type.Any
@@ -43,21 +43,21 @@ func getCursor(index: Number, arguments: Array<Type>): ArgCursor { // {{{
 			used: 0
 		)
 	}
-} // }}}
+} # }}}
 
-func getNextCursor(current: ArgCursor, arguments: Array<Type>, force: Boolean = false): ArgCursor { // {{{
+func getNextCursor(current: ArgCursor, arguments: Array<Type>, force: Boolean = false): ArgCursor { # {{{
 	if current.used >= current.length || (force && current.length != 0) {
 		return getCursor(current.index + 1, arguments)
 	}
 	else {
 		return current
 	}
-} // }}}
+} # }}}
 
 func toString(cursor: ArgCursor): String => `\(cursor.index),\(cursor.argument.hashCode()),\(cursor.spread),\(cursor.length),\(cursor.used)`
 func toString(cursor?): String => 'null'
 
-func matchTree(tree: Tree, context: MatchContext): Void { // {{{
+func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 	if context.arguments.length == 0 {
 		if context.async {
 			context.found = true
@@ -167,9 +167,9 @@ func matchTree(tree: Tree, context: MatchContext): Void { // {{{
 			}
 		}
 	}
-} // }}}
+} # }}}
 
-func pushUniqCallMatch(matches, newMatch) { // {{{
+func pushUniqCallMatch(matches, newMatch) { # {{{
 	for const match in matches {
 		if match.function != newMatch.funcion || match.arguments.length != newMatch.arguments.length {
 			return
@@ -183,9 +183,9 @@ func pushUniqCallMatch(matches, newMatch) { // {{{
 	}
 
 	matches.push(newMatch)
-} // }}}
+} # }}}
 
-func duplicateContext(context: MatchContext) { // {{{
+func duplicateContext(context: MatchContext) { # {{{
 	return MatchContext(
 		async: context.async
 		found: false
@@ -194,9 +194,9 @@ func duplicateContext(context: MatchContext) { // {{{
 		matches: []
 		possibilities: []
 	)
-} // }}}
+} # }}}
 
-func duplicateCursor(cursor: ArgCursor, type: Type = cursor.argument) { // {{{
+func duplicateCursor(cursor: ArgCursor, type: Type = cursor.argument) { # {{{
 	return ArgCursor(
 		argument: type
 		index: cursor.index
@@ -204,9 +204,9 @@ func duplicateCursor(cursor: ArgCursor, type: Type = cursor.argument) { // {{{
 		spread: cursor.spread
 		used: cursor.used
 	)
-} // }}}
+} # }}}
 
-func getZeroBranch(tree: Tree | TreeBranch) { // {{{
+func getZeroBranch(tree: Tree | TreeBranch) { # {{{
 	const column = tree.columns[tree.order.last()]
 
 	if column.isNode {
@@ -215,9 +215,9 @@ func getZeroBranch(tree: Tree | TreeBranch) { // {{{
 	else {
 		return column
 	}
-} // }}}
+} # }}}
 
-func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { // {{{
+func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
 	{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches)
 	return false if !?cursor
 
@@ -231,9 +231,9 @@ func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches
 	}
 
 	return false
-} // }}}
+} # }}}
 
-func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { // {{{
+func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
 	if !leaf.function.isAsync() {
 		{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches)
 		return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
@@ -309,9 +309,9 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: Ar
 
 		return true
 	}
-} // }}}
+} # }}}
 
-func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, argMatches: ArgMatches): { cursor: ArgCursor?, argMatches: ArgMatches? } { // {{{
+func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, argMatches: ArgMatches): { cursor: ArgCursor?, argMatches: ArgMatches? } { # {{{
 	const last = arguments.length - 1
 
 	if node.min == 0 && cursor.index > last {
@@ -461,9 +461,9 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 
 		return { cursor, argMatches }
 	}
-} // }}}
+} # }}}
 
-func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>) { // {{{
+func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>) { # {{{
 	let combinations = [[]]
 
 	for const argument in arguments {
@@ -540,9 +540,9 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 	}
 
 	return null
-} // }}}
+} # }}}
 
-func mergeResults(results: Array<CallMatchResult>) { // {{{
+func mergeResults(results: Array<CallMatchResult>) { # {{{
 	if results.length == 0 {
 		return null
 	}
@@ -587,9 +587,9 @@ func mergeResults(results: Array<CallMatchResult>) { // {{{
 	}
 
 	return LenientCallMatchResult(possibilities)
-} // }}}
+} # }}}
 
-func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { // {{{
+func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { # {{{
 	let combinations = [[]]
 
 	for const type in arguments {
@@ -654,9 +654,9 @@ func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, named
 	}
 
 	return mergeResults(results)
-} // }}}
+} # }}}
 
-func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { // {{{
+func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { # {{{
 	const perNames = {}
 
 	for const function, key of assessment.functions {
@@ -853,9 +853,9 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			)
 		}
 	}
-} // }}}
+} # }}}
 
-func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, possibleFunctions: Array, preciseness: Dictionary, excludes: Array<String>, node: AbstractNode) { // {{{
+func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, possibleFunctions: Array, preciseness: Dictionary, excludes: Array<String>, node: AbstractNode) { # {{{
 	if indexeds.length == 0 {
 		possibleFunctions = possibleFunctions.filter((key, _, _) => assessment.functions[key].min(excludes) == 0)
 
@@ -1118,9 +1118,9 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 			}
 		}
 	}
-} // }}}
+} # }}}
 
-func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>) { // {{{
+func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>) { # {{{
 	for const parameter in functions[0].parameters() {
 		const name = parameter.name()
 
@@ -1158,4 +1158,4 @@ func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<N
 	}
 
 	throw new NotSupportedException()
-} // }}}
+} # }}}

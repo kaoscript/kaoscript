@@ -18,7 +18,7 @@ class CallExpression extends Expression {
 		_type: Type
 	}
 	static {
-		toFlattenArgumentsFragments(fragments, arguments, prefill = null) { // {{{
+		toFlattenArgumentsFragments(fragments, arguments, prefill = null) { # {{{
 			if arguments.length == 1 && prefill == null && arguments[0].argument().type().isArray() {
 				arguments[0].argument().toArgumentFragments(fragments)
 			}
@@ -66,9 +66,9 @@ class CallExpression extends Expression {
 
 				fragments.code(')')
 			}
-		} // }}}
+		} # }}}
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		const es5 = @data.arguments.length != 1 && @options.format.spreads == 'es5'
 
 		for const data in @data.arguments {
@@ -94,8 +94,8 @@ class CallExpression extends Expression {
 			@object = $compile.expression(@data.callee.object, this)
 			@object.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const argument in @arguments {
 			argument.prepare()
 
@@ -235,8 +235,8 @@ class CallExpression extends Expression {
 		// console.log(@callees)
 		// console.log(@property)
 		// console.log(@type)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const argument in @arguments {
 			argument.translate()
 		}
@@ -251,8 +251,8 @@ class CallExpression extends Expression {
 			@callScope.prepare()
 			@callScope.translate()
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
@@ -264,9 +264,9 @@ class CallExpression extends Expression {
 		for argument in @arguments {
 			argument.acquireReusable(acquire)
 		}
-	} // }}}
+	} # }}}
 	arguments() => @arguments
-	inferTypes(inferables) { // {{{
+	inferTypes(inferables) { # {{{
 		if @object != null {
 			@object.inferTypes(inferables)
 
@@ -283,9 +283,9 @@ class CallExpression extends Expression {
 		}
 
 		return inferables
-	} // }}}
+	} # }}}
 	isAwait() => @await
-	isAwaiting() { // {{{
+	isAwaiting() { # {{{
 		for argument in @arguments {
 			if argument.isAwaiting() {
 				return true
@@ -293,13 +293,13 @@ class CallExpression extends Expression {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isCallable() => !@reusable
 	isComposite() => !@reusable
 	isComputed() => (@nullable || @callees.length > 1) && !@tested
 	isExit() => @type.isNever()
 	isExpectingType() => true
-	override isInitializingInstanceVariable(name) { // {{{
+	override isInitializingInstanceVariable(name) { # {{{
 		for const argument in @arguments {
 			if argument.isInitializingInstanceVariable(name) {
 				return true
@@ -313,11 +313,11 @@ class CallExpression extends Expression {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isSkippable() => @callees.length == 1 && @callees[0].isSkippable()
-	isUsingInstanceVariable(name) { // {{{
+	isUsingInstanceVariable(name) { # {{{
 		if @object != null {
 			if @object.isUsingInstanceVariable(name) {
 				return true
@@ -334,8 +334,8 @@ class CallExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override isUsingNonLocalVariables(scope) { // {{{
+	} # }}}
+	override isUsingNonLocalVariables(scope) { # {{{
 		if @object != null {
 			return true if @object.isUsingNonLocalVariables(scope)
 		}
@@ -352,8 +352,8 @@ class CallExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	isUsingStaticVariable(class, varname) { // {{{
+	} # }}}
+	isUsingStaticVariable(class, varname) { # {{{
 		if @object != null {
 			if @object.isUsingStaticVariable(class, varname) {
 				return true
@@ -367,8 +367,8 @@ class CallExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	isUsingVariable(name) { // {{{
+	} # }}}
+	isUsingVariable(name) { # {{{
 		if @object != null {
 			if @object.isUsingVariable(name) {
 				return true
@@ -385,8 +385,8 @@ class CallExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override listLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listLocalVariables(scope, variables) { # {{{
 		if @object != null {
 			@object.listLocalVariables(scope, variables)
 		}
@@ -403,8 +403,8 @@ class CallExpression extends Expression {
 		}
 
 		return variables
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		if @object != null {
 			@object.listNonLocalVariables(scope, variables)
 		}
@@ -421,8 +421,8 @@ class CallExpression extends Expression {
 		}
 
 		return variables
-	} // }}}
-	makeCallee(type: Type, name: String?) { // {{{
+	} # }}}
+	makeCallee(type: Type, name: String?) { # {{{
 		// console.log('-- call.makeCallee --')
 		// console.log(type)
 		// console.log(name)
@@ -525,8 +525,8 @@ class CallExpression extends Expression {
 		else {
 			this.addCallee(new DefaultCallee(@data, @object, null, this))
 		}
-	} // }}}
-	makeMemberCallee(value, name: NamedType = null) { // {{{
+	} # }}}
+	makeMemberCallee(value, name: NamedType = null) { # {{{
 		// console.log('-- call.makeMemberCallee --')
 		// console.log(value)
 		// console.log(@property)
@@ -712,8 +712,8 @@ class CallExpression extends Expression {
 				this.addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
-	} // }}}
-	makeMemberCalleeFromReference(value, reference: ReferenceType = value) { // {{{
+	} # }}}
+	makeMemberCalleeFromReference(value, reference: ReferenceType = value) { # {{{
 		// console.log('-- call.makeMemberCalleeFromReference --')
 		// console.log(value)
 		// console.log(@property)
@@ -878,8 +878,8 @@ class CallExpression extends Expression {
 				this.addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
-	} // }}}
-	makeNamespaceCallee(property, sealed, name) { // {{{
+	} # }}}
+	makeNamespaceCallee(property, sealed, name) { # {{{
 		if property is FunctionType {
 			if sealed {
 				this.addCallee(new SealedFunctionCallee(@data, name, property, property.getReturnType(), this))
@@ -894,8 +894,8 @@ class CallExpression extends Expression {
 		else {
 			this.addCallee(new DefaultCallee(@data, @object, property, this))
 		}
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		if @reuseName? {
 			@scope.releaseTempName(@reuseName)
 		}
@@ -903,8 +903,8 @@ class CallExpression extends Expression {
 		for callee in @callees {
 			callee.releaseReusable()
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if mode == Mode::Async {
 			for const argument in @arguments {
 				if argument.isAwaiting() {
@@ -941,8 +941,8 @@ class CallExpression extends Expression {
 				fragments.code(')')
 			}
 		}
-	} // }}}
-	toBooleanFragments(fragments, mode) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, mode) { # {{{
 		if mode == Mode::Async {
 			this.toCallFragments(fragments, mode)
 
@@ -979,8 +979,8 @@ class CallExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	toCallFragments(fragments, mode) { // {{{
+	} # }}}
+	toCallFragments(fragments, mode) { # {{{
 		if @callees.length == 1 {
 			@callees[0].toFragments(fragments, mode, this)
 		}
@@ -1000,8 +1000,8 @@ class CallExpression extends Expression {
 
 			@callees.last().toFragments(fragments, mode, this)
 		}
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		let fragments = ''
 
 		if @object != null {
@@ -1017,8 +1017,8 @@ class CallExpression extends Expression {
 		fragments += '()'
 
 		return fragments
-	} // }}}
-	toNullableFragments(fragments) { // {{{
+	} # }}}
+	toNullableFragments(fragments) { # {{{
 		if !@tested {
 			@tested = true
 
@@ -1029,16 +1029,16 @@ class CallExpression extends Expression {
 				throw new NotImplementedException(this)
 			}
 		}
-	} // }}}
-	toReusableFragments(fragments) { // {{{
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		fragments
 			.code(@reuseName, $equals)
 			.compile(this)
 
 		@reusable = true
-	} // }}}
+	} # }}}
 	type() => @type
-	private addCallee(callee: Callee) { // {{{
+	private addCallee(callee: Callee) { # {{{
 		if const hash = callee.hashCode() {
 			if const main = @calleeByHash[hash] {
 				main.mergeWith(callee)
@@ -1051,7 +1051,7 @@ class CallExpression extends Expression {
 		else {
 			@callees.push(callee)
 		}
-	} // }}}
+	} # }}}
 }
 
 class NamedArgument extends Expression {
@@ -1059,25 +1059,25 @@ class NamedArgument extends Expression {
 		_name: String
 		_value: Expression
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@name = @data.name.name
 
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	isAwait() => @value.isAwait()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	name() => @name
 	type() => @value.type()
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		@value.toFragments(fragments, mode)
-	} // }}}
+	} # }}}
 }
 
 class SimplifiedArrowFunctionExpression extends Expression {
@@ -1087,14 +1087,14 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	constructor(@expression, match) {
 		super(expression.data(), expression.parent(), expression.scope(), ScopeType::Block)
 	}
-	analyse() { // {{{
-	} // }}}
-	prepare() { // {{{
-	} // }}}
-	translate() { // {{{
+	analyse() { # {{{
+	} # }}}
+	prepare() { # {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.code('((')
 
 		const block = Parameter.toFragments(@expression, fragments, ParameterMode::Default, func(fragments) {
@@ -1110,7 +1110,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 		block.done()
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 }
 
 include {

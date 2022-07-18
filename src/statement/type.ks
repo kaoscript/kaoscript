@@ -3,17 +3,17 @@ class TypeAliasDeclaration extends Statement {
 		_name: String
 		_variable: Variable
 	}
-	override initiate() { // {{{
+	override initiate() { # {{{
 		@name = @data.name.name
 
 		@variable = @scope.define(@name, true, new AliasType(@scope, Type.fromAST(@data.type, this)), this)
-	} // }}}
+	} # }}}
 	analyse()
 	prepare()
 	translate()
-	export(recipient) { // {{{
+	export(recipient) { # {{{
 		recipient.export(@name, @variable)
-	} // }}}
+	} # }}}
 	name() => @name
 	toStatementFragments(fragments, mode)
 }

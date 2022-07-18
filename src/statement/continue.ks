@@ -1,5 +1,5 @@
 class ContinueStatement extends Statement {
-	analyse() { // {{{
+	analyse() { # {{{
 		let parent = @parent
 
 		unless parent.isJumpable() {
@@ -13,10 +13,10 @@ class ContinueStatement extends Statement {
 				SyntaxException.throwIllegalStatement('continue', this)
 			}
 		}
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	toStatementFragments(fragments, mode) { // {{{
+	toStatementFragments(fragments, mode) { # {{{
 		fragments.line('continue', this._data)
-	} // }}}
+	} # }}}
 }

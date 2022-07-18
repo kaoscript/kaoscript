@@ -7,19 +7,19 @@ class ImplementDeclaration extends Statement {
 		_type: NamedType
 		_variable: Variable
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		if @variable !?= @scope.getVariable(@data.variable.name) {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 
 		@variable.setComplete(false)
-	} // }}}
-	enhance() { // {{{
+	} # }}}
+	enhance() { # {{{
 		if !@variable.isClassStatement() {
 			@resolveType(false)
 		}
-	} // }}}
-	resolveType(class: Boolean) { // {{{
+	} # }}}
+	resolveType(class: Boolean) { # {{{
 		@type = @variable.getDeclaredType()
 
 		unless @type is NamedType {
@@ -45,8 +45,8 @@ class ImplementDeclaration extends Statement {
 		unless @type is NamedType {
 			TypeException.throwImplInvalidType(this)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @variable.isClassStatement() {
 			@resolveType(true)
 		}
@@ -189,13 +189,13 @@ class ImplementDeclaration extends Statement {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for property in @properties {
 			property.translate()
 		}
-	} // }}}
-	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType) { // {{{
+	} # }}}
+	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType) { # {{{
 		const index = oldMethod.index()
 
 		@forkedMethods[name] ??= {}
@@ -209,8 +209,8 @@ class ImplementDeclaration extends Statement {
 		else {
 			@forkedMethods[name][index].forks.push(newMethod)
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @newSealedClass {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
@@ -222,7 +222,7 @@ class ImplementDeclaration extends Statement {
 		for const properties of @sharingProperties {
 			properties[0].toSharedFragments(fragments, properties)
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }
 

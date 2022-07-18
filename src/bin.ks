@@ -19,7 +19,7 @@ import {
 	'vm'
 }
 
-func rewire(option) { // {{{
+func rewire(option) { # {{{
 	let files = []
 
 	for item in option.split(',') {
@@ -32,7 +32,7 @@ func rewire(option) { // {{{
 	}
 
 	return files
-} // }}}
+} # }}}
 
 program
 	.version(metadata.version)

@@ -1,10 +1,10 @@
-func $return(data = null) { // {{{
+func $return(data = null) { # {{{
 	return {
 		kind: NodeKind::ReturnStatement
 		value: data
 		start: data.start
 	}
-} // }}}
+} # }}}
 
 class ArrayComprehensionForFrom extends Expression {
 	private {
@@ -17,7 +17,7 @@ class ArrayComprehensionForFrom extends Expression {
 		_variable
 		_when			= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -46,29 +46,29 @@ class ArrayComprehensionForFrom extends Expression {
 			@when.initiate()
 			@when.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@variable.prepare()
 		@from.prepare()
 		@to.prepare()
 		@by.prepare() if @by?
 		@body.prepare()
 		@when.prepare() if @when?
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@variable.translate()
 		@from.translate()
 		@to.translate()
 		@by.translate() if @by?
 		@body.translate()
 		@when.translate() if @when?
-	} // }}}
+	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@from.listNonLocalVariables(scope, variables)
 		@to.listNonLocalVariables(scope, variables)
 		@by?.listNonLocalVariables(scope, variables)
@@ -76,8 +76,8 @@ class ArrayComprehensionForFrom extends Expression {
 		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
 		let surround = $function.surround(this)
@@ -121,7 +121,7 @@ class ArrayComprehensionForFrom extends Expression {
 		}
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Array')
 }
 
@@ -141,7 +141,7 @@ class ArrayComprehensionForIn extends Expression {
 		_value
 		_when						= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -176,8 +176,8 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		@bindingScope.releaseTempName(@valueName) if @valueName?
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@expression.prepare()
 
 		const type = @expression.type()
@@ -216,23 +216,23 @@ class ArrayComprehensionForIn extends Expression {
 		if @when? {
 			@when.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
 		@value.translate() if @value?
 		@index.translate() if @index?
 		@body.translate()
 		@when.translate() if @when?
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 		@when?.listNonLocalVariables(scope, variables)
 		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
 		let surround = $function.surround(this)
@@ -274,7 +274,7 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -292,7 +292,7 @@ class ArrayComprehensionForOf extends Expression {
 		_value
 		_when						= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -327,8 +327,8 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		@bindingScope.releaseTempName(@keyName) if @keyName?
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@expression.prepare()
 
 		const type = @expression.type()
@@ -360,23 +360,23 @@ class ArrayComprehensionForOf extends Expression {
 		if @when? {
 			@when.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
 		@key.translate() if @key?
 		@value.translate() if @value?
 		@body.translate()
 		@when.translate() if @when?
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 		@when?.listNonLocalVariables(scope, variables)
 		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
 		let surround = $function.surround(this)
@@ -418,7 +418,7 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Array')
 }
 
@@ -433,7 +433,7 @@ class ArrayComprehensionForRange extends Expression {
 		_value
 		_when			= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
@@ -462,29 +462,29 @@ class ArrayComprehensionForRange extends Expression {
 			@when.initiate()
 			@when.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 		@from.prepare()
 		@to.prepare()
 		@by.prepare() if @by?
 		@body.prepare()
 		@when.prepare() if @when?
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
 		@from.translate()
 		@to.translate()
 		@by.translate() if @by?
 		@body.translate()
 		@when.translate() if @when?
-	} // }}}
+	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		@from.listNonLocalVariables(scope, variables)
 		@to.listNonLocalVariables(scope, variables)
 		@by?.listNonLocalVariables(scope, variables)
@@ -492,8 +492,8 @@ class ArrayComprehensionForRange extends Expression {
 		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
 		let surround = $function.surround(this)
@@ -536,6 +536,6 @@ class ArrayComprehensionForRange extends Expression {
 		}
 
 		fragments.code(')')
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Array')
 }

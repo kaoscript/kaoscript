@@ -18,7 +18,7 @@ class ForFromStatement extends Statement {
 		_when
 		_while
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		let rename = false
 		const variable = @scope.getVariable(@data.variable.name)
 
@@ -125,8 +125,8 @@ class ForFromStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		unless @declared {
 			@bindingScope.replaceVariable(@data.variable.name, @bindingScope.reference('Number'), this)
 		}
@@ -193,8 +193,8 @@ class ForFromStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@variable.translate()
 		@from.translate()
 
@@ -217,13 +217,13 @@ class ForFromStatement extends Statement {
 		@when.translate() if @when?
 
 		@body.translate()
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		@body.checkReturnType(type)
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) => // {{{
+	isUsingVariable(name) => # {{{
 			@from.isUsingVariable(name)
 		||	@til?.isUsingVariable(name)
 		||	@to?.isUsingVariable(name)
@@ -232,8 +232,8 @@ class ForFromStatement extends Statement {
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
 		||	@body.isUsingVariable(name)
-	// }}}
-	toStatementFragments(fragments, mode) { // {{{
+	# }}}
+	toStatementFragments(fragments, mode) { # {{{
 		let ctrl = fragments.newControl().code('for(')
 
 		if @declared {
@@ -331,5 +331,5 @@ class ForFromStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 }

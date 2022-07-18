@@ -5,9 +5,9 @@ class OmittedExpression extends Expression {
 	isRedeclared() => false
 	listAssignments(array) => array
 	setAssignment(...)
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		if this._data.spread {
 			fragments.code('...')
 		}
-	} // }}}
+	} # }}}
 }

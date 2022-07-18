@@ -10,17 +10,17 @@ class DefaultCallee extends Callee {
 		@type: Type
 	}
 	private static {
-		toArgumentFragments(argument?, fragments, mode) { // {{{
+		toArgumentFragments(argument?, fragments, mode) { # {{{
 			if ?argument {
 				argument.toArgumentFragments(fragments, mode)
 			}
 			else {
 				fragments.code('void 0')
 			}
-		} // }}}
+		} # }}}
 	}
 
-	constructor(@data, @object, _type: Type | Array<Type> | Null, @arguments = null, @node) { // {{{
+	constructor(@data, @object, _type: Type | Array<Type> | Null, @arguments = null, @node) { # {{{
 		super(data)
 
 		if object == null {
@@ -65,8 +65,8 @@ class DefaultCallee extends Callee {
 		else {
 			@type = AnyType.NullableUnexplicit
 		}
-	} // }}}
-	constructor(@data, @object, @methods, @type, @arguments = null, @node) { // {{{
+	} # }}}
+	constructor(@data, @object, @methods, @type, @arguments = null, @node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
@@ -84,8 +84,8 @@ class DefaultCallee extends Callee {
 		if @type.isClass() {
 			TypeException.throwConstructorWithoutNew(@type.name(), node)
 		}
-	} // }}}
-	constructor(@data, @expression, @node) { // {{{
+	} # }}}
+	constructor(@data, @expression, @node) { # {{{
 		super(data)
 
 		@flatten = node._flatten
@@ -119,12 +119,12 @@ class DefaultCallee extends Callee {
 		else {
 			@type = AnyType.NullableUnexplicit
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
+	} # }}}
+	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
-	} // }}}
+	} # }}}
 	override hashCode() => `default`
-	isInitializingInstanceVariable(name: String): Boolean { // {{{
+	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		if @methods? {
 			for const method in @methods {
 				if !method.isInitializingInstanceVariable(name) {
@@ -137,14 +137,14 @@ class DefaultCallee extends Callee {
 		else {
 			return false
 		}
-	} // }}}
-	mergeWith(that: Callee) { // {{{
+	} # }}}
+	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
-	} // }}}
-	releaseReusable() { // {{{
+	} # }}}
+	releaseReusable() { # {{{
 		@expression.releaseReusable()
-	} // }}}
-	toFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toFragments(fragments, mode, node) { # {{{
 		const arguments = @prepareArguments(node)
 
 		if @flatten {
@@ -199,8 +199,8 @@ class DefaultCallee extends Callee {
 				}
 			}
 		}
-	} // }}}
-	toCurryFragments(fragments, mode, node) { // {{{
+	} # }}}
+	toCurryFragments(fragments, mode, node) { # {{{
 		node.module().flag('Helper')
 
 		const arguments = @prepareArguments(node)
@@ -265,8 +265,8 @@ class DefaultCallee extends Callee {
 				DefaultCallee.toArgumentFragments(argument, fragments, mode)
 			}
 		}
-	} // }}}
-	toNullableFragments(fragments, node) { // {{{
+	} # }}}
+	toNullableFragments(fragments, node) { # {{{
 		if @nullable {
 			if @expression.isNullable() {
 				fragments
@@ -288,27 +288,27 @@ class DefaultCallee extends Callee {
 				.compileReusable(@expression)
 				.code(')')
 		}
-	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isValue(')
 			.compileReusable(@object)
 			.code(')')
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
+	} # }}}
 	type() => @type
 	type(@type) => this
 
 	private {
-		prepareArguments(node) { // {{{
+		prepareArguments(node) { # {{{
 			if @arguments? {
 				return [node._arguments[index] for const index in @arguments]
 			}
 			else {
 				return node._arguments
 			}
-		} // }}}
+		} # }}}
 	}
 }

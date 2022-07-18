@@ -5,11 +5,11 @@ class ExpressionStatement extends Statement {
 		_ignorable: Boolean		= false
 		_variable				= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@expression = $compile.expression(@data, this)
 		@expression.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@expression.prepare()
 
 		for const data, name of @expression.inferTypes({}) {
@@ -24,11 +24,11 @@ class ExpressionStatement extends Statement {
 		}
 
 		this.assignTempVariables(@scope)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@expression.translate()
-	} // }}}
-	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
+	} # }}}
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
 		const assignments = []
 		let variable = null
 
@@ -68,9 +68,9 @@ class ExpressionStatement extends Statement {
 		else {
 			@assignments.push(...assignments)
 		}
-	} // }}}
+	} # }}}
 	hasExceptions() => @expression.hasExceptions()
-	initializeVariable(variable: VariableBrief, expression: Expression) { // {{{
+	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
 			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
 				ReferenceException.throwImmutableField(`\(variable.name)`, this)
@@ -88,7 +88,7 @@ class ExpressionStatement extends Statement {
 		else {
 			@parent.initializeVariable(variable, expression, this)
 		}
-	} // }}}
+	} # }}}
 	isAwait() => @expression.isAwait()
 	isExit() => @expression.isExit()
 	isInitializingInstanceVariable(name: String): Boolean => @expression.isInitializingInstanceVariable(name)
@@ -97,12 +97,12 @@ class ExpressionStatement extends Statement {
 	isUsingVariable(name) => @expression.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @expression.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @expression.isUsingStaticVariable(class, varname)
-	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 
 		return variables
-	} // }}}
-	toAwaitStatementFragments(fragments, statements) { // {{{
+	} # }}}
+	toAwaitStatementFragments(fragments, statements) { # {{{
 		const line = fragments.newLine()
 
 		const item = @expression.toFragments(line, Mode::None)
@@ -112,8 +112,8 @@ class ExpressionStatement extends Statement {
 		item(statements)
 
 		line.done()
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		return if @ignorable
 
 		if @expression.isSkippable() {
@@ -161,5 +161,5 @@ class ExpressionStatement extends Statement {
 		for afterward in @afterwards {
 			afterward.toAfterwardFragments(fragments)
 		}
-	} // }}}
+	} # }}}
 }

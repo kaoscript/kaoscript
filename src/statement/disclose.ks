@@ -3,7 +3,7 @@ class DiscloseDeclaration extends Statement {
 		@type: Type
 	}
 	analyse()
-	enhance() { // {{{
+	enhance() { # {{{
 		const variable = @scope.getVariable(@data.name.name)
 
 		unless variable? {
@@ -32,7 +32,7 @@ class DiscloseDeclaration extends Statement {
 		else {
 			@type.setExhaustive(true)
 		}
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
 	toStatementFragments(fragments, mode)

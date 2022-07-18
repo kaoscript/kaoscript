@@ -10,7 +10,7 @@ class CreateExpression extends Expression {
 		_sealed: Boolean			= false
 		_type: Type					= Type.Any
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@factory = $compile.expression(@data.class, this)
 		@factory.analyse()
 
@@ -25,8 +25,8 @@ class CreateExpression extends Expression {
 				@flatten = true
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@factory.prepare()
 
 		for argument in @arguments {
@@ -91,16 +91,16 @@ class CreateExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@factory.translate()
 
 		for argument in @arguments {
 			argument.translate()
 		}
-	} // }}}
+	} # }}}
 	isComputed() => @computed
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		if @factory.isUsingVariable(name) {
 			return true
 		}
@@ -112,8 +112,8 @@ class CreateExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	override listNonLocalVariables(scope, variables) { // {{{
+	} # }}}
+	override listNonLocalVariables(scope, variables) { # {{{
 		@factory.listNonLocalVariables(scope, variables)
 
 		for const argument in @arguments {
@@ -121,8 +121,8 @@ class CreateExpression extends Expression {
 		}
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @flatten {
 			if @sealed {
 				fragments.code(`\(@type.type().getSealedName()).new.apply(null`)
@@ -202,6 +202,6 @@ class CreateExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
+	} # }}}
 	type() => @type
 }

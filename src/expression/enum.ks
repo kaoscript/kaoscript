@@ -4,11 +4,11 @@ class EnumExpression extends Expression {
 		_enumCasting: Boolean	= false
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@enum = $compile.expression(@data.enum, this)
 		@enum.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@enum.prepare()
 
 		const named = @enum.type()
@@ -20,35 +20,35 @@ class EnumExpression extends Expression {
 		}
 
 		@type = named.reference(@scope)
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@enum.translate()
-	} // }}}
+	} # }}}
 	isUsingVariable(name) => false
-	toArgumentFragments(fragments, type: Type, mode: Mode) { // {{{
+	toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{
 		this.toFragments(fragments, mode)
 
 		if !(type.isAny() || type.isEnum()) {
 			fragments.code('.value')
 		}
-	} // }}}
-	toCastingFragments(fragments, mode) { // {{{
+	} # }}}
+	toCastingFragments(fragments, mode) { # {{{
 		this.toFragments(fragments, mode)
 
 		fragments.code('.value')
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@enum).code('.', @data.member.name)
 
 		if @enumCasting {
 			fragments.code('.value')
 		}
-	} // }}}
+	} # }}}
 	toQuote() => `\(@enum.toQuote())::\(@data.member.name)`
 	type() => @type
-	validateType(type: Type) { // {{{
+	validateType(type: Type) { # {{{
 		if !type.isAny() && !type.isEnum() {
 			@enumCasting = true
 		}
-	} // }}}
+	} # }}}
 }

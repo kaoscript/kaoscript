@@ -1,5 +1,5 @@
 const $switch = {
-	length(elements) { // {{{
+	length(elements) { # {{{
 		let min = 0
 		let max = 0
 
@@ -17,7 +17,7 @@ const $switch = {
 			min: min,
 			max: max
 		}
-	} // }}}
+	} # }}}
 }
 
 class SwitchStatement extends Statement {
@@ -35,7 +35,7 @@ class SwitchStatement extends Statement {
 		_value								= null
 		_valueType: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@value = $compile.expression(@data.expression, this)
 		@value.analyse()
 
@@ -120,8 +120,8 @@ class SwitchStatement extends Statement {
 				SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 
 		@valueType = @value.type()
@@ -265,8 +265,8 @@ class SwitchStatement extends Statement {
 		else {
 			@name = @scope.getVariable(@data.expression.name).getSecureName()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
 
 		for clause in @clauses {
@@ -282,8 +282,8 @@ class SwitchStatement extends Statement {
 
 			clause.body.translate()
 		}
-	} // }}}
-	addInitializableVariable(variable, node) { // {{{
+	} # }}}
+	addInitializableVariable(variable, node) { # {{{
 		const name = variable.name()
 
 		if !@hasDefaultClause {
@@ -332,8 +332,8 @@ class SwitchStatement extends Statement {
 		@hasLateInitVariables = true
 
 		@parent.addInitializableVariable(variable, node)
-	} // }}}
-	defineVariables(left, scope) { // {{{
+	} # }}}
+	defineVariables(left, scope) { # {{{
 		let alreadyDeclared
 
 		for const name in left.listAssignments([]) {
@@ -347,18 +347,18 @@ class SwitchStatement extends Statement {
 				scope.define(name, false, AnyType.NullableUnexplicit, true, this)
 			}
 		}
-	} // }}}
-	checkReturnType(type: Type) { // {{{
+	} # }}}
+	checkReturnType(type: Type) { # {{{
 		for const clause in @clauses {
 			clause.body.checkReturnType(type)
 		}
-	} // }}}
-	flagUsingFallthrough() { // {{{
+	} # }}}
+	flagUsingFallthrough() { # {{{
 		@usingFallthrough = true
 
 		return this
-	} // }}}
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+	} # }}}
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		const {name, type} = variable
 
 		if const map = @lateInitVariables[name] {
@@ -455,8 +455,8 @@ class SwitchStatement extends Statement {
 
 			@initializedVariables[name] = map
 		}
-	} // }}}
-	isExit() { // {{{
+	} # }}}
+	isExit() { # {{{
 		unless @hasDefaultClause {
 			return false
 		}
@@ -468,10 +468,10 @@ class SwitchStatement extends Statement {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		if @value.isUsingVariable(name) {
 			return true
 		}
@@ -483,13 +483,13 @@ class SwitchStatement extends Statement {
 		}
 
 		return false
-	} // }}}
-	toFallthroughFragments(fragments) { // {{{
+	} # }}}
+	toFallthroughFragments(fragments) { # {{{
 		if @nextClauseIndex < @clauses.length {
 			fragments.line(`\(@clauses[@nextClauseIndex].name)()`)
 		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	} # }}}
+	toStatementFragments(fragments, mode) { # {{{
 		if @clauses.length == 0 {
 			return
 		}
@@ -631,27 +631,27 @@ class SwitchStatement extends Statement {
 		}
 
 		ctrl.done()
-	} // }}}
+	} # }}}
 }
 
 class SwitchBindingArray extends AbstractNode {
 	private {
 		_array
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@array = $compile.expression(@data, this)
 		@array.setAssignment(AssignmentType::Expression)
 		@array.analyse()
 
 		@parent.defineVariables(@array, @scope)
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@array.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@array.translate()
-	} // }}}
-	toFragments(fragments) { // {{{
+	} # }}}
+	toFragments(fragments) { # {{{
 		let line = fragments.newLine()
 
 		line.code($runtime.scope(this))
@@ -659,29 +659,29 @@ class SwitchBindingArray extends AbstractNode {
 		@array.toAssignmentFragments(line, new Literal(@parent._name, this))
 
 		line.done()
-	} // }}}
+	} # }}}
 }
 
 class SwitchBindingType extends AbstractNode {
-	analyse() { // {{{
+	analyse() { # {{{
 		@scope.define(@data.name.name, false, Type.fromAST(@data.type, this), true, this)
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name.name, ' = ', @parent._name)
-	} // }}}
+	} # }}}
 }
 
 class SwitchBindingValue extends AbstractNode {
-	analyse() { // {{{
+	analyse() { # {{{
 		@scope.define(@data.name, false, this)
-	} // }}}
+	} # }}}
 	prepare()
 	translate()
-	toFragments(fragments) { // {{{
+	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name, ' = ', @parent._name)
-	} // }}}
+	} # }}}
 }
 
 class SwitchConditionArray extends AbstractNode {
@@ -690,7 +690,7 @@ class SwitchConditionArray extends AbstractNode {
 		_name: String?		= null
 		_values				= []
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for let value in @data.values {
@@ -707,8 +707,8 @@ class SwitchConditionArray extends AbstractNode {
 				@values.push(value)
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @values.length > 0 {
 			@name = @scope.parent().acquireTempName(false)
 		}
@@ -716,14 +716,14 @@ class SwitchConditionArray extends AbstractNode {
 		for value in @values {
 			value.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for value in @values {
 			value.translate()
 		}
-	} // }}}
+	} # }}}
 	isEnum() => false
-	toBooleanFragments(fragments, name) { // {{{
+	toBooleanFragments(fragments, name) { # {{{
 		this.module().flag('Type')
 
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
@@ -747,8 +747,8 @@ class SwitchConditionArray extends AbstractNode {
 		}
 
 		fragments.code(')')
-	} // }}}
-	toStatementFragments(fragments) { // {{{
+	} # }}}
+	toStatementFragments(fragments) { # {{{
 		if @values.length > 0 {
 			let line = fragments.newLine()
 
@@ -797,7 +797,7 @@ class SwitchConditionArray extends AbstractNode {
 
 			line.done()
 		}
-	} // }}}
+	} # }}}
 }
 
 class SwitchConditionRange extends AbstractNode {
@@ -807,7 +807,7 @@ class SwitchConditionRange extends AbstractNode {
 		_right
 		_to		= true
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		if @data.from? {
 			@left = $compile.expression(@data.from, this)
 		}
@@ -826,26 +826,26 @@ class SwitchConditionRange extends AbstractNode {
 
 		@left.analyse()
 		@right.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@left.prepare()
 		@right.prepare()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@left.translate()
 		@right.translate()
-	} // }}}
+	} # }}}
 	isEnum() => false
-	toBooleanFragments(fragments, name) { // {{{
+	toBooleanFragments(fragments, name) { # {{{
 		fragments
 			.code(name, @from ? ' >= ' : '>')
 			.compile(@left)
 			.code(' && ')
 			.code(name, @to ? ' <= ' : '<')
 			.compile(@right)
-	} // }}}
-	toStatementFragments(fragments) { // {{{
-	} // }}}
+	} # }}}
+	toStatementFragments(fragments) { # {{{
+	} # }}}
 }
 
 class SwitchConditionType extends AbstractNode {
@@ -853,14 +853,14 @@ class SwitchConditionType extends AbstractNode {
 		_type: Type
 	}
 	analyse()
-	prepare() { // {{{
+	prepare() { # {{{
 		@type = Type.fromAST(@data.type, this)
-	} // }}}
+	} # }}}
 	translate()
 	isEnum() => false
-	toBooleanFragments(fragments, name) { // {{{
+	toBooleanFragments(fragments, name) { # {{{
 		@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
-	} // }}}
+	} # }}}
 	toStatementFragments(fragments)
 }
 
@@ -870,21 +870,21 @@ class SwitchConditionValue extends AbstractNode {
 		_value
 		_type: Type
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@value = $compile.expression(@data, this)
 		@value.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@value.prepare()
 
 		@type = @value.type()
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@value.translate()
-	} // }}}
+	} # }}}
 	isEnum() => @type.isEnum()
 	setCastingEnum(@castingEnum)
-	toBooleanFragments(fragments, name) { // {{{
+	toBooleanFragments(fragments, name) { # {{{
 		fragments.code(name, ' === ').compile(@value)
 
 		if @castingEnum {
@@ -895,9 +895,9 @@ class SwitchConditionValue extends AbstractNode {
 				fragments.code('.valueOf()')
 			}
 		}
-	} // }}}
-	toStatementFragments(fragments) { // {{{
-	} // }}}
+	} # }}}
+	toStatementFragments(fragments) { # {{{
+	} # }}}
 }
 
 class SwitchFilter extends AbstractNode {
@@ -907,7 +907,7 @@ class SwitchFilter extends AbstractNode {
 		_flatten: Boolean	= false
 		_name				= null
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		if @data.filter? {
@@ -926,8 +926,8 @@ class SwitchFilter extends AbstractNode {
 			@filter = $compile.expression(@data.filter, this)
 			@filter.analyse()
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		if @filter != null {
 			for binding in @bindings {
 				binding.prepare()
@@ -935,8 +935,8 @@ class SwitchFilter extends AbstractNode {
 
 			@filter.prepare()
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		if @filter? {
 			for binding in @bindings {
 				binding.translate()
@@ -944,8 +944,8 @@ class SwitchFilter extends AbstractNode {
 
 			@filter.translate()
 		}
-	} // }}}
-	toBooleanFragments(fragments, nf) { // {{{
+	} # }}}
+	toBooleanFragments(fragments, nf) { # {{{
 		let mm
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
@@ -988,8 +988,8 @@ class SwitchFilter extends AbstractNode {
 
 			fragments.compile(@filter)
 		}
-	} // }}}
-	toStatementFragments(fragments) { // {{{
+	} # }}}
+	toStatementFragments(fragments) { # {{{
 		if @name != null {
 			let line = fragments.newLine()
 
@@ -1034,5 +1034,5 @@ class SwitchFilter extends AbstractNode {
 
 			line.done()
 		}
-	} // }}}
+	} # }}}
 }

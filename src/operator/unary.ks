@@ -2,20 +2,20 @@ class UnaryOperatorExpression extends Expression {
 	private {
 		_argument
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		@argument = $compile.expression(@data.argument, this)
 		@argument.analyse()
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		@argument.prepare()
 
 		if @argument.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		@argument.translate()
-	} // }}}
+	} # }}}
 	argument() => @argument
 	hasExceptions() => false
 	inferTypes(inferables) => @argument.inferTypes(inferables)
@@ -29,7 +29,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		_isNative: Boolean		= false
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if this.isAcceptingEnum() && @argument.type().isEnum() {
@@ -51,12 +51,12 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 
 			@type = @scope.reference('Number')
 		}
-	} // }}}
+	} # }}}
 	isAcceptingEnum() => false
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @isEnum {
 			fragments.code(this.symbol(), @data.operator).wrap(@argument)
 		}
@@ -66,7 +66,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		else {
 			fragments.code($runtime.operator(this), `.\(this.runtime())(`).compile(@argument).code(')')
 		}
-	} // }}}
+	} # }}}
 	toQuote() => `\(this.symbol())\(@argument.toQuote())`
 	type() => @type
 }
@@ -82,9 +82,9 @@ class UnaryOperatorDecrementPostfix extends NumericUnaryOperatorExpression {
 	operator() => Operator::DecrementPostfix
 	runtime() => 'decrementPostfix'
 	symbol() => '--'
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument).code(this.symbol(), @data.operator)
-	} // }}}
+	} # }}}
 	toQuote() => `\(@argument.toQuote())\(this.symbol())`
 }
 
@@ -92,16 +92,16 @@ class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
 	operator() => Operator::DecrementPrefix
 	runtime() => 'decrementPrefix'
 	symbol() => '--'
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(this.symbol(), @data.operator).compile(@argument)
-	} // }}}
+	} # }}}
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		@argument.prepare()
 
 		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
@@ -109,8 +109,8 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 		}
 
 		@type = @argument.type().setNullable(false)
-	} // }}}
-	inferWhenTrueTypes(inferables) { // {{{
+	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
 		@argument.inferTypes(inferables)
 
 		if @argument.isInferable() {
@@ -121,9 +121,9 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 		}
 
 		return inferables
-	} // }}}
+	} # }}}
 	isComputed() => @argument.isNullable()
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @argument.isNullable() {
 			fragments
 				.wrapNullable(@argument)
@@ -138,7 +138,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 				.compile(@argument)
 				.code(')',  @data.operator)
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
@@ -146,16 +146,16 @@ class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
 	private {
 		_type: Type		= AnyType.Unexplicit
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if !@parent.isExpectingType() {
 			SyntaxException.throwInvalidForcedTypeCasting(this)
 		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -163,9 +163,9 @@ class UnaryOperatorIncrementPostfix extends NumericUnaryOperatorExpression {
 	operator() => Operator::IncrementPostfix
 	runtime() => 'incrementPostfix'
 	symbol() => '++'
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument).code(this.symbol(), @data.operator)
-	} // }}}
+	} # }}}
 	toQuote() => `\(@argument.toQuote())\(this.symbol())`
 }
 
@@ -173,13 +173,13 @@ class UnaryOperatorIncrementPrefix extends NumericUnaryOperatorExpression {
 	operator() => Operator::IncrementPrefix
 	runtime() => 'incrementPrefix'
 	symbol() => '++'
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments.code(this.symbol(), @data.operator).compile(@argument)
-	} // }}}
+	} # }}}
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		if @argument.type().isBoolean() {
@@ -190,14 +190,14 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 		else if !@argument.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
 		}
-	} // }}}
+	} # }}}
 	inferWhenFalseTypes(inferables) => @argument.inferWhenTrueTypes(inferables)
 	inferWhenTrueTypes(inferables) => @argument.inferWhenFalseTypes(inferables)
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		fragments
 			.code('!', @data.operator)
 			.wrapBoolean(@argument)
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
@@ -211,14 +211,14 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		@type = @argument.type().setNullable(false)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
-	} // }}}
+	} # }}}
 	type() => @type
 }
 
@@ -226,7 +226,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
-	prepare() { // {{{
+	prepare() { # {{{
 		super()
 
 		const type = @argument.type()
@@ -240,9 +240,9 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		else {
 			TypeException.throwInvalidSpread(this)
 		}
-	} // }}}
+	} # }}}
 	isExpectingType() => true
-	toFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { # {{{
 		if @options.format.spreads == 'es5' {
 			throw new NotSupportedException(this)
 		}
@@ -250,7 +250,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		fragments
 			.code('...', @data.operator)
 			.wrap(@argument)
-	} // }}}
+	} # }}}
 	toTypeQuote() {
 		const type = @type.parameter(0)
 

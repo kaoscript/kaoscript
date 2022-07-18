@@ -1,8 +1,8 @@
 class CurryExpression extends CallExpression {
-	makeCallee(type, name) { // {{{
+	makeCallee(type, name) { # {{{
 		this.addCallee(new DefaultCallee(@data, @object, null, this))
-	} // }}}
-	toCallFragments(fragments, mode) { // {{{
+	} # }}}
+	toCallFragments(fragments, mode) { # {{{
 		if @callees.length == 1 {
 			@callees[0].toCurryFragments(fragments, mode, this)
 		}
@@ -22,6 +22,6 @@ class CurryExpression extends CallExpression {
 		else {
 			throw new NotImplementedException(this)
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('Function')
 }

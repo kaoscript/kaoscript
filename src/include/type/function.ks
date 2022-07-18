@@ -18,7 +18,7 @@ class FunctionType extends Type {
 		_returnType: Type					= AnyType.NullableUnexplicit
 	}
 	static {
-		clone(source: FunctionType, target: FunctionType): FunctionType { // {{{
+		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
 			for const key in ['_async', '_hasRest', '_index', '_max', '_maxBefore', '_maxAfter', '_min', '_minBefore', '_minAfter', '_missingParameters', '_missingReturn', '_restIndex', '_returnType'] {
 				target[key] = source[key]
 			}
@@ -27,17 +27,17 @@ class FunctionType extends Type {
 			target._errors = [...source._errors]
 
 			return target
-		} // }}}
+		} # }}}
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
-		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
+		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
 			if data.parameters? {
 				return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 			}
 			else {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 			}
-		} // }}}
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FunctionType { // {{{
+		} # }}}
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
 			const type = new FunctionType(scope)
 
 			type._index = data.index ?? -1
@@ -63,8 +63,8 @@ class FunctionType extends Type {
 			})
 
 			return type
-		} // }}}
-		isOptional(parameters, index, step) { // {{{
+		} # }}}
+		isOptional(parameters, index, step) { # {{{
 			if index >= parameters.length {
 				return true
 			}
@@ -80,8 +80,8 @@ class FunctionType extends Type {
 			}
 
 			return true
-		} // }}}
-		toQuote(parameters) { // {{{
+		} # }}}
+		toQuote(parameters) { # {{{
 			let fragments = ''
 
 			fragments += '('
@@ -98,15 +98,15 @@ class FunctionType extends Type {
 
 
 			return fragments
-		} // }}}
+		} # }}}
 	}
-	constructor(@scope) { // {{{
+	constructor(@scope) { # {{{
 		super(scope)
-	} // }}}
-	constructor(@scope, @index) { // {{{
+	} # }}}
+	constructor(@scope, @index) { # {{{
 		super(scope)
-	} // }}}
-	constructor(parameters: Array<ParameterType>, data, node) { // {{{
+	} # }}}
+	constructor(parameters: Array<ParameterType>, data, node) { # {{{
 		super(node.scope())
 
 		if data.type? {
@@ -153,16 +153,16 @@ class FunctionType extends Type {
 		}
 
 		this.updateParameters()
-	} // }}}
-	constructor(parameters: Array<ParameterType>, data, @index, node) { // {{{
+	} # }}}
+	constructor(parameters: Array<ParameterType>, data, @index, node) { # {{{
 		this(parameters, data, node)
-	} // }}}
+	} # }}}
 	absoluteMax() => @async ? @max + 1 : @max
 	absoluteMin() => @async ? @min + 1 : @min
-	addError(...types: Type) { // {{{
+	addError(...types: Type) { # {{{
 		@errors.pushUniq(...types)
-	} // }}}
-	addParameter(type: Type, name: String?, min, max) { // {{{
+	} # }}}
+	addParameter(type: Type, name: String?, min, max) { # {{{
 		@parameters.push(new ParameterType(@scope, name, type, min, max))
 
 		if @hasRest {
@@ -185,8 +185,8 @@ class FunctionType extends Type {
 		}
 
 		@min += min
-	} // }}}
-	addParameter(type: ParameterType) { // {{{
+	} # }}}
+	addParameter(type: ParameterType) { # {{{
 		@parameters.push(type)
 
 		if @hasRest {
@@ -209,21 +209,21 @@ class FunctionType extends Type {
 		}
 
 		@min += type.min()
-	} // }}}
-	assessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	assessment(name: String, node: AbstractNode) { # {{{
 		if @assessment == null {
 			@assessment = Router.assess([this], name, node)
 		}
 
 		return @assessment
-	} // }}}
-	async() { // {{{
+	} # }}}
+	async() { # {{{
 		@async = true
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const result = {
 			kind: TypeKind::Function
 		}
@@ -245,8 +245,8 @@ class FunctionType extends Type {
 		result.errors = [throw.toReference(references, indexDelta, mode, module) for const throw in @errors]
 
 		return result
-	} // }}}
-	flagExported(explicitly: Boolean) { // {{{
+	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
 		}
@@ -260,10 +260,10 @@ class FunctionType extends Type {
 		@returnType.flagExported(false)
 
 		return this
-	} // }}}
+	} # }}}
 	getCallIndex() => @alien ? 0 : @index
 	getMaxAfter(): @maxAfter
-	getMaxAfter(excludes: Array<String>?): Number { // {{{
+	getMaxAfter(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
 		if excludes? {
@@ -278,9 +278,9 @@ class FunctionType extends Type {
 		else {
 			return @maxAfter
 		}
-	} // }}}
+	} # }}}
 	getMaxBefore(): @maxBefore
-	getMaxBefore(excludes: Array<String>?): Number { // {{{
+	getMaxBefore(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
 		if excludes? {
@@ -295,9 +295,9 @@ class FunctionType extends Type {
 		else {
 			return @maxBefore
 		}
-	} // }}}
+	} # }}}
 	getMinAfter(): @minAfter
-	getMinAfter(excludes: Array<String>?): Number { // {{{
+	getMinAfter(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
 		if excludes? {
@@ -312,9 +312,9 @@ class FunctionType extends Type {
 		else {
 			return @minAfter
 		}
-	} // }}}
+	} # }}}
 	getMinBefore(): @minBefore
-	getMinBefore(excludes: Array<String>?): Number { // {{{
+	getMinBefore(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
 		if excludes? {
@@ -329,23 +329,23 @@ class FunctionType extends Type {
 		else {
 			return @minBefore
 		}
-	} // }}}
+	} # }}}
 	getProperty(name: String) => Type.Any
 	getRestIndex(): @restIndex
 	getRestParameter() => @parameters[@restIndex]
 	getReturnType(): @returnType
 	hashCode() => `Function`
 	hasRestParameter(): @hasRest
-	hasVarargsParameter() { // {{{
+	hasVarargsParameter() { # {{{
 		for const parameter in @parameters {
 			return true if parameter.isVarargs()
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	index(): @index
 	index(@index): this
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() || value.isFunction() {
 			return true
 		}
@@ -358,9 +358,9 @@ class FunctionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isAsync(): @async
-	isCatchingError(error): Boolean { // {{{
+	isCatchingError(error): Boolean { # {{{
 		if @errors.length != 0 {
 			for type in @errors {
 				if error.matchInheritanceOf(type) {
@@ -373,8 +373,8 @@ class FunctionType extends Type {
 		}
 
 		return false
-	} // }}}
-	isExportable() { // {{{
+	} # }}}
+	isExportable() { # {{{
 		for const parameter in @parameters {
 			if !parameter.isExportable() {
 				return false
@@ -386,12 +386,12 @@ class FunctionType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	isExtendable() => true
 	isFunction() => true
 	isMissingError() => @errors.length == 0
 	isMissingReturn() => @missingReturn
-	isMorePreciseThan(value: FunctionType) { // {{{
+	isMorePreciseThan(value: FunctionType) { # {{{
 		if @parameters.length != value._parameters.length {
 			return false
 		}
@@ -403,11 +403,11 @@ class FunctionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isMorePreciseThan(value: Type) => value.isAny()
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => this.isParametersMatching(0, -1, arguments, 0, -1, mode)
-	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { // {{{
+	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { # {{{
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
 				if mode !~ MatchingMode::RequireAllParameters {
@@ -493,11 +493,11 @@ class FunctionType extends Type {
 		else {
 			return false
 		}
-	} // }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return value.isFunction()
-	} // }}}
-	isSubsetOf(value: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
 		if @async != value._async {
 			return false
 		}
@@ -665,15 +665,15 @@ class FunctionType extends Type {
 		}
 
 		return true
-	} // }}}
+	} # }}}
 	length() => 1
 	listErrors() => @errors
-	matchArguments(arguments: Array, node: AbstractNode) { // {{{
+	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		const assessment = this.assessment('', node)
 
 		return ?Router.matchArguments(assessment, arguments, node)
-	} // }}}
-	matchContentOf(value: Type) { // {{{
+	} # }}}
+	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isFunction() {
 			return true
 		}
@@ -687,9 +687,9 @@ class FunctionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	max(): @max
-	max(excludes: Array<String>?): Number { // {{{
+	max(excludes: Array<String>?): Number { # {{{
 		if excludes? {
 			auto max = 0
 
@@ -702,9 +702,9 @@ class FunctionType extends Type {
 		else {
 			return @max
 		}
-	} // }}}
+	} # }}}
 	min(): @min
-	min(excludes: Array<String>?): Number { // {{{
+	min(excludes: Array<String>?): Number { # {{{
 		if excludes? {
 			auto min = 0
 
@@ -717,25 +717,25 @@ class FunctionType extends Type {
 		else {
 			return @min
 		}
-	} // }}}
+	} # }}}
 	parameter(index) => @parameters[index]
 	parameters(): Array<ParameterType> => @parameters
-	parameters(excludes: Array<String>?): Array<ParameterType> { // {{{
+	parameters(excludes: Array<String>?): Array<ParameterType> { # {{{
 		if excludes? {
 			return [parameter for const parameter in @parameters when !excludes.contains(parameter.name())]
 		}
 		else {
 			return @parameters
 		}
-	} // }}}
-	private processModifiers(modifiers) { // {{{
+	} # }}}
+	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {
 				@async = true
 			}
 		}
-	} // }}}
-	pushTo(methods) { // {{{
+	} # }}}
+	pushTo(methods) { # {{{
 		for const method in methods {
 			if this.isSubsetOf(method, MatchingMode::SimilarParameter) {
 				return
@@ -743,12 +743,12 @@ class FunctionType extends Type {
 		}
 
 		methods.push(this)
-	} // }}}
+	} # }}}
 	setReturnType(@returnType): this
-	toFragments(fragments, node) { // {{{
+	toFragments(fragments, node) { # {{{
 		fragments.code('Function')
-	} // }}}
-	toQuote() { // {{{
+	} # }}}
+	toQuote() { # {{{
 		let fragments = ''
 
 		fragments += '('
@@ -768,20 +768,20 @@ class FunctionType extends Type {
 		}
 
 		return fragments
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)
 			.code(')')
-	} // }}}
-	toTestFunctionFragments(fragments, node) { // {{{
+	} # }}}
+	toTestFunctionFragments(fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('func', 1)
-	} // }}}
-	updateParameters() { // {{{
+	} # }}}
+	updateParameters() { # {{{
 		for const parameter, i in @parameters {
 			if @hasRest {
 				@minAfter += parameter.min()
@@ -796,7 +796,7 @@ class FunctionType extends Type {
 				@maxBefore += parameter.max()
 			}
 		}
-	} // }}}
+	} # }}}
 }
 
 class OverloadedFunctionType extends Type {
@@ -809,7 +809,7 @@ class OverloadedFunctionType extends Type {
 		_references: Array<Type>			= []
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
 			const type = new OverloadedFunctionType(scope)
 
 			if data.exhaustive? {
@@ -823,9 +823,9 @@ class OverloadedFunctionType extends Type {
 			})
 
 			return type
-		} // }}}
+		} # }}}
 	}
-	addFunction(type: FunctionType) { // {{{
+	addFunction(type: FunctionType) { # {{{
 		if @functions.length == 0 {
 			@async = type.isAsync()
 		}
@@ -846,8 +846,8 @@ class OverloadedFunctionType extends Type {
 				@exhaustive = false
 			}
 		}
-	} // }}}
-	addFunction(type: OverloadedFunctionType) { // {{{
+	} # }}}
+	addFunction(type: OverloadedFunctionType) { # {{{
 		if @functions.length == 0 {
 			@async = type.isAsync()
 		}
@@ -870,8 +870,8 @@ class OverloadedFunctionType extends Type {
 				}
 			}
 		}
-	} // }}}
-	addFunction(type: ReferenceType) { // {{{
+	} # }}}
+	addFunction(type: ReferenceType) { # {{{
 		if @functions.length == 0 {
 			@async = type.isAsync()
 		}
@@ -884,18 +884,18 @@ class OverloadedFunctionType extends Type {
 		@functions.push(fn)
 
 		@references.pushUniq(type)
-	} // }}}
-	assessment(name: String, node: AbstractNode) { // {{{
+	} # }}}
+	assessment(name: String, node: AbstractNode) { # {{{
 		if @assessment == null {
 			@assessment = Router.assess(@functions, name, node)
 		}
 
 		return @assessment
-	} // }}}
-	clone() { // {{{
+	} # }}}
+	clone() { # {{{
 		throw new NotSupportedException()
-	} // }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+	} # }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		const functions = []
 
 		const overloadedMode = mode + ExportMode::OverloadedFunction
@@ -916,9 +916,9 @@ class OverloadedFunctionType extends Type {
 			exhaustive: this.isExhaustive()
 			functions
 		}
-	} // }}}
+	} # }}}
 	functions() => @functions
-	hasFunction(type: FunctionType) { // {{{
+	hasFunction(type: FunctionType) { # {{{
 		for function in @functions {
 			if function.equals(type) {
 				return true
@@ -926,9 +926,9 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isAsync() => @async
-	isExportable() { // {{{
+	isExportable() { # {{{
 		for const reference in @references {
 			if reference.isExportable() {
 				return true
@@ -936,25 +936,25 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isExtendable() => true
 	isFunction() => true
 	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
-	isMorePreciseThan(value: Type) { // {{{
+	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return true
 		}
 
 		return false
-	} // }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
 		return value.isFunction()
-	} // }}}
-	isSubsetOf(value: FunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
@@ -966,8 +966,8 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return false
-	} // }}}
-	isSubsetOf(value: OverloadedFunctionType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: OverloadedFunctionType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
@@ -988,30 +988,30 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return true
-	} // }}}
-	isSubsetOf(value: NamedType, mode: MatchingMode) { // {{{
+	} # }}}
+	isSubsetOf(value: NamedType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
 		return this.isSubsetOf(value.type(), mode)
-	} // }}}
+	} # }}}
 	length() => @functions.length
-	matchArguments(arguments: Array, node: AbstractNode) { // {{{
+	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		const assessment = this.assessment('', node)
 
 		return ?Router.matchArguments(assessment, arguments, node)
-	} // }}}
-	originals(@majorOriginal): this { // {{{
+	} # }}}
+	originals(@majorOriginal): this { # {{{
 		@altering = true
-	} // }}}
-	toFragments(fragments, node) { // {{{
+	} # }}}
+	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toPositiveTestFragments(fragments, node, junction) { // {{{
+	} # }}}
+	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
-	} // }}}
-	override toVariations(variations) { // {{{
+	} # }}}
+	override toVariations(variations) { # {{{
 		variations.push('func', @functions.length)
-	} // }}}
+	} # }}}
 }

@@ -4,7 +4,7 @@ class TemplateExpression extends Expression {
 		_elements: Array		= []
 		_isString: Boolean		= true
 	}
-	analyse() { // {{{
+	analyse() { # {{{
 		for const data in @data.elements {
 			const element = $compile.expression(data, this)
 
@@ -12,8 +12,8 @@ class TemplateExpression extends Expression {
 
 			@elements.push(element)
 		}
-	} // }}}
-	prepare() { // {{{
+	} # }}}
+	prepare() { # {{{
 		for const element, index in @elements {
 			element.prepare()
 
@@ -25,14 +25,14 @@ class TemplateExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	translate() { // {{{
+	} # }}}
+	translate() { # {{{
 		for const element in @elements {
 			element.translate()
 		}
-	} // }}}
+	} # }}}
 	computing(@computing)
-	isUsingVariable(name) { // {{{
+	isUsingVariable(name) { # {{{
 		for const element in @elements {
 			if element.isUsingVariable(name) {
 				return true
@@ -40,16 +40,16 @@ class TemplateExpression extends Expression {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 	isComputed() => @elements.length > 1 || !@isString
-	override listNonLocalVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { # {{{
 		for const element in @elements {
 			element.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
+	} # }}}
+	toFragments(fragments, mode) { # {{{
 		if @elements.length == 0 {
 			fragments.code('""')
 		}
@@ -80,6 +80,6 @@ class TemplateExpression extends Expression {
 
 			fragments.code(')')
 		}
-	} // }}}
+	} # }}}
 	type() => @scope.reference('String')
 }
