@@ -140,6 +140,15 @@ class UnionType extends Type {
 
 		return false
 	} # }}}
+	canBeFunction(any = true) { # {{{
+		for const type in @types {
+			if type.canBeFunction(any) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	canBeNumber(any = true) { # {{{
 		for const type in @types {
 			if type.canBeNumber(any) {

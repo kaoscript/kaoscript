@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "Number" can't be assigned with a value of type "()" (fixtures/compile/class/class.atthis.param.method.ncall.ks:2)

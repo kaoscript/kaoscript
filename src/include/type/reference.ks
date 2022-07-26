@@ -77,6 +77,7 @@ class ReferenceType extends Type {
 		@nullable = @explicitlyNull
 	} # }}}
 	canBeBoolean() => this.isUnion() ? @type.canBeBoolean() : super()
+	canBeFunction(any = true) => this.isUnion() ? @type.canBeFunction(any) : super(any)
 	canBeNumber(any = true) => this.isUnion() ? @type.canBeNumber(any) : super(any)
 	canBeString(any = true) => this.isUnion() ? @type.canBeString(any) : super(any)
 	clone() { # {{{

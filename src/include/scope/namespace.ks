@@ -24,6 +24,6 @@ class NamespaceTypeScope extends BlockScope {
 			@declarations[name] = true
 		}
 
-		@variables[name] = [@line, variable]
+		@variables[name] = [@line(), variable]
 	} # }}}
 }

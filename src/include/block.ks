@@ -80,7 +80,7 @@ class Block extends AbstractNode {
 	addStatement(statement) { # {{{
 		@data.statements.push(statement)
 	} # }}}
-	analyse(from: Number, to: Number = @data.statements.length + 1) { # {{{
+	analyse(from: Number, to: Number = @data.statements.length:Number + 1) { # {{{
 		for statement in @data.statements from from to to {
 			@scope.line(statement.start.line)
 

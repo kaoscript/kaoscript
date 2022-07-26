@@ -107,7 +107,7 @@ class ArrayBinding extends Expression {
 		return false
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array) { # {{{
+	listAssignments(array: Array<String>) { # {{{
 		for const element in @elements {
 			element.listAssignments(array)
 		}
@@ -259,7 +259,7 @@ class ArrayBindingElement extends Expression {
 	isRedeclared() => @named ? @name.isRedeclared() : false
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
-	listAssignments(array) => @named ? @name.listAssignments(array) : array
+	listAssignments(array: Array<String>) => @named ? @name.listAssignments(array) : array
 	max() => @rest ? Infinity : 1
 	min() => @rest ? 0 : 1
 	setAssignment(@assignment)
@@ -397,11 +397,15 @@ class ObjectBinding extends Expression {
 	} # }}}
 	prepare() { # {{{
 		if @type == null {
+			@type = new DestructurableObjectType()
+			
 			for const element in @elements {
 				element.prepare()
+				
+				if element is ObjectBindingElement {
+					@type.addProperty(element.name(), element.type())
+				}
 			}
-
-			@type = Type.DestructurableObject
 		}
 		else if @type is DictionaryType {
 			for const element in @elements {
@@ -483,7 +487,7 @@ class ObjectBinding extends Expression {
 		return false
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array) { # {{{
+	listAssignments(array: Array<String>) { # {{{
 		for const element in @elements {
 			element.listAssignments(array)
 		}
@@ -671,7 +675,7 @@ class ObjectBindingElement extends Expression {
 	isRedeclared() => @alias.isRedeclared()
 	isRequired() => !(@computed || @rest || @hasDefaultValue)
 	isThisAliasing() => @thisAlias
-	listAssignments(array) => @alias.listAssignments(array)
+	listAssignments(array: Array<String>) => @alias.listAssignments(array)
 	name(): String => @name.value()
 	setAssignment(@assignment)
 	toFragments(fragments) { # {{{
@@ -776,6 +780,7 @@ class ObjectBindingElement extends Expression {
 			}
 		}
 	} # }}}
+	type() => @type
 	type(@type) => this
 	walk(fn) { # {{{
 		@alias.walk(fn)

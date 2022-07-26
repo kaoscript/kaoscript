@@ -677,6 +677,10 @@ class Parameter extends AbstractNode {
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 			@defaultValue.translate()
+
+			if !@defaultValue.type().isAssignableToVariable(@name.getDeclaredType(), true, true, false) {
+				TypeException.throwInvalidAssignement(@name, @name.getDeclaredType(), @defaultValue.type(), this)
+			}
 		}
 	} # }}}
 	addAliasParameter(expression: ThisExpressionParameter) { # {{{
@@ -1587,6 +1591,10 @@ class ThisExpressionParameter extends ThisExpression {
 	override prepare() { # {{{
 		super()
 
+		unless ?@variableName {
+			throw new NotSupportedException(this)
+		}
+
 		const method = this.statement()
 
 		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
@@ -1619,7 +1627,7 @@ class ThisExpressionParameter extends ThisExpression {
 	} # }}}
 	getDeclaredType() => @type
 	isBinding() => false
-	listAssignments(array) { # {{{
+	listAssignments(array: Array<String>) { # {{{
 		array.push(@name)
 
 		return array

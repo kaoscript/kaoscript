@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(x = null, y) {
 		if(y === void 0 || y === null) {
-			y = false;
+			y = "";
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

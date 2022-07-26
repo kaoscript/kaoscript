@@ -1186,34 +1186,6 @@ class ClassType extends Type {
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
 	getProperty(name: String) => this.getClassProperty(name)
-	getPropertyGetter(name: String) { # {{{
-		if @instanceMethods[name] is Array {
-			for method in @instanceMethods[name] {
-				if method.min() == 0 && method.max() == 0 {
-					return method.getReturnType()
-				}
-			}
-		}
-		else if @extending {
-			return @extends.type().getPropertyGetter(name)
-		}
-
-		return null
-	} # }}}
-	getPropertySetter(name: String) { # {{{
-		if @instanceMethods[name] is Array {
-			for method in @instanceMethods[name] {
-				if method.min() == 1 && method.max() == 1 {
-					return method.parameter(0).type()
-				}
-			}
-		}
-		else if @extending {
-			return @extends.type().getPropertySetter(name)
-		}
-
-		return null
-	} # }}}
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
 	hasAbstractMethod(name) { # {{{
 		if @abstractMethods[name] is Array {

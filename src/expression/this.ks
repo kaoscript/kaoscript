@@ -68,44 +68,65 @@ class ThisExpression extends Expression {
 	prepare() { # {{{
 		return unless @type == null
 
+		const type = @class.type()
+
 		if @instance {
 			const name = @scope.getVariable('this').getSecureName()
 
 			if @calling {
-				if @class.type().hasInstantiableMethod(@name) {
-					const assessment = @class.type().getInstantiableAssessment(@name, this)
+				let variable
 
-					if const result = Router.matchArguments(assessment, @parent.arguments(), this) {
-						@fragment = `\(name).\(@name)`
+				if variable ?= type.getInstanceVariable(@name) {
+					@variableName = @name
+					@fragment = `\(name).\(@variableName)`
+				}
+				else if variable ?= type.getInstanceVariable(`_\(@name)`) {
+					@variableName = `_\(@name)`
 
-						if result is PreciseCallMatchResult {
-							@type = Type.union(@scope, ...[match.function for const match in result.matches])
-						}
-						else {
-							@type = Type.union(@scope, ...result.possibilities)
-						}
+					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
+						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+					}
+					else {
+						@fragment = `\(name).\(@variableName)`
 					}
 				}
 
-				if !?@type {
-					if @type ?= @class.type().getInstanceVariable(@name) {
-						@fragment = `\(name).\(@name)`
+				if ?variable {
+					@type = @scope.getChunkType(@fragment) ?? variable.type()
 
-						@variableName = @name
-						@immutable = @type.isImmutable()
-						@lateInit = !@immutable && @type.isLateInit()
+					if @type.canBeFunction() {
+						@immutable = variable.isImmutable()
+						@sealed = variable.isSealed()
+						@lateInit = !@immutable && variable.isLateInit()
 					}
-					else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-						if @type.isSealed() && @type.hasDefaultValue() && @assignment == AssignmentType::Neither {
-							@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+					else {
+						@type = null
+						@variableName = null
+						@fragment = ''
+					}
+				}
+
+				if !?@variableName {
+					if type.hasInstantiableMethod(@name) {
+						const assessment = type.getInstantiableAssessment(@name, this)
+
+						if const result = Router.matchArguments(assessment, @parent.arguments(), this) {
+							@fragment = `\(name).\(@name)`
+
+							if result is PreciseCallMatchResult {
+								@type = Type.union(@scope, ...[match.function for const match in result.matches])
+							}
+							else {
+								@type = Type.union(@scope, ...result.possibilities)
+							}
+						}
+						else if type.isExhaustive(this) {
+							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), @parent.arguments(), this)
 						}
 						else {
-							@fragment = `\(name)._\(@name)`
+							@fragment = `\(name).\(@name)`
+							@type = @scope.getChunkType(@fragment) ?? Type.union(@scope, ...type.listInstantiableMethods(@name))
 						}
-
-						@variableName = `_\(@name)`
-						@immutable = @type.isImmutable()
-						@lateInit = !@immutable && @type.isLateInit()
 					}
 					else {
 						ReferenceException.throwUndefinedInstanceField(@name, this)
@@ -113,38 +134,41 @@ class ThisExpression extends Expression {
 				}
 			}
 			else {
-				if variable ?= @class.type().getInstanceVariable(@name) {
-					@fragment = `\(name).\(@name)`
+				let variable
 
-					@type = @scope.getChunkType(@fragment) ?? variable.type()
-
+				if variable ?= type.getInstanceVariable(@name) {
 					@variableName = @name
-					@immutable = variable.isImmutable()
-					@sealed = variable.isSealed()
-					@lateInit = !@immutable && variable.isLateInit()
+					@fragment = `\(name).\(@variableName)`
 				}
-				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
+				else if variable ?= type.getInstanceVariable(`_\(@name)`) {
+					@variableName = `_\(@name)`
+
 					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
 						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
-						@fragment = `\(name)._\(@name)`
+						@fragment = `\(name).\(@variableName)`
 					}
+				}
 
+				if ?variable {
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
 
-					@variableName = `_\(@name)`
 					@immutable = variable.isImmutable()
 					@sealed = variable.isSealed()
 					@lateInit = !@immutable && variable.isLateInit()
 				}
-				else if @type ?= @class.type().getPropertyGetter(@name) {
-					if @namesake {
-						ReferenceException.throwLoopingAlias(@name, this)
+				else if type.hasInstantiableMethod(@name) {
+					@type = Type.union(@scope, ...type.listInstantiableMethods(@name))
+					@fragment = `\($runtime.helper(this)).bindMethod(\(name), "\(@name)")`
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
 					}
-
-					@fragment = `\(name).\(@name)()`
-					@composite = true
+					else {
+						ReferenceException.throwNotDefinedProperty(@name, this)
+					}
 				}
 				else {
 					ReferenceException.throwUndefinedInstanceField(@name, this)
@@ -158,21 +182,23 @@ class ThisExpression extends Expression {
 				NotImplementedException.throw(this)
 			}
 			else {
-				if variable ?= @class.type().getClassVariable(@name) {
-					@fragment = `\(name).\(@name)`
+				let variable
 
-					@type = @scope.getChunkType(@fragment) ?? variable.type()
-
+				if variable ?= type.getClassVariable(@name) {
 					@variableName = @name
-					@immutable = variable.isImmutable()
-					@sealed = variable.isSealed()
 				}
-				else if variable ?= @class.type().getClassVariable(`_\(@name)`) {
-					@fragment = `\(name)._\(@name)`
+				else if variable ?= type.getClassVariable(`_\(@name)`) {
+					@variableName = `_\(@name)`
+				}
+				else {
+					ReferenceException.throwUndefinedClassField(@name, this)
+				}
+
+				if ?variable {
+					@fragment = `\(name).\(@variableName)`
 
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
 
-					@variableName = `_\(@name)`
 					@immutable = variable.isImmutable()
 					@sealed = variable.isSealed()
 				}
@@ -213,24 +239,20 @@ class ThisExpression extends Expression {
 	fragment() => @fragment
 	getClass() => @class
 	getDeclaredType() { # {{{
-		if !@calling {
+		if @variableName? {
 			if @instance {
-				if variable ?= @class.type().getInstanceVariable(@name) {
-					return variable.type()
-				}
-				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
+				if const variable = @class.type().getInstanceVariable(@variableName) {
 					return variable.type()
 				}
 			}
 			else {
-				NotImplementedException.throw(this)
+				if const variable = @class.type().getClassVariable(@variableName) {
+					return variable.type()
+				}
 			}
 		}
 
 		return @type
-	} # }}}
-	getVariableDeclaration(class) { # {{{
-		return class.getInstanceVariable(@variableName)
 	} # }}}
 	getVariableName() => @variableName
 	getUnpreparedType() { # {{{
@@ -257,7 +279,7 @@ class ThisExpression extends Expression {
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name
-	listAssignments(array) { # {{{
+	listAssignments(array: Array<String>) { # {{{
 		if @variableName != null {
 			array.push(@variableName)
 		}

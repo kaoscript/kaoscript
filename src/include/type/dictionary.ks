@@ -75,6 +75,13 @@ class DictionaryType extends Type {
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
+		else if value.isObject() {
+			if this.isNullable() && !nullcast && !value.isNullable() {
+				return false
+			}
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		}
 		else if value is UnionType {
 			for const type in value.types() {
 				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
@@ -97,6 +104,20 @@ class DictionaryType extends Type {
 	isExhaustive() => false
 	isExportable() => true
 	isSealable() => true
+	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
+		for const type, name of value.properties() {
+			if const prop = @properties[name] {
+				if !prop.isSubsetOf(type, mode) {
+					return false
+				}
+			}
+			else if !type.isNullable() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
 		if this == value {
 			return true

@@ -25,7 +25,7 @@ class OperationScope extends InlineBlockScope {
 			else {
 				variable = variable.clone().setRealType(type, absolute, this)
 
-				@variables[name] = [@line, variable]
+				@variables[name] = [@line(), variable]
 			}
 		}
 

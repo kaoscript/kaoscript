@@ -29,13 +29,13 @@ class HollowScope extends Scope {
 
 		@variables[name] = [@parent.line(), variable]
 	} # }}}
-	getChunkType(name) => this.getChunkType(name, @line)
+	getChunkType(name) => this.getChunkType(name, @line())
 	getChunkType(name, line: Number) { # {{{
 		if @chunkTypes[name] is Array {
 			const types: Array = @chunkTypes[name]
 			let type = null
 
-			if line == -1 || line > @line {
+			if line == -1 || line > @line() {
 				type = types.last()
 			}
 			else {
@@ -107,7 +107,7 @@ class HollowScope extends Scope {
 		return @parent.getVariable(name, line)
 	} # }}}
 	hasBleedingVariable(name: String) => @parent.hasBleedingVariable(name)
-	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name, @line)
+	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number): Boolean => @parent.hasDefinedVariable(name, line)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
 	hasMacro(name) => @parent.hasMacro(name)
@@ -177,10 +177,10 @@ class HollowScope extends Scope {
 		}
 		else {
 			if @chunkTypes[name] is Array {
-				@chunkTypes[name].push(@line, data.type)
+				@chunkTypes[name].push(@line(), data.type)
 			}
 			else {
-				@chunkTypes[name] = [@line, data.type]
+				@chunkTypes[name] = [@line(), data.type]
 			}
 		}
 	} # }}}

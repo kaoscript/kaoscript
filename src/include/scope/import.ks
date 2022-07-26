@@ -22,7 +22,7 @@ class ImportScope extends BlockScope {
 			@declarations[name] = true
 		}
 
-		@variables[name] = [@line, variable]
+		@variables[name] = [@line(), variable]
 	} # }}}
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Renamed {

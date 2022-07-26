@@ -45,7 +45,7 @@ class BinaryOperatorExpression extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
-	listAssignments(array) { # {{{
+	listAssignments(array: Array<String>) { # {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
 
@@ -754,7 +754,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isNullable() => @left.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
-	listAssignments(array) => @left.listAssignments(array)
+	listAssignments(array: Array<String>) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { # {{{
 		if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
@@ -867,7 +867,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
-	listAssignments(array) => @subject.listAssignments(array)
+	listAssignments(array: Array<String>) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { # {{{
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
@@ -989,7 +989,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return inferables
 	} # }}}
-	listAssignments(array) => @subject.listAssignments(array)
+	listAssignments(array: Array<String>) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { # {{{
 		@falseType.toNegativeTestFragments(fragments, @subject)
 	} # }}}

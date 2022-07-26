@@ -124,7 +124,7 @@ class BlockScope extends Scope {
 				SyntaxException.throwAlreadyDeclared(name, node)
 			}
 
-			variables.push(@line, variable)
+			variables.push(@line(), variable)
 		}
 		else {
 			if const newName = this.declareVariable(name, this) {
@@ -133,19 +133,19 @@ class BlockScope extends Scope {
 				variable.renameAs(newName)
 			}
 
-			@variables[name] = [@line, variable]
+			@variables[name] = [@line(), variable]
 		}
 
 		if const reference = @references[name] {
 			reference.reset()
 		}
 	} # }}}
-	getChunkType(name, line: Number = @line) { # {{{
+	getChunkType(name, line: Number = @line()) { # {{{
 		if @chunkTypes[name] is Array {
 			const types: Array = @chunkTypes[name]
 			let type = null
 
-			if line == -1 || line > @line {
+			if line == -1 || line > @line() {
 				type = types.last()
 			}
 			else {
@@ -170,7 +170,9 @@ class BlockScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= @line {
+				const line = @line()
+
+				for const i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -238,12 +240,12 @@ class BlockScope extends Scope {
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
-	getVariable(name, line: Number = @line): Variable? { # {{{
+	getVariable(name, line: Number = @line()): Variable? { # {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
 
-			if line == -1 || line > @line {
+			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
@@ -263,13 +265,13 @@ class BlockScope extends Scope {
 		return @parent.getVariable(name, -1)
 	} # }}}
 	hasDeclaredVariable(name: String) => @declarations[name] || @renamedVariables[name]?
-	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line)
+	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
 
-			if line == -1 || line > @line {
+			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
@@ -286,12 +288,12 @@ class BlockScope extends Scope {
 		return false
 	} # }}}
 	hasMacro(name) => @macros[name] is Array || @parent.hasMacro(name)
-	hasVariable(name: String, line: Number = @line) { # {{{
+	hasVariable(name: String, line: Number = @line()) { # {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
 
-			if line == -1 || line > @line {
+			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
@@ -439,7 +441,7 @@ class BlockScope extends Scope {
 	} # }}}
 	removeVariable(name) { # {{{
 		if @variables[name] is Array {
-			@variables[name].push(@line, false)
+			@variables[name].push(@line(), false)
 		}
 		else {
 			@parent.removeVariable(name)
@@ -471,18 +473,19 @@ class BlockScope extends Scope {
 	replaceVariable(name: String, variable: Variable): Variable { # {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
+			const line = @line()
 
 			let i = 0
-			while i + 2 < variables.length && variables[i + 2] <= @line {
+			while i + 2 < variables.length && variables[i + 2] <= line {
 				i += 2
 			}
 
-			if variables[i] <= @line {
+			if variables[i] <= line {
 				variables[i + 1] = variable
 			}
 		}
 		else {
-			@variables[name] = [@line, variable]
+			@variables[name] = [@line(), variable]
 		}
 
 		if const reference = @references[name] {
@@ -512,12 +515,12 @@ class BlockScope extends Scope {
 			if @variables[name] is Array {
 				variable = variable.setRealType(type, absolute, this)
 
-				@variables[name].push(@line, variable)
+				@variables[name].push(@line(), variable)
 			}
 			else {
 				variable = variable.clone().setRealType(type, absolute, this)
 
-				@variables[name] = [@line, variable]
+				@variables[name] = [@line(), variable]
 			}
 		}
 
@@ -553,10 +556,10 @@ class BlockScope extends Scope {
 		}
 		else {
 			if @chunkTypes[name] is Array {
-				@chunkTypes[name].push(@line, data.type)
+				@chunkTypes[name].push(@line(), data.type)
 			}
 			else {
-				@chunkTypes[name] = [@line, data.type]
+				@chunkTypes[name] = [@line(), data.type]
 			}
 		}
 	} # }}}

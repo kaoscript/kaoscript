@@ -525,6 +525,7 @@ abstract class Type {
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
 	abstract toVariations(variations: Array<String>): Void
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
+	canBeFunction(any: Boolean = true): Boolean => (any && this.isAny()) || this.isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
 	canBeVirtual(name: String) { # {{{
@@ -896,7 +897,6 @@ include {
 }
 
 Type.Any = AnyType.Unexplicit
-Type.DestructurableObject = new DestructurableObjectType()
 Type.Never = new NeverType()
 Type.Null = NullType.Unexplicit
 Type.Void = new VoidType()

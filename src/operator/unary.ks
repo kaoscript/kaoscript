@@ -20,7 +20,7 @@ class UnaryOperatorExpression extends Expression {
 	hasExceptions() => false
 	inferTypes(inferables) => @argument.inferTypes(inferables)
 	isUsingVariable(name) => @argument.isUsingVariable(name)
-	listAssignments(array) => @argument.listAssignments(array)
+	listAssignments(array: Array<String>) => @argument.listAssignments(array)
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {

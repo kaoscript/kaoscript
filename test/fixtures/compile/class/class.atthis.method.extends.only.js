@@ -43,7 +43,7 @@ module.exports = function() {
 			return this.__ks_func_greet_rt.call(null, this, this, arguments);
 		}
 		__ks_func_greet_0(name) {
-			return Helper.concatString(this.message(), "\nIt's nice to meet you, ", name, ".");
+			return Helper.concatString(this.__ks_func_message_0(), "\nIt's nice to meet you, ", name, ".");
 		}
 		__ks_func_greet_rt(that, proto, args) {
 			const t0 = Type.isValue;

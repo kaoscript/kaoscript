@@ -1,1 +1,0 @@
-ReferenceException: Alias "@foobar" is looping on itself (fixtures/compile/class/class.atthis.loop.return.ks:2)

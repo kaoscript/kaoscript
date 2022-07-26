@@ -3,7 +3,7 @@ class OmittedExpression extends Expression {
 	prepare()
 	translate()
 	isRedeclared() => false
-	listAssignments(array) => array
+	listAssignments(array: Array<String>) => array
 	setAssignment(...)
 	toFragments(fragments) { # {{{
 		if this._data.spread {

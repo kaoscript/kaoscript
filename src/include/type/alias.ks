@@ -20,6 +20,7 @@ class AliasType extends Type {
 		super(scope)
 	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
+	canBeFunction(any = true) => @type.canBeFunction(any)
 	canBeNumber(any = true) => @type.canBeNumber(any)
 	canBeString(any = true) => @type.canBeString(any)
 	clone() { # {{{

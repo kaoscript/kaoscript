@@ -205,7 +205,9 @@ class ModuleScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= @line {
+				const line = @line
+
+				for const i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -484,13 +486,14 @@ class ModuleScope extends Scope {
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const l = variables.length
+			const line = @line
 
 			let i = 0
-			while i + 2 < l && variables[i + 2] <= @line {
+			while i + 2 < l && variables[i + 2] <= line {
 				i += 2
 			}
 
-			if variables[i] <= @line {
+			if variables[i] <= line {
 				variables[i + 1] = variable
 			}
 		}

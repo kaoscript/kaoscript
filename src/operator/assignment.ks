@@ -74,7 +74,7 @@ class AssignmentOperatorExpression extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
-	listAssignments(array) => @left.listAssignments(@right.listAssignments(array))
+	listAssignments(array: Array<String>) => @left.listAssignments(@right.listAssignments(array))
 	setAssignment(assignment)
 	toNullableFragments(fragments) { # {{{
 		fragments.compileNullable(@right)

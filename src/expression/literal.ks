@@ -13,7 +13,7 @@ class Literal extends Expression {
 	translate()
 	hasExceptions() => false
 	isComposite() => false
-	listAssignments(array) => array
+	listAssignments(array: Array<String>) => array
 	override listNonLocalVariables(scope, variables) => variables
 	toFragments(fragments, mode) { # {{{
 		if @data {
@@ -161,8 +161,8 @@ class IdentifierLiteral extends Literal {
 		return false
 	} # }}}
 	isUsingVariable(name) => @value == name
-	listAssignments(array) { # {{{
-		array.push(@name)
+	listAssignments(array: Array<String>) { # {{{
+		array.push(@value)
 
 		return array
 	} # }}}
@@ -205,7 +205,7 @@ class IdentifierLiteral extends Literal {
 	type() => @realType
 	type(type: Type, scope: Scope, node) { # {{{
 		if @isVariable {
-			@realType = scope.replaceVariable(@name, type, node).getRealType()
+			@realType = scope.replaceVariable(@value, type, node).getRealType()
 		}
 	} # }}}
 	variable() => @scope.getVariable(@value, @line)

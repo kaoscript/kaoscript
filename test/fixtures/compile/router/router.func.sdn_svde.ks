@@ -1,2 +1,2 @@
-func foobar(x: String = null, y!: String = false) {
+func foobar(x: String = null, y!: String = '') {
 }

@@ -191,6 +191,41 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingFunction('', @arguments, this)
 				}
 			}
+			else if @data.callee.kind == NodeKind::ThisExpression {
+				const expression = $compile.expression(@data.callee, this)
+				expression.analyse()
+				expression.prepare()
+
+				@property = @data.callee.name.name
+
+				const type = expression.type()
+				if type is FunctionType | OverloadedFunctionType {
+					const assessment = type.assessment(@property, this)
+
+					if const result = Router.matchArguments(assessment, @arguments, this) {
+						if result is LenientCallMatchResult {
+							this.addCallee(new ThisCallee(@data, expression, @property, result.possibilities, this))
+						}
+						else {
+							if result.matches.length == 1 {
+								this.addCallee(new PreciseThisCallee(@data, expression, @property, result.matches[0], this))
+							}
+							else {
+								throw new NotImplementedException(this)
+							}
+						}
+					}
+					else {
+						ReferenceException.throwNoMatchingFunction(@property, @arguments, this)
+					}
+				}
+				else if type.isFunction() {
+					this.addCallee(new DefaultCallee(@data, null, null, this))
+				}
+				else {
+					ReferenceException.throwUndefinedFunction(@property, this)
+				}
+			}
 			else {
 				if @named {
 					NotImplementedException.throw(this)
@@ -438,7 +473,7 @@ class CallExpression extends Expression {
 					if result.matches.length == 1 {
 						const match = result.matches[0]
 
-						if match.function.isAlien() || match.function.index() == -1 {
+						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
 							this.addCallee(new DefaultCallee(@data, @object, match.function, this))
 						}
 						else {
@@ -1121,11 +1156,13 @@ include {
 	'./callee/function'
 	'./callee/inverted-precise-method'
 	'./callee/precise-method'
+	'./callee/precise-this'
 	'./callee/sealed'
 	'./callee/sealed-function'
 	'./callee/sealed-method'
 	'./callee/sealed-precise-method'
 	'./callee/struct'
 	'./callee/substitute'
+	'./callee/this'
 	'./callee/tuple'
 }
