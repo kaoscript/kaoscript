@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" of the class "ClassA" can't be matched to given arguments (true) (fixtures/compile/class/class.atthis.method.call.badmatch.ks:5)
+ReferenceException: The method "foobar" of the class "ClassA" can't be matched to given arguments (Boolean) (fixtures/compile/class/class.atthis.method.call.badmatch.ks:5)

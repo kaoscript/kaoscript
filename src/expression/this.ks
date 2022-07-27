@@ -121,7 +121,7 @@ class ThisExpression extends Expression {
 							}
 						}
 						else if type.isExhaustive(this) {
-							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), @parent.arguments(), this)
+							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), [argument.type() for const argument in @parent.arguments()], this)
 						}
 						else {
 							@fragment = `\(name).\(@name)`

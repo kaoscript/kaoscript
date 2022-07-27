@@ -216,7 +216,7 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
-						ReferenceException.throwNoMatchingFunction(@property, @arguments, this)
+						ReferenceException.throwNoMatchingClassMethod(@property, expression.getClass().name(), [argument.type() for const argument in @arguments], this)
 					}
 				}
 				else if type.isFunction() {
