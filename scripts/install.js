@@ -1,47 +1,21 @@
 var fs = require('fs');
+var https = require('https');
 var metadata = require('../package.json');
 var path = require('path');
-var program = require('commander');
 
-function getPackage(source) {
-	var version = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'es6' : 'es5'
+var file = path.join(__dirname, '..', 'lib', 'compiler.js');
+var url = 'https://raw.githubusercontent.com/kaoscript/compiler-bin-js-es6/v' + metadata.version + '/compiler.js';
 
-	if(source === 'github') {
-		return 'compiler-bin-js-' + version;
-	}
-	else {
-		return 'compiler-bin-' + version;
-	}
-}
+https.get(url, function(response) {
+	var stream = fs.createWriteStream(file);
 
-program
-	.command('dependency')
-	.action(function() {
-		if(metadata._requested && (metadata._requested.type === 'git' || metadata._requested.type === 'hosted')) {
-			var library = 'github:kaoscript/' + getPackage('github');
-		}
-		else if(metadata._resolved && metadata._resolved.substr(0, 4) !== 'git:') {
-			var library = '@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.');
-		}
-		else {
-			var library = 'github:kaoscript/' + getPackage('github');
-		}
+	response.pipe(stream);
 
-		var manager = process.env.npm_execpath;
-		if(manager.indexOf('yarn') != -1) {
-			console.log('yarn add-no-save ' + library);
-		}
-		else {
-			console.log('npm install --no-save ' + library + '');
-		}
+	stream.on('finish', function() {
+		stream.close();
 	});
+}).on('error', function(error) {
+	fs.unlink(file);
 
-program
-	.command('binary')
-	.action(function() {
-		var data = fs.readFileSync(path.join(__dirname, '..', 'node_modules', '@kaoscript', getPackage(), 'compiler.js'));
-
-		fs.writeFileSync(path.join(__dirname, '..', 'lib', 'compiler.js'), data);
-	});
-
-program.parse(process.argv);
+	throw error;
+});

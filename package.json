@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.9.1",
+	"version": "0.10.0",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -37,17 +37,17 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/runtime": "github:kaoscript/runtime",
+		"@kaoscript/runtime": "^0.7.0",
 		"commander": "^2.20.3"
 	},
 	"devDependencies": {
-		"@kaoscript/ast": "github:kaoscript/ast",
-		"@kaoscript/coverage-istanbul": "^0.2.1",
-		"@kaoscript/parser": "github:kaoscript/parser",
-		"@kaoscript/source-generator": "github:kaoscript/source-generator",
+		"@kaoscript/ast": "^0.9.0",
+		"@kaoscript/coverage-istanbul": "^0.3.0",
+		"@kaoscript/parser": "^0.8.0",
+		"@kaoscript/source-generator": "^0.2.0",
 		"@kaoscript/target-commons": "^0.2.0",
 		"@kaoscript/test-import": "^0.2.2",
-		"@kaoscript/util": "github:kaoscript/util",
+		"@kaoscript/util": "^0.2.0",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
 		"@zokugun/istanbul.reporter.minimap": "^0.5.0",
@@ -56,11 +56,10 @@
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
 		"mocha": "^5.2.0",
-		"rimraf": "^2.7.1",
-		"yarn-add-no-save": "^1.0.3"
+		"rimraf": "^2.7.1"
 	},
 	"scripts": {
-		"postinstall": "`node ./scripts/install.js dependency` && node ./scripts/install.js binary",
+		"postinstall": "node ./scripts/install.js",
 		"prepublishOnly": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.test.js test/*.test.ks",
