@@ -82,7 +82,7 @@ class TryExpression extends Expression {
 			fragments.code(')')
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		if @unwrap {
 			fragments.compileBoolean(@argument)
 		}

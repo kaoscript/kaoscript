@@ -96,7 +96,7 @@ abstract class Expression extends AbstractNode {
 	toArgumentFragments(fragments, type: Type, mode = Mode::None) { # {{{
 		this.toArgumentFragments(fragments, mode)
 	} # }}}
-	toBooleanFragments(fragments, mode = Mode::None) { # {{{
+	toBooleanFragments(fragments, mode = Mode::None, junction = Junction::NONE) { # {{{
 		this.toFragments(fragments, mode)
 
 		if !this.type().isBoolean() || this.type().isNullable() {

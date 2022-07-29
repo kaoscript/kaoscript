@@ -87,6 +87,17 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			fragments.wrapBoolean(operand)
 		}
 	} # }}}
+	toBooleanFragments(fragments, mode, junction) { # {{{
+		if junction == Junction::OR {
+			fragments.code('(')
+		}
+
+		@toFragments(fragments, mode)
+
+		if junction == Junction::OR {
+			fragments.code(')')
+		}
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
@@ -303,6 +314,17 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 
 			fragments.wrapBoolean(operand)
+		}
+	} # }}}
+	toBooleanFragments(fragments, mode, junction) { # {{{
+		if junction == Junction::AND {
+			fragments.code('(')
+		}
+
+		@toFragments(fragments, mode)
+
+		if junction == Junction::AND {
+			fragments.code(')')
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')

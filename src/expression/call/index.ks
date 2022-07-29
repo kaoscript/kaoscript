@@ -977,7 +977,7 @@ class CallExpression extends Expression {
 			}
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		if mode == Mode::Async {
 			this.toCallFragments(fragments, mode)
 

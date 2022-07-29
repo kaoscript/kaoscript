@@ -109,8 +109,8 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	compileBoolean(node) { # {{{
-		@step.compileBoolean(node)
+	compileBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+		@step.compileBoolean(node, mode, junction)
 
 		return this
 	} # }}}
@@ -186,9 +186,9 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	compileBoolean(node, mode = Mode::None) { # {{{
+	compileBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
 		if node is not Primitive {
-			node.toBooleanFragments(this, mode)
+			node.toBooleanFragments(this, mode, junction)
 		}
 		else {
 			@writer.push(@writer.newFragment(node))
@@ -230,16 +230,16 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	wrapBoolean(node, mode = Mode::None) { # {{{
+	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
 		if node.isBooleanComputed() {
 			this.code('(')
 
-			node.toBooleanFragments(this, mode)
+			node.toBooleanFragments(this, mode, junction)
 
 			this.code(')')
 		}
 		else {
-			node.toBooleanFragments(this, mode)
+			node.toBooleanFragments(this, mode, junction)
 		}
 
 		return this

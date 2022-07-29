@@ -393,7 +393,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		if this.isNullable() && !@tested {
 			if @computed {
 				fragments

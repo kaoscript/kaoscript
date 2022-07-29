@@ -984,9 +984,12 @@ class SwitchFilter extends AbstractNode {
 			@scope.parent().releaseTempName(@name)
 		}
 		else if @filter? {
-			fragments.code(' && ') if nf
-
-			fragments.compile(@filter)
+			if nf {
+				fragments.code(' && ').compileBoolean(@filter, Mode::None, Junction::AND)
+			}
+			else {
+				fragments.compileBoolean(@filter)
+			}
 		}
 	} # }}}
 	toStatementFragments(fragments) { # {{{

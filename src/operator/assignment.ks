@@ -437,7 +437,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 			fragments.compile(@left).code($equals).compile(@right)
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		fragments.compile(@left).code($equals).wrap(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
@@ -542,7 +542,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		fragments.code(' : null')
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		if @right.isNullable() {
 			fragments
 				.wrapNullable(@right)
@@ -688,7 +688,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			.wrap(@right)
 			.code(' : null')
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		if @right.isNullable() {
 			fragments
 				.wrapNullable(@right)

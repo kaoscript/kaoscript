@@ -53,7 +53,7 @@ class SequenceExpression extends Expression {
 
 		fragments.code(')')
 	} # }}}
-	toBooleanFragments(fragments, mode) { # {{{
+	toBooleanFragments(fragments, mode, junction) { # {{{
 		fragments.code('(')
 
 		for const expression, index in @expressions til @last {
