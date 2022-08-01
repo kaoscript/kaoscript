@@ -262,8 +262,8 @@ export class Module {
 			return Parser.parse(data)
 		}
 		catch error {
-			error.message += ` (file "\(file)")`
 			error.fileName = file
+			error.message += ` (\(error.fileName):\(error.lineNumber):\(error.columnNumber))`
 
 			throw error
 		}

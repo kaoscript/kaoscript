@@ -321,8 +321,8 @@ class MacroDeclaration extends AbstractNode {
 			data = Parser.parse(data)
 		}
 		catch error {
-			error.filename = `\(@parent.file())$\(@name)$\(@executeCount)`
-			error.message += ` (file "\(error.filename)")`
+			error.fileName = `\(@parent.file())$\(@name)$\(@executeCount)`
+			error.message += ` (\(error.fileName):\(error.lineNumber):\(error.columnNumber))`
 
 			throw error
 		}
