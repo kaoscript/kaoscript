@@ -46,6 +46,18 @@ std:
 save:
 	cp lib/compiler.js lib/compiler.old.js
 
+restore:
+	cp lib/compiler.old.js lib/compiler.js
+
+update:
+	rm -rf node_modules package-lock.json
+	npm i
+
+local:
+	nrm use local
+	npm unpublish kaoscript --force
+	npm publish
+
 dev: export DEBUG = 1
 dev: export XARGS = 1
 dev:

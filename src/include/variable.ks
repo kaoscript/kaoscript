@@ -43,8 +43,6 @@ class Variable {
 	constructor()
 	constructor(@name, @immutable, @predefined, declaredType: Type = null, initialized: Boolean = false) { # {{{
 		if declaredType == null {
-			@declaredType = Type.toNamedType(@name, Type.Any)
-
 			if initialized {
 				@realType = @declaredType
 			}

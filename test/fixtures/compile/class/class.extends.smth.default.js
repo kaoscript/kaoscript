@@ -19,7 +19,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_foobar_0(index, arr) {
 			const data = Type.isNumber(index) ? arr[index] : index;
-			return Quxbaz.__ks_sttc_foobar_1(index, data, arr);
+			return Quxbaz.foobar(index, data, arr);
 		}
 		static foobar() {
 			const t0 = Type.isValue;
