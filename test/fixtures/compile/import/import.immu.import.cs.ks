@@ -1,1 +1,1 @@
-export const Color = 'color'
+export var Color = 'color'

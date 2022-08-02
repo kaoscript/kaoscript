@@ -75,13 +75,13 @@ Color.registerSpace!({ // {{{ cmy
 describe('color.space', func() {
 	describe('space', func() {
 		it('get', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 		}) // }}}
 
 		it('set :rgb', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -91,7 +91,7 @@ describe('color.space', func() {
 		}) // }}}
 
 		it('set :green', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -101,11 +101,11 @@ describe('color.space', func() {
 		}) // }}}
 
 		it('set :hsb', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
-			let error
+			var dyn error
 			try {
 				c.space('hsb')
 			}
@@ -118,7 +118,7 @@ describe('color.space', func() {
 		}) // }}}
 
 		it('like :rgb', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -130,7 +130,7 @@ describe('color.space', func() {
 
 	describe('rvb', func() {
 		it('set :rvb', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -144,7 +144,7 @@ describe('color.space', func() {
 		}) // }}}
 
 		it('set :rouge', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -154,7 +154,7 @@ describe('color.space', func() {
 		}) // }}}
 
 		it('like :rvb', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -172,7 +172,7 @@ describe('color.space', func() {
 
 	describe('cmy', func() {
 		it('set :blue', func() { // {{{
-			let c = new Color('#ff0')
+			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
 
@@ -180,7 +180,7 @@ describe('color.space', func() {
 
 			expect(c.space()).to.equal(Space::CMY)
 
-			let error
+			var dyn error
 			try {
 				c.space('blue')
 			}

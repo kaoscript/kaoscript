@@ -1,5 +1,5 @@
 extern expect
 
-let error = true
+var dyn error = true
 
 expect(error).to.exist

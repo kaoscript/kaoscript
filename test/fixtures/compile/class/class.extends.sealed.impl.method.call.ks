@@ -6,8 +6,8 @@ impl Date {
 class FDate extends Date {
 }
 
-const d = new Date()
-const f = new FDate()
+var d = new Date()
+var f = new FDate()
 
 d.foobar()
 f.foobar()

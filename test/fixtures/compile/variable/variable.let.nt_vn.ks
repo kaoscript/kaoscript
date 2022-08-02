@@ -1,4 +1,4 @@
-let x = null
+var dyn x = null
 
 export x
 

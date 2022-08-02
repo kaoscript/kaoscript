@@ -1,5 +1,5 @@
 func foobar(functions: Array<(x: String)>) {
-	for const fn in functions {
+	for var fn in functions {
 		fn('foobar')
 	}
 }

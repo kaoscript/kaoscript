@@ -1,3 +1,3 @@
-let x = null
+var dyn x = null
 
 x.foobar()

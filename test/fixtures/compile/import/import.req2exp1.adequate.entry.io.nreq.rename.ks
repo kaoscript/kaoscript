@@ -5,6 +5,6 @@ import './import.req2exp1.adequate.pivot.ks' {
 
 extern console
 
-const f = new Foobar()
+var f = new Foobar()
 
 console.log(f.x())

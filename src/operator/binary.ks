@@ -105,7 +105,7 @@ class BinaryOperatorExpression extends Expression {
 }
 
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
-	private lateinit {
+	private late {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -144,7 +144,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		super()
 
 		if @isEnum {
-			const type = @parent.type()
+			var type = @parent.type()
 
 			if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
 				if type.isEnum() {
@@ -202,7 +202,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 }
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
-	private lateinit {
+	private late {
 		_expectingEnum: Boolean		= true
 		_isEnum: Boolean			= false
 		_isNative: Boolean			= false
@@ -253,7 +253,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				TypeException.throwInvalidOperand(@left, Operator::Addition, this)
 			}
 
-			const nullable = @left.type().isNullable() || @right.type().isNullable()
+			var nullable = @left.type().isNullable() || @right.type().isNullable()
 			if nullable {
 				@isNative = false
 			}
@@ -265,7 +265,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				@type = @scope.reference('String')
 			}
 			else {
-				const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
 				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
 			}
@@ -295,7 +295,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
-			lateinit const operator: String
+			var late  operator: String
 
 			if @left.type().discard().isFlags() {
 				operator = ' | '
@@ -390,7 +390,7 @@ class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorMatch extends Expression {
-	private lateinit {
+	private late {
 		_await: Boolean				= false
 		_composite: Boolean			= false
 		_isNative: Boolean			= true
@@ -408,7 +408,7 @@ class BinaryOperatorMatch extends Expression {
 		if @data.right.kind == NodeKind::JunctionExpression {
 			@junctive = true
 
-			for const operand in @data.right.operands {
+			for var operand in @data.right.operands {
 				this.addOperand(operand)
 			}
 
@@ -438,7 +438,7 @@ class BinaryOperatorMatch extends Expression {
 			@isNative = false
 		}
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.prepare()
 
 			if operand.type().isInoperative() {
@@ -453,7 +453,7 @@ class BinaryOperatorMatch extends Expression {
 	translate() { # {{{
 		@subject.translate()
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.translate()
 		}
 	} # }}}
@@ -466,12 +466,12 @@ class BinaryOperatorMatch extends Expression {
 
 		@subject.acquireReusable(acquire)
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.acquireReusable(acquire)
 		}
 	} # }}}
 	private addOperand(data) { # {{{
-		const operand = $compile.expression(data, this)
+		var operand = $compile.expression(data, this)
 
 		operand.analyse()
 
@@ -491,7 +491,7 @@ class BinaryOperatorMatch extends Expression {
 
 		@subject.releaseReusable()
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.releaseReusable()
 		}
 	} # }}}
@@ -500,7 +500,7 @@ class BinaryOperatorMatch extends Expression {
 			NotSupportedException.throw(this)
 		}
 
-		const test = this.isNullable() && !@tested
+		var test = this.isNullable() && !@tested
 		if test {
 			fragments.wrapNullable(this).code(' ? ')
 		}
@@ -511,7 +511,7 @@ class BinaryOperatorMatch extends Expression {
 
 				this.toOperatorFragments(fragments, @operands[0], true)
 
-				for const operand in @operands from 1 {
+				for var operand in @operands from 1 {
 					fragments.code($comma)
 
 					this.toOperatorFragments(fragments, operand, false)
@@ -522,7 +522,7 @@ class BinaryOperatorMatch extends Expression {
 			else {
 				this.toOperatorFragments(fragments, @operands[0], true)
 
-				for const operand in @operands from 1 {
+				for var operand in @operands from 1 {
 					fragments.code(@junction)
 
 					this.toOperatorFragments(fragments, operand, false)
@@ -539,7 +539,7 @@ class BinaryOperatorMatch extends Expression {
 	} # }}}
 	toNullableFragments(fragments) { # {{{
 		if !@tested {
-			let nf = false
+			var mut nf = false
 
 			if @subject.isNullable() {
 				nf = true
@@ -547,7 +547,7 @@ class BinaryOperatorMatch extends Expression {
 				fragments.compileNullable(@subject)
 			}
 
-			for const operand in @operands {
+			for var operand in @operands {
 				if operand.isNullable() {
 					if nf {
 						fragments.code(' && ')
@@ -564,8 +564,8 @@ class BinaryOperatorMatch extends Expression {
 		}
 	} # }}}
 	toOperatorFragments(fragments, operand, assignable) { # {{{
-		const native = @isNative && operand.type().isNumber() && !operand.type().isNullable()
-		const operator = this.operator()
+		var native = @isNative && operand.type().isNumber() && !operand.type().isNullable()
+		var operator = this.operator()
 
 		if @composite {
 			if assignable {
@@ -624,7 +624,7 @@ class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	prepare() { # {{{
@@ -633,7 +633,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		@left.acquireReusable(true)
 		@left.releaseReusable()
 
-		const leftType = @left.type().setNullable(false)
+		var leftType = @left.type().setNullable(false)
 
 		if leftType.equals(@right.type()) {
 			@type = leftType
@@ -709,7 +709,7 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorTypeCasting extends Expression {
-	private lateinit {
+	private late {
 		_forced: Boolean	= false
 		_left
 		_nullable: Boolean	= false
@@ -721,7 +721,7 @@ class BinaryOperatorTypeCasting extends Expression {
 
 		@type = Type.fromAST(@data.right, this)
 
-		for const modifier in @data.operator.modifiers {
+		for var modifier in @data.operator.modifiers {
 			if modifier.kind == ModifierKind::Forced {
 				@forced = true
 			}
@@ -735,7 +735,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	prepare() { # {{{
 		@left.prepare()
 
-		const type = @left.type()
+		var type = @left.type()
 
 		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@left, this)
@@ -778,7 +778,7 @@ class BinaryOperatorTypeCasting extends Expression {
 }
 
 class BinaryOperatorTypeEquality extends Expression {
-	private lateinit {
+	private late {
 		_falseType: Type
 		_subject
 		_trueType: Type
@@ -795,7 +795,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		if @data.right.kind == NodeKind::JunctionExpression {
-			lateinit const type: Type
+			var late  type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)
@@ -804,9 +804,9 @@ class BinaryOperatorTypeEquality extends Expression {
 				type = new UnionType(@scope)
 			}
 
-			for const operand in @data.right.operands {
+			for var operand in @data.right.operands {
 				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
-					if const variable = @scope.getVariable(operand.typeName.name) {
+					if var variable = @scope.getVariable(operand.typeName.name) {
 						type.addType(this.validateType(variable))
 					}
 					else {
@@ -822,7 +822,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-				if const variable = @scope.getVariable(@data.right.typeName.name) {
+				if var variable = @scope.getVariable(@data.right.typeName.name) {
 					@trueType = this.validateType(variable)
 				}
 				else {
@@ -873,7 +873,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private validateType(variable: Variable) { # {{{
-		const type = variable.getRealType()
+		var type = variable.getRealType()
 
 		if @subject.type().isNull() {
 			TypeException.throwNullTypeChecking(type, this)
@@ -898,7 +898,7 @@ class BinaryOperatorTypeEquality extends Expression {
 }
 
 class BinaryOperatorTypeInequality extends Expression {
-	private lateinit {
+	private late {
 		_falseType: Type
 		_subject
 		_trueType: Type
@@ -916,7 +916,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		if @data.right.kind == NodeKind::JunctionExpression {
-			lateinit const type: Type
+			var late  type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)
@@ -925,9 +925,9 @@ class BinaryOperatorTypeInequality extends Expression {
 				type = new UnionType(@scope)
 			}
 
-			for const operand in @data.right.operands {
+			for var operand in @data.right.operands {
 				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
-					if const variable = @scope.getVariable(operand.typeName.name) {
+					if var variable = @scope.getVariable(operand.typeName.name) {
 						type.addType(this.validateType(variable))
 					}
 					else {
@@ -943,7 +943,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-				if const variable = @scope.getVariable(@data.right.typeName.name) {
+				if var variable = @scope.getVariable(@data.right.typeName.name) {
 					@falseType = this.validateType(variable)
 				}
 				else {
@@ -995,7 +995,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private validateType(variable: Variable) { # {{{
-		const type = variable.getRealType()
+		var type = variable.getRealType()
 
 		if @subject.type().isNull() {
 			TypeException.throwNullTypeChecking(type, this)

@@ -4,7 +4,7 @@ async func foo(a, b) => a - b
 // async func foo(x, y) => x - y
 
 async func bar() {
-	let x = -1
+	var dyn x = -1
 
 	try {
 		x = await foo(await foo(42, 24), await foo(4, 2))

@@ -1,5 +1,5 @@
 func expandUnboundeds(trees: Array<Tree>, node: AbstractNode) { # {{{
-	for const tree in trees til -1 {
+	for var tree in trees til -1 {
 		updateUnboundedTree(tree, false)
 	}
 
@@ -7,9 +7,9 @@ func expandUnboundeds(trees: Array<Tree>, node: AbstractNode) { # {{{
 } # }}}
 
 func getMaxMinAfter(tree: TreeBranch) { # {{{
-	let min = 0
+	var mut min = 0
 
-	for const column of tree.columns {
+	for var column of tree.columns {
 		if column.type.isAssignableToVariable(tree.type, false, true, true) {
 			min = Math.max(min, getMaxMinFromIndex(column))
 		}
@@ -44,9 +44,9 @@ func getMaxMinFromIndex(tree: TreeLeaf) { # {{{
 } # }}}
 
 func getMaxMinFromFunction(tree: TreeBranch) { # {{{
-	let min = 0
+	var mut min = 0
 
-	for const column of tree.columns {
+	for var column of tree.columns {
 		min = Math.max(min, getMaxMinFromFunction(column))
 	}
 
@@ -58,7 +58,7 @@ func getMaxMinFromFunction(tree: TreeLeaf) { # {{{
 } # }}}
 
 func getRowType(row, tree: TreeBranch | TreeLeaf) { # {{{
-	for const type in row.types {
+	for var type in row.types {
 		if type.index == tree.index {
 			return type
 		}
@@ -78,7 +78,7 @@ func reduceMinToZero(tree: TreeBranch | TreeLeaf) { # {{{
 	}
 
 	if tree.isNode {
-		for const column of tree.columns {
+		for var column of tree.columns {
 			reduceMinToZero(column)
 		}
 	}
@@ -86,7 +86,7 @@ func reduceMinToZero(tree: TreeBranch | TreeLeaf) { # {{{
 
 func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { # {{{
 	if unlimited {
-		for const hash in tree.order {
+		for var hash in tree.order {
 			if updateUnboundedTree4(tree, tree.columns[hash], true, 0, {}) {
 				tree.rest = true
 				tree.variadic = true
@@ -95,18 +95,18 @@ func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { # {{{
 		}
 	}
 	else {
-		for const hash in tree.order {
+		for var hash in tree.order {
 			updateUnboundedTree4(tree, tree.columns[hash], false, 0, {})
 		}
 	}
 } # }}}
 
 func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
-	let unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
+	var mut unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
 	min += node.min
 
-	for const hash in node.order {
+	for var hash in node.order {
 		if updateUnboundedTree4(tree, node.columns[hash], unlimited, min, arguments) {
 			unbounded = true
 		}
@@ -116,19 +116,19 @@ func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min:
 } # }}}
 
 func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
-	const unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
+	var unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
-	const function = node.function.index()
-	const row = node.rows[0]
+	var function = node.function.index()
+	var row = node.rows[0]
 
-	let from = { variadic: false, index: 0 }
-	let to
-	let last = null
+	var mut from = { variadic: false, index: 0 }
+	var mut to
+	var mut last = null
 
-	const rests = {}
+	var rests = {}
 
-	for const parameter in row.types {
-		let argument = arguments[parameter.index]
+	for var parameter in row.types {
+		var mut argument = arguments[parameter.index]
 
 		if !?argument {
 			if parameter.index >= 0 {
@@ -228,14 +228,14 @@ func getMinAfter(function: FunctionType): Number { # {{{
 } # }}}
 
 func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
-	const parameter = getRowType(tree.rows[0], tree).parameter
-	let unbounded = unlimited && tree.rest
+	var parameter = getRowType(tree.rows[0], tree).parameter
+	var mut unbounded = unlimited && tree.rest
 
 	if tree.type.isAny() && tree.type.isNullable() {
 		tree.variadic = unbounded || tree.min != tree.max
 
 		if unbounded {
-			const previousArgument = arguments[tree.index - 1]
+			var previousArgument = arguments[tree.index - 1]
 			if !(previousArgument?.parameter == parameter && previousArgument.variadic) {
 				tree.max = -(min + getMaxMinAfter(tree))
 			}
@@ -260,8 +260,8 @@ func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: 
 	}
 	else {
 		if unbounded {
-			for const type in tree.rows[0].types while unbounded when type.parameter == parameter {
-				if const argument = arguments[type.index] {
+			for var type in tree.rows[0].types while unbounded when type.parameter == parameter {
+				if var argument = arguments[type.index] {
 					if argument.tree.max == Infinity {
 						unbounded = false
 					}
@@ -272,7 +272,7 @@ func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: 
 		tree.variadic = unbounded || tree.min != tree.max
 
 		if unbounded && tree.max >= 0 {
-			const previousArgument = arguments[tree.index - 1]
+			var previousArgument = arguments[tree.index - 1]
 
 			if !(previousArgument?.parameter == parameter && previousArgument.variadic) {
 				tree.max = -(min + getMaxMinAfter(tree))

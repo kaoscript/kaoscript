@@ -1,1 +1,1 @@
-let a
+var dyn a

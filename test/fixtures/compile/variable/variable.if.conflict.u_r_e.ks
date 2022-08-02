@@ -1,13 +1,13 @@
 extern console
 
-let index = 0
+var dyn index = 0
 
 console.log(index)
 
 if true {
 	console.log(index)
 
-	let index = 42
+	var dyn index = 42
 
 	console.log(index)
 }

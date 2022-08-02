@@ -22,8 +22,8 @@ func getCursor(index: Number, arguments: Array<Type>): ArgCursor { # {{{
 		)
 	}
 
-	const argument = arguments[index]
-	const spread = argument.isSpread()
+	var argument = arguments[index]
+	var spread = argument.isSpread()
 
 	if spread {
 		return ArgCursor(
@@ -62,12 +62,12 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 		if context.async {
 			context.found = true
 
-			const branch = getZeroBranch(tree)
-			const function = branch.function
-			const parameters = function.parameters()
-			const arguments = []
+			var branch = getZeroBranch(tree)
+			var function = branch.function
+			var parameters = function.parameters()
+			var arguments = []
 
-			for const type in branch.rows[0].types til -1 {
+			for var type in branch.rows[0].types til -1 {
 				if parameters[type.parameter].isVarargs() {
 					arguments[type.parameter] = []
 				}
@@ -87,11 +87,11 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 			context.found = true
 
 			if tree.order.length == 0 {
-				const function = tree.function
-				const parameters = function.parameters()
-				const arguments = []
+				var function = tree.function
+				var parameters = function.parameters()
+				var arguments = []
 
-				for const parameter in parameters {
+				for var parameter in parameters {
 					if parameter.isVarargs() {
 						arguments.push([])
 					}
@@ -106,12 +106,12 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 				))
 			}
 			else {
-				const branch = getZeroBranch(tree)
-				const function = branch.function
-				const parameters = function.parameters()
-				const arguments = []
+				var branch = getZeroBranch(tree)
+				var function = branch.function
+				var parameters = function.parameters()
+				var arguments = []
 
-				for const type in branch.rows[0].types {
+				for var type in branch.rows[0].types {
 					if parameters[type.parameter].isVarargs() {
 						arguments[type.parameter] = []
 					}
@@ -128,15 +128,15 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 		}
 	}
 	else {
-		const cursor = getCursor(0, context.arguments)
+		var cursor = getCursor(0, context.arguments)
 
 		if cursor.argument.isUnion() {
-			const newContext = duplicateContext(context)
+			var newContext = duplicateContext(context)
 
-			for const type in cursor.argument.discardAlias().types() {
-				let nf = true
+			for var type in cursor.argument.discardAlias().types() {
+				var mut nf = true
 
-				for const key in tree.order while nf {
+				for var key in tree.order while nf {
 					if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), ArgMatches(), newContext) {
 						nf = false
 					}
@@ -150,17 +150,17 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 			if newContext.found {
 				context.found = true
 
-				for const function in newContext.possibilities {
+				for var function in newContext.possibilities {
 					context.possibilities.pushUniq(function)
 				}
 
-				for const match in newContext.matches {
+				for var match in newContext.matches {
 					pushUniqCallMatch(context.matches, match)
 				}
 			}
 		}
 		else {
-			for const key in tree.order {
+			for var key in tree.order {
 				if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), ArgMatches(), context) {
 					return
 				}
@@ -170,12 +170,12 @@ func matchTree(tree: Tree, context: MatchContext): Void { # {{{
 } # }}}
 
 func pushUniqCallMatch(matches, newMatch) { # {{{
-	for const match in matches {
+	for var match in matches {
 		if match.function != newMatch.funcion || match.arguments.length != newMatch.arguments.length {
 			return
 		}
 
-		for const value, index in newMatch.arguments {
+		for var value, index in newMatch.arguments {
 			if match.arguments[index] != value {
 				return
 			}
@@ -207,7 +207,7 @@ func duplicateCursor(cursor: ArgCursor, type: Type = cursor.argument) { # {{{
 } # }}}
 
 func getZeroBranch(tree: Tree | TreeBranch) { # {{{
-	const column = tree.columns[tree.order.last()]
+	var column = tree.columns[tree.order.last()]
 
 	if column.isNode {
 		return getZeroBranch(column)
@@ -221,7 +221,7 @@ func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches
 	{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches)
 	return false if !?cursor
 
-	for const key in branch.order {
+	for var key in branch.order {
 		if matchTreeNode(tree, branch.columns[key], cursor, ArgMatches(
 			precise: argMatches.precise
 			arguments: [...argMatches.arguments]
@@ -239,21 +239,21 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: Ar
 		return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
 	}
 
-	const parameters = leaf.function.parameters(context.excludes)
-	const match = []
+	var parameters = leaf.function.parameters(context.excludes)
+	var match = []
 
-	let length = 0
+	var dyn length = 0
 
-	const types = leaf.rows[0].types
+	var types = leaf.rows[0].types
 
-	for const parameter, pIndex in parameters {
-		let pMatch = null
+	for var parameter, pIndex in parameters {
+		var mut pMatch = null
 
-		for const type in types when type.parameter == pIndex {
-			const index = type.index >= 0 ? type.index : parameters.length + type.index
+		for var type in types when type.parameter == pIndex {
+			var index = type.index >= 0 ? type.index : parameters.length + type.index
 
 			if index < argMatches.arguments.length {
-				const arg = argMatches.arguments[index]
+				var arg = argMatches.arguments[index]
 
 				if pMatch? && pMatch is Array {
 					pMatch.push(...arg)
@@ -312,7 +312,7 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: Ar
 } # }}}
 
 func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, argMatches: ArgMatches): { cursor: ArgCursor?, argMatches: ArgMatches? } { # {{{
-	const last = arguments.length - 1
+	var last = arguments.length - 1
 
 	if node.min == 0 && cursor.index > last {
 		argMatches.arguments.push([])
@@ -325,7 +325,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 
 	if node.max == 1 {
 		if cursor.spread {
-			const argument = cursor.argument.parameter()
+			var argument = cursor.argument.parameter()
 
 			if argument.isAssignableToVariable(node.type, false, false, false) {
 				++cursor.used
@@ -383,9 +383,9 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 		}
 	}
 	else {
-		auto i = 0
+		var mut i = 0
 
-		const matches = []
+		var matches = []
 
 		while i < node.min {
 			if cursor.spread {
@@ -417,7 +417,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 		}
 
 		if node.max <= 0 {
-			const last = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
+			var last = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
 
 			while cursor.index <= last {
 				if cursor.argument.isSpread() {
@@ -464,31 +464,31 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 } # }}}
 
 func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>) { # {{{
-	let combinations = [[]]
+	var mut combinations = [[]]
 
-	for const argument in arguments {
+	for var argument in arguments {
 		if argument.isUnion() {
-			const oldCombinations = combinations
+			var oldCombinations = combinations
 
 			combinations = []
 
-			for const oldCombination in oldCombinations {
-				for const type in argument.discardAlias().types() {
+			for var oldCombination in oldCombinations {
+				for var type in argument.discardAlias().types() {
 					combinations.push([...oldCombination, type])
 				}
 			}
 		}
 		else {
-			for const combination in combinations {
+			for var combination in combinations {
 				combination.push(argument)
 			}
 		}
 	}
 
 	if combinations.length == 1 {
-		const context = MatchContext(combinations[0], excludes, async: assessment.async)
+		var context = MatchContext(combinations[0], excludes, async: assessment.async)
 
-		for const tree in assessment.trees {
+		for var tree in assessment.trees {
 			matchTree(tree, context)
 
 			if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
@@ -497,7 +497,7 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 		}
 
 		if context.found {
-			for const { function } in context.matches {
+			for var { function } in context.matches {
 				context.possibilities.pushUniq(function)
 			}
 
@@ -505,14 +505,14 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 		}
 	}
 	else {
-		const results = []
+		var results = []
 
-		for const combination in combinations {
-			const context = MatchContext(combination, excludes, async: assessment.async)
+		for var combination in combinations {
+			var context = MatchContext(combination, excludes, async: assessment.async)
 
-			let nf = true
+			var mut nf = true
 
-			for const tree in assessment.trees while nf {
+			for var tree in assessment.trees while nf {
 				matchTree(tree, context)
 
 				if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
@@ -524,7 +524,7 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 
 			if context.found {
 				if nf {
-					for const { function } in context.matches {
+					for var { function } in context.matches {
 						context.possibilities.pushUniq(function)
 					}
 
@@ -551,13 +551,13 @@ func mergeResults(results: Array<CallMatchResult>) { # {{{
 	}
 
 	if results.every((result, _, _) => result is PreciseCallMatchResult) {
-		const perFunctions = {}
+		var perFunctions = {}
 
-		let precise = true
+		var mut precise = true
 
-		for const { matches } in results while precise {
-			for const match in matches while precise {
-				if const result = perFunctions[match.function.index()] {
+		for var { matches } in results while precise {
+			for var match in matches while precise {
+				if var result = perFunctions[match.function.index()] {
 					if !Array.same(result.arguments, match.arguments) {
 						precise = false
 					}
@@ -569,18 +569,18 @@ func mergeResults(results: Array<CallMatchResult>) { # {{{
 		}
 
 		if precise {
-			return PreciseCallMatchResult([match for const match of perFunctions])
+			return PreciseCallMatchResult([match for var match of perFunctions])
 		}
 	}
 
-	const possibilities = []
+	var possibilities = []
 
-	for const result in results {
+	for var result in results {
 		if result is LenientCallMatchResult {
 			possibilities.pushUniq(...result.possibilities)
 		}
 		else {
-			for const { function } in result.matches {
+			for var { function } in result.matches {
 				possibilities.pushUniq(function)
 			}
 		}
@@ -590,19 +590,19 @@ func mergeResults(results: Array<CallMatchResult>) { # {{{
 } # }}}
 
 func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { # {{{
-	let combinations = [[]]
+	var mut combinations = [[]]
 
-	for const type in arguments {
+	for var type in arguments {
 		if type.isUnion() {
-			const oldCombinations = combinations
+			var oldCombinations = combinations
 
 			combinations = []
 
-			let nullable = false
+			var mut nullable = false
 
-			for const oldCombination in oldCombinations {
-				for const type in type.discardAlias().types() {
-					const combination = [...oldCombination]
+			for var oldCombination in oldCombinations {
+				for var type in type.discardAlias().types() {
+					var combination = [...oldCombination]
 
 					if type.isNullable() && !(type.isAny() || type.isNull()) {
 						combination.push(type.setNullable(false))
@@ -617,35 +617,35 @@ func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, named
 				}
 
 				if nullable {
-					const combination = [...oldCombination, Type.Null]
+					var combination = [...oldCombination, Type.Null]
 
 					combinations.push(combination)
 				}
 			}
 		}
 		else if type.isNullable() && !(type.isAny() || type.isNull()) {
-			const oldCombinations = combinations
+			var oldCombinations = combinations
 
 			combinations = []
 
-			for const oldCombination in oldCombinations {
-				const combination1 = [...oldCombination, type.setNullable(false)]
-				const combination2 = [...oldCombination, Type.Null]
+			for var oldCombination in oldCombinations {
+				var combination1 = [...oldCombination, type.setNullable(false)]
+				var combination2 = [...oldCombination, Type.Null]
 
 				combinations.push(combination1, combination2)
 			}
 		}
 		else {
-			for const combination in combinations {
+			for var combination in combinations {
 				combination.push(type)
 			}
 		}
 	}
 
-	const results = []
+	var results = []
 
-	for const combination in combinations {
-		if const result = matchNamedArguments4(assessment, combination, nameds, shorthands, [...indexeds], exhaustive, node) {
+	for var combination in combinations {
+		if var result = matchNamedArguments4(assessment, combination, nameds, shorthands, [...indexeds], exhaustive, node) {
 			results.push(result)
 		}
 		else {
@@ -657,14 +657,14 @@ func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, named
 } # }}}
 
 func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { # {{{
-	const perNames = {}
+	var perNames = {}
 
-	for const function, key of assessment.functions {
-		for const parameter, index in function.parameters() {
-			const name = parameter.name()
-			const type = parameter.type()
+	for var function, key of assessment.functions {
+		for var parameter, index in function.parameters() {
+			var name = parameter.name()
+			var type = parameter.type()
 
-			if const parameters = perNames[name] {
+			if var parameters = perNames[name] {
 				parameters.push({
 					function: key
 					type
@@ -681,21 +681,21 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 		}
 	}
 
-	let possibleFunctions: Array = Dictionary.keys(assessment.functions)
+	var mut possibleFunctions: Array = Dictionary.keys(assessment.functions)
 
-	const preciseness = {}
-	const excludes = Dictionary.keys(nameds)
+	var preciseness = {}
+	var excludes = Dictionary.keys(nameds)
 
-	for const key in possibleFunctions {
+	for var key in possibleFunctions {
 		preciseness[key] = true
 	}
 
-	for const argument, name of nameds {
-		if const parameters = perNames[name] {
-			const argumentType = argumentTypes[argument.index]
-			const matchedFunctions = []
+	for var argument, name of nameds {
+		if var parameters = perNames[name] {
+			var argumentType = argumentTypes[argument.index]
+			var matchedFunctions = []
 
-			for const { function, type } in parameters {
+			for var { function, type } in parameters {
 				if argumentType.isAssignableToVariable(type, false, false, false, true) {
 					matchedFunctions.push(function)
 				}
@@ -706,7 +706,7 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 				}
 			}
 
-			const functions = possibleFunctions.intersection(matchedFunctions)
+			var functions = possibleFunctions.intersection(matchedFunctions)
 
 			if exhaustive {
 				if functions.length == 0 {
@@ -741,9 +741,9 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 		)
 	}
 	else {
-		const perFunctions = {}
+		var perFunctions = {}
 
-		for const function in possibleFunctions {
+		for var function in possibleFunctions {
 			perFunctions[function] = {
 				preciseness: preciseness[function]
 				shorthands: {}
@@ -751,14 +751,14 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			}
 		}
 
-		for const argument, name of shorthands {
-			if const parameters = perNames[name] {
-				const argumentType = argumentTypes[argument.index]
+		for var argument, name of shorthands {
+			if var parameters = perNames[name] {
+				var argumentType = argumentTypes[argument.index]
 
-				let matched = false
+				var mut matched = false
 
-				for const function in possibleFunctions {
-					if const { type } = parameters.find((data, _, _) => data.function == function) {
+				for var function in possibleFunctions {
+					if var { type } = parameters.find((data, _, _) => data.function == function) {
 						if argumentType.isAssignableToVariable(type, false, false, false, true) {
 							matched = true
 
@@ -788,12 +788,12 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			}
 		}
 
-		const perArguments = {}
-		for const { shorthands, indexeds, preciseness }, key of perFunctions {
-			const hash = Dictionary.keys(shorthands).join()
+		var perArguments = {}
+		for var { shorthands, indexeds, preciseness }, key of perFunctions {
+			var hash = Dictionary.keys(shorthands).join()
 
 			if hash.length > 0 {
-				if const perArgument = perArguments[hash] {
+				if var perArgument = perArguments[hash] {
 					perArgument.functions.push(key)
 					perArgument.preciseness[key] = preciseness
 				}
@@ -824,8 +824,8 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			)
 		}
 		else {
-			for const perArgument of perArguments {
-				if const result = matchNamedArguments5(
+			for var perArgument of perArguments {
+				if var result = matchNamedArguments5(
 					assessment
 					argumentTypes
 					nameds
@@ -863,34 +863,34 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 			return null
 		}
 
-		const preciseFunctions = possibleFunctions.filter((key, _, _) => preciseness[key])
+		var preciseFunctions = possibleFunctions.filter((key, _, _) => preciseness[key])
 
 		if preciseFunctions.length == possibleFunctions.length {
-			let max = Infinity
+			var mut max = Infinity
 
-			for const key in preciseFunctions {
-				const m = assessment.functions[key].max()
+			for var key in preciseFunctions {
+				var m = assessment.functions[key].max()
 
 				if m < max {
 					max = m
 				}
 			}
 
-			const shortestFunctions = preciseFunctions.filter((key, _, _) => assessment.functions[key].max() == max)
+			var shortestFunctions = preciseFunctions.filter((key, _, _) => assessment.functions[key].max() == max)
 
-			const function = getMostPreciseFunction([assessment.functions[key] for const key in shortestFunctions], nameds, shorthands)
-			const arguments = []
+			var function = getMostPreciseFunction([assessment.functions[key] for var key in shortestFunctions], nameds, shorthands)
+			var arguments = []
 
-			let namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
+			var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
 
-			for const parameter in function.parameters() {
-				const name = parameter.name()
+			for var parameter in function.parameters() {
+				var name = parameter.name()
 
-				if const argument = nameds[name] {
+				if var argument = nameds[name] {
 					arguments.push(argument.index)
 					--namedLefts
 				}
-				else if const argument = shorthands[name] {
+				else if var argument = shorthands[name] {
 					arguments.push(argument.index)
 					--namedLefts
 				}
@@ -901,7 +901,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 				}
 			}
 
-			const match = CallMatch(
+			var match = CallMatch(
 				function
 				arguments
 			)
@@ -909,24 +909,24 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 			return PreciseCallMatchResult(matches: [match])
 		}
 		else {
-			const possibilities = []
+			var possibilities = []
 			// TODO rename variable
-			let arguments2 = null
+			var mut arguments2 = null
 
-			for const key in possibleFunctions {
-				const function = assessment.functions[key]
-				const args = []
+			for var key in possibleFunctions {
+				var function = assessment.functions[key]
+				var args = []
 
-				let namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
+				var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
 
-				for const parameter in function.parameters() {
-					const name = parameter.name()
+				for var parameter in function.parameters() {
+					var name = parameter.name()
 
-					if const argument = nameds[name] {
+					if var argument = nameds[name] {
 						args.push(argument.index)
 						--namedLefts
 					}
-					else if const argument = shorthands[name] {
+					else if var argument = shorthands[name] {
 						args.push(argument.index)
 						--namedLefts
 					}
@@ -958,40 +958,40 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 	else {
 		indexeds.sort((a, b) => a.index - b.index)
 
-		const arguments = indexeds.map(({ index }, _, _) => argumentTypes[index])
+		var arguments = indexeds.map(({ index }, _, _) => argumentTypes[index])
 
 		if indexeds.length == argumentTypes.length {
 			return matchArguments(assessment, arguments, excludes)
 		}
 		else {
-			const functions = [assessment.functions[key] for const key in possibleFunctions]
-			const reducedAssessment = assess(functions, excludes, assessment.name, node)
+			var functions = [assessment.functions[key] for var key in possibleFunctions]
+			var reducedAssessment = assess(functions, excludes, assessment.name, node)
 
-			if const result = matchArguments(reducedAssessment, arguments, excludes) {
+			if var result = matchArguments(reducedAssessment, arguments, excludes) {
 
 				if result is PreciseCallMatchResult {
-					for const match in result.matches {
-						const arguments = []
-						const indexes = {}
+					for var match in result.matches {
+						var arguments = []
+						var indexes = {}
 
-						for const parameter, index in match.function.parameters() {
-							const name = parameter.name()
+						for var parameter, index in match.function.parameters() {
+							var name = parameter.name()
 
-							if const argument = nameds[name] {
+							if var argument = nameds[name] {
 								arguments.push(argument.index)
 
 								indexes[argument.index] = true
 							}
-							else if const argument = shorthands[name] {
+							else if var argument = shorthands[name] {
 								arguments.push(argument.index)
 
 								indexes[argument.index] = true
 							}
-							else if let index = match.arguments.shift() {
+							else if var mut index = match.arguments.shift() {
 								if index is Array {
-									const args = []
+									var args = []
 
-									for const i in index {
+									for var i in index {
 										while indexes[i] {
 											++i
 										}
@@ -1025,11 +1025,11 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 						return result
 					}
 					else {
-						const possibilities = [result.matches[0].function]
+						var possibilities = [result.matches[0].function]
 						// TODO rename variable
-						const arguments3 = result.matches[0].arguments
+						var arguments3 = result.matches[0].arguments
 
-						for const match in result.matches from 1 {
+						for var match in result.matches from 1 {
 							if Array.same(arguments3, match.arguments) {
 								possibilities.push(match.function)
 							}
@@ -1042,39 +1042,39 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 					}
 				}
 				else if result.possibilities.length == 1 {
-					if const arguments = result.arguments {
+					if var arguments = result.arguments {
 						throw new NotImplementedException()
 					}
 					else {
-						const function = result.possibilities[0]
+						var function = result.possibilities[0]
 						result.arguments = []
 
-						let namedLefts = excludes.length
-						let requiredLefts = 0
+						var mut namedLefts = excludes.length
+						var mut requiredLefts = 0
 
-						for const parameter in function.parameters(excludes) {
+						for var parameter in function.parameters(excludes) {
 							if parameter.min() > 0 {
 								++requiredLefts
 							}
 						}
 
-						let lastIndexed = null
+						var mut lastIndexed = null
 
-						for const parameter, index in function.parameters() {
-							const name = parameter.name()
+						for var parameter, index in function.parameters() {
+							var name = parameter.name()
 
-							if const argument = nameds[name] {
+							if var argument = nameds[name] {
 								result.arguments.push(argument.index)
 								--namedLefts
 								lastIndexed = null
 							}
-							else if const argument = shorthands[name] {
+							else if var argument = shorthands[name] {
 								result.arguments.push(argument.index)
 								--namedLefts
 								lastIndexed = null
 							}
 							else if parameter.min() >= 1 {
-								const argument = indexeds.shift()
+								var argument = indexeds.shift()
 
 								result.arguments.push(argument.index)
 
@@ -1084,7 +1084,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 								arguments.shift()
 							}
 							else if arguments.length > requiredLefts {
-								const argument = indexeds.shift()
+								var argument = indexeds.shift()
 
 								result.arguments.push(argument.index)
 
@@ -1121,21 +1121,21 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 } # }}}
 
 func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>) { # {{{
-	for const parameter in functions[0].parameters() {
-		const name = parameter.name()
+	for var parameter in functions[0].parameters() {
+		var name = parameter.name()
 
 		if nameds[name]? || shorthands[name]? {
-			const types = []
-			const perType = {}
+			var types = []
+			var perType = {}
 
-			for const function in functions {
-				for const parameter in function.parameters() {
+			for var function in functions {
+				for var parameter in function.parameters() {
 					if parameter.name() == name {
 						types.push(parameter.type())
 
-						const key = parameter.type().hashCode()
+						var key = parameter.type().hashCode()
 
-						if const types = perType[key] {
+						if var types = perType[key] {
 							types.push(function)
 						}
 						else {
@@ -1147,7 +1147,7 @@ func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<N
 				}
 			}
 
-			const sorted = sortNodes(types)
+			var sorted = sortNodes(types)
 
 			functions = perType[sorted[0]]
 		}

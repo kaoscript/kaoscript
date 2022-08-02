@@ -1,6 +1,6 @@
 extern sealed class SyntaxError
 
-const foobar = {
+var foobar = {
 	#[error(off)]
 	corge() {
 		throw new SyntaxError()

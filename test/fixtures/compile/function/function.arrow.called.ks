@@ -1,1 +1,1 @@
-let four = ((a) => a / 10)(42)
+var dyn four = ((a) => a / 10)(42)

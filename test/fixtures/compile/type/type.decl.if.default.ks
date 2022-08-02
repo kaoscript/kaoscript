@@ -1,5 +1,5 @@
 func foo(x: Boolean): String {
-	let y = null
+	var dyn y = null
 
 	if x {
 		y = bar()

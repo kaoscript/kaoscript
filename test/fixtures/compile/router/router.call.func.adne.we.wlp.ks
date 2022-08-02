@@ -1,5 +1,5 @@
 func foobar(dict: Dictionary) {
-	for const item of dict {
+	for var item of dict {
 		quxbaz(item)
 	}
 }

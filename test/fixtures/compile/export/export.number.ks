@@ -1,2 +1,2 @@
-export const E = 2.71828
-export const PI = 3.14
+export var E = 2.71828
+export var PI = 3.14

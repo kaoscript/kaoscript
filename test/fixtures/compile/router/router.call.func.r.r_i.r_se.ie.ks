@@ -8,4 +8,4 @@ func foobar(...args) {
 	return null
 }
 
-const i = foobar(1) + 1
+var i = foobar(1) + 1

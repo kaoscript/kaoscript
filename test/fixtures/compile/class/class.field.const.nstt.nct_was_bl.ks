@@ -1,7 +1,7 @@
 class Foobar {
-	const PI: Number = 42
+	final PI: Number = 42
 }
 
-const f = new Foobar()
+var f = new Foobar()
 
 f.PI = 42

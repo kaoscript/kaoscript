@@ -1,4 +1,4 @@
-let $keywords = { # {{{
+var $keywords = { # {{{
 	abstract: true
 	arguments: true
 	boolean: true

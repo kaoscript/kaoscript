@@ -1,5 +1,5 @@
 class Foobar {
-	lateinit PI: Number
+	late PI: Number
 	constructor() {
 	}
 }

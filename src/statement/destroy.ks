@@ -1,5 +1,5 @@
 class DestroyStatement extends Statement {
-	private lateinit {
+	private late {
 		_expression
 		_identifier: Boolean		= false
 		_type: Type
@@ -40,8 +40,8 @@ class DestroyStatement extends Statement {
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if @identifier {
-			const variable = @scope.getVariable(@data.variable.name, @scope.line() - 1)
-			const type = @type.discardReference()
+			var variable = @scope.getVariable(@data.variable.name, @scope.line() - 1)
+			var type = @type.discardReference()
 
 			if type.isClass() && type.type().hasDestructors() {
 				fragments.newLine().code(type.path(), '.__ks_destroy(').compile(variable).code(')').done()

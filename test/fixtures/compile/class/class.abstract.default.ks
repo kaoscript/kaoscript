@@ -20,7 +20,7 @@ class Greetings extends AbstractGreetings {
 	greet(name) => `\(@message)\nIt's nice to meet you, \(name).`
 }
 
-const hello = new Greetings('Hello world!')
+var hello = new Greetings('Hello world!')
 
 console.log(`\(hello.greet('miss White'))`)
 

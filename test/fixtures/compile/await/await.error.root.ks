@@ -4,6 +4,6 @@ async func foo() {
 	return 1
 }
 
-let a = await foo()
+var dyn a = await foo()
 
 console.log(a)

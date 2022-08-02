@@ -15,12 +15,12 @@ import {
 type float = Number
 type int = Number
 
-let $spaces = {}
-let $aliases = {}
-let $components = {}
-let $formatters = {}
+var dyn $spaces = {}
+var dyn $aliases = {}
+var dyn $components = {}
+var dyn $formatters = {}
 
-const $names = { // {{{
+var $names = { // {{{
 	'aliceblue': 'f0f8ff'
 	'antiquewhite': 'faebd7'
 	'aqua': '0ff'
@@ -176,9 +176,9 @@ func $blend(x: float, y: float, percentage: float): float { // {{{
 } // }}}
 
 func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
-	let that = first**(...firstArgs)
+	var dyn that = first**(...firstArgs)
 
-	let lastArgs = [that[component.field] for component, name of components]
+	var dyn lastArgs = [that[component.field] for component, name of components]
 
 	lastArgs.push(that)
 
@@ -187,7 +187,7 @@ func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
 
 namespace $caster {
 	func alpha(n = null, percentage: bool = false): float { // {{{
-		let i: Number = Float.parse(n)
+		var dyn i: Number = Float.parse(n)
 
 		return 1 if i == NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
 	} // }}}
@@ -220,7 +220,7 @@ func $component(component, name: string, space: string): void { // {{{
 
 func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): Color | dict ~ Error { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
-		let args = [that[component.field] for component, name of s.components]
+		var dyn args = [that[component.field] for component, name of s.components]
 
 		args.push(result)
 
@@ -236,7 +236,7 @@ func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): C
 } // }}}
 
 func $find(from: string, to: string): void { // {{{
-	for const _, name of $spaces[from].converters {
+	for var _, name of $spaces[from].converters {
 		if $spaces[name].converters[to]? {
 			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
 
@@ -266,15 +266,15 @@ func $from(that: Color, args: array): Color { // {{{
 } // }}}
 
 func $hex(that: Color) { // {{{
-	let chars = '0123456789abcdef'
+	var dyn chars = '0123456789abcdef'
 
-	let r1 = that._red >>> 4
-	let g1 = that._green >>> 4
-	let b1 = that._blue >>> 4
+	var dyn r1 = that._red >>> 4
+	var dyn g1 = that._green >>> 4
+	var dyn b1 = that._blue >>> 4
 
-	let r2 = that._red &&& 0xf
-	let g2 = that._green &&& 0xf
-	let b2 = that._blue &&& 0xf
+	var dyn r2 = that._red &&& 0xf
+	var dyn g2 = that._green &&& 0xf
+	var dyn b2 = that._blue &&& 0xf
 
 	if that._alpha == 1 {
 		if ((r1 ^^^ r2) ||| (g1 ^^^ g2) ||| (b1 ^^^ b2)) == 0 {
@@ -284,9 +284,9 @@ func $hex(that: Color) { // {{{
 		return '#' + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2)
 	}
 	else {
-		let a = Math.round(that._alpha * 255)
-		let a1 = a >>> 4
-		let a2 = a &&& 0xf
+		var dyn a = Math.round(that._alpha * 255)
+		var dyn a1 = a >>> 4
+		var dyn a2 = a &&& 0xf
 
 		if ((r1 ^^^ r2) ||| (g1 ^^^ g2) ||| (b1 ^^^ b2) ||| (a1 ^^^ a2)) == 0 {
 			return '#' + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1) + chars.charAt(a1)
@@ -296,7 +296,7 @@ func $hex(that: Color) { // {{{
 	}
 } // }}}
 
-let $parsers = {
+var dyn $parsers = {
 	srgb(that: Color, args: array): bool { // {{{
 		if args.length == 1 {
 			if args[0] is number {
@@ -335,7 +335,7 @@ let $parsers = {
 				}
 			}
 			else if args[0] is string {
-				let color = (args[0] as string).lower().replace(/[^a-z0-9,.()#%]/g, '')
+				var dyn color = (args[0] as string).lower().replace(/[^a-z0-9,.()#%]/g, '')
 
 				if 'transparent' == color {
 					that._alpha = that._red = that._green = that._blue = 0
@@ -343,7 +343,7 @@ let $parsers = {
 				}
 
 				else if 'rand' == color {
-					let c = Math.random() * 0xffffff ||| 0
+					var dyn c = Math.random() * 0xffffff ||| 0
 					that._space = Space::SRGB
 					that._alpha = 1
 					that._red = ((c >>> 16) &&& 0xff)
@@ -459,7 +459,7 @@ let $parsers = {
 				return true
 			}
 			else if args[0] is string {
-				let color = (args[0] as string).lower().replace(/[^a-z0-9,.()#%]/g, '')
+				var dyn color = (args[0] as string).lower().replace(/[^a-z0-9,.()#%]/g, '')
 
 				// gray(56)
 				if match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
@@ -504,10 +504,10 @@ export class Color {
 	}
 
 	macro registerSpace(@space: Dictionary) {
-		const spaces: Array = [space.name.toUpperCase()]
+		var spaces: Array = [space.name.toUpperCase()]
 
 		if space.alias? {
-			for const name in space.alias {
+			for var name in space.alias {
 				spaces.push(name.toUpperCase())
 			}
 		}
@@ -519,11 +519,11 @@ export class Color {
 		}
 
 		if space.components? {
-			const fields: Array = []
-			const methods: Array = []
+			var fields: Array = []
+			var methods: Array = []
 
-			let field
-			for const component, name of space.components {
+			var dyn field
+			for var component, name of space.components {
 				field = `_\(name)`
 
 				fields.push(macro private #w(field): Number = 0)
@@ -552,13 +552,13 @@ export class Color {
 
 	static {
 		from(...args): Color | bool { // {{{
-			let color = $from(new Color(), args)
+			var dyn color = $from(new Color(), args)
 
 			return false if color._dummy else color
 		} // }}}
 
 		greyscale(...args): Color | bool { // {{{
-			let model = args.last()
+			var dyn model = args.last()
 			if model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY' {
 				args.pop()
 			}
@@ -566,19 +566,19 @@ export class Color {
 				model = null
 			}
 
-			let color = $from(new Color(), args)
+			var dyn color = $from(new Color(), args)
 
 			return false if color._dummy else color.greyscale(model)
 		} // }}}
 
 		hex(...args): String | bool { // {{{
-			let color = $from(new Color(), args)
+			var dyn color = $from(new Color(), args)
 
 			return false if color._dummy else color.hex()
 		} // }}}
 
 		negative(...args): Color | bool { // {{{
-			let color = $from(new Color(), args)
+			var dyn color = $from(new Color(), args)
 
 			return false if color._dummy else color.negative()
 		} // }}}
@@ -594,7 +594,7 @@ export class Color {
 		} // }}}
 
 		registerSpace(space: Dictionary) { // {{{
-			let spaces = Dictionary.keys($spaces)
+			var dyn spaces = Dictionary.keys($spaces)
 
 			$space(space.name)
 
@@ -705,8 +705,8 @@ export class Color {
 
 	blend(color: Color, percentage: float, space: Space = Space::SRGB, alpha: bool = false): Color { // {{{
 		if alpha {
-			let w = (percentage * 2) - 1
-			let a = color._alpha - this._alpha
+			var dyn w = (percentage * 2) - 1
+			var dyn a = color._alpha - this._alpha
 
 			this._alpha = $blend(this._alpha, color._alpha, percentage).round(2)
 			if w * a == -1 {
@@ -722,11 +722,11 @@ export class Color {
 		this.space(space)
 		color = color.like(space)
 
-		let components = $spaces[space].components
+		var dyn components = $spaces[space].components
 
 		for component, name of components {
 			if component.loop {
-				let d: Number = Math.abs(this[component.field] - color[component.field])
+				var dyn d: Number = Math.abs(this[component.field] - color[component.field])
 
 				if d > component.half {
 					d = component.mod:!Number - d
@@ -756,17 +756,17 @@ export class Color {
 	} // }}}
 
 	contrast(color: Color) { // {{{
-		let a = this._alpha
+		var dyn a = this._alpha
 
 		if a == 1 {
 			if color._alpha != 1 {
 				color = color.clone().blend(this, 0.5, Space::SRGB, true)
 			}
 
-			let l1 = this.luminance() + 0.05
-			let l2 = color.luminance() + 0.05
+			var dyn l1 = this.luminance() + 0.05
+			var dyn l2 = color.luminance() + 0.05
 
-			let ratio = l1 / l2
+			var dyn ratio = l1 / l2
 			if l2 > l1 {
 				ratio = 1 / ratio
 			}
@@ -781,18 +781,18 @@ export class Color {
 			}
 		}
 		else {
-			let black = this.clone().blend($static.black, 0.5, Space::SRGB, true).contrast(color).ratio
-			let white = this.clone().blend($static.white, 0.5, Space::SRGB, true).contrast(color).ratio
+			var dyn black = this.clone().blend($static.black, 0.5, Space::SRGB, true).contrast(color).ratio
+			var dyn white = this.clone().blend($static.white, 0.5, Space::SRGB, true).contrast(color).ratio
 
-			const max = Math.max(black, white)
+			var max = Math.max(black, white)
 
-			let closest = new Color(
+			var dyn closest = new Color(
 				((color._red - (this._red * a)) / (1 - a)).limit(0, 255),
 				((color._green - (this._green * a)) / (1 - a)).limit(0, 255),
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
 			)
 
-			const min: Number = this.clone().blend(closest, 0.5, Space::SRGB, true).contrast(color).ratio
+			var min: Number = this.clone().blend(closest, 0.5, Space::SRGB, true).contrast(color).ratio
 
 			return {
 				ratio: ((min + max) / 2).round(2)
@@ -804,8 +804,8 @@ export class Color {
 	} // }}}
 
 	copy(target: Color): Color { // {{{
-		let s1 = this._space
-		let s2 = target._space
+		var dyn s1 = this._space
+		var dyn s2 = target._space
 
 		this.space(Space::SRGB)
 		target.space(Space::SRGB)
@@ -823,7 +823,7 @@ export class Color {
 	} // }}}
 
 	distance(color: Color): float { // {{{
-		const that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
+		var that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
 
 		return Math.sqrt(3 * (color._red - that._red) * (color._red - that._red) + 4 * (color._green - that._green) * (color._green - that._green) + 2 * (color._blue - that._blue) * (color._blue - that._blue))
@@ -834,7 +834,7 @@ export class Color {
 	} // }}}
 
 	format(format: string = this._space) { // {{{
-		if const format = $formatters[format] {
+		if var format = $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
 		else {
@@ -847,7 +847,7 @@ export class Color {
 	} // }}}
 
 	private getField(name) { // {{{
-		const component = $components[name]
+		var component = $components[name]
 
 		if component.spaces[this._space]? {
 			return this[component.field]
@@ -861,7 +861,7 @@ export class Color {
 	} // }}}
 
 	gradient(endColor: Color, length: int): array<Color> { // {{{
-		let gradient: array<Color> = [this]
+		var dyn gradient: array<Color> = [this]
 
 		if length > 0 {
 			this.space(Space::SRGB)
@@ -869,14 +869,14 @@ export class Color {
 
 			++length
 
-			let red = endColor._red - this._red
-			let green = endColor._green - this._green
-			let blue = endColor._blue - this._blue
+			var dyn red = endColor._red - this._red
+			var dyn green = endColor._green - this._green
+			var dyn blue = endColor._blue - this._blue
 
-			for const i from 1 til length {
-				const offset = i / length
+			for var i from 1 til length {
+				var offset = i / length
 
-				const color = this.clone()
+				var color = this.clone()
 				color._red += Math.round(red * offset)
 				color._green += Math.round(green * offset)
 				color._blue += Math.round(blue * offset)
@@ -916,13 +916,13 @@ export class Color {
 	} // }}}
 
 	isBlack(): bool { // {{{
-		let that = this.like(Space::SRGB)
+		var dyn that = this.like(Space::SRGB)
 		return that._red == 0 && that._green == 0 && that._blue == 0
 	} // }}}
 
 	isTransparent(): bool { // {{{
 		if this._alpha == 0 {
-			let that = this.like(Space::SRGB)
+			var dyn that = this.like(Space::SRGB)
 			return that._red == 0 && that._green == 0 && that._blue == 0
 		}
 		else {
@@ -931,14 +931,14 @@ export class Color {
 	} // }}}
 
 	isWhite(): bool { // {{{
-		let that = this.like(Space::SRGB)
+		var dyn that = this.like(Space::SRGB)
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} // }}}
 
 	like(space: string) { // {{{
 		space = $aliases[space] ?? space
 
-		if const value = Space(space) {
+		if var value = Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				return $convert(this, value)
 			}
@@ -948,15 +948,15 @@ export class Color {
 	} // }}}
 
 	luminance(): Number { // {{{
-		const that = this.like(Space::SRGB)
+		var that = this.like(Space::SRGB)
 
-		let r: float = that._red:!float / 255
+		var dyn r: float = that._red:!float / 255
 		r = r / 12.92 if r < 0.03928 else Math.pow((r + 0.055) / 1.055, 2.4)
 
-		let g: float = that._green:!float / 255
+		var dyn g: float = that._green:!float / 255
 		g = g / 12.92 if g < 0.03928 else Math.pow((g + 0.055) / 1.055, 2.4)
 
-		let b: float = that._blue:!float / 255
+		var dyn b: float = that._blue:!float / 255
 		b = b / 12.92 if b < 0.03928 else Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
@@ -995,7 +995,7 @@ export class Color {
 	} // }}}
 
 	private setField(name, value: number | string): Color { // {{{
-		let component = $components[name]
+		var dyn component = $components[name]
 
 		if component.spaces[this._space]? {
 			component = $spaces[this._space].components[name]
@@ -1043,7 +1043,7 @@ export class Color {
 			}
 		}
 
-		if const value = Space(space) {
+		if var value = Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				$convert(this, value, this)
 			}
@@ -1093,7 +1093,7 @@ Color.registerSpace!({
 	}
 })
 
-let $static = { // {{{
+var dyn $static = { // {{{
 	black: Color.from('#000')
 	gray: Color.from('#808080')
 	white: Color.from('#fff')

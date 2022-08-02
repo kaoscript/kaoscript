@@ -2,5 +2,5 @@ class name {
 }
 
 func foo() {
-	let name = 'foobar'
+	var dyn name = 'foobar'
 }

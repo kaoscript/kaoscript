@@ -4,10 +4,10 @@ import '../export/export.sealed.class.default.ks' {
 	Shape
 }
 
-const shape = new Shape('yellow')
+var shape = new Shape('yellow')
 
 T.console.log(shape.draw('rectangle'))
 
-const shapeT = new T.Shape('yellow')
+var shapeT = new T.Shape('yellow')
 
 T.console.log(shapeT.draw('rectangle'))

@@ -1,7 +1,7 @@
-lateinit const x
+var late x
 
 x = 'foobar'
 
 x = '42'
 
-let y = `\(x)`
+var dyn y = `\(x)`

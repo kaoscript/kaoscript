@@ -3,10 +3,10 @@ require expect: func
 extern sealed class Date
 
 impl Date {
-	const @culture	= 'und'
+	final @culture	= 'und'
 }
 
-const d = new Date()
+var d = new Date()
 
 expect(d.culture).to.not.exist
 

@@ -1,6 +1,6 @@
-const $importTypeModifiers = /^(\w+)(!)?(\?)?$/
+var $importTypeModifiers = /^(\w+)(!)?(\?)?$/
 
-const $natives = { # {{{
+var $natives = { # {{{
 	Any: true
 	any: true
 	Array: true
@@ -40,7 +40,7 @@ const $natives = { # {{{
 	void: true
 } # }}}
 
-const $types = { # {{{
+var $types = { # {{{
 	any: 'Any'
 	array: 'Array'
 	bool: 'Boolean'
@@ -57,7 +57,7 @@ const $types = { # {{{
 	void: 'Void'
 } # }}}
 
-const $virtuals = {
+var $virtuals = {
 	Enum: true
 	Namespace: true
 	Primitive: true
@@ -214,7 +214,7 @@ abstract class Type {
 
 			switch data.kind {
 				NodeKind::ClassDeclaration => {
-					const type = new ClassType(scope)
+					var type = new ClassType(scope)
 
 					for modifier in data.modifiers {
 						if modifier.kind == ModifierKind::Abstract {
@@ -245,7 +245,7 @@ abstract class Type {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::Identifier => {
-					if const variable = scope.getVariable(data.name) {
+					if var variable = scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
 					else if $runtime.getVariable(data.name, node) != null {
@@ -256,7 +256,7 @@ abstract class Type {
 					}
 				}
 				NodeKind::MemberExpression => {
-					const object = Type.fromAST(data.object, scope, defined, node)
+					var object = Type.fromAST(data.object, scope, defined, node)
 
 					if object.isAny() {
 						return Type.Any
@@ -270,16 +270,16 @@ abstract class Type {
 				}
 				NodeKind::TypeReference => {
 					if data.elements? {
-						const type = new ArrayType(scope)
+						var type = new ArrayType(scope)
 
-						for const element in data.elements {
+						for var element in data.elements {
 							type.addElement(Type.fromAST(element, scope, defined, node))
 						}
 
 						return type
 					}
 					else if data.properties? {
-						const type = new DictionaryType(scope)
+						var type = new DictionaryType(scope)
 
 						for property in data.properties {
 							type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
@@ -288,23 +288,23 @@ abstract class Type {
 						return type
 					}
 					else if data.typeName? {
-						let nullable = false
+						var mut nullable = false
 
-						for const modifier in data.modifiers {
+						for var modifier in data.modifiers {
 							if modifier.kind == ModifierKind::Nullable {
 								nullable = true
 							}
 						}
 
 						if data.typeName.kind == NodeKind::Identifier {
-							const name = Type.renameNative(data.typeName.name)
+							var name = Type.renameNative(data.typeName.name)
 
 							if name == 'Any' {
 								return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 							}
 							else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 								if data.typeParameters? {
-									const type = new ReferenceType(scope, name, nullable)
+									var type = new ReferenceType(scope, name, nullable)
 
 									for parameter in data.typeParameters {
 										type._parameters.push(Type.fromAST(parameter, scope, defined, node))
@@ -321,9 +321,9 @@ abstract class Type {
 							}
 						}
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
-							const namespace = Type.fromAST(data.typeName.object, scope, defined, node)
+							var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
-							const type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
+							var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
 
 							if data.typeParameters? {
 								for parameter in data.typeParameters {
@@ -347,7 +347,7 @@ abstract class Type {
 			throw new NotImplementedException(node)
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
-			const data = index is Number ? metadata[index] : index
+			var data = index is Number ? metadata[index] : index
 
 			// console.log('-- import --')
 			// console.log(JSON.stringify(data, null, 2))
@@ -360,8 +360,8 @@ abstract class Type {
 					return Type.Null
 				}
 
-				if const match = $importTypeModifiers.exec(data) {
-					const nullable = match[3]?
+				if var match = $importTypeModifiers.exec(data) {
+					var nullable = match[3]?
 
 					if match[1] == 'Any' {
 						if match[2]? {
@@ -384,11 +384,11 @@ abstract class Type {
 					if data[0] == -1 {
 						throw new NotImplementedException(node)
 					}
-					else if const type = references[data[0]] {
+					else if var type = references[data[0]] {
 						return references[data[0]].name(data[1])
 					}
 					else {
-						const type = Type.toNamedType(
+						var type = Type.toNamedType(
 							Type.import(data[0], metadata, references, alterations, queue, scope, node)
 							false
 							scope
@@ -406,7 +406,7 @@ abstract class Type {
 					return scope.reference(references[data.reference])
 				}
 				else {
-					const type = Type.toNamedType(
+					var type = Type.toNamedType(
 						Type.import(data.reference, metadata, references, alterations, queue, scope, node)
 						false
 						scope
@@ -462,14 +462,14 @@ abstract class Type {
 				return Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			}
 			else if data.originals? {
-				const first = references[data.originals[0]]
-				const second = references[data.originals[1]]
+				var first = references[data.originals[0]]
+				var second = references[data.originals[1]]
 
-				const requirement = first.origin() ~~ TypeOrigin::Require
-				const [major, minor] = requirement ? [first, second] : [second, first]
-				const origin = requirement ? TypeOrigin::RequireOrExtern : TypeOrigin::ExternOrRequire
+				var requirement = first.origin() ~~ TypeOrigin::Require
+				var [major, minor] = requirement ? [first, second] : [second, first]
+				var origin = requirement ? TypeOrigin::RequireOrExtern : TypeOrigin::ExternOrRequire
 
-				const type = new ClassType(scope)
+				var type = new ClassType(scope)
 
 				type.origin(origin).originals(major.type(), minor.type())
 
@@ -498,7 +498,7 @@ abstract class Type {
 		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { # {{{
 			return type unless type.shallBeNamed()
 
-			const namedType = type.isContainer() ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
+			var namedType = type.isContainer() ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
 
 			scope.define(namedType.name(), true, namedType, node)
 
@@ -509,9 +509,9 @@ abstract class Type {
 				return types[0]
 			}
 
-			const union = new UnionType(scope)
+			var union = new UnionType(scope)
 
-			for const type in types {
+			for var type in types {
 				union.addType(type)
 			}
 
@@ -543,7 +543,7 @@ abstract class Type {
 		return false
 	} # }}}
 	clone(scope: Scope): Type { # {{{
-		const clone = this.clone()
+		var clone = this.clone()
 
 		clone._scope = scope
 
@@ -734,7 +734,7 @@ abstract class Type {
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !this.isVirtual() && !this.isSystemic() {
-			const varname = variable.name?()
+			var varname = variable.name?()
 
 			if name == varname {
 				fragments.line(name)
@@ -745,7 +745,7 @@ abstract class Type {
 		}
 
 		if this.isSealed() && this.isExtendable() {
-			const varname = this.getSealedName()
+			var varname = this.getSealedName()
 
 			if `__ks_\(name)` == varname {
 				fragments.line(varname)
@@ -780,7 +780,7 @@ abstract class Type {
 		}
 	} # }}}
 	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const reference = this.getMajorReferenceIndex()
+		var reference = this.getMajorReferenceIndex()
 		if reference != -1 {
 			return {
 				reference
@@ -797,7 +797,7 @@ abstract class Type {
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex == -1 {
-			const index = references.length
+			var index = references.length
 
 			@referenceIndex = index + indexDelta
 
@@ -829,7 +829,7 @@ abstract class Type {
 			return true
 		}
 
-		for const requirement in requirements {
+		for var requirement in requirements {
 			if this == requirement.alternative() {
 				return requirement.type().referenceIndex()
 			}

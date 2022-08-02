@@ -1,4 +1,4 @@
 class Foobar {
 }
 
-const x = Foobar::foo
+var x = Foobar::foo

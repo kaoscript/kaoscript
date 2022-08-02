@@ -8,7 +8,7 @@ likes = {
 	duncan: 'murbella'
 }
 
-let key, value
+var dyn key, value
 for value, key of likes {
 }
 

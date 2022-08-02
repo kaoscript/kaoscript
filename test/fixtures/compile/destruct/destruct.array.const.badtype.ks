@@ -1,7 +1,7 @@
 extern console
 
-const arr = 42
+var arr = 42
 
-const [a, b, c] = arr
+var [a, b, c] = arr
 
 console.log(a, b, c)

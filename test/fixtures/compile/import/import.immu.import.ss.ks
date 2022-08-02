@@ -1,1 +1,1 @@
-export const Space = 'space'
+export var Space = 'space'

@@ -1,7 +1,7 @@
 extern t1: Number, t2: Number, t3: Number, h: Number, i: Number
 
-const foo = t1 + (t2 - t1) * (2 / 3 - t3) * 6
-const bar = h + 1 / 3 * - (i - 1)
+var foo = t1 + (t2 - t1) * (2 / 3 - t3) * 6
+var bar = h + 1 / 3 * - (i - 1)
 
 export class Color {
 	macro registerSpace(@expression: Dictionary) {

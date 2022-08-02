@@ -8,4 +8,4 @@ enum Weekday {
     SUNDAY
 }
 
-const day = Weekday.fromString('monday')
+var day = Weekday.fromString('monday')

@@ -9,7 +9,7 @@ impl String {
 }
 
 func foobar() {
-	lateinit const x
+	var late x
 
 	x = 'foobar'
 

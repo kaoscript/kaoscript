@@ -3,6 +3,6 @@ class Foo {
 	}
 }
 
-let foo: Foo = new Foo()
+var dyn foo: Foo = new Foo()
 
 delete foo

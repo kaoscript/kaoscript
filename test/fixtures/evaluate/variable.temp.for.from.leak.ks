@@ -1,8 +1,8 @@
 require expect: func
 
-let foo = func(...args) {
-	let i = 42
-	
+var dyn foo = func(...args) {
+	var dyn i = 42
+
 	for i from 0 til args.length {
 		expect(args[i]).to.equal(0)
 	}

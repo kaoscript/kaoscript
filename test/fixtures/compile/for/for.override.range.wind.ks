@@ -1,6 +1,6 @@
 extern console
 
-const x = 3.14
+var x = 3.14
 
 for x in 0..10 {
 	console.log(x)

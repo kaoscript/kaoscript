@@ -1,5 +1,5 @@
 class UnlessStatement extends Statement {
-	private lateinit {
+	private late {
 		_body
 		_bodyScope: Scope
 		_condition
@@ -25,19 +25,19 @@ class UnlessStatement extends Statement {
 		@body.prepare()
 
 		if @body.isExit() {
-			for const data, name of @condition.inferWhenTrueTypes({}) {
+			for var data, name of @condition.inferWhenTrueTypes({}) {
 				@scope.updateInferable(name, data, this)
 			}
 		}
 		else {
-			const conditionInferables = @condition.inferWhenTrueTypes({})
-			const trueInferables = @bodyScope.listUpdatedInferables()
+			var conditionInferables = @condition.inferWhenTrueTypes({})
+			var trueInferables = @bodyScope.listUpdatedInferables()
 
-			for const inferable, name of trueInferables {
-				const trueType = inferable.type
+			for var inferable, name of trueInferables {
+				var trueType = inferable.type
 
 				if conditionInferables[name]? {
-					const conditionType = conditionInferables[name].type
+					var conditionType = conditionInferables[name].type
 
 					if trueType.equals(conditionType) {
 						@scope.updateInferable(name, inferable, this)

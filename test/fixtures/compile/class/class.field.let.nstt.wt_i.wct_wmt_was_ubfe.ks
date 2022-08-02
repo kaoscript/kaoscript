@@ -6,7 +6,7 @@ class Foobar {
 		this.x(x)
 	}
 	x(x: Number) {
-		const y = @x / 2
+		var y = @x / 2
 
 		@x = x
 	}

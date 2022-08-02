@@ -15,4 +15,4 @@ class Point3D extends Point2D {
 	}
 }
 
-const p = new Point3D(1, 2)
+var p = new Point3D(1, 2)

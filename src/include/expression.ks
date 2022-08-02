@@ -125,7 +125,7 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toStringFragments(fragments) { # {{{
-		const type = this.type()
+		var type = this.type()
 		if type.isReference() && type.type().isEnum() {
 			fragments.compile(this).code('.value')
 		}

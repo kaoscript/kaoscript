@@ -1,5 +1,5 @@
 class EnumExpression extends Expression {
-	private lateinit {
+	private late {
 		_enum
 		_enumCasting: Boolean	= false
 		_type: Type
@@ -11,7 +11,7 @@ class EnumExpression extends Expression {
 	prepare() { # {{{
 		@enum.prepare()
 
-		const named = @enum.type()
+		var named = @enum.type()
 		if !named.type().isEnum() {
 			TypeException.throwNotEnum(@data.enum.name, this)
 		}

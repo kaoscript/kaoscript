@@ -3,6 +3,6 @@ class Foo {
 	}
 }
 
-auto foo = new Foo()
+var mut foo = new Foo()
 
 delete foo

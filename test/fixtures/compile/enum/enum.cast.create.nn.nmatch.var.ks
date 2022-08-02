@@ -5,7 +5,7 @@ enum Color<String> {
 }
 
 func color(value: String): Color {
-	const color = Color('red')
+	var color = Color('red')
 
 	return color
 }

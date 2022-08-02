@@ -1,5 +1,5 @@
 class IfStatement extends Statement {
-	private lateinit {
+	private late {
 		_analyzeStep: Boolean								= true
 		_assignedInstanceVariables							= {}
 		_bindingDeclaration: Boolean						= false
@@ -78,7 +78,7 @@ class IfStatement extends Statement {
 				@condition.releaseReusable()
 			}
 
-			if const variable = @declaration.getIdentifierVariable() {
+			if var variable = @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
@@ -89,12 +89,12 @@ class IfStatement extends Statement {
 				TypeException.throwInvalidCondition(@condition, this)
 			}
 
-			for const data, name of @condition.inferWhenTrueTypes({}) {
+			for var data, name of @condition.inferWhenTrueTypes({}) {
 				@whenTrueScope.updateInferable(name, data, this)
 			}
 
 			if @whenFalseExpression != null {
-				for const data, name of @condition.inferWhenFalseTypes({}) {
+				for var data, name of @condition.inferWhenFalseTypes({}) {
 					@whenFalseScope.updateInferable(name, data, this)
 				}
 			}
@@ -114,7 +114,7 @@ class IfStatement extends Statement {
 
 			if !@declared {
 				if @whenTrueExpression.isExit() {
-					for const map, name of @lateInitVariables {
+					for var map, name of @lateInitVariables {
 						if map.false.initializable {
 							@parent.initializeVariable(VariableBrief(name, type: map.false.type), this, this)
 						}
@@ -123,13 +123,13 @@ class IfStatement extends Statement {
 						}
 					}
 
-					for const data, name of @condition.inferWhenFalseTypes({}) {
+					for var data, name of @condition.inferWhenFalseTypes({}) {
 						@scope.updateInferable(name, data, this)
 					}
 				}
 				else {
-					for const map, name of @lateInitVariables {
-						let type: Type
+					for var map, name of @lateInitVariables {
+						var mut type: Type
 
 						if map.true.initializable {
 							if map.false.initializable {
@@ -146,14 +146,14 @@ class IfStatement extends Statement {
 						@parent.initializeVariable(VariableBrief(name, type), this, this)
 					}
 
-					const conditionInferables = @condition.inferWhenFalseTypes({})
-					const trueInferables = @whenTrueScope.listUpdatedInferables()
+					var conditionInferables = @condition.inferWhenFalseTypes({})
+					var trueInferables = @whenTrueScope.listUpdatedInferables()
 
-					for const inferable, name of trueInferables {
-						const trueType = inferable.type
+					for var inferable, name of trueInferables {
+						var trueType = inferable.type
 
 						if conditionInferables[name]? {
-							const conditionType = conditionInferables[name].type
+							var conditionType = conditionInferables[name].type
 
 							if trueType.equals(conditionType) {
 								@scope.updateInferable(name, inferable, this)
@@ -180,13 +180,13 @@ class IfStatement extends Statement {
 			@scope.line(@data.end.line)
 
 			if @whenTrueExpression.isExit() {
-				for const data, name of @initializedVariables when data.false.initializable {
+				for var data, name of @initializedVariables when data.false.initializable {
 					data.variable.type = data.false.type
 
 					@parent.initializeVariable(data.variable, this, this)
 				}
 
-				for const map, name of @lateInitVariables {
+				for var map, name of @lateInitVariables {
 					if map.false.initializable {
 						@parent.initializeVariable(VariableBrief(name, type: map.false.type), this, this)
 					}
@@ -195,18 +195,18 @@ class IfStatement extends Statement {
 					}
 				}
 
-				for const data, name of @whenFalseScope.listUpdatedInferables() {
+				for var data, name of @whenFalseScope.listUpdatedInferables() {
 					@scope.updateInferable(name, data, this)
 				}
 			}
 			else if @whenFalseExpression.isExit() {
-				for const data, name of @initializedVariables when data.true.initializable {
+				for var data, name of @initializedVariables when data.true.initializable {
 					data.variable.type = data.true.type
 
 					@parent.initializeVariable(data.variable, this, this)
 				}
 
-				for const map, name of @lateInitVariables {
+				for var map, name of @lateInitVariables {
 					if map.true.initializable {
 						@parent.initializeVariable(VariableBrief(name, type: map.true.type), this, this)
 					}
@@ -215,12 +215,12 @@ class IfStatement extends Statement {
 					}
 				}
 
-				for const data, name of @whenTrueScope.listUpdatedInferables() {
+				for var data, name of @whenTrueScope.listUpdatedInferables() {
 					@scope.updateInferable(name, data, this)
 				}
 			}
 			else {
-				for const data, name of @initializedVariables {
+				for var data, name of @initializedVariables {
 					if data.true.initializable && data.false.initializable {
 						data.variable.type = Type.union(@scope, data.true.type, data.false.type)
 
@@ -228,8 +228,8 @@ class IfStatement extends Statement {
 					}
 				}
 
-				for const map, name of @lateInitVariables {
-					lateinit const type: Type
+				for var map, name of @lateInitVariables {
+					var late  type: Type
 
 					if map.true.initializable {
 						if map.false.initializable {
@@ -246,14 +246,14 @@ class IfStatement extends Statement {
 					@parent.initializeVariable(VariableBrief(name, type), this, this)
 				}
 
-				const trueInferables = @whenTrueScope.listUpdatedInferables()
-				const falseInferables = @whenFalseScope.listUpdatedInferables()
+				var trueInferables = @whenTrueScope.listUpdatedInferables()
+				var falseInferables = @whenFalseScope.listUpdatedInferables()
 
-				for const inferable, name of trueInferables {
-					const trueType = inferable.type
+				for var inferable, name of trueInferables {
+					var trueType = inferable.type
 
 					if falseInferables[name]? {
-						const falseType = falseInferables[name].type
+						var falseType = falseInferables[name].type
 
 						if trueType.equals(falseType) {
 							@scope.updateInferable(name, inferable, this)
@@ -270,7 +270,7 @@ class IfStatement extends Statement {
 					}
 				}
 
-				for const inferable, name of falseInferables when !?trueInferables[name] {
+				for var inferable, name of falseInferables when !?trueInferables[name] {
 					if inferable.isVariable && @scope.hasVariable(name) {
 						@scope.replaceVariable(name, inferable.type, true, false, this)
 					}
@@ -294,7 +294,7 @@ class IfStatement extends Statement {
 			@parent.addAssignments(variables)
 		}
 		else if @declared && !@bindingDeclaration {
-			for const variable in variables {
+			for var variable in variables {
 				if !@declaration.isDeclararingVariable(variable) {
 					@assignments.pushUniq(variable)
 				}
@@ -305,10 +305,10 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	addInitializableVariable(variable: Variable, node) { # {{{
-		const name = variable.name()
-		const whenTrue = node == @whenTrueExpression
+		var name = variable.name()
+		var whenTrue = node == @whenTrueExpression
 
-		if const map = @lateInitVariables[name] {
+		if var map = @lateInitVariables[name] {
 			if whenTrue {
 				if map[!whenTrue].initializable {
 					map[whenTrue].initializable = true
@@ -341,9 +341,9 @@ class IfStatement extends Statement {
 		@parent.addInitializableVariable(variable, node)
 	} # }}}
 	addInitializableVariable(variable: Variable, whenTrue: Boolean, node) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
-		if const map = @lateInitVariables[name] {
+		if var map = @lateInitVariables[name] {
 			map[whenTrue].initializable = true
 		}
 		else if !@hasWhenFalse && whenTrue {
@@ -380,7 +380,7 @@ class IfStatement extends Statement {
 	getWhenFalseScope(): @whenFalseScope
 	getWhenTrueScope(): @whenTrueScope
 	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{
-		if const map = @lateInitVariables[name] {
+		if var map = @lateInitVariables[name] {
 			map[whenTrue].type = type
 		}
 		else {
@@ -389,10 +389,10 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		const {name, type} = variable
-		const whenTrue = node == @whenTrueExpression
+		var {name, type} = variable
+		var whenTrue = node == @whenTrueExpression
 
-		if const map = @lateInitVariables[name] {
+		if var map = @lateInitVariables[name] {
 			if map[whenTrue].type != null {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
@@ -406,7 +406,7 @@ class IfStatement extends Statement {
 				map[whenTrue].type = type
 			}
 
-			const clone = node.scope().getVariable(name).clone()
+			var clone = node.scope().getVariable(name).clone()
 
 			if clone.isDefinitive() {
 				clone.setRealType(type)
@@ -417,7 +417,7 @@ class IfStatement extends Statement {
 
 			node.scope().replaceVariable(name, clone)
 		}
-		else if const map = @initializedVariables[name] {
+		else if var map = @initializedVariables[name] {
 			if map[whenTrue].type != null {
 				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
@@ -498,14 +498,14 @@ class IfStatement extends Statement {
 		if @declared && !@bindingDeclaration {
 			fragments.compile(@declaration)
 
-			const ctrl = fragments.newControl()
+			var ctrl = fragments.newControl()
 
 			this.toIfFragments(ctrl, mode)
 
 			ctrl.done()
 		}
 		else {
-			const ctrl = fragments.newControl()
+			var ctrl = fragments.newControl()
 
 			this.toIfFragments(ctrl, mode)
 
@@ -530,7 +530,7 @@ class IfStatement extends Statement {
 			}
 			else {
 				if @cascade {
-					let first = true
+					var mut first = true
 
 					@declaration.walk((name, _) => {
 						if first {
@@ -548,7 +548,7 @@ class IfStatement extends Statement {
 					})
 				}
 				else {
-					let first = true
+					var mut first = true
 
 					@declaration.walk((name, _) => {
 						if first {

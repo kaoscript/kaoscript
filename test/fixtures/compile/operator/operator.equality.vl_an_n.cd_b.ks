@@ -1,5 +1,5 @@
 func foobar() {
-	let x = null
+	var dyn x = null
 
 	if x == true {
 	}

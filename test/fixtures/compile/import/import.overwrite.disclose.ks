@@ -4,7 +4,7 @@ func foobar(d: Date) {
 
 }
 
-const d = new Date()
+var d = new Date()
 
 foobar(d.setDate(1))
 

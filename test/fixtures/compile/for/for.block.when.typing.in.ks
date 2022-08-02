@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values: Array) {
-	for const value in values when value is String {
+	for var value in values when value is String {
 		console.log(`\(value)`)
 	}
 }

@@ -1,3 +1,3 @@
-let x: Object
+var dyn x: Object
 
 x = {}

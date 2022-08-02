@@ -1,8 +1,8 @@
 extern console
 
-const arr = [1, '', true]
-const a = 10
+var arr = [1, '', true]
+var a = 10
 
-const [a, b, c] = arr
+var [a, b, c] = arr
 
 console.log(a, b, c)

@@ -1,3 +1,3 @@
 func foobar(x: Dictionary) {
-	const keys = Dictionary.keys(x)
+	var keys = Dictionary.keys(x)
 }

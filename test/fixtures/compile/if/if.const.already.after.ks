@@ -2,10 +2,10 @@ extern console
 
 func foobar(): String => 'foobar'
 
-if const x = foobar() {
+if var x = foobar() {
 	console.log(`\(x)`)
 }
 
-let x
+var dyn x
 
 console.log(`\(x)`)

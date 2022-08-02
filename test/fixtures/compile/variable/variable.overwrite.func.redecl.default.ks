@@ -1,4 +1,4 @@
 func name() {
 }
 
-let name = 'foobar'
+var dyn name = 'foobar'

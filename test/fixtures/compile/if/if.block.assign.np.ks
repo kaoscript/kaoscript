@@ -1,6 +1,6 @@
 extern func foobar
 
-let x
+var dyn x
 
 if x = foobar() {
 }

@@ -1,6 +1,6 @@
 extern console
 
-const x = 42
+var x = 42
 
 for x from 10 to x {
 	console.log(x)

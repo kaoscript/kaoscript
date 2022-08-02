@@ -1,3 +1,3 @@
 extern foobar
 
-const [x, y, z] = foobar()
+var [x, y, z] = foobar()

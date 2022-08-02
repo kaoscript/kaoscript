@@ -11,10 +11,10 @@ export class Color {
 	}
 	macro registerSpace(@expression: Dictionary) {
 		if expression.components? {
-			const fields: Array = []
-			const methods: Array = []
+			var fields: Array = []
+			var methods: Array = []
 
-			let field
+			var dyn field
 			for component, name of expression.components {
 				field = `_\(name)`
 
@@ -46,7 +46,7 @@ export class Color {
 	setField(name, value)
 }
 
-const $util = {
+var $util = {
 	formatToHex(that: Color): String => $hex(that)
 	formatToSRGB(that: Color): String { // {{{
 		if that._alpha == 1 {

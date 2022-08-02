@@ -4,9 +4,9 @@ struct Foobar {
 	z: Number	= 0
 }
 
-const y = -1
+var y = -1
 
-const a = Foobar(
+var a = Foobar(
 	x: 1
 	y
 )

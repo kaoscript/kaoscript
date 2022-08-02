@@ -2,6 +2,6 @@ class Master {
 	foobar(x) => x
 }
 
-const m = new Master()
+var m = new Master()
 
 m.foobar(null)

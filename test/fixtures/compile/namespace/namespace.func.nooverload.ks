@@ -6,6 +6,6 @@ namespace Util {
 	}
 }
 
-const foo = Util.reverse('hello', 42)
+var foo = Util.reverse('hello', 42)
 
 console.log(`\(foo)`)

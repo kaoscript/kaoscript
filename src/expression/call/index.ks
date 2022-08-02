@@ -1,5 +1,5 @@
 class CallExpression extends Expression {
-	private lateinit {
+	private late {
 		_arguments: Array						= []
 		_await: Boolean							= false
 		_callees: Array<Callee>					= []
@@ -30,9 +30,9 @@ class CallExpression extends Expression {
 					fragments.code('[').compile(prefill).code('].concat(')
 				}
 
-				let opened = false
+				var mut opened = false
 
-				for const argument, index in arguments {
+				for var argument, index in arguments {
 					if argument is UnaryOperatorSpread {
 						if opened {
 							fragments.code('], ')
@@ -69,10 +69,10 @@ class CallExpression extends Expression {
 		} # }}}
 	}
 	analyse() { # {{{
-		const es5 = @data.arguments.length != 1 && @options.format.spreads == 'es5'
+		var es5 = @data.arguments.length != 1 && @options.format.spreads == 'es5'
 
-		for const data in @data.arguments {
-			const argument = $compile.expression(data, this)
+		for var data in @data.arguments {
+			var argument = $compile.expression(data, this)
 
 			argument.analyse()
 
@@ -96,7 +96,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	prepare() { # {{{
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.prepare()
 
 			if argument.type().isInoperative() {
@@ -105,14 +105,14 @@ class CallExpression extends Expression {
 		}
 
 		if @options.format.spreads == 'es5' {
-			for const argument in @arguments until @flatten {
+			for var argument in @arguments until @flatten {
 				if argument is UnaryOperatorSpread {
 					@flatten = true
 				}
 			}
 		}
 		else {
-			for const argument in @arguments until @flatten {
+			for var argument in @arguments until @flatten {
 				if argument is UnaryOperatorSpread && !argument.argument().type().isArray() {
 					@flatten = true
 				}
@@ -128,8 +128,8 @@ class CallExpression extends Expression {
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier {
-				if const variable = @scope.getVariable(@data.callee.name) {
-					const type = variable.getRealType()
+				if var variable = @scope.getVariable(@data.callee.name) {
+					var type = variable.getRealType()
 
 					if type.isFunction() {
 						if type.isAsync() {
@@ -154,7 +154,7 @@ class CallExpression extends Expression {
 						}
 					}
 
-					if const substitute = variable.replaceCall?(@data, @arguments, this) {
+					if var substitute = variable.replaceCall?(@data, @arguments, this) {
 						this.addCallee(new SubstituteCallee(@data, substitute, this))
 					}
 					else {
@@ -169,20 +169,20 @@ class CallExpression extends Expression {
 				throw new NotImplementedException(this)
 			}
 			else if @data.callee.kind == NodeKind::LambdaExpression {
-				const expression = $compile.expression(@data.callee, this)
+				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
 				expression.prepare()
 
-				const function = expression.type()
+				var function = expression.type()
 
-				const assessment = function.assessment('', this)
+				var assessment = function.assessment('', this)
 
-				if const result = Router.matchArguments(assessment, @arguments, this) {
+				if var result = Router.matchArguments(assessment, @arguments, this) {
 					if result is LenientCallMatchResult {
 						this.addCallee(new DefaultCallee(@data, expression, this))
 					}
 					else {
-						const simplified = new SimplifiedArrowFunctionExpression(expression, result.matches[0])
+						var simplified = new SimplifiedArrowFunctionExpression(expression, result.matches[0])
 
 						this.addCallee(new DefaultCallee(@data, simplified, this))
 					}
@@ -192,17 +192,17 @@ class CallExpression extends Expression {
 				}
 			}
 			else if @data.callee.kind == NodeKind::ThisExpression {
-				const expression = $compile.expression(@data.callee, this)
+				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
 				expression.prepare()
 
 				@property = @data.callee.name.name
 
-				const type = expression.type()
+				var type = expression.type()
 				if type is FunctionType | OverloadedFunctionType {
-					const assessment = type.assessment(@property, this)
+					var assessment = type.assessment(@property, this)
 
-					if const result = Router.matchArguments(assessment, @arguments, this) {
+					if var result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new ThisCallee(@data, expression, @property, result.possibilities, this))
 						}
@@ -216,7 +216,7 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
-						ReferenceException.throwNoMatchingClassMethod(@property, expression.getClass().name(), [argument.type() for const argument in @arguments], this)
+						ReferenceException.throwNoMatchingClassMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
 					}
 				}
 				else if type.isFunction() {
@@ -245,11 +245,10 @@ class CallExpression extends Expression {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
 
-			const types = [@callees[0].type()]
+			var types = [@callees[0].type()]
 
-			let type
-			for i from 1 til @callees.length {
-				type = @callees[i].type()
+			for var i from 1 til @callees.length {
+				var type = @callees[i].type()
 
 				if !types.any((item, _, _) => type.equals(item)) {
 					types.push(type)
@@ -272,11 +271,11 @@ class CallExpression extends Expression {
 		// console.log(@type)
 	} # }}}
 	translate() { # {{{
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.translate()
 		}
 
-		for const callee in @callees {
+		for var callee in @callees {
 			callee.translate()
 		}
 
@@ -313,7 +312,7 @@ class CallExpression extends Expression {
 			}
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.inferTypes(inferables)
 		}
 
@@ -335,13 +334,13 @@ class CallExpression extends Expression {
 	isExit() => @type.isNever()
 	isExpectingType() => true
 	override isInitializingInstanceVariable(name) { # {{{
-		for const argument in @arguments {
+		for var argument in @arguments {
 			if argument.isInitializingInstanceVariable(name) {
 				return true
 			}
 		}
 
-		for const callee in @callees {
+		for var callee in @callees {
 			if !callee.isInitializingInstanceVariable(name) {
 				return false
 			}
@@ -362,7 +361,7 @@ class CallExpression extends Expression {
 			return true
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			if argument.isUsingInstanceVariable(name) {
 				return true
 			}
@@ -375,14 +374,14 @@ class CallExpression extends Expression {
 			return true if @object.isUsingNonLocalVariables(scope)
 		}
 		else if @data.callee.kind == NodeKind::Identifier {
-			const variable = @scope.getVariable(@data.callee.name)
+			var variable = @scope.getVariable(@data.callee.name)
 
 			if !scope.hasDeclaredVariable(variable.name()) {
 				return true
 			}
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			return true if argument.isUsingNonLocalVariables(scope)
 		}
 
@@ -395,7 +394,7 @@ class CallExpression extends Expression {
 			}
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			if argument.isUsingStaticVariable(class, varname) {
 				return true
 			}
@@ -413,7 +412,7 @@ class CallExpression extends Expression {
 			return true
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			if argument.isUsingVariable(name) {
 				return true
 			}
@@ -426,14 +425,14 @@ class CallExpression extends Expression {
 			@object.listLocalVariables(scope, variables)
 		}
 		else if @data.callee.kind == NodeKind::Identifier {
-			const variable = @scope.getVariable(@data.callee.name)
+			var variable = @scope.getVariable(@data.callee.name)
 
 			if scope.hasDeclaredVariable(variable.name()) {
 				variables.pushUniq(variable)
 			}
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.listLocalVariables(scope, variables)
 		}
 
@@ -444,14 +443,14 @@ class CallExpression extends Expression {
 			@object.listNonLocalVariables(scope, variables)
 		}
 		else if @data.callee.kind == NodeKind::Identifier {
-			const variable = @scope.getVariable(@data.callee.name)
+			var variable = @scope.getVariable(@data.callee.name)
 
 			if !variable.isModule() && !scope.hasDeclaredVariable(variable.name()) {
 				variables.pushUniq(variable)
 			}
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.listNonLocalVariables(scope, variables)
 		}
 
@@ -463,15 +462,15 @@ class CallExpression extends Expression {
 		// console.log(name)
 
 		if type is FunctionType | OverloadedFunctionType {
-			const assessment = type.assessment(name!!, this)
+			var assessment = type.assessment(name!!, this)
 
-			if const result = Router.matchArguments(assessment, @arguments, this) {
+			if var result = Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, result.possibilities, result.arguments, this))
 				}
 				else {
 					if result.matches.length == 1 {
-						const match = result.matches[0]
+						var match = result.matches[0]
 
 						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
 							this.addCallee(new DefaultCallee(@data, @object, match.function, this))
@@ -481,7 +480,7 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
-						const functions = [match.function for const match in result.matches]
+						var functions = [match.function for var match in result.matches]
 
 						this.addCallee(new DefaultCallee(@data, @object, functions, this))
 					}
@@ -498,9 +497,9 @@ class CallExpression extends Expression {
 
 		}
 		else if type.isEnum() {
-			const assessment = type.discardName().assessment(type.reference(@scope), this)
+			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
+			if var result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type.setNullable(true), result.arguments, this))
 				}
@@ -518,9 +517,9 @@ class CallExpression extends Expression {
 			}
 		}
 		else if type.isStruct() {
-			const assessment = type.discardName().assessment(type.reference(@scope), this)
+			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
+			if var result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -538,9 +537,9 @@ class CallExpression extends Expression {
 			}
 		}
 		else if type.isTuple() {
-			const assessment = type.discardName().assessment(type.reference(@scope), this)
+			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments(assessment, @arguments, this) {
+			if var result = Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -577,9 +576,9 @@ class CallExpression extends Expression {
 				name = name as NamedType
 
 				if value.hasClassMethod(@property) {
-					const assessment = value.getClassAssessment(@property, this)
+					var assessment = value.getClassAssessment(@property, this)
 
-					if const result = Router.matchArguments(assessment, @arguments, this) {
+					if var result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, name, false, result.possibilities, this))
@@ -590,7 +589,7 @@ class CallExpression extends Expression {
 						}
 						else {
 							if result.matches.length == 1 {
-								const match = result.matches[0]
+								var match = result.matches[0]
 
 								if match.function.isSealed() {
 									this.addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, name, this))
@@ -606,7 +605,7 @@ class CallExpression extends Expression {
 					}
 					else {
 						if value.isExhaustiveClassMethod(@property, this) {
-							ReferenceException.throwNoMatchingClassMethod(@property, name.name(), [argument.type() for const argument in @arguments], this)
+							ReferenceException.throwNoMatchingClassMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else if assessment.sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
@@ -624,7 +623,7 @@ class CallExpression extends Expression {
 				}
 			}
 			is DictionaryType => {
-				if const property = value.getProperty(@property) {
+				if var property = value.getProperty(@property) {
 					this.makeCallee(property, @property)
 				}
 				else {
@@ -635,9 +634,9 @@ class CallExpression extends Expression {
 				name = name as NamedType
 
 				if value.hasStaticMethod(@property) {
-					const assessment = value.getStaticAssessment(@property, this)
+					var assessment = value.getStaticAssessment(@property, this)
 
-					if const result = Router.matchArguments(assessment, @arguments, this) {
+					if var result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
 						}
@@ -676,17 +675,17 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), value)
 			}
 			is NamespaceType => {
-				if const property = value.getProperty(@property) {
+				if var property = value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
-						const assessment = property.assessment(@property, this)
+						var assessment = property.assessment(@property, this)
 
-						if const result = Router.matchArguments(assessment, @arguments, this) {
+						if var result = Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 							else {
 								if result.matches.length == 1 {
-									const match = result.matches[0]
+									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
 										this.addCallee(new DefaultCallee(@data, @object, match.function, this))
@@ -696,7 +695,7 @@ class CallExpression extends Expression {
 									}
 								}
 								else {
-									const functions = [match.function for const match in result.matches]
+									var functions = [match.function for var match in result.matches]
 
 									this.addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
@@ -739,7 +738,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is UnionType => {
-				for const type in value.types() {
+				for var type in value.types() {
 					this.makeMemberCallee(type)
 				}
 			}
@@ -759,9 +758,9 @@ class CallExpression extends Expression {
 			}
 			is ClassType => {
 				if value.hasInstantiableMethod(@property) {
-					const assessment = value.getInstantiableAssessment(@property, this)
+					var assessment = value.getInstantiableAssessment(@property, this)
 
-					if const result = Router.matchArguments(assessment, @arguments, this) {
+					if var result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, reference.type(), true, result.possibilities, this))
@@ -772,10 +771,10 @@ class CallExpression extends Expression {
 						}
 						else {
 							if result.matches.length == 1 {
-								const match = result.matches[0]
+								var match = result.matches[0]
 
 								if match.function.isSealed() {
-									const class = value.getClassWithInstanceMethod(@property, reference.type())
+									var class = value.getClassWithInstanceMethod(@property, reference.type())
 
 									this.addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, class, this))
 								}
@@ -790,7 +789,7 @@ class CallExpression extends Expression {
 					}
 					else {
 						if value.isExhaustiveInstanceMethod(@property, this) {
-							ReferenceException.throwNoMatchingClassMethod(@property, reference.name(), [argument.type() for const argument in @arguments], this)
+							ReferenceException.throwNoMatchingClassMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else {
 							this.addCallee(new DefaultCallee(@data, @object, null, this))
@@ -811,17 +810,17 @@ class CallExpression extends Expression {
 				}
 			}
 			is DictionaryType => {
-				if const property = value.getProperty(@property) {
+				if var property = value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
-						const assessment = property.assessment(@property, this)
+						var assessment = property.assessment(@property, this)
 
-						if const result = Router.matchArguments(assessment, @arguments, this) {
+						if var result = Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 							else {
 								if result.matches.length == 1 {
-									const match = result.matches[0]
+									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
 										this.addCallee(new DefaultCallee(@data, @object, match.function, this))
@@ -831,7 +830,7 @@ class CallExpression extends Expression {
 									}
 								}
 								else {
-									const functions = [match.function for const match in result.matches]
+									var functions = [match.function for var match in result.matches]
 
 									this.addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
@@ -857,20 +856,20 @@ class CallExpression extends Expression {
 			}
 			is EnumType => {
 				if value.hasInstanceMethod(@property) {
-					const assessment = value.getInstanceAssessment(@property, this)
+					var assessment = value.getInstanceAssessment(@property, this)
 
-					if const result = Router.matchArguments(assessment, @arguments, this) {
+					if var result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
 						else {
 							if result.matches.length == 1 {
-								const match = result.matches[0]
+								var match = result.matches[0]
 
 								this.addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, match, this))
 							}
 							else {
-								const functions = [match.function for const match in result.matches]
+								var functions = [match.function for var match in result.matches]
 
 								this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.functions, this))
 							}
@@ -905,7 +904,7 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type(), value)
 			}
 			is UnionType => {
-				for const type in value.types() {
+				for var type in value.types() {
 					this.makeMemberCallee(type)
 				}
 			}
@@ -941,7 +940,7 @@ class CallExpression extends Expression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if mode == Mode::Async {
-			for const argument in @arguments {
+			for var argument in @arguments {
 				if argument.isAwaiting() {
 					return argument.toFragments(fragments, mode)
 				}
@@ -965,7 +964,7 @@ class CallExpression extends Expression {
 				fragments.code(' : null')
 			}
 			else {
-				for const argument in @arguments {
+				for var argument in @arguments {
 					if argument.isAwaiting() {
 						return argument.toFragments(fragments, mode)
 					}
@@ -1022,7 +1021,7 @@ class CallExpression extends Expression {
 		else {
 			this.module().flag('Type')
 
-			for const callee in @callees til -1 {
+			for var callee in @callees til -1 {
 				callee.toPositiveTestFragments(fragments, this)
 
 				fragments.code(' ? ')
@@ -1037,7 +1036,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	toQuote() { # {{{
-		let fragments = ''
+		var mut fragments = ''
 
 		if @object != null {
 			fragments += @object.toQuote()
@@ -1074,8 +1073,8 @@ class CallExpression extends Expression {
 	} # }}}
 	type() => @type
 	private addCallee(callee: Callee) { # {{{
-		if const hash = callee.hashCode() {
-			if const main = @calleeByHash[hash] {
+		if var hash = callee.hashCode() {
+			if var main = @calleeByHash[hash] {
 				main.mergeWith(callee)
 			}
 			else {
@@ -1090,7 +1089,7 @@ class CallExpression extends Expression {
 }
 
 class NamedArgument extends Expression {
-	private lateinit {
+	private late {
 		_name: String
 		_value: Expression
 	}
@@ -1132,7 +1131,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code('((')
 
-		const block = Parameter.toFragments(@expression, fragments, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(@expression, fragments, ParameterMode::Default, func(fragments) {
 			return fragments.code(') =>').newBlock()
 		})
 

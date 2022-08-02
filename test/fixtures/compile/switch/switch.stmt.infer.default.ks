@@ -1,5 +1,5 @@
 func foobar(y, z) {
-	let x
+	var dyn x
 
 	switch y {
 		z => {

@@ -8,7 +8,7 @@ class UnionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
-			const type = new UnionType(scope)
+			var type = new UnionType(scope)
 
 			if data.nullable? {
 				type._nullable = data.nullable
@@ -16,7 +16,7 @@ class UnionType extends Type {
 			}
 
 			queue.push(() => {
-				for const item in data.types {
+				for var item in data.types {
 					type.addType(Type.import(item, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -27,7 +27,7 @@ class UnionType extends Type {
 	constructor(@scope, types: Array = [], @explicit = true) { # {{{
 		super(scope)
 
-		for const type in types {
+		for var type in types {
 			if type.isNull() {
 				if !@nullable {
 					@types.push(Type.Null)
@@ -86,15 +86,15 @@ class UnionType extends Type {
 			}
 		}
 		else if type.isUnion() {
-			for const type in type.discard().types() {
+			for var type in type.discard().types() {
 				this.addType(type)
 			}
 		}
 		else {
-			auto notMatched = true
+			var mut notMatched = true
 
 			if type.isNullable() {
-				for const t, i in @types while notMatched {
+				for var t, i in @types while notMatched {
 					if t.matchContentOf(type) {
 						notMatched = false
 
@@ -113,7 +113,7 @@ class UnionType extends Type {
 				}
 			}
 			else {
-				for const t, i in @types while notMatched {
+				for var t, i in @types while notMatched {
 					if type.matchContentOf(t) {
 						notMatched = false
 
@@ -132,7 +132,7 @@ class UnionType extends Type {
 		return this
 	} # }}}
 	canBeBoolean() { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.canBeBoolean() {
 				return true
 			}
@@ -141,7 +141,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	canBeFunction(any = true) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.canBeFunction(any) {
 				return true
 			}
@@ -150,7 +150,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	canBeNumber(any = true) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.canBeNumber(any) {
 				return true
 			}
@@ -159,7 +159,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	canBeString(any = true) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.canBeString(any) {
 				return true
 			}
@@ -168,7 +168,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	canBeVirtual(name: String) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.canBeVirtual(name) {
 				return true
 			}
@@ -177,7 +177,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	clone() { # {{{
-		const that = new UnionType(@scope)
+		var that = new UnionType(@scope)
 
 		that._any = @any
 		that._explicit = @explicit
@@ -229,10 +229,10 @@ class UnionType extends Type {
 		return this
 	} # }}}
 	getProperty(name: String) { # {{{
-		const types = []
+		var types = []
 
-		for const type in @types {
-			let property = type.getProperty(name) ?? Type.Any
+		for var type in @types {
+			var mut property = type.getProperty(name) ?? Type.Any
 
 			if property is StructFieldType {
 				property = property.discardVariable()
@@ -251,12 +251,12 @@ class UnionType extends Type {
 		}
 	} # }}}
 	hashCode(): String { # {{{
-		const elements = [type.hashCode() for type in @types]
+		var elements = [type.hashCode() for type in @types]
 
 		return elements.join('|')
 	} # }}}
 	isArray() { # {{{
-		for const type in @types {
+		for var type in @types {
 			if !type.isArray() {
 				return false
 			}
@@ -274,7 +274,7 @@ class UnionType extends Type {
 			}
 		}
 		else if limited {
-			for const type in @types {
+			for var type in @types {
 				if type.isAssignableToVariable(value, anycast, nullcast, downcast) {
 					return true
 				}
@@ -283,7 +283,7 @@ class UnionType extends Type {
 			return false
 		}
 		else {
-			for const type in @types {
+			for var type in @types {
 				if !type.isAssignableToVariable(value, anycast, nullcast, downcast) {
 					return false
 				}
@@ -293,7 +293,7 @@ class UnionType extends Type {
 		}
 	} # }}}
 	isDictionary() { # {{{
-		for const type in @types {
+		for var type in @types {
 			if !type.isDictionary() {
 				return false
 			}
@@ -321,7 +321,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	isMatchingParameter(value) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if type.isMatchingParameter(value) {
 				return true
 			}
@@ -360,9 +360,9 @@ class UnionType extends Type {
 				return false
 			}
 
-			let match = 0
-			for const aType in @types {
-				for const bType in value.types() {
+			var mut match = 0
+			for var aType in @types {
+				for var bType in value.types() {
 					if aType.isSubsetOf(bType, mode) {
 						match++
 						break
@@ -373,7 +373,7 @@ class UnionType extends Type {
 			return match == @types.length
 		}
 		else {
-			for const type in @types {
+			for var type in @types {
 				if !type.isSubsetOf(value, mode) {
 					return false
 				}
@@ -385,7 +385,7 @@ class UnionType extends Type {
 	isUnion() => true
 	length() => @types.length
 	matchContentOf(value: Type) { # {{{
-		for const type in @types {
+		for var type in @types {
 			if !type.matchContentOf(value) {
 				return false
 			}
@@ -394,12 +394,12 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	parameter() { # {{{
-		const types = [type.parameter() for const type in @types]
+		var types = [type.parameter() for var type in @types]
 
 		return Type.union(@scope, ...types)
 	} # }}}
 	reduce(type: Type) { # {{{
-		const types = [t for const t in @types when !t.matchContentOf(type)]
+		var types = [t for var t in @types when !t.matchContentOf(type)]
 
 		if types.length == 1 {
 			return types[0]
@@ -416,7 +416,7 @@ class UnionType extends Type {
 			return this.clone().addType(Type.Null)
 		}
 		else if @explicitNullity {
-			const that = this.clone()
+			var that = this.clone()
 
 			that._types:Array.remove(Type.Null)
 			that._nullable = false
@@ -430,7 +430,7 @@ class UnionType extends Type {
 	} # }}}
 	sort(): UnionType { # {{{
 		@types.sort((a, b) => {
-			const index = a.compareToRef(b)
+			var index = a.compareToRef(b)
 			if index == 0 {
 				return a.hashCode().localeCompare(b.hashCode())
 			}
@@ -441,25 +441,25 @@ class UnionType extends Type {
 		return this
 	} # }}}
 	split(types: Array) { # {{{
-		for const type in @types {
+		for var type in @types {
 			type.split(types)
 		}
 
 		return types
 	} # }}}
 	toCastFragments(fragments) { # {{{
-		for const type in @types {
+		for var type in @types {
 			type.toCastFragments(fragments)
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
 	} # }}}
-	toQuote() => [type.toQuote() for const type in @types].join('|')
+	toQuote() => [type.toQuote() for var type in @types].join('|')
 	toQuote(double: Boolean): String { # {{{
-		const elements = [type.toQuote() for type in @types]
+		var elements = [type.toQuote() for type in @types]
 
-		lateinit const last
+		var late  last
 		if @explicitNullity {
 			last = 'Null'
 		}
@@ -517,7 +517,7 @@ class UnionType extends Type {
 	toTestFunctionFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::AND
 
-		for const type, index in @types {
+		for var type, index in @types {
 			fragments.code(' || ') if index != 0
 
 			type.toTestFunctionFragments(fragments, node, Junction::OR)
@@ -528,13 +528,13 @@ class UnionType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('union')
 
-		for const type in @types {
+		for var type in @types {
 			type.toVariations(variations)
 		}
 	} # }}}
 	type() { # {{{
 		if @types.length == 1 {
-			const type = @types[0]
+			var type = @types[0]
 
 			if @nullable == type.isNullable() {
 				return type

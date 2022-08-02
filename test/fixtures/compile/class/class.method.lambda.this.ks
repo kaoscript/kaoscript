@@ -6,6 +6,6 @@ class Formatter {
 	toUpperCase(value) => value.toUpperCase()
 }
 
-const formatter = new Formatter()
+var formatter = new Formatter()
 
 console.log(formatter.camelize('john doe'))

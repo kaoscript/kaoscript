@@ -4,7 +4,7 @@ enum Color<String> {
 	Blue
 }
 
-const aliases: Array<Color> = [Color::Red]
+var aliases: Array<Color> = [Color::Red]
 
 func foobar() {
 	if aliases[0] == Color::Red {

@@ -11,7 +11,7 @@ enum TypeStatus { # {{{
 } # }}}
 
 class ClassDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_class: ClassType
 		_extendsName: String
 		_extendsType: NamedType<ClassType>
@@ -148,9 +148,9 @@ class ClassDeclaration extends Statement {
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		for const data in @data.members when data.kind == NodeKind::MacroDeclaration {
-			const name = data.name.name
-			const declaration = new MacroDeclaration(data, this, null)
+		for var data in @data.members when data.kind == NodeKind::MacroDeclaration {
+			var name = data.name.name
+			var declaration = new MacroDeclaration(data, this, null)
 
 			if @macros[name] is Array {
 				@macros[name].push(declaration)
@@ -163,7 +163,7 @@ class ClassDeclaration extends Statement {
 		@variable.flagClassStatement()
 	} # }}}
 	analyse() { # {{{
-		let thisVariable = @constructorScope.define('this', true, @scope.reference(@name), true, this)
+		var mut thisVariable = @constructorScope.define('this', true, @scope.reference(@name), true, this)
 
 		thisVariable.replaceCall = (data, arguments, node) => new CallThisConstructorSubstitude(data, arguments, @type, this)
 
@@ -175,8 +175,8 @@ class ClassDeclaration extends Statement {
 		if @data.extends? {
 			@extending = true
 
-			let name = ''
-			let member = @data.extends
+			var mut name = ''
+			var mut member = @data.extends
 			while member.kind == NodeKind::MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
@@ -190,7 +190,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				@abstract = true
 
@@ -203,8 +203,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		let declaration
-		for const data in @data.members {
+		var mut declaration
+		for var data in @data.members {
 			switch data.kind {
 				NodeKind::CommentBlock => {
 				}
@@ -265,7 +265,7 @@ class ClassDeclaration extends Statement {
 
 			@hybrid = @class.isHybrid()
 
-			const superType = @scope.reference(@extendsName)
+			var superType = @scope.reference(@extendsName)
 
 			@constructorScope.define('super', true, superType, true, this)
 
@@ -274,14 +274,14 @@ class ClassDeclaration extends Statement {
 			this.updateConstructorScope()
 		}
 
-		for const variable, name of @classVariables {
+		for var variable, name of @classVariables {
 			variable.prepare()
 
 			@class.addClassVariable(name, variable.type())
 		}
 
-		for const methods, name of @classMethods {
-			const async = @extendsType?.type().isAsyncClassMethod(name) ?? methods[0].type().isAsync()
+		for var methods, name of @classMethods {
+			var async = @extendsType?.type().isAsyncClassMethod(name) ?? methods[0].type().isAsync()
 
 			for method in methods {
 				method.prepare()
@@ -298,14 +298,14 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const variable, name of @instanceVariables {
+		for var variable, name of @instanceVariables {
 			variable.prepare()
 
 			@class.addInstanceVariable(name, variable.type())
 		}
 
-		for const methods, name of @instanceMethods {
-			const async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
+		for var methods, name of @instanceMethods {
+			var async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
 			for method in methods {
 				method.prepare()
@@ -322,10 +322,10 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const methods, name of @abstractMethods {
-			const async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
+		for var methods, name of @abstractMethods {
+			var async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
-			for const method in methods {
+			for var method in methods {
 				method.prepare()
 
 				if async != method.type().isAsync() {
@@ -341,14 +341,14 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @abstract {
-			for const constructor in @constructors {
+			for var constructor in @constructors {
 				constructor.prepare()
 
 				@class.addConstructor(constructor.type())
 			}
 		}
 		else {
-			for const constructor in @constructors {
+			for var constructor in @constructors {
 				constructor.prepare()
 
 				if @class.hasMatchingConstructor(constructor.type(), MatchingMode::ExactParameter) {
@@ -369,14 +369,14 @@ class ClassDeclaration extends Statement {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 
-		for const methods, name of @forkedMethods {
-			for let { original, forks, hidden } of methods {
-				const index = original.index()
-				const instance = original.isInstance()
-				let found = false
+		for var methods, name of @forkedMethods {
+			for var mut { original, forks, hidden } of methods {
+				var index = original.index()
+				var instance = original.isInstance()
+				var mut found = false
 
 				if instance {
-					for const method in @instanceMethods[name] until found {
+					for var method in @instanceMethods[name] until found {
 						if index == method.type().index() {
 							if hidden == false {
 								method.flagForked(@class, forks)
@@ -387,7 +387,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				else {
-					for const method in @classMethods[name] until found {
+					for var method in @classMethods[name] until found {
 						if index == method.type().index() {
 							if hidden == false {
 								method.flagForked(@class, forks)
@@ -399,7 +399,7 @@ class ClassDeclaration extends Statement {
 				}
 
 				if !found {
-					const method = original.clone()
+					var method = original.clone()
 
 					if !?hidden {
 						hidden = false
@@ -408,7 +408,7 @@ class ClassDeclaration extends Statement {
 							hidden = true
 						}
 						else {
-							for const fork in forks {
+							for var fork in forks {
 								if method.isSubsetOf(
 										fork
 										MatchingMode::FunctionSignature + MatchingMode::MissingParameter
@@ -439,12 +439,12 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @extending {
-			const extends = @extendsType.type()
-			for const methods, name of @instanceMethods {
-				const all = extends.listInstantiableMethods(name)
+			var extends = @extendsType.type()
+			for var methods, name of @instanceMethods {
+				var all = extends.listInstantiableMethods(name)
 
-				for const method in methods {
-					for const m in all when m.index() != method.type().index() && m.index() != method.type().getForkedIndex() {
+				for var method in methods {
+					for var m in all when m.index() != method.type().index() && m.index() != method.type().getForkedIndex() {
 						if method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 							SyntaxException.throwHiddenMethod(name, @type, m.type(), @type, method.type(), method)
 						}
@@ -456,8 +456,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const macros of @macros {
-			for const macro in macros {
+		for var macros of @macros {
+			for var macro in macros {
 				macro.export(this)
 			}
 		}
@@ -467,7 +467,7 @@ class ClassDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for const variable of @classVariables {
+		for var variable of @classVariables {
 			variable.translate()
 
 			if variable.isRequiringInitialization() && !variable.isInitialized() {
@@ -475,11 +475,11 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const variable of @instanceVariables {
+		for var variable of @instanceVariables {
 			variable.translate()
 		}
 
-		for const methods of @instanceMethods {
+		for var methods of @instanceMethods {
 			for method in methods {
 				method.translate()
 			}
@@ -487,14 +487,14 @@ class ClassDeclaration extends Statement {
 
 		if @constructors.length == 0 {
 			if @extending {
-				let extends = @class.extends()
+				var mut extends = @class.extends()
 
 				while extends? && !extends.type().hasConstructors() {
 					extends = extends.type().extends()
 				}
 
 				if extends? {
-					for const constructor in extends.type().listConstructors() {
+					for var constructor in extends.type().listConstructors() {
 						constructor.checkVariablesInitializations(this, @class)
 					}
 				}
@@ -511,7 +511,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		else {
-			for const constructor in @constructors {
+			for var constructor in @constructors {
 				constructor.translate()
 
 				@class.forEachInstanceVariables((name, variable) => {
@@ -526,24 +526,24 @@ class ClassDeclaration extends Statement {
 			@destructor.translate()
 		}
 
-		for const methods of @abstractMethods {
+		for var methods of @abstractMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 
-		for const methods of @classMethods {
+		for var methods of @classMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 	} # }}}
 	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType, hidden: Boolean?) { # {{{
-		const index = oldMethod.index()
+		var index = oldMethod.index()
 
 		@forkedMethods[name] ??= {}
 
-		if const fork = @forkedMethods[name][index] {
+		if var fork = @forkedMethods[name][index] {
 			fork.forks.push(newMethod)
 			fork.hidden = false
 		}
@@ -584,7 +584,7 @@ class ClassDeclaration extends Statement {
 	level() => @class.level()
 	name() => @name
 	newInstanceMethodScope(method: ClassMethodDeclaration) { # {{{
-		const scope = this.newScope(@scope, ScopeType::Function)
+		var scope = this.newScope(@scope, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
 
@@ -602,15 +602,15 @@ class ClassDeclaration extends Statement {
 		@parent.registerMacro(`\(@name).\(name)`, macro)
 	} # }}}
 	toContinousES6Fragments(fragments) { # {{{
-		let root = fragments
-		let breakable = true
+		var mut root = fragments
+		var mut breakable = true
 
 		if @forcefullyRebinded {
 			root = fragments.newLine().code(`var \(@name) = `)
 			breakable = false
 		}
 
-		const clazz = root
+		var clazz = root
 			.newControl(null, breakable, breakable)
 			.code('class ', @name)
 
@@ -621,7 +621,7 @@ class ClassDeclaration extends Statement {
 		clazz.step()
 
 		if !@abstract {
-			const constructors = @class.listAccessibleConstructors()
+			var constructors = @class.listAccessibleConstructors()
 
 			if constructors.length == 0 {
 				clazz
@@ -634,13 +634,13 @@ class ClassDeclaration extends Statement {
 					.done()
 			}
 			else {
-				for const method in constructors {
+				for var method in constructors {
 					ClassConstructorDeclaration.toCreatorFragments(@type, method.type(), clazz)
 				}
 			}
 		}
 
-		let ctrl
+		var mut ctrl
 		if !@extending {
 			clazz
 				.newControl()
@@ -661,7 +661,7 @@ class ClassDeclaration extends Statement {
 				ctrl.line('super.__ks_init()')
 			}
 
-			for const field of @instanceVariables {
+			for var field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
@@ -673,7 +673,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		const m = []
+		var m = []
 
 		for method in @constructors {
 			method.toFragments(clazz, Mode::None)
@@ -697,22 +697,22 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
-		for const methods of @abstractMethods {
-			for const method in methods {
+		for var methods of @abstractMethods {
+			for var method in methods {
 				method.toIndigentFragments(clazz)
 			}
 		}
 
-		for const methods, name of @instanceMethods {
-			const m = []
+		for var methods, name of @instanceMethods {
+			var m = []
 
 			if !@extending || !@extendsType.type().hasInstanceMethod(name) {
 				ClassMethodDeclaration.toInstanceHeadFragments(name, clazz)
 			}
 
-			const overrides = []
+			var overrides = []
 
-			for const method in methods {
+			for var method in methods {
 				if method.isForked() {
 					method.toForkFragments(clazz)
 				}
@@ -746,8 +746,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const methods, name of @classMethods {
-			const m = []
+		for var methods, name of @classMethods {
+			var m = []
 
 			for method in methods {
 				method.toFragments(clazz, Mode::None)
@@ -775,14 +775,14 @@ class ClassDeclaration extends Statement {
 		}
 	} # }}}
 	toHybridES6Fragments(fragments) { # {{{
-		const clazz = fragments
+		var clazz = fragments
 			.newControl()
 			.code('class ', @name, ' extends ', @extendsName)
 			.step()
 
-		const m = []
+		var m = []
 
-		let ctrl
+		var mut ctrl
 		if @constructors.length == 0 {
 			ctrl = clazz
 				.newControl()
@@ -811,10 +811,10 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			const assessment = Router.assess(m, 'constructor', this)
+			var assessment = Router.assess(m, 'constructor', this)
 
-			const line = ctrl.newLine()
-			const block = line.code('const __ks_cons_rt = (args) =>').newBlock()
+			var line = ctrl.newLine()
+			var block = line.code('const __ks_cons_rt = (args) =>').newBlock()
 
 			Router.toFragments(
 				(function, line) => {
@@ -843,7 +843,7 @@ class ClassDeclaration extends Statement {
 				.code(`__ks_init_\(@initsId)()`)
 				.step()
 
-			for const field of @instanceVariables {
+			for var field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
@@ -885,20 +885,20 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
-		for const methods of @abstractMethods {
-			for const method in methods {
+		for var methods of @abstractMethods {
+			for var method in methods {
 				method.toIndigentFragments(clazz)
 			}
 		}
 
-		for const methods, name of @instanceMethods {
+		for var methods, name of @instanceMethods {
 			m.clear()
 
-			let overflow = false
+			var mut overflow = false
 
 			if @extending {
-				if const methods = @extendsType.type().listInstanceMethods(name) {
-					for const method in methods until overflow {
+				if var methods = @extendsType.type().listInstanceMethods(name) {
+					for var method in methods until overflow {
 						if method.isOverflowing(m) {
 							overflow = true
 						}
@@ -908,7 +908,7 @@ class ClassDeclaration extends Statement {
 
 			ClassMethodDeclaration.toInstanceHeadFragments(name, clazz)
 
-			for const method in methods {
+			for var method in methods {
 				method.toFragments(clazz, Mode::None)
 
 				m.push(method.type())
@@ -926,7 +926,7 @@ class ClassDeclaration extends Statement {
 			)
 		}
 
-		for const methods, name of @classMethods {
+		for var methods, name of @classMethods {
 			m.clear()
 
 			for method in methods {
@@ -935,11 +935,11 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			let overflow = false
+			var mut overflow = false
 
 			if @extending {
-				if const methods = @extendsType.type().listClassMethods(name) {
-					for const method in methods {
+				if var methods = @extendsType.type().listClassMethods(name) {
+					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -956,7 +956,7 @@ class ClassDeclaration extends Statement {
 		clazz.done()
 	} # }}}
 	toSealedES6Fragments(fragments) { # {{{
-		const clazz = fragments
+		var clazz = fragments
 			.newControl()
 			.code('class ', @name)
 
@@ -967,7 +967,7 @@ class ClassDeclaration extends Statement {
 		clazz.step()
 
 		if !@abstract {
-			const constructors = @class.listAccessibleConstructors()
+			var constructors = @class.listAccessibleConstructors()
 
 			if constructors.length == 0 {
 				clazz
@@ -980,13 +980,13 @@ class ClassDeclaration extends Statement {
 					.done()
 			}
 			else {
-				for const method in constructors {
+				for var method in constructors {
 					ClassConstructorDeclaration.toCreatorFragments(@type, method.type(), clazz)
 				}
 			}
 		}
 
-		let ctrl
+		var mut ctrl
 		if @extending && !@extendsType.isSealedAlien() {
 			ctrl = clazz
 				.newControl()
@@ -996,7 +996,7 @@ class ClassDeclaration extends Statement {
 			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
 
 			if @inits {
-				for const field of @instanceVariables {
+				for var field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
 			}
@@ -1019,14 +1019,14 @@ class ClassDeclaration extends Statement {
 				.code('__ks_init()')
 				.step()
 
-			for const field of @instanceVariables {
+			for var field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
 			ctrl.done()
 		}
 
-		const m = []
+		var m = []
 
 		for method in @constructors {
 			method.toFragments(clazz, Mode::None)
@@ -1050,13 +1050,13 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
-		for const methods of @abstractMethods {
-			for const method in methods {
+		for var methods of @abstractMethods {
+			for var method in methods {
 				method.toIndigentFragments(clazz)
 			}
 		}
 
-		for const methods, name of @instanceMethods {
+		for var methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1065,11 +1065,11 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			let overflow = false
+			var mut overflow = false
 
 			if @extending {
-				if const methods = @extendsType.type().listInstanceMethods(name) {
-					for const method in methods {
+				if var methods = @extendsType.type().listInstanceMethods(name) {
+					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -1090,7 +1090,7 @@ class ClassDeclaration extends Statement {
 			)
 		}
 
-		for const methods, name of @classMethods {
+		for var methods, name of @classMethods {
 			m.clear()
 
 			for method in methods {
@@ -1099,11 +1099,11 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			let overflow = false
+			var mut overflow = false
 
 			if @extending {
-				if const methods = @extendsType.type().listClassMethods(name) {
-					for const method in methods {
+				if var methods = @extendsType.type().listClassMethods(name) {
+					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -1140,12 +1140,12 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for const variable of @classVariables {
+		for var variable of @classVariables {
 			variable.toFragments(fragments)
 		}
 
 		if !@es5 && @data.version? {
-			let line = fragments.newLine()
+			var mut line = fragments.newLine()
 
 			line
 				.code(`Object.defineProperty(\(@name), 'version', `)
@@ -1160,9 +1160,9 @@ class ClassDeclaration extends Statement {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
 		else {
-			for const {class, index}, name of @sharedMethods {
-				const line = fragments.newLine()
-				const block = line.code(`\(class.getSealedName())._im_\(name) = function(that, ...args)`).newBlock()
+			for var {class, index}, name of @sharedMethods {
+				var line = fragments.newLine()
+				var block = line.code(`\(class.getSealedName())._im_\(name) = function(that, ...args)`).newBlock()
 
 				block
 					.newControl()
@@ -1179,10 +1179,10 @@ class ClassDeclaration extends Statement {
 	} # }}}
 	type() => @type
 	updateConstructorScope() { # {{{
-		const superVariable = @constructorScope.getVariable('super')
+		var superVariable = @constructorScope.getVariable('super')
 
 		if @hybrid && !@es5 {
-			const thisVariable = @constructorScope.getVariable('this')
+			var thisVariable = @constructorScope.getVariable('this')
 
 			thisVariable.replaceCall = (data, arguments, node) => new CallHybridThisConstructorES6Substitude(data, arguments, @type, node)
 
@@ -1203,7 +1203,7 @@ class ClassDeclaration extends Statement {
 	} # }}}
 	updateMethodScope(method) { # {{{
 		if @extending {
-			const variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
+			var variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
 			if @extendsType.isSealed() {
 				variable.replaceCall = (data, arguments, node) => new CallSealedSuperMethodSubstitude(data, arguments, method, @type)

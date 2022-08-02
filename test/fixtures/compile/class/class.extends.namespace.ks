@@ -2,12 +2,12 @@ namespace T {
 	export class FooX {
 	}
 
-	const fox = new FooX()
+	var fox = new FooX()
 }
 
-const fox = new T.FooX()
+var fox = new T.FooX()
 
 class FooY extends T.FooX {
 }
 
-const foy = new FooY()
+var foy = new FooY()

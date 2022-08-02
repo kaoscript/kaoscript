@@ -10,7 +10,7 @@ func foobar(x: Foobar) {
 
 }
 
-const x = Foobar.get()
+var x = Foobar.get()
 
 foobar(x)
 

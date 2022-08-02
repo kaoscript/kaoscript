@@ -5,6 +5,6 @@ class Foobar {
 
 class Quzbaz extends Foobar {
 	foobar() {
-		const super = 42
+		var super = 42
 	}
 }

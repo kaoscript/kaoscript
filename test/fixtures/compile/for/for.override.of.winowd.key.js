@@ -8,7 +8,7 @@ module.exports = function() {
 		d.duncan = "murbella";
 		return d;
 	})();
-	for(let value in likes) {
+	for(const value in likes) {
 		console.log(value);
 	}
 };

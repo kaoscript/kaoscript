@@ -27,6 +27,6 @@ class ProxyGreetings extends AbstractGreetings {
 	greet(...args) => @greeting.greet(...args)
 }
 
-const greetings = new ProxyGreetings(new Greetings())
+var greetings = new ProxyGreetings(new Greetings())
 
 console.log(`\(greetings.greet('John'))`)

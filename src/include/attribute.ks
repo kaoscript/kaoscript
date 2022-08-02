@@ -13,10 +13,10 @@ flagged enum AttributeTarget {
 	Statement
 }
 
-const $attributes = {}
-const $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
+var $attributes = {}
+var $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
 
-const $rules = {
+var $rules = {
 	'no-undefined':					['noUndefined', true]
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]
@@ -38,8 +38,8 @@ class Attribute {
 	static {
 		conditional(data, node) { # {{{
 			if data.attributes?.length > 0 {
-				for const attr in data.attributes {
-					if const attribute = Attribute.get(attr.declaration, AttributeTarget::Conditional) {
+				for var attr in data.attributes {
+					if var attribute = Attribute.get(attr.declaration, AttributeTarget::Conditional) {
 						return attribute.evaluate(node)
 					}
 				}
@@ -48,7 +48,7 @@ class Attribute {
 			return true
 		} # }}}
 		configure(data, options!?, mode, fileName, force = false) { # {{{
-			const clone = !force && options != null && AttributeTarget::Global !~ mode
+			var clone = !force && options != null && AttributeTarget::Global !~ mode
 
 			if options == null {
 				options = {
@@ -57,23 +57,23 @@ class Attribute {
 			}
 
 			if data.attributes?.length > 0 {
-				const cloned = {}
+				var cloned = {}
 
 				if force {
 					options = Dictionary.clone(options)
 				}
 				else if clone {
-					const original = options
+					var original = options
 
 					options = {}
 
-					for const value, key of original {
+					for var value, key of original {
 						options[key] = value
 					}
 				}
 
-				for const attr in data.attributes {
-					if const attribute = Attribute.get(attr.declaration, mode) {
+				for var attr in data.attributes {
+					if var attribute = Attribute.get(attr.declaration, mode) {
 						if clone {
 							options = attribute.clone(options, cloned)
 						}
@@ -86,7 +86,7 @@ class Attribute {
 			return options
 		} # }}}
 		get(data, targets) { # {{{
-			let name = null
+			var dyn name = null
 
 			if data.kind == NodeKind::AttributeExpression {
 				name = data.name.name
@@ -103,7 +103,7 @@ class Attribute {
 			}
 		} # }}}
 		register(class: Class) { # {{{
-			let name = class.name.toLowerCase()
+			var mut name = class.name.toLowerCase()
 
 			if name.length > 9 && name.substr(-9) == 'attribute' {
 				name = name.substr(0, name.length - 9)
@@ -121,7 +121,7 @@ class ElseAttribute extends Attribute {
 	constructor(data)
 	clone(options, cloned) => options
 	evaluate(node) { # {{{
-		if const flag = node.getAttributeData(AttributeData::Conditional) {
+		if var flag = node.getAttributeData(AttributeData::Conditional) {
 			return !flag
 		}
 		else {
@@ -215,8 +215,9 @@ class IfAttribute extends Attribute {
 		a = a.split('.')
 		b = b.split('.')
 
-		let ai = parseInt(a[0])
-		let bi = parseInt(b[0])
+		var mut ai = parseInt(a[0])
+		var mut bi = parseInt(b[0])
+
 		if ai < bi {
 			return -1
 		}
@@ -243,7 +244,7 @@ class IfAttribute extends Attribute {
 			SyntaxException.throwTooMuchAttributesForIfAttribute()
 		}
 
-		const flag = this.evaluate(@data.arguments[0], node.target())
+		var flag = this.evaluate(@data.arguments[0], node.target())
 
 		node.setAttributeData(AttributeData::Conditional, flag)
 
@@ -267,7 +268,7 @@ class IfAttribute extends Attribute {
 					return false
 				}
 				'gt' => {
-					if const match = $semverRegex.exec(data.arguments[0].name) {
+					if var match = $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
 						}
@@ -279,7 +280,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'gte' => {
-					if const match = $semverRegex.exec(data.arguments[0].name) {
+					if var match = $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
 						}
@@ -294,7 +295,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'lt' => {
-					if const match = $semverRegex.exec(data.arguments[0].name) {
+					if var match = $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
 						}
@@ -306,7 +307,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'lte' => {
-					if const match = $semverRegex.exec(data.arguments[0].name) {
+					if var match = $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
 						}
@@ -328,7 +329,7 @@ class IfAttribute extends Attribute {
 					return true
 				}
 				'one' => {
-					let count = 0
+					var mut count = 0
 
 					for arg in data.arguments when this.evaluate(arg, target) {
 						++count
@@ -404,11 +405,11 @@ class RulesAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
-		for const argument in @data.arguments {
+		for var argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
-				const name = argument.name.toLowerCase()
+				var name = argument.name.toLowerCase()
 
-				if const data = $rules[name] {
+				if var data = $rules[name] {
 					options.rules[data[0]] = data[1]
 				}
 				else {
@@ -430,13 +431,13 @@ class RuntimeAttribute extends Attribute {
 	}
 	constructor(@data)
 	configure(options, fileName, lineNumber) { # {{{
-		for const arg in @data.arguments {
+		for var arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				if arg.name.name == 'package' {
 					options.runtime.helper.package = options.runtime.type.package = arg.value.value
 				}
 				else if arg.name.name == 'prefix' {
-					const prefix = arg.value.value
+					var prefix = arg.value.value
 
 					options.runtime.helper.alias = prefix + options.runtime.helper.alias
 					options.runtime.operator.alias = prefix + options.runtime.operator.alias
@@ -445,7 +446,7 @@ class RuntimeAttribute extends Attribute {
 			}
 			else if arg.kind == NodeKind::AttributeExpression {
 				if arg.name.name == 'helper' {
-					for let arg in arg.arguments {
+					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
 							switch arg.name.name {
 								'alias' => options.runtime.helper.alias = arg.value.value
@@ -456,7 +457,7 @@ class RuntimeAttribute extends Attribute {
 					}
 				}
 				else if arg.name.name == 'operator' {
-					for let arg in arg.arguments {
+					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
 							switch arg.name.name {
 								'alias' => options.runtime.operator.alias = arg.value.value
@@ -467,7 +468,7 @@ class RuntimeAttribute extends Attribute {
 					}
 				}
 				else if arg.name.name == 'type' {
-					for let arg in arg.arguments {
+					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
 							switch arg.name.name {
 								'alias' => options.runtime.type.alias = arg.value.value

@@ -1,5 +1,5 @@
 func foobar(values) {
-	let line
+	var dyn line
 
 	for {line, element} in values {
 	}

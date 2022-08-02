@@ -8,7 +8,7 @@ import '../export/export.filter.func.exported.sealed.ks'
 
 console.log(`\(qux('foobar'))`)
 
-const x = foobar()
+var x = foobar()
 
 console.log(`\(x.toString())`)
 

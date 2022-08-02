@@ -79,9 +79,9 @@ class ReturnStatement extends Statement {
 				@enumCasting = true
 			}
 			else if @type.isUnion() {
-				let cast = false
+				var mut cast = false
 
-				for const tt in @type.types() {
+				for var tt in @type.types() {
 					if tt.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
 						// do nothing
 					}
@@ -160,9 +160,9 @@ class ReturnStatement extends Statement {
 		}
 	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		const item = @value.toFragments(line, Mode::None)
+		var item = @value.toFragments(line, Mode::None)
 
 		item([this])
 
@@ -194,7 +194,7 @@ class ReturnStatement extends Statement {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
-				const line = fragments.newLine().code('return ')
+				var line = fragments.newLine().code('return ')
 
 				if @async {
 					line.code('__ks_cb(null, ')
@@ -221,7 +221,7 @@ class ReturnStatement extends Statement {
 					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 				}
 
-				const line = fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `)
+				var line = fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `)
 
 				@toCastingFragments(line, mode)
 

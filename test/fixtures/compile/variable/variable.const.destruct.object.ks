@@ -5,6 +5,6 @@ func foo() => {
 	y: 2
 }
 
-const {x, y} = foo()
+var {x, y} = foo()
 
 console.log(x, y)

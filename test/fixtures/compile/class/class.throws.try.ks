@@ -16,7 +16,7 @@ class Greetings {
 }
 
 try {
-	const hello = new Greetings('Hello world!')
+	var hello = new Greetings('Hello world!')
 
 	console.log(hello.greet('miss White'))
 }

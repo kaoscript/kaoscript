@@ -1,3 +1,3 @@
 import '../export/export.class.re.ks'
 
-const r = new ReShape('red')
+var r = new ReShape('red')

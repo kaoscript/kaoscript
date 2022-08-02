@@ -15,20 +15,20 @@ class ThisCallee extends Callee {
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
-		const types = []
-		for const method in methods {
+		var types = []
+		for var method in methods {
 			this.validate(method, node)
-			
+
 			types.push(method.getReturnType())
 		}
-		
+
 		@type = Type.union(@node.scope(), ...types)
 	} # }}}
 	override hashCode() { # {{{
 		return `this`
 	} # }}}
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for const method in @methods {
+		for var method in @methods {
 			if method.isInitializingInstanceVariable(name) {
 				return true
 			}
@@ -37,7 +37,7 @@ class ThisCallee extends Callee {
 		return false
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
-		const name = @node.scope().getVariable('this').getSecureName()
+		var name = @node.scope().getVariable('this').getSecureName()
 
 		if @flatten {
 			switch @scope {
@@ -63,7 +63,7 @@ class ThisCallee extends Callee {
 				ScopeKind::This => {
 					fragments.code(`\(name).\(@property)(`)
 
-					for const argument, index in node._arguments {
+					for var argument, index in node._arguments {
 						fragments.code($comma) if index != 0
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)

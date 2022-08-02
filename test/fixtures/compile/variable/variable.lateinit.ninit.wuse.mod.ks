@@ -1,3 +1,3 @@
-lateinit const x
+var late x
 
-let y = `\(x)`
+var dyn y = `\(x)`

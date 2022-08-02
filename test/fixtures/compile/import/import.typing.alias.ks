@@ -10,7 +10,7 @@ class WHITESPACE extends ChevrotainToken {
 	static GROUP	= ChevrotainLexer.SKIPPED
 }
 
-const tokens = [WHITESPACE]
+var tokens = [WHITESPACE]
 
 class MyParser extends ChevrotainParser {
 	constructor() {

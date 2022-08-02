@@ -14,6 +14,6 @@ func foobar(x: SuperClass) {
 	return 'super'
 }
 
-const x = new SuperClass()
+var x = new SuperClass()
 
 foobar(x)

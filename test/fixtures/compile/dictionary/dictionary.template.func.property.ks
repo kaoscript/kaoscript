@@ -1,6 +1,6 @@
-let x = 'y'
+var dyn x = 'y'
 
-let foo = {
+var dyn foo = {
 	`\(x)`: func() {
 		return 42
 	}

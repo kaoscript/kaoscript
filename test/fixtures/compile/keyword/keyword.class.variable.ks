@@ -1,3 +1,3 @@
 func foobar() {
-	let x = class
+	var dyn x = class
 }

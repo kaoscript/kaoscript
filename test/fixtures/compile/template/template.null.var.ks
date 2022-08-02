@@ -1,5 +1,5 @@
 extern console
 
-let x
+var dyn x
 
 console.log(`\(x)`)

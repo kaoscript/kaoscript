@@ -1,1 +1,1 @@
-let foo = 'qux'
+var dyn foo = 'qux'

@@ -1,5 +1,5 @@
 func foobar(values: Array) {
-	for const values in [value.values() for const value in values] {
+	for var values in [value.values() for var value in values] {
 
 	}
 }

@@ -7,7 +7,7 @@ func foobar(x: float, y: float) {
 
 foobar(1, 2)
 
-let x: int = 1
-let y: int = 1
+var dyn x: int = 1
+var dyn y: int = 1
 
 foobar(x, y)

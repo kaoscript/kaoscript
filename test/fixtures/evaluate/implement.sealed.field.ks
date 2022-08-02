@@ -13,7 +13,7 @@ impl Date {
 
 expect(new Date().culture()).to.equal('und')
 
-const d = new Date()
+var d = new Date()
 
 expect(d.culture('en')).to.equal(d)
 

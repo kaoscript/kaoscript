@@ -11,16 +11,16 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				TypeException.throwInvalidOperand(operand, Operator::And, this)
 			}
 
-			for const data, name of operand.inferWhenTrueTypes({}) {
+			for var data, name of operand.inferWhenTrueTypes({}) {
 				@scope.updateInferable(name, data, this)
 			}
 		}
 	} # }}}
 	inferTypes(inferables) { # {{{
-		const scope = this.statement().scope()
+		var scope = this.statement().scope()
 
-		for const operand, index in @operands {
-			for const data, name of operand.inferTypes({}) {
+		for var operand, index in @operands {
+			for var data, name of operand.inferTypes({}) {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
@@ -34,8 +34,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if const variable = scope.getVariable(name) {
-							const type = variable.getRealType()
+						if var variable = scope.getVariable(name) {
+							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
 								inferables[name] = data
@@ -62,8 +62,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	} # }}}
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
 	inferWhenTrueTypes(inferables) { # {{{
-		for const operand in @operands {
-			for const data, name of operand.inferWhenTrueTypes({}) {
+		for var operand in @operands {
+			for var data, name of operand.inferWhenTrueTypes({}) {
 				inferables[name] = data
 			}
 		}
@@ -71,9 +71,9 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		let nf = false
+		var mut nf = false
 
-		for const operand in @operands {
+		for var operand in @operands {
 			if nf {
 				fragments
 					.code($space)
@@ -103,7 +103,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 class BinaryOperatorAnd extends PolyadicOperatorAnd {
 	analyse() { # {{{
-		for const data in [@data.left, @data.right] {
+		for var data in [@data.left, @data.right] {
 			operand = $compile.expression(data, this)
 
 			operand.analyse()
@@ -115,10 +115,10 @@ class BinaryOperatorAnd extends PolyadicOperatorAnd {
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	prepare() { # {{{
-		const lastIndex = @operands.length - 1
-		const originals = {}
+		var lastIndex = @operands.length - 1
+		var originals = {}
 
-		for const operand, index in @operands {
+		for var operand, index in @operands {
 			operand.prepare()
 
 			if operand.type().isInoperative() {
@@ -130,7 +130,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 
 			if index < lastIndex {
-				for const data, name of operand.inferWhenFalseTypes({}) {
+				for var data, name of operand.inferWhenFalseTypes({}) {
 					if data.isVariable && !?originals[name] {
 						originals[name] = {
 							isVariable: true
@@ -143,15 +143,15 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 		}
 
-		for const data, name of originals {
+		for var data, name of originals {
 			@scope.updateInferable(name, data, this)
 		}
 	} # }}}
 	inferTypes(inferables) { # {{{
-		const scope = this.statement().scope()
+		var scope = this.statement().scope()
 
-		for const operand, index in @operands {
-			for const data, name of operand.inferTypes({}) {
+		for var operand, index in @operands {
+			for var data, name of operand.inferTypes({}) {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
@@ -165,8 +165,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if const variable = scope.getVariable(name) {
-							const type = variable.getRealType()
+						if var variable = scope.getVariable(name) {
+							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
 								inferables[name] = data
@@ -192,10 +192,10 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenFalseTypes(inferables) { # {{{
-		const scope = this.statement().scope()
+		var scope = this.statement().scope()
 
-		for const operand, index in @operands {
-			for const data, name of operand.inferWhenFalseTypes({}) {
+		for var operand, index in @operands {
+			for var data, name of operand.inferWhenFalseTypes({}) {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
@@ -209,8 +209,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if const variable = scope.getVariable(name) {
-							const type = variable.getRealType()
+						if var variable = scope.getVariable(name) {
+							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
 								inferables[name] = data
@@ -236,12 +236,12 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
-		const scope = this.statement().scope()
+		var scope = this.statement().scope()
 
-		const whenTrue = {}
+		var whenTrue = {}
 
-		for const operand, index in @operands {
-			for const data, name of operand.inferTypes({}) {
+		for var operand, index in @operands {
+			for var data, name of operand.inferTypes({}) {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
@@ -254,8 +254,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 					}
 				}
 				else if index != 0 && data.isVariable {
-					if const variable = scope.getVariable(name) {
-						const type = variable.getRealType()
+					if var variable = scope.getVariable(name) {
+						var type = variable.getRealType()
 
 						if data.type.equals(type) || data.type.isMorePreciseThan(type) {
 							inferables[name] = data
@@ -277,19 +277,19 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 
 			if index == 0 {
-				for const data, name of operand.inferWhenTrueTypes({}) when data.isVariable {
+				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable {
 					whenTrue[name] = [data.type]
 				}
 			}
 			else {
-				for const data, name of operand.inferWhenTrueTypes({}) when data.isVariable && whenTrue[name]? {
+				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable && whenTrue[name]? {
 					whenTrue[name].push(data.type)
 				}
 			}
 		}
 
-		for const types, name of whenTrue when types.length != 1 {
-			if const variable = scope.getVariable(name) {
+		for var types, name of whenTrue when types.length != 1 {
+			if var variable = scope.getVariable(name) {
 				inferables[name] = {
 					isVariable: true
 					type: Type.union(@scope, ...types)
@@ -300,9 +300,9 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		let nf = false
+		var mut nf = false
 
-		for const operand in @operands {
+		for var operand in @operands {
 			if nf {
 				fragments
 					.code($space)
@@ -332,7 +332,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 class BinaryOperatorOr extends PolyadicOperatorOr {
 	analyse() { # {{{
-		for const data in [@data.left, @data.right] {
+		for var data in [@data.left, @data.right] {
 			operand = $compile.expression(data, this)
 
 			operand.analyse()
@@ -344,12 +344,12 @@ class BinaryOperatorOr extends PolyadicOperatorOr {
 
 class PolyadicOperatorImply extends PolyadicOperatorOr {
 	toFragments(fragments, mode) { # {{{
-		const l = @operands.length - 2
+		var l = @operands.length - 2
 		fragments.code('!('.repeat(l))
 
 		fragments.code('!').wrapBoolean(@operands[0])
 
-		for const operand in @operands from 1 til -1 {
+		for var operand in @operands from 1 til -1 {
 			fragments.code(' || ').wrapBoolean(operand).code(')')
 		}
 
@@ -370,12 +370,12 @@ class BinaryOperatorImply extends BinaryOperatorOr {
 class PolyadicOperatorXor extends PolyadicOperatorAnd {
 	inferWhenFalseTypes(inferables) => this.inferWhenTrueTypes(inferables)
 	toFragments(fragments, mode) { # {{{
-		const l = @operands.length - 2
+		var l = @operands.length - 2
 		fragments.code('('.repeat(l))
 
 		fragments.wrapBoolean(@operands[0])
 
-		for const operand in @operands from 1 til -1 {
+		for var operand in @operands from 1 til -1 {
 			fragments.code(' !== ').wrapBoolean(operand).code(')')
 		}
 

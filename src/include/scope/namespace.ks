@@ -10,7 +10,7 @@ class NamespaceScope extends BlockScope {
 class NamespaceTypeScope extends BlockScope {
 	addVariable(name: String, variable: Variable) { # {{{
 		if $keywords[name] == true {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true

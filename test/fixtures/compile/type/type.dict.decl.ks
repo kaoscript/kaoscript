@@ -1,5 +1,5 @@
 func foobar(x: String, y: Number, z: Boolean) {
-	const xyz = {
+	var xyz = {
 		x
 		y
 		z

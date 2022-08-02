@@ -4,10 +4,10 @@ class ExportDeclaration extends Statement {
 		_statements		= []
 	}
 	override initiate() { # {{{
-		let statement
+		var mut statement
 
 		if @parent.includePath() == null {
-			for const declaration in @data.declarations {
+			for var declaration in @data.declarations {
 				switch declaration.kind {
 					NodeKind::ExportDeclarationSpecifier => {
 						statement = $compile.statement(declaration.declaration, this)
@@ -37,7 +37,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 		else {
-			for const declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
+			for var declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
 				@statements.push(statement = $compile.statement(declaration.declaration, this))
 
 				statement.initiate()
@@ -45,33 +45,33 @@ class ExportDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.analyse()
 		}
 	} # }}}
 	enhance() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.enhance()
 		}
 	} # }}}
 	prepare() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.prepare()
 		}
 	} # }}}
 	translate() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.translate()
 		}
 	} # }}}
 	export(recipient, enhancement: Boolean = false) { # {{{
 		if enhancement {
-			for const declaration in @declarations when declaration.isEnhancementExport() {
+			for var declaration in @declarations when declaration.isEnhancementExport() {
 				declaration.export(recipient)
 			}
 		}
 		else {
-			for const declaration in @declarations when !declaration.isEnhancementExport() {
+			for var declaration in @declarations when !declaration.isEnhancementExport() {
 				declaration.export(recipient)
 			}
 		}
@@ -103,9 +103,9 @@ class ExportExclusionSpecifier extends AbstractNode {
 	prepare()
 	translate()
 	export(recipient) { # {{{
-		const exclusions = [exclusion.name for exclusion in @data.exclusions]
+		var exclusions = [exclusion.name for exclusion in @data.exclusions]
 
-		for const variable in @parent.parent().scope().listDefinedVariables() when exclusions.indexOf(variable.name()) == -1 {
+		for var variable in @parent.parent().scope().listDefinedVariables() when exclusions.indexOf(variable.name()) == -1 {
 			recipient.export(variable.name(), variable)
 		}
 	} # }}}
@@ -123,7 +123,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		@expression.analyse()
 
 		if @expression.isMacro() {
-			for const macro in @scope.listMacros(@expression.name()) {
+			for var macro in @scope.listMacros(@expression.name()) {
 				@parent.registerMacro(@data.exported.name, macro)
 			}
 		}
@@ -133,19 +133,19 @@ class ExportNamedSpecifier extends AbstractNode {
 		@expression.prepare()
 
 		if @expression.isMacro() {
-			for const macro in @scope.listMacros(@expression.name()) {
+			for var macro in @scope.listMacros(@expression.name()) {
 				macro.export(recipient, @data.exported.name)
 			}
 		}
 		else {
 			recipient.export(@data.exported.name, @expression)
 
-			const type = @expression.type()
+			var type = @expression.type()
 
 			if type.isClass() || type.isNamespace() {
-				const regex = new RegExp(`^\(@expression.name())`)
+				var regex = new RegExp(`^\(@expression.name())`)
 
-				for const macro in @scope.listCompositeMacros(@expression.name()) {
+				for var macro in @scope.listCompositeMacros(@expression.name()) {
 					macro.export(recipient, macro.name().replace(regex, @data.exported.name))
 				}
 			}

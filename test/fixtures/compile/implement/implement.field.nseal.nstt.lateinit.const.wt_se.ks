@@ -11,13 +11,13 @@ class Shape {
 
 impl Shape {
 	private {
-		lateinit const @name: String
+		final late @name: String
 	}
 	constructor(@color = 'black', @name = 'circle')
 	name(): @name
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 
-const shape = Shape.makeBlue()
+var shape = Shape.makeBlue()
 
 console.log(shape.toString())

@@ -1,8 +1,8 @@
 extern console
 
-let foo = {
+var dyn foo = {
 	foo() {
-		let i = 0
+		var dyn i = 0
 	}
 }
 

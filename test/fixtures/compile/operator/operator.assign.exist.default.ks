@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let foo = 'otto'
+var dyn foo = 'otto'
 
 bar ?= foo
 

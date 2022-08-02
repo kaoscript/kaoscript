@@ -1,5 +1,5 @@
 class UntilStatement extends Statement {
-	private lateinit {
+	private late {
 		_bindingScope: Scope
 		_body
 		_bodyScope: Scope
@@ -29,7 +29,7 @@ class UntilStatement extends Statement {
 
 		@body.prepare()
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}

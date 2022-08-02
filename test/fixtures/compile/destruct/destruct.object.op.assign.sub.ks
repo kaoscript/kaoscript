@@ -2,6 +2,6 @@ func foobar() {
 	return null
 }
 
-let x = 0
+var dyn x = 0
 
 {x} -= foobar()

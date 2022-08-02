@@ -8,7 +8,7 @@ class Foobar {
 	x(x: Number) {
 		@x = x
 
-		const y = @x / 2
+		var y = @x / 2
 	}
 }
 

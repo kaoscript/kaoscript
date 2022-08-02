@@ -2,8 +2,8 @@ extern console
 
 import '../export/export.filter.class.nullable.ks'
 
-const q = new Qux()
+var q = new Qux()
 
-if const foo = q.foo() {
+if var foo = q.foo() {
 	console.log(`\(foo.toString())`)
 }

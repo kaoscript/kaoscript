@@ -1,3 +1,3 @@
 extern a
 
-let foo = ?(b = a?.b).c
+var dyn foo = ?(b = a?.b).c

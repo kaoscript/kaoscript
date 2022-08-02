@@ -8,7 +8,7 @@ class Car {
 	}
 }
 
-const factory = new CarFactory()
+var factory = new CarFactory()
 
 console.log(`\(factory.makeCar().getType())`)
 console.log(`\((new Car()).getType())`)

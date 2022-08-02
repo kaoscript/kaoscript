@@ -1,5 +1,5 @@
 class Foobar {
-	lateinit const PI: Number
+	final late PI: Number
 	constructor() {
 		this.PI = 42
 		this.PI = 42

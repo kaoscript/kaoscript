@@ -10,7 +10,7 @@ impl String {
 	lower() => this.toLowerCase()
 }
 
-let foo = 'HELLO!'
+var dyn foo = 'HELLO!'
 
 console.log(foo)
 console.log((foo as string).lower())

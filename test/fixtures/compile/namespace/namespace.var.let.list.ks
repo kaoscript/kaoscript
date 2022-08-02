@@ -1,3 +1,3 @@
 namespace coord {
-	export let x, y, z
+	export var dyn x, y, z
 }

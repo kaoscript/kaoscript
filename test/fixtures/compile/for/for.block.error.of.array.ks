@@ -1,6 +1,6 @@
 extern console
 
-const foo = []
+var foo = []
 
 for value of foo {
 	console.log(value)

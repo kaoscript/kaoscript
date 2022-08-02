@@ -1,3 +1,3 @@
 func foobar(functions: Array<(x: String): String>): Array<String> {
-	return [fn('foobar') for const fn in functions]
+	return [fn('foobar') for var fn in functions]
 }

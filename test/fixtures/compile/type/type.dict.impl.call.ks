@@ -10,7 +10,7 @@ type T = {
 	PI: Number
 }
 
-let Math: T = {
+var dyn Math: T = {
 	PI: 3.14
 }
 

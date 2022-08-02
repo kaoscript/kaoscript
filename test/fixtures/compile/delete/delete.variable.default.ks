@@ -1,3 +1,3 @@
-let foo = 'bar'
+var dyn foo = 'bar'
 
 delete foo

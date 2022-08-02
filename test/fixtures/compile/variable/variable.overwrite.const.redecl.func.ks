@@ -1,10 +1,10 @@
 extern console, bar
 
-const x = 42
+var x = 42
 
 func foo() {
-	let x
-	
+	var dyn x
+
 	if x ?= bar() {
 		console.log(x)
 	}

@@ -7,8 +7,8 @@ disclose RegExp {
 func foobar(x: Array<Number>?) {
 }
 
-const regex = /foo/
+var regex = /foo/
 
-const match = regex.exec('foobar')
+var match = regex.exec('foobar')
 
 foobar(match)

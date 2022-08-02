@@ -1,5 +1,5 @@
 class Coord {
-	public lateinit {
+	public late {
 		x: Number
 		y: Number
 		elevation: {

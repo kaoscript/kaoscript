@@ -1,3 +1,3 @@
-let a = 3
-let b = 7
-let c = a++ + ++b
+var dyn a = 3
+var dyn b = 7
+var dyn c = a++ + ++b

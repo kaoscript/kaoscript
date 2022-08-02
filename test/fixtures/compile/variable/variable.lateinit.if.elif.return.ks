@@ -1,5 +1,5 @@
 func foobar(x, y): Number {
-	lateinit const z
+	var late z
 
 	if x == 0 {
 		z = 1

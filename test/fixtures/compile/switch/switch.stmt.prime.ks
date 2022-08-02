@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let number = 13
+var dyn number = 13
 
 switch number {
 	1				=> console.log("One!")

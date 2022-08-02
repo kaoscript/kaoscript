@@ -4,7 +4,7 @@ extern systemic class Dictionary {
 impl Dictionary {
 	static {
 		map(dict: Dictionary, iterator: Function) {
-			let results = []
+			var dyn results = []
 
 			for item, index of dict {
 				results.push(iterator(item, index))
@@ -14,7 +14,7 @@ impl Dictionary {
 		}
 
 		map(dict: Dictionary, iterator: Function, condition: Function) {
-			let results = []
+			var dyn results = []
 
 			for item, index of dict when condition(item, index) {
 				results.push(iterator(item, index))

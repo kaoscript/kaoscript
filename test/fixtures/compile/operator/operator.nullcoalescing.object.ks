@@ -1,5 +1,5 @@
 extern x, y, z
 
-let foobar = x.y ?? {
+var dyn foobar = x.y ?? {
 	x: 42
 }

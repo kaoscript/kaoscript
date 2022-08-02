@@ -1,5 +1,5 @@
 class EnumDeclaration extends Statement {
-	private lateinit {
+	private late {
 		@enum: EnumType
 		@instanceMethods: Dictionary	= {}
 		@name: String
@@ -11,14 +11,14 @@ class EnumDeclaration extends Statement {
 	initiate() { # {{{
 		@name = @data.name.name
 
-		const type = Type.fromAST(@data.type, this)
+		var type = Type.fromAST(@data.type, this)
 
 		if type.isString() {
 			@enum = new EnumType(@scope, EnumTypeKind::String)
 		}
 		else if @data.modifiers.length != 0 {
-			let nf = true
-			for const modifier in @data.modifiers while nf {
+			var mut nf = true
+			for var modifier in @data.modifiers while nf {
 				if modifier.kind == ModifierKind::Flagged {
 					@enum = new EnumType(@scope, EnumTypeKind::Flags)
 
@@ -39,8 +39,8 @@ class EnumDeclaration extends Statement {
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	analyse() { # {{{
-		let declaration
-		for const data in @data.members {
+		var mut declaration
+		for var data in @data.members {
 			switch data.kind {
 				NodeKind::CommentBlock => {
 				}
@@ -66,16 +66,16 @@ class EnumDeclaration extends Statement {
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
-		for const variable, name of @variables {
+		for var variable, name of @variables {
 			variable.prepare()
 
 			@enum.addVariable(name)
 		}
 
-		for const methods, name of @instanceMethods {
-			let async: Boolean
+		for var methods, name of @instanceMethods {
+			var mut async: Boolean
 
-			for const method, index in methods {
+			for var method, index in methods {
 				method.prepare()
 
 				if index == 0 {
@@ -93,10 +93,10 @@ class EnumDeclaration extends Statement {
 			}
 		}
 
-		for const methods, name of @staticMethods {
-			let async: Boolean
+		for var methods, name of @staticMethods {
+			var mut async: Boolean
 
-			for const method, index in methods {
+			for var method, index in methods {
 				method.prepare()
 
 				if index == 0 {
@@ -115,18 +115,18 @@ class EnumDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for const variable of @variables {
+		for var variable of @variables {
 			variable.translate()
 		}
 
-		for const methods of @instanceMethods {
-			for const method in methods {
+		for var methods of @instanceMethods {
+			for var method in methods {
 				method.translate()
 			}
 		}
 
-		for const methods of @staticMethods {
-			for const method in methods {
+		for var methods of @staticMethods {
+			for var method in methods {
 				method.translate()
 			}
 		}
@@ -136,7 +136,7 @@ class EnumDeclaration extends Statement {
 	} # }}}
 	name() => @name
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
+		var line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
 		if @enum.isString() {
 			line.code('String, ')
@@ -148,9 +148,9 @@ class EnumDeclaration extends Statement {
 			line.code('Number, ')
 		}
 
-		const object = line.newObject()
+		var object = line.newObject()
 
-		for const variable of @variables when !variable.isComposite() {
+		for var variable of @variables when !variable.isComposite() {
 			variable.toFragments(object)
 		}
 
@@ -158,23 +158,23 @@ class EnumDeclaration extends Statement {
 
 		line.code(')').done()
 
-		for const variable of @variables when variable.isComposite() {
+		for var variable of @variables when variable.isComposite() {
 			variable.toFragments(fragments)
 		}
 
-		for const methods, name of @staticMethods {
-			const types = []
+		for var methods, name of @staticMethods {
+			var types = []
 
-			for const method in methods {
+			for var method in methods {
 				method.toFragments(fragments, Mode::None)
 
 				types.push(method.type())
 			}
 
-			const assessment = Router.assess(types, name, this)
+			var assessment = Router.assess(types, name, this)
 
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(@name).\(name) = function()`).step()
 
@@ -194,19 +194,19 @@ class EnumDeclaration extends Statement {
 			line.done()
 		}
 
-		for const methods, name of @instanceMethods {
-			const types = []
+		for var methods, name of @instanceMethods {
+			var types = []
 
-			for const method in methods {
+			for var method in methods {
 				method.toFragments(fragments, Mode::None)
 
 				types.push(method.type())
 			}
 
-			const assessment = Router.assess(types, name, this)
+			var assessment = Router.assess(types, name, this)
 
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(@name).__ks_func_\(name) = function(that, ...args)`).step()
 
@@ -230,7 +230,7 @@ class EnumDeclaration extends Statement {
 }
 
 class EnumVariableDeclaration extends AbstractNode {
-	private lateinit {
+	private late {
 		@operands: Array
 		@value: String
 		@type: Type
@@ -247,8 +247,8 @@ class EnumVariableDeclaration extends AbstractNode {
 		parent._variables[@name] = this
 	} # }}}
 	analyse() { # {{{
-		const enum = @parent.type().type()
-		const value = @data.value
+		var enum = @parent.type().type()
+		var value = @data.value
 
 		switch enum.kind() {
 			EnumTypeKind::Flags => {
@@ -326,10 +326,10 @@ class EnumVariableDeclaration extends AbstractNode {
 	name() => @name
 	toFragments(fragments) { # {{{
 		if @composite {
-			const name = @parent.name()
-			const line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
+			var name = @parent.name()
+			var line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
 
-			for const operand, i in @operands {
+			for var operand, i in @operands {
 				line.code(' | ') if i > 0
 
 				line.code(name, '.', operand.name)
@@ -345,7 +345,7 @@ class EnumVariableDeclaration extends AbstractNode {
 }
 
 class EnumMethodDeclaration extends Statement {
-	private lateinit {
+	private late {
 		@block: FunctionBlock
 		@internalName: String
 		@type: Type
@@ -365,7 +365,7 @@ class EnumMethodDeclaration extends Statement {
 
 		@name = data.name.name
 
-		for const modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Static {
 				@instance = false
 			}
@@ -389,8 +389,8 @@ class EnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for const data in @data.parameters {
-			const parameter = new Parameter(data, this)
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
 
@@ -400,13 +400,13 @@ class EnumMethodDeclaration extends Statement {
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	prepare() { # {{{
-		const enumName = @parent.name()
-		const enumRef = @scope.reference(enumName)
+		var enumName = @parent.name()
+		var enumRef = @scope.reference(enumName)
 
-		for const variable, name of @parent._variables {
-			const var = @scope.define(name, true, enumRef, true, @parent)
+		for var _, name of @parent._variables {
+			var variable = @scope.define(name, true, enumRef, true, @parent)
 
-			var.renameAs(`\(enumName).\(name)`)
+			variable.renameAs(`\(enumName).\(name)`)
 		}
 
 		if @instance {
@@ -414,11 +414,11 @@ class EnumMethodDeclaration extends Statement {
 			@scope.rename('this', 'that')
 		}
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		const arguments = [parameter.type() for const parameter in @parameters]
+		var arguments = [parameter.type() for var parameter in @parameters]
 
 		@type = new EnumMethodType(arguments, @data, this)
 
@@ -438,11 +438,11 @@ class EnumMethodDeclaration extends Statement {
 			@internalName = `__ks_sttc_\(@name)_\(@type.index())`
 		}
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
-		for const indigent in @indigentValues {
+		for var indigent in @indigentValues {
 			indigent.value.prepare()
 			indigent.value.translate()
 		}
@@ -462,7 +462,7 @@ class EnumMethodDeclaration extends Statement {
 		@exit = @block.isExit()
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
-		const name = `__ks_default_\(@parent.type().type().incDefaultSequence())`
+		var name = `__ks_default_\(@parent.type().type().incDefaultSequence())`
 
 		@indigentValues.push({
 			name
@@ -484,9 +484,9 @@ class EnumMethodDeclaration extends Statement {
 	isOverridableFunction() => true
 	parameters() => @parameters
 	toIndigentFragments(fragments) { # {{{
-		for const {name, value, parameters} in @indigentValues {
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+		for var {name, value, parameters} in @indigentValues {
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(@parent.name()).\(name) = function(\(parameters.join(', ')))`).step()
 
@@ -497,8 +497,8 @@ class EnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine()
-		const ctrl = line.newControl(null, false, false)
+		var line = fragments.newLine()
+		var ctrl = line.newControl(null, false, false)
 
 		ctrl.code(`\(@parent.name()).\(@internalName) = function(`)
 
@@ -508,7 +508,7 @@ class EnumMethodDeclaration extends Statement {
 
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, node => node.code(')').step())
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(ctrl)
 		}
 

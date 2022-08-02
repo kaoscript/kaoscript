@@ -6,7 +6,7 @@ impl JSON {
 	foobar(...args)
 }
 
-let coord = {
+var dyn coord = {
 	x: 1
 	y: 1
 }

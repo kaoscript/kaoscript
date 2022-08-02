@@ -6,6 +6,6 @@ impl Date {
 	}
 }
 
-const d = new Date()
+var d = new Date()
 
 export Date

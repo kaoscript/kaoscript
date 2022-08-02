@@ -4,7 +4,7 @@ class InlineBlockScope extends BlockScope {
 		_upatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		if const name = this.acquireUnusedTempName() {
+		if var name = this.acquireUnusedTempName() {
 			return name
 		}
 
@@ -12,7 +12,7 @@ class InlineBlockScope extends BlockScope {
 			@tempIndex = @parent.getTempIndex()
 		}
 
-		const name = `__ks_\(++@tempIndex)`
+		var name = `__ks_\(++@tempIndex)`
 
 		@tempNames[name] = false
 
@@ -23,13 +23,13 @@ class InlineBlockScope extends BlockScope {
 		return name
 	} # }}}
 	acquireUnusedTempName(): String? { # {{{
-		for const _, name of @tempNames when @tempNames[name] {
+		for var _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name
 		}
 
-		if const name = this.parent().acquireUnusedTempName() {
+		if var name = this.parent().acquireUnusedTempName() {
 			@tempParentNames[name] = true
 
 			return name
@@ -39,7 +39,7 @@ class InlineBlockScope extends BlockScope {
 	} # }}}
 	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && this.hasBleedingVariable(name)) {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -54,8 +54,8 @@ class InlineBlockScope extends BlockScope {
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{
-		let index = this.getRenamedIndex(name)
-		let newName = '__ks_' + name + '_' + (++index)
+		var mut index = this.getRenamedIndex(name)
+		var mut newName = '__ks_' + name + '_' + (++index)
 
 		while this.hasRenamedVariable(newName) {
 			newName = '__ks_' + name + '_' + (++index)
@@ -75,7 +75,7 @@ class InlineBlockScope extends BlockScope {
 	} # }}}
 	hasBleedingVariable(name: String) => super(name) || @parent.hasBleedingVariable(name)
 	hasRenamedVariable(name: String): Boolean { # {{{
-		let parent = this
+		var mut parent = this
 		do {
 			if parent.hasDeclaredVariable(name) {
 				return true
@@ -102,8 +102,8 @@ class InlineBlockScope extends BlockScope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		let parent = @parent
-		let nf = !parent.hasDeclaredVariable(name)
+		var mut parent = @parent
+		var mut nf = !parent.hasDeclaredVariable(name)
 
 		while nf && parent.isInline() {
 			parent = parent.parent()
@@ -115,12 +115,12 @@ class InlineBlockScope extends BlockScope {
 			@renamedIndexes[name] = parent.getRenamedIndex(name)
 		}
 
-		const newName = this.declareVariable(name, this)
+		var newName = this.declareVariable(name, this)
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
 
-		const variable = this.getVariable(name)
+		var variable = this.getVariable(name)
 
 		variable.renameAs(newName)
 
@@ -129,19 +129,19 @@ class InlineBlockScope extends BlockScope {
 	renameNext(name, line) { # {{{
 		return if @renamedVariables[name] is String
 
-		const newName = this.declareVariable(name, this)
+		var newName = this.declareVariable(name, this)
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
 
-		const variables: Array = @variables[name]
+		var variables: Array = @variables[name]
 
-		let i = 0
+		var mut i = 0
 		while i < variables.length && variables[i] < line {
 			i += 2
 		}
 
-		const variable: Variable = variables[i + 1]
+		var variable: Variable = variables[i + 1]
 
 		variable.renameAs(newName)
 	} # }}}
@@ -158,7 +158,7 @@ class InlineBlockScope extends BlockScope {
 		return variable
 	} # }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		const variable = super.replaceVariable(name, type, downcast, absolute, node)
+		var variable = super.replaceVariable(name, type, downcast, absolute, node)
 
 		if !@declarations[name] {
 			@upatedInferables[name] = {
@@ -174,7 +174,7 @@ class InlineBlockScope extends BlockScope {
 class LaxInlineBlockScope extends InlineBlockScope {
 	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || this.hasRenamedVariable(name) {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Variable {
 				@declarations[newName] = true

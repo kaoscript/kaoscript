@@ -6,7 +6,7 @@ impl String {
 	toInt(base = 10): Number => parseInt(this, base)
 }
 
-let d = 4
-let u = 2
+var dyn d = 4
+var dyn u = 2
 
 console.log(`\(d)\(u)`.toInt())

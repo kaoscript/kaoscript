@@ -13,7 +13,7 @@ enum ParameterWrongDoing {
 }
 
 class Parameter extends AbstractNode {
-	private lateinit {
+	private late {
 		_anonymous: Boolean					= false
 		_arity								= null
 		_comprehensive: Boolean				= true
@@ -35,10 +35,10 @@ class Parameter extends AbstractNode {
 		}
 	}
 	static getUntilDifferentTypeIndex(parameters, index) { # {{{
-		const activeType = parameters[index].type().type().setNullable(false)
+		var activeType = parameters[index].type().type().setNullable(false)
 
-		for const parameter, i in parameters from index + 1 {
-			const type = parameter.type()
+		for var parameter, i in parameters from index + 1 {
+			var type = parameter.type()
 
 			if type.min() == 0 {
 				if !activeType.equals(type.type().setNullable(false)) {
@@ -60,20 +60,21 @@ class Parameter extends AbstractNode {
 		return Parameter.toKSFragments(node, fragments, mode, fn)
 	} # }}}
 	static toKSFragments(node, fragments, mode: ParameterMode, fn) { # {{{
-		const parameters = node.parameters()
-		const signature = node.type()
+		var parameters = node.parameters()
+		var signature = node.type()
 
-		const name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
+		var name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
 
-		let restIndex = -1
-		let minBefore = 0
-		let maxBefore = 0
-		let minRest = 0
-		let minAfter = 0
-		let maxAfter = 0
+		// TODO move to `var mut`
+		var dyn restIndex = -1
+		var dyn minBefore = 0
+		var dyn maxBefore = 0
+		var dyn minRest = 0
+		var dyn minAfter = 0
+		var dyn maxAfter = 0
 
-		for const parameter, i in parameters {
-			const type = parameter.type()
+		for var parameter, i in parameters {
+			var type = parameter.type()
 
 			if restIndex != -1 {
 				minAfter += type.min()
@@ -100,7 +101,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		const context = {
+		var context = {
 			name
 			async: signature.isAsync()
 			required: minBefore
@@ -113,8 +114,8 @@ class Parameter extends AbstractNode {
 			increment: true
 		}
 
-		let lastHeaderParameterIndex = 0
-		let asyncHeaderParameter = false
+		var mut lastHeaderParameterIndex = 0
+		var mut asyncHeaderParameter = false
 
 		if signature.max() > 0 {
 			if mode == ParameterMode::ArrowFunction {
@@ -126,9 +127,9 @@ class Parameter extends AbstractNode {
 		}
 
 		if mode == ParameterMode::Default | ParameterMode::HelperConstructor {
-			const offset = node.getParameterOffset()
+			var offset = node.getParameterOffset()
 
-			for const parameter, i in parameters {
+			for var parameter, i in parameters {
 				fragments.code($comma) if i + offset > 0
 
 				parameter.toParameterFragments(fragments)
@@ -146,7 +147,7 @@ class Parameter extends AbstractNode {
 		fragments = fn(fragments)
 
 		if mode != ParameterMode::HelperConstructor {
-			for const parameter in parameters til lastHeaderParameterIndex {
+			for var parameter in parameters til lastHeaderParameterIndex {
 				parameter.toValidationFragments(fragments)
 			}
 		}
@@ -158,12 +159,12 @@ class Parameter extends AbstractNode {
 		return fragments
 	} # }}}
 	static toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { # {{{
-		const offset = node.getParameterOffset()
+		var offset = node.getParameterOffset()
 
-		let til = -1
+		var mut til = -1
 
-		for const parameter, i in parameters {
-			const type = parameter.type()
+		for var parameter, i in parameters {
+			var type = parameter.type()
 
 			if type.max() == Infinity {
 				fragments.code($comma) if i + offset > 0
@@ -222,7 +223,7 @@ class Parameter extends AbstractNode {
 								.done()
 						}
 						else {
-							let ctrl = fragments
+							var mut ctrl = fragments
 								.newControl()
 								.code(`if(arguments.length < \(signature.min() + 1))`)
 								.step()
@@ -252,7 +253,7 @@ class Parameter extends AbstractNode {
 					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
 
 					if node.isAssertingParameter() {
-						let ctrl = fragments
+						var mut ctrl = fragments
 							.newControl()
 							.code(`if(arguments.length < \(signature.min() + 1))`)
 							.step()
@@ -292,7 +293,7 @@ class Parameter extends AbstractNode {
 	static toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
 		parameter = parameters[restIndex]
 
-		const context = {
+		var context = {
 			name
 			any: parameter.type().isAny()
 			increment: false
@@ -301,12 +302,12 @@ class Parameter extends AbstractNode {
 			length: parameters.length
 		}
 
-		for const parameter, i in parameters from restIndex + 1 {
+		for var parameter, i in parameters from restIndex + 1 {
 			parameter.toAfterRestFragments(fragments, context, i, wrongdoer)
 		}
 	} # }}}
 	static toRestParameterFragments(fragments, node, name, signature, parameters, declared, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer) { # {{{
-		const parameter = parameters[restIndex]
+		var parameter = parameters[restIndex]
 
 		if parameter.type().isAny() {
 			if minAfter > 0 {
@@ -399,7 +400,7 @@ class Parameter extends AbstractNode {
 			}
 
 			if minAfter > 0 {
-				const line = fragments.newLine()
+				var line = fragments.newLine()
 
 				if !context.temp {
 					line.code($runtime.scope(node))
@@ -417,7 +418,7 @@ class Parameter extends AbstractNode {
 			}
 
 			if parameter.hasDefaultValue() && !parameter.type().isNullable() {
-				const ctrl = fragments.newControl()
+				var ctrl = fragments.newControl()
 
 				if minAfter > 0 {
 					ctrl.code('if(__ks__ > ++__ks_i)').step()
@@ -426,7 +427,7 @@ class Parameter extends AbstractNode {
 					ctrl.code('if(arguments.length > ++__ks_i)').step()
 				}
 
-				const ctrl2 = ctrl.newControl()
+				var ctrl2 = ctrl.newControl()
 
 				ctrl2.code(`if(arguments[__ks_i] === void 0 || arguments[__ks_i] === null)`).step()
 
@@ -435,7 +436,7 @@ class Parameter extends AbstractNode {
 				ctrl.done()
 			}
 
-			const ctrl = fragments.newControl()
+			var ctrl = fragments.newControl()
 
 			if minAfter > 0 {
 				ctrl.code('while(__ks__ > ++__ks_i)')
@@ -446,9 +447,9 @@ class Parameter extends AbstractNode {
 
 			ctrl.step()
 
-			const ctrl2 = ctrl.newControl()
+			var ctrl2 = ctrl.newControl()
 
-			const literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
+			var literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
 
 			if parameter.type().isNullable() {
 				ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
@@ -492,7 +493,7 @@ class Parameter extends AbstractNode {
 			ctrl.done()
 
 			if parameter.hasDefaultValue() {
-				const ctrl = fragments
+				var ctrl = fragments
 					.newControl()
 					.code('if(')
 					.compile(parameter)
@@ -509,9 +510,9 @@ class Parameter extends AbstractNode {
 				ctrl.done()
 			}
 
-			const min = parameter.type().min()
+			var min = parameter.type().min()
 			if min > 0 {
-				const ctrl = fragments
+				var ctrl = fragments
 					.newControl()
 					.code(`if(`)
 					.compile(parameter)
@@ -541,12 +542,12 @@ class Parameter extends AbstractNode {
 	} # }}}
 	static toBeforeRestParameterFragments(fragments, name, signature, parameters, nextIndex, restIndex, context, wrongdoer) { # {{{
 		if restIndex == -1 {
-			for const parameter, i in parameters from nextIndex {
+			for var parameter, i in parameters from nextIndex {
 				parameter.toBeforeRestFragments(fragments, context, i, false, wrongdoer)
 			}
 		}
 		else {
-			for const parameter, i in parameters from nextIndex til restIndex {
+			for var parameter, i in parameters from nextIndex til restIndex {
 				parameter.toBeforeRestFragments(fragments, context, i, true, wrongdoer)
 			}
 		}
@@ -562,7 +563,7 @@ class Parameter extends AbstractNode {
 			@name.setAssignment(AssignmentType::Parameter)
 			@name.analyse()
 
-			for const name in @name.listAssignments([]) {
+			for var name in @name.listAssignments([]) {
 				if @scope.hasDefinedVariable(name) {
 					SyntaxException.throwAlreadyDeclared(name, this)
 				}
@@ -574,14 +575,14 @@ class Parameter extends AbstractNode {
 	prepare() { # {{{
 		@name.prepare()
 
-		let type: Type? = @name.type()
+		var mut type: Type? = @name.type()
 
 		if !type?.isExplicit() {
 			type = null
 		}
 
 		if @data.type? {
-			const declaredType = Type.fromAST(@data.type, this)
+			var declaredType = Type.fromAST(@data.type, this)
 
 			if !?type || (type.isObject() && declaredType.isDictionary()) || declaredType.isMorePreciseThan(type) {
 				type = declaredType
@@ -595,8 +596,8 @@ class Parameter extends AbstractNode {
 			type = NullType.Explicit
 		}
 
-		let min: Number = 1
-		let max: Number = 1
+		var mut min: Number = 1
+		var mut max: Number = 1
 
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
@@ -642,12 +643,12 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		const name: String? = @name.name()
+		var name: String? = @name.name()
 
 		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
 
 		if @hasDefaultValue && @parent.isOverridableFunction() {
-			const scope = @parent.scope()
+			var scope = @parent.scope()
 
 			@comprehensive = !@defaultValue.isUsingNonLocalVariables(scope)
 
@@ -655,11 +656,11 @@ class Parameter extends AbstractNode {
 				@type.setDefaultValue(@data.defaultValue, true)
 			}
 			else {
-				const variables = [variable.name() for const variable in @defaultValue.listLocalVariables(scope, [])]
+				var variables = [variable.name() for var variable in @defaultValue.listLocalVariables(scope, [])]
 
-				const name = @parent.addIndigentValue(@defaultValue, variables)
+				var name = @parent.addIndigentValue(@defaultValue, variables)
 
-				const call = `\(name)(\(variables.join(', ')))`
+				var call = `\(name)(\(variables.join(', ')))`
 
 				@type.setDefaultValue(call, false)
 
@@ -684,7 +685,7 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	addAliasParameter(expression: ThisExpressionParameter) { # {{{
-		const alias = new AliasStatement(expression, this)
+		var alias = new AliasStatement(expression, this)
 
 		return @scope.reference(alias.type())
 	} # }}}
@@ -733,7 +734,7 @@ class Parameter extends AbstractNode {
 	toValidationFragments(fragments) { # {{{
 		if @rest {
 			if @hasDefaultValue {
-				const ctrl = fragments
+				var ctrl = fragments
 					.newControl()
 					.code('if(')
 					.compile(this)
@@ -772,7 +773,7 @@ class Parameter extends AbstractNode {
 			@hasDefaultValue = false
 		}
 
-		const t = @type.getVariableType()
+		var t = @type.getVariableType()
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
 	} # }}}
@@ -784,7 +785,7 @@ class AliasStatement extends Statement {
 		_parameter: Parameter
 	}
 	constructor(@expression, @parameter) { # {{{
-		const parent = parameter.parent()
+		var parent = parameter.parent()
 
 		super(expression.data(), parent)
 
@@ -797,7 +798,7 @@ class AliasStatement extends Statement {
 	name() => @expression.name()
 	path() => @expression.path()
 	toStatementFragments(fragments, mode) { # {{{
-		const variable = @scope.getVariable(@expression.name())
+		var variable = @scope.getVariable(@expression.name())
 
 		if @expression.isSealed() && !@parameter.parent().isConstructor() {
 			fragments.newLine().code(`\(@expression.getClass().getSealedName()).__ks_set_\(@expression.name())(this, `).compile(variable).code(')').done()
@@ -813,7 +814,7 @@ class IdentifierParameter extends IdentifierLiteral {
 	static {
 		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { # {{{
 			if arity != null {
-				const type = that.getDeclaredType().parameter()
+				var type = that.getDeclaredType().parameter()
 
 				if type.isAny() {
 					fragments
@@ -843,7 +844,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						fragments.line('--__ks_i')
 					}
 
-					const line = fragments.newLine()
+					var line = fragments.newLine()
 
 					if !context.tempL {
 						line.code($runtime.scope(that))
@@ -853,11 +854,11 @@ class IdentifierParameter extends IdentifierLiteral {
 
 					line.code(`__ks_l = __ks_i + \(arity.min + 1)`).done()
 
-					const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
+					var ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
 
 					ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
 
-					const ctrl2 = ctrl.newControl()
+					var ctrl2 = ctrl.newControl()
 
 					if type.isNullable() {
 						ctrl2
@@ -891,7 +892,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						})
 					}
 					else {
-						const ctrl3 = ctrl2
+						var ctrl3 = ctrl2
 							.newControl()
 							.code('if(')
 							.compile(that)
@@ -938,7 +939,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						.done()
 				}
 				else {
-					const declaredType = that.getDeclaredType()
+					var declaredType = that.getDeclaredType()
 
 					if declaredType.isAny() {
 						if !context.temp {
@@ -947,7 +948,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							context.temp = true
 						}
 
-						let line = fragments
+						var mut line = fragments
 							.newLine()
 							.code($runtime.scope(that))
 							.compile(that)
@@ -969,7 +970,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							context.temp = true
 						}
 
-						let line = fragments
+						var mut line = fragments
 							.newLine()
 							.code($runtime.scope(that))
 							.compile(that)
@@ -1012,7 +1013,7 @@ class IdentifierParameter extends IdentifierLiteral {
 			if arity != null {
 				context.required -= arity.min
 
-				const type = that.getDeclaredType().parameter()
+				var type = that.getDeclaredType().parameter()
 
 				if type.isAny() {
 					if context.required > 0 {
@@ -1059,7 +1060,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						fragments.line('--__ks_i')
 					}
 
-					const line = fragments.newLine()
+					var line = fragments.newLine()
 
 					if !context.tempL {
 						line.code($runtime.scope(that))
@@ -1077,11 +1078,11 @@ class IdentifierParameter extends IdentifierLiteral {
 
 					line.done()
 
-					const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
+					var ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
 
 					ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
 
-					const ctrl2 = ctrl.newControl()
+					var ctrl2 = ctrl.newControl()
 
 					if type.isNullable() {
 						ctrl2
@@ -1115,7 +1116,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						})
 					}
 					else {
-						const ctrl3 = ctrl2
+						var ctrl3 = ctrl2
 							.newControl()
 							.code('if(')
 							.compile(that)
@@ -1155,7 +1156,7 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 			else {
 				if !required && defaultValue != null {
-					const declaredType = that.getDeclaredType()
+					var declaredType = that.getDeclaredType()
 
 					if declaredType.isAny() {
 						if !context.temp {
@@ -1164,7 +1165,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							context.temp = true
 						}
 
-						const line = fragments
+						var line = fragments
 							.newLine()
 							.code($runtime.scope(that))
 							.compile(that)
@@ -1186,9 +1187,9 @@ class IdentifierParameter extends IdentifierLiteral {
 							.compile(that)
 							.done()
 
-						const fixed = (context.max - context.min) == 1
+						var fixed = (context.max - context.min) == 1
 
-						const ctrl = fragments.newControl()
+						var ctrl = fragments.newControl()
 
 						if fixed {
 							ctrl
@@ -1215,7 +1216,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 						ctrl.code(')').step()
 
-						const ctrl2 = ctrl.newControl().code('if(')
+						var ctrl2 = ctrl.newControl().code('if(')
 
 						if declaredType.isNullable() {
 							ctrl2.compile(that).code(' !== null && ')
@@ -1248,7 +1249,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							ctrl2.line('--__ks_i')
 						}
 						else {
-							const ctrl3 = ctrl2
+							var ctrl3 = ctrl2
 								.newControl()
 								.code(`if(arguments.length - __ks_i < \(context.max - context.optional + context.required))`)
 								.step()
@@ -1306,9 +1307,9 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 		} # }}}
 		toValidationFragments(fragments, rest, defaultValue?, header, async, that) { # {{{
-			const declaredType = that.getDeclaredType()
+			var declaredType = that.getDeclaredType()
 
-			let ctrl = null
+			var mut ctrl = null
 
 			if defaultValue != null {
 				if !header {
@@ -1348,7 +1349,7 @@ class IdentifierParameter extends IdentifierLiteral {
 	}
 	isBinding() => false
 	setDeclaredType(type, definitive) { # {{{
-		const variable = @scope.getVariable(@value)
+		var variable = @scope.getVariable(@value)
 
 		variable.setDeclaredType(type).setRealType(type).setDefinitive(definitive)
 
@@ -1369,7 +1370,7 @@ class IdentifierParameter extends IdentifierLiteral {
 }
 
 class ArrayBindingParameter extends ArrayBinding {
-	private lateinit {
+	private late {
 		_tempName: Literal
 	}
 	analyse() { # {{{
@@ -1384,20 +1385,20 @@ class ArrayBindingParameter extends ArrayBinding {
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
-			for const element in @elements {
+			for var element in @elements {
 				element.setDeclaredType(type, definitive)
 			}
 		}
 		else if type.isArray() {
 			if type.isReference() {
-				const elementType = type.parameter()
+				var elementType = type.parameter()
 
-				for const element in @elements {
+				for var element in @elements {
 					element.setDeclaredType(elementType, definitive)
 				}
 			}
 			else {
-				for const element, index in @elements {
+				for var element, index in @elements {
 					element.setDeclaredType(type.getElement(index), definitive)
 				}
 			}
@@ -1416,7 +1417,7 @@ class ArrayBindingParameter extends ArrayBinding {
 	} # }}}
 	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		if @flatten {
-			const ctrl = fragments
+			var ctrl = fragments
 				.newControl()
 				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
 				.step()
@@ -1432,11 +1433,11 @@ class ArrayBindingParameter extends ArrayBinding {
 
 			ctrl.done()
 
-			const line = fragments.newLine().code($runtime.scope(this))
+			var line = fragments.newLine().code($runtime.scope(this))
 
 			@elements[0].toFlatFragments(line, @tempName)
 
-			for const element in @elements from 1 {
+			for var element in @elements from 1 {
 				line.code(', ')
 
 				element.toFlatFragments(line, @tempName)
@@ -1456,7 +1457,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 }
 
 class ObjectBindingParameter extends ObjectBinding {
-	private lateinit {
+	private late {
 		_tempName: Literal
 	}
 	analyse() { # {{{
@@ -1471,20 +1472,20 @@ class ObjectBindingParameter extends ObjectBinding {
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
-			for const element in @elements {
+			for var element in @elements {
 				element.setDeclaredType(type, definitive)
 			}
 		}
 		else if type.isDictionary() {
 			if type.isReference() {
-				const elementType = type.parameter()
+				var elementType = type.parameter()
 
-				for const element in @elements {
+				for var element in @elements {
 					element.setDeclaredType(elementType, definitive)
 				}
 			}
 			else {
-				for const element in @elements {
+				for var element in @elements {
 					element.setDeclaredType(type.getProperty(element.name()), definitive)
 				}
 			}
@@ -1503,7 +1504,7 @@ class ObjectBindingParameter extends ObjectBinding {
 	} # }}}
 	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		if @flatten {
-			const ctrl = fragments
+			var ctrl = fragments
 				.newControl()
 				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
 				.step()
@@ -1519,11 +1520,11 @@ class ObjectBindingParameter extends ObjectBinding {
 
 			ctrl.done()
 
-			const line = fragments.newLine().code($runtime.scope(this))
+			var line = fragments.newLine().code($runtime.scope(this))
 
 			@elements[0].toFlatFragments(line, @tempName)
 
-			for const element in @elements from 1 {
+			for var element in @elements from 1 {
 				line.code(', ')
 
 				element.toFlatFragments(line, @tempName)
@@ -1543,7 +1544,7 @@ class ObjectBindingParameterElement extends ObjectBindingElement {
 }
 
 class AnonymousParameter extends AbstractNode {
-	private lateinit {
+	private late {
 		_name: String
 		_type: Type
 	}
@@ -1595,12 +1596,12 @@ class ThisExpressionParameter extends ThisExpression {
 			throw new NotSupportedException(this)
 		}
 
-		const method = this.statement()
+		var method = this.statement()
 
 		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
-			const class = method.parent()
+			var class = method.parent()
 
-			lateinit const variable
+			var late  variable
 
 			if method.isInstance() {
 				variable = class.type().type().getInstanceVariable(@variableName)
@@ -1614,9 +1615,9 @@ class ThisExpressionParameter extends ThisExpression {
 			}
 		}
 		else if method is ClassConstructorDeclaration || method is ImplementClassConstructorDeclaration {
-			const class = method.parent()
+			var class = method.parent()
 
-			const variable = class.type().type().getInstanceVariable(@variableName)
+			var variable = class.type().type().getInstanceVariable(@variableName)
 
 			if variable.isImmutable() && !variable.isLateInit() {
 				ReferenceException.throwImmutable(this)
@@ -1637,7 +1638,7 @@ class ThisExpressionParameter extends ThisExpression {
 			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
 		}
 
-		const variable = @parent.scope().getVariable(@name)
+		var variable = @parent.scope().getVariable(@name)
 
 		variable.setDeclaredType(type).setDefinitive(definitive)
 	} # }}}

@@ -154,7 +154,7 @@ class NamedType extends Type {
 			}
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast, limited) {
 					return true
 				}
@@ -163,13 +163,13 @@ class NamedType extends Type {
 			return false
 		}
 		else if value is ExclusionType {
-			const types = value.types()
+			var types = value.types()
 
 			if !this.isAssignableToVariable(types[0].discardReference(), anycast, nullcast, downcast) {
 				return false
 			}
 
-			for const type in types from 1 {
+			for var type in types from 1 {
 				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast) {
 					return false
 				}
@@ -199,8 +199,8 @@ class NamedType extends Type {
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
 	isInheriting(superclass: NamedType) { # {{{
-		let name = superclass.name()
-		let that = this
+		var mut name = superclass.name()
+		var mut that = this
 
 		while that.type().isExtending() {
 			that = that.type().extends()
@@ -223,7 +223,7 @@ class NamedType extends Type {
 			}
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.matchContentOf(value) {
 					return true
 				}
@@ -305,7 +305,7 @@ class NamedType extends Type {
 				return this.discardAlias().isSubsetOf(value, mode)
 			}
 			else if value is UnionType {
-				for const type in value.types() {
+				for var type in value.types() {
 					if this.isSubsetOf(type, mode) {
 						return true
 					}
@@ -399,7 +399,7 @@ class NamedType extends Type {
 			return @type.discardAlias().matchContentOf(value)
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -408,13 +408,13 @@ class NamedType extends Type {
 			return false
 		}
 		else if value is ExclusionType {
-			const types = value.types()
+			var types = value.types()
 
 			if !this.matchContentOf(types[0]) {
 				return false
 			}
 
-			for const type in types from 1 {
+			for var type in types from 1 {
 				if this.matchContentOf(type) {
 					return false
 				}
@@ -433,13 +433,13 @@ class NamedType extends Type {
 		}
 	} # }}}
 	matchInheritanceOf(base: Type) { # {{{
-		const basename = base.name()
+		var basename = base.name()
 
 		if @name == basename {
 			return true
 		}
 
-		let that = this
+		var mut that = this
 		while that.type().isExtending() {
 			that = that.type().extends()
 
@@ -528,7 +528,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		if const tof = $runtime.typeof(@name, node) {
+		if var tof = $runtime.typeof(@name, node) {
 			fragments.code(`!\(tof)(`).compile(node).code(')')
 		}
 		else {
@@ -536,7 +536,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		if const tof = $runtime.typeof(@name, node) {
+		if var tof = $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
@@ -608,7 +608,7 @@ class NamedContainerType extends NamedType {
 			return @name == value.name()
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -617,13 +617,13 @@ class NamedContainerType extends NamedType {
 			return false
 		}
 		else if value is ExclusionType {
-			const types = value.types()
+			var types = value.types()
 
 			if !this.matchContentOf(types[0]) {
 				return false
 			}
 
-			for const type in types from 1 {
+			for var type in types from 1 {
 				if this.matchContentOf(type) {
 					return false
 				}

@@ -1,6 +1,6 @@
 func foobar() {
-	let x: Number? = null
-	let y: Number? = null
+	var dyn x: Number? = null
+	var dyn y: Number? = null
 
 	quxbaz(x ?? y ?? 42)
 }

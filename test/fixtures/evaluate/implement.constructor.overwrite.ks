@@ -17,7 +17,7 @@ impl Date {
 	}
 }
 
-const d = new Date(2000, 1, 1)
+var d = new Date(2000, 1, 1)
 expect(d.getUTCFullYear()).to.equals(2000)
 expect(d.getUTCMonth()).to.equals(0)
 expect(d.getUTCDate()).to.equals(1)

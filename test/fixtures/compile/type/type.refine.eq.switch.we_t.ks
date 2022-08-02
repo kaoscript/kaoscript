@@ -1,5 +1,5 @@
 func foobar(i: Number, b) {
-	let x = i
+	var dyn x = i
 
 	switch b {
 		0 => {

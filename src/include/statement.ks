@@ -30,8 +30,8 @@ abstract class Statement extends AbstractNode {
 	assignments() => @assignments
 	checkReturnType(type: Type)
 	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
-		for const name in names {
-			if const variable = scope.getVariable(name) {
+		for var name in names {
+			if var variable = scope.getVariable(name) {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
 				}
@@ -86,7 +86,7 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		const variables = this.assignments()
+		var variables = this.assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}

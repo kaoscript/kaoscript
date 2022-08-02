@@ -1,5 +1,5 @@
 class FunctionType extends Type {
-	private lateinit {
+	private late {
 		_assessment							= null
 		_async: Boolean						= false
 		_errors: Array<Type>				= []
@@ -19,7 +19,7 @@ class FunctionType extends Type {
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
-			for const key in ['_async', '_hasRest', '_index', '_max', '_maxBefore', '_maxAfter', '_min', '_minBefore', '_minAfter', '_missingParameters', '_missingReturn', '_restIndex', '_returnType'] {
+			for var key in ['_async', '_hasRest', '_index', '_max', '_maxBefore', '_maxAfter', '_min', '_minBefore', '_minAfter', '_missingParameters', '_missingReturn', '_restIndex', '_returnType'] {
 				target[key] = source[key]
 			}
 
@@ -38,7 +38,7 @@ class FunctionType extends Type {
 			}
 		} # }}}
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
-			const type = new FunctionType(scope)
+			var type = new FunctionType(scope)
 
 			type._index = data.index ?? -1
 			type._async = data.async
@@ -73,7 +73,7 @@ class FunctionType extends Type {
 				return false
 			}
 
-			for const parameter in parameters from index + 1 {
+			for var parameter in parameters from index + 1 {
 				if parameter.min() != 0 {
 					return false
 				}
@@ -82,11 +82,11 @@ class FunctionType extends Type {
 			return true
 		} # }}}
 		toQuote(parameters) { # {{{
-			let fragments = ''
+			var mut fragments = ''
 
 			fragments += '('
 
-			for const parameter, index in parameters {
+			for var parameter, index in parameters {
 				if index != 0 {
 					fragments += ', '
 				}
@@ -117,7 +117,7 @@ class FunctionType extends Type {
 			@missingReturn = false
 		}
 
-		for const parameter in parameters {
+		for var parameter in parameters {
 			if parameter.max() == Infinity {
 				if @max == Infinity {
 					SyntaxException.throwTooMuchRestParameter(node)
@@ -140,9 +140,9 @@ class FunctionType extends Type {
 		}
 
 		if data.throws? {
-			let type
+			var mut type
 
-			for const throw in data.throws {
+			for var throw in data.throws {
 				if (type ?= Type.fromAST(throw, node).discardReference()) && type.isNamed() && type.isClass() {
 					@errors.push(type)
 				}
@@ -224,7 +224,7 @@ class FunctionType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const result = {
+		var result = {
 			kind: TypeKind::Function
 		}
 
@@ -240,9 +240,9 @@ class FunctionType extends Type {
 
 		result.min = @min
 		result.max = @max
-		result.parameters = [parameter.export(references, indexDelta, mode, module) for const parameter in @parameters]
+		result.parameters = [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
 		result.returns = @returnType.toReference(references, indexDelta, mode, module)
-		result.errors = [throw.toReference(references, indexDelta, mode, module) for const throw in @errors]
+		result.errors = [throw.toReference(references, indexDelta, mode, module) for var throw in @errors]
 
 		return result
 	} # }}}
@@ -267,9 +267,9 @@ class FunctionType extends Type {
 		return 0 unless @hasRest
 
 		if excludes? {
-			auto max = 0
+			var mut max = 0
 
-			for const parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
 				max += parameter.max()
 			}
 
@@ -284,9 +284,9 @@ class FunctionType extends Type {
 		return 0 unless @hasRest
 
 		if excludes? {
-			auto max = 0
+			var mut max = 0
 
-			for const parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
 				max += parameter.max()
 			}
 
@@ -301,9 +301,9 @@ class FunctionType extends Type {
 		return 0 unless @hasRest
 
 		if excludes? {
-			auto min = 0
+			var mut min = 0
 
-			for const parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
 				min += parameter.min()
 			}
 
@@ -318,9 +318,9 @@ class FunctionType extends Type {
 		return 0 unless @hasRest
 
 		if excludes? {
-			auto min = 0
+			var mut min = 0
 
-			for const parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
 				min += parameter.min()
 			}
 
@@ -337,7 +337,7 @@ class FunctionType extends Type {
 	hashCode() => `Function`
 	hasRestParameter(): @hasRest
 	hasVarargsParameter() { # {{{
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			return true if parameter.isVarargs()
 		}
 
@@ -350,7 +350,7 @@ class FunctionType extends Type {
 			return true
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
@@ -375,7 +375,7 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	isExportable() { # {{{
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			if !parameter.isExportable() {
 				return false
 			}
@@ -396,7 +396,7 @@ class FunctionType extends Type {
 			return false
 		}
 
-		for const parameter, i in @parameters {
+		for var parameter, i in @parameters {
 			if parameter.isMorePreciseThan(value._parameters[i]) {
 				return true
 			}
@@ -418,13 +418,13 @@ class FunctionType extends Type {
 				}
 			}
 
-			const parameter = @parameters[pIndex]
+			var parameter = @parameters[pIndex]
 
 			if parameter.max() == Infinity {
 				return this.isParametersMatching(pIndex, 1, arguments, aIndex, aStep, mode)
 			}
 
-			for const i from 1 to parameter.min() {
+			for var i from 1 to parameter.min() {
 				if !this.isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
 					return false
 				}
@@ -434,7 +434,7 @@ class FunctionType extends Type {
 				return true
 			}
 
-			for const i from parameter.min() + 1 to parameter.max() {
+			for var i from parameter.min() + 1 to parameter.max() {
 				if this.isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
 					return true
 				}
@@ -450,13 +450,13 @@ class FunctionType extends Type {
 				return FunctionType.isOptional(@parameters, pIndex, pStep)
 			}
 
-			const argument = arguments[aIndex]
+			var argument = arguments[aIndex]
 
 			if argument.max() == Infinity {
 				return this.isParametersMatching(pIndex, pStep, arguments, aIndex, 1, mode)
 			}
 
-			for const i from 1 to argument.min() {
+			for var i from 1 to argument.min() {
 				if !this.isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
 					return false
 				}
@@ -466,7 +466,7 @@ class FunctionType extends Type {
 				return true
 			}
 
-			for const i from argument.min() + 1 to argument.max() {
+			for var i from argument.min() + 1 to argument.max() {
 				if this.isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
 					return true
 				}
@@ -512,7 +512,7 @@ class FunctionType extends Type {
 			// do nothing
 		}
 		else if mode ~~ MatchingMode::ShiftableParameters {
-			let parameterMode: MatchingMode
+			var mut parameterMode: MatchingMode
 
 			if mode ~~ MatchingMode::ExactParameter {
 				parameterMode = MatchingMode::Exact
@@ -539,7 +539,7 @@ class FunctionType extends Type {
 						return false
 					}
 
-					for const parameter in value._parameters from @parameters.length {
+					for var parameter in value._parameters from @parameters.length {
 						if parameter.min() != 0 {
 							return false
 						}
@@ -556,7 +556,7 @@ class FunctionType extends Type {
 						}
 					}
 
-					for const parameter in @parameters from value._parameters.length {
+					for var parameter in @parameters from value._parameters.length {
 						if parameter.min() != 0 {
 							return false
 						}
@@ -568,7 +568,7 @@ class FunctionType extends Type {
 					return false
 				}
 
-				for const parameter in value._parameters from @parameters.length {
+				for var parameter in value._parameters from @parameters.length {
 					return false unless parameter.min() == 0
 				}
 
@@ -594,7 +594,7 @@ class FunctionType extends Type {
 				}
 			}
 
-			let paramMode = MatchingMode::Default
+			var mut paramMode = MatchingMode::Default
 
 			paramMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactParameter
 			paramMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarParameter
@@ -608,7 +608,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
 
 			if paramMode != 0 {
-				for const parameter, index in @parameters til value._parameters.length {
+				for var parameter, index in @parameters til value._parameters.length {
 					return false unless parameter.isSubsetOf(value._parameters[index], paramMode)
 				}
 			}
@@ -621,14 +621,14 @@ class FunctionType extends Type {
 			return false unless value.isMissingReturn()
 		}
 		else if !(mode ~~ MatchingMode::MissingReturn && value.isMissingReturn()) {
-			let returnMode = MatchingMode::Default
+			var mut returnMode = MatchingMode::Default
 
 			returnMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactReturn
 			returnMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarReturn
 			returnMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassReturn
 
 			if returnMode != 0 {
-				const newType = value.getReturnType()
+				var newType = value.getReturnType()
 
 				return false unless newType.isSubsetOf(@returnType, returnMode) || @returnType.isInstanceOf(newType)
 			}
@@ -641,19 +641,19 @@ class FunctionType extends Type {
 			return false unless value.isMissingError()
 		}
 		else if !(mode ~~ MatchingMode::MissingError && value.isMissingError()) {
-			let errorMode = MatchingMode::Default
+			var mut errorMode = MatchingMode::Default
 
 			errorMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactError
 			errorMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarErrors
 			errorMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassError
 
 			if errorMode != 0 {
-				const newTypes = value.listErrors()
+				var newTypes = value.listErrors()
 
-				for const oldType in @errors {
-					let matched = false
+				for var oldType in @errors {
+					var mut matched = false
 
-					for const newType in newTypes until matched {
+					for var newType in newTypes until matched {
 						if newType.isSubsetOf(oldType, errorMode) || oldType.isInstanceOf(newType) {
 							matched = true
 						}
@@ -669,7 +669,7 @@ class FunctionType extends Type {
 	length() => 1
 	listErrors() => @errors
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
-		const assessment = this.assessment('', node)
+		var assessment = this.assessment('', node)
 
 		return ?Router.matchArguments(assessment, arguments, node)
 	} # }}}
@@ -679,7 +679,7 @@ class FunctionType extends Type {
 		}
 
 		if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -691,9 +691,9 @@ class FunctionType extends Type {
 	max(): @max
 	max(excludes: Array<String>?): Number { # {{{
 		if excludes? {
-			auto max = 0
+			var mut max = 0
 
-			for const parameter in @parameters when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when !excludes.contains(parameter.name()) {
 				max += parameter.max()
 			}
 
@@ -706,9 +706,9 @@ class FunctionType extends Type {
 	min(): @min
 	min(excludes: Array<String>?): Number { # {{{
 		if excludes? {
-			auto min = 0
+			var mut min = 0
 
-			for const parameter in @parameters when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when !excludes.contains(parameter.name()) {
 				min += parameter.min()
 			}
 
@@ -722,7 +722,7 @@ class FunctionType extends Type {
 	parameters(): Array<ParameterType> => @parameters
 	parameters(excludes: Array<String>?): Array<ParameterType> { # {{{
 		if excludes? {
-			return [parameter for const parameter in @parameters when !excludes.contains(parameter.name())]
+			return [parameter for var parameter in @parameters when !excludes.contains(parameter.name())]
 		}
 		else {
 			return @parameters
@@ -736,7 +736,7 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	pushTo(methods) { # {{{
-		for const method in methods {
+		for var method in methods {
 			if this.isSubsetOf(method, MatchingMode::SimilarParameter) {
 				return
 			}
@@ -749,11 +749,11 @@ class FunctionType extends Type {
 		fragments.code('Function')
 	} # }}}
 	toQuote() { # {{{
-		let fragments = ''
+		var mut fragments = ''
 
 		fragments += '('
 
-		for const parameter, index in @parameters {
+		for var parameter, index in @parameters {
 			if index != 0 {
 				fragments += ', '
 			}
@@ -782,7 +782,7 @@ class FunctionType extends Type {
 		variations.push('func', 1)
 	} # }}}
 	updateParameters() { # {{{
-		for const parameter, i in @parameters {
+		for var parameter, i in @parameters {
 			if @hasRest {
 				@minAfter += parameter.min()
 				@maxAfter += parameter.max()
@@ -810,14 +810,14 @@ class OverloadedFunctionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
-			const type = new OverloadedFunctionType(scope)
+			var type = new OverloadedFunctionType(scope)
 
 			if data.exhaustive? {
 				type._exhaustive = data.exhaustive
 			}
 
 			queue.push(() => {
-				for const function in data.functions {
+				for var function in data.functions {
 					type.addFunction(Type.import(function, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -854,7 +854,7 @@ class OverloadedFunctionType extends Type {
 
 		@references.pushUniq(type)
 
-		for const function in type.functions() {
+		for var function in type.functions() {
 			if function.index() == -1 {
 				function.index(@functions.length)
 			}
@@ -876,7 +876,7 @@ class OverloadedFunctionType extends Type {
 			@async = type.isAsync()
 		}
 
-		const fn = new FunctionType(@scope, 0)
+		var fn = new FunctionType(@scope, 0)
 		fn.addParameter(AnyType.NullableExplicit, null, 0, Infinity)
 
 		fn._missingParameters = true
@@ -896,13 +896,13 @@ class OverloadedFunctionType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const functions = []
+		var functions = []
 
-		const overloadedMode = mode + ExportMode::OverloadedFunction
+		var overloadedMode = mode + ExportMode::OverloadedFunction
 
-		for const reference in @references {
+		for var reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
-				for const fn in reference.functions() when fn.isExportable(mode) {
+				for var fn in reference.functions() when fn.isExportable(mode) {
 					functions.push(fn.toExportOrReference(references, indexDelta, overloadedMode, module))
 				}
 			}
@@ -929,7 +929,7 @@ class OverloadedFunctionType extends Type {
 	} # }}}
 	isAsync() => @async
 	isExportable() { # {{{
-		for const reference in @references {
+		for var reference in @references {
 			if reference.isExportable() {
 				return true
 			}
@@ -972,7 +972,7 @@ class OverloadedFunctionType extends Type {
 			return false
 		}
 
-		let nf
+		var mut nf
 		for fb in value.functions() {
 			nf = true
 
@@ -998,7 +998,7 @@ class OverloadedFunctionType extends Type {
 	} # }}}
 	length() => @functions.length
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
-		const assessment = this.assessment('', node)
+		var assessment = this.assessment('', node)
 
 		return ?Router.matchArguments(assessment, arguments, node)
 	} # }}}

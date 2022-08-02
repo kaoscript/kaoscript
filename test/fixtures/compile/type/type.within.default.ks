@@ -1,1 +1,1 @@
-let foobar: Array<Array<String?>> = []
+var dyn foobar: Array<Array<String?>> = []

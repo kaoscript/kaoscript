@@ -4,7 +4,7 @@ extern console: {
 
 class Foo {
 	private {
-		lateinit _bar: Bar
+		late _bar: Bar
 	}
 	bar(): Bar => this._bar
 	bar(@bar) => this
@@ -12,7 +12,7 @@ class Foo {
 
 class Bar {
 	private {
-		lateinit _foo: Foo
+		late _foo: Foo
 	}
 	foo(): Foo => this._foo
 	foo(@foo) => this

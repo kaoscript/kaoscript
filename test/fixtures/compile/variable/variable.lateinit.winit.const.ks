@@ -1,9 +1,9 @@
 class Foobar {
 	constructor() {
-		lateinit const x
+		var late x
 
 		x = 'foobar'
 
-		let y = `\(x)`
+		var dyn y = `\(x)`
 	}
 }

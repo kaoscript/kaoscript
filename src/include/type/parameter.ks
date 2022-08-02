@@ -13,18 +13,18 @@ class ParameterType extends Type {
 	static {
 		fromAST(data, node: AbstractNode): ParameterType => ParameterType.fromAST(data, false, node.scope(), true, node)
 		fromAST(data, overridable: Boolean, scope: Scope, defined: Boolean, node: AbstractNode): ParameterType { # {{{
-			let type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
+			var mut type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
 
-			auto default = false
-			auto min = 1
-			auto max = 1
+			var mut default = false
+			var mut min = 1
+			var mut max = 1
 
 			if data.defaultValue? {
 				default = true
 				min = 0
 			}
 
-			let nf = true
+			var mut nf = true
 			for modifier in data.modifiers while nf {
 				if modifier.kind == ModifierKind::Rest {
 					if modifier.arity {
@@ -40,7 +40,7 @@ class ParameterType extends Type {
 				}
 			}
 
-			let name = null
+			var mut name = null
 			if data.name? {
 				if data.name.kind == NodeKind::Identifier {
 					name = data.name.name
@@ -51,7 +51,7 @@ class ParameterType extends Type {
 			}
 
 
-			const parameter = new ParameterType(scope, name, type, min, max, default)
+			var parameter = new ParameterType(scope, name, type, min, max, default)
 
 			if default && overridable {
 				parameter.setDefaultValue(data.defaultValue, true)
@@ -60,9 +60,9 @@ class ParameterType extends Type {
 			return parameter
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
-			const data = index
-			const subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
-			const type = new ParameterType(scope, data.name, subtype, data.min, data.max, data.default)
+			var data = index
+			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			var type = new ParameterType(scope, data.name, subtype, data.min, data.max, data.default)
 
 			if data.default {
 				if data.comprehensive {
@@ -99,7 +99,7 @@ class ParameterType extends Type {
 	} # }}}
 	clone() => new ParameterType(@scope, @name, @type, @min, @max, @default)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const export = {}
+		var export = {}
 
 		if @name != null {
 			export.name = @name
@@ -157,8 +157,8 @@ class ParameterType extends Type {
 			return false unless @type.setNullable(true).isSubsetOf(value.type(), mode)
 		}
 		else if mode ~~ MatchingMode::Subset {
-			const oldType = @getArgumentType()
-			const newType = value.getArgumentType()
+			var oldType = @getArgumentType()
+			var newType = value.getArgumentType()
 			return false unless newType.isSubsetOf(oldType, mode) || oldType.isSubsetOf(newType, mode)
 		}
 		else {
@@ -179,7 +179,7 @@ class ParameterType extends Type {
 	matchArgument(value: Expression) { # {{{
 		value.setCastingEnum(false)
 
-		const type = value.type()
+		var type = value.type()
 
 		if type.matchContentOf(@type) {
 			if type.isReference() && type.isEnum() && !@type.isEnum() && !@type.isAny() {
@@ -204,7 +204,7 @@ class ParameterType extends Type {
 		throw new NotImplementedException(node)
 	} # }}}
 	toQuote() { # {{{
-		auto fragments = ''
+		var mut fragments = ''
 
 		if @max > 1 {
 			if @max == Infinity {

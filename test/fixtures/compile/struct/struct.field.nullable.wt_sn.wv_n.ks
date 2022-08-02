@@ -2,6 +2,6 @@ struct Foobar {
 	x: String?	= null
 }
 
-const f = Foobar()
+var f = Foobar()
 
 f.x = null

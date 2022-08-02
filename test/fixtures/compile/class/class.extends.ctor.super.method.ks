@@ -6,7 +6,7 @@ class Subby extends Master {
 	constructor() {
 		super()
 
-		const name = super.name()
+		var name = super.name()
 	}
 	name() => 'Subby'
 }

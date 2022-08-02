@@ -1,7 +1,7 @@
-const o = {}
+var o = {}
 
 func foo(key: String) {
-	const x = o[key]
+	var x = o[key]
 
 	if x is Function {
 	}

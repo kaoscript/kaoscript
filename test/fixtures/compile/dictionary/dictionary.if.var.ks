@@ -1,5 +1,5 @@
 func foobar(a, b, c) {
-	let x
+	var dyn x
 
 	if a {
 		x = {

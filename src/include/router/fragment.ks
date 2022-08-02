@@ -1,7 +1,7 @@
 func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { # {{{
-	const allArgs = tree.min == 0 && tree.rest
+	var allArgs = tree.min == 0 && tree.rest
 
-	lateinit const fragments
+	var late  fragments
 	if !allArgs {
 		if tree.rest && continuous {
 			// no test needed
@@ -30,15 +30,15 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, n
 		fragments = block
 	}
 
-	let useAllArgs = allArgs
+	var mut useAllArgs = allArgs
 
 	if tree.order.length == 0 {
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		let comma = buildPath(tree.function, line.code('return '))
+		var mut comma = buildPath(tree.function, line.code('return '))
 
 		if tree.function.hasVarargsParameter() {
-			for const parameter in tree.function.parameters() {
+			for var parameter in tree.function.parameters() {
 				if comma {
 					line.code($comma)
 				}
@@ -60,7 +60,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, n
 		line.code(')').done()
 	}
 	else if tree.order.length == 1 {
-		const column = tree.columns[tree.order[0]]
+		var column = tree.columns[tree.order[0]]
 
 		if isNeedingTestings(column) {
 			useAllArgs = toTreeFragments(buildPath, args, tree, column, false, helper, fragments, 0, 1, Junction::NONE, continuous, -1, tree.min, node)
@@ -72,10 +72,10 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, n
 		}
 	}
 	else {
-		auto anyTested = false
+		var mut anyTested = false
 
-		for const key, index in tree.order {
-			const column = tree.columns[key]
+		for var key, index in tree.order {
+			var column = tree.columns[key]
 
 			useAllArgs = toTreeFragments(buildPath, args, tree, column, anyTested, helper, fragments, index, tree.order.length, Junction::NONE, hasAlternative(tree, index), -1, tree.min, node)
 
@@ -101,12 +101,12 @@ func isNeedingTestings(tree: TreeBranch): Boolean { # {{{
 } # }}}
 
 func isNeedingTestings(tree: TreeLeaf): Boolean { # {{{
-	const parameters = tree.function.parameters()
-	const async = tree.function.isAsync()
+	var parameters = tree.function.parameters()
+	var async = tree.function.isAsync()
 
-	for const argument in tree.arguments {
+	for var argument in tree.arguments {
 		if !async || argument.parameter < parameters.length {
-			const type = parameters[argument.parameter].type()
+			var type = parameters[argument.parameter].type()
 
 			if type.isAny() && type.isNullable() {
 				return false
@@ -122,10 +122,10 @@ func hasAlternative(tree, index: Number): Boolean { # {{{
 		return false
 	}
 
-	const { type } = tree.columns[tree.order[index]]
+	var { type } = tree.columns[tree.order[index]]
 
-	for const key in tree.order from index + 1 {
-		const column = tree.columns[key]
+	for var key in tree.order from index + 1 {
+		var column = tree.columns[key]
 
 		if type.isAssignableToVariable(column.type) {
 			return true
@@ -136,13 +136,13 @@ func hasAlternative(tree, index: Number): Boolean { # {{{
 } # }}}
 
 func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, hasAlternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
-	const type = leaf.type
+	var type = leaf.type
 
-	const isTest = !((anyTested || type.isAny()) && type.isNullable() && (startIndex == -1 || leaf.max <= 0))
-	const isBacktrack = leaf.backtracks.length != 0
+	var isTest = !((anyTested || type.isAny()) && type.isNullable() && (startIndex == -1 || leaf.max <= 0))
+	var isBacktrack = leaf.backtracks.length != 0
 
-	lateinit const fragments: BlockBuilder | ControlBuilder
-	let shouldClose = false
+	var late  fragments: BlockBuilder | ControlBuilder
+	var mut shouldClose = false
 	if isTest || isBacktrack {
 		if junction == Junction::AND {
 			fragments = builder
@@ -160,9 +160,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	}
 
 	if isBacktrack {
-		let nf = false
+		var mut nf = false
 
-		for const { index, type } in leaf.backtracks {
+		for var { index, type } in leaf.backtracks {
 			if nf {
 				fragments.code(' && ')
 			}
@@ -170,7 +170,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 				nf = true
 			}
 
-			const test = helper.tester(type)
+			var test = helper.tester(type)
 
 			if startIndex == -1 {
 				fragments.code(`\(test)(\(args)[\(index)])`)
@@ -184,12 +184,12 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	}
 
 	if isTest {
-		const test = helper.tester(type)
+		var test = helper.tester(type)
 
 		if startIndex == -1 && leaf.min == leaf.max != 0 {
 			if leaf.min <= 5 {
 				if leaf.index >= 0 {
-					for const i from leaf.index til leaf.index + leaf.min {
+					for var i from leaf.index til leaf.index + leaf.min {
 						if i != leaf.index {
 							fragments.code(' && ')
 						}
@@ -198,9 +198,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 					}
 				}
 				else if tree.min == tree.max {
-					const index = tree.min + leaf.index
+					var index = tree.min + leaf.index
 
-					for const i from index til index + leaf.min {
+					for var i from index til index + leaf.min {
 						if i != index {
 							fragments.code(' && ')
 						}
@@ -209,9 +209,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 					}
 				}
 				else {
-					const index = tree.min + leaf.index
+					var index = tree.min + leaf.index
 
-					for const i from index til 0 by -1 {
+					for var i from index til 0 by -1 {
 						if i != index {
 							fragments.code(' && ')
 						}
@@ -225,7 +225,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 			}
 		}
 		else {
-			let max
+			var mut max
 			if leaf.max == Infinity {
 				if tree.min > 0 {
 					max = `\(args).length - \(tree.min - leaf.min)`
@@ -283,21 +283,21 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 } # }}}
 
 func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, fragments, node: AbstractNode): void { # {{{
-	const { function, arguments } = leaf
-	const async = function.isAsync()
-	const parameters = function.parameters()
-	const scope = node.scope()
+	var { function, arguments } = leaf
+	var async = function.isAsync()
+	var parameters = function.parameters()
+	var scope = node.scope()
 
-	const line = fragments.newLine()
+	var line = fragments.newLine()
 
-	let comma = buildPath(function, line.code('return '))
+	var mut comma = buildPath(function, line.code('return '))
 
-	const lastIndex = arguments.length - 1
-	auto lastParameter = -1
-	auto anyTested = false
-	auto variadic = false
+	var lastIndex = arguments.length - 1
+	var mut lastParameter = -1
+	var mut anyTested = false
+	var mut variadic = false
 
-	for const { parameter, from, to }, index in arguments {
+	for var { parameter, from, to }, index in arguments {
 		if comma {
 			line.code($comma)
 		}
@@ -305,7 +305,7 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 			comma = true
 		}
 
-		for const param in parameters from lastParameter + 1 til parameter {
+		for var param in parameters from lastParameter + 1 til parameter {
 			if param.isVarargs() {
 				line.code('[], ')
 			}
@@ -314,8 +314,8 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 			}
 		}
 
-		const varargs = async && parameter >= parameters.length ? false : parameters[parameter].isVarargs()
-		const type = async && parameter >= parameters.length ? scope.reference('Function') : parameters[parameter].type()
+		var varargs = async && parameter >= parameters.length ? false : parameters[parameter].isVarargs()
+		var type = async && parameter >= parameters.length ? scope.reference('Function') : parameters[parameter].type()
 
 		if !((anyTested || type.isAny()) && type.isNullable()) {
 			if from.variadic || to.variadic || to.index - from.index > 5 {
@@ -354,7 +354,7 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 				if varargs {
 					line.code(`[`)
 
-					for const i from 0 til to.index - from.index {
+					for var i from 0 til to.index - from.index {
 						if i != 0 {
 							line.code($comma)
 						}
@@ -446,7 +446,7 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 		}
 	}
 
-	for const parameter in parameters from lastParameter + 1 {
+	for var parameter in parameters from lastParameter + 1 {
 		if parameter.isVarargs() {
 			line.code(', []')
 		}
@@ -459,10 +459,10 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 } # }}}
 
 func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, branch: TreeBranch, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, alternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
-	const type = branch.type
-	let useAllArgs = false
+	var type = branch.type
+	var mut useAllArgs = false
 
-	const isTest = !((anyTested || type.isAny()) && type.isNullable() && startIndex == -1 && (branch.max == branch.min || branch.rest))
+	var isTest = !((anyTested || type.isAny()) && type.isNullable() && startIndex == -1 && (branch.max == branch.min || branch.rest))
 
 	if !isTest {
 		if branch.order.length == 1 {
@@ -473,14 +473,14 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 				builder.code(')').step()
 			}
 
-			for const key, index in branch.order {
+			for var key, index in branch.order {
 				useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], false, helper, builder, index, branch.order.length, Junction::NONE, true, startIndex, min - branch.min, node)
 			}
 		}
 	}
 	else {
-		lateinit const fragments: BlockBuilder | ControlBuilder
-		let shouldClose = false
+		var late  fragments: BlockBuilder | ControlBuilder
+		var mut shouldClose = false
 
 		if junction == Junction::AND {
 			fragments = builder
@@ -493,12 +493,12 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 			shouldClose = true
 		}
 
-		const test = helper.tester(type)
+		var test = helper.tester(type)
 
 		if startIndex == -1 && branch.min == branch.max != 0 {
 			if branch.min <= 5 {
 				if branch.index >= 0 {
-					for const i from branch.index til branch.index + branch.min {
+					for var i from branch.index til branch.index + branch.min {
 						if i != branch.index {
 							fragments.code(' && ')
 						}
@@ -507,9 +507,9 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 					}
 				}
 				else if tree.min == tree.max {
-					const index = tree.min + branch.index
+					var index = tree.min + branch.index
 
-					for const i from index til index + branch.min {
+					for var i from index til index + branch.min {
 						if i != index {
 							fragments.code(' && ')
 						}
@@ -526,7 +526,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 			}
 		}
 		else {
-			let max
+			var mut max
 			if branch.max == Infinity {
 				if tree.min > 0 {
 					max = `\(args).length - \(tree.min - branch.min)`
@@ -566,10 +566,10 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 			else {
 				fragments.code(')').step()
 
-				auto useAllArgs = false
-				auto nullTested = false
+				var mut useAllArgs = false
+				var mut nullTested = false
 
-				for const key, index in branch.order {
+				for var key, index in branch.order {
 					useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], nullTested, helper, fragments, index, branch.order.length, Junction::NONE, alternative || hasAlternative(branch, index), startIndex, min - branch.min, node)
 
 					if !nullTested && branch.columns[key].type.isNull() {
@@ -585,7 +585,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 		else {
 			fragments.code(')').step()
 
-			const useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction::NONE, alternative || hasAlternative(branch, 0), startIndex, min - branch.min, node)
+			var useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction::NONE, alternative || hasAlternative(branch, 0), startIndex, min - branch.min, node)
 
 			if !alternative && !useAllArgs {
 				fragments.line(`throw \($runtime.helper(node)).badArgs()`)
@@ -605,9 +605,9 @@ func isUsingTestings(branch: TreeBranch, startIndex: Number): Boolean { # {{{
 		return true
 	}
 
-	const column = branch.columns[branch.order[0]]
+	var column = branch.columns[branch.order[0]]
 
-	const type = column.type
+	var type = column.type
 
 	if type.isAny() && type.isNullable() {
 		if column.isNode {
@@ -623,7 +623,7 @@ func isUsingTestings(branch: TreeBranch, startIndex: Number): Boolean { # {{{
 } # }}}
 
 func isVarargs(assessement: Assessement) { # {{{
-	for const tree in assessement.trees {
+	for var tree in assessement.trees {
 		if tree.variadic {
 			return true
 		}
@@ -633,17 +633,17 @@ func isVarargs(assessement: Assessement) { # {{{
 } # }}}
 
 func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): string { # {{{
-	const hash = type.hashCode(true)
+	var hash = type.hashCode(true)
 
-	if const name = this.testers[hash] {
+	if var name = this.testers[hash] {
 		return name
 	}
 
-	const index = ++this.index
+	var index = ++this.index
 
-	const name = `t\(index)`
+	var name = `t\(index)`
 
-	const line = fragments.newLine()
+	var line = fragments.newLine()
 
 	line.code(`\($runtime.immutableScope(node))\(name) = `)
 
@@ -661,10 +661,10 @@ func toDefaultFooter(fragments, node: AbstractNode) { # {{{
 } # }}}
 
 func buildHelper(fragments: MarkWriter, args: String, node: AbstractNode) { # {{{
-	const allArgsMark = fragments.mark()
-	const pointsMark = allArgsMark.mark()
+	var allArgsMark = fragments.mark()
+	var pointsMark = allArgsMark.mark()
 
-	const context = {
+	var context = {
 		allArgs: false
 		allArgsMark
 		points: false

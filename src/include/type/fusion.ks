@@ -5,10 +5,10 @@ class FusionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
-			const fusion = new FusionType(scope)
+			var fusion = new FusionType(scope)
 
 			queue.push(() => {
-				for const type in data.types {
+				for var type in data.types {
 					fusion.addType(Type.import(type, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -19,7 +19,7 @@ class FusionType extends Type {
 	constructor(@scope, @types = []) { # {{{
 		super(scope)
 
-		for const type in @types {
+		for var type in @types {
 			if type.isNullable() {
 				@nullable = true
 			}
@@ -42,8 +42,8 @@ class FusionType extends Type {
 		}
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		for const type in @types {
-			if const property = type.getProperty(name) {
+		for var type in @types {
+			if var property = type.getProperty(name) {
 				return property
 			}
 		}
@@ -74,7 +74,7 @@ class FusionType extends Type {
 			return false
 		}
 
-		let match = 0
+		var mut match = 0
 		for aType in @types {
 			for bType in value._types {
 				if aType.isSubsetOf(bType, mode) {
@@ -87,7 +87,7 @@ class FusionType extends Type {
 		return match == @types.length
 	} # }}}
 	parameter() { # {{{
-		for const type in @types when type.isArray() {
+		for var type in @types when type.isArray() {
 			return type.parameter()
 		}
 
@@ -125,13 +125,13 @@ class FusionType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('fusion', @nullable)
 
-		for const type in @types {
+		for var type in @types {
 			type.toVariations(variations)
 		}
 	} # }}}
 	type() { # {{{
 		if @types.length == 1 {
-			const type = @types[0]
+			var type = @types[0]
 
 			if @nullable == type.isNullable() {
 				return type

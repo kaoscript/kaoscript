@@ -1,6 +1,6 @@
 extern console
 
-const PI = 3.14
+var PI = 3.14
 
 import './type.scope.source.ks' for CarFactory, Car => OldCar
 
@@ -10,7 +10,7 @@ class Car {
 	}
 }
 
-const factory = new CarFactory()
+var factory = new CarFactory()
 
 console.log(`\(factory.makeCar().getType())`)
 console.log(`\((new Car()).getType())`)

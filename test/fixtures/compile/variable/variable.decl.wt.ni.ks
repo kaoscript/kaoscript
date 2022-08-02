@@ -1,1 +1,1 @@
-let a : Array
+var dyn a : Array

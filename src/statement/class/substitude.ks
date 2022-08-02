@@ -12,9 +12,9 @@ class CallThisConstructorSubstitude extends Substitude {
 	constructor(@data, @arguments, @class, node) { # {{{
 		super()
 
-		const assessement = class.type().getConstructorAssessment(class.name(), node)
+		var assessement = class.type().getConstructorAssessment(class.name(), node)
 
-		if const result = Router.matchArguments(assessement, @arguments, node) {
+		if var result = Router.matchArguments(assessement, @arguments, node) {
 			@result = result
 		}
 		else {
@@ -23,7 +23,7 @@ class CallThisConstructorSubstitude extends Substitude {
 	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
 		if @result is not LenientCallMatchResult {
-			for const {function} in @result.matches {
+			for var {function} in @result.matches {
 				if !function.isInitializingInstanceVariable(name) {
 					return false
 				}
@@ -47,7 +47,7 @@ class CallThisConstructorSubstitude extends Substitude {
 		}
 		else {
 			if @result.matches.length == 1 {
-				const { function, arguments } = @result.matches[0]
+				var { function, arguments } = @result.matches[0]
 
 				fragments.code(`\(@class.path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
@@ -76,7 +76,7 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 		}
 		else {
 			if @result.matches.length == 1 {
-				const { function, arguments } = @result.matches[0]
+				var { function, arguments } = @result.matches[0]
 
 				fragments.code(`__ks_cons_\(function.index())`).code('(')
 
@@ -100,10 +100,10 @@ class CallSuperConstructorSubstitude extends Substitude {
 	constructor(@data, @arguments, @class, node) { # {{{
 		super()
 
-		const extends = @class.type().extends()
-		const assessment = extends.type().getConstructorAssessment(extends.name(), node)
+		var extends = @class.type().extends()
+		var assessment = extends.type().getConstructorAssessment(extends.name(), node)
 
-		if const result = Router.matchArguments(assessment, @arguments, node) {
+		if var result = Router.matchArguments(assessment, @arguments, node) {
 			@result = result
 			@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
 		}
@@ -116,7 +116,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 			return false
 		}
 		else if @result is LenientCallMatchResult {
-			for const constructor in @class.type().extends().type().listAccessibleConstructors() {
+			for var constructor in @class.type().extends().type().listAccessibleConstructors() {
 				if !constructor.isInitializingInstanceVariable(name) {
 					return false
 				}
@@ -126,7 +126,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 			return false
 		}
 		else {
-			for const {function} in @result.matches {
+			for var {function} in @result.matches {
 				if !function.isInitializingInstanceVariable(name) {
 					return false
 				}
@@ -153,11 +153,11 @@ class CallSuperConstructorSubstitude extends Substitude {
 		}
 		else {
 			if @result.matches.length == 1 {
-				const { function, arguments } = @result.matches[0]
+				var { function, arguments } = @result.matches[0]
 
 				fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
-				for const argument, index in arguments {
+				for var argument, index in arguments {
 					fragments.code($comma)
 
 					if !?argument {
@@ -167,7 +167,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 						@arguments[argument].toArgumentFragments(fragments, mode)
 					}
 					else {
-						for const arg, i in argument {
+						for var arg, i in argument {
 							fragments.code($comma)
 
 							@arguments[arg].toArgumentFragments(fragments, mode)
@@ -198,7 +198,7 @@ class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubsti
 }
 
 class CallSuperMethodES6Substitude extends Substitude {
-	private lateinit {
+	private late {
 		_extendsName: String
 		_name: String
 		_precise: Boolean
@@ -213,9 +213,9 @@ class CallSuperMethodES6Substitude extends Substitude {
 	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
 
-		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
+		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		const result = Router.matchArguments(assessment, @arguments, @method)
+		var result = Router.matchArguments(assessment, @arguments, @method)
 
 		if ?result {
 			@result = result
@@ -229,7 +229,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 			}
 		}
 		else {
-			ReferenceException.throwNoMatchingClassMethod(@method.name(), @class.name(), [argument.type() for const argument in @arguments], @method)
+			ReferenceException.throwNoMatchingClassMethod(@method.name(), @class.name(), [argument.type() for var argument in @arguments], @method)
 		}
 
 		@extendsName = @class.type().extends().name()
@@ -239,7 +239,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 		if @precise {
 			fragments.code(`super.\(@name)(`)
 
-			for const argument, index in @arguments {
+			for var argument, index in @arguments {
 				if index != 0 {
 					fragments.code($comma)
 				}
@@ -250,7 +250,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 		else {
 			fragments.code(`super.\(@name).call(null, this, \(@extendsName).prototype, [`)
 
-			for const argument, index in @arguments {
+			for var argument, index in @arguments {
 				fragments.code($comma) if index > 0
 
 				fragments.compile(argument)
@@ -265,11 +265,11 @@ class CallSuperMethodES6Substitude extends Substitude {
 				return @result.matches[0].function.getReturnType()
 			}
 			else {
-				return Type.union(@method.scope(), ...[match.function.getReturnType() for const match in @result.matches])
+				return Type.union(@method.scope(), ...[match.function.getReturnType() for var match in @result.matches])
 			}
 		}
 		else {
-			return Type.union(@method.scope(), ...[fn.getReturnType() for const fn in @result.possibilities])
+			return Type.union(@method.scope(), ...[fn.getReturnType() for var fn in @result.possibilities])
 		}
 	} # }}}
 }
@@ -287,9 +287,9 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
 
-		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
+		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		const result = Router.matchArguments(assessment, @arguments, @method)
+		var result = Router.matchArguments(assessment, @arguments, @method)
 
 		if ?result {
 			@result = result
@@ -312,14 +312,14 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 		if @sealed {
 			fragments.code(`\(@class.type().extends().getSealedPath()).\(@name).call(this`)
 
-			for const argument in @arguments {
+			for var argument in @arguments {
 				fragments.code($comma).compile(argument)
 			}
 		}
 		else {
 			fragments.code(`super.\(@name)(`)
 
-			for const argument, index in @arguments {
+			for var argument, index in @arguments {
 				fragments.code($comma) if index != 0
 
 				fragments.compile(argument)
@@ -332,17 +332,17 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 				return @result.matches[0].function.getReturnType()
 			}
 			else {
-				return Type.union(@method.scope(), ...[match.function.getReturnType() for const match in @result.matches])
+				return Type.union(@method.scope(), ...[match.function.getReturnType() for var match in @result.matches])
 			}
 		}
 		else {
-			return Type.union(@method.scope(), ...[fn.getReturnType() for const fn in @result.possibilities])
+			return Type.union(@method.scope(), ...[fn.getReturnType() for var fn in @result.possibilities])
 		}
 	} # }}}
 }
 
 class MemberSealedSuperMethodSubstitude extends Substitude {
-	private lateinit {
+	private late {
 		_result: CallMatchResult
 	}
 	private {
@@ -357,7 +357,7 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 
 		@extendsType = @class.type().extends()
 
-		if const property = @extendsType.type().getInstanceProperty(@property) {
+		if var property = @extendsType.type().getInstanceProperty(@property) {
 			@sealed = property.isSealed()
 		}
 	} # }}}
@@ -365,21 +365,21 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 	setCallMatchResult(@result)
 	toFragments(fragments, mode) { # {{{
 		if @sealed {
-			if const index = @extendsType.type().getSharedMethodIndex(@property) {
+			if var index = @extendsType.type().getSharedMethodIndex(@property) {
 				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@property)(this`)
 			}
 			else {
 				fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
 			}
 
-			for const argument in @arguments {
+			for var argument in @arguments {
 				fragments.code($comma).compile(argument)
 			}
 		}
 		else {
 			fragments.code(`super.\(@property)(`)
 
-			for const argument, index in @arguments {
+			for var argument, index in @arguments {
 				if index != 0 {
 					fragments.code($comma)
 				}

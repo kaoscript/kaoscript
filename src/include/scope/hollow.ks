@@ -16,14 +16,14 @@ class HollowScope extends Scope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type, initialized)
+		var variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 
 		return variable
 	} # }}}
 	defineVariable(variable: Variable, node: AbstractNode) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
 		@parent.defineVariable(variable, node)
 
@@ -32,14 +32,14 @@ class HollowScope extends Scope {
 	getChunkType(name) => this.getChunkType(name, @line())
 	getChunkType(name, line: Number) { # {{{
 		if @chunkTypes[name] is Array {
-			const types: Array = @chunkTypes[name]
-			let type = null
+			var types: Array = @chunkTypes[name]
+			var mut type = null
 
 			if line == -1 || line > @line() {
 				type = types.last()
 			}
 			else {
-				for const i from 0 til types.length by 2 while types[i] <= line {
+				for var i from 0 til types.length by 2 while types[i] <= line {
 					type = types[i + 1]
 				}
 			}
@@ -53,16 +53,16 @@ class HollowScope extends Scope {
 	} # }}}
 	getDefinedVariable(name: String) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if @parent.isAtLastLine() {
 				variable = variables.last()
 			}
 			else {
-				const line = @parent.line()
+				var line = @parent.line()
 
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -83,15 +83,15 @@ class HollowScope extends Scope {
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name, line: Number = @parent.line()): Variable? { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			const currentLine = @parent.line()
-			let variable = null
+			var variables: Array = @variables[name]
+			var currentLine = @parent.line()
+			var mut variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -132,7 +132,7 @@ class HollowScope extends Scope {
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name, newName) { # {{{
 		if newName != name {
-			const variable = this.getVariable(name).clone()
+			var variable = this.getVariable(name).clone()
 
 			variable.renameAs(newName)
 
@@ -141,7 +141,7 @@ class HollowScope extends Scope {
 	} # }}}
 	renameNext(name, line) => @parent.renameNext(name, line)
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		let variable = this.getVariable(name)!?
+		var mut variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {

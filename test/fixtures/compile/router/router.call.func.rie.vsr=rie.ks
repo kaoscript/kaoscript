@@ -1,5 +1,5 @@
 func foobar(...values: Number): Number => 0
 
-const values = [0, 1, 2]
+var values = [0, 1, 2]
 
 foobar(...values)

@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let temperature = 54
+var dyn temperature = 54
 
 switch temperature {
 	0..49 	when temperature % 2 == 0	=> console.log("Cold and even")

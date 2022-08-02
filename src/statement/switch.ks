@@ -1,7 +1,7 @@
-const $switch = {
+var $switch = {
 	length(elements) { # {{{
-		let min = 0
-		let max = 0
+		var mut min = 0
+		var mut max = 0
 
 		for element in elements {
 			if element.spread {
@@ -21,7 +21,7 @@ const $switch = {
 }
 
 class SwitchStatement extends Statement {
-	private lateinit {
+	private late {
 		_castingEnum: Boolean				= false
 		_clauses							= []
 		_hasDefaultClause: Boolean			= false
@@ -42,9 +42,9 @@ class SwitchStatement extends Statement {
 		@reusableValue = @value is not IdentifierLiteral
 		@hasDefaultClause = false
 
-		let condition, binding
-		for const data, index in @data.clauses {
-			const clause = {
+		var mut condition, binding
+		for var data, index in @data.clauses {
+			var clause = {
 				hasTest: data.filter?
 				bindings: []
 				conditions: []
@@ -55,7 +55,7 @@ class SwitchStatement extends Statement {
 
 			clause.scope.index = index
 
-			for const ccData in data.conditions {
+			for var ccData in data.conditions {
 				if ccData.kind == NodeKind::SwitchConditionArray {
 					condition = new SwitchConditionArray(ccData, this, clause.scope)
 				}
@@ -84,7 +84,7 @@ class SwitchStatement extends Statement {
 				@hasDefaultClause = true
 			}
 
-			for const bbData in data.bindings {
+			for var bbData in data.bindings {
 				if bbData.kind == NodeKind::ArrayBinding {
 					binding = new SwitchBindingArray(bbData, this, clause.scope)
 
@@ -111,12 +111,12 @@ class SwitchStatement extends Statement {
 			clause.body = $compile.block(data.body, this, clause.scope)
 		}
 
-		for const clause in @clauses {
+		for var clause in @clauses {
 			clause.body.analyse()
 		}
 
 		if @hasLateInitVariables && !@hasDefaultClause {
-			for const value, name of @lateInitVariables when value.variable.isImmutable() {
+			for var value, name of @lateInitVariables when value.variable.isImmutable() {
 				SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
 			}
 		}
@@ -130,16 +130,16 @@ class SwitchStatement extends Statement {
 			@name = @scope.acquireTempName(false)
 		}
 
-		const enumValue = @valueType.isEnum()
+		var enumValue = @valueType.isEnum()
 
-		const inferables = {}
-		auto enumConditions = 0
-		auto maxConditions = 0
+		var inferables = {}
+		var mut enumConditions = 0
+		var mut maxConditions = 0
 
-		let maxInferables = @clauses.length
+		var mut maxInferables = @clauses.length
 
-		for const clause, index in @clauses {
-			for const condition in clause.conditions {
+		for var clause, index in @clauses {
+			for var condition in clause.conditions {
 				condition.prepare()
 
 				if condition.isEnum() {
@@ -149,7 +149,7 @@ class SwitchStatement extends Statement {
 				++maxConditions
 			}
 
-			for const binding in clause.bindings {
+			for var binding in clause.bindings {
 				binding.prepare()
 			}
 
@@ -165,7 +165,7 @@ class SwitchStatement extends Statement {
 				--maxInferables
 			}
 			else {
-				for const data, name of clause.body.scope().listUpdatedInferables() {
+				for var data, name of clause.body.scope().listUpdatedInferables() {
 					if inferables[name]? {
 						if inferables[name].union {
 							inferables[name].data.type.addType(data.type)
@@ -193,8 +193,8 @@ class SwitchStatement extends Statement {
 				// do nothing
 			}
 			else {
-				for const clause in @clauses {
-					for const condition in clause.conditions {
+				for var clause in @clauses {
+					for var condition in clause.conditions {
 						condition.setCastingEnum(true)
 					}
 				}
@@ -211,11 +211,11 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		for const data, name of @initializedVariables {
-			const types = []
-			let initializable = true
+		for var data, name of @initializedVariables {
+			var types = []
+			var mut initializable = true
 
-			for const clause, index in data.clauses {
+			for var clause, index in data.clauses {
 				if clause.initializable {
 					types.push(clause.type)
 				}
@@ -233,10 +233,10 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		for const data, name of @lateInitVariables {
-			const types = []
+		for var data, name of @lateInitVariables {
+			var types = []
 
-			for const clause, index in data.clauses {
+			for var clause, index in data.clauses {
 				if clause.initializable {
 					types.push(clause.type)
 				}
@@ -245,12 +245,12 @@ class SwitchStatement extends Statement {
 				}
 			}
 
-			const type = Type.union(@scope, ...types)
+			var type = Type.union(@scope, ...types)
 
 			@parent.initializeVariable(VariableBrief(name, type), this, this)
 		}
 
-		for const inferable, name of inferables {
+		for var inferable, name of inferables {
 			if inferable.count == maxInferables {
 				@scope.updateInferable(name, inferable.data, this)
 			}
@@ -284,14 +284,14 @@ class SwitchStatement extends Statement {
 		}
 	} # }}}
 	addInitializableVariable(variable, node) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
 		if !@hasDefaultClause {
 			SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
 		}
 
-		let clauseIndex
-		for const clause, index in @clauses {
+		var mut clauseIndex
+		for var clause, index in @clauses {
 			if clause.body == node {
 				clauseIndex = index
 
@@ -299,19 +299,19 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		if const map = @lateInitVariables[name] {
+		if var map = @lateInitVariables[name] {
 			map.clauses[clauseIndex] = {
 				initializable: true
 				type: null
 			}
 		}
 		else {
-			const map = {
+			var map = {
 				variable
 				clauses: []
 			}
 
-			for const i from 0 til @data.clauses.length {
+			for var i from 0 til @data.clauses.length {
 				if i == clauseIndex {
 					map.clauses[i] = {
 						initializable: true
@@ -334,9 +334,9 @@ class SwitchStatement extends Statement {
 		@parent.addInitializableVariable(variable, node)
 	} # }}}
 	defineVariables(left, scope) { # {{{
-		let alreadyDeclared
+		var mut alreadyDeclared
 
-		for const name in left.listAssignments([]) {
+		for var name in left.listAssignments([]) {
 			if scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
@@ -349,7 +349,7 @@ class SwitchStatement extends Statement {
 		}
 	} # }}}
 	checkReturnType(type: Type) { # {{{
-		for const clause in @clauses {
+		for var clause in @clauses {
 			clause.body.checkReturnType(type)
 		}
 	} # }}}
@@ -359,12 +359,12 @@ class SwitchStatement extends Statement {
 		return this
 	} # }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		const {name, type} = variable
+		var {name, type} = variable
 
-		if const map = @lateInitVariables[name] {
-			let clause = null
+		if var map = @lateInitVariables[name] {
+			var mut clause = null
 
-			for const cc, i in @clauses {
+			for var cc, i in @clauses {
 				if cc.body == node {
 					unless ?map.clauses[i] {
 						ReferenceException.throwImmutable(name, expression)
@@ -388,7 +388,7 @@ class SwitchStatement extends Statement {
 				clause.type = type
 			}
 
-			const clone = node.scope().getVariable(name).clone()
+			var clone = node.scope().getVariable(name).clone()
 
 			if clone.isDefinitive() {
 				clone.setRealType(type)
@@ -402,10 +402,10 @@ class SwitchStatement extends Statement {
 		else if !@hasDefaultClause {
 			// do nothing
 		}
-		else if const map = @initializedVariables[name] {
-			let clause = null
+		else if var map = @initializedVariables[name] {
+			var mut clause = null
 
-			for const cc, i in @clauses {
+			for var cc, i in @clauses {
 				if cc.body == node {
 					unless ?map.clauses[i] {
 						ReferenceException.throwImmutable(name, expression)
@@ -433,12 +433,12 @@ class SwitchStatement extends Statement {
 			node.scope().updateInferable(name, variable, expression)
 		}
 		else {
-			const map = {
+			var map = {
 				variable
 				clauses: []
 			}
 
-			for const clause, index in @clauses {
+			for var clause, index in @clauses {
 				if clause.body == node {
 					map.clauses[index] = {
 						initializable: true
@@ -461,7 +461,7 @@ class SwitchStatement extends Statement {
 			return false
 		}
 
-		for const clause in @clauses {
+		for var clause in @clauses {
 			if !clause.body.isExit() {
 				return false
 			}
@@ -476,7 +476,7 @@ class SwitchStatement extends Statement {
 			return true
 		}
 
-		for const clause in @clauses {
+		for var clause in @clauses {
 			if clause.body.isUsingVariable(name) {
 				return true
 			}
@@ -495,7 +495,7 @@ class SwitchStatement extends Statement {
 		}
 
 		if @reusableValue {
-			const line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
+			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
 
 			if @castingEnum {
 				if @valueType.isEnum() {
@@ -509,7 +509,7 @@ class SwitchStatement extends Statement {
 			line.done()
 		}
 		else if @castingEnum {
-			const line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
+			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
 
 			if @valueType.isEnum() {
 				line.code('.value')
@@ -521,16 +521,16 @@ class SwitchStatement extends Statement {
 			line.done()
 		}
 
-		for const clause, clauseIdx in @clauses {
-			for const condition in clause.conditions {
+		for var clause, clauseIdx in @clauses {
+			for var condition in clause.conditions {
 				condition.toStatementFragments(fragments)
 			}
 
 			clause.filter.toStatementFragments(fragments)
 
 			if @usingFallthrough {
-				const line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
-				const block = line.newBlock()
+				var line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
+				var block = line.newBlock()
 
 				@nextClauseIndex = clauseIdx + 1
 
@@ -545,10 +545,10 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		let ctrl = fragments.newControl()
-		let we = false
+		var mut ctrl = fragments.newControl()
+		var mut we = false
 
-		for const clause, clauseIdx in @clauses {
+		for var clause, clauseIdx in @clauses {
 			if clause.conditions.length != 0 {
 				if we {
 					SyntaxException.throwAfterDefaultClause(this)
@@ -561,7 +561,7 @@ class SwitchStatement extends Statement {
 					ctrl.code('if(')
 				}
 
-				for const condition, i in clause.conditions {
+				for var condition, i in clause.conditions {
 					ctrl.code(' || ') if i != 0
 
 					condition.toBooleanFragments(ctrl, @name)
@@ -575,7 +575,7 @@ class SwitchStatement extends Statement {
 					ctrl.line(`\(clause.name)()`)
 				}
 				else {
-					for const binding in clause.bindings {
+					for var binding in clause.bindings {
 						binding.toFragments(ctrl)
 					}
 
@@ -598,7 +598,7 @@ class SwitchStatement extends Statement {
 					ctrl.line(`\(clause.name)()`)
 				}
 				else {
-					for const binding in clause.bindings {
+					for var binding in clause.bindings {
 						binding.toFragments(ctrl)
 					}
 
@@ -621,7 +621,7 @@ class SwitchStatement extends Statement {
 					ctrl.line(`\(clause.name)()`)
 				}
 				else {
-					for const binding in clause.bindings {
+					for var binding in clause.bindings {
 						binding.toFragments(ctrl)
 					}
 
@@ -652,7 +652,7 @@ class SwitchBindingArray extends AbstractNode {
 		@array.translate()
 	} # }}}
 	toFragments(fragments) { # {{{
-		let line = fragments.newLine()
+		var mut line = fragments.newLine()
 
 		line.code($runtime.scope(this))
 
@@ -693,7 +693,7 @@ class SwitchConditionArray extends AbstractNode {
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		for let value in @data.values {
+		for var mut value in @data.values {
 			if value.kind != NodeKind::OmittedExpression {
 				if value.kind == NodeKind::SwitchConditionRange {
 					value = new SwitchConditionRange(value, this)
@@ -728,7 +728,7 @@ class SwitchConditionArray extends AbstractNode {
 
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
 
-		let mm = $switch.length(@data.values)
+		var mut mm = $switch.length(@data.values)
 		if mm.min == mm.max {
 			if mm.min != Infinity {
 				fragments.code(' && ', name, '.length === ', mm.min)
@@ -750,14 +750,14 @@ class SwitchConditionArray extends AbstractNode {
 	} # }}}
 	toStatementFragments(fragments) { # {{{
 		if @values.length > 0 {
-			let line = fragments.newLine()
+			var mut line = fragments.newLine()
 
 			if @flatten {
-				const name = new Literal('__ks__', this)
+				var name = new Literal('__ks__', this)
 
 				line.code($runtime.scope(this), @name, ' = function(__ks__)')
 
-				const block = line.newBlock()
+				var block = line.newBlock()
 
 				block.done()
 			}
@@ -781,7 +781,7 @@ class SwitchConditionArray extends AbstractNode {
 
 				line.code(']) => ')
 
-				let index = 0
+				var mut index = 0
 				for value, i in @data.values {
 					if value.kind != NodeKind::OmittedExpression {
 						if index != 0 {
@@ -849,7 +849,7 @@ class SwitchConditionRange extends AbstractNode {
 }
 
 class SwitchConditionType extends AbstractNode {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	analyse()
@@ -865,7 +865,7 @@ class SwitchConditionType extends AbstractNode {
 }
 
 class SwitchConditionValue extends AbstractNode {
-	private lateinit {
+	private late {
 		_castingEnum: Boolean	= false
 		_value
 		_type: Type
@@ -914,8 +914,8 @@ class SwitchFilter extends AbstractNode {
 			if @data.bindings.length > 0 {
 				@name = @scope.parent().acquireTempName(false)
 
-				for const data in @data.bindings {
-					const binding = $compile.expression(data, this)
+				for var data in @data.bindings {
+					var binding = $compile.expression(data, this)
 
 					binding.analyse()
 
@@ -946,7 +946,7 @@ class SwitchFilter extends AbstractNode {
 		}
 	} # }}}
 	toBooleanFragments(fragments, nf) { # {{{
-		let mm
+		var mut mm
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
 				this.module().flag('Type')
@@ -994,19 +994,19 @@ class SwitchFilter extends AbstractNode {
 	} # }}}
 	toStatementFragments(fragments) { # {{{
 		if @name != null {
-			let line = fragments.newLine()
+			var mut line = fragments.newLine()
 
 			if @flatten {
-				const name = new Literal('__ks__', this)
+				var name = new Literal('__ks__', this)
 
 				line.code($runtime.scope(this), @name, ' = function(__ks__)')
 
-				const block = line.newBlock()
+				var block = line.newBlock()
 
-				const ln = block.newLine().code($runtime.scope(this))
+				var ln = block.newLine().code($runtime.scope(this))
 
-				let comma = false
-				for const binding in @bindings {
+				var mut comma = false
+				for var binding in @bindings {
 					if comma {
 						line.code(', ')
 					}

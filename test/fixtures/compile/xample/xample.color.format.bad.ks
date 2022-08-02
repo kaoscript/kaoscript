@@ -2,7 +2,7 @@ import {
 	'../_/_string.ks'
 }
 
-const $formatters = {}
+var $formatters = {}
 
 func format(format: String) {
 	if format ?= $formatters[format] {

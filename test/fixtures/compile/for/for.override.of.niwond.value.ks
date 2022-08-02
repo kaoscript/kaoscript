@@ -1,6 +1,6 @@
 extern console
 
-let value = {
+var dyn value = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'

@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let temperature = 83
+var dyn temperature = 83
 
 switch temperature {
 	0..49	=> console.log("Cold")

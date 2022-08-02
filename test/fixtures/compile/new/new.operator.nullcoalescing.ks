@@ -1,13 +1,13 @@
 class Foobar {
 }
 
-const $map = {
+var $map = {
 	default: Foobar
 	foobar: Foobar
 }
 
 func foobar(name) {
-	const clazz = $map[name] ?? $map.default
+	var clazz = $map[name] ?? $map.default
 
 	return new clazz()
 }

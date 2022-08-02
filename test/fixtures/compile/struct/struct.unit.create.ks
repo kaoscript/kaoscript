@@ -1,3 +1,3 @@
 struct Unit
 
-const unit = Unit()
+var unit = Unit()

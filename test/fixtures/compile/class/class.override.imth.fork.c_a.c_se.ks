@@ -8,7 +8,7 @@ class Quxbaz extends Foobar {
 
 func foobar(f: Foobar) => f.foobar('foobar')
 
-const q = new Quxbaz()
+var q = new Quxbaz()
 
 q.foobar('foobar')
 

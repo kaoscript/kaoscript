@@ -1,3 +1,3 @@
-let x: Number = null
+var dyn x: Number = null
 
 export x

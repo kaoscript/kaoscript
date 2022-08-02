@@ -1,5 +1,5 @@
 class ImplementDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_forkedMethods			= {}
 		_newSealedClass			= false
 		_properties				= []
@@ -51,11 +51,11 @@ class ImplementDeclaration extends Statement {
 			@resolveType(true)
 		}
 
-		const type = @type.type()
+		var type = @type.type()
 
 		if type is ClassType {
-			for const data in @data.properties {
-				let property: Statement
+			for var data in @data.properties {
+				var mut property: Statement
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -83,8 +83,8 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 		else if type is EnumType {
-			for const data in @data.properties {
-				let property: Statement
+			for var data in @data.properties {
+				var mut property: Statement
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -105,7 +105,7 @@ class ImplementDeclaration extends Statement {
 		}
 		else if type is NamespaceType {
 			for data in @data.properties {
-				let property: Statement
+				var mut property: Statement
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -128,15 +128,15 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 
-		const methods = {
+		var methods = {
 			false: {}
 			true: {}
 		}
 
-		for const property in @properties {
+		for var property in @properties {
 			property.prepare()
 
-			if const name = property.getSharedName() {
+			if var name = property.getSharedName() {
 				if @sharingProperties[name]? {
 					@sharingProperties[name].push(property)
 				}
@@ -146,13 +146,13 @@ class ImplementDeclaration extends Statement {
 			}
 
 			if property.isMethod() {
-				const name = property.name()
-				const type = property.type()
-				const instance = property.isInstance()
-				const mode = property.getMatchingMode()
+				var name = property.name()
+				var type = property.type()
+				var instance = property.isInstance()
+				var mode = property.getMatchingMode()
 
-				if const methods = methods[instance][name] {
-					for const method in methods {
+				if var methods = methods[instance][name] {
+					for var method in methods {
 						if method.isSubsetOf(type, mode) {
 							if property.isConstructor() {
 								SyntaxException.throwDuplicateConstructor(property)
@@ -171,12 +171,12 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 
-		for const methods, name of @forkedMethods {
-			for const { original, forks } of methods {
-				const index = original.index()
-				let found = false
+		for var methods, name of @forkedMethods {
+			for var { original, forks } of methods {
+				var index = original.index()
+				var mut found = false
 
-				for const method in @type.listInstanceMethods(name) until found {
+				for var method in @type.listInstanceMethods(name) until found {
 					if index == method.type().index() {
 						method.flagForked(@type, forks)
 
@@ -196,7 +196,7 @@ class ImplementDeclaration extends Statement {
 		}
 	} # }}}
 	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType) { # {{{
-		const index = oldMethod.index()
+		var index = oldMethod.index()
 
 		@forkedMethods[name] ??= {}
 
@@ -219,7 +219,7 @@ class ImplementDeclaration extends Statement {
 			property.toFragments(fragments, Mode::None)
 		}
 
-		for const properties of @sharingProperties {
+		for var properties of @sharingProperties {
 			properties[0].toSharedFragments(fragments, properties)
 		}
 	} # }}}

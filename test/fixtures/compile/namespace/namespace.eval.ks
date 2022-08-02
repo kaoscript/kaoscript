@@ -1,7 +1,7 @@
 require expect: func
 
 namespace NS {
-	const foobar = 42
+	var foobar = 42
 
 	export *
 }

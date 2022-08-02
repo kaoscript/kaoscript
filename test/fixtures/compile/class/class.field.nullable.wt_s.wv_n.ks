@@ -1,7 +1,7 @@
 class Foobar {
-	public x: String	= null
+	public x: String?	= null
 }
 
-const f = new Foobar()
+var f = new Foobar()
 
 f.x = null

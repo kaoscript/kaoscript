@@ -8,7 +8,7 @@ class ImportScope extends BlockScope {
 		}
 
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -26,8 +26,8 @@ class ImportScope extends BlockScope {
 	} # }}}
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Renamed {
-			if const renames = @scopeRenames[name] {
-				for const rename in renames {
+			if var renames = @scopeRenames[name] {
+				for var rename in renames {
 					if rename.name == newName {
 						return true
 					}
@@ -39,7 +39,7 @@ class ImportScope extends BlockScope {
 	} # }}}
 	rename(name: String, newName: String, scope: Scope) { # {{{
 		if newName != name {
-			if const renames = @scopeRenames[name] {
+			if var renames = @scopeRenames[name] {
 				renames.push({
 					name: newName
 					scope
@@ -55,7 +55,7 @@ class ImportScope extends BlockScope {
 	} # }}}
 	resetReference(name: String)
 	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
-		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
+		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
 			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)

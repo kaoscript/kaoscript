@@ -5,6 +5,6 @@ func foobar() => {
 	y: 2
 }
 
-if let {x, y} = foobar() {
+if var {x, y} = foobar() {
 	console.log(`\(x)`)
 }

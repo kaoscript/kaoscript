@@ -2,10 +2,10 @@ import {
 	'../_/_string.ks'
 }
 
-const $formatters = {}
+var $formatters = {}
 
 func format(format: String) {
-	if const format = $formatters[format] {
+	if var format = $formatters[format] {
 		return format.formatter(format.space)
 	}
 	else {

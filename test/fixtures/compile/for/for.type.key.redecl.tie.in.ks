@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values) {
-	let key: Number
+	var dyn key: Number
 
 	for _, key in values {
 		console.log(`\(key)`)

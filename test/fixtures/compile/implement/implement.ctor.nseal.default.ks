@@ -15,6 +15,6 @@ impl Shape {
 	}
 }
 
-const s = new Shape('x', 'y')
+var s = new Shape('x', 'y')
 
 export Shape

@@ -1,8 +1,8 @@
 extern console
 
-let x = 42
+var dyn x = 42
 
-for let x from 10 to x {
+for var x from 10 to x {
 	console.log(x)
 }
 

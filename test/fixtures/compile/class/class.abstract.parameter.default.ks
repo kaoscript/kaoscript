@@ -8,6 +8,6 @@ class Rectangle extends Shape {
 	draw(color) => `I'm drawing a \(color) rectangle.`
 }
 
-let r = new Rectangle()
+var dyn r = new Rectangle()
 
 console.log(r.draw('black'))

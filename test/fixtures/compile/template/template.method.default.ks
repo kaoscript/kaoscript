@@ -1,6 +1,6 @@
 extern console
 
-let d = 'foo'
-let u = 42
+var dyn d = 'foo'
+var dyn u = 42
 
 console.log(`\(d)\(u)`.toUpperCase())

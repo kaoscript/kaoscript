@@ -1,5 +1,5 @@
 func foobar(i: Number, b: Boolean) {
-	let x: Number
+	var dyn x: Number
 
 	if b {
 	}

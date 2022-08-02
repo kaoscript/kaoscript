@@ -1,1 +1,1 @@
-let foo = 4 + 2
+var dyn foo = 4 + 2

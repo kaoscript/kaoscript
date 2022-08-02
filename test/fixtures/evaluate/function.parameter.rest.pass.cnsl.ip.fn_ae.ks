@@ -10,9 +10,9 @@ impl ClassA {
 	}
 }
 
-const a = new ClassA()
+var a = new ClassA()
 
-const items = []
+var items = []
 
 func foobar(values) {
 	a.foobar(...values)

@@ -7,4 +7,4 @@ class Foobar {
 	constructor(@x)
 }
 
-const f = new Foobar(null)
+var f = new Foobar(null)

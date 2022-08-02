@@ -15,7 +15,7 @@ export namespace NS {
 	}
 }
 
-const $available = []
+var $available = []
 
 export func acquire(): NS.Foobar {
 	if $available.length == 0 {

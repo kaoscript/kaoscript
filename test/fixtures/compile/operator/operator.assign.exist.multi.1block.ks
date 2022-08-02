@@ -2,8 +2,8 @@ extern console: {
 	log(...args)
 }
 
-let foo = () => 'otto'
-let qux = () => 'itti'
+var dyn foo = () => 'otto'
+var dyn qux = () => 'itti'
 
 if x ?= foo() {
 	console.log(x)

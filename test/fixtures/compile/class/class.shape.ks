@@ -20,6 +20,6 @@ class Shape {
 	}
 }
 
-let s = new Shape('#777')
+var dyn s = new Shape('#777')
 
 console.log(s.color())

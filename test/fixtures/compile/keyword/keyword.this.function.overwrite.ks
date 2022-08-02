@@ -1,3 +1,3 @@
 func foobar() {
-	const this = 42
+	var this = 42
 }

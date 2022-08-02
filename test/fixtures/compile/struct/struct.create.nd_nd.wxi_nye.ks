@@ -3,4 +3,4 @@ struct Point {
     y: Number
 }
 
-const point = Point(42)
+var point = Point(42)

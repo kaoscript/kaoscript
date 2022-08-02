@@ -1,5 +1,5 @@
 func foo() {
-	const cache = foo.cache
+	var cache = foo.cache
 }
 
 foo.cache = {}

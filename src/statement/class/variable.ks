@@ -1,9 +1,8 @@
 class ClassVariableDeclaration extends AbstractNode {
-	private lateinit {
+	private late {
 		_type: ClassVariableType
 	}
 	private {
-		_autoTyping: Boolean		= false
 		_defaultValue: Boolean		= false
 		_immutable: Boolean			= false
 		_instance: Boolean			= true
@@ -17,17 +16,13 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@name = data.name.name
 
-		let public = false
-		let alias = false
+		var mut public = false
+		var mut alias = false
 
-		for const modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			switch modifier.kind {
-				ModifierKind::AutoTyping => {
-					@autoTyping = true
-				}
 				ModifierKind::Immutable => {
 					@immutable = true
-					@autoTyping = true
 				}
 				ModifierKind::LateInit => {
 					@lateInit = true
@@ -62,16 +57,11 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @data.value? {
 			@defaultValue = true
 			@lateInit = false
-
-			if !@instance {
-				@value = $compile.expression(@data.value, this)
-				@value.analyse()
-			}
 		}
 	} # }}}
 	prepare() { # {{{
 		if @parent.isExtending() {
-			const type = @parent._extendsType.type()
+			var type = @parent._extendsType.type()
 
 			if @instance {
 				if type.hasInstanceVariable(@name) {
@@ -87,31 +77,23 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@type = ClassVariableType.fromAST(@data!?, this)
 
-		if @defaultValue {
-			if @instance {
-				@value = $compile.expression(@data.value, this, @parent._instanceVariableScope)
-				@value.analyse()
-			}
-
-			if @autoTyping {
-				@type.type(@value.type())
-			}
-			else if @data.value.kind == NodeKind::Identifier && @data.value.name == 'null' {
-				@type.flagNullable()
-			}
-		}
-		else {
-			if @type.isRequiringInitialization() {
-				@initialized = false
-			}
+		if !@defaultValue && @type.isRequiringInitialization() {
+			@initialized = false
 		}
 	} # }}}
 	translate() { # {{{
 		if @defaultValue {
+			@value = $compile.expression(@data.value, this, @instance ? @parent._instanceVariableScope : null)
+			@value.analyse()
 			@value.prepare()
 
-			if !@value.isMatchingType(@type.type()) {
-				TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
+			if @data.type? {
+				unless @value.type().isAssignableToVariable(@type.type(), true, true, false) {
+					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
+				}
+			}
+			else if @immutable && !@lateInit {
+				@type.type(@value.type())
 			}
 
 			@value.translate()
@@ -121,10 +103,6 @@ class ClassVariableDeclaration extends AbstractNode {
 	initialize(type, node) { # {{{
 		if !@initialized {
 			@initialized = true
-
-			if @autoTyping {
-				@type.type(type)
-			}
 		}
 	} # }}}
 	isImmutable() => @immutable

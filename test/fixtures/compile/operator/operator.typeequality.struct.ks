@@ -8,7 +8,7 @@ struct Quxbaz extends Foobar {
 
 }
 
-const x = Quxbaz()
+var x = Quxbaz()
 
 if x is Quxbaz {
 

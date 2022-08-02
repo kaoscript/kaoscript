@@ -1,4 +1,4 @@
 import '../export/export.sealed.class.nullable.ks'
 
-let shape: Shape = new Shape('circle')
+var dyn shape: Shape = new Shape('circle')
 console.log(shape.draw('black'))

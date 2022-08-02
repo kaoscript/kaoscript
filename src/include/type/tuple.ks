@@ -37,10 +37,10 @@ abstract class TupleType extends Type {
 	} # }}}
 	function(reference, node) { # {{{
 		if @function == null {
-			const scope = node.scope()
+			var scope = node.scope()
 			@function = new FunctionType(scope)
 
-			for const field in this.listAllFields([]) {
+			for var field in this.listAllFields([]) {
 				if field.isRequired() {
 					@function.addParameter(field.type(), field.name(), 1, 1)
 				}
@@ -55,7 +55,7 @@ abstract class TupleType extends Type {
 		return @function
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
-		if const field = @fieldsByIndex[index] {
+		if var field = @fieldsByIndex[index] {
 			return field
 		}
 
@@ -67,7 +67,7 @@ abstract class TupleType extends Type {
 		}
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if const field = @fieldsByIndex[name] {
+		if var field = @fieldsByIndex[name] {
 			return field
 		}
 
@@ -86,7 +86,7 @@ abstract class TupleType extends Type {
 			@extends.type().listAllFields(list)
 		}
 
-		for const index from @extendedLength til @extendedLength + @length {
+		for var index from @extendedLength til @extendedLength + @length {
 			list.push(@fieldsByIndex[index])
 		}
 
@@ -108,15 +108,15 @@ abstract class TupleType extends Type {
 class NamedTupleType extends TupleType {
 	static {
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { # {{{
-			const data = index
-			const value = new NamedTupleType(scope)
+			var data = index
+			var value = new NamedTupleType(scope)
 
 			queue.push(() => {
 				if data.extends? {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
-				for const type, name of data.fields {
+				for var type, name of data.fields {
 					value.addField(TupleFieldType.import(name, type, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -134,13 +134,13 @@ class NamedTupleType extends TupleType {
 		++@length
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
-		const export = {
+		var export = {
 			kind: TypeKind::Tuple
 			named: true
 			fields: {}
 		}
 
-		for const field, name of @fieldsByName {
+		for var field, name of @fieldsByName {
 			export.fields[name] = field.export(references, indexDelta, mode, module)
 		}
 
@@ -155,17 +155,17 @@ class NamedTupleType extends TupleType {
 			@extends.type().getAllFieldsMap(list)
 		}
 
-		for const field, name of @fieldsByName {
+		for var field, name of @fieldsByName {
 			list[name] = field
 		}
 
 		return list
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if const field = @fieldsByName[name] {
+		if var field = @fieldsByName[name] {
 			return field
 		}
-		else if const field = @fieldsByIndex[name] {
+		else if var field = @fieldsByIndex[name] {
 			return field
 		}
 
@@ -186,7 +186,7 @@ class NamedTupleType extends TupleType {
 	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
-		for const type in value.types() {
+		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
 			}
@@ -195,18 +195,18 @@ class NamedTupleType extends TupleType {
 		return false
 	} # }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		const fields = this.getAllFieldsMap()
-		const count = this.length()
+		var fields = this.getAllFieldsMap()
+		var count = this.length()
 
-		const nameds = {}
-		let namedCount = 0
+		var nameds = {}
+		var mut namedCount = 0
 
-		const shorthands = {}
-		const leftovers = []
+		var shorthands = {}
+		var leftovers = []
 
-		for const argument in arguments {
+		for var argument in arguments {
 			if argument is NamedArgument {
-				const name = argument.name()
+				var name = argument.name()
 
 				if !?fields[name] {
 					SyntaxException.throwUnrecognizedTupleField(name, node)
@@ -217,7 +217,7 @@ class NamedTupleType extends TupleType {
 				++namedCount
 			}
 			else if argument is IdentifierLiteral {
-				const name = argument.name()
+				var name = argument.name()
 
 				if ?fields[name] {
 					shorthands[name] = true
@@ -234,25 +234,25 @@ class NamedTupleType extends TupleType {
 		if namedCount == arguments.length {
 			if namedCount != count {
 				if arguments.length == 0 {
-					for const field, name of fields when field.isRequired() {
+					for var field, name of fields when field.isRequired() {
 						ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
 					}
 				}
 				else {
-					for const field, name of fields when !nameds[name] && field.isRequired() {
+					for var field, name of fields when !nameds[name] && field.isRequired() {
 						SyntaxException.throwMissingTupleField(name, node)
 					}
 				}
 			}
 		}
 		else {
-			const groups = []
+			var groups = []
 
-			let index = 0
-			let required = 0
-			let optional = 0
+			var mut index = 0
+			var mut required = 0
+			var mut optional = 0
 
-			for const field, name of fields {
+			for var field, name of fields {
 				if nameds[name] || shorthands[name] {
 					++index
 				}
@@ -275,10 +275,10 @@ class NamedTupleType extends TupleType {
 				SyntaxException.throwTooMuchTupleFields(node)
 			}
 
-			let countdown = leftovers.length - required
-			let leftover = 0
+			var mut countdown = leftovers.length - required
+			var mut leftover = 0
 
-			for const [index, field] in groups {
+			for var [index, field] in groups {
 				if field.isRequired() {
 					if !leftovers[leftover].type().matchContentOf(field.type()) {
 						ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
@@ -296,20 +296,20 @@ class NamedTupleType extends TupleType {
 		return true
 	} # }}}
 	sortArguments(arguments: Array, node) { # {{{
-		const order = []
+		var order = []
 
-		const fields = this.getAllFieldsMap()
-		const count = this.length()
+		var fields = this.getAllFieldsMap()
+		var count = this.length()
 
-		const nameds = {}
-		let namedCount = 0
+		var nameds = {}
+		var mut namedCount = 0
 
-		const shorthands = {}
-		const leftovers = []
+		var shorthands = {}
+		var leftovers = []
 
-		for const argument in arguments {
+		for var argument in arguments {
 			if argument is NamedArgument {
-				const name = argument.name()
+				var name = argument.name()
 
 				if !?fields[name] {
 					SyntaxException.throwUnrecognizedTupleField(name, node)
@@ -320,7 +320,7 @@ class NamedTupleType extends TupleType {
 				++namedCount
 			}
 			else if argument is IdentifierLiteral {
-				const name = argument.name()
+				var name = argument.name()
 
 				if ?fields[name] {
 					shorthands[name] = argument
@@ -333,12 +333,12 @@ class NamedTupleType extends TupleType {
 
 		if namedCount == arguments.length {
 			if namedCount == count {
-				for const field, name of fields {
+				for var field, name of fields {
 					order.push(nameds[name])
 				}
 			}
 			else {
-				for const field, name of fields {
+				for var field, name of fields {
 					if nameds[name]? {
 						order.push(nameds[name])
 					}
@@ -352,11 +352,11 @@ class NamedTupleType extends TupleType {
 			}
 		}
 		else {
-			const groups = []
-			let required = 0
-			let optional = 0
+			var groups = []
+			var mut required = 0
+			var mut optional = 0
 
-			for const field, name of fields {
+			for var field, name of fields {
 				if nameds[name]? {
 					order.push(nameds[name])
 				}
@@ -364,7 +364,7 @@ class NamedTupleType extends TupleType {
 					order.push(shorthands[name])
 				}
 				else {
-					const index = order.length
+					var index = order.length
 
 					order.push(null)
 					groups.push([index, field])
@@ -385,10 +385,10 @@ class NamedTupleType extends TupleType {
 				SyntaxException.throwTooMuchTupleFields(node)
 			}
 
-			let countdown = leftovers.length - required
-			let leftover = 0
+			var mut countdown = leftovers.length - required
+			var mut leftover = 0
 
-			for const [index, field] in groups {
+			for var [index, field] in groups {
 				if field.isRequired() {
 					order[index] = leftovers[leftover]
 
@@ -413,15 +413,15 @@ class NamedTupleType extends TupleType {
 class UnnamedTupleType extends TupleType {
 	static {
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { # {{{
-			const data = index
-			const value = new UnnamedTupleType(scope)
+			var data = index
+			var value = new UnnamedTupleType(scope)
 
 			queue.push(() => {
 				if data.extends? {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
-				for const type in data.fields {
+				for var type in data.fields {
 					value.addField(TupleFieldType.import(null, type, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -440,13 +440,13 @@ class UnnamedTupleType extends TupleType {
 		++@length
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
-		const export = {
+		var export = {
 			kind: TypeKind::Tuple
 			named: false
 			fields: []
 		}
 
-		for const field in @fields {
+		for var field in @fields {
 			export.fields.push(field.export(references, indexDelta, mode, module))
 		}
 
@@ -467,7 +467,7 @@ class UnnamedTupleType extends TupleType {
 	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
-		for const type in value.types() {
+		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
 			}
@@ -476,12 +476,12 @@ class UnnamedTupleType extends TupleType {
 		return false
 	} # }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		const fields = this.listAllFields()
+		var fields = this.listAllFields()
 
-		let required = 0
-		let optional = 0
+		var mut required = 0
+		var mut optional = 0
 
-		for const field of fields {
+		for var field of fields {
 			if field.isRequired() {
 				++required
 			}
@@ -497,10 +497,10 @@ class UnnamedTupleType extends TupleType {
 			SyntaxException.throwTooMuchTupleFields(node)
 		}
 
-		let countdown = arguments.length - required
-		let leftover = 0
+		var mut countdown = arguments.length - required
+		var mut leftover = 0
 
-		for const field of fields {
+		for var field of fields {
 			if field.isRequired() {
 				if !arguments[leftover].type().matchContentOf(field.type()) {
 					ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
@@ -527,9 +527,9 @@ class TupleFieldType extends Type {
 	}
 	static {
 		import(_name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
-			const fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			// FIXME
-			const name: String? = _name!!
+			var name: String? = _name!!
 
 			return new TupleFieldType(scope, name, data.index as Number, fieldType, data.required)
 		} # }}}

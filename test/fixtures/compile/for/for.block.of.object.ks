@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-const likes = {
+var likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'

@@ -1,8 +1,8 @@
 extern console, parseFloat
 
 namespace Float {
-	const PI = 3.14
-	
+	var PI = 3.14
+
 	export func toFloat(value: String): Number => PI * parseFloat(value)
 	export func toString(value: Number): String => value.toString()
 }

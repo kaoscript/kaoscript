@@ -1,3 +1,3 @@
 extern foo
 
-let tt = ?foo ? 'foo' : 'bar'
+var dyn tt = ?foo ? 'foo' : 'bar'

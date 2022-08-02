@@ -1,5 +1,5 @@
 class Foobar {
-	private lateinit {
+	private late {
 		@x: Number	= 0
 	}
 }

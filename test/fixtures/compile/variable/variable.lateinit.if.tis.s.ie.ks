@@ -8,7 +8,7 @@ impl String {
 	toString(): String => this
 }
 
-lateinit const x
+var late x
 
 if true {
 	x = 'foobar'

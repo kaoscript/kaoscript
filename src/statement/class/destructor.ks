@@ -1,5 +1,5 @@
 class ClassDestructorDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: Block
 		_parameters: Array
 		_type: Type
@@ -8,7 +8,7 @@ class ClassDestructorDeclaration extends Statement {
 		_internalName: String
 	}
 	static toRouterFragments(node, fragments, variable) { # {{{
-		let ctrl = fragments.newControl()
+		var mut ctrl = fragments.newControl()
 
 		if node._es5 {
 			ctrl.code('__ks_destroy: function(that)')
@@ -37,7 +37,7 @@ class ClassDestructorDeclaration extends Statement {
 		parent._destructor = this
 	} # }}}
 	analyse() { # {{{
-		const parameter = new Parameter({
+		var parameter = new Parameter({
 			kind: NodeKind::Parameter
 			modifiers: []
 			name: $ast.identifier('that')
@@ -76,7 +76,7 @@ class ClassDestructorDeclaration extends Statement {
 	isOverridableFunction() => false
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl()
+		var mut ctrl = fragments.newControl()
 
 		if @parent._es5 {
 			ctrl.code(`\(@internalName): function(`)

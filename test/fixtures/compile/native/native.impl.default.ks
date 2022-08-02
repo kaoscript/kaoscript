@@ -11,7 +11,7 @@ impl String {
 	}
 }
 
-let foo: string = 'HELLO!'
+var dyn foo: string = 'HELLO!'
 
 console.log(foo)
 console.log(foo.lowerFirst())

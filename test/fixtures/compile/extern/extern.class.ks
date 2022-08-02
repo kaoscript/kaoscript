@@ -9,5 +9,5 @@ extern class Shape {
 	draw(shape, canvas): string
 }
 
-let shape = new Shape('yellow')
+var dyn shape = new Shape('yellow')
 console.log(shape.draw())

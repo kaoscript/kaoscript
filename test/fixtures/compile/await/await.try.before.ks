@@ -1,11 +1,11 @@
 async func foo(x, y) => x - y
 
 async func bar() {
-	let d
+	var dyn d
 	
 	try {
-		let x = 42
-		let y = 24
+		var dyn x = 42
+		var dyn y = 24
 		
 		d = await foo(x, y)
 		

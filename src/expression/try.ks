@@ -1,5 +1,5 @@
 class TryExpression extends Expression {
-	private lateinit {
+	private late {
 		_argument: Expression
 		_defaultValue: Expression?		= null
 		_reusable: Boolean				= false
@@ -7,7 +7,7 @@ class TryExpression extends Expression {
 		_unwrap: Boolean				= false
 	}
 	analyse() { # {{{
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Disabled {
 				@unwrap = true
 			}

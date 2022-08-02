@@ -4,5 +4,5 @@ impl Date {
 }
 
 func foobar(...args) {
-	const d = new Date(...args)
+	var d = new Date(...args)
 }

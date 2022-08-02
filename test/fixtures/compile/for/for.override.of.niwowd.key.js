@@ -7,7 +7,7 @@ module.exports = function() {
 		d.duncan = "murbella";
 		return d;
 	})();
-	for(let __ks_value_1 in value) {
+	for(const __ks_value_1 in value) {
 		console.log(__ks_value_1);
 	}
 };

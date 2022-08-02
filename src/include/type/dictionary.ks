@@ -4,7 +4,7 @@ class DictionaryType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
-			const type = new DictionaryType(scope)
+			var type = new DictionaryType(scope)
 
 			if data.systemic {
 				type.flagSystemic()
@@ -14,7 +14,7 @@ class DictionaryType extends Type {
 			}
 
 			queue.push(() => {
-				for const property, name of data.properties {
+				for var property, name of data.properties {
 					type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -29,7 +29,7 @@ class DictionaryType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const export = {
+		var export = {
 			kind: TypeKind::Dictionary
 		}
 
@@ -42,7 +42,7 @@ class DictionaryType extends Type {
 
 		export.properties = {}
 
-		for const value, name of @properties {
+		for var value, name of @properties {
 			export.properties[name] = value.export(references, indexDelta, mode, module)
 		}
 
@@ -51,7 +51,7 @@ class DictionaryType extends Type {
 	flagAlien() { # {{{
 		@alien = true
 
-		for const property of @properties {
+		for var property of @properties {
 			property.flagAlien()
 		}
 
@@ -83,7 +83,7 @@ class DictionaryType extends Type {
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
@@ -105,8 +105,8 @@ class DictionaryType extends Type {
 	isExportable() => true
 	isSealable() => true
 	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
-		for const type, name of value.properties() {
-			if const prop = @properties[name] {
+		for var type, name of value.properties() {
+			if var prop = @properties[name] {
 				if !prop.isSubsetOf(type, mode) {
 					return false
 				}
@@ -127,8 +127,8 @@ class DictionaryType extends Type {
 			return false
 		}
 
-		for const type, name of value.properties() {
-			if const prop = @properties[name] {
+		for var type, name of value.properties() {
+			if var prop = @properties[name] {
 				if !prop.isSubsetOf(type, mode) {
 					return false
 				}
@@ -144,9 +144,9 @@ class DictionaryType extends Type {
 		return false unless value.isDictionary()
 
 		if value.hasParameters() {
-			const parameter = value.parameter(0)
+			var parameter = value.parameter(0)
 
-			for const type, name of @properties {
+			for var type, name of @properties {
 				if !type.isSubsetOf(parameter, mode) {
 					return false
 				}
@@ -162,7 +162,7 @@ class DictionaryType extends Type {
 		}
 
 		if value is UnionType {
-			for const type in value.types() {
+			for var type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -174,7 +174,7 @@ class DictionaryType extends Type {
 	parameter() => AnyType.NullableUnexplicit
 	properties() => @properties
 	setExhaustive(@exhaustive) { # {{{
-		for const property of @properties {
+		for var property of @properties {
 			property.setExhaustive(exhaustive)
 		}
 
@@ -184,10 +184,10 @@ class DictionaryType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	toQuote() { # {{{
-		auto str = '{'
+		var mut str = '{'
 
-		let first = true
-		for const property, name of @properties {
+		var mut first = true
+		for var property, name of @properties {
 			if first {
 				first = false
 			}
@@ -210,7 +210,7 @@ class DictionaryType extends Type {
 
 		fragments.code('!', $runtime.type(node), '.isDictionary(').compile(node).code(')')
 
-		for const value, name of @properties {
+		for var value, name of @properties {
 			fragments.code(' || ')
 
 			value.toNegativeTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
@@ -223,7 +223,7 @@ class DictionaryType extends Type {
 
 		fragments.code($runtime.type(node), '.isDictionary(').compile(node).code(')')
 
-		for const value, name of @properties {
+		for var value, name of @properties {
 			fragments.code(' && ')
 
 			value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
@@ -238,7 +238,7 @@ class DictionaryType extends Type {
 		else {
 			fragments.code(`value => `, $runtime.type(node), '.isDictionary(value)')
 
-			for const value, name of @properties {
+			for var value, name of @properties {
 				fragments.code(' && ')
 
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
@@ -248,14 +248,14 @@ class DictionaryType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('dict')
 
-		for const type, name of @properties {
+		for var type, name of @properties {
 			variations.push(name)
 
 			type.toVariations(variations)
 		}
 	} # }}}
 	walk(fn) { # {{{
-		for const type, name of @properties {
+		for var type, name of @properties {
 			fn(name, type)
 		}
 	} # }}}

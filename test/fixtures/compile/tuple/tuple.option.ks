@@ -3,12 +3,12 @@ tuple Pair(
 	Number	= 0
 )
 
-const pair = Pair()
+var pair = Pair()
 
-const pair2 = Pair(null, 3.14)
+var pair2 = Pair(null, 3.14)
 
-const pair3 = Pair('foobar')
+var pair3 = Pair('foobar')
 
-const pair4 = Pair('foobar', null)
+var pair4 = Pair('foobar', null)
 
-const pair5 = Pair(null, null)
+var pair5 = Pair(null, null)

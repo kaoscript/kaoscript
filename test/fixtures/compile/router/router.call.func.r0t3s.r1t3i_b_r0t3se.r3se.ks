@@ -6,7 +6,7 @@ func foobar(...{1,3}values: Number, flag: Boolean, ...{0,3}args: String): Number
 }
 
 func f() {
-	const args = ['x', 'y', 'z']
+	var args = ['x', 'y', 'z']
 
 	return `\(foobar(...args))`
 }

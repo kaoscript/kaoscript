@@ -1,5 +1,5 @@
 class Variable {
-	private lateinit {
+	private late {
 		// true: can be altered by `impl` declaration
 		_altereable: Boolean		= false
 		_class: Boolean				= false
@@ -60,7 +60,7 @@ class Variable {
 		@module = @predefined
 	} # }}}
 	clone() { # {{{
-		const clone = new Variable()
+		var clone = new Variable()
 
 		clone._name = @name
 		clone._secureName = @secureName

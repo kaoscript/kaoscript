@@ -1,1 +1,1 @@
-const foo = func(a:Number, b:Number) => a - b
+var foo = func(a:Number, b:Number) => a - b

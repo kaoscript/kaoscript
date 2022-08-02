@@ -8,4 +8,4 @@ func foobar(...args) {
 	return null
 }
 
-const i = `\(foobar(false))`
+var i = `\(foobar(false))`

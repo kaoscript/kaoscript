@@ -8,7 +8,7 @@ extern {
 
 import '../require/require.alt.roe.methods.ks'
 
-const a = [1..10]
+var a = [1..10]
 
 console.log(`\(a.indexOf(5).toString())`)
 

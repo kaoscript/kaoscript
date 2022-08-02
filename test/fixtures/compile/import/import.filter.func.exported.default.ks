@@ -4,7 +4,7 @@ import '../export/export.filter.func.exported.default.ks'
 
 console.log(`\(qux('foobar'))`)
 
-const x = foobar()
+var x = foobar()
 
 console.log(`\(x.toString())`)
 

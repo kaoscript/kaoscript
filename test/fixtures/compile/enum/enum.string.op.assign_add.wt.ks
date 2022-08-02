@@ -6,7 +6,7 @@ enum CardSuit<String> {
 }
 
 func foobar(): CardSuit {
-	auto card = CardSuit::Clubs
+	var mut card = CardSuit::Clubs
 
 	card += 'clubs'
 

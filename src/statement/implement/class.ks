@@ -1,9 +1,8 @@
 class ImplementClassFieldDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_type: ClassVariableType
 	}
 	private {
-		_autoTyping: Boolean				= false
 		_class: ClassType
 		_classRef: ReferenceType
 		_defaultValue: Boolean				= false
@@ -24,17 +23,13 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		@name = @internalName = data.name.name
 
-		let private = false
-		let alias = false
+		var mut private = false
+		var mut alias = false
 
-		for const modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			switch modifier.kind {
-				ModifierKind::AutoTyping => {
-					@autoTyping = true
-				}
 				ModifierKind::Immutable => {
 					@immutable = true
-					@autoTyping = true
 				}
 				ModifierKind::LateInit => {
 					@lateInit = true
@@ -88,12 +83,6 @@ class ImplementClassFieldDeclaration extends Statement {
 			if @instance {
 				@init = @class.incInitializationSequence()
 			}
-
-			@value.prepare()
-
-			if @autoTyping {
-				@type.type(@value.type())
-			}
 		}
 		else if !@lateInit && !@type.isNullable() {
 			SyntaxException.throwNotInitializedField(@name, this)
@@ -101,6 +90,12 @@ class ImplementClassFieldDeclaration extends Statement {
 	} # }}}
 	translate() { # {{{
 		if @defaultValue {
+			@value.prepare()
+
+			if !?@data.type && @immutable && !@lateInit {
+				@type.type(@value.type())
+			}
+
 			@value.translate()
 		}
 	} # }}}
@@ -112,7 +107,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		if @class.isSealed() {
 			if @instance {
-				let line, block, ctrl
+				var mut line, block, ctrl
 
 				// get()
 				line = fragments.newLine()
@@ -175,17 +170,17 @@ class ImplementClassFieldDeclaration extends Statement {
 					fragments.line(`\(@variable.getSealedName()).__ks_init_\(@init) = \(@variable.getSealedName()).__ks_init`)
 				}
 
-				const line = fragments.newLine()
+				var line = fragments.newLine()
 
 				line.code(`\(@variable.getSealedName()).__ks_init = function(that)`)
 
-				const block = line.newBlock()
+				var block = line.newBlock()
 
 				if @init > 0 {
 					block.line(`\(@variable.getSealedName()).__ks_init_\(@init)(that)`)
 				}
 
-				for const property in properties {
+				for var property in properties {
 					property.toDefaultFragments(block)
 				}
 
@@ -197,15 +192,15 @@ class ImplementClassFieldDeclaration extends Statement {
 			else {
 				fragments.line(`\(@variable.name()).prototype.__ks_init_\(@init) = \(@variable.name()).prototype.__ks_init`)
 
-				const line = fragments.newLine()
+				var line = fragments.newLine()
 
 				line.code(`\(@variable.name()).prototype.__ks_init = function()`)
 
-				const block = line.newBlock()
+				var block = line.newBlock()
 
 				block.line(`this.__ks_init_\(@init)()`)
 
-				for const property in properties {
+				for var property in properties {
 					property.toDefaultFragments(block)
 				}
 
@@ -218,7 +213,7 @@ class ImplementClassFieldDeclaration extends Statement {
 }
 
 class ImplementClassMethodDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: Block
 		_internalName: String
 		_name: String
@@ -251,7 +246,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@name = @data.name.name
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Override {
 				@override = true
 			}
@@ -277,7 +272,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	prepare() { # {{{
 		@scope.line(@data.start.line)
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
@@ -290,7 +285,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		@type = new ClassMethodType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAltering()
 
@@ -298,24 +293,24 @@ class ImplementClassMethodDeclaration extends Statement {
 			@type.flagSealed()
 		}
 
-		const returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
+		var returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
 
-		let overridden
+		var mut overridden
 
 		if @instance {
 			if @override {
-				if const data = @getOveriddenMethod(@class, returnReference) {
+				if var data = @getOveriddenMethod(@class, returnReference) {
 					{ method: overridden, type: @type } = data
 
 					unless @class.isAbstract() {
 						@hiddenOverride = true
 					}
 
-					const overloaded = @listOverloadedMethods(@class)
+					var overloaded = @listOverloadedMethods(@class)
 
 					overloaded:Array.remove(overridden)
 
-					for const method in overloaded {
+					for var method in overloaded {
 						@parent.addForkedMethod(@name, method, @type)
 					}
 				}
@@ -332,7 +327,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					SyntaxException.throwNotSealedOverwrite(this)
 				}
 
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError)
+				var methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -341,8 +336,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				@internalName = `__ks_func_\(@name)_\(@type.index())`
 
-				const type = Type.union(@scope, ...methods)
-				const variable = @scope.define('precursor', true, type, this)
+				var type = Type.union(@scope, ...methods)
+				var variable = @scope.define('precursor', true, type, this)
 
 				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, true, this)
 			}
@@ -364,7 +359,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					NotImplementedException.throw(this)
 				}
 
-				const methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameters)
+				var methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -373,8 +368,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				@internalName = `__ks_sttc_\(@name)_\(@type.index())`
 
-				const type = Type.union(@scope, ...methods)
-				const variable = @scope.define('precursor', true, type, this)
+				var type = Type.union(@scope, ...methods)
+				var variable = @scope.define('precursor', true, type, this)
 
 				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, false, this)
 			}
@@ -408,7 +403,7 @@ class ImplementClassMethodDeclaration extends Statement {
 						}
 
 						if @instance {
-							const return = $compile.expression(@data.type.value, this)
+							var return = $compile.expression(@data.type.value, this)
 
 							return.analyse()
 
@@ -417,7 +412,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					}
 				}
 				NodeKind::ThisExpression => {
-					const return = $compile.expression(@data.type.value, this)
+					var return = $compile.expression(@data.type.value, this)
 
 					return.analyse()
 
@@ -431,8 +426,8 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if ?overridden {
-			const oldType = overridden.getReturnType()
-			const newType = @type.getReturnType()
+			var oldType = overridden.getReturnType()
+			var newType = @type.getReturnType()
 
 			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
 				if @override {
@@ -456,7 +451,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		for const indigent in @indigentValues {
+		for var indigent in @indigentValues {
 			indigent.value.prepare()
 			indigent.value.translate()
 		}
@@ -478,7 +473,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
-		const name = `__ks_default_\(@class.level())_\(@class.incDefaultSequence())`
+		var name = `__ks_default_\(@class.level())_\(@class.incDefaultSequence())`
 
 		@indigentValues.push({
 			name
@@ -519,9 +514,9 @@ class ImplementClassMethodDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toIndigentFragments(fragments) { # {{{
-		for const {name, value, parameters} in @indigentValues {
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+		for var {name, value, parameters} in @indigentValues {
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			if @class.isSealed() {
 				ctrl.code(`\(@variable.getSealedName()).\(name) = function(\(parameters.join(', ')))`).step()
@@ -537,12 +532,12 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toInstanceFragments(fragments) { # {{{
-		const name = @variable.name()
+		var name = @variable.name()
 
-		const assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
+		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
 
-		const line = fragments.newLine()
-		const block = line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -560,7 +555,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		line.done()
 
 		if !@exists {
-			const line = fragments.newLine()
+			var line = fragments.newLine()
 
 			line
 				.code(`\(name).prototype.\(@name) = function()`)
@@ -572,12 +567,12 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toStaticFragments(fragments) { # {{{
-		const name = @variable.name()
+		var name = @variable.name()
 
-		const assessment = Router.assess(@class.listClassMethods(@name), @name, this)
+		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
 
-		const line = fragments.newLine()
-		const block = line.code(`\(name).\(@name) = function()`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(name).\(@name) = function()`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -595,15 +590,15 @@ class ImplementClassMethodDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toSealedInstanceFragments(fragments) { # {{{
-		const name = @variable.name()
-		const sealedName = @variable.getSealedName()
+		var name = @variable.name()
+		var sealedName = @variable.getSealedName()
 
-		const assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
-		const exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
+		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
+		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
 
 		if !@exists {
-			const line = fragments.newLine()
-			const block = line.code(`\(sealedName)._im_\(@name) = function(that, ...args)`).newBlock()
+			var line = fragments.newLine()
+			var block = line.code(`\(sealedName)._im_\(@name) = function(that, ...args)`).newBlock()
 
 			block.line(`return \(sealedName).__ks_func_\(@name)_rt(that, args)`)
 
@@ -611,8 +606,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			line.done()
 		}
 
-		const line = fragments.newLine()
-		const block = line.code(`\(sealedName).__ks_func_\(@name)_rt = function(that, args)`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(sealedName).__ks_func_\(@name)_rt = function(that, args)`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -648,13 +643,13 @@ class ImplementClassMethodDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toSealedStaticFragments(fragments) { # {{{
-		const name = @variable.getSealedName()
+		var name = @variable.getSealedName()
 
-		const assessment = Router.assess(@class.listClassMethods(@name), @name, this)
-		const exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
+		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
+		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
 
-		const line = fragments.newLine()
-		const block = line.code(`\(name)._sm_\(@name) = function()`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(name)._sm_\(@name) = function()`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -703,7 +698,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
 		if @class.isSealed() {
 			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
@@ -717,13 +712,13 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()
 		})
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(block)
 		}
 
@@ -737,21 +732,21 @@ class ImplementClassMethodDeclaration extends Statement {
 	type() => @type
 	private {
 		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
-			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if !@override {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
 			}
 
-			const methods = superclass.listInstantiableMethods(@name, @type, mode)
+			var methods = superclass.listInstantiableMethods(@name, @type, mode)
 
-			let method = null
-			let exact = false
+			var mut method = null
+			var mut exact = false
 			if methods.length == 1 {
 				method = methods[0]
 			}
 			else if methods.length > 0 {
-				for const m in methods {
+				for var m in methods {
 					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						method = m
 						exact = true
@@ -766,14 +761,14 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 
 			if method? {
-				const type = @override ? method.clone() : @type
+				var type = @override ? method.clone() : @type
 
 				if @override {
-					const parameters = type.parameters()
+					var parameters = type.parameters()
 
-					for const parameter, index in @parameters {
-						const currentType = parameter.type()
-						const masterType = parameters[index]
+					for var parameter, index in @parameters {
+						var currentType = parameter.type()
+						var masterType = parameters[index]
 
 						if currentType.isMissingType() {
 							parameter.type(masterType)
@@ -793,8 +788,8 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 				else if @override {
 					if !@type.isMissingReturn() {
-						const oldType = method.getReturnType()
-						const newType = @type.getReturnType()
+						var oldType = method.getReturnType()
+						var newType = @type.getReturnType()
 
 						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
 							if this.isAssertingOverride() {
@@ -818,12 +813,12 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 
 				if !@type.isMissingError() {
-					const newTypes = @type.listErrors()
+					var newTypes = @type.listErrors()
 
-					for const oldType in method.listErrors() {
-						let matched = false
+					for var oldType in method.listErrors() {
+						var mut matched = false
 
-						for const newType in newTypes until matched {
+						for var newType in newTypes until matched {
 							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
@@ -862,8 +857,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			return null
 		} # }}}
 		listOverloadedMethods(superclass: ClassType) { # {{{
-			if const methods = superclass.listInstanceMethods(@name) {
-				for const method in methods {
+			if var methods = superclass.listInstanceMethods(@name) {
+				for var method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						return []
 					}
@@ -880,7 +875,7 @@ class ImplementClassMethodDeclaration extends Statement {
 }
 
 class ImplementClassConstructorDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: Block
 		_internalName: String
 		_parameters: Array<Parameter>
@@ -909,7 +904,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	analyse() { # {{{
 		@scope.line(@data.start.line)
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Overwrite {
 				@overwrite = true
 			}
@@ -917,7 +912,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		@this = @scope.define('this', true, @classRef, true, this)
 
-		const body = $ast.body(@data)
+		var body = $ast.body(@data)
 
 		if @class.isSealed() {
 			if this.getConstructorIndex($ast.block(body).statements) != -1 {
@@ -944,11 +939,11 @@ class ImplementClassConstructorDeclaration extends Statement {
 	prepare() { # {{{
 		@scope.line(@data.start.line)
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAltering()
 
@@ -965,7 +960,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				SyntaxException.throwNotSealedOverwrite(this)
 			}
 
-			const methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters)
+			var methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters)
 			if methods.length == 0 {
 				SyntaxException.throwNoSuitableOverwrite(@classRef, 'constructor', @type, this)
 			}
@@ -974,7 +969,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 			@internalName = `__ks_cons_\(@type.index())`
 
-			const variable = @scope.define('precursor', true, @classRef, this)
+			var variable = @scope.define('precursor', true, @classRef, this)
 
 			variable.replaceCall = (data, arguments, node) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable, this)
 		}
@@ -987,7 +982,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			}
 		}
 
-		let index = 1
+		var mut index = 1
 		if @block.isEmpty() {
 			if @class.isExtending() {
 				this.addCallToParentConstructor()
@@ -1010,10 +1005,10 @@ class ImplementClassConstructorDeclaration extends Statement {
 			@block.analyse(index + 1)
 		}
 
-		for const statement in @aliases {
-			const name = statement.getVariableName()
+		for var statement in @aliases {
+			var name = statement.getVariableName()
 
-			if const variable = @class.getInstanceVariable(name) {
+			if var variable = @class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
 					@block.initializeVariable(VariableBrief(
 						name
@@ -1045,7 +1040,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	} # }}}
 	private addCallToParentConstructor() { # {{{
 		// only add call if parent has an empty constructor
-		const extendedType = @class.extends().type()
+		var extendedType = @class.extends().type()
 
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
@@ -1086,7 +1081,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	} # }}}
 	class() => @variable
 	private getConstructorIndex(body: Array) { # {{{
-		for const statement, index in body {
+		for var statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
 				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
 					return index
@@ -1123,12 +1118,12 @@ class ImplementClassConstructorDeclaration extends Statement {
 	name() => 'constructor'
 	parameters() => @parameters
 	toCreatorFragments(fragments) { # {{{
-		const classname = @variable.name()
-		const name = @class.isSealed() ? @variable.getSealedName() : @variable.name()
-		const args = @type.max() == 0 ? '' : '...args'
+		var classname = @variable.name()
+		var name = @class.isSealed() ? @variable.getSealedName() : @variable.name()
+		var args = @type.max() == 0 ? '' : '...args'
 
-		const line = fragments.newLine()
-		const block = line.code(`\(name).__ks_new_\(@type.index()) = function(\(args))`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(name).__ks_new_\(@type.index()) = function(\(args))`).newBlock()
 
 		if @class.isSealed() {
 			if @type.isDependent() {
@@ -1150,17 +1145,17 @@ class ImplementClassConstructorDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toSharedFragments(fragments, _) { # {{{
-		const classname = @variable.name()
+		var classname = @variable.name()
 
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		const assessment = Router.assess(@class.listAccessibleConstructors(), 'constructor', this)
+		var assessment = Router.assess(@class.listAccessibleConstructors(), 'constructor', this)
 
 		if @class.isSealed() {
-			const sealedName = @variable.getSealedName()
-			const exhaustive = @class.isExhaustiveConstructor(this)
+			var sealedName = @variable.getSealedName()
+			var exhaustive = @class.isExhaustiveConstructor(this)
 
-			const block = line.code(`\(sealedName).new = function()`).newBlock()
+			var block = line.code(`\(sealedName).new = function()`).newBlock()
 
 			Router.toFragments(
 				(function, line) => {
@@ -1195,7 +1190,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			block.done()
 		}
 		else {
-			const block = line.code(`\(classname).prototype.__ks_cons_rt = function(that, args)`).newBlock()
+			var block = line.code(`\(classname).prototype.__ks_cons_rt = function(that, args)`).newBlock()
 
 			Router.toFragments(
 				(function, line) => {
@@ -1217,7 +1212,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { # {{{
 		this.toCreatorFragments(fragments)
 
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
 		if @class.isSealed() {
 			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
@@ -1226,13 +1221,13 @@ class ImplementClassConstructorDeclaration extends Statement {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()
 		})
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(block)
 		}
 
@@ -1250,7 +1245,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 
 class CallOverwrittenMethodSubstitude {
-	private lateinit {
+	private late {
 		_instance: Boolean
 	}
 	private {
@@ -1262,9 +1257,9 @@ class CallOverwrittenMethodSubstitude {
 		_type: Type
 	}
 	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance, node: AbstractNode) { # {{{
-		const types = []
+		var types = []
 
-		for const method in methods {
+		for var method in methods {
 			if method.matchArguments(@arguments, node) {
 				types.push(method.getReturnType())
 
@@ -1286,7 +1281,7 @@ class CallOverwrittenMethodSubstitude {
 			else {
 				fragments.code(`.call(this, `)
 
-				for const argument, index in @arguments {
+				for var argument, index in @arguments {
 					if index != 0 {
 						fragments.code($comma)
 					}
@@ -1298,7 +1293,7 @@ class CallOverwrittenMethodSubstitude {
 		else {
 			fragments.code(`this.\(@name)(`)
 
-			for const argument, index in @arguments {
+			for var argument, index in @arguments {
 				if index != 0 {
 					fragments.code($comma)
 				}
@@ -1323,7 +1318,7 @@ class CallSealedConstructorSubstitude {
 	toFragments(fragments, mode) { # {{{
 		fragments.code(`var that = \(@class.getSealedName()).new(`)
 
-		for const argument, index in @arguments {
+		for var argument, index in @arguments {
 			if index != 0 {
 				fragments.code($comma)
 			}
@@ -1351,7 +1346,7 @@ class CallOverwrittenConstructorSubstitude {
 	toFragments(fragments, mode) { # {{{
 		fragments.code(`const that = new \(@class.name())(`)
 
-		for const argument, index in @arguments {
+		for var argument, index in @arguments {
 			if index != 0 {
 				fragments.code($comma)
 			}
@@ -1367,7 +1362,7 @@ class CallOverwrittenConstructorSubstitude {
 }
 
 func $callSealedInitializer(fragments, type, node) { # {{{
-	const ctrl = fragments.newControl()
+	var ctrl = fragments.newControl()
 	ctrl.code(`if(!that[\($runtime.initFlag(node))])`).step()
 	ctrl.line(`\(type.getSealedName()).__ks_init(that)`)
 	ctrl.done()

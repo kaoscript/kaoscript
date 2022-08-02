@@ -19,8 +19,8 @@ class SealedCallee extends Callee {
 		@nullableProperty = data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Nullable)
 		@scope = data.scope.kind
 
-		const types = []
-		for const method in methods {
+		var types = []
+		for var method in methods {
 			this.validate(method, node)
 
 			types.push(method.getReturnType())
@@ -30,7 +30,7 @@ class SealedCallee extends Callee {
 	} # }}}
 	override hashCode() => `sealed`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for const method in @methods {
+		for var method in @methods {
 			if !method.isInitializingInstanceVariable(name) {
 				return false
 			}
@@ -78,7 +78,7 @@ class SealedCallee extends Callee {
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
-						for const argument in node._arguments {
+						for var argument in node._arguments {
 							fragments.code($comma)
 
 							argument.toArgumentFragments(fragments, mode)
@@ -87,7 +87,7 @@ class SealedCallee extends Callee {
 					else {
 						fragments.code(`\(@variable.getSealedPath())._sm_\(@property)(`)
 
-						for const argument, index in node._arguments {
+						for var argument, index in node._arguments {
 							if index != 0 {
 								fragments.code($comma)
 							}

@@ -1,5 +1,5 @@
 class CreateExpression extends Expression {
-	private lateinit {
+	private late {
 		_alien: Boolean				= false
 		_arguments: Array			= []
 		_computed: Boolean			= true
@@ -14,7 +14,7 @@ class CreateExpression extends Expression {
 		@factory = $compile.expression(@data.class, this)
 		@factory.analyse()
 
-		const es5 = @options.format.spreads == 'es5'
+		var es5 = @options.format.spreads == 'es5'
 
 		for argument in @data.arguments {
 			@arguments.push(argument = $compile.expression(argument, this))
@@ -45,9 +45,9 @@ class CreateExpression extends Expression {
 				@sealed = true
 			}
 
-			const assessment = type.type().getConstructorAssessment(type.name(), this)
+			var assessment = type.type().getConstructorAssessment(type.name(), this)
 
-			if const result = Router.matchArguments(assessment, @arguments, this) {
+			if var result = Router.matchArguments(assessment, @arguments, this) {
 				@result = result
 			}
 			else if type.type().isExhaustiveConstructor(this) {
@@ -81,7 +81,7 @@ class CreateExpression extends Expression {
 				@computed = @alien
 			}
 			else if @result.matches.length == 1 {
-				const { function, arguments } = @result.matches[0]
+				var { function, arguments } = @result.matches[0]
 
 				if @sealed && !function.isSealed() {
 					@computed = true
@@ -105,7 +105,7 @@ class CreateExpression extends Expression {
 			return true
 		}
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			if argument.isUsingVariable(name) {
 				return true
 			}
@@ -116,7 +116,7 @@ class CreateExpression extends Expression {
 	override listNonLocalVariables(scope, variables) { # {{{
 		@factory.listNonLocalVariables(scope, variables)
 
-		for const argument in @arguments {
+		for var argument in @arguments {
 			argument.listNonLocalVariables(scope, variables)
 		}
 
@@ -150,7 +150,7 @@ class CreateExpression extends Expression {
 					fragments.code('new ').compile(@factory).code('(')
 				}
 
-				for const argument, i in @arguments {
+				for var argument, i in @arguments {
 					fragments.code($comma) if i != 0
 
 					fragments.compile(argument)
@@ -162,7 +162,7 @@ class CreateExpression extends Expression {
 				if @hybrid {
 					fragments.code('new ').compile(@factory).code('(')
 
-					for const argument, i in @arguments {
+					for var argument, i in @arguments {
 						fragments.code($comma) if i != 0
 
 						fragments.compile(argument)
@@ -179,7 +179,7 @@ class CreateExpression extends Expression {
 					}
 				}
 				else if @result.matches.length == 1 {
-					const { function, arguments } = @result.matches[0]
+					var { function, arguments } = @result.matches[0]
 
 					if @sealed {
 						if function.isSealed() {

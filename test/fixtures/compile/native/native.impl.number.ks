@@ -8,7 +8,7 @@ impl Number {
 			return 0
 		}
 		else {
-			let n = this % max
+			var dyn n = this % max
 			if n < 0 {
 				return n + max
 			}

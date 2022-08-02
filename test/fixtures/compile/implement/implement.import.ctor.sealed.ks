@@ -1,6 +1,6 @@
 import './implement.ctor.wseal.default'
 
-const d1 = new Date()
-const d2 = new Date([2000, 1, 1])
-const d3 = new Date('2000-01-01')
-const d4 = new Date(2000)
+var d1 = new Date()
+var d2 = new Date([2000, 1, 1])
+var d3 = new Date('2000-01-01')
+var d4 = new Date(2000)

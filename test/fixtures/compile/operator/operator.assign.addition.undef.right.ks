@@ -1,3 +1,3 @@
-let x: Number = 0
+var dyn x: Number = 0
 
 x += y

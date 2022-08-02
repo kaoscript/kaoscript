@@ -1,7 +1,7 @@
-let foo = {
+var dyn foo = {
 	bar: {
 		qux() {
-			let i = 1
+			var dyn i = 1
 		}
 	}
 }

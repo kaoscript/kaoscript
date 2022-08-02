@@ -20,9 +20,9 @@ class EnumMethodCallee extends Callee {
 		@scope = data.scope.kind
 
 		if ?@methods {
-			const union = new UnionType(node.scope())
+			var union = new UnionType(node.scope())
 
-			for const method in @methods {
+			for var method in @methods {
 				union.addType(method.getReturnType())
 			}
 
@@ -42,7 +42,7 @@ class EnumMethodCallee extends Callee {
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		if @methods? {
-			for const method in @methods {
+			for var method in @methods {
 				if !method.isInitializingInstanceVariable(name) {
 					return false
 				}
@@ -74,7 +74,7 @@ class EnumMethodCallee extends Callee {
 
 					fragments.wrap(@expression._object, mode)
 
-					for const argument, index in node._arguments {
+					for var argument, index in node._arguments {
 						fragments.code($comma)
 
 						argument.toArgumentFragments(fragments, mode)

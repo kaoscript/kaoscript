@@ -3,4 +3,4 @@ tuple Point {
     y: Number	= 0
 }
 
-const point = Point()
+var point = Point()

@@ -4,18 +4,18 @@ extern console: {
 	log(...args)
 }
 
-let x = 0
+var dyn x = 0
 console.log(x)
 
-let o = {}
+var dyn o = {}
 o.x = 30
 
 if true {
-	let x = 42
+	var dyn x = 42
 	console.log(x)
 	
 	if true {
-		let x = 10
+		var dyn x = 10
 		console.log(x)
 	}
 	
@@ -25,5 +25,5 @@ if true {
 console.log(x)
 
 func foo() {
-	let x = 5
+	var dyn x = 5
 }

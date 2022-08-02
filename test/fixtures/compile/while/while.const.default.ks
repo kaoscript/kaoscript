@@ -1,7 +1,7 @@
 extern console
 
 func foobar(text: String) {
-	while const data = quxbaz(text) {
+	while var data = quxbaz(text) {
 		console.log(`\(data)`)
 	}
 }

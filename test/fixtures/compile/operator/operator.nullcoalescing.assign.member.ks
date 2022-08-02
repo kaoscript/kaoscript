@@ -1,5 +1,5 @@
 extern foo, bar
 
-let tt = foo()
+var dyn tt = foo()
 
 tt.uu ??= bar

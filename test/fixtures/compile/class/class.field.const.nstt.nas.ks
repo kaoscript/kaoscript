@@ -1,5 +1,5 @@
 class Foobar {
-	public const PI: Number = 42
+	public final PI: Number = 42
 }
 
 export Foobar

@@ -2,7 +2,7 @@ extern console
 
 func foo(): String => ''
 
-let x = ''
+var dyn x = ''
 
 console.log(`\(x)`)
 
@@ -10,7 +10,7 @@ x = foo()
 
 console.log(`\(x)`)
 
-let y = 42
+var dyn y = 42
 
 console.log(`\(y)`)
 

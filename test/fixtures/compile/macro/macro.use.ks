@@ -1,10 +1,10 @@
 macro using(id: Identifier, exp: Expression) {
 	macro {
 		(() => {
-			let #id = 42
+			var dyn #id = 42
 			return #exp
 		})()
 	}
 }
 
-let four = using!(a, a / 10)
+var dyn four = using!(a, a / 10)

@@ -3,4 +3,4 @@ class Foobar {
 	}
 }
 
-const builder = (data, arguments) => new Foobar(data, arguments)
+var builder = (data, arguments) => new Foobar(data, arguments)

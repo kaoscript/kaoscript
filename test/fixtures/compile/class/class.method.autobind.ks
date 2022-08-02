@@ -7,9 +7,9 @@ class Foobar {
 	x() => @x
 }
 
-const f = new Foobar()
+var f = new Foobar()
 
-let x = f.x
+var dyn x = f.x
 
 console.log(x())
 

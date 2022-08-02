@@ -1,5 +1,5 @@
 class StructDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_array: Boolean							= false
 		_extending: Boolean						= false
 		_extendsName: String
@@ -19,8 +19,8 @@ class StructDeclaration extends Statement {
 		if @data.extends? {
 			@extending = true
 
-			let name = ''
-			let member = @data.extends
+			var mut name = ''
+			var mut member = @data.extends
 			while member.kind == NodeKind::MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
@@ -37,8 +37,8 @@ class StructDeclaration extends Statement {
 	override analyse() { # {{{
 		@function = new StructFunction(@data, this, new BlockScope(@scope!?))
 
-		for const data in @data.fields {
-			const field = new StructFieldDeclaration(data, this)
+		for var data in @data.fields {
+			var field = new StructFieldDeclaration(data, this)
 
 			field.analyse()
 
@@ -61,12 +61,12 @@ class StructDeclaration extends Statement {
 
 		@function.prepare()
 
-		for const field in @fields {
+		for var field in @fields {
 			@struct.addField(field.type())
 		}
 	} # }}}
 	override translate() { # {{{
-		for const field in @fields {
+		for var field in @fields {
 			field.translate()
 		}
 	} # }}}
@@ -81,13 +81,13 @@ class StructDeclaration extends Statement {
 			fragments.line(`return new \($runtime.dictionary(this))`)
 		}
 		else {
-			let varname = '_'
+			var mut varname = '_'
 
 			if @extending {
-				const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_new(')
+				var line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_new(')
 
-				let nf = false
-				for const name in @extendsType.type().listAllFieldNames() {
+				var mut nf = false
+				for var name in @extendsType.type().listAllFieldNames() {
 					if nf {
 						line.code($comma)
 					}
@@ -104,7 +104,7 @@ class StructDeclaration extends Statement {
 				fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
 			}
 
-			for const field in @fields {
+			for var field in @fields {
 				fragments.newLine().code(varname, '.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
 			}
 
@@ -112,9 +112,9 @@ class StructDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).struct(`)
+		var line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).struct(`)
 
-		let ctrl = line.newControl(null, false, false).code(`function(`)
+		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
 		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
@@ -124,7 +124,7 @@ class StructDeclaration extends Statement {
 
 		ctrl.done()
 
-		const assessment = @type.type().assessment(@type.reference(@scope), this)
+		var assessment = @type.type().assessment(@type.reference(@scope), this)
 
 		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
 
@@ -162,15 +162,15 @@ class StructFunction extends AbstractNode {
 	} # }}}
 	analyse()
 	prepare() { # {{{
-		let index = -1
+		var mut index = -1
 
 		if @parent.isExtending() {
-			for const type in @parent._extendsType.type().listAllFields() {
-				const field = new StructFieldDeclaration(type as StructFieldType, @parent!?)
+			for var type in @parent._extendsType.type().listAllFields() {
+				var field = new StructFieldDeclaration(type as StructFieldType, @parent!?)
 				field.analyse()
 				field.prepare()
 
-				const parameter = field.parameter()
+				var parameter = field.parameter()
 
 				@parameters.push(parameter)
 
@@ -182,12 +182,12 @@ class StructFunction extends AbstractNode {
 			}
 		}
 
-		for const field in @parent.fields() {
+		for var field in @parent.fields() {
 			field.index(++index)
 
 			field.prepare()
 
-			const parameter = field.parameter()
+			var parameter = field.parameter()
 
 			@parameters.push(parameter)
 
@@ -204,7 +204,7 @@ class StructFunction extends AbstractNode {
 }
 
 class StructFieldDeclaration extends AbstractNode {
-	private lateinit {
+	private late {
 		_index: Number
 		_type: StructFieldType
 	}
@@ -234,7 +234,7 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter.prepare()
 
 		if !?@type {
-			let type: Type? = null
+			var mut type: Type? = null
 
 			if @data.type? {
 				type = Type.fromAST(@data.type, this)
@@ -282,7 +282,7 @@ class StructFieldParameter extends Parameter {
 		@name.setAssignment(AssignmentType::Parameter)
 		@name.analyse()
 
-		for const name in @name.listAssignments([]) {
+		for var name in @name.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
 	} # }}}

@@ -1,7 +1,7 @@
 impl Dictionary {
 	static {
 		clone(dict: Dictionary): Dictionary {
-			let clone = {}
+			var dyn clone = {}
 
 			return clone
 		}

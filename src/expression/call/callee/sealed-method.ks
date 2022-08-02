@@ -19,12 +19,12 @@ class SealedMethodCallee extends Callee {
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		let class = @variable.type()
+		var mut class = @variable.type()
 
 		if @instance {
 			while true {
-				if const methods = class.listInstanceMethods(@property) {
-					for const method in methods {
+				if var methods = class.listInstanceMethods(@property) {
+					for var method in methods {
 						if !method.isInitializingInstanceVariable(name) {
 							return false
 						}
@@ -41,8 +41,8 @@ class SealedMethodCallee extends Callee {
 		}
 		else {
 			while true {
-				if const methods = class.listClassMethods(@property) {
-					for const method in methods {
+				if var methods = class.listClassMethods(@property) {
+					for var method in methods {
 						if !method.isInitializingInstanceVariable(name) {
 							return false
 						}
@@ -97,7 +97,7 @@ class SealedMethodCallee extends Callee {
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
-						for const argument in node._arguments {
+						for var argument in node._arguments {
 							fragments.code($comma)
 
 							argument.toArgumentFragments(fragments, mode)
@@ -106,7 +106,7 @@ class SealedMethodCallee extends Callee {
 					else {
 						fragments.code(`\(@variable.getSealedPath())._sm_\(@property)(`)
 
-						for const argument, index in node._arguments {
+						for var argument, index in node._arguments {
 							if index != 0 {
 								fragments.code($comma)
 							}

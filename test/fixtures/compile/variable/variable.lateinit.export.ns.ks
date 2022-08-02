@@ -1,5 +1,5 @@
 namespace Foobar {
-	lateinit const x
+	var late x
 
 	x = 'foobar'
 

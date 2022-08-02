@@ -1,7 +1,7 @@
-for const i from 1 til 10 {
-	lateinit const x
+for var i from 1 til 10 {
+	var late x
 
 	x = 42
 
-	let y = x + i
+	var dyn y = x + i
 }

@@ -16,7 +16,7 @@ expect(foobar(0)).to.equal('number')
 expect(foobar({})).to.equal('dictionary')
 
 func testIf(x: Foobar, y: Number, z) {
-	const results = []
+	var results = []
 
 	if x ~~ Foobar::foo {
 		results.push('c')

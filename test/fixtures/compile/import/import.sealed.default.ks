@@ -1,4 +1,4 @@
 import '../export/export.sealed.class.default.ks'
 
-let shape: Shape = new Shape('yellow')
+var dyn shape: Shape = new Shape('yellow')
 console.log(shape.draw('rectangle'))

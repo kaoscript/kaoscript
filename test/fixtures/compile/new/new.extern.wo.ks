@@ -1,3 +1,3 @@
 extern class Foo
 
-let foo = new Foo()
+var dyn foo = new Foo()

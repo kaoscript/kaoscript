@@ -8,7 +8,7 @@ class Quxbaz extends Foobar {
 
 }
 
-const x = new Quxbaz()
+var x = new Quxbaz()
 
 if x is Quxbaz {
 

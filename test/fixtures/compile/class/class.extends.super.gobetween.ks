@@ -21,6 +21,6 @@ class Rectangle extends Quadrilateral {
     }
 }
 
-let r = new Rectangle('black')
+var dyn r = new Rectangle('black')
 
 console.log(r.draw())

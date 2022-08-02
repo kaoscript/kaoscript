@@ -1,3 +1,3 @@
-const x = 42
+var x = 42
 
-let x = 24
+var dyn x = 24

@@ -4,4 +4,4 @@ struct Point {
 	z: Number	= 0
 }
 
-const point = Point(x: 42, y: 1)
+var point = Point(x: 42, y: 1)

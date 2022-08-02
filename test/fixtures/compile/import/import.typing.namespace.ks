@@ -10,7 +10,7 @@ class WHITESPACE extends RT.Token {
 	static GROUP	= RT.Lexer.SKIPPED
 }
 
-const tokens = [WHITESPACE]
+var tokens = [WHITESPACE]
 
 class MyParser extends RT.Parser {
 	constructor() {

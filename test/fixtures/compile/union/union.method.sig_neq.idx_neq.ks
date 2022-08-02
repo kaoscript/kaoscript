@@ -10,7 +10,7 @@ class Bar {
 }
 
 func foo(x, y: Foo | Bar) {
-	const z = y.y(x)
+	var z = y.y(x)
 
 	console.log(`\(z)`)
 }

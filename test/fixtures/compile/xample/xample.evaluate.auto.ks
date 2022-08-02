@@ -7,7 +7,7 @@ extern eval
 
 impl String {
 	evaluate() {
-		auto value = this.trim()
+		var mut value = this.trim()
 
 		if value.startsWith('function') || value.startsWith('{') {
 			return eval('(function(){return ' + value + ';})()')

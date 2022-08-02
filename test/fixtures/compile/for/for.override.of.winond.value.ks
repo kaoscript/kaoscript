@@ -1,8 +1,8 @@
 extern console
 
-const value = 'spice'
+var value = 'spice'
 
-let likes = {
+var dyn likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'

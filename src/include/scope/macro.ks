@@ -46,8 +46,8 @@ class MacroScope extends Scope {
 	block() => this
 	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
-			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-			let newName = '__ks_' + name + '_' + (++index)
+			var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+			var mut newName = '__ks_' + name + '_' + (++index)
 
 			while @variables[newName] is Variable {
 				newName = '__ks_' + name + '_' + (++index)
@@ -66,14 +66,14 @@ class MacroScope extends Scope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type, initialized)
+		var variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 
 		return variable
 	} # }}}
 	defineVariable(variable: Variable, node: AbstractNode) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
@@ -81,13 +81,13 @@ class MacroScope extends Scope {
 
 		@variables[name] = variable
 
-		if const newName = this.declareVariable(name, this) {
+		if var newName = this.declareVariable(name, this) {
 			@renamedVariables[name] = newName
 
 			variable.renameAs(newName)
 		}
 
-		if const reference = @references[name] {
+		if var reference = @references[name] {
 			reference.reset()
 		}
 	} # }}}
@@ -115,10 +115,10 @@ class MacroScope extends Scope {
 	hasDefinedVariable(name: String) => @variables[name] is Variable
 	hasVariable(name: String, line = -1) => @variables[name] is Variable
 	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
-		const hash = a.toQuote()
+		var hash = a.toQuote()
 
-		if const matches = @matchingTypes[hash] {
-			for const type, i in matches by 2 {
+		if var matches = @matchingTypes[hash] {
+			for var type, i in matches by 2 {
 				if type == b {
 					return matches[i + 1]
 				}
@@ -130,9 +130,9 @@ class MacroScope extends Scope {
 
 		@matchingTypes[hash].push(b, false)
 
-		const index = @matchingTypes[hash].length
+		var index = @matchingTypes[hash].length
 
-		const match = a.isSubsetOf(b, mode)
+		var match = a.isSubsetOf(b, mode)
 
 		@matchingTypes[hash][index - 1] = match
 
@@ -162,7 +162,7 @@ class MacroScope extends Scope {
 		return this.resolveReference(value, nullable, parameters)
 	} # }}}
 	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
-		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
+		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
 			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)

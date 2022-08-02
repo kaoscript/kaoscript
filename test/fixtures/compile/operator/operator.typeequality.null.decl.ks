@@ -1,4 +1,4 @@
-let v = null
+var dyn v = null
 
 if v is Array {
 

@@ -1,5 +1,5 @@
 class SequenceExpression extends Expression {
-	private lateinit {
+	private late {
 		_expressions: Array<Expression>		= []
 		_last: Number
 		_type: Type
@@ -25,7 +25,7 @@ class SequenceExpression extends Expression {
 		}
 	} # }}}
 	isUsingVariable(name) { # {{{
-		for const expression in @expressions {
+		for var expression in @expressions {
 			if expression.isUsingVariable(name) {
 				return true
 			}
@@ -34,7 +34,7 @@ class SequenceExpression extends Expression {
 		return false
 	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
-		for const expression in @expressions {
+		for var expression in @expressions {
 			expression.listNonLocalVariables(scope, variables)
 		}
 
@@ -43,7 +43,7 @@ class SequenceExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code('(')
 
-		for const expression, index in @expressions {
+		for var expression, index in @expressions {
 			if index != 0 {
 				fragments.code($comma)
 			}
@@ -56,7 +56,7 @@ class SequenceExpression extends Expression {
 	toBooleanFragments(fragments, mode, junction) { # {{{
 		fragments.code('(')
 
-		for const expression, index in @expressions til @last {
+		for var expression, index in @expressions til @last {
 			if index != 0 {
 				fragments.code($comma)
 			}

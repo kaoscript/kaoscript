@@ -1,4 +1,4 @@
-const $weightTOFs = { # {{{
+var $weightTOFs = { # {{{
 	Array: 1
 	Boolean: 2
 	Class: 12
@@ -17,7 +17,7 @@ const $weightTOFs = { # {{{
 
 // TODO add strict flag for router.call.func.cb.cre.vsr=cre.ks
 class ReferenceType extends Type {
-	private lateinit {
+	private late {
 		_type: Type
 		_variable: Variable
 	}
@@ -32,9 +32,9 @@ class ReferenceType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
-			let name
+			var mut name
 			if data.name is Number {
-				const reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
+				var reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
 
 				name = reference.name()
 			}
@@ -42,17 +42,17 @@ class ReferenceType extends Type {
 				name = data.name
 			}
 
-			const parameters = ?data.parameters ? [Type.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
+			var parameters = ?data.parameters ? [Type.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
 
 			return new ReferenceType(scope, name as String, data.nullable!?, parameters)
 		} # }}}
 		toQuote(name, nullable, parameters) { # {{{
-			const fragments = [name]
+			var fragments = [name]
 
 			if parameters.length != 0 {
 				fragments.push('<')
 
-				for const parameter, index in parameters {
+				for var parameter, index in parameters {
 					if index != 0 {
 						fragments.push(', ')
 					}
@@ -237,7 +237,7 @@ class ReferenceType extends Type {
 			return @nullable ? `\(@name)?` : @name
 		}
 		else {
-			const export = {
+			var export = {
 				kind: TypeKind::Reference
 				name: @name
 			}
@@ -255,7 +255,7 @@ class ReferenceType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name) { # {{{
 		if @nullable || @parameters.length != 0 {
-			const export = {
+			var export = {
 				kind: TypeKind::Reference
 				name: name.reference ?? name
 			}
@@ -282,14 +282,14 @@ class ReferenceType extends Type {
 		return super.flagExported(explicitly)
 	} # }}}
 	flagSealed(): ReferenceType { # {{{
-		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
+		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
 
 		type._sealed = true
 
 		return type
 	} # }}}
 	flagSpread(): ReferenceType { # {{{
-		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
+		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
 
 		type._spread = true
 
@@ -301,7 +301,7 @@ class ReferenceType extends Type {
 			return AnyType.NullableUnexplicit
 		}
 
-		let type: Type = this.type()
+		var mut type: Type = this.type()
 
 		if type is NamedType {
 			type = type.type()
@@ -318,12 +318,12 @@ class ReferenceType extends Type {
 	hashCode(): String => this.hashCode(false)
 	hashCode(fattenNull: Boolean): String { # {{{
 	// hashCode(fattenNull: Boolean = false): String { # {{{
-		let hash = @name
+		var mut hash = @name
 
 		if @parameters.length != 0 {
 			hash += '<'
 
-			for const parameter, i in @parameters {
+			for var parameter, i in @parameters {
 				if i != 0 {
 					hash += ','
 				}
@@ -367,7 +367,7 @@ class ReferenceType extends Type {
 					return false
 				}
 
-				for const index from 0 til Math.max(@parameters.length, value.parameters().length) {
+				for var index from 0 til Math.max(@parameters.length, value.parameters().length) {
 					if !this.parameter(index).isAssignableToVariable(value.parameter(index), true, nullcast, downcast) {
 						return false
 					}
@@ -403,7 +403,7 @@ class ReferenceType extends Type {
 				return this.setNullable(false).isAssignableToVariable(value, anycast, nullcast, downcast, limited)
 			}
 			else {
-				for const type in value.types() {
+				for var type in value.types() {
 					if this.isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
 						return true
 					}
@@ -444,9 +444,9 @@ class ReferenceType extends Type {
 			return true
 		}
 
-		if const type = value.discardAlias() {
+		if var type = value.discardAlias() {
 			if type is UnionType {
-				for const type in type.types() {
+				for var type in type.types() {
 					if this.isInstanceOf(type) {
 						return true
 					}
@@ -487,8 +487,8 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			const a: Type = this.discardReference()!?
-			const b: Type = value.discardReference()!?
+			var a: Type = this.discardReference()!?
+			var b: Type = value.discardReference()!?
 
 			return a.isMorePreciseThan(b)
 		}
@@ -530,7 +530,7 @@ class ReferenceType extends Type {
 
 				if @parameters? {
 					if value._parameters? && @parameters.length == value._parameters.length {
-						for const parameter, i in @parameters {
+						for var parameter, i in @parameters {
 							if !parameter.isSubsetOf(value._parameters[i], mode) {
 								return false
 							}
@@ -562,10 +562,10 @@ class ReferenceType extends Type {
 				}
 
 				if value.scope().isRenamed(value.name(), @name, @scope, mode) {
-					const parameters = value.parameters()
+					var parameters = value.parameters()
 
 					if parameters.length == @parameters.length {
-						for const parameter, index in @parameters {
+						for var parameter, index in @parameters {
 							if !parameter.isSubsetOf(parameters[index], mode) {
 								return false
 							}
@@ -591,7 +591,7 @@ class ReferenceType extends Type {
 				return @type.type().matchInstanceWith(value, [])
 			}
 			else if value is UnionType {
-				for const type in value.types() {
+				for var type in value.types() {
 					if this.isSubsetOf(type, mode) {
 						return true
 					}
@@ -622,8 +622,8 @@ class ReferenceType extends Type {
 			return value.isFunction()
 		}
 		else {
-			const a: Type = this.discardReference()!?
-			const b: Type = value.discardReference()!?
+			var a: Type = this.discardReference()!?
+			var b: Type = value.discardReference()!?
 
 			if a is ReferenceType || b is ReferenceType || !a.matchContentOf(b) {
 				return false
@@ -634,13 +634,13 @@ class ReferenceType extends Type {
 					return true
 				}
 
-				const parameters = value.parameters()
+				var parameters = value.parameters()
 
 				if @parameters.length != parameters.length {
 					return false
 				}
 
-				for const parameter, index in @parameters {
+				for var parameter, index in @parameters {
 					if !parameter.matchContentOf(parameters[index]) {
 						return false
 					}
@@ -673,7 +673,7 @@ class ReferenceType extends Type {
 			return this
 		}
 		else {
-			const reduced = this.type().reduce(type)
+			var reduced = this.type().reduce(type)
 
 			if @nullable && !type.isNullable() {
 				return (reduced.isUnion() ? reduced : @scope.reference(reduced)).setNullable(true)
@@ -703,7 +703,7 @@ class ReferenceType extends Type {
 				@predefined = true
 			}
 			else {
-				const names = @name.split('.')
+				var names = @name.split('.')
 
 				if names.length == 1 {
 					if @variable ?= @scope.getVariable(@name, -1) {
@@ -724,13 +724,13 @@ class ReferenceType extends Type {
 					}
 				}
 				else {
-					let type = @scope.getVariable(names[0], -1)?.getRealType()
+					var mut type = @scope.getVariable(names[0], -1)?.getRealType()
 					if !?type {
 						console.info(this)
 						throw new NotImplementedException()
 					}
 
-					for const name in names from 1 {
+					for var name in names from 1 {
 						if type !?= type.getProperty(name) {
 							console.info(this)
 							throw new NotImplementedException()
@@ -777,16 +777,16 @@ class ReferenceType extends Type {
 						return @scope.reference(@name, true, [...@parameters])
 					}
 
-					const types = @type.discard().types()
+					var types = @type.discard().types()
 
 					types.push(Type.Null)
 
 					return Type.union(@scope, ...types)
 				}
 				else {
-					const types = []
+					var types = []
 
-					for const type in @type.discard().types() {
+					for var type in @type.discard().types() {
 						if type.isNull() {
 							continue
 						}
@@ -843,7 +843,7 @@ class ReferenceType extends Type {
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !this.isVirtual() {
-			const varname = variable.name?()
+			var varname = variable.name?()
 
 			if name == varname {
 				fragments.line(name)
@@ -872,7 +872,7 @@ class ReferenceType extends Type {
 			return super.toMetadata(references, indexDelta, mode, module)
 		}
 		else {
-			const index = references.length
+			var index = references.length
 
 			@referenceIndex = index + indexDelta
 
@@ -966,7 +966,7 @@ class ReferenceType extends Type {
 
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
-		const literal = new Literal(false, node, node.scope(), 'value')
+		var literal = new Literal(false, node, node.scope(), 'value')
 
 		if node._options.format.functions == 'es5' {
 			fragments.code('function(value) { return ')
@@ -1034,7 +1034,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			const literal = new Literal(false, node, node.scope(), 'value')
+			var literal = new Literal(false, node, node.scope(), 'value')
 
 			if node._options.format.functions == 'es5' {
 				fragments.code('function(value) { return ')
@@ -1061,9 +1061,9 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toTestFunctionFragments(fragments, node) { # {{{
-		const unalias = this.discardAlias()
-		const name = unalias.name?() ?? @name
-		const tof = $runtime.typeof(name, node)
+		var unalias = this.discardAlias()
+		var name = unalias.name?() ?? @name
+		var tof = $runtime.typeof(name, node)
 
 		if @parameters.length == 0 && ?tof && !@nullable {
 			fragments.code(`\(tof)`)
@@ -1079,29 +1079,29 @@ class ReferenceType extends Type {
 		this.resolveType()
 
 		if @parameters.length == 0 && !@nullable {
-			if const tof = $runtime.typeof(@name, node) {
+			if var tof = $runtime.typeof(@name, node) {
 				fragments.code(`\(tof)(value)`)
 
 				return
 			}
 		}
 
-		let subjunction = null
+		var mut subjunction = null
 		if @nullable && junction == Junction::AND {
 			fragments.code('(')
 
 			subjunction = Junction::OR
 		}
 
-		const unalias = this.discardAlias()
+		var unalias = this.discardAlias()
 
 		if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {
 			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
 		}
 		else {
-			const name = unalias.name?() ?? @name
+			var name = unalias.name?() ?? @name
 
-			if const tof = $runtime.typeof(name, node) {
+			if var tof = $runtime.typeof(name, node) {
 				fragments.code(`\(tof)(value`)
 			}
 			else {
@@ -1137,7 +1137,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			const literal = new Literal(false, node, node.scope(), 'value')
+			var literal = new Literal(false, node, node.scope(), 'value')
 
 			@parameters[0].toTestFunctionFragments(fragments, literal)
 		}

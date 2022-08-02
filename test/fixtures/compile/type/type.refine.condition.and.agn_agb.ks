@@ -4,9 +4,9 @@ extern sealed class String {
 }
 
 func foobar(lines: Array<String>) {
-	let line
+	var dyn line
 
-	for const i from 0 til lines.length {
+	for var i from 0 til lines.length {
 		if (line = lines[i].trim()).length != 0 || (line = true) {
 			if line {
 			}

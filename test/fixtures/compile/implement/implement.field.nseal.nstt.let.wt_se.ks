@@ -18,6 +18,6 @@ impl Shape {
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 
-const shape = Shape.makeBlue()
+var shape = Shape.makeBlue()
 
 console.log(shape.toString())

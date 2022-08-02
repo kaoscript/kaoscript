@@ -1,6 +1,6 @@
 func foobar() => 42
 
-let x
-let y = {}
+var dyn x
+var dyn y = {}
 
 x = y.x = foobar()

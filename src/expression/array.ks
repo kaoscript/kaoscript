@@ -1,14 +1,14 @@
 class ArrayExpression extends Expression {
-	private lateinit {
+	private late {
 		_flatten: Boolean	= false
 		_type: Type
 		_values: Array		= []
 	}
 	analyse() { # {{{
-		const es5 = @options.format.spreads == 'es5'
+		var es5 = @options.format.spreads == 'es5'
 
-		for const data in @data.values {
-			const value = $compile.expression(data, this)
+		for var data in @data.values {
+			var value = $compile.expression(data, this)
 
 			value.analyse()
 
@@ -20,9 +20,9 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	prepare() { # {{{
-		let type = null
+		var dyn type = null
 
-		for const value, index in @values {
+		for var value, index in @values {
 			value.prepare()
 
 			if index == 0 {
@@ -56,7 +56,7 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	isUsingVariable(name) { # {{{
-		for const value in @values {
+		for var value in @values {
 			if value.isUsingVariable(name) {
 				return true
 			}
@@ -65,7 +65,7 @@ class ArrayExpression extends Expression {
 		return false
 	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
-		for const value in @values {
+		for var value in @values {
 			value.listNonLocalVariables(scope, variables)
 		}
 
@@ -97,9 +97,9 @@ class ArrayExpression extends Expression {
 	type() => @type
 	validateType(type: ReferenceType) { # {{{
 		if type.hasParameters() {
-			const parameter = type.parameter(0)
+			var parameter = type.parameter(0)
 
-			for const value in @values {
+			for var value in @values {
 				value.validateType(parameter)
 			}
 		}
@@ -107,7 +107,7 @@ class ArrayExpression extends Expression {
 }
 
 class ArrayRange extends Expression {
-	private lateinit {
+	private late {
 		_by				= null
 		_from
 		_to

@@ -34,7 +34,7 @@ class PreciseThisCallee extends Callee {
 		return `this:\(@property):\(@index):\(@alien):\(@instance):\(@arguments)`
 	} # }}}
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for const function in @functions {
+		for var function in @functions {
 			if function.isInitializingInstanceVariable(name) {
 				return true
 			}
@@ -47,7 +47,7 @@ class PreciseThisCallee extends Callee {
 		@functions.push(...that.functions())
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
-		const name = @node.scope().getVariable('this').getSecureName()
+		var name = @node.scope().getVariable('this').getSecureName()
 
 		if @flatten {
 			switch @scope {

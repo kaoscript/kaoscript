@@ -1,7 +1,7 @@
 extern console
 
-const arr = [1, '', true]
-let a = 'foo'
+var arr = [1, '', true]
+var dyn a = 'foo'
 
 [a, b, c] = arr
 

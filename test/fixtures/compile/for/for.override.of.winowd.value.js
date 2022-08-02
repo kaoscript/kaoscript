@@ -9,7 +9,7 @@ module.exports = function() {
 		return d;
 	})();
 	for(let __ks_0 in likes) {
-		let value = likes[__ks_0];
+		const value = likes[__ks_0];
 		console.log(value);
 	}
 };

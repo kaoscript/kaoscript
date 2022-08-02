@@ -1,5 +1,5 @@
 func init(data, builder) {
-	const block = builder.newBlock()
+	var block = builder.newBlock()
 
 	for statement in data.block(data.body).statements {
 		block.statement(statement)
@@ -7,7 +7,7 @@ func init(data, builder) {
 
 	block.done()
 
-	let source = ''
+	var dyn source = ''
 
 	for fragment in builder.toArray() {
 		source += fragment.code

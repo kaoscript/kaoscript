@@ -3,7 +3,7 @@ class Foobar {
 		@foobar
 	}
 	foobar() {
-		const fn = (data) => new Quxbaz(data, @foobar)
+		var fn = (data) => new Quxbaz(data, @foobar)
 	}
 }
 

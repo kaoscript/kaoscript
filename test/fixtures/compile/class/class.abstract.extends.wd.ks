@@ -26,7 +26,7 @@ class Greetings extends AbstractGreetings {
 	greet(name = @name) => `\(@message) My name is \(name).`
 }
 
-const greetings = new Greetings('John')
+var greetings = new Greetings('John')
 
 console.log(`\(greetings.greet())`)
 console.log(`\(greetings.greet('John'))`)

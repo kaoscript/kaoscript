@@ -1,3 +1,3 @@
 tuple Pair(Number, Number)
 
-const pair = Pair(0, 0)
+var pair = Pair(0, 0)

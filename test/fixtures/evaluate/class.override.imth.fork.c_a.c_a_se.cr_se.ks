@@ -11,6 +11,6 @@ class Quxbaz extends Foobar {
 
 func getFoobar(): Foobar => new Quxbaz()
 
-const f = getFoobar()
+var f = getFoobar()
 
 expect(f.foobar('foobar')).to.equal(2)

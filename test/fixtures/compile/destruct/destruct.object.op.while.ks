@@ -2,7 +2,7 @@ func foobar() {
 	return null
 }
 
-while const {x} = foobar() {
+while var {x} = foobar() {
 }
 
 while {x} ?= foobar() {

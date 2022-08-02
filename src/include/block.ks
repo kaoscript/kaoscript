@@ -33,7 +33,7 @@ class Block extends AbstractNode {
 	} # }}}
 	prepare() { # {{{
 		if @type != null && !@type.isAny() {
-			for const statement in @statements {
+			for var statement in @statements {
 				@scope.line(statement.line())
 
 				if @exit {
@@ -50,7 +50,7 @@ class Block extends AbstractNode {
 			}
 		}
 		else {
-			for const statement in @statements {
+			for var statement in @statements {
 				@scope.line(statement.line())
 
 				if @exit {
@@ -119,14 +119,14 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	checkReturnType(type: Type) { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.checkReturnType(type)
 		}
 	} # }}}
 	getUnpreparedType() { # {{{
-		const types = []
+		var types = []
 
-		for const statement in @statements {
+		for var statement in @statements {
 			if statement.isExit() {
 				types.push(statement.getUnpreparedType())
 			}
@@ -153,7 +153,7 @@ class Block extends AbstractNode {
 	isEmpty() => @empty
 	isExit() => @exit
 	isInitializingInstanceVariable(name) { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			if statement.isInitializingInstanceVariable(name) {
 				return true
 			}
@@ -164,7 +164,7 @@ class Block extends AbstractNode {
 	isJumpable() => @parent.isJumpable()
 	isLoop() => @parent.isLoop()
 	isUsingVariable(name) { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			if statement.isUsingVariable(name) {
 				return true
 			}
@@ -173,9 +173,9 @@ class Block extends AbstractNode {
 		return false
 	} # }}}
 	isUsingInstanceVariableBefore(name: String, stmt: Statement): Boolean { # {{{
-		const line = stmt.line()
+		var line = stmt.line()
 
-		for const statement in @statements while statement.line() < line && statement != stmt {
+		for var statement in @statements while statement.line() < line && statement != stmt {
 			if statement.isUsingInstanceVariable(name) {
 				return true
 			}
@@ -184,9 +184,9 @@ class Block extends AbstractNode {
 		return false
 	} # }}}
 	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
-		const line = stmt.line()
+		var line = stmt.line()
 
-		for const statement in @statements while statement.line() < line && statement != stmt {
+		for var statement in @statements while statement.line() < line && statement != stmt {
 			if statement.isUsingStaticVariable(class, varname) {
 				return true
 			}
@@ -195,7 +195,7 @@ class Block extends AbstractNode {
 		return false
 	} # }}}
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.listNonLocalVariables(scope, variables)
 		}
 
@@ -204,8 +204,8 @@ class Block extends AbstractNode {
 	statements() => @data.statements
 	toFragments(fragments, mode) { # {{{
 		if @awaiting {
-			let index = -1
-			let item
+			var mut index = -1
+			var dyn item
 
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(fragments, Mode::None) {
@@ -231,9 +231,9 @@ class Block extends AbstractNode {
 	type() { # {{{
 		if @type == null {
 			if @exit {
-				const types = []
+				var types = []
 
-				for const statement in @statements {
+				for var statement in @statements {
 					if statement.isExit() {
 						types.push(statement.type())
 					}
@@ -258,9 +258,9 @@ class FunctionBlock extends Block {
 	addReturn(@return)
 	override checkExit() { # {{{
 		if @return != null {
-			auto toAdd = false
+			var mut toAdd = false
 
-			if const statement = @statements.last() {
+			if var statement = @statements.last() {
 				toAdd = !statement.isExit()
 			}
 			else {
@@ -268,7 +268,7 @@ class FunctionBlock extends Block {
 			}
 
 			if toAdd {
-				const statement = new ReturnStatement(@return, this)
+				var statement = new ReturnStatement(@return, this)
 
 				statement.analyse()
 				statement.prepare()
@@ -287,7 +287,7 @@ class ConstructorBlock extends FunctionBlock {
 		@initializedVariables: Dictionary<Boolean>		= {}
 	}
 	override initializeVariable(variable, expression, node) { # {{{
-		lateinit const name
+		var late  name
 
 		if variable.instance {
 			name = `this.\(variable.name)`
@@ -313,7 +313,7 @@ class ConstructorBlock extends FunctionBlock {
 			return true
 		}
 
-		for const statement in @statements {
+		for var statement in @statements {
 			if statement.isInitializingInstanceVariable(name) {
 				return true
 			}

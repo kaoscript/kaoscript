@@ -1,1 +1,1 @@
-let a = 42
+var dyn a = 42

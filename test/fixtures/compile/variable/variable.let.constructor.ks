@@ -1,1 +1,1 @@
-let constructor = 42
+var dyn constructor = 42

@@ -1,5 +1,5 @@
 func foo(x: Boolean): String {
-	let y
+	var dyn y
 
 	if x {
 		y = '42 * x'

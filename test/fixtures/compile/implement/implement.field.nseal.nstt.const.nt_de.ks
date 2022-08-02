@@ -11,12 +11,12 @@ class Shape {
 
 impl Shape {
 	private {
-		const @name	= 'circle'
+		final @name	= 'circle'
 	}
 	name(): @name
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 
-const shape = Shape.makeBlue()
+var shape = Shape.makeBlue()
 
 console.log(shape.toString())

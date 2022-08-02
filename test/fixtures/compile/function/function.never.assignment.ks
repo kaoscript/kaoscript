@@ -1,5 +1,5 @@
 func foobar() {
-	let a
+	var dyn a
 
 	a = quxbaz()
 }

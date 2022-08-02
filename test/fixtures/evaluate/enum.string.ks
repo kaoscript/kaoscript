@@ -11,7 +11,7 @@ enum CardSuit<String> {
 
 expect(CardSuit is Enum).to.equal(true)
 
-const x = CardSuit::Clubs
+var x = CardSuit::Clubs
 
 expect(x is CardSuit).to.equal(true)
 expect(Type.typeOf(CardSuit)).to.equal('enum')
@@ -46,7 +46,7 @@ expect(foobar('foo')).to.equal('string')
 expect(foobar([])).to.equal('any')
 
 func testIf(x: CardSuit, y: String, z) {
-	const results = []
+	var results = []
 
 	if x == CardSuit::Clubs {
 		results.push('c')
@@ -78,7 +78,7 @@ expect(testIf(CardSuit::Clubs, CardSuit::Clubs, CardSuit::Clubs)).to.eql(['c', '
 expect(testIf(CardSuit::Diamonds, CardSuit::Clubs.value, CardSuit::Clubs.value)).to.eql([null, 'c', 'c', null, 'c', 'c'])
 
 func testSwitch(x: CardSuit, y: String, z) {
-	const results = []
+	var results = []
 
 	switch x {
 		CardSuit::Clubs		=> results.push('c')

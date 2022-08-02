@@ -30,10 +30,10 @@ func $quote(value) { # {{{
 	return '"' + value.replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
 } # }}}
 
-const $comma = $code(', ')
-const $dot = $code('.')
-const $equals = $code(' = ')
-const $space = $code(' ')
+var $comma = $code(', ')
+var $dot = $code('.')
+var $equals = $code(' = ')
+var $space = $code(' ')
 
 class FragmentBuilder extends Writer {
 	constructor(@indent) { # {{{
@@ -53,7 +53,7 @@ class FragmentBuilder extends Writer {
 		})
 	} # }}}
 	line(...args) { # {{{
-		let line = this.newLine(@indent)
+		var line = this.newLine(@indent)
 
 		if args.length == 1 && args[0] is not Primitive {
 			line.compile(args[0])
@@ -80,7 +80,7 @@ class BlockBuilder extends BlockWriter {
 		return this
 	} # }}}
 	line(...args) { # {{{
-		let line = @writer.newLine(@indent + 1)
+		var line = @writer.newLine(@indent + 1)
 
 		if args.length == 1 && args[0] is not Primitive {
 			line.compile(args[0])
@@ -148,7 +148,7 @@ class ControlBuilder extends ControlWriter {
 
 class ExpressionBuilder extends ExpressionWriter {
 	code(...args) { # {{{
-		let data
+		var dyn data
 
 		for arg, i in args {
 			if arg is Array {

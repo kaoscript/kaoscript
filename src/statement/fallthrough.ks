@@ -1,9 +1,9 @@
 class FallthroughStatement extends Statement {
-	private lateinit {
+	private late {
 		_switch: SwitchStatement
 	}
 	analyse() { # {{{
-		let parent = @parent
+		var mut parent = @parent
 
 		unless parent.isJumpable() {
 			SyntaxException.throwIllegalStatement('fallthrough', this)

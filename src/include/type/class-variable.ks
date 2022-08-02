@@ -8,9 +8,9 @@ class ClassVariableType extends Type {
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassVariableType { # {{{
-			const scope = node.scope()
+			var scope = node.scope()
 
-			let type: ClassVariableType
+			var mut type: ClassVariableType
 
 			if data.type? {
 				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
@@ -20,7 +20,7 @@ class ClassVariableType extends Type {
 			}
 
 			if data.modifiers? {
-				for const modifier in data.modifiers {
+				for var modifier in data.modifiers {
 					switch modifier.kind {
 						ModifierKind::Immutable => {
 							type._immutable = true
@@ -49,8 +49,8 @@ class ClassVariableType extends Type {
 			return type
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
-			const data = index
-			const type = new ClassVariableType(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
+			var data = index
+			var type = new ClassVariableType(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
 			type._default = data.default
@@ -69,7 +69,7 @@ class ClassVariableType extends Type {
 	discardVariable() => @type
 	access(@access) => this
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const data = {
+		var data = {
 			access: @access
 			type: @type.toReference(references, indexDelta, mode, module)
 			default: @default

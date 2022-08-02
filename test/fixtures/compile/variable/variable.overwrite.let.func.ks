@@ -1,5 +1,5 @@
-let foo = 42
+var dyn foo = 42
 
 func foo() {
-	let x = 24
+	var dyn x = 24
 }

@@ -1,11 +1,11 @@
 extern console
 
-const foo = 'bar'
+var foo = 'bar'
 
 console.log(`\(foo)`)
 
 delete foo
 
-const foo = 42
+var foo = 42
 
 console.log(`\(foo)`)

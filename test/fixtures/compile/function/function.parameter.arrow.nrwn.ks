@@ -1,1 +1,1 @@
-let foo = (x = null, y) => [x, y]
+var dyn foo = (x = null, y) => [x, y]

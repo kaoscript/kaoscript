@@ -1,5 +1,5 @@
 class WhileStatement extends Statement {
-	private lateinit {
+	private late {
 		_bindingDeclaration: Boolean		= false
 		_bindingScope: Scope
 		_body								= null
@@ -51,7 +51,7 @@ class WhileStatement extends Statement {
 				@condition.releaseReusable()
 			}
 
-			if const variable = @declaration.getIdentifierVariable() {
+			if var variable = @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
@@ -62,7 +62,7 @@ class WhileStatement extends Statement {
 				TypeException.throwInvalidCondition(@condition, this)
 			}
 
-			for const data, name of @condition.inferWhenTrueTypes({}) {
+			for var data, name of @condition.inferWhenTrueTypes({}) {
 				@bodyScope.updateInferable(name, data, this)
 			}
 
@@ -76,7 +76,7 @@ class WhileStatement extends Statement {
 
 		@body.prepare()
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
@@ -113,7 +113,7 @@ class WhileStatement extends Statement {
 		return @body.isUsingVariable(name)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const ctrl = fragments.newControl().code('while(')
+		var ctrl = fragments.newControl().code('while(')
 
 		if @declared {
 			if @bindingDeclaration {
@@ -129,7 +129,7 @@ class WhileStatement extends Statement {
 				ctrl.code(', true) : false')
 			}
 			else {
-				let first = true
+				var mut first = true
 
 				@declaration.walk((name, _) => {
 					if first {

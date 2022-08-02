@@ -41,6 +41,6 @@ class Proxy {
 	draw(color, shape): string => this._shape.draw(color, shape)
 }
 
-let shape = new Proxy('yellow')
+var dyn shape = new Proxy('yellow')
 console.log(shape.draw('rectangle'))
 console.log(shape.draw('red', 'rectangle'))

@@ -20,6 +20,6 @@ sealed class Greetings {
 	}
 }
 
-let hello = new Greetings('Hello world!')
+var dyn hello = new Greetings('Hello world!')
 
 console.log(hello.greet('miss White'))

@@ -7,11 +7,11 @@ extern console: {
 
 type T = number | string
 
-let n: T = 0
+var dyn n: T = 0
 
 console.log(n.toInt())
 
-let s: T = ''
+var dyn s: T = ''
 
 console.log(s.toInt())
 

@@ -25,7 +25,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 	isRoutable() => false
 	toFragments(fragments, mode) { # {{{
 		if !@hidden && !@instance {
-			const ctrl = fragments.newControl()
+			var ctrl = fragments.newControl()
 
 			ctrl.code(`static __ks_sttc_\(@name)_\(@type.index())()`).step()
 
@@ -35,15 +35,15 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		}
 	} # }}}
 	toForkFragments(fragments) { # {{{
-		const ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
 		ctrl.code(`__ks_func_\(@name)_\(@type.index())(`)
 
-		let parameters = ''
+		var mut parameters = ''
 
-		const names = {}
+		var names = {}
 
-		for const parameter, index in @type.parameters() {
+		for var parameter, index in @type.parameters() {
 			if index > 0 {
 				ctrl.code($comma)
 
@@ -60,14 +60,14 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		ctrl.code(')').step()
 
 		if @hidden {
-			const fork = @forks[0]
+			var fork = @forks[0]
 
 			if fork.hasVarargsParameter() {
-				const line = ctrl.newLine().code(`return this.__ks_func_\(@name)_\(@forks[0].index())(`)
+				var line = ctrl.newLine().code(`return this.__ks_func_\(@name)_\(@forks[0].index())(`)
 
-				let comma = false
+				var mut comma = false
 
-				for const parameter in fork.parameters() {
+				for var parameter in fork.parameters() {
 					if comma {
 						line.code($comma)
 					}
@@ -75,7 +75,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 						comma = true
 					}
 
-					const name = parameter.name()
+					var name = parameter.name()
 
 					if parameter.isVarargs() {
 						if names[name] {
@@ -105,23 +105,23 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		}
 		else if @type.hasVarargsParameter() {
 			if @type.parameters().length == 1 {
-				const parameter = @type.parameter(0)
+				var parameter = @type.parameter(0)
 
-				const ctrl3 = ctrl.newControl()
+				var ctrl3 = ctrl.newControl()
 
 				ctrl3.code(`if(\(parameter.name()).length === 1)`).step()
 
-				for const fork in @forks {
-					const ctrl2 = ctrl3.newControl()
+				for var fork in @forks {
+					var ctrl2 = ctrl3.newControl()
 
 					ctrl2.code(`if(`)
 
-					let index = 0
+					var mut index = 0
 
-					for const parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+					for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 						ctrl2.code(' && ') unless index == 0
 
-						const literal = new Literal(false, this, this.scope(), `\(parameter.name())[0]`)
+						var literal = new Literal(false, this, this.scope(), `\(parameter.name())[0]`)
 
 						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
@@ -144,17 +144,17 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 			}
 		}
 		else {
-			for const fork in @forks {
-				const ctrl2 = ctrl.newControl()
+			for var fork in @forks {
+				var ctrl2 = ctrl.newControl()
 
 				ctrl2.code(`if(`)
 
-				let index = 0
+				var mut index = 0
 
-				for const parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+				for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 					ctrl2.code(' && ') unless index == 0
 
-					const literal = new Literal(false, this, this.scope(), parameter.name())
+					var literal = new Literal(false, this, this.scope(), parameter.name())
 
 					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 

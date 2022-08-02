@@ -33,7 +33,7 @@ class Literal extends Expression {
 }
 
 class IdentifierLiteral extends Literal {
-	private lateinit {
+	private late {
 		_assignable: Boolean		= false
 		_assignment: AssignmentType		= AssignmentType::Neither
 		_declaredType: Type
@@ -58,7 +58,7 @@ class IdentifierLiteral extends Literal {
 			else if @scope.hasMacro(@value) {
 				@isMacro = true
 			}
-			else if const name = $runtime.getVariable(@value, @parent) {
+			else if var name = $runtime.getVariable(@value, @parent) {
 				@value = name
 				@realType = @declaredType = Type.Any
 			}
@@ -73,7 +73,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	prepare() { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			if @assignable {
 				if variable.isImmutable() {
@@ -120,7 +120,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			if variable.isLateInit() {
 				node.initializeVariable(VariableBrief(
@@ -137,7 +137,7 @@ class IdentifierLiteral extends Literal {
 	isDeclararingVariable(name: String) => @value == name
 	isExpectingType() { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			return variable.isDefinitive()
 		}
@@ -151,7 +151,7 @@ class IdentifierLiteral extends Literal {
 	isInferable() => true
 	override isUsingNonLocalVariables(scope) { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			if @value != 'this' && !variable.isPredefined() && !scope.hasDeclaredVariable(@value) {
 				return true
@@ -168,7 +168,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	override listLocalVariables(scope, variables) { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			if @value != 'this' && !variable.isPredefined() && scope.hasDeclaredVariable(@value) {
 				variables.pushUniq(variable)
@@ -179,7 +179,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value, @line)
+			var variable = @scope.getVariable(@value, @line)
 
 			if @value != 'this' && !variable.isModule() && !scope.hasDeclaredVariable(@value) {
 				variables.pushUniq(variable)

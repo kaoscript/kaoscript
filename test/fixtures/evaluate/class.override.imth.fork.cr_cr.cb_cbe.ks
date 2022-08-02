@@ -10,8 +10,8 @@ class Quxbaz extends Foobar {
 
 func compare(a: Foobar, b: Foobar) => a.compare(b)
 
-const f = new Foobar()
-const q = new Quxbaz()
+var f = new Foobar()
+var q = new Quxbaz()
 
 expect(compare(f, f)).to.equal('foobar/foobar')
 expect(compare(f, q)).to.equal('foobar/foobar')

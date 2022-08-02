@@ -1,6 +1,6 @@
 func foobar(): Number? => null
 
-let x = foobar()
+var dyn x = foobar()
 
 export x
 

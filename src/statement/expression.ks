@@ -12,7 +12,7 @@ class ExpressionStatement extends Statement {
 	prepare() { # {{{
 		@expression.prepare()
 
-		for const data, name of @expression.inferTypes({}) {
+		for var data, name of @expression.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
@@ -29,13 +29,13 @@ class ExpressionStatement extends Statement {
 		@expression.translate()
 	} # }}}
 	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
-		const assignments = []
-		let variable = null
+		var assignments = []
+		var mut variable = null
 
-		let declaration = names.length != 0
+		var mut declaration = names.length != 0
 
-		for const name in names {
-			if const variable = scope.getVariable(name) {
+		for var name in names {
+			if var variable = scope.getVariable(name) {
 				if variable.isLateInit() {
 					@parent.addInitializableVariable(variable, this)
 				}
@@ -103,9 +103,9 @@ class ExpressionStatement extends Statement {
 		return variables
 	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		const item = @expression.toFragments(line, Mode::None)
+		var item = @expression.toFragments(line, Mode::None)
 
 		statements.unshift(this)
 
@@ -127,7 +127,7 @@ class ExpressionStatement extends Statement {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			let line = fragments.newLine()
+			var mut line = fragments.newLine()
 
 			if @declaration {
 				line.code($runtime.scope(this))

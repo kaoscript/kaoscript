@@ -51,9 +51,11 @@ restore:
 
 update:
 	rm -rf node_modules package-lock.json
+	nrm use local
 	npm i
 
 local:
+	make save
 	nrm use local
 	npm unpublish kaoscript --force
 	npm publish

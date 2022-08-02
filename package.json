@@ -46,7 +46,7 @@
 		"@kaoscript/parser": "^0.8.0",
 		"@kaoscript/source-generator": "^0.2.0",
 		"@kaoscript/target-commons": "^0.2.0",
-		"@kaoscript/test-import": "^0.2.2",
+		"@kaoscript/test-import": "^0.3.0",
 		"@kaoscript/util": "^0.2.0",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",

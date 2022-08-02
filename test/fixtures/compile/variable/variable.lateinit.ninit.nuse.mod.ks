@@ -1,1 +1,1 @@
-lateinit const x
+var late x

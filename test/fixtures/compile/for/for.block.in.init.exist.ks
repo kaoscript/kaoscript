@@ -1,7 +1,7 @@
 extern console
 
 func print(heroes) {
-	let hero
+	var dyn hero
 
 	for hero in heroes {
 		console.log(hero.name)

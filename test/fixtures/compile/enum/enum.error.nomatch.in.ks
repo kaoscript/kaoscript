@@ -8,7 +8,7 @@ enum Quxbaz {
 	baz
 }
 
-const x = Foobar::foo
+var x = Foobar::foo
 
 if x is not Quxbaz {
 

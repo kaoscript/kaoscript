@@ -4,7 +4,7 @@ extern console: {
 
 import '../export/export.enum.color.ks'
 
-let color = Color::Red
+var dyn color = Color::Red
 
 console.log(color)
 

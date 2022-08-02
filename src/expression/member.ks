@@ -1,5 +1,5 @@
 class MemberExpression extends Expression {
-	private lateinit {
+	private late {
 		_assignable: Boolean		= false
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_callee
@@ -26,7 +26,7 @@ class MemberExpression extends Expression {
 		@prepareObject = false
 	} # }}}
 	analyse() { # {{{
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Computed {
 				@computed = true
 			}
@@ -50,7 +50,7 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
-			const type = @object.type()
+			var type = @object.type()
 
 			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
 				ReferenceException.throwNullExpression(@object, this)
@@ -61,7 +61,7 @@ class MemberExpression extends Expression {
 
 				if type.isTuple() {
 					if @property is NumberLiteral {
-						if const property = type.discard().getProperty(@property.value()) {
+						if var property = type.discard().getProperty(@property.value()) {
 							@type = property.type()
 						}
 						else if type.isExhaustive(this) {
@@ -84,14 +84,14 @@ class MemberExpression extends Expression {
 					}
 
 					if @inferable {
-						if const type = @scope.getChunkType(@path) {
+						if var type = @scope.getChunkType(@path) {
 							@type = type
 						}
 					}
 				}
 			}
 			else {
-				const isTuple = type.isTuple()
+				var isTuple = type.isTuple()
 
 				@property = @data.property.name
 
@@ -109,7 +109,7 @@ class MemberExpression extends Expression {
 					@computed = true
 					@stringProperty = true
 
-					if const property = type.getProperty(@property) {
+					if var property = type.getProperty(@property) {
 						@property = `\(property.index())`
 						@type = property.type()
 					}
@@ -126,7 +126,7 @@ class MemberExpression extends Expression {
 					}
 				}
 				else if type.isStruct() {
-					if const property = type.getProperty(@property) {
+					if var property = type.getProperty(@property) {
 						@type = property.type()
 					}
 					else if @assignable {
@@ -142,8 +142,8 @@ class MemberExpression extends Expression {
 					}
 				}
 				else {
-					if const property = type.getProperty(@property) {
-						const type = type.discardReference()
+					if var property = type.getProperty(@property) {
+						var type = type.discardReference()
 						if type.isClass() && property is ClassVariableType && property.isSealed() {
 							@sealed = true
 							@usingGetter = property.hasDefaultValue()
@@ -173,7 +173,7 @@ class MemberExpression extends Expression {
 				}
 
 				if @assignable {
-					if const variable = this.declaration() {
+					if var variable = this.declaration() {
 						if variable.isImmutable() {
 							if variable.isLateInit() {
 								if variable.isInitialized() {
@@ -185,7 +185,7 @@ class MemberExpression extends Expression {
 							}
 						}
 					}
-					else if const property = @object.type().getProperty(@property) {
+					else if var property = @object.type().getProperty(@property) {
 						if property.isImmutable() {
 							ReferenceException.throwImmutable(this)
 						}
@@ -194,7 +194,7 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			const type = @object.type()
+			var type = @object.type()
 
 			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
 				ReferenceException.throwNullExpression(@object, this)
@@ -242,12 +242,12 @@ class MemberExpression extends Expression {
 	declaration() { # {{{
 		return null if @computed
 
-		if const declaration = @object.variable()?.declaration() {
+		if var declaration = @object.variable()?.declaration() {
 			if declaration is ClassDeclaration {
 				return declaration.getClassVariable(@property)
 			}
 		}
-		else if const node = @parent.getFunctionNode() {
+		else if var node = @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
 				return node.parent().getInstanceVariable(@property)
 			}
@@ -271,7 +271,7 @@ class MemberExpression extends Expression {
 		return if @computed
 
 		if @object is IdentifierLiteral {
-			if const property = @object.type().getProperty(@property) {
+			if var property = @object.type().getProperty(@property) {
 				if @object.type().isClass() && !@object.type().isReference() {
 					node.initializeVariable(VariableBrief(
 						name: @property
@@ -337,11 +337,11 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			const type = @object.type()
+			var type = @object.type()
 
 			if @usingGetter {
 				if @sealed {
-					const name = @property[0] == '_' ? @property.substr(1) : @property
+					var name = @property[0] == '_' ? @property.substr(1) : @property
 
 					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
 				}
@@ -443,7 +443,7 @@ class MemberExpression extends Expression {
 		if !@tested {
 			@tested = true
 
-			let conditional = false
+			var mut conditional = false
 
 			if @object.isNullable() {
 				fragments.compileNullable(@object)
@@ -470,7 +470,7 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	toQuote() { # {{{
-		let fragments = @object.toQuote()
+		var mut fragments = @object.toQuote()
 
 		if @nullable {
 			fragments += '?'
@@ -491,7 +491,7 @@ class MemberExpression extends Expression {
 		return fragments
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		const objectCallable = @object.isCallable()
+		var objectCallable = @object.isCallable()
 
 		if objectCallable {
 			fragments
@@ -528,7 +528,7 @@ class MemberExpression extends Expression {
 	} # }}}
 	toSetterFragments(fragments, value) { # {{{
 		if @sealed {
-			const name = @property[0] == '_' ? @property.substr(1) : @property
+			var name = @property[0] == '_' ? @property.substr(1) : @property
 
 			fragments.code(`\(@object.type().type().getSealedName()).__ks_set_\(name)(`).compile(@object).code($comma).compile(value).code(')')
 		}

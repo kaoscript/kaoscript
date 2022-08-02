@@ -6,6 +6,6 @@ class ReShape extends Shape {
 	}
 }
 
-const r = new ReShape('red')
+var r = new ReShape('red')
 
 export ReShape

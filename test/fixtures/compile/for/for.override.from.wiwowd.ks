@@ -1,8 +1,8 @@
 extern console
 
-const x = 42
+var x = 42
 
-for let x from 10 to x {
+for var x from 10 to x {
 	console.log(x)
 }
 

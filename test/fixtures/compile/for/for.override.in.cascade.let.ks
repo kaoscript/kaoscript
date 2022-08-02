@@ -1,23 +1,23 @@
 func foobar(values: Array) {
-	let x = -1
+	var dyn x = -1
 
-	for let value, i in values {
-		let x = i
+	for var value, i in values {
+		var dyn x = i
 
-		for let value, i in value.values {
-			let x = i
+		for var value, i in value.values {
+			var dyn x = i
 
-			for let value, i in value.values {
-				let x = i
+			for var value, i in value.values {
+				var dyn x = i
 
-				for let value, i in value.values {
-					let x = i
+				for var value, i in value.values {
+					var dyn x = i
 				}
 			}
 		}
 	}
 
-	for let value, i in values {
-		let x = i * value.max
+	for var value, i in values {
+		var dyn x = i * value.max
 	}
 }

@@ -7,9 +7,9 @@ func quxbaz() {
 func corge() {
 }
 
-if const x = foobar() {
+if var x = foobar() {
 }
-else if const x = quxbaz() {
+else if var x = quxbaz() {
 }
-else if const x = corge() {
+else if var x = corge() {
 }

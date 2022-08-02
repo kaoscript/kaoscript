@@ -1,7 +1,7 @@
 func getIndex() => 0
 
 func translate(statements, extending) {
-	let index = 1
+	var dyn index = 1
 	if (index = getIndex()) == -1 && extending {
 
 	}

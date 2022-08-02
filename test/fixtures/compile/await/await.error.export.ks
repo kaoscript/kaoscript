@@ -1,3 +1,3 @@
 async func min() => 'female'
 
-export let gender: String = await min()
+export var dyn gender: String = await min()

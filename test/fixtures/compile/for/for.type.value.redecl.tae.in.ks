@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values) {
-	let value
+	var dyn value
 
 	for value: String in values {
 		console.log(`\(value)`)

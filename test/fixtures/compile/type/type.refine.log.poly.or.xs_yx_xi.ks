@@ -7,8 +7,8 @@ import '../_/_string'
 func test(x): Boolean => true
 
 func foobar() {
-	let x = false
-	let y = false
+	var dyn x = false
+	var dyn y = false
 
 	if test(x = '1') || test(y = x) || test(x = 3) {
 		console.log(x.toInt())

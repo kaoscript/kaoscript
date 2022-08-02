@@ -176,22 +176,22 @@ namespace Router {
 				)
 			}
 
-			const parameters = {
+			var parameters = {
 				functions: {}
 				names: {}
 			}
 
-			const async = functions[0].isAsync()
-			const asyncMin = async ? 1 : 0
+			var async = functions[0].isAsync()
+			var asyncMin = async ? 1 : 0
 
-			let min = Infinity
-			let max = 0
-			let maxRest = 0
-			let rest = false
-			let sealed = false
+			var mut min = Infinity
+			var mut max = 0
+			var mut maxRest = 0
+			var mut rest = false
+			var mut sealed = false
 
-			for const function in functions {
-				if const parameter = function.getRestParameter() {
+			for var function in functions {
+				if var parameter = function.getRestParameter() {
 					rest = true
 
 					min = Math.min(function.getMinBefore() + parameter.min() + function.getMinAfter() + asyncMin, min)
@@ -207,7 +207,7 @@ namespace Router {
 				}
 			}
 
-			const groups: Dictionary<Group> = {}
+			var groups: Dictionary<Group> = {}
 
 			if rest {
 				if max == 0 {
@@ -221,28 +221,28 @@ namespace Router {
 				}
 			}
 
-			for const n from min to max {
+			for var n from min to max {
 				groups[n] = Group(n)
 			}
 
-			for const function in functions {
+			for var function in functions {
 				if function.max() == Infinity {
-					for const n from function.min() + asyncMin to max {
+					for var n from function.min() + asyncMin to max {
 						groups[n].functions.push(function)
 					}
 				}
 				else {
-					for const n from function.min() + asyncMin to function.max() + asyncMin {
+					for var n from function.min() + asyncMin to function.max() + asyncMin {
 						groups[n].functions.push(function)
 					}
 				}
 
 				parameters.functions[function.index()] = function
 
-				for const parameter in function.parameters() {
-					const name = parameter.name() ?? '_'
+				for var parameter in function.parameters() {
+					var name = parameter.name() ?? '_'
 
-					if const group = parameters.names[name] {
+					if var group = parameters.names[name] {
 						group.push(`\(function.index())`)
 					}
 					else {
@@ -251,10 +251,10 @@ namespace Router {
 				}
 			}
 
-			const trees: Array<Tree> = []
-			const names = {}
+			var trees: Array<Tree> = []
+			var names = {}
 
-			for const group of groups when group.functions.length > 0 {
+			for var group of groups when group.functions.length > 0 {
 				trees.push(buildTree(group, name, false, null, node))
 
 				if group.n != 0 {
@@ -266,9 +266,9 @@ namespace Router {
 
 			expandUnboundeds(trees, node)
 
-			const functionMap = {}
+			var functionMap = {}
 
-			for const function in functions {
+			for var function in functions {
 				functionMap[function.index()] = function
 			}
 
@@ -291,17 +291,17 @@ namespace Router {
 				return PreciseCallMatchResult([])
 			}
 
-			const nameds = {}
-			const shorthands = {}
-			const indexeds = []
-			const types = []
+			var nameds = {}
+			var shorthands = {}
+			var indexeds = []
+			var types = []
 
-			let namedCount = 0
-			let shortCount = 0
-			const invalids = {}
+			var mut namedCount = 0
+			var mut shortCount = 0
+			var invalids = {}
 
 			if assessment.macro {
-				for const argument, index in arguments {
+				for var argument, index in arguments {
 					indexeds.push(NamingArgument(
 						index
 						type: argument
@@ -312,9 +312,9 @@ namespace Router {
 				}
 			}
 			else {
-				for const argument, index in arguments {
+				for var argument, index in arguments {
 					if argument is NamedArgument {
-						const name = argument.name()
+						var name = argument.name()
 
 						if ?nameds[name] {
 							throw new NotSupportedException()
@@ -336,7 +336,7 @@ namespace Router {
 						}
 					}
 					else if argument is IdentifierLiteral {
-						const name = argument.name()
+						var name = argument.name()
 
 						if argument.variable().isPredefined() {
 							indexeds.push(NamingArgument(
@@ -399,16 +399,16 @@ namespace Router {
 		} # }}}
 
 		func toFragments(buildPath: FunctionPathBuilder, args!: String = 'args', assessment: Assessement, fragments: BlockBuilder, footerType: FooterType = FooterType::MUST_THROW, footer: Function = toDefaultFooter, node: AbstractNode): Void { # {{{
-			const mark = fragments.mark()
-			const helper = buildHelper(mark, args, node)
-			const fallback = footerType != FooterType::MUST_THROW
+			var mark = fragments.mark()
+			var helper = buildHelper(mark, args, node)
+			var fallback = footerType != FooterType::MUST_THROW
 
 			if assessment.trees.length == 0 {
 				if footerType == FooterType::NO_THROW {
 					footer(fragments, node)
 				}
 				else {
-					const ctrl = fragments
+					var ctrl = fragments
 						.newControl()
 						.code(`if(\(args).length !== 0)`)
 						.step()
@@ -419,7 +419,7 @@ namespace Router {
 				}
 			}
 			else if assessment.trees.length == 1 && assessment.trees[0].min == 0 && assessment.trees[0].rest {
-				const tree = assessment.trees[0]
+				var tree = assessment.trees[0]
 
 				if tree.order.length == 1 && isNeedingTestings(tree.columns[tree.order[0]]) {
 					toTreeFragments(buildPath, args, tree, 0, 1, true, fallback, helper, fragments, node)
@@ -431,11 +431,11 @@ namespace Router {
 				}
 			}
 			else {
-				let continuous = true
-				let previous = -1
-				let useAllArgs = false
+				var mut continuous = true
+				var mut previous = -1
+				var mut useAllArgs = false
 
-				for const tree, i in assessment.trees {
+				for var tree, i in assessment.trees {
 					if continuous {
 						if previous + 1 != tree.min {
 							continuous = false
@@ -470,8 +470,8 @@ namespace Router {
 		} # }}}
 
 		func toArgumentsFragments(matchArguments: Array<CallMatchArgument>, expressions: Array<Expression>, function: FunctionType, hasContext: Boolean, fragments, mode) { # {{{
-			const arguments = [...matchArguments]
-			for const argument in arguments desc while !?argument {
+			var arguments = [...matchArguments]
+			for var argument in arguments desc while !?argument {
 				arguments.pop()
 			}
 
@@ -481,12 +481,12 @@ namespace Router {
 				fragments.code($comma)
 			}
 
-			const parameters = function.parameters()
+			var parameters = function.parameters()
 
-			for const argument, index in arguments {
+			for var argument, index in arguments {
 				fragments.code($comma) if index != 0
 
-				const parameter = parameters[index].type()
+				var parameter = parameters[index].type()
 
 				if !?argument {
 					fragments.code('void 0')
@@ -495,7 +495,7 @@ namespace Router {
 					expressions[argument].toArgumentFragments(fragments, parameter, mode)
 				}
 				else if function.isAlien() {
-					for const arg, i in argument {
+					for var arg, i in argument {
 						fragments.code($comma) if i != 0
 
 						expressions[arg].toArgumentFragments(fragments, mode)
@@ -508,7 +508,7 @@ namespace Router {
 					else {
 						fragments.code('[')
 
-						for const arg, i in argument {
+						for var arg, i in argument {
 							fragments.code($comma) if i != 0
 
 							expressions[arg].toArgumentFragments(fragments, mode)

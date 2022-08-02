@@ -1,12 +1,12 @@
 class StructType extends Type {
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructType { # {{{
-			const value = new StructType(scope)
+			var value = new StructType(scope)
 
 			queue.push(() => {
-				let index = 0
+				var mut index = 0
 
-				for const type, name of data.fields {
+				for var type, name of data.fields {
 					value.addField(StructFieldType.import(index, name, type, metadata, references, alterations, queue, scope, node))
 
 					++index
@@ -51,12 +51,12 @@ class StructType extends Type {
 		}
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
-		const export = {
+		var export = {
 			kind: TypeKind::Struct
 			fields: {}
 		}
 
-		for const field of @fields {
+		for var field of @fields {
 			export.fields[field.name()] = field.export(references, indexDelta, mode, module)
 		}
 
@@ -72,11 +72,11 @@ class StructType extends Type {
 	} # }}}
 	function(reference, node) { # {{{
 		if @function == null {
-			const scope = node.scope()
+			var scope = node.scope()
 
 			@function = new FunctionType(scope)
 
-			for const field, index in this.listAllFields([]) {
+			for var field, index in this.listAllFields([]) {
 				if field.isRequired() {
 					@function.addParameter(field.type(), field.name(), 1, 1)
 				}
@@ -95,14 +95,14 @@ class StructType extends Type {
 			@extends.type().getAllFieldsMap(list)
 		}
 
-		for const field, name of @fields {
+		for var field, name of @fields {
 			list[name] = field
 		}
 
 		return list
 	} # }}}
 	getProperty(name: String) { # {{{
-		if const field = @fields[name] {
+		if var field = @fields[name] {
 			return field
 		}
 
@@ -126,7 +126,7 @@ class StructType extends Type {
 	// } # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
-		for const type in value.types() {
+		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
 			}
@@ -149,7 +149,7 @@ class StructType extends Type {
 			@extends.type().listAllFields(list)
 		}
 
-		for const field of @fields {
+		for var field of @fields {
 			list.push(field)
 		}
 
@@ -160,25 +160,25 @@ class StructType extends Type {
 			@extends.type().listAllFieldNames(list)
 		}
 
-		for const _, name of @fields {
+		for var _, name of @fields {
 			list.push(name)
 		}
 
 		return list
 	} # }}}
 	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		const fields = this.getAllFieldsMap()
-		const count = this.count()
+		var fields = this.getAllFieldsMap()
+		var count = this.count()
 
-		const nameds = {}
-		let namedCount = 0
+		var nameds = {}
+		var mut namedCount = 0
 
-		const shorthands = {}
-		const leftovers = []
+		var shorthands = {}
+		var leftovers = []
 
-		for const argument in arguments {
+		for var argument in arguments {
 			if argument is NamedArgument {
-				const name = argument.name()
+				var name = argument.name()
 
 				if !?fields[name] {
 					SyntaxException.throwUnrecognizedStructField(name, node)
@@ -189,7 +189,7 @@ class StructType extends Type {
 				++namedCount
 			}
 			else if argument is IdentifierLiteral {
-				const name = argument.name()
+				var name = argument.name()
 
 				if ?fields[name] {
 					shorthands[name] = true
@@ -203,25 +203,25 @@ class StructType extends Type {
 		if namedCount == arguments.length {
 			if namedCount != count {
 				if arguments.length == 0 {
-					for const field, name of fields when field.isRequired() {
+					for var field, name of fields when field.isRequired() {
 						ReferenceException.throwNoMatchingStruct(structName, arguments, node)
 					}
 				}
 				else {
-					for const field, name of fields when !nameds[name] && field.isRequired() {
+					for var field, name of fields when !nameds[name] && field.isRequired() {
 						SyntaxException.throwMissingStructField(name, node)
 					}
 				}
 			}
 		}
 		else {
-			const groups = []
+			var groups = []
 
-			let index = 0
-			let required = 0
-			let optional = 0
+			var mut index = 0
+			var mut required = 0
+			var mut optional = 0
 
-			for const field, name of fields {
+			for var field, name of fields {
 				if nameds[name] || shorthands[name] {
 					++index
 				}
@@ -244,10 +244,10 @@ class StructType extends Type {
 				SyntaxException.throwTooMuchStructFields(node)
 			}
 
-			let countdown = leftovers.length - required
-			let leftover = 0
+			var mut countdown = leftovers.length - required
+			var mut leftover = 0
 
-			for const [index, field] in groups {
+			for var [index, field] in groups {
 				if field.isRequired() {
 					if !leftovers[leftover].type().matchContentOf(field.type()) {
 						ReferenceException.throwNoMatchingStruct(structName, arguments, node)
@@ -267,20 +267,20 @@ class StructType extends Type {
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [this.toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
 	sortArguments(arguments: Array, node) { # {{{
-		const order = []
+		var order = []
 
-		const fields = this.getAllFieldsMap()
-		const count = this.count()
+		var fields = this.getAllFieldsMap()
+		var count = this.count()
 
-		const nameds = {}
-		let namedCount = 0
+		var nameds = {}
+		var mut namedCount = 0
 
-		const shorthands = {}
-		const leftovers = []
+		var shorthands = {}
+		var leftovers = []
 
-		for const argument in arguments {
+		for var argument in arguments {
 			if argument is NamedArgument {
-				const name = argument.name()
+				var name = argument.name()
 
 				if !?fields[name] {
 					SyntaxException.throwUnrecognizedStructField(name, node)
@@ -291,7 +291,7 @@ class StructType extends Type {
 				++namedCount
 			}
 			else if argument is IdentifierLiteral {
-				const name = argument.name()
+				var name = argument.name()
 
 				if ?fields[name] {
 					shorthands[name] = argument
@@ -307,12 +307,12 @@ class StructType extends Type {
 
 		if namedCount == arguments.length {
 			if namedCount == count {
-				for const field, name of fields {
+				for var field, name of fields {
 					order.push(nameds[name])
 				}
 			}
 			else {
-				for const field, name of fields {
+				for var field, name of fields {
 					if nameds[name]? {
 						order.push(nameds[name])
 					}
@@ -326,11 +326,11 @@ class StructType extends Type {
 			}
 		}
 		else {
-			const groups = []
-			let required = 0
-			let optional = 0
+			var groups = []
+			var mut required = 0
+			var mut optional = 0
 
-			for const field, name of fields {
+			for var field, name of fields {
 				if nameds[name]? {
 					order.push(nameds[name])
 				}
@@ -338,7 +338,7 @@ class StructType extends Type {
 					order.push(shorthands[name])
 				}
 				else {
-					const index = order.length
+					var index = order.length
 
 					order.push(null)
 					groups.push([index, field])
@@ -359,10 +359,10 @@ class StructType extends Type {
 				SyntaxException.throwTooMuchStructFields(node)
 			}
 
-			let countdown = leftovers.length - required
-			let leftover = 0
+			var mut countdown = leftovers.length - required
+			var mut leftover = 0
 
-			for const [index, field] in groups {
+			for var [index, field] in groups {
 				if field.isRequired() {
 					order[index] = leftovers[leftover]
 
@@ -401,7 +401,7 @@ class StructFieldType extends Type {
 	}
 	static {
 		import(index: Number, name: String?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { # {{{
-			const fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
 			return new StructFieldType(scope, name, index, fieldType, data.required)
 		} # }}}

@@ -1,6 +1,6 @@
-let foo = 'otto'
-let quz = 0
+var dyn foo = 'otto'
+var dyn quz = 0
 
-let bar
+var dyn bar
 if (++quz, true) && (++quz, bar ?= foo) {
 }

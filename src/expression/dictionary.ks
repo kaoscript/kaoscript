@@ -1,5 +1,5 @@
 class DictionaryExpression extends Expression {
-	private lateinit {
+	private late {
 		_empty: Boolean				= true
 		_properties					= []
 		_reusable: Boolean			= false
@@ -12,20 +12,21 @@ class DictionaryExpression extends Expression {
 		super(data, parent, scope, ScopeType::Hollow)
 	} # }}}
 	analyse() { # {{{
-		const names = {}
+		var names = {}
 
-		let ref
-		for let property in @data.properties {
-			if property.kind == NodeKind::UnaryExpression {
-				property = new DictionarySpreadMember(property, this)
+		for var data in @data.properties {
+			var late property
+
+			if data.kind == NodeKind::UnaryExpression {
+				property = new DictionarySpreadMember(data, this)
 				property.analyse()
 
 				@spread = true
 
 				this.module().flag('Helper')
 			}
-			else if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
-				property = new DictionaryLiteralMember(property, this)
+			else if data.name.kind == NodeKind::Identifier || data.name.kind == NodeKind::Literal {
+				property = new DictionaryLiteralMember(data, this)
 				property.analyse()
 
 				if names[property.reference()] {
@@ -34,8 +35,8 @@ class DictionaryExpression extends Expression {
 
 				names[property.reference()] = true
 			}
-			else if property.name.kind == NodeKind::ThisExpression {
-				property = new DictionaryThisMember(property, this)
+			else if data.name.kind == NodeKind::ThisExpression {
+				property = new DictionaryThisMember(data, this)
 				property.analyse()
 
 				if names[property.reference()] {
@@ -45,7 +46,7 @@ class DictionaryExpression extends Expression {
 				names[property.reference()] = true
 			}
 			else {
-				property = new DictionaryComputedMember(property, this)
+				property = new DictionaryComputedMember(data, this)
 				property.analyse()
 			}
 
@@ -61,7 +62,7 @@ class DictionaryExpression extends Expression {
 	prepare() { # {{{
 		@type = new DictionaryType(@scope)
 
-		for const property in @properties {
+		for var property in @properties {
 			property.prepare()
 
 			if property is DictionaryLiteralMember {
@@ -79,7 +80,7 @@ class DictionaryExpression extends Expression {
 			@reuseName = @scope.acquireTempName()
 		}
 
-		for const property in @properties {
+		for var property in @properties {
 			property.acquireReusable(acquire)
 		}
 	} # }}}
@@ -94,7 +95,7 @@ class DictionaryExpression extends Expression {
 	} # }}}
 	isSpread() => @spread
 	isUsingVariable(name) { # {{{
-		for const property in @properties {
+		for var property in @properties {
 			if property.isUsingVariable(name) {
 				return true
 			}
@@ -103,7 +104,7 @@ class DictionaryExpression extends Expression {
 		return false
 	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
-		for const property in @properties {
+		for var property in @properties {
 			property.listNonLocalVariables(scope, variables)
 		}
 
@@ -129,9 +130,9 @@ class DictionaryExpression extends Expression {
 		else if @spread {
 			fragments.code($runtime.helper(this), '.concatDictionary(')
 
-			let opened = false
+			var mut opened = false
 
-			for const property, index in @properties {
+			for var property, index in @properties {
 				if property is DictionarySpreadMember {
 					if opened {
 						fragments.code('}, ')
@@ -178,7 +179,7 @@ class DictionaryExpression extends Expression {
 				}
 			}
 
-			let usingThis = false
+			var mut usingThis = false
 
 			if @options.format.functions == 'es5' {
 				if this.isUsingVariable('this') {
@@ -194,11 +195,11 @@ class DictionaryExpression extends Expression {
 				fragments.code('(() =>')
 			}
 
-			const block = fragments.newBlock()
+			var block = fragments.newBlock()
 
 			block.line($const(this), @varname, ' = new ', $runtime.dictionary(this), '()')
 
-			for const property in @properties {
+			for var property in @properties {
 				block.newLine().compile(property).done()
 			}
 
@@ -221,9 +222,9 @@ class DictionaryExpression extends Expression {
 	} # }}}
 	type() => @type
 	validateType(type: DictionaryType) { # {{{
-		for const property in @properties {
+		for var property in @properties {
 			if property is DictionaryLiteralMember {
-				if const propertyType = type.getProperty(property.name()) {
+				if var propertyType = type.getProperty(property.name()) {
 					property.validateType(propertyType)
 				}
 			}
@@ -231,9 +232,9 @@ class DictionaryExpression extends Expression {
 	} # }}}
 	validateType(type: ReferenceType) { # {{{
 		if type.hasParameters() {
-			const parameter = type.parameter(0)
+			var parameter = type.parameter(0)
 
-			for const property in @properties {
+			for var property in @properties {
 				if property is DictionaryLiteralMember {
 					property.validateType(parameter)
 				}
@@ -244,7 +245,7 @@ class DictionaryExpression extends Expression {
 }
 
 class DictionaryLiteralMember extends Expression {
-	private lateinit {
+	private late {
 		_computed: Boolean		= true
 		_enumCasting: Boolean	= false
 		_function: Boolean		= false

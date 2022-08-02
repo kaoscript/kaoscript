@@ -1,5 +1,5 @@
-const foo = [1, 2]
-const bar = []
+var foo = [1, 2]
+var bar = []
 
 bar.push(0, ...foo)
 
@@ -12,12 +12,12 @@ func log(...args) {
 	console.log(...args)
 }
 
-let machine = 'tesla'
-let directory = 'xfer'
-let user = 'john'
+var dyn machine = 'tesla'
+var dyn directory = 'xfer'
+var dyn user = 'john'
 
-let info = (() => [directory, ' ', user, ': '])()
+var dyn info = (() => [directory, ' ', user, ': '])()
 
-let logHello = log^^(machine, ':', ...info)
+var dyn logHello = log^^(machine, ':', ...info)
 
 logHello('foo')

@@ -2,6 +2,6 @@ extern console
 
 func foo() => [1, 2]
 
-let [x, y] = foo()
+var dyn [x, y] = foo()
 
 console.log(x, y)

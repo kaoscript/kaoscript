@@ -4,13 +4,13 @@ class Shape {
 	private {
 		_color: string = ''
 	}
-	
+
 	static makeBlue(): Shape {
 		return new Shape('blue')
 	}
-	
+
 	constructor(@color)
-	
+
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
@@ -22,5 +22,5 @@ impl Shape {
 	}
 }
 
-let shape = Shape.makeRed()
+var dyn shape = Shape.makeRed()
 expect(shape.draw()).to.equals(`I'm drawing a red rectangle.`)

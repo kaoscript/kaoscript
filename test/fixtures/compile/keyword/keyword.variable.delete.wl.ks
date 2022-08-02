@@ -1,5 +1,5 @@
 extern console
 
-let delete = 0
+var dyn delete = 0
 
 console.log(delete)

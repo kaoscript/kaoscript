@@ -6,6 +6,6 @@ func log(...args) {
 	console.log(...args)
 }
 
-let logHello = log^^()
+var dyn logHello = log^^()
 
 logHello('foo')

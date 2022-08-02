@@ -1,6 +1,6 @@
 require expect: func
 
-let foo = (() => (...items, x) => [items, x])()
+var dyn foo = (() => (...items, x) => [items, x])()
 
 expect(() => foo()).to.throw()
 

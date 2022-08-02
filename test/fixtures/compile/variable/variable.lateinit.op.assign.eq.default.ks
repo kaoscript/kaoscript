@@ -1,6 +1,6 @@
 func foobar(values: Dictionary<String>, key: String) {
-	lateinit const value: String
-	
+	var late value: String
+
 	if (value = '') == '' {
 	}
 }

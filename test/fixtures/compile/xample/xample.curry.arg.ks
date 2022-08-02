@@ -1,4 +1,4 @@
-let o = {
+var dyn o = {
 	name: 'White'
 }
 
@@ -6,6 +6,6 @@ func fff(prefix) {
 	return prefix + this.name
 }
 
-let f = fff^$(o)
+var dyn f = fff^$(o)
 
-let s = f('Hello ')
+var dyn s = f('Hello ')

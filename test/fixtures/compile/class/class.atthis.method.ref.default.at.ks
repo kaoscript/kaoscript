@@ -2,7 +2,7 @@ class ClassA {
 	foobar() {
 	}
 	quxbaz() {
-		const foobar = @foobar
+		var foobar = @foobar
 
 		return foobar()
 	}

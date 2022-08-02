@@ -63,13 +63,13 @@ class ClassType extends Type {
 	}
 	static {
 		getExternReference(...types?): Number? { # {{{
-			for const type in types when ?type {
+			for var type in types when ?type {
 				if type.isAlien() && !type.isRequirement() && type.referenceIndex() != -1 {
 					return type.referenceIndex()
 				}
 
 				if ?type._majorOriginal {
-					if const reference = ClassType.getExternReference(type._majorOriginal) {
+					if var reference = ClassType.getExternReference(type._majorOriginal) {
 						return reference
 					}
 					else if ?type._minorOriginal {
@@ -105,7 +105,7 @@ class ClassType extends Type {
 			}
 		} # }}}
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassType { # {{{
-			const type = new ClassType(scope)
+			var type = new ClassType(scope)
 
 			type._sequences.initializations = data.sequences[0]
 			type._sequences.defaults = data.sequences[1]
@@ -137,7 +137,7 @@ class ClassType extends Type {
 
 			if data.original? {
 				queue.push(() => {
-					const original = references[data.original].discardName()
+					var original = references[data.original].discardName()
 
 					ClassType.importFromOriginal(data, type, original, alterations[data.original], metadata, references, alterations, queue, scope, node)
 
@@ -147,11 +147,11 @@ class ClassType extends Type {
 			else if data.originals? {
 
 				queue.push(() => {
-					const first = references[data.originals[0]].discardName()
-					const second = references[data.originals[1]].discardName()
+					var first = references[data.originals[0]].discardName()
+					var second = references[data.originals[1]].discardName()
 
-					const [major, minor] = first.origin() ~~ TypeOrigin::Require ? [first, second] : [second, first]
-					const isArgument = alterations[major == first ? data.originals[0] : data.originals[1]]
+					var [major, minor] = first.origin() ~~ TypeOrigin::Require ? [first, second] : [second, first]
+					var isArgument = alterations[major == first ? data.originals[0] : data.originals[1]]
 
 					ClassType.importFromOriginal(data, type, major, isArgument, metadata, references, alterations, queue, scope, node)
 
@@ -179,7 +179,7 @@ class ClassType extends Type {
 					}
 
 					if data.abstract {
-						for const methods, name of data.abstractMethods {
+						for var methods, name of data.abstractMethods {
 							for method in methods {
 								type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 							}
@@ -190,25 +190,25 @@ class ClassType extends Type {
 						type.addConstructor(ClassConstructorType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 
-					for const vtype, name of data.instanceVariables {
+					for var vtype, name of data.instanceVariables {
 						if !type.hasInstanceVariable(name) {
 							type.addInstanceVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
-					for const vtype, name of data.classVariables {
+					for var vtype, name of data.classVariables {
 						if !type.hasClassVariable(name) {
 							type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
-					for const methods, name of data.instanceMethods {
+					for var methods, name of data.instanceMethods {
 						for method in methods {
 							type.dedupInstanceMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
-					for const methods, name of data.classMethods {
+					for var methods, name of data.classMethods {
 						for method in methods {
 							type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
@@ -224,37 +224,37 @@ class ClassType extends Type {
 			type.copyFrom(original)
 
 			if type.isAbstract() {
-				for const methods, name of data.abstractMethods {
+				for var methods, name of data.abstractMethods {
 					for method in methods {
 						type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
 			}
 
-			for const constructor in data.constructors {
+			for var constructor in data.constructors {
 				type.addConstructor(ClassConstructorType.import(constructor, metadata, references, alterations, queue, scope, node))
 			}
 
-			for const vtype, name of data.instanceVariables {
+			for var vtype, name of data.instanceVariables {
 				if !type.hasInstanceVariable(name) {
 					type.addInstanceVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
-			for const vtype, name of data.classVariables {
+			for var vtype, name of data.classVariables {
 				if !type.hasClassVariable(name) {
 					type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
-			for const methods, name of data.instanceMethods {
-				for const method in methods {
+			for var methods, name of data.instanceMethods {
+				for var method in methods {
 					type.dedupInstanceMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
-			for const methods, name of data.classMethods {
-				for const method in methods {
+			for var methods, name of data.classMethods {
+				for var method in methods {
 					type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
@@ -263,10 +263,10 @@ class ClassType extends Type {
 		} # }}}
 	}
 	addAbstractMethod(name: String, type: ClassMethodType): Number { # {{{
-		const sequences = @sequences.instanceMethods
+		var sequences = @sequences.instanceMethods
 		sequences[name] = sequences[name] ?? -1
 
-		let index = type.index()
+		var mut index = type.index()
 
 		if index == -1 {
 			index = ++sequences[name]
@@ -292,13 +292,13 @@ class ClassType extends Type {
 		return index
 	} # }}}
 	addClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		const root = this.ancestor()
-		const sequences = root._sequences.classMethods
+		var root = this.ancestor()
+		var sequences = root._sequences.classMethods
 
 		@classMethods[name] = @classMethods[name] ?? []
 		sequences[name] = sequences[name] ?? -1
 
-		let index = type.index()
+		var mut index = type.index()
 
 		if index == -1 {
 			index = ++sequences[name]
@@ -335,7 +335,7 @@ class ClassType extends Type {
 		@alterations.classVariables[name] = true
 	} # }}}
 	addConstructor(type: ClassConstructorType) { # {{{
-		let index = type.index()
+		var mut index = type.index()
 		if index == -1 {
 			index = ++@sequences.constructors
 
@@ -360,13 +360,13 @@ class ClassType extends Type {
 		return index
 	} # }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
-		const root = this.ancestor()
-		const sequences = root._sequences.instanceMethods
+		var root = this.ancestor()
+		var sequences = root._sequences.instanceMethods
 
 		@instanceMethods[name] = @instanceMethods[name] ?? []
 		sequences[name] = sequences[name] ?? -1
 
-		let index = type.index()
+		var mut index = type.index()
 		if index == -1 {
 			index = ++sequences[name]
 
@@ -408,16 +408,16 @@ class ClassType extends Type {
 		@alterations.instanceVariables[name] = true
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
-		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		switch data.kind {
 			NodeKind::FieldDeclaration => {
-				let instance = true
+				var mut instance = true
 				for i from 0 til data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind::Static
 				}
 
-				const type = ClassVariableType.fromAST(data, node)
+				var type = ClassVariableType.fromAST(data, node)
 
 				if instance {
 					this.addInstanceVariable(data.name.name, type)
@@ -428,7 +428,7 @@ class ClassType extends Type {
 			}
 			NodeKind::MethodDeclaration => {
 				if this.isConstructor(data.name.name) {
-					const type = ClassConstructorType.fromAST(data, node)
+					var type = ClassConstructorType.fromAST(data, node)
 
 					if options.rules.nonExhaustive {
 						@exhaustiveness.constructor = false
@@ -440,12 +440,12 @@ class ClassType extends Type {
 					throw new NotImplementedException(node)
 				}
 				else {
-					let instance = true
+					var mut instance = true
 					for i from 0 til data.modifiers.length while instance {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 
-					const type = ClassMethodType.fromAST(data, node)
+					var type = ClassMethodType.fromAST(data, node)
 
 					if options.rules.nonExhaustive {
 						if instance {
@@ -484,7 +484,7 @@ class ClassType extends Type {
 	checkVariablesInitializations(node) { # {{{
 		return if @alien
 
-		for const variable, name of @instanceVariables {
+		for var variable, name of @instanceVariables {
 			if variable.isRequiringInitialization() {
 				SyntaxException.throwNotInitializedField(name, node)
 			}
@@ -495,7 +495,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	clone() { # {{{
-		const that = new ClassType(@scope)
+		var that = new ClassType(@scope)
 
 		that.copyFrom(this)
 
@@ -514,20 +514,20 @@ class ClassType extends Type {
 		@sealed = src._sealed
 		@systemic = src._systemic
 
-		for const methods, name of src._abstractMethods {
+		for var methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
 		}
-		for const methods, name of src._classMethods {
+		for var methods, name of src._classMethods {
 			@classMethods[name] = [].concat(methods)
 		}
-		for const methods, name of src._instanceMethods {
+		for var methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
 		}
 
-		for const variable, name of src._classVariables {
+		for var variable, name of src._classVariables {
 			@classVariables[name] = variable
 		}
-		for const variable, name of src._instanceVariables {
+		for var variable, name of src._instanceVariables {
 			@instanceVariables[name] = variable
 		}
 
@@ -548,9 +548,9 @@ class ClassType extends Type {
 		return this
 	} # }}}
 	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if const id = type.index() {
+		if var id = type.index() {
 			if @abstractMethods[name] is Array {
-				for const method in @abstractMethods[name] {
+				for var method in @abstractMethods[name] {
 					if method.index() == id {
 						return id
 					}
@@ -561,9 +561,9 @@ class ClassType extends Type {
 		return this.addAbstractMethod(name, type)
 	} # }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if const id = type.index() {
+		if var id = type.index() {
 			if @classMethods[name] is Array {
-				for const method in @classMethods[name] {
+				for var method in @classMethods[name] {
 					if method.index() == id {
 						return id
 					}
@@ -571,11 +571,11 @@ class ClassType extends Type {
 			}
 		}
 
-		if const overwrite = type.overwrite() {
-			const methods = @classMethods[name]
+		if var overwrite = type.overwrite() {
+			var methods = @classMethods[name]
 
-			for const data in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+			for var data in overwrite {
+				for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
 					methods.splice(i, 1)
 					break
 				}
@@ -587,9 +587,9 @@ class ClassType extends Type {
 		return this.addClassMethod(name, type)
 	} # }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if const id = type.index() {
+		if var id = type.index() {
 			if @instanceMethods[name] is Array {
-				for const method in @instanceMethods[name] {
+				for var method in @instanceMethods[name] {
 					if method.index() == id {
 						return id
 					}
@@ -597,10 +597,10 @@ class ClassType extends Type {
 			}
 		}
 
-		if const overwrite = type.overwrite() {
-			if const methods = @instanceMethods[name] {
-				for const data in overwrite {
-					for const i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+		if var overwrite = type.overwrite() {
+			if var methods = @instanceMethods[name] {
+				for var data in overwrite {
+					for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
 						methods.splice(i, 1)
 						break
 					}
@@ -612,17 +612,18 @@ class ClassType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 
-		const exhaustive = this.isExhaustive()
+		var exhaustive = this.isExhaustive()
 
-		let export
+		var mut export
 
-		let exportSuper = false
+		var mut exportSuper = false
 		if @majorOriginal? {
 			if mode ~~ ExportMode::Export {
 				exportSuper = this.hasExportableOriginals()
 			}
 			else if mode ~~ ExportMode::Requirement {
-				let original = @majorOriginal
+				// TODO shorten
+				var mut original: ClassType? = @majorOriginal
 
 				while ?original {
 					if original.isRequirement() || original.referenceIndex() != -1 {
@@ -642,9 +643,9 @@ class ClassType extends Type {
 			}
 
 			if mode ~~ ExportMode::Export {
-				const origin = this.origin()
-				const extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
-				const require = ClassType.getRequireReference(@majorOriginal)
+				var origin = this.origin()
+				var extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
+				var require = ClassType.getRequireReference(@majorOriginal)
 
 				if extern? {
 					if require? {
@@ -679,35 +680,35 @@ class ClassType extends Type {
 
 			@majorOriginal.exportProperties(export, references, indexDelta, mode, module, @overwritten)
 
-			let original = @majorOriginal
+			var mut original = @majorOriginal
 			while original.referenceIndex() == -1 {
 				original = original.majorOriginal()
 			}
 
-			const originalConstructors = original?.listConstructors()?.map((method, _, _) => method.index())
-			for const constructor in @constructors when constructor.isExportable(mode) {
+			var originalConstructors = original?.listConstructors()?.map((method, _, _) => method.index())
+			for var constructor in @constructors when constructor.isExportable(mode) {
 				if @alterations.constructors[constructor.index()] {
 					export.constructors.push(constructor.export(references, indexDelta, mode, module, originalConstructors))
 				}
 			}
 
-			for const variable, name of @instanceVariables {
+			for var variable, name of @instanceVariables {
 				if @alterations.instanceVariables[name] {
 					export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 				}
 			}
 
-			for const variable, name of @classVariables {
+			for var variable, name of @classVariables {
 				if @alterations.classVariables[name] {
 					export.classVariables[name] = variable.export(references, indexDelta, mode, module)
 				}
 			}
 
-			for const methods, name of @instanceMethods {
-				const exportedMethods = export.instanceMethods[name] ?? []
-				const originalMethods = original?.listInstanceMethods(name)?.map((method, _, _) => method.index())
+			for var methods, name of @instanceMethods {
+				var exportedMethods = export.instanceMethods[name] ?? []
+				var originalMethods = original?.listInstanceMethods(name)?.map((method, _, _) => method.index())
 
-				for const method in methods when method.isExportable(mode) {
+				for var method in methods when method.isExportable(mode) {
 					if @alterations.instanceMethods[name]?[method.index()] {
 						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
 					}
@@ -718,11 +719,11 @@ class ClassType extends Type {
 				}
 			}
 
-			for const methods, name of @classMethods {
-				const exportedMethods = export.classMethods[name] ?? []
-				const originalMethods = original?.listClassMethods(name)?.map((method, _, _) => method.index())
+			for var methods, name of @classMethods {
+				var exportedMethods = export.classMethods[name] ?? []
+				var originalMethods = original?.listClassMethods(name)?.map((method, _, _) => method.index())
 
-				for const method in methods when method.isExportable(mode) {
+				for var method in methods when method.isExportable(mode) {
 					if @alterations.classMethods[name]?[method.index()] {
 						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
 					}
@@ -742,31 +743,31 @@ class ClassType extends Type {
 				sealed: @sealed
 				systemic: @systemic
 				exhaustive
-				constructors: [constructor.export(references, indexDelta, mode, module, null) for const constructor in @constructors]
+				constructors: [constructor.export(references, indexDelta, mode, module, null) for var constructor in @constructors]
 				instanceVariables: {}
 				classVariables: {}
 				instanceMethods: {}
 				classMethods: {}
 			}
 
-			for const variable, name of @instanceVariables {
+			for var variable, name of @instanceVariables {
 				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
-			for const variable, name of @classVariables {
+			for var variable, name of @classVariables {
 				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
-			for const methods, name of @instanceMethods {
-				const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
+			for var methods, name of @instanceMethods {
+				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
 
 				if exportedMethods.length != 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
-			for const methods, name of @classMethods {
-				const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
+			for var methods, name of @classMethods {
+				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
 
 				if exportedMethods.length != 0 {
 					export.classMethods[name] = exportedMethods
@@ -776,8 +777,8 @@ class ClassType extends Type {
 			if @abstract {
 				export.abstractMethods = {}
 
-				for const methods, name of @abstractMethods {
-					const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
+				for var methods, name of @abstractMethods {
+					var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
 
 					if exportedMethods.length != 0 {
 						export.abstractMethods[name] = exportedMethods
@@ -791,7 +792,7 @@ class ClassType extends Type {
 		}
 
 		if mode !~ ExportMode::Export && @origin? && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
-			const origin = @origin - TypeOrigin::Extern - TypeOrigin::Require
+			var origin = @origin - TypeOrigin::Extern - TypeOrigin::Require
 
 			if origin != 0 {
 				export.origin = origin
@@ -804,18 +805,18 @@ class ClassType extends Type {
 			@sequences.destructors
 		]
 
-		const exhaustiveness = {}
+		var exhaustiveness = {}
 
 		if @exhaustiveness.constructor != exhaustive {
 			exhaustiveness.constructor = @exhaustiveness.constructor
 		}
 
-		for const value, name of @exhaustiveness.classMethods when value != exhaustive {
+		for var value, name of @exhaustiveness.classMethods when value != exhaustive {
 			exhaustiveness.classMethods ??= {}
 			exhaustiveness.classMethods[name] = value
 		}
 
-		for const value, name of @exhaustiveness.instanceMethods when value != exhaustive {
+		for var value, name of @exhaustiveness.instanceMethods when value != exhaustive {
 			exhaustiveness.instanceMethods ??= {}
 			exhaustiveness.instanceMethods[name] = value
 		}
@@ -835,30 +836,30 @@ class ClassType extends Type {
 
 		@majorOriginal?.exportProperties(export, references, indexDelta, mode, module, overwritten)
 
-		for const variable, name of @instanceVariables {
+		for var variable, name of @instanceVariables {
 			if @alterations.instanceVariables[name] {
 				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 		}
 
-		for const variable, name of @classVariables {
+		for var variable, name of @classVariables {
 			if @alterations.classVariables[name] {
 				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 		}
 
-		const ignoredConstructors = overwritten.constructors ?? []
-		for const constructor in @constructors when constructor.isExportable(mode) {
+		var ignoredConstructors = overwritten.constructors ?? []
+		for var constructor in @constructors when constructor.isExportable(mode) {
 			if @alterations.constructors[constructor.index()] && !ignoredConstructors:Array.contains(constructor.index()) {
 				export.constructors.push(constructor.export(references, indexDelta, mode, module, true))
 			}
 		}
 
-		for const methods, name of @instanceMethods {
-			const exportedMethods = export.instanceMethods[name] ?? []
-			const ignoredMethods = overwritten.instanceMethods[name] ?? []
+		for var methods, name of @instanceMethods {
+			var exportedMethods = export.instanceMethods[name] ?? []
+			var ignoredMethods = overwritten.instanceMethods[name] ?? []
 
-			for const method in methods when method.isExportable(mode) {
+			for var method in methods when method.isExportable(mode) {
 				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:Array.contains(method.index()) {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
@@ -869,10 +870,10 @@ class ClassType extends Type {
 			}
 		}
 
-		for const methods, name of @classMethods {
-			const exportedMethods = export.classMethods[name] ?? []
+		for var methods, name of @classMethods {
+			var exportedMethods = export.classMethods[name] ?? []
 
-			for const method in methods when method.isExportable(mode) {
+			for var method in methods when method.isExportable(mode) {
 				if @alterations.classMethods[name]?[method.index()] {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
@@ -887,7 +888,7 @@ class ClassType extends Type {
 	extends(@extends) { # {{{
 		@extending = true
 
-		const type = @extends.type()
+		var type = @extends.type()
 
 		if type.isAlien() || type.isHybrid() {
 			@hybrid = true
@@ -913,21 +914,21 @@ class ClassType extends Type {
 			method.flagExported(false)
 		}
 
-		for const variable of @instanceVariables {
+		for var variable of @instanceVariables {
 			variable.type().flagExported(false)
 		}
 
-		for const variable of @classVariables {
+		for var variable of @classVariables {
 			variable.type().flagExported(false)
 		}
 
-		for const methods of @instanceMethods when methods is Array {
+		for var methods of @instanceMethods when methods is Array {
 			for method in methods {
 				method.flagExported(false)
 			}
 		}
 
-		for const methods of @classMethods when methods is Array {
+		for var methods of @classMethods when methods is Array {
 			for method in methods {
 				method.flagExported(false)
 			}
@@ -945,7 +946,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract {
-			for const methods, name of @abstractMethods {
+			for var methods, name of @abstractMethods {
 				if abstractMethods[name] is not Array {
 					abstractMethods[name] = []
 				}
@@ -954,10 +955,10 @@ class ClassType extends Type {
 			}
 		}
 
-		const matchables = []
+		var matchables = []
 
-		let method, index
-		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
+		var mut method, index
+		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
 				if method.isSubsetOf(@instanceMethods[name], MatchingMode::FunctionSignature) {
 					methods.splice(index, 1)
@@ -988,7 +989,7 @@ class ClassType extends Type {
 		return this
 	} # }}}
 	forEachInstanceVariables(fn) { # {{{
-		for const variable, name of @instanceVariables {
+		for var variable, name of @instanceVariables {
 			fn(name, variable)
 		}
 
@@ -1023,14 +1024,14 @@ class ClassType extends Type {
 		}
 
 		if @classAssessments[name] is not Dictionary {
-			const methods = [...@classMethods[name]]
+			var methods = [...@classMethods[name]]
 
-			let that = this
+			var mut that = this
 			while methods.length == 0 && that.isExtending() {
 				that = that.extends().type()
 
-				if const m = that.listClassMethods(name) {
-					for const method in m {
+				if var m = that.listClassMethods(name) {
+					for var method in m {
 						method.pushTo(methods)
 					}
 				}
@@ -1050,7 +1051,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	getClassVariable(name: String) { # {{{
-		if const variable = @classVariables[name] {
+		if var variable = @classVariables[name] {
 			return variable
 		}
 
@@ -1068,7 +1069,7 @@ class ClassType extends Type {
 			return @extends.type().getConstructor(type)
 		}
 
-		const result = []
+		var result = []
 
 		for method in @constructors {
 			if method.isSubsetOf(type, mode) {
@@ -1085,7 +1086,7 @@ class ClassType extends Type {
 	} # }}}
 	getConstructorAssessment(name: String, node: AbstractNode) { # {{{
 		if @constructorAssessment == null {
-			const methods = this.listAccessibleConstructors()
+			var methods = this.listAccessibleConstructors()
 
 			@constructorAssessment = Router.assess(methods, name, node)
 		}
@@ -1096,9 +1097,9 @@ class ClassType extends Type {
 	getDestructorCount() => @sequences.destructors + 1
 	getHierarchy(name) { # {{{
 		if @extending {
-			let class = this.extends()
+			var mut class = this.extends()
 
-			const hierarchy = [name, class.name()]
+			var hierarchy = [name, class.name()]
 
 			while class.type().isExtending() {
 				hierarchy.push((class = class.type().extends()).name())
@@ -1163,22 +1164,22 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	getInstantiableAssessment(name: String, node: AbstractNode) { # {{{
-		if const assessment = @instanceAssessments[name] {
+		if var assessment = @instanceAssessments[name] {
 			return assessment
 		}
 
-		const methods = this.listInstantiableMethods(name)
+		var methods = this.listInstantiableMethods(name)
 
-		let that = this
+		var mut that = this
 		while methods.length == 0 && that.isExtending() {
 			that = that.extends().type()
 
-			for const method in that.listInstantiableMethods(name) {
+			for var method in that.listInstantiableMethods(name) {
 				method.pushTo(methods)
 			}
 		}
 
-		const assessment = Router.assess(methods, name, node)
+		var assessment = Router.assess(methods, name, node)
 
 		@instanceAssessments[name] = assessment
 
@@ -1277,7 +1278,7 @@ class ClassType extends Type {
 	} # }}}
 	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @classMethods[name] is Array {
-			for const method in @classMethods[name] {
+			for var method in @classMethods[name] {
 				if method.isSubsetOf(type, mode) {
 					return true
 				}
@@ -1292,7 +1293,7 @@ class ClassType extends Type {
 	} # }}}
 	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { # {{{
 		if @constructors.length != 0 {
-			for const constructor in @constructors {
+			for var constructor in @constructors {
 				if constructor.isSubsetOf(type, mode) {
 					return true
 				}
@@ -1303,7 +1304,7 @@ class ClassType extends Type {
 	} # }}}
 	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
-			for const method in @instanceMethods[name] {
+			for var method in @instanceMethods[name] {
 				if method.isSubsetOf(type, mode) {
 					return true
 				}
@@ -1311,7 +1312,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract && @abstractMethods[name] is Array {
-			for const method in @abstractMethods[name] {
+			for var method in @abstractMethods[name] {
 				if method.isSubsetOf(type, mode) {
 					return true
 				}
@@ -1347,7 +1348,7 @@ class ClassType extends Type {
 		return ++@sequences.initializations
 	} # }}}
 	incSharedMethod(name: String): Number { # {{{
-		if const value = @sharedMethods[name] {
+		if var value = @sharedMethods[name] {
 			@sharedMethods[name] = ++value
 		}
 		else {
@@ -1469,39 +1470,39 @@ class ClassType extends Type {
 		}
 
 		if mode ~~ MatchingMode::Similar {
-			for const variable, name of value._instanceVariables {
+			for var variable, name of value._instanceVariables {
 				if !@instanceVariables[name]?.isSubsetOf(variable, mode) {
 					return false
 				}
 			}
 
-			for const variable, name of value._classVariables {
+			for var variable, name of value._classVariables {
 				if !@classVariables[name]?.isSubsetOf(variable, mode) {
 					return false
 				}
 			}
 
-			let functionMode = MatchingMode::FunctionSignature + MatchingMode::Similar
+			var mut functionMode = MatchingMode::FunctionSignature + MatchingMode::Similar
 			functionMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
 
-			for const methods, name of value._instanceMethods {
+			for var methods, name of value._instanceMethods {
 				if @instanceMethods[name] is not Array {
 					return false
 				}
 
-				for const method in methods {
+				for var method in methods {
 					if !method.isSupersetOf(@instanceMethods[name], functionMode) {
 						return false
 					}
 				}
 			}
 
-			for const methods, name of value._classMethods {
+			for var methods, name of value._classMethods {
 				if @classMethods[name] is not Array {
 					return false
 				}
 
-				for const method in methods {
+				for var method in methods {
 					if !method.isSupersetOf(@classMethods[name], functionMode) {
 						return false
 					}
@@ -1534,9 +1535,9 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
-		const result = []
+		var result = []
 
-		if const methods = @classMethods[name] {
+		if var methods = @classMethods[name] {
 			for method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -1556,9 +1557,9 @@ class ClassType extends Type {
 	} # }}}
 	listConstructors() => @constructors
 	listConstructors(type: FunctionType, mode: MatchingMode): Array { # {{{
-		const result = []
+		var result = []
 
-		for const method in @constructors {
+		for var method in @constructors {
 			if method.isSubsetOf(type, mode) {
 				result.push(method)
 			}
@@ -1582,14 +1583,14 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	listInstantiableMethods(name: String) { # {{{
-		const methods = []
+		var methods = []
 
-		if const functions = @instanceMethods[name] {
+		if var functions = @instanceMethods[name] {
 			methods.push(...functions)
 		}
 
 		if @abstract {
-			if const functions = @abstractMethods[name] {
+			if var functions = @abstractMethods[name] {
 				methods.push(...functions)
 			}
 		}
@@ -1597,9 +1598,9 @@ class ClassType extends Type {
 		return methods
 	} # }}}
 	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
-		const result = []
+		var result = []
 
-		if const methods = @instanceMethods[name] {
+		if var methods = @instanceMethods[name] {
 			for method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -1612,7 +1613,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract {
-			if const methods = @abstractMethods[name] {
+			if var methods = @abstractMethods[name] {
 				for method in methods {
 					if method.isSubsetOf(type, mode) {
 						result.push(method)
@@ -1632,9 +1633,9 @@ class ClassType extends Type {
 		return result
 	} # }}}
 	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { # {{{
-		const results: Array = []
+		var results: Array = []
 
-		for const constructor in @constructors {
+		for var constructor in @constructors {
 			if constructor.isSubsetOf(type, mode) {
 				results.push(constructor)
 			}
@@ -1643,10 +1644,10 @@ class ClassType extends Type {
 		return results
 	} # }}}
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
-		const results: Array = []
+		var results: Array = []
 
 		if @instanceMethods[name] is Array {
-			for const method in @instanceMethods[name] {
+			for var method in @instanceMethods[name] {
 				if method.isSubsetOf(type, mode) {
 					results.push(method)
 				}
@@ -1654,7 +1655,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract && @abstractMethods[name] is Array {
-			for const method in @abstractMethods[name] {
+			for var method in @abstractMethods[name] {
 				if method.isSubsetOf(type, mode) {
 					results.push(method)
 				}
@@ -1668,16 +1669,16 @@ class ClassType extends Type {
 			return []
 		}
 
-		const abstractMethods = {}
+		var abstractMethods = {}
 
 		@extends.type().filterAbstractMethods(abstractMethods)
 
-		const mode = MatchingMode::Signature - MatchingMode::MissingParameterType
+		var mode = MatchingMode::Signature - MatchingMode::MissingParameterType
 
-		const matchables = []
+		var matchables = []
 
-		let method, index
-		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
+		var mut method, index
+		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
 				if method.isSubsetOf(@instanceMethods[name], mode) {
 					methods.splice(index, 1)
@@ -1712,11 +1713,11 @@ class ClassType extends Type {
 		}
 	} # }}}
 	matchInstanceWith(object: DictionaryType, matchables) { # {{{
-		for const property, name of object._properties {
+		for var property, name of object._properties {
 			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode::Signature) {
 			}
 			else if @instanceMethods[name] is Array {
-				let nf = true
+				var mut nf = true
 
 				for method in @instanceMethods[name] while nf {
 					if method.isSubsetOf(property, MatchingMode::FunctionSignature) {
@@ -1761,9 +1762,9 @@ class ClassType extends Type {
 	overwriteConstructor(type, methods) { # {{{
 		@constructors.remove(...methods)
 
-		if const alterMethods = @majorOriginal?._constructors {
-			const indexes = [method.index() for const method in alterMethods]
-			const overwrite = [method.index() for const method in methods when indexes.contains(method.index())]
+		if var alterMethods = @majorOriginal?._constructors {
+			var indexes = [method.index() for var method in alterMethods]
+			var overwrite = [method.index() for var method in methods when indexes.contains(method.index())]
 
 			if overwrite.length != 0 {
 				type.overwrite(overwrite)
@@ -1777,9 +1778,9 @@ class ClassType extends Type {
 	overwriteInstanceMethod(name: String, type, methods) { # {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
-		if const alterMethods = @majorOriginal?._instanceMethods[name] {
-			const indexes = [method.index() for const method in alterMethods]
-			const overwrite = [method.index() for const method in methods when indexes.contains(method.index())]
+		if var alterMethods = @majorOriginal?._instanceMethods[name] {
+			var indexes = [method.index() for var method in alterMethods]
+			var overwrite = [method.index() for var method in methods when indexes.contains(method.index())]
 
 			if overwrite.length != 0 {
 				type.overwrite(overwrite)
@@ -1794,15 +1795,15 @@ class ClassType extends Type {
 	setExhaustive(@exhaustive) { # {{{
 		if @exhaustive {
 			if @extending {
-				const extends = @extends.type()
+				var extends = @extends.type()
 
 				@exhaustiveness.constructor = @constructors.length != 0 || extends.isExhaustiveConstructor()
 
-				for const _, name of @instanceMethods {
+				for var _, name of @instanceMethods {
 					@exhaustiveness.instanceMethods[name] = extends.isExhaustiveInstanceMethod(name)
 				}
 
-				for const _, name of @classMethods {
+				for var _, name of @classMethods {
 					@exhaustiveness.classMethods[name] = extends.isExhaustiveClassMethod(name)
 				}
 			}
@@ -1814,11 +1815,11 @@ class ClassType extends Type {
 					@exhaustiveness.constructor = true
 				}
 
-				for const _, name of @instanceMethods {
+				for var _, name of @instanceMethods {
 					@exhaustiveness.instanceMethods[name] ??= true
 				}
 
-				for const _, name of @classMethods {
+				for var _, name of @classMethods {
 					@exhaustiveness.classMethods[name] ??= true
 				}
 			}
@@ -1826,11 +1827,11 @@ class ClassType extends Type {
 		else {
 			@exhaustiveness.constructor = false
 
-			for const _, name of @instanceMethods {
+			for var _, name of @instanceMethods {
 				@exhaustiveness.instanceMethods[name] ??= false
 			}
 
-			for const _, name of @classMethods {
+			for var _, name of @classMethods {
 				@exhaustiveness.classMethods[name] ??= false
 			}
 		}
@@ -1857,11 +1858,11 @@ class ClassType extends Type {
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode::Export {
 			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin::ExternOrRequire | TypeOrigin::RequireOrExtern {
-				const require = ClassType.getRequireReference(this)
-				const extern = ClassType.getExternReference(this)
+				var require = ClassType.getRequireReference(this)
+				var extern = ClassType.getExternReference(this)
 
 				if require? && extern? {
-					const referenceIndex = references.length + indexDelta
+					var referenceIndex = references.length + indexDelta
 
 					references.push({
 						originals: @origin ~~ TypeOrigin::ExternOrRequire ? [extern, require] : [require, extern]
@@ -1906,43 +1907,43 @@ class ClassType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)
 
-		for const sequence, name of @sequences.classMethods {
+		for var sequence, name of @sequences.classMethods {
 			variations.push(name, sequence)
 		}
 
-		for const sequence, name of @sequences.instanceMethods {
+		for var sequence, name of @sequences.instanceMethods {
 			variations.push(name, sequence)
 		}
 	} # }}}
 	unflagAltering(): this { # {{{
-		for const methods of this._abstractMethods {
-			for const method in methods {
+		for var methods of this._abstractMethods {
+			for var method in methods {
 				method.unflagAltering()
 			}
 		}
-		for const methods of this._classMethods {
-			for const method in methods {
+		for var methods of this._classMethods {
+			for var method in methods {
 				method.unflagAltering()
 			}
 		}
-		for const methods of this._instanceMethods {
-			for const method in methods {
+		for var methods of this._instanceMethods {
+			for var method in methods {
 				method.unflagAltering()
 			}
 		}
 
-		for const variable of this._classVariables {
+		for var variable of this._classVariables {
 			variable.unflagAltering()
 		}
-		for const variable of this._instanceVariables {
+		for var variable of this._instanceVariables {
 			variable.unflagAltering()
 		}
 
 		@altering = false
 	} # }}}
 	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { # {{{
-		const root = this.ancestor()
-		const index = ++root._sequences.instanceMethods[name]
+		var root = this.ancestor()
+		var index = ++root._sequences.instanceMethods[name]
 
 		type.setForkedIndex(index)
 

@@ -1,13 +1,13 @@
 extern console
 
-const value = 'spice'
+var value = 'spice'
 
-let likes = {
+var dyn likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'
 }
 
-for let value of likes {
+for var value of likes {
 	console.log(value)
 }

@@ -1,1 +1,1 @@
-const x = Type::foo
+var x = Type::foo

@@ -1,5 +1,5 @@
 class ImplementNamespaceVariableDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_type: Type
 		_value
 	}
@@ -19,7 +19,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	prepare() { # {{{
 		@value.prepare()
 
-		const property = NamespacePropertyType.fromAST(@data.type, this)
+		var property = NamespacePropertyType.fromAST(@data.type, this)
 
 		property.flagAltering()
 
@@ -56,7 +56,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 }
 
 class ImplementNamespaceFunctionDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: Block
 		_internalName: String
 		_name: String
@@ -83,8 +83,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	analyse() { # {{{
 		@name = @data.name.name
 
-		for const data in @data.parameters {
-			const parameter = new Parameter(data, this)
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
 
@@ -92,11 +92,11 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		}
 	} # }}}
 	prepare() { # {{{
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		const property = NamespacePropertyType.fromAST(@data, this)
+		var property = NamespacePropertyType.fromAST(@data, this)
 
 		property.flagAltering()
 
@@ -127,7 +127,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -169,11 +169,11 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		this.toRouterFragments(fragments)
 	} # }}}
 	toMainFragments(fragments) { # {{{
-		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		const block = line.code(`\(namespace).\(@name) = function()`).newBlock()
+		var block = line.code(`\(namespace).\(@name) = function()`).newBlock()
 
 		block.line(`return \(namespace).\(@name).__ks_rt(this, arguments)`)
 
@@ -181,12 +181,12 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toRouterFragments(fragments) { # {{{
-		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 
-		const assessment = this.type().assessment(@name, this)
+		var assessment = this.type().assessment(@name, this)
 
-		const line = fragments.newLine()
-		const block = line.code(`\(namespace).\(@name).__ks_rt = function(that, args)`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(namespace).\(@name).__ks_rt = function(that, args)`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -204,12 +204,12 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
-		const line = fragments.newLine()
+		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var line = fragments.newLine()
 
 		line.code(`\(namespace).\(@name).\(@internalName) = function(`)
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 

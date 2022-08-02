@@ -5,6 +5,6 @@ tuple Pair {
 	y: Number	= 0
 }
 
-const pair = Pair('x', 0.1)
+var pair = Pair('x', 0.1)
 
 console.log(`\(pair.x)`, pair.y + 1)

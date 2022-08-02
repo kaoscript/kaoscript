@@ -1,7 +1,7 @@
 class Foobar {
 }
 
-const x = new Foobar()
+var x = new Foobar()
 
 if x is Class {
 }

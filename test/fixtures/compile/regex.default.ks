@@ -1,1 +1,1 @@
-let r = /foobar/gim
+var dyn r = /foobar/gim

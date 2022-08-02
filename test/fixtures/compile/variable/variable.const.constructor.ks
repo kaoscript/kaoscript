@@ -1,1 +1,1 @@
-const constructor = 42
+var constructor = 42

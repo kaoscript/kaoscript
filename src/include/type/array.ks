@@ -9,7 +9,7 @@ class ArrayType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const export = {
+		var export = {
 			kind: TypeKind::Array
 		}
 
@@ -17,7 +17,7 @@ class ArrayType extends Type {
 			export.sealed = @sealed
 		}
 
-		export.elements = [element.export(references, indexDelta, mode, module) for const element in @elements]
+		export.elements = [element.export(references, indexDelta, mode, module) for var element in @elements]
 
 		return export
 	} # }}}
@@ -35,7 +35,7 @@ class ArrayType extends Type {
 			return false
 		}
 
-		for const element, index in value._elements {
+		for var element, index in value._elements {
 			unless @elements[index].isSubsetOf(element, mode) {
 				return false
 			}
@@ -57,7 +57,7 @@ class ArrayType extends Type {
 		else {
 			fragments.code(`value => `, $runtime.type(node), '.isArray(value)')
 
-			for const value, index in @elements {
+			for var value, index in @elements {
 				fragments.code(' && ')
 
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value[\(index)]`))
@@ -67,7 +67,7 @@ class ArrayType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('array')
 
-		for const element in @elements {
+		for var element in @elements {
 			element.toVariations(variations)
 		}
 	} # }}}

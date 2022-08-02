@@ -17,10 +17,10 @@ class DestructurableObjectType extends ReferenceType {
 	matchContentOf(value) => false
 	properties() => @properties
 	toQuote() { # {{{
-		auto str = '{'
+		var mut str = '{'
+		var mut first = true
 
-		let first = true
-		for const property, name of @properties {
+		for var property, name of @properties {
 			if first {
 				first = false
 			}

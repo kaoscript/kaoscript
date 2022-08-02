@@ -1,9 +1,9 @@
 class Foobar {
-	static lateinit const PI: Number
+	static final late PI: Number
 }
 
 Foobar.PI = 42
 
-const x = Foobar.PI + 3.14
+var x = Foobar.PI + 3.14
 
 export Foobar

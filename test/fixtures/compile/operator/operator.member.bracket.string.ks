@@ -1,3 +1,3 @@
 extern foo
 
-let qux = foo?['qux']
+var dyn qux = foo?['qux']

@@ -4,15 +4,15 @@ class ExclusionType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
-			const type = new ExclusionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for const item in data.types])
+			var type = new ExclusionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for var item in data.types])
 
 			return type
 		} # }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
-			const type = new ExclusionType(scope)
+			var type = new ExclusionType(scope)
 
 			queue.push(() => {
-				for const item in data.types {
+				for var item in data.types {
 					type.addType(Type.fromMetadata(item, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -24,7 +24,7 @@ class ExclusionType extends Type {
 		super(scope)
 	} # }}}
 	clone() { # {{{
-		const that = new ExclusionType(@scope)
+		var that = new ExclusionType(@scope)
 
 		that._types = [...@types]
 
@@ -44,7 +44,7 @@ class ExclusionType extends Type {
 			@exported = true
 		}
 
-		for const type in @types {
+		for var type in @types {
 			type.flagExported(explicitly)
 		}
 
@@ -71,7 +71,7 @@ class ExclusionType extends Type {
 			return false
 		}
 
-		for const type in @types from 1 {
+		for var type in @types from 1 {
 			if type.matchContentOf(value) {
 				return false
 			}
@@ -82,7 +82,7 @@ class ExclusionType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
 	} # }}}
-	toQuote() => [type.toQuote() for const type in @types].join('^')
+	toQuote() => [type.toQuote() for var type in @types].join('^')
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
@@ -90,7 +90,7 @@ class ExclusionType extends Type {
 		if @types[0].isAny() {
 			@types[1].toNegativeTestFragments(fragments, node, Junction::AND)
 
-			for const type in @types from 2 {
+			for var type in @types from 2 {
 				fragments.code(' && ')
 
 				type.toNegativeTestFragments(fragments, node, Junction::AND)
@@ -99,7 +99,7 @@ class ExclusionType extends Type {
 		else {
 			@types[0].toPositiveTestFragments(fragments, node, Junction::AND)
 
-			for const type in @types from 1 {
+			for var type in @types from 1 {
 				fragments.code(' && ')
 
 				type.toNegativeTestFragments(fragments, node, Junction::AND)
@@ -114,7 +114,7 @@ class ExclusionType extends Type {
 		if @types[0].isAny() {
 			@types[1].toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
 
-			for const type in @types from 2 {
+			for var type in @types from 2 {
 				fragments.code(' && ')
 
 				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
@@ -123,7 +123,7 @@ class ExclusionType extends Type {
 		else {
 			@types[0].toTestFunctionFragments(fragments, node, Junction::AND)
 
-			for const type in @types from 1 {
+			for var type in @types from 1 {
 				fragments.code(' && ')
 
 				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)

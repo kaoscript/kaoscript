@@ -5,7 +5,7 @@ enum TryState {
 }
 
 class TryStatement extends Statement {
-	private lateinit {
+	private late {
 		_await: Boolean				= false
 		_block: Block
 		_catchVarname: String
@@ -20,10 +20,10 @@ class TryStatement extends Statement {
 		_state: TryState
 	}
 	analyse() { # {{{
-		let scope
+		var mut scope
 
 		if @data.catchClauses? {
-			let variable, body, type
+			var mut variable, body, type
 			for clause in @data.catchClauses {
 				if variable !?= @scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
@@ -78,7 +78,7 @@ class TryStatement extends Statement {
 	prepare() { # {{{
 		@hasCatch = @catchClauses.length != 0
 
-		for const clause in @catchClauses {
+		for var clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
 		}
@@ -117,7 +117,7 @@ class TryStatement extends Statement {
 	checkReturnType(type: Type) { # {{{
 		@block.checkReturnType(type)
 
-		for const clause in @catchClauses {
+		for var clause in @catchClauses {
 			clause.body.translate()
 		}
 
@@ -154,7 +154,7 @@ class TryStatement extends Statement {
 			return true
 		}
 
-		for const clause in @catchClauses {
+		for var clause in @catchClauses {
 			if clause.body.isUsingVariable(name) {
 				return true
 			}
@@ -170,14 +170,14 @@ class TryStatement extends Statement {
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()
 
-			const line = fragments
+			var line = fragments
 				.newLine()
 				.code($runtime.scope(this), @continueVarname, ` = () =>`)
 
-			const block = line.newBlock()
+			var block = line.newBlock()
 
-			let index = -1
-			let item
+			var mut index = -1
+			var mut item
 
 			for statement, i in statements while index == -1 {
 				if item ?= statement.toFragments(block, Mode::None) {
@@ -198,7 +198,7 @@ class TryStatement extends Statement {
 
 			@finallyVarname = @scope.acquireTempName()
 
-			const line = fragments
+			var line = fragments
 				.newLine()
 				.code($runtime.scope(this), @finallyVarname, ' = () =>')
 
@@ -215,13 +215,13 @@ class TryStatement extends Statement {
 
 			@catchVarname = @scope.acquireTempName()
 
-			const error = this.getErrorVarname()
+			var error = this.getErrorVarname()
 
-			const line = fragments
+			var line = fragments
 				.newLine()
 				.code($runtime.scope(this), @catchVarname, ` = (\(error)) =>`)
 
-			const block = line.newBlock()
+			var block = line.newBlock()
 
 			this.toCatchFragments(block, error)
 
@@ -233,7 +233,7 @@ class TryStatement extends Statement {
 
 		@state = TryState::Body
 
-		const ctrl = fragments
+		var ctrl = fragments
 			.newControl()
 			.code('try')
 			.step()
@@ -266,9 +266,9 @@ class TryStatement extends Statement {
 
 		fragments.code(') =>')
 
-		const block = fragments.newBlock()
+		var block = fragments.newBlock()
 
-		const ctrl = block
+		var ctrl = block
 			.newControl()
 			.code('if(__ks_e)')
 			.step()
@@ -303,7 +303,7 @@ class TryStatement extends Statement {
 			.code('else')
 			.step()
 
-		const statement = statements[statements.length - 1]
+		var statement = statements[statements.length - 1]
 
 		if @state == TryState::Body {
 			if !statement.hasExceptions() && (statements.length == 1 || (statements.length == 2 && statements[0] is VariableDeclaration && statements[0].isAwait())) {
@@ -323,19 +323,19 @@ class TryStatement extends Statement {
 				}
 			}
 			else {
-				const returnOutside = statement is ReturnStatement && statement.hasExceptions()
+				var returnOutside = statement is ReturnStatement && statement.hasExceptions()
 
 				if returnOutside {
 					statement.toDeclareReusableFragments(ctrl)
 				}
 
-				const ctrl2 = ctrl
+				var ctrl2 = ctrl
 					.newControl()
 					.code('try')
 					.step()
 
-				let index = -1
-				let item
+				var mut index = -1
+				var mut item
 
 				for i from 0 til statements.length - 1 while index == -1 {
 					if item ?= statements[i].toFragments(ctrl2, Mode::None) {
@@ -384,8 +384,8 @@ class TryStatement extends Statement {
 			}
 		}
 		else {
-			let index = -1
-			let item
+			var mut index = -1
+			var mut item
 
 			for i from 0 til statements.length while index == -1 {
 				if item ?= statements[i].toFragments(ctrl, Mode::None) {
@@ -419,12 +419,12 @@ class TryStatement extends Statement {
 		fragments.code(')').done()
 	} # }}}
 	toCatchFragments(fragments, error) { # {{{
-		let async = false
+		var mut async = false
 
 		if @catchClauses.length != 0 {
 			this.module().flag('Type')
 
-			let ifs = fragments.newControl()
+			var mut ifs = fragments.newControl()
 
 			for clause, i in @data.catchClauses {
 				ifs.step().code('else ') if i != 0
@@ -494,7 +494,7 @@ class TryStatement extends Statement {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else {
-			const ctrl = fragments
+			var ctrl = fragments
 				.newControl()
 				.code('try')
 				.step()
@@ -507,7 +507,7 @@ class TryStatement extends Statement {
 
 			ctrl.step()
 
-			const error = this.getErrorVarname()
+			var error = this.getErrorVarname()
 
 			if @hasCatch {
 				ctrl.code(`catch(\(error))`).step()

@@ -5,7 +5,7 @@ abstract class Callee {
 		_nullableProperty: Boolean	= false
 	}
 	constructor(@data) { # {{{
-		for const modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Nullable {
 				@nullable = true
 			}
@@ -24,7 +24,7 @@ abstract class Callee {
 	} # }}}
 	releaseReusable()
 	validate(type: FunctionType, node) { # {{{
-		for const error in type.listErrors() {
+		for var error in type.listErrors() {
 			Exception.validateReportedError(error.discardReference(), node)
 		}
 	} # }}}

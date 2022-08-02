@@ -2,9 +2,9 @@ extern sealed class Array
 
 impl Array {
 	pluck(name) {
-		let result = []
-		
-		let value
+		var dyn result = []
+
+		var dyn value
 		for item in this {
 			if value ?= item?[name] {
 				if value is Function {
@@ -15,7 +15,7 @@ impl Array {
 				}
 			}
 		}
-		
+
 		return result
 	}
 }

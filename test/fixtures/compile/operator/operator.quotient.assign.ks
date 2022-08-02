@@ -1,3 +1,3 @@
-let x = 7
+var dyn x = 7
 
 x /.= 2

@@ -1,7 +1,7 @@
 class Foobar {
-	lateinit PI: Number
+	late PI: Number
 	constructor() {
-		const x = @PI + 3.14
+		var x = @PI + 3.14
 
 		@PI = 42
 	}

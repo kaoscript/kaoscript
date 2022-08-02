@@ -1,1 +1,1 @@
-const map: Array<Number> = [0, true]
+var map: Array<Number> = [0, true]

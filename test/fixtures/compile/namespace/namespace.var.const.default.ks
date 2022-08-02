@@ -1,8 +1,8 @@
 extern console
 
 namespace Float {
-	export const PI = 3.14
-	export const name = 'john'
+	export var PI = 3.14
+	export var name = 'john'
 }
 
 console.log(Float.PI)

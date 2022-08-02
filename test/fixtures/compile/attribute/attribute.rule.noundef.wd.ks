@@ -1,3 +1,3 @@
 #![rules(no-undefined)]
 
-let x = 42
+var dyn x = 42

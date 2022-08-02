@@ -6,6 +6,6 @@ func log(...args) {
 	this.log(...args)
 }
 
-const messages = ['hello', 'world']
+var messages = ['hello', 'world']
 
 log*$(console, ...messages)

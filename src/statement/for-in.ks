@@ -1,5 +1,5 @@
 class ForInStatement extends Statement {
-	private lateinit {
+	private late {
 		_bindingScope: Scope
 		_bindingValue						= null
 		_body
@@ -34,7 +34,7 @@ class ForInStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
 				@declaration = true
 			}
@@ -47,7 +47,7 @@ class ForInStatement extends Statement {
 		}
 
 		if @data.index? {
-			const variable = @bindingScope.getVariable(@data.index.name)
+			var variable = @bindingScope.getVariable(@data.index.name)
 
 			if @declaration || variable == null {
 				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), true, this)
@@ -67,8 +67,8 @@ class ForInStatement extends Statement {
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
 
-			for const name in @value.listAssignments([]) {
-				const variable = @scope.getVariable(name)
+			for var name in @value.listAssignments([]) {
+				var variable = @scope.getVariable(name)
 
 				if @declaration || variable == null {
 					@declareValue = true
@@ -81,7 +81,7 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		const variables = []
+		var variables = []
 
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
@@ -115,7 +115,7 @@ class ForInStatement extends Statement {
 			this.checkForRenamedVariables(@by, variables)
 		}
 
-		for const variable in variables {
+		for var variable in variables {
 			@bindingScope.rename(variable)
 		}
 
@@ -149,20 +149,20 @@ class ForInStatement extends Statement {
 	prepare() { # {{{
 		@expression.prepare()
 
-		const type = @expression.type()
+		var type = @expression.type()
 		if !(type.isAny() || type.isArray()) {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
 		if @value != null {
-			const parameterType = type.parameter()
+			var parameterType = type.parameter()
 
-			const valueType = Type.fromAST(@data.type, this)
+			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
 			if @value is IdentifierLiteral {
 				if @declareValue {
@@ -173,7 +173,7 @@ class ForInStatement extends Statement {
 				}
 			}
 			else {
-				for const name in @value.listAssignments([]) {
+				for var name in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
@@ -257,7 +257,7 @@ class ForInStatement extends Statement {
 				TypeException.throwInvalidCondition(@when, this)
 			}
 
-			for const data, name of @when.inferWhenTrueTypes({}) {
+			for var data, name of @when.inferWhenTrueTypes({}) {
 				@bodyScope.updateInferable(name, data, this)
 			}
 
@@ -273,7 +273,7 @@ class ForInStatement extends Statement {
 		@bindingScope.releaseTempName(@indexName) if @indexName?
 		@bindingScope.releaseTempName(@boundName)
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
@@ -314,7 +314,7 @@ class ForInStatement extends Statement {
 	} # }}}
 	checkForBreak(expression) { # {{{
 		if !@useBreak && @value != null {
-			for const variable in @value.listAssignments([]) until @useBreak {
+			for var variable in @value.listAssignments([]) until @useBreak {
 				if expression.isUsingVariable(variable) {
 					@useBreak = true
 				}
@@ -332,7 +332,7 @@ class ForInStatement extends Statement {
 		}
 
 		if @value != null {
-			for const variable in @value.listAssignments([]) {
+			for var variable in @value.listAssignments([]) {
 				if expression.isUsingVariable(variable) {
 					if @declareValue {
 						variables.pushUniq(variable)
@@ -517,10 +517,10 @@ class ForInStatement extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl
+		var mut ctrl
 
 		if @index != null && !@declaration && !@declareIndex {
-			const line = fragments
+			var line = fragments
 				.newLine()
 				.compile(@index)
 				.code($equals)
@@ -554,7 +554,7 @@ class ForInStatement extends Statement {
 		this.toBoundFragments(ctrl)
 
 		if @declareValue {
-			for const variable in @declaredVariables {
+			for var variable in @declaredVariables {
 				ctrl.code($comma).compile(variable)
 			}
 		}
@@ -623,7 +623,7 @@ class ForInStatement extends Statement {
 		ctrl.code(')').step()
 
 		if @value? {
-			const line = ctrl.newLine()
+			var line = ctrl.newLine()
 
 			@value.toAssignmentFragments(line, @bindingValue)
 

@@ -1,1 +1,1 @@
-let x = foo * bar
+var dyn x = foo * bar

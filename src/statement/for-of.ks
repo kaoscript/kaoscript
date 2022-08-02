@@ -1,5 +1,5 @@
 class ForOfStatement extends Statement {
-	private lateinit {
+	private late {
 		_bindingScope: Scope
 		_bindingValue						= null
 		_bleeding: Boolean					= false
@@ -24,7 +24,7 @@ class ForOfStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
 				@declaration = true
 			}
@@ -34,7 +34,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if @data.key? {
-			const keyVariable = @scope.getVariable(@data.key.name)
+			var keyVariable = @scope.getVariable(@data.key.name)
 
 			if @declaration || keyVariable == null {
 				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), true, this)
@@ -54,8 +54,8 @@ class ForOfStatement extends Statement {
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
 
-			for const name in @value.listAssignments([]) {
-				const variable = @bindingScope.getVariable(name)
+			for var name in @value.listAssignments([]) {
+				var variable = @bindingScope.getVariable(name)
 
 				if @declaration || variable == null {
 					@defineValue = true
@@ -68,14 +68,14 @@ class ForOfStatement extends Statement {
 			}
 		}
 
-		const variables = []
+		var variables = []
 
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
 		this.checkForRenamedVariables(@expression, variables)
 
-		for const variable in variables {
+		for var variable in variables {
 			@bindingScope.rename(variable)
 		}
 
@@ -99,7 +99,7 @@ class ForOfStatement extends Statement {
 	prepare() { # {{{
 		@expression.prepare()
 
-		const type = @expression.type()
+		var type = @expression.type()
 		if !(type.isAny() || type.isDictionary() || type.isObject()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
@@ -111,14 +111,14 @@ class ForOfStatement extends Statement {
 		}
 
 		if @value != null {
-			const parameterType = type.parameter()
+			var parameterType = type.parameter()
 
-			const valueType = Type.fromAST(@data.type, this)
+			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
 			if @value is IdentifierLiteral {
 				if @defineValue {
@@ -129,7 +129,7 @@ class ForOfStatement extends Statement {
 				}
 			}
 			else {
-				for const name in @value.listAssignments([]) {
+				for var name in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
@@ -180,7 +180,7 @@ class ForOfStatement extends Statement {
 				TypeException.throwInvalidCondition(@when, this)
 			}
 
-			for const data, name of @when.inferWhenTrueTypes({}) {
+			for var data, name of @when.inferWhenTrueTypes({}) {
 				@bodyScope.updateInferable(name, data, this)
 			}
 
@@ -192,7 +192,7 @@ class ForOfStatement extends Statement {
 		@bindingScope.releaseTempName(@expressionName) if @expressionName?
 		@bindingScope.releaseTempName(@keyName) if @keyName?
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
@@ -225,7 +225,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if @value != null {
-			for const variable in @value.listAssignments([]) {
+			for var variable in @value.listAssignments([]) {
 				if expression.isUsingVariable(variable) {
 					if @defineValue {
 						variables.pushUniq(variable)
@@ -261,7 +261,7 @@ class ForOfStatement extends Statement {
 				this.toLoopFragments(fragments, mode)
 			}
 			else {
-				const block = fragments.newBlock()
+				var block = fragments.newBlock()
 
 				block
 					.newLine()
@@ -279,7 +279,7 @@ class ForOfStatement extends Statement {
 		}
 	} # }}}
 	toLoopFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl().code('for(')
+		var mut ctrl = fragments.newControl().code('for(')
 
 		if @key != null {
 			if @declaration || @defineKey {
@@ -303,7 +303,7 @@ class ForOfStatement extends Statement {
 		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
 
 		if @value != null {
-			let line = ctrl.newLine()
+			var mut line = ctrl.newLine()
 
 			if @declaration || @defineValue {
 				if @options.format.variables == 'es5' {

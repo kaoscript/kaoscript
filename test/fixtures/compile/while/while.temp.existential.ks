@@ -1,5 +1,5 @@
 func foobar(x) {
-	let parent = x.parent()
+	var dyn parent = x.parent()
 
 	while parent ?= parent.parent() {
 

@@ -1,5 +1,5 @@
 class TupleDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_extending: Boolean						= false
 		_extendsName: String
 		_extendsType: NamedType<TupleType>
@@ -13,9 +13,9 @@ class TupleDeclaration extends Statement {
 	override initiate() { # {{{
 		@name = @data.name.name
 
-		let named = false
+		var mut named = false
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			switch modifier.kind {
 				ModifierKind::Named => {
 					named = true
@@ -33,8 +33,8 @@ class TupleDeclaration extends Statement {
 		if @data.extends? {
 			@extending = true
 
-			let name = ''
-			let member = @data.extends
+			var mut name = ''
+			var mut member = @data.extends
 			while member.kind == NodeKind::MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
@@ -51,8 +51,8 @@ class TupleDeclaration extends Statement {
 	override analyse() { # {{{
 		@function = new TupleFunction(@data, this, new BlockScope(@scope!?))
 
-		for const data in @data.fields {
-			const field = new TupleFieldDeclaration(data, this)
+		for var data in @data.fields {
+			var field = new TupleFieldDeclaration(data, this)
 
 			field.analyse()
 
@@ -75,12 +75,12 @@ class TupleDeclaration extends Statement {
 
 		@function.prepare()
 
-		for const field in @fields {
+		for var field in @fields {
 			@tuple.addField(field.type())
 		}
 	} # }}}
 	override translate() { # {{{
-		for const field in @fields {
+		for var field in @fields {
 			field.translate()
 		}
 	} # }}}
@@ -92,11 +92,11 @@ class TupleDeclaration extends Statement {
 	isExtending() => @extending
 	toArrayFragments(fragments, mode) { # {{{
 		if @extending {
-			let varname = '_'
+			var mut varname = '_'
 
-			const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
+			var line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
 
-			for const field, index in @extendsType.type().listAllFields() {
+			for var field, index in @extendsType.type().listAllFields() {
 				line.code($comma) if index != 0
 
 				line.code(field.name())
@@ -104,16 +104,16 @@ class TupleDeclaration extends Statement {
 
 			line.code(')').done()
 
-			for const field in @fields {
+			for var field in @fields {
 				fragments.line(varname, '.push(', field.type().name(), ')')
 			}
 
 			fragments.line(`return \(varname)`)
 		}
 		else {
-			const line = fragments.newLine().code('return [')
+			var line = fragments.newLine().code('return [')
 
-			for const field, index in @fields {
+			for var field, index in @fields {
 				line.code($comma) if index != 0
 
 				line.compile(field.parameter().name())
@@ -123,9 +123,9 @@ class TupleDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).tuple(`)
+		var line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).tuple(`)
 
-		let ctrl = line.newControl(null, false, false).code(`function(`)
+		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
 		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
@@ -135,7 +135,7 @@ class TupleDeclaration extends Statement {
 
 		ctrl.done()
 
-		const assessment = @type.type().assessment(@type.reference(@scope), this)
+		var assessment = @type.type().assessment(@type.reference(@scope), this)
 
 		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
 
@@ -173,17 +173,18 @@ class TupleFunction extends AbstractNode {
 	} # }}}
 	analyse()
 	prepare() { # {{{
-		let index = -1
+		// TODO move to `var mut`
+		var dyn index = -1
 
 		if @parent.isExtending() {
-			const parent = @parent._extendsType.type()
+			var parent = @parent._extendsType.type()
 
-			for const type in parent.listAllFields() {
-				const field = new TupleFieldDeclaration(type, @parent!?)
+			for var type in parent.listAllFields() {
+				var field = new TupleFieldDeclaration(type, @parent!?)
 				field.analyse()
 				field.prepare()
 
-				const parameter = field.parameter()
+				var parameter = field.parameter()
 
 				@parameters.push(parameter)
 
@@ -193,12 +194,12 @@ class TupleFunction extends AbstractNode {
 			index += parent.length()
 		}
 
-		for const field in @parent.fields() {
+		for var field in @parent.fields() {
 			field.index(++index)
 
 			field.prepare()
 
-			const parameter = field.parameter()
+			var parameter = field.parameter()
 
 			@parameters.push(parameter)
 
@@ -215,7 +216,7 @@ class TupleFunction extends AbstractNode {
 }
 
 class TupleFieldDeclaration extends AbstractNode {
-	private lateinit {
+	private late {
 		_index: Number
 		_name: String
 		_type: TupleFieldType
@@ -291,7 +292,7 @@ class TupleFieldParameter extends Parameter {
 		@name.setAssignment(AssignmentType::Parameter)
 		@name.analyse()
 
-		for const name in @name.listAssignments([]) {
+		for var name in @name.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
 	} # }}}

@@ -1,5 +1,5 @@
-const foo = 42
+var foo = 42
 
-let bar = []
+var dyn bar = []
 
 bar.push(...foo)

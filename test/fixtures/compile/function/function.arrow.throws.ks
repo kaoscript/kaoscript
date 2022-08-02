@@ -1,4 +1,4 @@
-const foobar = (x) ~ Error => {
+var foobar = (x) ~ Error => {
 	throw new Error()
 }
 

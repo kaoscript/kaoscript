@@ -1,23 +1,23 @@
 func foobar(values: Array) {
-	const x = -1
+	var x = -1
 
-	for const value, i in values {
-		const x = i
+	for var value, i in values {
+		var x = i
 
-		for const value, i in value.values {
-			const x = i
+		for var value, i in value.values {
+			var x = i
 
-			for const value, i in value.values {
-				const x = i
+			for var value, i in value.values {
+				var x = i
 
-				for const value, i in value.values {
-					const x = i
+				for var value, i in value.values {
+					var x = i
 				}
 			}
 		}
 	}
 
-	for const value, i in values {
-		const x = i * value.max
+	for var value, i in values {
+		var x = i * value.max
 	}
 }

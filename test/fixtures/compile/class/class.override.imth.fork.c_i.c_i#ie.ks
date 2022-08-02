@@ -6,5 +6,5 @@ class Quxbaz extends Foobar {
 	foobar(x: Number): Number => 2
 }
 
-const q = new Quxbaz()
-const f = q.foobar(42)
+var q = new Quxbaz()
+var f = q.foobar(42)

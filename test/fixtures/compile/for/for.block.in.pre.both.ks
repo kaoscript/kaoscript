@@ -4,7 +4,7 @@ extern console: {
 
 heroes = ['leto', 'duncan', 'goku']
 
-let hero, index
+var dyn hero, index
 for hero, index in heroes {
 }
 

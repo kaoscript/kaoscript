@@ -1,5 +1,5 @@
 class ClassConstructorDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: Block
 		_internalName: String
 		_parameters: Array<Parameter>
@@ -17,10 +17,10 @@ class ClassConstructorDeclaration extends Statement {
 		_topNodes: Array						= []
 	}
 	static toCreatorFragments(class, constructor, fragments) { # {{{
-		const ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
-		const args = constructor.max() == 0 ? '' : '...args'
-		const block = ctrl.code(`static __ks_new_\(constructor.index())(\(args))`).step()
+		var args = constructor.max() == 0 ? '' : '...args'
+		var block = ctrl.code(`static __ks_new_\(constructor.index())(\(args))`).step()
 
 		block
 			.line(`const o = Object.create(\(class.name()).prototype)`)
@@ -31,9 +31,9 @@ class ClassConstructorDeclaration extends Statement {
 		ctrl.done()
 	} # }}}
 	static toRouterFragments(node, fragments, variable, methods, scope: String?, header, footer) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
-		const assessment = Router.assess(methods, 'constructor', node)
+		var assessment = Router.assess(methods, 'constructor', node)
 
 		header(node, fragments)
 
@@ -49,7 +49,7 @@ class ClassConstructorDeclaration extends Statement {
 				fragments.block()
 				variable.type().hasConstructors() ? Router.FooterType::MUST_THROW : Router.FooterType::NO_THROW
 				(fragments, _) => {
-					const constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons_rt'
+					var constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons_rt'
 
 					fragments.line(`super.\(constructorName).call(null, that, args)`)
 				}
@@ -96,18 +96,18 @@ class ClassConstructorDeclaration extends Statement {
 		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	prepare() { # {{{
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
 
-		let overridden
+		var mut overridden
 
 		if @parent.isExtending() {
-			const superclass = @parent.extends().type()
+			var superclass = @parent.extends().type()
 
-			if const data = @getOveriddenConstructor(superclass) {
+			if var data = @getOveriddenConstructor(superclass) {
 				{ method: overridden, type: @type } = data
 
 				@overriding = true
@@ -121,7 +121,7 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoOverridableConstructor(@parent.type(), @parameters, this)
 		}
 
-		let index = 1
+		var mut index = 1
 		if @block.isEmpty() {
 			if @parent._extending {
 				this.addCallToParentConstructor()
@@ -144,12 +144,12 @@ class ClassConstructorDeclaration extends Statement {
 			@block.analyse(index + 1)
 		}
 
-		const class = @parent.type().type()
+		var class = @parent.type().type()
 
-		for const statement in @aliases {
-			const name = statement.getVariableName()
+		for var statement in @aliases {
+			var name = statement.getVariableName()
 
-			if const variable = class.getInstanceVariable(name) {
+			if var variable = class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
 					@block.initializeVariable(VariableBrief(
 						name
@@ -165,7 +165,7 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		for const {value} in @indigentValues {
+		for var {value} in @indigentValues {
 			value.prepare()
 			value.translate()
 		}
@@ -182,7 +182,7 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	private addCallToParentConstructor() { # {{{
 		// only add call if parent has an empty constructor
-		const extendsType = @parent.extends().type()
+		var extendsType = @parent.extends().type()
 
 		if extendsType.matchArguments([], this) {
 			if extendsType.hasConstructors() || extendsType.isSealed() {
@@ -210,8 +210,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
-		const class = @parent.type().type()
-		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
+		var class = @parent.type().type()
+		var name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
 
 		@indigentValues.push({
 			name
@@ -287,7 +287,7 @@ class ClassConstructorDeclaration extends Statement {
 	isRoutable() => true
 	parameters() => @parameters
 	toHybridConstructorFragments(fragments) { # {{{
-		let ctrl = fragments
+		var mut ctrl = fragments
 			.newControl()
 			.code('constructor(')
 
@@ -296,7 +296,7 @@ class ClassConstructorDeclaration extends Statement {
 		})
 
 		if @parent._extendsType.isSealedAlien() {
-			const index = this.getSuperIndex(@block.statements())
+			var index = this.getSuperIndex(@block.statements())
 
 			if index == -1 {
 				ctrl.line('super()')
@@ -319,8 +319,8 @@ class ClassConstructorDeclaration extends Statement {
 		ctrl.done()
 	} # }}}
 	toIndigentFragments(fragments) { # {{{
-		for const {name, value, parameters} in @indigentValues {
-			const ctrl = fragments.newControl()
+		for var {name, value, parameters} in @indigentValues {
+			var ctrl = fragments.newControl()
 
 			if @parent._es5 {
 				ctrl.code(`\(name): function(\(parameters.join(', ')))`).step()
@@ -336,15 +336,15 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if !@parent._es5 && @parent.isHybrid() {
-			const ctrl = fragments
+			var ctrl = fragments
 				.newLine()
 				.code(`const \(@internalName) = (`)
 
-			const block = Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+			var block = Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 				return node.code(') =>').newBlock()
 			})
 
-			const index = this.getSuperIndex(@block.statements())
+			var index = this.getSuperIndex(@block.statements())
 
 			if index == -1 {
 				block.compile(@block)
@@ -363,7 +363,7 @@ class ClassConstructorDeclaration extends Statement {
 			ctrl.done()
 		}
 		else {
-			let ctrl = fragments.newControl()
+			var mut ctrl = fragments.newControl()
 
 			if @parent._es5 {
 				ctrl.code(`\(@internalName): function(`)
@@ -376,7 +376,7 @@ class ClassConstructorDeclaration extends Statement {
 				return node.code(')').step()
 			})
 
-			for const node in @topNodes {
+			for var node in @topNodes {
 				node.toAuthorityFragments(ctrl)
 			}
 
@@ -390,21 +390,21 @@ class ClassConstructorDeclaration extends Statement {
 	type() => @type
 	private {
 		getOveriddenConstructor(superclass: ClassType) { # {{{
-			let mode = MatchingMode::FunctionSignature
+			var mut mode = MatchingMode::FunctionSignature
 
 			if !@override {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
 			}
 
-			const methods = superclass.listConstructors(@type, mode)
+			var methods = superclass.listConstructors(@type, mode)
 
-			let method = null
-			let exact = false
+			var mut method = null
+			var mut exact = false
 			if methods.length == 1 {
 				method = methods[0]
 			}
 			else if methods.length > 0 {
-				for const m in methods {
+				for var m in methods {
 					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						method = m
 						exact = true
@@ -419,14 +419,14 @@ class ClassConstructorDeclaration extends Statement {
 			}
 
 			if method? {
-				const type = @override ? method.clone() : @type
+				var type = @override ? method.clone() : @type
 
 				if @override {
-					const parameters = type.parameters()
+					var parameters = type.parameters()
 
-					for const parameter, index in @parameters {
-						const currentType = parameter.type()
-						const masterType = parameters[index]
+					for var parameter, index in @parameters {
+						var currentType = parameter.type()
+						var masterType = parameters[index]
 
 						if currentType.isMissingType() {
 							parameter.type(masterType)
@@ -442,12 +442,12 @@ class ClassConstructorDeclaration extends Statement {
 				}
 
 				if !@type.isMissingError() {
-					const newTypes = @type.listErrors()
+					var newTypes = @type.listErrors()
 
-					for const oldType in method.listErrors() {
-						let matched = false
+					for var oldType in method.listErrors() {
+						var mut matched = false
 
-						for const newType in newTypes until matched {
+						for var newType in newTypes until matched {
 							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
@@ -472,8 +472,8 @@ class ClassConstructorDeclaration extends Statement {
 			return null
 		} # }}}
 		listOverloadedConstructors(superclass: ClassType) { # {{{
-			if const methods = superclass.listConstructors() {
-				for const method in methods {
+			if var methods = superclass.listConstructors() {
+				for var method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						return []
 					}

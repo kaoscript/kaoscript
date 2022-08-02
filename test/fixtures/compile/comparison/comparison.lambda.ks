@@ -1,5 +1,5 @@
 class Foobar {
 	qux() {
-		const test = (x, y) => x == y
+		var test = (x, y) => x == y
 	}
 }

@@ -2,7 +2,7 @@ func foobar() {
 	return null
 }
 
-if const {x} = foobar() {
+if var {x} = foobar() {
 }
 
 if {x} ?= foobar() {

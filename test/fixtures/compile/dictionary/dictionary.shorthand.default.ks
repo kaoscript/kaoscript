@@ -1,5 +1,5 @@
-let x = 2
-let y = -1
-let z = 1
+var dyn x = 2
+var dyn y = -1
+var dyn z = 1
 
-const foo = {x, y, z}
+var foo = {x, y, z}

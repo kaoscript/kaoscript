@@ -12,7 +12,7 @@ flagged enum AnimalFlags {
 }
 
 func printAnimalAbilities(animal) {
-	const animalFlags: Number = animal.flags
+	var animalFlags: Number = animal.flags
 
 	if animalFlags &&& AnimalFlags::HasClaws != 0 {
 		console.log('animal has claws')
@@ -27,7 +27,7 @@ func printAnimalAbilities(animal) {
 	}
 }
 
-let animal = {
+var dyn animal = {
 	flags: AnimalFlags::None
 }
 

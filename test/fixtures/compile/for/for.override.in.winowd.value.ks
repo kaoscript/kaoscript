@@ -1,10 +1,10 @@
 extern console
 
-const hero = 'you'
+var hero = 'you'
 
-let heroes = ['leto', 'duncan', 'goku']
+var dyn heroes = ['leto', 'duncan', 'goku']
 
-for let hero in heroes {
+for var hero in heroes {
 	console.log(hero)
 }
 

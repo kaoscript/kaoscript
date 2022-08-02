@@ -1,5 +1,5 @@
 extern console
 
-let x = 'john'
+var dyn x = 'john'
 
 console.log(`\(x.toUpperCase?)`)

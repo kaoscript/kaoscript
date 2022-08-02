@@ -4,7 +4,7 @@ class Shape {
 	private {
 		_color: string = ''
 	}
-	
+
 	constructor(@color)
 }
 
@@ -14,5 +14,5 @@ impl Shape {
 	}
 }
 
-let shape = new Shape('red')
+var dyn shape = new Shape('red')
 expect(shape.draw()).to.equals(`I'm drawing a red rectangle.`)

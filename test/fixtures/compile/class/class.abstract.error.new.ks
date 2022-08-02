@@ -12,4 +12,4 @@ abstract class AbstractGreetings {
 	abstract greet(name): String
 }
 
-let hello = new AbstractGreetings('Hello world!')
+var dyn hello = new AbstractGreetings('Hello world!')

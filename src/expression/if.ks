@@ -20,7 +20,7 @@ class IfExpression extends Expression {
 	prepare() { # {{{
 		@condition.prepare()
 
-		for const data, name of @condition.inferTypes({}) {
+		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
@@ -29,8 +29,8 @@ class IfExpression extends Expression {
 		if @whenFalse? {
 			@whenFalse.prepare()
 
-			const t = @whenTrue.type()
-			const f = @whenFalse.type()
+			var t = @whenTrue.type()
+			var f = @whenFalse.type()
 
 			if t.equals(f) {
 				@type = t
@@ -81,7 +81,7 @@ class IfExpression extends Expression {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
 		ctrl.code('if(')
 

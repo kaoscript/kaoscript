@@ -1,5 +1,5 @@
 import '../class/class.ctor.rest'
 
-const m0 = new Message()
-const m1 = new Message('foo')
-const m2 = new Message('foo', 'bar')
+var m0 = new Message()
+var m1 = new Message('foo')
+var m2 = new Message('foo', 'bar')

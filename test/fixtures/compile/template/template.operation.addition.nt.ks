@@ -1,7 +1,7 @@
 extern console
 
-let x = 1
-let y = 3
+var dyn x = 1
+var dyn y = 3
 
 console.log(x + y)
 

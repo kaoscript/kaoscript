@@ -4,4 +4,4 @@ enum Foo {
 	Z
 }
 
-let foo = Foo.X
+var dyn foo = Foo.X

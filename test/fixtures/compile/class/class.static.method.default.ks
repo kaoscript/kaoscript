@@ -13,4 +13,4 @@ class Shape {
 	constructor(@type, @color)
 }
 
-let r = Shape.makeRectangle('black')
+var dyn r = Shape.makeRectangle('black')

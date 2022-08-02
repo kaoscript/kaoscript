@@ -3,4 +3,4 @@ struct Point {
 	y: Number
 }
 
-const [x, y] = Point(0, 0)
+var [x, y] = Point(0, 0)

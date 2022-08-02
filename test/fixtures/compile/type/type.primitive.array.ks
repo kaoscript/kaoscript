@@ -1,3 +1,3 @@
-let x: Primitive
+var dyn x: Primitive
 
 x = []

@@ -5,7 +5,7 @@ func foo(...args) {
 		console.log(args[i])
 	}
 
-	let j = 42
+	var dyn j = 42
 
 	for j from 0 til args.length {
 		console.log(args[j])

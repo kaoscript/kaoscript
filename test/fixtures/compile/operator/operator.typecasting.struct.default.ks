@@ -10,7 +10,7 @@ struct Point3D extends Point {
 }
 
 func foobar(p: Point) {
-	const d3 = p as Point3D
+	var d3 = p as Point3D
 
 	console.log(d3.x + 1, d3.y + 2, d3.z + 3)
 }

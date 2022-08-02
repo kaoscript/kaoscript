@@ -1,10 +1,10 @@
 class DiscloseDeclaration extends Statement {
-	private lateinit {
+	private late {
 		@type: Type
 	}
 	analyse()
 	enhance() { # {{{
-		const variable = @scope.getVariable(@data.name.name)
+		var variable = @scope.getVariable(@data.name.name)
 
 		unless variable? {
 			ReferenceException.throwNotDefined(@data.name.name, this)
@@ -22,7 +22,7 @@ class DiscloseDeclaration extends Statement {
 
 		@type = variable.getDeclaredType().type()
 
-		for const data in @data.members {
+		for var data in @data.members {
 			@type.addPropertyFromAST(data, this)
 		}
 

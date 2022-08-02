@@ -1,6 +1,6 @@
 require expect: func
 
-let foo = func(x = null, y = null, z = null) {
+var dyn foo = func(x = null, y = null, z = null) {
 	return [x, y, z]
 }
 

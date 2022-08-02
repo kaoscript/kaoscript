@@ -31,9 +31,9 @@ class SealedPreciseMethodCallee extends Callee {
 	} # }}}
 	getContextSubstitute(expression) { # {{{
 		if expression is IdentifierLiteral {
-			const variable = expression.variable()
+			var variable = expression.variable()
 
-			if const substitute = variable.replaceContext?() {
+			if var substitute = variable.replaceContext?() {
 				return substitute
 			}
 		}
@@ -57,7 +57,7 @@ class SealedPreciseMethodCallee extends Callee {
 					if @function.isInstance() {
 						fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-						if const substitute = this.getContextSubstitute(@object) {
+						if var substitute = this.getContextSubstitute(@object) {
 							substitute(fragments)
 						}
 						else {
@@ -92,7 +92,7 @@ class SealedPreciseMethodCallee extends Callee {
 						if @function.isInstance() {
 							fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-							if const substitute = this.getContextSubstitute(@object) {
+							if var substitute = this.getContextSubstitute(@object) {
 								substitute(fragments)
 							}
 							else {

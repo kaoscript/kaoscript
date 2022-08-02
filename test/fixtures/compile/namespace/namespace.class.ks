@@ -5,8 +5,8 @@ namespace qux {
 		}
 		constructor(@name = 'john')
 	}
-	
+
 	export Foobar
 }
 
-const x = new qux.Foobar()
+var x = new qux.Foobar()

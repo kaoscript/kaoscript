@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let foo = {
+var dyn foo = {
 	message: 'hello'
 }
 

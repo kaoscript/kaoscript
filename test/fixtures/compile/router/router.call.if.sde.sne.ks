@@ -1,10 +1,10 @@
 func foobar(...args) {
-	let x = args.pop()
-	
+	var dyn x = args.pop()
+
 	if x != 'a' {
 		x = null
 	}
-	
+
 	quxbaz(x)
 }
 

@@ -27,7 +27,7 @@ func grault(x) {
 	console.log(`\(x)`)
 }
 
-let x: String = ''
+var dyn x: String = ''
 
 console.log(`\(x)`)
 
@@ -39,7 +39,7 @@ x = bar()
 
 console.log(`\(x)`)
 
-let y = ''
+var dyn y = ''
 
 console.log(`\(y)`)
 

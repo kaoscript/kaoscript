@@ -1,6 +1,6 @@
 class ContinueStatement extends Statement {
 	analyse() { # {{{
-		let parent = @parent
+		var mut parent = @parent
 
 		unless parent.isJumpable() {
 			SyntaxException.throwIllegalStatement('continue', this)

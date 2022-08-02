@@ -1,1 +1,1 @@
-let x: Null = null
+var dyn x: Null = null

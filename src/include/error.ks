@@ -1,7 +1,7 @@
 extern sealed class Error
 
 Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
-	let message = error.toString()
+	var mut message = error.toString()
 
 	for i from 0 til Math.min(12, stack.length) {
 		message += '\n    ' + stack[i].toString()
@@ -31,7 +31,7 @@ export class Exception extends Error {
 				}
 			}
 
-			let options = node._options.error
+			var options = node._options.error
 
 			if options.level == 'fatal' {
 				if !node.parent().isConsumedError(error) {
@@ -39,9 +39,9 @@ export class Exception extends Error {
 						SyntaxException.throwUnreportedError(error.name(), node)
 					}
 					else {
-						const hierarchy = error.getHierarchy()
+						var hierarchy = error.getHierarchy()
 
-						let nf = true
+						var mut nf = true
 
 						for name in hierarchy while nf {
 							if options.ignore:Array.contains(name) {
@@ -194,7 +194,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingFunction(name, arguments, node) ~ ReferenceException { # {{{
@@ -202,7 +202,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node) ~ ReferenceException { # {{{
@@ -210,7 +210,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingClassMethod(method, class, arguments, node) ~ ReferenceException { # {{{
@@ -218,7 +218,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingEnumMethod(method, enum, arguments, node) ~ ReferenceException { # {{{
@@ -226,7 +226,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwUnrecognizedNamedArgument(name, node) ~ ReferenceException { # {{{
@@ -237,7 +237,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The struct "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingTuple(name, arguments, node) ~ ReferenceException { # {{{
@@ -245,7 +245,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The tuple "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNotDefined(name, node): Never ~ ReferenceException { # {{{
@@ -344,10 +344,10 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
 		} # }}}
 		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node) ~ SyntaxException { # {{{
-			const last = functions.length - 1
-			auto fragments = ''
+			var last = functions.length - 1
+			var mut fragments = ''
 
-			for const function, i in functions {
+			for var function, i in functions {
 				if i == last {
 					fragments += ' and '
 				}
@@ -361,12 +361,12 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`The functions \(fragments) can't be distinguished`, node)
 		} # }}}
 		throwIndistinguishableFunctions(name: String, arguments: Array<Type>, functions: Array<Type>, node) ~ SyntaxException { # {{{
-			const args = `(\(arguments.map((type, _, _) => type.toQuote(true)).join(', ')))`
+			var args = `(\(arguments.map((type, _, _) => type.toQuote(true)).join(', ')))`
 
-			const last = functions.length - 1
-			auto fragments = `the function "\(name)" can be matched with `
+			var last = functions.length - 1
+			var mut fragments = `the function "\(name)" can be matched with `
 
-			for const function, i in functions {
+			for var function, i in functions {
 				if i == last {
 					fragments += ' or '
 				}
@@ -385,10 +385,10 @@ export class SyntaxException extends Exception {
 			}
 		} # }}}
 		throwIndistinguishableFunctions(name: String, functions: Array<Type>, count: Number, node) ~ SyntaxException { # {{{
-			const last = functions.length - 1
-			auto fragments = ''
+			var last = functions.length - 1
+			var mut fragments = ''
 
-			for const function, i in functions {
+			for var function, i in functions {
 				if i == last {
 					fragments += ' and '
 				}
@@ -449,10 +449,10 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`Inclusions of "\(name)" should have the same version`, node)
 		} # }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { # {{{
-			const fragments = []
+			var fragments = []
 
-			for const methods, name of methods {
-				for const method in methods {
+			for var methods, name of methods {
+				for var method in methods {
 					fragments.push(`"\(name)\(method.toQuote())"`)
 				}
 			}
@@ -577,7 +577,7 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
 		} # }}}
 		throwUnmatchedImportArguments(names, node) ~ SyntaxException { # {{{
-			const fragments = [`"\(name)"` for const name in names]
+			var fragments = [`"\(name)"` for var name in names]
 
 			throw new SyntaxException(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} # }}}

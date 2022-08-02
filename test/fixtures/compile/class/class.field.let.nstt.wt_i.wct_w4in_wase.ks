@@ -3,7 +3,7 @@ class Foobar {
 		@x: Number
 	}
 	constructor(values) {
-		for const value in values {
+		for var value in values {
 			@x = value
 		}
 	}

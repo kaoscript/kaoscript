@@ -6,7 +6,7 @@ func foobar(argument: Argument) {
 	else if argument is Number {
 	}
 	else {
-		for const arg, i in argument {
+		for var arg, i in argument {
 		}
 	}
 }

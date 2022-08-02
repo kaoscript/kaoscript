@@ -1,5 +1,5 @@
 func foobar() {
-	const a = quxbaz()
+	var a = quxbaz()
 }
 
 func quxbaz(): never {

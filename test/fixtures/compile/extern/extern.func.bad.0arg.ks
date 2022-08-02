@@ -1,3 +1,3 @@
 extern func foo()
 
-let x = foo('foobar', 42, 24)
+var dyn x = foo('foobar', 42, 24)

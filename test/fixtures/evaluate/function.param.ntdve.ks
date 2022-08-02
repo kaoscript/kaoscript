@@ -1,6 +1,6 @@
 require expect: func
 
-let foo = func(x: Any? = 42) {
+var dyn foo = func(x: Any? = 42) {
 	return [x]
 }
 

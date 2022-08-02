@@ -1,5 +1,5 @@
 func foobar(): String {
-	let name: String
+	var dyn name: String
 
 	until true {
 		name = 'foobar'

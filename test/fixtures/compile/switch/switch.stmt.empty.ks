@@ -1,4 +1,4 @@
-let x
+var dyn x
 
 switch x {
 }

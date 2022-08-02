@@ -1,5 +1,5 @@
-let bar = []
+var dyn bar = []
 
 func foo(...args) {
-	const foo = [...args]
+	var foo = [...args]
 }

@@ -3,7 +3,7 @@ class Foobar {
 		@values: Array<Number>	= []
 	}
 	clone(): Foobar {
-		const clone = new Foobar()
+		var clone = new Foobar()
 
 		clone._values = [...@values]
 

@@ -1,11 +1,11 @@
 extern console
 
-let foo = 'bar'
+var dyn foo = 'bar'
 
 console.log(`\(foo)`)
 
 delete foo
 
-let foo = 42
+var dyn foo = 42
 
 console.log(`\(foo)`)

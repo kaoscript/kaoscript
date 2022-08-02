@@ -9,7 +9,7 @@ impl Dictionary {
 			return dict.clone()
 		}
 
-		let clone = {}
+		var dyn clone = {}
 
 		for value, key of dict {
 			if value is array {

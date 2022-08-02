@@ -30,7 +30,7 @@ func printAnimalAbilities(abilities: AnimalFlags) {
 	}
 }
 
-auto abilities = AnimalFlags::None
+var mut abilities = AnimalFlags::None
 
 printAnimalAbilities(abilities)
 
@@ -62,7 +62,7 @@ printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags
 printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags::HasClaws - AnimalFlags::CanFly)
 
 func quxbaz(x) {
-	let abex
+	var dyn abex
 	if x {
 		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}
@@ -70,7 +70,7 @@ func quxbaz(x) {
 		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly
 	}
 
-	let abey: AnimalFlags
+	var dyn abey: AnimalFlags
 	if x {
 		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}
@@ -78,7 +78,7 @@ func quxbaz(x) {
 		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly
 	}
 
-	let abez: Number
+	var dyn abez: Number
 	if x {
 		abez = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}
@@ -87,5 +87,5 @@ func quxbaz(x) {
 	}
 }
 
-const abyx = AnimalFlags::HasClaws + AnimalFlags::CanFly
-const abyy = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+var abyx = AnimalFlags::HasClaws + AnimalFlags::CanFly
+var abyy = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered

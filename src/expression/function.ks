@@ -1,5 +1,5 @@
 class AnonymousFunctionExpression extends Expression {
-	private lateinit {
+	private late {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -76,12 +76,12 @@ class AnonymousFunctionExpression extends Expression {
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
-		const assessment = this.type().assessment('__ks_rt', this)
+		var assessment = this.type().assessment('__ks_rt', this)
 
-		const block = fragments.code('(() =>').newBlock()
+		var block = fragments.code('(() =>').newBlock()
 
-		const lineRouter = block.newLine()
-		const blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+		var lineRouter = block.newLine()
+		var blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -98,15 +98,15 @@ class AnonymousFunctionExpression extends Expression {
 		blockRouter.done()
 		lineRouter.done()
 
-		const lineFunction = block.newLine()
+		var lineFunction = block.newLine()
 
 		lineFunction.code('__ks_rt.__ks_0 = function(')
 
-		const blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
+		var blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			blockFunction.toAuthorityFragments(block)
 		}
 
@@ -129,7 +129,7 @@ class AnonymousFunctionExpression extends Expression {
 }
 
 class ArrowFunctionExpression extends Expression {
-	private lateinit {
+	private late {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -179,7 +179,7 @@ class ArrowFunctionExpression extends Expression {
 			if @usingThis || @variables.length != 0 {
 				@shiftToAuthority = true
 
-				const authority = this.authority()
+				var authority = this.authority()
 
 				@name = authority.scope().getReservedName()
 
@@ -244,11 +244,11 @@ class ArrowFunctionExpression extends Expression {
 				}
 			}
 			else {
-				const bind = @usingThis ? 'this' : 'null'
+				var bind = @usingThis ? 'this' : 'null'
 
 				fragments.code(`\($runtime.helper(this)).vcurry(\(@name), \(bind)`)
 
-				for const variable in @variables {
+				for var variable in @variables {
 					fragments.code(`, \(variable.getSecureName())`)
 				}
 
@@ -260,12 +260,12 @@ class ArrowFunctionExpression extends Expression {
 				throw new NotImplementedException(this)
 			}
 			else {
-				const assessment = @type.assessment('__ks_rt', this)
+				var assessment = @type.assessment('__ks_rt', this)
 
-				const block = fragments.code('(() =>').newBlock()
+				var block = fragments.code('(() =>').newBlock()
 
-				const lineRouter = block.newLine()
-				const blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+				var lineRouter = block.newLine()
+				var blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
 
 				Router.toFragments(
 					(function, line) => {
@@ -282,11 +282,11 @@ class ArrowFunctionExpression extends Expression {
 				blockRouter.done()
 				lineRouter.done()
 
-				const lineFunction = block.newLine()
+				var lineFunction = block.newLine()
 
 				lineFunction.code('__ks_rt.__ks_0 = (')
 
-				const blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
+				var blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
 					return fragments.code(') =>').newBlock()
 				})
 
@@ -308,9 +308,9 @@ class ArrowFunctionExpression extends Expression {
 		}
 	} # }}}
 	toAuthorityFragments(fragments) { # {{{
-		const ctrl = fragments.newControl().code(`\($runtime.immutableScope(this))\(@name) = function(`)
+		var ctrl = fragments.newControl().code(`\($runtime.immutableScope(this))\(@name) = function(`)
 
-		for const variable, index in @variables {
+		for var variable, index in @variables {
 			if index != 0 {
 				ctrl.code($comma)
 			}

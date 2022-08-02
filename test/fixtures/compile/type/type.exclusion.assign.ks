@@ -3,7 +3,7 @@ type Instance = Any ^ Primitive ^ Array
 class Foobar {
 }
 
-let x: Instance
+var dyn x: Instance
 
 x = new Foobar()
 x = new Date()

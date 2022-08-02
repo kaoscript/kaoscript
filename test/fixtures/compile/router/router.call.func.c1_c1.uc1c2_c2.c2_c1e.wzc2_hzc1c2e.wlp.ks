@@ -9,7 +9,7 @@ class ClassB {
 type Classes = ClassA | ClassB
 
 func foobar(x: ClassB, y: Classes) {
-	for const node of x.nodes {
+	for var node of x.nodes {
 		quxbaz(node, y)
 	}
 }

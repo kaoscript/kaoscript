@@ -7,10 +7,10 @@ enum Space<String> {
 class Color {
 	macro registerSpace(@expression: Dictionary) {
 		if expression.components? {
-			const fields: Array = []
-			const methods: Array = []
+			var fields: Array = []
+			var methods: Array = []
 
-			let field
+			var dyn field
 			for component, name of expression.components {
 				field = `_\(name)`
 

@@ -1,11 +1,11 @@
 extern console
 
-let value = {
+var dyn value = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'
 }
 
-for let value of value {
+for var value of value {
 	console.log(value)
 }

@@ -2,8 +2,8 @@ extern console
 
 tuple Pair(String, Number)
 
-const pair = Pair('x', 0.1)
+var pair = Pair('x', 0.1)
 
-const [x, y] = pair
+var [x, y] = pair
 
 console.log(`\(x)`, y + 1)

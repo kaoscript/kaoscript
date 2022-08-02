@@ -1,7 +1,7 @@
 func test(x) => true
 
 func foobar(i: Number, b: Boolean) {
-	let x: Number
+	var dyn x: Number
 
 	unless b {
 		x = 42

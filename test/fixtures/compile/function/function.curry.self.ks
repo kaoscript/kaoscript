@@ -2,6 +2,6 @@ extern console: {
 	log(...args)
 }
 
-let log = console.log^@(...['hello: '])
+var dyn log = console.log^@(...['hello: '])
 
 log('foo')

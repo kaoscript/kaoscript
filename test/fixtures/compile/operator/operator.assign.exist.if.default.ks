@@ -1,5 +1,5 @@
-let foo = 'otto'
+var dyn foo = 'otto'
 
-let bar
+var dyn bar
 if true && (bar ?= foo) {
 }

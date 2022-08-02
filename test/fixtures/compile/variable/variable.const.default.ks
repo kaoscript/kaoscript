@@ -1,1 +1,1 @@
-const a = 42
+var a = 42

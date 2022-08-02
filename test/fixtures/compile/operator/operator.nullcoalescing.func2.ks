@@ -1,3 +1,3 @@
 extern foo, bar
 
-let tt = foo ?? bar(12, 42)
+var dyn tt = foo ?? bar(12, 42)

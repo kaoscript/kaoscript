@@ -1,8 +1,8 @@
 extern console
 
-const foo = { bar: 'hello', baz: 3 }
+var foo = { bar: 'hello', baz: 3 }
 
-let {bar, baz} = foo
+var dyn {bar, baz} = foo
 
 bar = 'foo'
 

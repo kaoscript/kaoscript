@@ -1,9 +1,9 @@
 export class Color {
 	macro registerSpace(@expression: Dictionary) {
-		const fields: Array = []
-		const methods: Array = []
+		var fields: Array = []
+		var methods: Array = []
 
-		let field
+		var dyn field
 		for component, name of expression.components when !?component.family {
 			field = `_\(name)`
 

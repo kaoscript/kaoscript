@@ -1,7 +1,7 @@
 require expect: func
 
-const t = true
-const f = false
+var t = true
+var f = false
 
 expect(f -> f).to.equal(true)
 expect(t -> f).to.equal(false)

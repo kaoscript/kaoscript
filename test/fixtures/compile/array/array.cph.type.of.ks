@@ -1,9 +1,9 @@
-const likes = {
+var likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'
 }
 
-const flag = false
+var flag = false
 
-export const spicyHeroes = flag ? [hero for like, hero of likes when like == 'spice'] : []
+export var spicyHeroes = flag ? [hero for like, hero of likes when like == 'spice'] : []

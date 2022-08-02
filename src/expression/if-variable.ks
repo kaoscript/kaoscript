@@ -1,5 +1,5 @@
 class IfVariableDeclarationExpression extends Expression {
-	private lateinit {
+	private late {
 		_autotype: Boolean
 		_await: Boolean
 		_declarators: Array			= []
@@ -12,8 +12,9 @@ class IfVariableDeclarationExpression extends Expression {
 		@autotype = @immutable || @data.autotype
 		@await = @data.await
 
-		let declarator
-		for data in @data.variables {
+		for var data in @data.variables {
+			var late declarator
+
 			switch data.name.kind {
 				NodeKind::ArrayBinding => {
 					declarator = new VariableBindingDeclarator(data, this)

@@ -2,7 +2,7 @@ extern console
 
 func foo(): Number => 42
 
-let x: String = ''
+var dyn x: String = ''
 
 console.log(`\(x)`)
 

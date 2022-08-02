@@ -2,4 +2,4 @@ extern console
 
 console.log(name)
 
-let name = 'John'
+var dyn name = 'John'

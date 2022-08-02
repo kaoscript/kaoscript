@@ -1,3 +1,3 @@
-let x
+var dyn x
 
 x.y = 42

@@ -3,7 +3,7 @@ extern console
 func foobar() {
 	values = quxbaz()!!
 
-	for const value in values {
+	for var value in values {
 		console.log(`\(value)`)
 	}
 }

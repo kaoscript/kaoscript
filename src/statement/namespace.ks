@@ -1,5 +1,5 @@
 class NamespaceDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_exports									= {}
 		_name: String
 		_statements: Array
@@ -33,26 +33,26 @@ class NamespaceDeclaration extends Statement {
 		}
 	} # }}}
 	enhance() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.enhance()
 		}
 
-		for const statement in @statements when statement.isExportable() {
+		for var statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 
 			statement.export(this, true)
 		}
 	} # }}}
 	prepare() { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.prepare()
 		}
 
-		for const statement in @statements when statement.isExportable() {
+		for var statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 
 			statement.export(this, false)
@@ -83,8 +83,9 @@ class NamespaceDeclaration extends Statement {
 	} # }}}
 	includePath() => null
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		if const var = @scope.getDefinedVariable(variable.name) {
-			var.setDeclaredType(variable.type)
+		// TODO rename `variable2` to `var`
+		if var variable2 = @scope.getDefinedVariable(variable.name) {
+			variable2.setDeclaredType(variable.type)
 		}
 	} # }}}
 	name() => @name
@@ -98,10 +99,10 @@ class NamespaceDeclaration extends Statement {
 		@scope.addMacro(name, macro)
 	} # }}}
 	toExportFragements(fragments) { # {{{
-		const line = fragments.newLine().code('return ')
-		const object = line.newObject()
+		var line = fragments.newLine().code('return ')
+		var object = line.newObject()
 
-		for const variable, name of @exports {
+		for var variable, name of @exports {
 			variable.getDeclaredType().toExportFragment(object, name, variable)
 		}
 
@@ -109,10 +110,10 @@ class NamespaceDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
-		const block = line.newBlock()
+		var line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
+		var block = line.newBlock()
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(block)
 		}
 

@@ -4,6 +4,6 @@ extern sealed class Object {
 	static keys(...): Array<String>
 }
 
-auto item = {}
+var mut item = {}
 
 Object.keys(item).last()

@@ -4,4 +4,4 @@ enum Color<String> {
 	Blue
 }
 
-const color = Color('red')
+var color = Color('red')

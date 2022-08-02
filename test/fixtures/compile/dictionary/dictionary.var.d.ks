@@ -1,5 +1,5 @@
-let d = 42
+var dyn d = 42
 
-let foobar = {
+var dyn foobar = {
 	x: d
 }

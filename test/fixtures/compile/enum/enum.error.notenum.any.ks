@@ -1,3 +1,3 @@
-let Foobar
+var dyn Foobar
 
-const x = Foobar::foo
+var x = Foobar::foo

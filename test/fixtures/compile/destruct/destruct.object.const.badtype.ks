@@ -1,7 +1,7 @@
 extern console
 
-const foo = 'foo'
+var foo = 'foo'
 
-const {bar, baz} = foo
+var {bar, baz} = foo
 
 console.log(bar, baz)

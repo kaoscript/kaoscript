@@ -6,7 +6,7 @@ enum CardSuit<String> {
 }
 
 func foobar(): String {
-	let card = CardSuit::Clubs
+	var dyn card = CardSuit::Clubs
 
 	card += 'clubs'
 

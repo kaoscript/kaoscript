@@ -2,8 +2,8 @@ extern console: {
 	log(...args)
 }
 
-let left = 10
-let right = 20
+var dyn left = 10
+var dyn right = 20
 
 if right > left {
 	[left, right] = [right, left]

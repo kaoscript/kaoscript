@@ -1,17 +1,17 @@
 extern console
 
-let values = [[[[42]]]]
+var dyn values = [[[[42]]]]
 
-if let values = values[0] {
+if var values = values[0] {
 	console.log(values)
 
-	if let values = values[0] {
+	if var values = values[0] {
 		console.log(values)
 
-		if let values = values[0] {
+		if var values = values[0] {
 			console.log(values)
 
-			if let values = values[0] {
+			if var values = values[0] {
 				console.log(values)
 			}
 		}

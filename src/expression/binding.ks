@@ -9,8 +9,8 @@ class ArrayBinding extends Expression {
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		for const data, index in @data.elements {
-			const element = this.newElement(data)
+		for var data, index in @data.elements {
+			var element = this.newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -27,7 +27,7 @@ class ArrayBinding extends Expression {
 	} # }}}
 	prepare() { # {{{
 		if @type == null {
-			for const element in @elements {
+			for var element in @elements {
 				element.prepare()
 			}
 
@@ -38,29 +38,29 @@ class ArrayBinding extends Expression {
 				ReferenceException.throwBindingExceedArray(@elements.length, @type.length(), this)
 			}
 
-			for const element, index in @elements {
+			for var element, index in @elements {
 				element.type(@type.getElement(index))
 
 				element.prepare()
 			}
 		}
 		else if @type.isTuple() {
-			const type = @type.discard()
+			var type = @type.discard()
 
 			if type.length() < @elements.length {
 				ReferenceException.throwBindingExceedArray(@elements.length, type.length(), this)
 			}
 
-			for const element, index in @elements {
+			for var element, index in @elements {
 				element.type(type.getProperty(index).type())
 
 				element.prepare()
 			}
 		}
 		else {
-			const type = @type.parameter()
+			var type = @type.parameter()
 
-			for const element in @elements {
+			for var element in @elements {
 				element.type(type)
 
 				element.prepare()
@@ -68,7 +68,7 @@ class ArrayBinding extends Expression {
 		}
 	} # }}}
 	translate() { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			element.translate()
 		}
 	} # }}}
@@ -81,7 +81,7 @@ class ArrayBinding extends Expression {
 		@immutable = true
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			element.initializeVariables(type, node)
 		}
 	} # }}}
@@ -98,7 +98,7 @@ class ArrayBinding extends Expression {
 		return false
 	} # }}}
 	isRedeclared() { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			if element.isRedeclared() {
 				return true
 			}
@@ -108,7 +108,7 @@ class ArrayBinding extends Expression {
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
 	listAssignments(array: Array<String>) { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			element.listAssignments(array)
 		}
 
@@ -144,10 +144,10 @@ class ArrayBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			const reusableValue = new TempReusableExpression(value, this)
+			var reusableValue = new TempReusableExpression(value, this)
 
-			let comma = false
-			for const element in @elements when !element.isAnonymous() {
+			var mut comma = false
+			for var element in @elements when !element.isAnonymous() {
 				if comma {
 					fragments.code(', ')
 				}
@@ -199,7 +199,7 @@ class ArrayBindingElement extends Expression {
 			@thisAlias =  @data.name.kind == NodeKind::ThisExpression
 		}
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
 			}
@@ -218,7 +218,7 @@ class ArrayBindingElement extends Expression {
 			}
 
 			if @name is IdentifierLiteral {
-				const variable = @name.variable()
+				var variable = @name.variable()
 
 				variable.setDeclaredType(@type)
 
@@ -249,7 +249,7 @@ class ArrayBindingElement extends Expression {
 	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
 	initializeVariables(type: Type, node: Expression) { # {{{
-		if const name = @name.name() {
+		if var name = @name.name() {
 			@name.initializeVariables(type.getProperty(name) ?? AnyType.NullableUnexplicit, node)
 		}
 	} # }}}
@@ -381,8 +381,8 @@ class ObjectBinding extends Expression {
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		for const data in @data.elements {
-			const element = this.newElement(data)
+		for var data in @data.elements {
+			var element = this.newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -398,19 +398,19 @@ class ObjectBinding extends Expression {
 	prepare() { # {{{
 		if @type == null {
 			@type = new DestructurableObjectType()
-			
-			for const element in @elements {
+
+			for var element in @elements {
 				element.prepare()
-				
+
 				if element is ObjectBindingElement {
 					@type.addProperty(element.name(), element.type())
 				}
 			}
 		}
 		else if @type is DictionaryType {
-			for const element in @elements {
+			for var element in @elements {
 				if element.isRequired() {
-					if const property = @type.getProperty(element.name()) {
+					if var property = @type.getProperty(element.name()) {
 						element.type(property)
 					}
 					else {
@@ -422,11 +422,11 @@ class ObjectBinding extends Expression {
 			}
 		}
 		else if @type.isStruct() {
-			const type = @type.discard()
+			var type = @type.discard()
 
-			for const element in @elements {
+			for var element in @elements {
 				if element.isRequired() {
-					if const property = type.getProperty(element.name()) {
+					if var property = type.getProperty(element.name()) {
 						element.type(property.type())
 					}
 					else {
@@ -438,9 +438,9 @@ class ObjectBinding extends Expression {
 			}
 		}
 		else {
-			const type = @type.parameter()
+			var type = @type.parameter()
 
-			for const element in @elements {
+			for var element in @elements {
 				element.type(type)
 
 				element.prepare()
@@ -461,7 +461,7 @@ class ObjectBinding extends Expression {
 		@immutable = true
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			element.initializeVariables(type, node)
 		}
 	} # }}}
@@ -478,7 +478,7 @@ class ObjectBinding extends Expression {
 		return false
 	} # }}}
 	isRedeclared() { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			if element.isRedeclared() {
 				return true
 			}
@@ -488,7 +488,7 @@ class ObjectBinding extends Expression {
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
 	listAssignments(array: Array<String>) { # {{{
-		for const element in @elements {
+		for var element in @elements {
 			element.listAssignments(array)
 		}
 
@@ -532,11 +532,11 @@ class ObjectBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			const reusableValue = new TempReusableExpression(value, this)
+			var reusableValue = new TempReusableExpression(value, this)
 
 			@elements[0].toFlatFragments(fragments, reusableValue)
 
-			for const element in @elements from 1 {
+			for var element in @elements from 1 {
 				fragments.code(', ')
 
 				element.toFlatFragments(fragments, reusableValue)
@@ -544,9 +544,9 @@ class ObjectBinding extends Expression {
 		}
 	} # }}}
 	override toQuote() { # {{{
-		let fragments = '{'
+		var mut fragments = '{'
 
-		for const element, index in @elements {
+		for var element, index in @elements {
 			if index != 0 {
 				fragments += ', '
 			}
@@ -582,7 +582,7 @@ class ObjectBindingElement extends Expression {
 		_type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { # {{{
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Computed {
 				@computed = true
 
@@ -622,7 +622,7 @@ class ObjectBindingElement extends Expression {
 			@defaultValue.analyse()
 		}
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
 			}
@@ -640,7 +640,7 @@ class ObjectBindingElement extends Expression {
 		}
 
 		if @alias is IdentifierLiteral {
-			const variable = @alias.variable()
+			var variable = @alias.variable()
 
 			variable.setDeclaredType(@type)
 

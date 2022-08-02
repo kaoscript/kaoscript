@@ -1,4 +1,4 @@
 extern func foo
 
-let x = foo('foobar')
-let y = foo('foobar', 42, 24)
+var dyn x = foo('foobar')
+var dyn y = foo('foobar', 42, 24)

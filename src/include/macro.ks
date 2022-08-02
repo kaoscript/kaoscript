@@ -5,12 +5,12 @@ enum MacroVariableKind {
 	AutoEvaluated
 }
 
-const $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
+var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
 func $evaluate(source) { # {{{
 	// console.log('--> ', source)
 
-	const compiler = new Compiler('__ks__', {
+	var compiler = new Compiler('__ks__', {
 		register: false
 		target: $target
 	})
@@ -48,7 +48,7 @@ func $reificate(macro, node, data, ast, reification = null, separator = null) { 
 				}
 			}
 			ReificationKind::Expression => {
-				const context = {
+				var context = {
 					data: ''
 				}
 
@@ -114,12 +114,12 @@ func $serialize(macro, data, context) { # {{{
 		context.data += $quote(data)
 	}
 	else {
-		let empty = true
-		let computed, name
+		var mut empty = true
+		var mut computed, name
 
 		context.data += '{'
 
-		for const value, key of data {
+		for var value, key of data {
 			if empty {
 				empty = false
 
@@ -181,8 +181,8 @@ func $transformExpression(macro, node, data, writer) { # {{{
 			return macro.addMark(data)
 		}
 		NodeKind::ObjectMember => {
-			const name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
-			const value = 	data.value.kind == NodeKind::EnumExpression ||
+			var name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
+			var value = 	data.value.kind == NodeKind::EnumExpression ||
 							(data.value.kind == NodeKind::Identifier && !node.scope().isPredefinedVariable(data.value.name)) ||
 							data.value.kind == NodeKind::LambdaExpression ||
 							data.value.kind == NodeKind::MemberExpression
@@ -219,26 +219,25 @@ class MacroDeclaration extends AbstractNode {
 		@type = MacroType.fromAST(data!?, this)
 		@line = data.start?.line ?? -1
 
-		const builder = new Generator.KSWriter({
+		var builder = new Generator.KSWriter({
 			filters: {
 				expression: this.filter^@(false)
 				statement: this.filter^@(true)
 			}
 		})
 
-		const line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
+		var line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
 
-		let auto
-		for const data in @data.parameters {
+		for var data in @data.parameters {
 			line.code(', ', data.name.name)
 
 			if data.defaultValue? {
 				line.code(' = ').expression(data.defaultValue)
 			}
 
-			auto = false
+			var mut auto = false
 
-			for const modifier in data.modifiers until auto {
+			for var modifier in data.modifiers until auto {
 				if modifier.kind == ModifierKind::AutoEvaluate {
 					auto = true
 				}
@@ -247,17 +246,17 @@ class MacroDeclaration extends AbstractNode {
 			@parameters[data.name.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
 		}
 
-		const block = line.code(')').newBlock()
+		var block = line.code(')').newBlock()
 
-		for const kind, name of @parameters {
+		for var kind, name of @parameters {
 			if kind == MacroVariableKind::AutoEvaluated {
 				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, \(ReificationKind::Expression.value)))`)
 			}
 		}
 
-		block.line('let __ks_src = ""')
+		block.line('var mut __ks_src = ""')
 
-		for const statement in $ast.block(@data.body).statements {
+		for var statement in $ast.block(@data.body).statements {
 			block.statement(statement)
 		}
 
@@ -265,7 +264,7 @@ class MacroDeclaration extends AbstractNode {
 
 		line.done()
 
-		let source = ''
+		var mut source = ''
 
 		for fragment in builder.toArray() {
 			source += fragment.code
@@ -279,7 +278,7 @@ class MacroDeclaration extends AbstractNode {
 	prepare()
 	translate()
 	addMark(data, kind = null) { # {{{
-		const index = @marks.length
+		var index = @marks.length
 
 		@marks.push(data, kind)
 
@@ -298,7 +297,7 @@ class MacroDeclaration extends AbstractNode {
 		}
 	} # }}}
 	addPropertyNameMark(data, kind = null) { # {{{
-		const index = @marks.length
+		var index = @marks.length
 
 		@marks.push(data, kind)
 
@@ -309,12 +308,12 @@ class MacroDeclaration extends AbstractNode {
 	} # }}}
 	execute(arguments: Array, parent) { # {{{
 		// console.log(@fn.toString())
-		const module = this.module()
+		var module = this.module()
 		++@executeCount
 
-		const args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
+		var args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
 
-		let data = @fn(...args)
+		var mut data = @fn(...args)
 		// console.log('execute =>', data)
 
 		try {
@@ -397,12 +396,12 @@ class MacroDeclaration extends AbstractNode {
 
 class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode): MacroType { # {{{
-		const scope = node.scope()
+		var scope = node.scope()
 
 		return new MacroType([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
 	} # }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
-		const type = new MacroType(scope)
+		var type = new MacroType(scope)
 
 		type._min = data.min
 		type._max = data.max
@@ -432,7 +431,7 @@ class MacroType extends FunctionType {
 			return false
 		}
 
-		const params = value.parameters()
+		var params = value.parameters()
 
 		if @parameters.length == params.length {
 			for parameter, i in @parameters {
@@ -457,7 +456,7 @@ class MacroArgument extends Type {
 	private {
 		_data
 	}
-	static build(arguments: Array) => [new MacroArgument(argument) for const argument in arguments]
+	static build(arguments: Array) => [new MacroArgument(argument) for var argument in arguments]
 	constructor(@data) { # {{{
 		super(null)
 	} # }}}
@@ -514,7 +513,7 @@ class MacroArgument extends Type {
 		return false
 	} # }}}
 	isAssignableToVariable(value: UnionType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
-		for const type in value.types() {
+		for var type in value.types() {
 			if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
 				return true
 			}
@@ -527,9 +526,9 @@ class MacroArgument extends Type {
 }
 
 func $callMacroExpression(data, parent, scope) { # {{{
-	const macro = scope.getMacro(data, parent)
+	var macro = scope.getMacro(data, parent)
 
-	const result = macro.execute(data.arguments, parent)
+	var result = macro.execute(data.arguments, parent)
 
 	if result.body.length == 1 {
 		return $compile.expression(result.body[0], parent)
@@ -546,24 +545,24 @@ class CallMacroStatement extends Statement {
 		_statements: Array		= []
 	}
 	initiate() { # {{{
-		const macro = @scope.getMacro(@data, this)
+		var macro = @scope.getMacro(@data, this)
 
-		const data = macro.execute(@data.arguments, this)
+		var data = macro.execute(@data.arguments, this)
 
-		const offset = @scope.getLineOffset()
+		var offset = @scope.getLineOffset()
 
 		@offsetStart = @scope.line()
 
 		@scope.setLineOffset(@offsetStart)
 
-		const file = `\(this.file())!#\(macro.name())`
+		var file = `\(this.file())!#\(macro.name())`
 
 		@options = Attribute.configure(data, @options, AttributeTarget::Global, file)
 
-		for const data in data.body {
+		for var data in data.body {
 			@scope.line(data.start.line)
 
-			if const statement = $compile.statement(data, this) {
+			if var statement = $compile.statement(data, this) {
 				@statements.push(statement)
 
 				statement.initiate()

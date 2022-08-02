@@ -8,7 +8,7 @@ class Quxbaz extends Foobar {
 			return false
 		}
 
-		const name = x.name()
+		var name = x.name()
 	}
 	isNamed() => true
 	name(): String => 'quxbaz'

@@ -6,7 +6,7 @@ type RegExpExecArray = Array<String?> & {
 extern console
 extern func exec(): RegExpExecArray
 
-const match = exec()
+var match = exec()
 
 console.log(`\(match.input)`)
 console.log(`\(match[0])`)

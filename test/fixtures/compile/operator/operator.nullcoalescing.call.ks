@@ -1,4 +1,4 @@
 extern x, y, z
 
-let foo = (x ?? y)()
-let bar = (x ?? y ?? z)()
+var dyn foo = (x ?? y)()
+var dyn bar = (x ?? y ?? z)()

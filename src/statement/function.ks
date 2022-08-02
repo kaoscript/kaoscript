@@ -1,6 +1,6 @@
-const $function = {
+var $function = {
 	surround(node) { # {{{
-		let parent = node._parent
+		var mut parent = node._parent
 		while parent? && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
 		}
@@ -75,7 +75,7 @@ const $function = {
 				}
 			}
 			NodeKind::ComparisonExpression => {
-				for const operand in data.values by 2 {
+				for var operand in data.values by 2 {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
@@ -144,7 +144,7 @@ const $function = {
 }
 
 class FunctionDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_continued: Boolean			= false
 		_extended: Boolean			= false
 		_main: Boolean				= false
@@ -193,7 +193,7 @@ class FunctionDeclaration extends Statement {
 			}
 			else {
 				@scope.addStash(@name, variable => {
-					const type = variable.getRealType()
+					var type = variable.getRealType()
 
 					if type.isFunction() {
 						@main = true
@@ -215,7 +215,7 @@ class FunctionDeclaration extends Statement {
 				}, variable => {
 					@variable = variable
 
-					const declarator = new FunctionDeclarator(@variable, @data, this)
+					var declarator = new FunctionDeclarator(@variable, @data, this)
 
 					declarator.analyse()
 				})
@@ -232,14 +232,14 @@ class FunctionDeclaration extends Statement {
 	analyse() { # {{{
 		if @main {
 			if @continued {
-				const variable = @scope.getDefinedVariable(@name)
+				var variable = @scope.getDefinedVariable(@name)
 
 				if variable is FunctionVariable {
 					@main = false
 					@variable = variable
 				}
 				else {
-					const type = @variable.getDeclaredType()
+					var type = @variable.getDeclaredType()
 
 					@variable = new FunctionVariable(@scope!?, @name, true, type.length?() ?? 1)
 
@@ -249,12 +249,12 @@ class FunctionDeclaration extends Statement {
 				}
 			}
 
-			const declarator = new FunctionDeclarator(@variable, @data, this)
+			var declarator = new FunctionDeclarator(@variable, @data, this)
 
 			declarator.analyse()
 		}
 		else if @continued {
-			const declarator = new FunctionDeclarator(@variable, @data, this)
+			var declarator = new FunctionDeclarator(@variable, @data, this)
 
 			declarator.analyse()
 		}
@@ -276,9 +276,9 @@ class FunctionDeclaration extends Statement {
 	initializeVariable(variable, expression, node)
 	name() => @name
 	toMainFragments(fragments) { # {{{
-		const name = @variable.getSecureName()
-		const line = fragments.newLine()
-		const block = line.code(`function \(name)()`).newBlock()
+		var name = @variable.getSecureName()
+		var line = fragments.newLine()
+		var block = line.code(`function \(name)()`).newBlock()
 
 		block.line(`return \(name).__ks_rt(this, arguments)`)
 
@@ -289,14 +289,14 @@ class FunctionDeclaration extends Statement {
 		return unless @main
 
 		if @continued {
-			for const declarator in @variable.declarators() {
+			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
 			this.toRouterFragments(fragments)
 		}
 		else if @extended {
-			const name = @variable.getSecureName()
+			var name = @variable.getSecureName()
 
 			fragments.line($const(this), @oldVariableName, $equals, name)
 
@@ -304,7 +304,7 @@ class FunctionDeclaration extends Statement {
 
 			fragments.line(`\(name).__ks_0 = \(@oldVariableName)`)
 
-			for const declarator in @variable.declarators() {
+			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
@@ -313,7 +313,7 @@ class FunctionDeclaration extends Statement {
 		else {
 			this.toMainFragments(fragments)
 
-			for const declarator in @variable.declarators() {
+			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
@@ -321,12 +321,12 @@ class FunctionDeclaration extends Statement {
 		}
 	} # }}}
 	toRouterFragments(fragments) { # {{{
-		const name = @variable.getSecureName()
+		var name = @variable.getSecureName()
 
-		const assessment = this.type().assessment(@variable.name(), this)
+		var assessment = this.type().assessment(@variable.name(), this)
 
-		const line = fragments.newLine()
-		const block = line.code(`\(name).__ks_rt = function(that, args)`).newBlock()
+		var line = fragments.newLine()
+		var block = line.code(`\(name).__ks_rt = function(that, args)`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -352,7 +352,7 @@ class FunctionDeclaration extends Statement {
 }
 
 class FunctionDeclarator extends AbstractNode {
-	private lateinit {
+	private late {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -375,8 +375,8 @@ class FunctionDeclarator extends AbstractNode {
 
 		@scope.define('this', true, Type.Any, this)
 
-		for const data in @data.parameters {
-			const parameter = new Parameter(data, this)
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
 
@@ -388,7 +388,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@scope.line(@data.start.line)
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
@@ -455,9 +455,9 @@ class FunctionDeclarator extends AbstractNode {
 
 		fragments.code(') =>')
 
-		const block = fragments.newBlock()
+		var block = fragments.newBlock()
 
-		const ctrl = block
+		var ctrl = block
 			.newControl()
 			.code('if(__ks_e)')
 			.step()
@@ -466,8 +466,8 @@ class FunctionDeclarator extends AbstractNode {
 			.code('else')
 			.step()
 
-		let index = -1
-		let item
+		var mut index = -1
+		var mut item
 
 		for statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(ctrl, Mode::None) {
@@ -486,9 +486,9 @@ class FunctionDeclarator extends AbstractNode {
 		fragments.code(')').done()
 	} # }}}
 	toStatementFragments(fragments) { # {{{
-		const line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
+		var line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 
@@ -528,7 +528,7 @@ class FunctionVariable extends Variable {
 	} # }}}
 	prepare() { # {{{
 		if @extended {
-			let type
+			var mut type
 
 			for declarator in @declarators {
 				declarator.prepare()
@@ -548,19 +548,19 @@ class FunctionVariable extends Variable {
 		else if @declarators.length == 1 {
 			@declarators[0].prepare()
 
-			const type = @declarators[0].type()
+			var type = @declarators[0].type()
 
 			@declaredType = Type.toNamedType(@name, type)
 			@realType = @declaredType
 		}
 		else {
-			let declarator = @declarators[0]
+			var mut declarator = @declarators[0]
 			declarator.prepare()
 
-			let type = declarator.type()
+			var mut type = declarator.type()
 			@declaredType.addFunction(type)
 
-			const async = type.isAsync()
+			var async = type.isAsync()
 
 			for declarator in @declarators from 1 {
 				declarator.prepare()
@@ -592,7 +592,7 @@ class FunctionVariable extends Variable {
 	isAsync() => @declaredType.isAsync()
 	length() => @declarators.length
 	toStatementFragments(fragments, mode) { # {{{
-		for const declarator, index in @declarators {
+		for var declarator, index in @declarators {
 			declarator.toStatementFragments(fragments, `__ks_\(@name)_\(index)`, mode)
 		}
 	} # }}}

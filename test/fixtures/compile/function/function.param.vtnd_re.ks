@@ -1,6 +1,6 @@
 require expect: func
 
-let foo = (() => (x: Number = null, ...items) => [x, items])()
+var dyn foo = (() => (x: Number = null, ...items) => [x, items])()
 
 expect(foo()).to.eql([null, []])
 

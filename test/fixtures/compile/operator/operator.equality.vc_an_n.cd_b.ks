@@ -1,5 +1,5 @@
 func foobar() {
-	const x = null
+	var x = null
 
 	if x == true {
 	}

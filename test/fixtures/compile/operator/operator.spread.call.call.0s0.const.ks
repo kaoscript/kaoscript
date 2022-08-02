@@ -1,4 +1,4 @@
-const foo = [1, 2]
-const bar = []
+var foo = [1, 2]
+var bar = []
 
 bar.push(...foo)

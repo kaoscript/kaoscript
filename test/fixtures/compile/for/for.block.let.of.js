@@ -9,8 +9,8 @@ module.exports = function() {
 		d.duncan = "murbella";
 		return d;
 	})();
-	for(let key in likes) {
-		let value = likes[key];
+	for(const key in likes) {
+		const value = likes[key];
 		console.log(Helper.concatString(key, " likes ", value));
 	}
 };

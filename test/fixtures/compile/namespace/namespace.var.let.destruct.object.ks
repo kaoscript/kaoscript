@@ -6,7 +6,7 @@ func min() => {
 }
 
 namespace foo {
-	export let {gender, age} = min()
+	export var dyn {gender, age} = min()
 }
 
 console.log(foo.age)

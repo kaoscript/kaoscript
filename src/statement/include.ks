@@ -1,15 +1,15 @@
-const $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
+var $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
 
 class IncludeDeclaration extends Statement {
 	private {
 		_declarators			= []
 	}
 	initiate() { # {{{
-		let directory = this.directory()
+		var mut directory = this.directory()
 
-		let x
-		for const data in @data.declarations {
-			const file = data.file
+		var mut x
+		for var data in @data.declarations {
+			var file = data.file
 
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
@@ -24,11 +24,11 @@ class IncludeDeclaration extends Statement {
 				}
 			}
 			else {
-				let modulePath = file
-				let moduleVersion = ''
+				var mut modulePath = file
+				var mut moduleVersion = ''
 
-				let nf = true
-				for const dir in $nodeModulesPaths(directory) while nf {
+				var mut nf = true
+				for var dir in $nodeModulesPaths(directory) while nf {
 					x = fs.resolve(dir, file)
 
 					if fs.isFile(x) {
@@ -41,10 +41,10 @@ class IncludeDeclaration extends Statement {
 						nf = false
 					}
 					else {
-						let pkgfile = path.join(x, 'package.json')
+						var mut pkgfile = path.join(x, 'package.json')
 
 						if fs.isFile(pkgfile) {
-							if const pkg = try JSON.parse(fs.readFile(pkgfile)) {
+							if var pkg = try JSON.parse(fs.readFile(pkgfile)) {
 								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
 									x = path.join(x, pkg.kaoscript.main)
 									modulePath = path.join(modulePath, pkg.kaoscript.main)
@@ -98,22 +98,22 @@ class IncludeDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.analyse()
 		}
 	} # }}}
 	enhance() { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.enhance()
 		}
 	} # }}}
 	prepare() { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.prepare()
 		}
 	} # }}}
 	translate() { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.translate()
 		}
 	} # }}}
@@ -132,15 +132,15 @@ class IncludeDeclaration extends Statement {
 		}
 	} # }}}
 	export(recipient, enhancement: Boolean = false) { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.export(recipient, enhancement)
 		}
 	} # }}}
 	isExportable() => true
 	loadLocalFile(declaration, path) { # {{{
-		const module = this.module()
+		var module = this.module()
 
-		let data = fs.readFile(path)
+		var mut data = fs.readFile(path)
 
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path)
@@ -156,16 +156,16 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		const declarator = new IncludeDeclarator(declaration, data, path, this)
+		var declarator = new IncludeDeclarator(declaration, data, path, this)
 
 		declarator.initiate()
 
 		@declarators.push(declarator)
 	} # }}}
 	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { # {{{
-		const module = this.module()
+		var module = this.module()
 
-		let data = fs.readFile(path)
+		var mut data = fs.readFile(path)
 
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path, modulePath, moduleVersion)
@@ -181,7 +181,7 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		const declarator = new IncludeDeclarator(declaration, data, path, moduleName, this)
+		var declarator = new IncludeDeclarator(declaration, data, path, moduleName, this)
 
 		declarator.initiate()
 
@@ -189,7 +189,7 @@ class IncludeDeclaration extends Statement {
 	} # }}}
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
 	} # }}}
@@ -229,16 +229,16 @@ class IncludeDeclarator extends Statement {
 	initiate() { # {{{
 		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, this.file())
 
-		const offset = @scope.getLineOffset()
+		var offset = @scope.getLineOffset()
 
 		@offsetStart = @scope.line()
 
 		@scope.setLineOffset(@offsetStart)
 
-		for const data in @data.body {
+		for var data in @data.body {
 			@scope.line(data.start.line)
 
-			if const statement = $compile.statement(data, this) {
+			if var statement = $compile.statement(data, this) {
 				@statements.push(statement)
 
 				statement.initiate()
@@ -254,7 +254,7 @@ class IncludeDeclarator extends Statement {
 	analyse() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.analyse()
@@ -265,7 +265,7 @@ class IncludeDeclarator extends Statement {
 	enhance() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.enhance()
@@ -276,7 +276,7 @@ class IncludeDeclarator extends Statement {
 	prepare() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.prepare()
@@ -287,7 +287,7 @@ class IncludeDeclarator extends Statement {
 	translate() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for const statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
@@ -297,16 +297,16 @@ class IncludeDeclarator extends Statement {
 	} # }}}
 	directory() => @directory
 	export(recipient, enhancement: Boolean = false) { # {{{
-		for const statement in @statements when statement.isExportable() {
+		for var statement in @statements when statement.isExportable() {
 			statement.export(recipient, enhancement)
 		}
 	} # }}}
 	file() => @file
 	includePath() => @includePath
 	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
-		const line = stmt.line()
+		var line = stmt.line()
 
-		for const statement in @statements while statement.line() < line && statement != stmt {
+		for var statement in @statements while statement.line() < line && statement != stmt {
 			if statement.isUsingStaticVariable(class, varname) {
 				return true
 			}
@@ -317,7 +317,7 @@ class IncludeDeclarator extends Statement {
 	recipient() => this.module()
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { # {{{
-		for const statement in @statements {
+		for var statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
 	} # }}}

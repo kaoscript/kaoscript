@@ -1,6 +1,6 @@
 require expect: func
 
-let foo = (() => ({ x }) => [x])()
+var dyn foo = (() => ({ x }) => [x])()
 
 struct StructA {
 	x: Number

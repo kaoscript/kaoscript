@@ -1,11 +1,11 @@
 extern console
 
 func foobar() {
-	let values: Array<String>
+	var dyn values: Array<String>
 
 	values = quxbaz()!!
 
-	for const value in values {
+	for var value in values {
 		console.log(`\(value)`)
 	}
 }

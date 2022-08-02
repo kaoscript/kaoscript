@@ -1,4 +1,4 @@
-let foo = 42
+var dyn foo = 42
 
 class foo {
 }

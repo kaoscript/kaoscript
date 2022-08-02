@@ -1,17 +1,17 @@
 extern console
 
 macro trace_build_age_with_reification() {
-	let d = new Date(2013, 2, 15)
-	
+	var dyn d = new Date(2013, 2, 15)
+
 	d.setUTCDate(1)
 	d.setUTCHours(0, 0, 0)
-	
-	const buildTime = Math.floor(d.getTime() / 1000)
-	
+
+	var buildTime = Math.floor(d.getTime() / 1000)
+
 	macro {
-		const runTime = Math.floor(Date.now() / 1000)
-		const age = runTime - #buildTime
-		
+		var runTime = Math.floor(Date.now() / 1000)
+		var age = runTime - #buildTime
+
 		console.log(`Right now it's \(runTime), and this build is \(age) seconds old`)
 	}
 }

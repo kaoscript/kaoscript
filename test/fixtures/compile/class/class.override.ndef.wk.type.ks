@@ -20,9 +20,9 @@ class Rectangle extends Shape {
 	}
 
 	override draw(text) {
-		let fragments = ''
+		var dyn fragments = ''
 
-		for const line in text.lines() {
+		for var line in text.lines() {
 
 		}
 
@@ -30,7 +30,7 @@ class Rectangle extends Shape {
 	}
 }
 
-let r = new Rectangle('black')
+var dyn r = new Rectangle('black')
 
 console.log(`\(r.draw('foo\nbar'))`)
 

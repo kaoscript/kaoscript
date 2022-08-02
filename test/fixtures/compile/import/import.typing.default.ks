@@ -10,7 +10,7 @@ class WHITESPACE extends Token {
 	static GROUP	= Lexer.SKIPPED
 }
 
-const tokens = [WHITESPACE]
+var tokens = [WHITESPACE]
 
 class MyParser extends Parser {
 	constructor() {

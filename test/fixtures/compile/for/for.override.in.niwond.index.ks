@@ -1,6 +1,6 @@
 extern console
 
-let hero = ['leto', 'duncan', 'goku']
+var dyn hero = ['leto', 'duncan', 'goku']
 
 for _, hero in hero {
 	console.log(hero)

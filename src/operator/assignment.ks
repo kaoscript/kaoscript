@@ -1,5 +1,5 @@
 class AssignmentOperatorExpression extends Expression {
-	private lateinit {
+	private late {
 		_await: Boolean				= false
 		_bindingScope: Scope
 		_left						= null
@@ -35,7 +35,7 @@ class AssignmentOperatorExpression extends Expression {
 
 		@left.prepare()
 
-		if const variable = @left.variable() {
+		if var variable = @left.variable() {
 			if variable.isInitialized() {
 				@right.setExpectedType(variable.getRealType())
 			}
@@ -58,7 +58,7 @@ class AssignmentOperatorExpression extends Expression {
 		@right.translate()
 	} # }}}
 	defineVariables(left) { # {{{
-		const statement = @statement()
+		var statement = @statement()
 
 		statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
 	} # }}}
@@ -83,7 +83,7 @@ class AssignmentOperatorExpression extends Expression {
 }
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {
-	private lateinit {
+	private late {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -156,7 +156,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
-	private lateinit {
+	private late {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_isNumber: Boolean		= false
@@ -201,7 +201,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				TypeException.throwInvalidOperand(@left, Operator::Addition, this)
 			}
 
-			const nullable = @left.type().isNullable() || @right.type().isNullable()
+			var nullable = @left.type().isNullable() || @right.type().isNullable()
 			if nullable {
 				@isNative = false
 			}
@@ -213,7 +213,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				@type = @scope.reference('String')
 			}
 			else {
-				const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
 				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
 			}
@@ -237,7 +237,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		else {
 			fragments.compile(@left).code(' = ')
 
-			let type
+			var mut type
 			if @isNumber {
 				fragments.code($runtime.operator(this), '.addition(')
 
@@ -310,7 +310,7 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
-	private lateinit {
+	private late {
 		@condition: Boolean		= false
 		@ignorable: Boolean		= false
 		@lateinit: Boolean		= false
@@ -351,10 +351,10 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	} # }}}
 	defineVariables(left) { # {{{
 		if @condition {
-			const names = []
+			var names = []
 
-			for const name in left.listAssignments([]) {
-				if const variable = @scope.getVariable(name) {
+			for var name in left.listAssignments([]) {
+				if var variable = @scope.getVariable(name) {
 					if variable.isLateInit() {
 						throw new NotImplementedException(this)
 					}
@@ -403,7 +403,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 			return false
 		}
 
-		let parent = @parent
+		var dyn parent = @parent
 
 		while parent? {
 			parent = parent.parent()
@@ -461,7 +461,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		@right.releaseReusable()
 
 		if @left is IdentifierLiteral {
-			const type = @right.type().setNullable(false)
+			var type = @right.type().setNullable(false)
 
 			if @condition {
 				if @lateinit {
@@ -478,10 +478,10 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	} # }}}
 	defineVariables(left) { # {{{
 		if @condition {
-			const names = []
+			var names = []
 
-			for const name in left.listAssignments([]) {
-				if const variable = @scope.getVariable(name) {
+			for var name in left.listAssignments([]) {
+				if var variable = @scope.getVariable(name) {
 					if variable.isLateInit() {
 						@statement.addInitializableVariable(variable, true, this)
 						@lateinit = true
@@ -604,13 +604,13 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		@right.releaseReusable()
 
 		if @left is IdentifierLiteral {
-			const type = @right.type().setNullable(false)
+			var type = @right.type().setNullable(false)
 
 			if @condition {
 				if @lateinit {
 					@statement.initializeLateVariable(@left.name(), type, false)
 				}
-				else if const scope = @statement.getWhenFalseScope() {
+				else if var scope = @statement.getWhenFalseScope() {
 					@left.type(type, scope, this)
 				}
 			}
@@ -621,11 +621,11 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 	} # }}}
 	defineVariables(left) { # {{{
 		if @condition {
-			const scope = @statement.scope()
-			const names = []
+			var scope = @statement.scope()
+			var names = []
 
-			for const name in left.listAssignments([]) {
-				if const variable = scope.getVariable(name) {
+			for var name in left.listAssignments([]) {
+				if var variable = scope.getVariable(name) {
 					if variable.isLateInit() {
 						if @parent == @statement {
 							@statement.addInitializableVariable(variable, false, this)
@@ -740,7 +740,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 			.compile(@right)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl()
+		var mut ctrl = fragments.newControl()
 
 		ctrl.code('if(!')
 

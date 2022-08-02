@@ -4,6 +4,6 @@ impl Dictionary {
 	static clone(): Dictionary => this
 }
 
-export const foobar = {
+export var foobar = {
 	qux: 42
 }

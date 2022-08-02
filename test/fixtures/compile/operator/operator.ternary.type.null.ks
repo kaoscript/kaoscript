@@ -1,3 +1,3 @@
-const flag = true
+var flag = true
 
-export const foo = flag ? [] : null
+export var foo = flag ? [] : null

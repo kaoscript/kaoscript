@@ -12,5 +12,5 @@ class Rectangle extends Shape {
 	}
 }
 
-const s = new Shape('red')
-const r = new Rectangle('red')
+var s = new Shape('red')
+var r = new Rectangle('red')

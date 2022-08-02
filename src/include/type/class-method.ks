@@ -10,13 +10,13 @@ class ClassMethodType extends FunctionType {
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
-			const scope = node.scope()
+			var scope = node.scope()
 
 			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
-			const data = index
-			const type = new ClassMethodType(scope)
+			var data = index
+			var type = new ClassMethodType(scope)
 
 			type._index = data.index
 			type._access = data.access
@@ -40,7 +40,7 @@ class ClassMethodType extends FunctionType {
 			}
 
 			if data.inits? {
-				for const name in data.inits {
+				for var name in data.inits {
 					type._initVariables[name] = true
 				}
 			}
@@ -55,7 +55,7 @@ class ClassMethodType extends FunctionType {
 		@initVariables[name] = true
 	} # }}}
 	clone() { # {{{
-		const clone = new ClassMethodType(@scope)
+		var clone = new ClassMethodType(@scope)
 
 		FunctionType.clone(this, clone)
 
@@ -76,7 +76,7 @@ class ClassMethodType extends FunctionType {
 		return clone
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
-		const export = {
+		var export = {
 			index: @index
 			access: @access
 			sealed: @sealed
@@ -90,7 +90,7 @@ class ClassMethodType extends FunctionType {
 		}
 
 		if originalMethods? && @overwrite? {
-			const overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
+			var overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
 
 			if overwrite.length > 0 {
 				export.overwrite = overwrite
@@ -129,9 +129,9 @@ class ClassMethodType extends FunctionType {
 	isInstance() => @instance
 	isMethod() => true
 	isOverflowing(methods: Array<ClassMethodType>) { # {{{
-		const mode = MatchingMode::SimilarParameter + MatchingMode::MissingParameter + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
+		var mode = MatchingMode::SimilarParameter + MatchingMode::MissingParameter + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
 
-		for const method in methods {
+		for var method in methods {
 			if this.isSubsetOf(method, mode) {
 				return false
 			}
@@ -141,7 +141,7 @@ class ClassMethodType extends FunctionType {
 	} # }}}
 	isSealable() => true
 	isSubsetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
-		for const method in methods {
+		for var method in methods {
 			if this.isSubsetOf(method, mode) {
 				return true
 			}
@@ -150,7 +150,7 @@ class ClassMethodType extends FunctionType {
 		return false
 	} # }}}
 	isSupersetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
-		for const method in methods {
+		for var method in methods {
 			if method.isSubsetOf(this, mode) {
 				return true
 			}

@@ -1,6 +1,6 @@
 extern console
 
-let x = 0
+var dyn x = 0
 
 include again '../_/_includeagain.ks'
 

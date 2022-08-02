@@ -1,7 +1,7 @@
 func foobar(): Number {
-	lateinit const z
+	var late z
 
-	for const i from 1 to 10 {
+	for var i from 1 to 10 {
 		z = i
 	}
 

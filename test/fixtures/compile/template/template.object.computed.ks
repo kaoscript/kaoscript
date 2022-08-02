@@ -1,5 +1,5 @@
-let x = [24]
+var dyn x = [24]
 
-let foo = {
+var dyn foo = {
 	`\(x[0])`: 42
 }

@@ -2,14 +2,14 @@ extern sealed class Array
 
 impl Array {
 	static merge(...args) {
-		let i = 0
-		let l = args.length
+		var dyn i = 0
+		var dyn l = args.length
 		while i < l && args[i] is not Array {
 			++i
 		}
 
 		if i < l {
-			const source: Array = args[i]
+			var source: Array = args[i]
 
 			while ++i < l {
 				if args[i] is Array {

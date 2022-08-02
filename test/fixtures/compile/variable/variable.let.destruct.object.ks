@@ -5,6 +5,6 @@ func foo() => {
 	y: 2
 }
 
-let {x, y} = foo()
+var dyn {x, y} = foo()
 
 console.log(x, y)

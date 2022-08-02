@@ -1,3 +1,3 @@
 func foobar(x: String) {
-	const y = x as Number
+	var y = x as Number
 }

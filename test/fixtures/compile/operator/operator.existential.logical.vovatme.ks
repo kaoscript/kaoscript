@@ -1,3 +1,3 @@
 extern foo, bar, qux
 
-let tt = foo || (bar && qux?.qux)
+var dyn tt = foo || (bar && qux?.qux)

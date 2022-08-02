@@ -80,7 +80,7 @@ class ArrayComprehensionForFrom extends Expression {
 	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
-		let surround = $function.surround(this)
+		var surround = $function.surround(this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -126,7 +126,7 @@ class ArrayComprehensionForFrom extends Expression {
 }
 
 class ArrayComprehensionForIn extends Expression {
-	private lateinit {
+	private late {
 		_indexVariable: Variable
 		_type: Type
 		_valueName: String
@@ -180,20 +180,20 @@ class ArrayComprehensionForIn extends Expression {
 	prepare() { # {{{
 		@expression.prepare()
 
-		const type = @expression.type()
+		var type = @expression.type()
 		if !(type.isAny() || type.isArray()) {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
 		if @value? {
-			const parameterType = type.parameter()
+			var parameterType = type.parameter()
 
-			const valueType = Type.fromAST(@data.type, this)
+			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
 			@valueVariable.setRealType(realType)
 
@@ -235,7 +235,7 @@ class ArrayComprehensionForIn extends Expression {
 	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
-		let surround = $function.surround(this)
+		var surround = $function.surround(this)
 
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
@@ -279,7 +279,7 @@ class ArrayComprehensionForIn extends Expression {
 }
 
 class ArrayComprehensionForOf extends Expression {
-	private lateinit {
+	private late {
 		_valueVariable: Variable
 	}
 	private {
@@ -331,20 +331,20 @@ class ArrayComprehensionForOf extends Expression {
 	prepare() { # {{{
 		@expression.prepare()
 
-		const type = @expression.type()
+		var type = @expression.type()
 		if !(type.isAny() || type.isDictionary() || type.isObject()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 
 		if @value? {
-			const parameterType = type.parameter()
+			var parameterType = type.parameter()
 
-			const valueType = Type.fromAST(@data.type, this)
+			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
 			@valueVariable.setRealType(realType)
 
@@ -379,7 +379,7 @@ class ArrayComprehensionForOf extends Expression {
 	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
-		let surround = $function.surround(this)
+		var surround = $function.surround(this)
 
 		fragments
 			.code($runtime.helper(this), '.mapDictionary(')
@@ -496,7 +496,7 @@ class ArrayComprehensionForRange extends Expression {
 	toFragments(fragments, mode) { # {{{
 		this.module().flag('Helper')
 
-		let surround = $function.surround(this)
+		var surround = $function.surround(this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')

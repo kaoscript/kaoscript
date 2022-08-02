@@ -1,3 +1,3 @@
-let x: Number
+var dyn x: Number
 
 export x

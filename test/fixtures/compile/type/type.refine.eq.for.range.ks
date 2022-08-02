@@ -1,7 +1,7 @@
 func foobar(i: Number, b: Boolean) {
-	let x = i
+	var dyn x = i
 
-	for const j in 0..1 {
+	for var j in 0..1 {
 		x = null
 	}
 

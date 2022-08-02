@@ -8,7 +8,7 @@ import '../export/export.filter.func.extern.ks'
 
 console.log(`\(foobar('foobar'))`)
 
-const x = new Foobar()
+var x = new Foobar()
 
 console.log(`\(x.toString())`)
 

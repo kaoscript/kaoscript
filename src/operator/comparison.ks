@@ -11,17 +11,17 @@ class ComparisonExpression extends Expression {
 		_tested: Boolean			= false
 	}
 	analyse() { # {{{
-		let operand1, operand2, operator
+		var mut operand1, operand2, operator
 
 		operand1 = this.addOperand(@data.values[0])
 
 		if @data.values.length == 3 {
-			const value = @data.values[2]
+			var value = @data.values[2]
 
 			if value.kind == NodeKind::JunctionExpression {
 				@junctive = true
 
-				for const operand in value.operands {
+				for var operand in value.operands {
 					this.addOperator(@data.values[1], operand1, this.addOperand(operand))
 				}
 
@@ -40,7 +40,7 @@ class ComparisonExpression extends Expression {
 			}
 		}
 		else {
-			for const i from 1 til @data.values.length by 2 {
+			for var i from 1 til @data.values.length by 2 {
 				operand2 = this.addOperand(@data.values[i + 1])
 
 				this.addOperator(@data.values[i], operand1, operand2)
@@ -50,7 +50,7 @@ class ComparisonExpression extends Expression {
 		}
 	} # }}}
 	prepare() { # {{{
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.prepare()
 
 			if operand.type().isInoperative() {
@@ -58,7 +58,7 @@ class ComparisonExpression extends Expression {
 			}
 		}
 
-		for const operator in @operators {
+		for var operator in @operators {
 			operator.prepare()
 		}
 
@@ -67,7 +67,7 @@ class ComparisonExpression extends Expression {
 		}
 	} # }}}
 	translate() { # {{{
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.translate()
 		}
 	} # }}}
@@ -81,7 +81,7 @@ class ComparisonExpression extends Expression {
 		}
 		else {
 			if @operators.length > 1 {
-				for const operand in @operands from 1 til -1 until @composite {
+				for var operand in @operands from 1 til -1 until @composite {
 					@composite = operand.isComposite()
 				}
 
@@ -91,12 +91,12 @@ class ComparisonExpression extends Expression {
 			}
 		}
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.acquireReusable(acquire)
 		}
 	} # }}}
 	private addOperand(data) { # {{{
-		const operand = $compile.expression(data, this)
+		var operand = $compile.expression(data, this)
 
 		operand.analyse()
 
@@ -109,7 +109,7 @@ class ComparisonExpression extends Expression {
 		return operand
 	} # }}}
 	private addOperator(data, operand1, operand2) { # {{{
-		const operator = this.getOperator(data, operand1, operand2)
+		var operator = this.getOperator(data, operand1, operand2)
 
 		@operators.push(operator)
 	} # }}}
@@ -150,7 +150,7 @@ class ComparisonExpression extends Expression {
 	} # }}}
 	isComputed() => @computed
 	isNullable() { # {{{
-		for const operand in @operands {
+		for var operand in @operands {
 			if operand.isNullable() {
 				return true
 			}
@@ -159,9 +159,9 @@ class ComparisonExpression extends Expression {
 		return false
 	} # }}}
 	isNullableComputed() { # {{{
-		let nullable = true
+		var mut nullable = true
 
-		for const operand in @operands {
+		for var operand in @operands {
 			if operand.isNullableComputed() {
 				return true
 			}
@@ -173,7 +173,7 @@ class ComparisonExpression extends Expression {
 		return nullable
 	} # }}}
 	isUsingVariable(name) { # {{{
-		for const operand in @operands {
+		for var operand in @operands {
 			if operand.isUsingVariable(name) {
 				return true
 			}
@@ -182,7 +182,7 @@ class ComparisonExpression extends Expression {
 		return false
 	} # }}}
 	listAssignments(array: Array<String>) { # {{{
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.listAssignments(array)
 		}
 
@@ -193,7 +193,7 @@ class ComparisonExpression extends Expression {
 			@scope.releaseTempName(@reuseName)
 		}
 
-		for const operand in @operands {
+		for var operand in @operands {
 			operand.releaseReusable()
 		}
 	} # }}}
@@ -202,7 +202,7 @@ class ComparisonExpression extends Expression {
 			NotSupportedException.throw(this)
 		}
 
-		const test = this.isNullable() && !@tested
+		var test = this.isNullable() && !@tested
 		if test {
 			fragments.wrapNullable(this).code(' ? ')
 		}
@@ -213,7 +213,7 @@ class ComparisonExpression extends Expression {
 
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
-				for const operator in @operators from 1 {
+				for var operator in @operators from 1 {
 					fragments.code($comma)
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, false, false)
@@ -224,7 +224,7 @@ class ComparisonExpression extends Expression {
 			else {
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
-				for const operator in @operators from 1 {
+				for var operator in @operators from 1 {
 					fragments.code(@junction)
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, false, false)
@@ -235,7 +235,7 @@ class ComparisonExpression extends Expression {
 			@operators[0].toOperatorFragments(fragments, @reuseName, false, false, true, true)
 
 			if @operators.length > 1 {
-				for const operator in @operators from 1 til -1 {
+				for var operator in @operators from 1 til -1 {
 					fragments.code(@junction)
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, true, true)
@@ -253,8 +253,8 @@ class ComparisonExpression extends Expression {
 	} # }}}
 	toNullableFragments(fragments) { # {{{
 		if !@tested {
-			let nf = false
-			for const operand in @operands {
+			var mut nf = false
+			for var operand in @operands {
 				if operand.isNullable() {
 					if nf {
 						fragments.code(' && ')
@@ -296,8 +296,8 @@ class EqualityOperator extends ComparisonOperator {
 		_nanRight: Boolean		= false
 	}
 	prepare() { # {{{
-		const leftType = @left.type()
-		const rightType = @right.type()
+		var leftType = @left.type()
+		var rightType = @right.type()
 
 		if leftType.isEnum() && @left is not NumericBinaryOperatorExpression {
 			@enumLeft = true
@@ -412,8 +412,8 @@ class EqualityOperator extends ComparisonOperator {
 	inferWhenTrueTypes(inferables) { # {{{
 		inferables = @right.inferTypes(@left.inferTypes(inferables))
 
-		const leftType = @left.type()
-		const rightType = @right.type()
+		var leftType = @left.type()
+		var rightType = @right.type()
 
 		if @left.isInferable() {
 			if @right.isInferable() {
@@ -447,8 +447,8 @@ class EqualityOperator extends ComparisonOperator {
 		return inferables
 	} # }}}
 	toLeftFragments(fragments, reuseName?, reusable, assignable) { # {{{
-		let suffix = null
-		let wrap = true
+		var mut suffix = null
+		var mut wrap = true
 
 		if @enumLeft {
 			if @left.type().isNullable() {
@@ -519,8 +519,8 @@ class EqualityOperator extends ComparisonOperator {
 		}
 	} # }}}
 	toRightFragments(fragments, reuseName?, reusable, assignable) { # {{{
-		let suffix = null
-		let wrap = true
+		var mut suffix = null
+		var mut wrap = true
 
 		if @enumRight {
 			suffix = '.value'

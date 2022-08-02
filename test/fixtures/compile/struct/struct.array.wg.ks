@@ -2,6 +2,6 @@ struct Event {
 	names: Array<String>
 }
 
-const e = Event(
+var e = Event(
 	names: []
 )

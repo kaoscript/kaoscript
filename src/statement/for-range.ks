@@ -21,7 +21,7 @@ class ForRangeStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
 				@declaration = true
 			}
@@ -30,7 +30,7 @@ class ForRangeStatement extends Statement {
 			}
 		}
 
-		const variable = @scope.getVariable(@data.value.name)
+		var variable = @scope.getVariable(@data.value.name)
 		if @declaration || variable == null {
 			@bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
 
@@ -116,7 +116,7 @@ class ForRangeStatement extends Statement {
 		@bindingScope.releaseTempName(@boundName) if @boundName?
 		@bindingScope.releaseTempName(@byName) if @byName?
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
@@ -155,7 +155,7 @@ class ForRangeStatement extends Statement {
 		||	@body.isUsingVariable(name)
 	# }}}
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl().code('for(')
+		var mut ctrl = fragments.newControl().code('for(')
 
 		if @defineVariable {
 			ctrl.code($runtime.scope(this))

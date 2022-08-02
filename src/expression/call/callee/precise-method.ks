@@ -42,7 +42,7 @@ class PreciseMethodCallee extends Callee {
 		return `method:\(@property):\(@index):\(@alien):\(@instance):\(@arguments)`
 	} # }}}
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for const function in @functions {
+		for var function in @functions {
 			if function.isInitializingInstanceVariable(name) {
 				return true
 			}

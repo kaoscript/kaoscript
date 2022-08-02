@@ -7,8 +7,8 @@ disclose RegExp {
 func foobar(x: String) {
 }
 
-const regex = /foo/
+var regex = /foo/
 
-if const match = regex.exec('foobar') {
+if var match = regex.exec('foobar') {
 	foobar(match[0])
 }

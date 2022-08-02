@@ -1,3 +1,3 @@
 func foobar(data) {
-	const {class, for: f4} = data
+	var {class, for: f4} = data
 }

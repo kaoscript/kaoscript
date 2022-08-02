@@ -4,7 +4,7 @@ extern console: {
 
 func foo() => { bar: 'hello', baz: 3 }
 
-let bar = 0
+var dyn bar = 0
 
 {bar, baz} = foo()
 

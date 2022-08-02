@@ -6,13 +6,13 @@ sealed class Shape {
 	private {
 		_color: string = ''
 	}
-	
+
 	static makeBlue(): Shape {
 		return new Shape('blue')
 	}
-	
+
 	constructor(@color)
-	
+
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
@@ -21,16 +21,16 @@ sealed class Shape {
 impl Shape {
 	makeRed(): Shape {
 		this._color = 'red'
-		
+
 		return this
 	}
-	
+
 	static makeRed(): Shape {
 		return new Shape('red')
 	}
 }
 
-let shape: Shape = Shape.makeRed()
+var dyn shape: Shape = Shape.makeRed()
 console.log(shape.draw())
 
 shape = Shape.makeBlue()

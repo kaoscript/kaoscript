@@ -2,9 +2,9 @@ extern console: {
 	log(...)
 }
 
-let foo = { bar: 'hello', baz: 3 }
+var dyn foo = { bar: 'hello', baz: 3 }
 
-let {bar: a, baz: b} = foo
+var dyn {bar: a, baz: b} = foo
 
 console.log(a)
 // <- 'hello'

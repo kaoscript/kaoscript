@@ -1,6 +1,6 @@
-let label = name.firstname
+var dyn label = name.firstname
 
-let name = {
+var dyn name = {
 	firstname: 'John'
 	lastname: 'Doe'
 }

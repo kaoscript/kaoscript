@@ -5,9 +5,9 @@ type Coord = {
 }
 
 func foobar(values: Dictionary<Coord>) {
-	auto r = 0
+	var mut r = 0
 
-	for const {x, y, z} of values {
+	for var {x, y, z} of values {
 		r += (x * y) /. z
 	}
 

@@ -5,9 +5,9 @@ type Coord = {
 }
 
 func foobar(values: Array<Coord>) {
-	auto r = 0
+	var mut r = 0
 
-	for const {x, y, z} in values {
+	for var {x, y, z} in values {
 		r += (x * y) /. z
 	}
 

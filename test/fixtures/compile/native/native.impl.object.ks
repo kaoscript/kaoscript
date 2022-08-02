@@ -4,7 +4,7 @@ extern sealed class Dictionary
 
 impl Dictionary {
 	map(iterator: func) {
-		let results = []
+		var dyn results = []
 
 		for item, index of this {
 			results.push(iterator(item, index))

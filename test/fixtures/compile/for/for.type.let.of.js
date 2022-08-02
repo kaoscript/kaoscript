@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		for(let __ks_0 in values) {
-			let value = values[__ks_0];
+			const value = values[__ks_0];
 			console.log(value);
 		}
 	};

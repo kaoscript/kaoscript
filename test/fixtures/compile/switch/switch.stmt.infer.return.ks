@@ -1,5 +1,5 @@
 func foobar(x) {
-	let value
+	var dyn value
 	switch x {
 		0, 1 => {
 			value = 'binary'

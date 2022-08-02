@@ -1,5 +1,5 @@
 class Foobar {
 	foobar() {
-		lateinit const x
+		var late x
 	}
 }

@@ -1,4 +1,4 @@
-let foo = {
+var dyn foo = {
 	bar: 'qux'
 }
 

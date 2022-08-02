@@ -1,5 +1,5 @@
 class ForFromStatement extends Statement {
-	private lateinit {
+	private late {
 		_bindingScope
 		_body
 		_bodyScope
@@ -19,10 +19,10 @@ class ForFromStatement extends Statement {
 		_while
 	}
 	analyse() { # {{{
-		let rename = false
-		const variable = @scope.getVariable(@data.variable.name)
+		var mut rename = false
+		var variable = @scope.getVariable(@data.variable.name)
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
 				@declaration = true
 			}
@@ -188,7 +188,7 @@ class ForFromStatement extends Statement {
 		@bindingScope.releaseTempName(@boundName) if ?@boundName
 		@bindingScope.releaseTempName(@byName) if ?@byName
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() {
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
@@ -234,7 +234,7 @@ class ForFromStatement extends Statement {
 		||	@body.isUsingVariable(name)
 	# }}}
 	toStatementFragments(fragments, mode) { # {{{
-		let ctrl = fragments.newControl().code('for(')
+		var mut ctrl = fragments.newControl().code('for(')
 
 		if @declared {
 			ctrl.code($runtime.scope(this))
@@ -254,7 +254,7 @@ class ForFromStatement extends Statement {
 
 		ctrl.compile(@variable)
 
-		let desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
+		var mut desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
 
 		if @data.til? {
 			if desc {

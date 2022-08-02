@@ -1,4 +1,4 @@
 func foobar(values) {
-	for let {line, element} in values {
+	for var {line, element} in values {
 	}
 }

@@ -27,7 +27,7 @@ include {
 	'./include/error'
 }
 
-const $extensions = { # {{{
+var $extensions = { # {{{
 	binary: '.ksb',
 	exports: '.kse',
 	hash: '.ksh',
@@ -35,9 +35,9 @@ const $extensions = { # {{{
 	source: '.ks'
 } # }}}
 
-const $targetRegex = /^(\w+)-v((?:\d+)(?:\.\d+)?(?:\.\d+)?)$/
+var $targetRegex = /^(\w+)-v((?:\d+)(?:\.\d+)?(?:\.\d+)?)$/
 
-const $typeofs = { # {{{
+var $typeofs = { # {{{
 	Array: true
 	Boolean: true
 	Class: true
@@ -54,7 +54,7 @@ const $typeofs = { # {{{
 	Tuple: true
 } # }}}
 
-const $ast = {
+var $ast = {
 	block(data) { # {{{
 		if data.kind == NodeKind::Block {
 			return data
@@ -112,7 +112,7 @@ const $ast = {
 	} # }}}
 }
 
-const $runtime = {
+var $runtime = {
 	dictionary(node) { # {{{
 		node.module?().flag('Dictionary')
 
@@ -271,12 +271,12 @@ include {
 	'./include/router'
 }
 
-const $compile = {
+var $compile = {
 	block(data, parent, scope = parent.scope()) => new Block($ast.block(data), parent, scope)
 	expression(data, parent, scope = parent.scope()) { # {{{
-		let expression
+		var dyn expression
 
-		if const clazz = $expressions[data.kind] {
+		if var clazz = $expressions[data.kind] {
 			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind::BinaryExpression {
@@ -288,7 +288,7 @@ const $compile = {
 					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
-			else if const clazz = $binaryOperators[data.operator.kind] {
+			else if var clazz = $binaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -296,7 +296,7 @@ const $compile = {
 			}
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
-			if const clazz = $polyadicOperators[data.operator.kind] {
+			if var clazz = $polyadicOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -304,7 +304,7 @@ const $compile = {
 			}
 		}
 		else if data.kind == NodeKind::UnaryExpression {
-			if const clazz = $unaryOperators[data.operator.kind] {
+			if var clazz = $unaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -323,7 +323,7 @@ const $compile = {
 	function(data, parent, scope = parent.scope()) => new FunctionBlock($ast.block(data), parent, scope)
 	statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
-			const clazz = $statements[data.kind] ?? $statements.default
+			var clazz = $statements[data.kind] ?? $statements.default
 
 			return new clazz(data, parent, scope)
 		}
@@ -333,7 +333,7 @@ const $compile = {
 	} # }}}
 }
 
-const $assignmentOperators = {
+var $assignmentOperators = {
 	`\(AssignmentOperatorKind::Addition)`			: AssignmentOperatorAddition
 	`\(AssignmentOperatorKind::BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
 	`\(AssignmentOperatorKind::BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
@@ -351,7 +351,7 @@ const $assignmentOperators = {
 	`\(AssignmentOperatorKind::Subtraction)`		: AssignmentOperatorSubtraction
 }
 
-const $binaryOperators = {
+var $binaryOperators = {
 	`\(BinaryOperatorKind::Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperatorKind::And)`				: BinaryOperatorAnd
 	`\(BinaryOperatorKind::BitwiseAnd)`			: BinaryOperatorBitwiseAnd
@@ -375,7 +375,7 @@ const $binaryOperators = {
 	`\(BinaryOperatorKind::Xor)`				: BinaryOperatorXor
 }
 
-const $expressions = {
+var $expressions = {
 	`\(NodeKind::ArrayBinding)`					: ArrayBinding
 	`\(NodeKind::ArrayComprehension)`			: func(data, parent, scope) {
 		if data.loop.kind == NodeKind::ForFromStatement {
@@ -423,7 +423,7 @@ const $expressions = {
 	`\(NodeKind::UnlessExpression)`				: UnlessExpression
 }
 
-const $statements = {
+var $statements = {
 	`\(NodeKind::BreakStatement)`				: BreakStatement
 	`\(NodeKind::CallMacroExpression)`	 		: CallMacroStatement
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
@@ -467,7 +467,7 @@ const $statements = {
 	`default`									: ExpressionStatement
 }
 
-const $polyadicOperators = {
+var $polyadicOperators = {
 	`\(BinaryOperatorKind::Addition)`			: PolyadicOperatorAddition
 	`\(BinaryOperatorKind::And)`				: PolyadicOperatorAnd
 	`\(BinaryOperatorKind::BitwiseAnd)`			: PolyadicOperatorBitwiseAnd
@@ -486,7 +486,7 @@ const $polyadicOperators = {
 	`\(BinaryOperatorKind::Xor)`				: PolyadicOperatorXor
 }
 
-const $unaryOperators = {
+var $unaryOperators = {
 	`\(UnaryOperatorKind::BitwiseNot)`			: UnaryOperatorBitwiseNot
 	`\(UnaryOperatorKind::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
 	`\(UnaryOperatorKind::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
@@ -501,13 +501,13 @@ const $unaryOperators = {
 }
 
 func $expandOptions(options) { # {{{
-	const engine = $targets[options.target.name]
+	var engine = $targets[options.target.name]
 	if !?engine {
 		throw new Error(`Undefined target '\(options.target.name)'`)
 	}
 
 	if engine is Function {
-		if const opts = engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
+		if var opts = engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
 			return Dictionary.defaults(options, opts)
 		}
 		else {
@@ -523,7 +523,7 @@ func $expandOptions(options) { # {{{
 	}
 } # }}}
 
-const $targets = {
+var $targets = {
 	ecma: { # {{{
 		'5': {
 			format: {
@@ -557,7 +557,7 @@ const $targets = {
 }
 
 export class Compiler {
-	private lateinit {
+	private late {
 		_module: Module
 	}
 	private {
@@ -580,7 +580,7 @@ export class Compiler {
 			$targets[target[1]][target[2]] = options
 		} # }}}
 		registerTargets(targets) { # {{{
-			for const data, name of targets {
+			for var data, name of targets {
 				if data is String {
 					Compiler.registerTargetAlias(name, data)
 				}
@@ -716,7 +716,7 @@ export class Compiler {
 	toHashes() => @module.toHashes()
 	toRequirements() => @module.toRequirements()
 	toSource() { # {{{
-		let source = ''
+		var mut source = ''
 
 		for fragment in @fragments {
 			source += fragment.code
@@ -742,16 +742,16 @@ export class Compiler {
 		}
 	} # }}}
 	private writeBinaryFiles() { # {{{
-		const variationId = @module.toVariationId()
+		var variationId = @module.toVariationId()
 
 		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
 
 		this.writeHashFile(variationId)
 	} # }}}
 	private writeHashFile(variationId: String) { # {{{
-		const hashPath = getHashPath(@file)
+		var hashPath = getHashPath(@file)
 
-		let data
+		var dyn data
 
 		try {
 			data = JSON.parse(fs.readFile(hashPath))
@@ -775,7 +775,7 @@ export class Compiler {
 		fs.writeFile(hashPath, JSON.stringify(data))
 	} # }}}
 	private writeModuleFiles() { # {{{
-		const variationId = @module.toVariationId()
+		var variationId = @module.toVariationId()
 
 		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
 
@@ -792,7 +792,7 @@ export class Compiler {
 
 		fs.mkdir(@options.output)
 
-		const filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.js'
+		var filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.js'
 
 		fs.writeFile(filename, this.toSource())
 
@@ -801,7 +801,7 @@ export class Compiler {
 }
 
 export func compileFile(file, options = null) { # {{{
-	let compiler = new Compiler(file, options)
+	var compiler = new Compiler(file, options)
 
 	return compiler.compile().toSource()
 } # }}}
@@ -815,7 +815,7 @@ export func getHashPath(file) => fs.hidden(file, null, $extensions.hash)
 export func getRequirementsPath(file) => fs.hidden(file, null, $extensions.requirements)
 
 export func isUpToDate(file, variationId, source) { # {{{
-	let data
+	var late data
 	try {
 		data = JSON.parse(fs.readFile(getHashPath(file)))
 	}
@@ -827,9 +827,9 @@ export func isUpToDate(file, variationId, source) { # {{{
 		return false
 	}
 
-	let root = path.dirname(file)
+	var root = path.dirname(file)
 
-	for const hash, name of data.hashes {
+	for var hash, name of data.hashes {
 		if name == '.' {
 			return null if fs.sha256(source) != hash
 		}

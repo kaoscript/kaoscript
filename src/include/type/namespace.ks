@@ -1,5 +1,5 @@
 class NamespaceType extends Type {
-	private lateinit {
+	private late {
 		_altering: Boolean					= false
 		_alterations: Dictionary			= {}
 		_majorOriginal: NamespaceType?
@@ -8,7 +8,7 @@ class NamespaceType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
-			const type = new NamespaceType(scope)
+			var type = new NamespaceType(scope)
 
 			if data.exhaustive? {
 				type._exhaustive = data.exhaustive
@@ -17,11 +17,11 @@ class NamespaceType extends Type {
 			if data.original? {
 
 				queue.push(() => {
-					const original = references[data.original]
+					var original = references[data.original]
 
 					type.copyFrom(original.discardName())
 
-					for const property, name of data.properties {
+					for var property, name of data.properties {
 						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
@@ -35,7 +35,7 @@ class NamespaceType extends Type {
 				}
 
 				queue.push(() => {
-					for const property, name of data.properties {
+					for var property, name of data.properties {
 						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
@@ -48,8 +48,8 @@ class NamespaceType extends Type {
 		super(new NamespaceTypeScope(scope))
 	} # }}}
 	addFunction(name: String, type: FunctionType) { # {{{
-		if const property = @properties[name] {
-			const propertyType = property.type()
+		if var property = @properties[name] {
+			var propertyType = property.type()
 
 			if propertyType is OverloadedFunctionType {
 				propertyType.addFunction(type)
@@ -80,7 +80,7 @@ class NamespaceType extends Type {
 			property = new NamespacePropertyType(property.scope(), property)
 		}
 
-		const variable = new Variable(name, false, false, property.type())
+		var variable = new Variable(name, false, false, property.type())
 
 		@scope.addVariable(name, variable)
 
@@ -95,9 +95,9 @@ class NamespaceType extends Type {
 		return variable.getDeclaredType()
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
-		let type = Type.fromAST(data, node)
+		var mut type = Type.fromAST(data, node)
 
-		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		if options.rules.nonExhaustive {
 			type.setExhaustive(false)
@@ -117,17 +117,17 @@ class NamespaceType extends Type {
 		return this.addProperty(data.name.name, type)
 	} # }}}
 	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { # {{{
-		const type = Type.import(data, metadata, references, alterations, queue, @scope, node)
+		var type = Type.import(data, metadata, references, alterations, queue, @scope, node)
 
 		if type._scope != @scope {
 			type._scope = @scope
 		}
 
-		const variable = new Variable(name, false, false, type)
+		var variable = new Variable(name, false, false, type)
 
 		@scope.addVariable(name, variable)
 
-		const property = new NamespacePropertyType(@scope, variable.getDeclaredType())
+		var property = new NamespacePropertyType(@scope, variable.getDeclaredType())
 
 		@properties[name] = property
 
@@ -142,7 +142,7 @@ class NamespaceType extends Type {
 		return variable.getDeclaredType()
 	} # }}}
 	clone() { # {{{
-		const that = new NamespaceType(@scope:Scope)
+		var that = new NamespaceType(@scope:Scope)
 
 		that.copyFrom(this)
 
@@ -159,10 +159,10 @@ class NamespaceType extends Type {
 		@requirement = src._requirement
 		@required = src._required
 
-		for const property, name of src._properties {
+		for var property, name of src._properties {
 			@properties[name] = property
 		}
-		for const property, name of src._sealProperties {
+		for var property, name of src._sealProperties {
 			@sealProperties[name] = property
 		}
 
@@ -170,14 +170,14 @@ class NamespaceType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if ?@majorOriginal {
-			const export = {
+			var export = {
 				kind: TypeKind::Namespace
 				original: @majorOriginal.referenceIndex()
 				exhaustive: this.isExhaustive()
 				properties: {}
 			}
 
-			for const property, name of @properties {
+			for var property, name of @properties {
 				if @alterations[name] {
 					export.properties[name] = property.toExportOrIndex(references, indexDelta, mode, module)
 				}
@@ -186,7 +186,7 @@ class NamespaceType extends Type {
 			return export
 		}
 		else {
-			const export = {
+			var export = {
 				kind: TypeKind::Namespace
 				sealed: @sealed
 				systemic: @systemic
@@ -194,7 +194,7 @@ class NamespaceType extends Type {
 				properties: {}
 			}
 
-			for const property, name of @properties {
+			for var property, name of @properties {
 				export.properties[name] = property.toExportOrIndex(references, indexDelta, mode, module)
 			}
 
@@ -209,7 +209,7 @@ class NamespaceType extends Type {
 			@exported = true
 		}
 
-		for const value of @properties {
+		for var value of @properties {
 			value.flagExported(explicitly)
 		}
 
@@ -251,7 +251,7 @@ class NamespaceType extends Type {
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
 	isSubsetOf(value: NamespaceType, mode: MatchingMode) { # {{{
-		for const property, name of value._properties {
+		for var property, name of value._properties {
 			if !@properties[name]?.isSubsetOf(property, mode) {
 				return false
 			}
@@ -264,7 +264,7 @@ class NamespaceType extends Type {
 		@altering = true
 	} # }}}
 	setExhaustive(@exhaustive) { # {{{
-		for const property of @properties {
+		for var property of @properties {
 			property.setExhaustive(@exhaustive)
 		}
 
@@ -280,14 +280,14 @@ class NamespaceType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('namespace')
 
-		for const property, name of @properties {
+		for var property, name of @properties {
 			variations.push(name)
 
 			property.toVariations(variations)
 		}
 	} # }}}
 	walk(fn) { # {{{
-		for const type, name of @properties {
+		for var type, name of @properties {
 			fn(name, type)
 		}
 	} # }}}
@@ -307,7 +307,7 @@ class NamespacePropertyType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		let export
+		var mut export
 
 		if @type is ReferenceType {
 			export = @type.toReference(references, indexDelta, mode, module)

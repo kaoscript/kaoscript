@@ -1,16 +1,16 @@
 class VariableDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_autotype: Boolean			= false
 		_await: Boolean				= false
 		_cascade: Boolean			= false
 		_declarators: Array			= []
 		_function					= null
 		_hasInit: Boolean			= false
-		_immutable: Boolean			= false
+		_immutable: Boolean			= true
 		_init
 		_initScope: Scope
 		_lateInit: Boolean			= false
-		_rebindable: Boolean		= true
+		_rebindable: Boolean		= false
 		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
 		_try						= null
@@ -35,20 +35,22 @@ class VariableDeclaration extends Statement {
 		this(data, parent, scope)
 	} # }}}
 	override initiate() { # {{{
-		for const modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::AutoTyping {
-				@autotype = true
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Dynamic {
+				@immutable = false
+				@rebindable = true
 			}
-			else if modifier.kind == ModifierKind::Immutable {
-				@immutable = true
-				@rebindable = false
+			else if modifier.kind == ModifierKind::Mutable {
+				@autotype = true
+				@immutable = false
+				@rebindable = true
 			}
 			else if modifier.kind == ModifierKind::LateInit {
 				@lateInit = true
 			}
 		}
 
-		let declarator
+		var mut declarator
 		for data in @data.variables {
 			switch data.name.kind {
 				NodeKind::ArrayBinding => {
@@ -80,7 +82,7 @@ class VariableDeclaration extends Statement {
 
 			@initScope ??= this.newScope(@scope, ScopeType::Hollow)
 
-			const line = @initScope.getRawLine()
+			var line = @initScope.getRawLine()
 
 			@initScope.line(line - 1)
 
@@ -104,7 +106,7 @@ class VariableDeclaration extends Statement {
 
 	} # }}}
 	prepare() { # {{{
-		const declarator = @declarators[0]
+		var declarator = @declarators[0]
 
 		if @hasInit {
 			@init.prepare()
@@ -136,7 +138,7 @@ class VariableDeclaration extends Statement {
 			this.assignTempVariables(@initScope)
 		}
 
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.prepare()
 
 			if declarator.isRedeclared() {
@@ -148,7 +150,7 @@ class VariableDeclaration extends Statement {
 			declarator.setRealType(@type)
 
 			if declarator is VariableIdentifierDeclarator {
-				if const type = declarator.type() {
+				if var type = declarator.type() {
 					@init.validateType(type)
 				}
 			}
@@ -173,18 +175,18 @@ class VariableDeclaration extends Statement {
 	} # }}}
 	declarator() => @declarators[0]
 	defineVariables(declarator) { # {{{
-		let alreadyDeclared
+		var mut alreadyDeclared
 
-		const assignments = []
+		var assignments = []
 
-		for const name in declarator.listAssignments([]) {
+		for var name in declarator.listAssignments([]) {
 			if @scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
 
 			alreadyDeclared = @scope.hasDeclaredVariable(name)
 
-			const variable = @scope.define(name, this.isImmutable(), null, this)
+			var variable = @scope.define(name, this.isImmutable(), null, this)
 
 			if alreadyDeclared {
 				alreadyDeclared = !variable.isRenamed()
@@ -229,7 +231,7 @@ class VariableDeclaration extends Statement {
 		return false
 	} # }}}
 	isDuplicate(scope) { # {{{
-		for const declarator in @declarators {
+		for var declarator in @declarators {
 			if declarator.isDuplicate(scope) {
 				return true
 			}
@@ -251,9 +253,9 @@ class VariableDeclaration extends Statement {
 		return variables
 	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
-		const item = @init.toFragments(line, Mode::None)
+		var item = @init.toFragments(line, Mode::None)
 
 		statements.unshift(this)
 
@@ -262,7 +264,7 @@ class VariableDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		const variables = this.assignments()
+		var variables = this.assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
@@ -272,9 +274,9 @@ class VariableDeclaration extends Statement {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
-				const declarator = @declarators[0]
+				var declarator = @declarators[0]
 
-				let line = fragments.newLine()
+				var mut line = fragments.newLine()
 
 				if @toDeclareAll {
 					if @options.format.variables == 'es5' {
@@ -294,7 +296,7 @@ class VariableDeclaration extends Statement {
 			}
 		}
 		else {
-			let line = fragments.newLine()
+			var mut line = fragments.newLine()
 
 			if @toDeclareAll {
 				if @options.format.variables == 'es5' {
@@ -412,7 +414,7 @@ class VariableBindingDeclarator extends AbstractNode {
 }
 
 class VariableIdentifierDeclarator extends AbstractNode {
-	private lateinit {
+	private late {
 		_identifier: IdentifierLiteral
 		_lateInit: Boolean					= false
 		_name: String

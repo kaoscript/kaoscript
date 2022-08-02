@@ -1,5 +1,5 @@
 class ClassConstructorType extends FunctionType {
-	private lateinit {
+	private late {
 		_access: Accessibility					= Accessibility::Public
 		_class: ClassType
 		_dependent: Boolean						= false
@@ -8,13 +8,13 @@ class ClassConstructorType extends FunctionType {
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{
-			const scope = node.scope()
+			var scope = node.scope()
 
 			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
-			const data = index
-			const type = new ClassConstructorType(scope)
+			var data = index
+			var type = new ClassConstructorType(scope)
 
 			type._index = data.index
 			type._access = data.access
@@ -30,7 +30,7 @@ class ClassConstructorType extends FunctionType {
 			type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 			if data.inits? {
-				for const name in data.inits {
+				for var name in data.inits {
 					type._initVariables[name] = true
 				}
 			}
@@ -52,7 +52,7 @@ class ClassConstructorType extends FunctionType {
 		})
 	} # }}}
 	clone() { # {{{
-		const clone = new ClassConstructorType(@scope)
+		var clone = new ClassConstructorType(@scope)
 
 		FunctionType.clone(this, clone)
 
@@ -69,7 +69,7 @@ class ClassConstructorType extends FunctionType {
 		return clone
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
-		const export = {
+		var export = {
 			index: @index
 			access: @access
 			sealed: @sealed
@@ -88,7 +88,7 @@ class ClassConstructorType extends FunctionType {
 		}
 
 		if originalMethods? && @overwrite? {
-			const overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
+			var overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
 
 			if overwrite.length > 0 {
 				export.overwrite = overwrite

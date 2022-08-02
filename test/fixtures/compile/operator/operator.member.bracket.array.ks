@@ -1,4 +1,4 @@
 extern foo
 
-let m = ['qux']
-let qux = foo?[m[0]]
+var dyn m = ['qux']
+var dyn qux = foo?[m[0]]

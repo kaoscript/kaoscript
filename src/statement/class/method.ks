@@ -1,5 +1,5 @@
 class ClassMethodDeclaration extends Statement {
-	private lateinit {
+	private late {
 		_block: FunctionBlock
 		_internalName: String
 		_type: Type
@@ -25,15 +25,15 @@ class ClassMethodDeclaration extends Statement {
 		_topNodes: Array					= []
 	}
 	static toClassRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
-		const classname = variable.name()
+		var classname = variable.name()
 
-		const assessment = Router.assess(methods, name, node)
+		var assessment = Router.assess(methods, name, node)
 
 		header(node, fragments)
 
 		if variable.type().isExtending() {
-			const extends = variable.type().extends()
-			const parent = extends.name()
+			var extends = variable.type().extends()
+			var parent = extends.name()
 
 			Router.toFragments(
 				(function, line) => {
@@ -80,7 +80,7 @@ class ClassMethodDeclaration extends Statement {
 		footer(fragments)
 	} # }}}
 	static toInstanceHeadFragments(name, fragments) { # {{{
-		const ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
 		ctrl.code(`\(name)()`).step()
 
@@ -89,19 +89,19 @@ class ClassMethodDeclaration extends Statement {
 		ctrl.done()
 	} # }}}
 	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
-		const classname = variable.name()
+		var classname = variable.name()
 
-		const assessment = Router.assess(methods, name, node)
+		var assessment = Router.assess(methods, name, node)
 
 		header(node, fragments)
 
 		if variable.type().isExtending() {
-			const extends = variable.type().extends()
-			const parent = extends.name()
+			var extends = variable.type().extends()
+			var parent = extends.name()
 
 			Router.toFragments(
 				(function, line) => {
-					const index = function.isForked() ? function.getForkedIndex() : function.index()
+					var index = function.isForked() ? function.getForkedIndex() : function.index()
 
 					line.code(`proto.__ks_func_\(name)_\(index).call(that`)
 
@@ -230,21 +230,21 @@ class ClassMethodDeclaration extends Statement {
 
 		@parent.updateMethodScope(this)
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new ClassMethodType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
 
-		const returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
+		var returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
 
-		let overridden
-		auto overloaded = []
+		var mut overridden
+		var mut overloaded = []
 
 		if @parent.isExtending() {
-			const superclass = @parent.extends().type()
+			var superclass = @parent.extends().type()
 
-			if const data = @getOveriddenMethod(superclass, returnReference) {
+			if var data = @getOveriddenMethod(superclass, returnReference) {
 
 				@overriding = true
 				{ method: overridden, type: @type, exact: @exact } = data
@@ -266,8 +266,8 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 
-			for const method in overloaded {
-				let hidden = null
+			for var method in overloaded {
+				var mut hidden = null
 
 				if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = true
@@ -279,7 +279,7 @@ class ClassMethodDeclaration extends Statement {
 				@parent.addForkedMethod(@name, method, @type, hidden)
 			}
 
-			if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
+			if var sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
 				@parent.addSharedMethod(@name, sealedclass)
 			}
 		}
@@ -291,7 +291,7 @@ class ClassMethodDeclaration extends Statement {
 			@hiddenOverride = !overridden.isAbstract()
 		}
 		else {
-			const mode = MatchingMode::ExactParameter + MatchingMode::IgnoreName + MatchingMode::Superclass
+			var mode = MatchingMode::ExactParameter + MatchingMode::IgnoreName + MatchingMode::Superclass
 
 			if @instance {
 				if @parent.class().hasMatchingInstanceMethod(@name, @type, mode) {
@@ -305,7 +305,7 @@ class ClassMethodDeclaration extends Statement {
 			}
 		}
 
-		for const alias in @aliases {
+		for var alias in @aliases {
 			@type.addInitializingInstanceVariable(alias.getVariableName())
 		}
 
@@ -325,7 +325,7 @@ class ClassMethodDeclaration extends Statement {
 						@type.setReturnType(@parent.type().reference(@scope))
 
 						if @instance {
-							const return = $compile.expression(@data.type.value, this)
+							var return = $compile.expression(@data.type.value, this)
 
 							return.analyse()
 
@@ -337,7 +337,7 @@ class ClassMethodDeclaration extends Statement {
 					}
 				}
 				NodeKind::ThisExpression => {
-					const return = $compile.expression(@data.type.value, this)
+					var return = $compile.expression(@data.type.value, this)
 
 					return.analyse()
 
@@ -349,8 +349,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		if @overriding {
-			const oldType = overridden.getReturnType()
-			const newType = @type.getReturnType()
+			var oldType = overridden.getReturnType()
+			var newType = @type.getReturnType()
 
 			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
 				if @override {
@@ -368,7 +368,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		if overloaded.length == 1 {
-			const overload = overloaded[0]
+			var overload = overloaded[0]
 
 			if @type.isMissingReturn() && !overload.isMissingReturn() {
 				@type.setReturnType(overload.getReturnType())
@@ -380,9 +380,9 @@ class ClassMethodDeclaration extends Statement {
 		}
 		else if overloaded.length > 1 {
 			if @type.isMissingReturn() {
-				let type = null
+				var mut type = null
 
-				for const overload in overloaded when !overload.isMissingReturn() {
+				for var overload in overloaded when !overload.isMissingReturn() {
 					if ?type {
 						if type.isSubsetOf(overload.getReturnType()) {
 							type = overload.getReturnType()
@@ -405,7 +405,7 @@ class ClassMethodDeclaration extends Statement {
 		@analysed = true
 	} # }}}
 	translate() { # {{{
-		const index = @forked || (@overriding && @type.isForked()) ? @type.getForkedIndex() : @type.index()
+		var index = @forked || (@overriding && @type.isForked()) ? @type.getForkedIndex() : @type.index()
 
 		if @instance {
 			@internalName = `__ks_func_\(@name)_\(index)`
@@ -414,11 +414,11 @@ class ClassMethodDeclaration extends Statement {
 			@internalName = `__ks_sttc_\(@name)_\(index)`
 		}
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
-		for const {value} in @indigentValues {
+		for var {value} in @indigentValues {
 			value.prepare()
 			value.translate()
 		}
@@ -447,8 +447,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
-		const class = @parent.type().type()
-		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
+		var class = @parent.type().type()
+		var name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
 
 		@indigentValues.push({
 			name
@@ -487,15 +487,15 @@ class ClassMethodDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toForkFragments(fragments) { # {{{
-		const ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
 		ctrl.code(`__ks_func_\(@name)_\(@type.index())(`)
 
-		let parameters = ''
+		var mut parameters = ''
 
-		const names = {}
+		var names = {}
 
-		for const parameter, index in @type.parameters() {
+		for var parameter, index in @type.parameters() {
 			if index > 0 {
 				ctrl.code($comma)
 
@@ -511,17 +511,17 @@ class ClassMethodDeclaration extends Statement {
 
 		ctrl.code(')').step()
 
-		for const fork in @forks {
-			const ctrl2 = ctrl.newControl()
+		for var fork in @forks {
+			var ctrl2 = ctrl.newControl()
 
 			ctrl2.code(`if(`)
 
-			let index = 0
+			var mut index = 0
 
-			for const parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+			for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 				ctrl2.code(' && ') unless index == 0
 
-				const literal = new Literal(false, this, this.scope(), parameter.name())
+				var literal = new Literal(false, this, this.scope(), parameter.name())
 
 				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
@@ -540,8 +540,8 @@ class ClassMethodDeclaration extends Statement {
 		ctrl.done()
 	} # }}}
 	toIndigentFragments(fragments) { # {{{
-		for const {name, value, parameters} in @indigentValues {
-			const ctrl = fragments.newControl()
+		for var {name, value, parameters} in @indigentValues {
+			var ctrl = fragments.newControl()
 
 			if @parent._es5 {
 				ctrl.code(`\(name): function(\(parameters.join(', ')))`).step()
@@ -556,7 +556,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const ctrl = fragments.newControl()
+		var ctrl = fragments.newControl()
 
 		if @parent._es5 {
 			ctrl.code(`\(@internalName): function(`)
@@ -571,7 +571,7 @@ class ClassMethodDeclaration extends Statement {
 			return node.code(')').step()
 		})
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(ctrl)
 		}
 
@@ -607,21 +607,21 @@ class ClassMethodDeclaration extends Statement {
 	} # }}}
 	private {
 		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
-			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if !@override {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
 			}
 
-			const methods = @instance ? superclass.listInstantiableMethods(@name, @type, mode) : superclass.listClassMethods(@name, @type, mode)
+			var methods = @instance ? superclass.listInstantiableMethods(@name, @type, mode) : superclass.listClassMethods(@name, @type, mode)
 
-			let method = null
-			let exact = false
+			var mut method = null
+			var mut exact = false
 			if methods.length == 1 {
 				method = methods[0]
 			}
 			else if methods.length > 0 {
-				for const m in methods {
+				for var m in methods {
 					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						method = m
 						exact = true
@@ -636,14 +636,14 @@ class ClassMethodDeclaration extends Statement {
 			}
 
 			if method? {
-				const type = @override ? method.clone() : @type
+				var type = @override ? method.clone() : @type
 
 				if @override {
-					const parameters = type.parameters()
+					var parameters = type.parameters()
 
-					for const parameter, index in @parameters {
-						const currentType = parameter.type()
-						const masterType = parameters[index]
+					for var parameter, index in @parameters {
+						var currentType = parameter.type()
+						var masterType = parameters[index]
 
 						if currentType.isMissingType() {
 							parameter.type(masterType)
@@ -663,8 +663,8 @@ class ClassMethodDeclaration extends Statement {
 				}
 				else if @override {
 					if !@type.isMissingReturn() {
-						const oldType = method.getReturnType()
-						const newType = @type.getReturnType()
+						var oldType = method.getReturnType()
+						var newType = @type.getReturnType()
 
 						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
 							if this.isAssertingOverride() {
@@ -691,12 +691,12 @@ class ClassMethodDeclaration extends Statement {
 					type.addError(...method.listErrors())
 				}
 				else {
-					const newTypes = @type.listErrors()
+					var newTypes = @type.listErrors()
 
-					for const oldType in method.listErrors() {
-						let matched = false
+					for var oldType in method.listErrors() {
+						var mut matched = false
 
-						for const newType in newTypes until matched {
+						for var newType in newTypes until matched {
 							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
@@ -748,8 +748,8 @@ class ClassMethodDeclaration extends Statement {
 		} # }}}
 		listOverloadedMethods(superclass: ClassType) { # {{{
 			if @instance {
-				if const methods = superclass.listInstanceMethods(@name) {
-					for const method in methods {
+				if var methods = superclass.listInstanceMethods(@name) {
+					for var method in methods {
 						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 							return []
 						}
@@ -763,8 +763,8 @@ class ClassMethodDeclaration extends Statement {
 				)
 			}
 			else {
-				if const methods = superclass.listClassMethods(@name) {
-					for const method in methods {
+				if var methods = superclass.listClassMethods(@name) {
+					for var method in methods {
 						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 							return []
 						}

@@ -7,7 +7,7 @@ struct Quxbaz {
 }
 
 func foobar(item: Foobar | Quxbaz) {
-	for const value of item.values {
+	for var value of item.values {
 
 	}
 }

@@ -20,7 +20,7 @@ import {
 }
 
 func rewire(option) { # {{{
-	let files = []
+	var files = []
 
 	for item in option.split(',') {
 		item = item.split('=')
@@ -61,9 +61,9 @@ else if program.args.length == 0 {
 	process.exit(1)
 }
 
-const file = path.join(process.cwd(), program.args[0])
+var file = path.join(process.cwd(), program.args[0])
 
-const options = {
+var options = {
 	header: program.header
 	register: program.register
 }
@@ -86,7 +86,7 @@ if program.target? {
 if program.compile {
 	options.output = path.join(process.cwd(), program.output ?? '')
 
-	const compiler = new Compiler(file, options)
+	var compiler = new Compiler(file, options)
 
 	compiler.compile()
 
@@ -97,19 +97,19 @@ if program.compile {
 	compiler.writeOutput()
 }
 else if program.print {
-	const compiler = new Compiler(file, options)
+	var compiler = new Compiler(file, options)
 
 	compiler.compile()
 
 	console.log(compiler.toSource())
 }
 else {
-	const compiler = new Compiler(file, options)
+	var compiler = new Compiler(file, options)
 
 	compiler.compile()
 
-	const sandbox = {}
-	for const _, key of global {
+	var sandbox = {}
+	for var _, key of global {
 		sandbox[key] = global[key]
 	}
 
@@ -117,13 +117,13 @@ else {
 	sandbox.__dirname = path.dirname(file)
 	sandbox.__filename = file
 
-	const _module = sandbox.module = new Module('eval')
-	const _require = sandbox.require = (path) => Module._load(path, _module, true)
+	var _module = sandbox.module = new Module('eval')
+	var _require = sandbox.require = (path) => Module._load(path, _module, true)
 
 	_module.filename = file
 
 	#[rules(ignore-misfit)]
-	for const r in Object.getOwnPropertyNames(require) {
+	for var r in Object.getOwnPropertyNames(require) {
 		if r != 'paths' && r != 'arguments' && r != 'caller' {
 			_require[r] = require[r]
 		}

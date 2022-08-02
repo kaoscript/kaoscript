@@ -1,10 +1,10 @@
 class Foobar {
-	lateinit const PI: Number
+	final late PI: Number
 	constructor() {
 		this.PI = 42
 	}
 }
 
-const f = new Foobar()
+var f = new Foobar()
 
 f.PI = 42

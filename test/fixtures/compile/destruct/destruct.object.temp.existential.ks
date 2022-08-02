@@ -1,5 +1,5 @@
 func parse(line, rules?) {
-	const tokens = []
+	var tokens = []
 
 	return {
 		tokens
@@ -8,9 +8,9 @@ func parse(line, rules?) {
 }
 
 func foobar(lines) {
-	let tokens, rules
+	var dyn tokens, rules
 
-	for const line in lines {
+	for var line in lines {
 		if {tokens, rules} ?= parse(line, rules) {
 		}
 	}

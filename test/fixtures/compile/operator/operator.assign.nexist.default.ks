@@ -5,7 +5,7 @@ extern console: {
 extern class Error
 
 func qux() ~ Error {
-	let foo = () => 'otto'
+	var dyn foo = () => 'otto'
 
 	if bar !?= foo() {
 		throw new Error()

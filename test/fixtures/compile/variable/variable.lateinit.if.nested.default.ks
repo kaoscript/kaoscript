@@ -1,9 +1,9 @@
 func quxbaz(): Number => 42
 
 func foobar() {
-	lateinit const x
+	var late x
 
-	if const a = quxbaz() {
+	if var a = quxbaz() {
 		if a == 0 {
 			x = -1
 		}

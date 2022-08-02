@@ -24,6 +24,6 @@ class Rectangle extends Shape {
 	}
 }
 
-let r = new Rectangle('black', 'white')
+var dyn r = new Rectangle('black', 'white')
 
 console.log(r.draw())

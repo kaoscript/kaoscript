@@ -1,3 +1,3 @@
-let x = 5
+var dyn x = 5
 
-let y = 10 if x == 5 else 15
+var dyn y = 10 if x == 5 else 15

@@ -1,5 +1,5 @@
 class ConditionalExpression extends Expression {
-	private lateinit {
+	private late {
 		_condition
 		_whenFalse
 		_whenTrue
@@ -18,15 +18,15 @@ class ConditionalExpression extends Expression {
 	prepare() { # {{{
 		@condition.prepare()
 
-		for const data, name of @condition.inferTypes({}) {
+		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
 		@whenTrue.prepare()
 		@whenFalse.prepare()
 
-		const t = @whenTrue.type()
-		const f = @whenFalse.type()
+		var t = @whenTrue.type()
+		var f = @whenFalse.type()
 
 		if t.equals(f) {
 			@type = t

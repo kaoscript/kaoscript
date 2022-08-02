@@ -1,5 +1,5 @@
 func foobar(i: Number, b: Boolean) {
-	let x = i
+	var dyn x = i
 
 	until b {
 		x = null

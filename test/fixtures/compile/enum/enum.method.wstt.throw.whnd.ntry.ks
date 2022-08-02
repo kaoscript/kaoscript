@@ -16,6 +16,6 @@
     }
 }
 
-const day = Weekday.fromString('monday')
+var day = Weekday.fromString('monday')
 
 export Weekday

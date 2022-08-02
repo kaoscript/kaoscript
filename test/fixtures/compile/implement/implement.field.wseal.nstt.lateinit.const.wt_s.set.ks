@@ -4,13 +4,13 @@ extern sealed class Date
 
 impl Date {
 	private {
-		lateinit const @culture: String
+		final late @culture: String
 	}
 	culture() => @culture
 	culture(@culture) => this
 }
 
-const d = new Date()
+var d = new Date()
 
 expect(d.culture()).to.equal('und')
 

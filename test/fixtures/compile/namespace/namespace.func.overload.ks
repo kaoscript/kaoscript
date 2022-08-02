@@ -7,7 +7,7 @@ namespace Util {
 	export reverse
 }
 
-const foo = Util.reverse('hello')
+var foo = Util.reverse('hello')
 
 console.log(`\(foo)`)
 

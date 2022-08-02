@@ -8,7 +8,7 @@ func garply(s: String): String => s.toLowerCase()
 
 func waldo(): String => 'miss White'
 
-export const foobar: {
+export var foobar: {
 	func corge(): Number
 	func grault(n: Number): Number
 	func garply(s: String): String

@@ -1,10 +1,10 @@
 extern console
 
 func foobar() {
-	let data = 42
+	var dyn data = 42
 
 	if true {
-		if const data = quxbaz() {
+		if var data = quxbaz() {
 			console.log(data)
 		}
 

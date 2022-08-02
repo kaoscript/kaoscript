@@ -1,1 +1,1 @@
-let foo = foo.bar()
+var dyn foo = foo.bar()

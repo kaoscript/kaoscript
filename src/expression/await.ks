@@ -43,10 +43,10 @@ class AwaitExpression extends Expression {
 	toAwaitExpressionFragments(fragments, statements) { # {{{
 		fragments.code(`(__ks_e, \(@reuseName)) =>`)
 
-		const block = fragments.newBlock()
+		var block = fragments.newBlock()
 
-		let index = -1
-		let item
+		var mut index = -1
+		var dyn item
 
 		for statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(block, Mode::None) {

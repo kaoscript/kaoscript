@@ -1,10 +1,10 @@
 class AliasType extends Type {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
-			const type = new AliasType(scope)
+			var type = new AliasType(scope)
 
 			queue.push(() => {
 				type.type(Type.import(data.of, metadata, references, alterations, queue, scope, node))

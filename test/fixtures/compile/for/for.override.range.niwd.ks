@@ -1,8 +1,8 @@
 extern console
 
-let x = 3.14
+var dyn x = 3.14
 
-for let x in 0..10 {
+for var x in 0..10 {
 	console.log(x)
 }
 

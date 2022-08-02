@@ -1,5 +1,5 @@
 func foobar(x) {
-	lateinit const value
+	var late value
 
 	switch x {
 		1, 2, 3 => {

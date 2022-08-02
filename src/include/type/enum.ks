@@ -30,7 +30,7 @@ class EnumType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): EnumType { # {{{
-			const type = new EnumType(scope, EnumTypeKind(data.type))
+			var type = new EnumType(scope, EnumTypeKind(data.type))
 
 			type._exhaustive = data.exhaustive
 			type._index = data.sequenceIndex
@@ -39,7 +39,7 @@ class EnumType extends Type {
 				type._sequences.defaults = data.sequences[0]
 			}
 
-			for const name in data.variables {
+			for var name in data.variables {
 				type.addVariable(name)
 			}
 
@@ -54,13 +54,13 @@ class EnumType extends Type {
 			}
 
 			queue.push(() => {
-				for const methods, name of data.instanceMethods {
+				for var methods, name of data.instanceMethods {
 					for method in methods {
 						type.dedupInstanceMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
-				for const methods, name of data.staticMethods {
+				for var methods, name of data.staticMethods {
 					for method in methods {
 						type.dedupStaticMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
@@ -83,7 +83,7 @@ class EnumType extends Type {
 	addInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
 		@sequences.instanceMethods[name] ??= 0
 
-		let index = type.index()
+		var mut index = type.index()
 		if index == -1 {
 			index = @sequences.instanceMethods[name]++
 
@@ -111,19 +111,19 @@ class EnumType extends Type {
 		return index
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
-		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		switch data.kind {
 			NodeKind::FieldDeclaration => {
 				this.addVariable(data.name.name)
 			}
 			NodeKind::MethodDeclaration => {
-				let instance = true
+				var mut instance = true
 				for i from 0 til data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind::Static
 				}
 
-				const type = EnumMethodType.fromAST(data, node)
+				var type = EnumMethodType.fromAST(data, node)
 
 				if options.rules.nonExhaustive {
 					if instance {
@@ -152,7 +152,7 @@ class EnumType extends Type {
 			@sequences.staticMethods[name] = 0
 		}
 
-		let index = type.index()
+		var mut index = type.index()
 		if index == -1 {
 			index = @sequences.staticMethods[name]++
 
@@ -173,7 +173,7 @@ class EnumType extends Type {
 		return index
 	} # }}}
 	addVariable(name: String) { # {{{
-		const variable = new EnumVariableType()
+		var variable = new EnumVariableType()
 
 		@variables[name] = variable
 
@@ -191,7 +191,7 @@ class EnumType extends Type {
 		return @assessment
 	} # }}}
 	clone() { # {{{
-		const that = new EnumType(@scope)
+		var that = new EnumType(@scope)
 
 		return that.copyFrom(this)
 	} # }}}
@@ -202,14 +202,14 @@ class EnumType extends Type {
 		@requirement = src._requirement
 		@required = src._required
 
-		for const methods, name of src._staticMethods {
+		for var methods, name of src._staticMethods {
 			@staticMethods[name] = [].concat(methods)
 		}
-		for const methods, name of src._instanceMethods {
+		for var methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
 		}
 
-		for const variable, name of src._variables {
+		for var variable, name of src._variables {
 			@variables[name] = variable
 		}
 
@@ -224,9 +224,9 @@ class EnumType extends Type {
 		return this
 	} # }}}
 	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if const index = type.index() {
+		if var index = type.index() {
 			if @instanceMethods[name] is Array {
-				for const method in @instanceMethods[name] {
+				for var method in @instanceMethods[name] {
 					if method.index() == index {
 						return index
 					}
@@ -237,9 +237,9 @@ class EnumType extends Type {
 		return this.addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if const index = type.index() {
+		if var index = type.index() {
 			if @staticMethods[name] is Array {
-				for const method in @staticMethods[name] {
+				for var method in @staticMethods[name] {
 					if method.index() == index {
 						return index
 					}
@@ -250,24 +250,24 @@ class EnumType extends Type {
 		return this.addStaticMethod(name, type)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const exhaustive = this.isExhaustive()
+		var exhaustive = this.isExhaustive()
 
-		const export = {
+		var export = {
 			kind: TypeKind::Enum
 			type: @kind
 			sequenceIndex: @index
 			exhaustive
-			variables: [name for const _, name of @variables]
+			variables: [name for var _, name of @variables]
 			instanceMethods: {}
 			staticMethods: {}
 		}
 
-		for const methods, name of @instanceMethods {
-			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for const method in methods when method.isExportable(mode)]
+		for var methods, name of @instanceMethods {
+			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
 		}
 
-		for const methods, name of @staticMethods {
-			export.staticMethods[name] = [method.export(references, indexDelta, mode, module) for const method in methods when method.isExportable(mode)]
+		for var methods, name of @staticMethods {
+			export.staticMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
 		}
 
 		export.sequences = [
@@ -275,8 +275,8 @@ class EnumType extends Type {
 		]
 
 		if exhaustive {
-			const exhaustiveness = {}
-			let notEmpty = false
+			var exhaustiveness = {}
+			var mut notEmpty = false
 
 			if !Dictionary.isEmpty(@exhaustiveness.staticMethods) {
 				exhaustiveness.staticMethods = @exhaustiveness.staticMethods
@@ -297,7 +297,7 @@ class EnumType extends Type {
 	} # }}}
 	function(reference, node) { # {{{
 		if @function == null {
-			const scope = node.scope()
+			var scope = node.scope()
 
 			@function = new FunctionType(scope)
 
@@ -310,11 +310,11 @@ class EnumType extends Type {
 	} # }}}
 	hasVariable(name: String) => @variables[name]?
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
-		if const assessment = @instanceAssessments[name] {
+		if var assessment = @instanceAssessments[name] {
 			return assessment
 		}
-		else if const methods = @instanceMethods[name] {
-			const assessment = Router.assess([...methods], name, node)
+		else if var methods = @instanceMethods[name] {
+			var assessment = Router.assess([...methods], name, node)
 
 			@instanceAssessments[name] = assessment
 
@@ -325,9 +325,9 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getInstantiableMethod(name: String, type: FunctionType, mode: MatchingMode) { # {{{
-		const result = []
+		var result = []
 
-		if const methods = @instanceMethods[name] {
+		if var methods = @instanceMethods[name] {
 			for method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -343,11 +343,11 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getStaticAssessment(name: String, node: AbstractNode) { # {{{
-		if const assessment = @staticAssessments[name] {
+		if var assessment = @staticAssessments[name] {
 			return assessment
 		}
-		else if const methods = @staticMethods[name] {
-			const assessment = Router.assess([...methods], name, node)
+		else if var methods = @staticMethods[name] {
+			var assessment = Router.assess([...methods], name, node)
 
 			@staticAssessments[name] = assessment
 
@@ -383,7 +383,7 @@ class EnumType extends Type {
 	} # }}}
 	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
-			for const method in @instanceMethods[name] {
+			for var method in @instanceMethods[name] {
 				if method.isMatching(type, mode) {
 					return true
 				}
@@ -394,7 +394,7 @@ class EnumType extends Type {
 	} # }}}
 	hasMatchingStaticMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @staticMethods[name] is Array {
-			for const method in @staticMethods[name] {
+			for var method in @staticMethods[name] {
 				if method.isMatching(type, mode) {
 					return true
 				}
@@ -453,10 +453,10 @@ class EnumType extends Type {
 	} # }}}
 	kind() => @kind
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
-		const results: Array = []
+		var results: Array = []
 
 		if @instanceMethods[name] is Array {
-			for const method in @instanceMethods[name] {
+			for var method in @instanceMethods[name] {
 				if method.isMatching(type, mode) {
 					results.push(method)
 				}
@@ -465,7 +465,7 @@ class EnumType extends Type {
 
 		return results
 	} # }}}
-	listVariables() => [name for const _, name of @variables]
+	listVariables() => [name for var _, name of @variables]
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true
 	} # }}}
@@ -480,11 +480,11 @@ class EnumType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('enum', @sequences.defaults)
 
-		for const sequence, name of @sequences.staticMethods {
+		for var sequence, name of @sequences.staticMethods {
 			variations.push(name, sequence)
 		}
 
-		for const sequence, name of @sequences.instanceMethods {
+		for var sequence, name of @sequences.instanceMethods {
 			variations.push(name, sequence)
 		}
 	} # }}}
@@ -516,13 +516,13 @@ class EnumMethodType extends FunctionType {
 	}
 	static {
 		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
-			const scope = node.scope()
+			var scope = node.scope()
 
 			return new EnumMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
-			const data = index
-			const type = new EnumMethodType(scope)
+			var data = index
+			var type = new EnumMethodType(scope)
 
 			type._identifier = data.id
 			type._access = data.access
@@ -544,7 +544,7 @@ class EnumMethodType extends FunctionType {
 		} # }}}
 	}
 	clone() { # {{{
-		const clone = new EnumMethodType(@scope)
+		var clone = new EnumMethodType(@scope)
 
 		FunctionType.clone(this, clone)
 
@@ -555,7 +555,7 @@ class EnumMethodType extends FunctionType {
 		return clone
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		const export = {
+		var export = {
 			index: @index
 			access: @access
 			async: @async

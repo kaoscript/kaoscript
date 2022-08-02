@@ -2,4 +2,4 @@ func hello(name) => `Hello \(name)!`
 
 hello(name)
 
-let name = 'John'
+var dyn name = 'John'

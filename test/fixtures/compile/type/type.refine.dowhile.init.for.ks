@@ -1,4 +1,4 @@
-let i
+var dyn i
 
 do {
 	for i from 0 to 10 {

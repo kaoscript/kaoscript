@@ -1,3 +1,3 @@
-const x = 42
+var x = 42
 
 x = 24

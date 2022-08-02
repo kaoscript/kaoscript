@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-let name = 'foobar'
-let debug = true
+var dyn name = 'foobar'
+var dyn debug = true
 
 console.log(name) if debug

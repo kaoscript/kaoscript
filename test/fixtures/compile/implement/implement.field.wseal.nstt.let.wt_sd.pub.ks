@@ -6,7 +6,7 @@ impl Date {
 	@culture: String = 'und'
 }
 
-const d = new Date()
+var d = new Date()
 
 expect(d.culture).to.equal('und')
 
@@ -14,6 +14,6 @@ d.culture = 'en'
 
 expect(d.culture).to.equal('en')
 
-const culture = d.culture
+var culture = d.culture
 
 export Date

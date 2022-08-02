@@ -18,14 +18,14 @@ class BleedingScope extends Scope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type, initialized)
+		var variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 
 		return variable
 	} # }}}
 	defineVariable(variable: Variable, node: AbstractNode) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
 		if @variables[name] is Array {
 			SyntaxException.throwAlreadyDeclared(name, node)
@@ -33,7 +33,7 @@ class BleedingScope extends Scope {
 
 		@variables[name] = [@parent.line(), variable]
 
-		if const newName = @parent.declareVariable(name, this) {
+		if var newName = @parent.declareVariable(name, this) {
 			@renamedVariables[name] = newName
 
 			variable.renameAs(newName)
@@ -42,16 +42,16 @@ class BleedingScope extends Scope {
 	getChunkType(name, line) => @parent.getChunkType(name, line)
 	getDefinedVariable(name: String) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if @parent.isAtLastLine() {
 				variable = variables.last()
 			}
 			else {
-				const line = @parent.line()
+				var line = @parent.line()
 
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -71,15 +71,15 @@ class BleedingScope extends Scope {
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name, line: Number = @parent.line()): Variable? { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			const currentLine = @parent.line()
-			let variable = null
+			var variables: Array = @variables[name]
+			var currentLine = @parent.line()
+			var mut variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -98,15 +98,15 @@ class BleedingScope extends Scope {
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @parent.line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			const currentLine = @parent.line()
-			let variable = null
+			var variables: Array = @variables[name]
+			var currentLine = @parent.line()
+			var mut variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -147,14 +147,14 @@ class BleedingScope extends Scope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		let index = @parent.getRenamedIndex(name)
+		var mut index = @parent.getRenamedIndex(name)
 
-		let newName = '__ks_' + name + '_' + (++index)
+		var mut newName = '__ks_' + name + '_' + (++index)
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
 
-		const variable = this.getVariable(name)
+		var variable = this.getVariable(name)
 
 		variable.renameAs(newName)
 	} # }}}

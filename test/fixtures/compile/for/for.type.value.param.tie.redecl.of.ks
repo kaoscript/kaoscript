@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values: Dictionary<Number>) {
-	let value: String = ''
+	var dyn value: String = ''
 
 	for value of values {
 		console.log(`\(value)`)

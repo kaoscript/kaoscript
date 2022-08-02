@@ -24,13 +24,13 @@ class BlockScope extends Scope {
 		@module = @parent.module()
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		for const _, name of @tempNames when @tempNames[name] {
+		for var _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name
 		}
 
-		const name = `__ks_\(++@tempIndex)`
+		var name = `__ks_\(++@tempIndex)`
 
 		@tempNames[name] = false
 
@@ -43,7 +43,7 @@ class BlockScope extends Scope {
 		return name
 	} # }}}
 	acquireUnusedTempName(): String? { # {{{
-		for const _, name of @tempNames when @tempNames[name] {
+		for var _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name
@@ -53,10 +53,10 @@ class BlockScope extends Scope {
 	} # }}}
 	addMacro(name: String, macro: MacroDeclaration) { # {{{
 		if @macros[name] is Array {
-			const type = macro.type()
-			let notAdded = true
+			var type = macro.type()
+			var mut notAdded = true
 
-			for const m, index in @macros[name] while notAdded {
+			for var m, index in @macros[name] while notAdded {
 				if m.type().isSubsetOf(type, MatchingMode::Signature) {
 					@macros[name].splice(index, 0, macro)
 
@@ -89,7 +89,7 @@ class BlockScope extends Scope {
 	} # }}}
 	protected declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @declarations[name] == true {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -108,17 +108,17 @@ class BlockScope extends Scope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type, initialized)
+		var variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 
 		return variable
 	} # }}}
 	defineVariable(variable: Variable, node: AbstractNode) { # {{{
-		const name = variable.name()
+		var name = variable.name()
 
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
+			var variables: Array = @variables[name]
 
 			if variables.last() is Variable {
 				SyntaxException.throwAlreadyDeclared(name, node)
@@ -127,7 +127,7 @@ class BlockScope extends Scope {
 			variables.push(@line(), variable)
 		}
 		else {
-			if const newName = this.declareVariable(name, this) {
+			if var newName = this.declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)
@@ -136,20 +136,20 @@ class BlockScope extends Scope {
 			@variables[name] = [@line(), variable]
 		}
 
-		if const reference = @references[name] {
+		if var reference = @references[name] {
 			reference.reset()
 		}
 	} # }}}
 	getChunkType(name, line: Number = @line()) { # {{{
 		if @chunkTypes[name] is Array {
-			const types: Array = @chunkTypes[name]
-			let type = null
+			var types: Array = @chunkTypes[name]
+			var mut type = null
 
 			if line == -1 || line > @line() {
 				type = types.last()
 			}
 			else {
-				for const i from 0 til types.length by 2 while types[i] <= line {
+				for var i from 0 til types.length by 2 while types[i] <= line {
 					type = types[i + 1]
 				}
 			}
@@ -163,16 +163,16 @@ class BlockScope extends Scope {
 	} # }}}
 	getDefinedVariable(name: String) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if this.isAtLastLine() {
 				variable = variables.last()
 			}
 			else {
-				const line = @line()
+				var line = @line()
 
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -191,7 +191,7 @@ class BlockScope extends Scope {
 	getMacro(data, parent) { # {{{
 		if data.callee.kind == NodeKind::Identifier {
 			if @macros[data.callee.name]? {
-				const arguments = MacroArgument.build(data.arguments)
+				var arguments = MacroArgument.build(data.arguments)
 
 				for macro in @macros[data.callee.name] {
 					if macro.matchArguments(arguments) {
@@ -206,10 +206,10 @@ class BlockScope extends Scope {
 			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
 		}
 		else {
-			const path = Generator.generate(data.callee)
+			var path = Generator.generate(data.callee)
 
 			if @macros[path]? {
-				const arguments = MacroArgument.build(data.arguments)
+				var arguments = MacroArgument.build(data.arguments)
 
 				for macro in @macros[path] {
 					if macro.matchArguments(arguments) {
@@ -225,8 +225,8 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{
-		let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-		let newName = '__ks_' + name + '_' + (++index)
+		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+		var mut newName = '__ks_' + name + '_' + (++index)
 
 		while @declarations[newName] {
 			newName = '__ks_' + name + '_' + (++index)
@@ -242,14 +242,14 @@ class BlockScope extends Scope {
 	getTempIndex() => @tempIndex
 	getVariable(name, line: Number = @line()): Variable? { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -268,14 +268,14 @@ class BlockScope extends Scope {
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -290,14 +290,14 @@ class BlockScope extends Scope {
 	hasMacro(name) => @macros[name] is Array || @parent.hasMacro(name)
 	hasVariable(name: String, line: Number = @line()) { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			let variable = null
+			var variables: Array = @variables[name]
+			var mut variable = null
 
 			if line == -1 || line > @line() {
 				variable = variables.last()
 			}
 			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 til variables.length by 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -311,10 +311,10 @@ class BlockScope extends Scope {
 	} # }}}
 	isAtLastLine() => @module.isAtLastLine()
 	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
-		const hash = a.toQuote()
+		var hash = a.toQuote()
 
-		if const matches = @matchingTypes[hash] {
-			for const type, i in matches by 2 {
+		if var matches = @matchingTypes[hash] {
+			for var type, i in matches by 2 {
 				if type == b {
 					return matches[i + 1]
 				}
@@ -326,9 +326,9 @@ class BlockScope extends Scope {
 
 		@matchingTypes[hash].push(b, false)
 
-		const index = @matchingTypes[hash].length
+		var index = @matchingTypes[hash].length
 
-		const match = a.isSubsetOf(b, mode)
+		var match = a.isSubsetOf(b, mode)
 
 		@matchingTypes[hash][index - 1] = match
 
@@ -353,8 +353,8 @@ class BlockScope extends Scope {
 	line() => @module.line()
 	line(line: Number) => @module.line(line)
 	listCompositeMacros(name) { # {{{
-		const regex = new RegExp(`^\(name)\.`)
-		const list = []
+		var regex = new RegExp(`^\(name)\.`)
+		var list = []
 
 		for m, n of @macros when regex.test(n) {
 			list.push(...m)
@@ -363,9 +363,9 @@ class BlockScope extends Scope {
 		return list
 	} # }}}
 	listDefinedVariables() { # {{{
-		const variables = []
+		var variables = []
 
-		for const array of @variables {
+		for var array of @variables {
 			variables.push(array[array.length - 1])
 		}
 
@@ -382,19 +382,19 @@ class BlockScope extends Scope {
 	module() => @module
 	parent() => @parent
 	processStash(name) { # {{{
-		const stash = @stashes[name]
+		var stash = @stashes[name]
 		if ?stash {
 			delete @stashes[name]
 
-			let variable = this.getVariable(name)
-			for let fn in stash {
+			var mut variable = this.getVariable(name)
+			for var mut fn in stash {
 				if fn[0](variable) {
 					break
 				}
 			}
 
 			variable = this.getVariable(name)
-			for let fn in stash {
+			for var mut fn in stash {
 				fn[1](variable)
 			}
 
@@ -405,11 +405,11 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	reassignReference(oldName, newName, newScope) { # {{{
-		if const reference = @references[oldName] {
+		if var reference = @references[oldName] {
 			reference.reassign(newName, newScope)
 		}
 
-		if const reference = newScope._references[newName] {
+		if var reference = newScope._references[newName] {
 			reference.reset()
 		}
 	} # }}}
@@ -450,14 +450,14 @@ class BlockScope extends Scope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		let index = this.getRenamedIndex(name)
+		var mut index = this.getRenamedIndex(name)
 
-		let newName = '__ks_' + name + '_' + (++index)
+		var mut newName = '__ks_' + name + '_' + (++index)
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
 
-		const variable = this.getVariable(name)
+		var variable = this.getVariable(name)
 
 		variable.renameAs(newName)
 	} # }}}
@@ -465,17 +465,17 @@ class BlockScope extends Scope {
 		if newName != name {
 			@renamedVariables[name] = newName
 
-			const variable = this.getVariable(name)
+			var variable = this.getVariable(name)
 
 			variable.renameAs(newName)
 		}
 	} # }}}
 	replaceVariable(name: String, variable: Variable): Variable { # {{{
 		if @variables[name] is Array {
-			const variables: Array = @variables[name]
-			const line = @line()
+			var variables: Array = @variables[name]
+			var line = @line()
 
-			let i = 0
+			var mut i = 0
 			while i + 2 < variables.length && variables[i + 2] <= line {
 				i += 2
 			}
@@ -488,14 +488,14 @@ class BlockScope extends Scope {
 			@variables[name] = [@line(), variable]
 		}
 
-		if const reference = @references[name] {
+		if var reference = @references[name] {
 			reference.reset()
 		}
 
 		return variable
 	} # }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		let variable = this.getVariable(name)!?
+		var mut variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
@@ -524,20 +524,20 @@ class BlockScope extends Scope {
 			}
 		}
 
-		if const reference = @references[name] {
+		if var reference = @references[name] {
 			reference.reset()
 		}
 
 		return variable
 	} # }}}
 	resetReferences() { # {{{
-		for const reference of @references {
+		for var reference of @references {
 			reference.reset()
 		}
 	} # }}}
 	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
 		if @variables[name] is Array {
-			const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
+			var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 			if @references[hash] is not ReferenceType {
 				@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)

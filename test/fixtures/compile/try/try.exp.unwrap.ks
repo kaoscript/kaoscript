@@ -7,4 +7,4 @@ func foobar(x) ~ Error {
     }
 }
 
-let x = try! foobar(true)
+var dyn x = try! foobar(true)

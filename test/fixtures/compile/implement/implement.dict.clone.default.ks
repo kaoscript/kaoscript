@@ -9,7 +9,7 @@ impl Dictionary {
 			return object.clone()
 		}
 
-		let clone = {}
+		var dyn clone = {}
 
 		for value, key of object {
 			if value is Array {

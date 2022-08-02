@@ -3,4 +3,4 @@
 func foo(bar, qux) {
 }
 
-let x = await foo(42, 24)
+var dyn x = await foo(42, 24)

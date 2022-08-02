@@ -1,5 +1,5 @@
 class ThisExpression extends Expression {
-	private lateinit {
+	private late {
 		_assignable: Boolean		= false
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_calling: Boolean			= false
@@ -19,7 +19,7 @@ class ThisExpression extends Expression {
 	analyse() { # {{{
 		@name = @data.name.name
 
-		let parent = @parent
+		var mut parent = @parent
 
 		do {
 			if parent is CallExpression && parent.data().callee == @data {
@@ -68,13 +68,13 @@ class ThisExpression extends Expression {
 	prepare() { # {{{
 		return unless @type == null
 
-		const type = @class.type()
+		var type = @class.type()
 
 		if @instance {
-			const name = @scope.getVariable('this').getSecureName()
+			var name = @scope.getVariable('this').getSecureName()
 
 			if @calling {
-				let variable
+				var mut variable
 
 				if variable ?= type.getInstanceVariable(@name) {
 					@variableName = @name
@@ -108,20 +108,20 @@ class ThisExpression extends Expression {
 
 				if !?@variableName {
 					if type.hasInstantiableMethod(@name) {
-						const assessment = type.getInstantiableAssessment(@name, this)
+						var assessment = type.getInstantiableAssessment(@name, this)
 
-						if const result = Router.matchArguments(assessment, @parent.arguments(), this) {
+						if var result = Router.matchArguments(assessment, @parent.arguments(), this) {
 							@fragment = `\(name).\(@name)`
 
 							if result is PreciseCallMatchResult {
-								@type = Type.union(@scope, ...[match.function for const match in result.matches])
+								@type = Type.union(@scope, ...[match.function for var match in result.matches])
 							}
 							else {
 								@type = Type.union(@scope, ...result.possibilities)
 							}
 						}
 						else if type.isExhaustive(this) {
-							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), [argument.type() for const argument in @parent.arguments()], this)
+							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
 						}
 						else {
 							@fragment = `\(name).\(@name)`
@@ -134,7 +134,7 @@ class ThisExpression extends Expression {
 				}
 			}
 			else {
-				let variable
+				var mut variable
 
 				if variable ?= type.getInstanceVariable(@name) {
 					@variableName = @name
@@ -176,13 +176,14 @@ class ThisExpression extends Expression {
 			}
 		}
 		else {
-			const name = @class.name()
+			var name = @class.name()
 
 			if @calling {
 				NotImplementedException.throw(this)
 			}
 			else {
-				let variable
+				// TODO move to `var late`
+				var dyn variable
 
 				if variable ?= type.getClassVariable(@name) {
 					@variableName = @name
@@ -209,7 +210,7 @@ class ThisExpression extends Expression {
 		}
 
 		if @assignable {
-			if const variable = this.declaration() {
+			if var variable = this.declaration() {
 				if variable.isImmutable() {
 					if variable.isLateInit() {
 						if variable.isInitialized() {
@@ -225,7 +226,7 @@ class ThisExpression extends Expression {
 	} # }}}
 	translate()
 	declaration() { # {{{
-		if const node = @parent.getFunctionNode() {
+		if var node = @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
 				return node.parent().getInstanceVariable(@variableName)
 			}
@@ -241,12 +242,12 @@ class ThisExpression extends Expression {
 	getDeclaredType() { # {{{
 		if @variableName? {
 			if @instance {
-				if const variable = @class.type().getInstanceVariable(@variableName) {
+				if var variable = @class.type().getInstanceVariable(@variableName) {
 					return variable.type()
 				}
 			}
 			else {
-				if const variable = @class.type().getClassVariable(@variableName) {
+				if var variable = @class.type().getClassVariable(@variableName) {
 					return variable.type()
 				}
 			}

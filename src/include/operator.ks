@@ -43,7 +43,7 @@ enum Operator<String> {
 	Xor					= 'xor'
 }
 
-const $operatorTypes = {
+var $operatorTypes = {
 	[Operator::Addition]: ['Number']
 	[Operator::And]: ['Boolean']
 	[Operator::BitwiseAnd]: ['Number']

@@ -2,8 +2,8 @@ class Foobar {
 
 }
 
-const x = new Foobar()
+var x = new Foobar()
 
-for const property of x {
+for var property of x {
 
 }

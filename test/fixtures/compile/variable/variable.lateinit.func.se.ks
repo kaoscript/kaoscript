@@ -8,10 +8,10 @@ impl String {
 	toString(): String => this
 }
 
-lateinit const x
+var late x
 
 func foobar() {
-	lateinit const x
+	var late x
 
 	x = 'foobar'
 

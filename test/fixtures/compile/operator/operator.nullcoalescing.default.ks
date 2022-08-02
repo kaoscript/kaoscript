@@ -1,5 +1,5 @@
 extern x, y, z
 
-let foo = x ?? y
-let bar = x() ?? y
-let qux = x ?? y ?? z
+var dyn foo = x ?? y
+var dyn bar = x() ?? y
+var dyn qux = x ?? y ?? z

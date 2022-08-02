@@ -1,3 +1,3 @@
 class Foobar {
-	static lateinit const PI: Number
+	static final late PI: Number
 }

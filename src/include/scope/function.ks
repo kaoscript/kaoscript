@@ -15,7 +15,7 @@ class FunctionScope extends BlockScope {
 			return null
 		}
 		else if $keywords[name] == true || @declarations[name] == true {
-			const newName = this.getNewName(name)
+			var newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true

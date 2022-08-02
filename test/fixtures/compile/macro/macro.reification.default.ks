@@ -1,5 +1,5 @@
 macro build(@name: String, @amount: Number, @operator: String) {
-	const args = [`x\(i)` for const i from 0 til amount]
+	var args = [`x\(i)` for var i from 0 til amount]
 
 	macro {
 		func #w(name)#w(amount)(#a(args)) {

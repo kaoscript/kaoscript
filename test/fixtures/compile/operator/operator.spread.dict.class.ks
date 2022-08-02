@@ -3,6 +3,6 @@ class Foobar {
 		@values: Dictionary = {}
 	}
 	foobar() {
-		const values = {...@values}
+		var values = {...@values}
 	}
 }

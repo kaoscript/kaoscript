@@ -2,11 +2,11 @@ extern console
 
 func foobar() => 'foobar'
 
-let x = 'barfoo'
+var dyn x = 'barfoo'
 
 console.log(`\(x)`)
 
-if let x = foobar() {
+if var x = foobar() {
 	console.log(`\(x)`)
 }
 

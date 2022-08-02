@@ -24,7 +24,7 @@ class UnaryOperatorExpression extends Expression {
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
-	private lateinit {
+	private late {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -98,7 +98,7 @@ class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	prepare() { # {{{
@@ -208,7 +208,7 @@ class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
 }
 
 class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	prepare() { # {{{
@@ -223,13 +223,13 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
-	private lateinit {
+	private late {
 		_type: Type
 	}
 	prepare() { # {{{
 		super()
 
-		const type = @argument.type()
+		var type = @argument.type()
 
 		if type.isArray() {
 			@type = type.flagSpread()
@@ -252,7 +252,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			.wrap(@argument)
 	} # }}}
 	toTypeQuote() {
-		const type = @type.parameter(0)
+		var type = @type.parameter(0)
 
 		return `...\(type.toQuote())`
 	}

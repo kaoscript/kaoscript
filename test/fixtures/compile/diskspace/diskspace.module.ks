@@ -1,13 +1,13 @@
 import '../_/_string.ks'
 import 'child_process' for exec
 
-const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
+var df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
 
 async func disks() {
-	let stdout: string, stderr = await exec('df -k')
+	var dyn stdout: string, stderr = await exec('df -k')
 
-	let disks = []
-	let matches: Array<String>
+	var dyn disks = []
+	var dyn matches: Array<String>
 	for line in stdout.lines() {
 		if matches ?= df_regex.exec(line) {
 			disks.push({

@@ -1,13 +1,13 @@
 func foo(x: Boolean): String {
-	let y
+	var dyn y
 
 	if x {
-		let y
+		var dyn y
 
 		y = '42 * x'
 	}
 	else {
-		let y
+		var dyn y
 
 		y = '24 * x'
 	}

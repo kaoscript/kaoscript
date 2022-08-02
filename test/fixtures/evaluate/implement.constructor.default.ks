@@ -15,5 +15,5 @@ impl Shape {
 	}
 }
 
-let shape = new Shape()
+var dyn shape = new Shape()
 expect(shape.draw()).to.equals(`I'm drawing a red rectangle.`)

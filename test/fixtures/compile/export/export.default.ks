@@ -1,1 +1,1 @@
-export let name = 'foobar'
+export var dyn name = 'foobar'

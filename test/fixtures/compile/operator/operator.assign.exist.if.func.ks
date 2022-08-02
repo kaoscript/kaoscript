@@ -1,7 +1,7 @@
-let foo = {
+var dyn foo = {
 	otto: 'hello :)'
 }
-let bar = ['otto']
+var dyn bar = ['otto']
 
 if qux ?= foo[bar.join(',')] {
 }

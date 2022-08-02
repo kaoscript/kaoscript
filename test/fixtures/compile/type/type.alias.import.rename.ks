@@ -6,11 +6,11 @@ extern console: {
 	log(...args)
 }
 
-let n: NS = 0
+var dyn n: NS = 0
 
 console.log(n.toInt())
 
-let s: NS = ''
+var dyn s: NS = ''
 
 console.log(s.toInt())
 

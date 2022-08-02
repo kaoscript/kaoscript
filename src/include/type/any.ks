@@ -16,7 +16,7 @@ class AnyType extends Type {
 		super(null)
 	} # }}}
 	clone() { # {{{
-		const that = new AnyType(@explicit, @nullable)
+		var that = new AnyType(@explicit, @nullable)
 
 		return that.copyFrom(this)
 	} # }}}
@@ -74,7 +74,7 @@ class AnyType extends Type {
 			return this
 		}
 
-		const type = this.clone()
+		var type = this.clone()
 
 		type._alien = true
 
@@ -85,7 +85,7 @@ class AnyType extends Type {
 			return this
 		}
 
-		const type = this.clone()
+		var type = this.clone()
 
 		type._required = true
 
@@ -139,7 +139,7 @@ class AnyType extends Type {
 	parameter() => AnyType.NullableUnexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { # {{{
-		let type
+		var mut type
 
 		if @nullable == nullable {
 			return this
@@ -200,7 +200,7 @@ class AnyType extends Type {
 	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
-		const literal = new Literal(false, node, node.scope(), 'value')
+		var literal = new Literal(false, node, node.scope(), 'value')
 
 		if @nullable {
 			if node._options.format.functions == 'es5' {

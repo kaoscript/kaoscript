@@ -1,9 +1,9 @@
 extern console
 
 func foobar() {
-	const values = quxbaz()!!
+	var values = quxbaz()!!
 
-	for const value in values {
+	for var value in values {
 		console.log(`\(value)`)
 	}
 }

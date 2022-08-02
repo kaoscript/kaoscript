@@ -1,4 +1,4 @@
 class Foo {
 }
 
-let foo = Foo()
+var dyn foo = Foo()

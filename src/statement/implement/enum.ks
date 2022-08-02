@@ -1,5 +1,5 @@
 class ImplementEnumFieldDeclaration extends Statement {
-	private lateinit {
+	private late {
 		@operands: Array
 		@value: String
 		@variable: EnumVariableType
@@ -22,7 +22,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 
 	} # }}}
 	analyse() { # {{{
-		const value = @data.value
+		var value = @data.value
 
 		switch @enum.kind() {
 			EnumTypeKind::Flags => {
@@ -43,7 +43,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 								SyntaxException.throwEnumOverflow(@enumName.name(), this)
 							}
 
-							let tmp = @enum.index(value.value)
+							var mut tmp = @enum.index(value.value)
 						}
 						else {
 							SyntaxException.throwInvalidEnumValue(value, this)
@@ -98,11 +98,11 @@ class ImplementEnumFieldDeclaration extends Statement {
 	getSharedName() => null
 	isMethod() => false
 	toFragments(fragments, mode) { # {{{
-		const name = @enumName.name()
-		const line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
+		var name = @enumName.name()
+		var line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
 
 		if @composite {
-			for const operand, i in @operands {
+			for var operand, i in @operands {
 				line.code(' | ') if i > 0
 
 				line.code(name, '.', operand.name)
@@ -117,7 +117,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 }
 
 class ImplementEnumMethodDeclaration extends Statement {
-	private lateinit {
+	private late {
 		@block: Block
 		@name: String
 		@parameters: Array<Parameter>
@@ -144,7 +144,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@name = @data.name.name
 
-		for const modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Override {
 				@override = true
 			}
@@ -173,30 +173,30 @@ class ImplementEnumMethodDeclaration extends Statement {
 			@scope.rename('this', 'that')
 		}
 
-		for const name in @enum.listVariables() {
-			const var = @scope.define(name, true, @enumRef, true, @parent)
+		for var name in @enum.listVariables() {
+			var variable = @scope.define(name, true, @enumRef, true, @parent)
 
-			var.renameAs(`\(@enumName.name()).\(name)`)
+			variable.renameAs(`\(@enumName.name()).\(name)`)
 		}
 
-		for const parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new EnumMethodType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new EnumMethodType([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAlteration()
 
 		if @instance {
-			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if @override {
-				if const method = @enum.getInstantiableMethod(@name, @type, mode) {
+				if var method = @enum.getInstantiableMethod(@name, @type, mode) {
 					@type = method.clone().flagAlteration()
 
-					const parameters = @type.parameters()
+					var parameters = @type.parameters()
 
-					for const parameter, index in @parameters {
+					for var parameter, index in @parameters {
 						parameter.type(parameters[index])
 					}
 				}
@@ -258,7 +258,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		for const indigent in @indigentValues {
+		for var indigent in @indigentValues {
 			indigent.value.prepare()
 			indigent.value.translate()
 		}
@@ -275,7 +275,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@block.translate()
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
-		const name = `__ks_default_\(@enum.incDefaultSequence())`
+		var name = `__ks_default_\(@enum.incDefaultSequence())`
 
 		@indigentValues.push({
 			name
@@ -310,9 +310,9 @@ class ImplementEnumMethodDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toIndigentFragments(fragments) { # {{{
-		for const {name, value, parameters} in @indigentValues {
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+		for var {name, value, parameters} in @indigentValues {
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(@enumName.name()).\(name) = function(\(parameters.join(', ')))`).step()
 
@@ -323,13 +323,13 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toSharedFragments(fragments, _) { # {{{
-		const name = @enumName.name()
+		var name = @enumName.name()
 
 		if @instance {
-			const assessment = @enum.getInstanceAssessment(@name, this)
+			var assessment = @enum.getInstanceAssessment(@name, this)
 
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(name).__ks_func_\(@name) = function(that, ...args)`).step()
 
@@ -349,10 +349,10 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.done()
 		}
 		else {
-			const assessment = @enum.getStaticAssessment(@name, this)
+			var assessment = @enum.getStaticAssessment(@name, this)
 
-			const line = fragments.newLine()
-			const ctrl = line.newControl(null, false, false)
+			var line = fragments.newLine()
+			var ctrl = line.newControl(null, false, false)
 
 			ctrl.code(`\(name).\(@name) = function()`).step()
 
@@ -373,7 +373,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		const line = fragments.newLine()
+		var line = fragments.newLine()
 
 		if @instance {
 			line.code(`\(@enumName.name()).__ks_func_\(@name)_\(@type.index()) = function(that`)
@@ -382,13 +382,13 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.code(`\(@enumName.name()).__ks_sttc_\(@name)_\(@type.index()) = function(`)
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()
 		})
 
-		for const node in @topNodes {
+		for var node in @topNodes {
 			node.toAuthorityFragments(block)
 		}
 
