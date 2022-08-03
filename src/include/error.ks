@@ -19,7 +19,7 @@ export class Exception extends Error {
 	}
 
 	static {
-		validateReportedError(error: Type, node) { # {{{
+		validateReportedError(mut error: Type, node) { # {{{
 			#![rules(ignore-misfit)]
 
 			until error is NamedType {

@@ -35,8 +35,8 @@ impl Number {
 		}
 	}
 	round(precision: Number = 0): Number {
-		precision = Math.pow(10, precision).toFixed(0)
-		return Math.round(this * precision) / precision
+		var p = Math.pow(10, precision).toFixed(0)
+		return Math.round(this * p) / p
 	}
 	toFloat(): Number => parseFloat(this)
 	toInt(base: Number = 10): Number => parseInt(this, base)

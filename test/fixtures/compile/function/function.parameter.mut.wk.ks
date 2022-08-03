@@ -1,3 +1,3 @@
 func foobar(mut x) {
-	x = null
+	x = 0
 }

@@ -1,7 +1,7 @@
 func foobar(x) {
 }
 
-func quzbaz(x?) {
+func quzbaz(mut x?) {
 	if x == null {
 		x = 42
 	}

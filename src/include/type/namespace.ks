@@ -75,7 +75,7 @@ class NamespaceType extends Type {
 
 		return type.index()
 	} # }}}
-	addProperty(name: String, property: Type) { # {{{
+	addProperty(name: String, mut property: Type) { # {{{
 		if property is not NamespacePropertyType {
 			property = new NamespacePropertyType(property.scope(), property)
 		}

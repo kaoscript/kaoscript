@@ -202,7 +202,7 @@ abstract class Type {
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
 		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope(), true, node)
-		fromAST(data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
+		fromAST(mut data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
 			}

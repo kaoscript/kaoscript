@@ -1,7 +1,7 @@
 class Foobar {
 }
 
-func foobar(x: Foobar | String | Number, y) {
+func foobar(mut x: Foobar | String | Number, y) {
 	if x is String && y == 0 {
 		x = new Foobar()
 	}

@@ -497,7 +497,7 @@ class FunctionType extends Type {
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return value.isFunction()
 	} # }}}
-	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
+	isSubsetOf(value: FunctionType, mut mode: MatchingMode) { # {{{
 		if @async != value._async {
 			return false
 		}

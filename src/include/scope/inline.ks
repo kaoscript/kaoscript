@@ -145,7 +145,7 @@ class InlineBlockScope extends BlockScope {
 
 		variable.renameAs(newName)
 	} # }}}
-	replaceVariable(name: String, variable: Variable): Variable { # {{{
+	replaceVariable(name: String, mut variable: Variable): Variable { # {{{
 		variable = super.replaceVariable(name, variable)
 
 		if !@declarations[name] {

@@ -47,7 +47,7 @@ class Attribute {
 
 			return true
 		} # }}}
-		configure(data, options!?, mode, fileName, force = false) { # {{{
+		configure(data, mut options!?, mode, fileName, force = false) { # {{{
 			var clone = !force && options != null && AttributeTarget::Global !~ mode
 
 			if options == null {
@@ -212,11 +212,11 @@ class IfAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) => options
 	compareVersion(a, b) { # {{{
-		a = a.split('.')
-		b = b.split('.')
+		var as = a.split('.')
+		var bs = b.split('.')
 
-		var mut ai = parseInt(a[0])
-		var mut bi = parseInt(b[0])
+		var mut ai = parseInt(as[0])
+		var mut bi = parseInt(bs[0])
 
 		if ai < bi {
 			return -1
@@ -225,8 +225,8 @@ class IfAttribute extends Attribute {
 			return 1
 		}
 		else {
-			ai = a.length == 1 ? 0 : parseInt(a[1])
-			bi = b.length == 1 ? 0 : parseInt(b[1])
+			ai = as.length == 1 ? 0 : parseInt(as[1])
+			bi = bs.length == 1 ? 0 : parseInt(bs[1])
 
 			if ai < bi {
 				return -1
@@ -512,7 +512,7 @@ class TargetAttribute extends Attribute {
 
 		return options
 	} # }}}
-	configure(options, fileName, lineNumber) { # {{{
+	configure(mut options, fileName, lineNumber) { # {{{
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
 				if match !?= $targetRegex.exec(argument.name) {

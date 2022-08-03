@@ -3,7 +3,7 @@ extern console
 func foo() => ''
 func bar(): String => ''
 
-func corge(x: String) {
+func corge(mut x: String) {
 	console.log(`\(x)`)
 
 	x = foo()
@@ -15,7 +15,7 @@ func corge(x: String) {
 	console.log(`\(x)`)
 }
 
-func grault(x) {
+func grault(mut x) {
 	console.log(`\(x)`)
 
 	x = foo()

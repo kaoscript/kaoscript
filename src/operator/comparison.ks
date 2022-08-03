@@ -366,7 +366,7 @@ class EqualityOperator extends ComparisonOperator {
 		}
 	} # }}}
 	isComputed() => !@nanLeft && !@nanRight
-	inferWhenFalseTypes(inferables) { # {{{
+	inferWhenFalseTypes(mut inferables) { # {{{
 		if @left is IdentifierLiteral && @left.value() == 'null' && @right.isInferable() {
 			inferables = @right.inferTypes(inferables)
 
@@ -409,7 +409,7 @@ class EqualityOperator extends ComparisonOperator {
 
 		return inferables
 	} # }}}
-	inferWhenTrueTypes(inferables) { # {{{
+	inferWhenTrueTypes(mut inferables) { # {{{
 		inferables = @right.inferTypes(@left.inferTypes(inferables))
 
 		var leftType = @left.type()

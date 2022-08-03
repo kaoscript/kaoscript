@@ -560,7 +560,7 @@ class CallExpression extends Expression {
 			this.addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 	} # }}}
-	makeMemberCallee(value, name: NamedType = null) { # {{{
+	makeMemberCallee(value, mut name: NamedType = null) { # {{{
 		// console.log('-- call.makeMemberCallee --')
 		// console.log(value)
 		// console.log(@property)

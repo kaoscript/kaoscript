@@ -329,7 +329,7 @@ class UnionType extends Type {
 
 		return false
 	} # }}}
-	isMorePreciseThan(value: Type) { # {{{
+	isMorePreciseThan(mut value: Type) { # {{{
 		if value.isAny() {
 			return true
 		}

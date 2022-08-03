@@ -23,8 +23,8 @@ module.exports = function() {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
-		precision = Math.pow(10, precision).toFixed(0);
-		return Math.round(this * precision) / precision;
+		const p = Math.pow(10, precision).toFixed(0);
+		return Math.round(this * p) / p;
 	};
 	__ks_Number.__ks_func_toFloat_0 = function() {
 		return parseFloat(this);

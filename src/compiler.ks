@@ -571,7 +571,7 @@ export class Compiler {
 		registerTarget(target: String, fn: Function) { # {{{
 			$targets[target] = fn
 		} # }}}
-		registerTarget(target: String, options: Dictionary) { # {{{
+		registerTarget(mut target: String, options: Dictionary) { # {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
@@ -589,7 +589,7 @@ export class Compiler {
 				}
 			}
 		} # }}}
-		registerTargetAlias(target: String, alias: String) { # {{{
+		registerTargetAlias(mut target: String, mut alias: String) { # {{{
 			if alias !?= $targetRegex.exec(alias) {
 				if !?$targets[alias] || $targets[alias] is not Function {
 					throw new Error(`Invalid target syntax: \(alias)`)
@@ -601,7 +601,6 @@ export class Compiler {
 				if target !?= $targetRegex.exec(target) {
 					throw new Error(`Invalid target syntax: \(target)`)
 				}
-
 
 				if !?$targets[alias[1]] {
 					throw new Error(`Undefined target '\(alias[1])'`)

@@ -45,7 +45,7 @@ var $nodeModules = { # {{{
 	zlib: true
 } # }}}
 
-func $nodeModulesPaths(start) { # {{{
+func $nodeModulesPaths(mut start) { # {{{
 	start = fs.resolve(start)
 
 	var mut prefix = '/'
@@ -591,7 +591,7 @@ abstract class Importer extends Statement {
 
 		return false
 	} # }}}
-	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', moduleName = null, metadataPath = null) { # {{{
+	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', mut moduleName = null, metadataPath = null) { # {{{
 		var module = this.module()
 
 		if moduleName == null {
@@ -789,7 +789,7 @@ abstract class Importer extends Statement {
 
 		@variationId = compiler.toVariationId()
 	} # }}}
-	loadNodeFile(filename = null, moduleName = null) { # {{{
+	loadNodeFile(filename = null, mut moduleName = null) { # {{{
 		var module = this.module()
 
 		var mut file = null

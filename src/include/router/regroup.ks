@@ -22,7 +22,7 @@ func regroupTreesByArguments2(trees: Array<Tree>) { # {{{
 	}
 } # }}}
 
-func regroupTreesByGroup(group: Array<Tree>, trees: Array<Tree>, last: Tree, shadows: Array) { # {{{
+func regroupTreesByGroup(mut group: Array<Tree>, trees: Array<Tree>, last: Tree, mut shadows: Array) { # {{{
 	var tree = group.pop()
 	var max = tree.max
 
@@ -296,12 +296,11 @@ enum ShadowKind {
 }
 
 func listShadows(tree: Tree, data: Array, ceiling: Number) { # {{{
-	data = data.clone()
-
+	var newData = data.clone()
 	var results = [ShadowKind::None]
 
 	for var key in tree.order {
-		listShadows(tree.columns[key], tree.max, ceiling, data, {}, results)
+		listShadows(tree.columns[key], tree.max, ceiling, newData, {}, results)
 	}
 
 	return results
@@ -448,7 +447,7 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 	}
 } # }}}
 
-func setResult(result: Array, kind: ShadowKind, index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary) { # {{{
+func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary) { # {{{
 	index = getValidNode(index, data, parameters)
 	if kind == ShadowKind::Soft {
 		if var maximus = data[index] {

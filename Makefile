@@ -55,10 +55,11 @@ update:
 	npm i
 
 local:
-	make save
+	@make save
 	nrm use local
 	npm unpublish kaoscript --force
 	npm publish
+	@make restore
 
 dev: export DEBUG = 1
 dev: export XARGS = 1

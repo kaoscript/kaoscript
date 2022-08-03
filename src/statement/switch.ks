@@ -945,7 +945,7 @@ class SwitchFilter extends AbstractNode {
 			@filter.translate()
 		}
 	} # }}}
-	toBooleanFragments(fragments, nf) { # {{{
+	toBooleanFragments(fragments, mut nf) { # {{{
 		var mut mm
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {

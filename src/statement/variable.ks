@@ -19,16 +19,25 @@ class VariableDeclaration extends Statement {
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
-		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
-			if parent is TryStatement {
-				@try = parent
+		var mut ancestor = parent
+
+		while ancestor? && !(
+			ancestor is AnonymousFunctionExpression ||
+			ancestor is ArrowFunctionExpression ||
+			ancestor is FunctionDeclarator ||
+			ancestor is ClassMethodDeclaration ||
+			ancestor is ImplementClassMethodDeclaration ||
+			ancestor is ImplementNamespaceFunctionDeclaration
+		) {
+			if ancestor is TryStatement {
+				@try = ancestor
 			}
 
-			parent = parent.parent()
+			ancestor = ancestor.parent()
 		}
 
-		if parent? {
-			@function = parent
+		if ancestor? {
+			@function = ancestor
 		}
 	} # }}}
 	constructor(@data, @parent, @scope, @initScope, @cascade) { # {{{
@@ -476,7 +485,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	flagDefinitive() { # {{{
 		@variable.flagDefinitive()
 	} # }}}
-	isDuplicate(scope) { # {{{
+	isDuplicate(mut scope) { # {{{
 		if scope.hasDeclaredVariable(@name) {
 			return true
 		}

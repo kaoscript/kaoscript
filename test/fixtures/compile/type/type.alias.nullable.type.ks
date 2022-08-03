@@ -6,7 +6,7 @@ class Foobar {
 
 type FS = Foobar | String
 
-func foobar(x: FS = null) {
+func foobar(mut x: FS = null) {
 	if !?x {
 		x = Foobar.get('foobar')
 	}

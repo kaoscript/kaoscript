@@ -3,7 +3,7 @@ extern test
 func foobar(x) {
 }
 
-func quzbaz(x?) {
+func quzbaz(mut x?) {
 	if test() {
 		x = 24
 	}

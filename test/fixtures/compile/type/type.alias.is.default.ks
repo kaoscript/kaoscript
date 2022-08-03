@@ -1,6 +1,6 @@
 type NS = Number | String
 
-func foobar(x: NS) {
+func foobar(mut x: NS) {
 	if x is String {
 		x = 42
 	}

@@ -229,12 +229,6 @@ class MacroDeclaration extends AbstractNode {
 		var line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
 
 		for var data in @data.parameters {
-			line.code(', ', data.name.name)
-
-			if data.defaultValue? {
-				line.code(' = ').expression(data.defaultValue)
-			}
-
 			var mut auto = false
 
 			for var modifier in data.modifiers until auto {
@@ -244,6 +238,17 @@ class MacroDeclaration extends AbstractNode {
 			}
 
 			@parameters[data.name.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
+
+			if auto {
+				line.code(', mut ', data.name.name)
+			}
+			else {
+				line.code(', ', data.name.name)
+			}
+
+			if data.defaultValue? {
+				line.code(' = ').expression(data.defaultValue)
+			}
 		}
 
 		var block = line.code(')').newBlock()
@@ -331,7 +336,7 @@ class MacroDeclaration extends AbstractNode {
 	export(recipient, name = @name) { # {{{
 		recipient.exportMacro(name, this)
 	} # }}}
-	private filter(statement, data, fragments) { # {{{
+	private filter(statement, data, mut fragments) { # {{{
 		if data.kind == NodeKind::MacroExpression {
 			if statement {
 				fragments = fragments.newLine().code('__ks_src += ')

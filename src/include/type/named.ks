@@ -570,7 +570,7 @@ class NamedContainerType extends NamedType {
 	constructor(@name, @type) { # {{{
 		super(name, type)
 	} # }}}
-	addProperty(name: String, property: Type) { # {{{
+	addProperty(name: String, mut property: Type) { # {{{
 		if property is NamedType {
 			property = property.duplicate().container(this)
 		}

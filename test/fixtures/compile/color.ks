@@ -703,7 +703,7 @@ export class Color {
 		return this
 	} // }}}
 
-	blend(color: Color, percentage: float, space: Space = Space::SRGB, alpha: bool = false): Color { // {{{
+	blend(mut color: Color, mut percentage: float, mut space: Space = Space::SRGB, alpha: bool = false): Color { // {{{
 		if alpha {
 			var dyn w = (percentage * 2) - 1
 			var dyn a = color._alpha - this._alpha
@@ -755,7 +755,7 @@ export class Color {
 		return this.copy(new Color())
 	} // }}}
 
-	contrast(color: Color) { // {{{
+	contrast(mut color: Color) { // {{{
 		var dyn a = this._alpha
 
 		if a == 1 {
@@ -822,7 +822,7 @@ export class Color {
 		return target
 	} // }}}
 
-	distance(color: Color): float { // {{{
+	distance(mut color: Color): float { // {{{
 		var that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
 
@@ -935,7 +935,7 @@ export class Color {
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} // }}}
 
-	like(space: string) { // {{{
+	like(mut space: string) { // {{{
 		space = $aliases[space] ?? space
 
 		if var value = Space(space) {
@@ -1028,7 +1028,7 @@ export class Color {
 
 	space(): Space => this._space
 
-	space(space: string): Color { // {{{
+	space(mut space: string): Color { // {{{
 		space = $aliases[space] ?? space
 
 		if !?$spaces[space] && ?$components[space] {

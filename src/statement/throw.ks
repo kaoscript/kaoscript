@@ -7,26 +7,27 @@ class ThrowStatement extends Statement {
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
+		var mut ancestor = parent
+
 		do {
-			if	parent is AnonymousFunctionExpression ||
-				parent is ArrowFunctionExpression ||
-				parent is FunctionDeclarator ||
-				parent is ClassMethodDeclaration ||
-				parent is ImplementClassMethodDeclaration ||
-				parent is ImplementNamespaceFunctionDeclaration
+			if	ancestor is AnonymousFunctionExpression ||
+				ancestor is ArrowFunctionExpression ||
+				ancestor is FunctionDeclarator ||
+				ancestor is ClassMethodDeclaration ||
+				ancestor is ImplementClassMethodDeclaration ||
+				ancestor is ImplementNamespaceFunctionDeclaration
 			{
-				@function = parent
+				@function = ancestor
 				@inSource = false
 				break
 			}
-			else if	parent is ClassConstructorDeclaration ||
-					parent is ClassDestructorDeclaration
+			else if	ancestor is ClassConstructorDeclaration | ClassDestructorDeclaration
 			{
 				@inSource = false
 				break
 			}
 		}
-		while parent ?= parent.parent()
+		while ancestor ?= ancestor.parent()
 	} # }}}
 	analyse() { # {{{
 		@value = $compile.expression(@data.value, this)

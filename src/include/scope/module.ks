@@ -277,7 +277,7 @@ class ModuleScope extends Scope {
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
-	getVariable(name, line: Number = @line): Variable? { # {{{
+	getVariable(mut name, line: Number = @line): Variable? { # {{{
 		if @variables[name] is not Array && $types[name] is String {
 			name = $types[name]
 		}

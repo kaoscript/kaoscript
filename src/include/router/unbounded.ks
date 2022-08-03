@@ -101,7 +101,7 @@ func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { # {{{
 	}
 } # }}}
 
-func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
+func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, mut min: Number, mut arguments: Dictionary): Boolean { # {{{
 	var mut unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
 	min += node.min
@@ -115,7 +115,7 @@ func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, min:
 	return unbounded
 } # }}}
 
-func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
+func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, mut arguments: Dictionary): Boolean { # {{{
 	var unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
 
 	var function = node.function.index()

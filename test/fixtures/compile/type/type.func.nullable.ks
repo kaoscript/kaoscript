@@ -1,3 +1,3 @@
-func foo(x?) {
+func foo(mut x?) {
 	x = 42
 }

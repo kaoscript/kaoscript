@@ -12,12 +12,21 @@ class ReturnStatement extends Statement {
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
-		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
-			parent = parent.parent()
+		var mut ancestor = parent
+
+		while ancestor? && !(
+			ancestor is AnonymousFunctionExpression ||
+			ancestor is ArrowFunctionExpression ||
+			ancestor is FunctionDeclarator ||
+			ancestor is ClassMethodDeclaration ||
+			ancestor is ImplementClassMethodDeclaration ||
+			ancestor is ImplementNamespaceFunctionDeclaration
+		) {
+			ancestor = ancestor.parent()
 		}
 
-		if parent? {
-			@function = parent
+		if ancestor? {
+			@function = ancestor
 		}
 	} # }}}
 	constructor(@value, @parent) { # {{{

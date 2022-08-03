@@ -59,7 +59,7 @@ class Parameter extends AbstractNode {
 	static toFragments(node, fragments, mode, fn) { # {{{
 		return Parameter.toKSFragments(node, fragments, mode, fn)
 	} # }}}
-	static toKSFragments(node, fragments, mode: ParameterMode, fn) { # {{{
+	static toKSFragments(node, mut fragments, mode: ParameterMode, fn) { # {{{
 		var parameters = node.parameters()
 		var signature = node.type()
 
@@ -555,6 +555,14 @@ class Parameter extends AbstractNode {
 	analyse() { # {{{
 		@anonymous = !?@data.name
 
+		var mut immutable = true
+
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Mutable {
+				immutable = false
+			}
+		}
+
 		if @anonymous {
 			@name = new AnonymousParameter(@data, this)
 		}
@@ -568,7 +576,7 @@ class Parameter extends AbstractNode {
 					SyntaxException.throwAlreadyDeclared(name, this)
 				}
 
-				@scope.define(name, false, null, this)
+				@scope.define(name, immutable, null, this)
 			}
 		}
 	} # }}}

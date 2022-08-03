@@ -1,3 +1,3 @@
-func foobar(x: Number, y: Boolean) {
+func foobar(mut x: Number, y: Boolean) {
 	x += y
 }

@@ -1,7 +1,7 @@
 import '../_/_array.ks'
 
 impl Array {
-	injectAt(index: Number, ...args): Array {
+	injectAt(mut index: Number, ...args): Array {
 		if index < 0 {
 			do {
 				index = this.length + index + 1

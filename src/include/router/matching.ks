@@ -217,7 +217,7 @@ func getZeroBranch(tree: Tree | TreeBranch) { # {{{
 	}
 } # }}}
 
-func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
+func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: ArgCursor, mut argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
 	{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches)
 	return false if !?cursor
 
@@ -233,7 +233,7 @@ func matchTreeNode(tree: Tree, branch: TreeBranch, cursor: ArgCursor, argMatches
 	return false
 } # }}}
 
-func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
+func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: ArgCursor, mut argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
 	if !leaf.function.isAsync() {
 		{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches)
 		return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
@@ -311,7 +311,7 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, cursor: ArgCursor, argMatches: Ar
 	}
 } # }}}
 
-func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, argMatches: ArgMatches): { cursor: ArgCursor?, argMatches: ArgMatches? } { # {{{
+func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCursor, argMatches: ArgMatches): { cursor: ArgCursor?, argMatches: ArgMatches? } { # {{{
 	var last = arguments.length - 1
 
 	if node.min == 0 && cursor.index > last {
@@ -855,7 +855,7 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 	}
 } # }}}
 
-func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, possibleFunctions: Array, preciseness: Dictionary, excludes: Array<String>, node: AbstractNode) { # {{{
+func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, mut possibleFunctions: Array, preciseness: Dictionary, excludes: Array<String>, node: AbstractNode) { # {{{
 	if indexeds.length == 0 {
 		possibleFunctions = possibleFunctions.filter((key, _, _) => assessment.functions[key].min(excludes) == 0)
 
@@ -1120,7 +1120,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 	}
 } # }}}
 
-func getMostPreciseFunction(functions: Array<FunctionType>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>) { # {{{
+func getMostPreciseFunction(mut functions: Array<FunctionType>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>) { # {{{
 	for var parameter in functions[0].parameters() {
 		var name = parameter.name()
 

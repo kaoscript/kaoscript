@@ -1,4 +1,4 @@
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { # {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, mut fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { # {{{
 	var allArgs = tree.min == 0 && tree.rest
 
 	var late  fragments
@@ -135,7 +135,7 @@ func hasAlternative(tree, index: Number): Boolean { # {{{
 	return false
 } # }}}
 
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, hasAlternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, leaf: TreeLeaf, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, hasAlternative: Boolean, mut startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
 	var type = leaf.type
 
 	var isTest = !((anyTested || type.isAny()) && type.isNullable() && (startIndex == -1 || leaf.max <= 0))
@@ -458,7 +458,7 @@ func toCallFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	line.code(`)`).done()
 } # }}}
 
-func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, branch: TreeBranch, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, alternative: Boolean, startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
+func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, branch: TreeBranch, anyTested: Boolean, helper, builder: BlockBuilder | ControlBuilder, nIndex: Number, nLength: Number, junction: Junction, alternative: Boolean, mut startIndex: Number, min: Number, node: AbstractNode): Boolean { # {{{
 	var type = branch.type
 	var mut useAllArgs = false
 

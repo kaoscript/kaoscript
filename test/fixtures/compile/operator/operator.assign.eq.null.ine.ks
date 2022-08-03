@@ -1,3 +1,3 @@
-func foobar(x: Number?) {
+func foobar(mut x: Number?) {
 	x = null
 }

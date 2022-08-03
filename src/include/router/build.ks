@@ -219,7 +219,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 	return tree
 } # }}}
 
-func buildNode(tree: Tree, branch: TreeBranch, pIndex: Number, max: Number, name: String, node: AbstractNode): TreeColumn { # {{{
+func buildNode(tree: Tree, mut branch: TreeBranch, pIndex: Number, max: Number, name: String, node: AbstractNode): TreeColumn { # {{{
 	var usages: Dictionary<Number> = {}
 	for var row in branch.rows {
 		var index = row.function.index()
@@ -2360,7 +2360,7 @@ func expandName(group: Group, name: String, node: AbstractNode, functions: Array
 	}
 } # }}}
 
-func expandNameRow(parameter: ParameterType, paramIndex: Number, type: Type, rows: Array, node: AbstractNode) { # {{{
+func expandNameRow(parameter: ParameterType, paramIndex: Number, type: Type, mut rows: Array, node: AbstractNode) { # {{{
 	if type.isSplittable() {
 		var types = type.split([])
 
@@ -2393,7 +2393,7 @@ func expandNameRow(parameter: ParameterType, paramIndex: Number, type: Type, row
 	}
 } # }}}
 
-func expandNameOptionalRow(optionals: Array, left: Number, index: Number, parameter: ParameterType, paramIndex: Number, rows: Array, node: AbstractNode) { # {{{
+func expandNameOptionalRow(optionals: Array, left: Number, index: Number, parameter: ParameterType, paramIndex: Number, mut rows: Array, node: AbstractNode) { # {{{
 	rows = expandNameRow(parameter, paramIndex, parameter.type(), rows, node)
 
 	if left == 1 {

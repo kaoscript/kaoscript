@@ -2,7 +2,7 @@ extern console, qux
 
 import '../_/_array'
 
-func foo(x) {
+func foo(mut x) {
 	if x is Array {
 		console.log(x.last())
 
