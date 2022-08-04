@@ -83,9 +83,8 @@ class NamespaceDeclaration extends Statement {
 	} # }}}
 	includePath() => null
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		// TODO rename `variable2` to `var`
-		if var variable2 = @scope.getDefinedVariable(variable.name) {
-			variable2.setDeclaredType(variable.type)
+		if var var = @scope.getDefinedVariable(variable.name) {
+			var.setDeclaredType(variable.type)
 		}
 	} # }}}
 	name() => @name

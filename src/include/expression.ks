@@ -28,6 +28,7 @@ abstract class Expression extends AbstractNode {
 	isAwaiting() => false
 	// if the generated code, to cast the expression has a boolean, requires to be wrapped inside parentheses
 	isBooleanComputed() => this.isComputed() || !this.type().isBoolean() || this.type().isNullable()
+	isBooleanComputed(junction: Junction) => this.isBooleanComputed()
 	// if the expression contains a call
 	isCallable() => false
 	// if the expression needs to be assign to a temp variable to be reused

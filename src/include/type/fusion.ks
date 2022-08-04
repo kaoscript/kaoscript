@@ -122,6 +122,17 @@ class FusionType extends Type {
 
 		fragments.code(')') if junction == Junction::OR
 	} # }}}
+	toTestFunctionFragments(fragments, node, junction) { # {{{
+		fragments.code('(') if junction == Junction::OR
+
+		for var type, index in @types {
+			fragments.code(' && ') if index != 0
+
+			type.toTestFunctionFragments(fragments, node, Junction::AND)
+		}
+
+		fragments.code(')') if junction == Junction::OR
+	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('fusion', @nullable)
 

@@ -431,6 +431,7 @@ class UnionType extends Type {
 	sort(): UnionType { # {{{
 		@types.sort((a, b) => {
 			var index = a.compareToRef(b)
+
 			if index == 0 {
 				return a.hashCode().localeCompare(b.hashCode())
 			}
@@ -438,6 +439,7 @@ class UnionType extends Type {
 				return index
 			}
 		})
+
 		return this
 	} # }}}
 	split(types: Array) { # {{{

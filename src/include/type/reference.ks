@@ -300,6 +300,13 @@ class ReferenceType extends Type {
 		if this.isAny() {
 			return AnyType.NullableUnexplicit
 		}
+		else if @name == 'Dictionary' {
+			if @parameters.length > 0 {
+				return @parameters[0]
+			}
+
+			return AnyType.NullableUnexplicit
+		}
 
 		var mut type: Type = this.type()
 
@@ -345,7 +352,7 @@ class ReferenceType extends Type {
 
 		return hash
 	} # }}}
-	hasParameters() => @parameters.length != 0
+	hasParameters() => @parameters.length > 0
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || this.type().isArray()

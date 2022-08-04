@@ -182,8 +182,7 @@ class ThisExpression extends Expression {
 				NotImplementedException.throw(this)
 			}
 			else {
-				// TODO move to `var late`
-				var dyn variable
+				var late variable
 
 				if variable ?= type.getClassVariable(@name) {
 					@variableName = @name

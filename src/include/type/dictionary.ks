@@ -1,6 +1,6 @@
 class DictionaryType extends Type {
 	private {
-		_properties: Dictionary			= {}
+		@properties: Dictionary			= {}
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
@@ -243,6 +243,24 @@ class DictionaryType extends Type {
 
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
 			}
+		}
+	} # }}}
+	override toTestFunctionFragments(fragments, node, junction) { # {{{
+		if Dictionary.isEmpty(@properties) {
+			fragments.code($runtime.type(node), '.isDictionary(value)')
+		}
+		else {
+			fragments.code('(') if junction == Junction::OR
+
+			fragments.code($runtime.type(node), '.isDictionary(value)')
+
+			for var value, name of @properties {
+				fragments.code(' && ')
+
+				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
+			}
+
+			fragments.code(')') if junction == Junction::OR
 		}
 	} # }}}
 	override toVariations(variations) { # {{{

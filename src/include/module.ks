@@ -688,16 +688,15 @@ class ModuleBlock extends AbstractNode {
 	file() => @module.file()
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		// TODO rename `variable2` to `var`
 		if variable.static {
 			var class = @scope.getVariable(variable.class).declaration()
 
-			if var variable2 = class.getClassVariable(variable.name) {
-				variable2.initialize(variable.type, expression)
+			if var var = class.getClassVariable(variable.name) {
+				var.initialize(variable.type, expression)
 			}
 		}
-		else if var variable2 = @scope.getDefinedVariable(variable.name) {
-			variable2.setDeclaredType(variable.type)
+		else if var var = @scope.getDefinedVariable(variable.name) {
+			var.setDeclaredType(variable.type)
 		}
 	} # }}}
 	isConsumedError(error): Boolean => @module.isBinary()

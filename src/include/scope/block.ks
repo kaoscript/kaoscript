@@ -495,7 +495,7 @@ class BlockScope extends Scope {
 		return variable
 	} # }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		var mut variable = this.getVariable(name)!?
+		var mut variable = @getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
@@ -552,7 +552,9 @@ class BlockScope extends Scope {
 	setLineOffset(offset: Number) => @module.setLineOffset(offset)
 	updateInferable(name, data, node) { # {{{
 		if data.isVariable {
-			this.replaceVariable(name, data.type, true, true, node)
+			if @hasVariable(name) {
+				@replaceVariable(name, data.type, true, true, node)
+			}
 		}
 		else {
 			if @chunkTypes[name] is Array {

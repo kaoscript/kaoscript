@@ -135,7 +135,7 @@ class StructType extends Type {
 		return false
 	} # }}}
 	// TODO remove
-	isSubsetOf(value: Type, mode: MatchingMode) {
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if value is NamedType | ReferenceType {
 			if value.name() == 'Struct' {
 				return true
@@ -143,7 +143,7 @@ class StructType extends Type {
 		}
 
 		return false
-	}
+	} # }}}
 	listAllFields(list = []) { # {{{
 		if @extending {
 			@extends.type().listAllFields(list)

@@ -16,6 +16,7 @@ class NullType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	compareToRef(value: AnyType) => -value.compareToRef(this)
+	compareToRef(value: DictionaryType) => 1
 	compareToRef(value: NullType) => 0
 	compareToRef(value: ReferenceType) => -value.compareToRef(this)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)

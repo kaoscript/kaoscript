@@ -70,6 +70,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
+	isBooleanComputed(junction: Junction) => junction != Junction::AND
 	toFragments(fragments, mode) { # {{{
 		var mut nf = false
 
@@ -84,19 +85,11 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				nf = true
 			}
 
-			fragments.wrapBoolean(operand)
+			fragments.wrapBoolean(operand, Mode::None, Junction::AND)
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		if junction == Junction::OR {
-			fragments.code('(')
-		}
-
 		@toFragments(fragments, mode)
-
-		if junction == Junction::OR {
-			fragments.code(')')
-		}
 	} # }}}
 	type() => @scope.reference('Boolean')
 }
@@ -299,6 +292,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
+	isBooleanComputed(junction: Junction) => junction != Junction::OR
 	toFragments(fragments, mode) { # {{{
 		var mut nf = false
 
@@ -313,19 +307,11 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				nf = true
 			}
 
-			fragments.wrapBoolean(operand)
+			fragments.wrapBoolean(operand, Mode::None, Junction::OR)
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		if junction == Junction::AND {
-			fragments.code('(')
-		}
-
 		@toFragments(fragments, mode)
-
-		if junction == Junction::AND {
-			fragments.code(')')
-		}
 	} # }}}
 	type() => @scope.reference('Boolean')
 }

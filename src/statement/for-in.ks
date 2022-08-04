@@ -577,7 +577,7 @@ class ForInStatement extends Statement {
 				ctrl.code(' && !(').compileBoolean(@until).code(')')
 			}
 			else if @while? {
-				ctrl.code(' && ').wrapBoolean(@while)
+				ctrl.code(' && ').wrapBoolean(@while, Mode::None, Junction::AND)
 			}
 		}
 

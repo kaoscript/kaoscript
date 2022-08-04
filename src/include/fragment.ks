@@ -134,8 +134,8 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	wrapBoolean(node) { # {{{
-		@step.wrapBoolean(node)
+	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+		@step.wrapBoolean(node, mode, junction)
 
 		return this
 	} # }}}
@@ -231,7 +231,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} # }}}
 	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
-		if node.isBooleanComputed() {
+		if node.isBooleanComputed(junction) {
 			this.code('(')
 
 			node.toBooleanFragments(this, mode, junction)

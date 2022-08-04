@@ -871,6 +871,9 @@ class BinaryOperatorTypeEquality extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
+	toBooleanFragments(fragments, mode, junction) { # {{{
+		@trueType.toPositiveTestFragments(fragments, @subject, junction)
+	} # }}}
 	type() => @scope.reference('Boolean')
 	private validateType(variable: Variable) { # {{{
 		var type = variable.getRealType()

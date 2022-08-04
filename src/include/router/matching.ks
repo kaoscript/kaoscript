@@ -910,8 +910,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 		}
 		else {
 			var possibilities = []
-			// TODO rename variable
-			var mut arguments2 = null
+			var mut arguments = null
 
 			for var key in possibleFunctions {
 				var function = assessment.functions[key]
@@ -937,21 +936,21 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 					}
 				}
 
-				if arguments2 == null {
-					arguments2 = args
+				if arguments == null {
+					arguments = args
 				}
-				else if !Array.same(arguments2, args) {
+				else if !Array.same(arguments, args) {
 					throw new NotSupportedException()
 				}
 
 				possibilities.push(function)
 			}
 
-			if arguments2 == null {
+			if arguments == null {
 				return LenientCallMatchResult(possibilities)
 			}
 			else {
-				return LenientCallMatchResult(possibilities, arguments: arguments2)
+				return LenientCallMatchResult(possibilities, arguments)
 			}
 		}
 	}
@@ -1026,11 +1025,10 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 					}
 					else {
 						var possibilities = [result.matches[0].function]
-						// TODO rename variable
-						var arguments3 = result.matches[0].arguments
+						var arguments = result.matches[0].arguments
 
 						for var match in result.matches from 1 {
-							if Array.same(arguments3, match.arguments) {
+							if Array.same(arguments, match.arguments) {
 								possibilities.push(match.function)
 							}
 							else {
@@ -1038,7 +1036,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 							}
 						}
 
-						return LenientCallMatchResult(possibilities, arguments: arguments3)
+						return LenientCallMatchResult(possibilities, arguments)
 					}
 				}
 				else if result.possibilities.length == 1 {

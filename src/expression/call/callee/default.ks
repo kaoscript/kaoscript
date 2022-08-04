@@ -20,7 +20,7 @@ class DefaultCallee extends Callee {
 		} # }}}
 	}
 
-	constructor(@data, @object, _type: Type | Array<Type> | Null, @arguments = null, @node) { # {{{
+	constructor(@data, @object, mut type: Type | Array<Type> | Null, @arguments = null, @node) { # {{{
 		super(data)
 
 		if object == null {
@@ -37,8 +37,7 @@ class DefaultCallee extends Callee {
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
-		// FIX type ??= @expression.type()
-		var type = _type ?? @expression.type()
+		type ??= @expression.type()
 
 		if type is Array {
 			var types = []

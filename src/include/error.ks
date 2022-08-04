@@ -105,16 +105,16 @@ export class Exception extends Error {
 
 export class IOException extends Exception {
 	static {
-		throwNotFoundFile(path, node) ~ IOException { # {{{
+		throwNotFoundFile(path, node): Never ~ IOException { # {{{
 			throw new IOException(`The file "\(path)" can't be found`, node)
 		} # }}}
-		throwNotFoundFile(path, directory, node) ~ IOException { # {{{
+		throwNotFoundFile(path, directory, node): Never ~ IOException { # {{{
 			throw new IOException(`The file "\(path)" can't be found in the directory "\(directory)"`, node)
 		} # }}}
-		throwNotFoundModule(name, node) ~ IOException { # {{{
+		throwNotFoundModule(name, node): Never ~ IOException { # {{{
 			throw new IOException(`The module "\(name)" can't be found`, node)
 		} # }}}
-		throwNotFoundModule(name, directory, node) ~ IOException { # {{{
+		throwNotFoundModule(name, directory, node): Never ~ IOException { # {{{
 			throw new IOException(`The module "\(name)" can't be found in the directory "\(directory)"`, node)
 		} # }}}
 	}
@@ -142,7 +142,7 @@ export class NotImplementedException extends Exception {
 
 export class NotSupportedException extends Exception {
 	static {
-		throw(...arguments) ~ NotSupportedException { # {{{
+		throw(...arguments): Never ~ NotSupportedException { # {{{
 			throw new NotSupportedException(...arguments)
 		} # }}}
 	}
@@ -159,37 +159,37 @@ export class NotSupportedException extends Exception {
 
 export class ReferenceException extends Exception {
 	static {
-		throwAlreadyDefinedField(name, node) ~ ReferenceException { # {{{
+		throwAlreadyDefinedField(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Field "\(name)" is already defined by its parent class`, node)
 		} # }}}
-		throwBindingExceedArray(name, node) ~ ReferenceException { # {{{
+		throwBindingExceedArray(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
 		} # }}}
-		throwConfusingArguments(name, node) ~ ReferenceException { # {{{
+		throwConfusingArguments(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The arguments (indexed/named) can be matched to the function "\(name)" in multiple ways`, node)
 		} # }}}
-		throwDefined(name, node) ~ ReferenceException { # {{{
+		throwDefined(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`"\(name)" should not be defined`, node)
 		} # }}}
-		throwImmutable(name: String, node) ~ ReferenceException { # {{{
+		throwImmutable(name: String, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The identifier "\(name)" is immutable`, node)
 		} # }}}
-		throwImmutable(node) ~ ReferenceException { # {{{
+		throwImmutable(node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The expression "\(node.toQuote())" is immutable`, node)
 		} # }}}
-		throwImmutableField(name, node) ~ ReferenceException { # {{{
+		throwImmutableField(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The class variable "\(name)" is immutable`, node)
 		} # }}}
-		throwIncompleteVariable(argname, modname, node) ~ ReferenceException { # {{{
+		throwIncompleteVariable(argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The variable "\(argname)" must be complete before passing it to the module "\(modname)"`, node)
 		} # }}}
-		throwInvalidAssignment(node) ~ ReferenceException { # {{{
+		throwInvalidAssignment(node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Invalid left-hand side in assignment`, node)
 		} # }}}
-		throwLoopingAlias(name, node) ~ ReferenceException { # {{{
+		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
 		} # }}}
-		throwNoMatchingConstructor(name, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingConstructor(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to no arguments`, node)
 			}
@@ -197,7 +197,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingFunction(name, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingFunction(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The function "\(name)" can't be matched to no arguments`, node)
 			}
@@ -205,7 +205,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to no arguments`, node)
 			}
@@ -213,7 +213,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingClassMethod(method, class, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingClassMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
 			}
@@ -221,7 +221,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingEnumMethod(method, enum, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingEnumMethod(method, enum, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to no arguments`, node)
 			}
@@ -229,10 +229,10 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwUnrecognizedNamedArgument(name, node) ~ ReferenceException { # {{{
+		throwUnrecognizedNamedArgument(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The argument "\(name)" isn't recognized`, node)
 		} # }}}
-		throwNoMatchingStruct(name, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingStruct(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The struct "\(name)" can't be matched to no arguments`, node)
 			}
@@ -240,7 +240,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingTuple(name, arguments, node) ~ ReferenceException { # {{{
+		throwNoMatchingTuple(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The tuple "\(name)" can't be matched to no arguments`, node)
 			}
@@ -251,43 +251,43 @@ export class ReferenceException extends Exception {
 		throwNotDefined(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} # }}}
-		throwNotDefinedEnumElement(element, enum, node) ~ ReferenceException { # {{{
+		throwNotDefinedEnumElement(element, enum, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Element "\(element)" is not defined in enum "\(enum)"`, node)
 		} # }}}
-		throwNotDefinedInModule(name, module, node) ~ ReferenceException { # {{{
+		throwNotDefinedInModule(name, module, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`"\(name)" is not defined in the module "\(module)"`, node)
 		} # }}}
-		throwNotDefinedMember(name, node) ~ ReferenceException { # {{{
+		throwNotDefinedMember(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Member "\(name)" is not defined`, node)
 		} # }}}
 		throwNotDefinedProperty(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} # }}}
-		throwNotExportable(name, node) ~ ReferenceException { # {{{
+		throwNotExportable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
 		} # }}}
-		throwNotFoundClassMethod(method, class, node) ~ ReferenceException { # {{{
+		throwNotFoundClassMethod(method, class, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The method "\(method)" can't be found in the class "\(class)"`, node)
 		} # }}}
-		throwNotFoundEnumMethod(method, enum, node) ~ ReferenceException { # {{{
+		throwNotFoundEnumMethod(method, enum, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The method "\(method)" can't be found in the enum "\(enum)"`, node)
 		} # }}}
-		throwNotPassed(name, module, node) ~ ReferenceException { # {{{
+		throwNotPassed(name, module, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} # }}}
-		throwNullExpression(expression, node) ~ TypeException { # {{{
+		throwNullExpression(expression, node): Never ~ TypeException { # {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
 		} # }}}
-		throwUndefinedBindingVariable(name, node) ~ ReferenceException { # {{{
+		throwUndefinedBindingVariable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
 		} # }}}
-		throwUndefinedClassField(name, node) ~ ReferenceException { # {{{
+		throwUndefinedClassField(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The class field "\(name)" isn't defined`, node)
 		} # }}}
-		throwUndefinedInstanceField(name, node) ~ ReferenceException { # {{{
+		throwUndefinedInstanceField(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The instance field "\(name)" isn't defined`, node)
 		} # }}}
-		throwUndefinedFunction(name, node) ~ ReferenceException { # {{{
+		throwUndefinedFunction(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The function "\(name)" can't be found`, node)
 		} # }}}
 	}
@@ -295,55 +295,55 @@ export class ReferenceException extends Exception {
 
 export class SyntaxException extends Exception {
 	static {
-		throwAfterDefaultClause(node) ~ SyntaxException { # {{{
+		throwAfterDefaultClause(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Clause is must be before the default clause`, node)
 		} # }}}
-		throwAfterRestParameter(node) ~ SyntaxException { # {{{
+		throwAfterRestParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter must be before the rest parameter`, node)
 		} # }}}
-		throwAlreadyDeclared(name, node) ~ SyntaxException { # {{{
+		throwAlreadyDeclared(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Identifier "\(name)" has already been declared`, node)
 		} # }}}
-		throwAlreadyImported(name, module, line, node) ~ SyntaxException { # {{{
+		throwAlreadyImported(name, module, line, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The variable "\(name)" has already been imported by "\(module)" at line \(line)`, node)
 		} # }}}
-		throwDeadCode(node) ~ SyntaxException { # {{{
+		throwDeadCode(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Dead code`, node)
 		} # }}}
-		throwDeadCodeParameter(node) ~ SyntaxException { # {{{
+		throwDeadCodeParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The default value of a required and nullable parameter can only be 'null'`, node)
 		} # }}}
-		throwDuplicateConstructor(node) ~ SyntaxException { # {{{
+		throwDuplicateConstructor(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The constructor is matching an existing constructor`, node)
 		} # }}}
-		throwDuplicateKey(node) ~ SyntaxException { # {{{
+		throwDuplicateKey(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Duplicate key has been found in object`, node)
 		} # }}}
-		throwDuplicateMethod(name, node) ~ SyntaxException { # {{{
+		throwDuplicateMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(name)" is matching an existing method`, node)
 		} # }}}
-		throwEnumOverflow(name, node) ~ SyntaxException { # {{{
+		throwEnumOverflow(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
 		} # }}}
-		throwExcessiveRequirement(name, node) ~ SyntaxException { # {{{
+		throwExcessiveRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The import don't require the argument "\(name)"`, node)
 		} # }}}
-		throwHiddenMethod(name, class1, method1, class2, method2, node) ~ SyntaxException { # {{{
+		throwHiddenMethod(name, class1, method1, class2, method2, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(class1.toQuote()).\(name)\(method1.toQuote())" hides the method "\(class2.toQuote()).\(name)\(method2.toQuote())"`, node)
 		} # }}}
-		throwIdenticalConstructor(node) ~ SyntaxException { # {{{
+		throwIdenticalConstructor(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The constructor is identical with another constructor`, node)
 		} # }}}
-		throwIdenticalFunction(name, type, node) ~ SyntaxException { # {{{
+		throwIdenticalFunction(name, type, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The function "\(name)\(type.toQuote())" is a duplicate`, node)
 		} # }}}
-		throwIdenticalMethod(name, node) ~ SyntaxException { # {{{
+		throwIdenticalMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(name)" is matching another method with the same types of parameters`, node)
 		} # }}}
-		throwIllegalStatement(name, node) ~ SyntaxException { # {{{
+		throwIllegalStatement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
 		} # }}}
-		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node) ~ SyntaxException { # {{{
+		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node): Never ~ SyntaxException { # {{{
 			var last = functions.length - 1
 			var mut fragments = ''
 
@@ -360,7 +360,7 @@ export class SyntaxException extends Exception {
 
 			throw new SyntaxException(`The functions \(fragments) can't be distinguished`, node)
 		} # }}}
-		throwIndistinguishableFunctions(name: String, arguments: Array<Type>, functions: Array<Type>, node) ~ SyntaxException { # {{{
+		throwIndistinguishableFunctions(name: String, arguments: Array<Type>, functions: Array<Type>, node): Never ~ SyntaxException { # {{{
 			var args = `(\(arguments.map((type, _, _) => type.toQuote(true)).join(', ')))`
 
 			var last = functions.length - 1
@@ -384,7 +384,7 @@ export class SyntaxException extends Exception {
 				throw new SyntaxException(`When the arguments are \(args), \(fragments)`, node)
 			}
 		} # }}}
-		throwIndistinguishableFunctions(name: String, functions: Array<Type>, count: Number, node) ~ SyntaxException { # {{{
+		throwIndistinguishableFunctions(name: String, functions: Array<Type>, count: Number, node): Never ~ SyntaxException { # {{{
 			var last = functions.length - 1
 			var mut fragments = ''
 
@@ -409,46 +409,46 @@ export class SyntaxException extends Exception {
 				throw new SyntaxException(`The functions \(fragments) can't be distinguished when there are \(count) arguments`, node)
 			}
 		} # }}}
-		throwInheritanceLoop(name, node) ~ SyntaxException { # {{{
+		throwInheritanceLoop(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`An inheritance loop is occurring the class "\(name)"`, node)
 		} # }}}
-		throwInvalidAwait(node) ~ SyntaxException { # {{{
+		throwInvalidAwait(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} # }}}
-		throwInvalidEnumAccess(node) ~ SyntaxException { # {{{
+		throwInvalidEnumAccess(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Accessing an enum can only be done with "::"`, node)
 		} # }}}
-		throwInvalidEnumValue(data, node) ~ SyntaxException { # {{{
+		throwInvalidEnumValue(data, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The enum's value isn't valid`, node, data)
 		} # }}}
-		throwInvalidForcedTypeCasting(node) ~ SyntaxException { # {{{
+		throwInvalidForcedTypeCasting(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
 		} # }}}
-		throwInvalidLateInitAssignment(name, node) ~ SyntaxException { # {{{
+		throwInvalidLateInitAssignment(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" can't be initialized by the statement at`, node)
 		} # }}}
-		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { # {{{
+		throwInvalidMethodReturn(className, methodName, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} # }}}
-		throwInvalidImportAliasArgument(name, node) ~ SyntaxException { # {{{
+		throwInvalidImportAliasArgument(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Aliases arguments can't be used with classic JavaScript module`, node)
 		} # }}}
-		throwInvalidIdentifier(value, node) ~ SyntaxException { # {{{
+		throwInvalidIdentifier(value, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"\(value)" is an invalid identifier`, node)
 		} # }}}
-		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { # {{{
+		throwInvalidSyncMethods(className, methodName, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} # }}}
-		throwInvalidRule(name, fileName, lineNumber) ~ SyntaxException { # {{{
+		throwInvalidRule(name, fileName, lineNumber): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The rule "\(name)" is invalid`, fileName, lineNumber)
 		} # }}}
-		throwLoopingImport(name, node) ~ SyntaxException { # {{{
+		throwLoopingImport(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The import "\(name)" is looping`, node)
 		} # }}}
-		throwMismatchedInclude(name, node) ~ SyntaxException { # {{{
+		throwMismatchedInclude(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Inclusions of "\(name)" should have the same version`, node)
 		} # }}}
-		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { # {{{
+		throwMissingAbstractMethods(name, methods, node): Never ~ SyntaxException { # {{{
 			var fragments = []
 
 			for var methods, name of methods {
@@ -468,138 +468,138 @@ export class SyntaxException extends Exception {
 		throwMissingAssignmentIfTrue(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is true`, node)
 		} # }}}
-		throwMissingAssignmentSwitchClause(name, node) ~ SyntaxException { # {{{
+		throwMissingAssignmentSwitchClause(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized by the clause at`, node)
 		} # }}}
-		throwMissingAssignmentSwitchNoDefault(name, node) ~ SyntaxException { # {{{
+		throwMissingAssignmentSwitchNoDefault(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing default clause`, node)
 		} # }}}
-		throwMissingRequirement(name, node) ~ SyntaxException { # {{{
+		throwMissingRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)
 		} # }}}
-		throwMissingRequirement(argname, modname, node) ~ ReferenceException { # {{{
+		throwMissingRequirement(argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The module "\(modname)" is missing the argument "\(argname)"`, node)
 		} # }}}
-		throwMissingStructField(name, node) ~ SyntaxException { # {{{
+		throwMissingStructField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The field "\(name)" is missing to create the struct`, node)
 		} # }}}
-		throwMissingTupleField(name, node) ~ SyntaxException { # {{{
+		throwMissingTupleField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The field "\(name)" is missing to create the tuple`, node)
 		} # }}}
-		throwMixedOverloadedFunction(node) ~ SyntaxException { # {{{
+		throwMixedOverloadedFunction(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Overloaded functions can't mix sync/async`, node)
 		} # }}}
-		throwNoDefaultParameter(node) ~ SyntaxException { # {{{
+		throwNoDefaultParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter can't have a default value`, node)
 		} # }}}
-		throwNoExport(module, node) ~ SyntaxException { # {{{
+		throwNoExport(module, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`No export can be found in module "\(module)"`, node)
 		} # }}}
-		throwNoNullParameter(node) ~ SyntaxException { # {{{
+		throwNoNullParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter can't be nullable`, node)
 		} # }}}
-		throwNoOverridableConstructor(class, parameters, node) ~ SyntaxException { # {{{
+		throwNoOverridableConstructor(class, parameters, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The constructor "\(class.toQuote())\(FunctionType.toQuote(parameters))" can't override a suitable constructor`, node)
 		} # }}}
-		throwNoOverridableMethod(class, name, parameters, node) ~ SyntaxException { # {{{
+		throwNoOverridableMethod(class, name, parameters, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't override a suitable method`, node)
 		} # }}}
-		throwNoRestParameter(node) ~ SyntaxException { # {{{
+		throwNoRestParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
 		} # }}}
-		throwNoSuitableOverwrite(class, name, type, node) ~ SyntaxException { # {{{
+		throwNoSuitableOverwrite(class, name, type, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be matched to any suitable method to overwrite`, node)
 		} # }}}
-		throwNoSuperCall(node) ~ SyntaxException { # {{{
+		throwNoSuperCall(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Call "super()" is missing`, node)
 		} # }}}
-		throwNotAbstractClass(className, methodName, node) ~ SyntaxException { # {{{
+		throwNotAbstractClass(className, methodName, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Method "\(methodName)" is abstract but the class "\(className)" is not`, node)
 		} # }}}
-		throwNotBinary(tag, node) ~ SyntaxException { # {{{
+		throwNotBinary(tag, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Binary file can't use "\(tag)" statement`, node)
 		} # }}}
-		throwNotCompatibleConstructor(name, node) ~ SyntaxException { # {{{
+		throwNotCompatibleConstructor(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parent's constructor of class "\(name)" can't be called`, node)
 		} # }}}
-		throwNotEnoughStructFields(node) ~ SyntaxException { # {{{
+		throwNotEnoughStructFields(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`There is not enough fields to create the struct`, node)
 		} # }}}
-		throwNotEnoughTupleFields(node) ~ SyntaxException { # {{{
+		throwNotEnoughTupleFields(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`There is not enough fields to create the tuple`, node)
 		} # }}}
-		throwNotFullyInitializedVariable(name, node) ~ SyntaxException { # {{{
+		throwNotFullyInitializedVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" is only partially initialized`, node)
 		} # }}}
-		throwNotInitializedField(name, node) ~ SyntaxException { # {{{
+		throwNotInitializedField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class variable "\(name)" isn't initialized`, node)
 		} # }}}
-		throwNotInitializedVariable(name, node) ~ SyntaxException { # {{{
+		throwNotInitializedVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't initialized`, node)
 		} # }}}
-		throwNotNamedParameter(node) ~ SyntaxException { # {{{
+		throwNotNamedParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter must be named`, node)
 		} # }}}
-		throwNotOverloadableFunction(name, node) ~ SyntaxException { # {{{
+		throwNotOverloadableFunction(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Variable "\(name)" is not an overloadable function`, node)
 		} # }}}
-		throwNotSealedOverwrite(node) ~ SyntaxException { # {{{
+		throwNotSealedOverwrite(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`A method can be overwritten only in a sealed class`, node)
 		} # }}}
-		throwOnlyStaticImport(modname, node) ~ ReferenceException { # {{{
+		throwOnlyStaticImport(modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The arguments of the module "\(modname)" must have unmodified types`, node)
 		} # }}}
-		throwOnlyStaticImport(argname, modname, node) ~ ReferenceException { # {{{
+		throwOnlyStaticImport(argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" must have an unmodified type`, node)
 		} # }}}
-		throwReservedClassMethod(name, node) ~ SyntaxException { # {{{
+		throwReservedClassMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class method "\(name)" is reserved`, node)
 		} # }}}
-		throwReservedClassVariable(name, node) ~ SyntaxException { # {{{
+		throwReservedClassVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class variable "\(name)" is reserved`, node)
 		} # }}}
-		throwShadowFunction(name, function, node) ~ SyntaxException { # {{{
+		throwShadowFunction(name, function, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The function "\(name)\(function.toQuote())" is been concealed by others functions`, node)
 		} # }}}
-		throwTooMuchAttributesForIfAttribute() ~ SyntaxException { # {{{
+		throwTooMuchAttributesForIfAttribute(): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Expected 1 argument for 'if' attribute`)
 		} # }}}
-		throwTooMuchStructFields(node) ~ SyntaxException { # {{{
+		throwTooMuchStructFields(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`There is too much fields to create the struct`, node)
 		} # }}}
-		throwTooMuchTupleFields(node) ~ SyntaxException { # {{{
+		throwTooMuchTupleFields(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`There is too much fields to create the tuple`, node)
 		} # }}}
-		throwTooMuchRestParameter(node) ~ SyntaxException { # {{{
+		throwTooMuchRestParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)
 		} # }}}
-		throwUnexpectedAlias(name, node) ~ SyntaxException { # {{{
+		throwUnexpectedAlias(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
 		} # }}}
-		throwUnmatchedImportArguments(names, node) ~ SyntaxException { # {{{
+		throwUnmatchedImportArguments(names, node): Never ~ SyntaxException { # {{{
 			var fragments = [`"\(name)"` for var name in names]
 
 			throw new SyntaxException(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} # }}}
-		throwUnmatchedMacro(name, node, data) ~ SyntaxException { # {{{
+		throwUnmatchedMacro(name, node, data): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The macro "\(name)" can't be matched`, node, data)
 		} # }}}
-		throwUnnamedWildcardImport(node) ~ SyntaxException { # {{{
+		throwUnnamedWildcardImport(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Wilcard import can't be named`, node)
 		} # }}}
-		throwUnrecognizedStructField(name, node) ~ SyntaxException { # {{{
+		throwUnrecognizedStructField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The argument "\(name)" isn't recognized to create the struct`, node)
 		} # }}}
-		throwUnrecognizedTupleField(name, node) ~ SyntaxException { # {{{
+		throwUnrecognizedTupleField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The argument "\(name)" isn't recognized to create the tuple`, node)
 		} # }}}
-		throwUnreportedError(node) ~ SyntaxException { # {{{
+		throwUnreportedError(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)
 		} # }}}
-		throwUnreportedError(name, node) ~ SyntaxException { # {{{
+		throwUnreportedError(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`An error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
 		} # }}}
-		throwUnsupportedDestructuringAssignment(node) ~ SyntaxException { # {{{
+		throwUnsupportedDestructuringAssignment(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The current destructuring assignment is unsupported`, node)
 		} # }}}
 	}
@@ -607,7 +607,7 @@ export class SyntaxException extends Exception {
 
 export class TargetException extends Exception {
 	static {
-		throwNotSupported(target, node) ~ TargetException { # {{{
+		throwNotSupported(target, node): Never ~ TargetException { # {{{
 			throw new TargetException(`The target "\(target.name)-v\(target.version)" isn't supported`, node)
 		} # }}}
 	}
@@ -615,28 +615,28 @@ export class TargetException extends Exception {
 
 export class TypeException extends Exception {
 	static {
-		throwCannotBeInstantiated(name, node) ~ TypeException { # {{{
+		throwCannotBeInstantiated(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Class "\(name)" is abstract so it can't be instantiated`, node)
 		} # }}}
 		throwConstructorWithoutNew(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Class constructor "\(name)" cannot be invoked without 'new'`, node)
 		} # }}}
-		throwExpectedReturnedValue(type, node) ~ TypeException { # {{{
+		throwExpectedReturnedValue(type, node): Never ~ TypeException { # {{{
 			throw new TypeException(`A value of type \(type.toQuote(true)) is expected to be returned`, node)
 		} # }}}
-		throwExpectedThrownError(node) ~ TypeException { # {{{
+		throwExpectedThrownError(node): Never ~ TypeException { # {{{
 			throw new TypeException(`An error is expected to be thrown`, node)
 		} # }}}
-		throwImplFieldToSealedType(node) ~ TypeException { # {{{
+		throwImplFieldToSealedType(node): Never ~ TypeException { # {{{
 			throw new TypeException(`impl can add field to only non-sealed type`, node)
 		} # }}}
-		throwImplInvalidType(node) ~ TypeException { # {{{
+		throwImplInvalidType(node): Never ~ TypeException { # {{{
 			throw new TypeException(`impl has an invalid type`, node)
 		} # }}}
-		throwInvalid(name, node) ~ TypeException { # {{{
+		throwInvalid(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} # }}}
-		throwInvalidAssignement(declaredType: Type, valueType: Type, node) ~ TypeException { # {{{
+		throwInvalidAssignement(declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw new TypeException(`The variable of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -644,7 +644,7 @@ export class TypeException extends Exception {
 				throw new TypeException(`The variable of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} # }}}
-		throwInvalidAssignement(name: String, declaredType: Type, valueType: Type, node) ~ TypeException { # {{{
+		throwInvalidAssignement(name: String, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -652,7 +652,7 @@ export class TypeException extends Exception {
 				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} # }}}
-		throwInvalidAssignement(name: AbstractNode, declaredType: Type, valueType: Type, node) ~ TypeException { # {{{
+		throwInvalidAssignement(name: AbstractNode, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw new TypeException(`The variable \(name.toQuote(true)) of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -660,100 +660,100 @@ export class TypeException extends Exception {
 				throw new TypeException(`The variable \(name.toQuote(true)) of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} # }}}
-		throwInvalidBinding(expected, node) ~ TypeException { # {{{
+		throwInvalidBinding(expected, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The binding is expected to be of type "\(expected)"`, node)
 		} # }}}
-		throwInvalidCasting(node) ~ TypeException { # {{{
+		throwInvalidCasting(node): Never ~ TypeException { # {{{
 			throw new TypeException(`Only variables can be casted`, node)
 		} # }}}
-		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node) ~ TypeException { # {{{
+		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The expression \(left.toQuote(true)) of type \(left.type().toQuote(true)) can't be compared to a value of type \(right.type().toQuote(true))`, node)
 		} # }}}
-		throwInvalidCondition(expression, node) ~ TypeException { # {{{
+		throwInvalidCondition(expression, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The condition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
 		} # }}}
-		throwInvalidForInExpression(node) ~ TypeException { # {{{
+		throwInvalidForInExpression(node): Never ~ TypeException { # {{{
 			throw new TypeException(`"for..in" must be used with an array`, node)
 		} # }}}
-		throwInvalidForOfExpression(node) ~ TypeException { # {{{
+		throwInvalidForOfExpression(node): Never ~ TypeException { # {{{
 			throw new TypeException(`"for..of" must be used with a dictionary`, node)
 		} # }}}
-		throwInvalidOperand(expression, operator, node) ~ TypeException { # {{{
+		throwInvalidOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" in a \(operator) operation`, node)
 		} # }}}
-		throwInvalidSpread(node) ~ TypeException { # {{{
+		throwInvalidSpread(node): Never ~ TypeException { # {{{
 			throw new TypeException(`Spread operator require an array`, node)
 		} # }}}
-		throwInvalidTypeChecking(left, right, node) ~ TypeException { # {{{
+		throwInvalidTypeChecking(left, right, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The variable of type \(left.toQuote(true)) can never be of type \(right.toQuote(true))`, node)
 		} # }}}
-		throwNotAlien(name, node) ~ TypeException { # {{{
+		throwNotAlien(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The type "\(name)" must be declared externally`, node)
 		} # }}}
-		throwNotAsyncFunction(name, node) ~ TypeException { # {{{
+		throwNotAsyncFunction(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
 		} # }}}
-		throwNotCastableTo(valueType: Type, castingType: Type, node) ~ TypeException { # {{{
+		throwNotCastableTo(valueType: Type, castingType: Type, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The type \(valueType.toQuote(true)) can't be casted as a \(castingType.toQuote(true))`, node)
 		} # }}}
-		throwNotClass(name, node) ~ TypeException { # {{{
+		throwNotClass(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
 		} # }}}
-		throwNotCompatibleArgument(argname, modname, node) ~ ReferenceException { # {{{
+		throwNotCompatibleArgument(argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" isn't compatible`, node)
 		} # }}}
-		throwNotCompatibleArgument(varname, argname, modname, node) ~ ReferenceException { # {{{
+		throwNotCompatibleArgument(varname, argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} # }}}
-		throwNotCompatibleDefinition(varname, argname, modname, node) ~ ReferenceException { # {{{
+		throwNotCompatibleDefinition(varname, argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The definition for "\(varname)" and the variable "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} # }}}
-		throwNotEnum(name, node) ~ TypeException { # {{{
+		throwNotEnum(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not an enum`, node)
 		} # }}}
-		throwNotNamespace(name, node) ~ TypeException { # {{{
+		throwNotNamespace(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)
 		} # }}}
-		throwNotNullableExistential(expression, node) ~ TypeException { # {{{
+		throwNotNullableExistential(expression, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The existential test of \(expression.toQuote(true)) is always positive`, node)
 		} # }}}
-		throwNotNullableOperand(expression, operator, node) ~ TypeException { # {{{
+		throwNotNullableOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
 		} # }}}
-		throwNotStruct(name, node) ~ TypeException { # {{{
+		throwNotStruct(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a struct`, node)
 		} # }}}
-		throwNotTuple(name, node) ~ TypeException { # {{{
+		throwNotTuple(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a tuple`, node)
 		} # }}}
-		throwNotSyncFunction(name, node) ~ TypeException { # {{{
+		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)
 		} # }}}
-		throwNullableCaller(property, node) ~ TypeException { # {{{
+		throwNullableCaller(property, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The caller of "\(property)" can't be nullable`, node)
 		} # }}}
-		throwNullTypeChecking(type, node) ~ TypeException { # {{{
+		throwNullTypeChecking(type, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)
 		} # }}}
-		throwNullTypeVariable(name, node) ~ TypeException { # {{{
+		throwNullTypeVariable(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The variable "\(name)" can't be of type "Null"`, node)
 		} # }}}
-		throwRequireClass(node) ~ TypeException { # {{{
+		throwRequireClass(node): Never ~ TypeException { # {{{
 			throw new TypeException(`An instance is required`, node)
 		} # }}}
-		throwUnexpectedExportType(name, expected, unexpected, node) ~ TypeException { # {{{
+		throwUnexpectedExportType(name, expected, unexpected, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The type of export "\(name)" must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} # }}}
-		throwUnexpectedInoperative(operand, node) ~ TypeException { # {{{
+		throwUnexpectedInoperative(operand, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)
 		} # }}}
-		throwUnexpectedReturnedValue(node) ~ TypeException { # {{{
+		throwUnexpectedReturnedValue(node): Never ~ TypeException { # {{{
 			throw new TypeException(`No values are expected to be returned`, node)
 		} # }}}
-		throwUnexpectedReturnType(expected, unexpected, node) ~ TypeException { # {{{
+		throwUnexpectedReturnType(expected, unexpected, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The return type must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} # }}}
-		throwUnnecessaryTypeChecking(type, node) ~ TypeException { # {{{
+		throwUnnecessaryTypeChecking(type, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The variable is always of type \(type.toQuote(true))`, node)
 		} # }}}
 	}

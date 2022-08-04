@@ -985,7 +985,7 @@ class SwitchFilter extends AbstractNode {
 		}
 		else if @filter? {
 			if nf {
-				fragments.code(' && ').compileBoolean(@filter, Mode::None, Junction::AND)
+				fragments.code(' && ').wrapBoolean(@filter, Mode::None, Junction::AND)
 			}
 			else {
 				fragments.compileBoolean(@filter)
