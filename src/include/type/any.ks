@@ -92,7 +92,7 @@ class AnyType extends Type {
 		return type
 	} # }}}
 	getProperty(name) => AnyType.NullableUnexplicit
-	// TODO: merge methods
+	// TODO merge methods
 	hashCode(): String => this.hashCode(false)
 	hashCode(fattenNull: Boolean): String => @nullable ? fattenNull ? `Any|Null` : `Any?` : `Any`
 	isAny() => true

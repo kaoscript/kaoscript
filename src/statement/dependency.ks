@@ -221,7 +221,7 @@ class ExternDeclaration extends DependencyStatement {
 					}
 				}
 				else {
-					// TODO: check & merge type
+					// TODO check & merge type
 				}
 			}
 			else {
@@ -336,7 +336,7 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 			var mut variable
 			for declaration in @data.declarations {
 				if variable ?= @scope.getVariable(declaration.name.name) {
-					// TODO: check & merge type
+					// TODO check & merge type
 				}
 				else {
 					this.addRequirement(declaration)
@@ -385,7 +385,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 		if @parent.includePath() != null {
 			for var data in @data.declarations {
 				if var variable = @scope.getVariable(data.name.name) {
-					// TODO: check & merge type
+					// TODO check & merge type
 				}
 				else {
 					this.addRequirement(data)

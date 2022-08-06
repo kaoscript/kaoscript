@@ -127,39 +127,74 @@ class ArrayComprehensionForFrom extends Expression {
 
 class ArrayComprehensionForIn extends Expression {
 	private late {
-		_indexVariable: Variable
-		_type: Type
-		_valueName: String
-		_valueVariable: Variable
-	}
-	private {
 		_bindingScope
 		_body
 		_bodyScope
+		_declaration: Boolean				= false
+		_declaredVariables: Array			= []
+		_declareIndex: Boolean				= false
+		_declareValue: Boolean				= false
+		_descending: Boolean				= false
 		_expression
 		_index
+		_immutable: Boolean					= false
+		_type: Type
 		_value
-		_when						= null
+		_valueName: String
+		_when								= null
 	}
 	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
+		for var modifier in @data.loop.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+			else if modifier.kind == ModifierKind::Descending {
+				@descending = true
+			}
+		}
+
 		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
 		if @data.loop.value? {
-			@valueVariable = @bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
-
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
+			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
+
+			for var name in @value.listAssignments([]) {
+				var variable = @scope.getVariable(name)
+
+				if @declaration || variable == null {
+					@declareValue = true
+
+					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
+				}
+				else if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, this)
+				}
+			}
 		}
 		else {
 			@valueName = @bindingScope.acquireTempName()
 		}
 
 		if @data.loop.index? {
-			@indexVariable = @bindingScope.define(@data.loop.index.name, false, @bindingScope.reference('Number'), true, this)
+			var variable = @bindingScope.getVariable(@data.loop.index.name)
+
+			if @declaration || variable == null {
+				@bindingScope.define(@data.loop.index.name, @immutable, @bindingScope.reference('Number'), true, this)
+
+				@declareIndex = true
+			}
+			else if variable.isImmutable() {
+				ReferenceException.throwImmutable(@data.loop.index.name, this)
+			}
 
 			@index = $compile.expression(@data.loop.index, this, @bindingScope)
 			@index.analyse()
@@ -195,12 +230,26 @@ class ArrayComprehensionForIn extends Expression {
 
 			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
-			@valueVariable.setRealType(realType)
-
-			@value.prepare()
+			if @value is IdentifierLiteral {
+				if @declareValue {
+					@value.type(realType, @bindingScope, this)
+				}
+				else {
+					@bindingScope.replaceVariable(@value.name(), realType, this)
+				}
+			}
+			else {
+				for var name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
+				}
+			}
 		}
 
 		if @index? {
+			unless @declareIndex {
+				@bindingScope.replaceVariable(@data.loop.index.name, @bindingScope.reference('Number'), this)
+			}
+
 			@index.prepare()
 		}
 
@@ -280,27 +329,46 @@ class ArrayComprehensionForIn extends Expression {
 
 class ArrayComprehensionForOf extends Expression {
 	private late {
-		_valueVariable: Variable
-	}
-	private {
 		_bindingScope
 		_body
 		_bodyScope
+		_declaration: Boolean				= false
+		_defineKey: Boolean					= false
+		_defineValue: Boolean				= false
 		_expression
 		_key
 		_keyName
+		_immutable: Boolean					= false
 		_value
-		_when						= null
+		_when								= null
 	}
 	analyse() { # {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
+		for var modifier in @data.loop.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+		}
+
 		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
 		if @data.loop.key? {
-			@bindingScope.define(@data.loop.key.name, false, @bindingScope.reference('String'), true, this)
+			var keyVariable = @scope.getVariable(@data.loop.key.name)
+
+			if @declaration || keyVariable == null {
+				@bindingScope.define(@data.loop.key.name, @immutable, @bindingScope.reference('String'), true, this)
+
+				@defineKey = true
+			}
+			else if keyVariable.isImmutable() {
+				ReferenceException.throwImmutable(@data.loop.key.name, this)
+			}
 
 			@key = $compile.expression(@data.loop.key, this, @bindingScope)
 			@key.analyse()
@@ -310,10 +378,22 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		if @data.loop.value? {
-			@valueVariable = @bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
-
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
+			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
+
+			for var name in @value.listAssignments([]) {
+				var variable = @bindingScope.getVariable(name)
+
+				if @declaration || variable == null {
+					@defineValue = true
+
+					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
+				}
+				else if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, this)
+				}
+			}
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
@@ -346,12 +426,26 @@ class ArrayComprehensionForOf extends Expression {
 
 			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
-			@valueVariable.setRealType(realType)
-
-			@value.prepare()
+			if @value is IdentifierLiteral {
+				if @defineValue {
+					@value.type(realType, @bindingScope, this)
+				}
+				else {
+					@bindingScope.replaceVariable(@value.name(), realType, this)
+				}
+			}
+			else {
+				for var name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
+				}
+			}
 		}
 
 		if @key? {
+			unless @defineKey {
+				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
+			}
+
 			@key.prepare()
 		}
 

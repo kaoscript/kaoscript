@@ -398,7 +398,7 @@ class ReferenceType extends Type {
 			return type.getProperty(name)
 		}
 	} # }}}
-	// TODO: merge methods
+	// TODO merge methods
 	hashCode(): String => this.hashCode(false)
 	hashCode(fattenNull: Boolean): String { # {{{
 	// hashCode(fattenNull: Boolean = false): String { # {{{
