@@ -1,7 +1,7 @@
 func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, nIndex: Number, nLength: Number, continuous: Boolean, mut fallback: Boolean, helper, block: BlockBuilder, node: AbstractNode): Boolean { # {{{
 	var allArgs = tree.min == 0 && tree.rest
 
-	var late  fragments
+	var late fragments
 	if !allArgs {
 		if tree.rest && continuous {
 			// no test needed
@@ -141,7 +141,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 	var isTest = !((anyTested || type.isAny()) && type.isNullable() && (startIndex == -1 || leaf.max <= 0))
 	var isBacktrack = leaf.backtracks.length != 0
 
-	var late  fragments: BlockBuilder | ControlBuilder
+	var late fragments: BlockBuilder | ControlBuilder
 	var mut shouldClose = false
 	if isTest || isBacktrack {
 		if junction == Junction::AND {
@@ -479,7 +479,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 		}
 	}
 	else {
-		var late  fragments: BlockBuilder | ControlBuilder
+		var late fragments: BlockBuilder | ControlBuilder
 		var mut shouldClose = false
 
 		if junction == Junction::AND {

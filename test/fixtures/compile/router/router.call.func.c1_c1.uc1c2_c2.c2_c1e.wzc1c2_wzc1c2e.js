@@ -76,11 +76,11 @@ module.exports = function() {
 				throw Helper.badArgs();
 			}
 			if(t1(args[0])) {
-				if(t1(args[1])) {
-					return quxbaz.__ks_1.call(that, args[0], args[1]);
-				}
 				if(t0(args[1])) {
 					return quxbaz.__ks_2.call(that, args[0], args[1]);
+				}
+				if(t1(args[1])) {
+					return quxbaz.__ks_1.call(that, args[0], args[1]);
 				}
 				throw Helper.badArgs();
 			}

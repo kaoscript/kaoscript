@@ -15,10 +15,10 @@ class NullType extends Type {
 	clone() { # {{{
 		throw new NotSupportedException()
 	} # }}}
-	compareToRef(value: AnyType) => -value.compareToRef(this)
-	compareToRef(value: DictionaryType) => 1
-	compareToRef(value: NullType) => 0
-	compareToRef(value: ReferenceType) => -value.compareToRef(this)
+	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) => -value.compareToRef(this, equivalences)
+	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) => 1
+	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => 0
+	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) => -value.compareToRef(this, equivalences)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => 'Null'

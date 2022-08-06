@@ -128,15 +128,15 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 			fragments
 				.wrapNullable(@argument)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(',  @data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
 				.compile(@argument)
-				.code(')',  @data.operator)
+				.code(')', @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(',  @data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
 				.compile(@argument)
-				.code(')',  @data.operator)
+				.code(')', @data.operator)
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')

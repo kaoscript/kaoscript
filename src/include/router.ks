@@ -55,12 +55,13 @@ namespace Router {
 
 	struct Tree {
 		min: Number
-		max: Number						= min
-		variadic: Boolean				= false
-		rest: Boolean					= false
-		columns: Dictionary<TreeColumn>	= {}
-		order: Array<String>			= []
-		function: FunctionType?			= null
+		max: Number								= min
+		variadic: Boolean						= false
+		rest: Boolean							= false
+		columns: Dictionary<TreeColumn>			= {}
+		order: Array<String>					= []
+		equivalences: Array<Array<String>>?		= null
+		function: FunctionType?					= null
 	}
 
 	struct Group {
@@ -129,7 +130,8 @@ namespace Router {
 	}
 
 	struct TreeBranch extends TreeNode {
-		columns: Dictionary<TreeColumn>	= {}
+		columns: Dictionary<TreeColumn>			= {}
+		equivalences: Array<Array<String>>?		= null
 	}
 
 	type TreeColumn = TreeBranch | TreeLeaf

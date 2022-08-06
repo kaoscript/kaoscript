@@ -7,19 +7,131 @@ func regroupTreesByArguments2(trees: Array<Tree>) { # {{{
 	var groups: Dictionary<Array<Tree>> = {}
 
 	for var tree in trees {
-		var hash = getArgumentsHash4(tree)
-
-		if var group = groups[hash] {
-			group.push(tree)
+		for var hash in listEquivalentHashes(tree) {
+			if var group = groups[hash] {
+				group.push(tree)
+			}
+			else {
+				groups[hash] = [tree]
+			}
 		}
-		else {
-			groups[hash] = [tree]
+	}
+
+	var values = Dictionary.values(groups).sort((a, b) => b.length - a.length)
+
+	for var value, index in values when value.length > 0{
+		for var val in values from index + 1 when val.length > 0 {
+			val:Array.remove(...value)
 		}
 	}
 
 	for var group, key of groups when group.length > 1 {
 		regroupTreesByGroup(group, trees, last, [])
 	}
+} # }}}
+
+func listEquivalentHashes(tree: Tree) { # {{{
+	if tree.order.length == 0 {
+		return [`\(tree.function.index());`]
+	}
+	else if tree.equivalences? {
+		var mut orders = [tree.order]
+
+		for var eq in tree.equivalences {
+			orders = replaceOrder(eq, orders)
+		}
+
+		var result = []
+
+		for var order in orders {
+			var mut hashes = ['']
+
+			for var key in order {
+				hashes = listEquivalentHashes(tree.columns[key], hashes)
+			}
+
+			result.push(...hashes)
+		}
+
+		return result
+	}
+	else {
+		var mut hashes = ['']
+
+		for var key in tree.order {
+			hashes = listEquivalentHashes(tree.columns[key], hashes)
+		}
+
+		return hashes
+	}
+} # }}}
+func listEquivalentHashes(tree: TreeBranch, mut hashes: Array) { # {{{
+	if tree.equivalences? {
+		var mut orders = [tree.order]
+
+		for var eq in tree.equivalences {
+			orders = replaceOrder(eq, orders)
+		}
+
+		var result = []
+
+		for var order in orders {
+			var mut h = [...hashes]
+
+			for var key in order {
+				h = listEquivalentHashes(tree.columns[key], h)
+			}
+
+			result.push(...h)
+		}
+
+		return result
+	}
+	else {
+		for var key in tree.order {
+			hashes = listEquivalentHashes(tree.columns[key], hashes)
+		}
+
+		return hashes
+	}
+} # }}}
+func listEquivalentHashes(tree: TreeLeaf, hashes: Array) { # {{{
+	var index = tree.function.index()
+
+	for var hash, i in hashes {
+		hashes[i] += `\(index);`
+	}
+
+	return hashes
+} # }}}
+
+func replaceOrder(equivalences: Array<String>, orders: Array<Array<String>>): Array<Array<String>> { # {{{
+	var mut result = [...orders]
+
+	for var eq1, index in equivalences {
+		for var eq2 in equivalences from index + 1 {
+			for var order in orders {
+				var index1 = order.indexOf(eq1)
+
+				if index1 != -1 {
+					var index2 = order.indexOf(eq2)
+
+					if index2 != -1 {
+						var match = [...order]
+
+						match[index1] = eq2
+						match[index2] = eq1
+
+						result.push(match)
+
+						break
+					}
+				}
+			}
+		}
+	}
+
+	return result
 } # }}}
 
 func regroupTreesByGroup(mut group: Array<Tree>, trees: Array<Tree>, last: Tree, mut shadows: Array) { # {{{

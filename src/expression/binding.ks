@@ -196,7 +196,7 @@ class ArrayBindingElement extends Expression {
 				@defaultValue.analyse()
 			}
 
-			@thisAlias =  @data.name.kind == NodeKind::ThisExpression
+			@thisAlias = @data.name.kind == NodeKind::ThisExpression
 		}
 
 		for var modifier in @data.modifiers {
@@ -595,7 +595,7 @@ class ObjectBindingElement extends Expression {
 
 			@alias = this.compileVariable(@data.alias)
 
-			@thisAlias =  @data.alias.kind == NodeKind::ThisExpression
+			@thisAlias = @data.alias.kind == NodeKind::ThisExpression
 		}
 		else if @data.name.kind == NodeKind::ThisExpression {
 			@name = $compile.expression(@data.name.name, this)

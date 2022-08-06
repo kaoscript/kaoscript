@@ -27,15 +27,15 @@ module.exports = function() {
 		return "any";
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isStructInstance(value, Point);
-		const t1 = Type.isStruct;
+		const t0 = Type.isStruct;
+		const t1 = value => Type.isStructInstance(value, Point);
 		const t2 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return foobar.__ks_1.call(that, args[0]);
+				return foobar.__ks_0.call(that, args[0]);
 			}
 			if(t1(args[0])) {
-				return foobar.__ks_0.call(that, args[0]);
+				return foobar.__ks_1.call(that, args[0]);
 			}
 			if(t2(args[0])) {
 				return foobar.__ks_2.call(that, args[0]);

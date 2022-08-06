@@ -119,7 +119,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: AnyType) { # {{{
+	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
 		if this.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -135,7 +135,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: NullType) { # {{{
+	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
 		if this.isNull() {
 			return 0
 		}
@@ -143,9 +143,54 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: ReferenceType) { # {{{
+	// TODO replace as `String[][]`
+	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
 		if @name == value.name() {
+			if @isNullable() != value.isNullable() {
+				return @nullable ? 1 : -1
+			}
+
 			if @parameters.length == 0 {
+				if value.hasParameters() {
+					return -1
+				}
+				else {
+					return 0
+				}
+			}
+
+			return @parameters[0].compareTo(value.parameter(0))
+		}
+
+		if @isTypeOf() {
+			if value.type().isEnum() {
+				var name = value.discard().type().name()
+
+				return $weightTOFs[@name] - $weightTOFs[name]
+			}
+
+			if @isNullable() != value.isNullable() {
+				return @nullable ? 1 : -1
+			}
+
+			if value.isTypeOf() {
+				if @hasParameters() {
+					if value.hasParameters() {
+						return $weightTOFs[@name] - $weightTOFs[value.name()]
+					}
+					else {
+						return 1
+					}
+				}
+				else if value.hasParameters() {
+					return -1
+				}
+				else {
+					return $weightTOFs[@name] - $weightTOFs[value.name()]
+				}
+			}
+
+			if @hasParameters() {
 				if value.hasParameters() {
 					return -1
 				}
@@ -154,44 +199,76 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return @parameters[0].compareTo(value.parameter(0))
-		}
-		else if this.isTypeOf() {
-			if this.hasParameters() {
-				return 1
-			}
-			else if this.isNullable() != value.isNullable() {
-				return this.isNullable() ? 1 : -1
-			}
-			else if value.isTypeOf() {
-				return $weightTOFs[@name] - $weightTOFs[value.name()]
-			}
-			else if value.isInstance() {
-				return -1
-			}
-			else {
-				return 1
-			}
-		}
-		else if value.isTypeOf() {
-			if value.hasParameters() {
-				return -1
-			}
-			else {
-				return 1
-			}
-		}
-		else if this.type().isClass() {
-			if value.type().isInstance() {
-				return Helper.compareString(@type.name(), value.name())
-			}
-			else {
-				return 1
-			}
-		}
-		else {
 			return -1
 		}
+
+		if value.isTypeOf() {
+			if @type().isEnum() {
+				var name = @discard().type().name()
+
+				return $weightTOFs[@name] - $weightTOFs[name]
+			}
+
+			if @isNullable() != value.isNullable() {
+				return @nullable ? 1 : -1
+			}
+
+			if value.hasParameters() {
+				if @hasParameters() {
+					return 1
+				}
+				else {
+					return -1
+				}
+			}
+
+			return 1
+		}
+
+		var valType = value.type()
+
+		if (@type().isClass() && valType.isClass()) || (@type.isStruct() && valType.isStruct()) || (@type.isTuple() && valType.isTuple()) {
+			if @type.isInheriting(valType) {
+				return -1
+			}
+			else if valType.isInheriting(@type) {
+				return 1
+			}
+			else if @isNullable() != value.isNullable() {
+				return @nullable ? 1 : -1
+			}
+		}
+
+		if equivalences? {
+			if equivalences.length == 0 {
+				equivalences.push([@hashCode(), value.hashCode()])
+			}
+			else {
+				var tHash = @hashCode()
+				var vHash = value.hashCode()
+
+				var mut nf = true
+
+				for var eq in equivalences while nf {
+					if eq.contains(tHash) {
+						eq.pushUniq(vHash)
+
+						nf = false
+					}
+					else if eq.contains(vHash) {
+						eq.pushUniq(tHash)
+
+						nf = false
+					}
+				}
+
+				if nf {
+					equivalences.push([tHash, vHash])
+				}
+			}
+		}
+
+		return Helper.compareString(@type.name(), valType.name())
 	} # }}}
 	compareToRef(value: UnionType) { # {{{
 		return -1
@@ -397,6 +474,13 @@ class ReferenceType extends Type {
 			else if (value.name() == 'Tuple' && this.type().isTuple()) || (@name == 'Tuple' && value.type().isTuple()) {
 				return false
 			}
+			else if value.name() == 'Object' && this.isObject() {
+				if @nullable && !nullcast && !value.isNullable() {
+					return false
+				}
+
+				return true
+			}
 			else {
 				return this.type().isAssignableToVariable(value.type(), anycast, nullcast, downcast)
 			}
@@ -440,6 +524,7 @@ class ReferenceType extends Type {
 	isExtendable() => @name == 'Function'
 	isFunction() => @name == 'Function' || this.type().isFunction()
 	isHybrid() => this.type().isHybrid()
+	isInheriting(superclass) => this.type().isInheriting(superclass)
 	isInstance() => this.type().isClass() || this.type().isStruct() || this.type().isTuple()
 	isInstanceOf(value: AnyType) => false
 	isInstanceOf(value: ReferenceType) { # {{{

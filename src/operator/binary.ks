@@ -295,7 +295,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
-			var late  operator: String
+			var late operator: String
 
 			if @left.type().discard().isFlags() {
 				operator = ' | '
@@ -795,7 +795,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		if @data.right.kind == NodeKind::JunctionExpression {
-			var late  type: Type
+			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)
@@ -919,7 +919,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		if @data.right.kind == NodeKind::JunctionExpression {
-			var late  type: Type
+			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)

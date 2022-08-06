@@ -65,7 +65,7 @@ module.exports = function() {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, SubClassA);
-		const t1 = value => Type.isClassInstance(value, Master) || Type.isClassInstance(value, Disturb);
+		const t1 = value => Type.isClassInstance(value, Disturb) || Type.isClassInstance(value, Master);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

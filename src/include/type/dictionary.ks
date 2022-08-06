@@ -28,6 +28,7 @@ class DictionaryType extends Type {
 	clone() { # {{{
 		throw new NotSupportedException()
 	} # }}}
+	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => -1
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
 			kind: TypeKind::Dictionary

@@ -229,7 +229,7 @@ class IfStatement extends Statement {
 				}
 
 				for var map, name of @lateInitVariables {
-					var late  type: Type
+					var late type: Type
 
 					if map.true.initializable {
 						if map.false.initializable {

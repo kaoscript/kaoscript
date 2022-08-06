@@ -25,7 +25,8 @@ clean:
 	./bin/kaoscript --clean
 
 ok:
-	make clean
+	@make std
+	@make clean
 	make comp
 	make comp
 	make comp

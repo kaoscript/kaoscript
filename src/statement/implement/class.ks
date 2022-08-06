@@ -626,7 +626,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			assessment
 			block
 			exhaustive ? null : Router.FooterType::NO_THROW
-			exhaustive ? null : (fragments, _) =>  {
+			exhaustive ? null : (fragments, _) => {
 				fragments
 					.newControl()
 					.code(`if(that.\(@name))`)
@@ -661,7 +661,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			assessment
 			block
 			exhaustive ? null : Router.FooterType::NO_THROW
-			exhaustive ? null : (fragments, _) =>  {
+			exhaustive ? null : (fragments, _) => {
 				fragments
 					.newControl()
 					.code(`if(\(@variable.name()).\(@name))`)

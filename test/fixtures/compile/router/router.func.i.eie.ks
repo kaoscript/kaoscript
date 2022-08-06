@@ -1,4 +1,4 @@
-enum Color {
+enum Color<Number> {
 	Red
 	Green
 	Blue

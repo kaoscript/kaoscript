@@ -45,7 +45,7 @@ class Parameter extends AbstractNode {
 					return 0
 				}
 
-				if type.max() > 1  {
+				if type.max() > 1 {
 					return i + 1
 				}
 			}
@@ -171,7 +171,7 @@ class Parameter extends AbstractNode {
 
 				parameter.toParameterFragments(fragments)
 			}
-			else if type.max() > 1  {
+			else if type.max() > 1 {
 				fragments.code($comma) if i + offset > 0
 
 				parameter.toParameterFragments(fragments)
@@ -1609,7 +1609,7 @@ class ThisExpressionParameter extends ThisExpression {
 		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
 			var class = method.parent()
 
-			var late  variable
+			var late variable
 
 			if method.isInstance() {
 				variable = class.type().type().getInstanceVariable(@variableName)

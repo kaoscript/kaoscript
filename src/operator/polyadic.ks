@@ -377,7 +377,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
 		if @isEnum {
-			var late  operator: String
+			var late operator: String
 
 			if @operands[0].type().discard().isFlags() {
 				operator = ' | '

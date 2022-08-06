@@ -292,7 +292,7 @@ abstract class Importer extends Statement {
 		}
 
 		if argument.required {
-			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined()  {
+			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined() {
 				ReferenceException.throwDefined(data.value.name, this)
 			}
 
@@ -446,7 +446,7 @@ abstract class Importer extends Statement {
 			for var i from 0 til metadata.aliens.length by 3 {
 				var index = metadata.aliens[i]
 				var name = metadata.aliens[i + 1]
-				var late  type
+				var late type
 
 				if !?reqReferences[index] {
 					type = Type.import(index, metadata.references, reqReferences, alterations, queue, @scope, this)
@@ -973,7 +973,7 @@ abstract class Importer extends Statement {
 			}
 			else {
 				if !destructuring || @options.format.destructuring == 'es5' {
-					var late  varname
+					var late varname
 
 					if @reusable {
 						varname = @reuseName
@@ -1438,7 +1438,7 @@ class ImportWorker {
 		for var i from 0 til @metaRequirements.requirements.length by 3 {
 			var index = @metaRequirements.requirements[i]
 			var name = @metaRequirements.requirements[i + 1]
-			var late  type
+			var late type
 
 			if !?references[index] {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)

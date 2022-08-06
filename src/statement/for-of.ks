@@ -124,7 +124,7 @@ class ForOfStatement extends Statement {
 				if @defineValue {
 					@value.type(realType, @bindingScope, this)
 				}
-				else  {
+				else {
 					@bindingScope.replaceVariable(@value.name(), realType, this)
 				}
 			}

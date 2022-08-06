@@ -187,16 +187,16 @@ class UnionType extends Type {
 
 		return that
 	} # }}}
-	compareToRef(value: AnyType) { # {{{
+	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: NullType) { # {{{
+	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: ReferenceType) { # {{{
+	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: UnionType) { # {{{
+	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
 		return 1
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -461,7 +461,7 @@ class UnionType extends Type {
 	toQuote(double: Boolean): String { # {{{
 		var elements = [type.toQuote() for type in @types]
 
-		var late  last
+		var late last
 		if @explicitNullity {
 			last = 'Null'
 		}
@@ -526,6 +526,48 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::AND
+	} # }}}
+	override toTestType() { # {{{
+		var types = []
+
+		for var t1 in @types {
+			if t1.isInstance() {
+				var mut add = true
+
+				for var t2 in @types while add when t2 != t1 {
+					if t1.isInheriting(t2) {
+						add = false
+					}
+				}
+
+				if add {
+					types.push(t1)
+				}
+			}
+			else {
+				types.push(t1)
+			}
+		}
+
+		if types.length == 1 {
+			var type = @types[0]
+
+			if @nullable == type.isNullable() {
+				return type
+			}
+			else {
+				return type.setNullable(@nullable)
+			}
+		}
+		else if types.length != @types.length {
+			var clone = @clone()
+
+			clone._types = types
+
+			return clone
+		}
+
+		return this
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('union')

@@ -212,6 +212,12 @@ class NamedType extends Type {
 
 		return false
 	} # }}}
+	isInheriting(superclass: ReferenceType) { # {{{
+		return false unless superclass.isInstance()
+
+		return @isInheriting(superclass.type())
+	} # }}}
+	isInheriting(superclass: Type) => false
 	isInstanceOf(value: Type) => @type.isInstanceOf(value)
 	isMorePreciseThan(value: Type) { # {{{
 		if value is NamedType {

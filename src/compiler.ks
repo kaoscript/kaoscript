@@ -79,7 +79,7 @@ var $ast = {
 				end: data.end
 			}
 		}
-		else if data.body.kind == NodeKind::Block ||  data.body.kind == NodeKind::ReturnStatement {
+		else if data.body.kind == NodeKind::Block || data.body.kind == NodeKind::ReturnStatement {
 			return data.body
 		}
 		else if data.body.kind == NodeKind::IfStatement || data.body.kind == NodeKind::UnlessStatement {

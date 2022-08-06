@@ -40,7 +40,7 @@ class AnyType extends Type {
 			return 1
 		}
 	} # }}}
-	compareToRef(value: AnyType) { # {{{
+	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
 		if @nullable == value.isNullable() {
 			return 0
 		}
@@ -51,8 +51,8 @@ class AnyType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: NullType) => -1
-	compareToRef(value: ReferenceType) { # {{{
+	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => -1
+	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
 		if value.isAny() {
 			if @nullable == value.isNullable() {
 				return 0

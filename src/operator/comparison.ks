@@ -492,7 +492,7 @@ class EqualityOperator extends ComparisonOperator {
 	} # }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { # {{{
 		if @nanLeft {
-			if rightReusable && reuseName != null  {
+			if rightReusable && reuseName != null {
 				fragments.code('Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
 			}
 			else {
@@ -500,7 +500,7 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 		else if @nanRight {
-			if leftReusable && reuseName != null  {
+			if leftReusable && reuseName != null {
 				fragments.code('Number.isNaN(', reuseName, ')')
 			}
 			else {
@@ -562,7 +562,7 @@ class InequalityOperator extends EqualityOperator {
 	inferWhenTrueTypes(inferables) => super.inferWhenFalseTypes(inferables)
 	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { # {{{
 		if @nanLeft {
-			if rightReusable && reuseName != null  {
+			if rightReusable && reuseName != null {
 				fragments.code('!Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
 			}
 			else {
@@ -570,7 +570,7 @@ class InequalityOperator extends EqualityOperator {
 			}
 		}
 		else if @nanRight {
-			if leftReusable && reuseName != null  {
+			if leftReusable && reuseName != null {
 				fragments.code('!Number.isNaN(', reuseName, ')')
 			}
 			else {
@@ -617,7 +617,7 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 	abstract runtime(): String
 	abstract symbol(): String
 	toNativeFragments(fragments, reuseName?, leftReusable, rightReusable) { # {{{
-		if leftReusable && reuseName != null  {
+		if leftReusable && reuseName != null {
 			fragments.code(reuseName)
 		}
 		else {
@@ -626,7 +626,7 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 
 		fragments.code($space, this.symbol(), $space)
 
-		if rightReusable && reuseName != null  {
+		if rightReusable && reuseName != null {
 			fragments.code('(', reuseName, $equals).compile(@right).code(')')
 		}
 		else {

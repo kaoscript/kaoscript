@@ -1,6 +1,6 @@
 {
 	"explorer.fileNesting.patterns": {
-		"*.ks": "${capture}.js, ${capture}.json, ${capture}.error, .${capture}.ks.*",
+		"*.ks": "${capture}.error, .${capture}.ks.*",
 	},
 	"files.exclude": {
 		"**/.git": true,

@@ -1,5 +1,6 @@
 const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	var TimSort = require("timsort");
 	function $clone() {
 		return $clone.__ks_rt(this, arguments);
 	};
@@ -23,63 +24,89 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const $merge = (() => {
-		const d = new Dictionary();
-		d.merge = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = Type.isValue;
-				if(args.length === 3) {
-					if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
-						return __ks_rt.__ks_0.call(null, args[0], args[1], args[2]);
-					}
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(source, key, value) {
-				if(Type.isArray(value)) {
-					source[key] = __ks_Array.__ks_func_clone_0.call(value);
-				}
-				else if(!Type.isPrimitive(value)) {
-					if(Type.isDictionary(source[key]) || Type.isObject(source[key])) {
-						$merge.object(source[key], value);
-					}
-					else {
-						source[key] = $clone.__ks_0(value);
-					}
-				}
-				else {
-					source[key] = value;
-				}
-				return source;
-			};
-			return __ks_rt;
-		})();
-		d.object = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = Type.isValue;
-				if(args.length === 2) {
-					if(t0(args[0]) && t0(args[1])) {
-						return __ks_rt.__ks_0.call(null, args[0], args[1]);
-					}
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(source, current) {
-				for(const key in current) {
-					if(Type.isValue(source[key])) {
-						$merge.merge(source, key, current[key]);
-					}
-					else {
-						source[key] = current[key];
-					}
-				}
-			};
-			return __ks_rt;
-		})();
-		return d;
-	})();
+	function $merge() {
+		return $merge.__ks_rt(this, arguments);
+	};
+	$merge.__ks_0 = function(source, key, value) {
+		if(Type.isArray(value)) {
+			source[key] = __ks_Array.__ks_func_clone_0.call(value);
+		}
+		else if(!Type.isPrimitive(value)) {
+			if(Type.isDictionary(source[key]) || Type.isObject(source[key])) {
+				$mergeObject(source[key], value);
+			}
+			else {
+				source[key] = $clone.__ks_0(value);
+			}
+		}
+		else {
+			source[key] = value;
+		}
+		return source;
+	};
+	$merge.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 3) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
+				return $merge.__ks_0.call(that, args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	function $mergeObject() {
+		return $mergeObject.__ks_rt(this, arguments);
+	};
+	$mergeObject.__ks_0 = function(source, current) {
+		for(const key in current) {
+			if(Type.isValue(source[key])) {
+				$merge(source, key, current[key]);
+			}
+			else {
+				source[key] = current[key];
+			}
+		}
+	};
+	$mergeObject.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return $mergeObject.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	var __ks_Array = {};
 	var __ks_Dictionary = {};
+	__ks_Array.__ks_sttc_merge_0 = function(args) {
+		let source = [];
+		let i = 0;
+		let l = args.length;
+		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
+			++i;
+		}
+		++i;
+		while(i < l) {
+			if(Type.isArray(args[i])) {
+				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
+					value = args[i][__ks_0];
+					__ks_Array.__ks_func_pushUniq_0.call(source, [value]);
+				}
+			}
+			++i;
+		}
+		return source;
+	};
+	__ks_Array.__ks_sttc_same_0 = function(a, b) {
+		if(a.length !== b.length) {
+			return false;
+		}
+		for(let i = 0, __ks_0 = a.length; i < __ks_0; ++i) {
+			if(a[i] !== b[i]) {
+				return false;
+			}
+		}
+		return true;
+	};
 	__ks_Array.__ks_func_append_0 = function(args) {
 		let l = null, i = null, j = null, arg = null;
 		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
@@ -164,6 +191,22 @@ module.exports = function() {
 		}
 		return (this.length !== 0) ? this[this.length - index] : null;
 	};
+	__ks_Array.__ks_func_pushUniq_0 = function(args) {
+		if(args.length === 1) {
+			if(!__ks_Array.__ks_func_contains_0.call(this, args[0])) {
+				this.push(args[0]);
+			}
+		}
+		else {
+			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
+				item = args[__ks_0];
+				if(!__ks_Array.__ks_func_contains_0.call(this, item)) {
+					this.push(item);
+				}
+			}
+		}
+		return this;
+	};
 	__ks_Array.__ks_func_remove_0 = function(items) {
 		if(items.length === 1) {
 			let item = items[0];
@@ -185,51 +228,33 @@ module.exports = function() {
 		}
 		return this;
 	};
-	__ks_Array.__ks_sttc_merge_0 = function(args) {
-		let source = [];
-		let i = 0;
-		let l = args.length;
-		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
-			++i;
-		}
-		++i;
-		while(i < l) {
-			if(Type.isArray(args[i])) {
-				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
-					value = args[i][__ks_0];
-					__ks_Array.__ks_func_pushUniq_0.call(source, [value]);
-				}
-			}
-			++i;
-		}
-		return source;
-	};
-	__ks_Array.__ks_func_pushUniq_0 = function(args) {
-		if(args.length === 1) {
-			if(!__ks_Array.__ks_func_contains_0.call(this, args[0])) {
-				this.push(args[0]);
-			}
-		}
-		else {
-			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = args[__ks_0];
-				if(!__ks_Array.__ks_func_contains_0.call(this, item)) {
-					this.push(item);
-				}
-			}
-		}
+	__ks_Array.__ks_func_sort_0 = function(compareFn) {
+		TimSort.sort(this, compareFn);
 		return this;
 	};
-	__ks_Array.__ks_sttc_same_0 = function(a, b) {
-		if(a.length !== b.length) {
-			return false;
+	__ks_Array._sm_merge = function() {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+		let pts;
+		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+			return __ks_Array.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
 		}
-		for(let i = 0, __ks_0 = a.length; i < __ks_0; ++i) {
-			if(a[i] !== b[i]) {
-				return false;
+		if(Array.merge) {
+			return Array.merge(...arguments);
+		}
+		throw Helper.badArgs();
+	};
+	__ks_Array._sm_same = function() {
+		const t0 = Type.isValue;
+		if(arguments.length === 2) {
+			if(t0(arguments[0]) && t0(arguments[1])) {
+				return __ks_Array.__ks_sttc_same_0(arguments[0], arguments[1]);
 			}
 		}
-		return true;
+		if(Array.same) {
+			return Array.same(...arguments);
+		}
+		throw Helper.badArgs();
 	};
 	__ks_Array._im_append = function(that, ...args) {
 		return __ks_Array.__ks_func_append_rt(that, args);
@@ -331,39 +356,30 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	__ks_Array._im_remove = function(that, ...args) {
-		return __ks_Array.__ks_func_remove_rt(that, args);
-	};
-	__ks_Array.__ks_func_remove_rt = function(that, args) {
-		return __ks_Array.__ks_func_remove_0.call(that, Array.from(args));
-	};
-	__ks_Array._sm_merge = function() {
-		const t0 = Type.isValue;
-		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-		let pts;
-		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-			return __ks_Array.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
-		}
-		if(Array.merge) {
-			return Array.merge(...arguments);
-		}
-		throw Helper.badArgs();
-	};
 	__ks_Array._im_pushUniq = function(that, ...args) {
 		return __ks_Array.__ks_func_pushUniq_rt(that, args);
 	};
 	__ks_Array.__ks_func_pushUniq_rt = function(that, args) {
 		return __ks_Array.__ks_func_pushUniq_0.call(that, Array.from(args));
 	};
-	__ks_Array._sm_same = function() {
+	__ks_Array._im_remove = function(that, ...args) {
+		return __ks_Array.__ks_func_remove_rt(that, args);
+	};
+	__ks_Array.__ks_func_remove_rt = function(that, args) {
+		return __ks_Array.__ks_func_remove_0.call(that, Array.from(args));
+	};
+	__ks_Array._im_sort = function(that, ...args) {
+		return __ks_Array.__ks_func_sort_rt(that, args);
+	};
+	__ks_Array.__ks_func_sort_rt = function(that, args) {
 		const t0 = Type.isValue;
-		if(arguments.length === 2) {
-			if(t0(arguments[0]) && t0(arguments[1])) {
-				return __ks_Array.__ks_sttc_same_0(arguments[0], arguments[1]);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_Array.__ks_func_sort_0.call(that, args[0]);
 			}
 		}
-		if(Array.same) {
-			return Array.same(...arguments);
+		if(that.sort) {
+			return that.sort(...args);
 		}
 		throw Helper.badArgs();
 	};
@@ -416,7 +432,7 @@ module.exports = function() {
 			if(Type.isDictionary(args[i]) || Type.isObject(args[i])) {
 				for(const key in args[i]) {
 					const value = args[i][key];
-					$merge.merge(source, key, value);
+					$merge(source, key, value);
 				}
 			}
 			++i;

@@ -59,7 +59,7 @@ module.exports = function() {
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = value => Type.isClassInstance(value, ClassB);
-			const t1 = value => Type.isClassInstance(value, ClassD) || Type.isClassInstance(value, ClassC);
+			const t1 = value => Type.isClassInstance(value, ClassC) || Type.isClassInstance(value, ClassD);
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_1.call(that, args[0]);

@@ -860,7 +860,9 @@ abstract class Type {
 	toTestFunctionFragments(fragments, node, junction) { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	toTestType() => this
 	toTypeQuote() => this.toQuote()
+	// TODO `: this`
 	type() => this
 	unflagAltering(): this
 	unflagRequired(): this { # {{{

@@ -287,7 +287,7 @@ class ConstructorBlock extends FunctionBlock {
 		@initializedVariables: Dictionary<Boolean>		= {}
 	}
 	override initializeVariable(variable, expression, node) { # {{{
-		var late  name
+		var late name
 
 		if variable.instance {
 			name = `this.\(variable.name)`

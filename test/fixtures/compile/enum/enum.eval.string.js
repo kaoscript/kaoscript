@@ -45,8 +45,8 @@ module.exports = function(expect) {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isEnum;
-		const t1 = value => Type.isEnumInstance(value, CardSuit);
-		const t2 = Type.isNumber;
+		const t1 = Type.isNumber;
+		const t2 = value => Type.isEnumInstance(value, CardSuit);
 		const t3 = Type.isString;
 		const t4 = Type.isDictionary;
 		const t5 = Type.isValue;
@@ -55,10 +55,10 @@ module.exports = function(expect) {
 				return foobar.__ks_0.call(that, args[0]);
 			}
 			if(t1(args[0])) {
-				return foobar.__ks_1.call(that, args[0]);
+				return foobar.__ks_2.call(that, args[0]);
 			}
 			if(t2(args[0])) {
-				return foobar.__ks_2.call(that, args[0]);
+				return foobar.__ks_1.call(that, args[0]);
 			}
 			if(t3(args[0])) {
 				return foobar.__ks_4.call(that, args[0]);

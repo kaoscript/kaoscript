@@ -22,7 +22,7 @@ func buildTree(group: Group, name: String, ignoreIndistinguishable: Boolean, exc
 			}
 		}
 
-		tree.order = sortNodes(tree.columns)
+		sortNodes2(tree)
 
 		if group.n == 1 {
 			regroupLeaf_SiblingsEq(tree, node)
@@ -107,7 +107,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 
 		++argCount
 
-		var type = parameter.parameter.getArgumentType()
+		var type = parameter.parameter.getArgumentType().toTestType()
 
 		if type.isNullable() {
 			var types = type.split([Type.Null])
@@ -309,7 +309,7 @@ func buildNode(tree: Tree, mut branch: TreeBranch, pIndex: Number, max: Number, 
 		}
 	}
 
-	branch.order = sortNodes(branch.columns)
+	sortNodes2(branch)
 
 	resolveBackTracing(branch, max)
 
@@ -495,7 +495,7 @@ func expandOneGroup(group: Group, name: String, ignoreIndistinguishable: Boolean
 
 			for var parameter, index in parameters {
 				if parameter.min() == 1 {
-					var type = parameter.type()
+					var type = parameter.type().toTestType()
 
 					addOneGroupRow(group, name, ignoreIndistinguishable, node, function, parameters, parameter, type, nullTested, null, index, argIndex)
 
@@ -516,7 +516,7 @@ func expandOneGroup(group: Group, name: String, ignoreIndistinguishable: Boolean
 			var mut nullTested = false
 
 			for var parameter, index in parameters {
-				var type = parameter.type()
+				var type = parameter.type().toTestType()
 				var mut addable = true
 
 				for var t in types while addable {
@@ -1161,7 +1161,7 @@ func regroupLeaf_SiblingsEq(branch: TreeBranch | Tree, node: AbstractNode) { # {
 			branch.columns[type.hashCode()] = column
 		}
 
-		branch.order = sortNodes(branch.columns)
+		sortNodes2(branch)
 	}
 } # }}}
 
@@ -1198,7 +1198,7 @@ func regroupTreeByIndex(tree: Tree | TreeBranch, node: AbstractNode) { # {{{
 
 		tree.columns[type.hashCode()] = column
 
-		tree.order = sortNodes(tree.columns)
+		sortNodes2(tree)
 	}
 } # }}}
 
@@ -1316,10 +1316,12 @@ func applyBackTracking(tree: TreeLeaf, max: Number, backtracing: Array) { # {{{
 	}
 } # }}}
 
-func sortNodes(nodes: Dictionary<TreeColumn>): Array<String> { # {{{
+// TODO
+// func sortNodes2(tree: { columns: Dictionary<TreeColumn>, equivalences: Array<Array<String>>?, order: Array<String> }): Void { # {{{
+func sortNodes2(tree): Void { # {{{
 	var items = []
 
-	for var node, key of nodes {
+	for var node, key of tree.columns {
 		items.push({
 			key
 			node
@@ -1333,13 +1335,15 @@ func sortNodes(nodes: Dictionary<TreeColumn>): Array<String> { # {{{
 	}
 
 	if items.length == 1 {
-		return [items[0].key]!!
+		tree.order = [items[0].key]
+
+		return
 	}
 
 	for var node in items {
 		if node.alternative {
 			for var item in items when item != node {
-				if !item.alternative || item.type.matchContentOf(node.type) {
+				if !item.alternative || item.type.isAssignableToVariable(node.type, true, true, false) {
 					node.children.push(item)
 				}
 			}
@@ -1353,63 +1357,43 @@ func sortNodes(nodes: Dictionary<TreeColumn>): Array<String> { # {{{
 		}
 		else {
 			for var item in items when item != node {
-				if !item.isAny && item.type.matchContentOf(node.type) {
+				if !item.isAny && item.type.isAssignableToVariable(node.type, true, true, false) {
 					node.children.push(item)
 				}
 			}
 		}
 	}
 
-	var levels = []
+	var equivalences = []
 
-	while items.length != 0 {
-		var level = []
-
-		for var item in items desc when item.children.length == 0 {
-			items.remove(item)
-
-			level.push(item)
+	items.sort((a, b) => {
+		if a.children:Array.contains(b) {
+			// console.log(a.key, b.key, 1, 'b⊂a')
+			return 1
+		}
+		if b.children:Array.contains(a) {
+			// console.log(a.key, b.key, -1, 'a⊂b')
+			return -1
 		}
 
-		if level.length == 0 {
-			items.sort((a, b) => b.children.length - a.children.length)
+		var d = b.usage - a.usage
 
-			level.push(items.shift())
-		}
-
-		for var item in items {
-			item.children:Array.remove(...level)
-		}
-
-		levels.push(level)
-	}
-
-	var sorted = []
-
-	for var level in levels {
-		if level.length == 1 {
-			sorted.push(level[0].key)
+		if d == 0 {
+			// console.log(a.key, b.key, a.type.compareToRef(b.type), d, a.type.isTypeOf(), b.type.isTypeOf(), b.type.hasParameters())
+			return a.type.compareToRef(b.type, equivalences)
 		}
 		else {
-			level.sort((a, b) => {
-
-				var d = b.usage - a.usage
-
-				if d == 0 {
-					return a.type.compareToRef(b.type)
-				}
-				else {
-					return d
-				}
-			})
-
-			for var item in level {
-				sorted.push(item.key)
-			}
+			// console.log(a.key, b.key, d)
+			return d
 		}
-	}
+	})
+	// console.log([item.key for var item in items])
 
-	return sorted!!
+	tree.order = [item.key for var item in items]
+
+	if equivalences.length != 0 {
+		tree.equivalences = equivalences
+	}
 } # }}}
 
 func isSameFunction(...nodes: TreeNode): Boolean { # {{{
@@ -1467,8 +1451,8 @@ func regroupBranch_TopForkEqLastChild(branch: TreeBranch | Tree) { # {{{
 
 	return unless Array.same(getFunctions(first), getFunctions(last))
 
-	var late  type
-	var late  node
+	var late type
+	var late node
 
 	if isSameFork(branch, last) {
 		return if last.type.isAssignableToVariable(first.type)
@@ -1547,7 +1531,7 @@ func getParameterHash(tree: TreeBranch, hashes: Array, all: Boolean): Array { # 
 	}
 
 	if all {
-		for var hash in tree.order  {
+		for var hash in tree.order {
 			getParameterHash(tree.columns[hash], hashes, all)
 		}
 	}
@@ -1745,7 +1729,7 @@ func regroupBranch_ChildrenEqFunc(branch: TreeBranch | Tree, node: AbstractNode)
 	}
 
 	if reorder {
-		branch.order = sortNodes(branch.columns)
+		sortNodes2(branch)
 	}
 } # }}}
 
@@ -1866,7 +1850,8 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 			}
 			else {
 				branch.columns[hash] = leaf
-				branch.order = sortNodes(branch.columns)
+
+				sortNodes2(branch)
 			}
 		}
 		else if i == 0 {
@@ -1915,7 +1900,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 				isNode: true
 			)
 
-			branch.order = sortNodes(branch.columns)
+			sortNodes2(branch)
 
 			branch = branch.columns[hash]
 			index++
@@ -2036,7 +2021,7 @@ func regroupBranch_Children_ForkAlike_SiblingsEq(branch: TreeBranch | Tree, node
 	for var key in branch.order {
 		var column = branch.columns[key]
 
-		var late  hash: String
+		var late hash: String
 
 		if column.node {
 			hash =	`:\(column.min):\(column.max):\(column.variadic):\(column.rest)`
@@ -2082,7 +2067,7 @@ func regroupBranch_Children_ForkAlike_SiblingsEq(branch: TreeBranch | Tree, node
 	}
 
 	if reorder {
-		branch.order = sortNodes(branch.columns)
+		sortNodes2(branch)
 	}
 } # }}}
 
@@ -2165,53 +2150,25 @@ func sortNodes(types: Array<Type>): Array<String> { # {{{
 		}
 		else {
 			for var item in items when item != node {
-				if !item.isAny && item.type.matchContentOf(node.type) {
+				if !item.isAny && item.type.isAssignableToVariable(node.type, true, true, false) {
 					node.children.push(item)
 				}
 			}
 		}
 	}
 
-	var levels = []
-
-	while items.length != 0 {
-		var level = []
-
-		for var item in items desc when item.children.length == 0 {
-			items.remove(item)
-
-			level.push(item)
+	items.sort((a, b) => {
+		if a.children:Array.contains(b) {
+			return 1
+		}
+		if b.children:Array.contains(a) {
+			return -1
 		}
 
-		if level.length == 0 {
-			items.sort((a, b) => b.children.length - a.children.length)
+		return a.type.compareToRef(b.type)
+	})
 
-			level.push(items.shift())
-		}
-
-		for var item in items {
-			item.children:Array.remove(...level)
-		}
-
-		levels.push(level)
-	}
-
-	var sorted = []
-
-	for var level in levels {
-		if level.length == 1 {
-			sorted.push(level[0].key)
-		}
-		else {
-			level.sort((a, b) => a.type.compareToRef(b.type))
-
-			for var item in level {
-				sorted.push(item.key)
-			}
-		}
-	}
-
-	return sorted
+	return [item.key for var item in items]
 } # }}}
 
 func addOneNameRow(group: Group, name: String, node: AbstractNode, function: FunctionType, parameter: ParameterType, type: Type, union: UnionMatch?, paramIndex: Number, rows: Dictionary) { # {{{
