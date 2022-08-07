@@ -276,9 +276,19 @@ class FunctionDeclaration extends Statement {
 	initializeVariable(variable, expression, node)
 	name() => @name
 	toMainFragments(fragments) { # {{{
+		var declarators = @variable.declarators()
 		var name = @variable.getSecureName()
-		var line = fragments.newLine()
-		var block = line.code(`function \(name)()`).newBlock()
+		var line = fragments.newLine().code(`function \(name)(`)
+
+		if declarators.length == 1 && declarators[0].hasPreservedParameter() {
+			for var parameter, index in declarators[0].parameters() {
+				line.code($comma) unless index == 0
+
+				line.compile(parameter)
+			}
+		}
+
+		var block = line.code(`)`).newBlock()
 
 		block.line(`return \(name).__ks_rt(this, arguments)`)
 
@@ -435,6 +445,13 @@ class FunctionDeclarator extends AbstractNode {
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
+	hasPreservedParameter() { # {{{
+		for var parameter in @parameters {
+			return true if parameter.isPreserved()
+		}
+
+		return false
+	} # }}}
 	index(@index): this
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter

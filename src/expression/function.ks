@@ -66,6 +66,13 @@ class AnonymousFunctionExpression extends Expression {
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
+	hasPreservedParameter() { # {{{
+		for var parameter in @parameters {
+			return true if parameter.isPreserved()
+		}
+
+		return false
+	} # }}}
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -80,8 +87,29 @@ class AnonymousFunctionExpression extends Expression {
 
 		var block = fragments.code('(() =>').newBlock()
 
-		var lineRouter = block.newLine()
-		var blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+		var lineRouter = block.newLine().code(`const __ks_rt = (`)
+
+		var preserved = @hasPreservedParameter()
+
+		if preserved {
+			for var parameter in @parameters {
+				lineRouter.compile(parameter).code($comma)
+			}
+		}
+
+		var blockRouter = lineRouter.code(`...args) =>`).newBlock()
+
+		if preserved {
+			var line = blockRouter.newLine().code(`args.unshift(`)
+
+			for var parameter, index in @parameters {
+				line.code($comma) unless index == 0
+
+				line.compile(parameter)
+			}
+
+			line.code(')').done()
+		}
 
 		Router.toFragments(
 			(function, line) => {
@@ -216,6 +244,13 @@ class ArrowFunctionExpression extends Expression {
 			return 0
 		}
 	} # }}}
+	hasPreservedParameter() { # {{{
+		for var parameter in @parameters {
+			return true if parameter.isPreserved()
+		}
+
+		return false
+	} # }}}
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -264,8 +299,29 @@ class ArrowFunctionExpression extends Expression {
 
 				var block = fragments.code('(() =>').newBlock()
 
-				var lineRouter = block.newLine()
-				var blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+				var lineRouter = block.newLine().code(`const __ks_rt = (`)
+
+				var preserved = @hasPreservedParameter()
+
+				if preserved {
+					for var parameter in @parameters {
+						lineRouter.compile(parameter).code($comma)
+					}
+				}
+
+				var blockRouter = lineRouter.code(`...args) =>`).newBlock()
+
+				if preserved {
+					var line = blockRouter.newLine().code(`args.unshift(`)
+
+					for var parameter, index in @parameters {
+						line.code($comma) unless index == 0
+
+						line.compile(parameter)
+					}
+
+					line.code(')').done()
+				}
 
 				Router.toFragments(
 					(function, line) => {

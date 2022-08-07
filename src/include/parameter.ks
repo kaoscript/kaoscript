@@ -23,6 +23,7 @@ class Parameter extends AbstractNode {
 		_header: Boolean					= false
 		_maybeHeadedDefaultValue: Boolean	= false
 		_name
+		_preserved: Boolean
 		_rest: Boolean						= false
 		_type: ParameterType
 	}
@@ -552,6 +553,12 @@ class Parameter extends AbstractNode {
 			}
 		}
 	} # }}}
+	constructor(@data, @parent, @scope = parent.scope()) { # {{{
+		super(data, parent, scope)
+
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Parameter, super.file())
+		@preserved = @options.parameters.preserve
+	} # }}}
 	analyse() { # {{{
 		@anonymous = !?@data.name
 
@@ -655,6 +662,11 @@ class Parameter extends AbstractNode {
 
 		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
 
+		// if @options.parameters.preserve {
+		// 	// @type.flagPreserved()
+		// 	@preserved = true
+		// }
+
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			var scope = @parent.scope()
 
@@ -704,6 +716,7 @@ class Parameter extends AbstractNode {
 	isAssertingParameter() => @parent.isAssertingParameter()
 	isAssertingParameterType() => @parent.isAssertingParameterType()
 	isComprehensive() => @comprehensive
+	isPreserved() => @preserved
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)

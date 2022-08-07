@@ -20,6 +20,7 @@
         "systemic": false,
         "exhaustive": true,
         "properties": {
+          "Foobar": 1,
           "foo": {
             "kind": "function",
             "index": 0,
@@ -55,8 +56,7 @@
             "returns": "Any?",
             "errors": [],
             "sealed": false
-          },
-          "Foobar": 1
+          }
         }
       },
       {

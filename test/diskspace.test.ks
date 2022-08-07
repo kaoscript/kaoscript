@@ -12,9 +12,8 @@ import {
 }
 
 describe('diskspace', func() {
-	// TODO
 	it('print', func(#[preserve] done) { // {{{
-		let d = await disks()
+		var d = await disks()
 
 		console.log(d)
 

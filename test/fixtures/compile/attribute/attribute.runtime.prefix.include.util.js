@@ -526,4 +526,35 @@ module.exports = function() {
 		}
 		throw KSHelper.badArgs();
 	};
+	const __ks_String = {};
+	__ks_String.__ks_func_dasherize_0 = function() {
+		return this.replace(/([A-Z])/g, "-$1").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase();
+	};
+	__ks_String.__ks_func_toFirstLowerCase_0 = function() {
+		return KSHelper.cast(this.charAt(0).toLowerCase(), "String", false, null, "String") + KSHelper.cast(this.substring(1), "String", false, null, "String");
+	};
+	__ks_String._im_dasherize = function(that, ...args) {
+		return __ks_String.__ks_func_dasherize_rt(that, args);
+	};
+	__ks_String.__ks_func_dasherize_rt = function(that, args) {
+		if(args.length === 0) {
+			return __ks_String.__ks_func_dasherize_0.call(that);
+		}
+		if(that.dasherize) {
+			return that.dasherize(...args);
+		}
+		throw KSHelper.badArgs();
+	};
+	__ks_String._im_toFirstLowerCase = function(that, ...args) {
+		return __ks_String.__ks_func_toFirstLowerCase_rt(that, args);
+	};
+	__ks_String.__ks_func_toFirstLowerCase_rt = function(that, args) {
+		if(args.length === 0) {
+			return __ks_String.__ks_func_toFirstLowerCase_0.call(that);
+		}
+		if(that.toFirstLowerCase) {
+			return that.toFirstLowerCase(...args);
+		}
+		throw KSHelper.badArgs();
+	};
 };

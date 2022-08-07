@@ -16,42 +16,6 @@
         "systemic": false,
         "exhaustive": true,
         "properties": {
-          "foo": {
-            "kind": "function",
-            "index": 0,
-            "async": false,
-            "exhaustive": true,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "errors": [],
-            "sealed": false
-          },
-          "bar": {
-            "kind": "function",
-            "index": 0,
-            "async": false,
-            "exhaustive": true,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "errors": [],
-            "sealed": false
-          },
-          "qux": {
-            "kind": "function",
-            "index": 0,
-            "async": false,
-            "exhaustive": true,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "errors": [],
-            "sealed": false
-          },
           "Foobar": {
             "kind": "class",
             "abstract": false,
@@ -116,6 +80,42 @@
               -1,
               -1
             ]
+          },
+          "foo": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "bar": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "qux": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
           }
         }
       }

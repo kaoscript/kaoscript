@@ -628,6 +628,9 @@ export class Compiler {
 				parameters: 'kaoscript'
 			}
 			format: {}
+			parameters: {
+				preserve: false
+			}
 			rules: {
 				assertNewStruct: true
 				assertNewTuple: true

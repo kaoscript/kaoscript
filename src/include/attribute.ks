@@ -9,6 +9,7 @@ flagged enum AttributeTarget {
 	Field
 	Global
 	Method
+	Parameter
 	Property
 	Statement
 }
@@ -103,10 +104,10 @@ class Attribute {
 			}
 		} # }}}
 		register(class: Class) { # {{{
-			var mut name = class.name.toLowerCase()
+			var mut name = class.name:String.toFirstLowerCase().dasherize()
 
-			if name.length > 9 && name.substr(-9) == 'attribute' {
-				name = name.substr(0, name.length - 9)
+			if name.length > 10 && name.substr(-10) == '-attribute' {
+				name = name.substr(0, name.length - 10)
 			}
 
 			$attributes[name] = class
@@ -387,6 +388,36 @@ class ParseAttribute extends Attribute {
 	} # }}}
 }
 
+class PreserveAttribute extends Attribute {
+	private {
+		_data
+	}
+	static {
+		target() => AttributeTarget::Parameter
+	}
+	constructor(@data)
+	clone(options, cloned) { # {{{
+		if !?cloned.parameters {
+			options.parameters = Dictionary.clone(options.parameters)
+
+			cloned.parameters = true
+		}
+
+		return options
+	} # }}}
+	configure(options, fileName, lineNumber) { # {{{
+		options.parameters.preserve = true
+
+		return options
+	} # }}}
+}
+
+class PreserveParametersAttribute extends PreserveAttribute {
+	static {
+		target() => AttributeTarget::Global + AttributeTarget::Statement
+	}
+}
+
 class RulesAttribute extends Attribute {
 	private {
 		_data
@@ -536,6 +567,9 @@ Attribute.register(ElseAttribute)
 Attribute.register(ErrorAttribute)
 Attribute.register(FormatAttribute)
 Attribute.register(IfAttribute)
+Attribute.register(ParseAttribute)
+Attribute.register(PreserveAttribute)
+Attribute.register(PreserveParametersAttribute)
 Attribute.register(ParseAttribute)
 Attribute.register(RulesAttribute)
 Attribute.register(RuntimeAttribute)
