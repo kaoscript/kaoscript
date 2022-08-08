@@ -1,9 +1,11 @@
 class ArrayType extends Type {
 	private {
-		_elements: Array			= []
+		@properties: Array<Type>		= []
+		@rest: Boolean					= false
+		@restType: Type?				= null
 	}
-	addElement(type: Type) { # {{{
-		@elements.push(type)
+	addProperty(type: Type) { # {{{
+		@properties.push(type)
 	} # }}}
 	clone() { # {{{
 		throw new NotSupportedException()
@@ -17,11 +19,22 @@ class ArrayType extends Type {
 			export.sealed = @sealed
 		}
 
-		export.elements = [element.export(references, indexDelta, mode, module) for var element in @elements]
+		export.properties = [property.export(references, indexDelta, mode, module) for var property in @properties]
 
 		return export
 	} # }}}
-	getElement(index: Number): Type => index >= @elements.length ? AnyType.NullableUnexplicit : @elements[index]
+	getProperty(index: Number): Type? {
+		if index >= @properties.length {
+			if @rest {
+				return @restType
+			}
+
+			return null
+		}
+		else {
+			return @properties[index]
+		}
+	}
 	isArray() => true
 	isMorePreciseThan(value) => true
 	isNullable() => false
@@ -35,15 +48,18 @@ class ArrayType extends Type {
 			return false
 		}
 
-		for var element, index in value._elements {
-			unless @elements[index].isSubsetOf(element, mode) {
+		for var property, index in value._properties {
+			unless @properties[index].isSubsetOf(property, mode) {
 				return false
 			}
 		}
 
 		return true
 	} # }}}
-	length() => @elements.length
+	length() => @properties.length
+	setRestType(@restType): this { # {{{
+		@rest = true
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
 	} # }}}
@@ -51,13 +67,13 @@ class ArrayType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
-		if @elements.length == 0 {
+		if @properties.length == 0 {
 			fragments.code($runtime.type(node), '.isArray')
 		}
 		else {
 			fragments.code(`value => `, $runtime.type(node), '.isArray(value)')
 
-			for var value, index in @elements {
+			for var value, index in @properties {
 				fragments.code(' && ')
 
 				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value[\(index)]`))
@@ -67,8 +83,8 @@ class ArrayType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('array')
 
-		for var element in @elements {
-			element.toVariations(variations)
+		for var property in @properties {
+			property.toVariations(variations)
 		}
 	} # }}}
 	walk(fn)

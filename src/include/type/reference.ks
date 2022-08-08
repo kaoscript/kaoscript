@@ -373,6 +373,24 @@ class ReferenceType extends Type {
 		return type
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? this.type().getMajorReferenceIndex() : @referenceIndex
+	getProperty(index: Number): Type { # {{{
+		if @name == 'Array' {
+			if @parameters.length > 0 {
+				return @parameters[0]
+			}
+
+			return AnyType.NullableUnexplicit
+		}
+
+		@resolveType()
+
+		if @type.isArray() || @type.isTuple() {
+			return @discard().getProperty(index)
+		}
+		else {
+			return @getProperty(index.toString())
+		}
+	} # }}}
 	getProperty(name: String): Type { # {{{
 		if this.isAny() {
 			return AnyType.NullableUnexplicit

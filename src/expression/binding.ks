@@ -39,7 +39,7 @@ class ArrayBinding extends Expression {
 			}
 
 			for var element, index in @elements {
-				element.type(@type.getElement(index))
+				element.type(@type.getProperty(index))
 
 				element.prepare()
 			}

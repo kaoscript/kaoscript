@@ -1420,7 +1420,7 @@ class ArrayBindingParameter extends ArrayBinding {
 			}
 			else {
 				for var element, index in @elements {
-					element.setDeclaredType(type.getElement(index), definitive)
+					element.setDeclaredType(type.getProperty(index), definitive)
 				}
 			}
 		}

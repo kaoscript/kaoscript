@@ -273,7 +273,12 @@ abstract class Type {
 						var type = new ArrayType(scope)
 
 						for var element in data.elements {
-							type.addElement(Type.fromAST(element, scope, defined, node))
+							if element.modifiers.length == 1 && element.modifiers[0].kind == ModifierKind::Rest {
+								type.setRestType(Type.fromAST(element, scope, defined, node))
+							}
+							else {
+								type.addProperty(Type.fromAST(element, scope, defined, node))
+							}
 						}
 
 						return type
@@ -281,8 +286,13 @@ abstract class Type {
 					else if data.properties? {
 						var type = new DictionaryType(scope)
 
-						for property in data.properties {
-							type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+						for var property in data.properties {
+							if property.name? {
+								type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+							}
+							else {
+								type.setRestType(Type.fromAST(property.type, scope, defined, node))
+							}
 						}
 
 						return type
@@ -594,6 +604,7 @@ abstract class Type {
 		return this.flagSealed()
 	} # }}}
 	getExhaustive() => @exhaustive
+	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getMajorReferenceIndex() => @referenceIndex
 	hashCode(): String => ''

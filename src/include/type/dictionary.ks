@@ -1,6 +1,8 @@
 class DictionaryType extends Type {
 	private {
-		@properties: Dictionary			= {}
+		@properties: Dictionary<Type>	= {}
+		@rest: Boolean					= false
+		@restType: Type?				= null
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
@@ -58,7 +60,17 @@ class DictionaryType extends Type {
 
 		return this
 	} # }}}
-	getProperty(name: String): Type? => @properties[name]
+	getProperty(name: String): Type? { # {{{
+		if var type = @properties[name] {
+			return type
+		}
+
+		if @rest {
+			return @restType
+		}
+
+		return null
+	} # }}}
 	hashCode() => this.toQuote()
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
@@ -102,7 +114,6 @@ class DictionaryType extends Type {
 	} # }}}
 	isNullable() => false
 	isDictionary() => true
-	isExhaustive() => false
 	isExportable() => true
 	isSealable() => true
 	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
@@ -180,6 +191,9 @@ class DictionaryType extends Type {
 		}
 
 		return this
+	} # }}}
+	setRestType(@restType): this { # {{{
+		@rest = true
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()

@@ -228,6 +228,24 @@ class UnionType extends Type {
 
 		return this
 	} # }}}
+	getProperty(index: Number) { # {{{
+		var types = []
+
+		for var type in @types {
+			var mut property = type.getProperty(index) ?? Type.Any
+
+			if !types.some((t, _, _) => property.matchContentOf(t)) {
+				types.push(property)
+			}
+		}
+
+		if types.length == 1 {
+			return types[0]
+		}
+		else {
+			return Type.union(@scope, ...types)
+		}
+	} # }}}
 	getProperty(name: String) { # {{{
 		var types = []
 

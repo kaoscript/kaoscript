@@ -59,17 +59,63 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property.prepare()
 
+				var mut nf = true
+
 				if type.isTuple() {
-					if @property is NumberLiteral {
-						if var property = type.discard().getProperty(@property.value()) {
+					if @property is NumberLiteral | StringLiteral {
+						if var property = type.getProperty(@property.value()) {
 							@type = property.type()
+
+							nf = false
 						}
 						else if type.isExhaustive(this) {
-							ReferenceException.throwNotDefinedProperty(@property.value(), this)
+							if @assignable {
+								ReferenceException.throwInvalidAssignment(this)
+							}
+							else {
+								ReferenceException.throwNotDefinedProperty(@property.value(), this)
+							}
 						}
 					}
 				}
-				else if type.isArray() || type.isDictionary() {
+
+				if nf && type.isArray() {
+					if @property is NumberLiteral {
+						if var property = type.getProperty(@property.value()) {
+							@type = property
+
+							nf = false
+						}
+						else if type.isExhaustive(this) {
+							if @assignable {
+								ReferenceException.throwInvalidAssignment(this)
+							}
+							else {
+								ReferenceException.throwNotDefinedProperty(@property.value(), this)
+							}
+						}
+					}
+				}
+
+				if nf && type.isDictionary() {
+					if @property is NumberLiteral | StringLiteral {
+						if var property = type.getProperty(@property.value()) {
+							@type = property
+
+							nf = false
+						}
+						else if type.isExhaustive(this) {
+							if @assignable {
+								ReferenceException.throwInvalidAssignment(this)
+							}
+							else {
+								ReferenceException.throwNotDefinedProperty(@property.value(), this)
+							}
+						}
+					}
+				}
+
+				if nf {
 					@type = type.parameter()
 				}
 
@@ -113,11 +159,13 @@ class MemberExpression extends Expression {
 						@property = `\(property.index())`
 						@type = property.type()
 					}
-					else if @assignable {
-						ReferenceException.throwInvalidAssignment(this)
-					}
 					else if type.isExhaustive(this) {
-						ReferenceException.throwNotDefinedProperty(@property, this)
+						if @assignable {
+							ReferenceException.throwInvalidAssignment(this)
+						}
+						else {
+							ReferenceException.throwNotDefinedProperty(@property, this)
+						}
 					}
 
 					if @object.isInferable() {
@@ -129,11 +177,13 @@ class MemberExpression extends Expression {
 					if var property = type.getProperty(@property) {
 						@type = property.type()
 					}
-					else if @assignable {
-						ReferenceException.throwInvalidAssignment(this)
-					}
 					else if type.isExhaustive(this) {
-						ReferenceException.throwNotDefinedProperty(@property, this)
+						if @assignable {
+							ReferenceException.throwInvalidAssignment(this)
+						}
+						else {
+							ReferenceException.throwNotDefinedProperty(@property, this)
+						}
 					}
 
 					if @object.isInferable() {

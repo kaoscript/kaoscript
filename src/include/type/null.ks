@@ -20,7 +20,7 @@ class NullType extends Type {
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => 0
 	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) => -value.compareToRef(this, equivalences)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
-	getProperty(name) => AnyType.NullableUnexplicit
+	override getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => 'Null'
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => nullcast || value.isNullable()
 	isExplicit() => @explicit

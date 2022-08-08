@@ -41,6 +41,15 @@ class FusionType extends Type {
 			types: [type.toExportOrReference(references, indexDelta, mode, module) for type in @types]
 		}
 	} # }}}
+	getProperty(index: Number): Type? { # {{{
+		for var type in @types {
+			if var property = type.getProperty(index) {
+				return property
+			}
+		}
+
+		return null
+	} # }}}
 	getProperty(name: String): Type? { # {{{
 		for var type in @types {
 			if var property = type.getProperty(name) {
