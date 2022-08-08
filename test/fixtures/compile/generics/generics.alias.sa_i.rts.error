@@ -1,0 +1,1 @@
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/generics/generics.alias.sa_i.rts.ks:2)

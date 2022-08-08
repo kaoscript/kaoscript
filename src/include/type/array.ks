@@ -23,7 +23,7 @@ class ArrayType extends Type {
 
 		return export
 	} # }}}
-	getProperty(index: Number): Type? {
+	getProperty(index: Number): Type? { # {{{
 		if index >= @properties.length {
 			if @rest {
 				return @restType
@@ -34,7 +34,7 @@ class ArrayType extends Type {
 		else {
 			return @properties[index]
 		}
-	}
+	} # }}}
 	isArray() => true
 	isMorePreciseThan(value) => true
 	isNullable() => false

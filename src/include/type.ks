@@ -213,6 +213,13 @@ abstract class Type {
 			data = data as Any
 
 			switch data.kind {
+				NodeKind::ArrayType => {
+					var type = new ArrayType(scope)
+
+					type.setRestType(Type.fromAST(data.element, scope, defined, node))
+
+					return type
+				}
 				NodeKind::ClassDeclaration => {
 					var type = new ClassType(scope)
 
@@ -267,6 +274,13 @@ abstract class Type {
 				}
 				NodeKind::NumericExpression => {
 					return scope.reference('Number')
+				}
+				NodeKind::ObjectType => {
+					var type = new DictionaryType(scope)
+
+					type.setRestType(Type.fromAST(data.element, scope, defined, node))
+
+					return type
 				}
 				NodeKind::TypeReference => {
 					if data.elements? {
