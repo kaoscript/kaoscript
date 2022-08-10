@@ -2,8 +2,11 @@ class ClassMethodType extends FunctionType {
 	private {
 		@abstract: Boolean						= false
 		@access: Accessibility					= Accessibility::Public
+		@alias: Boolean							= false
+		@aliasName: String						= ''
+		@aliasPath: String						= ''
 		@forked: Boolean						= false
-		@forkedIndex: Number?						= null
+		@forkedIndex: Number?					= null
 		@initVariables: Dictionary<Boolean>		= {}
 		@instance: Boolean						= false
 		@overwrite: Array?						= null
@@ -43,6 +46,11 @@ class ClassMethodType extends FunctionType {
 				for var name in data.inits {
 					type._initVariables[name] = true
 				}
+			}
+
+			if type.aliasPath? {
+				type._alias = true
+				type._aliasPath = data.aliasPath
 			}
 
 			type.updateParameters()
@@ -101,6 +109,10 @@ class ClassMethodType extends FunctionType {
 			export.forkedIndex = @forkedIndex
 		}
 
+		if @alias {
+			export.aliasPath = @aliasPath
+		}
+
 		return export
 	} # }}}
 	flagAbstract() { # {{{
@@ -115,8 +127,11 @@ class ClassMethodType extends FunctionType {
 
 		return this
 	} # }}}
+	getAliasName() => @aliasName
+	getAliasPath() => @aliasPath
 	getForkedIndex() => @forkedIndex
 	isAbstract() => @abstract
+	isAlias() => @alias
 	isExportable() { # {{{
 		if !super() {
 			return false
@@ -181,6 +196,9 @@ class ClassMethodType extends FunctionType {
 				@sealed = true
 			}
 		}
+	} # }}}
+	setAlias(@aliasPath, @aliasName) { # {{{
+		@alias = true
 	} # }}}
 	setForkedIndex(@forkedIndex): this { # {{{
 		@forked = true

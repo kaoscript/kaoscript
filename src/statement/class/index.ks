@@ -23,6 +23,7 @@ class ClassDeclaration extends Statement {
 	private {
 		_abstract: Boolean 					= false
 		_abstractMethods					= {}
+		_aliases							= {}
 		_classMethods						= {}
 		_classVariables						= {}
 		_constructors						= []
@@ -203,7 +204,6 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		var mut declaration
 		for var data in @data.members {
 			switch data.kind {
 				NodeKind::CommentBlock => {
@@ -211,7 +211,7 @@ class ClassDeclaration extends Statement {
 				NodeKind::CommentLine => {
 				}
 				NodeKind::FieldDeclaration => {
-					declaration = new ClassVariableDeclaration(data, this)
+					var declaration = new ClassVariableDeclaration(data, this)
 
 					declaration.analyse()
 
@@ -221,7 +221,14 @@ class ClassDeclaration extends Statement {
 				}
 				NodeKind::MacroDeclaration => {
 				}
+				NodeKind::AliasDeclaration => {
+					var declaration = new ClassAliasDeclaration(data, this)
+
+					declaration.analyse()
+				}
 				NodeKind::MethodDeclaration => {
+					var late declaration
+
 					if @class.isConstructor(data.name.name) {
 						declaration = new ClassConstructorDeclaration(data, this)
 					}
@@ -307,7 +314,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @instanceMethods {
 			var async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
-			for method in methods {
+			for var method in methods {
 				method.prepare()
 
 				if async != method.type().isAsync() {
@@ -338,6 +345,10 @@ class ClassDeclaration extends Statement {
 
 				@class.addAbstractMethod(name, method.type())
 			}
+		}
+
+		for var alias of @aliases {
+			alias.prepare()
 		}
 
 		if @abstract {
@@ -480,7 +491,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var methods of @instanceMethods {
-			for method in methods {
+			for var method in methods {
 				method.translate()
 			}
 		}
@@ -527,15 +538,19 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var methods of @abstractMethods {
-			for method in methods {
+			for var method in methods {
 				method.translate()
 			}
 		}
 
 		for var methods of @classMethods {
-			for method in methods {
+			for var method in methods {
 				method.translate()
 			}
+		}
+
+		for var alias of @aliases {
+			alias.translate()
 		}
 	} # }}}
 	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType, hidden: Boolean?) { # {{{
@@ -583,7 +598,7 @@ class ClassDeclaration extends Statement {
 	isHybrid() => @hybrid
 	level() => @class.level()
 	name() => @name
-	newInstanceMethodScope(method: ClassMethodDeclaration) { # {{{
+	newInstanceMethodScope() { # {{{
 		var scope = this.newScope(@scope, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
@@ -766,6 +781,10 @@ class ClassDeclaration extends Statement {
 				(node, fragments) => fragments.code(`static \(name)()`).step()
 				(fragments) => fragments.done()
 			)
+		}
+
+		for var alias of @aliases {
+			alias.toFragments(clazz, Mode::None)
 		}
 
 		clazz.done()
@@ -1225,6 +1244,7 @@ class ClassDeclaration extends Statement {
 
 include {
 	'./substitude'
+	'./alias'
 	'./variable'
 	'./constructor'
 	'./destructor'

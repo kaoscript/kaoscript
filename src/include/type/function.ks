@@ -261,6 +261,7 @@ class FunctionType extends Type {
 
 		return this
 	} # }}}
+	functions() => [this]
 	getCallIndex() => @alien ? 0 : @index
 	getMaxAfter(): @maxAfter
 	getMaxAfter(excludes: Array<String>?): Number { # {{{

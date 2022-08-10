@@ -662,11 +662,6 @@ class Parameter extends AbstractNode {
 
 		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
 
-		// if @options.parameters.preserve {
-		// 	// @type.flagPreserved()
-		// 	@preserved = true
-		// }
-
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			var scope = @parent.scope()
 

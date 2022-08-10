@@ -161,7 +161,7 @@ class ClassMethodDeclaration extends Statement {
 		footer(fragments)
 	} # }}}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newInstanceMethodScope(this))
+		super(data, parent, parent.newInstanceMethodScope())
 
 		@name = data.name.name
 
@@ -473,6 +473,7 @@ class ClassMethodDeclaration extends Statement {
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	isAbstract() => @abstract
+	isAlias() => false
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

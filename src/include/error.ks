@@ -275,6 +275,9 @@ export class ReferenceException extends Exception {
 		throwNotPassed(name, module, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} # }}}
+		throwNullableAlias(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`An alias can't be null`, node)
+		} # }}}
 		throwNullExpression(expression, node): Never ~ TypeException { # {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
 		} # }}}

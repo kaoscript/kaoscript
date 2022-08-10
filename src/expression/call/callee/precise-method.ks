@@ -1,9 +1,11 @@
 class PreciseMethodCallee extends Callee {
 	private {
+		@alias: Boolean
 		@alien: Boolean
 		@arguments: Array<CallMatchArgument>
 		@expression
 		@flatten: Boolean
+		@function: FunctionType
 		@functions: Array<FunctionType>
 		@index: Number
 		@instance: Boolean
@@ -27,8 +29,10 @@ class PreciseMethodCallee extends Callee {
 
 		this.validate(match.function, node)
 
-		@functions = [match.function]
+		@function = match.function
+		@functions = [@function]
 		@index = match.function.index()
+		@alias = match.function.isAlias()
 		@alien = match.function.isAlien()
 		@instance = match.function.isInstance()
 		@arguments = match.arguments
@@ -81,7 +85,7 @@ class PreciseMethodCallee extends Callee {
 
 					fragments.compile(@object, mode)
 
-					Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], true, fragments, mode)
+					Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
 				}
 			}
 		}
@@ -94,17 +98,24 @@ class PreciseMethodCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
+					fragments.wrap(@object)
+
 					if @alien {
-						fragments.wrap(@object).code(`.\(@property)(`)
+						fragments.code(`.\(@property)(`)
 					}
 					else if @instance {
-						fragments.wrap(@object).code(`.__ks_func_\(@property)_\(@index)(`)
+						if @alias {
+							fragments.code(`\(@function.getAliasPath()).__ks_func_\(@function.getAliasName())_\(@index)(`)
+						}
+						else {
+							fragments.code(`.__ks_func_\(@property)_\(@index)(`)
+						}
 					}
 					else {
-						fragments.wrap(@object).code(`.__ks_sttc_\(@property)_\(@index)(`)
+						fragments.code(`.__ks_sttc_\(@property)_\(@index)(`)
 					}
 
-					Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], false, fragments, mode)
+					Router.toArgumentsFragments(@arguments, node._arguments, @function, false, fragments, mode)
 				}
 			}
 		}
@@ -140,7 +151,7 @@ class PreciseMethodCallee extends Callee {
 				}
 			}
 
-			Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], true, fragments, mode)
+			Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
 		}
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{

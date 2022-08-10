@@ -622,7 +622,7 @@ class ClassType extends Type {
 				exportSuper = this.hasExportableOriginals()
 			}
 			else if mode ~~ ExportMode::Requirement {
-				// TODO shorten
+				// TODO shorten `original?`
 				var mut original: ClassType? = @majorOriginal
 
 				while ?original {

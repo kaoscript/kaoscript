@@ -25,7 +25,7 @@ class ThisExpression extends Expression {
 			if parent is CallExpression && parent.data().callee == @data {
 				@calling = true
 			}
-			else if parent is ClassMethodDeclaration ||	parent is ClassVariableDeclaration {
+			else if parent is ClassMethodDeclaration | ClassVariableDeclaration | ClassAliasDeclaration {
 				@instance = parent.isInstance()
 
 				@class = parent.parent().type()
@@ -274,8 +274,8 @@ class ThisExpression extends Expression {
 	isComposite() => @composite
 	isExpectingType() => true
 	isInferable() => !@calling && !@composite
-	isLateInit() => @lateInit
 	isInitializable() => true
+	isLateInit() => @lateInit
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name

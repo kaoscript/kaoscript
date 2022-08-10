@@ -399,7 +399,7 @@ class MemberExpression extends Expression {
 					NotImplementedException.throw(this)
 				}
 			}
-			else if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression {
+			else if @prepareObject && @type.isMethod() && @parent is not ClassAliasDeclaration {
 				fragments.code(`\($runtime.helper(this)).bindMethod(`)
 
 				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
