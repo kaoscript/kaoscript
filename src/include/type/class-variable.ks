@@ -99,11 +99,15 @@ class ClassVariableType extends Type {
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	// TODO add alias
-	toQuote() => @type.toQuote()
-	toQuote(double) => @type.toQuote(double)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations)
 	type(): @type
 	type(@type): this
+
+	// TODO add alias
+	toQuote() => @type.toQuote()
+	toQuote(double) => @type.toQuote(double)
+	// alias {
+	// 	toQuote = @type.toQuote
+	// }
 }

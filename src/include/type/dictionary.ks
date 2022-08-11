@@ -1,5 +1,6 @@
 class DictionaryType extends Type {
 	private {
+		@length: Number					= 0
 		@properties: Dictionary<Type>	= {}
 		@rest: Boolean					= false
 		@restType: Type?				= null
@@ -26,11 +27,27 @@ class DictionaryType extends Type {
 	}
 	addProperty(name: String, type: Type) { # {{{
 		@properties[name] = type
+		++@length
 	} # }}}
 	clone() { # {{{
 		throw new NotSupportedException()
 	} # }}}
+	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+		if @isSubsetOf(value, MatchingMode::Similar) {
+			if @isSubsetOf(value, MatchingMode::Exact) {
+				return 0
+			}
+			else {
+				return -1
+			}
+		}
+
+		return 1
+	} # }}}
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => -1
+	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
+		return -value.compareToRef(this, equivalences)
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
 			kind: TypeKind::Dictionary
@@ -69,9 +86,16 @@ class DictionaryType extends Type {
 			return @restType
 		}
 
+		if @length == 0 {
+			return AnyType.NullableUnexplicit
+		}
+
 		return null
 	} # }}}
+	getRestType(): @restType
 	hashCode() => this.toQuote()
+	hasProperties() => @length > 0
+	hasRest() => @rest
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
 			if this.isNullable() {
@@ -131,22 +155,51 @@ class DictionaryType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
-		if this == value {
-			return true
-		}
+		return true if this == value
+		return false unless @rest == value.hasRest()
 
-		if this.isSealed() != value.isSealed() {
-			return false
-		}
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false unless @length == value.length()
 
-		for var type, name of value.properties() {
-			if var prop = @properties[name] {
-				if !prop.isSubsetOf(type, mode) {
-					return false
+			var properties = value.properties()
+
+			return false unless Array.same(Dictionary.keys(@properties), Dictionary.keys(properties))
+
+			for var type, name of properties {
+				return false unless @properties[name].isSubsetOf(type, mode)
+			}
+
+			if @rest {
+				return @restType.isSubsetOf(value.getRestType(), mode)
+			}
+		}
+		else {
+			if @rest {
+				return false unless value.hasRest()
+				return false unless @restType.isSubsetOf(value.getRestType(), mode)
+
+				for var type, name of value.properties() {
+					if var prop = @properties[name] {
+						return false unless prop.isSubsetOf(type, mode)
+					}
+					else {
+						return false unless type.isNullable() || @restType.isSubsetOf(type, mode)
+					}
 				}
 			}
-			else if !type.isNullable() {
-				return false
+			else {
+				if value.hasRest() {
+					return false unless value.getRestType().isNullable()
+				}
+
+				for var type, name of value.properties() {
+					if var prop = @properties[name] {
+						return false unless prop.isSubsetOf(type, mode)
+					}
+					else {
+						return false unless type.isNullable()
+					}
+				}
 			}
 		}
 
@@ -155,19 +208,32 @@ class DictionaryType extends Type {
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isDictionary()
 
-		if value.hasParameters() {
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false unless @length == 0
+			return false unless @rest == value.hasParameters()
+
+			if @rest {
+				return @restType.isSubsetOf(value.parameter(0), mode)
+			}
+		}
+		else {
+			return true if !value.hasParameters()
+
 			var parameter = value.parameter(0)
 
-			for var type, name of @properties {
-				if !type.isSubsetOf(parameter, mode) {
-					return false
-				}
+			for var type of @properties {
+				return false unless type.isSubsetOf(parameter, mode)
+			}
+
+			if @rest {
+				return @restType.isSubsetOf(parameter, mode)
 			}
 		}
 
 		return true
 	} # }}}
 	isMatching(value: Type, mode: MatchingMode) => false
+	length(): @length
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isDictionary() {
 			return true
@@ -199,84 +265,88 @@ class DictionaryType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	toQuote() { # {{{
-		var mut str = '{'
+		if @length == 0 && !@rest {
+			return 'Dictionary'
+		}
 
-		var mut first = true
+		var mut str = '{'
+		var mut nc = false
+
 		for var property, name of @properties {
-			if first {
-				first = false
+			if nc {
+				str += ', '
 			}
 			else {
-				str += ', '
+				nc = true
 			}
 
 			str += `\(name): \(property.toQuote())`
 		}
 
-		if first {
-			return 'Dictionary'
+		if @rest {
+			if nc {
+				str += ', '
+			}
+
+			str += `...\(@restType.toQuote())`
 		}
-		else {
-			return str + '}'
-		}
+
+		str += '}'
+
+		return str
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::AND
-
-		fragments.code('!', $runtime.type(node), '.isDictionary(').compile(node).code(')')
-
-		for var value, name of @properties {
-			fragments.code(' || ')
-
-			value.toNegativeTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
-		}
-
-		fragments.code(')') if junction == Junction::AND
+		throw new NotImplementedException()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
-
-		fragments.code($runtime.type(node), '.isDictionary(').compile(node).code(')')
-
-		for var value, name of @properties {
-			fragments.code(' && ')
-
-			value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
-		}
-
-		fragments.code(')') if junction == Junction::OR
+		throw new NotImplementedException()
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
-		if Dictionary.isEmpty(@properties) {
+		if @length == 0 && !@rest {
 			fragments.code($runtime.type(node), '.isDictionary')
 		}
 		else {
-			fragments.code(`value => `, $runtime.type(node), '.isDictionary(value)')
+			fragments.code(`value => `)
 
-			for var value, name of @properties {
-				fragments.code(' && ')
-
-				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
-			}
+			@toTestFunctionFragments(fragments, node, Junction::NONE)
 		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if Dictionary.isEmpty(@properties) {
-			fragments.code($runtime.type(node), '.isDictionary(value)')
+		fragments.code($runtime.type(node), '.isDictionary(value')
+
+		var literal = new Literal(false, node, node.scope(), 'value')
+
+		if @rest {
+			fragments.code($comma)
+
+			@restType.toTestFunctionFragments(fragments, literal)
 		}
-		else {
-			fragments.code('(') if junction == Junction::OR
+		else if @length > 0 {
+			fragments.code(', void 0')
+		}
 
-			fragments.code($runtime.type(node), '.isDictionary(value)')
+		if @length > 0 {
+			fragments.code(', {')
 
-			for var value, name of @properties {
-				fragments.code(' && ')
+			var mut nc = false
 
-				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
+			for var type, name of @properties {
+				if nc {
+					fragments.code($comma)
+				}
+				else {
+					nc = true
+				}
+
+				fragments.code(`\(name): `)
+
+				type.toTestFunctionFragments(fragments, literal)
 			}
 
-			fragments.code(')') if junction == Junction::OR
+			fragments.code('}')
 		}
+
+		fragments.code(')')
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('dict')
@@ -285,6 +355,10 @@ class DictionaryType extends Type {
 			variations.push(name)
 
 			type.toVariations(variations)
+		}
+
+		if @rest {
+			@restType.toVariations(variations)
 		}
 	} # }}}
 	walk(fn) { # {{{

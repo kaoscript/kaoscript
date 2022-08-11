@@ -427,6 +427,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		_identifier: IdentifierLiteral
 		_lateInit: Boolean					= false
 		_name: String
+		_nullable: Boolean					= false
 		_type: Type?						= null
 		_variable: Variable
 	}
@@ -444,6 +445,12 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 		if @lateInit {
 			@variable.flagLateInit()
+		}
+
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Nullable {
+				@nullable = true
+			}
 		}
 	} # }}}
 	prepare() { # {{{
@@ -507,7 +514,12 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	name() => @name
 	setDeclaredType(type: Type) { # {{{
 		if @type == null {
-			@variable.setDeclaredType(type)
+			if @nullable && !type.isNullable() {
+				@variable.setDeclaredType(type.setNullable(true))
+			}
+			else {
+				@variable.setDeclaredType(type)
+			}
 		}
 	} # }}}
 	setRealType(type: Type) { # {{{
@@ -517,7 +529,12 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			}
 		}
 
-		@variable.setRealType(type)
+		if @nullable && !type.isNullable() {
+			@variable.setRealType(type.setNullable(true))
+		}
+		else {
+			@variable.setRealType(type)
+		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@identifier)

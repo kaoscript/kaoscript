@@ -34,7 +34,7 @@ class AnonymousFunctionExpression extends Expression {
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 
-		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+		@autoTyping = @type.isAutoTyping()
 
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
@@ -193,7 +193,7 @@ class ArrowFunctionExpression extends Expression {
 
 		@block.analyse()
 
-		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+		@autoTyping = @type.isAutoTyping()
 
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())

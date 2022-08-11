@@ -116,28 +116,17 @@ class StructType extends Type {
 	isExtending() => @extending
 	override isStruct() => true
 	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
-	// TODO uncomment
-	// isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
-	// 	if value.name() == 'Struct' {
-	// 		return true
-	// 	}
-
-	// 	return false
-	// } # }}}
-	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
-		for var type in value.types() {
-			if this.isSubsetOf(type) {
-				return true
-			}
+	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
+		if value.name() == 'Struct' {
+			return true
 		}
 
 		return false
 	} # }}}
-	// TODO remove
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		if value is NamedType | ReferenceType {
-			if value.name() == 'Struct' {
+	isSubsetOf(value: NullType, mode: MatchingMode) => false
+	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
+		for var type in value.types() {
+			if this.isSubsetOf(type) {
 				return true
 			}
 		}

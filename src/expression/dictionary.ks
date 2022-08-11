@@ -62,16 +62,11 @@ class DictionaryExpression extends Expression {
 	prepare() { # {{{
 		@type = new DictionaryType(@scope)
 
-		if @properties.length == 0 {
-			@type.setRestType(AnyType.NullableUnexplicit)
-		}
-		else {
-			for var property in @properties {
-				property.prepare()
+		for var property in @properties {
+			property.prepare()
 
-				if property is DictionaryLiteralMember {
-					@type.addProperty(property.name(), property.type())
-				}
+			if property is DictionaryLiteralMember {
+				@type.addProperty(property.name(), property.type())
 			}
 		}
 	} # }}}

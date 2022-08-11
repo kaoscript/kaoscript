@@ -31,7 +31,7 @@ class NullType extends Type {
 	isNullable() => true
 	isSplittable() => false
 	isSubsetOf(value: NullType, mode: MatchingMode) => true
-	isSubsetOf(value: Type, mode: MatchingMode) => value.isNullable()
+	isSubsetOf(value: Type, mode: MatchingMode) => value.isNullable() || value.isNull()
 	matchContentOf(value: Type) => value.isNullable()
 	setNullable(nullable: Boolean) { # {{{
 		if nullable {

@@ -1,7 +1,8 @@
 class ClassAliasDeclaration extends Statement {
 	private late {
-		@instance: Boolean					= true
+		@instance: Boolean				= true
 		@name: String
+		@overridenMethods: Array		= []
 		@target: Expression
 		@targetName: String
 		@targetPath: String
@@ -62,6 +63,13 @@ class ClassAliasDeclaration extends Statement {
 					var type = function.clone()
 					type.setAlias(@targetPath, @targetName)
 
+					if var method = class.getMatchingInstanceMethod(@name, type, MatchingMode::ExactParameter + MatchingMode::Superclass) {
+						@overridenMethods.push({
+							index: method.index()
+							type
+						})
+					}
+
 					class.addInstanceMethod(@name, type)
 				}
 			}
@@ -90,6 +98,16 @@ class ClassAliasDeclaration extends Statement {
 				ctrl.line(`return this\(@targetPath).__ks_func_\(@targetName)_rt.call(null, this\(@targetPath), this\(@targetPath), arguments)`)
 
 				ctrl.done()
+
+				for var { index, type } in @overridenMethods {
+					var ctrl = fragments.newControl()
+
+					ctrl.code(`__ks_func_\(@name)_\(index)()`).step()
+
+					ctrl.line(`return this\(@targetPath).__ks_func_\(@targetName)_\(type.index())(...arguments)`)
+
+					ctrl.done()
+				}
 			}
 			else {
 				throw new NotImplementedException()

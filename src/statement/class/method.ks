@@ -236,7 +236,10 @@ class ClassMethodDeclaration extends Statement {
 
 		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
 
-		var returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
+		@autoTyping = @type.isAutoTyping()
+		var dynamicReturn = @type.isDynamicReturn()
+		var returnData = @type.getReturnData()
+		var unknownReturnType = @type.isUnknownReturnType()
 
 		var mut overridden
 		var mut overloaded = []
@@ -244,8 +247,7 @@ class ClassMethodDeclaration extends Statement {
 		if @parent.isExtending() {
 			var superclass = @parent.extends().type()
 
-			if var data = @getOveriddenMethod(superclass, returnReference) {
-
+			if var data = @getOveriddenMethod(superclass, unknownReturnType) {
 				@overriding = true
 				{ method: overridden, type: @type, exact: @exact } = data
 			}
@@ -313,38 +315,20 @@ class ClassMethodDeclaration extends Statement {
 
 		@block.analyse()
 
-		if returnReference {
-			switch @data.type.value.kind {
-				NodeKind::Identifier => {
-					if @data.type.value.name == 'auto' {
-						@type.setReturnType(@block.getUnpreparedType())
+		if dynamicReturn {
+			if @autoTyping {
+				@type.setReturnType(@block.getUnpreparedType())
+			}
+			else {
+				var return = $compile.expression(returnData, this)
 
-						@autoTyping = true
-					}
-					else if @data.type.value.name == 'this' {
-						@type.setReturnType(@parent.type().reference(@scope))
+				return.analyse()
 
-						if @instance {
-							var return = $compile.expression(@data.type.value, this)
-
-							return.analyse()
-
-							@block.addReturn(return)
-						}
-					}
-					else {
-						throw new NotSupportedException()
-					}
-				}
-				NodeKind::ThisExpression => {
-					var return = $compile.expression(@data.type.value, this)
-
-					return.analyse()
-
+				if unknownReturnType {
 					@type.setReturnType(return.getUnpreparedType())
-
-					@block.addReturn(return)
 				}
+
+				@block.addReturn(return)
 			}
 		}
 

@@ -293,13 +293,16 @@ class ImplementClassMethodDeclaration extends Statement {
 			@type.flagSealed()
 		}
 
-		var returnReference = @data.type?.kind == NodeKind::ReturnTypeReference
+		@autoTyping = @type.isAutoTyping()
+		var dynamicReturn = @type.isDynamicReturn()
+		var returnData = @type.getReturnData()
+		var unknownReturnType = @type.isUnknownReturnType()
 
 		var mut overridden
 
 		if @instance {
 			if @override {
-				if var data = @getOveriddenMethod(@class, returnReference) {
+				if var data = @getOveriddenMethod(@class, unknownReturnType) {
 					{ method: overridden, type: @type } = data
 
 					unless @class.isAbstract() {
@@ -387,41 +390,25 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@block.analyse()
 
-		if returnReference {
-			switch @data.type.value.kind {
-				NodeKind::Identifier => {
-					if @data.type.value.name == 'auto' {
-						if !@override {
-							@type.setReturnType(@block.getUnpreparedType())
-
-							@autoTyping = true
-						}
-					}
-					else {
-						if !@override {
-							@type.setReturnType(@parent.type().reference(@scope))
-						}
-
-						if @instance {
-							var return = $compile.expression(@data.type.value, this)
-
-							return.analyse()
-
-							@block.addReturn(return)
-						}
-					}
+		if dynamicReturn {
+			if @autoTyping {
+				if @override {
+					@autoTyping = false
 				}
-				NodeKind::ThisExpression => {
-					var return = $compile.expression(@data.type.value, this)
-
-					return.analyse()
-
-					if !@override {
-						@type.setReturnType(return.getUnpreparedType())
-					}
-
-					@block.addReturn(return)
+				else {
+					@type.setReturnType(@block.getUnpreparedType())
 				}
+			}
+			else {
+				var return = $compile.expression(returnData, this)
+
+				return.analyse()
+
+				if unknownReturnType && !@override {
+					@type.setReturnType(return.getUnpreparedType())
+				}
+
+				@block.addReturn(return)
 			}
 		}
 

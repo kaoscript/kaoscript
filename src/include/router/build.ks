@@ -2085,7 +2085,7 @@ func buildNames(group: Group, name: String, node: AbstractNode): NamedLength { #
 	return NamedLength(functions, parameters)
 } # }}}
 
-func expandOneName(group: Group, name: String, node: AbstractNode, functions: Array, parameters: Dictionary) { # {{{
+func expandOneName(group: Group, name: String, node: AbstractNode, functions: Array<String>, parameters: Dictionary<NamedParameter>) { # {{{
 	var rows = {}
 
 	for var function in group.functions {
@@ -2114,10 +2114,10 @@ func expandOneName(group: Group, name: String, node: AbstractNode, functions: Ar
 		for var { type, function, index }, hash of row {
 			types[hash] = NamedType(
 				type
-				functions: [function.index()]
+				functions: [`\(function.index())`]
 			)
 
-			functions.pushUniq(function.index())
+			functions.pushUniq(`\(function.index())`)
 
 			indexes[function.index()] = index
 		}
@@ -2243,7 +2243,7 @@ func addOneNameRow(group: Group, name: String, node: AbstractNode, function: Fun
 	}
 } # }}}
 
-func expandName(group: Group, name: String, node: AbstractNode, functions: Array, parameters: Dictionary) { # {{{
+func expandName(group: Group, name: String, node: AbstractNode, functions: Array<String>, parameters: Dictionary<NamedParameter>) { # {{{
 	var rows = {}
 
 	for var function in group.functions {
@@ -2298,7 +2298,7 @@ func expandName(group: Group, name: String, node: AbstractNode, functions: Array
 			else {
 				names[name].types[type.hashCode()] = NamedType(
 					type
-					functions: [row.function.index()]
+					functions: [`\(row.function.index())`]
 				)
 			}
 
@@ -2307,7 +2307,7 @@ func expandName(group: Group, name: String, node: AbstractNode, functions: Array
 			}
 		}
 
-		functions.pushUniq(row.function.index())
+		functions.pushUniq(`\(row.function.index())`)
 	}
 
 	for var {indexes, types}, name of names {

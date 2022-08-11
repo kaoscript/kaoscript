@@ -526,12 +526,10 @@ class TupleFieldType extends Type {
 		@type: Type
 	}
 	static {
-		import(_name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
+		import(name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
-			// TODO fix me
-			var name: String? = _name!!
 
-			return new TupleFieldType(scope, name, data.index as Number, fieldType, data.required)
+			return new TupleFieldType(scope, name, data.index, fieldType, data.required)
 		} # }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { # {{{

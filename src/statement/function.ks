@@ -409,7 +409,7 @@ class FunctionDeclarator extends AbstractNode {
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 
-		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+		@autoTyping = @type.isAutoTyping()
 
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
@@ -547,7 +547,7 @@ class FunctionVariable extends Variable {
 		if @extended {
 			var mut type
 
-			for declarator in @declarators {
+			for var declarator in @declarators {
 				declarator.prepare()
 
 				type = declarator.type()
@@ -579,7 +579,7 @@ class FunctionVariable extends Variable {
 
 			var async = type.isAsync()
 
-			for declarator in @declarators from 1 {
+			for var declarator in @declarators from 1 {
 				declarator.prepare()
 
 				type = declarator.type()

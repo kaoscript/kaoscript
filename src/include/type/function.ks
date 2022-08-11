@@ -1,7 +1,10 @@
 class FunctionType extends Type {
 	private late {
+		// TODO @assessment? = null
 		_assessment							= null
 		_async: Boolean						= false
+		_autoTyping: Boolean				= false
+		_dynamicReturn: Boolean				= false
 		_errors: Array<Type>				= []
 		_hasRest: Boolean					= false
 		_index: Number						= -1
@@ -15,6 +18,7 @@ class FunctionType extends Type {
 		_missingReturn: Boolean				= true
 		_parameters: Array<ParameterType>	= []
 		_restIndex: Number					= -1
+		_returnData							= null
 		_returnType: Type					= AnyType.NullableUnexplicit
 	}
 	static {
@@ -110,9 +114,7 @@ class FunctionType extends Type {
 		super(node.scope())
 
 		if data.type? {
-			if data.type.kind != NodeKind::ReturnTypeReference {
-				@returnType = Type.fromAST(data.type, node)
-			}
+			@setReturnType(data.type, node)
 
 			@missingReturn = false
 		}
@@ -334,6 +336,7 @@ class FunctionType extends Type {
 	getProperty(name: String) => Type.Any
 	getRestIndex(): @restIndex
 	getRestParameter() => @parameters[@restIndex]
+	getReturnData(): @returnData
 	getReturnType(): @returnType
 	hashCode() => `Function`
 	hasRestParameter(): @hasRest
@@ -361,6 +364,7 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	isAsync(): @async
+	isAutoTyping(): @autoTyping
 	isCatchingError(error): Boolean { # {{{
 		if @errors.length != 0 {
 			for type in @errors {
@@ -375,6 +379,7 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
+	isDynamicReturn(): @dynamicReturn
 	isExportable() { # {{{
 		for var parameter in @parameters {
 			if !parameter.isExportable() {
@@ -667,6 +672,7 @@ class FunctionType extends Type {
 
 		return true
 	} # }}}
+	isUnknownReturnType() => @autoTyping
 	length() => 1
 	listErrors() => @errors
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
@@ -744,6 +750,54 @@ class FunctionType extends Type {
 		}
 
 		methods.push(this)
+	} # }}}
+	setReturnType(data?, node) { # {{{
+		if !?data {
+			@returnType = AnyType.NullableUnexplicit
+
+			return
+		}
+
+		if data.kind == NodeKind::TypeReference && data.typeName.kind == NodeKind::Identifier {
+			switch data.typeName.name {
+				'auto' => {
+					@dynamicReturn = true
+					@autoTyping = true
+
+					return
+				}
+				'false', 'true' => {
+					@dynamicReturn = true
+					@returnType = node.scope().reference('Boolean')
+					@returnData = data.typeName
+
+					return
+				}
+				'Infinity', 'NaN' => {
+					@dynamicReturn = true
+					@returnType = node.scope().reference('Number')
+					@returnData = data.typeName
+
+					return
+				}
+				'null' => {
+					@dynamicReturn = true
+					@returnType = node.scope().reference('Null')
+					@returnData = data.typeName
+
+					return
+				}
+			}
+		}
+		else if data.kind == NodeKind::NumericExpression {
+			@dynamicReturn = true
+			@returnType = node.scope().reference('Number')
+			@returnData = data
+
+			return
+		}
+
+		@returnType = Type.fromAST(data, node)
 	} # }}}
 	setReturnType(@returnType): this
 	toFragments(fragments, node) { # {{{
@@ -920,7 +974,7 @@ class OverloadedFunctionType extends Type {
 	} # }}}
 	functions() => @functions
 	hasFunction(type: FunctionType) { # {{{
-		for function in @functions {
+		for var function in @functions {
 			if function.equals(type) {
 				return true
 			}

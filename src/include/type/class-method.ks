@@ -10,6 +10,7 @@ class ClassMethodType extends FunctionType {
 		@initVariables: Dictionary<Boolean>		= {}
 		@instance: Boolean						= false
 		@overwrite: Array?						= null
+		@unknownReturnType: Boolean				= false
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
@@ -173,6 +174,7 @@ class ClassMethodType extends FunctionType {
 
 		return false
 	} # }}}
+	isUnknownReturnType() => @autoTyping || @unknownReturnType
 	overwrite() => @overwrite
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
@@ -202,6 +204,32 @@ class ClassMethodType extends FunctionType {
 	} # }}}
 	setForkedIndex(@forkedIndex): this { # {{{
 		@forked = true
+	} # }}}
+	setReturnType(data?, node) { # {{{
+		if !?data {
+			@returnType = AnyType.NullableUnexplicit
+
+			return
+		}
+
+		if data.kind == NodeKind::TypeReference && data.typeName.kind == NodeKind::Identifier {
+			if data.typeName.name == 'this' {
+				@dynamicReturn = true
+				@unknownReturnType = true
+				@returnData = data.typeName
+
+				return
+			}
+		}
+		else if data.kind == NodeKind::ThisExpression {
+			@dynamicReturn = true
+			@unknownReturnType = true
+			@returnData = data
+
+			return
+		}
+
+		super(data, node)
 	} # }}}
 	override setReturnType(@returnType): this
 }

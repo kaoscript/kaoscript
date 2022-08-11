@@ -5,7 +5,7 @@ module.exports = function() {
 		_.item = item;
 		return _;
 	}, function(__ks_new, args) {
-		const t0 = value => Type.isDictionary(value) && (Type.isArray(value.values, value => Type.isString(value)) || Type.isNull(value.values));
+		const t0 = value => Type.isDictionary(value, void 0, {values: value => Type.isArray(value, Type.isString) || Type.isNull(value)});
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return __ks_new(args[0]);

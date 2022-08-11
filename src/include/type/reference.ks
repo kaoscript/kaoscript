@@ -120,6 +120,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
+	// compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
 		if this.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -135,7 +136,64 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
+	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) { # {{{
+		if @name == 'Array' {
+			if @parameters.length == 0 {
+				if value.hasRest() {
+					return -1
+				}
+				else {
+					return 0
+				}
+			}
+			else {
+				if value.hasRest() {
+					return @parameters[0].compareTo(value.getRestType())
+				}
+				else {
+					return 1
+				}
+			}
+		}
+
+
+		if value.hasRest() {
+			return @compareToRef(@scope.resolveReference('Array', false, [value.getRestType()]), equivalences)
+		}
+		else {
+			return @compareToRef(@scope.reference('Array'), equivalences)
+		}
+	} # }}}
+	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+		if @name == 'Dictionary' {
+			if @parameters.length == 0 {
+				if value.hasRest() {
+					return -1
+				}
+				else {
+					return 0
+				}
+			}
+			else {
+				if value.hasRest() {
+					return @parameters[0].compareTo(value.getRestType())
+				}
+				else {
+					return 1
+				}
+			}
+		}
+
+
+		if value.hasRest() {
+			return @compareToRef(@scope.resolveReference('Dictionary', false, [value.getRestType()]), equivalences)
+		}
+		else {
+			return @compareToRef(@scope.reference('Dictionary'), equivalences)
+		}
+	} # }}}
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
+	// compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
 		if this.isNull() {
 			return 0
 		}
@@ -145,6 +203,7 @@ class ReferenceType extends Type {
 	} # }}}
 	// TODO replace as `String[][]`
 	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
+	// compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
 		if @name == value.name() {
 			if @isNullable() != value.isNullable() {
 				return @nullable ? 1 : -1
@@ -270,7 +329,7 @@ class ReferenceType extends Type {
 
 		return Helper.compareString(@type.name(), valType.name())
 	} # }}}
-	compareToRef(value: UnionType) { # {{{
+	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
 		return -1
 	} # }}}
 	discard() => this.discardReference()?.discard()
@@ -619,46 +678,114 @@ class ReferenceType extends Type {
 	isSpread() => @spread
 	isString() => @name == 'String' || this.type().isString()
 	isStruct() => @name == 'Struct' || this.type().isStruct()
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
+		return false unless @isArray()
+
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false unless !value.hasProperties()
+			return false unless @hasParameters() == value.hasRest()
+
+			if @hasParameters() {
+				return @parameters[0].isSubsetOf(value.getRestType(), mode)
+			}
+
+			return true
+		}
+		else {
+			throw new NotImplementedException()
+		}
+	} # }}}
+	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false unless @isDictionary()
+			return false unless !value.hasProperties()
+			return false unless @hasParameters() == value.hasRest()
+
+			if @hasParameters() {
+				return @parameters[0].isSubsetOf(value.getRestType(), mode)
+			}
+
+			return true
+		}
+		else {
+			return false unless @isDictionary() || @isInstance()
+
+			return @discard().isSubsetOf(value, mode)
+		}
+	} # }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		if this == value {
 			return true
 		}
 		else if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
-			if value is ReferenceType {
-				if @name != value._name || @parameters.length != value._parameters.length {
+			if @name != value._name || @parameters.length != value._parameters.length {
+				return false
+			}
+
+			if mode ~~ MatchingMode::NonNullToNull {
+				if @isNullable() && !value.isNullable() {
 					return false
 				}
+			}
+			else if @isNullable() != value.isNullable() {
+				return false
+			}
 
-				if mode ~~ MatchingMode::NonNullToNull {
-					if @isNullable() && !value.isNullable() {
-						return false
-					}
-				}
-				else if @isNullable() != value.isNullable() {
-					return false
-				}
-
-				if @parameters? {
-					if value._parameters? && @parameters.length == value._parameters.length {
-						for var parameter, i in @parameters {
-							if !parameter.isSubsetOf(value._parameters[i], mode) {
-								return false
-							}
+			if @parameters? {
+				if value._parameters? && @parameters.length == value._parameters.length {
+					for var parameter, i in @parameters {
+						if !parameter.isSubsetOf(value._parameters[i], mode) {
+							return false
 						}
-					}
-					else {
-						return false
 					}
 				}
 				else {
-					if value._parameters? {
-						return false
-					}
+					return false
 				}
-
-				return true
 			}
-			else if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode::Missing {
+			else {
+				if value._parameters? {
+					return false
+				}
+			}
+
+			return true
+		}
+		else {
+			if @isNullable() && !value.isNullable() {
+				return false
+			}
+
+			if value.scope().isRenamed(value.name(), @name, @scope, mode) {
+				var parameters = value.parameters()
+
+				if parameters.length == @parameters.length {
+					for var parameter, index in @parameters {
+						if !parameter.isSubsetOf(parameters[index], mode) {
+							return false
+						}
+					}
+
+					return true
+				}
+			}
+
+			if $virtuals[value.name()] {
+				return this.type().canBeVirtual(value.name())
+			}
+
+			if mode ~~ MatchingMode::AutoCast {
+				if @type().isEnum() {
+					return @type().discard().type().isSubsetOf(value, mode)
+				}
+			}
+
+			return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
+		}
+	} # }}}
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode::Missing {
 				return true
 			}
 			else {
@@ -666,38 +793,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			if value is ReferenceType {
-				if @isNullable() && !value.isNullable() {
-					return false
-				}
-
-				if value.scope().isRenamed(value.name(), @name, @scope, mode) {
-					var parameters = value.parameters()
-
-					if parameters.length == @parameters.length {
-						for var parameter, index in @parameters {
-							if !parameter.isSubsetOf(parameters[index], mode) {
-								return false
-							}
-						}
-
-						return true
-					}
-				}
-
-				if $virtuals[value.name()] {
-					return this.type().canBeVirtual(value.name())
-				}
-
-				if mode ~~ MatchingMode::AutoCast {
-					if @type().isEnum() {
-						return @type().discard().type().isSubsetOf(value, mode)
-					}
-				}
-
-				return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
-			}
-			else if value.isDictionary() && this.type().isClass() {
+			if value.isDictionary() && this.type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
 			else if value is UnionType {
@@ -805,7 +901,7 @@ class ReferenceType extends Type {
 			}
 			else if @name == 'Null' {
 				@type = Type.Null
-				@nullable = true
+				@nullable = false
 				@predefined = true
 			}
 			else if @name == 'Void' {
@@ -867,7 +963,10 @@ class ReferenceType extends Type {
 		@predefined = false
 	} # }}}
 	setNullable(nullable: Boolean): ReferenceType { # {{{
-		if @explicitlyNull {
+		if @isNull() {
+			return this
+		}
+		else if @explicitlyNull {
 			if nullable {
 				return this
 			}

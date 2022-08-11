@@ -14,6 +14,7 @@ class ReturnStatement extends Statement {
 
 		var mut ancestor = parent
 
+		// TODO
 		while ancestor? && !(
 			ancestor is AnonymousFunctionExpression ||
 			ancestor is ArrowFunctionExpression ||
@@ -33,7 +34,7 @@ class ReturnStatement extends Statement {
 		super(value.data(), parent, parent.scope())
 	} # }}}
 	analyse() { # {{{
-		if @data.value? {
+		if !?@value && ?@data.value {
 			@value = $compile.expression(@data.value, this)
 
 			@value.analyse()

@@ -234,7 +234,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		if node.isBooleanComputed(junction) {
 			this.code('(')
 
-			node.toBooleanFragments(this, mode, junction)
+			node.toBooleanFragments(this, mode, Junction::NONE)
 
 			this.code(')')
 		}

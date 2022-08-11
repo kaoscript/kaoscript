@@ -1,0 +1,6 @@
+func foobar(x: Dictionary<String>) {
+	return 1
+}
+func foobar(x: String{}) {
+	return 2
+}

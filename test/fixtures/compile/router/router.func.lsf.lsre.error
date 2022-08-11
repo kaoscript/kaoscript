@@ -1,0 +1,1 @@
+SyntaxException: The function "foobar(x: [...String])" is a duplicate (fixtures/compile/router/router.func.lsf.lsre.ks:4)

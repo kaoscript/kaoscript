@@ -624,6 +624,7 @@ class ClassType extends Type {
 			else if mode ~~ ExportMode::Requirement {
 				// TODO shorten `original?`
 				var mut original: ClassType? = @majorOriginal
+				// var mut original? = @majorOriginal
 
 				while ?original {
 					if original.isRequirement() || original.referenceIndex() != -1 {
@@ -1186,6 +1187,29 @@ class ClassType extends Type {
 		return assessment
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
+	getMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
+		if @instanceMethods[name] is Array {
+			for var method in @instanceMethods[name] {
+				if method.isSubsetOf(type, mode) {
+					return method
+				}
+			}
+		}
+
+		if @abstract && @abstractMethods[name] is Array {
+			for var method in @abstractMethods[name] {
+				if method.isSubsetOf(type, mode) {
+					return method
+				}
+			}
+		}
+
+		if @extending && mode ~~ MatchingMode::Superclass {
+			return @extends.type().getMatchingInstanceMethod(name, type, mode)
+		}
+
+		return null
+	} # }}}
 	getProperty(name: String) => this.getClassProperty(name)
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
 	hasAbstractMethod(name) { # {{{
@@ -1513,6 +1537,22 @@ class ClassType extends Type {
 		}
 
 		return false
+	} # }}}
+	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
+		if value.hasRest() {
+			return false unless value.getRestType().isNullable()
+		}
+
+		for var type, name of value.properties() {
+			if var prop = @getInstanceProperty(name) {
+				return false unless prop.isSubsetOf(type, mode)
+			}
+			else {
+				return false unless type.isNullable()
+			}
+		}
+
+		return true
 	} # }}}
 	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
 	level() => @level

@@ -11,15 +11,7 @@ class AwaitExpression extends Expression {
 
 		var mut ancestor = parent
 
-		// TODO support `ancestor is AnonymousFunctionExpression | ArrowFunctionExpression`
-		while ancestor? && !(
-			ancestor is AnonymousFunctionExpression ||
-			ancestor is ArrowFunctionExpression ||
-			ancestor is FunctionDeclarator ||
-			ancestor is ClassMethodDeclaration ||
-			ancestor is ImplementClassMethodDeclaration ||
-			ancestor is ImplementNamespaceFunctionDeclaration
-		) {
+		while ancestor? && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			if ancestor is TryStatement {
 				@try = ancestor
 			}

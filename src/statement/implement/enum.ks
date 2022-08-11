@@ -235,22 +235,10 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@block.analyse()
 
-		if @data.type?.kind == NodeKind::ReturnTypeReference {
-			switch @data.type.value.kind {
-				NodeKind::Identifier => {
-					if @data.type.value.name == 'auto' {
-						@type.setReturnType(@block.getUnpreparedType())
+		@autoTyping = @type.isAutoTyping()
 
-						@autoTyping = true
-					}
-					else {
-						NotSupportedException.throw(this)
-					}
-				}
-				NodeKind::ThisExpression => {
-					NotSupportedException.throw(this)
-				}
-			}
+		if @autoTyping {
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 	} # }}}
 	translate() { # {{{

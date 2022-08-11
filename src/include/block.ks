@@ -258,13 +258,10 @@ class FunctionBlock extends Block {
 	addReturn(@return)
 	override checkExit() { # {{{
 		if @return != null {
-			var mut toAdd = false
+			var mut toAdd = true
 
 			if var statement = @statements.last() {
 				toAdd = !statement.isExit()
-			}
-			else {
-				toAdd = true
 			}
 
 			if toAdd {

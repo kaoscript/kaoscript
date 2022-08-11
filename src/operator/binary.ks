@@ -779,7 +779,9 @@ class BinaryOperatorTypeCasting extends Expression {
 
 class BinaryOperatorTypeEquality extends Expression {
 	private late {
+		_computed: Boolean		= false
 		_falseType: Type
+		_junction: Junction		= Junction::NONE
 		_subject
 		_trueType: Type
 	}
@@ -799,9 +801,13 @@ class BinaryOperatorTypeEquality extends Expression {
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)
+
+				@junction = Junction::AND
 			}
 			else {
 				type = new UnionType(@scope)
+
+				@junction = Junction::OR
 			}
 
 			for var operand in @data.right.operands {
@@ -819,6 +825,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 
 			@trueType = type.type()
+			@computed = true
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
@@ -863,6 +870,7 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		return inferables
 	} # }}}
+	isBooleanComputed(junction: Junction) => @computed && junction != @junction
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
@@ -902,7 +910,9 @@ class BinaryOperatorTypeEquality extends Expression {
 
 class BinaryOperatorTypeInequality extends Expression {
 	private late {
+		_computed: Boolean		= false
 		_falseType: Type
+		_junction: Junction		= Junction::NONE
 		_subject
 		_trueType: Type
 	}
@@ -923,9 +933,13 @@ class BinaryOperatorTypeInequality extends Expression {
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
 				type = new FusionType(@scope)
+
+				@junction = Junction::AND
 			}
 			else {
 				type = new UnionType(@scope)
+
+				@junction = Junction::OR
 			}
 
 			for var operand in @data.right.operands {
@@ -943,6 +957,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			}
 
 			@falseType = type.type()
+			@computed = true
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
@@ -967,6 +982,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @subject.inferTypes(inferables)
+	isBooleanComputed(junction: Junction) => @computed && junction != @junction
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
