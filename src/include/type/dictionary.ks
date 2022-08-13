@@ -43,7 +43,7 @@ class DictionaryType extends Type {
 
 		return type
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
 			if @isSubsetOf(value, MatchingMode::Exact) {
 				return 0
@@ -55,11 +55,11 @@ class DictionaryType extends Type {
 
 		return 1
 	} # }}}
-	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => -1
-	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][] = null) => -1
+	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
-	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discardSpread() { # {{{

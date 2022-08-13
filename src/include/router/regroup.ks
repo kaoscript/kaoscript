@@ -105,7 +105,7 @@ func listEquivalentHashes(tree: TreeLeaf, hashes: Array) { # {{{
 	return hashes
 } # }}}
 
-func replaceOrder(equivalences: Array<String>, orders: Array<Array<String>>): Array<Array<String>> { # {{{
+func replaceOrder(equivalences: Array<String>, orders: String[][]): String[][] { # {{{
 	var mut result = [...orders]
 
 	for var eq1, index in equivalences {

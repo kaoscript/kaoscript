@@ -187,22 +187,22 @@ class UnionType extends Type {
 
 		return that
 	} # }}}
-	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: ArrayType, equivalences: String[][] = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
 		return 1
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{

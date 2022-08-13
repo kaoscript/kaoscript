@@ -119,7 +119,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
 		if this.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -135,7 +135,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: ArrayType, equivalences: String[][] = null) { # {{{
 		if @name == 'Array' {
 			if @parameters.length == 0 {
 				if value.hasRest() {
@@ -163,7 +163,7 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Array'), equivalences)
 		}
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
 		if @name == 'Dictionary' {
 			if @parameters.length == 0 {
 				if value.hasRest() {
@@ -191,7 +191,7 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Dictionary'), equivalences)
 		}
 	} # }}}
-	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
 		if this.isNull() {
 			return 0
 		}
@@ -199,9 +199,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	// TODO replace as `String[][]`
-	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
-	// compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
 		if @name == value.name() {
 			if @isNullable() != value.isNullable() {
 				return @nullable ? 1 : -1
@@ -327,7 +325,7 @@ class ReferenceType extends Type {
 
 		return Helper.compareString(@type.name(), valType.name())
 	} # }}}
-	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
 		return -1
 	} # }}}
 	discard() => this.discardReference()?.discard()

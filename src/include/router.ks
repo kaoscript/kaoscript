@@ -60,7 +60,7 @@ namespace Router {
 		rest: Boolean							= false
 		columns: Dictionary<TreeColumn>			= {}
 		order: Array<String>					= []
-		equivalences: Array<Array<String>>?		= null
+		equivalences: String[][]?		= null
 		function: FunctionType?					= null
 	}
 
@@ -131,7 +131,7 @@ namespace Router {
 
 	struct TreeBranch extends TreeNode {
 		columns: Dictionary<TreeColumn>			= {}
-		equivalences: Array<Array<String>>?		= null
+		equivalences: String[][]?		= null
 	}
 
 	type TreeColumn = TreeBranch | TreeLeaf
