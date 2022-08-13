@@ -105,7 +105,55 @@ class DictionaryType extends Type {
 		return null
 	} # }}}
 	getRestType(): @restType
-	hashCode() => this.toQuote()
+	hashCode(fattenNull: Boolean = false): String { # {{{
+		var mut str = ''
+
+		if @length == 0 {
+			if @rest {
+				str = `\(@restType.hashCode(fattenNull)){}`
+			}
+			else {
+				str = `Dictionary`
+			}
+		}
+		else {
+			str = '{'
+
+			var mut nc = false
+
+			for var property, name of @properties {
+				if nc {
+					str += ', '
+				}
+				else {
+					nc = true
+				}
+
+				str += `\(name): \(property.hashCode(fattenNull))`
+			}
+
+			if @rest {
+				if nc {
+					str += ', '
+				}
+
+				str += `...\(@restType.hashCode(fattenNull))`
+			}
+
+			str += '}'
+		}
+
+		if @nullable {
+			if fattenNull {
+				str += '|Null'
+			}
+			else {
+				str += '?'
+			}
+		}
+
+		return str
+	} # }}}
 	hasProperties() => @length > 0
 	hasRest() => @rest
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
@@ -296,33 +344,42 @@ class DictionaryType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	toQuote() { # {{{
-		if @length == 0 && !@rest {
-			return 'Dictionary'
-		}
+		var mut str = ''
 
-		var mut str = '{'
-		var mut nc = false
-
-		for var property, name of @properties {
-			if nc {
-				str += ', '
+		if @length == 0 {
+			if @rest {
+				str = `\(@restType.toQuote()){}`
 			}
 			else {
-				nc = true
+				str = `Dictionary`
+			}
+		}
+		else {
+			str = '{'
+
+			var mut nc = false
+
+			for var property, name of @properties {
+				if nc {
+					str += ', '
+				}
+				else {
+					nc = true
+				}
+
+				str += `\(name): \(property.toQuote())`
 			}
 
-			str += `\(name): \(property.toQuote())`
-		}
+			if @rest {
+				if nc {
+					str += ', '
+				}
 
-		if @rest {
-			if nc {
-				str += ', '
+				str += `...\(@restType.toQuote())`
 			}
 
-			str += `...\(@restType.toQuote())`
+			str += '}'
 		}
-
-		str += '}'
 
 		if @nullable {
 			str += '?'
@@ -337,7 +394,7 @@ class DictionaryType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
-		if @length == 0 && !@rest {
+		if @length == 0 && !@rest && !@nullable {
 			fragments.code($runtime.type(node), '.isDictionary')
 		}
 		else {
@@ -347,6 +404,10 @@ class DictionaryType extends Type {
 		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
+		if @nullable && junction == Junction::AND {
+			fragments.code('(')
+		}
+
 		fragments.code($runtime.type(node), '.isDictionary(value')
 
 		var literal = new Literal(false, node, node.scope(), 'value')
@@ -382,6 +443,14 @@ class DictionaryType extends Type {
 		}
 
 		fragments.code(')')
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(value)`)
+
+			if junction == Junction::AND {
+				fragments.code(')')
+			}
+		}
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('dict')

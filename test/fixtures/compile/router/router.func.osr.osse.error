@@ -1,1 +1,1 @@
-SyntaxException: The function "foobar(x: {...String})" is a duplicate (fixtures/compile/router/router.func.osr.osse.ks:4)
+SyntaxException: The function "foobar(x: String{})" is a duplicate (fixtures/compile/router/router.func.osr.osse.ks:4)

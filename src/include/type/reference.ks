@@ -474,20 +474,30 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	hashCode(fattenNull: Boolean = false): String { # {{{
-		var mut hash = @name
+		var mut hash = ''
 
-		if @parameters.length != 0 {
-			hash += '<'
+		if @name == 'Array' && @parameters.length == 1 {
+			hash = `\(@parameters[0].hashCode())[]`
+		}
+		else if @name == 'Dictionary' && @parameters.length == 1 {
+			hash = `\(@parameters[0].hashCode()){}`
+		}
+		else {
+			hash = @name
 
-			for var parameter, i in @parameters {
-				if i != 0 {
-					hash += ','
+			if @parameters.length > 0 {
+				hash += '<'
+
+				for var parameter, i in @parameters {
+					if i != 0 {
+						hash += ','
+					}
+
+					hash += parameter.hashCode()
 				}
 
-				hash += parameter.hashCode()
+				hash += '>'
 			}
-
-			hash += '>'
 		}
 
 		if @explicitlyNull {

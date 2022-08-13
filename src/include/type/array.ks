@@ -63,7 +63,50 @@ class ArrayType extends Type {
 		}
 	} # }}}
 	getRestType(): @restType
-	hashCode() => this.toQuote()
+	hashCode(fattenNull: Boolean = false): String { # {{{
+		var mut str = ''
+
+		if @properties.length == 0 {
+			if @rest {
+				str = `\(@restType.hashCode(fattenNull))[]`
+			}
+			else {
+				str = `Array`
+			}
+		}
+		else {
+			str = '['
+
+			for var property, index in @properties {
+				if index > 0 {
+					str += ', '
+				}
+
+				str += `\(property.hashCode(fattenNull))`
+			}
+
+			if @rest {
+				if @properties.length > 0 {
+					str += ', '
+				}
+
+				str += `...\(@restType.hashCode(fattenNull))`
+			}
+
+			str += ']'
+		}
+
+		if @nullable {
+			if fattenNull {
+				str += '|Null'
+			}
+			else {
+				str += '?'
+			}
+		}
+
+		return str
+	} # }}}
 	hasProperties() => @properties.length > 0
 	hasRest() => @rest
 	isArray() => true
@@ -199,29 +242,37 @@ class ArrayType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	toQuote() { # {{{
-		if @properties.length == 0 && !@rest {
-			return 'Array'
+		var mut str = ''
+
+		if @properties.length == 0 {
+			if @rest {
+				str = `\(@restType.toQuote())[]`
+			}
+			else {
+				str = `Array`
+			}
 		}
+		else {
+			str = '['
 
-		var mut str = '['
+			for var property, index in @properties {
+				if index > 0 {
+					str += ', '
+				}
 
-		for var property, index in @properties {
-			if index > 0 {
-				str += ', '
+				str += `\(property.toQuote())`
 			}
 
-			str += `\(property.toQuote())`
-		}
+			if @rest {
+				if @properties.length > 0 {
+					str += ', '
+				}
 
-		if @rest {
-			if @properties.length > 0 {
-				str += ', '
+				str += `...\(@restType.toQuote())`
 			}
 
-			str += `...\(@restType.toQuote())`
+			str += ']'
 		}
-
-		str += ']'
 
 		if @nullable {
 			str += '?'
@@ -233,7 +284,7 @@ class ArrayType extends Type {
 		throw new NotImplementedException()
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
-		if @properties.length == 0 && !@rest {
+		if @properties.length == 0 && !@rest && !@nullable {
 			fragments.code($runtime.type(node), '.isArray')
 		}
 		else {
@@ -243,6 +294,10 @@ class ArrayType extends Type {
 		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
+		if @nullable && junction == Junction::AND {
+			fragments.code('(')
+		}
+
 		fragments.code($runtime.type(node), '.isArray(value')
 
 		var literal = new Literal(false, node, node.scope(), 'value')
@@ -271,6 +326,14 @@ class ArrayType extends Type {
 		}
 
 		fragments.code(')')
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(value)`)
+
+			if junction == Junction::AND {
+				fragments.code(')')
+			}
+		}
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('array')
