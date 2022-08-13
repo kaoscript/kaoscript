@@ -590,7 +590,7 @@ class Parameter extends AbstractNode {
 	prepare() { # {{{
 		@name.prepare()
 
-		var mut type: Type? = @name.type()
+		var mut type: Type? = @name.type()?.asReference()
 
 		if !type?.isExplicit() {
 			type = null

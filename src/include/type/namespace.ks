@@ -378,12 +378,13 @@ class NamespacePropertyType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	// TODO add alias
-	toQuote() => @type.toQuote()
-	toQuote(double) => @type.toQuote(double)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
+
+	alias {
+		toQuote = @type.toQuote
+	}
 }

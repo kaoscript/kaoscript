@@ -84,8 +84,7 @@ class ClassAliasDeclaration extends Statement {
 	translate() { # {{{
 		@target.translate()
 	} # }}}
-	// TODO isAlias(): true
-	isAlias() => true
+	isAlias(): true
 	isInstance() => @instance
 	name(): @name
 	toStatementFragments(fragments, mode) { # {{{

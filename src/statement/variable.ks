@@ -120,7 +120,7 @@ class VariableDeclaration extends Statement {
 		if @hasInit {
 			@init.prepare()
 
-			@type = @init.type()
+			@type = @init.type().asReference()
 
 			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@init, this)

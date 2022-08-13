@@ -548,6 +548,7 @@ abstract class Type {
 	abstract toFragments(fragments, node)
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
 	abstract toVariations(variations: Array<String>): Void
+	asReference(): this
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeFunction(any: Boolean = true): Boolean => (any && this.isAny()) || this.isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()

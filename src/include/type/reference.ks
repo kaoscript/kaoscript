@@ -469,16 +469,13 @@ class ReferenceType extends Type {
 		}
 
 		if type.isClass() {
-			return type.getInstanceProperty(name)
+			return type.getInstantiableProperty(name)
 		}
 		else {
 			return type.getProperty(name)
 		}
 	} # }}}
-	// TODO merge methods
-	hashCode(): String => this.hashCode(false)
-	hashCode(fattenNull: Boolean): String { # {{{
-	// hashCode(fattenNull: Boolean = false): String { # {{{
+	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut hash = @name
 
 		if @parameters.length != 0 {

@@ -92,9 +92,7 @@ class AnyType extends Type {
 		return type
 	} # }}}
 	override getProperty(name) => AnyType.NullableUnexplicit
-	// TODO merge methods
-	hashCode(): String => this.hashCode(false)
-	hashCode(fattenNull: Boolean): String => @nullable ? fattenNull ? `Any|Null` : `Any?` : `Any`
+	hashCode(fattenNull: Boolean = false): String => @nullable ? fattenNull ? `Any|Null` : `Any?` : `Any`
 	isAny() => true
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if anycast && !@explicit {

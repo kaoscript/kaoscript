@@ -8,6 +8,14 @@ class NamedType extends Type {
 	constructor(@name, @type) { # {{{
 		super(type.scope())
 	} # }}}
+	asReference() { # {{{
+		if @type.isClass() {
+			return @scope.reference('Class')
+		}
+		else {
+			return this
+		}
+	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
 	canBeFunction(any = true) => @type.canBeFunction(any)
 	canBeNumber(any = true) => @type.canBeNumber(any)

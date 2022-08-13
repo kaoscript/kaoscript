@@ -1,6 +1,5 @@
 class FunctionType extends Type {
 	private late {
-		// TODO @assessment? = null
 		_assessment							= null
 		_async: Boolean						= false
 		_autoTyping: Boolean				= false

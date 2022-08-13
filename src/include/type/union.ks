@@ -190,6 +190,12 @@ class UnionType extends Type {
 	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
 		return -1
 	} # }}}
+	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) { # {{{
+		return 1
+	} # }}}
+	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
+		return 1
+	} # }}}
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
 		return -1
 	} # }}}

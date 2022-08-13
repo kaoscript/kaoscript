@@ -14,15 +14,7 @@ class ReturnStatement extends Statement {
 
 		var mut ancestor = parent
 
-		// TODO
-		while ancestor? && !(
-			ancestor is AnonymousFunctionExpression ||
-			ancestor is ArrowFunctionExpression ||
-			ancestor is FunctionDeclarator ||
-			ancestor is ClassMethodDeclaration ||
-			ancestor is ImplementClassMethodDeclaration ||
-			ancestor is ImplementNamespaceFunctionDeclaration
-		) {
+		while ancestor? && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			ancestor = ancestor.parent()
 		}
 
@@ -56,7 +48,7 @@ class ReturnStatement extends Statement {
 
 			this.assignTempVariables(@scope)
 
-			@type = @value.type()
+			@type = @value.type().asReference()
 		}
 
 		if @function? {

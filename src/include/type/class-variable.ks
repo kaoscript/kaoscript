@@ -104,10 +104,8 @@ class ClassVariableType extends Type {
 	type(): @type
 	type(@type): this
 
-	// TODO add alias
-	toQuote() => @type.toQuote()
-	toQuote(double) => @type.toQuote(double)
-	// alias {
-	// 	toQuote = @type.toQuote
-	// }
+	alias {
+		hashCode	= @type.hashCode
+		toQuote		= @type.toQuote
+	}
 }

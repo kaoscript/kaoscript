@@ -4,11 +4,13 @@ class ClassVariableDeclaration extends AbstractNode {
 	}
 	private {
 		_defaultValue: Boolean		= false
+		_dynamic: Boolean			= false
 		_immutable: Boolean			= false
 		_instance: Boolean			= true
 		_initialized: Boolean		= true
 		_lateInit: Boolean			= false
 		_name: String
+		_nullable: Boolean			= false
 		_value						= null
 	}
 	constructor(data, parent) { # {{{
@@ -21,11 +23,17 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		for var modifier in data.modifiers {
 			switch modifier.kind {
+				ModifierKind::Dynamic => {
+					@dynamic = true
+				}
 				ModifierKind::Immutable => {
 					@immutable = true
 				}
 				ModifierKind::LateInit => {
 					@lateInit = true
+				}
+				ModifierKind::Nullable => {
+					@nullable = true
 				}
 				ModifierKind::Public => {
 					public = true
@@ -77,7 +85,7 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@type = ClassVariableType.fromAST(@data!?, this)
 
-		if !@defaultValue && @type.isRequiringInitialization() {
+		if @type.isRequiringInitialization() {
 			@initialized = false
 		}
 	} # }}}
@@ -87,13 +95,28 @@ class ClassVariableDeclaration extends AbstractNode {
 			@value.analyse()
 			@value.prepare()
 
+			var type = @value.type().asReference()
+
 			if @data.type? {
-				unless @value.type().isAssignableToVariable(@type.type(), true, true, false) {
+				unless type.isAssignableToVariable(@type.type(), true, true, false) {
 					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 				}
 			}
-			else if @immutable && !@lateInit {
-				@type.type(@value.type())
+			else if @immutable {
+				if !@lateInit {
+					@type.type(type)
+				}
+			}
+			else if !@dynamic {
+				if type.isNull() {
+					@type.type(AnyType.NullableUnexplicit)
+				}
+				else if @nullable && !type.isNullable() {
+					@type.type(type.setNullable(true))
+				}
+				else {
+					@type.type(type)
+				}
 			}
 
 			@value.translate()

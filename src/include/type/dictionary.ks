@@ -48,6 +48,9 @@ class DictionaryType extends Type {
 	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
+	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
+		return -value.compareToRef(this, equivalences)
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
 			kind: TypeKind::Dictionary

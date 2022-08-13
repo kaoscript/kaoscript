@@ -289,7 +289,11 @@ class DictionaryLiteralMember extends Expression {
 	prepare() { # {{{
 		@value.prepare()
 
-		@type = @value.type()
+		@type = @value.type().asReference()
+
+		if @type.isNull() {
+			@type = AnyType.NullableUnexplicit
+		}
 	} # }}}
 	translate() { # {{{
 		@value.translate()

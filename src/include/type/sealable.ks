@@ -57,10 +57,6 @@ class SealableType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	// TODO add alias
-	// toQuote(...args) => @type.toQuote(...args)
-	toQuote() => @type.toQuote()
-	toQuote(double) => @type.toQuote(double)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{
 		variations.push('sealable')
@@ -68,4 +64,8 @@ class SealableType extends Type {
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
+	
+	alias {
+		toQuote = @type.toQuote
+	}
 }

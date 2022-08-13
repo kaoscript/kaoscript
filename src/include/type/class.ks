@@ -622,9 +622,7 @@ class ClassType extends Type {
 				exportSuper = this.hasExportableOriginals()
 			}
 			else if mode ~~ ExportMode::Requirement {
-				// TODO shorten `original?`
-				var mut original: ClassType? = @majorOriginal
-				// var mut original? = @majorOriginal
+				var mut original? = @majorOriginal
 
 				while ?original {
 					if original.isRequirement() || original.referenceIndex() != -1 {
@@ -1185,6 +1183,37 @@ class ClassType extends Type {
 		@instanceAssessments[name] = assessment
 
 		return assessment
+	} # }}}
+	getInstantiableProperty(name: String) { # {{{
+		if @instanceMethods[name] is Array {
+			if @instanceMethods[name].length == 1 {
+				return @instanceMethods[name][0]
+			}
+			else {
+				return new ClassMethodSetType(@scope, @instanceMethods[name])
+			}
+		}
+		
+		if @abstract {
+			if var functions = @abstractMethods[name] {
+				if functions.length == 1 {
+					return functions[0]
+				}
+				else {
+					return new ClassMethodSetType(@scope, functions)
+				}
+			}
+		}
+		
+		if @instanceVariables[name] is ClassVariableType {
+			return @instanceVariables[name]
+		}
+		
+		if @extending {
+			return @extends.type().getInstanceProperty(name)
+		}
+
+		return null
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
 	getMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{

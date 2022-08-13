@@ -13,7 +13,8 @@ class ParameterType extends Type {
 	static {
 		fromAST(data, node: AbstractNode): ParameterType => ParameterType.fromAST(data, false, node.scope(), true, node)
 		fromAST(data, overridable: Boolean, scope: Scope, defined: Boolean, node: AbstractNode): ParameterType { # {{{
-			var mut type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
+			// TODO remove type
+			var mut type: Type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
 
 			var mut default = false
 			var mut min = 1
