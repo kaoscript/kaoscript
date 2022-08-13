@@ -22,17 +22,8 @@ var $rules = {
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]
 	'dont-ignore-misfit':			['ignoreMisfit', false]
-	// TODO delete followings rules:
 	'assert-override':				['assertOverride', true]
 	'dont-assert-override':			['assertOverride', false]
-	'assert-parameter':				['assertParameter', true]
-	'dont-assert-parameter':		['assertParameter', false]
-	'assert-parameter-type':		['assertParameterType', true]
-	'dont-assert-parameter-type':	['assertParameterType', false]
-	'assert-new-struct':			['assertNewStruct', true]
-	'dont-assert-new-struct':		['assertNewStruct', false]
-	'assert-new-tuple':				['assertNewTuple', true]
-	'dont-assert-new-tuple':		['assertNewTuple', false]
 }
 
 class Attribute {
