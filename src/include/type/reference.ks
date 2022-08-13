@@ -120,7 +120,6 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) { # {{{
-	// compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
 		if this.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -193,7 +192,6 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) { # {{{
-	// compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
 		if this.isNull() {
 			return 0
 		}

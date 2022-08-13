@@ -214,9 +214,15 @@ abstract class Type {
 
 			switch data.kind {
 				NodeKind::ArrayType => {
-					var type = new ArrayType(scope)
+					var mut type = new ArrayType(scope)
 
 					type.setRestType(Type.fromAST(data.element, scope, defined, node))
+
+					for var modifier in data.modifiers {
+						if modifier.kind == ModifierKind::Nullable {
+							type = type.setNullable(true)
+						}
+					}
 
 					return type
 				}
@@ -276,9 +282,15 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind::ObjectType => {
-					var type = new DictionaryType(scope)
+					var mut type = new DictionaryType(scope)
 
 					type.setRestType(Type.fromAST(data.element, scope, defined, node))
+
+					for var modifier in data.modifiers {
+						if modifier.kind == ModifierKind::Nullable {
+							type = type.setNullable(true)
+						}
+					}
 
 					return type
 				}

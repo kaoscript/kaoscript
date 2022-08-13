@@ -16,6 +16,7 @@ class NullType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	compareToRef(value: AnyType, equivalences: Array<Array<String>> = null) => -value.compareToRef(this, equivalences)
+	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) => 1
 	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) => 1
 	compareToRef(value: NullType, equivalences: Array<Array<String>> = null) => 0
 	compareToRef(value: ReferenceType, equivalences: Array<Array<String>> = null) => -value.compareToRef(this, equivalences)

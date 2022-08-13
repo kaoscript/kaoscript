@@ -1,5 +1,6 @@
 class ArrayType extends Type {
 	private {
+		@nullable: Boolean				= false
 		@properties: Array<Type>		= []
 		@rest: Boolean					= false
 		@restType: Type?				= null
@@ -8,7 +9,14 @@ class ArrayType extends Type {
 		@properties.push(type)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		var type = new ArrayType(@scope)
+
+		type._nullable = @nullable
+		type._properties = [...@properties]
+		type._rest = @rest
+		type._restType = @restType
+
+		return type
 	} # }}}
 	compareToRef(value: ArrayType, equivalences: Array<Array<String>> = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
@@ -75,13 +83,6 @@ class ArrayType extends Type {
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
-		else if value.isArray() {
-			if this.isNullable() && !nullcast && !value.isNullable() {
-				return false
-			}
-
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
-		}
 		else if value is UnionType {
 			for var type in value.types() {
 				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
@@ -93,7 +94,7 @@ class ArrayType extends Type {
 		return false
 	} # }}}
 	isMorePreciseThan(value) => true
-	isNullable() => false
+	isNullable() => @nullable
 	isSealable() => true
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		return true if this == value
@@ -170,7 +171,20 @@ class ArrayType extends Type {
 		return true
 	} # }}}
 	length() => @properties.length
+	parameter() => AnyType.NullableUnexplicit
 	properties() => @properties
+	setNullable(nullable: Boolean) { # {{{
+		if @nullable == nullable {
+			return this
+		}
+		else {
+			var type = @clone()
+
+			type._nullable = nullable
+
+			return type
+		}
+	} # }}}
 	setRestType(@restType): this { # {{{
 		@rest = true
 	} # }}}
@@ -201,6 +215,10 @@ class ArrayType extends Type {
 		}
 
 		str += ']'
+
+		if @nullable {
+			str += '?'
+		}
 
 		return str
 	} # }}}

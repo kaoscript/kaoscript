@@ -1,5 +1,6 @@
 class DictionaryType extends Type {
 	private {
+		@nullable: Boolean				= false
 		@length: Number					= 0
 		@properties: Dictionary<Type>	= {}
 		@rest: Boolean					= false
@@ -30,7 +31,15 @@ class DictionaryType extends Type {
 		++@length
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		var type = new DictionaryType(@scope)
+
+		type._nullable = @nullable
+		type._length = @length
+		type._properties = {...@properties}
+		type._rest = @rest
+		type._restType = @restType
+
+		return type
 	} # }}}
 	compareToRef(value: DictionaryType, equivalences: Array<Array<String>> = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
@@ -139,7 +148,7 @@ class DictionaryType extends Type {
 
 		return false
 	} # }}}
-	isNullable() => false
+	isNullable() => @nullable
 	isDictionary() => true
 	isExportable() => true
 	isSealable() => true
@@ -261,6 +270,18 @@ class DictionaryType extends Type {
 
 		return this
 	} # }}}
+	setNullable(nullable: Boolean) { # {{{
+		if @nullable == nullable {
+			return this
+		}
+		else {
+			var type = @clone()
+
+			type._nullable = nullable
+
+			return type
+		}
+	} # }}}
 	setRestType(@restType): this { # {{{
 		@rest = true
 	} # }}}
@@ -295,6 +316,10 @@ class DictionaryType extends Type {
 		}
 
 		str += '}'
+
+		if @nullable {
+			str += '?'
+		}
 
 		return str
 	} # }}}
