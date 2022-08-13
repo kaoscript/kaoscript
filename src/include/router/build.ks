@@ -1316,7 +1316,7 @@ func applyBackTracking(tree: TreeLeaf, max: Number, backtracing: Array) { # {{{
 	}
 } # }}}
 
-// TODO
+// TODO A Struct can be an Object
 // func sortNodes2(tree: { columns: Dictionary<TreeColumn>, equivalences: Array<Array<String>>?, order: Array<String> }): Void { # {{{
 func sortNodes2(tree): Void { # {{{
 	var items = []

@@ -577,6 +577,11 @@ class ReferenceType extends Type {
 				return false
 			}
 		}
+		else if value is ArrayType {
+			return false unless !@nullable || nullcast || value.isNullable()
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		}
 		else {
 			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
@@ -689,7 +694,24 @@ class ReferenceType extends Type {
 			return true
 		}
 		else {
-			throw new NotImplementedException()
+			if @hasParameters() {
+				return false unless value.hasRest()
+
+				var parameter = @parameters[0]
+
+				return false unless parameter.isSubsetOf(value.getRestType(), mode)
+			}
+			else {
+				if value.hasRest() {
+					return false unless value.getRestType().isNullable()
+				}
+
+				for var type, index in value.properties() {
+					return false unless type.isNullable()
+				}
+			}
+
+			return true
 		}
 	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{

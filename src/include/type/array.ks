@@ -59,6 +59,39 @@ class ArrayType extends Type {
 	hasProperties() => @properties.length > 0
 	hasRest() => @rest
 	isArray() => true
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+		if value.isAny() {
+			if this.isNullable() {
+				return nullcast || value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if value.isArray() {
+			if this.isNullable() && !nullcast && !value.isNullable() {
+				return false
+			}
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		}
+		else if value.isArray() {
+			if this.isNullable() && !nullcast && !value.isNullable() {
+				return false
+			}
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		}
+		else if value is UnionType {
+			for var type in value.types() {
+				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} # }}}
 	isMorePreciseThan(value) => true
 	isNullable() => false
 	isSealable() => true

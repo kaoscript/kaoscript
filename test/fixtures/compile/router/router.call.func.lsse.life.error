@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Array<Number>) (fixtures/compile/router/router.call.func.lsse.life.ks:2)
