@@ -156,9 +156,9 @@ class ForInStatement extends Statement {
 
 		if @value != null {
 			var parameterType = type.parameter()
-
 			var valueType = Type.fromAST(@data.type, this)
-			unless parameterType.matchContentOf(valueType) {
+
+			unless parameterType.isAssignableToVariable(valueType, true, true, false) {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 

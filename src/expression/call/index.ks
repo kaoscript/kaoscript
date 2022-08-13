@@ -569,6 +569,14 @@ class CallExpression extends Expression {
 			is AliasType => {
 				this.makeMemberCallee(value.type(), name)
 			}
+			is ArrayType => {
+				if var property = value.getProperty(@property) {
+					this.makeCallee(property, @property)
+				}
+				else {
+					this.makeMemberCalleeFromReference(@scope.reference('Array'))
+				}
+			}
 			is ClassVariableType => {
 				this.makeMemberCalleeFromReference(value.type())
 			}

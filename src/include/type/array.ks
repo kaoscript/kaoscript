@@ -171,7 +171,14 @@ class ArrayType extends Type {
 		return true
 	} # }}}
 	length() => @properties.length
-	parameter() => AnyType.NullableUnexplicit
+	parameter(index: Number = -1) { # {{{
+		if @properties.length > 0 || !@rest {
+			return AnyType.NullableUnexplicit
+		}
+		else {
+			return @restType
+		}
+	} # }}}
 	properties() => @properties
 	setNullable(nullable: Boolean) { # {{{
 		if @nullable == nullable {

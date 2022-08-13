@@ -261,7 +261,14 @@ class DictionaryType extends Type {
 
 		return false
 	} # }}}
-	parameter() => AnyType.NullableUnexplicit
+	parameter(index: Number = -1) { # {{{
+		if @length > 0 || !@rest {
+			return AnyType.NullableUnexplicit
+		}
+		else {
+			return @restType
+		}
+	} # }}}
 	properties() => @properties
 	setExhaustive(@exhaustive) { # {{{
 		for var property of @properties {
