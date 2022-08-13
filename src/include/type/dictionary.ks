@@ -5,6 +5,7 @@ class DictionaryType extends Type {
 		@properties: Dictionary<Type>	= {}
 		@rest: Boolean					= false
 		@restType: Type?				= null
+		@spread: Boolean				= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
@@ -38,6 +39,7 @@ class DictionaryType extends Type {
 		type._properties = {...@properties}
 		type._rest = @rest
 		type._restType = @restType
+		type._spread = @spread
 
 		return type
 	} # }}}
@@ -59,6 +61,19 @@ class DictionaryType extends Type {
 	} # }}}
 	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
 		return -value.compareToRef(this, equivalences)
+	} # }}}
+	discardSpread() { # {{{
+		if @spread {
+			if @rest {
+				return @restType!?
+			}
+			else {
+				return AnyType.NullableUnexplicit
+			}
+		}
+		else {
+			return this
+		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
@@ -88,6 +103,15 @@ class DictionaryType extends Type {
 		}
 
 		return this
+	} # }}}
+	flagSpread() { # {{{
+		return this if @spread
+		
+		var type = @clone()
+
+		type._spread = true
+
+		return type
 	} # }}}
 	getProperty(name: String): Type? { # {{{
 		if var type = @properties[name] {

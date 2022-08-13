@@ -4,6 +4,7 @@ class ArrayType extends Type {
 		@properties: Array<Type>		= []
 		@rest: Boolean					= false
 		@restType: Type?				= null
+		@spread: Boolean				= false
 	}
 	addProperty(type: Type) { # {{{
 		@properties.push(type)
@@ -15,6 +16,7 @@ class ArrayType extends Type {
 		type._properties = [...@properties]
 		type._rest = @rest
 		type._restType = @restType
+		type._spread = @spread
 
 		return type
 	} # }}}
@@ -37,6 +39,19 @@ class ArrayType extends Type {
 	compareToRef(value: UnionType, equivalences: Array<Array<String>> = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
+	discardSpread() { # {{{
+		if @spread {
+			if @rest {
+				return @restType!?
+			}
+			else {
+				return AnyType.NullableUnexplicit
+			}
+		}
+		else {
+			return this
+		}
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
 			kind: TypeKind::Array
@@ -49,6 +64,15 @@ class ArrayType extends Type {
 		export.properties = [property.export(references, indexDelta, mode, module) for var property in @properties]
 
 		return export
+	} # }}}
+	flagSpread() { # {{{
+		return this if @spread
+		
+		var type = @clone()
+
+		type._spread = true
+
+		return type
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
 		if index >= @properties.length {
