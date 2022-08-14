@@ -18,6 +18,7 @@ var $attributes = {}
 var $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
 
 var $rules = {
+	// TODO should be by default
 	'no-undefined':					['noUndefined', true]
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]

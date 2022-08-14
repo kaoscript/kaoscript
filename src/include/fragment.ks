@@ -266,10 +266,12 @@ class LineBuilder extends ExpressionBuilder {
 	}
 	block() => this.newBlock()
 	done() { # {{{
-		if @undone {
-			@writer.push(@writer.lineTerminator)
+		if @notDone {
+			if @terminator {
+				@writer.push(@writer.lineTerminator)
+			}
 
-			@undone = false
+			@notDone = false
 
 			if @whenDone != null {
 				@whenDone()

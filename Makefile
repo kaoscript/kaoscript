@@ -51,6 +51,7 @@ restore:
 	cp lib/compiler.old.js lib/compiler.js
 
 update:
+	@make clean
 	rm -rf node_modules package-lock.json
 	nrm use local
 	npm i

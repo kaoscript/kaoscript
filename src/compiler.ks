@@ -736,7 +736,7 @@ export class Compiler {
 	writeFiles() { # {{{
 		fs.mkdir(path.dirname(@file))
 
-		if @module._binary {
+		if @module.isBinary() {
 			this.writeBinaryFiles()
 		}
 		else {
