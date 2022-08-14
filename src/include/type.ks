@@ -438,8 +438,13 @@ abstract class Type {
 				}
 			}
 			else if data.reference? {
-				if references[data.reference]? {
-					return scope.reference(references[data.reference])
+				if var reference = references[data.reference] {
+					if reference is ArrayType | DictionaryType | ReferenceType {
+						return reference
+					}
+					else {
+						return scope.reference(reference)
+					}
 				}
 				else {
 					var type = Type.toNamedType(
@@ -458,6 +463,9 @@ abstract class Type {
 				switch data.kind {
 					TypeKind::Alias => {
 						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Array => {
+						return ArrayType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Class => {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)

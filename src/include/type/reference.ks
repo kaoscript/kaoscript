@@ -326,7 +326,7 @@ class ReferenceType extends Type {
 		return Helper.compareString(@type.name(), valType.name())
 	} # }}}
 	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
-		return -1
+		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discard() => this.discardReference()?.discard()
 	discardAlias() { # {{{
@@ -583,8 +583,20 @@ class ReferenceType extends Type {
 				return false
 			}
 		}
+		// TODO duplicate?
 		else if value is ArrayType {
+			return false unless @isArray()
 			return false unless !@nullable || nullcast || value.isNullable()
+
+			if anycast {
+				return true if @parameters.length == 0
+
+				var parameter = @parameters[0]
+
+				if parameter.isAny() && !parameter.isExplicit() {
+					return true
+				}
+			}
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}

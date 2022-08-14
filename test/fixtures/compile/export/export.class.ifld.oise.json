@@ -7,7 +7,7 @@
   {
     "exports": [
       0,
-      "Coord"
+      "Foobar"
     ],
     "references": [
       {
@@ -20,34 +20,15 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {
-          "x": {
-            "access": 4,
-            "type": "Number",
-            "default": false,
-            "immutable": false,
-            "lateInit": true,
-            "sealed": false
-          },
-          "y": {
-            "access": 4,
-            "type": "Number",
-            "default": false,
-            "immutable": false,
-            "lateInit": true,
-            "sealed": false
-          },
-          "elevation": {
+          "values": {
             "access": 4,
             "type": {
               "kind": "dictionary",
-              "properties": {
-                "unit": "String",
-                "value": "Number"
-              }
+              "rest": "Number"
             },
-            "default": false,
+            "default": true,
             "immutable": false,
-            "lateInit": true,
+            "lateInit": false,
             "sealed": false
           }
         },
@@ -55,7 +36,7 @@
         "instanceMethods": {},
         "classMethods": {},
         "sequences": [
-          -1,
+          0,
           -1,
           -1
         ]

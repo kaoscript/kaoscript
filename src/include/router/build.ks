@@ -1366,6 +1366,7 @@ func sortNodes2(tree): Void { # {{{
 
 	var equivalences = []
 
+	// console.log([item.key for var item in items])
 	items.sort((a, b) => {
 		if a.children:Array.contains(b) {
 			// console.log(a.key, b.key, 1, 'b⊂a')
@@ -1379,7 +1380,7 @@ func sortNodes2(tree): Void { # {{{
 		var d = b.usage - a.usage
 
 		if d == 0 {
-			// console.log(a.key, b.key, a.type.compareToRef(b.type), d, a.type.isTypeOf(), b.type.isTypeOf(), b.type.hasParameters())
+			// console.log(a.key, b.key, a.type.compareToRef(b.type))
 			return a.type.compareToRef(b.type, equivalences)
 		}
 		else {

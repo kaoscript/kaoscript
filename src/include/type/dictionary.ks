@@ -1,10 +1,10 @@
 class DictionaryType extends Type {
 	private {
-		@nullable: Boolean				= false
 		@length: Number					= 0
+		@nullable: Boolean				= false
 		@properties: Dictionary<Type>	= {}
 		@rest: Boolean					= false
-		@restType: Type?				= null
+		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
 	}
 	static {
@@ -19,8 +19,14 @@ class DictionaryType extends Type {
 			}
 
 			queue.push(() => {
-				for var property, name of data.properties {
-					type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
+				if data.properties? {
+					for var property, name of data.properties {
+						type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
+					}
+				}
+
+				if data.rest? {
+					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
@@ -76,6 +82,10 @@ class DictionaryType extends Type {
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		if !@systemic && !@sealed && @length == 0 && !@rest {
+			return 'Dictionary'
+		}
+
 		var export = {
 			kind: TypeKind::Dictionary
 		}
@@ -87,10 +97,16 @@ class DictionaryType extends Type {
 			export.sealed = true
 		}
 
-		export.properties = {}
+		if @length > 0 {
+			export.properties = {}
 
-		for var value, name of @properties {
-			export.properties[name] = value.export(references, indexDelta, mode, module)
+			for var value, name of @properties {
+				export.properties[name] = value.export(references, indexDelta, mode, module)
+			}
+		}
+
+		if @rest {
+			export.rest = @restType.export(references, indexDelta, mode, module)
 		}
 
 		return export
@@ -106,7 +122,7 @@ class DictionaryType extends Type {
 	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
-		
+
 		var type = @clone()
 
 		type._spread = true
@@ -194,11 +210,19 @@ class DictionaryType extends Type {
 				return false
 			}
 
+			if anycast && @length == 0 && !@rest {
+				return true
+			}
+
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value.isObject() {
 			if this.isNullable() && !nullcast && !value.isNullable() {
 				return false
+			}
+
+			if anycast && @length == 0 && !@rest {
+				return true
 			}
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
@@ -410,6 +434,9 @@ class DictionaryType extends Type {
 		}
 
 		return str
+	} # }}}
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		return this.export(references, indexDelta, mode, module)
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()

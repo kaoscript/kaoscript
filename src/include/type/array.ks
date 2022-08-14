@@ -1,17 +1,39 @@
 class ArrayType extends Type {
 	private {
+		@length: Number					= 0
 		@nullable: Boolean				= false
 		@properties: Array<Type>		= []
 		@rest: Boolean					= false
-		@restType: Type?				= null
+		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+	}
+	static {
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ArrayType { # {{{
+			var type = new ArrayType(scope)
+
+			queue.push(() => {
+				if data.properties? {
+					for var property in data.properties {
+						type.addProperty(Type.import(property, metadata, references, alterations, queue, scope, node))
+					}
+				}
+
+				if data.rest? {
+					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
+				}
+			})
+
+			return type
+		} # }}}
 	}
 	addProperty(type: Type) { # {{{
 		@properties.push(type)
+		++@length
 	} # }}}
 	clone() { # {{{
 		var type = new ArrayType(@scope)
 
+		type._length = @length
 		type._nullable = @nullable
 		type._properties = [...@properties]
 		type._rest = @rest
@@ -53,21 +75,27 @@ class ArrayType extends Type {
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		if @length == 0 && !@rest {
+			return 'Array'
+		}
+
 		var export = {
 			kind: TypeKind::Array
 		}
 
-		if @sealed {
-			export.sealed = @sealed
+		if @length > 0 {
+			export.properties = [property.export(references, indexDelta, mode, module) for var property in @properties]
 		}
 
-		export.properties = [property.export(references, indexDelta, mode, module) for var property in @properties]
+		if @rest {
+			export.rest = @restType.export(references, indexDelta, mode, module)
+		}
 
 		return export
 	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
-		
+
 		var type = @clone()
 
 		type._spread = true
@@ -75,7 +103,7 @@ class ArrayType extends Type {
 		return type
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
-		if index >= @properties.length {
+		if index >= @length {
 			if @rest {
 				return @restType
 			}
@@ -90,7 +118,7 @@ class ArrayType extends Type {
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''
 
-		if @properties.length == 0 {
+		if @length == 0 {
 			if @rest {
 				str = `\(@restType.hashCode(fattenNull))[]`
 			}
@@ -110,7 +138,7 @@ class ArrayType extends Type {
 			}
 
 			if @rest {
-				if @properties.length > 0 {
+				if @length > 0 {
 					str += ', '
 				}
 
@@ -131,7 +159,7 @@ class ArrayType extends Type {
 
 		return str
 	} # }}}
-	hasProperties() => @properties.length > 0
+	hasProperties() => @length > 0
 	hasRest() => @rest
 	isArray() => true
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
@@ -146,6 +174,10 @@ class ArrayType extends Type {
 		else if value.isArray() {
 			if this.isNullable() && !nullcast && !value.isNullable() {
 				return false
+			}
+
+			if anycast && @length == 0 && !@rest {
+				return true
 			}
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
@@ -168,7 +200,7 @@ class ArrayType extends Type {
 		return false unless @rest == value.hasRest()
 
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
-			return false unless @properties.length == value.length()
+			return false unless @length == value.length()
 
 			for var type, index in value.properties() {
 				return false unless @properties[index].isSubsetOf(type, mode)
@@ -214,7 +246,7 @@ class ArrayType extends Type {
 		return false unless value.isArray()
 
 		if mode ~~ MatchingMode::Exact {
-			return false unless @properties.length == 0
+			return false unless @length == 0
 			return false unless @rest == value.hasParameters()
 
 			if @rest {
@@ -237,9 +269,9 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	length() => @properties.length
+	length() => @length
 	parameter(index: Number = -1) { # {{{
-		if @properties.length > 0 || !@rest {
+		if @length > 0 || !@rest {
 			return AnyType.NullableUnexplicit
 		}
 		else {
@@ -268,7 +300,7 @@ class ArrayType extends Type {
 	toQuote() { # {{{
 		var mut str = ''
 
-		if @properties.length == 0 {
+		if @length == 0 {
 			if @rest {
 				str = `\(@restType.toQuote())[]`
 			}
@@ -288,7 +320,7 @@ class ArrayType extends Type {
 			}
 
 			if @rest {
-				if @properties.length > 0 {
+				if @length > 0 {
 					str += ', '
 				}
 
@@ -304,11 +336,14 @@ class ArrayType extends Type {
 
 		return str
 	} # }}}
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		return this.export(references, indexDelta, mode, module)
+	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
-		if @properties.length == 0 && !@rest && !@nullable {
+		if @length == 0 && !@rest && !@nullable {
 			fragments.code($runtime.type(node), '.isArray')
 		}
 		else {
@@ -331,11 +366,11 @@ class ArrayType extends Type {
 
 			@restType.toTestFunctionFragments(fragments, literal)
 		}
-		else if @properties.length > 0 {
+		else if @length > 0 {
 			fragments.code(', void 0')
 		}
 
-		if @properties.length > 0 {
+		if @length > 0 {
 			fragments.code(', [')
 
 			for var type, index in @properties {

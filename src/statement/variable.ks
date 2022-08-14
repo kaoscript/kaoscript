@@ -524,7 +524,10 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} # }}}
 	setRealType(type: Type) { # {{{
 		if @type != null {
-			if !type.isAssignableToVariable(@type, false) {
+			// console.log(type.hashCode())
+			// console.log(@type.hashCode())
+			// console.log(type.isAssignableToVariable(@type, true, false, false))
+			unless type.isAssignableToVariable(@type, true, false, false) {
 				TypeException.throwInvalidAssignement(@name, @type, type, this)
 			}
 		}
