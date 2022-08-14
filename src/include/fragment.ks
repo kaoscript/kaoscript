@@ -267,9 +267,7 @@ class LineBuilder extends ExpressionBuilder {
 	block() => this.newBlock()
 	done() { # {{{
 		if @notDone {
-			if @terminator {
-				@writer.push(@writer.lineTerminator)
-			}
+			@writer.push(@writer.lineTerminator)
 
 			@notDone = false
 
