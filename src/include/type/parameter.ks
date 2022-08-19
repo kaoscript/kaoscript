@@ -146,7 +146,6 @@ class ParameterType extends Type {
 	isMissingType() => !@type.isExplicit()
 	isNullable() => @type.isNullable()
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
-
 		if mode !~ MatchingMode::IgnoreName && @name != value.name() != null {
 			return false
 		}
@@ -156,6 +155,9 @@ class ParameterType extends Type {
 		}
 		else if mode ~~ MatchingMode::NonNullToNull && !@type.isNullable() && value.type().isNullable() {
 			return false unless @type.setNullable(true).isSubsetOf(value.type(), mode)
+		}
+		else if mode ~~ MatchingMode::NullToNonNull && @type.isNullable() && !value.type().isNullable() {
+			return false unless @type.setNullable(false).isSubsetOf(value.type(), mode)
 		}
 		else if mode ~~ MatchingMode::Subset {
 			var oldType = @getArgumentType()

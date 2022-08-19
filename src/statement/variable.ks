@@ -114,7 +114,7 @@ class VariableDeclaration extends Statement {
 		}
 
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		var declarator = @declarators[0]
 
 		if @hasInit {
@@ -359,7 +359,7 @@ class VariableBindingDeclarator extends AbstractNode {
 
 		@parent.defineVariables(@binding)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @data.type? {
 			this.setDeclaredType(Type.fromAST(@data.type, this))
 		}
@@ -453,7 +453,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 

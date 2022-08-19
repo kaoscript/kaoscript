@@ -13,7 +13,7 @@ module.exports = function() {
 		if(Type.isValue(z)) {
 			return z;
 		}
-		return Operator.addOrConcat(x, y);
+		return Operator.add(x, y);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

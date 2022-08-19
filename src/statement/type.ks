@@ -9,7 +9,7 @@ class TypeAliasDeclaration extends Statement {
 		@variable = @scope.define(@name, true, new AliasType(@scope, Type.fromAST(@data.type, this)), this)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)

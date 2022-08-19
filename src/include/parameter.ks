@@ -587,7 +587,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@name.prepare()
 
 		var mut type: Type? = @name.type()?.asReference()
@@ -808,7 +808,7 @@ class AliasStatement extends Statement {
 		parent.addAtThisParameter(this)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
@@ -1565,7 +1565,7 @@ class AnonymousParameter extends AbstractNode {
 		_type: Type
 	}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@name = @scope.acquireTempName(false)
 	} # }}}
 	translate()
@@ -1605,7 +1605,7 @@ class AnonymousParameter extends AbstractNode {
 }
 
 class ThisExpressionParameter extends ThisExpression {
-	override prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		unless ?@variableName {

@@ -10,7 +10,7 @@ module.exports = function() {
 		if(z === void 0) {
 			z = null;
 		}
-		x = Helper.concatString(x, Operator.addOrConcat(y, z));
+		x = Helper.concatString(x, Operator.add(y, z));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;

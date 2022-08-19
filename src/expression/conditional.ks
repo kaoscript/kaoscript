@@ -15,7 +15,7 @@ class ConditionalExpression extends Expression {
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@condition.prepare()
 
 		for var data, name of @condition.inferTypes({}) {

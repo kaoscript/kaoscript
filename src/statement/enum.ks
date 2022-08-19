@@ -62,7 +62,7 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
@@ -253,12 +253,12 @@ class EnumVariableDeclaration extends AbstractNode {
 		switch enum.kind() {
 			EnumTypeKind::Flags => {
 				if value? {
-					if value.kind == NodeKind::BinaryExpression && (value.operator.kind == BinaryOperatorKind::BitwiseOr || value.operator.kind == BinaryOperatorKind::Addition) {
+					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
 						@operands = [value.left, value.right]
 					}
-					else if value.kind == NodeKind::PolyadicExpression && (value.operator.kind == BinaryOperatorKind::BitwiseOr || value.operator.kind == BinaryOperatorKind::Addition) {
+					else if value.kind == NodeKind::PolyadicExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
 						@operands = value.operands
@@ -320,7 +320,7 @@ class EnumVariableDeclaration extends AbstractNode {
 			}
 		}
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	isComposite() => @composite
 	name() => @name
@@ -399,7 +399,7 @@ class EnumMethodDeclaration extends Statement {
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		var enumName = @parent.name()
 		var enumRef = @scope.reference(enumName)
 
@@ -453,7 +453,7 @@ class EnumMethodDeclaration extends Statement {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()

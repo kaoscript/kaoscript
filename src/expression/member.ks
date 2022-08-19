@@ -46,7 +46,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @prepareObject {
 			@object.prepare()
 

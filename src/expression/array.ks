@@ -19,7 +19,7 @@ class ArrayExpression extends Expression {
 			@values.push(value)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		var dyn type = null
 
 		for var value, index in @values {
@@ -126,7 +126,7 @@ class ArrayRange extends Expression {
 		}
 
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@type = Type.arrayOf(@scope.reference('Number'), @scope)
 
 		@from.prepare()

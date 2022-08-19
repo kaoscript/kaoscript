@@ -22,7 +22,7 @@ class ClassAliasDeclaration extends Statement {
 		parent._aliases[@name] = this
 	} # }}}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		var class = @parent.type().type()
 
 		@target = $compile.expression(@data.target, this)

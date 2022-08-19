@@ -11,7 +11,7 @@ class SequenceExpression extends Expression {
 			expression.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for expression in @expressions {
 			expression.prepare()
 		}

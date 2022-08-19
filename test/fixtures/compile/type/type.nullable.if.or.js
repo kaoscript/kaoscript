@@ -13,7 +13,7 @@ module.exports = function() {
 		if((x === null) || (y === null)) {
 			return null;
 		}
-		return Operator.addOrConcat(x.foobar(), y.foobar());
+		return Operator.add(x.foobar(), y.foobar());
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 2) {

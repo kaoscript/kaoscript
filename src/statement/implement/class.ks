@@ -63,7 +63,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			@value.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@type = ClassVariableType.fromAST(@data!?, this)
 
 		@type.flagAltering()
@@ -269,7 +269,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@block = $compile.function($ast.body(@data), this)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {
@@ -449,7 +449,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()
@@ -923,7 +923,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		@block = new ConstructorBlock($ast.block(body), this, @scope)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {

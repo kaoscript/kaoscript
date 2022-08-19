@@ -4,7 +4,7 @@ module.exports = function() {
 		return camelize.__ks_rt(this, arguments);
 	};
 	camelize.__ks_0 = function(value) {
-		return Operator.addOrConcat(value.charAt(0).toLowerCase(), value.substring(1).replace(/[-_\s]+(.)/g, (() => {
+		return Operator.add(value.charAt(0).toLowerCase(), value.substring(1).replace(/[-_\s]+(.)/g, (() => {
 			const __ks_rt = (...args) => {
 				const t0 = Type.isValue;
 				if(args.length === 2) {

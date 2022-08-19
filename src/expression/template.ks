@@ -13,7 +13,7 @@ class TemplateExpression extends Expression {
 			@elements.push(element)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var element, index in @elements {
 			element.prepare()
 

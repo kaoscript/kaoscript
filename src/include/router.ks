@@ -259,6 +259,7 @@ namespace Router {
 			for var group of groups when group.functions.length > 0 {
 				trees.push(buildTree(group, name, false, null, node))
 
+				// TODO validate if needed
 				if group.n != 0 {
 					names[group.n] = buildNames(group, name, node)
 				}

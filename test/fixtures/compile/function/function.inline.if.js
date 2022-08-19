@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x, y) {
-		if(Operator.addOrConcat(x, y) === 0) {
+		if(Operator.add(x, y) === 0) {
 			return 42;
 		}
 		return null;
@@ -22,7 +22,7 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(x, y) {
-		return (Operator.addOrConcat(x, y) === 0) ? 42 : 24;
+		return (Operator.add(x, y) === 0) ? 42 : 24;
 	};
 	quxbaz.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

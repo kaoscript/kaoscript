@@ -607,6 +607,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassParameter
 			paramMode += MatchingMode::Subset if mode ~~ MatchingMode::SubsetParameter
 			paramMode += MatchingMode::NonNullToNull if mode ~~ MatchingMode::NonNullToNullParameter
+			paramMode += MatchingMode::NullToNonNull if mode ~~ MatchingMode::NullToNonNullParameter
 			paramMode += MatchingMode::MissingDefault if mode ~~ MatchingMode::MissingParameterDefault
 			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
 			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed

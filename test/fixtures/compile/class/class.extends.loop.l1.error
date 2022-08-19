@@ -1,1 +1,1 @@
-ReferenceException: "ClassC" is not defined (fixtures/compile/class/class.extends.loop.l1.ks:4)
+ReferenceException: Type "ClassC" is not defined (fixtures/compile/class/class.extends.loop.l1.ks:4)

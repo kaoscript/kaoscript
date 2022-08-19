@@ -59,7 +59,7 @@ class DictionaryExpression extends Expression {
 
 		@empty = @properties.length == 0
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@type = new DictionaryType(@scope)
 
 		for var property in @properties {
@@ -286,7 +286,7 @@ class DictionaryLiteralMember extends Expression {
 
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 
 		@type = @value.type().asReference()
@@ -357,7 +357,7 @@ class DictionaryComputedMember extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@name.prepare()
 		@value.prepare()
 	} # }}}
@@ -409,7 +409,7 @@ class DictionaryThisMember extends Expression {
 
 		this.reference(`.\(@name.value())`)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 	} # }}}
 	translate() { # {{{
@@ -444,7 +444,7 @@ class DictionarySpreadMember extends Expression {
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 	} # }}}
 	translate() { # {{{

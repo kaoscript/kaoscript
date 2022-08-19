@@ -25,7 +25,7 @@ class DestroyStatement extends Statement {
 			@expression.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @identifier {
 			@type = @scope.getVariable(@data.variable.name, @scope.line() - 1).getRealType()
 		}

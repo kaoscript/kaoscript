@@ -126,28 +126,28 @@ class ForFromStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		unless @declared {
 			@bindingScope.replaceVariable(@data.variable.name, @bindingScope.reference('Number'), this)
 		}
 
 		@variable.prepare()
 
-		@from.prepare()
+		@from.prepare(@scope.reference('Number'))
 
 		if @til? {
-			@til.prepare()
+			@til.prepare(@scope.reference('Number'))
 
 			@boundName = @bindingScope.acquireTempName(!@declared) if @til.isComposite()
 		}
 		else {
-			@to.prepare()
+			@to.prepare(@scope.reference('Number'))
 
 			@boundName = @bindingScope.acquireTempName(!@declared) if @to.isComposite()
 		}
 
 		if @by? {
-			@by.prepare()
+			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName(!@declared) if @by.isComposite()
 		}
@@ -155,7 +155,7 @@ class ForFromStatement extends Statement {
 		this.assignTempVariables(@bindingScope)
 
 		if @until? {
-			@until.prepare()
+			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@until, this)
@@ -164,7 +164,7 @@ class ForFromStatement extends Statement {
 			this.assignTempVariables(@bodyScope)
 		}
 		else if @while? {
-			@while.prepare()
+			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@while, this)
@@ -174,7 +174,7 @@ class ForFromStatement extends Statement {
 		}
 
 		if @when? {
-			@when.prepare()
+			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@when, this)
@@ -183,7 +183,7 @@ class ForFromStatement extends Statement {
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
 
-		@body.prepare()
+		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@boundName) if ?@boundName
 		@bindingScope.releaseTempName(@byName) if ?@byName
@@ -218,9 +218,9 @@ class ForFromStatement extends Statement {
 
 		@body.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => # {{{

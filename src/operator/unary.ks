@@ -6,8 +6,8 @@ class UnaryOperatorExpression extends Expression {
 		@argument = $compile.expression(@data.argument, this)
 		@argument.analyse()
 	} # }}}
-	prepare() { # {{{
-		@argument.prepare()
+	override prepare(target) { # {{{
+		@argument.prepare(target)
 
 		if @argument.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@argument, this)
@@ -29,7 +29,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		_isNative: Boolean		= false
 		_type: Type
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		if this.isAcceptingEnum() && @argument.type().isEnum() {
@@ -71,13 +71,6 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	type() => @type
 }
 
-class UnaryOperatorBitwiseNot extends NumericUnaryOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseNot
-	runtime() => 'bitwiseNot'
-	symbol() => '~'
-}
-
 class UnaryOperatorDecrementPostfix extends NumericUnaryOperatorExpression {
 	operator() => Operator::DecrementPostfix
 	runtime() => 'decrementPostfix'
@@ -99,9 +92,9 @@ class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private late {
-		_type: Type
+		@type: Type
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@argument.prepare()
 
 		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
@@ -144,15 +137,19 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 
 class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
 	private {
-		_type: Type		= AnyType.Unexplicit
+		@type: Type		= AnyType.Unexplicit
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		if !@parent.isExpectingType() {
 			SyntaxException.throwInvalidForcedTypeCasting(this)
 		}
 	} # }}}
+	adaptTo(type: Type): Type { # {{{
+		return @type = type
+	} # }}}
+	isAdaptable() => true
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
 	} # }}}
@@ -179,26 +176,140 @@ class UnaryOperatorIncrementPrefix extends NumericUnaryOperatorExpression {
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
-	prepare() { # {{{
-		super()
+	private late {
+		@native: Boolean		= false
+		@operand: OperandType	= OperandType::Any
+		@type: Type
+	}
+	override prepare(target) { # {{{
+		super(target)
 
-		if @argument.type().isBoolean() {
-			if @argument.type().isNullable() {
-				TypeException.throwNotNullableOperand(@argument, Operator::Negation, this)
+		var mut boolean = true
+		var mut number = true
+		var mut native = true
+
+		if target? {
+			boolean = target.canBeBoolean()
+			number = target.canBeNumber()
+		}
+
+		// if @argument.type().isBoolean() {
+		// 	@operand = OperandType::Boolean
+		// 	@type = @scope.reference('Boolean')
+		// }
+		// else if @argument.type().isNumber() {
+		// 	if @argument.type().isNullable() {
+		// 		@type = @scope.reference('Number').setNullable(true)
+		// 	}
+		// 	else {
+		// 		@operand = OperandType::Number
+		// 		@type = @scope.reference('Number')
+		// 	}
+		// }
+		// else if @argument.type().canBeBoolean() {
+		// 	if @argument.type().canBeNumber() {
+		// 		@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+
+		// 		if @argument.type().isNullable() {
+		// 			@type = @type.setNullable(true)
+		// 		}
+		// 	}
+		// 	else {
+		// 		@operand = OperandType::Boolean
+		// 		@type = @scope.reference('Boolean')
+		// 	}
+		// }
+		// else if @argument.type().canBeNumber() {
+		// 	@type = @scope.reference('Number')
+
+		// 	if @argument.type().isNullable() {
+		// 		@type = @type.setNullable(true)
+		// 	}
+		// }
+		// else {
+		// 	TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
+		// }
+		var type = @argument.type()
+
+		if type.isBoolean() {
+			number = false
+		}
+		else if type.isNumber() {
+			boolean = false
+		}
+		else if type.canBeBoolean() {
+			if !type.canBeNumber() {
+				number = false
+			}
+
+			native = false
+		}
+		else if type.canBeNumber() {
+			boolean = false
+			native = false
+		}
+		else {
+			TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
+		}
+
+		if !boolean && !number {
+			if target? {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+			else {
+				TypeException.throwInvalidOperation(this, Operator::Negation, this)
 			}
 		}
-		else if !@argument.type().canBeBoolean() {
-			TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
+
+		if boolean {
+			if number {
+				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+
+				if type.isNullable() {
+					@type = @type.setNullable(true)
+				}
+			}
+			else {
+				@type = @scope.reference('Boolean')
+				@operand = OperandType::Boolean
+				@native = true
+			}
+		}
+		else if number {
+			@type = @scope.reference('Number')
+			@operand = OperandType::Number
+			@native = native
+
+			if type.isNullable() {
+				@type = @type.setNullable(true)
+			}
 		}
 	} # }}}
 	inferWhenFalseTypes(inferables) => @argument.inferWhenTrueTypes(inferables)
 	inferWhenTrueTypes(inferables) => @argument.inferWhenFalseTypes(inferables)
 	toFragments(fragments, mode) { # {{{
-		fragments
-			.code('!', @data.operator)
-			.wrapBoolean(@argument)
+		if @native {
+			if @operand == OperandType::Boolean {
+				fragments.code('!', @data.operator).wrapBoolean(@argument)
+			}
+			else {
+				fragments.code('~', @data.operator).compile(@argument)
+			}
+		}
+		else {
+			fragments.code(`\($runtime.operator(this))`)
+
+			if @operand == OperandType::Number {
+				fragments.code('.negationNum(')
+			}
+			else {
+				fragments.code('.negation(')
+			}
+
+			fragments.compile(@argument).code(')')
+		}
 	} # }}}
-	type() => @scope.reference('Boolean')
+	type(): @type
 }
 
 class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
@@ -209,9 +320,9 @@ class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
 
 class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 	private late {
-		_type: Type
+		@type: Type
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		@type = @argument.type().setNullable(false)
@@ -224,9 +335,9 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private late {
-		_type: Type
+		@type: Type
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		var type = @argument.type()
@@ -251,10 +362,10 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			.code('...', @data.operator)
 			.wrap(@argument)
 	} # }}}
-	toTypeQuote() {
+	toTypeQuote() { # {{{
 		var type = @type.parameter(0)
 
 		return `...\(type.toQuote())`
-	}
+	} # }}}
 	type() => @type
 }

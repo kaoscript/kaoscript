@@ -26,7 +26,7 @@ class CreateExpression extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@factory.prepare()
 
 		for argument in @arguments {

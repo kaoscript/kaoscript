@@ -24,7 +24,7 @@ class AnonymousFunctionExpression extends Expression {
 
 		@isObjectMember = @parent.parent() is DictionaryExpression
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for parameter in @parameters {
 			parameter.prepare()
 		}
@@ -51,7 +51,7 @@ class AnonymousFunctionExpression extends Expression {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()
@@ -184,7 +184,7 @@ class ArrowFunctionExpression extends Expression {
 			parameter.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for parameter in @parameters {
 			parameter.prepare()
 		}
@@ -226,7 +226,7 @@ class ArrowFunctionExpression extends Expression {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()

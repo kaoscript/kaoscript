@@ -54,7 +54,7 @@ class ExportDeclaration extends Statement {
 			statement.enhance()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var statement in @statements {
 			statement.prepare()
 		}
@@ -100,7 +100,7 @@ class ExportExclusionSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	export(recipient) { # {{{
 		var exclusions = [exclusion.name for exclusion in @data.exclusions]
@@ -118,7 +118,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
 
@@ -165,7 +165,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 		_object
 	}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@object = $compile.expression(@data.object, @parent)
 		@object.analyse()
 	} # }}}
@@ -186,7 +186,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
 	} # }}}

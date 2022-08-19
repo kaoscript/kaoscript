@@ -71,32 +71,32 @@ class ForRangeStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		unless @defineVariable {
 			@bindingScope.replaceVariable(@data.value.name, @bindingScope.reference('Number'), this)
 		}
 
 		@value.prepare()
-		@from.prepare()
-		@to.prepare()
+		@from.prepare(@scope.reference('Number'))
+		@to.prepare(@scope.reference('Number'))
 
 		@boundName = @bindingScope.acquireTempName() if @to.isComposite()
 
 		if @by? {
-			@by.prepare()
+			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName() if @by.isComposite()
 		}
 
 		if @until? {
-			@until.prepare()
+			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@until, this)
 			}
 		}
 		else if @while? {
-			@while.prepare()
+			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@while, this)
@@ -104,14 +104,14 @@ class ForRangeStatement extends Statement {
 		}
 
 		if @when? {
-			@when.prepare()
+			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@when, this)
 			}
 		}
 
-		@body.prepare()
+		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@boundName) if @boundName?
 		@bindingScope.releaseTempName(@byName) if @byName?
@@ -140,9 +140,9 @@ class ForRangeStatement extends Statement {
 
 		@body.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => # {{{

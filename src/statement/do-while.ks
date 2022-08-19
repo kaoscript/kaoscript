@@ -13,8 +13,8 @@ class DoWhileStatement extends Statement {
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
 	} # }}}
-	prepare() { # {{{
-		@body.prepare()
+	override prepare(target) { # {{{
+		@body.prepare(target)
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -22,7 +22,7 @@ class DoWhileStatement extends Statement {
 			}
 		}
 
-		@condition.prepare()
+		@condition.prepare(@scope.reference('Boolean'))
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)
@@ -34,9 +34,9 @@ class DoWhileStatement extends Statement {
 		@body.translate()
 		@condition.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true

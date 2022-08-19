@@ -7,7 +7,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			y = 0;
 		}
-		return x.times(Operator.addOrConcat(y, z));
+		return x.times(Operator.add(y, z));
 	};
 	foobar.__ks_1 = function(x, y, z) {
 		if(y === void 0 || y === null) {

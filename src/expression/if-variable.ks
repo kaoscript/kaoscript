@@ -39,7 +39,7 @@ class IfVariableDeclarationExpression extends Expression {
 		@init = $compile.expression(@data.init, this)
 		@init.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@init.prepare()
 
 		if @autotype {

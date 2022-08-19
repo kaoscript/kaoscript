@@ -4,7 +4,7 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x, y) {
-		return KSOperator.addOrConcat(x, y);
+		return KSOperator.add(x, y);
 	};
 	foo.__ks_rt = function(that, args) {
 		const t0 = KSType.isValue;

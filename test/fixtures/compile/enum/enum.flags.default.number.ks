@@ -14,11 +14,11 @@ flagged enum AnimalFlags {
 func printAnimalAbilities(animal) {
 	var animalFlags: Number = animal.flags
 
-	if animalFlags &&& AnimalFlags::HasClaws != 0 {
+	if (animalFlags && AnimalFlags::HasClaws) != 0 {
 		console.log('animal has claws')
 	}
 
-	if animalFlags &&& AnimalFlags::CanFly != 0 {
+	if (animalFlags && AnimalFlags::CanFly) != 0 {
 		console.log('animal can fly')
 	}
 

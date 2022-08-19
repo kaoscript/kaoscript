@@ -9,7 +9,7 @@ class Literal extends Expression {
 		super(data, parent, scope)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	hasExceptions() => false
 	isComposite() => false
@@ -71,7 +71,7 @@ class IdentifierLiteral extends Literal {
 			@line = @scope.line()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @isVariable {
 			var variable = @scope.getVariable(@value, @line)
 

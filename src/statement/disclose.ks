@@ -33,7 +33,7 @@ class DiscloseDeclaration extends Statement {
 			@type.setExhaustive(true)
 		}
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	toStatementFragments(fragments, mode)
 }

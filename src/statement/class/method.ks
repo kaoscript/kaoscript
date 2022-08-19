@@ -225,7 +225,7 @@ class ClassMethodDeclaration extends Statement {
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		return if @analysed
 
 		@parent.updateMethodScope(this)
@@ -407,23 +407,21 @@ class ClassMethodDeclaration extends Statement {
 			value.translate()
 		}
 
-		if @autoTyping {
-			@block.prepare()
+		if !@abstract {
+			if @autoTyping {
+				@block.prepare()
 
-			@type.setReturnType(@block.type())
-		}
-		else {
-			if !@abstract {
-				@block.type(@type.getReturnType())
+				@type.setReturnType(@block.type())
+			}
+			else {
+				@block.prepare(@type.getReturnType())
 			}
 
-			@block.prepare()
+			@block.translate()
+
+			@awaiting = @block.isAwait()
+			@exit = @block.isExit()
 		}
-
-		@block.translate()
-
-		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
@@ -594,11 +592,20 @@ class ClassMethodDeclaration extends Statement {
 		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
 			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
-			if !@override {
+			if @override {
+				// mode -= MatchingMode::NonNullToNullParameter
+				mode += MatchingMode::NullToNonNullParameter
+			}
+			else {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter
+				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter + MatchingMode::NullToNonNullParameter
+				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter
+				// mode += MatchingMode::NullToNonNullParameter
 			}
 
 			var methods = @instance ? superclass.listInstantiableMethods(@name, @type, mode) : superclass.listClassMethods(@name, @type, mode)
+			// console.log(methods)
 
 			var mut method = null
 			var mut exact = false
@@ -619,6 +626,7 @@ class ClassMethodDeclaration extends Statement {
 					return null
 				}
 			}
+			// console.log(method)
 
 			if method? {
 				var type = @override ? method.clone() : @type

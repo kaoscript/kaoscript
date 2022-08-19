@@ -95,7 +95,7 @@ class CallExpression extends Expression {
 			@object.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var argument in @arguments {
 			argument.prepare()
 
@@ -1107,7 +1107,7 @@ class NamedArgument extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 	} # }}}
 	translate() { # {{{
@@ -1131,7 +1131,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	}
 	analyse() { # {{{
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

@@ -74,6 +74,7 @@ class UnionType extends Type {
 
 				@nullable = true
 			}
+
 			@explicitNullity = true
 		}
 		else if type.isAny() {
@@ -485,13 +486,7 @@ class UnionType extends Type {
 	toQuote(double: Boolean): String { # {{{
 		var elements = [type.toQuote() for type in @types]
 
-		var late last
-		if @explicitNullity {
-			last = 'Null'
-		}
-		else {
-			last = elements.pop()
-		}
+		var last = elements.pop()
 
 		if double {
 			return `"\(elements.join(`", "`))" or "\(last)"`

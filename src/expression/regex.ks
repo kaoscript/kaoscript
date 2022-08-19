@@ -1,6 +1,6 @@
 class RegularExpression extends Expression {
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isUsingVariable(name) => false
 	toFragments(fragments, mode) { # {{{

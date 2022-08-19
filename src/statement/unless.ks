@@ -13,8 +13,8 @@ class UnlessStatement extends Statement {
 		@body = $compile.block(@data.whenFalse, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
-		@condition.prepare()
+	override prepare(target) { # {{{
+		@condition.prepare(@scope.reference('Boolean'))
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)
@@ -22,7 +22,7 @@ class UnlessStatement extends Statement {
 
 		this.assignTempVariables(@scope)
 
-		@body.prepare()
+		@body.prepare(target)
 
 		if @body.isExit() {
 			for var data, name of @condition.inferWhenTrueTypes({}) {
@@ -59,9 +59,9 @@ class UnlessStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
 	toStatementFragments(fragments, mode) { # {{{

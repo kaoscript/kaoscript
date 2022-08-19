@@ -107,7 +107,7 @@ class IncludeDeclaration extends Statement {
 			declarator.enhance()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var declarator in @declarators {
 			declarator.prepare()
 		}
@@ -273,7 +273,7 @@ class IncludeDeclarator extends Statement {
 
 		@scope.setLineOffset(@offsetEnd)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for var statement in @statements {

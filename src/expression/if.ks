@@ -17,7 +17,7 @@ class IfExpression extends Expression {
 			@whenFalse.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@condition.prepare()
 
 		for var data, name of @condition.inferTypes({}) {

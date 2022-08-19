@@ -7,6 +7,7 @@ enum AssignmentType {
 
 enum OperandType {
 	Any
+	Boolean
 	Enum
 	Number
 	String
@@ -15,12 +16,6 @@ enum OperandType {
 enum Operator<String> {
 	Addition			= 'additive'
 	And					= 'and'
-	BitwiseAnd			= 'bitwise-and'
-	BitwiseLeftShift	= 'bitwise-left-shift'
-	BitwiseNot			= 'bitwise-not'
-	BitwiseOr			= 'bitwise-or'
-	BitwiseRightShift	= 'bitwise-right-shift'
-	BitwiseXor			= 'bitwise-xor'
 	DecrementPostfix	= 'postfix-decrement'
 	DecrementPrefix		= 'prefix-decrement'
 	Division			= 'divisive'
@@ -29,6 +24,7 @@ enum Operator<String> {
 	Imply				= 'imply'
 	IncrementPostfix	= 'postfix-increment'
 	IncrementPrefix		= 'prefix-increment'
+	LeftShift			= 'left-shift'
 	LessThan			= 'less-than'
 	LessThanOrEqual		= 'less-than-or-equal'
 	Match				= 'match'
@@ -37,21 +33,17 @@ enum Operator<String> {
 	Multiplication		= 'multiplicative'
 	Negation			= 'negation'
 	Negative			= 'negative'
+	NullCoalescing		= 'null-coalescing'
 	Or					= 'or'
 	Quotient			= 'quotient'
+	RightShift			= 'right-shift'
 	Subtraction			= 'subtractive'
 	Xor					= 'xor'
 }
 
 var $operatorTypes = {
 	[Operator::Addition]: ['Number']
-	[Operator::And]: ['Boolean']
-	[Operator::BitwiseAnd]: ['Number']
-	[Operator::BitwiseLeftShift]: ['Number']
-	[Operator::BitwiseNot]: ['Number']
-	[Operator::BitwiseOr]: ['Number']
-	[Operator::BitwiseRightShift]: ['Number']
-	[Operator::BitwiseXor]: ['Number']
+	[Operator::And]: ['Boolean', 'Number']
 	[Operator::DecrementPostfix]: ['Number']
 	[Operator::DecrementPrefix]: ['Number']
 	[Operator::Division]: ['Number']
@@ -60,16 +52,18 @@ var $operatorTypes = {
 	[Operator::Imply]: ['Boolean']
 	[Operator::IncrementPostfix]: ['Number']
 	[Operator::IncrementPrefix]: ['Number']
+	[Operator::LeftShift]: ['Number']
 	[Operator::LessThan]: ['Number']
 	[Operator::LessThanOrEqual]: ['Number']
 	[Operator::Modulo]: ['Number']
 	[Operator::Multiplication]: ['Number']
-	[Operator::Negation]: ['Boolean']
+	[Operator::Negation]: ['Boolean', 'Number']
 	[Operator::Negative]: ['Number']
-	[Operator::Or]: ['Boolean']
+	[Operator::Or]: ['Boolean', 'Number']
 	[Operator::Quotient]: ['Number']
+	[Operator::RightShift]: ['Number']
 	[Operator::Subtraction]: ['Number']
-	[Operator::Xor]: ['Boolean']
+	[Operator::Xor]: ['Boolean', 'Number']
 }
 
 include {

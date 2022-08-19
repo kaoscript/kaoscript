@@ -9,7 +9,7 @@ class ExpressionStatement extends Statement {
 		@expression = $compile.expression(@data, this)
 		@expression.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression.prepare()
 
 		for var data, name of @expression.inferTypes({}) {

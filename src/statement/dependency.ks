@@ -240,7 +240,7 @@ class ExternDeclaration extends DependencyStatement {
 		}
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	override applyFlags(type) { # {{{
 		return type
@@ -306,7 +306,7 @@ class RequireDeclaration extends DependencyStatement {
 		}
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = this.define(declaration)
@@ -350,7 +350,7 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 		}
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = this.define(declaration)
@@ -399,7 +399,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 		}
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = this.define(declaration)
@@ -440,7 +440,7 @@ class RequireOrImportDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for declarator in @declarators {
 			declarator.prepare()
 		}
@@ -646,7 +646,7 @@ class ExternOrImportDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var declarator in @declarators {
 			declarator.prepare()
 		}
@@ -667,7 +667,7 @@ class ExternOrImportDeclarator extends Importer {
 	private {
 		_requirements: Array	= []
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		var module = this.module()

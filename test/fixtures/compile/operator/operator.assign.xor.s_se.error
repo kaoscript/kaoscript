@@ -1,0 +1,1 @@
+TypeException: The elements of "x ^^= y" are expected to be of type "Boolean" or "Number" (fixtures/compile/operator/operator.assign.xor.s_se.ks:2)

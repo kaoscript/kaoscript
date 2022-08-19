@@ -18,7 +18,7 @@ module.exports = function(expect) {
 				};
 				__ks_rt.__ks_0 = (x, y) => {
 					const d = new Date(year, __ks_case_1[0], __ks_case_1[1]);
-					expect(d.getDay()).to.equal(Operator.addOrConcat(__ks_case_1[i + 2], x));
+					expect(d.getDay()).to.equal(Operator.add(__ks_case_1[i + 2], x));
 				};
 				return __ks_rt;
 			})());

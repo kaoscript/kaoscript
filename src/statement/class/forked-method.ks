@@ -19,7 +19,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		}
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isForked() => true
 	isRoutable() => false

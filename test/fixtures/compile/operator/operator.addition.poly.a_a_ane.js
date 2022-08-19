@@ -7,7 +7,7 @@ module.exports = function() {
 		if(z === void 0) {
 			z = null;
 		}
-		return Operator.addOrConcat(x, y, z);
+		return Operator.add(x, y, z);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

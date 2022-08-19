@@ -65,7 +65,7 @@ class ThisExpression extends Expression {
 			SyntaxException.throwUnexpectedAlias(@name, this)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		return unless @type == null
 
 		var type = @class.type()

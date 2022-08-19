@@ -1,7 +1,11 @@
-class PolyadicOperatorExpression extends Expression {
+abstract class PolyadicOperatorExpression extends Expression {
 	private {
-		_operands			= []
-		_tested: Boolean	= false
+		@operands			= []
+		@tested: Boolean	= false
+	}
+	abstract {
+		symbol(): String
+		operator(): Operator
 	}
 	analyse() { # {{{
 		for var data in @data.operands {
@@ -12,9 +16,9 @@ class PolyadicOperatorExpression extends Expression {
 			@operands.push(operand)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var operand in @operands {
-			operand.prepare()
+			operand.prepare(target)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -53,6 +57,10 @@ class PolyadicOperatorExpression extends Expression {
 		}
 
 		return false
+	} # }}}
+	left() => @operands[0]
+	left(left): this { # {{{
+		@operands[0] = left
 	} # }}}
 	listAssignments(array: Array<String>) { # {{{
 		for var operand in @operands {
@@ -94,50 +102,83 @@ class PolyadicOperatorExpression extends Expression {
 			@tested = true
 		}
 	} # }}}
+	toQuote() { # {{{
+		var mut fragments = ''
+
+		for var operand, index in @operands {
+			if index != 0 {
+				fragments += ` \(this.symbol()) `
+			}
+
+			if operand.isComputed() {
+				fragments += `(\(operand.toQuote()))`
+			}
+			else {
+				fragments += operand.toQuote()
+			}
+		}
+
+		return fragments
+	} # }}}
 }
 
 abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
 	private late {
-		_isEnum: Boolean		= false
-		_isNative: Boolean		= false
-		_type: Type
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
+		@type: Type
 	}
-	prepare() { # {{{
-		super()
+	override prepare(target) { # {{{
+		super(target)
 
-		if this.isAcceptingEnum() && @operands[0].type().isEnum() {
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
+
+		if @isAcceptingEnum() && @operands[0].type().isEnum() {
 			var name = @operands[0].type().name()
 
-			@isEnum = true
+			@enum = true
 
 			for var operand in @operands from 1 {
 				if !operand.type().isEnum() || operand.type().name() != name {
-					@isEnum = false
+					@enum = false
 
 					break
 				}
 			}
 
-			if @isEnum {
-				@type = @operands[0].type()
+			if @enum {
+				if @expectingEnum {
+					@type = @left().type()
+				}
+				else {
+					@type = @left().type().discard().type()
+				}
+
+				for var operand in @operands {
+					operand.unflagExpectingEnum()
+				}
 			}
 		}
+		// console.log(@enum, @expectingEnum)
 
-		if !@isEnum {
+		if !@enum {
 			var mut nullable = false
 
-			@isNative = true
+			@native = true
 
 			for var operand in @operands {
 				if operand.type().isNullable() {
 					nullable = true
-					@isNative = false
+					@native = false
 				}
 
 				if operand.type().isNumber() {
 				}
 				else if operand.type().canBeNumber() {
-					@isNative = false
+					@native = false
 				}
 				else {
 					TypeException.throwInvalidOperand(operand, this.operator(), this)
@@ -150,32 +191,30 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	translate() { # {{{
 		super()
 
-		if @isEnum {
-			var type = @parent.type()
+		// if @enum {
+		// 	var type = @parent.type()
 
-			if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
-				if type.isEnum() {
-					if @type.name() != type.name() {
-						@isEnum = false
-						@isNative = true
-					}
-				}
-				else if type.isNumber() {
-					@isEnum = false
-					@isNative = true
-				}
-			}
-			else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
-				@isEnum = false
-				@isNative = true
-			}
-		}
+		// 	if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
+		// 		if type.isEnum() {
+		// 			if @type.name() != type.name() {
+		// 				@enum = false
+		// 				@native = true
+		// 			}
+		// 		}
+		// 		else if type.isNumber() {
+		// 			@enum = false
+		// 			@native = true
+		// 		}
+		// 	}
+		// 	else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
+		// 		@enum = false
+		// 		@native = true
+		// 	}
+		// }
 	} # }}}
 	isAcceptingEnum() => false
-	isComputed() => @isNative
-	abstract operator(): Operator
+	isComputed() => @native
 	abstract runtime(): String
-	abstract symbol(): String
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
 		for var operand, index in @operands {
@@ -187,7 +226,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
-		if @isEnum {
+		if @enum {
 			this.toEnumFragments(fragments)
 		}
 		else if operator == this.operator() && type == OperandType::Number {
@@ -204,14 +243,10 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @isEnum {
-			fragments.code(@type.name(), '(')
-
+		if @enum {
 			this.toEnumFragments(fragments)
-
-			fragments.code(')')
 		}
-		else if @isNative {
+		else if @native {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -228,94 +263,95 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 			fragments.code(')')
 		}
 	} # }}}
-	toQuote() { # {{{
-		var mut fragments = ''
-
-		for var operand, index in @operands {
-			if index != 0 {
-				fragments += ` \(this.symbol()) `
-			}
-
-			fragments += operand.toQuote()
-		}
-
-		return fragments
-	} # }}}
 	type() => @type
+	unflagExpectingEnum() { # {{{
+		@expectingEnum = false
+	} # }}}
 }
 
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	private late {
-		_expectingEnum: Boolean		= true
-		_isEnum: Boolean			= false
-		_isNative: Boolean			= false
-		_isNumber: Boolean			= false
-		_isString: Boolean			= false
-		_type: Type
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
+		@number: Boolean			= false
+		@string: Boolean			= false
+		@type: Type
 	}
-	prepare() { # {{{
-		super()
+	override prepare(target) { # {{{
+		super(target)
+
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
 
 		if @operands[0].type().isEnum() {
 			var name = @operands[0].type().name()
 
-			@isEnum = true
+			@enum = true
 
 			for var operand in @operands from 1 {
 				if !operand.type().isEnum() || operand.type().name() != name {
-					@isEnum = false
+					@enum = false
 
 					break
 				}
 			}
 
-			if @isEnum {
+			if @enum {
+				@enum = true
+				@number = @left().type().discard().isFlags()
+
 				if @expectingEnum {
-					@type = @operands[0].type()
+					@type = @left().type()
 				}
 				else {
-					@type = @operands[0].type().discard().type()
+					@type = @left().type().discard().type()
+				}
+
+				for var operand in @operands {
+					operand.unflagExpectingEnum()
 				}
 			}
 		}
 
-		if !@isEnum {
+		if !@enum {
 			var mut nullable = false
 
-			@isNative = true
+			@native = true
 
 			for var operand in @operands {
 				if operand.type().isNullable() {
 					nullable = true
-					@isNative = false
+					@native = false
 				}
 
 				if operand.type().isString() {
-					@isString = true
+					@string = true
 				}
 				else if operand.type().canBeString(false) && !operand.type().canBeNumber(false) {
-					@isString = true
-					@isNative = false
+					@string = true
+					@native = false
 				}
 			}
 
-			if !@isString {
-				@isNumber = true
+			if !@string {
+				@number = true
 
 				var mut notNumber = null
 
-				for var operand in @operands while @isNative || @isNumber {
+				for var operand in @operands while @native || @number {
 					if operand.type().isNumber() {
 					}
 					else if operand.type().isAny() {
-						@isNumber = false
-						@isNative = false
+						@number = false
+						@native = false
 					}
 					else if operand.type().canBeNumber(false) {
-						@isNative = false
+						@native = false
 
 						if operand.type().canBeString(false) {
-							@isNumber = false
+							@number = false
 						}
 					}
 					else if notNumber == null {
@@ -323,15 +359,15 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 					}
 				}
 
-				if @isNumber && notNumber != null {
+				if @number && notNumber != null {
 					TypeException.throwInvalidOperand(notNumber, Operator::Addition, this)
 				}
 			}
 
-			if @isNumber {
+			if @number {
 				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 			}
-			else if @isString {
+			else if @string {
 				@type = @scope.reference('String')
 			}
 			else {
@@ -341,15 +377,17 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			}
 		}
 	} # }}}
-	isComputed() => @isNative
-	override setExpectedType(type) { # {{{
-		if !type.isEnum() && (type.isNumber() || type.isString()) {
-			@expectingEnum = false
-		}
-	} # }}}
+	isComputed() => @native
+	// override setExpectedType(type) { # {{{
+	// 	if !type.isEnum() && (type.isNumber() || type.isString()) {
+	// 		@expectingEnum = false
+	// 	}
+	// } # }}}
+	operator() => Operator::Addition
+	symbol() => '+'
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Addition {
-			if type == OperandType::Enum && (@isEnum || @isNumber) {
+			if type == OperandType::Enum && (@enum || @number) {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code(' | ')
@@ -358,7 +396,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 					fragments.wrap(operand)
 				}
 			}
-			else if ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
+			else if ((@number && type == OperandType::Number) || (@string && type == OperandType::String)) {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code($comma)
@@ -376,10 +414,10 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @isEnum {
+		if @enum {
 			var late operator: String
 
-			if @operands[0].type().discard().isFlags() {
+			if @number {
 				operator = ' | '
 			}
 			else {
@@ -388,28 +426,21 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 
 			if @expectingEnum {
 				fragments.code(@type.name(), '(')
+			}
 
-				for var operand, index in @operands {
-					if index != 0 {
-						fragments.code(operator)
-					}
-
-					fragments.wrap(operand)
+			for var operand, index in @operands {
+				if index != 0 {
+					fragments.code(operator)
 				}
 
+				fragments.wrap(operand)
+			}
+
+			if @expectingEnum {
 				fragments.code(')')
 			}
-			else {
-				for var operand, index in @operands {
-					if index != 0 {
-						fragments.code(operator)
-					}
-
-					fragments.wrap(operand)
-				}
-			}
 		}
-		else if @isNative {
+		else if @native {
 			for var operand, index in @operands {
 				if index != 0 {
 					fragments.code($space).code('+', @data.operator).code($space)
@@ -419,14 +450,14 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			}
 		}
 		else {
-			if @isNumber {
-				fragments.code($runtime.operator(this), '.addition(')
+			if @number {
+				fragments.code($runtime.operator(this), '.addNum(')
 			}
-			else if @isString {
+			else if @string {
 				fragments.code($runtime.helper(this), '.concatString(')
 			}
 			else {
-				fragments.code($runtime.operator(this), '.addOrConcat(')
+				fragments.code($runtime.operator(this), '.add(')
 			}
 
 			for var operand, index in @operands {
@@ -440,76 +471,22 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			fragments.code(')')
 		}
 	} # }}}
-	toQuote() { # {{{
-		var mut fragments = ''
-
-		for var operand, index in @operands {
-			if index != 0 {
-				fragments += ' + '
-			}
-
-			fragments += operand.toQuote()
-		}
-
-		return fragments
-	} # }}}
 	type() => @type
-}
-
-class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseAnd
-	runtime() => 'bitwiseAnd'
-	symbol() => '&'
-	toEnumFragments(fragments) { # {{{
-		for var operand, index in @operands {
-			if index != 0 {
-				fragments.code(' & ')
-			}
-
-			fragments.wrap(operand)
-		}
+	unflagExpectingEnum() { # {{{
+		@expectingEnum = false
 	} # }}}
-}
-
-class PolyadicOperatorBitwiseLeftShift extends NumericPolyadicOperatorExpression {
-	operator() => Operator::BitwiseLeftShift
-	runtime() => 'bitwiseLeftShift'
-	symbol() => '<<'
-}
-
-class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseOr
-	runtime() => 'bitwiseOr'
-	symbol() => '|'
-	toEnumFragments(fragments) { # {{{
-		for var operand, index in @operands {
-			if index != 0 {
-				fragments.code(' & ')
-			}
-
-			fragments.wrap(operand)
-		}
-	} # }}}
-}
-
-class PolyadicOperatorBitwiseRightShift extends NumericPolyadicOperatorExpression {
-	operator() => Operator::BitwiseRightShift
-	runtime() => 'bitwiseRightShift'
-	symbol() => '>>'
-}
-
-class PolyadicOperatorBitwiseXor extends NumericPolyadicOperatorExpression {
-	operator() => Operator::BitwiseXor
-	runtime() => 'bitwiseXor'
-	symbol() => '^'
 }
 
 class PolyadicOperatorDivision extends NumericPolyadicOperatorExpression {
 	operator() => Operator::Division
 	runtime() => 'division'
 	symbol() => '/'
+}
+
+class PolyadicOperatorLeftShift extends NumericPolyadicOperatorExpression {
+	operator() => Operator::LeftShift
+	runtime() => 'leftShift'
+	symbol() => '<<'
 }
 
 class PolyadicOperatorModulo extends NumericPolyadicOperatorExpression {
@@ -526,7 +503,7 @@ class PolyadicOperatorMultiplication extends NumericPolyadicOperatorExpression {
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private late {
-		_type: Type
+		@type: Type
 	}
 	analyse() { # {{{
 		@operands = []
@@ -536,7 +513,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			operand.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		var types = []
 		var last = @operands.length - 1
 
@@ -584,6 +561,8 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			@type = Type.union(@scope, ...types)
 		}
 	} # }}}
+	operator() => Operator::NullCoalescing
+	symbol() => '??'
 	toFragments(fragments, mode) { # {{{
 		this.module().flag('Type')
 
@@ -637,6 +616,12 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 	} # }}}
 }
 
+class PolyadicOperatorRightShift extends NumericPolyadicOperatorExpression {
+	operator() => Operator::RightShift
+	runtime() => 'rightShift'
+	symbol() => '>>'
+}
+
 class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 	isAcceptingEnum() => true
 	operator() => Operator::Subtraction
@@ -668,12 +653,20 @@ class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 		}
 	} # }}}
 	toEnumFragments(fragments) { # {{{
+		if @expectingEnum {
+			fragments.code(@type.name(), '(')
+		}
+
 		for var operand, index in @operands {
 			if index != 0 {
 				fragments.code(' & ~')
 			}
 
 			fragments.wrap(operand)
+		}
+
+		if @expectingEnum {
+			fragments.code(')')
 		}
 	} # }}}
 }

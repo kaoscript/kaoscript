@@ -46,7 +46,7 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @variable.isClassStatement() {
 			@resolveType(true)
 		}

@@ -21,7 +21,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(x, y) {
-			if(Operator.addOrConcat(x, y) === 0) {
+			if(Operator.add(x, y) === 0) {
 				return 42;
 			}
 			return null;
@@ -39,7 +39,7 @@ module.exports = function() {
 			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_quxbaz_0(x, y) {
-			return (Operator.addOrConcat(x, y) === 0) ? 42 : 24;
+			return (Operator.add(x, y) === 0) ? 42 : 24;
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {
 			const t0 = Type.isValue;

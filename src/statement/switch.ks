@@ -121,7 +121,7 @@ class SwitchStatement extends Statement {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 
 		@valueType = @value.type()
@@ -140,7 +140,7 @@ class SwitchStatement extends Statement {
 
 		for var clause, index in @clauses {
 			for var condition in clause.conditions {
-				condition.prepare()
+				condition.prepare(@scope.reference('Boolean'))
 
 				if condition.isEnum() {
 					++enumConditions
@@ -153,9 +153,9 @@ class SwitchStatement extends Statement {
 				binding.prepare()
 			}
 
-			clause.filter.prepare()
+			clause.filter.prepare(@scope.reference('Boolean'))
 
-			clause.body.prepare()
+			clause.body.prepare(target)
 
 			if @usingFallthrough {
 				clause.name = @scope.acquireTempName(false)
@@ -348,11 +348,11 @@ class SwitchStatement extends Statement {
 			}
 		}
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		for var clause in @clauses {
-			clause.body.checkReturnType(type)
-		}
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	for var clause in @clauses {
+	// 		clause.body.checkReturnType(type)
+	// 	}
+	// } # }}}
 	flagUsingFallthrough() { # {{{
 		@usingFallthrough = true
 
@@ -645,7 +645,7 @@ class SwitchBindingArray extends AbstractNode {
 
 		@parent.defineVariables(@array, @scope)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@array.prepare()
 	} # }}}
 	translate() { # {{{
@@ -666,7 +666,7 @@ class SwitchBindingType extends AbstractNode {
 	analyse() { # {{{
 		@scope.define(@data.name.name, false, Type.fromAST(@data.type, this), true, this)
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name.name, ' = ', @parent._name)
@@ -677,7 +677,7 @@ class SwitchBindingValue extends AbstractNode {
 	analyse() { # {{{
 		@scope.define(@data.name, false, this)
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name, ' = ', @parent._name)
@@ -708,7 +708,7 @@ class SwitchConditionArray extends AbstractNode {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @values.length > 0 {
 			@name = @scope.parent().acquireTempName(false)
 		}
@@ -827,7 +827,7 @@ class SwitchConditionRange extends AbstractNode {
 		@left.analyse()
 		@right.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@left.prepare()
 		@right.prepare()
 	} # }}}
@@ -853,7 +853,7 @@ class SwitchConditionType extends AbstractNode {
 		_type: Type
 	}
 	analyse()
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@type = Type.fromAST(@data.type, this)
 	} # }}}
 	translate()
@@ -874,7 +874,7 @@ class SwitchConditionValue extends AbstractNode {
 		@value = $compile.expression(@data, this)
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 
 		@type = @value.type()
@@ -927,7 +927,7 @@ class SwitchFilter extends AbstractNode {
 			@filter.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @filter != null {
 			for binding in @bindings {
 				binding.prepare()

@@ -95,7 +95,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var parameter in @parameters {
 			parameter.prepare()
 		}
@@ -170,7 +170,7 @@ class ClassConstructorDeclaration extends Statement {
 			value.translate()
 		}
 
-		@block.prepare()
+		@block.prepare(Type.Void)
 		@block.translate()
 
 		@internalName = `__ks_cons_\(@type.index())`

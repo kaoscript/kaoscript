@@ -197,7 +197,8 @@ abstract class AbstractNode {
 		@scope = this.newScope(scope, kind)
 	} # }}}
 	abstract analyse()
-	abstract prepare()
+	// abstract prepare(target: Type = AnyType.NullableUnexplicit)
+	abstract prepare(target: Type = null)
 	abstract translate()
 	authority() => @parent.authority()
 	data() => @data
@@ -335,32 +336,28 @@ var $compile = {
 
 var $assignmentOperators = {
 	`\(AssignmentOperatorKind::Addition)`			: AssignmentOperatorAddition
-	`\(AssignmentOperatorKind::BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
-	`\(AssignmentOperatorKind::BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
-	`\(AssignmentOperatorKind::BitwiseOr)`			: AssignmentOperatorBitwiseOr
-	`\(AssignmentOperatorKind::BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
-	`\(AssignmentOperatorKind::BitwiseXor)`			: AssignmentOperatorBitwiseXor
+	`\(AssignmentOperatorKind::And)`				: AssignmentOperatorAnd
 	`\(AssignmentOperatorKind::Division)`			: AssignmentOperatorDivision
 	`\(AssignmentOperatorKind::Equality)`			: AssignmentOperatorEquality
 	`\(AssignmentOperatorKind::Existential)`		: AssignmentOperatorExistential
+	`\(AssignmentOperatorKind::LeftShift)`			: AssignmentOperatorLeftShift
 	`\(AssignmentOperatorKind::Modulo)`				: AssignmentOperatorModulo
 	`\(AssignmentOperatorKind::Multiplication)`		: AssignmentOperatorMultiplication
 	`\(AssignmentOperatorKind::NonExistential)`		: AssignmentOperatorNonExistential
 	`\(AssignmentOperatorKind::NullCoalescing)`		: AssignmentOperatorNullCoalescing
+	`\(AssignmentOperatorKind::Or)`					: AssignmentOperatorOr
 	`\(AssignmentOperatorKind::Quotient)`			: AssignmentOperatorQuotient
+	`\(AssignmentOperatorKind::RightShift)`			: AssignmentOperatorRightShift
 	`\(AssignmentOperatorKind::Subtraction)`		: AssignmentOperatorSubtraction
+	`\(AssignmentOperatorKind::Xor)`				: AssignmentOperatorXor
 }
 
 var $binaryOperators = {
 	`\(BinaryOperatorKind::Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperatorKind::And)`				: BinaryOperatorAnd
-	`\(BinaryOperatorKind::BitwiseAnd)`			: BinaryOperatorBitwiseAnd
-	`\(BinaryOperatorKind::BitwiseLeftShift)`	: BinaryOperatorBitwiseLeftShift
-	`\(BinaryOperatorKind::BitwiseOr)`			: BinaryOperatorBitwiseOr
-	`\(BinaryOperatorKind::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
-	`\(BinaryOperatorKind::BitwiseXor)`			: BinaryOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
 	`\(BinaryOperatorKind::Imply)`				: BinaryOperatorImply
+	`\(BinaryOperatorKind::LeftShift)`			: BinaryOperatorLeftShift
 	`\(BinaryOperatorKind::Match)`				: BinaryOperatorMatch
 	`\(BinaryOperatorKind::Mismatch)`			: BinaryOperatorMismatch
 	`\(BinaryOperatorKind::Modulo)`				: BinaryOperatorModulo
@@ -368,6 +365,7 @@ var $binaryOperators = {
 	`\(BinaryOperatorKind::NullCoalescing)`		: BinaryOperatorNullCoalescing
 	`\(BinaryOperatorKind::Or)`					: BinaryOperatorOr
 	`\(BinaryOperatorKind::Quotient)`			: BinaryOperatorQuotient
+	`\(BinaryOperatorKind::RightShift)`			: BinaryOperatorRightShift
 	`\(BinaryOperatorKind::Subtraction)`		: BinaryOperatorSubtraction
 	`\(BinaryOperatorKind::TypeCasting)`		: BinaryOperatorTypeCasting
 	`\(BinaryOperatorKind::TypeEquality)`		: BinaryOperatorTypeEquality
@@ -470,24 +468,20 @@ var $statements = {
 var $polyadicOperators = {
 	`\(BinaryOperatorKind::Addition)`			: PolyadicOperatorAddition
 	`\(BinaryOperatorKind::And)`				: PolyadicOperatorAnd
-	`\(BinaryOperatorKind::BitwiseAnd)`			: PolyadicOperatorBitwiseAnd
-	`\(BinaryOperatorKind::BitwiseLeftShift)`	: PolyadicOperatorBitwiseLeftShift
-	`\(BinaryOperatorKind::BitwiseOr)`			: PolyadicOperatorBitwiseOr
-	`\(BinaryOperatorKind::BitwiseRightShift)`	: PolyadicOperatorBitwiseRightShift
-	`\(BinaryOperatorKind::BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
 	`\(BinaryOperatorKind::Modulo)`				: PolyadicOperatorModulo
 	`\(BinaryOperatorKind::Imply)`				: PolyadicOperatorImply
+	`\(BinaryOperatorKind::LeftShift)`			: PolyadicOperatorLeftShift
 	`\(BinaryOperatorKind::Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: PolyadicOperatorNullCoalescing
 	`\(BinaryOperatorKind::Or)`					: PolyadicOperatorOr
 	`\(BinaryOperatorKind::Quotient)`			: PolyadicOperatorQuotient
+	`\(BinaryOperatorKind::RightShift)`			: PolyadicOperatorRightShift
 	`\(BinaryOperatorKind::Subtraction)`		: PolyadicOperatorSubtraction
 	`\(BinaryOperatorKind::Xor)`				: PolyadicOperatorXor
 }
 
 var $unaryOperators = {
-	`\(UnaryOperatorKind::BitwiseNot)`			: UnaryOperatorBitwiseNot
 	`\(UnaryOperatorKind::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
 	`\(UnaryOperatorKind::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
 	`\(UnaryOperatorKind::Existential)`			: UnaryOperatorExistential

@@ -21,7 +21,7 @@ class TryExpression extends Expression {
 			@defaultValue.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@argument.prepare()
 
 		if @unwrap && @argument.type().isInoperative() {

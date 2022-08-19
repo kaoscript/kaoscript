@@ -259,7 +259,7 @@ class FunctionDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @main || @scope.processStash(@name) {
 			@variable.prepare()
 		}
@@ -393,7 +393,7 @@ class FunctionDeclarator extends AbstractNode {
 			@parameters.push(parameter)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@scope.module().setLineOffset(@offset)
 
 		@scope.line(@data.start.line)
@@ -430,7 +430,7 @@ class FunctionDeclarator extends AbstractNode {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()

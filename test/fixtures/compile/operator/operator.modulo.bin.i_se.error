@@ -1,1 +1,1 @@
-TypeException: The expression "y" of type "String" is expected to be of type "Number" or "Any" in a modulo operation (fixtures/compile/operator/operator.modulo.bin.i_se.ks:2)
+TypeException: The expression "y" of type "String" is expected to be of type "Number" (fixtures/compile/operator/operator.modulo.bin.i_se.ks:2)

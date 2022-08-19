@@ -45,4 +45,4 @@ func testIf(x: Foobar, y: Number, z) {
 }
 
 expect(testIf(Foobar::foo + Foobar::bar, Foobar::foo + Foobar::bar, Foobar::foo + Foobar::bar)).to.eql(['c', 'c', 'c', 'c', 'c', 'c'])
-expect(testIf(Foobar::bar, Foobar::foo.value ||| Foobar::bar.value, Foobar::foo.value ||| Foobar::bar.value)).to.eql([null, 'c', 'c', null, 'c', 'c'])
+expect(testIf(Foobar::bar, Foobar::foo.value || Foobar::bar.value, Foobar::foo.value || Foobar::bar.value)).to.eql([null, 'c', 'c', null, 'c', 'c'])

@@ -11,7 +11,7 @@ class UnlessExpression extends Expression {
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@condition.prepare()
 		@whenFalse.prepare()
 

@@ -1,9 +1,10 @@
-class AssignmentOperatorExpression extends Expression {
+abstract class AssignmentOperatorExpression extends Expression {
 	private late {
-		_await: Boolean				= false
-		_bindingScope: Scope
-		_left						= null
-		_right						= null
+		@await: Boolean				= false
+		@bindingScope: Scope
+		@left						= null
+		@right						= null
+		@type: Type
 	}
 	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
@@ -30,24 +31,44 @@ class AssignmentOperatorExpression extends Expression {
 			this.defineVariables(@left)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@left.flagAssignable()
 
-		@left.prepare()
+		@left.prepare(target)
 
+		// if var variable = @left.variable() {
+		// 	if variable.isInitialized() {
+		// 		@right.setExpectedType(variable.getRealType())
+		// 	}
+		// 	else {
+		// 		@right.setExpectedType(variable.getDeclaredType())
+		// 	}
+		// }
+		// else {
+		// 	@right.setExpectedType(@left.type())
+		// }
 		if var variable = @left.variable() {
 			if variable.isInitialized() {
-				@right.setExpectedType(variable.getRealType())
+				@type = variable.getRealType()
 			}
 			else {
-				@right.setExpectedType(variable.getDeclaredType())
+				@type = variable.getDeclaredType()
 			}
 		}
 		else {
-			@right.setExpectedType(@left.type())
+			@type = @left.type()
 		}
 
-		@right.prepare()
+		if target? {
+			if target.isAssignableToVariable(@type, true, true, false) {
+				@type = target
+			}
+			else {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+		}
+
+		@right.prepare(@type)
 
 		if @right.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
@@ -84,21 +105,52 @@ class AssignmentOperatorExpression extends Expression {
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {
 	private late {
-		_isEnum: Boolean		= false
-		_isNative: Boolean		= false
-		_type: Type
+		@adjusted: Boolean			= false
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
 	}
-	prepare() { # {{{
-		super()
+	override prepare(target) { # {{{
+		super(target)
 
-		if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-			@isEnum = true
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
+
+		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+			@enum = true
 
 			@type = @left.type()
+
+			if @expectingEnum {
+				@type = @left.type()
+			}
+			else {
+				@type = @left.type().discard().type()
+			}
+
+			@left.unflagExpectingEnum()
+			@right.unflagExpectingEnum()
+
+			if @right is BinaryOperatorExpression | PolyadicOperatorExpression {
+				var mut leftMost = @right
+
+				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
+					leftMost = leftMost.left()
+				}
+
+				var newLeft = new BinaryOperatorSubtraction(@data, leftMost, @scope)
+
+				newLeft.setOperands(@left, leftMost.left(), enum: true, expectingEnum: false)
+
+				leftMost.left(newLeft)
+
+				@adjusted = true
+			}
 		}
 		else {
 			if @left.type().isNumber() && @right.type().isNumber() {
-				@isNative = true
+				@native = true
 			}
 			else if @left.type().canBeNumber() {
 				unless @right.type().canBeNumber() {
@@ -112,7 +164,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			if @left.type().isNullable() || @right.type().isNullable() {
 				@type = @scope.reference('Number').setNullable(true)
 
-				@isNative = false
+				@native = false
 			}
 			else {
 				@type = @scope.reference('Number')
@@ -124,14 +176,21 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		}
 	} # }}}
 	isAcceptingEnum() => false
-	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toFragments(fragments, mode) { # {{{
-		if @isEnum {
+		if @adjusted {
+			if @enum && @expectingEnum {
+				fragments.compile(@left).code($equals, @type.name(), '(').compile(@right).code(')')
+			}
+			else {
+				fragments.compile(@left).code($equals).compile(@right)
+			}
+		}
+		else if @enum {
 			this.toEnumFragments(fragments)
 		}
-		else if @isNative {
+		else if @native {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -155,33 +214,222 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	type() => @type
 }
 
+abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExpression {
+	private late {
+		@native: Boolean		= false
+		@operand: OperandType	= OperandType::Any
+	}
+	override prepare(target) { # {{{
+		// if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		// 	@enum = true
+
+		// 	@type = @left.type()
+		// }
+		// else {
+		// 	if @left.type().isNumber() && @right.type().isNumber() {
+		// 		@native = true
+		// 	}
+		// 	else if @left.type().canBeNumber() {
+		// 		unless @right.type().canBeNumber() {
+		// 			TypeException.throwInvalidOperand(@right, this.operator(), this)
+		// 		}
+		// 	}
+		// 	else {
+		// 		TypeException.throwInvalidOperand(@left, this.operator(), this)
+		// 	}
+
+		// 	if @left.type().isNullable() || @right.type().isNullable() {
+		// 		@type = @scope.reference('Number').setNullable(true)
+
+		// 		@native = false
+		// 	}
+		// 	else {
+		// 		@type = @scope.reference('Number')
+		// 	}
+
+		// 	if @left is IdentifierLiteral {
+		// 		@left.type(@type, @scope, this)
+		// 	}
+		// }
+		super(target)
+
+		var mut nullable = false
+		var mut boolean = true
+		var mut number = true
+		var mut native = true
+
+		if @type.isBoolean() {
+			number = false
+		}
+		else if @type.isNumber() {
+			if @type.isNullable() {
+				nullable = true
+				native = false
+			}
+
+			boolean = false
+		}
+		else if @type.isNull() {
+			nullable = true
+		}
+		else if @type.canBeBoolean() {
+			if @type.isNullable() {
+				nullable = true
+			}
+
+			if !@type.canBeNumber() {
+				number = false
+			}
+			else if !boolean {
+				native = false
+			}
+		}
+		else if @type.canBeNumber() {
+			if @type.isNullable() {
+				nullable = true
+			}
+
+			boolean = false
+			native = false
+		}
+		else {
+			if target? {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+			else {
+				TypeException.throwInvalidOperation(this, @operator(), this)
+			}
+		}
+
+		if !boolean && !number {
+			if target? {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+			else {
+				TypeException.throwInvalidOperation(this, @operator(), this)
+			}
+		}
+
+		if boolean {
+			if number {
+				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+
+				if nullable {
+					@type = @type.setNullable(true)
+				}
+			}
+			else {
+				@type = @scope.reference('Boolean')
+				@operand = OperandType::Boolean
+				@native = true
+			}
+		}
+		else if number {
+			@type = @scope.reference('Number')
+			@operand = OperandType::Number
+			@native = native
+
+			if nullable {
+				@type = @type.setNullable(true)
+			}
+		}
+	} # }}}
+	abstract native(): String
+	abstract operator(): Operator
+	abstract runtime(): String
+	abstract symbol(): String
+	toFragments(fragments, mode) { # {{{
+		if @native {
+			@toNativeFragments(fragments)
+		}
+		else {
+			var late operator
+			if @operand == OperandType::Number {
+				operator = `\(@runtime())Num`
+			}
+			else {
+				operator = @runtime()
+			}
+
+			fragments
+				.compile(@left)
+				.code(' = ')
+				.code($runtime.operator(this), `.\(operator)(`)
+				.compile(@left)
+				.code($comma)
+				.compile(@right)
+				.code(')')
+		}
+	} # }}}
+	toNativeFragments(fragments) { # {{{
+		if @operand == OperandType::Boolean {
+			fragments.compile(@left).code(' = ').compile(@left).code(` \(@native()) `).compile(@right)
+		}
+		else {
+			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+		}
+	} # }}}
+	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
+	type() => @type
+}
+
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	private late {
-		_isEnum: Boolean		= false
-		_isNative: Boolean		= false
-		_isNumber: Boolean		= false
-		_isString: Boolean		= false
-		_type: Type
+		@adjusted: Boolean			= false
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
+		@number: Boolean			= false
+		@string: Boolean			= false
 	}
-	prepare() { # {{{
-		super()
+	override prepare(target) { # {{{
+		super(target)
+
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
 
 		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-			@isEnum = true
+			@enum = true
+			@number = @left.type().discard().isFlags()
 
-			@type = @left.type()
+			if @expectingEnum {
+				@type = @left.type()
+			}
+			else {
+				@type = @left.type().discard().type()
+			}
+
+			@left.unflagExpectingEnum()
+			@right.unflagExpectingEnum()
+
+			if @right is BinaryOperatorExpression | PolyadicOperatorExpression {
+				var mut leftMost = @right
+
+				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
+					leftMost = leftMost.left()
+				}
+
+				var newLeft = new BinaryOperatorAddition(@data, leftMost, @scope)
+
+				newLeft.setOperands(@left, leftMost.left(), enum: true, number: @number, expectingEnum: false)
+
+				leftMost.left(newLeft)
+
+				@adjusted = true
+			}
 		}
 		else {
 			if @left.type().isString() || @right.type().isString() {
-				@isString = true
-				@isNative = true
+				@string = true
+				@native = true
 			}
 			else if @left.type().isNumber() && @right.type().isNumber() {
-				@isNumber = true
-				@isNative = true
+				@number = true
+				@native = true
 			}
 			else if (@left.type().canBeString(false) && !@left.type().canBeNumber(false)) || (@right.type().canBeString(false) && !@right.type().canBeNumber(false)) {
-				@isString = true
+				@string = true
 			}
 			else if @left.type().isAny() || @right.type().isAny() {
 			}
@@ -189,7 +437,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				if !@left.type().canBeString(false) {
 					if @right.type().canBeNumber() {
 						if !@right.type().canBeString(false) {
-							@isNumber = true
+							@number = true
 						}
 					}
 					else {
@@ -203,13 +451,13 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 
 			var nullable = @left.type().isNullable() || @right.type().isNullable()
 			if nullable {
-				@isNative = false
+				@native = false
 			}
 
-			if @isNumber {
+			if @number {
 				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 			}
-			else if @isString {
+			else if @string {
 				@type = @scope.reference('String')
 			}
 			else {
@@ -224,26 +472,41 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @isEnum {
-			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ')
+		if @adjusted {
+			if @enum && @expectingEnum {
+				fragments.compile(@left).code($equals, @type.name(), '(').compile(@right).code(')')
+			}
+			else {
+				fragments.compile(@left).code($equals).compile(@right)
+			}
+		}
+		else if @enum {
+			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left)
+
+			if @number {
+				fragments.code(' | ')
+			}
+			else {
+				fragments.code(' + ')
+			}
 
 			@right.toOperandFragments(fragments, Operator::Addition, OperandType::Enum)
 
 			fragments.code(')')
 		}
-		else if @isNative {
+		else if @native {
 			fragments.compile(@left).code(' += ').compile(@right)
 		}
 		else {
-			fragments.compile(@left).code(' = ')
+			fragments.compile(@left).code($equals)
 
 			var mut type
-			if @isNumber {
+			if @number {
 				fragments.code($runtime.operator(this), '.addition(')
 
 				type = OperandType::Number
 			}
-			else if @isString {
+			else if @string {
 				fragments.code($runtime.helper(this), '.concatString(')
 
 				type = OperandType::String
@@ -264,43 +527,15 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	type() => @type
 }
 
-class AssignmentOperatorBitwiseAnd extends NumericAssignmentOperatorExpression {
+class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 	isAcceptingEnum() => true
-	operator() => Operator::BitwiseAnd
-	runtime() => 'bitwiseAnd'
-	symbol() => '&='
+	native() => @operand == OperandType::Boolean ? '&&' : '&='
+	operator() => Operator::And
+	runtime() => 'and'
+	symbol() => '&&='
 	toEnumFragments(fragments) { # {{{
-		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ').compile(@right).code(')')
+		// fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ').compile(@right).code(')')
 	} # }}}
-}
-
-class AssignmentOperatorBitwiseLeftShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator::BitwiseLeftShift
-	runtime() => 'bitwiseLeftShift'
-	symbol() => '<<='
-}
-
-class AssignmentOperatorBitwiseOr extends NumericAssignmentOperatorExpression {
-	getEnumSymbol() => '|'
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseOr
-	runtime() => 'bitwiseOr'
-	symbol() => '|='
-	toEnumFragments(fragments) { # {{{
-		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ').compile(@right).code(')')
-	} # }}}
-}
-
-class AssignmentOperatorBitwiseRightShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator::BitwiseRightShift
-	runtime() => 'bitwiseRightShift'
-	symbol() => '>>='
-}
-
-class AssignmentOperatorBitwiseXor extends NumericAssignmentOperatorExpression {
-	operator() => Operator::BitwiseXor
-	runtime() => 'bitwiseXor'
-	symbol() => '^='
 }
 
 class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
@@ -314,14 +549,13 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		@condition: Boolean		= false
 		@ignorable: Boolean		= false
 		@lateinit: Boolean		= false
-		@type: Type
 	}
 	analyse() { # {{{
 		@condition = @statement() is IfStatement
 
 		super()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		if @condition && @lateinit {
@@ -454,7 +688,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		@right.acquireReusable(true)
@@ -575,6 +809,12 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
+class AssignmentOperatorLeftShift extends NumericAssignmentOperatorExpression {
+	operator() => Operator::LeftShift
+	runtime() => 'leftShift'
+	symbol() => '<<='
+}
+
 class AssignmentOperatorModulo extends NumericAssignmentOperatorExpression {
 	operator() => Operator::Modulo
 	runtime() => 'modulo'
@@ -597,7 +837,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		@right.acquireReusable(true)
@@ -774,6 +1014,16 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	} # }}}
 }
 
+class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
+	native() => @operand == OperandType::Boolean ? '||' : '|='
+	operator() => Operator::Or
+	runtime() => 'or'
+	symbol() => '||='
+	toEnumFragments(fragments) { # {{{
+		// fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ').compile(@right).code(')')
+	} # }}}
+}
+
 class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	operator() => Operator::Quotient
 	runtime() => 'quotient'
@@ -781,6 +1031,12 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	toNativeFragments(fragments) { # {{{
 		fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
 	} # }}}
+}
+
+class AssignmentOperatorRightShift extends NumericAssignmentOperatorExpression {
+	operator() => Operator::RightShift
+	runtime() => 'rightShift'
+	symbol() => '>>='
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {
@@ -794,5 +1050,20 @@ class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression 
 		@right.toOperandFragments(fragments, Operator::Subtraction, OperandType::Enum)
 
 		fragments.code(')')
+	} # }}}
+}
+
+class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
+	native() => '^='
+	operator() => Operator::Xor
+	runtime() => 'xor'
+	symbol() => '^^='
+	toNativeFragments(fragments) { # {{{
+		if @operand == OperandType::Boolean {
+			fragments.compile(@left).code(' = ').compile(@left).code(` !== `).compile(@right)
+		}
+		else {
+			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+		}
 	} # }}}
 }

@@ -53,13 +53,13 @@ module.exports = function() {
 	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws);
 	printAnimalAbilities.__ks_0(abilities);
-	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly);
+	abilities = AnimalFlags((abilities | AnimalFlags.HasClaws) | AnimalFlags.CanFly);
 	printAnimalAbilities.__ks_0(abilities);
-	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
+	abilities = AnimalFlags((abilities | AnimalFlags.HasClaws) | AnimalFlags.CanFly | AnimalFlags.Endangered);
 	printAnimalAbilities.__ks_0(abilities);
-	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly);
+	abilities = AnimalFlags((abilities & ~AnimalFlags.HasClaws) & ~AnimalFlags.CanFly);
 	printAnimalAbilities.__ks_0(abilities);
-	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly & ~AnimalFlags.Endangered);
+	abilities = AnimalFlags((abilities & ~AnimalFlags.HasClaws) & ~AnimalFlags.CanFly & ~AnimalFlags.Endangered);
 	printAnimalAbilities.__ks_0(abilities);
 	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
 	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));

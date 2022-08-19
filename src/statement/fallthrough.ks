@@ -21,7 +21,7 @@ class FallthroughStatement extends Statement {
 
 		@switch.flagUsingFallthrough()
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
 		@switch.toFallthroughFragments(fragments)

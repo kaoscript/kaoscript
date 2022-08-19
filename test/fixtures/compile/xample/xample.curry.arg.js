@@ -9,7 +9,7 @@ module.exports = function() {
 		return fff.__ks_rt(this, arguments);
 	};
 	fff.__ks_0 = function(prefix) {
-		return Operator.addOrConcat(prefix, this.name);
+		return Operator.add(prefix, this.name);
 	};
 	fff.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

@@ -502,17 +502,17 @@ module.exports = function() {
 						}
 						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
 							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
-							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.addOrConcat(match[4], match[4]), 16) / 255);
+							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
+							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.add(match[4], match[4]), 16) / 255);
 							return true;
 						}
 						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
 							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
+							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
 							that._alpha = 1;
 							return true;
 						}
@@ -542,9 +542,9 @@ module.exports = function() {
 						}
 						else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
 							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
+							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
 							that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
 							return true;
 						}
@@ -1495,7 +1495,7 @@ module.exports = function() {
 							component.loop = false;
 						}
 						else if(component.loop === true) {
-							component.mod = Operator.addOrConcat(component.max, 1);
+							component.mod = Operator.add(component.max, 1);
 							component.half = Operator.division(component.mod, 2);
 						}
 						$component(component, name, space.name);

@@ -10,7 +10,7 @@ module.exports = function() {
 		if(y === void 0) {
 			y = null;
 		}
-		return Operator.addition(x, y);
+		return Operator.addNum(x, y);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isNumber(value) || Type.isNull(value);

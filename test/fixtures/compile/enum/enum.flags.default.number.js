@@ -43,7 +43,7 @@ module.exports = function() {
 	printAnimalAbilities.__ks_0(animal);
 	animal.flags = AnimalFlags(animal.flags & ~AnimalFlags.HasClaws);
 	printAnimalAbilities.__ks_0(animal);
-	animal.flags = AnimalFlags(animal.flags | AnimalFlags.HasClaws | AnimalFlags.CanFly);
+	animal.flags = AnimalFlags((animal.flags | AnimalFlags.HasClaws) | AnimalFlags.CanFly);
 	printAnimalAbilities.__ks_0(animal);
 	return {
 		AnimalFlags,

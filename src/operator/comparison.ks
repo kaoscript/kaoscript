@@ -49,7 +49,11 @@ class ComparisonExpression extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
+		if target? && !target.canBeBoolean() {
+			TypeException.throwUnexpectedExpression(this, target, this)
+		}
+
 		for var operand in @operands {
 			operand.prepare()
 
@@ -270,6 +274,29 @@ class ComparisonExpression extends Expression {
 			@tested = true
 		}
 	} # }}}
+	toQuote() { # {{{
+		var mut fragments = ''
+
+		if @operands[0].isComputed() {
+			fragments += `(\(@operands[0].toQuote()))`
+		}
+		else {
+			fragments += @operands[0].toQuote()
+		}
+
+		for var i from 0 til @operators.length {
+			fragments += ` \(@operators[i].symbol()) `
+
+			if @operands[i + 1].isComputed() {
+				fragments += `(\(@operands[i + 1].toQuote()))`
+			}
+			else {
+				fragments += @operands[i + 1].toQuote()
+			}
+		}
+
+		return fragments
+	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
@@ -280,6 +307,7 @@ abstract class ComparisonOperator {
 		_right
 	}
 	constructor(@node, @left, @right)
+	abstract symbol(): String
 	prepare()
 	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
@@ -446,6 +474,7 @@ class EqualityOperator extends ComparisonOperator {
 
 		return inferables
 	} # }}}
+	symbol() => '=='
 	toLeftFragments(fragments, reuseName?, reusable, assignable) { # {{{
 		var mut suffix = null
 		var mut wrap = true
@@ -560,6 +589,7 @@ class EqualityOperator extends ComparisonOperator {
 class InequalityOperator extends EqualityOperator {
 	inferWhenFalseTypes(inferables) => super.inferWhenTrueTypes(inferables)
 	inferWhenTrueTypes(inferables) => super.inferWhenFalseTypes(inferables)
+	symbol() => '!='
 	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { # {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null {
@@ -615,7 +645,6 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 	} # }}}
 	isComputed() => @isNative
 	abstract runtime(): String
-	abstract symbol(): String
 	toNativeFragments(fragments, reuseName?, leftReusable, rightReusable) { # {{{
 		if leftReusable && reuseName != null {
 			fragments.code(reuseName)

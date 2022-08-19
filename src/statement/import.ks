@@ -270,7 +270,7 @@ abstract class Importer extends Statement {
 			}
 		}
 	} # }}}
-	prepare()
+	override prepare(target)
 	translate()
 	addArgument(data, autofill, arguments) { # {{{
 		var argument = {
@@ -1271,7 +1271,7 @@ class ImportDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for declarator in @declarators {
 			declarator.prepare()
 		}

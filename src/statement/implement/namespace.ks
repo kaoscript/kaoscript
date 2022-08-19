@@ -16,7 +16,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 
 		var property = NamespacePropertyType.fromAST(@data.type, this)
@@ -91,7 +91,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@parameters.push(parameter)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		for var parameter in @parameters {
 			parameter.prepare()
 		}
@@ -137,7 +137,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()

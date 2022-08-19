@@ -1193,7 +1193,7 @@ class ClassType extends Type {
 				return new ClassMethodSetType(@scope, @instanceMethods[name])
 			}
 		}
-		
+
 		if @abstract {
 			if var functions = @abstractMethods[name] {
 				if functions.length == 1 {
@@ -1204,11 +1204,11 @@ class ClassType extends Type {
 				}
 			}
 		}
-		
+
 		if @instanceVariables[name] is ClassVariableType {
 			return @instanceVariables[name]
 		}
-		
+
 		if @extending {
 			return @extends.type().getInstanceProperty(name)
 		}
@@ -1670,7 +1670,7 @@ class ClassType extends Type {
 		var result = []
 
 		if var methods = @instanceMethods[name] {
-			for method in methods {
+			for var method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
 				}
@@ -1683,7 +1683,7 @@ class ClassType extends Type {
 
 		if @abstract {
 			if var methods = @abstractMethods[name] {
-				for method in methods {
+				for var method in methods {
 					if method.isSubsetOf(type, mode) {
 						result.push(method)
 					}

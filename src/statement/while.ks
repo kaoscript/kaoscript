@@ -42,7 +42,7 @@ class WhileStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @declared {
 			@declaration.prepare()
 
@@ -56,7 +56,7 @@ class WhileStatement extends Statement {
 			}
 		}
 		else {
-			@condition.prepare()
+			@condition.prepare(@scope.reference('Boolean'))
 
 			unless @condition.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@condition, this)
@@ -74,7 +74,7 @@ class WhileStatement extends Statement {
 
 		@scope.line(@data.body.start.line)
 
-		@body.prepare()
+		@body.prepare(target)
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -92,9 +92,9 @@ class WhileStatement extends Statement {
 
 		@body.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isCascade() => @declared
 	isJumpable() => true
 	isLoop() => true

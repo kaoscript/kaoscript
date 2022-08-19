@@ -4,7 +4,7 @@ module.exports = function() {
 		return add3.__ks_rt(this, arguments);
 	};
 	add3.__ks_0 = function(x0, x1, x2) {
-		return Operator.addOrConcat(x0, x1, x2);
+		return Operator.add(x0, x1, x2);
 	};
 	add3.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

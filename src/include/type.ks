@@ -265,7 +265,7 @@ abstract class Type {
 						return Type.Any
 					}
 					else {
-						ReferenceException.throwNotDefined(data.name, node)
+						ReferenceException.throwNotDefinedType(data.name, node)
 					}
 				}
 				NodeKind::MemberExpression => {
@@ -353,7 +353,7 @@ abstract class Type {
 								}
 							}
 							else {
-								ReferenceException.throwNotDefined(data.typeName.name, node)
+								ReferenceException.throwNotDefinedType(data.typeName.name, node)
 							}
 						}
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
@@ -570,6 +570,7 @@ abstract class Type {
 	abstract toVariations(variations: Array<String>): Void
 	asReference(): this
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
+	canBeEnum(any: Boolean = true): Boolean => (any && this.isAny()) || this.isEnum()
 	canBeFunction(any: Boolean = true): Boolean => (any && this.isAny()) || this.isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()

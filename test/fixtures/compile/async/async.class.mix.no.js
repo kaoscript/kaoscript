@@ -24,7 +24,7 @@ module.exports = function() {
 			return __ks_cb(null, 42);
 		}
 		__ks_func_foo_1(x, __ks_cb) {
-			return __ks_cb(null, Operator.addOrConcat(x, 42));
+			return __ks_cb(null, Operator.add(x, 42));
 		}
 		__ks_func_foo_rt(that, proto, args) {
 			const t0 = Type.isFunction;

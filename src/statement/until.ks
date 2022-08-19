@@ -16,8 +16,8 @@ class UntilStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
-		@condition.prepare()
+	override prepare(target) { # {{{
+		@condition.prepare(@scope.reference('Boolean'))
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)
@@ -27,7 +27,7 @@ class UntilStatement extends Statement {
 
 		@scope.line(@data.body.start.line)
 
-		@body.prepare()
+		@body.prepare(target)
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -39,9 +39,9 @@ class UntilStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()

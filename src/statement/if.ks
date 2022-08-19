@@ -69,7 +69,7 @@ class IfStatement extends Statement {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @declared {
 			@declaration.prepare()
 
@@ -83,7 +83,7 @@ class IfStatement extends Statement {
 			}
 		}
 		else {
-			@condition.prepare()
+			@condition.prepare(@scope.reference('Boolean'))
 
 			unless @condition.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@condition, this)
@@ -107,7 +107,7 @@ class IfStatement extends Statement {
 
 		@scope.line(@data.whenTrue.start.line)
 
-		@whenTrueExpression.prepare()
+		@whenTrueExpression.prepare(target)
 
 		if @whenFalseExpression == null {
 			@scope.line(@data.end.line)
@@ -175,7 +175,7 @@ class IfStatement extends Statement {
 		else {
 			@scope.line(@data.whenFalse.start.line)
 
-			@whenFalseExpression.prepare()
+			@whenFalseExpression.prepare(target)
 
 			@scope.line(@data.end.line)
 
@@ -373,10 +373,10 @@ class IfStatement extends Statement {
 			return @assignments
 		}
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@whenTrueExpression.checkReturnType(type)
-		@whenFalseExpression?.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@whenTrueExpression.checkReturnType(type)
+	// 	@whenFalseExpression?.checkReturnType(type)
+	// } # }}}
 	getWhenFalseScope(): @whenFalseScope
 	getWhenTrueScope(): @whenTrueScope
 	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{

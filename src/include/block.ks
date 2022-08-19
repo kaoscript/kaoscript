@@ -4,7 +4,7 @@ class Block extends AbstractNode {
 		_empty: Boolean		= false
 		_exit: Boolean		= false
 		_statements: Array	= []
-		_type: Type?		= null
+		// _type: Type?		= null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -31,8 +31,8 @@ class Block extends AbstractNode {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
-		if @type != null && !@type.isAny() {
+	override prepare(target) { # {{{
+		if target? && !target.isAny() {
 			for var statement in @statements {
 				@scope.line(statement.line())
 
@@ -40,11 +40,11 @@ class Block extends AbstractNode {
 					SyntaxException.throwDeadCode(statement)
 				}
 
-				statement.setExpectedType(@type)
+				// statement.setExpectedType(@type)
 
-				statement.prepare()
+				statement.prepare(target)
 
-				statement.checkReturnType(@type)
+				// statement.checkReturnType(@type)
 
 				@exit = statement.isExit()
 			}
@@ -57,13 +57,13 @@ class Block extends AbstractNode {
 					SyntaxException.throwDeadCode(statement)
 				}
 
-				statement.prepare()
+				statement.prepare(target)
 
 				@exit = statement.isExit()
 			}
 		}
 
-		this.checkExit()
+		@checkExit(target)
 	} # }}}
 	translate() { # {{{
 		for statement in @statements {
@@ -105,24 +105,24 @@ class Block extends AbstractNode {
 			}
 		}
 	} # }}}
-	checkExit() { # {{{
-		if !@exit && @type != null && !@type.isVoid() {
-			if @type.isNever() {
-				TypeException.throwExpectedThrownError(this)
-			}
-			else if @type.isAny() && !@type.isExplicit() {
-				// do nothing
-			}
-			else if @statements.length == 0 || !@statements.last().isExit() {
-				TypeException.throwExpectedReturnedValue(@type, this)
-			}
-		}
+	checkExit(target?) { # {{{
+		// if !@exit && target? && !target.isVoid() {
+		// 	if target.isNever() {
+		// 		TypeException.throwExpectedThrownError(this)
+		// 	}
+		// 	else if target.isAny() && !target.isExplicit() {
+		// 		// do nothing
+		// 	}
+		// 	else if @statements.length == 0 || !@statements.last().isExit() {
+		// 		TypeException.throwExpectedReturnedValue(target, this)
+		// 	}
+		// }
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		for var statement in @statements {
-			statement.checkReturnType(type)
-		}
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	for var statement in @statements {
+	// 		statement.checkReturnType(type)
+	// 	}
+	// } # }}}
 	getUnpreparedType() { # {{{
 		var types = []
 
@@ -229,26 +229,22 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	type() { # {{{
-		if @type == null {
-			if @exit {
-				var types = []
+		if @exit {
+			var types = []
 
-				for var statement in @statements {
-					if statement.isExit() {
-						types.push(statement.type())
-					}
+			for var statement in @statements {
+				if statement.isExit() {
+					types.push(statement.type())
 				}
+			}
 
-				@type = Type.union(@scope, ...types)
-			}
-			else {
-				@type = Type.Never
-			}
+			return Type.union(@scope, ...types)
 		}
-
-		return @type
+		else {
+			return Type.Never
+		}
 	} # }}}
-	type(@type) => this
+	// type(@type) => this
 }
 
 class FunctionBlock extends Block {
@@ -256,7 +252,7 @@ class FunctionBlock extends Block {
 		@return: Expression		= null
 	}
 	addReturn(@return)
-	override checkExit() { # {{{
+	override checkExit(target?) { # {{{
 		if @return != null {
 			var mut toAdd = true
 
@@ -268,13 +264,23 @@ class FunctionBlock extends Block {
 				var statement = new ReturnStatement(@return, this)
 
 				statement.analyse()
-				statement.prepare()
+				statement.prepare(target)
 
 				@statements.push(statement)
 			}
 		}
 
-		super()
+		if !@exit && target? && !target.isVoid() {
+			if target.isNever() {
+				TypeException.throwExpectedThrownError(this)
+			}
+			else if target.isAny() && !target.isExplicit() {
+				// do nothing
+			}
+			else if @statements.length == 0 || !@statements.last().isExit() {
+				TypeException.throwExpectedReturnedValue(target, this)
+			}
+		}
 	} # }}}
 	isInitializedVariable(name: String): Boolean => true
 }

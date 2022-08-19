@@ -1,10 +1,10 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		return !(x === true);
+		return Operator.negation(x);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

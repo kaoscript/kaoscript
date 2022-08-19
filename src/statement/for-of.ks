@@ -96,7 +96,7 @@ class ForOfStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression.prepare()
 
 		var type = @expression.type()
@@ -155,7 +155,7 @@ class ForOfStatement extends Statement {
 		this.assignTempVariables(@bindingScope)
 
 		if @until? {
-			@until.prepare()
+			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@until, this)
@@ -164,7 +164,7 @@ class ForOfStatement extends Statement {
 			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 		else if @while? {
-			@while.prepare()
+			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@while, this)
@@ -174,7 +174,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if @when? {
-			@when.prepare()
+			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@when, this)
@@ -187,7 +187,7 @@ class ForOfStatement extends Statement {
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
 
-		@body.prepare()
+		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@expressionName) if @expressionName?
 		@bindingScope.releaseTempName(@keyName) if @keyName?
@@ -237,9 +237,9 @@ class ForOfStatement extends Statement {
 			}
 		}
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => # {{{

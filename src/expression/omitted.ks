@@ -1,6 +1,6 @@
 class OmittedExpression extends Expression {
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isRedeclared() => false
 	listAssignments(array: Array<String>) => array

@@ -96,7 +96,12 @@ class AnyType extends Type {
 	isAny() => true
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if anycast && !@explicit {
-			return true
+			if value.isNull() {
+				return @nullable
+			}
+			else {
+				return true
+			}
 		}
 		else if value.isAny() {
 			if @nullable {

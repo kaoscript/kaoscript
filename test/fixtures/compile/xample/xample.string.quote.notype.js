@@ -5,7 +5,7 @@ module.exports = function() {
 		if(quote === void 0 || quote === null) {
 			quote = "\"";
 		}
-		return Operator.addOrConcat(quote, this.replaceAll(escape, Operator.addOrConcat(escape, escape)).replaceAll(quote, Operator.addOrConcat(escape, quote)), quote);
+		return Operator.add(quote, this.replaceAll(escape, Operator.add(escape, escape)).replaceAll(quote, Operator.add(escape, quote)), quote);
 	};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
 		return this;

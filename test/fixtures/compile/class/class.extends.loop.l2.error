@@ -1,1 +1,1 @@
-ReferenceException: "ClassD" is not defined (fixtures/compile/class/class.extends.loop.l2.ks:4)
+ReferenceException: Type "ClassD" is not defined (fixtures/compile/class/class.extends.loop.l2.ks:4)

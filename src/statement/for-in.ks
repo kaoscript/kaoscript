@@ -146,7 +146,7 @@ class ForInStatement extends Statement {
 			@descending = @fromDesc = false
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression.prepare()
 
 		var type = @expression.type()
@@ -203,18 +203,18 @@ class ForInStatement extends Statement {
 		}
 
 		if @from? {
-			@from.prepare()
+			@from.prepare(@scope.reference('Number'))
 		}
 
 		if @til? {
-			@til.prepare()
+			@til.prepare(@scope.reference('Number'))
 		}
 		else if @to? {
-			@to.prepare()
+			@to.prepare(@scope.reference('Number'))
 		}
 
 		if @by? {
-			@by.prepare()
+			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName(false) if @by.isComposite()
 		}
@@ -222,7 +222,7 @@ class ForInStatement extends Statement {
 		this.assignTempVariables(@bindingScope)
 
 		if @until? {
-			@until.prepare()
+			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@until, this)
@@ -236,7 +236,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else if @while? {
-			@while.prepare()
+			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@while, this)
@@ -251,7 +251,7 @@ class ForInStatement extends Statement {
 		}
 
 		if @when? {
-			@when.prepare()
+			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@when, this)
@@ -267,7 +267,7 @@ class ForInStatement extends Statement {
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
 
-		@body.prepare()
+		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@expressionName) if @expressionName?
 		@bindingScope.releaseTempName(@indexName) if @indexName?
@@ -344,9 +344,9 @@ class ForInStatement extends Statement {
 			}
 		}
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@body.checkReturnType(type)
-	} # }}}
+	// checkReturnType(type: Type) { # {{{
+	// 	@body.checkReturnType(type)
+	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => # {{{

@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" or "String" and not "Number", "String" or "Null" (fixtures/compile/operator/operator.addition.bin.a_an_rtuise.ks:2)

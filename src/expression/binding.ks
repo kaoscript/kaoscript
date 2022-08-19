@@ -25,7 +25,7 @@ class ArrayBinding extends Expression {
 			@elements.push(element)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @type == null {
 			for var element in @elements {
 				element.prepare()
@@ -205,7 +205,7 @@ class ArrayBindingElement extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 		}
@@ -319,7 +319,7 @@ class FlatArrayBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -340,7 +340,7 @@ class FlatObjectBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -359,7 +359,7 @@ class FlatReusableBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	prepare()
+	override prepare(target)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -395,7 +395,7 @@ class ObjectBinding extends Expression {
 			@elements.push(element)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @type == null {
 			@type = new DestructurableObjectType()
 
@@ -628,7 +628,7 @@ class ObjectBindingElement extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		if @data.type? {
 			@type = Type.fromAST(@data.type, this)
 		}

@@ -1,9 +1,9 @@
 class BinaryOperatorExpression extends Expression {
 	private {
-		_await: Boolean		= false
-		_left
-		_right
-		_tested: Boolean	= false
+		@await: Boolean		= false
+		@left
+		@right
+		@tested: Boolean	= false
 	}
 	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
@@ -14,14 +14,14 @@ class BinaryOperatorExpression extends Expression {
 
 		@await = @left.isAwait() || @right.isAwait()
 	} # }}}
-	prepare() { # {{{
-		@left.prepare()
+	override prepare(target) { # {{{
+		@left.prepare(target)
 
 		if @left.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		@right.prepare()
+		@right.prepare(target)
 
 		if @right.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
@@ -45,6 +45,8 @@ class BinaryOperatorExpression extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
+	left(): @left
+	left(@left): this
 	listAssignments(array: Array<String>) { # {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
@@ -106,21 +108,39 @@ class BinaryOperatorExpression extends Expression {
 
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
 	private late {
-		_isEnum: Boolean		= false
-		_isNative: Boolean		= false
-		_type: Type
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
+		@type: Type
 	}
-	prepare() { # {{{
-		super()
+	abstract {
+		operator(): Operator
+		runtime(): String
+		symbol(): String
+	}
+	override prepare(target) { # {{{
+		super(target)
 
-		if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-			@isEnum = true
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
 
-			@type = @left.type()
+		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+			@enum = true
+
+			if @expectingEnum {
+				@type = @left.type()
+			}
+			else {
+				@type = @left.type().discard().type()
+			}
+
+			@left.unflagExpectingEnum()
+			@right.unflagExpectingEnum()
 		}
 		else {
 			if @left.type().isNumber() && @right.type().isNumber() {
-				@isNative = true
+				@native = true
 			}
 			else if @left.type().canBeNumber() {
 				unless @right.type().canBeNumber() {
@@ -130,45 +150,44 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 			else {
 				TypeException.throwInvalidOperand(@left, this.operator(), this)
 			}
+
 			if @left.type().isNullable() || @right.type().isNullable() {
 				@type = @scope.reference('Number').setNullable(true)
 
-				@isNative = false
+				@native = false
 			}
 			else {
 				@type = @scope.reference('Number')
 			}
 		}
 	} # }}}
-	translate() { # {{{
-		super()
+	// translate() { # {{{
+	// 	super()
 
-		if @isEnum {
-			var type = @parent.type()
+	// 	if @enum {
+	// 		var type = @parent.type()
 
-			if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
-				if type.isEnum() {
-					if @type.name() != type.name() {
-						@isEnum = false
-						@isNative = true
-					}
-				}
-				else if type.isNumber() {
-					@isEnum = false
-					@isNative = true
-				}
-			}
-			else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
-				@isEnum = false
-				@isNative = true
-			}
-		}
-	} # }}}
+	// 		if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
+	// 			if type.isEnum() {
+	// 				if @type.name() != type.name() {
+	// 					@enum = false
+	// 					@native = true
+	// 				}
+	// 			}
+	// 			else if type.isNumber() {
+	// 				@enum = false
+	// 				@native = true
+	// 			}
+	// 		}
+	// 		else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
+	// 			@enum = false
+	// 			@native = true
+	// 		}
+	// 	}
+	// } # }}}
 	isAcceptingEnum() => false
-	isComputed() => @isNative
-	abstract operator(): Operator
-	abstract runtime(): String
-	abstract symbol(): String
+	isComputed() => @native || (@enum && !@expectingEnum)
+	setOperands(@left, @right, @enum = false, @expectingEnum = false): this
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
 		fragments.wrap(@left).code($space).code(this.symbol(), @data.operator).code($space).wrap(@right)
@@ -182,10 +201,10 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @isEnum {
+		if @enum {
 			this.toEnumFragments(fragments)
 		}
-		else if @isNative {
+		else if @native {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -199,22 +218,30 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
 	type() => @type
+	unflagExpectingEnum() { # {{{
+		@expectingEnum = false
+	} # }}}
 }
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
 	private late {
-		_expectingEnum: Boolean		= true
-		_isEnum: Boolean			= false
-		_isNative: Boolean			= false
-		_isNumber: Boolean			= false
-		_isString: Boolean			= false
-		_type: Type
+		@enum: Boolean				= false
+		@expectingEnum: Boolean		= true
+		@native: Boolean			= false
+		@number: Boolean			= false
+		@string: Boolean			= false
+		@type: Type
 	}
-	prepare() { # {{{
-		super()
+	override prepare(target) { # {{{
+		super(target)
+
+		if target? && !target.canBeEnum() {
+			@expectingEnum = false
+		}
 
 		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-			@isEnum = true
+			@enum = true
+			@number = @left.type().discard().isFlags()
 
 			if @expectingEnum {
 				@type = @left.type()
@@ -222,18 +249,21 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			else {
 				@type = @left.type().discard().type()
 			}
+
+			@left.unflagExpectingEnum()
+			@right.unflagExpectingEnum()
 		}
 		else {
 			if @left.type().isString() || @right.type().isString() {
-				@isString = true
-				@isNative = true
+				@string = true
+				@native = true
 			}
 			else if @left.type().isNumber() && @right.type().isNumber() {
-				@isNumber = true
-				@isNative = true
+				@number = true
+				@native = true
 			}
 			else if (@left.type().canBeString(false) && !@left.type().canBeNumber(false)) || (@right.type().canBeString(false) && !@right.type().canBeNumber(false)) {
-				@isString = true
+				@string = true
 			}
 			else if @left.type().isAny() || @right.type().isAny() {
 			}
@@ -241,7 +271,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				if !@left.type().canBeString(false) {
 					if @right.type().canBeNumber() {
 						if !@right.type().canBeString(false) {
-							@isNumber = true
+							@number = true
 						}
 					}
 					else {
@@ -255,34 +285,37 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 
 			var nullable = @left.type().isNullable() || @right.type().isNullable()
 			if nullable {
-				@isNative = false
+				@native = false
 			}
 
-			if @isNumber {
+			if @number {
 				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 			}
-			else if @isString {
+			else if @string {
 				@type = @scope.reference('String')
 			}
 			else {
-				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				@type = new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
 
-				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+				if nullable {
+					@type = @type.setNullable(true)
+				}
 			}
 		}
 	} # }}}
-	isComputed() => @isNative
-	override setExpectedType(type) { # {{{
-		if !type.isEnum() && (type.isNumber() || type.isString()) {
-			@expectingEnum = false
-		}
-	} # }}}
+	isComputed() => @native || (@enum && !@expectingEnum)
+	// override setExpectedType(type) { # {{{
+	// 	if !type.isEnum() && (type.isNumber() || type.isString()) {
+	// 		@expectingEnum = false
+	// 	}
+	// } # }}}
+	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): this
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Addition {
-			if type == OperandType::Enum && (@isEnum || @isNumber) {
+			if type == OperandType::Enum && (@enum || @number) {
 				fragments.wrap(@left).code(' | ').wrap(@right)
 			}
-			else if ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
+			else if ((@number && type == OperandType::Number) || (@string && type == OperandType::String)) {
 				fragments.compile(@left).code($comma).compile(@right)
 			}
 			else {
@@ -294,10 +327,10 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @isEnum {
+		if @enum {
 			var late operator: String
 
-			if @left.type().discard().isFlags() {
+			if @number {
 				operator = ' | '
 			}
 			else {
@@ -311,7 +344,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				fragments.wrap(@left).code(operator).wrap(@right)
 			}
 		}
-		else if @isNative {
+		else if @native {
 			fragments
 				.wrap(@left)
 				.code($space)
@@ -320,14 +353,14 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				.wrap(@right)
 		}
 		else {
-			if @isNumber {
-				fragments.code($runtime.operator(this), '.addition(')
+			if @number {
+				fragments.code($runtime.operator(this), '.addNum(')
 			}
-			else if @isString {
+			else if @string {
 				fragments.code($runtime.helper(this), '.concatString(')
 			}
 			else {
-				fragments.code($runtime.operator(this), '.addOrConcat(')
+				fragments.code($runtime.operator(this), '.add(')
 			}
 
 			fragments.compile(@left).code($comma).compile(@right).code(')')
@@ -335,52 +368,9 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	} # }}}
 	toQuote() => `\(@left.toQuote()) + \(@right.toQuote())`
 	type() => @type
-}
-
-class BinaryOperatorBitwiseAnd extends NumericBinaryOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseAnd
-	runtime() => 'bitwiseAnd'
-	symbol() => '&'
-	toEnumFragments(fragments) { # {{{
-		fragments.code(@type.name(), '(')
-
-		this.toNativeFragments(fragments)
-
-		fragments.code(')')
+	unflagExpectingEnum() { # {{{
+		@expectingEnum = false
 	} # }}}
-}
-
-class BinaryOperatorBitwiseLeftShift extends NumericBinaryOperatorExpression {
-	operator() => Operator::BitwiseLeftShift
-	runtime() => 'bitwiseLeftShift'
-	symbol() => '<<'
-}
-
-class BinaryOperatorBitwiseOr extends NumericBinaryOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator::BitwiseOr
-	runtime() => 'bitwiseOr'
-	symbol() => '|'
-	toEnumFragments(fragments) { # {{{
-		fragments.code(@type.name(), '(')
-
-		this.toNativeFragments(fragments)
-
-		fragments.code(')')
-	} # }}}
-}
-
-class BinaryOperatorBitwiseRightShift extends NumericBinaryOperatorExpression {
-	operator() => Operator::BitwiseRightShift
-	runtime() => 'bitwiseRightShift'
-	symbol() => '>>'
-}
-
-class BinaryOperatorBitwiseXor extends NumericBinaryOperatorExpression {
-	operator() => Operator::BitwiseXor
-	runtime() => 'bitwiseXor'
-	symbol() => '^'
 }
 
 class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
@@ -389,17 +379,23 @@ class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
 	symbol() => '/'
 }
 
+class BinaryOperatorLeftShift extends NumericBinaryOperatorExpression {
+	operator() => Operator::LeftShift
+	runtime() => 'leftShift'
+	symbol() => '<<'
+}
+
 class BinaryOperatorMatch extends Expression {
 	private late {
-		_await: Boolean				= false
-		_composite: Boolean			= false
-		_isNative: Boolean			= true
-		_junction: String
-		_junctive: Boolean			= false
-		_operands					= []
-		_reuseName: String?			= null
-		_subject
-		_tested: Boolean			= false
+		@await: Boolean				= false
+		@composite: Boolean			= false
+		@native: Boolean			= true
+		@junction: String
+		@junctive: Boolean			= false
+		@operands					= []
+		@reuseName: String?			= null
+		@subject
+		@tested: Boolean			= false
 	}
 	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
@@ -423,7 +419,7 @@ class BinaryOperatorMatch extends Expression {
 			this.addOperand(@data.right)
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {
@@ -435,7 +431,7 @@ class BinaryOperatorMatch extends Expression {
 		}
 
 		if !@subject.type().isNumber() || @subject.type().isNullable() {
-			@isNative = false
+			@native = false
 		}
 
 		for var operand in @operands {
@@ -564,7 +560,7 @@ class BinaryOperatorMatch extends Expression {
 		}
 	} # }}}
 	toOperatorFragments(fragments, operand, assignable) { # {{{
-		var native = @isNative && operand.type().isNumber() && !operand.type().isNullable()
+		var native = @native && operand.type().isNumber() && !operand.type().isNullable()
 		var operator = this.operator()
 
 		if @composite {
@@ -625,9 +621,9 @@ class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	private late {
-		_type: Type
+		@type: Type
 	}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		super()
 
 		@left.acquireReusable(true)
@@ -685,6 +681,12 @@ class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
 	} # }}}
 }
 
+class BinaryOperatorRightShift extends NumericBinaryOperatorExpression {
+	operator() => Operator::RightShift
+	runtime() => 'rightShift'
+	symbol() => '>>'
+}
+
 class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 	isAcceptingEnum() => true
 	operator() => Operator::Subtraction
@@ -704,16 +706,21 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 		}
 	} # }}}
 	toEnumFragments(fragments) { # {{{
-		fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
+		if @expectingEnum {
+			fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
+		}
+		else {
+			fragments.wrap(@left).code(' & ~').wrap(@right)
+		}
 	} # }}}
 }
 
 class BinaryOperatorTypeCasting extends Expression {
 	private late {
-		_forced: Boolean	= false
-		_left
-		_nullable: Boolean	= false
-		_type: Type
+		@forced: Boolean	= false
+		@left
+		@nullable: Boolean	= false
+		@type: Type
 	}
 	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
@@ -732,7 +739,7 @@ class BinaryOperatorTypeCasting extends Expression {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@left.prepare()
 
 		var type = @left.type()
@@ -779,17 +786,17 @@ class BinaryOperatorTypeCasting extends Expression {
 
 class BinaryOperatorTypeEquality extends Expression {
 	private late {
-		_computed: Boolean		= false
-		_falseType: Type
-		_junction: Junction		= Junction::NONE
-		_subject
-		_trueType: Type
+		@computed: Boolean		= false
+		@falseType: Type
+		@junction: Junction		= Junction::NONE
+		@subject
+		@trueType: Type
 	}
 	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {
@@ -910,18 +917,18 @@ class BinaryOperatorTypeEquality extends Expression {
 
 class BinaryOperatorTypeInequality extends Expression {
 	private late {
-		_computed: Boolean		= false
-		_falseType: Type
-		_junction: Junction		= Junction::NONE
-		_subject
-		_trueType: Type
+		@computed: Boolean		= false
+		@falseType: Type
+		@junction: Junction		= Junction::NONE
+		@subject
+		@trueType: Type
 	}
 	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@subject.prepare()
 
 		if @subject.type().isInoperative() {

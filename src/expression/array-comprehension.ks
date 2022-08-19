@@ -47,7 +47,7 @@ class ArrayComprehensionForFrom extends Expression {
 			@when.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@variable.prepare()
 		@from.prepare()
 		@to.prepare()
@@ -212,7 +212,7 @@ class ArrayComprehensionForIn extends Expression {
 
 		@bindingScope.releaseTempName(@valueName) if @valueName?
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression.prepare()
 
 		var type = @expression.type()
@@ -408,7 +408,7 @@ class ArrayComprehensionForOf extends Expression {
 
 		@bindingScope.releaseTempName(@keyName) if @keyName?
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@expression.prepare()
 
 		var type = @expression.type()
@@ -557,7 +557,7 @@ class ArrayComprehensionForRange extends Expression {
 			@when.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@value.prepare()
 		@from.prepare()
 		@to.prepare()

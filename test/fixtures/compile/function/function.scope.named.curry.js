@@ -5,7 +5,7 @@ module.exports = function(expect) {
 	};
 	test.__ks_0 = function(__ks_case_1, year, index) {
 		const d = new Date(year, __ks_case_1[0], __ks_case_1[1]);
-		expect(d.getDay()).to.equal(__ks_case_1[Operator.addOrConcat(index, 2)]);
+		expect(d.getDay()).to.equal(__ks_case_1[Operator.add(index, 2)]);
 	};
 	test.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

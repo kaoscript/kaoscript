@@ -1,0 +1,1 @@
+TypeException: The expression "x ^^ y" is expected to be of type "Boolean" (fixtures/compile/operator/operator.xor.bin.if.b_ie.ks:2)

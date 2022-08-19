@@ -75,26 +75,26 @@ class TryStatement extends Statement {
 			@finalizer.analyse()
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@hasCatch = @catchClauses.length != 0
 
 		for var clause in @catchClauses {
-			clause.body.prepare()
+			clause.body.prepare(target)
 			clause.type.prepare()
 		}
 
 		if @catchClause != null {
-			@catchClause.prepare()
+			@catchClause.prepare(target)
 
 			@hasCatch = true
 		}
 
-		@block.prepare()
+		@block.prepare(target)
 
 		@exit = @block.isExit() && @hasCatch && @catchClause.isExit()
 
 		if @finalizer != null {
-			@finalizer.prepare()
+			@finalizer.prepare(target)
 
 			@hasFinally = true
 
@@ -114,16 +114,16 @@ class TryStatement extends Statement {
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
 	} # }}}
-	checkReturnType(type: Type) { # {{{
-		@block.checkReturnType(type)
+	// checkReturnType(type: Type) { # {{{
+	// 	@block.checkReturnType(type)
 
-		for var clause in @catchClauses {
-			clause.body.translate()
-		}
+	// 	for var clause in @catchClauses {
+	// 		clause.body.translate()
+	// 	}
 
-		@catchClause?.checkReturnType(type)
-		@finalizer?.checkReturnType(type)
-	} # }}}
+	// 	@catchClause?.checkReturnType(type)
+	// 	@finalizer?.checkReturnType(type)
+	// } # }}}
 	getErrorVarname() { # {{{
 		if @catchClauses.length == 0 && @data.catchClause?.binding? {
 			return @data.catchClause.binding.name

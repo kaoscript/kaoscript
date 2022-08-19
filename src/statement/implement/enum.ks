@@ -27,12 +27,12 @@ class ImplementEnumFieldDeclaration extends Statement {
 		switch @enum.kind() {
 			EnumTypeKind::Flags => {
 				if value? {
-					if value.kind == NodeKind::BinaryExpression && (value.operator.kind == BinaryOperatorKind::BitwiseOr || value.operator.kind == BinaryOperatorKind::Addition) {
+					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
 						@operands = [value.left, value.right]
 					}
-					else if value.kind == NodeKind::PolyadicExpression && (value.operator.kind == BinaryOperatorKind::BitwiseOr || value.operator.kind == BinaryOperatorKind::Addition) {
+					else if value.kind == NodeKind::PolyadicExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
 						@operands = value.operands
@@ -88,7 +88,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@variable = @enum.addVariable(@name)
 
 		@variable.flagAlteration()
@@ -165,7 +165,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@block = $compile.function($ast.body(@data), this)
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@scope.line(@data.start.line)
 
 		if @instance {
@@ -257,7 +257,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.getReturnType()).prepare()
+			@block.prepare(@type.getReturnType())
 		}
 
 		@block.translate()

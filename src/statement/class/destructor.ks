@@ -47,7 +47,7 @@ class ClassDestructorDeclaration extends Statement {
 
 		@parameters = [parameter]
 	} # }}}
-	prepare() { # {{{
+	override prepare(target) { # {{{
 		@parameters[0].prepare()
 
 		@type = new ClassDestructorType(@data, this)
@@ -55,7 +55,7 @@ class ClassDestructorDeclaration extends Statement {
 	translate() { # {{{
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
-		@block.prepare()
+		@block.prepare(Type.Void)
 		@block.translate()
 	} # }}}
 	getFunctionNode() => this

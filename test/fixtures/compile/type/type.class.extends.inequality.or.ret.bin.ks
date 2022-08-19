@@ -9,6 +9,8 @@ class Quxbaz extends Foobar {
 		}
 
 		var name = x.name()
+		// if !x.isNamed() {
+		// }
 	}
 	isNamed() => true
 	name(): String => 'quxbaz'

@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "Array" is expected to be of type "Number" or "Any" in a additive operation (fixtures/compile/operator/operator.addition.bin.r_be.ks:2)
+TypeException: The expression "x" of type "Array" is expected to be of type "Number" (fixtures/compile/operator/operator.addition.bin.r_be.ks:2)

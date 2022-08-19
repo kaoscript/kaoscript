@@ -10,6 +10,32 @@ Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
 	return message
 } # }}}
 
+func $joinQuote(values: String[]): String { # {{{
+	var last = values.length - 1
+
+	if last > 0 {
+		var mut result = '"'
+
+		for var value, index in values {
+			if index == last {
+				result += '" or "'
+			}
+			else if index > 0 {
+				result += '", "'
+			}
+
+			result += value
+		}
+
+		result += '"'
+
+		return result
+	}
+	else {
+		return `"\(values[0])"`
+	}
+} # }}}
+
 export class Exception extends Error {
 	public {
 		fileName: String?		= null
@@ -262,6 +288,9 @@ export class ReferenceException extends Exception {
 		} # }}}
 		throwNotDefinedProperty(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
+		} # }}}
+		throwNotDefinedType(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`Type "\(name)" is not defined`, node)
 		} # }}}
 		throwNotExportable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
@@ -673,7 +702,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`The expression \(left.toQuote(true)) of type \(left.type().toQuote(true)) can't be compared to a value of type \(right.type().toQuote(true))`, node)
 		} # }}}
 		throwInvalidCondition(expression, node): Never ~ TypeException { # {{{
-			throw new TypeException(`The condition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
+			throw new TypeException(`The condition \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "Boolean"`, node)
 		} # }}}
 		throwInvalidForInExpression(node): Never ~ TypeException { # {{{
 			throw new TypeException(`"for..in" must be used with an array`, node)
@@ -682,7 +711,10 @@ export class TypeException extends Exception {
 			throw new TypeException(`"for..of" must be used with a dictionary`, node)
 		} # }}}
 		throwInvalidOperand(expression, operator, node): Never ~ TypeException { # {{{
-			throw new TypeException(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" in a \(operator) operation`, node)
+			throw new TypeException(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type \($joinQuote($operatorTypes[operator]))`, node)
+		} # }}}
+		throwInvalidOperation(expression, operator, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The elements of \(expression.toQuote(true)) are expected to be of type \($joinQuote($operatorTypes[operator]))`, node)
 		} # }}}
 		throwInvalidSpread(node): Never ~ TypeException { # {{{
 			throw new TypeException(`Spread operator require an array`, node)
@@ -746,6 +778,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwUnexpectedExportType(name, expected, unexpected, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The type of export "\(name)" must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
+		} # }}}
+		throwUnexpectedExpression(expression, target, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The expression \(expression.toQuote(true)) is expected to be of type \(target.toQuote(true))`, node)
 		} # }}}
 		throwUnexpectedInoperative(operand, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)

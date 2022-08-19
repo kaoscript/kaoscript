@@ -21,7 +21,7 @@ module.exports = function() {
 			return this.__ks_func_camelize_rt.call(null, this, this, arguments);
 		}
 		__ks_func_camelize_0(value) {
-			return Operator.addOrConcat(value.charAt(0).toLowerCase(), value.substr(1).replace(/[-_\s]+(.)/g, (() => {
+			return Operator.add(value.charAt(0).toLowerCase(), value.substr(1).replace(/[-_\s]+(.)/g, (() => {
 				const __ks_rt = (...args) => {
 					const t0 = Type.isValue;
 					if(args.length === 2) {

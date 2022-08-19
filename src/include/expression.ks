@@ -20,6 +20,8 @@ abstract class Expression extends AbstractNode {
 	// types if the condition is false
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
+	// if the expression's type can be adapted to an expected type
+	isAdaptable() => false
 	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression
@@ -77,7 +79,7 @@ abstract class Expression extends AbstractNode {
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
-	setExpectedType(type: Type): Void
+	// setExpectedType(type: Type): Void
 	statement() { # {{{
 		if !?@statement {
 			@leftMost = this
@@ -136,6 +138,7 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	toTypeQuote() => this.type().toQuote()
 	type() => AnyType.NullableUnexplicit
+	unflagExpectingEnum()
 	validateType(type: Type)
 	variable() => null
 }

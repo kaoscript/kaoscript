@@ -28,7 +28,7 @@ module.exports = function() {
 			})();
 		}
 		__ks_func_xy_1(x, y) {
-			return Operator.addOrConcat(x, y);
+			return Operator.add(x, y);
 		}
 		__ks_func_xy_rt(that, proto, args) {
 			const t0 = Type.isValue;
