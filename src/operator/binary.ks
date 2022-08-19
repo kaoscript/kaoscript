@@ -570,7 +570,7 @@ class BinaryOperatorMatch extends Expression {
 				}
 				else {
 					fragments
-						.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName) = `)
+						.code($runtime.operator(this), `.andNum(\(@reuseName) = `)
 						.compile(@subject)
 						.code($comma)
 						.compile(operand)
@@ -582,7 +582,7 @@ class BinaryOperatorMatch extends Expression {
 					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0n`)
 				}
 				else {
-					fragments.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0n`)
+					fragments.code($runtime.operator(this), `.andNum(\(@reuseName), `).compile(operand).code(`) \(operator) 0n`)
 				}
 			}
 		}
@@ -592,7 +592,7 @@ class BinaryOperatorMatch extends Expression {
 			}
 			else {
 				fragments
-					.code($runtime.operator(this), `.bitwiseAnd(`)
+					.code($runtime.operator(this), `.andNum(`)
 					.compile(@subject)
 					.code($comma)
 					.compile(operand)

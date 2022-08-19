@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x, y) {
-		x = Operator.addOrConcat(x, y);
+		x = Operator.add(x, y);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

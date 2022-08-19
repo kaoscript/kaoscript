@@ -502,7 +502,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 
 			var mut type
 			if @number {
-				fragments.code($runtime.operator(this), '.addition(')
+				fragments.code($runtime.operator(this), '.addNum(')
 
 				type = OperandType::Number
 			}
@@ -512,7 +512,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				type = OperandType::String
 			}
 			else {
-				fragments.code($runtime.operator(this), '.addOrConcat(')
+				fragments.code($runtime.operator(this), '.add(')
 
 				type = OperandType::Any
 			}

@@ -55,7 +55,7 @@ module.exports = function(expect) {
 		else {
 			results.push(null);
 		}
-		if(Operator.bitwiseAnd(z, Foobar.foo) !== 0n) {
+		if(Operator.andNum(z, Foobar.foo) !== 0n) {
 			results.push("c");
 		}
 		else {
@@ -63,7 +63,7 @@ module.exports = function(expect) {
 		}
 		results.push(((x & Foobar.foo) !== 0n) ? "c" : null);
 		results.push(((y & Foobar.foo) !== 0n) ? "c" : null);
-		results.push((Operator.bitwiseAnd(z, Foobar.foo) !== 0n) ? "c" : null);
+		results.push((Operator.andNum(z, Foobar.foo) !== 0n) ? "c" : null);
 		return results;
 	};
 	testIf.__ks_rt = function(that, args) {
