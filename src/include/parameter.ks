@@ -14,18 +14,19 @@ enum ParameterWrongDoing {
 
 class Parameter extends AbstractNode {
 	private late {
-		_anonymous: Boolean					= false
-		_arity								= null
-		_comprehensive: Boolean				= true
-		_defaultValue						= null
-		_explicitlyRequired: Boolean		= false
-		_hasDefaultValue: Boolean			= false
-		_header: Boolean					= false
-		_maybeHeadedDefaultValue: Boolean	= false
-		_name
-		_preserved: Boolean
-		_rest: Boolean						= false
-		_type: ParameterType
+		@anonymous: Boolean					= false
+		@arity								= null
+		@comprehensive: Boolean				= true
+		@defaultValue						= null
+		@explicitlyRequired: Boolean		= false
+		@external: String?					= null
+		@hasDefaultValue: Boolean			= false
+		@header: Boolean					= false
+		@internal
+		@maybeHeadedDefaultValue: Boolean	= false
+		@preserved: Boolean
+		@rest: Boolean						= false
+		@type: ParameterType
 	}
 	static compileExpression(data, node) {
 		switch data.kind {
@@ -560,7 +561,7 @@ class Parameter extends AbstractNode {
 		@preserved = @options.parameters.preserve
 	} # }}}
 	analyse() { # {{{
-		@anonymous = !?@data.name
+		@anonymous = !?@data.internal
 
 		var mut immutable = true
 
@@ -571,14 +572,14 @@ class Parameter extends AbstractNode {
 		}
 
 		if @anonymous {
-			@name = new AnonymousParameter(@data, this)
+			@internal = new AnonymousParameter(@data, this)
 		}
 		else {
-			@name = Parameter.compileExpression(@data.name, this)
-			@name.setAssignment(AssignmentType::Parameter)
-			@name.analyse()
+			@internal = Parameter.compileExpression(@data.internal, this)
+			@internal.setAssignment(AssignmentType::Parameter)
+			@internal.analyse()
 
-			for var name in @name.listAssignments([]) {
+			for var name in @internal.listAssignments([]) {
 				if @scope.hasDefinedVariable(name) {
 					SyntaxException.throwAlreadyDeclared(name, this)
 				}
@@ -588,9 +589,9 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@name.prepare()
+		@internal.prepare()
 
-		var mut type: Type? = @name.type()?.asReference()
+		var mut type: Type? = @internal.type()?.asReference()
 
 		if !type?.isExplicit() {
 			type = null
@@ -645,7 +646,7 @@ class Parameter extends AbstractNode {
 			}
 
 			if !(@explicitlyRequired && type.isNullable()) {
-				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @name.isBinding())
+				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @internal.isBinding())
 
 				@defaultValue = $compile.expression(@data.defaultValue, @parent)
 				@defaultValue.analyse()
@@ -658,7 +659,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		var name: String? = @name.name()
+		var name: String? = @internal.name()
 
 		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
 
@@ -685,17 +686,17 @@ class Parameter extends AbstractNode {
 
 		type = @type.getVariableType()
 
-		@name.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
+		@internal.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
 	} # }}}
 	translate() { # {{{
-		@name.translate()
+		@internal.translate()
 
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 			@defaultValue.translate()
 
-			if !@defaultValue.type().isAssignableToVariable(@name.getDeclaredType(), true, true, false) {
-				TypeException.throwInvalidAssignement(@name, @name.getDeclaredType(), @defaultValue.type(), this)
+			if !@defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, true, false) {
+				TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
 			}
 		}
 	} # }}}
@@ -726,19 +727,19 @@ class Parameter extends AbstractNode {
 		@type.setDefaultValue(data)
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@name)
+		fragments.compile(@internal)
 	} # }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer) { # {{{
-		@name.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+		@internal.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { # {{{
-		@name.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+		@internal.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toErrorFragments(fragments, async) { # {{{
-		@name.toErrorFragments(fragments, async)
+		@internal.toErrorFragments(fragments, async)
 	} # }}}
 	toParameterFragments(fragments) { # {{{
-		@name.toParameterFragments(fragments)
+		@internal.toParameterFragments(fragments)
 
 		if @maybeHeadedDefaultValue {
 			fragments.code($equals).compile(@defaultValue)
@@ -768,7 +769,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 		else {
-			@name.toValidationFragments(fragments, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+			@internal.toValidationFragments(fragments, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 		}
 	} # }}}
 	type(): ParameterType => @type
@@ -791,7 +792,7 @@ class Parameter extends AbstractNode {
 
 		var t = @type.getVariableType()
 
-		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
+		@internal.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
 	} # }}}
 }
 

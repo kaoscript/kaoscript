@@ -8,4 +8,4 @@ impl Dictionary {
 	}
 }
 
-func foobar(value!?) => Dictionary.clone(value)
+func foobar(value?) => Dictionary.clone(value)

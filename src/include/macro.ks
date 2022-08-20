@@ -237,13 +237,13 @@ class MacroDeclaration extends AbstractNode {
 				}
 			}
 
-			@parameters[data.name.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
+			@parameters[data.internal.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
 
 			if auto {
-				line.code(', mut ', data.name.name)
+				line.code(', mut ', data.internal.name)
 			}
 			else {
-				line.code(', ', data.name.name)
+				line.code(', ', data.internal.name)
 			}
 
 			if data.defaultValue? {

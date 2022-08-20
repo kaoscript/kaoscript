@@ -283,20 +283,20 @@ class TupleFieldParameter extends Parameter {
 	} # }}}
 	analyse() { # {{{
 		if @field.hasName() {
-			@name = new IdentifierParameter({name: @field.name()}, this, @scope)
+			@internal = new IdentifierParameter({name: @field.name()}, this, @scope)
 		}
 		else {
-			@name = new IdentifierParameter({name: `__ks_\(@field.index())`}, this, @scope)
+			@internal = new IdentifierParameter({name: `__ks_\(@field.index())`}, this, @scope)
 		}
 
-		@name.setAssignment(AssignmentType::Parameter)
-		@name.analyse()
+		@internal.setAssignment(AssignmentType::Parameter)
+		@internal.analyse()
 
-		for var name in @name.listAssignments([]) {
+		for var name in @internal.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
 	} # }}}
-	name() => @name
+	name() => @internal
 	toValidationFragments(fragments) { # {{{
 		if @validation {
 			super(fragments)

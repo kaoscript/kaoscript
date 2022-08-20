@@ -1,14 +1,14 @@
 class ParameterType extends Type {
 	private {
-		_comprehensive: Boolean				= true
-		_default: Boolean
-		_defaultValue: Any?
-		_min: Number
-		_max: Number
-		_name: String?						= null
-		_nullableByDefault: Boolean
-		_type: Type
-		_variableType: Type
+		@comprehensive: Boolean				= true
+		@default: Boolean
+		@defaultValue: Any?
+		@min: Number
+		@max: Number
+		@name: String?						= null
+		@nullableByDefault: Boolean
+		@type: Type
+		@variableType: Type
 	}
 	static {
 		fromAST(data, node: AbstractNode): ParameterType => ParameterType.fromAST(data, false, node.scope(), true, node)
@@ -41,16 +41,17 @@ class ParameterType extends Type {
 				}
 			}
 
+			// if min == 0 && !type.isNullable() {
+			// 	type = type.setNullable(true)
+			// }
+
 			var mut name = null
-			if data.name? {
-				if data.name.kind == NodeKind::Identifier {
-					name = data.name.name
-				}
+			if data.external? {
+				name = data.external.name
 			}
-			else {
+			else if min == 0 {
 				type = type.setNullable(true)
 			}
-
 
 			var parameter = new ParameterType(scope, name, type, min, max, default)
 

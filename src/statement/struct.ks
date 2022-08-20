@@ -275,18 +275,18 @@ class StructFieldParameter extends Parameter {
 		@data.modifiers = []
 	} # }}}
 	analyse() { # {{{
-		@name = new IdentifierParameter({
+		@internal = new IdentifierParameter({
 			name: @field.name()
 		}, this, @scope)
 
-		@name.setAssignment(AssignmentType::Parameter)
-		@name.analyse()
+		@internal.setAssignment(AssignmentType::Parameter)
+		@internal.analyse()
 
-		for var name in @name.listAssignments([]) {
+		for var name in @internal.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
 	} # }}}
-	name() => @name
+	name() => @internal
 	toValidationFragments(fragments) { # {{{
 		if @validation {
 			super(fragments)

@@ -40,7 +40,7 @@ class ClassDestructorDeclaration extends Statement {
 		var parameter = new Parameter({
 			kind: NodeKind::Parameter
 			modifiers: []
-			name: $ast.identifier('that')
+			internal: $ast.identifier('that')
 		}, this)
 
 		parameter.analyse()

@@ -40,7 +40,7 @@ class Attribute {
 
 			return true
 		} # }}}
-		configure(data, mut options!?, mode, fileName, force = false) { # {{{
+		configure(data, mut options?, mode, fileName, force = false) { # {{{
 			var clone = !force && options != null && AttributeTarget::Global !~ mode
 
 			if options == null {
