@@ -122,50 +122,6 @@ class ReturnStatement extends Statement {
 			@value.acquireReusable(acquire)
 		}
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	if ?@value {
-	// 		if @value.isAdaptable() {
-	// 			@type = @value.adaptTo(type)
-	// 		}
-
-	// 		if @type == type {
-	// 			// do nothing
-	// 		}
-	// 		else if !@type.isExplicit() && @type.isAny() {
-	// 			// do nothing
-	// 		}
-	// 		else if @type.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
-	// 			// do nothing
-	// 		}
-	// 		else if @type.isEnum() && @type.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast) {
-	// 			@type = type
-	// 			@enumCasting = true
-	// 		}
-	// 		else if @type.isUnion() {
-	// 			var mut cast = false
-
-	// 			for var tt in @type.types() {
-	// 				if tt.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
-	// 					// do nothing
-	// 				}
-	// 				else if tt.isEnum() && tt.discard().type().isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
-	// 					cast = true
-	// 				}
-	// 				else {
-	// 					TypeException.throwUnexpectedReturnType(type, @type, this)
-	// 				}
-	// 			}
-
-	// 			if cast {
-	// 				@type = type
-	// 				@enumCasting = true
-	// 			}
-	// 		}
-	// 		else {
-	// 			TypeException.throwUnexpectedReturnType(type, @type, this)
-	// 		}
-	// 	}
-	// } # }}}
 	hasExceptions() => @exceptions
 	getUnpreparedType() => @value.getUnpreparedType()
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
@@ -204,24 +160,6 @@ class ReturnStatement extends Statement {
 			@value.releaseReusable()
 		}
 	} # }}}
-	// override setExpectedType(type) { # {{{
-	// 	if type.isNever() {
-	// 		TypeException.throwUnexpectedReturnedValue(this)
-	// 	}
-	// 	else if type.isVoid() {
-	// 		if @value != null {
-	// 			TypeException.throwUnexpectedReturnedValue(this)
-	// 		}
-	// 	}
-	// 	else {
-	// 		if @value == null {
-	// 			TypeException.throwExpectedReturnedValue(type, this)
-	// 		}
-	// 		else {
-	// 			@value.setExpectedType(type)
-	// 		}
-	// 	}
-	// } # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 

@@ -114,16 +114,6 @@ class TryStatement extends Statement {
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@block.checkReturnType(type)
-
-	// 	for var clause in @catchClauses {
-	// 		clause.body.translate()
-	// 	}
-
-	// 	@catchClause?.checkReturnType(type)
-	// 	@finalizer?.checkReturnType(type)
-	// } # }}}
 	getErrorVarname() { # {{{
 		if @catchClauses.length == 0 && @data.catchClause?.binding? {
 			return @data.catchClause.binding.name

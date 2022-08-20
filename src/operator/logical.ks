@@ -113,27 +113,6 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			}
 		}
 	} # }}}
-	// adaptTo(type: Type): Type { # {{{
-	// 	if @type.isUnion() {
-	// 		if type.isBoolean() {
-	// 			@type = @scope.reference('Boolean')
-	// 			@operand = OperandType::Boolean
-	// 			@native = true
-	// 		}
-	// 		else if type.isNumber() {
-	// 			var nullable = @type.isNullable()
-
-	// 			@type = @scope.reference('Number')
-	// 			@operand = OperandType::Number
-
-	// 			if nullable {
-	// 				@type = @type.setNullable(true)
-	// 			}
-	// 		}
-	// 	}
-
-	// 	return @type
-	// } # }}}
 	inferTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
@@ -192,7 +171,6 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
-	// isAdaptable() => true
 	isBooleanComputed(junction: Junction) => junction != Junction::AND
 	operator() => Operator::And
 	symbol() => '&&'
@@ -396,29 +374,6 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 		}
 	} # }}}
-	// adaptTo(type: Type): Type { # {{{
-	// 	if @type.isUnion() {
-	// 		if type.isBoolean() {
-	// 			@type = @scope.reference('Boolean')
-	// 			@operand = OperandType::Boolean
-	// 			@native = true
-	// 		}
-	// 		else if type.isNumber() {
-	// 			var nullable = @type.isNullable()
-
-	// 			@type = @scope.reference('Number')
-	// 			@operand = OperandType::Number
-
-	// 			if nullable {
-	// 				TypeException.throwInvalidOperation(Operator::And, this) unless type.isNullable()
-
-	// 				@type = @type.setNullable(true)
-	// 			}
-	// 		}
-	// 	}
-
-	// 	return @type
-	// } # }}}
 	inferTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
@@ -577,7 +532,6 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
-	// isAdaptable() => true
 	isBooleanComputed(junction: Junction) => junction != Junction::OR
 	operator() => Operator::Or
 	symbol() => '||'

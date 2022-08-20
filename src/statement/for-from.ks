@@ -218,9 +218,6 @@ class ForFromStatement extends Statement {
 
 		@body.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => # {{{

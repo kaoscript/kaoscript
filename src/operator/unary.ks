@@ -193,42 +193,6 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			number = target.canBeNumber()
 		}
 
-		// if @argument.type().isBoolean() {
-		// 	@operand = OperandType::Boolean
-		// 	@type = @scope.reference('Boolean')
-		// }
-		// else if @argument.type().isNumber() {
-		// 	if @argument.type().isNullable() {
-		// 		@type = @scope.reference('Number').setNullable(true)
-		// 	}
-		// 	else {
-		// 		@operand = OperandType::Number
-		// 		@type = @scope.reference('Number')
-		// 	}
-		// }
-		// else if @argument.type().canBeBoolean() {
-		// 	if @argument.type().canBeNumber() {
-		// 		@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
-
-		// 		if @argument.type().isNullable() {
-		// 			@type = @type.setNullable(true)
-		// 		}
-		// 	}
-		// 	else {
-		// 		@operand = OperandType::Boolean
-		// 		@type = @scope.reference('Boolean')
-		// 	}
-		// }
-		// else if @argument.type().canBeNumber() {
-		// 	@type = @scope.reference('Number')
-
-		// 	if @argument.type().isNullable() {
-		// 		@type = @type.setNullable(true)
-		// 	}
-		// }
-		// else {
-		// 	TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
-		// }
 		var type = @argument.type()
 
 		if type.isBoolean() {

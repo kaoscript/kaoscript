@@ -79,7 +79,6 @@ abstract class Expression extends AbstractNode {
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
-	// setExpectedType(type: Type): Void
 	statement() { # {{{
 		if !?@statement {
 			@leftMost = this

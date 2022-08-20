@@ -4,7 +4,6 @@ class Block extends AbstractNode {
 		_empty: Boolean		= false
 		_exit: Boolean		= false
 		_statements: Array	= []
-		// _type: Type?		= null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -40,11 +39,7 @@ class Block extends AbstractNode {
 					SyntaxException.throwDeadCode(statement)
 				}
 
-				// statement.setExpectedType(@type)
-
 				statement.prepare(target)
-
-				// statement.checkReturnType(@type)
 
 				@exit = statement.isExit()
 			}
@@ -105,24 +100,7 @@ class Block extends AbstractNode {
 			}
 		}
 	} # }}}
-	checkExit(target?) { # {{{
-		// if !@exit && target? && !target.isVoid() {
-		// 	if target.isNever() {
-		// 		TypeException.throwExpectedThrownError(this)
-		// 	}
-		// 	else if target.isAny() && !target.isExplicit() {
-		// 		// do nothing
-		// 	}
-		// 	else if @statements.length == 0 || !@statements.last().isExit() {
-		// 		TypeException.throwExpectedReturnedValue(target, this)
-		// 	}
-		// }
-	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	for var statement in @statements {
-	// 		statement.checkReturnType(type)
-	// 	}
-	// } # }}}
+	checkExit(target?)
 	getUnpreparedType() { # {{{
 		var types = []
 
@@ -244,7 +222,6 @@ class Block extends AbstractNode {
 			return Type.Never
 		}
 	} # }}}
-	// type(@type) => this
 }
 
 class FunctionBlock extends Block {

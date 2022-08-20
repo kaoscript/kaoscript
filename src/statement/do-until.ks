@@ -34,9 +34,6 @@ class DoUntilStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true

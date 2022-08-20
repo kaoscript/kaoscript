@@ -161,30 +161,6 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 			}
 		}
 	} # }}}
-	// translate() { # {{{
-	// 	super()
-
-	// 	if @enum {
-	// 		var type = @parent.type()
-
-	// 		if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
-	// 			if type.isEnum() {
-	// 				if @type.name() != type.name() {
-	// 					@enum = false
-	// 					@native = true
-	// 				}
-	// 			}
-	// 			else if type.isNumber() {
-	// 				@enum = false
-	// 				@native = true
-	// 			}
-	// 		}
-	// 		else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
-	// 			@enum = false
-	// 			@native = true
-	// 		}
-	// 	}
-	// } # }}}
 	isAcceptingEnum() => false
 	isComputed() => @native || (@enum && !@expectingEnum)
 	setOperands(@left, @right, @enum = false, @expectingEnum = false): this
@@ -304,11 +280,6 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	isComputed() => @native || (@enum && !@expectingEnum)
-	// override setExpectedType(type) { # {{{
-	// 	if !type.isEnum() && (type.isNumber() || type.isString()) {
-	// 		@expectingEnum = false
-	// 	}
-	// } # }}}
 	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): this
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator::Addition {

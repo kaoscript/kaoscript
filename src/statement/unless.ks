@@ -59,9 +59,6 @@ class UnlessStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isJumpable() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
 	toStatementFragments(fragments, mode) { # {{{

@@ -34,9 +34,6 @@ class DoWhileStatement extends Statement {
 		@body.translate()
 		@condition.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true

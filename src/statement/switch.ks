@@ -348,11 +348,6 @@ class SwitchStatement extends Statement {
 			}
 		}
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	for var clause in @clauses {
-	// 		clause.body.checkReturnType(type)
-	// 	}
-	// } # }}}
 	flagUsingFallthrough() { # {{{
 		@usingFallthrough = true
 

@@ -373,10 +373,6 @@ class IfStatement extends Statement {
 			return @assignments
 		}
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@whenTrueExpression.checkReturnType(type)
-	// 	@whenFalseExpression?.checkReturnType(type)
-	// } # }}}
 	getWhenFalseScope(): @whenFalseScope
 	getWhenTrueScope(): @whenTrueScope
 	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{

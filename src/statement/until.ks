@@ -39,9 +39,6 @@ class UntilStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()

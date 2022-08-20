@@ -593,19 +593,13 @@ class ClassMethodDeclaration extends Statement {
 			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if @override {
-				// mode -= MatchingMode::NonNullToNullParameter
 				mode += MatchingMode::NullToNonNullParameter
 			}
 			else {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
-				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter
-				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter + MatchingMode::NullToNonNullParameter
-				// mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity - MatchingMode::NonNullToNullParameter
-				// mode += MatchingMode::NullToNonNullParameter
 			}
 
 			var methods = @instance ? superclass.listInstantiableMethods(@name, @type, mode) : superclass.listClassMethods(@name, @type, mode)
-			// console.log(methods)
 
 			var mut method = null
 			var mut exact = false
@@ -626,7 +620,6 @@ class ClassMethodDeclaration extends Statement {
 					return null
 				}
 			}
-			// console.log(method)
 
 			if method? {
 				var type = @override ? method.clone() : @type

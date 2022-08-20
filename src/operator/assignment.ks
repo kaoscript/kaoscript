@@ -36,17 +36,6 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@left.prepare(target)
 
-		// if var variable = @left.variable() {
-		// 	if variable.isInitialized() {
-		// 		@right.setExpectedType(variable.getRealType())
-		// 	}
-		// 	else {
-		// 		@right.setExpectedType(variable.getDeclaredType())
-		// 	}
-		// }
-		// else {
-		// 	@right.setExpectedType(@left.type())
-		// }
 		if var variable = @left.variable() {
 			if variable.isInitialized() {
 				@type = variable.getRealType()
@@ -220,37 +209,6 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		@operand: OperandType	= OperandType::Any
 	}
 	override prepare(target) { # {{{
-		// if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-		// 	@enum = true
-
-		// 	@type = @left.type()
-		// }
-		// else {
-		// 	if @left.type().isNumber() && @right.type().isNumber() {
-		// 		@native = true
-		// 	}
-		// 	else if @left.type().canBeNumber() {
-		// 		unless @right.type().canBeNumber() {
-		// 			TypeException.throwInvalidOperand(@right, this.operator(), this)
-		// 		}
-		// 	}
-		// 	else {
-		// 		TypeException.throwInvalidOperand(@left, this.operator(), this)
-		// 	}
-
-		// 	if @left.type().isNullable() || @right.type().isNullable() {
-		// 		@type = @scope.reference('Number').setNullable(true)
-
-		// 		@native = false
-		// 	}
-		// 	else {
-		// 		@type = @scope.reference('Number')
-		// 	}
-
-		// 	if @left is IdentifierLiteral {
-		// 		@left.type(@type, @scope, this)
-		// 	}
-		// }
 		super(target)
 
 		var mut nullable = false
@@ -533,9 +491,6 @@ class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 	operator() => Operator::And
 	runtime() => 'and'
 	symbol() => '&&='
-	toEnumFragments(fragments) { # {{{
-		// fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ').compile(@right).code(')')
-	} # }}}
 }
 
 class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
@@ -1019,9 +974,6 @@ class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
 	operator() => Operator::Or
 	runtime() => 'or'
 	symbol() => '||='
-	toEnumFragments(fragments) { # {{{
-		// fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ').compile(@right).code(')')
-	} # }}}
 }
 
 class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {

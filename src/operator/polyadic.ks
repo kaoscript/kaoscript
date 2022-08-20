@@ -162,7 +162,6 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 				}
 			}
 		}
-		// console.log(@enum, @expectingEnum)
 
 		if !@enum {
 			var mut nullable = false
@@ -187,30 +186,6 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 
 			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 		}
-	} # }}}
-	translate() { # {{{
-		super()
-
-		// if @enum {
-		// 	var type = @parent.type()
-
-		// 	if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
-		// 		if type.isEnum() {
-		// 			if @type.name() != type.name() {
-		// 				@enum = false
-		// 				@native = true
-		// 			}
-		// 		}
-		// 		else if type.isNumber() {
-		// 			@enum = false
-		// 			@native = true
-		// 		}
-		// 	}
-		// 	else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
-		// 		@enum = false
-		// 		@native = true
-		// 	}
-		// }
 	} # }}}
 	isAcceptingEnum() => false
 	isComputed() => @native
@@ -378,11 +353,6 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	isComputed() => @native
-	// override setExpectedType(type) { # {{{
-	// 	if !type.isEnum() && (type.isNumber() || type.isString()) {
-	// 		@expectingEnum = false
-	// 	}
-	// } # }}}
 	operator() => Operator::Addition
 	symbol() => '+'
 	toOperandFragments(fragments, operator, type) { # {{{

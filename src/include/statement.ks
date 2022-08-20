@@ -28,7 +28,6 @@ abstract class Statement extends AbstractNode {
 		scope.commitTempVariables(@assignments)
 	} # }}}
 	assignments() => @assignments
-	// checkReturnType(type: Type)
 	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
 		for var name in names {
 			if var variable = scope.getVariable(name) {
@@ -77,7 +76,6 @@ abstract class Statement extends AbstractNode {
 	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
 	} # }}}
-	// setExpectedType(type: Type): Void
 	statement() => this
 	target() => @options.target
 	toDeclarationFragments(variables, fragments) { # {{{

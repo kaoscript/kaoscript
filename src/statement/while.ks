@@ -92,9 +92,6 @@ class WhileStatement extends Statement {
 
 		@body.translate()
 	} # }}}
-	// checkReturnType(type: Type) { # {{{
-	// 	@body.checkReturnType(type)
-	// } # }}}
 	isCascade() => @declared
 	isJumpable() => true
 	isLoop() => true
