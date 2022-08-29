@@ -1,6 +1,6 @@
 class FunctionScope extends BlockScope {
 	private {
-		_extending: Boolean		= false
+		@extending: Boolean		= false
 	}
 	constructor(@parent) { # {{{
 		super(parent)

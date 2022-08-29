@@ -5,7 +5,7 @@ abstract class Expression extends AbstractNode {
 	}
 	acquireReusable(acquire)
 	flagAssignable() { # {{{
-		if !this.isAssignable() {
+		if !@isAssignable() {
 			ReferenceException.throwInvalidAssignment(this)
 		}
 	} # }}}
@@ -20,8 +20,6 @@ abstract class Expression extends AbstractNode {
 	// types if the condition is false
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
-	// if the expression's type can be adapted to an expected type
-	isAdaptable() => false
 	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression
@@ -57,6 +55,8 @@ abstract class Expression extends AbstractNode {
 	isLooseComposite() => this.isComposite()
 	// if the type is matching the given type
 	isMatchingType(type: Type) => this.type().matchContentOf(type)
+	// if the expression isn't empty
+	isNotEmpty() => false
 	// if the expression is nullable
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
@@ -118,12 +118,7 @@ abstract class Expression extends AbstractNode {
 		throw new NotSupportedException()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
-		if double {
-			return `"\(this.toQuote())"`
-		}
-		else {
-			return `'\(this.toQuote())'`
-		}
+		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
 	} # }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toStringFragments(fragments) { # {{{

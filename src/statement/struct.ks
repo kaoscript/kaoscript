@@ -16,7 +16,7 @@ class StructDeclaration extends Statement {
 
 		@struct = new StructType(@scope)
 
-		if @data.extends? {
+		if ?@data.extends {
 			@extending = true
 
 			var mut name = ''
@@ -183,7 +183,9 @@ class StructFunction extends AbstractNode {
 		}
 
 		for var field in @parent.fields() {
-			field.index(++index)
+			index += 1
+
+			field.index(index)
 
 			field.prepare()
 
@@ -220,7 +222,7 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter = new StructFieldParameter(this, parent._function)
 	} # }}}
 	constructor(@type, parent) { # {{{
-		super({}, parent)
+		super($ast.parameter(), parent)
 
 		@name = @type.name()
 		@index = @type.index()
@@ -236,12 +238,18 @@ class StructFieldDeclaration extends AbstractNode {
 		if !?@type {
 			var mut type: Type? = null
 
-			if @data.type? {
+			if ?@data.type {
 				type = Type.fromAST(@data.type, this)
 			}
 
 			if type == null {
-				type = AnyType.Unexplicit
+				for var modifier in @data.modifiers {
+					if modifier.kind == ModifierKind::Nullable {
+						type = AnyType.NullableUnexplicit
+					}
+				}
+
+				type ??= AnyType.Unexplicit
 			}
 			else if type.isNull() {
 				type = NullType.Explicit
@@ -249,7 +257,7 @@ class StructFieldDeclaration extends AbstractNode {
 
 			@type = new StructFieldType(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
-			if @data.defaultValue? && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
 			}
 		}
@@ -271,8 +279,6 @@ class StructFieldParameter extends Parameter {
 	}
 	constructor(@field, parent) { # {{{
 		super(field._data, parent)
-
-		@data.modifiers = []
 	} # }}}
 	analyse() { # {{{
 		@internal = new IdentifierParameter({

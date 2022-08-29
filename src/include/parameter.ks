@@ -18,213 +18,247 @@ class Parameter extends AbstractNode {
 		@arity								= null
 		@comprehensive: Boolean				= true
 		@defaultValue						= null
+		@existential: Boolean				= false
 		@explicitlyRequired: Boolean		= false
 		@external: String?					= null
 		@hasDefaultValue: Boolean			= false
+		@headedDefaultValue: Boolean		= false
 		@header: Boolean					= false
 		@internal
-		@maybeHeadedDefaultValue: Boolean	= false
+		@nullable: Boolean					= false
 		@preserved: Boolean
 		@rest: Boolean						= false
+		@tempVariables: Array				= []
 		@type: ParameterType
 	}
-	static compileExpression(data, node) {
-		switch data.kind {
-			NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
-			NodeKind::Identifier => return new IdentifierParameter(data, node)
-			NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
-			NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
+	static {
+		compileExpression(data, node) {
+			switch data.kind {
+				NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
+				NodeKind::Identifier => return new IdentifierParameter(data, node)
+				NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
+				NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
+			}
 		}
-	}
-	static getUntilDifferentTypeIndex(parameters, index) { # {{{
-		var activeType = parameters[index].type().type().setNullable(false)
+		getUntilDifferentTypeIndex(parameters, index) { # {{{
+			var activeType = parameters[index].type().type().setNullable(false)
 
-		for var parameter, i in parameters from index + 1 {
-			var type = parameter.type()
+			for var parameter, i in parameters from index + 1 {
+				var type = parameter.type()
 
-			if type.min() == 0 {
-				if !activeType.equals(type.type().setNullable(false)) {
+				if type.min() == 0 {
+					if !activeType.equals(type.type().setNullable(false)) {
+						return 0
+					}
+
+					if type.max() > 1 {
+						return i + 1
+					}
+				}
+				else {
 					return 0
 				}
-
-				if type.max() > 1 {
-					return i + 1
-				}
 			}
-			else {
-				return 0
-			}
-		}
 
-		return parameters.length
-	} # }}}
-	static toFragments(node, fragments, mode, fn) { # {{{
-		return Parameter.toKSFragments(node, fragments, mode, fn)
-	} # }}}
-	static toKSFragments(node, mut fragments, mode: ParameterMode, fn) { # {{{
-		var parameters = node.parameters()
-		var signature = node.type()
+			return parameters.length
+		} # }}}
+		toFragments(node, fragments, mode, fn) { # {{{
+			return Parameter.toKSFragments(node, fragments, mode, fn)
+		} # }}}
+		toKSFragments(node, mut fragments, mode: ParameterMode, fn) { # {{{
+			var parameters = node.parameters()
+			var signature = node.type()
 
-		var name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
+			var name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
 
-		// TODO move to `var mut`
-		var dyn restIndex = -1
-		var dyn minBefore = 0
-		var dyn maxBefore = 0
-		var dyn minRest = 0
-		var dyn minAfter = 0
-		var dyn maxAfter = 0
-
-		for var parameter, i in parameters {
-			var type = parameter.type()
-
-			if restIndex != -1 {
-				minAfter += type.min()
-				maxAfter += type.max()
-			}
-			else if type.max() == Infinity {
-				restIndex = i
-				minRest = type.min()
-			}
-			else {
-				minBefore += type.min()
-				maxBefore += type.max()
-			}
-		}
-
-		if signature.isAsync() {
-			if restIndex != -1 {
-				++minAfter
-				++maxAfter
-			}
-			else {
-				++minBefore
-				++maxBefore
-			}
-		}
-
-		var context = {
-			name
-			async: signature.isAsync()
-			required: minBefore
-			optional: signature.min()
-			temp: false
-			tempL: false
-			length: parameters.length
-			min: minBefore
-			max: maxBefore + minRest + minAfter
-			increment: true
-		}
-
-		var mut lastHeaderParameterIndex = 0
-		var mut asyncHeaderParameter = false
-
-		if signature.max() > 0 {
-			if mode == ParameterMode::ArrowFunction {
-				fragments.code(`...\(name)`)
-			}
-			else if mode == ParameterMode::HybridConstructor {
-				fragments.code(name)
-			}
-		}
-
-		if mode == ParameterMode::Default | ParameterMode::HelperConstructor {
-			var offset = node.getParameterOffset()
+			// TODO move to `var mut`
+			var dyn restIndex = -1
+			var dyn minBefore = 0
+			var dyn maxBefore = 0
+			var dyn minRest = 0
+			var dyn minAfter = 0
+			var dyn maxAfter = 0
 
 			for var parameter, i in parameters {
-				fragments.code($comma) if i + offset > 0
+				var type = parameter.type()
 
-				parameter.toParameterFragments(fragments)
+				if restIndex != -1 {
+					minAfter += type.min()
+					maxAfter += type.max()
+				}
+				else if type.max() == Infinity {
+					restIndex = i
+					minRest = type.min()
+				}
+				else {
+					minBefore += type.min()
+					maxBefore += type.max()
+				}
 			}
 
-			lastHeaderParameterIndex = parameters.length
+			if signature.isAsync() {
+				if restIndex != -1 {
+					minAfter += 1
+					maxAfter += 1
+				}
+				else {
+					minBefore += 1
+					maxBefore += 1
+				}
+			}
 
-			if context.async {
-				fragments.code($comma) if offset + lastHeaderParameterIndex > 0
+			var context = {
+				name
+				async: signature.isAsync()
+				required: minBefore
+				optional: signature.min()
+				temp: false
+				tempL: false
+				length: parameters.length
+				min: minBefore
+				max: maxBefore + minRest + minAfter
+				increment: true
+			}
+
+			var mut lastHeaderParameterIndex = 0
+			var mut asyncHeaderParameter = false
+
+			if signature.max() > 0 {
+				if mode == ParameterMode::ArrowFunction {
+					fragments.code(`...\(name)`)
+				}
+				else if mode == ParameterMode::HybridConstructor {
+					fragments.code(name)
+				}
+			}
+
+			if mode == ParameterMode::Default | ParameterMode::HelperConstructor {
+				var offset = node.getParameterOffset()
+
+				for var parameter, i in parameters {
+					fragments.code($comma) if i + offset > 0
+
+					parameter.toParameterFragments(fragments)
+				}
+
+				lastHeaderParameterIndex = parameters.length
+
+				if context.async {
+					fragments.code($comma) if offset + lastHeaderParameterIndex > 0
+
+					fragments.code('__ks_cb')
+				}
+			}
+
+			fragments = fn(fragments)
+
+			if mode != ParameterMode::HelperConstructor {
+				for var parameter in parameters til lastHeaderParameterIndex {
+					parameter.toValidationFragments(fragments)
+				}
+			}
+
+			if lastHeaderParameterIndex == parameters.length {
+				return fragments
+			}
+
+			return fragments
+		} # }}}
+		toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { # {{{
+			var offset = node.getParameterOffset()
+
+			var mut til = -1
+
+			for var parameter, i in parameters {
+				var type = parameter.type()
+
+				if type.max() == Infinity {
+					fragments.code($comma) if i + offset > 0
+
+					parameter.toParameterFragments(fragments)
+				}
+				else if type.max() > 1 {
+					fragments.code($comma) if i + offset > 0
+
+					parameter.toParameterFragments(fragments)
+				}
+				else if parameter.isRequired() || i + 1 == parameters.length || i < (til == -1 ? (til <- Parameter.getUntilDifferentTypeIndex(parameters, i)) : til) {
+					fragments.code($comma) if i + offset > 0
+
+					parameter.toParameterFragments(fragments)
+
+					context.optional += type.max() - type.min()
+					context.required -= type.min()
+				}
+				else {
+					return i
+				}
+			}
+
+			return parameters.length
+		} # }}}
+		toAsyncHeaderParameterFragments(fragments, parameters, lastHeader) { # {{{
+			if lastHeader == parameters.length {
+				fragments.code($comma) if lastHeader > 0
 
 				fragments.code('__ks_cb')
-			}
-		}
 
-		fragments = fn(fragments)
-
-		if mode != ParameterMode::HelperConstructor {
-			for var parameter in parameters til lastHeaderParameterIndex {
-				parameter.toValidationFragments(fragments)
-			}
-		}
-
-		if lastHeaderParameterIndex == parameters.length {
-			return fragments
-		}
-
-		return fragments
-	} # }}}
-	static toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { # {{{
-		var offset = node.getParameterOffset()
-
-		var mut til = -1
-
-		for var parameter, i in parameters {
-			var type = parameter.type()
-
-			if type.max() == Infinity {
-				fragments.code($comma) if i + offset > 0
-
-				parameter.toParameterFragments(fragments)
-			}
-			else if type.max() > 1 {
-				fragments.code($comma) if i + offset > 0
-
-				parameter.toParameterFragments(fragments)
-			}
-			else if parameter.isRequired() || i + 1 == parameters.length || i < (til == -1 ? (til = Parameter.getUntilDifferentTypeIndex(parameters, i)) : til) {
-				fragments.code($comma) if i + offset > 0
-
-				parameter.toParameterFragments(fragments)
-
-				context.optional += type.max() - type.min()
-				context.required -= type.min()
+				return true
 			}
 			else {
-				return i
+				return false
 			}
-		}
+		} # }}}
+		toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minRest, minAfter) { # {{{
+			if minBefore + minRest + minAfter != 0 {
+				if signature.isAsync() {
+					node.module().flag('Type')
 
-		return parameters.length
-	} # }}}
-	static toAsyncHeaderParameterFragments(fragments, parameters, lastHeader) { # {{{
-		if lastHeader == parameters.length {
-			fragments.code($comma) if lastHeader > 0
+					if asyncHeader {
+						if node.isAssertingParameter() {
+							if signature.min() == 0 {
+								fragments
+									.newControl()
+									.code(`if(arguments.length < 1)`)
+									.step()
+									.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
+									.step()
+									.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
+									.step()
+									.line(`throw new TypeError("'callback' must be a function")`)
+									.done()
+							}
+							else {
+								var mut ctrl = fragments
+									.newControl()
+									.code(`if(arguments.length < \(signature.min() + 1))`)
+									.step()
+									.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
 
-			fragments.code('__ks_cb')
+								ctrl
+									.newControl()
+									.code(`if(arguments.length > 0 && \($runtime.type(node)).isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+									.step()
+									.line(`return __ks_cb(__ks_error)`)
+									.step()
+									.code(`else`)
+									.step()
+									.line(`throw __ks_error`)
+									.done()
 
-			return true
-		}
-		else {
-			return false
-		}
-	} # }}}
-	static toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minRest, minAfter) { # {{{
-		if minBefore + minRest + minAfter != 0 {
-			if signature.isAsync() {
-				node.module().flag('Type')
-
-				if asyncHeader {
-					if node.isAssertingParameter() {
-						if signature.min() == 0 {
-							fragments
-								.newControl()
-								.code(`if(arguments.length < 1)`)
-								.step()
-								.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
-								.step()
-								.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
-								.step()
-								.line(`throw new TypeError("'callback' must be a function")`)
-								.done()
+								ctrl
+									.step()
+									.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
+									.step()
+									.line(`throw new TypeError("'callback' must be a function")`)
+									.done()
+							}
 						}
-						else {
+					}
+					else {
+						fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
+
+						if node.isAssertingParameter() {
 							var mut ctrl = fragments
 								.newControl()
 								.code(`if(arguments.length < \(signature.min() + 1))`)
@@ -233,7 +267,7 @@ class Parameter extends AbstractNode {
 
 							ctrl
 								.newControl()
-								.code(`if(arguments.length > 0 && \($runtime.type(node)).isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+								.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
 								.step()
 								.line(`return __ks_cb(__ks_error)`)
 								.step()
@@ -247,313 +281,284 @@ class Parameter extends AbstractNode {
 								.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 								.step()
 								.line(`throw new TypeError("'callback' must be a function")`)
+
+							ctrl.done()
+						}
+					}
+				}
+				else if node.isAssertingParameter() {
+					fragments
+						.newControl()
+						.code(`if(\(name).length < \(signature.min() + node.getParameterOffset()))`)
+						.step()
+						.line(`throw new SyntaxError("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
+						.done()
+				}
+			}
+		} # }}}
+		toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
+			parameter = parameters[restIndex]
+
+			var context = {
+				name
+				any: parameter.type().isAny()
+				increment: false
+				temp: beforeContext.temp
+				tempL: beforeContext.tempL
+				length: parameters.length
+			}
+
+			for var parameter, i in parameters from restIndex + 1 {
+				parameter.toAfterRestFragments(fragments, context, i, wrongdoer)
+			}
+		} # }}}
+		toRestParameterFragments(fragments, node, name, signature, parameters, declared, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer) { # {{{
+			var parameter = parameters[restIndex]
+
+			if parameter.type().isAny() {
+				if minAfter > 0 {
+					if !declared {
+						fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1 + node.getParameterOffset())`)
+					}
+
+					if parameter.isAnonymous() {
+						fragments.line(`__ks_i = arguments.length - \(minAfter)`)
+					}
+					else {
+						if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
+								.compile(parameter._defaultValue)
+								.done()
+						}
+						else {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = Array.prototype.slice.call(arguments, \(context.increment ? '++__ks_i' : '__ks_i'), __ks_i = arguments.length - \(minAfter))`)
+								.done()
+						}
+					}
+
+					context.increment = true
+				}
+				else {
+					return if parameter.isAnonymous()
+
+					if declared {
+						if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = \(name).length > \(context.increment ? '++__ks_i' : '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, \(name).length) : `)
+								.compile(parameter._defaultValue)
+								.done()
+						}
+						else {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = Array.prototype.slice.call(\(name), \(context.increment ? '++__ks_i' : '__ks_i'), \(name).length)`)
+								.done()
+						}
+					}
+					else {
+						if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = \(name).length > 0 ? Array.prototype.slice.call(\(name), \(minBefore), \(name).length) : `)
+								.compile(parameter._defaultValue)
+								.done()
+						}
+						else {
+							fragments
+								.newLine()
+								.code($runtime.scope(node))
+								.compile(parameter)
+								.code(` = Array.prototype.slice.call(\(name), \(minBefore), \(name).length)`)
 								.done()
 						}
 					}
 				}
-				else {
-					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
-
-					if node.isAssertingParameter() {
-						var mut ctrl = fragments
-							.newControl()
-							.code(`if(arguments.length < \(signature.min() + 1))`)
-							.step()
-							.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
-
-						ctrl
-							.newControl()
-							.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
-							.step()
-							.line(`return __ks_cb(__ks_error)`)
-							.step()
-							.code(`else`)
-							.step()
-							.line(`throw __ks_error`)
-							.done()
-
-						ctrl
-							.step()
-							.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
-							.step()
-							.line(`throw new TypeError("'callback' must be a function")`)
-
-						ctrl.done()
-					}
-				}
-			}
-			else if node.isAssertingParameter() {
-				fragments
-					.newControl()
-					.code(`if(\(name).length < \(signature.min() + node.getParameterOffset()))`)
-					.step()
-					.line(`throw new SyntaxError("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
-					.done()
-			}
-		}
-	} # }}}
-	static toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
-		parameter = parameters[restIndex]
-
-		var context = {
-			name
-			any: parameter.type().isAny()
-			increment: false
-			temp: beforeContext.temp
-			tempL: beforeContext.tempL
-			length: parameters.length
-		}
-
-		for var parameter, i in parameters from restIndex + 1 {
-			parameter.toAfterRestFragments(fragments, context, i, wrongdoer)
-		}
-	} # }}}
-	static toRestParameterFragments(fragments, node, name, signature, parameters, declared, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer) { # {{{
-		var parameter = parameters[restIndex]
-
-		if parameter.type().isAny() {
-			if minAfter > 0 {
-				if !declared {
-					fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1 + node.getParameterOffset())`)
-				}
-
-				if parameter.isAnonymous() {
-					fragments.line(`__ks_i = arguments.length - \(minAfter)`)
-				}
-				else {
-					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
-							.compile(parameter._defaultValue)
-							.done()
-					}
-					else {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = Array.prototype.slice.call(arguments, \(context.increment ? '++__ks_i' : '__ks_i'), __ks_i = arguments.length - \(minAfter))`)
-							.done()
-					}
-				}
-
-				context.increment = true
 			}
 			else {
-				return if parameter.isAnonymous()
+				node.module().flag('Type')
 
-				if declared {
-					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = \(name).length > \(context.increment ? '++__ks_i' : '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, \(name).length) : `)
-							.compile(parameter._defaultValue)
-							.done()
+				if !declared {
+					fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1)`)
+				}
+
+				if !parameter.isAnonymous() {
+					fragments
+						.newLine()
+						.code($runtime.scope(node))
+						.compile(parameter)
+						.code(' = []')
+						.done()
+				}
+
+				if minAfter > 0 {
+					var line = fragments.newLine()
+
+					if !context.temp {
+						line.code($runtime.scope(node))
+
+						context.temp = true
+					}
+
+					line.code(`__ks__ = arguments.length - \(minAfter)`).done()
+				}
+
+				if !context.increment {
+					fragments.line('--__ks_i')
+
+					context.increment = true
+				}
+
+				if parameter.hasDefaultValue() && !parameter.type().isNullable() {
+					var ctrl = fragments.newControl()
+
+					if minAfter > 0 {
+						ctrl.code('if(__ks__ > ++__ks_i)').step()
 					}
 					else {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = Array.prototype.slice.call(\(name), \(context.increment ? '++__ks_i' : '__ks_i'), \(name).length)`)
-							.done()
+						ctrl.code('if(arguments.length > ++__ks_i)').step()
 					}
-				}
-				else {
-					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = \(name).length > 0 ? Array.prototype.slice.call(\(name), \(minBefore), \(name).length) : `)
-							.compile(parameter._defaultValue)
-							.done()
-					}
-					else {
-						fragments
-							.newLine()
-							.code($runtime.scope(node))
-							.compile(parameter)
-							.code(` = Array.prototype.slice.call(\(name), \(minBefore), \(name).length)`)
-							.done()
-					}
-				}
-			}
-		}
-		else {
-			node.module().flag('Type')
 
-			if !declared {
-				fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1)`)
-			}
+					var ctrl2 = ctrl.newControl()
 
-			if !parameter.isAnonymous() {
-				fragments
-					.newLine()
-					.code($runtime.scope(node))
-					.compile(parameter)
-					.code(' = []')
-					.done()
-			}
+					ctrl2.code(`if(arguments[__ks_i] === void 0 || arguments[__ks_i] === null)`).step()
 
-			if minAfter > 0 {
-				var line = fragments.newLine()
+					ctrl2.step().code('else').step().line('--__ks_i').done()
 
-				if !context.temp {
-					line.code($runtime.scope(node))
-
-					context.temp = true
+					ctrl.done()
 				}
 
-				line.code(`__ks__ = arguments.length - \(minAfter)`).done()
-			}
-
-			if !context.increment {
-				fragments.line('--__ks_i')
-
-				context.increment = true
-			}
-
-			if parameter.hasDefaultValue() && !parameter.type().isNullable() {
 				var ctrl = fragments.newControl()
 
 				if minAfter > 0 {
-					ctrl.code('if(__ks__ > ++__ks_i)').step()
+					ctrl.code('while(__ks__ > ++__ks_i)')
 				}
 				else {
-					ctrl.code('if(arguments.length > ++__ks_i)').step()
+					ctrl.code('while(arguments.length > ++__ks_i)')
 				}
+
+				ctrl.step()
 
 				var ctrl2 = ctrl.newControl()
 
-				ctrl2.code(`if(arguments[__ks_i] === void 0 || arguments[__ks_i] === null)`).step()
+				var literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
 
-				ctrl2.step().code('else').step().line('--__ks_i').done()
+				if parameter.type().isNullable() {
+					ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
 
-				ctrl.done()
-			}
+					ctrl2.newLine().compile(parameter).code('.push(null)').done()
 
-			var ctrl = fragments.newControl()
+					ctrl2.step()
 
-			if minAfter > 0 {
-				ctrl.code('while(__ks__ > ++__ks_i)')
-			}
-			else {
-				ctrl.code('while(arguments.length > ++__ks_i)')
-			}
+					ctrl2.code(`else if(arguments[__ks_i] === null || `)
 
-			ctrl.step()
+					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::OR)
 
-			var ctrl2 = ctrl.newControl()
-
-			var literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
-
-			if parameter.type().isNullable() {
-				ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
-
-				ctrl2.newLine().compile(parameter).code('.push(null)').done()
-
-				ctrl2.step()
-
-				ctrl2.code(`else if(arguments[__ks_i] === null || `)
-
-				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::OR)
-
-				ctrl2.code(')').step()
-			}
-			else {
-				ctrl2.code('if(')
-
-				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::NONE)
-
-				ctrl2.code(')').step()
-			}
-
-			if !parameter.isAnonymous() {
-				ctrl2
-					.newLine()
-					.compile(parameter)
-					.code('.push(arguments[__ks_i])')
-					.done()
-			}
-
-			ctrl2.step().code('else').step()
-
-			if minAfter != 0 || maxAfter != 0 {
-				ctrl2.line('--__ks_i').line('break')
-			}
-			else {
-				parameter.toErrorFragments(ctrl2, wrongdoer, signature.isAsync())
-			}
-
-			ctrl2.done()
-			ctrl.done()
-
-			if parameter.hasDefaultValue() {
-				var ctrl = fragments
-					.newControl()
-					.code('if(')
-					.compile(parameter)
-					.code('.length === 0)')
-					.step()
-
-				ctrl
-					.newLine()
-					.compile(parameter)
-					.code($equals)
-					.compile(parameter._defaultValue)
-					.done()
-
-				ctrl.done()
-			}
-
-			var min = parameter.type().min()
-			if min > 0 {
-				var ctrl = fragments
-					.newControl()
-					.code(`if(`)
-					.compile(parameter)
-					.code(`.length < \(min))`)
-					.step()
-
-				if context.async {
-					ctrl
-						.newLine()
-						.code(`return __ks_cb(new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
-						.compile(parameter)
-						.code(`.length + ")"))`)
-						.done()
+					ctrl2.code(')').step()
 				}
 				else {
-					ctrl
+					ctrl2.code('if(')
+
+					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::NONE)
+
+					ctrl2.code(')').step()
+				}
+
+				if !parameter.isAnonymous() {
+					ctrl2
 						.newLine()
-						.code(`throw new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
 						.compile(parameter)
-						.code(`.length + ")")`)
+						.code('.push(arguments[__ks_i])')
 						.done()
 				}
 
+				ctrl2.step().code('else').step()
+
+				if minAfter != 0 || maxAfter != 0 {
+					ctrl2.line('--__ks_i').line('break')
+				}
+				else {
+					parameter.toErrorFragments(ctrl2, wrongdoer, signature.isAsync())
+				}
+
+				ctrl2.done()
 				ctrl.done()
+
+				if parameter.hasDefaultValue() {
+					var ctrl = fragments
+						.newControl()
+						.code('if(')
+						.compile(parameter)
+						.code('.length === 0)')
+						.step()
+
+					ctrl
+						.newLine()
+						.compile(parameter)
+						.code($equals)
+						.compile(parameter._defaultValue)
+						.done()
+
+					ctrl.done()
+				}
+
+				var min = parameter.type().min()
+				if min > 0 {
+					var ctrl = fragments
+						.newControl()
+						.code(`if(`)
+						.compile(parameter)
+						.code(`.length < \(min))`)
+						.step()
+
+					if context.async {
+						ctrl
+							.newLine()
+							.code(`return __ks_cb(new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.compile(parameter)
+							.code(`.length + ")"))`)
+							.done()
+					}
+					else {
+						ctrl
+							.newLine()
+							.code(`throw new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.compile(parameter)
+							.code(`.length + ")")`)
+							.done()
+					}
+
+					ctrl.done()
+				}
 			}
-		}
-	} # }}}
-	static toBeforeRestParameterFragments(fragments, name, signature, parameters, nextIndex, restIndex, context, wrongdoer) { # {{{
-		if restIndex == -1 {
-			for var parameter, i in parameters from nextIndex {
-				parameter.toBeforeRestFragments(fragments, context, i, false, wrongdoer)
+		} # }}}
+		toBeforeRestParameterFragments(fragments, name, signature, parameters, nextIndex, restIndex, context, wrongdoer) { # {{{
+			if restIndex == -1 {
+				for var parameter, i in parameters from nextIndex {
+					parameter.toBeforeRestFragments(fragments, context, i, false, wrongdoer)
+				}
 			}
-		}
-		else {
-			for var parameter, i in parameters from nextIndex til restIndex {
-				parameter.toBeforeRestFragments(fragments, context, i, true, wrongdoer)
+			else {
+				for var parameter, i in parameters from nextIndex til restIndex {
+					parameter.toBeforeRestFragments(fragments, context, i, true, wrongdoer)
+				}
 			}
-		}
-	} # }}}
+		} # }}}
+	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
@@ -568,6 +573,8 @@ class Parameter extends AbstractNode {
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Mutable {
 				immutable = false
+
+				break
 			}
 		}
 
@@ -577,6 +584,11 @@ class Parameter extends AbstractNode {
 		else {
 			@internal = Parameter.compileExpression(@data.internal, this)
 			@internal.setAssignment(AssignmentType::Parameter)
+
+			if ?@data.operator {
+				@internal.operator(@data.operator.assignment)
+			}
+
 			@internal.analyse()
 
 			for var name in @internal.listAssignments([]) {
@@ -597,11 +609,46 @@ class Parameter extends AbstractNode {
 			type = null
 		}
 
-		if @data.type? {
+		if ?@data.type {
 			var declaredType = Type.fromAST(@data.type, this)
 
 			if !?type || (type.isObject() && declaredType.isDictionary()) || declaredType.isMorePreciseThan(type) {
 				type = declaredType
+			}
+		}
+
+		var mut min: Number = 1
+		var mut max: Number = 1
+		var mut passing = null
+
+		for var modifier in @data.modifiers {
+			switch modifier.kind {
+				ModifierKind::NameOnly => {
+					passing = PassingMode::NAMED
+				}
+				ModifierKind::Nullable => {
+					type ??= AnyType.NullableUnexplicit
+				}
+				ModifierKind::PositionOnly => {
+					passing = PassingMode::POSITIONAL
+				}
+				ModifierKind::Rest => {
+					@rest = true
+
+					if ?modifier.arity {
+						@arity = modifier.arity
+
+						min = modifier.arity.min
+						max = modifier.arity.max
+					}
+					else {
+						min = 0
+						max = Infinity
+					}
+				}
+				ModifierKind::Required => {
+					@explicitlyRequired = true
+				}
 			}
 		}
 
@@ -612,56 +659,37 @@ class Parameter extends AbstractNode {
 			type = NullType.Explicit
 		}
 
-		var mut min: Number = 1
-		var mut max: Number = 1
-
-		for modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Rest {
-				@rest = true
-
-				if modifier.arity? {
-					@arity = modifier.arity
-
-					min = modifier.arity.min
-					max = modifier.arity.max
+		if ?@data.defaultValue {
+			if @explicitlyRequired && type.isNullable() {
+				if @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+					// do nothing
+				}
+				else if @internal is IdentifierLiteral {
+					SyntaxException.throwDeadCodeParameter(@internal.name(), this)
 				}
 				else {
-					min = 0
-					max = Infinity
+					SyntaxException.throwDeadCodeParameter(this)
 				}
 			}
-			else if modifier.kind == ModifierKind::Required {
-				@explicitlyRequired = true
-			}
-		}
 
-		if @data.defaultValue? {
-			if @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
-				if !type.isNullable() {
-					type = type.setNullable(true)
-				}
-			}
-			else if @explicitlyRequired && type.isNullable() {
-				SyntaxException.throwDeadCodeParameter(this)
+			@defaultValue = $compile.expression(@data.defaultValue, @parent)
+			@defaultValue.analyse()
+
+			@internal.setDefaultValue(@defaultValue)
+
+			@hasDefaultValue = true
+			@nullable = type.isNullable()
+
+			if !@explicitlyRequired {
+				min = 0
 			}
 
-			if !(@explicitlyRequired && type.isNullable()) {
-				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @internal.isBinding())
-
-				@defaultValue = $compile.expression(@data.defaultValue, @parent)
-				@defaultValue.analyse()
-
-				@hasDefaultValue = true
-
-				if !@explicitlyRequired {
-					min = 0
-				}
-			}
+			@scope.commitTempVariables(@tempVariables)
 		}
 
 		var name: String? = @internal.name()
 
-		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
+		@type = new ParameterType(@scope, name, passing, type!?, min, max, @hasDefaultValue)
 
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			var scope = @parent.scope()
@@ -693,9 +721,17 @@ class Parameter extends AbstractNode {
 
 		if @hasDefaultValue {
 			@defaultValue.prepare()
+
+			if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind::Equals {
+				@headedDefaultValue = @nullable || @internal.isBinding()
+			}
+			else {
+				@headedDefaultValue = @defaultValue.type().isNull()
+			}
+
 			@defaultValue.translate()
 
-			if !@defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, true, false) {
+			unless @defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, false, false) {
 				TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
 			}
 		}
@@ -730,10 +766,10 @@ class Parameter extends AbstractNode {
 		fragments.compile(@internal)
 	} # }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer) { # {{{
-		@internal.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+		@internal.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { # {{{
-		@internal.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+		@internal.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toErrorFragments(fragments, async) { # {{{
 		@internal.toErrorFragments(fragments, async)
@@ -741,7 +777,7 @@ class Parameter extends AbstractNode {
 	toParameterFragments(fragments) { # {{{
 		@internal.toParameterFragments(fragments)
 
-		if @maybeHeadedDefaultValue {
+		if @headedDefaultValue {
 			fragments.code($equals).compile(@defaultValue)
 		}
 
@@ -749,6 +785,10 @@ class Parameter extends AbstractNode {
 	} # }}}
 	toQuote() => @type.toQuote()
 	toValidationFragments(fragments) { # {{{
+		if @tempVariables.length != 0 {
+			fragments.newLine().code($runtime.scope(this) + @tempVariables.join(', ')).done()
+		}
+
 		if @rest {
 			if @hasDefaultValue {
 				var ctrl = fragments
@@ -769,7 +809,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 		else {
-			@internal.toValidationFragments(fragments, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+			@internal.toValidationFragments(fragments, @rest, @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
 		}
 	} # }}}
 	type(): ParameterType => @type
@@ -798,8 +838,9 @@ class Parameter extends AbstractNode {
 
 class AliasStatement extends Statement {
 	private {
-		_expression: ThisExpressionParameter
-		_parameter: Parameter
+		@expression: ThisExpressionParameter
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@parameter: Parameter
 	}
 	constructor(@expression, @parameter) { # {{{
 		var parent = parameter.parent()
@@ -813,6 +854,7 @@ class AliasStatement extends Statement {
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
+	operator(@operator): this
 	path() => @expression.path()
 	toStatementFragments(fragments, mode) { # {{{
 		var variable = @scope.getVariable(@expression.name())
@@ -828,6 +870,9 @@ class AliasStatement extends Statement {
 }
 
 class IdentifierParameter extends IdentifierLiteral {
+	private {
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+	}
 	static {
 		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { # {{{
 			if arity != null {
@@ -1307,7 +1352,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						ctrl.done()
 					}
 
-					++context.optional
+					context.optional += 1
 				}
 				else {
 					fragments
@@ -1319,58 +1364,85 @@ class IdentifierParameter extends IdentifierLiteral {
 
 					that.toValidationFragments(fragments, rest, defaultValue, header, async)
 
-					--context.required
+					context.required -= 1
 				}
 			}
 		} # }}}
-		toValidationFragments(fragments, rest, defaultValue?, header, async, that) { # {{{
+		toValidationFragments(fragments, rest, value?, header, async, that) { # {{{
 			var declaredType = that.getDeclaredType()
 
-			var mut ctrl = null
-
-			if defaultValue != null {
+			if value != null {
 				if !header {
-					ctrl = fragments
+					var ctrl = fragments
 						.newControl()
 						.code('if(').compile(that).code(' === void 0')
 
-					if !declaredType.isNullable() {
+					if !declaredType.isNullable() || that.operator() != AssignmentOperatorKind::Equals {
 						ctrl.code(' || ').compile(that).code(' === null')
 					}
 
 					ctrl.code(')').step()
 
-					ctrl
-						.newLine()
-						.compile(that)
-						.code($equals)
-						.compile(defaultValue)
-						.done()
+					if that.operator() == AssignmentOperatorKind::EmptyCoalescing {
+						if value.isComposite() {
+							ctrl
+								.newLine()
+								.compileReusable(value)
+								.done()
+
+							var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(that)).isNotEmpty(`).compile(value).code('))').step()
+
+							ctrl2.newLine().compile(that).code($equals).compile(value).done()
+
+							ctrl2.done()
+						}
+						else if value.isNotEmpty() {
+							ctrl.newLine().compile(that).code($equals).compile(value).done()
+						}
+						else {
+							var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(that)).isNotEmpty(`).compile(value).code('))').step()
+
+							ctrl2.newLine().compile(that).code($equals).compile(value).done()
+
+							ctrl2.done()
+						}
+					}
+					else {
+						ctrl.newLine().compile(that).code($equals).compile(value).done()
+					}
+
+					ctrl.done()
 				}
 			}
 			else {
 				if declaredType.isNullable() {
-					ctrl = fragments
+					var ctrl = fragments
 						.newControl()
 						.code('if(').compile(that).code(' === void 0').code(')')
 						.step()
 
 					ctrl.newLine().compile(that).code(' = null').done()
-				}
-			}
 
-			if ctrl != null {
-				ctrl.done()
+					ctrl.done()
+				}
 			}
 		} # }}}
 	}
 	isBinding() => false
+	operator(): @operator
+	operator(@operator): this
 	setDeclaredType(type, definitive) { # {{{
 		var variable = @scope.getVariable(@value)
 
 		variable.setDeclaredType(type).setRealType(type).setDefinitive(definitive)
 
 		@declaredType = @realType = type
+	} # }}}
+	setDefaultValue(value) { # {{{
+		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+			value.acquireReusable(true)
+			value.releaseReusable()
+		}
 	} # }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
@@ -1388,7 +1460,8 @@ class IdentifierParameter extends IdentifierLiteral {
 
 class ArrayBindingParameter extends ArrayBinding {
 	private late {
-		_tempName: Literal
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@tempName: Literal
 	}
 	analyse() { # {{{
 		super()
@@ -1400,6 +1473,7 @@ class ArrayBindingParameter extends ArrayBinding {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
+	operator(@operator): this
 	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
@@ -1424,6 +1498,12 @@ class ArrayBindingParameter extends ArrayBinding {
 			TypeException.throwInvalidBinding('Array', this)
 		}
 	} # }}}
+	setDefaultValue(value) { # {{{
+		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+			value.acquireReusable(true)
+			value.releaseReusable()
+		}
+	} # }}}
 	toParameterFragments(fragments) { # {{{
 		if @flatten {
 			fragments.compile(@tempName)
@@ -1432,20 +1512,41 @@ class ArrayBindingParameter extends ArrayBinding {
 			fragments.compile(this)
 		}
 	} # }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
+	toValidationFragments(fragments, rest, value?, header, async) { # {{{
 		if @flatten {
 			var ctrl = fragments
 				.newControl()
 				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
 				.step()
 
-			if defaultValue != null {
-				ctrl
-					.newLine()
-					.compile(@tempName)
-					.code($equals)
-					.compile(defaultValue)
-					.done()
+			if value != null {
+				if @operator == AssignmentOperatorKind::EmptyCoalescing {
+					if value.isComposite() {
+						ctrl
+							.newLine()
+							.compileReusable(value)
+							.done()
+
+						var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(this)).isNotEmpty(`).compile(value).code('))').step()
+
+						ctrl2.newLine().compile(@tempName).code($equals).compile(value).done()
+
+						ctrl2.done()
+					}
+					else if value.isNotEmpty() {
+						ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
+					}
+					else {
+						var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(this)).isNotEmpty(`).compile(value).code('))').step()
+
+						ctrl2.newLine().compile(@tempName).code($equals).compile(value).done()
+
+						ctrl2.done()
+					}
+				}
+				else {
+					ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
+				}
 			}
 
 			ctrl.done()
@@ -1475,7 +1576,8 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 
 class ObjectBindingParameter extends ObjectBinding {
 	private late {
-		_tempName: Literal
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@tempName: Literal
 	}
 	analyse() { # {{{
 		super()
@@ -1487,6 +1589,7 @@ class ObjectBindingParameter extends ObjectBinding {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
+	operator(@operator): this
 	setDeclaredType(type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
@@ -1511,6 +1614,12 @@ class ObjectBindingParameter extends ObjectBinding {
 			TypeException.throwInvalidBinding('Object', this)
 		}
 	} # }}}
+	setDefaultValue(value) { # {{{
+		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+			value.acquireReusable(true)
+			value.releaseReusable()
+		}
+	} # }}}
 	toParameterFragments(fragments) { # {{{
 		if @flatten {
 			fragments.compile(@tempName)
@@ -1519,20 +1628,41 @@ class ObjectBindingParameter extends ObjectBinding {
 			fragments.compile(this)
 		}
 	} # }}}
-	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
+	toValidationFragments(fragments, rest, value?, header, async) { # {{{
 		if @flatten {
 			var ctrl = fragments
 				.newControl()
 				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
 				.step()
 
-			if defaultValue != null {
-				ctrl
-					.newLine()
-					.compile(@tempName)
-					.code($equals)
-					.compile(defaultValue)
-					.done()
+			if value != null {
+				if @operator == AssignmentOperatorKind::EmptyCoalescing {
+					if value.isComposite() {
+						ctrl
+							.newLine()
+							.compileReusable(value)
+							.done()
+
+						var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(this)).isNotEmpty(`).compile(value).code('))').step()
+
+						ctrl2.newLine().compile(@tempName).code($equals).compile(value).done()
+
+						ctrl2.done()
+					}
+					else if value.isNotEmpty() {
+						ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
+					}
+					else {
+						var ctrl2 = ctrl.newControl().code(`if(\($runtime.type(this)).isNotEmpty(`).compile(value).code('))').step()
+
+						ctrl2.newLine().compile(@tempName).code($equals).compile(value).done()
+
+						ctrl2.done()
+					}
+				}
+				else {
+					ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
+				}
 			}
 
 			ctrl.done()
@@ -1562,8 +1692,9 @@ class ObjectBindingParameterElement extends ObjectBindingElement {
 
 class AnonymousParameter extends AbstractNode {
 	private late {
-		_name: String
-		_type: Type
+		@name: String
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@type: Type
 	}
 	analyse()
 	override prepare(target) { # {{{
@@ -1571,7 +1702,9 @@ class AnonymousParameter extends AbstractNode {
 	} # }}}
 	translate()
 	name() => null
+	operator(@operator): this
 	setDeclaredType(@type, definitive)
+	setDefaultValue(value)
 	toFragments(fragments, mode) { # {{{
 		fragments.code(@name)
 	} # }}}
@@ -1594,7 +1727,7 @@ class AnonymousParameter extends AbstractNode {
 				this.toValidationFragments(fragments, rest, defaultValue, header, async)
 			}
 
-			--context.required
+			context.required -= 1
 		}
 	} # }}}
 	toParameterFragments(fragments) { # {{{
@@ -1606,8 +1739,11 @@ class AnonymousParameter extends AbstractNode {
 }
 
 class ThisExpressionParameter extends ThisExpression {
+	private {
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		unless ?@variableName {
 			throw new NotSupportedException(this)
@@ -1650,6 +1786,8 @@ class ThisExpressionParameter extends ThisExpression {
 
 		return array
 	} # }}}
+	operator(): @operator
+	operator(@operator): this
 	setDeclaredType(type, definitive) { # {{{
 		if !type.matchContentOf(@type) {
 			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
@@ -1658,6 +1796,12 @@ class ThisExpressionParameter extends ThisExpression {
 		var variable = @parent.scope().getVariable(@name)
 
 		variable.setDeclaredType(type).setDefinitive(definitive)
+	} # }}}
+	setDefaultValue(value) { # {{{
+		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+			value.acquireReusable(true)
+			value.releaseReusable()
+		}
 	} # }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)

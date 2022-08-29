@@ -213,13 +213,15 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
-		if @data.body? {
+		if ?@data.body {
 			@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 		}
 
@@ -247,7 +249,7 @@ class ClassMethodDeclaration extends Statement {
 		if @parent.isExtending() {
 			var superclass = @parent.extends().type()
 
-			if var data = @getOveriddenMethod(superclass, unknownReturnType) {
+			if var data ?= @getOveriddenMethod(superclass, unknownReturnType) {
 				@overriding = true
 				{ method: overridden, type: @type, exact: @exact } = data
 			}
@@ -281,7 +283,7 @@ class ClassMethodDeclaration extends Statement {
 				@parent.addForkedMethod(@name, method, @type, hidden)
 			}
 
-			if var sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
+			if var sealedclass ?= superclass.getHybridMethod(@name, @parent.extends()) {
 				@parent.addSharedMethod(@name, sealedclass)
 			}
 		}
@@ -409,7 +411,7 @@ class ClassMethodDeclaration extends Statement {
 
 		if !@abstract {
 			if @autoTyping {
-				@block.prepare()
+				@block.prepare(AnyType.NullableUnexplicit)
 
 				@type.setReturnType(@block.type())
 			}
@@ -508,7 +510,7 @@ class ClassMethodDeclaration extends Statement {
 
 				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
-				++index
+				index += 1
 			}
 
 			ctrl2.code(`)`).step()
@@ -621,7 +623,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 
-			if method? {
+			if ?method {
 				var type = @override ? method.clone() : @type
 
 				if @override {
@@ -734,7 +736,7 @@ class ClassMethodDeclaration extends Statement {
 		} # }}}
 		listOverloadedMethods(superclass: ClassType) { # {{{
 			if @instance {
-				if var methods = superclass.listInstanceMethods(@name) {
+				if var methods ?= superclass.listInstanceMethods(@name) {
 					for var method in methods {
 						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 							return []
@@ -749,7 +751,7 @@ class ClassMethodDeclaration extends Statement {
 				)
 			}
 			else {
-				if var methods = superclass.listClassMethods(@name) {
+				if var methods ?= superclass.listClassMethods(@name) {
 					for var method in methods {
 						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 							return []

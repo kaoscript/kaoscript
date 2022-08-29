@@ -2,7 +2,7 @@
 
 extern console, foo
 
-if foo? {
+if ?foo {
 	if foo.foo() {
 	}
 	else if items ?= foo.bar() {

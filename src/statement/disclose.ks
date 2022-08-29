@@ -6,7 +6,7 @@ class DiscloseDeclaration extends Statement {
 	enhance() { # {{{
 		var variable = @scope.getVariable(@data.name.name)
 
-		unless variable? {
+		unless ?variable {
 			ReferenceException.throwNotDefined(@data.name.name, this)
 		}
 

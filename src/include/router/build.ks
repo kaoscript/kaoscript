@@ -10,6 +10,20 @@ func buildTree(group: Group, name: String, ignoreIndistinguishable: Boolean, exc
 		expandGroup(group, name, ignoreIndistinguishable, excludes, node)
 	}
 
+	var perNames = {}
+
+	for var row of group.rows when ?row.names {
+		var names = Dictionary.keys(row.names).sort()
+		var key = names.map((name, _, _) => `;\(name);\(row.names[name].sort().join('|'))`).join(',')
+
+		if var function ?= perNames[key] {
+			SyntaxException.throwIndistinguishableFunctions(name, [function, row.function], node) unless function == row.function
+		}
+		else {
+			perNames[key] = row.function
+		}
+	}
+
 	if isFlattenable(group, excludes, node) {
 		return buildFlatTree(group.functions[0], group.rows, group.n, excludes, node)
 	}
@@ -67,7 +81,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 		var args = {}
 
 		for var type in row.types {
-			if args[type.parameter]? {
+			if ?args[type.parameter] {
 				args[type.parameter] += 1
 			}
 			else {
@@ -78,18 +92,22 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 		var mut last = -1
 
 		for var { index } of parameters {
-			while ++last < index {
-				if var argument = arguments[last] {
+			last += 1
+
+			while last < index {
+				if var argument ?= arguments[last] {
 					arguments[last].push(0)
 				}
 				else {
 					arguments[last] = [0]
 				}
+
+				last += 1
 			}
 
 			var size = args[index] ?? 0
 
-			if var argument = arguments[index] {
+			if var argument ?= arguments[index] {
 				arguments[index].push(size)
 			}
 			else {
@@ -105,7 +123,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 		parameter.min = Math.min(...arguments[parameter.index])
 		parameter.max = Math.max(...arguments[parameter.index])
 
-		++argCount
+		argCount += 1
 
 		var type = parameter.parameter.getArgumentType().toTestType()
 
@@ -126,6 +144,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 	)
 
 	var mut afterRest = false
+	var byNames = []
 
 	for var { parameter, index, argIndex, argType: type } of parameters {
 		var hash = type.hashCode()
@@ -142,6 +161,10 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 
 		if rest {
 			afterRest = true
+		}
+
+		if parameter.isNamedOnlyArgument() {
+			byNames.push(parameter.name())
 		}
 	}
 
@@ -181,6 +204,9 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 				function
 				arguments: []
 				rows: [row]
+				// TODO!
+				byNames: byNames
+				// byNames
 			)
 		}
 		else {
@@ -234,7 +260,7 @@ func buildNode(tree: Tree, mut branch: TreeBranch, pIndex: Number, max: Number, 
 			var {type, index, rest, parameter} = row.types[pIndex]
 			var hash = type.hashCode()
 
-			if var match = branch.columns[hash] {
+			if var match ?= branch.columns[hash] {
 				SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:TreeLeaf.function, row.function], node)
 			}
 
@@ -257,6 +283,7 @@ func buildNode(tree: Tree, mut branch: TreeBranch, pIndex: Number, max: Number, 
 				function: row.function
 				arguments: []
 				rows: [row]
+				byNames: []
 			)
 		}
 	}
@@ -411,6 +438,7 @@ func createTree(rows: Dictionary<Row>, min: Number): Tree { # {{{
 				function: row.function
 				arguments: []
 				rows: [row]
+				byNames: []
 			)
 		}
 	}
@@ -486,7 +514,7 @@ func expandOneGroup(group: Group, name: String, ignoreIndistinguishable: Boolean
 		if function.isAsync() {
 			var scope = node.scope()
 
-			++min
+			min += 1
 			parameters = [...parameters, new ParameterType(scope, scope.reference('Function'))]
 		}
 
@@ -589,7 +617,7 @@ func addOneGroupRow(group: Group, name: String, ignoreIndistinguishable: Boolean
 				matchUnion = group.rows[`;0;\(type.hashCode())`].union
 			}
 			else {
-				group.rowCount++
+				group.rowCount += 1
 			}
 
 			if ?matchFunction {
@@ -628,6 +656,14 @@ func addOneGroupRow(group: Group, name: String, ignoreIndistinguishable: Boolean
 		}
 
 		if addable {
+			var mut names = null
+
+			if parameter.isNamedArgument() {
+				names = {
+					[parameter.name()]: [type.hashCode()]
+				}
+			}
+
 			group.rows[key] = Row(
 				key
 				function
@@ -640,6 +676,9 @@ func addOneGroupRow(group: Group, name: String, ignoreIndistinguishable: Boolean
 						parameter: paramIndex
 					)
 				]
+				// TODO error when names=null
+				// names
+				names: names
 			)
 		}
 	}
@@ -654,23 +693,24 @@ func expandGroup(group: Group, name: String, ignoreIndistinguishable: Boolean, e
 		if function.isAsync() {
 			var scope = node.scope()
 
-			++min
-			++minAfter
+			min += 1
+			minAfter += 1
 			parameters = [...parameters, new ParameterType(scope, scope.reference('Function'))]
 		}
 
-		expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, group.n, group.n - min, 0, 0, 0, -1, '', [])
+		expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, group.n, group.n - min, 0, 0, 0, -1, '', [], {})
 	}
 } # }}}
 
-func expandFunction(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, argIndex: Number, key: String, types: Array<RowType>): Void { # {{{
+func expandFunction(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, argIndex: Number, key: String, types: Array<RowType>, names: Dictionary<String[]>?): Void { # {{{
 	if types.length == target {
-		if var match = group.rows[key] {
+		if var match ?= group.rows[key] {
 			if function == match.function {
 				group.rows[key] = Row(
 					key
 					function
 					types
+					names
 				)
 			}
 			else if function.max() == match.function.max() {
@@ -681,6 +721,7 @@ func expandFunction(group: Group, name: String, ignoreIndistinguishable: Boolean
 					key
 					function
 					types
+					names
 				)
 			}
 		}
@@ -689,9 +730,10 @@ func expandFunction(group: Group, name: String, ignoreIndistinguishable: Boolean
 				key
 				function
 				types
+				names
 			)
 
-			group.rowCount++
+			group.rowCount += 1
 		}
 	}
 	else if paramIndex < parameters.length || (function.isAsync() && paramIndex == parameters.length) {
@@ -702,43 +744,43 @@ func expandFunction(group: Group, name: String, ignoreIndistinguishable: Boolean
 
 		if stepIndex == 0 {
 			if stepCount < min {
-				expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, 0, stepCount + 1, max == Infinity, argIndex + 1, key, types, type)
+				expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, 0, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
 			}
 			else {
 				var rest = max == Infinity
 
 				if paramIndex + 1 < parameters.length {
 					if rest {
-						expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types)
+						expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
 					}
 					else {
 						if stepCount == max || hasMin(type, paramIndex + 1, parameters, remaining) {
-							expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types)
+							expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
 						}
 					}
 				}
 
 				if rest {
 					for var i from 1 to getMaxRestExpand(paramIndex, parameters, remaining, function) {
-						expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, [...types], type)
+						expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
 					}
 				}
 				else {
 					for var i from 1 to Math.min(max - min, remaining) {
-						expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, [...types], type)
+						expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
 					}
 				}
 			}
 		}
 		else if stepCount < stepIndex {
-			expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, stepIndex, stepCount + 1, max == Infinity, argIndex + 1, key, types, type)
+			expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, stepIndex, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
 		}
 		else {
 			if max == Infinity {
-				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types)
+				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
 			}
 			else if remaining == 0 || stepCount + min >= max || hasMin2(type, paramIndex + 1, parameters) {
-				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types)
+				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
 			}
 		}
 	}
@@ -751,8 +793,8 @@ func getMaxRestExpand(restIndex: Number, parameters: Array<ParameterType>, remai
 	return remaining if min == max
 
 	if function.isAsync() {
-		++min
-		++max
+		min += 1
+		max += 1
 	}
 
 	var restType = parameters[restIndex].type()
@@ -809,25 +851,48 @@ func hasMin2(type: Type, index: Number, parameters: Array<ParameterType>): Boole
 	return false
 } # }}}
 
-func expandParameter(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, rest: Boolean, argIndex: Number, key: String, types: Array<RowType>, type: Type): Void { # {{{
+// TODO names: Dictionary<String[]>?
+func expandParameter(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, rest: Boolean, argIndex: Number, key: String, types: Array<RowType>, mut names: Dictionary<Array<String>>?, type: Type): Void { # {{{
 	if type.isUnion() {
 		for var value in type.discard():UnionType.types() {
-			expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, value)
+			expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
 		}
 	}
 	else {
 		var key = `\(key);\(argIndex);\(type.hashCode())`
 
-		var types = [...types]
+		var types = [
+			...types
+			RowType(
+				index: argIndex
+				type
+				rest
+				parameter: paramIndex
+			)
+		]
 
-		types.push(RowType(
-			index: argIndex
-			type
-			rest
-			parameter: paramIndex
-		))
+		if ?names {
+			var parameter = parameters[paramIndex]
 
-		expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, argIndex, key, types)
+			// TODO
+			// names = {
+			// 	...names
+			// 	// [parameter.name()]: type.hashCode()
+			// 	// `\(parameter.name())`: type.hashCode()
+			// }
+			names = {...names}
+
+			var name = parameter.name()
+
+			if var hashes ?= names[name] {
+				names[name] = [...hashes, type.hashCode()]
+			}
+			else {
+				names[name] = [type.hashCode()]
+			}
+		}
+
+		expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, argIndex, key, types, names)
 	}
 } # }}}
 
@@ -857,10 +922,10 @@ func regroupBranch_ForkEq_TopChildrenEqFunc(branch: TreeBranch) { # {{{
 	if branch.order.length >= 2 {
 		var type = branch.type.hashCode()
 
-		if var column = branch.columns[type] {
+		if var column ?= branch.columns[type] {
 
 			if isSameFork(branch, column) {
-				if var column2 = Dictionary.values(branch.columns).find((c, _, _) => c != column && isSameFunction(column, c)) {
+				if var column2 ?= Dictionary.values(branch.columns).find((c, _, _) => c != column && isSameFunction(column, c)) {
 					var mut regroup = false
 
 					if !column.isNode && !column2.isNode && column2.index > 0 {
@@ -912,7 +977,7 @@ func regroupBranch_ForkEq_ChildrenEqFunc(branch: TreeBranch) { # {{{
 			branch.order.remove(type)
 		}
 		else if !column.isNode {
-			if var column2 = Dictionary.values(branch.columns).find((c, _, _) => c != column && !c.isNode && c.index > 0 && isSameFunction(column, c)) {
+			if var column2 ?= Dictionary.values(branch.columns).find((c, _, _) => c != column && !c.isNode && c.index > 0 && isSameFunction(column, c)) {
 				branch.max += column.max
 				branch.variadic = true
 
@@ -931,7 +996,7 @@ func applyMin2(tree: TreeBranch, mins, type) { # {{{
 	for var key in tree.order when key != type {
 		var node = tree.columns[key]
 
-		if var m = mins[key] {
+		if var m ?= mins[key] {
 			applyMin(node, m as Array)
 		}
 		else {
@@ -948,7 +1013,7 @@ func applyMin2(tree: TreeBranch, mins, type) { # {{{
 func toSignature3(tree: TreeBranch, withRoot: Boolean, type: String?) { # {{{
 	var mut s = withRoot ? `/\(tree.type.hashCode())()` : ''
 
-	if type? {
+	if ?type {
 		for var key, i in tree.order when key != type {
 			s += toSignature3(tree.columns[key], true, null)
 		}
@@ -969,7 +1034,7 @@ func toSignature3(tree: TreeLeaf, withRoot: Boolean, type: String?) { # {{{
 func isRegroupeableBranch2(tree1: TreeBranch, tree2: TreeBranch) { # {{{
 	for var key in tree2.order {
 		return false if tree2.columns[key].type.isAssignableToVariable(tree2.type, false, false, false)
-		return false unless tree1.columns[key]?
+		return false unless ?tree1.columns[key]
 		return false unless isRegroupeableBranch2(tree1.columns[key], tree2.columns[key])
 	}
 
@@ -978,7 +1043,7 @@ func isRegroupeableBranch2(tree1: TreeBranch, tree2: TreeBranch) { # {{{
 
 func isRegroupeableBranch2(tree1: TreeBranch, tree2: TreeBranch, type: String) { # {{{
 	for var key in tree1.order when key != type {
-		return false unless tree2.columns[key]?
+		return false unless ?tree2.columns[key]
 		return false unless isRegroupeableBranch2(tree1.columns[key], tree2.columns[key])
 	}
 
@@ -1023,13 +1088,13 @@ func regroupBranch_ChildrenEqFunc_Flatten(branch: TreeBranch, node: AbstractNode
 
 	var mut first = branch.columns[branch.order[0]]
 
-	if var function = getFunction(branch) {
+	if var function ?= getFunction(branch) {
 		var param2row = {}
 		for var parameter, key of branch.parameters {
 			param2row[key] = parameter.rows
 		}
 		for var parameter, key of first.parameters {
-			if var rows = param2row[key] {
+			if var rows ?= param2row[key] {
 				for var row in parameter.rows {
 					return unless rows:Array.contains(row)
 				}
@@ -1075,7 +1140,7 @@ func getFunction(tree: TreeLeaf) { # {{{
 } # }}}
 
 func applyMax2(tree: TreeBranch, maxs) { # {{{
-	var setter = (node, value = null) => {
+	var setter = (node, value? = null) => {
 		if value != null && value > node.max {
 			node.max = value
 		}
@@ -1131,7 +1196,7 @@ func regroupLeaf_SiblingsEq(branch: TreeBranch | Tree, node: AbstractNode) { # {
 		}
 
 		if Array.same(Dictionary.keys(column.parameters), Dictionary.keys(column2.parameters)) {
-			if groups[index + 1]? {
+			if ?groups[index + 1] {
 				groups[index] = groups[index + 1]
 
 				delete groups[index + 1]
@@ -1171,7 +1236,7 @@ func regroupTreeByIndex(tree: Tree | TreeBranch, node: AbstractNode) { # {{{
 	for var column, key of tree.columns {
 		var hash = getIndexHash(column)
 
-		if var group = groups[hash] {
+		if var group ?= groups[hash] {
 			group.keys.push(key)
 			group.columns.push(column)
 		}
@@ -1229,7 +1294,7 @@ func resolveBackTracing(tree: TreeBranch, max: Number) { # {{{
 	if tree.type.hashCode() != 'Any?' {
 		var backtracing = []
 
-		if var column = getBackTracing(tree, backtracing) {
+		if var column ?= getBackTracing(tree, backtracing) {
 			for var column of column.columns {
 				applyBackTracking(column, max, backtracing)
 			}
@@ -1237,8 +1302,8 @@ func resolveBackTracing(tree: TreeBranch, max: Number) { # {{{
 	}
 } # }}}
 
-func getBackTracing(tree: TreeBranch, backtracing: Array, default: TreeBranch = null) { # {{{
-	if var column = tree.columns['Any?'] {
+func getBackTracing(tree: TreeBranch, backtracing: Array, default: TreeBranch? = null) { # {{{
+	if var column ?= tree.columns['Any?'] {
 		var index = tree.order.indexOf('Any?') + 1
 
 		for var key in tree.order from index {
@@ -1303,8 +1368,8 @@ func applyBackTracking(tree: TreeLeaf, max: Number, backtracing: Array) { # {{{
 
 			if shift {
 				tree.index = index
-				tree.min++
-				tree.max++
+				tree.min += 1
+				tree.max += 1
 			}
 			else {
 				tree.backtracks.push(BackTrack(
@@ -1498,7 +1563,7 @@ func getForkHash(tree: TreeBranch | Tree, index: Number = 0, from: Number = inde
 	return hash
 } # }}}
 
-func getForkHash(tree: TreeLeaf, index: Number = null, from: Number = null) { # {{{
+func getForkHash(tree: TreeLeaf, index: Number? = null, from: Number? = null) { # {{{
 	return `:\(tree.function.index()).\(tree.rows[0].types.filter(({ index }, _, _) => index == tree.index)[0].parameter).\(tree.type.hashCode())`
 } # }}}
 
@@ -1585,7 +1650,7 @@ func buildMinMax(tree: TreeLeaf, property: String, result: Array, nodes: Array<T
 		}
 
 		if result.length == 0 || ancestors.length == 0 {
-			if var m = values[type.parameter] {
+			if var m ?= values[type.parameter] {
 				m.push(node[property])
 			}
 			else {
@@ -1593,7 +1658,7 @@ func buildMinMax(tree: TreeLeaf, property: String, result: Array, nodes: Array<T
 			}
 		}
 		else {
-			if var m = values[type.parameter] {
+			if var m ?= values[type.parameter] {
 				m.push([...ancestors, node[property]])
 			}
 			else {
@@ -1611,7 +1676,7 @@ func buildMinMax(tree: TreeLeaf, property: String, result: Array, nodes: Array<T
 } # }}}
 
 func applyMax(tree: TreeBranch | TreeLeaf, data: Array) { # {{{
-	var setter = (node, value = null) => {
+	var setter = (node, value? = null) => {
 		if value != null {
 			node.max = value
 		}
@@ -1621,7 +1686,7 @@ func applyMax(tree: TreeBranch | TreeLeaf, data: Array) { # {{{
 } # }}}
 
 func applyMin(tree: TreeBranch | TreeLeaf, data: Array) { # {{{
-	var setter = (node, value = null) => {
+	var setter = (node, value? = null) => {
 		if value != null {
 			node.min = value
 		}
@@ -1662,8 +1727,8 @@ func applyMinMax(tree: TreeLeaf, setter: Function, data: Array, nodes: Array<Tre
 
 		ancestors.push(`\(function).\(type.parameter)`)
 
-		if var m = values?[type.parameter] {
-			if var value = m.shift() {
+		if var m ?= values?[type.parameter] {
+			if var value ?= m.shift() {
 				if value is Array {
 					var m = value.pop()
 					if value.every((m, _, _) => ancestors.contains(m)) {
@@ -1698,7 +1763,7 @@ func regroupBranch_ChildrenEqFunc(branch: TreeBranch | Tree, node: AbstractNode)
 
 		var function = functions[0]
 
-		if var group = groups[function] {
+		if var group ?= groups[function] {
 			group.push(key)
 		}
 		else {
@@ -1759,8 +1824,8 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 		var params = {}
 
 		for var type in row.types when type.index >= pIndex || type.index == -1 {
-			if var param = params[type.parameter] {
-				param.max++
+			if var param ?= params[type.parameter] {
+				param.max += 1
 
 				if !type.type.isAssignableToVariable(param.type, true, false, false) {
 					param.type = Type.union(scope, param.type, type.type).sort()
@@ -1777,7 +1842,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 		}
 
 		for var parameter, key of parameters {
-			if var param = params[key] {
+			if var param ?= params[key] {
 				if !param.type.isAssignableToVariable(parameter.type, true, false, false) {
 					parameter.type = Type.union(scope, parameter.type, param.type).sort()
 				}
@@ -1844,6 +1909,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 				function: row.function
 				arguments: []
 				rows: [row]
+				byNames: []
 			)
 
 			if result == null {
@@ -1876,7 +1942,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 				isNode: true
 			)
 
-			index++
+			index += 1
 
 			result = branch
 		}
@@ -1904,7 +1970,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 			sortNodes2(branch)
 
 			branch = branch.columns[hash]
-			index++
+			index += 1
 		}
 	}
 
@@ -1915,9 +1981,9 @@ func isRegroupeableBranch(branch: TreeBranch, node: AbstractNode): Boolean { # {
 	return false unless branch.order.length > 1
 
 	if Dictionary.length(branch.parameters) > 1 {
-		if var column = branch.columns[branch.type.hashCode()] {
+		if var column ?= branch.columns[branch.type.hashCode()] {
 			for var _, key of column.parameters {
-				if branch.parameters[key]? {
+				if ?branch.parameters[key] {
 					return false
 				}
 			}
@@ -1927,10 +1993,10 @@ func isRegroupeableBranch(branch: TreeBranch, node: AbstractNode): Boolean { # {
 	var arguments = {}
 	for var row in branch.rows {
 		var fnIndex = row.function.index()
-		var fnArguments = arguments[fnIndex] ?? (arguments[fnIndex] = { function: row.function, args: {} })
+		var fnArguments = arguments[fnIndex] ?? (arguments[fnIndex] <- { function: row.function, args: {} })
 
 		for var type in row.types when type.index > branch.index {
-			if var types = fnArguments.args[type.index] {
+			if var types ?= fnArguments.args[type.index] {
 				if !types.some((b, _, _) => type.index == b.index && type.parameter == b.parameter && type.type.hashCode() == b.type.hashCode()) {
 					types.push(type)
 				}
@@ -1992,7 +2058,7 @@ func isFlattenable(group: Group, excludes: Array<String>?, node: AbstractNode): 
 	var mut count = 0
 	for var parameter in parameters {
 		if parameter.isVarargs() || parameter.min() == 0 {
-			++count
+			count += 1
 		}
 	}
 
@@ -2033,7 +2099,7 @@ func regroupBranch_Children_ForkAlike_SiblingsEq(branch: TreeBranch | Tree, node
 			hash = Dictionary.keys(column.parameters).sort((a, b) => a.localeCompare(b)).join(';')
 		}
 
-		if var group = groups[hash] {
+		if var group ?= groups[hash] {
 			group.push(key)
 		}
 		else {
@@ -2069,63 +2135,6 @@ func regroupBranch_Children_ForkAlike_SiblingsEq(branch: TreeBranch | Tree, node
 
 	if reorder {
 		sortNodes2(branch)
-	}
-} # }}}
-
-func buildNames(group: Group, name: String, node: AbstractNode): NamedLength { # {{{
-	var functions = []
-	var parameters = {}
-
-	if group.n == 1 {
-		expandOneName(group, name, node, functions, parameters)
-	}
-	else {
-		expandName(group, name, node, functions, parameters)
-	}
-
-	return NamedLength(functions, parameters)
-} # }}}
-
-func expandOneName(group: Group, name: String, node: AbstractNode, functions: Array<String>, parameters: Dictionary<NamedParameter>) { # {{{
-	var rows = {}
-
-	for var function in group.functions {
-		var required = []
-
-		for var parameter, index in function.parameters() {
-			if parameter.min() != 0 {
-				required.push({ parameter, index })
-			}
-		}
-
-		if required.length == 0 {
-			for var parameter, index in function.parameters() {
-				addOneNameRow(group, name, node, function, parameter, parameter.type(), null, index, rows)
-			}
-		}
-		else if required.length == 1 {
-			addOneNameRow(group, name, node, function, required[0].parameter, required[0].parameter.type(), null, required[0].index, rows)
-		}
-	}
-
-	for var row, name of rows {
-		var indexes = {}
-		var types = {}
-
-		for var { type, function, index }, hash of row {
-			types[hash] = NamedType(
-				type
-				functions: [`\(function.index())`]
-			)
-
-			functions.pushUniq(`\(function.index())`)
-
-			indexes[function.index()] = index
-		}
-
-		var order = sortNodes([r.type for var r of row])
-
-		parameters[name] = NamedParameter(indexes, types, order)
 	}
 } # }}}
 
@@ -2172,227 +2181,6 @@ func sortNodes(types: Array<Type>): Array<String> { # {{{
 	return [item.key for var item in items]
 } # }}}
 
-func addOneNameRow(group: Group, name: String, node: AbstractNode, function: FunctionType, parameter: ParameterType, type: Type, union: UnionMatch?, paramIndex: Number, rows: Dictionary) { # {{{
-	if type.isSplittable() {
-		var types = type.split([])
-		var union = UnionMatch(
-			function
-			length: types.length
-			matches: []
-		)
-
-		for var type in types {
-			addOneNameRow(group, name, node, function, parameter, type, union, paramIndex, rows)
-		}
-	}
-	else if var row = rows[parameter.name()] {
-		var hash = type.hashCode()
-		var mut addable = true
-
-		if var match = row[hash] {
-			if function.max() == match.function.max() {
-				if ?match.union {
-					if ?union {
-						SyntaxException.throwIndistinguishableFunctions(name, [type], [function, match.function], node)
-					}
-					else {
-						match.union.matches.push([type, function])
-
-						if match.union.matches.length == match.union.length {
-							SyntaxException.throwShadowFunction(name, match.function, node)
-						}
-					}
-				}
-				else {
-					if ?union {
-						union.matches.push([type, match.function])
-
-						if union.matches.length == union.length {
-							SyntaxException.throwShadowFunction(name, function, node)
-						}
-
-						addable = false
-					}
-					else {
-						SyntaxException.throwIndistinguishableFunctions(name, [type], [function, match.function], node)
-					}
-				}
-			}
-			else if function.max() > match.function.max() {
-				addable = false
-			}
-		}
-
-		if addable {
-			row[hash] = {
-				type
-				function
-				union
-				index: paramIndex
-			}
-		}
-	}
-	else {
-		rows[parameter.name()] = {
-			[type.hashCode()]: {
-				type
-				function
-				union
-				index: paramIndex
-			}
-		}
-	}
-} # }}}
-
-func expandName(group: Group, name: String, node: AbstractNode, functions: Array<String>, parameters: Dictionary<NamedParameter>) { # {{{
-	var rows = {}
-
-	for var function in group.functions {
-		var requireds = []
-		var optionals = []
-
-		for var parameter, index in function.parameters() {
-			if parameter.min() != 0 {
-				requireds.push({parameter, index})
-			}
-			else {
-				optionals.push({parameter, index})
-			}
-		}
-
-		var mut currents = [{}]
-
-		if requireds.length == group.n {
-			for var {parameter, index} in requireds {
-				currents = expandNameRow(parameter, index, parameter.type(), currents, node)
-			}
-		}
-		else if requireds.length < group.n {
-			for var {parameter, index} in requireds {
-				currents = expandNameRow(parameter, index, parameter.type(), currents, node)
-			}
-
-			var fulls = []
-
-			for var {parameter, index}, i in optionals {
-				fulls.push(...expandNameOptionalRow(optionals, group.n - requireds.length, i, parameter, index, currents, node))
-			}
-
-			currents = fulls
-		}
-
-		addNameRow(function, name, node, currents, rows)
-	}
-
-	var names = {}
-
-	for var row of rows {
-		for var {index, type}, name of row.parameters {
-			names[name] ??= {
-				indexes: {}
-				types: {}
-			}
-
-			if var types = names[name].types[type.hashCode()] {
-				types.functions:Array.pushUniq(row.function.index())
-			}
-			else {
-				names[name].types[type.hashCode()] = NamedType(
-					type
-					functions: [`\(row.function.index())`]
-				)
-			}
-
-			if !?names[name].indexes[row.function.index()] {
-				names[name].indexes[row.function.index()] = index
-			}
-		}
-
-		functions.pushUniq(`\(row.function.index())`)
-	}
-
-	for var {indexes, types}, name of names {
-		var order = sortNodes([r.type for var r of types])
-
-		parameters[name] = NamedParameter(indexes, types, order)
-	}
-} # }}}
-
-func expandNameRow(parameter: ParameterType, paramIndex: Number, type: Type, mut rows: Array, node: AbstractNode) { # {{{
-	if type.isSplittable() {
-		var types = type.split([])
-
-		for var type in types {
-			rows = expandNameRow(parameter, paramIndex, type, rows, node)
-		}
-
-		return rows
-	}
-	else {
-		var result = []
-
-		for var row in rows {
-			var r = {...row}
-
-			if var rx = r[parameter.name()] {
-				rx.type = Type.union(node.scope(), rx.type, type).sort()
-			}
-			else {
-				r[parameter.name()] = {
-					index: paramIndex
-					type
-				}
-			}
-
-			result.push(r)
-		}
-
-		return result
-	}
-} # }}}
-
-func expandNameOptionalRow(optionals: Array, left: Number, index: Number, parameter: ParameterType, paramIndex: Number, mut rows: Array, node: AbstractNode) { # {{{
-	rows = expandNameRow(parameter, paramIndex, parameter.type(), rows, node)
-
-	if left == 1 {
-		return rows
-	}
-	else {
-		var fulls = []
-
-		for var optional, i in optionals from index + 1 {
-			fulls.push(...expandNameOptionalRow(optionals, left - 1, i, optional.parameter, optional.index, rows, node))
-		}
-
-		return fulls
-	}
-} # }}}
-
-func addNameRow(function: FunctionType, name: String, node: AbstractNode, rows: Array, container: Dictionary) { # {{{
-	for var row in rows {
-		var names = Dictionary.keys(row).sort()
-		var key = names.map((name, _, _) => `;\(name);\(row[name].type.hashCode())`).join()
-
-		if var match = container[key] {
-			if function.max() == match.function.max() {
-				SyntaxException.throwIndistinguishableFunctions(name, [function, match.function], node)
-			}
-			else if function.max() < match.function.max() {
-				container[key] = {
-					function
-					parameters: row
-				}
-			}
-		}
-		else {
-			container[key] = {
-				function
-				parameters: row
-			}
-		}
-	}
-} # }}}
-
 func assess(functions: Array<FunctionType>, excludes: Array<String>, name: String, node: AbstractNode): Assessement { # {{{
 	if functions.length == 0 {
 		return Assessement(
@@ -2403,7 +2191,6 @@ func assess(functions: Array<FunctionType>, excludes: Array<String>, name: Strin
 			async: false
 			rest: false
 			trees: []
-			names: {}
 			macro: false
 			sealed: false
 		)
@@ -2424,7 +2211,7 @@ func assess(functions: Array<FunctionType>, excludes: Array<String>, name: Strin
 	var mut sealed = false
 
 	for var function in functions {
-		if var parameter = function.getRestParameter() {
+		if var parameter ?= function.getRestParameter() {
 			rest = true
 
 			min = Math.min(function.getMinBefore(excludes) + parameter.min() + function.getMinAfter(excludes) + asyncMin, min)
@@ -2450,7 +2237,7 @@ func assess(functions: Array<FunctionType>, excludes: Array<String>, name: Strin
 			max = maxRest
 		}
 		else {
-			++max
+			max += 1
 		}
 	}
 
@@ -2475,7 +2262,7 @@ func assess(functions: Array<FunctionType>, excludes: Array<String>, name: Strin
 		for var parameter in function.parameters(excludes) {
 			var name = parameter.name() ?? '_'
 
-			if var group = parameters.names[name] {
+			if var group ?= parameters.names[name] {
 				group.push(`\(function.index())`)
 			}
 			else {
@@ -2508,7 +2295,6 @@ func assess(functions: Array<FunctionType>, excludes: Array<String>, name: Strin
 		max: rest ? Infinity : max
 		rest
 		trees
-		names: {}
 		macro: false
 		sealed
 	)

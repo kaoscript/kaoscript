@@ -129,7 +129,7 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	wrap(node, mode = null) { # {{{
+	wrap(node, mode? = null) { # {{{
 		@step.wrap(node, mode)
 
 		return this
@@ -158,15 +158,15 @@ class ExpressionBuilder extends ExpressionWriter {
 				@writer.push(arg)
 			}
 			else {
-				if i + 1 < args.length && (data = args[i + 1]) is not Primitive && data.kind? {
-					if data.start? {
+				if i + 1 < args.length && (data <- args[i + 1]) is not Primitive && ?data.kind {
+					if ?data.start {
 						@writer.push(@writer.newFragment(arg, data.start, data.end))
 					}
 					else {
 						@writer.push(@writer.newFragment(arg))
 					}
 
-					i++
+					i += 1
 				}
 				else {
 					@writer.push(@writer.newFragment(arg))

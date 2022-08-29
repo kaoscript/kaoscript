@@ -1,3 +1,3 @@
 extern foo
 
-var dyn tt = foo?.bar?
+var dyn tt = ?foo?.bar

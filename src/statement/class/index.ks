@@ -173,7 +173,7 @@ class ClassDeclaration extends Statement {
 
 		@instanceVariableScope.define('this', true, @scope.reference(@name), true, this)
 
-		if @data.extends? {
+		if ?@data.extends {
 			@extending = true
 
 			var mut name = ''
@@ -376,7 +376,7 @@ class ClassDeclaration extends Statement {
 			@class.incDestructorSequence()
 		}
 
-		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented = @class.listMissingAbstractMethods()) {
+		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented <- @class.listMissingAbstractMethods()) {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 
@@ -500,11 +500,11 @@ class ClassDeclaration extends Statement {
 			if @extending {
 				var mut extends = @class.extends()
 
-				while extends? && !extends.type().hasConstructors() {
+				while ?extends && !extends.type().hasConstructors() {
 					extends = extends.type().extends()
 				}
 
-				if extends? {
+				if ?extends {
 					for var constructor in extends.type().listConstructors() {
 						constructor.checkVariablesInitializations(this, @class)
 					}
@@ -533,7 +533,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		if @destructor? {
+		if ?@destructor {
 			@destructor.translate()
 		}
 
@@ -558,7 +558,7 @@ class ClassDeclaration extends Statement {
 
 		@forkedMethods[name] ??= {}
 
-		if var fork = @forkedMethods[name][index] {
+		if var fork ?= @forkedMethods[name][index] {
 			fork.forks.push(newMethod)
 			fork.hidden = false
 		}
@@ -706,7 +706,7 @@ class ClassDeclaration extends Statement {
 			(fragments) => fragments.done()
 		)
 
-		if @destructor? {
+		if ?@destructor {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
@@ -898,7 +898,7 @@ class ClassDeclaration extends Statement {
 				.done()
 		}
 
-		if @destructor? {
+		if ?@destructor {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
@@ -916,7 +916,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods = @extendsType.type().listInstanceMethods(name) {
+				if var methods ?= @extendsType.type().listInstanceMethods(name) {
 					for var method in methods until overflow {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -957,7 +957,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods = @extendsType.type().listClassMethods(name) {
+				if var methods ?= @extendsType.type().listClassMethods(name) {
 					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -1063,7 +1063,7 @@ class ClassDeclaration extends Statement {
 			(fragments) => fragments.done()
 		)
 
-		if @destructor? {
+		if ?@destructor {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
@@ -1087,7 +1087,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods = @extendsType.type().listInstanceMethods(name) {
+				if var methods ?= @extendsType.type().listInstanceMethods(name) {
 					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -1121,7 +1121,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods = @extendsType.type().listClassMethods(name) {
+				if var methods ?= @extendsType.type().listClassMethods(name) {
 					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -1163,7 +1163,7 @@ class ClassDeclaration extends Statement {
 			variable.toFragments(fragments)
 		}
 
-		if !@es5 && @data.version? {
+		if !@es5 && ?@data.version {
 			var mut line = fragments.newLine()
 
 			line

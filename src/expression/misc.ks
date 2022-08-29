@@ -18,7 +18,7 @@ class TempReusableExpression extends Expression {
 			fragments.compile(@value)
 		}
 
-		++@count
+		@count += 1
 	} # }}}
 }
 
@@ -43,7 +43,7 @@ class TempMemberExpression extends Expression {
 	} # }}}
 	isComposite() => true
 	releaseReusable() { # {{{
-		if @reuseName? {
+		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
 		}
 	} # }}}

@@ -128,12 +128,12 @@
                 },
                 {
                   "name": "thisArg",
-                  "type": "Dictionary",
+                  "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NTR9fQ=="
+                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjUxfSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NTV9fQ=="
                 }
               ],
               "returns": "Boolean",
@@ -159,12 +159,12 @@
                 },
                 {
                   "name": "thisArg",
-                  "type": "Dictionary",
+                  "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUyfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTZ9fQ=="
+                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUzfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTd9fQ=="
                 }
               ],
               "returns": "Void",
@@ -332,12 +332,12 @@
                 },
                 {
                   "name": "thisArg",
-                  "type": "Dictionary",
+                  "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0OX0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1M319"
+                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1MH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1NH19"
                 }
               ],
               "returns": "Boolean",
@@ -356,12 +356,12 @@
               "parameters": [
                 {
                   "name": "compare",
-                  "type": "Function",
+                  "type": "Function?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjozMX19"
+                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjozMn19"
                 }
               ],
               "returns": {
@@ -822,18 +822,20 @@
                   "name": "separator",
                   "type": {
                     "kind": "union",
+                    "nullable": true,
                     "types": [
                       "RegExp",
                       {
                         "reference": 3
-                      }
+                      },
+                      "Null"
                     ]
                   },
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjozN30sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo0MX19"
+                  "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo0OH19"
                 },
                 {
                   "name": "limit",
@@ -842,7 +844,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo1OX0sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo2MX19"
+                  "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo2Nn0sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo2OH19"
                 }
               ],
               "returns": {

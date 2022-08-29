@@ -1,0 +1,1 @@
+SyntaxException: The default value of parameter "x" must be "null" when its type is "required" and "nullable" (fixtures/compile/parameter/parameter.make.avndse.ks:1)

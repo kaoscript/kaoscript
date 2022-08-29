@@ -4,15 +4,18 @@ class InlineBlockScope extends BlockScope {
 		_upatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		if var name = this.acquireUnusedTempName() {
+		if var name ?= this.acquireUnusedTempName() {
 			return name
 		}
 
 		if @tempIndex == -1 {
-			@tempIndex = @parent.getTempIndex()
+			@tempIndex = @parent.getTempIndex():Number + 1
+		}
+		else {
+			@tempIndex += 1
 		}
 
-		var name = `__ks_\(++@tempIndex)`
+		var name = `__ks_\(@tempIndex)`
 
 		@tempNames[name] = false
 
@@ -29,7 +32,7 @@ class InlineBlockScope extends BlockScope {
 			return name
 		}
 
-		if var name = this.parent().acquireUnusedTempName() {
+		if var name ?= this.parent().acquireUnusedTempName() {
 			@tempParentNames[name] = true
 
 			return name
@@ -54,11 +57,12 @@ class InlineBlockScope extends BlockScope {
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{
-		var mut index = this.getRenamedIndex(name)
-		var mut newName = '__ks_' + name + '_' + (++index)
+		var mut index = this.getRenamedIndex(name) + 1
+		var mut newName = '__ks_' + name + '_' + index
 
 		while this.hasRenamedVariable(newName) {
-			newName = '__ks_' + name + '_' + (++index)
+			index += 1
+			newName = '__ks_' + name + '_' + index
 		}
 
 		@renamedIndexes[name] = index

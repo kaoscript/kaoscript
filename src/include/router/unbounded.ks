@@ -102,7 +102,7 @@ func updateUnboundedTree(tree: Tree, unlimited: Boolean): Void { # {{{
 } # }}}
 
 func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, mut min: Number, mut arguments: Dictionary): Boolean { # {{{
-	var mut unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
+	var mut unbounded = updateUnboundedTree5(node, unlimited, min, arguments <- {...arguments})
 
 	min += node.min
 
@@ -116,7 +116,7 @@ func updateUnboundedTree4(tree: Tree, node: TreeBranch, unlimited: Boolean, mut 
 } # }}}
 
 func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, mut arguments: Dictionary): Boolean { # {{{
-	var unbounded = updateUnboundedTree5(node, unlimited, min, arguments = {...arguments})
+	var unbounded = updateUnboundedTree5(node, unlimited, min, arguments <- {...arguments})
 
 	var function = node.function.index()
 	var row = node.rows[0]
@@ -261,7 +261,7 @@ func updateUnboundedTree5(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: 
 	else {
 		if unbounded {
 			for var type in tree.rows[0].types while unbounded when type.parameter == parameter {
-				if var argument = arguments[type.index] {
+				if var argument ?= arguments[type.index] {
 					if argument.tree.max == Infinity {
 						unbounded = false
 					}

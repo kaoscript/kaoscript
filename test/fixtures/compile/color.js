@@ -954,7 +954,7 @@ module.exports = function() {
 			if(length > 0) {
 				this.__ks_func_space_1(Space.SRGB.value);
 				endColor.__ks_func_space_1(Space.SRGB.value);
-				++length;
+				length += 1;
 				let red = endColor._red - this._red;
 				let green = endColor._green - this._green;
 				let blue = endColor._blue - this._blue;

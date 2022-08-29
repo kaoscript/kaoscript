@@ -132,7 +132,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}

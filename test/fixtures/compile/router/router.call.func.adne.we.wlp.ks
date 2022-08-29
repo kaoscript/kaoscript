@@ -4,5 +4,5 @@ func foobar(dict: Dictionary) {
 	}
 }
 
-func quxbaz(value = null) {
+func quxbaz(value? = null) {
 }

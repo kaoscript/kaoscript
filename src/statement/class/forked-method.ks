@@ -125,7 +125,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
-						++index
+						index += 1
 					}
 
 					ctrl2.code(`)`).step()
@@ -158,7 +158,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
-					++index
+					index += 1
 				}
 
 				ctrl2.code(`)`).step()

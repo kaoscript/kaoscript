@@ -9,10 +9,10 @@ class StructType extends Type {
 				for var type, name of data.fields {
 					value.addField(StructFieldType.import(index, name, type, metadata, references, alterations, queue, scope, node))
 
-					++index
+					index += 1
 				}
 
-				if data.extends? {
+				if ?data.extends {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 			})
@@ -21,16 +21,16 @@ class StructType extends Type {
 		} # }}}
 	}
 	private {
-		@assessment								= null
+		@assessment?							= null
 		@count: Number							= 0
 		@extending: Boolean						= false
 		@extends: NamedType<StructType>?		= null
 		@fields: Dictionary<StructFieldType>	= {}
-		@function: FunctionType					= null
+		@function: FunctionType?				= null
 	}
 	addField(field: StructFieldType) { # {{{
 		@fields[field.name()] = field
-		++@count
+		@count += 1
 	} # }}}
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
@@ -102,7 +102,7 @@ class StructType extends Type {
 		return list
 	} # }}}
 	getProperty(name: String) { # {{{
-		if var field = @fields[name] {
+		if var field ?= @fields[name] {
 			return field
 		}
 
@@ -175,7 +175,7 @@ class StructType extends Type {
 
 				nameds[name] = true
 
-				++namedCount
+				namedCount += 1
 			}
 			else if argument is IdentifierLiteral {
 				var name = argument.name()
@@ -212,16 +212,18 @@ class StructType extends Type {
 
 			for var field, name of fields {
 				if nameds[name] || shorthands[name] {
-					++index
+					index += 1
 				}
 				else {
-					groups.push([++index, field])
+					index += 1
+
+					groups.push([index, field])
 
 					if field.isRequired() {
-						++required
+						required += 1
 					}
 					else {
-						++optional
+						optional += 1
 					}
 				}
 			}
@@ -242,11 +244,11 @@ class StructType extends Type {
 						ReferenceException.throwNoMatchingStruct(structName, arguments, node)
 					}
 
-					++leftover
+					leftover += 1
 				}
 				else if countdown > 0 {
-					++leftover
-					--countdown
+					leftover += 1
+					countdown -= 1
 				}
 			}
 		}
@@ -277,7 +279,7 @@ class StructType extends Type {
 
 				nameds[name] = argument
 
-				++namedCount
+				namedCount += 1
 			}
 			else if argument is IdentifierLiteral {
 				var name = argument.name()
@@ -302,7 +304,7 @@ class StructType extends Type {
 			}
 			else {
 				for var field, name of fields {
-					if nameds[name]? {
+					if ?nameds[name] {
 						order.push(nameds[name])
 					}
 					else if field.isRequired() {
@@ -320,10 +322,10 @@ class StructType extends Type {
 			var mut optional = 0
 
 			for var field, name of fields {
-				if nameds[name]? {
+				if ?nameds[name] {
 					order.push(nameds[name])
 				}
-				else if shorthands[name]? {
+				else if ?shorthands[name] {
 					order.push(shorthands[name])
 				}
 				else {
@@ -333,10 +335,10 @@ class StructType extends Type {
 					groups.push([index, field])
 
 					if field.isRequired() {
-						++required
+						required += 1
 					}
 					else {
-						++optional
+						optional += 1
 					}
 				}
 			}
@@ -355,13 +357,13 @@ class StructType extends Type {
 				if field.isRequired() {
 					order[index] = leftovers[leftover]
 
-					++leftover
+					leftover += 1
 				}
 				else if countdown > 0 {
 					order[index] = leftovers[leftover]
 
-					++leftover
-					--countdown
+					leftover += 1
+					countdown -= 1
 				}
 				else {
 					order[index] = new Literal('null', node)

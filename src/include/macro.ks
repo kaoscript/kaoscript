@@ -15,11 +15,10 @@ func $evaluate(source) { # {{{
 		target: $target
 	})
 
-	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)
+	compiler.compile('extern console, JSON\nrequire __ks_marker\nreturn ' + source)
+	// console.log('=- ', compiler.toSource())
 
-	// console.log('<-- ', compiler.toSource())
-
-	return eval(`(function(__ks_marker) {\(compiler.toSource())})`)(MacroMarker)
+	return eval(compiler.toSource())(MacroMarker)
 } # }}}
 
 class MacroMarker {
@@ -29,7 +28,7 @@ class MacroMarker {
 	constructor(@index)
 }
 
-func $reificate(macro, node, data, ast, reification = null, separator = null) { # {{{
+func $reificate(macro, node, data, ast, reification? = null, separator? = null) { # {{{
 	if ast {
 		return Generator.generate(data, {
 			transformers: {
@@ -129,7 +128,7 @@ func $serialize(macro, data, context) { # {{{
 			computed = /^\_ks\_property\_name\_mark\_(\d+)$/.exec(key)
 
 			if value is MacroMarker {
-				if computed? {
+				if ?computed {
 					name = `\(Generator.generate(macro.getMark(computed[1]), {
 						mode: Generator.KSWriterMode::Property
 					}))`
@@ -149,7 +148,7 @@ func $serialize(macro, data, context) { # {{{
 					}))`
 				}
 			}
-			else if computed? {
+			else if ?computed {
 				context.data += `\(Generator.generate(macro.getMark(computed[1]), {
 					mode: Generator.KSWriterMode::Property
 				})): `
@@ -209,7 +208,7 @@ class MacroDeclaration extends AbstractNode {
 		_line: Number
 		_marks:	Array							= []
 		_name: String
-		_parameters: Dictionary						= {}
+		_parameters: Dictionary					= {}
 		_referenceIndex: Number					= -1
 		_type: MacroType
 	}
@@ -246,7 +245,7 @@ class MacroDeclaration extends AbstractNode {
 				line.code(', ', data.internal.name)
 			}
 
-			if data.defaultValue? {
+			if ?data.defaultValue {
 				line.code(' = ').expression(data.defaultValue)
 			}
 		}
@@ -282,7 +281,7 @@ class MacroDeclaration extends AbstractNode {
 	analyse()
 	override prepare(target)
 	translate()
-	addMark(data, kind = null) { # {{{
+	addMark(data, kind? = null) { # {{{
 		var index = @marks.length
 
 		@marks.push(data, kind)
@@ -301,7 +300,7 @@ class MacroDeclaration extends AbstractNode {
 			]
 		}
 	} # }}}
-	addPropertyNameMark(data, kind = null) { # {{{
+	addPropertyNameMark(data, kind? = null) { # {{{
 		var index = @marks.length
 
 		@marks.push(data, kind)
@@ -314,10 +313,11 @@ class MacroDeclaration extends AbstractNode {
 	execute(arguments: Array, parent) { # {{{
 		// console.log(@fn.toString())
 		var module = this.module()
-		++@executeCount
+		@executeCount += 1
 
 		var args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
 
+		// console.log(args)
 		var mut data = @fn(...args)
 		// console.log('execute =>', data)
 
@@ -502,7 +502,7 @@ class MacroArgument extends Type {
 				return	@data.kind == NodeKind::UnaryExpression ||
 						@data.kind == NodeKind::BinaryExpression ||
 						@data.kind == NodeKind::PolyadicExpression ||
-						$expressions[@data.kind]?
+						?$expressions[@data.kind]
 			}
 			'Identifier' => {
 				return @data.kind == NodeKind::Identifier
@@ -567,7 +567,7 @@ class CallMacroStatement extends Statement {
 		for var data in data.body {
 			@scope.line(data.start.line)
 
-			if var statement = $compile.statement(data, this) {
+			if var statement ?= $compile.statement(data, this) {
 				@statements.push(statement)
 
 				statement.initiate()
@@ -604,10 +604,10 @@ class CallMacroStatement extends Statement {
 	override prepare(target) { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
-			statement.prepare()
+			statement.prepare(target)
 		}
 
 		@scope.setLineOffset(@offsetEnd)

@@ -2,5 +2,5 @@ class Foobar {
 	private {
 		@x
 	}
-	foobar() => @x = 42
+	foobar() => @x <- 42
 }

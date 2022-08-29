@@ -7,7 +7,7 @@ func foobar(i: Number, b: Boolean) {
 		x = 42
 	}
 
-	if test(x = null) {
+	if test(x <- null) {
 
 	}
 }

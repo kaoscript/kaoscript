@@ -13,7 +13,7 @@ class EnumMethodCallee extends Callee {
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()
@@ -41,7 +41,7 @@ class EnumMethodCallee extends Callee {
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		if @methods? {
+		if ?@methods {
 			for var method in @methods {
 				if !method.isInitializingInstanceVariable(name) {
 					return false

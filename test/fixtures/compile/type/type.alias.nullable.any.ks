@@ -6,13 +6,13 @@ class Foobar {
 
 type FS = Foobar | String
 
-func foobar(x: FS = null) {
-	// if !?x {
-	// 	x = Foobar.get('foobar')
-	// }
+func foobar(mut x: FS? = null) {
+	if !?x {
+		x = Foobar.get('foobar')
+	}
 
 	if x is String {
-		// x = Foobar.get(x)
+		x = Foobar.get(x)
 	}
 
 	quxbaz(x)

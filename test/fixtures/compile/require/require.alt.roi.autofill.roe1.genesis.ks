@@ -5,16 +5,16 @@ require class Foobar
 disclose Array {
 	length: Number
 	concat(...values): Array
-	every(callback: Function, thisArg: Dictionary = null): Boolean
-	forEach(callback: Function, thisArg: Dictionary = null): void
+	every(callback: Function, thisArg: Dictionary? = null): Boolean
+	forEach(callback: Function, thisArg: Dictionary? = null): void
 	indexOf(searchElement, fromIndex: Number = 0): Number
 	join(separator: String = ','): String
 	pop(): Any
 	push(...elements): Number
 	shift(): Any
 	slice(begin: Number = 0, end: Number = -1)
-	some(callback: Function, thisArg: Dictionary = null): Boolean
-	sort(compare: Function = null): Array
+	some(callback: Function, thisArg: Dictionary? = null): Boolean
+	sort(compare: Function? = null): Array
 	splice(start: Number, delete: Number = -1, ...items): Array
 	toString(): String
 	unshift(...elements): Number
@@ -32,7 +32,7 @@ disclose String {
 	replace(pattern: RegExp | String, replacement: Function | String): String
 	search(regexp: RegExp): Number
 	slice(beginIndex: Number, endIndex: Number = -1): String
-	split(separator: RegExp | String = null, limit: Number = -1): Array<String>
+	split(separator: RegExp | String | Null = null, limit: Number = -1): Array<String>
 	substr(start: Number, length: Number = -1): String
 	substring(indexStart: Number, indexEnd: Number = -1): String
 	toLowerCase(): String

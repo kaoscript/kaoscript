@@ -5,17 +5,19 @@ module.exports = function() {
 		let i = 0;
 		let l = args.length;
 		while(Operator.lt(i, l) && !Type.isArray(args[i])) {
-			++i;
+			i += 1;
 		}
 		if(Operator.lt(i, l)) {
 			const source = args[i];
-			while(Operator.lt(++i, l)) {
+			i += 1;
+			while(Operator.lt(i, l)) {
 				if(Type.isArray(args[i])) {
 					for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
 						value = args[i][__ks_0];
 						source.pushUniq(value);
 					}
 				}
+				i += 1;
 			}
 			return source;
 		}

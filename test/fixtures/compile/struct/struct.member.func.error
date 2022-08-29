@@ -1,1 +1,1 @@
-ReferenceException: Invalid left-hand side in assignment (fixtures/compile/struct/struct.member.func.ks:6)
+ReferenceException: Any value can't be assigned to the expression "Foobar.test" (fixtures/compile/struct/struct.member.func.ks:6)

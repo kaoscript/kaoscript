@@ -21,7 +21,7 @@ class PreciseMethodCallee extends Callee {
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()

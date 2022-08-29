@@ -1,5 +1,5 @@
 struct Foobar {
-	x	= null
+	x?	= null
 }
 
 var f = Foobar('')

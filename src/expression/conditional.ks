@@ -1,9 +1,9 @@
 class ConditionalExpression extends Expression {
 	private late {
-		_condition
-		_whenFalse
-		_whenTrue
-		_type: Type
+		@condition
+		@whenFalse
+		@whenTrue
+		@type: Type
 	}
 	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)
@@ -16,14 +16,14 @@ class ConditionalExpression extends Expression {
 		@whenFalse.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@condition.prepare()
+		@condition.prepare(@scope.reference('Boolean'))
 
 		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
-		@whenTrue.prepare()
-		@whenFalse.prepare()
+		@whenTrue.prepare(target)
+		@whenFalse.prepare(target)
 
 		var t = @whenTrue.type()
 		var f = @whenFalse.type()

@@ -14,11 +14,11 @@ class ReturnStatement extends Statement {
 
 		var mut ancestor = parent
 
-		while ancestor? && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			ancestor = ancestor.parent()
 		}
 
-		if ancestor? {
+		if ?ancestor {
 			@function = ancestor
 		}
 	} # }}}
@@ -35,16 +35,12 @@ class ReturnStatement extends Statement {
 			@exceptions = @value.hasExceptions()
 		}
 	} # }}}
-	// TODO
-	// override prepare(target = AnyType.NullableUnexplicit) { # {{{
-	override prepare(mut target) { # {{{
-		target ??= AnyType.NullableUnexplicit
-
+	override prepare(target) { # {{{
 		if target.isNever() {
 			TypeException.throwUnexpectedReturnedValue(this)
 		}
 
-		if @value? {
+		if ?@value {
 			@value.prepare(target)
 
 			@value.acquireReusable(false)
@@ -108,7 +104,7 @@ class ReturnStatement extends Statement {
 			TypeException.throwExpectedReturnedValue(target, this) unless target.isNullable() || target.isVoid()
 		}
 
-		if @function? {
+		if ?@function {
 			@async = @function.type().isAsync()
 		}
 	} # }}}

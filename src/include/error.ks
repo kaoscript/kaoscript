@@ -210,7 +210,7 @@ export class ReferenceException extends Exception {
 			throw new ReferenceException(`The variable "\(argname)" must be complete before passing it to the module "\(modname)"`, node)
 		} # }}}
 		throwInvalidAssignment(node): Never ~ ReferenceException { # {{{
-			throw new ReferenceException(`Invalid left-hand side in assignment`, node)
+			throw new ReferenceException(`Any value can't be assigned to the expression \(node.toQuote(true))`, node)
 		} # }}}
 		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
@@ -343,7 +343,10 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`Dead code`, node)
 		} # }}}
 		throwDeadCodeParameter(node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The default value of a required and nullable parameter can only be 'null'`, node)
+			throw new SyntaxException(`A parameter's default value must be "null" when its type is "required" and "nullable"`, node)
+		} # }}}
+		throwDeadCodeParameter(name, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The default value of parameter "\(name)" must be "null" when its type is "required" and "nullable"`, node)
 		} # }}}
 		throwDuplicateConstructor(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The constructor is matching an existing constructor`, node)
@@ -521,6 +524,14 @@ export class SyntaxException extends Exception {
 		throwMixedOverloadedFunction(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Overloaded functions can't mix sync/async`, node)
 		} # }}}
+		throwNamedOnlyParameters(names: String[], node): Never ~ SyntaxException { # {{{
+			if names.length == 1 {
+				throw new SyntaxException(`The parameter "\(names[0])" must be passed by name`, node)
+			}
+			else {
+				throw new SyntaxException(`The \($joinQuote(names)) parameters must be passed by name`, node)
+			}
+		} # }}}
 		throwNoDefaultParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter can't have a default value`, node)
 		} # }}}
@@ -538,6 +549,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwNoRestParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
+		} # }}}
+		throwNoReturn(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The expression \(node.toQuote(true)) doesn't return a value.`, node)
 		} # }}}
 		throwNoSuitableOverwrite(class, name, type, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be matched to any suitable method to overwrite`, node)
@@ -583,6 +597,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwOnlyStaticImport(argname, modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" must have an unmodified type`, node)
+		} # }}}
+		throwPositionalOnlyParameter(name: String, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The parameter "\(name)" must be passed by position`, node)
 		} # }}}
 		throwReservedClassMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class method "\(name)" is reserved`, node)
@@ -701,6 +718,9 @@ export class TypeException extends Exception {
 		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The expression \(left.toQuote(true)) of type \(left.type().toQuote(true)) can't be compared to a value of type \(right.type().toQuote(true))`, node)
 		} # }}}
+		throwInvalidComprehensionType(expected: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`An array comprehension can't be of type \(expected.toQuote(true))`, node)
+		} # }}}
 		throwInvalidCondition(expression, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The condition \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "Boolean"`, node)
 		} # }}}
@@ -745,6 +765,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwNotEnum(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not an enum`, node)
+		} # }}}
+		throwNotIterable(expression, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The non-emptiness test of \(expression.toQuote(true)) is always negative`, node)
 		} # }}}
 		throwNotNamespace(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)

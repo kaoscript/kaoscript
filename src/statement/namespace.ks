@@ -17,12 +17,14 @@ class NamespaceDeclaration extends Statement {
 		@variable = @scope.parent().define(@name, true, @type, this)
 
 		@statements = []
-		for statement in @data.statements {
-			@scope.line(statement.start.line)
+		for var data in @data.statements {
+			@scope.line(data.start.line)
 
-			@statements.push(statement = $compile.statement(statement, this))
+			var statement = $compile.statement(data, this)
 
 			statement.initiate()
+
+			@statements.push(statement)
 		}
 	} # }}}
 	analyse() { # {{{
@@ -49,7 +51,7 @@ class NamespaceDeclaration extends Statement {
 		for var statement in @statements {
 			@scope.line(statement.line())
 
-			statement.prepare()
+			statement.prepare(Type.Void)
 		}
 
 		for var statement in @statements when statement.isExportable() {
@@ -83,7 +85,7 @@ class NamespaceDeclaration extends Statement {
 	} # }}}
 	includePath() => null
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		if var var = @scope.getDefinedVariable(variable.name) {
+		if var var ?= @scope.getDefinedVariable(variable.name) {
 			var.setDeclaredType(variable.type)
 		}
 	} # }}}

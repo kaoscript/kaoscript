@@ -1,27 +1,27 @@
 class VariableDeclaration extends Statement {
 	private late {
-		_autotype: Boolean			= false
-		_await: Boolean				= false
-		_cascade: Boolean			= false
-		_declarators: Array			= []
-		_function					= null
-		_hasInit: Boolean			= false
-		_immutable: Boolean			= true
-		_init
-		_initScope: Scope
-		_lateInit: Boolean			= false
-		_rebindable: Boolean		= false
-		_redeclared: Boolean		= false
-		_toDeclareAll: Boolean		= true
-		_try						= null
-		_type: Type					= Type.Null
+		@autotype: Boolean			= true
+		@await: Boolean				= false
+		@cascade: Boolean			= false
+		@declarators: Array			= []
+		@function					= null
+		@hasValue: Boolean			= false
+		@immutable: Boolean			= true
+		@lateInit: Boolean			= false
+		@rebindable: Boolean		= false
+		@redeclared: Boolean		= false
+		@toDeclareAll: Boolean		= true
+		@try						= null
+		@type: Type					= Type.Null
+		@value
+		@valueScope: Scope
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
 		var mut ancestor = parent
 
-		while ancestor? && !(
+		while ?ancestor && !(
 			ancestor is AnonymousFunctionExpression ||
 			ancestor is ArrowFunctionExpression ||
 			ancestor is FunctionDeclarator ||
@@ -36,21 +36,21 @@ class VariableDeclaration extends Statement {
 			ancestor = ancestor.parent()
 		}
 
-		if ancestor? {
+		if ?ancestor {
 			@function = ancestor
 		}
 	} # }}}
-	constructor(@data, @parent, @scope, @initScope, @cascade) { # {{{
+	constructor(@data, @parent, @scope, @valueScope, @cascade) { # {{{
 		this(data, parent, scope)
 	} # }}}
 	override initiate() { # {{{
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Dynamic {
+				@autotype = false
 				@immutable = false
 				@rebindable = true
 			}
 			else if modifier.kind == ModifierKind::Mutable {
-				@autotype = true
 				@immutable = false
 				@rebindable = true
 			}
@@ -82,32 +82,32 @@ class VariableDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		if @data.init? {
-			@hasInit = true
+		if ?@data.value {
+			@hasValue = true
 
 			if @immutable {
-				@rebindable = ?@initScope
+				@rebindable = ?@valueScope
 			}
 
-			@initScope ??= this.newScope(@scope, ScopeType::Hollow)
+			@valueScope ??= this.newScope(@scope, ScopeType::Hollow)
 
-			var line = @initScope.getRawLine()
+			var line = @valueScope.getRawLine()
 
-			@initScope.line(line - 1)
+			@valueScope.line(line - 1)
 
-			@init = $compile.expression(@data.init, this, @initScope)
-			@init.analyse()
+			@value = $compile.expression(@data.value, this, @valueScope)
+			@value.analyse()
 
-			@initScope.line(line)
+			@valueScope.line(line)
 
-			@await = @init.isAwait()
+			@await = @value.isAwait()
 
 			if @await && !?@function && !this.module().isBinary() {
 				SyntaxException.throwInvalidAwait(this)
 			}
 		}
 
-		if @hasInit && @declarators.length == 1 {
+		if @hasValue && @declarators.length == 1 {
 			if @declarators[0] is VariableIdentifierDeclarator {
 				this.reference(@declarators[0].name())
 			}
@@ -115,15 +115,23 @@ class VariableDeclaration extends Statement {
 
 	} # }}}
 	override prepare(target) { # {{{
+		for var declarator in @declarators {
+			declarator.prepare()
+
+			if declarator.isRedeclared() {
+				@redeclared = true
+			}
+		}
+
 		var declarator = @declarators[0]
 
-		if @hasInit {
-			@init.prepare()
+		if @hasValue {
+			@value.prepare(declarator.type() ?? AnyType.NullableUnexplicit)
 
-			@type = @init.type().asReference()
+			@type = @value.type().asReference()
 
 			if @type.isInoperative() {
-				TypeException.throwUnexpectedInoperative(@init, this)
+				TypeException.throwUnexpectedInoperative(@value, this)
 			}
 
 			if @parent is IfStatement {
@@ -141,41 +149,31 @@ class VariableDeclaration extends Statement {
 				declarator.flagDefinitive()
 			}
 			else {
-				declarator.setRealType(@type)
+				declarator.setDeclaredType(AnyType.NullableUnexplicit)
 			}
 
-			this.assignTempVariables(@initScope)
-		}
-
-		for var declarator in @declarators {
-			declarator.prepare()
-
-			if declarator.isRedeclared() {
-				@redeclared = true
-			}
-		}
-
-		if @hasInit {
 			declarator.setRealType(@type)
 
+			@assignTempVariables(@valueScope)
+
 			if declarator is VariableIdentifierDeclarator {
-				if var type = declarator.type() {
-					@init.validateType(type)
+				if var type ?= declarator.type() {
+					@value.validateType(type)
 				}
 			}
 
-			@init.acquireReusable(declarator.isSplitAssignment())
-			@init.releaseReusable()
+			@value.acquireReusable(declarator.isSplitAssignment())
+			@value.releaseReusable()
 
-			this.statement().assignTempVariables(@scope)
+			@statement().assignTempVariables(@scope)
 		}
 		else {
-			@type = @declarators[0].variable().getRealType()
+			@type = declarator.variable().getRealType()
 		}
 	} # }}}
 	translate() { # {{{
-		if @hasInit {
-			@init.translate()
+		if @hasValue {
+			@value.translate()
 		}
 
 		for declarator in @declarators {
@@ -214,11 +212,11 @@ class VariableDeclaration extends Statement {
 		}
 	} # }}}
 	export(recipient) { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.export(recipient)
 		}
 	} # }}}
-	hasInit() => @hasInit
+	hasInit() => @hasValue
 	getIdentifierVariable() { # {{{
 		if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
 			return @declarators[0]._variable
@@ -227,7 +225,6 @@ class VariableDeclaration extends Statement {
 			return null
 		}
 	} # }}}
-	init() => @init
 	isAutoTyping() => @autotype
 	isAwait() => @await
 	isDeclararingVariable(name: String) { # {{{
@@ -251,12 +248,12 @@ class VariableDeclaration extends Statement {
 	isExpectingType() => @declarators[0].isStronglyTyped()
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
-	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
-	isUsingInstanceVariable(name) => @hasInit && @init.isUsingInstanceVariable(name)
-	isUsingStaticVariable(class, varname) => @hasInit && @init.isUsingStaticVariable(class, varname)
+	isUsingVariable(name) => @hasValue && @value.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @hasValue && @value.isUsingInstanceVariable(name)
+	isUsingStaticVariable(class, varname) => @hasValue && @value.isUsingStaticVariable(class, varname)
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
-		if @hasInit {
-			@init.listNonLocalVariables(scope, variables)
+		if @hasValue {
+			@value.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
@@ -264,7 +261,7 @@ class VariableDeclaration extends Statement {
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 
-		var item = @init.toFragments(line, Mode::None)
+		var item = @value.toFragments(line, Mode::None)
 
 		statements.unshift(this)
 
@@ -278,8 +275,8 @@ class VariableDeclaration extends Statement {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 
-		if @hasInit {
-			if @init.isAwaiting() {
+		if @hasValue {
+			if @value.isAwaiting() {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
@@ -299,7 +296,7 @@ class VariableDeclaration extends Statement {
 					}
 				}
 
-				declarator.toAssignmentFragments(line, @init)
+				declarator.toAssignmentFragments(line, @value)
 
 				line.done()
 			}
@@ -326,14 +323,15 @@ class VariableDeclaration extends Statement {
 		}
 	} # }}}
 	toInlineFragments(fragments, mode) { # {{{
-		if @init.isAwaiting() {
+		if @value.isAwaiting() {
 			NotImplementedException.throw(this)
 		}
 		else {
-			@declarators[0].toAssignmentFragments(fragments, @init)
+			@declarators[0].toAssignmentFragments(fragments, @value)
 		}
 	} # }}}
 	type() => @type
+	value() => @value
 	walk(fn) { # {{{
 		for declarator in @declarators {
 			declarator.walk(fn)
@@ -343,8 +341,8 @@ class VariableDeclaration extends Statement {
 
 class VariableBindingDeclarator extends AbstractNode {
 	private {
-		_binding
-		_type: Type?						= null
+		@binding
+		@type: Type?						= null
 	}
 	analyse() { # {{{
 		@binding = $compile.expression(@data.name, this)
@@ -360,14 +358,15 @@ class VariableBindingDeclarator extends AbstractNode {
 		@parent.defineVariables(@binding)
 	} # }}}
 	override prepare(target) { # {{{
-		if @data.type? {
-			this.setDeclaredType(Type.fromAST(@data.type, this))
+		if ?@data.type {
+			@setDeclaredType(Type.fromAST(@data.type, this))
+		}
+		else if @parent.hasInit() {
+			// do nothing
 		}
 		else if @parent.isImmutable() {
-			this.setDeclaredType(@parent.type())
+			@setDeclaredType(@parent.type())
 		}
-
-		@binding.prepare()
 	} # }}}
 	translate() { # {{{
 		@binding.translate()
@@ -383,20 +382,23 @@ class VariableBindingDeclarator extends AbstractNode {
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
 	isStronglyTyped() => true
-	setDeclaredType(@type) { # {{{
-		if !@type.isAny() {
-			if @binding is ArrayBinding {
-				unless type.isArray() || type.isTuple() {
-					TypeException.throwInvalidBinding('Array', this)
+	setDeclaredType(type: Type) { # {{{
+		if !?@type {
+			if !type.isAny() {
+				if @binding is ArrayBinding {
+					unless type.isArray() || type.isTuple() {
+						TypeException.throwInvalidBinding('Array', this)
+					}
 				}
-			}
-			else {
-				unless type.isDictionary() || type.isStruct() {
-					TypeException.throwInvalidBinding('Dictionary', this)
+				else {
+					unless type.isDictionary() || type.isStruct() {
+						TypeException.throwInvalidBinding('Dictionary', this)
+					}
 				}
 			}
 
-			@binding.type(@type)
+			@type = type
+			@binding.type(type).prepare()
 		}
 	} # }}}
 	setRealType(type: Type) { # {{{
@@ -417,6 +419,7 @@ class VariableBindingDeclarator extends AbstractNode {
 		fragments.compile(@binding)
 	} # }}}
 	toAssignmentFragments(fragments, value) => @binding.toAssignmentFragments(fragments, value)
+	type() => @type
 	walk(fn) { # {{{
 		@binding.walk(fn)
 	} # }}}
@@ -424,12 +427,12 @@ class VariableBindingDeclarator extends AbstractNode {
 
 class VariableIdentifierDeclarator extends AbstractNode {
 	private late {
-		_identifier: IdentifierLiteral
-		_lateInit: Boolean					= false
-		_name: String
-		_nullable: Boolean					= false
-		_type: Type?						= null
-		_variable: Variable
+		@identifier: IdentifierLiteral
+		@lateInit: Boolean					= false
+		@name: String
+		@nullable: Boolean					= false
+		@type: Type?						= null
+		@variable: Variable
 	}
 	analyse() { # {{{
 		@name = @data.name.name
@@ -454,7 +457,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		if @data.type? {
+		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 
 			if @type.isNull() {
@@ -463,21 +466,29 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
 		}
-		else if @parent.isAutoTyping() {
+		else if @parent.hasInit() {
 			// do nothing
 		}
-		else if !@lateInit || !@parent.isImmutable() {
-			if @parent.isImmutable() {
-				@type = @variable.getRealType()
-			}
-			else {
-				@type = AnyType.NullableUnexplicit
-			}
+		else {
+			@type = AnyType.NullableUnexplicit
 
-			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
+			@variable.setDeclaredType(@type, false).flagDefinitive()
 		}
+		// else if @parent.isAutoTyping() {
+		// 	// do nothing
+		// }
+		// else if !@lateInit || !@parent.isImmutable() {
+		// 	if @parent.isImmutable() {
+		// 		@type = @variable.getRealType()
+		// 	}
+		// 	else {
+		// 		@type = AnyType.NullableUnexplicit
+		// 	}
 
-		@identifier.prepare()
+		// 	@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
+		// }
+
+		// @identifier.prepare()
 	} # }}}
 	translate() { # {{{
 		@identifier.translate()
@@ -510,16 +521,20 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	isDeclararingVariable(name: String) => @name == name
 	isRedeclared() => @scope.isRedeclaredVariable(@name)
 	isSplitAssignment() => false
-	isStronglyTyped() => @data.type?
+	isStronglyTyped() => ?@data.type
 	name() => @name
 	setDeclaredType(type: Type) { # {{{
-		if @type == null {
+		if !?@type {
 			if @nullable && !type.isNullable() {
 				@variable.setDeclaredType(type.setNullable(true))
 			}
 			else {
 				@variable.setDeclaredType(type)
 			}
+
+			@type = type
+
+			@identifier.prepare()
 		}
 	} # }}}
 	setRealType(type: Type) { # {{{

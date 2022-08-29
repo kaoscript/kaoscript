@@ -4,6 +4,6 @@ func foo() {
 	return true
 }
 
-while x = foo() {
+while x <- foo() {
 	console.log(x)
 }

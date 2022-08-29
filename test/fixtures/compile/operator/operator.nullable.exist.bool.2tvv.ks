@@ -1,4 +1,4 @@
 extern foo
 
-if foo?.bar? {
+if ?foo?.bar {
 }

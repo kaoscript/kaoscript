@@ -87,7 +87,7 @@ abstract class Scope {
 	abstract authority(): Scope
 	abstract block(): Scope
 	private abstract declareVariable(name: String, scope: Scope): String?
-	abstract define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable
+	abstract define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable
 	abstract defineVariable(variable: Variable, node: AbstractNode)
 	abstract getDefinedVariable(name: String): Variable?
 	getLineOffset(): Number => 0

@@ -1,3 +1,3 @@
-func isNotString(value = null) {
+func isNotString(value? = null) {
 	return value is not string
 }

@@ -186,7 +186,7 @@ func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
 } // }}}
 
 namespace $caster {
-	func alpha(n = null, percentage: bool = false): float { // {{{
+	func alpha(n? = null, percentage: bool = false): float { // {{{
 		var dyn i: Number = Float.parse(n)
 
 		return 1 if i == NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
@@ -237,7 +237,7 @@ func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): C
 
 func $find(from: string, to: string): void { // {{{
 	for var _, name of $spaces[from].converters {
-		if $spaces[name].converters[to]? {
+		if ?$spaces[name].converters[to] {
 			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
 
 			return
@@ -506,7 +506,7 @@ export class Color {
 	macro registerSpace(@space: Dictionary) {
 		var spaces: Array = [space.name.toUpperCase()]
 
-		if space.alias? {
+		if ?space.alias {
 			for var name in space.alias {
 				spaces.push(name.toUpperCase())
 			}
@@ -518,7 +518,7 @@ export class Color {
 			}
 		}
 
-		if space.components? {
+		if ?space.components {
 			var fields: Array = []
 			var methods: Array = []
 
@@ -834,7 +834,7 @@ export class Color {
 	} // }}}
 
 	format(format: string = this._space) { // {{{
-		if var format = $formatters[format] {
+		if var format ?= $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
 		else {
@@ -849,7 +849,7 @@ export class Color {
 	private getField(name) { // {{{
 		var component = $components[name]
 
-		if component.spaces[this._space]? {
+		if ?component.spaces[this._space] {
 			return this[component.field]
 		}
 		else if component.families.length > 1 {
@@ -860,14 +860,14 @@ export class Color {
 		}
 	} // }}}
 
-	gradient(endColor: Color, length: int): array<Color> { // {{{
+	gradient(endColor: Color, mut length: int): array<Color> { // {{{
 		var dyn gradient: array<Color> = [this]
 
 		if length > 0 {
 			this.space(Space::SRGB)
 			endColor.space(Space::SRGB)
 
-			++length
+			length += 1
 
 			var dyn red = endColor._red - this._red
 			var dyn green = endColor._green - this._green
@@ -938,7 +938,7 @@ export class Color {
 	like(mut space: string) { // {{{
 		space = $aliases[space] ?? space
 
-		if var value = Space(space) {
+		if var value ?= Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				return $convert(this, value)
 			}
@@ -997,7 +997,7 @@ export class Color {
 	private setField(name, value: number | string): Color { // {{{
 		var dyn component = $components[name]
 
-		if component.spaces[this._space]? {
+		if ?component.spaces[this._space] {
 			component = $spaces[this._space].components[name]
 		}
 		else if component.families.length > 1 {
@@ -1043,7 +1043,7 @@ export class Color {
 			}
 		}
 
-		if var value = Space(space) {
+		if var value ?= Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				$convert(this, value, this)
 			}

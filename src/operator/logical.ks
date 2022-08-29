@@ -7,17 +7,12 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	}
 	override prepare(target) { # {{{
 		var mut nullable = false
-		var mut boolean = true
-		var mut number = true
+		var mut boolean = target.canBeBoolean()
+		var mut number = target.canBeNumber()
 		var mut native = true
 
-		if target? {
-			boolean = target.canBeBoolean()
-			number = target.canBeNumber()
-
-			if !target.canBeEnum() {
-				@expectingEnum = false
-			}
+		if !target.canBeEnum() {
+			@expectingEnum = false
 		}
 
 		for var operand in @operands {
@@ -73,7 +68,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		if !boolean && !number {
-			if target? {
+			if !target.isVoid() {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
@@ -96,7 +91,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			}
 		}
 		else if number {
-			if target?.isEnum() {
+			if target.isEnum() {
 				@type = target
 				@operand = OperandType::Enum
 			}
@@ -120,7 +115,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferTypes({}) {
-				if inferables[name]? {
+				if ?inferables[name] {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
 					}
@@ -133,7 +128,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if var variable = scope.getVariable(name) {
+						if var variable ?= scope.getVariable(name) {
 							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
@@ -255,17 +250,12 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	}
 	override prepare(target) { # {{{
 		var mut nullable = false
-		var mut boolean = true
-		var mut number = true
+		var mut boolean = target.canBeBoolean()
+		var mut number = target.canBeNumber()
 		var mut native = true
 
-		if target? {
-			boolean = target.canBeBoolean()
-			number = target.canBeNumber()
-
-			if !target.canBeEnum() {
-				@expectingEnum = false
-			}
+		if !target.canBeEnum() {
+			@expectingEnum = false
 		}
 
 		var lastIndex = @operands.length - 1
@@ -330,7 +320,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 
 		if !boolean && !number {
-			if target? {
+			if !target.isVoid() {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
@@ -357,7 +347,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 		}
 		else if number {
-			if target?.isEnum() {
+			if target.isEnum() {
 				@type = target
 				@operand = OperandType::Enum
 			}
@@ -381,7 +371,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferTypes({}) {
-				if inferables[name]? {
+				if ?inferables[name] {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
 					}
@@ -394,7 +384,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if var variable = scope.getVariable(name) {
+						if var variable ?= scope.getVariable(name) {
 							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
@@ -427,7 +417,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferWhenFalseTypes({}) {
-				if inferables[name]? {
+				if ?inferables[name] {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
 					}
@@ -440,7 +430,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				}
 				else {
 					if index != 0 && data.isVariable {
-						if var variable = scope.getVariable(name) {
+						if var variable ?= scope.getVariable(name) {
 							var type = variable.getRealType()
 
 							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
@@ -475,7 +465,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferTypes({}) {
-				if inferables[name]? {
+				if ?inferables[name] {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
 					}
@@ -487,7 +477,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 					}
 				}
 				else if index != 0 && data.isVariable {
-					if var variable = scope.getVariable(name) {
+					if var variable ?= scope.getVariable(name) {
 						var type = variable.getRealType()
 
 						if data.type.equals(type) || data.type.isMorePreciseThan(type) {
@@ -515,14 +505,14 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				}
 			}
 			else {
-				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable && whenTrue[name]? {
+				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable && ?whenTrue[name] {
 					whenTrue[name].push(data.type)
 				}
 			}
 		}
 
 		for var types, name of whenTrue when types.length != 1 {
-			if var variable = scope.getVariable(name) {
+			if var variable ?= scope.getVariable(name) {
 				inferables[name] = {
 					isVariable: true
 					type: Type.union(@scope, ...types)

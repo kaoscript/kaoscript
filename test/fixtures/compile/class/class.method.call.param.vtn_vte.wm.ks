@@ -3,7 +3,7 @@
 extern console
 
 class Foobar {
-	foo(x: Number = null, y: String): String => `[\(x), \(y)]`
+	foo(x: Number? = null, y: String): String => `[\(x), \(y)]`
 }
 
 var x = new Foobar()

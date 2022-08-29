@@ -5,18 +5,23 @@ class SequenceExpression extends Expression {
 		_type: Type
 	}
 	analyse() { # {{{
-		for expression in @data.expressions {
-			@expressions.push(expression = $compile.expression(expression, this))
+		for var data in @data.expressions {
+			var expression = $compile.expression(data, this)
 
 			expression.analyse()
+
+			@expressions.push(expression)
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		for expression in @expressions {
-			expression.prepare()
+		@last = @expressions.length - 1
+
+		for var expression in @expressions til -1 {
+			expression.prepare(Type.Void)
 		}
 
-		@last = @expressions.length - 1
+		@expressions[@last].prepare(target)
+
 		@type = @expressions[@last].type()
 	} # }}}
 	translate() { # {{{

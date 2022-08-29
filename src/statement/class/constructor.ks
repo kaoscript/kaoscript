@@ -87,10 +87,13 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
 		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
@@ -107,7 +110,7 @@ class ClassConstructorDeclaration extends Statement {
 		if @parent.isExtending() {
 			var superclass = @parent.extends().type()
 
-			if var data = @getOveriddenConstructor(superclass) {
+			if var data ?= @getOveriddenConstructor(superclass) {
 				{ method: overridden, type: @type } = data
 
 				@overriding = true
@@ -129,7 +132,7 @@ class ClassConstructorDeclaration extends Statement {
 				index = 0
 			}
 		}
-		else if (index = this.getConstructorIndex(@block.statements())) == -1 && @parent._extending {
+		else if (index <- this.getConstructorIndex(@block.statements())) == -1 && @parent._extending {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -149,7 +152,7 @@ class ClassConstructorDeclaration extends Statement {
 		for var statement in @aliases {
 			var name = statement.getVariableName()
 
-			if var variable = class.getInstanceVariable(name) {
+			if var variable ?= class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
 					@block.initializeVariable(VariableBrief(
 						name
@@ -241,7 +244,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if statement.whenFalse? && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}
@@ -260,7 +263,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if statement.whenFalse? && this.getSuperIndex(statement.whenTrue.statements) != -1 && this.getSuperIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && this.getSuperIndex(statement.whenTrue.statements) != -1 && this.getSuperIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}
@@ -418,7 +421,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 
-			if method? {
+			if ?method {
 				var type = @override ? method.clone() : @type
 
 				if @override {
@@ -472,7 +475,7 @@ class ClassConstructorDeclaration extends Statement {
 			return null
 		} # }}}
 		listOverloadedConstructors(superclass: ClassType) { # {{{
-			if var methods = superclass.listConstructors() {
+			if var methods ?= superclass.listConstructors() {
 				for var method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						return []

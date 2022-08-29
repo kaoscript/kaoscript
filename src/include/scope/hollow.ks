@@ -11,7 +11,7 @@ class HollowScope extends Scope {
 	authority() => @parent.authority()
 	block() => @parent.block()
 	private declareVariable(name: String, scope: Scope): String? => @parent.declareVariable(name, scope)
-	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -111,7 +111,7 @@ class HollowScope extends Scope {
 	hasDefinedVariable(name: String, line: Number): Boolean => @parent.hasDefinedVariable(name, line)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
 	hasMacro(name) => @parent.hasMacro(name)
-	hasVariable(name: String, line: Number = null) => @parent.hasVariable(name, line)
+	hasVariable(name: String, line: Number? = null) => @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
 	isRedeclaredVariable(name: String) { # {{{

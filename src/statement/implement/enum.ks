@@ -26,7 +26,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 
 		switch @enum.kind() {
 			EnumTypeKind::Flags => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
@@ -61,7 +61,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 				}
 			}
 			EnumTypeKind::String => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::Literal {
 						@value = $quote(value.value)
 					}
@@ -74,7 +74,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 				}
 			}
 			EnumTypeKind::Number => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::NumericExpression {
 						@value = `\(@enum.index(value.value))`
 					}
@@ -157,10 +157,12 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
 		@block = $compile.function($ast.body(@data), this)
@@ -191,7 +193,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 
 			if @override {
-				if var method = @enum.getInstantiableMethod(@name, @type, mode) {
+				if var method ?= @enum.getInstantiableMethod(@name, @type, mode) {
 					@type = method.clone().flagAlteration()
 
 					var parameters = @type.parameters()

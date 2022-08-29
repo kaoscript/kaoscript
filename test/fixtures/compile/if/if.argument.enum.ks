@@ -5,7 +5,7 @@ enum Qux {
 }
 
 func foobar(x, y, filter) {
-	if var z = filter(x, y, Qux::abc) {
+	if var z ?= filter(x, y, Qux::abc) {
 		return z
 	}
 

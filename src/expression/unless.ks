@@ -12,8 +12,8 @@ class UnlessExpression extends Expression {
 		@whenFalse.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@condition.prepare()
-		@whenFalse.prepare()
+		@condition.prepare(@scope.reference('Boolean'))
+		@whenFalse.prepare(target)
 
 		@type = @whenFalse.type().setNullable(true)
 	} # }}}

@@ -1,20 +1,21 @@
 class IfStatement extends Statement {
 	private late {
-		_analyzeStep: Boolean								= true
-		_assignedInstanceVariables							= {}
-		_bindingDeclaration: Boolean						= false
-		_bindingScope: Scope
-		_cascade: Boolean									= false
-		_condition: Expression
-		_declaration: VariableDeclaration
-		_declared: Boolean									= false
-		_initializedVariables: Dictionary					= {}
-		_lateInitVariables									= {}
-		_hasWhenFalse: Boolean								= false
-		_whenFalseExpression								= null
-		_whenFalseScope: Scope?								= null
-		_whenTrueExpression									= null
-		_whenTrueScope: Scope?								= null
+		@analyzeStep: Boolean								= true
+		@assignedInstanceVariables							= {}
+		@bindingDeclaration: Boolean						= false
+		@bindingScope: Scope
+		@cascade: Boolean									= false
+		@condition: Expression
+		@declaration: VariableDeclaration
+		@declared: Boolean									= false
+		@existential: Boolean								= false
+		@initializedVariables: Dictionary					= {}
+		@lateInitVariables									= {}
+		@hasWhenFalse: Boolean								= false
+		@whenFalseExpression								= null
+		@whenFalseScope: Scope?								= null
+		@whenTrueExpression									= null
+		@whenTrueScope: Scope?								= null
 	}
 	override initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
@@ -23,18 +24,20 @@ class IfStatement extends Statement {
 
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
 
+			@existential =  @data.condition.operator.assignment == AssignmentOperatorKind::Existential
+
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
 			@declaration.initiate()
 		}
 	} # }}}
 	override analyse() { # {{{
-		@hasWhenFalse = @data.whenFalse?
+		@hasWhenFalse = ?@data.whenFalse
 
 		if @declared {
 			@declaration.analyse()
 
 			if @bindingDeclaration {
-				@condition = @declaration.init()
+				@condition = @declaration.value()
 			}
 
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
@@ -71,14 +74,14 @@ class IfStatement extends Statement {
 	} # }}}
 	override prepare(target) { # {{{
 		if @declared {
-			@declaration.prepare()
+			@declaration.prepare(AnyType.NullableUnexplicit)
 
 			if @bindingDeclaration {
 				@condition.acquireReusable(true)
 				@condition.releaseReusable()
 			}
 
-			if var variable = @declaration.getIdentifierVariable() {
+			if var variable ?= @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
@@ -152,7 +155,7 @@ class IfStatement extends Statement {
 					for var inferable, name of trueInferables {
 						var trueType = inferable.type
 
-						if conditionInferables[name]? {
+						if ?conditionInferables[name] {
 							var conditionType = conditionInferables[name].type
 
 							if trueType.equals(conditionType) {
@@ -252,7 +255,7 @@ class IfStatement extends Statement {
 				for var inferable, name of trueInferables {
 					var trueType = inferable.type
 
-					if falseInferables[name]? {
+					if ?falseInferables[name] {
 						var falseType = falseInferables[name].type
 
 						if trueType.equals(falseType) {
@@ -308,7 +311,7 @@ class IfStatement extends Statement {
 		var name = variable.name()
 		var whenTrue = node == @whenTrueExpression
 
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			if whenTrue {
 				if map[!whenTrue].initializable {
 					map[whenTrue].initializable = true
@@ -343,7 +346,7 @@ class IfStatement extends Statement {
 	addInitializableVariable(variable: Variable, whenTrue: Boolean, node) { # {{{
 		var name = variable.name()
 
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			map[whenTrue].initializable = true
 		}
 		else if !@hasWhenFalse && whenTrue {
@@ -376,7 +379,7 @@ class IfStatement extends Statement {
 	getWhenFalseScope(): @whenFalseScope
 	getWhenTrueScope(): @whenTrueScope
 	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			map[whenTrue].type = type
 		}
 		else {
@@ -388,7 +391,7 @@ class IfStatement extends Statement {
 		var {name, type} = variable
 		var whenTrue = node == @whenTrueExpression
 
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			if map[whenTrue].type != null {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
@@ -413,7 +416,7 @@ class IfStatement extends Statement {
 
 			node.scope().replaceVariable(name, clone)
 		}
-		else if var map = @initializedVariables[name] {
+		else if var map ?= @initializedVariables[name] {
 			if map[whenTrue].type != null {
 				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
@@ -444,7 +447,7 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	isCascade() => @cascade
-	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	isExit() => ?@whenFalseExpression && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInitializingInstanceVariable(name) { # {{{
 		if @condition.isInitializingInstanceVariable(name) {
 			return true
@@ -514,7 +517,7 @@ class IfStatement extends Statement {
 		if @declared {
 			if @bindingDeclaration {
 				fragments
-					.code($runtime.type(this) + '.isValue(')
+					.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
 					.compileReusable(@condition)
 					.code(')')
 
@@ -530,7 +533,7 @@ class IfStatement extends Statement {
 
 					@declaration.walk((name, _) => {
 						if first {
-							fragments.code($runtime.type(this) + '.isValue((')
+							fragments.code($runtime.type(this), @existential ? '.isValue((' : '.isNotEmpty((')
 
 							@declaration.toInlineFragments(fragments, mode)
 
@@ -539,7 +542,7 @@ class IfStatement extends Statement {
 							first = false
 						}
 						else {
-							fragments.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
+							fragments.code(' && ', $runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
 						}
 					})
 				}
@@ -554,7 +557,7 @@ class IfStatement extends Statement {
 							fragments.code(' && ')
 						}
 
-						fragments.code($runtime.type(this) + '.isValue(', name, ')')
+						fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
 					})
 				}
 			}
@@ -567,7 +570,7 @@ class IfStatement extends Statement {
 
 		fragments.compile(@whenTrueExpression, mode)
 
-		if @whenFalseExpression? {
+		if ?@whenFalseExpression {
 			if @whenFalseExpression is IfStatement {
 				fragments.step().code('else ')
 

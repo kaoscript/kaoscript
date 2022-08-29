@@ -45,7 +45,14 @@ var loadFile = function(module, filename) { // {{{
 
 		var compiler = new Compiler(filename, options);
 
-		compiler.compile(source);
+		try {
+			compiler.compile(source);
+		}
+		catch(error) {
+			console.error(error.toString());
+
+			throw error;
+		}
 
 		compiler.writeFiles();
 

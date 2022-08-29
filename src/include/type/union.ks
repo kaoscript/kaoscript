@@ -10,7 +10,7 @@ class UnionType extends Type {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
 			var type = new UnionType(scope)
 
-			if data.nullable? {
+			if ?data.nullable {
 				type._nullable = data.nullable
 				type._explicitNullity = true
 			}
@@ -188,22 +188,22 @@ class UnionType extends Type {
 
 		return that
 	} # }}}
-	compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: ArrayType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
 		return -1
 	} # }}}
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -389,7 +389,7 @@ class UnionType extends Type {
 			for var aType in @types {
 				for var bType in value.types() {
 					if aType.isSubsetOf(bType, mode) {
-						match++
+						match += 1
 						break
 					}
 				}

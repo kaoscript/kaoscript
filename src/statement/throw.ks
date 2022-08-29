@@ -34,7 +34,7 @@ class ThrowStatement extends Statement {
 		@value.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(AnyType.NullableUnexplicit)
 
 		if type !?= @value.type().discardReference() {
 			TypeException.throwRequireClass(this)

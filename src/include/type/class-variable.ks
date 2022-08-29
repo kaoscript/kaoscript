@@ -12,14 +12,14 @@ class ClassVariableType extends Type {
 
 			var mut type: ClassVariableType
 
-			if data.type? {
+			if ?data.type {
 				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
 			}
 			else {
 				type = new ClassVariableType(scope, AnyType.NullableUnexplicit)
 			}
 
-			if data.modifiers? {
+			if ?data.modifiers {
 				for var modifier in data.modifiers {
 					switch modifier.kind {
 						ModifierKind::Immutable => {
@@ -41,7 +41,7 @@ class ClassVariableType extends Type {
 				}
 			}
 
-			if data.value? {
+			if ?data.value {
 				type._default = true
 				type._lateInit = false
 			}

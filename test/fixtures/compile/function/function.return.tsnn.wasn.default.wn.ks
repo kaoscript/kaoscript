@@ -1,3 +1,3 @@
-func foobar(foobar: String = null): String {
+func foobar(foobar: String? = null): String {
 	return foobar
 }

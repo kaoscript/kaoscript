@@ -1,29 +1,29 @@
 export class Module {
 	private {
-		_aliens							= {}
-		_arguments: Array				= []
-		_binary: Boolean				= false
-		_body
-		_compiler: Compiler
-		_data
-		_directory
-		_exports						= {}
-		_exportedMacros					= {}
-		_file
-		_flags							= {}
-		_hashes							= {}
-		_imports						= {}
-		_includeModules					= {}
-		_includePaths					= {}
-		_metaExports					= null
-		_metaRequirements				= null
-		_options
-		_output
-		_register						= false
-		_requirements					= []
-		_requirementByNames				= {}
-		_rewire
-		_variationId
+		@aliens							= {}
+		@arguments: Array				= []
+		@binary: Boolean				= false
+		@body
+		@compiler: Compiler
+		@data
+		@directory
+		@exports						= {}
+		@exportedMacros					= {}
+		@file
+		@flags							= {}
+		@hashes							= {}
+		@imports						= {}
+		@includeModules					= {}
+		@includePaths					= {}
+		@metaExports?					= null
+		@metaRequirements?				= null
+		@options
+		@output
+		@register						= false
+		@requirements					= []
+		@requirementByNames				= {}
+		@rewire
+		@variationId
 	}
 	constructor(data, @compiler, @file) { # {{{
 		@data = this.parse(data, file)
@@ -178,7 +178,7 @@ export class Module {
 
 		@body.enhance()
 
-		@body.prepare()
+		@body.prepare(@binary ? Type.Void : AnyType.NullableUnexplicit)
 
 		@body.translate()
 
@@ -237,7 +237,7 @@ export class Module {
 	isUpToDate(hashes): Boolean { # {{{
 		for var hash, name of @hashes {
 			var h = hashes[name]
-			if h? {
+			if ?h {
 				if h != hash {
 					return false
 				}
@@ -271,7 +271,7 @@ export class Module {
 			throw error
 		}
 	} # }}}
-	path(x = null, name) { # {{{
+	path(x? = null, name) { # {{{
 		if !?x || !?@output {
 			return name
 		}
@@ -314,7 +314,7 @@ export class Module {
 						@arguments.push(false)
 					}
 				}
-				else if var { name, type } = arguments[index] {
+				else if var { name, type } ?= arguments[index] {
 					if type.isSubsetOf(requirement.type(), MatchingMode::Signature) {
 						if !requirement.type().isSubsetOf(type, MatchingMode::Signature) {
 							var index = type.toMetadata(metadata, 0, ExportMode::Requirement, this)
@@ -578,12 +578,12 @@ export class Module {
 		if !?@variationId {
 			var variations = [@options.target.name, @options.target.version]
 
-			if @arguments? {
+			if ?@arguments {
 				for var type in @arguments {
 					if type is Boolean {
 						variations.push(false)
 					}
-					else if type? {
+					else if ?type {
 						type.toVariations(variations)
 					}
 					else {
@@ -601,10 +601,10 @@ export class Module {
 
 class ModuleBlock extends AbstractNode {
 	private {
-		_attributeDatas			= {}
-		_module
-		_statements: Array		= []
-		_topNodes: Array		= []
+		@attributeDatas				= {}
+		@module: Module
+		@statements: Array			= []
+		@topNodes: Array			= []
 	}
 	constructor(@data, @module) { # {{{
 		super()
@@ -626,7 +626,7 @@ class ModuleBlock extends AbstractNode {
 		for var statement in @data.body from start {
 			@scope.line(statement.start.line)
 
-			if var statement = $compile.statement(statement, this) {
+			if var statement ?= $compile.statement(statement, this) {
 				@statements.push(statement)
 
 				statement.initiate()
@@ -658,10 +658,15 @@ class ModuleBlock extends AbstractNode {
 		for var statement in @statements {
 			@scope.line(statement.line())
 
-			statement.prepare()
+			if statement is ReturnStatement {
+				statement.prepare(target)
+			}
+			else {
+				statement.prepare(Type.Void)
+			}
 		}
 
-		var recipient = this.recipient()
+		var recipient = @recipient()
 		for var statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 
@@ -704,11 +709,11 @@ class ModuleBlock extends AbstractNode {
 		if variable.static {
 			var class = @scope.getVariable(variable.class).declaration()
 
-			if var var = class.getClassVariable(variable.name) {
+			if var var ?= class.getClassVariable(variable.name) {
 				var.initialize(variable.type, expression)
 			}
 		}
-		else if var var = @scope.getDefinedVariable(variable.name) {
+		else if var var ?= @scope.getDefinedVariable(variable.name) {
 			var.setDeclaredType(variable.type)
 		}
 	} # }}}

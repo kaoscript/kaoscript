@@ -1,21 +1,21 @@
 class BlockScope extends Scope {
 	private {
-		_authority: Scope
-		_chunkTypes							= {}
-		_declarations						= {}
-		_macros								= {}
-		_matchingTypes: Dictionary<Array>	= {}
-		_module: ModuleScope
-		_parent: Scope
-		_references							= {}
-		_renamedIndexes 					= {}
-		_renamedVariables					= {}
-		_reservedIndex						= -1
-		_stashes							= {}
-		_tempDeclarations: Array			= []
-		_tempIndex 							= -1
-		_tempNames							= {}
-		_variables							= {}
+		@authority: Scope
+		@chunkTypes							= {}
+		@declarations						= {}
+		@macros								= {}
+		@matchingTypes: Dictionary<Array>	= {}
+		@module: ModuleScope
+		@parent: Scope
+		@references							= {}
+		@renamedIndexes 					= {}
+		@renamedVariables					= {}
+		@reservedIndex						= -1
+		@stashes							= {}
+		@tempDeclarations: Array			= []
+		@tempIndex 							= -1
+		@tempNames							= {}
+		@variables							= {}
 	}
 	constructor(@parent) { # {{{
 		super()
@@ -30,9 +30,9 @@ class BlockScope extends Scope {
 			return name
 		}
 
-		var name = `__ks_\(++@tempIndex)`
+		@tempIndex += 1
 
-		@tempNames[name] = false
+		var name = `__ks_\(@tempIndex)`
 
 		@tempNames[name] = false
 
@@ -103,7 +103,7 @@ class BlockScope extends Scope {
 			return null
 		}
 	} # }}}
-	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -127,7 +127,7 @@ class BlockScope extends Scope {
 			variables.push(@line(), variable)
 		}
 		else {
-			if var newName = this.declareVariable(name, this) {
+			if var newName ?= this.declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)
@@ -136,7 +136,7 @@ class BlockScope extends Scope {
 			@variables[name] = [@line(), variable]
 		}
 
-		if var reference = @references[name] {
+		if var reference ?= @references[name] {
 			reference.reset()
 		}
 	} # }}}
@@ -190,7 +190,7 @@ class BlockScope extends Scope {
 	getLineOffset() => @module.getLineOffset()
 	getMacro(data, parent) { # {{{
 		if data.callee.kind == NodeKind::Identifier {
-			if @macros[data.callee.name]? {
+			if ?@macros[data.callee.name] {
 				var arguments = MacroArgument.build(data.arguments)
 
 				for macro in @macros[data.callee.name] {
@@ -208,7 +208,7 @@ class BlockScope extends Scope {
 		else {
 			var path = Generator.generate(data.callee)
 
-			if @macros[path]? {
+			if ?@macros[path] {
 				var arguments = MacroArgument.build(data.arguments)
 
 				for macro in @macros[path] {
@@ -225,11 +225,12 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{
-		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-		var mut newName = '__ks_' + name + '_' + (++index)
+		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
+		var mut newName = '__ks_' + name + '_' + index
 
 		while @declarations[newName] {
-			newName = '__ks_' + name + '_' + (++index)
+			index += 1
+			newName = '__ks_' + name + '_' + index
 		}
 
 		@renamedIndexes[name] = index
@@ -238,7 +239,11 @@ class BlockScope extends Scope {
 	} # }}}
 	getRawLine() => @module.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-	getReservedName() => `__ks_00\(++@reservedIndex)`
+	getReservedName() { # {{{
+		@reservedIndex += 1
+
+		return `__ks_00\(@reservedIndex)`
+	} # }}}
 	getTempIndex() => @tempIndex
 	getVariable(name, line: Number = @line()): Variable? { # {{{
 		if @variables[name] is Array {
@@ -264,7 +269,7 @@ class BlockScope extends Scope {
 
 		return @parent.getVariable(name, -1)
 	} # }}}
-	hasDeclaredVariable(name: String) => @declarations[name] || @renamedVariables[name]?
+	hasDeclaredVariable(name: String) => @declarations[name] || ?@renamedVariables[name]
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
@@ -313,7 +318,7 @@ class BlockScope extends Scope {
 	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
 		var hash = a.toQuote()
 
-		if var matches = @matchingTypes[hash] {
+		if var matches ?= @matchingTypes[hash] {
 			for var type, i in matches by 2 {
 				if type == b {
 					return matches[i + 1]
@@ -405,11 +410,11 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	reassignReference(oldName, newName, newScope) { # {{{
-		if var reference = @references[oldName] {
+		if var reference ?= @references[oldName] {
 			reference.reassign(newName, newScope)
 		}
 
-		if var reference = newScope._references[newName] {
+		if var reference ?= newScope._references[newName] {
 			reference.reset()
 		}
 	} # }}}
@@ -450,9 +455,8 @@ class BlockScope extends Scope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		var mut index = this.getRenamedIndex(name)
-
-		var mut newName = '__ks_' + name + '_' + (++index)
+		var index = this.getRenamedIndex(name) + 1
+		var newName = '__ks_' + name + '_' + index
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
@@ -488,7 +492,7 @@ class BlockScope extends Scope {
 			@variables[name] = [@line(), variable]
 		}
 
-		if var reference = @references[name] {
+		if var reference ?= @references[name] {
 			reference.reset()
 		}
 
@@ -524,7 +528,7 @@ class BlockScope extends Scope {
 			}
 		}
 
-		if var reference = @references[name] {
+		if var reference ?= @references[name] {
 			reference.reset()
 		}
 

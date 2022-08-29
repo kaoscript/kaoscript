@@ -41,7 +41,7 @@ class Variable {
 		} # }}}
 	}
 	constructor()
-	constructor(@name, @immutable, @predefined, declaredType: Type = null, initialized: Boolean = false) { # {{{
+	constructor(@name, @immutable, @predefined, declaredType: Type? = null, initialized: Boolean = false) { # {{{
 		if declaredType == null {
 			if initialized {
 				@realType = @declaredType

@@ -12,22 +12,22 @@ class IfExpression extends Expression {
 		@whenTrue = $compile.expression(@data.whenTrue, this)
 		@whenTrue.analyse()
 
-		if @data.whenFalse? {
+		if ?@data.whenFalse {
 			@whenFalse = $compile.expression(@data.whenFalse, this)
 			@whenFalse.analyse()
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@condition.prepare()
+		@condition.prepare(@scope.reference('Boolean'))
 
 		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
-		@whenTrue.prepare()
+		@whenTrue.prepare(target)
 
-		if @whenFalse? {
-			@whenFalse.prepare()
+		if ?@whenFalse {
+			@whenFalse.prepare(target)
 
 			var t = @whenTrue.type()
 			var f = @whenFalse.type()
@@ -52,7 +52,7 @@ class IfExpression extends Expression {
 	translate() { # {{{
 		@condition.translate()
 		@whenTrue.translate()
-		@whenFalse.translate() if @whenFalse?
+		@whenFalse.translate() if ?@whenFalse
 	} # }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse?.isUsingVariable(name)
@@ -64,7 +64,7 @@ class IfExpression extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @whenFalse? {
+		if ?@whenFalse {
 			fragments
 				.wrapBoolean(@condition)
 				.code(' ? ')

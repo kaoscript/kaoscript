@@ -5,7 +5,7 @@ import {
 var $formatters = {}
 
 func format(format: String) {
-	if var format = $formatters[format] {
+	if var format ?= $formatters[format] {
 		return format.formatter(format.space)
 	}
 	else {

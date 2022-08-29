@@ -50,12 +50,12 @@ class ComparisonExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		if target? && !target.canBeBoolean() {
+		if !target.isVoid() && !target.canBeBoolean() {
 			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
 		for var operand in @operands {
-			operand.prepare()
+			operand.prepare(AnyType.NullableUnexplicit)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -323,7 +323,7 @@ class EqualityOperator extends ComparisonOperator {
 		_nanLeft: Boolean		= false
 		_nanRight: Boolean		= false
 	}
-	prepare() { # {{{
+	override prepare() { # {{{
 		var leftType = @left.type()
 		var rightType = @right.type()
 

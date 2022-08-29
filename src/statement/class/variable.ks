@@ -62,7 +62,7 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} # }}}
 	analyse() { # {{{
-		if @data.value? {
+		if ?@data.value {
 			@defaultValue = true
 			@lateInit = false
 		}
@@ -97,7 +97,7 @@ class ClassVariableDeclaration extends AbstractNode {
 
 			var type = @value.type().asReference()
 
-			if @data.type? {
+			if ?@data.type {
 				unless type.isAssignableToVariable(@type.type(), true, true, false) {
 					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 				}

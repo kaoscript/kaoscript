@@ -2,7 +2,7 @@ func foobar(x) {
 }
 
 func quzbaz(x?) {
-	if x? {
+	if ?x {
 		foobar(x)
 	}
 }

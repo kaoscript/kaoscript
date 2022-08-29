@@ -57,13 +57,13 @@ class MemberExpression extends Expression {
 			}
 
 			if @computed {
-				@property.prepare()
+				@property.prepare(target)
 
 				var mut nf = true
 
 				if type.isTuple() {
 					if @property is NumberLiteral | StringLiteral {
-						if var property = type.getProperty(@property.value()) {
+						if var property ?= type.getProperty(@property.value()) {
 							@type = property.type()
 
 							nf = false
@@ -81,7 +81,7 @@ class MemberExpression extends Expression {
 
 				if nf && type.isArray() {
 					if @property is NumberLiteral {
-						if var property = type.getProperty(@property.value()) {
+						if var property ?= type.getProperty(@property.value()) {
 							@type = property
 
 							nf = false
@@ -99,7 +99,7 @@ class MemberExpression extends Expression {
 
 				if nf && type.isDictionary() {
 					if @property is NumberLiteral | StringLiteral {
-						if var property = type.getProperty(@property.value()) {
+						if var property ?= type.getProperty(@property.value()) {
 							@type = property
 
 							nf = false
@@ -130,7 +130,7 @@ class MemberExpression extends Expression {
 					}
 
 					if @inferable {
-						if var type = @scope.getChunkType(@path) {
+						if var type ?= @scope.getChunkType(@path) {
 							@type = type
 						}
 					}
@@ -155,7 +155,7 @@ class MemberExpression extends Expression {
 					@computed = true
 					@stringProperty = true
 
-					if var property = type.getProperty(@property) {
+					if var property ?= type.getProperty(@property) {
 						@property = `\(property.index())`
 						@type = property.type()
 					}
@@ -174,7 +174,7 @@ class MemberExpression extends Expression {
 					}
 				}
 				else if type.isStruct() {
-					if var property = type.getProperty(@property) {
+					if var property ?= type.getProperty(@property) {
 						@type = property.type()
 					}
 					else if type.isExhaustive(this) {
@@ -192,7 +192,7 @@ class MemberExpression extends Expression {
 					}
 				}
 				else {
-					if var property = type.getProperty(@property) {
+					if var property ?= type.getProperty(@property) {
 						var type = type.discardReference()
 						if type.isClass() && property is ClassVariableType && property.isSealed() {
 							@sealed = true
@@ -223,7 +223,7 @@ class MemberExpression extends Expression {
 				}
 
 				if @assignable {
-					if var variable = this.declaration() {
+					if var variable ?= this.declaration() {
 						if variable.isImmutable() {
 							if variable.isLateInit() {
 								if variable.isInitialized() {
@@ -235,7 +235,7 @@ class MemberExpression extends Expression {
 							}
 						}
 					}
-					else if var property = @object.type().getProperty(@property) {
+					else if var property ?= @object.type().getProperty(@property) {
 						if property.isImmutable() {
 							ReferenceException.throwImmutable(this)
 						}
@@ -253,7 +253,7 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property = $compile.expression(@data.property, this)
 				@property.analyse()
-				@property.prepare()
+				@property.prepare(target)
 			}
 			else {
 				@property = @data.property.name
@@ -292,12 +292,12 @@ class MemberExpression extends Expression {
 	declaration() { # {{{
 		return null if @computed
 
-		if var declaration = @object.variable()?.declaration() {
+		if var declaration ?= @object.variable()?.declaration() {
 			if declaration is ClassDeclaration {
 				return declaration.getClassVariable(@property)
 			}
 		}
-		else if var node = @parent.getFunctionNode() {
+		else if var node ?= @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
 				return node.parent().getInstanceVariable(@property)
 			}
@@ -321,7 +321,7 @@ class MemberExpression extends Expression {
 		return if @computed
 
 		if @object is IdentifierLiteral {
-			if var property = @object.type().getProperty(@property) {
+			if var property ?= @object.type().getProperty(@property) {
 				if @object.type().isClass() && !@object.type().isReference() {
 					node.initializeVariable(VariableBrief(
 						name: @property

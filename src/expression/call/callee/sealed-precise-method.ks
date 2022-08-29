@@ -16,7 +16,7 @@ class SealedPreciseMethodCallee extends Callee {
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()
@@ -33,7 +33,7 @@ class SealedPreciseMethodCallee extends Callee {
 		if expression is IdentifierLiteral {
 			var variable = expression.variable()
 
-			if var substitute = variable.replaceContext?() {
+			if var substitute ?= variable.replaceContext?() {
 				return substitute
 			}
 		}
@@ -57,7 +57,7 @@ class SealedPreciseMethodCallee extends Callee {
 					if @function.isInstance() {
 						fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-						if var substitute = this.getContextSubstitute(@object) {
+						if var substitute ?= this.getContextSubstitute(@object) {
 							substitute(fragments)
 						}
 						else {
@@ -92,7 +92,7 @@ class SealedPreciseMethodCallee extends Callee {
 						if @function.isInstance() {
 							fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-							if var substitute = this.getContextSubstitute(@object) {
+							if var substitute ?= this.getContextSubstitute(@object) {
 								substitute(fragments)
 							}
 							else {

@@ -58,7 +58,7 @@ class IdentifierLiteral extends Literal {
 			else if @scope.hasMacro(@value) {
 				@isMacro = true
 			}
-			else if var name = $runtime.getVariable(@value, @parent) {
+			else if var name ?= $runtime.getVariable(@value, @parent) {
 				@value = name
 				@realType = @declaredType = Type.Any
 			}
@@ -232,5 +232,6 @@ class StringLiteral extends Literal {
 		super(data, parent, scope, $quote(data.value))
 	} # }}}
 	getUnpreparedType() => this.type()
+	isNotEmpty() => @value.length > 0
 	type() => @scope.reference('String')
 }

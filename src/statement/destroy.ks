@@ -30,7 +30,7 @@ class DestroyStatement extends Statement {
 			@type = @scope.getVariable(@data.variable.name, @scope.line() - 1).getRealType()
 		}
 		else {
-			@expression.prepare()
+			@expression.prepare(AnyType.NullableUnexplicit)
 		}
 	} # }}}
 	translate() { # {{{

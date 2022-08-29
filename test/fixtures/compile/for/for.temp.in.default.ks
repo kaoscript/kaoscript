@@ -1,13 +1,13 @@
 extern console
 
 func foo(x) {
-	if x.foo? {
+	if ?x.foo {
 		for value in x.foo {
 			console.log(value)
 		}
 	}
-	
-	if x.bar? {
+
+	if ?x.bar {
 		for value in x.bar {
 			console.log(value)
 		}

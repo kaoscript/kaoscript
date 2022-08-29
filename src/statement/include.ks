@@ -14,7 +14,7 @@ class IncludeDeclaration extends Statement {
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
 
-				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
+				if fs.isFile(x) || fs.isFile((x += $extensions.source, x)) {
 					if this.canLoadLocalFile(x) {
 						this.loadLocalFile(data, x)
 					}
@@ -44,14 +44,14 @@ class IncludeDeclaration extends Statement {
 						var mut pkgfile = path.join(x, 'package.json')
 
 						if fs.isFile(pkgfile) {
-							if var pkg = try JSON.parse(fs.readFile(pkgfile)) {
-								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
+							if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
+								if ?pkg.kaoscript && fs.isFile(path.join(x, pkg.kaoscript.main)) {
 									x = path.join(x, pkg.kaoscript.main)
 									modulePath = path.join(modulePath, pkg.kaoscript.main)
 
 									nf = false
 								}
-								else if pkg.main? {
+								else if ?pkg.main {
 									if fs.isFile(path.join(x, pkg.main)) {
 										x = path.join(x, pkg.main)
 										modulePath = path.join(modulePath, pkg.main)
@@ -209,7 +209,7 @@ class IncludeDeclarator extends Statement {
 		_offsetStart: Number	= 0
 		_statements				= []
 	}
-	constructor(declaration, @data, @file, moduleName: String = null, @parent) { # {{{
+	constructor(declaration, @data, @file, moduleName: String? = null, @parent) { # {{{
 		super(data, parent)
 
 		@options = Attribute.configure(declaration, @options, AttributeTarget::Global, super.file(), true)
@@ -238,7 +238,7 @@ class IncludeDeclarator extends Statement {
 		for var data in @data.body {
 			@scope.line(data.start.line)
 
-			if var statement = $compile.statement(data, this) {
+			if var statement ?= $compile.statement(data, this) {
 				@statements.push(statement)
 
 				statement.initiate()

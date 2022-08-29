@@ -2,7 +2,7 @@ extern func foobar
 
 var dyn x
 
-if x = foobar() {
+if x <- foobar() {
 }
 else {
 }

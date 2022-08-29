@@ -15,7 +15,7 @@ class TemplateExpression extends Expression {
 	} # }}}
 	override prepare(target) { # {{{
 		for var element, index in @elements {
-			element.prepare()
+			element.prepare(@scope.reference('String'))
 
 			if @isString {
 				var type = element.type()

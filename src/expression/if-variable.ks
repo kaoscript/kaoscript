@@ -40,13 +40,13 @@ class IfVariableDeclarationExpression extends Expression {
 		@init.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@init.prepare()
+		@init.prepare(target)
 
 		if @autotype {
 			@declarators[0].type(@init.type())
 		}
 
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.prepare()
 		}
 	} # }}}

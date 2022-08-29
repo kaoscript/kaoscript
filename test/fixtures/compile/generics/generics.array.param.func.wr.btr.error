@@ -1,1 +1,1 @@
-TypeException: The return type must be "Array<String>" and not "Array<Number>" (fixtures/compile/generics/generics.array.param.func.wr.btr.ks:2)
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/generics/generics.array.param.func.wr.btr.ks:2)

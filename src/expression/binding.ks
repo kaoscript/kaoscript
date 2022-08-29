@@ -26,9 +26,11 @@ class ArrayBinding extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
+		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
+
 		if @type == null {
 			for var element in @elements {
-				element.prepare()
+				element.prepare(subtarget)
 			}
 
 			@type = @scope.reference('Array')
@@ -41,7 +43,7 @@ class ArrayBinding extends Expression {
 			for var element, index in @elements {
 				element.type(@type.getProperty(index))
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 		else if @type.isTuple() {
@@ -54,7 +56,7 @@ class ArrayBinding extends Expression {
 			for var element, index in @elements {
 				element.type(type.getProperty(index).type())
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 		else {
@@ -63,7 +65,7 @@ class ArrayBinding extends Expression {
 			for var element in @elements {
 				element.type(type)
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 	} # }}}
@@ -73,7 +75,7 @@ class ArrayBinding extends Expression {
 		}
 	} # }}}
 	export(recipient) { # {{{
-		for element in @elements {
+		for var element in @elements {
 			element.export(recipient)
 		}
 	} # }}}
@@ -182,14 +184,14 @@ class ArrayBindingElement extends Expression {
 		_type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { # {{{
-		if @data.name? {
+		if ?@data.name {
 			@name = this.compileVariable(@data.name)
 			@name.setAssignment(@assignment)
 			@name.analyse()
 
 			@named = true
 
-			if @data.defaultValue? {
+			if ?@data.defaultValue {
 				@hasDefaultValue = true
 
 				@defaultValue = $compile.expression(@data.defaultValue, this)
@@ -206,7 +208,7 @@ class ArrayBindingElement extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		if @data.type? {
+		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 		}
 
@@ -214,7 +216,7 @@ class ArrayBindingElement extends Expression {
 			@name.prepare()
 
 			if @hasDefaultValue {
-				@defaultValue.prepare()
+				@defaultValue.prepare(target)
 			}
 
 			if @name is IdentifierLiteral {
@@ -249,7 +251,7 @@ class ArrayBindingElement extends Expression {
 	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
 	initializeVariables(type: Type, node: Expression) { # {{{
-		if var name = @name.name() {
+		if var name ?= @name.name() {
 			@name.initializeVariables(type.getProperty(name) ?? AnyType.NullableUnexplicit, node)
 		}
 	} # }}}
@@ -396,11 +398,13 @@ class ObjectBinding extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
+		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
+
 		if @type == null {
 			@type = new DestructurableObjectType()
 
 			for var element in @elements {
-				element.prepare()
+				element.prepare(subtarget)
 
 				if element is ObjectBindingElement {
 					@type.addProperty(element.name(), element.type())
@@ -410,7 +414,7 @@ class ObjectBinding extends Expression {
 		else if @type is DictionaryType {
 			for var element in @elements {
 				if element.isRequired() {
-					if var property = @type.getProperty(element.name()) {
+					if var property ?= @type.getProperty(element.name()) {
 						element.type(property)
 					}
 					else {
@@ -418,7 +422,7 @@ class ObjectBinding extends Expression {
 					}
 				}
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 		else if @type.isStruct() {
@@ -426,7 +430,7 @@ class ObjectBinding extends Expression {
 
 			for var element in @elements {
 				if element.isRequired() {
-					if var property = type.getProperty(element.name()) {
+					if var property ?= type.getProperty(element.name()) {
 						element.type(property.type())
 					}
 					else {
@@ -434,7 +438,7 @@ class ObjectBinding extends Expression {
 					}
 				}
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 		else {
@@ -443,7 +447,7 @@ class ObjectBinding extends Expression {
 			for var element in @elements {
 				element.type(type)
 
-				element.prepare()
+				element.prepare(subtarget)
 			}
 		}
 	} # }}}
@@ -590,7 +594,7 @@ class ObjectBindingElement extends Expression {
 			}
 		}
 
-		if @data.alias? {
+		if ?@data.alias {
 			@name = $compile.expression(@data.name, this)
 
 			@alias = this.compileVariable(@data.alias)
@@ -615,7 +619,7 @@ class ObjectBindingElement extends Expression {
 		@alias.setAssignment(@assignment)
 		@alias.analyse()
 
-		if @data.defaultValue? {
+		if ?@data.defaultValue {
 			@hasDefaultValue = true
 
 			@defaultValue = $compile.expression(@data.defaultValue, this)
@@ -629,14 +633,14 @@ class ObjectBindingElement extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		if @data.type? {
+		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 		}
 
 		@alias.prepare()
 
 		if @hasDefaultValue {
-			@defaultValue.prepare()
+			@defaultValue.prepare(target)
 		}
 
 		if @alias is IdentifierLiteral {

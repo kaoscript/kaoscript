@@ -10,13 +10,13 @@ abstract class TupleType extends Type {
 		} # }}}
 	}
 	private {
-		@assessment							= null
+		@assessment?						= null
 		@length: Number						= 0
 		@extending: Boolean					= false
 		@extends: NamedType<TupleType>?		= null
 		@extendedLength: Number				= 0
 		@fieldsByIndex: Dictionary<TupleFieldType>	= {}
-		@function: FunctionType				= null
+		@function: FunctionType?			= null
 	}
 	abstract addField(field: TupleFieldType): Void
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
@@ -55,7 +55,7 @@ abstract class TupleType extends Type {
 		return @function
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
-		if var field = @fieldsByIndex[index] {
+		if var field ?= @fieldsByIndex[index] {
 			return field
 		}
 
@@ -67,7 +67,7 @@ abstract class TupleType extends Type {
 		}
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if var field = @fieldsByIndex[name] {
+		if var field ?= @fieldsByIndex[name] {
 			return field
 		}
 
@@ -112,7 +112,7 @@ class NamedTupleType extends TupleType {
 			var value = new NamedTupleType(scope)
 
 			queue.push(() => {
-				if data.extends? {
+				if ?data.extends {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
@@ -131,7 +131,7 @@ class NamedTupleType extends TupleType {
 		@fieldsByName[field.name()] = field
 		@fieldsByIndex[field.index()] = field
 
-		++@length
+		@length += 1
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
@@ -162,10 +162,10 @@ class NamedTupleType extends TupleType {
 		return list
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if var field = @fieldsByName[name] {
+		if var field ?= @fieldsByName[name] {
 			return field
 		}
-		else if var field = @fieldsByIndex[name] {
+		else if var field ?= @fieldsByIndex[name] {
 			return field
 		}
 
@@ -214,7 +214,7 @@ class NamedTupleType extends TupleType {
 
 				nameds[name] = true
 
-				++namedCount
+				namedCount += 1
 			}
 			else if argument is IdentifierLiteral {
 				var name = argument.name()
@@ -254,16 +254,18 @@ class NamedTupleType extends TupleType {
 
 			for var field, name of fields {
 				if nameds[name] || shorthands[name] {
-					++index
+					index += 1
 				}
 				else {
-					groups.push([++index, field])
+					index += 1
+
+					groups.push([index, field])
 
 					if field.isRequired() {
-						++required
+						required += 1
 					}
 					else {
-						++optional
+						optional += 1
 					}
 				}
 			}
@@ -284,11 +286,11 @@ class NamedTupleType extends TupleType {
 						ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
 					}
 
-					++leftover
+					leftover += 1
 				}
 				else if countdown > 0 {
-					++leftover
-					--countdown
+					leftover += 1
+					countdown -= 1
 				}
 			}
 		}
@@ -317,7 +319,7 @@ class NamedTupleType extends TupleType {
 
 				nameds[name] = argument
 
-				++namedCount
+				namedCount += 1
 			}
 			else if argument is IdentifierLiteral {
 				var name = argument.name()
@@ -339,7 +341,7 @@ class NamedTupleType extends TupleType {
 			}
 			else {
 				for var field, name of fields {
-					if nameds[name]? {
+					if ?nameds[name] {
 						order.push(nameds[name])
 					}
 					else if field.isRequired() {
@@ -357,10 +359,10 @@ class NamedTupleType extends TupleType {
 			var mut optional = 0
 
 			for var field, name of fields {
-				if nameds[name]? {
+				if ?nameds[name] {
 					order.push(nameds[name])
 				}
-				else if shorthands[name]? {
+				else if ?shorthands[name] {
 					order.push(shorthands[name])
 				}
 				else {
@@ -370,10 +372,10 @@ class NamedTupleType extends TupleType {
 					groups.push([index, field])
 
 					if field.isRequired() {
-						++required
+						required += 1
 					}
 					else {
-						++optional
+						optional += 1
 					}
 				}
 			}
@@ -392,13 +394,13 @@ class NamedTupleType extends TupleType {
 				if field.isRequired() {
 					order[index] = leftovers[leftover]
 
-					++leftover
+					leftover += 1
 				}
 				else if countdown > 0 {
 					order[index] = leftovers[leftover]
 
-					++leftover
-					--countdown
+					leftover += 1
+					countdown -= 1
 				}
 				else {
 					order[index] = new Literal('null', node)
@@ -417,7 +419,7 @@ class UnnamedTupleType extends TupleType {
 			var value = new UnnamedTupleType(scope)
 
 			queue.push(() => {
-				if data.extends? {
+				if ?data.extends {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
@@ -437,7 +439,7 @@ class UnnamedTupleType extends TupleType {
 
 		@fields.push(field)
 
-		++@length
+		@length += 1
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
@@ -483,10 +485,10 @@ class UnnamedTupleType extends TupleType {
 
 		for var field of fields {
 			if field.isRequired() {
-				++required
+				required += 1
 			}
 			else {
-				++optional
+				optional += 1
 			}
 		}
 
@@ -506,11 +508,11 @@ class UnnamedTupleType extends TupleType {
 					ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
 				}
 
-				++leftover
+				leftover += 1
 			}
 			else if countdown > 0 {
-				++leftover
-				--countdown
+				leftover += 1
+				countdown -= 1
 			}
 		}
 

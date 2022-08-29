@@ -30,7 +30,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		_type: Type
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		if this.isAcceptingEnum() && @argument.type().isEnum() {
 			@isEnum = true
@@ -69,25 +69,6 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	} # }}}
 	toQuote() => `\(this.symbol())\(@argument.toQuote())`
 	type() => @type
-}
-
-class UnaryOperatorDecrementPostfix extends NumericUnaryOperatorExpression {
-	operator() => Operator::DecrementPostfix
-	runtime() => 'decrementPostfix'
-	symbol() => '--'
-	toFragments(fragments, mode) { # {{{
-		fragments.compile(@argument).code(this.symbol(), @data.operator)
-	} # }}}
-	toQuote() => `\(@argument.toQuote())\(this.symbol())`
-}
-
-class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
-	operator() => Operator::DecrementPrefix
-	runtime() => 'decrementPrefix'
-	symbol() => '--'
-	toFragments(fragments, mode) { # {{{
-		fragments.code(this.symbol(), @data.operator).compile(@argument)
-	} # }}}
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
@@ -140,39 +121,16 @@ class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
 		@type: Type		= AnyType.Unexplicit
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		if !@parent.isExpectingType() {
 			SyntaxException.throwInvalidForcedTypeCasting(this)
 		}
 	} # }}}
-	adaptTo(type: Type): Type { # {{{
-		return @type = type
-	} # }}}
-	isAdaptable() => true
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
 	} # }}}
 	type() => @type
-}
-
-class UnaryOperatorIncrementPostfix extends NumericUnaryOperatorExpression {
-	operator() => Operator::IncrementPostfix
-	runtime() => 'incrementPostfix'
-	symbol() => '++'
-	toFragments(fragments, mode) { # {{{
-		fragments.compile(@argument).code(this.symbol(), @data.operator)
-	} # }}}
-	toQuote() => `\(@argument.toQuote())\(this.symbol())`
-}
-
-class UnaryOperatorIncrementPrefix extends NumericUnaryOperatorExpression {
-	operator() => Operator::IncrementPrefix
-	runtime() => 'incrementPrefix'
-	symbol() => '++'
-	toFragments(fragments, mode) { # {{{
-		fragments.code(this.symbol(), @data.operator).compile(@argument)
-	} # }}}
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
@@ -188,7 +146,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 		var mut number = true
 		var mut native = true
 
-		if target? {
+		if !target.isVoid() {
 			boolean = target.canBeBoolean()
 			number = target.canBeNumber()
 		}
@@ -217,7 +175,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 		}
 
 		if !boolean && !number {
-			if target? {
+			if !target.isVoid() {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
@@ -287,7 +245,7 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		@type = @argument.type().setNullable(false)
 	} # }}}
@@ -302,7 +260,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		var type = @argument.type()
 

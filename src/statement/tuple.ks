@@ -30,7 +30,7 @@ class TupleDeclaration extends Statement {
 			@tuple = new UnnamedTupleType(@scope)
 		}
 
-		if @data.extends? {
+		if ?@data.extends {
 			@extending = true
 
 			var mut name = ''
@@ -195,7 +195,9 @@ class TupleFunction extends AbstractNode {
 		}
 
 		for var field in @parent.fields() {
-			field.index(++index)
+			index += 1
+
+			field.index(index)
 
 			field.prepare()
 
@@ -228,7 +230,7 @@ class TupleFieldDeclaration extends AbstractNode {
 	constructor(data, parent) { # {{{
 		super(data, parent)
 
-		if data.name? {
+		if ?data.name {
 			@name = data.name.name
 			@hasName = true
 		}
@@ -236,7 +238,7 @@ class TupleFieldDeclaration extends AbstractNode {
 		@parameter = new TupleFieldParameter(this, parent._function)
 	} # }}}
 	constructor(@type, parent) { # {{{
-		super({}, parent)
+		super($ast.parameter(), parent)
 
 		if @name ?= @type.name() {
 			@hasName = true
@@ -253,9 +255,28 @@ class TupleFieldDeclaration extends AbstractNode {
 		@parameter.prepare()
 
 		if !?@type {
-			@type = new TupleFieldType(@scope, @data.name?.name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
+			var mut type: Type? = null
 
-			if @data.defaultValue? && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+			if ?@data.type {
+				type = Type.fromAST(@data.type, this)
+			}
+
+			if type == null {
+				for var modifier in @data.modifiers {
+					if modifier.kind == ModifierKind::Nullable {
+						type = AnyType.NullableUnexplicit
+					}
+				}
+
+				type ??= AnyType.Unexplicit
+			}
+			else if type.isNull() {
+				type = NullType.Explicit
+			}
+
+			@type = new TupleFieldType(@scope, @data.name?.name, @index, type, @parameter.isRequired())
+
+			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
 			}
 		}
@@ -278,8 +299,6 @@ class TupleFieldParameter extends Parameter {
 	}
 	constructor(@field, parent) { # {{{
 		super(field._data, parent)
-
-		@data.modifiers = []
 	} # }}}
 	analyse() { # {{{
 		if @field.hasName() {

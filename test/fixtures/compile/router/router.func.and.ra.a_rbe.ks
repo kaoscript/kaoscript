@@ -1,4 +1,4 @@
-func foobar(value = null) {
+func foobar(value? = null) {
 	return 0
 }
 func foobar(...args) {

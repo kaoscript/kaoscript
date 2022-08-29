@@ -31,7 +31,7 @@ class DefaultCallee extends Callee {
 		}
 
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()
@@ -70,7 +70,7 @@ class DefaultCallee extends Callee {
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()
@@ -124,7 +124,7 @@ class DefaultCallee extends Callee {
 	} # }}}
 	override hashCode() => `default`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		if @methods? {
+		if ?@methods {
 			for var method in @methods {
 				if !method.isInitializingInstanceVariable(name) {
 					return false
@@ -302,7 +302,7 @@ class DefaultCallee extends Callee {
 
 	private {
 		prepareArguments(node) { # {{{
-			if @arguments? {
+			if ?@arguments {
 				return [node._arguments[index] for var index in @arguments]
 			}
 			else {

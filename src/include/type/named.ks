@@ -83,7 +83,7 @@ class NamedType extends Type {
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => `__ks_\(@name)`
 	getSealedPath() { # {{{
-		if @container? {
+		if ?@container {
 			return `\(@container.path()).\(this.getSealedName())`
 		}
 		else {
@@ -482,7 +482,7 @@ class NamedType extends Type {
 	} # }}}
 	parameter() => @type.parameter()
 	path() { # {{{
-		if @container? {
+		if ?@container {
 			return `\(@container.path()).\(@name)`
 		}
 		else {
@@ -542,7 +542,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		if var tof = $runtime.typeof(@name, node) {
+		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`!\(tof)(`).compile(node).code(')')
 		}
 		else {
@@ -550,7 +550,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		if var tof = $runtime.typeof(@name, node) {
+		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {

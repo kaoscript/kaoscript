@@ -110,7 +110,7 @@ class ThisExpression extends Expression {
 					if type.hasInstantiableMethod(@name) {
 						var assessment = type.getInstantiableAssessment(@name, this)
 
-						if var result = Router.matchArguments(assessment, @parent.arguments(), this) {
+						if var result ?= Router.matchArguments(assessment, @parent.arguments(), this) {
 							@fragment = `\(name).\(@name)`
 
 							if result is PreciseCallMatchResult {
@@ -209,7 +209,7 @@ class ThisExpression extends Expression {
 		}
 
 		if @assignable {
-			if var variable = this.declaration() {
+			if var variable ?= this.declaration() {
 				if variable.isImmutable() {
 					if variable.isLateInit() {
 						if variable.isInitialized() {
@@ -225,7 +225,7 @@ class ThisExpression extends Expression {
 	} # }}}
 	translate()
 	declaration() { # {{{
-		if var node = @parent.getFunctionNode() {
+		if var node ?= @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
 				return node.parent().getInstanceVariable(@variableName)
 			}
@@ -239,14 +239,14 @@ class ThisExpression extends Expression {
 	fragment() => @fragment
 	getClass() => @class
 	getDeclaredType() { # {{{
-		if @variableName? {
+		if ?@variableName {
 			if @instance {
-				if var variable = @class.type().getInstanceVariable(@variableName) {
+				if var variable ?= @class.type().getInstanceVariable(@variableName) {
 					return variable.type()
 				}
 			}
 			else {
-				if var variable = @class.type().getClassVariable(@variableName) {
+				if var variable ?= @class.type().getClassVariable(@variableName) {
 					return variable.type()
 				}
 			}
@@ -256,7 +256,7 @@ class ThisExpression extends Expression {
 	} # }}}
 	getVariableName() => @variableName
 	getUnpreparedType() { # {{{
-		this.prepare()
+		this.prepare(AnyType.NullableUnexplicit)
 
 		return @type
 	} # }}}

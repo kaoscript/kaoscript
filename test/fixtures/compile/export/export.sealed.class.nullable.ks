@@ -6,13 +6,13 @@ sealed class Shape {
 	private {
 		_shape: String
 	}
-	
+
 	constructor(@shape)
 }
 
 impl Shape {
 	draw(color?): String {
-		if color? {
+		if ?color {
 			return `I'm drawing a \(color) \(@shape).`
 		}
 		else {

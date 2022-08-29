@@ -15,15 +15,15 @@ class NullType extends Type {
 	clone() { # {{{
 		throw new NotSupportedException()
 	} # }}}
-	compareToRef(value: AnyType, equivalences: String[][] = null) => -value.compareToRef(this, equivalences)
-	compareToRef(value: ArrayType, equivalences: String[][] = null) => 1
-	compareToRef(value: DictionaryType, equivalences: String[][] = null) => 1
-	compareToRef(value: NullType, equivalences: String[][] = null) => 0
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) => -value.compareToRef(this, equivalences)
+	compareToRef(value: AnyType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)
+	compareToRef(value: ArrayType, equivalences: String[][]? = null) => 1
+	compareToRef(value: DictionaryType, equivalences: String[][]? = null) => 1
+	compareToRef(value: NullType, equivalences: String[][]? = null) => 0
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	override getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => 'Null'
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => nullcast || value.isNullable()
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => value.isNullable()
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => true

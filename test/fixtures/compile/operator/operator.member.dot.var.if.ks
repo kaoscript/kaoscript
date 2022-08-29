@@ -4,6 +4,6 @@ extern console: {
 
 extern a
 
-if (b = a.b).c? {
+if ?(b = a.b).c {
 	console.log(b)
 }

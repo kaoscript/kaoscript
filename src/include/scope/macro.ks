@@ -46,11 +46,12 @@ class MacroScope extends Scope {
 	block() => this
 	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
-			var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-			var mut newName = '__ks_' + name + '_' + (++index)
+			var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
+			var mut newName = '__ks_' + name + '_' + index
 
 			while @variables[newName] is Variable {
-				newName = '__ks_' + name + '_' + (++index)
+				index += 1
+				newName = '__ks_' + name + '_' + index
 			}
 
 			@renamedIndexes[name] = index
@@ -61,7 +62,7 @@ class MacroScope extends Scope {
 			return null
 		}
 	} # }}}
-	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -81,13 +82,13 @@ class MacroScope extends Scope {
 
 		@variables[name] = variable
 
-		if var newName = this.declareVariable(name, this) {
+		if var newName ?= this.declareVariable(name, this) {
 			@renamedVariables[name] = newName
 
 			variable.renameAs(newName)
 		}
 
-		if var reference = @references[name] {
+		if var reference ?= @references[name] {
 			reference.reset()
 		}
 	} # }}}
@@ -117,7 +118,7 @@ class MacroScope extends Scope {
 	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
 		var hash = a.toQuote()
 
-		if var matches = @matchingTypes[hash] {
+		if var matches ?= @matchingTypes[hash] {
 			for var type, i in matches by 2 {
 				if type == b {
 					return matches[i + 1]

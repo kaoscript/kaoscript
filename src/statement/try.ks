@@ -22,14 +22,14 @@ class TryStatement extends Statement {
 	analyse() { # {{{
 		var mut scope
 
-		if @data.catchClauses? {
+		if ?@data.catchClauses {
 			var mut variable, body, type
 			for clause in @data.catchClauses {
 				if variable !?= @scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
-				if clause.binding? {
+				if ?clause.binding {
 					scope = this.newScope(@scope, ScopeType::InlineBlock)
 
 					scope.define(clause.binding.name, false, Type.Any, this)
@@ -51,8 +51,8 @@ class TryStatement extends Statement {
 			}
 		}
 
-		if @data.catchClause? {
-			if @data.catchClause.binding? {
+		if ?@data.catchClause {
+			if ?@data.catchClause.binding {
 				scope = this.newScope(@scope, ScopeType::InlineBlock)
 
 				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
@@ -70,7 +70,7 @@ class TryStatement extends Statement {
 
 		@await = @block.isAwait()
 
-		if @data.finalizer? {
+		if ?@data.finalizer {
 			@finalizer = $compile.block(@data.finalizer, this)
 			@finalizer.analyse()
 		}
@@ -111,11 +111,11 @@ class TryStatement extends Statement {
 			clause.type.translate()
 		}
 
-		@catchClause.translate() if @catchClause?
-		@finalizer.translate() if @finalizer?
+		@catchClause.translate() if ?@catchClause
+		@finalizer.translate() if ?@finalizer
 	} # }}}
 	getErrorVarname() { # {{{
-		if @catchClauses.length == 0 && @data.catchClause?.binding? {
+		if @catchClauses.length == 0 && ?@data.catchClause?.binding {
 			return @data.catchClause.binding.name
 		}
 		else {
@@ -183,7 +183,7 @@ class TryStatement extends Statement {
 			line.done()
 		}
 
-		if @finalizer? {
+		if ?@finalizer {
 			@state = TryState::Finally
 
 			@finallyVarname = @scope.acquireTempName()
@@ -200,7 +200,7 @@ class TryStatement extends Statement {
 			line.done()
 		}
 
-		if @catchClauses.length != 0 || @catchClause? {
+		if @catchClauses.length != 0 || ?@catchClause {
 			@state = TryState::Catch
 
 			@catchVarname = @scope.acquireTempName()
@@ -235,13 +235,13 @@ class TryStatement extends Statement {
 			.code(`catch(__ks_e)`)
 			.step()
 
-		if @catchVarname? {
+		if ?@catchVarname {
 			ctrl.line(`\(@catchVarname)(__ks_e)`)
 		}
-		else if @finallyVarname? {
+		else if ?@finallyVarname {
 			ctrl.line(`\(@finallyVarname)()`)
 		}
-		else if @continueVarname? {
+		else if ?@continueVarname {
 			ctrl.line(`\(@continueVarname)()`)
 		}
 
@@ -264,26 +264,26 @@ class TryStatement extends Statement {
 			.step()
 
 		if @state == TryState::Body {
-			if @catchVarname? {
+			if ?@catchVarname {
 				ctrl.line(`\(@catchVarname)(__ks_e)`)
 			}
-			else if @finallyVarname? {
+			else if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)
 			}
-			else if @continueVarname? {
+			else if ?@continueVarname {
 				ctrl.line(`\(@continueVarname)()`)
 			}
 		}
 		else if @state == TryState::Catch {
-			if @finallyVarname? {
+			if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)
 			}
-			else if @continueVarname? {
+			else if ?@continueVarname {
 				ctrl.line(`\(@continueVarname)()`)
 			}
 		}
 		else if @state == TryState::Finally {
-			if @continueVarname? {
+			if ?@continueVarname {
 				ctrl.line(`\(@continueVarname)()`)
 			}
 		}
@@ -304,10 +304,10 @@ class TryStatement extends Statement {
 				ctrl.compile(statement)
 
 				if statement is not ReturnStatement {
-					if @finallyVarname? {
+					if ?@finallyVarname {
 						ctrl.line(`\(@finallyVarname)()`)
 					}
-					else if @continueVarname? {
+					else if ?@continueVarname {
 						ctrl.line(`\(@continueVarname)()`)
 					}
 				}
@@ -352,7 +352,7 @@ class TryStatement extends Statement {
 					.code(`catch(__ks_e)`)
 					.step()
 
-				if @catchVarname? {
+				if ?@catchVarname {
 					ctrl2.line(`return \(@catchVarname)(__ks_e)`)
 				}
 
@@ -363,10 +363,10 @@ class TryStatement extends Statement {
 						ctrl.compile(statement)
 					}
 					else if statement is not ReturnStatement {
-						if @finallyVarname? {
+						if ?@finallyVarname {
 							ctrl.line(`\(@finallyVarname)()`)
 						}
-						else if @continueVarname? {
+						else if ?@continueVarname {
 							ctrl.line(`\(@continueVarname)()`)
 						}
 					}
@@ -388,15 +388,15 @@ class TryStatement extends Statement {
 			}
 
 			if @state == TryState::Catch {
-				if @finallyVarname? {
+				if ?@finallyVarname {
 					ctrl.line(`\(@finallyVarname)()`)
 				}
-				else if @continueVarname? {
+				else if ?@continueVarname {
 					ctrl.line(`\(@continueVarname)()`)
 				}
 			}
 			else if @state == TryState::Finally {
-				if @continueVarname? {
+				if ?@continueVarname {
 					ctrl.line(`\(@continueVarname)()`)
 				}
 			}
@@ -425,31 +425,31 @@ class TryStatement extends Statement {
 					.code('))')
 					.step()
 
-				if clause.binding? {
+				if ?clause.binding {
 					ifs.line($runtime.scope(this), clause.binding.name, ' = ', error)
 				}
 
 				ifs.compile(@catchClauses[i].body)
 
-				if !@catchClauses[i].body.isAwait() && @continueVarname? {
+				if !@catchClauses[i].body.isAwait() && ?@continueVarname {
 					ifs.line(`\(@continueVarname)()`)
 				}
 			}
 
-			if @catchClause? {
+			if ?@catchClause {
 				ifs.step().code('else').step()
 
-				if @data.catchClause.binding? {
+				if ?@data.catchClause.binding {
 					ifs.line($runtime.scope(this), @data.catchClause.binding.name, ' = ', error)
 				}
 
 				ifs.compile(@catchClause)
 
-				if !@catchClause.isAwait() && @continueVarname? {
+				if !@catchClause.isAwait() && ?@continueVarname {
 					ifs.line(`\(@continueVarname)()`)
 				}
 			}
-			else if @continueVarname? {
+			else if ?@continueVarname {
 				ifs.step().code('else').step()
 
 				ifs.line(`\(@continueVarname)()`)
@@ -457,22 +457,22 @@ class TryStatement extends Statement {
 
 			ifs.done()
 		}
-		else if @catchClause? {
+		else if ?@catchClause {
 			fragments.compile(@catchClause)
 
 			if !@catchClause.isAwait() {
-				if @finallyVarname? {
+				if ?@finallyVarname {
 					fragments.line(`\(@finallyVarname)()`)
 				}
-				else if @continueVarname? {
+				else if ?@continueVarname {
 					fragments.line(`\(@continueVarname)()`)
 				}
 			}
 		}
-		else if @finallyVarname? {
+		else if ?@finallyVarname {
 			fragments.line(`\(@finallyVarname)()`)
 		}
-		else if @continueVarname? {
+		else if ?@continueVarname {
 			fragments.line(`\(@continueVarname)()`)
 		}
 	} # }}}
@@ -491,7 +491,7 @@ class TryStatement extends Statement {
 
 			ctrl.compile(@block, Mode::None)
 
-			if @finallyVarname? {
+			if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)
 			}
 

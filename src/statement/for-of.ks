@@ -33,7 +33,7 @@ class ForOfStatement extends Statement {
 			}
 		}
 
-		if @data.key? {
+		if ?@data.key {
 			var keyVariable = @scope.getVariable(@data.key.name)
 
 			if @declaration || keyVariable == null {
@@ -49,7 +49,7 @@ class ForOfStatement extends Statement {
 			@key.analyse()
 		}
 
-		if @data.value? {
+		if ?@data.value {
 			@value = $compile.expression(@data.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
@@ -79,16 +79,16 @@ class ForOfStatement extends Statement {
 			@bindingScope.rename(variable)
 		}
 
-		if @data.until? {
+		if ?@data.until {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while? {
+		else if ?@data.while {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when? {
+		if ?@data.when {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -97,7 +97,7 @@ class ForOfStatement extends Statement {
 		@body.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
 		if !(type.isAny() || type.isDictionary() || type.isObject()) {
@@ -140,7 +140,7 @@ class ForOfStatement extends Statement {
 				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
 			}
 
-			@key.prepare()
+			@key.prepare(@scope.reference('String'))
 		}
 		else {
 			@keyName = @bindingScope.acquireTempName(false)
@@ -154,7 +154,7 @@ class ForOfStatement extends Statement {
 
 		this.assignTempVariables(@bindingScope)
 
-		if @until? {
+		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
@@ -163,7 +163,7 @@ class ForOfStatement extends Statement {
 
 			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
-		else if @while? {
+		else if ?@while {
 			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
@@ -173,7 +173,7 @@ class ForOfStatement extends Statement {
 			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 
-		if @when? {
+		if ?@when {
 			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
@@ -189,8 +189,8 @@ class ForOfStatement extends Statement {
 
 		@body.prepare(target)
 
-		@bindingScope.releaseTempName(@expressionName) if @expressionName?
-		@bindingScope.releaseTempName(@keyName) if @keyName?
+		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
+		@bindingScope.releaseTempName(@keyName) if ?@keyName
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -201,16 +201,16 @@ class ForOfStatement extends Statement {
 	translate() { # {{{
 		@expression.translate()
 
-		@key.translate() if @key?
+		@key.translate() if ?@key
 
-		if @until? {
+		if ?@until {
 			@until.translate()
 		}
-		else if @while? {
+		else if ?@while {
 			@while.translate()
 		}
 
-		@when.translate() if @when?
+		@when.translate() if ?@when
 
 		@body.translate()
 	} # }}}
@@ -247,7 +247,7 @@ class ForOfStatement extends Statement {
 		||	@body.isUsingVariable(name)
 	# }}}
 	toStatementFragments(fragments, mode) { # {{{
-		if @expressionName? {
+		if ?@expressionName {
 			if @bleeding {
 				fragments
 					.newLine()
@@ -330,7 +330,7 @@ class ForOfStatement extends Statement {
 			line.done()
 		}
 
-		if @until? {
+		if ?@until {
 			this.toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
@@ -342,7 +342,7 @@ class ForOfStatement extends Statement {
 				.line('break')
 				.done()
 		}
-		else if @while? {
+		else if ?@while {
 			this.toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
@@ -355,7 +355,7 @@ class ForOfStatement extends Statement {
 				.done()
 		}
 
-		if @when? {
+		if ?@when {
 			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl

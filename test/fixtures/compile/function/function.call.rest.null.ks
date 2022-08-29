@@ -1,4 +1,4 @@
-func foobar(x, y = null, ...z) {
+func foobar(x, y? = null, ...z) {
 
 }
 

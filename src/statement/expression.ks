@@ -10,7 +10,7 @@ class ExpressionStatement extends Statement {
 		@expression.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@expression.prepare()
+		@expression.prepare(Type.Void)
 
 		for var data, name of @expression.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
@@ -28,14 +28,14 @@ class ExpressionStatement extends Statement {
 	translate() { # {{{
 		@expression.translate()
 	} # }}}
-	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
 		var assignments = []
 		var mut variable = null
 
 		var mut declaration = names.length != 0
 
 		for var name in names {
-			if var variable = scope.getVariable(name) {
+			if var variable ?= scope.getVariable(name) {
 				if variable.isLateInit() {
 					@parent.addInitializableVariable(variable, this)
 				}
@@ -133,7 +133,7 @@ class ExpressionStatement extends Statement {
 				line.code($runtime.scope(this))
 			}
 
-			if @expression.toAssignmentFragments? {
+			if ?@expression.toAssignmentFragments {
 				@expression.toAssignmentFragments(line)
 			}
 			else {
@@ -147,7 +147,7 @@ class ExpressionStatement extends Statement {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			if @expression.toStatementFragments? {
+			if ?@expression.toStatementFragments {
 				@expression.toStatementFragments(fragments, Mode::None)
 			}
 			else {

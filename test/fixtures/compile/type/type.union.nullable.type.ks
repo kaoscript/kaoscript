@@ -4,7 +4,7 @@ class Foobar {
 	}
 }
 
-func foobar(mut x: Foobar | String = null) {
+func foobar(mut x: Foobar | String | Null = null) {
 	if !?x {
 		x = Foobar.get('foobar')
 	}

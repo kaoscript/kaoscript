@@ -4,10 +4,10 @@ class ExportDeclaration extends Statement {
 		_statements		= []
 	}
 	override initiate() { # {{{
-		var mut statement
-
 		if @parent.includePath() == null {
 			for var declaration in @data.declarations {
+				var late statement
+
 				switch declaration.kind {
 					NodeKind::ExportDeclarationSpecifier => {
 						statement = $compile.statement(declaration.declaration, this)
@@ -38,9 +38,11 @@ class ExportDeclaration extends Statement {
 		}
 		else {
 			for var declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
-				@statements.push(statement = $compile.statement(declaration.declaration, this))
+				var statement = $compile.statement(declaration.declaration, this)
 
 				statement.initiate()
+
+				@statements.push(statement)
 			}
 		}
 	} # }}}

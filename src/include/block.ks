@@ -1,9 +1,9 @@
 class Block extends AbstractNode {
 	private {
-		_awaiting: Boolean	= false
-		_empty: Boolean		= false
-		_exit: Boolean		= false
-		_statements: Array	= []
+		@awaiting: Boolean	= false
+		@empty: Boolean		= false
+		@exit: Boolean		= false
+		@statements: Array	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -17,13 +17,15 @@ class Block extends AbstractNode {
 		@empty = @data.statements.length == 0
 	} # }}}
 	analyse() { # {{{
-		for statement in @data.statements {
-			@scope.line(statement.start.line)
+		for var data in @data.statements {
+			@scope.line(data.start.line)
 
-			@statements.push(statement = $compile.statement(statement, this))
+			var statement = $compile.statement(data, this)
 
 			statement.initiate()
 			statement.analyse()
+
+			@statements.push(statement)
 
 			if statement.isAwait() {
 				@awaiting = true
@@ -31,7 +33,7 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		if target? && !target.isAny() {
+		if !target.isVoid() && !target.isAny() {
 			for var statement in @statements {
 				@scope.line(statement.line())
 
@@ -76,13 +78,15 @@ class Block extends AbstractNode {
 		@data.statements.push(statement)
 	} # }}}
 	analyse(from: Number, to: Number = @data.statements.length:Number + 1) { # {{{
-		for statement in @data.statements from from to to {
-			@scope.line(statement.start.line)
+		for var data in @data.statements from from to to {
+			@scope.line(data.start.line)
 
-			@statements.push(statement = $compile.statement(statement, this))
+			var statement = $compile.statement(data, this)
 
 			statement.initiate()
 			statement.analyse()
+
+			@statements.push(statement)
 
 			if statement.isAwait() {
 				@awaiting = true
@@ -226,14 +230,14 @@ class Block extends AbstractNode {
 
 class FunctionBlock extends Block {
 	private {
-		@return: Expression		= null
+		@return: Expression?		= null
 	}
 	addReturn(@return)
 	override checkExit(target?) { # {{{
 		if @return != null {
 			var mut toAdd = true
 
-			if var statement = @statements.last() {
+			if var statement ?= @statements.last() {
 				toAdd = !statement.isExit()
 			}
 
@@ -247,7 +251,7 @@ class FunctionBlock extends Block {
 			}
 		}
 
-		if !@exit && target? && !target.isVoid() {
+		if !@exit && ?target && !target.isVoid() {
 			if target.isNever() {
 				TypeException.throwExpectedThrownError(this)
 			}

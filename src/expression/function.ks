@@ -16,17 +16,19 @@ class AnonymousFunctionExpression extends Expression {
 		@scope.define('this', true, Type.Any, this)
 
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
 		@isObjectMember = @parent.parent() is DictionaryExpression
 	} # }}}
 	override prepare(target) { # {{{
-		for parameter in @parameters {
-			parameter.prepare()
+		for var parameter in @parameters {
+			parameter.prepare(AnyType.NullableUnexplicit)
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
@@ -46,7 +48,7 @@ class AnonymousFunctionExpression extends Expression {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}
@@ -178,15 +180,17 @@ class ArrowFunctionExpression extends Expression {
 		@block = $compile.function($ast.body(@data), this)
 
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		for parameter in @parameters {
-			parameter.prepare()
+		for var parameter in @parameters {
+			parameter.prepare(AnyType.NullableUnexplicit)
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
@@ -221,7 +225,7 @@ class ArrowFunctionExpression extends Expression {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}

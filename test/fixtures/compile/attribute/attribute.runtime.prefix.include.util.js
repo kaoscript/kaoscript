@@ -78,13 +78,13 @@ module.exports = function() {
 	var __ks_Array = {};
 	var __ks_Dictionary = {};
 	__ks_Array.__ks_sttc_merge_0 = function(args) {
+		const l = args.length;
 		let source = [];
 		let i = 0;
-		let l = args.length;
 		while((i < l) && !((KSType.isValue(args[i]) ? (source = args[i], true) : false) && KSType.isArray(source))) {
-			++i;
+			i += 1;
 		}
-		++i;
+		i += 1;
 		while(i < l) {
 			if(KSType.isArray(args[i])) {
 				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
@@ -92,7 +92,7 @@ module.exports = function() {
 					__ks_Array.__ks_func_pushUniq_0.call(source, [value]);
 				}
 			}
-			++i;
+			i += 1;
 		}
 		return source;
 	};
@@ -108,12 +108,12 @@ module.exports = function() {
 		return true;
 	};
 	__ks_Array.__ks_func_append_0 = function(args) {
-		let l = null, i = null, j = null, arg = null;
 		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
-			arg = KSHelper.array(args[k]);
-			if((l = arg.length) > 50000) {
-				i = 0;
-				j = 50000;
+			const arg = KSHelper.array(args[k]);
+			const l = arg.length;
+			if(l > 50000) {
+				let i = 0;
+				let j = 50000;
 				while(i < l) {
 					this.push(...arg.slice(i, j));
 					i = j;
@@ -152,9 +152,10 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_clone_0 = function() {
 		let i = this.length;
-		let clone = new Array(i);
+		const clone = new Array(i);
 		while(i > 0) {
-			clone[--i] = $clone.__ks_0(this[i]);
+			i -= 1;
+			clone[i] = $clone.__ks_0(this[i]);
 		}
 		return clone;
 	};
@@ -169,7 +170,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_intersection_0 = function(arrays) {
 		const result = [];
-		let seen = null;
+		let seen = false;
 		for(let __ks_0 = 0, __ks_1 = this.length, value; __ks_0 < __ks_1; ++__ks_0) {
 			value = this[__ks_0];
 			seen = true;
@@ -387,7 +388,7 @@ module.exports = function() {
 		if(KSType.isFunction(dict.clone)) {
 			return dict.clone();
 		}
-		let clone = new Dictionary();
+		const clone = new Dictionary();
 		for(const key in dict) {
 			const value = dict[key];
 			clone[key] = $clone.__ks_0(value);
@@ -405,11 +406,12 @@ module.exports = function() {
 		return true;
 	};
 	__ks_Dictionary.__ks_sttc_key_0 = function(dict, index) {
-		let i = -1;
+		let i = 0;
 		for(const key in dict) {
-			if(++i === index) {
+			if(i === index) {
 				return key;
 			}
+			i += 1;
 		}
 		return null;
 	};
@@ -419,12 +421,12 @@ module.exports = function() {
 	__ks_Dictionary.__ks_sttc_merge_0 = function(args) {
 		let source = new Dictionary();
 		let i = 0;
-		let l = args.length;
+		const l = args.length;
 		let src = null;
 		while((i < l) && !((KSType.isValue(args[i]) ? (src = args[i], true) : false) && KSType.isDictionary(src))) {
-			++i;
+			i += 1;
 		}
-		++i;
+		i += 1;
 		if(KSType.isValue(src) && KSType.isDictionary(src)) {
 			source = src;
 		}
@@ -435,17 +437,18 @@ module.exports = function() {
 					$merge(source, key, value);
 				}
 			}
-			++i;
+			i += 1;
 		}
 		return source;
 	};
 	__ks_Dictionary.__ks_sttc_value_0 = function(dict, index) {
-		let i = -1;
+		let i = 0;
 		for(let __ks_0 in dict) {
 			const value = dict[__ks_0];
-			if(++i === index) {
+			if(i === index) {
 				return value;
 			}
+			i += 1;
 		}
 		return null;
 	};

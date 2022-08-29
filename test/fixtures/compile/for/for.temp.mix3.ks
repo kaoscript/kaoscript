@@ -1,7 +1,7 @@
 extern console
 
 func foo(x) {
-	if x.foo? {
+	if ?x.foo {
 		for value in x.foo {
 			switch value.kind {
 				42 => {

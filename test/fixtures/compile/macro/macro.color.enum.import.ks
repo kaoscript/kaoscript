@@ -2,7 +2,7 @@ import '../export/export.enum.space'
 
 class Color {
 	macro registerSpace(@expression: Dictionary) {
-		if expression.components? {
+		if ?expression.components {
 			var fields: Array = []
 			var methods: Array = []
 

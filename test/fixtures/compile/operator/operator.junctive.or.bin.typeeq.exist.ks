@@ -1,4 +1,4 @@
 func foobar(x?) {
-	if x? && x is String | Number {
+	if ?x && x is String | Number {
 	}
 }

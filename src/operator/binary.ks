@@ -121,7 +121,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -211,7 +211,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -391,7 +391,7 @@ class BinaryOperatorMatch extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@subject.prepare()
+		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@subject, this)
@@ -406,7 +406,7 @@ class BinaryOperatorMatch extends Expression {
 		}
 
 		for var operand in @operands {
-			operand.prepare()
+			operand.prepare(AnyType.NullableUnexplicit)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -595,7 +595,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		@left.acquireReusable(true)
 		@left.releaseReusable()
@@ -711,7 +711,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@left.prepare()
+		@left.prepare(AnyType.NullableUnexplicit)
 
 		var type = @left.type()
 
@@ -768,7 +768,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@subject.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@subject.prepare()
+		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@subject, this)
@@ -790,8 +790,8 @@ class BinaryOperatorTypeEquality extends Expression {
 
 			for var operand in @data.right.operands {
 				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
-					if var variable = @scope.getVariable(operand.typeName.name) {
-						type.addType(this.validateType(variable))
+					if var variable ?= @scope.getVariable(operand.typeName.name) {
+						type.addType(@validateType(variable))
 					}
 					else {
 						ReferenceException.throwNotDefined(operand.typeName.name, this)
@@ -807,8 +807,8 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-				if var variable = @scope.getVariable(@data.right.typeName.name) {
-					@trueType = this.validateType(variable)
+				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
+					@trueType = @validateType(variable)
 				}
 				else {
 					ReferenceException.throwNotDefined(@data.right.typeName.name, this)
@@ -900,7 +900,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 	} # }}}
 	override prepare(target) { # {{{
-		@subject.prepare()
+		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@subject, this)
@@ -922,7 +922,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 			for var operand in @data.right.operands {
 				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
-					if var variable = @scope.getVariable(operand.typeName.name) {
+					if var variable ?= @scope.getVariable(operand.typeName.name) {
 						type.addType(this.validateType(variable))
 					}
 					else {
@@ -939,7 +939,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-				if var variable = @scope.getVariable(@data.right.typeName.name) {
+				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
 					@falseType = this.validateType(variable)
 				}
 				else {

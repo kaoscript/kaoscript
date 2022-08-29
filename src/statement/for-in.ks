@@ -46,7 +46,7 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		if @data.index? {
+		if ?@data.index {
 			var variable = @bindingScope.getVariable(@data.index.name)
 
 			if @declaration || variable == null {
@@ -62,7 +62,7 @@ class ForInStatement extends Statement {
 			@index.analyse()
 		}
 
-		if @data.value? {
+		if ?@data.value {
 			@value = $compile.expression(@data.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
@@ -88,27 +88,27 @@ class ForInStatement extends Statement {
 
 		this.checkForRenamedVariables(@expression, variables)
 
-		if @data.from? {
+		if ?@data.from {
 			@from = $compile.expression(@data.from, this, @scope)
 			@from.analyse()
 
 			this.checkForRenamedVariables(@from, variables)
 		}
 
-		if @data.til? {
+		if ?@data.til {
 			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
 			this.checkForRenamedVariables(@til, variables)
 		}
-		else if @data.to? {
+		else if ?@data.to {
 			@to = $compile.expression(@data.to, this, @scope)
 			@to.analyse()
 
 			this.checkForRenamedVariables(@to, variables)
 		}
 
-		if @data.by? {
+		if ?@data.by {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
@@ -119,20 +119,20 @@ class ForInStatement extends Statement {
 			@bindingScope.rename(variable)
 		}
 
-		if @data.until? {
+		if ?@data.until {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 
 			this.checkForBreak(@until)
 		}
-		else if @data.while? {
+		else if ?@data.while {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 
 			this.checkForBreak(@while)
 		}
 
-		if @data.when? {
+		if ?@data.when {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -147,7 +147,7 @@ class ForInStatement extends Statement {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@expression.prepare()
+		@expression.prepare(@scope.reference('Array'))
 
 		var type = @expression.type()
 		if !(type.isAny() || type.isArray()) {
@@ -184,7 +184,7 @@ class ForInStatement extends Statement {
 				@bindingScope.replaceVariable(@data.index.name, @bindingScope.reference('Number'), this)
 			}
 
-			@index.prepare()
+			@index.prepare(@scope.reference('Number'))
 		}
 		else {
 			@indexName = @bindingScope.acquireTempName(false)
@@ -202,18 +202,18 @@ class ForInStatement extends Statement {
 			@bindingValue.acquireReusable(true)
 		}
 
-		if @from? {
+		if ?@from {
 			@from.prepare(@scope.reference('Number'))
 		}
 
-		if @til? {
+		if ?@til {
 			@til.prepare(@scope.reference('Number'))
 		}
-		else if @to? {
+		else if ?@to {
 			@to.prepare(@scope.reference('Number'))
 		}
 
-		if @by? {
+		if ?@by {
 			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName(false) if @by.isComposite()
@@ -221,7 +221,7 @@ class ForInStatement extends Statement {
 
 		this.assignTempVariables(@bindingScope)
 
-		if @until? {
+		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
@@ -235,7 +235,7 @@ class ForInStatement extends Statement {
 				this.assignTempVariables(@bodyScope)
 			}
 		}
-		else if @while? {
+		else if ?@while {
 			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
@@ -250,7 +250,7 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		if @when? {
+		if ?@when {
 			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
@@ -269,8 +269,8 @@ class ForInStatement extends Statement {
 
 		@body.prepare(target)
 
-		@bindingScope.releaseTempName(@expressionName) if @expressionName?
-		@bindingScope.releaseTempName(@indexName) if @indexName?
+		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
+		@bindingScope.releaseTempName(@indexName) if ?@indexName
 		@bindingScope.releaseTempName(@boundName)
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
@@ -282,31 +282,31 @@ class ForInStatement extends Statement {
 	translate() { # {{{
 		@expression.translate()
 
-		if @value? {
+		if ?@value {
 			@value.translate()
 		}
 
-		if @from? {
+		if ?@from {
 			@from.translate()
 		}
 
-		if @til? {
+		if ?@til {
 			@til.translate()
 		}
-		else if @to? {
+		else if ?@to {
 			@to.translate()
 		}
 
-		@by.translate() if @by?
+		@by.translate() if ?@by
 
-		if @until? {
+		if ?@until {
 			@until.translate()
 		}
-		else if @while? {
+		else if ?@while {
 			@while.translate()
 		}
 
-		if @when? {
+		if ?@when {
 			@when.translate()
 		}
 
@@ -359,7 +359,7 @@ class ForInStatement extends Statement {
 	# }}}
 	toBoundFragments(fragments) { # {{{
 		if @descending {
-			if @from? {
+			if ?@from {
 				if @from is NumberLiteral && @from.value() < 0 {
 					fragments
 						.code('Math.max(0, ')
@@ -375,7 +375,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if @til? {
+			if ?@til {
 				if @fromDesc {
 					fragments.compile(@til)
 				}
@@ -395,7 +395,7 @@ class ForInStatement extends Statement {
 					}
 				}
 			}
-			else if @to? {
+			else if ?@to {
 				if @fromDesc {
 					fragments.compile(@to)
 				}
@@ -437,7 +437,7 @@ class ForInStatement extends Statement {
 	} # }}}
 	toFromFragments(fragments) { # {{{
 		if @descending {
-			if @til? {
+			if ?@til {
 				if @til is NumberLiteral && @til.value() < 0 {
 					fragments
 						.compile(@expressionName ?? @expression)
@@ -452,7 +452,7 @@ class ForInStatement extends Statement {
 						.code(') - 1')
 				}
 			}
-			else if @to? {
+			else if ?@to {
 				if @to is NumberLiteral {
 					if @to.value() < 0 {
 						fragments
@@ -483,7 +483,7 @@ class ForInStatement extends Statement {
 		}
 		else {
 			if @fromDesc {
-				if @from? {
+				if ?@from {
 					fragments
 						.code('Math.min(')
 						.compile(@expressionName ?? @expression)
@@ -496,7 +496,7 @@ class ForInStatement extends Statement {
 				}
 			}
 			else {
-				if @from? {
+				if ?@from {
 					if @from is NumberLiteral && @from.value() < 0 {
 						fragments
 							.code('Math.max(0, ')
@@ -542,7 +542,7 @@ class ForInStatement extends Statement {
 			ctrl.code($comma)
 		}
 
-		if @expressionName? {
+		if ?@expressionName {
 			ctrl.code(@expressionName, $equals).compile(@expression).code($comma)
 		}
 
@@ -570,10 +570,10 @@ class ForInStatement extends Statement {
 		}
 
 		if !@useBreak {
-			if @until? {
+			if ?@until {
 				ctrl.code(' && !(').compileBoolean(@until).code(')')
 			}
-			else if @while? {
+			else if ?@while {
 				ctrl.code(' && ').wrapBoolean(@while, Mode::None, Junction::AND)
 			}
 		}
@@ -581,7 +581,7 @@ class ForInStatement extends Statement {
 		ctrl.code('; ')
 
 		if @descending || @fromDesc {
-			if @data.by? {
+			if ?@data.by {
 				if @data.by.kind == NodeKind::NumericExpression {
 					if Math.abs(@data.by.value) == 1 {
 						ctrl.code('--').compile(@indexName ?? @index)
@@ -599,7 +599,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if @data.by? {
+			if ?@data.by {
 				if @data.by.kind == NodeKind::NumericExpression {
 					if Math.abs(@data.by.value) == 1 {
 						ctrl.code('++').compile(@indexName ?? @index)
@@ -619,7 +619,7 @@ class ForInStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		if @value? {
+		if ?@value {
 			var line = ctrl.newLine()
 
 			@value.toAssignmentFragments(line, @bindingValue)
@@ -627,7 +627,7 @@ class ForInStatement extends Statement {
 			line.done()
 
 			if @useBreak {
-				if @until? {
+				if ?@until {
 					this.toDeclarationFragments(@loopTempVariables, ctrl)
 
 					ctrl
@@ -639,7 +639,7 @@ class ForInStatement extends Statement {
 						.line('break')
 						.done()
 				}
-				else if @while? {
+				else if ?@while {
 					this.toDeclarationFragments(@loopTempVariables, ctrl)
 
 					ctrl
@@ -654,7 +654,7 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		if @when? {
+		if ?@when {
 			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl

@@ -36,7 +36,7 @@ class UnlessStatement extends Statement {
 			for var inferable, name of trueInferables {
 				var trueType = inferable.type
 
-				if conditionInferables[name]? {
+				if ?conditionInferables[name] {
 					var conditionType = conditionInferables[name].type
 
 					if trueType.equals(conditionType) {

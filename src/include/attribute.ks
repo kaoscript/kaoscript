@@ -32,7 +32,7 @@ class Attribute {
 		conditional(data, node) { # {{{
 			if data.attributes?.length > 0 {
 				for var attr in data.attributes {
-					if var attribute = Attribute.get(attr.declaration, AttributeTarget::Conditional) {
+					if var attribute ?= Attribute.get(attr.declaration, AttributeTarget::Conditional) {
 						return attribute.evaluate(node)
 					}
 				}
@@ -66,7 +66,7 @@ class Attribute {
 				}
 
 				for var attr in data.attributes {
-					if var attribute = Attribute.get(attr.declaration, mode) {
+					if var attribute ?= Attribute.get(attr.declaration, mode) {
 						if clone {
 							options = attribute.clone(options, cloned)
 						}
@@ -114,7 +114,7 @@ class ElseAttribute extends Attribute {
 	constructor(data)
 	clone(options, cloned) => options
 	evaluate(node) { # {{{
-		if var flag = node.getAttributeData(AttributeData::Conditional) {
+		if var flag ?= node.getAttributeData(AttributeData::Conditional) {
 			return !flag
 		}
 		else {
@@ -261,7 +261,7 @@ class IfAttribute extends Attribute {
 					return false
 				}
 				'gt' => {
-					if var match = $semverRegex.exec(data.arguments[0].name) {
+					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
 						}
@@ -273,7 +273,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'gte' => {
-					if var match = $semverRegex.exec(data.arguments[0].name) {
+					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
 						}
@@ -288,7 +288,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'lt' => {
-					if var match = $semverRegex.exec(data.arguments[0].name) {
+					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
 						}
@@ -300,7 +300,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'lte' => {
-					if var match = $semverRegex.exec(data.arguments[0].name) {
+					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
 						}
@@ -325,7 +325,7 @@ class IfAttribute extends Attribute {
 					var mut count = 0
 
 					for arg in data.arguments when this.evaluate(arg, target) {
-						++count
+						count += 1
 					}
 
 					return count == 1
@@ -338,7 +338,7 @@ class IfAttribute extends Attribute {
 		}
 		else if data.kind == NodeKind::Identifier {
 			if match ?= $semverRegex.exec(data.name) {
-				if match[2]? {
+				if ?match[2] {
 					return target.name == match[1] && target.version == match[2]
 				}
 				else {
@@ -432,7 +432,7 @@ class RulesAttribute extends Attribute {
 			if argument.kind == NodeKind::Identifier {
 				var name = argument.name.toLowerCase()
 
-				if var data = $rules[name] {
+				if var data ?= $rules[name] {
 					options.rules[data[0]] = data[1]
 				}
 				else {

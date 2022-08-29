@@ -8,8 +8,8 @@ var $switch = {
 				max = Infinity
 			}
 			else {
-				++min
-				++max
+				min += 1
+				max += 1
 			}
 		}
 
@@ -45,7 +45,7 @@ class SwitchStatement extends Statement {
 		var mut condition, binding
 		for var data, index in @data.clauses {
 			var clause = {
-				hasTest: data.filter?
+				hasTest: ?data.filter
 				bindings: []
 				conditions: []
 				scope: this.newScope(@scope, ScopeType::InlineBlock)
@@ -122,7 +122,7 @@ class SwitchStatement extends Statement {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(AnyType.NullableUnexplicit)
 
 		@valueType = @value.type()
 
@@ -143,10 +143,10 @@ class SwitchStatement extends Statement {
 				condition.prepare(@scope.reference('Boolean'))
 
 				if condition.isEnum() {
-					++enumConditions
+					enumConditions += 1
 				}
 
-				++maxConditions
+				maxConditions += 1
 			}
 
 			for var binding in clause.bindings {
@@ -162,11 +162,11 @@ class SwitchStatement extends Statement {
 			}
 
 			if clause.body.isExit() {
-				--maxInferables
+				maxInferables -= 1
 			}
 			else {
 				for var data, name of clause.body.scope().listUpdatedInferables() {
-					if inferables[name]? {
+					if ?inferables[name] {
 						if inferables[name].union {
 							inferables[name].data.type.addType(data.type)
 						}
@@ -175,7 +175,7 @@ class SwitchStatement extends Statement {
 							inferables[name].union = inferables[name].data.type.isUnion()
 						}
 
-						inferables[name].count++
+						inferables[name].count += 1
 					}
 					else {
 						inferables[name] = {
@@ -299,7 +299,7 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			map.clauses[clauseIndex] = {
 				initializable: true
 				type: null
@@ -356,7 +356,7 @@ class SwitchStatement extends Statement {
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		var {name, type} = variable
 
-		if var map = @lateInitVariables[name] {
+		if var map ?= @lateInitVariables[name] {
 			var mut clause = null
 
 			for var cc, i in @clauses {
@@ -397,7 +397,7 @@ class SwitchStatement extends Statement {
 		else if !@hasDefaultClause {
 			// do nothing
 		}
-		else if var map = @initializedVariables[name] {
+		else if var map ?= @initializedVariables[name] {
 			var mut clause = null
 
 			for var cc, i in @clauses {
@@ -708,7 +708,7 @@ class SwitchConditionArray extends AbstractNode {
 			@name = @scope.parent().acquireTempName(false)
 		}
 
-		for value in @values {
+		for var value in @values {
 			value.prepare()
 		}
 	} # }}}
@@ -737,7 +737,7 @@ class SwitchConditionArray extends AbstractNode {
 			}
 		}
 
-		if @name? {
+		if ?@name {
 			fragments.code(' && ', @name, '(', name, ')')
 		}
 
@@ -785,7 +785,7 @@ class SwitchConditionArray extends AbstractNode {
 
 						@values[index].toBooleanFragments(line, '__ks_' + i)
 
-						index++
+						index += 1
 					}
 				}
 			}
@@ -803,7 +803,7 @@ class SwitchConditionRange extends AbstractNode {
 		_to		= true
 	}
 	analyse() { # {{{
-		if @data.from? {
+		if ?@data.from {
 			@left = $compile.expression(@data.from, this)
 		}
 		else {
@@ -811,7 +811,7 @@ class SwitchConditionRange extends AbstractNode {
 			@from = false
 		}
 
-		if @data.to? {
+		if ?@data.to {
 			@right = $compile.expression(@data.to, this)
 		}
 		else {
@@ -870,7 +870,7 @@ class SwitchConditionValue extends AbstractNode {
 		@value.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(target)
 
 		@type = @value.type()
 	} # }}}
@@ -905,7 +905,7 @@ class SwitchFilter extends AbstractNode {
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		if @data.filter? {
+		if ?@data.filter {
 			if @data.bindings.length > 0 {
 				@name = @scope.parent().acquireTempName(false)
 
@@ -928,11 +928,11 @@ class SwitchFilter extends AbstractNode {
 				binding.prepare()
 			}
 
-			@filter.prepare()
+			@filter.prepare(target)
 		}
 	} # }}}
 	translate() { # {{{
-		if @filter? {
+		if ?@filter {
 			for binding in @bindings {
 				binding.translate()
 			}
@@ -971,14 +971,14 @@ class SwitchFilter extends AbstractNode {
 			}
 		}
 
-		if @name? {
+		if ?@name {
 			fragments.code(' && ') if nf
 
 			fragments.code(@name, '(', @parent._name, ')')
 
 			@scope.parent().releaseTempName(@name)
 		}
-		else if @filter? {
+		else if ?@filter {
 			if nf {
 				fragments.code(' && ').wrapBoolean(@filter, Mode::None, Junction::AND)
 			}

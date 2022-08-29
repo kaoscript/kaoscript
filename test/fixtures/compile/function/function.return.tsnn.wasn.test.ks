@@ -1,5 +1,5 @@
 func foobar(foobar: String?): String {
-	if foobar? {
+	if ?foobar {
 		return foobar
 	}
 	else {

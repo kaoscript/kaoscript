@@ -19,13 +19,13 @@ class DictionaryType extends Type {
 			}
 
 			queue.push(() => {
-				if data.properties? {
+				if ?data.properties {
 					for var property, name of data.properties {
 						type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
-				if data.rest? {
+				if ?data.rest {
 					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -35,7 +35,7 @@ class DictionaryType extends Type {
 	}
 	addProperty(name: String, type: Type) { # {{{
 		@properties[name] = type
-		++@length
+		@length += 1
 	} # }}}
 	clone() { # {{{
 		var type = new DictionaryType(@scope)
@@ -49,7 +49,7 @@ class DictionaryType extends Type {
 
 		return type
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
 			if @isSubsetOf(value, MatchingMode::Exact) {
 				return 0
@@ -61,11 +61,11 @@ class DictionaryType extends Type {
 
 		return 1
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][] = null) => -1
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
-	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discardSpread() { # {{{
@@ -130,7 +130,7 @@ class DictionaryType extends Type {
 		return type
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if var type = @properties[name] {
+		if var type ?= @properties[name] {
 			return type
 		}
 
@@ -250,7 +250,7 @@ class DictionaryType extends Type {
 	isSealable() => true
 	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
 		for var type, name of value.properties() {
-			if var prop = @properties[name] {
+			if var prop ?= @properties[name] {
 				if !prop.isSubsetOf(type, mode) {
 					return false
 				}
@@ -287,7 +287,7 @@ class DictionaryType extends Type {
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)
 
 				for var type, name of value.properties() {
-					if var prop = @properties[name] {
+					if var prop ?= @properties[name] {
 						return false unless prop.isSubsetOf(type, mode)
 					}
 					else {
@@ -301,7 +301,7 @@ class DictionaryType extends Type {
 				}
 
 				for var type, name of value.properties() {
-					if var prop = @properties[name] {
+					if var prop ?= @properties[name] {
 						return false unless prop.isSubsetOf(type, mode)
 					}
 					else {

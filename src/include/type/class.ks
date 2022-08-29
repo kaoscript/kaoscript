@@ -69,7 +69,7 @@ class ClassType extends Type {
 				}
 
 				if ?type._majorOriginal {
-					if var reference = ClassType.getExternReference(type._majorOriginal) {
+					if var reference ?= ClassType.getExternReference(type._majorOriginal) {
 						return reference
 					}
 					else if ?type._minorOriginal {
@@ -81,7 +81,7 @@ class ClassType extends Type {
 			return null
 		} # }}}
 		getOriginReference(type: ClassType): Number? { # {{{
-			if type.origin()? {
+			if ?type.origin() {
 				return type.referenceIndex()
 			}
 
@@ -113,29 +113,29 @@ class ClassType extends Type {
 
 			type._exhaustive = data.exhaustive
 
-			if data.exhaustiveness? {
-				if data.exhaustiveness.constructor? {
+			if ?data.exhaustiveness {
+				if ?data.exhaustiveness.constructor {
 					type._exhaustiveness.constructor = data.exhaustiveness.constructor
 				}
 
-				if data.exhaustiveness.classMethods? {
+				if ?data.exhaustiveness.classMethods {
 					type._exhaustiveness.classMethods = data.exhaustiveness.classMethods
 				}
 
-				if data.exhaustiveness.instanceMethods? {
+				if ?data.exhaustiveness.instanceMethods {
 					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
 				}
 			}
 
-			if data.sharedMethods? {
+			if ?data.sharedMethods {
 				type._sharedMethods = data.sharedMethods
 			}
 
-			if data.origin? {
+			if ?data.origin {
 				type._origin = TypeOrigin(data.origin)
 			}
 
-			if data.original? {
+			if ?data.original {
 				queue.push(() => {
 					var original = references[data.original].discardName()
 
@@ -144,7 +144,7 @@ class ClassType extends Type {
 					references[data.original].reference().reset()
 				})
 			}
-			else if data.originals? {
+			else if ?data.originals {
 
 				queue.push(() => {
 					var first = references[data.originals[0]].discardName()
@@ -174,7 +174,7 @@ class ClassType extends Type {
 				}
 
 				queue.push(() => {
-					if data.extends? {
+					if ?data.extends {
 						type.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 					}
 
@@ -269,7 +269,9 @@ class ClassType extends Type {
 		var mut index = type.index()
 
 		if index == -1 {
-			index = ++sequences[name]
+			sequences[name] += 1
+
+			index = sequences[name]
 
 			type.index(index)
 		}
@@ -301,7 +303,9 @@ class ClassType extends Type {
 		var mut index = type.index()
 
 		if index == -1 {
-			index = ++sequences[name]
+			sequences[name] += 1
+
+			index = sequences[name]
 
 			type.index(index)
 		}
@@ -337,7 +341,9 @@ class ClassType extends Type {
 	addConstructor(type: ClassConstructorType) { # {{{
 		var mut index = type.index()
 		if index == -1 {
-			index = ++@sequences.constructors
+			@sequences.constructors += 1
+
+			index = @sequences.constructors
 
 			type.index(index)
 		}
@@ -368,7 +374,9 @@ class ClassType extends Type {
 
 		var mut index = type.index()
 		if index == -1 {
-			index = ++sequences[name]
+			sequences[name] += 1
+
+			index = sequences[name]
 
 			type.index(index)
 		}
@@ -548,7 +556,7 @@ class ClassType extends Type {
 		return this
 	} # }}}
 	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id = type.index() {
+		if var id ?= type.index() {
 			if @abstractMethods[name] is Array {
 				for var method in @abstractMethods[name] {
 					if method.index() == id {
@@ -561,7 +569,7 @@ class ClassType extends Type {
 		return this.addAbstractMethod(name, type)
 	} # }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id = type.index() {
+		if var id ?= type.index() {
 			if @classMethods[name] is Array {
 				for var method in @classMethods[name] {
 					if method.index() == id {
@@ -571,7 +579,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if var overwrite = type.overwrite() {
+		if var overwrite ?= type.overwrite() {
 			var methods = @classMethods[name]
 
 			for var data in overwrite {
@@ -587,7 +595,7 @@ class ClassType extends Type {
 		return this.addClassMethod(name, type)
 	} # }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id = type.index() {
+		if var id ?= type.index() {
 			if @instanceMethods[name] is Array {
 				for var method in @instanceMethods[name] {
 					if method.index() == id {
@@ -597,8 +605,8 @@ class ClassType extends Type {
 			}
 		}
 
-		if var overwrite = type.overwrite() {
-			if var methods = @instanceMethods[name] {
+		if var overwrite ?= type.overwrite() {
+			if var methods ?= @instanceMethods[name] {
 				for var data in overwrite {
 					for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
 						methods.splice(i, 1)
@@ -617,7 +625,7 @@ class ClassType extends Type {
 		var mut export
 
 		var mut exportSuper = false
-		if @majorOriginal? {
+		if ?@majorOriginal {
 			if mode ~~ ExportMode::Export {
 				exportSuper = this.hasExportableOriginals()
 			}
@@ -646,8 +654,8 @@ class ClassType extends Type {
 				var extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
 				var require = ClassType.getRequireReference(@majorOriginal)
 
-				if extern? {
-					if require? {
+				if ?extern {
+					if ?require {
 						if origin ~~ TypeOrigin::ExternOrRequire {
 							export.originals = [extern, require]
 						}
@@ -790,7 +798,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if mode !~ ExportMode::Export && @origin? && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
+		if mode !~ ExportMode::Export && ?@origin && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
 			var origin = @origin - TypeOrigin::Extern - TypeOrigin::Require
 
 			if origin != 0 {
@@ -1029,7 +1037,7 @@ class ClassType extends Type {
 			while methods.length == 0 && that.isExtending() {
 				that = that.extends().type()
 
-				if var m = that.listClassMethods(name) {
+				if var m ?= that.listClassMethods(name) {
 					for var method in m {
 						method.pushTo(methods)
 					}
@@ -1050,7 +1058,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	getClassVariable(name: String) { # {{{
-		if var variable = @classVariables[name] {
+		if var variable ?= @classVariables[name] {
 			return variable
 		}
 
@@ -1101,7 +1109,7 @@ class ClassType extends Type {
 			var hierarchy = [name, class.name()]
 
 			while class.type().isExtending() {
-				hierarchy.push((class = class.type().extends()).name())
+				hierarchy.push((class <- class.type().extends()).name())
 			}
 
 			return hierarchy
@@ -1153,7 +1161,7 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	getInstanceVariable(name: String) { # {{{
-		if @instanceVariables[name]? {
+		if ?@instanceVariables[name] {
 			return @instanceVariables[name]
 		}
 		else if @extending {
@@ -1163,7 +1171,7 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	getInstantiableAssessment(name: String, node: AbstractNode) { # {{{
-		if var assessment = @instanceAssessments[name] {
+		if var assessment ?= @instanceAssessments[name] {
 			return assessment
 		}
 
@@ -1195,7 +1203,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract {
-			if var functions = @abstractMethods[name] {
+			if var functions ?= @abstractMethods[name] {
 				if functions.length == 1 {
 					return functions[0]
 				}
@@ -1215,7 +1223,7 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
+	getMajorReferenceIndex() => @referenceIndex == -1 && ?@majorOriginal ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
 	getMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
 			for var method in @instanceMethods[name] {
@@ -1280,7 +1288,7 @@ class ClassType extends Type {
 	hasConstructors() => @constructors.length != 0
 	hasDestructors() => @sequences.destructors != -1
 	hasExportableOriginals() { # {{{
-		if @minorOriginal? {
+		if ?@minorOriginal {
 			return true if @minorOriginal._referenceIndex != -1 || @minorOriginal.hasExportableOriginals()
 		}
 
@@ -1392,17 +1400,23 @@ class ClassType extends Type {
 		}
 	} # }}}
 	incDefaultSequence() { # {{{
-		return ++@sequences.defaults
+		@sequences.defaults += 1
+
+		return @sequences.defaults
 	} # }}}
 	incDestructorSequence() { # {{{
-		return ++@sequences.destructors
+		@sequences.destructors += 1
+
+		return @sequences.destructors
 	} # }}}
 	incInitializationSequence() { # {{{
-		return ++@sequences.initializations
+		@sequences.initializations += 1
+
+		return @sequences.initializations
 	} # }}}
 	incSharedMethod(name: String): Number { # {{{
-		if var value = @sharedMethods[name] {
-			@sharedMethods[name] = ++value
+		if var value ?= @sharedMethods[name] {
+			@sharedMethods[name] = value + 1
 		}
 		else {
 			@sharedMethods[name] = 0
@@ -1460,7 +1474,7 @@ class ClassType extends Type {
 	isExhaustiveConstructor() => @exhaustiveness.constructor
 	isExhaustiveConstructor(node) => this.isExhaustive(node) && this.isExhaustiveConstructor()
 	isExhaustiveClassMethod(name) { # {{{
-		if @exhaustiveness.classMethods[name]? {
+		if ?@exhaustiveness.classMethods[name] {
 			return @exhaustiveness.classMethods[name]
 		}
 		else if @extending {
@@ -1472,7 +1486,7 @@ class ClassType extends Type {
 	} # }}}
 	isExhaustiveClassMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveClassMethod(name)
 	isExhaustiveInstanceMethod(name) { # {{{
-		if @exhaustiveness.instanceMethods[name]? {
+		if ?@exhaustiveness.instanceMethods[name] {
 			return @exhaustiveness.instanceMethods[name]
 		}
 		else if @abstract && this.hasAbstractMethod(name) {
@@ -1573,7 +1587,7 @@ class ClassType extends Type {
 		}
 
 		for var type, name of value.properties() {
-			if var prop = @getInstanceProperty(name) {
+			if var prop ?= @getInstanceProperty(name) {
 				return false unless prop.isSubsetOf(type, mode)
 			}
 			else {
@@ -1606,7 +1620,7 @@ class ClassType extends Type {
 	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		var result = []
 
-		if var methods = @classMethods[name] {
+		if var methods ?= @classMethods[name] {
 			for method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -1654,12 +1668,12 @@ class ClassType extends Type {
 	listInstantiableMethods(name: String) { # {{{
 		var methods = []
 
-		if var functions = @instanceMethods[name] {
+		if var functions ?= @instanceMethods[name] {
 			methods.push(...functions)
 		}
 
 		if @abstract {
-			if var functions = @abstractMethods[name] {
+			if var functions ?= @abstractMethods[name] {
 				methods.push(...functions)
 			}
 		}
@@ -1669,7 +1683,7 @@ class ClassType extends Type {
 	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		var result = []
 
-		if var methods = @instanceMethods[name] {
+		if var methods ?= @instanceMethods[name] {
 			for var method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -1682,7 +1696,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract {
-			if var methods = @abstractMethods[name] {
+			if var methods ?= @abstractMethods[name] {
 				for var method in methods {
 					if method.isSubsetOf(type, mode) {
 						result.push(method)
@@ -1815,10 +1829,10 @@ class ClassType extends Type {
 	} # }}}
 	minorOriginal() => @minorOriginal ?? @majorOriginal
 	origin() { # {{{
-		if @origin? {
+		if ?@origin {
 			return @origin
 		}
-		else if @majorOriginal? {
+		else if ?@majorOriginal {
 			return @majorOriginal.origin()
 		}
 		else {
@@ -1831,7 +1845,7 @@ class ClassType extends Type {
 	overwriteConstructor(type, methods) { # {{{
 		@constructors.remove(...methods)
 
-		if var alterMethods = @majorOriginal?._constructors {
+		if var alterMethods ?= @majorOriginal?._constructors {
 			var indexes = [method.index() for var method in alterMethods]
 			var overwrite = [method.index() for var method in methods when indexes.contains(method.index())]
 
@@ -1847,7 +1861,7 @@ class ClassType extends Type {
 	overwriteInstanceMethod(name: String, type, methods) { # {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
-		if var alterMethods = @majorOriginal?._instanceMethods[name] {
+		if var alterMethods ?= @majorOriginal?._instanceMethods[name] {
 			var indexes = [method.index() for var method in alterMethods]
 			var overwrite = [method.index() for var method in methods when indexes.contains(method.index())]
 
@@ -1930,7 +1944,7 @@ class ClassType extends Type {
 				var require = ClassType.getRequireReference(this)
 				var extern = ClassType.getExternReference(this)
 
-				if require? && extern? {
+				if ?require && ?extern {
 					var referenceIndex = references.length + indexDelta
 
 					references.push({
@@ -1955,15 +1969,15 @@ class ClassType extends Type {
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode::Alien {
-			if @minorOriginal? {
+			if ?@minorOriginal {
 				return @minorOriginal.toReference(references, indexDelta, mode, module)
 			}
-			else if @majorOriginal? && !@majorOriginal.isPredefined() {
+			else if ?@majorOriginal && !@majorOriginal.isPredefined() {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
 		}
 		else if mode ~~ ExportMode::Requirement {
-			if @majorOriginal? && !this.isRequirement() {
+			if ?@majorOriginal && !this.isRequirement() {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
 		}
@@ -2012,7 +2026,10 @@ class ClassType extends Type {
 	} # }}}
 	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { # {{{
 		var root = this.ancestor()
-		var index = ++root._sequences.instanceMethods[name]
+
+		root._sequences.instanceMethods[name] += 1
+
+		var index = root._sequences.instanceMethods[name]
 
 		type.setForkedIndex(index)
 

@@ -10,11 +10,11 @@ class NamespaceType extends Type {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
 			var type = new NamespaceType(scope)
 
-			if data.exhaustive? {
+			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
 			}
 
-			if data.original? {
+			if ?data.original {
 
 				queue.push(() => {
 					var original = references[data.original]
@@ -48,7 +48,7 @@ class NamespaceType extends Type {
 		super(new NamespaceTypeScope(scope))
 	} # }}}
 	addFunction(name: String, type: FunctionType) { # {{{
-		if var property = @properties[name] {
+		if var property ?= @properties[name] {
 			var propertyType = property.type()
 
 			if propertyType is OverloadedFunctionType {

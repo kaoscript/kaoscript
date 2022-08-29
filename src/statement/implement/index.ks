@@ -136,8 +136,8 @@ class ImplementDeclaration extends Statement {
 		for var property in @properties {
 			property.prepare()
 
-			if var name = property.getSharedName() {
-				if @sharingProperties[name]? {
+			if var name ?= property.getSharedName() {
+				if ?@sharingProperties[name] {
 					@sharingProperties[name].push(property)
 				}
 				else {
@@ -151,7 +151,7 @@ class ImplementDeclaration extends Statement {
 				var instance = property.isInstance()
 				var mode = property.getMatchingMode()
 
-				if var methods = methods[instance][name] {
+				if var methods ?= methods[instance][name] {
 					for var method in methods {
 						if method.isSubsetOf(type, mode) {
 							if property.isConstructor() {

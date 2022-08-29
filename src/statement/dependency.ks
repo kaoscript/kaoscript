@@ -9,7 +9,7 @@ abstract class DependencyStatement extends Statement {
 				var type = this.applyFlags(new ClassType(scope))
 				var variable = scope.define(declaration.name.name, true, type, this)
 
-				if declaration.extends? {
+				if ?declaration.extends {
 					if superVar !?= @scope.getVariable(declaration.extends.name) {
 						ReferenceException.throwNotDefined(declaration.extends.name, this)
 					}
@@ -50,7 +50,7 @@ abstract class DependencyStatement extends Statement {
 			NodeKind::EnumDeclaration => {
 				var mut ekind = EnumTypeKind::Number
 
-				if declaration.type? {
+				if ?declaration.type {
 					if Type.fromAST(declaration.type, this).isString() {
 						ekind = EnumTypeKind::String
 					}
@@ -76,7 +76,7 @@ abstract class DependencyStatement extends Statement {
 			}
 			NodeKind::FunctionDeclaration => {
 				var mut type
-				if declaration.parameters? {
+				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 
 					type = new FunctionType(parameters, declaration, this)
@@ -263,7 +263,7 @@ class RequireDeclaration extends DependencyStatement {
 		}
 
 		for var declaration in @data.declarations {
-			if var variable = @scope.getVariable(declaration.name.name) {
+			if var variable ?= @scope.getVariable(declaration.name.name) {
 				if declaration.kind == NodeKind::FunctionDeclaration {
 					var requirement = module.getRequirement(declaration.name.name)
 
@@ -384,7 +384,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 
 		if @parent.includePath() != null {
 			for var data in @data.declarations {
-				if var variable = @scope.getVariable(data.name.name) {
+				if var variable ?= @scope.getVariable(data.name.name) {
 					// TODO check & merge type
 				}
 				else {
@@ -441,8 +441,8 @@ class RequireOrImportDeclaration extends Statement {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		for declarator in @declarators {
-			declarator.prepare()
+		for var declarator in @declarators {
+			declarator.prepare(target)
 		}
 	} # }}}
 	translate() { # {{{
@@ -471,7 +471,7 @@ class RequireOrImportDeclarator extends Importer {
 				var line = this.line()
 
 				for var var of @variables {
-					if var variable = @scope.getVariable(var.name) {
+					if var variable ?= @scope.getVariable(var.name) {
 						if @scope.hasDefinedVariableBefore(var.name, line) {
 							variable.declaration().flagForcefullyRebinded()
 						}
@@ -481,7 +481,7 @@ class RequireOrImportDeclarator extends Importer {
 
 							if type.isAlien() {
 								var origin = type.origin()
-								if origin? {
+								if ?origin {
 									type.origin(origin:TypeOrigin + TypeOrigin::RequireOrExtern)
 								}
 								else {
@@ -648,7 +648,7 @@ class ExternOrImportDeclaration extends Statement {
 	} # }}}
 	override prepare(target) { # {{{
 		for var declarator in @declarators {
-			declarator.prepare()
+			declarator.prepare(target)
 		}
 	} # }}}
 	translate() { # {{{
@@ -668,17 +668,17 @@ class ExternOrImportDeclarator extends Importer {
 		_requirements: Array	= []
 	}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		var module = this.module()
 
 		for var var of @variables {
-			if var variable = @scope.getVariable(var.name) {
+			if var variable ?= @scope.getVariable(var.name) {
 				var requirement = new ROIDynamicRequirement(variable, this)
 				var type = requirement.type().flagAlien()
 
 				var origin = type.origin()
-				if origin? {
+				if ?origin {
 					type.origin(origin:TypeOrigin + TypeOrigin::ExternOrRequire)
 				}
 				else {
@@ -791,7 +791,7 @@ abstract class Requirement {
 	flagAlternative(): this { # {{{
 		var mut type = @type
 
-		while type.minorOriginal()? {
+		while ?type.minorOriginal() {
 			type = type.minorOriginal()
 		}
 
@@ -816,7 +816,7 @@ abstract class Requirement {
 		if @type.isRequired() {
 			return true
 		}
-		else if @alternative? {
+		else if ?@alternative {
 			return @alternative.referenceIndex()
 		}
 		else {
@@ -1022,7 +1022,7 @@ class ROIDynamicRequirement extends StaticRequirement {
 		super(name, type, node)
 	} # }}}
 	constructor(variable: Variable, importer) { # {{{
-		super(variable, @importer = importer)
+		super(variable, @importer <- importer)
 	} # }}}
 	acquireTempName() { # {{{
 		@tempName = @node.module().scope().acquireTempName(false)

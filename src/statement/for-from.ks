@@ -54,7 +54,7 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if @data.til? {
+		if ?@data.til {
 			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
@@ -81,7 +81,7 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if @data.by? {
+		if ?@data.by {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
@@ -109,16 +109,16 @@ class ForFromStatement extends Statement {
 		@variable = $compile.expression(@data.variable, this, @bindingScope)
 		@variable.analyse()
 
-		if @data.until? {
+		if ?@data.until {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while? {
+		else if ?@data.while {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when? {
+		if ?@data.when {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -135,7 +135,7 @@ class ForFromStatement extends Statement {
 
 		@from.prepare(@scope.reference('Number'))
 
-		if @til? {
+		if ?@til {
 			@til.prepare(@scope.reference('Number'))
 
 			@boundName = @bindingScope.acquireTempName(!@declared) if @til.isComposite()
@@ -146,7 +146,7 @@ class ForFromStatement extends Statement {
 			@boundName = @bindingScope.acquireTempName(!@declared) if @to.isComposite()
 		}
 
-		if @by? {
+		if ?@by {
 			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName(!@declared) if @by.isComposite()
@@ -154,7 +154,7 @@ class ForFromStatement extends Statement {
 
 		this.assignTempVariables(@bindingScope)
 
-		if @until? {
+		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
@@ -163,7 +163,7 @@ class ForFromStatement extends Statement {
 
 			this.assignTempVariables(@bodyScope)
 		}
-		else if @while? {
+		else if ?@while {
 			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
@@ -173,7 +173,7 @@ class ForFromStatement extends Statement {
 			this.assignTempVariables(@bodyScope)
 		}
 
-		if @when? {
+		if ?@when {
 			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
@@ -198,23 +198,23 @@ class ForFromStatement extends Statement {
 		@variable.translate()
 		@from.translate()
 
-		if @til? {
+		if ?@til {
 			@til.translate()
 		}
 		else {
 			@to.translate()
 		}
 
-		@by.translate() if @by?
+		@by.translate() if ?@by
 
-		if @until? {
+		if ?@until {
 			@until.translate()
 		}
-		else if @while? {
+		else if ?@while {
 			@while.translate()
 		}
 
-		@when.translate() if @when?
+		@when.translate() if ?@when
 
 		@body.translate()
 	} # }}}
@@ -239,11 +239,11 @@ class ForFromStatement extends Statement {
 
 		ctrl.compile(@variable).code($equals).compile(@from)
 
-		if @boundName? {
+		if ?@boundName {
 			ctrl.code($comma, @boundName, $equals).compile(@til ?? @to)
 		}
 
-		if @byName? {
+		if ?@byName {
 			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
 
@@ -253,7 +253,7 @@ class ForFromStatement extends Statement {
 
 		var mut desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
 
-		if @data.til? {
+		if ?@data.til {
 			if desc {
 				ctrl.code(' > ')
 			}
@@ -274,16 +274,16 @@ class ForFromStatement extends Statement {
 			ctrl.compile(@boundName ?? @to)
 		}
 
-		if @until? {
+		if ?@until {
 			ctrl.code(' && !(').compileBoolean(@until).code(')')
 		}
-		else if @while? {
+		else if ?@while {
 			ctrl.code(' && ').wrapBoolean(@while, Mode::None, Junction::AND)
 		}
 
 		ctrl.code('; ')
 
-		if @data.by? {
+		if ?@data.by {
 			if @data.by.kind == NodeKind::NumericExpression {
 				if @data.by.value == 1 {
 					ctrl.code('++').compile(@variable)
@@ -311,7 +311,7 @@ class ForFromStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		if @data.when? {
+		if ?@data.when {
 			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl

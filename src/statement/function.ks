@@ -1,7 +1,7 @@
 var $function = {
 	surround(node) { # {{{
 		var mut parent = node._parent
-		while parent? && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
+		while ?parent && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
 		}
 
@@ -99,7 +99,7 @@ var $function = {
 					return true
 				}
 
-				if data.whenFalse? && $function.useThisVariable(data.whenFalse, node) {
+				if ?data.whenFalse && $function.useThisVariable(data.whenFalse, node) {
 					return true
 				}
 			}
@@ -132,7 +132,7 @@ var $function = {
 			NodeKind::ThrowStatement => return $function.useThisVariable(data.value, node)
 			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
 			NodeKind::VariableDeclaration => {
-				return data.init? && $function.useThisVariable(data.init, node)
+				return ?data.init && $function.useThisVariable(data.init, node)
 			}
 			=> {
 				throw new NotImplementedException(`Unknow kind \(data.kind)`, node)
@@ -399,7 +399,7 @@ class FunctionDeclarator extends AbstractNode {
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {
-			parameter.prepare()
+			parameter.prepare(AnyType.NullableUnexplicit)
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, @index, this)
@@ -425,7 +425,7 @@ class FunctionDeclarator extends AbstractNode {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}

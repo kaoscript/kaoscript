@@ -1,7 +1,7 @@
 extern console
 
 class Foobar {
-	foo(x: String, y: String = null, z: Boolean = false): String => `[\(x), \(y), \(z)]`
+	foo(x: String, y: String? = null, z: Boolean = false): String => `[\(x), \(y), \(z)]`
 }
 
 var x = new Foobar()

@@ -33,7 +33,7 @@ class FunctionType extends Type {
 		} # }}}
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
-			if data.parameters? {
+			if ?data.parameters {
 				return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 			}
 			else {
@@ -48,14 +48,14 @@ class FunctionType extends Type {
 			type._min = data.min
 			type._max = data.max
 
-			if data.exhaustive? {
+			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
 			}
 
 			queue.push(() => {
 				type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
 
-				if data.returns? {
+				if ?data.returns {
 					type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 					type._missingReturn = false
 				}
@@ -112,7 +112,7 @@ class FunctionType extends Type {
 	constructor(parameters: Array<ParameterType>, data, node) { # {{{
 		super(node.scope())
 
-		if data.type? {
+		if ?data.type {
 			@setReturnType(data.type, node)
 
 			@missingReturn = false
@@ -136,11 +136,11 @@ class FunctionType extends Type {
 			@parameters.push(parameter)
 		}
 
-		if data.modifiers? {
+		if ?data.modifiers {
 			this.processModifiers(data.modifiers)
 		}
 
-		if data.throws? {
+		if ?data.throws {
 			var mut type
 
 			for var throw in data.throws {
@@ -268,7 +268,7 @@ class FunctionType extends Type {
 	getMaxAfter(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
-		if excludes? {
+		if ?excludes {
 			var mut max = 0
 
 			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
@@ -285,7 +285,7 @@ class FunctionType extends Type {
 	getMaxBefore(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
-		if excludes? {
+		if ?excludes {
 			var mut max = 0
 
 			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
@@ -302,7 +302,7 @@ class FunctionType extends Type {
 	getMinAfter(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
-		if excludes? {
+		if ?excludes {
 			var mut min = 0
 
 			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
@@ -319,7 +319,7 @@ class FunctionType extends Type {
 	getMinBefore(excludes: Array<String>?): Number { # {{{
 		return 0 unless @hasRest
 
-		if excludes? {
+		if ?excludes {
 			var mut min = 0
 
 			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
@@ -697,7 +697,7 @@ class FunctionType extends Type {
 	} # }}}
 	max(): @max
 	max(excludes: Array<String>?): Number { # {{{
-		if excludes? {
+		if ?excludes {
 			var mut max = 0
 
 			for var parameter in @parameters when !excludes.contains(parameter.name()) {
@@ -712,7 +712,7 @@ class FunctionType extends Type {
 	} # }}}
 	min(): @min
 	min(excludes: Array<String>?): Number { # {{{
-		if excludes? {
+		if ?excludes {
 			var mut min = 0
 
 			for var parameter in @parameters when !excludes.contains(parameter.name()) {
@@ -728,7 +728,7 @@ class FunctionType extends Type {
 	parameter(index) => @parameters[index]
 	parameters(): Array<ParameterType> => @parameters
 	parameters(excludes: Array<String>?): Array<ParameterType> { # {{{
-		if excludes? {
+		if ?excludes {
 			return [parameter for var parameter in @parameters when !excludes.contains(parameter.name())]
 		}
 		else {
@@ -867,7 +867,7 @@ class OverloadedFunctionType extends Type {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
 			var type = new OverloadedFunctionType(scope)
 
-			if data.exhaustive? {
+			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
 			}
 

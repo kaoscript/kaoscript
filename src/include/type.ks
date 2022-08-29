@@ -244,7 +244,7 @@ abstract class Type {
 					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
-					if data.parameters? {
+					if ?data.parameters {
 						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 					}
 					else {
@@ -258,7 +258,7 @@ abstract class Type {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::Identifier => {
-					if var variable = scope.getVariable(data.name) {
+					if var variable ?= scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
 					else if $runtime.getVariable(data.name, node) != null {
@@ -295,7 +295,7 @@ abstract class Type {
 					return type
 				}
 				NodeKind::TypeReference => {
-					if data.elements? {
+					if ?data.elements {
 						var type = new ArrayType(scope)
 
 						for var element in data.elements {
@@ -309,11 +309,11 @@ abstract class Type {
 
 						return type
 					}
-					else if data.properties? {
+					else if ?data.properties {
 						var type = new DictionaryType(scope)
 
 						for var property in data.properties {
-							if property.name? {
+							if ?property.name {
 								type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
 							}
 							else {
@@ -323,7 +323,7 @@ abstract class Type {
 
 						return type
 					}
-					else if data.typeName? {
+					else if ?data.typeName {
 						var mut nullable = false
 
 						for var modifier in data.modifiers {
@@ -339,7 +339,7 @@ abstract class Type {
 								return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 							}
 							else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
-								if data.typeParameters? {
+								if ?data.typeParameters {
 									var type = new ReferenceType(scope, name, nullable)
 
 									for parameter in data.typeParameters {
@@ -361,7 +361,7 @@ abstract class Type {
 
 							var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
 
-							if data.typeParameters? {
+							if ?data.typeParameters {
 								for parameter in data.typeParameters {
 									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
 								}
@@ -396,11 +396,11 @@ abstract class Type {
 					return Type.Null
 				}
 
-				if var match = $importTypeModifiers.exec(data) {
-					var nullable = match[3]?
+				if var match ?= $importTypeModifiers.exec(data) {
+					var nullable = ?match[3]
 
 					if match[1] == 'Any' {
-						if match[2]? {
+						if ?match[2] {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
 						else {
@@ -420,7 +420,7 @@ abstract class Type {
 					if data[0] == -1 {
 						throw new NotImplementedException(node)
 					}
-					else if var type = references[data[0]] {
+					else if var type ?= references[data[0]] {
 						return references[data[0]].name(data[1])
 					}
 					else {
@@ -437,8 +437,8 @@ abstract class Type {
 					}
 				}
 			}
-			else if data.reference? {
-				if var reference = references[data.reference] {
+			else if ?data.reference {
+				if var reference ?= references[data.reference] {
 					if reference is ArrayType | DictionaryType | ReferenceType {
 						return reference
 					}
@@ -459,7 +459,7 @@ abstract class Type {
 					return scope.reference(type)
 				}
 			}
-			else if data.kind? {
+			else if ?data.kind {
 				switch data.kind {
 					TypeKind::Alias => {
 						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
@@ -502,10 +502,10 @@ abstract class Type {
 					}
 				}
 			}
-			else if data.type? {
+			else if ?data.type {
 				return Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			}
-			else if data.originals? {
+			else if ?data.originals {
 				var first = references[data.originals[0]]
 				var second = references[data.originals[1]]
 
@@ -602,7 +602,7 @@ abstract class Type {
 	discardReference(): Type? => this
 	discardSpread(): Type => this
 	discardVariable(): Type => this
-	equals(value?): Boolean => value? && this.isSubsetOf(value, MatchingMode::Exact)
+	equals(value?): Boolean => ?value && this.isSubsetOf(value, MatchingMode::Exact)
 	flagAlien() { # {{{
 		@alien = true
 
@@ -714,6 +714,7 @@ abstract class Type {
 	isImmutable() => false
 	isInoperative() => this.isNever() || this.isVoid()
 	isInstance() => false
+	isIterable() => false
 	isMergeable(type) => false
 	isMethod() => false
 	isMorePreciseThan(value: Type): Boolean => false
@@ -751,7 +752,9 @@ abstract class Type {
 	origin(): @origin
 	origin(@origin): this
 	reduce(type: Type) => this
-	reference(scope = @scope) => scope.reference(this)
+	// TODO support !?
+	// reference(scope = @scope!?) => scope.reference(this)
+	reference(scope? = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	resetReferences() { # {{{
 		@referenceIndex = -1

@@ -3,7 +3,7 @@ func foobar(): String? {
 }
 
 func quxbaz(): String {
-	if var name = foobar() {
+	if var name ?= foobar() {
 		return name
 	}
 	else {

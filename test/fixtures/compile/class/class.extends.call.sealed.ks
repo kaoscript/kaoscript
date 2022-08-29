@@ -14,7 +14,7 @@ class Foobar {
 }
 
 class Quxbaz extends Foobar {
-	constructor(options = null) {
+	constructor(options? = null) {
 		super(Dictionary.merge({
 			x: 0
 			y: 0

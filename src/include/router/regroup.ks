@@ -8,7 +8,7 @@ func regroupTreesByArguments2(trees: Array<Tree>) { # {{{
 
 	for var tree in trees {
 		for var hash in listEquivalentHashes(tree) {
-			if var group = groups[hash] {
+			if var group ?= groups[hash] {
 				group.push(tree)
 			}
 			else {
@@ -34,7 +34,7 @@ func listEquivalentHashes(tree: Tree) { # {{{
 	if tree.order.length == 0 {
 		return [`\(tree.function.index());`]
 	}
-	else if tree.equivalences? {
+	else if ?tree.equivalences {
 		var mut orders = [tree.order]
 
 		for var eq in tree.equivalences {
@@ -66,7 +66,7 @@ func listEquivalentHashes(tree: Tree) { # {{{
 	}
 } # }}}
 func listEquivalentHashes(tree: TreeBranch, mut hashes: Array) { # {{{
-	if tree.equivalences? {
+	if ?tree.equivalences {
 		var mut orders = [tree.order]
 
 		for var eq in tree.equivalences {
@@ -310,8 +310,8 @@ func applyMin4(tree: TreeLeaf, max: Number, data: Array, shadows: Array, nodes: 
 
 	var shadow = shadows.shift()
 
-	if shadow? && shadow.length > 1 {
-		if var node = nodes.find((node, _, _) => i2p[node.index] == shadow[1]) {
+	if ?shadow && shadow.length > 1 {
+		if var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1]) {
 			if node.index >= 0 && node.max - max != 0 {
 				node.max = node.max - max
 			}
@@ -393,7 +393,7 @@ func buildMax4(tree: TreeLeaf, last: Boolean, result: Array, nodes: Dictionary) 
 	var parameters = {}
 
 	for var type in tree.rows[0].types desc {
-		if var parameter = nodes[type.index] {
+		if var parameter ?= nodes[type.index] {
 			parameters[type.parameter] = parameter
 		}
 	}
@@ -445,7 +445,7 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 		var parameters = {}
 
 		for var type in tree.rows[0].types {
-			if var parameter = nodes[type.index] {
+			if var parameter ?= nodes[type.index] {
 				parameters[type.parameter] = parameter
 			}
 		}
@@ -459,16 +459,16 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 		var mut length = tree.rows[0].function.parameters().length
 
 		if tree.rows[0].function.isAsync() {
-			++length
+			length += 1
 		}
 
 		for var index from 0 til length {
-			if var maximus = data[index] {
-				if var parameter = parameters[index] {
+			if var maximus ?= data[index] {
+				if var parameter ?= parameters[index] {
 
 					if left < parameter.min {
 						for var i from 1 to parameter.min {
-							if var argType = arguments.shift() {
+							if var argType ?= arguments.shift() {
 								if parameter.type.isAssignableToVariable(argType, false, false, false, true) || (argType.isNullable() && parameter.type.isNullable()) {
 									if useNegLength0 {
 										useNegLength0 = false
@@ -512,7 +512,7 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 					}
 					else if left > parameter.min {
 						for var i from 1 to Math.min(parameter.min, arguments.length) {
-							if var argType = arguments.shift() {
+							if var argType ?= arguments.shift() {
 								var assignable = parameter.type.isAssignableToVariable(argType, false, false, false, true)
 								if (assignable && argType.isNullable()) || (!assignable && parameter.type.isAssignableToVariable(argType, false, true, false, true)) {
 									setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
@@ -562,7 +562,7 @@ func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, node
 func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary) { # {{{
 	index = getValidNode(index, data, parameters)
 	if kind == ShadowKind::Soft {
-		if var maximus = data[index] {
+		if var maximus ?= data[index] {
 			if ceiling - max > maximus.max && !maximus.rest {
 				kind = ShadowKind::Hard
 			}
@@ -584,12 +584,12 @@ func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Numb
 } # }}}
 
 func getValidNodeLoop(index: Number, data: Dictionary, parameters: Dictionary) { # {{{
-	if var maximus = data[index] {
+	if var maximus ?= data[index] {
 		if maximus.min != maximus.max || maximus.rest {
 			return index
 		}
 
-		if var parameter = parameters[index] {
+		if var parameter ?= parameters[index] {
 			if parameter.min != maximus.max {
 				return index
 			}

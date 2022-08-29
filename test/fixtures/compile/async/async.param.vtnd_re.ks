@@ -1,2 +1,2 @@
-async func foo(x: Number = null, ...items) {
+async func foo(x: Number? = null, ...items) {
 }

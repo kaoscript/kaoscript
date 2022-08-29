@@ -56,7 +56,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		if @data.value? {
+		if ?@data.value {
 			@defaultValue = true
 
 			@value = $compile.expression(@data.value, this)
@@ -261,10 +261,12 @@ class ImplementClassMethodDeclaration extends Statement {
 		@this = @scope.define('this', true, @classRef, true, this)
 
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
 		@block = $compile.function($ast.body(@data), this)
@@ -302,7 +304,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @override {
-				if var data = @getOveriddenMethod(@class, unknownReturnType) {
+				if var data ?= @getOveriddenMethod(@class, unknownReturnType) {
 					{ method: overridden, type: @type } = data
 
 					unless @class.isAbstract() {
@@ -434,7 +436,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -444,7 +446,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}
@@ -747,7 +749,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 
-			if method? {
+			if ?method {
 				var type = @override ? method.clone() : @type
 
 				if @override {
@@ -844,7 +846,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			return null
 		} # }}}
 		listOverloadedMethods(superclass: ClassType) { # {{{
-			if var methods = superclass.listInstanceMethods(@name) {
+			if var methods ?= superclass.listInstanceMethods(@name) {
 				for var method in methods {
 					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 						return []
@@ -915,10 +917,12 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 
 		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for var data in @data.parameters {
+			var parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 
 		@block = new ConstructorBlock($ast.block(body), this, @scope)
@@ -977,7 +981,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				index = 0
 			}
 		}
-		else if @class.isExtending() && (index = this.getConstructorIndex(@block.statements())) == -1 {
+		else if @class.isExtending() && (index <- this.getConstructorIndex(@block.statements())) == -1 {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -995,7 +999,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		for var statement in @aliases {
 			var name = statement.getVariableName()
 
-			if var variable = @class.getInstanceVariable(name) {
+			if var variable ?= @class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
 					@block.initializeVariable(VariableBrief(
 						name
@@ -1075,7 +1079,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if statement.whenFalse? && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}

@@ -26,7 +26,7 @@ class ImportScope extends BlockScope {
 	} # }}}
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Renamed {
-			if var renames = @scopeRenames[name] {
+			if var renames ?= @scopeRenames[name] {
 				for var rename in renames {
 					if rename.name == newName {
 						return true
@@ -39,7 +39,7 @@ class ImportScope extends BlockScope {
 	} # }}}
 	rename(name: String, newName: String, scope: Scope) { # {{{
 		if newName != name {
-			if var renames = @scopeRenames[name] {
+			if var renames ?= @scopeRenames[name] {
 				renames.push({
 					name: newName
 					scope

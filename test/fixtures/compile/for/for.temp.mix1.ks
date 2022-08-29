@@ -9,7 +9,7 @@ func foo(x, y, z) {
 		console.log(value)
 	}
 
-	if x.bar? {
+	if ?x.bar {
 		for value, key of x.bar {
 			console.log(key, value)
 		}

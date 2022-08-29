@@ -1,1 +1,0 @@
-SyntaxException: The default value of a required and nullable parameter can only be 'null' (fixtures/compile/function/function.param.vrntdve.ks:3)

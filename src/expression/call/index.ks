@@ -18,7 +18,7 @@ class CallExpression extends Expression {
 		_type: Type
 	}
 	static {
-		toFlattenArgumentsFragments(fragments, arguments, prefill = null) { # {{{
+		toFlattenArgumentsFragments(fragments, arguments, prefill? = null) { # {{{
 			if arguments.length == 1 && prefill == null && arguments[0].argument().type().isArray() {
 				arguments[0].argument().toArgumentFragments(fragments)
 			}
@@ -97,7 +97,7 @@ class CallExpression extends Expression {
 	} # }}}
 	override prepare(target) { # {{{
 		for var argument in @arguments {
-			argument.prepare()
+			argument.prepare(AnyType.NullableUnexplicit)
 
 			if argument.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(argument, this)
@@ -120,7 +120,7 @@ class CallExpression extends Expression {
 		}
 
 		if @object != null {
-			@object.prepare()
+			@object.prepare(AnyType.NullableUnexplicit)
 
 			@property = @data.callee.property.name
 
@@ -128,7 +128,7 @@ class CallExpression extends Expression {
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier {
-				if var variable = @scope.getVariable(@data.callee.name) {
+				if var variable ?= @scope.getVariable(@data.callee.name) {
 					var type = variable.getRealType()
 
 					if type.isFunction() {
@@ -154,7 +154,7 @@ class CallExpression extends Expression {
 						}
 					}
 
-					if var substitute = variable.replaceCall?(@data, @arguments, this) {
+					if var substitute ?= variable.replaceCall?(@data, @arguments, this) {
 						this.addCallee(new SubstituteCallee(@data, substitute, this))
 					}
 					else {
@@ -171,13 +171,13 @@ class CallExpression extends Expression {
 			else if @data.callee.kind == NodeKind::LambdaExpression {
 				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
-				expression.prepare()
+				expression.prepare(AnyType.NullableUnexplicit)
 
 				var function = expression.type()
 
 				var assessment = function.assessment('', this)
 
-				if var result = Router.matchArguments(assessment, @arguments, this) {
+				if var result ?= Router.matchArguments(assessment, @arguments, this) {
 					if result is LenientCallMatchResult {
 						this.addCallee(new DefaultCallee(@data, expression, this))
 					}
@@ -194,7 +194,7 @@ class CallExpression extends Expression {
 			else if @data.callee.kind == NodeKind::ThisExpression {
 				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
-				expression.prepare()
+				expression.prepare(AnyType.NullableUnexplicit)
 
 				@property = @data.callee.name.name
 
@@ -202,7 +202,7 @@ class CallExpression extends Expression {
 				if type is FunctionType | OverloadedFunctionType {
 					var assessment = type.assessment(@property, this)
 
-					if var result = Router.matchArguments(assessment, @arguments, this) {
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new ThisCallee(@data, expression, @property, result.possibilities, this))
 						}
@@ -282,7 +282,7 @@ class CallExpression extends Expression {
 		if @data.scope.kind == ScopeKind::Argument {
 			@callScope = $compile.expression(@data.scope.value, this)
 			@callScope.analyse()
-			@callScope.prepare()
+			@callScope.prepare(AnyType.NullableUnexplicit)
 			@callScope.translate()
 		}
 	} # }}}
@@ -464,7 +464,7 @@ class CallExpression extends Expression {
 		if type is FunctionType | OverloadedFunctionType {
 			var assessment = type.assessment(name!!, this)
 
-			if var result = Router.matchArguments(assessment, @arguments, this) {
+			if var result ?= Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, result.possibilities, result.arguments, this))
 				}
@@ -499,7 +499,7 @@ class CallExpression extends Expression {
 		else if type.isEnum() {
 			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if var result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
+			if var result ?= Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type.setNullable(true), result.arguments, this))
 				}
@@ -519,7 +519,7 @@ class CallExpression extends Expression {
 		else if type.isStruct() {
 			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if var result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
+			if var result ?= Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -539,7 +539,7 @@ class CallExpression extends Expression {
 		else if type.isTuple() {
 			var assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if var result = Router.matchArguments(assessment, @arguments, this) {
+			if var result ?= Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -560,7 +560,7 @@ class CallExpression extends Expression {
 			this.addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 	} # }}}
-	makeMemberCallee(value, mut name: NamedType = null) { # {{{
+	makeMemberCallee(value, mut name: NamedType? = null) { # {{{
 		// console.log('-- call.makeMemberCallee --')
 		// console.log(value)
 		// console.log(@property)
@@ -570,7 +570,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is ArrayType => {
-				if var property = value.getProperty(@property) {
+				if var property ?= value.getProperty(@property) {
 					this.makeCallee(property, @property)
 				}
 				else {
@@ -586,7 +586,7 @@ class CallExpression extends Expression {
 				if value.hasClassMethod(@property) {
 					var assessment = value.getClassAssessment(@property, this)
 
-					if var result = Router.matchArguments(assessment, @arguments, this) {
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, name, false, result.possibilities, this))
@@ -631,7 +631,7 @@ class CallExpression extends Expression {
 				}
 			}
 			is DictionaryType => {
-				if var property = value.getProperty(@property) {
+				if var property ?= value.getProperty(@property) {
 					this.makeCallee(property, @property)
 				}
 				else {
@@ -644,7 +644,7 @@ class CallExpression extends Expression {
 				if value.hasStaticMethod(@property) {
 					var assessment = value.getStaticAssessment(@property, this)
 
-					if var result = Router.matchArguments(assessment, @arguments, this) {
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
 						}
@@ -683,11 +683,11 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), value)
 			}
 			is NamespaceType => {
-				if var property = value.getProperty(@property) {
+				if var property ?= value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
 						var assessment = property.assessment(@property, this)
 
-						if var result = Router.matchArguments(assessment, @arguments, this) {
+						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
@@ -768,7 +768,7 @@ class CallExpression extends Expression {
 				if value.hasInstantiableMethod(@property) {
 					var assessment = value.getInstantiableAssessment(@property, this)
 
-					if var result = Router.matchArguments(assessment, @arguments, this) {
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, reference.type(), true, result.possibilities, this))
@@ -818,11 +818,11 @@ class CallExpression extends Expression {
 				}
 			}
 			is DictionaryType => {
-				if var property = value.getProperty(@property) {
+				if var property ?= value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
 						var assessment = property.assessment(@property, this)
 
-						if var result = Router.matchArguments(assessment, @arguments, this) {
+						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
@@ -866,7 +866,7 @@ class CallExpression extends Expression {
 				if value.hasInstanceMethod(@property) {
 					var assessment = value.getInstanceAssessment(@property, this)
 
-					if var result = Router.matchArguments(assessment, @arguments, this) {
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
@@ -938,7 +938,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	releaseReusable() { # {{{
-		if @reuseName? {
+		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
 		}
 
@@ -1081,8 +1081,8 @@ class CallExpression extends Expression {
 	} # }}}
 	type() => @type
 	private addCallee(callee: Callee) { # {{{
-		if var hash = callee.hashCode() {
-			if var main = @calleeByHash[hash] {
+		if var hash ?= callee.hashCode() {
+			if var main ?= @calleeByHash[hash] {
 				main.mergeWith(callee)
 			}
 			else {
@@ -1108,7 +1108,7 @@ class NamedArgument extends Expression {
 		@value.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
 		@value.translate()

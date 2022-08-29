@@ -3,5 +3,5 @@ extern {
 }
 
 export namespace Integer {
-	export func parse(value = null, radix = null): Number => parseInt(value, radix)
+	export func parse(value? = null, radix? = null): Number => parseInt(value, radix)
 }

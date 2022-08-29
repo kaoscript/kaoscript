@@ -13,7 +13,7 @@ class InvertedPreciseMethodCallee extends Callee {
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind

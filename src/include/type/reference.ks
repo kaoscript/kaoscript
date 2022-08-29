@@ -119,7 +119,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
 		if this.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -135,7 +135,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: ArrayType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
 		if @name == 'Array' {
 			if @parameters.length == 0 {
 				if value.hasRest() {
@@ -163,7 +163,7 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Array'), equivalences)
 		}
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
 		if @name == 'Dictionary' {
 			if @parameters.length == 0 {
 				if value.hasRest() {
@@ -191,7 +191,7 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Dictionary'), equivalences)
 		}
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
 		if this.isNull() {
 			return 0
 		}
@@ -199,7 +199,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		if @name == value.name() {
 			if @isNullable() != value.isNullable() {
 				return @nullable ? 1 : -1
@@ -294,7 +294,7 @@ class ReferenceType extends Type {
 			}
 		}
 
-		if equivalences? {
+		if ?equivalences {
 			if equivalences.length == 0 {
 				equivalences.push([@hashCode(), value.hashCode()])
 			}
@@ -325,7 +325,7 @@ class ReferenceType extends Type {
 
 		return Helper.compareString(@type.name(), valType.name())
 	} # }}}
-	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discard() => this.discardReference()?.discard()
@@ -633,7 +633,7 @@ class ReferenceType extends Type {
 			return true
 		}
 
-		if var type = value.discardAlias() {
+		if var type ?= value.discardAlias() {
 			if type is UnionType {
 				for var type in type.types() {
 					if this.isInstanceOf(type) {
@@ -657,6 +657,7 @@ class ReferenceType extends Type {
 
 		return false
 	} # }}}
+	isIterable() => @type().isIterable() || @isArray() || @isDictionary() || @isString()
 	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return !this.isAny() || (value.isNullable() && !@nullable)
@@ -768,8 +769,8 @@ class ReferenceType extends Type {
 				return false
 			}
 
-			if @parameters? {
-				if value._parameters? && @parameters.length == value._parameters.length {
+			if ?@parameters {
+				if ?value._parameters && @parameters.length == value._parameters.length {
 					for var parameter, i in @parameters {
 						if !parameter.isSubsetOf(value._parameters[i], mode) {
 							return false
@@ -781,7 +782,7 @@ class ReferenceType extends Type {
 				}
 			}
 			else {
-				if value._parameters? {
+				if ?value._parameters {
 					return false
 				}
 			}
@@ -1325,7 +1326,7 @@ class ReferenceType extends Type {
 		this.resolveType()
 
 		if @parameters.length == 0 && !@nullable {
-			if var tof = $runtime.typeof(@name, node) {
+			if var tof ?= $runtime.typeof(@name, node) {
 				fragments.code(`\(tof)(value)`)
 
 				return
@@ -1347,7 +1348,7 @@ class ReferenceType extends Type {
 		else {
 			var name = unalias.name?() ?? @name
 
-			if var tof = $runtime.typeof(name, node) {
+			if var tof ?= $runtime.typeof(name, node) {
 				fragments.code(`\(tof)(value`)
 			}
 			else {

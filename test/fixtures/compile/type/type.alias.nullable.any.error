@@ -1,1 +1,1 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (FS?) (fixtures/compile/type/type.alias.nullable.any.ks:18)
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|String) (fixtures/compile/type/type.alias.nullable.any.ks:18)

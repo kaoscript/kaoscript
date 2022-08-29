@@ -1,5 +1,5 @@
 func foobar(x?) {
-	if x?.y()? {
+	if ?x?.y() {
 		return x.z()
 	}
 }

@@ -13,7 +13,7 @@ class EnumType extends Type {
 			instanceMethods: {}
 			staticMethods: {}
 		}
-		@function: FunctionType							= null
+		@function: FunctionType?							= null
 		@index: Number									= -1
 		@instanceAssessments: Dictionary				= {}
 		@instanceMethods: Dictionary					= {}
@@ -35,7 +35,7 @@ class EnumType extends Type {
 			type._exhaustive = data.exhaustive
 			type._index = data.sequenceIndex
 
-			if data.sequences? {
+			if ?data.sequences {
 				type._sequences.defaults = data.sequences[0]
 			}
 
@@ -43,12 +43,12 @@ class EnumType extends Type {
 				type.addVariable(name)
 			}
 
-			if data.exhaustive && data.exhaustiveness? {
-				if data.exhaustiveness.instanceMethods? {
+			if data.exhaustive && ?data.exhaustiveness {
+				if ?data.exhaustiveness.instanceMethods {
 					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
 				}
 
-				if data.exhaustiveness.staticMethods? {
+				if ?data.exhaustiveness.staticMethods {
 					type._exhaustiveness.staticMethods = data.exhaustiveness.staticMethods
 				}
 			}
@@ -85,7 +85,9 @@ class EnumType extends Type {
 
 		var mut index = type.index()
 		if index == -1 {
-			index = @sequences.instanceMethods[name]++
+			index = @sequences.instanceMethods[name]
+
+			@sequences.instanceMethods[name] += 1
 
 			type.index(index)
 		}
@@ -154,7 +156,9 @@ class EnumType extends Type {
 
 		var mut index = type.index()
 		if index == -1 {
-			index = @sequences.staticMethods[name]++
+			index = @sequences.staticMethods[name]
+
+			@sequences.staticMethods[name] += 1
 
 			type.index(index)
 		}
@@ -224,7 +228,7 @@ class EnumType extends Type {
 		return this
 	} # }}}
 	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if var index = type.index() {
+		if var index ?= type.index() {
 			if @instanceMethods[name] is Array {
 				for var method in @instanceMethods[name] {
 					if method.index() == index {
@@ -237,7 +241,7 @@ class EnumType extends Type {
 		return this.addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if var index = type.index() {
+		if var index ?= type.index() {
 			if @staticMethods[name] is Array {
 				for var method in @staticMethods[name] {
 					if method.index() == index {
@@ -308,12 +312,12 @@ class EnumType extends Type {
 
 		return @function
 	} # }}}
-	hasVariable(name: String) => @variables[name]?
+	hasVariable(name: String) => ?@variables[name]
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
-		if var assessment = @instanceAssessments[name] {
+		if var assessment ?= @instanceAssessments[name] {
 			return assessment
 		}
-		else if var methods = @instanceMethods[name] {
+		else if var methods ?= @instanceMethods[name] {
 			var assessment = Router.assess([...methods], name, node)
 
 			@instanceAssessments[name] = assessment
@@ -327,7 +331,7 @@ class EnumType extends Type {
 	getInstantiableMethod(name: String, type: FunctionType, mode: MatchingMode) { # {{{
 		var result = []
 
-		if var methods = @instanceMethods[name] {
+		if var methods ?= @instanceMethods[name] {
 			for method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
@@ -343,10 +347,10 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getStaticAssessment(name: String, node: AbstractNode) { # {{{
-		if var assessment = @staticAssessments[name] {
+		if var assessment ?= @staticAssessments[name] {
 			return assessment
 		}
-		else if var methods = @staticMethods[name] {
+		else if var methods ?= @staticMethods[name] {
 			var assessment = Router.assess([...methods], name, node)
 
 			@staticAssessments[name] = assessment
@@ -405,7 +409,9 @@ class EnumType extends Type {
 	} # }}}
 	hasProperty(name: String) => name == 'value'
 	incDefaultSequence() { # {{{
-		return ++@sequences.defaults
+		@sequences.defaults += 1
+
+		return @sequences.defaults
 	} # }}}
 	index() => @index
 	index(@index) => @index
@@ -470,7 +476,11 @@ class EnumType extends Type {
 		@alteration = true
 	} # }}}
 	shallBeNamed() => true
-	step() => ++@index
+	step()  { # {{{
+		@index += 1
+
+		return @index
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
 	} # }}}

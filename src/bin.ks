@@ -68,7 +68,7 @@ var options = {
 	register: program.register
 }
 
-if program.rewire? {
+if ?program.rewire {
 	options.rewire = []
 
 	for item in program.rewire {
@@ -79,7 +79,7 @@ if program.rewire? {
 	}
 }
 
-if program.target? {
+if ?program.target {
 	options.target = program.target
 }
 

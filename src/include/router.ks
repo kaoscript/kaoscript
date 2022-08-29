@@ -11,7 +11,7 @@ struct PreciseCallMatchResult {
 
 struct LenientCallMatchResult {
 	possibilities: Array<FunctionType>
-	arguments: Array<Number>			= null
+	arguments: Array<Number>?			= null
 }
 
 type CallMatchResult = PreciseCallMatchResult | LenientCallMatchResult
@@ -25,7 +25,6 @@ namespace Router {
 		rest: Boolean
 		trees: Array<Tree>
 		functions: Dictionary<FunctionType>
-		names: Dictionary<NamedLength>
 		macro: Boolean
 		sealed: Boolean
 	}
@@ -60,7 +59,7 @@ namespace Router {
 		rest: Boolean							= false
 		columns: Dictionary<TreeColumn>			= {}
 		order: Array<String>					= []
-		equivalences: String[][]?		= null
+		equivalences: String[][]?				= null
 		function: FunctionType?					= null
 	}
 
@@ -89,7 +88,8 @@ namespace Router {
 		function: FunctionType
 		types: Array<RowType>
 		alternative: Boolean			= false
-		union: UnionMatch				= null
+		union: UnionMatch?				= null
+		names: Dictionary<String[]>?	= null
 	}
 
 	struct TreeNode {
@@ -126,11 +126,14 @@ namespace Router {
 
 	struct TreeLeaf extends TreeNode {
 		function: FunctionType
-		arguments: Array<TreeArgument>
+		arguments: TreeArgument[]
+		byNames: String[]
 	}
 
 	struct TreeBranch extends TreeNode {
-		columns: Dictionary<TreeColumn>			= {}
+		// TODO!
+		columns: Dictionary<TreeColumn>	= {}
+		// columns: TreeColumn{}			= {}
 		equivalences: String[][]?		= null
 	}
 
@@ -143,6 +146,7 @@ namespace Router {
 		excludes: Array<String>
 		matches: Array<CallMatch>			= []
 		possibilities: Array<FunctionType>	= []
+		node: AbstractNode
 	}
 
 	type FunctionPathBuilder = (function: FunctionType, line: LineBuilder): Boolean
@@ -172,7 +176,6 @@ namespace Router {
 					async: false
 					rest: false
 					trees: []
-					names: {}
 					macro: false
 					sealed: false
 				)
@@ -193,7 +196,7 @@ namespace Router {
 			var mut sealed = false
 
 			for var function in functions {
-				if var parameter = function.getRestParameter() {
+				if var parameter ?= function.getRestParameter() {
 					rest = true
 
 					min = Math.min(function.getMinBefore() + parameter.min() + function.getMinAfter() + asyncMin, min)
@@ -219,7 +222,7 @@ namespace Router {
 					max = maxRest
 				}
 				else {
-					++max
+					max += 1
 				}
 			}
 
@@ -244,7 +247,7 @@ namespace Router {
 				for var parameter in function.parameters() {
 					var name = parameter.name() ?? '_'
 
-					if var group = parameters.names[name] {
+					if var group ?= parameters.names[name] {
 						group.push(`\(function.index())`)
 					}
 					else {
@@ -254,15 +257,9 @@ namespace Router {
 			}
 
 			var trees: Array<Tree> = []
-			var names = {}
 
 			for var group of groups when group.functions.length > 0 {
 				trees.push(buildTree(group, name, false, null, node))
-
-				// TODO validate if needed
-				if group.n != 0 {
-					names[group.n] = buildNames(group, name, node)
-				}
 			}
 
 			regroupTrees(trees, node)
@@ -283,7 +280,6 @@ namespace Router {
 				max: rest ? Infinity : max
 				rest
 				trees
-				names
 				macro: false
 				sealed
 			)
@@ -330,12 +326,12 @@ namespace Router {
 							strict: true
 						)
 
-						++namedCount
+						namedCount += 1
 
 						if ?shorthands[name] {
 							delete shorthands[name]
 
-							--shortCount
+							shortCount -= 1
 						}
 					}
 					else if argument is IdentifierLiteral {
@@ -360,10 +356,10 @@ namespace Router {
 
 								delete shorthands[name]
 
-								--shortCount
+								shortCount -= 1
 							}
 							else {
-								++shortCount
+								shortCount += 1
 
 								shorthands[name] = NamingArgument(
 									index
@@ -397,7 +393,7 @@ namespace Router {
 				return matchNamedArguments3(assessment, types, nameds, shorthands, indexeds, exhaustive, node)
 			}
 			else {
-				return matchArguments(assessment, types, [])
+				return matchArguments(assessment, types, [], node)
 			}
 		} # }}}
 

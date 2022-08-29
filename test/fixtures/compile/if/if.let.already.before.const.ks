@@ -6,7 +6,7 @@ var x = 'barfoo'
 
 console.log(`\(x)`)
 
-if var x = foobar() {
+if var x ?= foobar() {
 	console.log(`\(x)`)
 }
 

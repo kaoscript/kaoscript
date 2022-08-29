@@ -22,7 +22,7 @@ expect(() => default(p2)).to.throw('The given value can\'t be casted as a "Point
 expect(default(p3)).to.equal(6)
 
 func nullable(p: Point): Number {
-	if var d3 = p as? Point3D {
+	if var d3 ?= p as? Point3D {
 		return d3.x + d3.y + d3.z
 	}
 	else {

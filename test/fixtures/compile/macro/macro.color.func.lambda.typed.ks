@@ -10,7 +10,7 @@ export class Color {
 		_alpha: Number	= 1
 	}
 	macro registerSpace(@expression: Dictionary) {
-		if expression.components? {
+		if ?expression.components {
 			var fields: Array = []
 			var methods: Array = []
 

@@ -1,3 +1,3 @@
-func isString(value = null) {
+func isString(value? = null) {
 	return value is string
 }

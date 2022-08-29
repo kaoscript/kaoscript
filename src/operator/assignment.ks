@@ -34,21 +34,24 @@ abstract class AssignmentOperatorExpression extends Expression {
 	override prepare(target) { # {{{
 		@left.flagAssignable()
 
+		@validate(target)
+
 		@left.prepare(target)
 
-		if var variable = @left.variable() {
-			if variable.isInitialized() {
-				@type = variable.getRealType()
-			}
-			else {
-				@type = variable.getDeclaredType()
-			}
+		if var variable ?= @left.variable() {
+			// if variable.isInitialized() {
+			// 	@type = variable.getRealType()
+			// }
+			// else {
+			// 	@type = variable.getDeclaredType()
+			// }
+			@type = variable.getDeclaredType()
 		}
 		else {
 			@type = @left.type()
 		}
 
-		if target? {
+		if !target.isVoid() {
 			if target.isAssignableToVariable(@type, true, true, false) {
 				@type = target
 			}
@@ -56,12 +59,26 @@ abstract class AssignmentOperatorExpression extends Expression {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 		}
+		// console.log(target.hashCode())
+		// console.log(@type.hashCode())
+		// if !target.isVoid() && target.isAssignableToVariable(@type, true, true, false) {
+		// 	@type = target
+		// }
 
 		@right.prepare(@type)
 
-		if @right.type().isInoperative() {
+		var type = @right.type()
+		// console.log(type.hashCode())
+
+		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
 		}
+		// else if type.isAssignableToVariable(@type, true, false, false) {
+		// 	@type = type
+		// }
+		// else if !target.isVoid() {
+		// 	TypeException.throwUnexpectedExpression(this, target, this)
+		// }
 	} # }}}
 	translate() { # {{{
 		@left.translate()
@@ -89,6 +106,9 @@ abstract class AssignmentOperatorExpression extends Expression {
 	toNullableFragments(fragments) { # {{{
 		fragments.compileNullable(@right)
 	} # }}}
+	validate(target: Type) { # {{{
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || @parent is ExpressionStatement
+	} # }}}
 	variable() => @left.variable()
 }
 
@@ -102,7 +122,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -251,7 +271,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			native = false
 		}
 		else {
-			if target? {
+			if !target.isVoid() {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
@@ -260,7 +280,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		}
 
 		if !boolean && !number {
-			if target? {
+			if !target.isVoid() {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
@@ -343,7 +363,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -499,7 +519,7 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 	symbol() => '/='
 }
 
-class AssignmentOperatorEquality extends AssignmentOperatorExpression {
+class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	private late {
 		@condition: Boolean		= false
 		@ignorable: Boolean		= false
@@ -511,7 +531,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target) { # {{{
-		super()
+		super(target)
 
 		if @condition && @lateinit {
 			@statement.initializeLateVariable(@left.name(), @right.type(), true)
@@ -543,7 +563,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 			var names = []
 
 			for var name in left.listAssignments([]) {
-				if var variable = @scope.getVariable(name) {
+				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
 						throw new NotImplementedException(this)
 					}
@@ -594,7 +614,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 
 		var dyn parent = @parent
 
-		while parent? {
+		while ?parent {
 			parent = parent.parent()
 
 			if parent is ClassDestructorDeclaration {
@@ -619,7 +639,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	toAssignmentFragments(fragments) { # {{{
-		if @left.toAssignmentFragments? {
+		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
@@ -631,6 +651,11 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 	type() => @type
+	validate(target: Type) { # {{{
+		if !target.isVoid() && @parent is not AssignmentOperatorEquals {
+			SyntaxException.throwNoReturn(this)
+		}
+	} # }}}
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
@@ -644,7 +669,9 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target) { # {{{
-		super()
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
+
+		super(AnyType.NullableUnexplicit)
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
@@ -670,7 +697,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			var names = []
 
 			for var name in left.listAssignments([]) {
-				if var variable = @scope.getVariable(name) {
+				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
 						@statement.addInitializableVariable(variable, true, this)
 						@lateinit = true
@@ -722,7 +749,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		fragments.code(' ? ')
 
-		if @left.toAssignmentFragments? {
+		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
@@ -749,7 +776,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		fragments.code(' ? (')
 
-		if @left.toAssignmentFragments? {
+		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
@@ -762,6 +789,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		return `\(@left.toQuote()) ?= \(@right.toQuote())`
 	} # }}}
 	type() => @scope.reference('Boolean')
+	override validate(target)
 }
 
 class AssignmentOperatorLeftShift extends NumericAssignmentOperatorExpression {
@@ -793,7 +821,9 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target) { # {{{
-		super()
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
+
+		super(AnyType.NullableUnexplicit)
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
@@ -805,7 +835,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 				if @lateinit {
 					@statement.initializeLateVariable(@left.name(), type, false)
 				}
-				else if var scope = @statement.getWhenFalseScope() {
+				else if var scope ?= @statement.getWhenFalseScope() {
 					@left.type(type, scope, this)
 				}
 			}
@@ -820,7 +850,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			var names = []
 
 			for var name in left.listAssignments([]) {
-				if var variable = scope.getVariable(name) {
+				if var variable ?= scope.getVariable(name) {
 					if variable.isLateInit() {
 						if @parent == @statement {
 							@statement.addInitializableVariable(variable, false, this)
@@ -907,6 +937,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			.code(', false) : true')
 	} # }}}
 	type() => @scope.reference('Boolean')
+	override validate(target)
 }
 
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
@@ -967,6 +998,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 
 		ctrl.done()
 	} # }}}
+	toQuote() => `\(@left.toQuote()) ??= \(@right.toQuote())`
 }
 
 class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
@@ -983,6 +1015,11 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	toNativeFragments(fragments) { # {{{
 		fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
 	} # }}}
+}
+
+class AssignmentOperatorReturn extends AssignmentOperatorEquals {
+	override validate(target)
+	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 }
 
 class AssignmentOperatorRightShift extends NumericAssignmentOperatorExpression {

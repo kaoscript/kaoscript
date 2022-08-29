@@ -12,13 +12,13 @@ class ArrayType extends Type {
 			var type = new ArrayType(scope)
 
 			queue.push(() => {
-				if data.properties? {
+				if ?data.properties {
 					for var property in data.properties {
 						type.addProperty(Type.import(property, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
-				if data.rest? {
+				if ?data.rest {
 					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -28,7 +28,7 @@ class ArrayType extends Type {
 	}
 	addProperty(type: Type) { # {{{
 		@properties.push(type)
-		++@length
+		@length += 1
 	} # }}}
 	clone() { # {{{
 		var type = new ArrayType(@scope)
@@ -42,7 +42,7 @@ class ArrayType extends Type {
 
 		return type
 	} # }}}
-	compareToRef(value: ArrayType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
 			if @isSubsetOf(value, MatchingMode::Exact) {
 				return 0
@@ -54,11 +54,11 @@ class ArrayType extends Type {
 
 		return 1
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][] = null) => -1
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
-	compareToRef(value: UnionType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: UnionType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discardSpread() { # {{{
@@ -216,7 +216,7 @@ class ArrayType extends Type {
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)
 
 				for var type, index in value.properties() {
-					if var prop = @properties[index] {
+					if var prop ?= @properties[index] {
 						return false unless prop.isSubsetOf(type, mode)
 					}
 					else {
@@ -230,7 +230,7 @@ class ArrayType extends Type {
 				}
 
 				for var type, index in value.properties() {
-					if var prop = @properties[index] {
+					if var prop ?= @properties[index] {
 						return false unless prop.isSubsetOf(type, mode)
 					}
 					else {

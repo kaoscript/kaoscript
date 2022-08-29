@@ -13,7 +13,7 @@ enum Weekday {
 }
 
 func foobar(day: Weekday) {
-    if (wk = try day.isWeekend() ~ false) && wk {
+    if (wk <- try day.isWeekend() ~ false) && wk {
     }
 }
 

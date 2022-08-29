@@ -193,6 +193,7 @@ func duplicateContext(context: MatchContext) { # {{{
 		excludes: context.excludes
 		matches: []
 		possibilities: []
+		node: context.node
 	)
 } # }}}
 
@@ -235,8 +236,14 @@ func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: ArgCursor, mut ar
 
 func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: ArgCursor, mut argMatches: ArgMatches, context: MatchContext): Boolean { # {{{
 	if !leaf.function.isAsync() {
+		// console.log(toString(cursor))
 		{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches)
+		// console.log(toString(cursor), argMatches)
 		return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
+	}
+
+	if leaf.byNames.length > 0 {
+		SyntaxException.throwNamedOnlyParameters(leaf.byNames, context.node)
 	}
 
 	var parameters = leaf.function.parameters(context.excludes)
@@ -255,13 +262,13 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: ArgCursor, mut argMat
 			if index < argMatches.arguments.length {
 				var arg = argMatches.arguments[index]
 
-				if pMatch? && pMatch is Array {
+				if ?pMatch && pMatch is Array {
 					pMatch.push(...arg)
 
 					length += arg.length
 				}
 				else if parameter.isVarargs() {
-					if arg? {
+					if ?arg {
 						pMatch = arg
 
 						length += Math.max(parameter.min(), arg.length)
@@ -275,7 +282,7 @@ func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: ArgCursor, mut argMat
 				else {
 					pMatch = arg[0]
 
-					++length
+					length += 1
 				}
 			}
 		}
@@ -328,16 +335,16 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 			var argument = cursor.argument.parameter()
 
 			if argument.isAssignableToVariable(node.type, false, false, false) {
-				++cursor.used
+				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
 
 				return { cursor, argMatches }
 			}
-			else if argument.isAssignableToVariable(node.type, true, true, false) {
+			else if argument.isAssignableToVariable(node.type, true, false, false) {
 				argMatches.precise = false
 
-				++cursor.used
+				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
 
@@ -346,7 +353,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 		}
 		else {
 			if cursor.argument.isAssignableToVariable(node.type, false, false, false) {
-				++cursor.used
+				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
 
@@ -357,7 +364,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 			else if cursor.argument.isAssignableToVariable(node.type, true, false, false) {
 				argMatches.precise = false
 
-				++cursor.used
+				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
 
@@ -390,7 +397,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 		while i < node.min {
 			if cursor.spread {
 				if cursor.argument.parameter().isAssignableToVariable(node.type) {
-					++cursor.used
+					cursor.used += 1
 
 					matches.push(cursor.index)
 
@@ -408,8 +415,8 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 				}
 			}
 
-			++i
-			++cursor.used
+			i += 1
+			cursor.used += 1
 
 			matches.push(cursor.index)
 
@@ -429,8 +436,8 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 					break
 				}
 
-				++i
-				++cursor.used
+				i += 1
+				cursor.used += 1
 
 				matches.push(cursor.index)
 
@@ -448,8 +455,8 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 					break
 				}
 
-				++i
-				++cursor.used
+				i += 1
+				cursor.used += 1
 
 				matches.push(cursor.index)
 
@@ -463,7 +470,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 	}
 } # }}}
 
-func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>) { # {{{
+func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>, node: AbstractNode) { # {{{
 	var mut combinations = [[]]
 
 	for var argument in arguments {
@@ -486,7 +493,7 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 	}
 
 	if combinations.length == 1 {
-		var context = MatchContext(combinations[0], excludes, async: assessment.async)
+		var context = MatchContext(combinations[0], excludes, async: assessment.async, node)
 
 		for var tree in assessment.trees {
 			matchTree(tree, context)
@@ -508,7 +515,7 @@ func matchArguments(assessment: Assessement, arguments: Array<Expression>, exclu
 		var results = []
 
 		for var combination in combinations {
-			var context = MatchContext(combination, excludes, async: assessment.async)
+			var context = MatchContext(combination, excludes, async: assessment.async, node)
 
 			var mut nf = true
 
@@ -557,7 +564,7 @@ func mergeResults(results: Array<CallMatchResult>) { # {{{
 
 		for var { matches } in results while precise {
 			for var match in matches while precise {
-				if var result = perFunctions[match.function.index()] {
+				if var result ?= perFunctions[match.function.index()] {
 					if !Array.same(result.arguments, match.arguments) {
 						precise = false
 					}
@@ -645,7 +652,7 @@ func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, named
 	var results = []
 
 	for var combination in combinations {
-		if var result = matchNamedArguments4(assessment, combination, nameds, shorthands, [...indexeds], exhaustive, node) {
+		if var result ?= matchNamedArguments4(assessment, combination, nameds, shorthands, [...indexeds], exhaustive, node) {
 			results.push(result)
 		}
 		else {
@@ -663,12 +670,14 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 		for var parameter, index in function.parameters() {
 			var name = parameter.name()
 			var type = parameter.type()
+			var positional = parameter.isPositionalOnlyArgument()
 
-			if var parameters = perNames[name] {
+			if var parameters ?= perNames[name] {
 				parameters.push({
 					function: key
 					type
 					index
+					positional
 				})
 			}
 			else {
@@ -676,6 +685,7 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 					function: key
 					type
 					index
+					positional
 				}]
 			}
 		}
@@ -691,15 +701,20 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 	}
 
 	for var argument, name of nameds {
-		if var parameters = perNames[name] {
+		if var parameters ?= perNames[name] {
 			var argumentType = argumentTypes[argument.index]
 			var matchedFunctions = []
 
-			for var { function, type } in parameters {
+			for var { function, type, positional } in parameters {
 				if argumentType.isAssignableToVariable(type, false, false, false, true) {
+					SyntaxException.throwPositionalOnlyParameter(name, node) if positional
+
 					matchedFunctions.push(function)
+
 				}
 				else if type.isAssignableToVariable(argumentType, true, false, false, true) {
+					SyntaxException.throwPositionalOnlyParameter(name, node) if positional
+
 					matchedFunctions.push(function)
 
 					preciseness[function] = false
@@ -752,13 +767,13 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 		}
 
 		for var argument, name of shorthands {
-			if var parameters = perNames[name] {
+			if var parameters ?= perNames[name] {
 				var argumentType = argumentTypes[argument.index]
 
 				var mut matched = false
 
 				for var function in possibleFunctions {
-					if var { type } = parameters.find((data, _, _) => data.function == function) {
+					if var { type } ?= parameters.find((data, _, _) => data.function == function) {
 						if argumentType.isAssignableToVariable(type, false, false, false, true) {
 							matched = true
 
@@ -793,7 +808,7 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			var hash = Dictionary.keys(shorthands).join()
 
 			if hash.length > 0 {
-				if var perArgument = perArguments[hash] {
+				if var perArgument ?= perArguments[hash] {
 					perArgument.functions.push(key)
 					perArgument.preciseness[key] = preciseness
 				}
@@ -825,7 +840,7 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 		}
 		else {
 			for var perArgument of perArguments {
-				if var result = matchNamedArguments5(
+				if var result ?= matchNamedArguments5(
 					assessment
 					argumentTypes
 					nameds
@@ -886,13 +901,13 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 			for var parameter in function.parameters() {
 				var name = parameter.name()
 
-				if var argument = nameds[name] {
+				if var argument ?= nameds[name] {
 					arguments.push(argument.index)
-					--namedLefts
+					namedLefts -= 1
 				}
-				else if var argument = shorthands[name] {
+				else if var argument ?= shorthands[name] {
 					arguments.push(argument.index)
-					--namedLefts
+					namedLefts -= 1
 				}
 				else {
 					if namedLefts > 0 {
@@ -921,13 +936,13 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 				for var parameter in function.parameters() {
 					var name = parameter.name()
 
-					if var argument = nameds[name] {
+					if var argument ?= nameds[name] {
 						args.push(argument.index)
-						--namedLefts
+						namedLefts -= 1
 					}
-					else if var argument = shorthands[name] {
+					else if var argument ?= shorthands[name] {
 						args.push(argument.index)
-						--namedLefts
+						namedLefts -= 1
 					}
 					else {
 						if namedLefts > 0 {
@@ -960,14 +975,13 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 		var arguments = indexeds.map(({ index }, _, _) => argumentTypes[index])
 
 		if indexeds.length == argumentTypes.length {
-			return matchArguments(assessment, arguments, excludes)
+			return matchArguments(assessment, arguments, excludes, node)
 		}
 		else {
 			var functions = [assessment.functions[key] for var key in possibleFunctions]
 			var reducedAssessment = assess(functions, excludes, assessment.name, node)
 
-			if var result = matchArguments(reducedAssessment, arguments, excludes) {
-
+			if var result ?= matchArguments(reducedAssessment, arguments, excludes, node) {
 				if result is PreciseCallMatchResult {
 					for var match in result.matches {
 						var arguments = []
@@ -976,23 +990,23 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 						for var parameter, index in match.function.parameters() {
 							var name = parameter.name()
 
-							if var argument = nameds[name] {
+							if var argument ?= nameds[name] {
 								arguments.push(argument.index)
 
 								indexes[argument.index] = true
 							}
-							else if var argument = shorthands[name] {
+							else if var argument ?= shorthands[name] {
 								arguments.push(argument.index)
 
 								indexes[argument.index] = true
 							}
-							else if var mut index = match.arguments.shift() {
+							else if var mut index ?= match.arguments.shift() {
 								if index is Array {
 									var args = []
 
-									for var i in index {
+									for var mut i in index {
 										while indexes[i] {
-											++i
+											i += 1
 										}
 
 										args.push(i)
@@ -1004,7 +1018,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 								}
 								else {
 									while indexes[index] {
-										++index
+										index += 1
 									}
 
 									arguments.push(index)
@@ -1040,7 +1054,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 					}
 				}
 				else if result.possibilities.length == 1 {
-					if var arguments = result.arguments {
+					if var arguments ?= result.arguments {
 						throw new NotImplementedException()
 					}
 					else {
@@ -1052,7 +1066,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 
 						for var parameter in function.parameters(excludes) {
 							if parameter.min() > 0 {
-								++requiredLefts
+								requiredLefts += 1
 							}
 						}
 
@@ -1061,14 +1075,14 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 						for var parameter, index in function.parameters() {
 							var name = parameter.name()
 
-							if var argument = nameds[name] {
+							if var argument ?= nameds[name] {
 								result.arguments.push(argument.index)
-								--namedLefts
+								namedLefts -= 1
 								lastIndexed = null
 							}
-							else if var argument = shorthands[name] {
+							else if var argument ?= shorthands[name] {
 								result.arguments.push(argument.index)
-								--namedLefts
+								namedLefts -= 1
 								lastIndexed = null
 							}
 							else if parameter.min() >= 1 {
@@ -1076,7 +1090,7 @@ func matchNamedArguments5(assessment: Assessement, argumentTypes: Array<Type>, n
 
 								result.arguments.push(argument.index)
 
-								--requiredLefts
+								requiredLefts -= 1
 
 								lastIndexed = null
 								arguments.shift()
@@ -1122,7 +1136,7 @@ func getMostPreciseFunction(mut functions: Array<FunctionType>, nameds: Dictiona
 	for var parameter in functions[0].parameters() {
 		var name = parameter.name()
 
-		if nameds[name]? || shorthands[name]? {
+		if ?nameds[name] || ?shorthands[name] {
 			var types = []
 			var perType = {}
 
@@ -1133,7 +1147,7 @@ func getMostPreciseFunction(mut functions: Array<FunctionType>, nameds: Dictiona
 
 						var key = parameter.type().hashCode()
 
-						if var types = perType[key] {
+						if var types ?= perType[key] {
 							types.push(function)
 						}
 						else {

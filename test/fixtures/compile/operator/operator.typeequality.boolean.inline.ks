@@ -1,5 +1,5 @@
 var dyn v
 
-if (v = true) is Array {
+if (v <- true) is Array {
 
 }

@@ -1,8 +1,8 @@
 class ArrayExpression extends Expression {
 	private late {
-		_flatten: Boolean	= false
-		_type: Type
-		_values: Array		= []
+		@flatten: Boolean	= false
+		@type: Type
+		@values: Array		= []
 	}
 	analyse() { # {{{
 		var es5 = @options.format.spreads == 'es5'
@@ -20,10 +20,12 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
+		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
+
 		var dyn type = null
 
 		for var value, index in @values {
-			value.prepare()
+			value.prepare(subtarget)
 
 			if index == 0 {
 				type = value.type().discardSpread()
@@ -55,6 +57,7 @@ class ArrayExpression extends Expression {
 			return @type.matchContentOf(type)
 		}
 	} # }}}
+	isNotEmpty() => @values.length > 0
 	isUsingVariable(name) { # {{{
 		for var value in @values {
 			if value.isUsingVariable(name) {
@@ -108,10 +111,10 @@ class ArrayExpression extends Expression {
 
 class ArrayRange extends Expression {
 	private late {
-		_by				= null
-		_from
-		_to
-		_type: Type
+		@by				= null
+		@from
+		@to
+		@type: Type
 	}
 	analyse() { # {{{
 		@from = $compile.expression(@data.from ?? @data.then, this)
@@ -120,7 +123,7 @@ class ArrayRange extends Expression {
 		@to = $compile.expression(@data.to ?? @data.til, this)
 		@to.analyse()
 
-		if @data.by? {
+		if ?@data.by {
 			@by = $compile.expression(@data.by, this)
 			@by.analyse()
 		}
@@ -129,9 +132,9 @@ class ArrayRange extends Expression {
 	override prepare(target) { # {{{
 		@type = Type.arrayOf(@scope.reference('Number'), @scope)
 
-		@from.prepare()
-		@to.prepare()
-		@by.prepare() if @by?
+		@from.prepare(@scope.reference('Number'))
+		@to.prepare(@scope.reference('Number'))
+		@by.prepare(@scope.reference('Number')) if ?@by
 	} # }}}
 	translate() { # {{{
 		@from.translate()
@@ -165,7 +168,7 @@ class ArrayRange extends Expression {
 			fragments.code(', ').compile(@by)
 		}
 
-		fragments.code($comma, @data.from?, $comma, @data.to?, ')')
+		fragments.code($comma, ?@data.from, $comma, ?@data.to, ')')
 	} # }}}
 	type() => @type
 }

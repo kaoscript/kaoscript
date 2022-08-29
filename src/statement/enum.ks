@@ -252,7 +252,7 @@ class EnumVariableDeclaration extends AbstractNode {
 
 		switch enum.kind() {
 			EnumTypeKind::Flags => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
 
@@ -289,7 +289,7 @@ class EnumVariableDeclaration extends AbstractNode {
 				@type = @scope.reference('Number')
 			}
 			EnumTypeKind::String => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::Literal {
 						@value = $quote(value.value)
 					}
@@ -304,7 +304,7 @@ class EnumVariableDeclaration extends AbstractNode {
 				@type = @scope.reference('String')
 			}
 			EnumTypeKind::Number => {
-				if value? {
+				if ?value {
 					if value.kind == NodeKind::NumericExpression {
 						@value = `\(enum.index(value.value))`
 					}
@@ -448,7 +448,7 @@ class EnumMethodDeclaration extends Statement {
 		}
 
 		if @autoTyping {
-			@block.prepare()
+			@block.prepare(AnyType.NullableUnexplicit)
 
 			@type.setReturnType(@block.type())
 		}

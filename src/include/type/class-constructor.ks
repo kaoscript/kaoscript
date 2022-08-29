@@ -29,7 +29,7 @@ class ClassConstructorType extends FunctionType {
 			type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for error in data.errors]
 			type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
-			if data.inits? {
+			if ?data.inits {
 				for var name in data.inits {
 					type._initVariables[name] = true
 				}
@@ -87,7 +87,7 @@ class ClassConstructorType extends FunctionType {
 			export.dependent = true
 		}
 
-		if originalMethods? && @overwrite? {
+		if ?originalMethods && ?@overwrite {
 			var overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
 
 			if overwrite.length > 0 {

@@ -1,3 +1,12 @@
+flagged enum PassingMode {
+	NIL
+
+	NAMED
+	POSITIONAL
+
+	BOTH = NAMED + POSITIONAL
+}
+
 class ParameterType extends Type {
 	private {
 		@comprehensive: Boolean				= true
@@ -7,6 +16,7 @@ class ParameterType extends Type {
 		@max: Number
 		@name: String?						= null
 		@nullableByDefault: Boolean
+		@passing: PassingMode
 		@type: Type
 		@variableType: Type
 	}
@@ -19,34 +29,33 @@ class ParameterType extends Type {
 			var mut default = false
 			var mut min = 1
 			var mut max = 1
+			var mut nullable = false
 
-			if data.defaultValue? {
+			if ?data.defaultValue {
 				default = true
 				min = 0
 			}
 
-			var mut nf = true
-			for modifier in data.modifiers while nf {
-				if modifier.kind == ModifierKind::Rest {
-					if modifier.arity {
-						min = modifier.arity.min
-						max = modifier.arity.max
+			for modifier in data.modifiers {
+				switch modifier.kind {
+					ModifierKind::Nullable => {
+						type = type.setNullable(true)
 					}
-					else {
-						min = 0
-						max = Infinity
+					ModifierKind::Rest => {
+						if modifier.arity {
+							min = modifier.arity.min
+							max = modifier.arity.max
+						}
+						else {
+							min = 0
+							max = Infinity
+						}
 					}
-
-					nf = true
 				}
 			}
 
-			// if min == 0 && !type.isNullable() {
-			// 	type = type.setNullable(true)
-			// }
-
 			var mut name = null
-			if data.external? {
+			if ?data.external {
 				name = data.external.name
 			}
 			else if min == 0 {
@@ -82,6 +91,7 @@ class ParameterType extends Type {
 	constructor(@scope, @type, @min = 1, @max = 1, @default = false) { # {{{
 		super(scope)
 
+		@passing = PassingMode::POSITIONAL
 		@variableType = @type
 		@nullableByDefault = @min == 0 && @max == 1 && @default && !@type.isNullable()
 
@@ -89,7 +99,7 @@ class ParameterType extends Type {
 			@type = @type.setNullable(true)
 		}
 	} # }}}
-	constructor(@scope, @name, @type, @min = 1, @max = 1, @default = false) { # {{{
+	constructor(@scope, @name, @passing = PassingMode::BOTH, @type, @min = 1, @max = 1, @default = false) { # {{{
 		super(scope)
 
 		@variableType = @type
@@ -99,7 +109,7 @@ class ParameterType extends Type {
 			@type = @type.setNullable(true)
 		}
 	} # }}}
-	clone() => new ParameterType(@scope, @name, @type, @min, @max, @default)
+	clone() => new ParameterType(@scope, @name, @passing, @type, @min, @max, @default)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {}
 
@@ -112,7 +122,7 @@ class ParameterType extends Type {
 		export.max = @max
 		export.default = @default
 
-		if @default && @defaultValue? {
+		if @default && ?@defaultValue {
 			export.comprehensive = @comprehensive
 
 			if @comprehensive {
@@ -145,7 +155,10 @@ class ParameterType extends Type {
 	isMorePreciseThan(value: ParameterType) => @type.isMorePreciseThan(value.type())
 	isMorePreciseThan(value: Type) => @type.isMorePreciseThan(value)
 	isMissingType() => !@type.isExplicit()
+	isNamedArgument() => @passing ~~ PassingMode::NAMED
+	isNamedOnlyArgument() => @passing == PassingMode::NAMED
 	isNullable() => @type.isNullable()
+	isPositionalOnlyArgument() => @passing == PassingMode::POSITIONAL
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
 		if mode !~ MatchingMode::IgnoreName && @name != value.name() != null {
 			return false

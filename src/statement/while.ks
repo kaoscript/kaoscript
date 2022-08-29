@@ -24,7 +24,7 @@ class WhileStatement extends Statement {
 			@declaration.analyse()
 
 			if @bindingDeclaration {
-				@condition = @declaration.init()
+				@condition = @declaration.value()
 			}
 
 			@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
@@ -44,14 +44,14 @@ class WhileStatement extends Statement {
 	} # }}}
 	override prepare(target) { # {{{
 		if @declared {
-			@declaration.prepare()
+			@declaration.prepare(AnyType.NullableUnexplicit)
 
 			if @bindingDeclaration {
 				@condition.acquireReusable(true)
 				@condition.releaseReusable()
 			}
 
-			if var variable = @declaration.getIdentifierVariable() {
+			if var variable ?= @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}

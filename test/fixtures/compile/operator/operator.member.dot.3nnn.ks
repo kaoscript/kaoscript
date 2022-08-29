@@ -1,3 +1,3 @@
 extern a
 
-var dyn foo = a?.b?.c?
+var dyn foo = ?a?.b?.c

@@ -63,7 +63,7 @@ class ClassAliasDeclaration extends Statement {
 					var type = function.clone()
 					type.setAlias(@targetPath, @targetName)
 
-					if var method = class.getMatchingInstanceMethod(@name, type, MatchingMode::ExactParameter + MatchingMode::Superclass) {
+					if var method ?= class.getMatchingInstanceMethod(@name, type, MatchingMode::ExactParameter + MatchingMode::Superclass) {
 						@overridenMethods.push({
 							index: method.index()
 							type

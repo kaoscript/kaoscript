@@ -9,6 +9,6 @@ func foobar(x: String) {
 
 var regex = /foo/
 
-if var match = regex.exec('foobar') {
+if var match ?= regex.exec('foobar') {
 	foobar(match[0])
 }

@@ -4,7 +4,7 @@ func foobar() {
 	var dyn data = 42
 
 	if true {
-		if var data = quxbaz() {
+		if var data ?= quxbaz() {
 			console.log(data)
 		}
 

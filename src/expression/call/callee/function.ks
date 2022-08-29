@@ -14,7 +14,7 @@ class FunctionCallee extends Callee {
 
 		@expression = $compile.expression(data.callee, node)
 		@expression.analyse()
-		@expression.prepare()
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()

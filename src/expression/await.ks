@@ -11,7 +11,7 @@ class AwaitExpression extends Expression {
 
 		var mut ancestor = parent
 
-		while ancestor? && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			if ancestor is TryStatement {
 				@try = ancestor
 			}
@@ -19,7 +19,7 @@ class AwaitExpression extends Expression {
 			ancestor = ancestor.parent()
 		}
 
-		if ancestor? {
+		if ?ancestor {
 			@function = ancestor
 		}
 		else if !this.module().isBinary() {
@@ -31,7 +31,7 @@ class AwaitExpression extends Expression {
 		@operation.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@operation.prepare()
+		@operation.prepare(target)
 
 		@reuseName = @scope.acquireTempName(false)
 	} # }}}
@@ -72,7 +72,7 @@ class AwaitExpression extends Expression {
 			else {
 				@awaiting = false
 
-				if @try? {
+				if ?@try {
 					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName:String, this)])
 				}
 				else if @function?.type().isAsync() {

@@ -43,7 +43,7 @@ class FusionType extends Type {
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
 		for var type in @types {
-			if var property = type.getProperty(index) {
+			if var property ?= type.getProperty(index) {
 				return property
 			}
 		}
@@ -52,7 +52,7 @@ class FusionType extends Type {
 	} # }}}
 	getProperty(name: String): Type? { # {{{
 		for var type in @types {
-			if var property = type.getProperty(name) {
+			if var property ?= type.getProperty(name) {
 				return property
 			}
 		}
@@ -87,7 +87,7 @@ class FusionType extends Type {
 		for aType in @types {
 			for bType in value._types {
 				if aType.isSubsetOf(bType, mode) {
-					match++
+					match += 1
 					break
 				}
 			}

@@ -49,21 +49,21 @@ class ForRangeStatement extends Statement {
 		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
-		if @data.by? {
+		if ?@data.by {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 		}
 
-		if @data.until? {
+		if ?@data.until {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while? {
+		else if ?@data.while {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when? {
+		if ?@data.when {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -82,20 +82,20 @@ class ForRangeStatement extends Statement {
 
 		@boundName = @bindingScope.acquireTempName() if @to.isComposite()
 
-		if @by? {
+		if ?@by {
 			@by.prepare(@scope.reference('Number'))
 
 			@byName = @bindingScope.acquireTempName() if @by.isComposite()
 		}
 
-		if @until? {
+		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
 
 			unless @until.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@until, this)
 			}
 		}
-		else if @while? {
+		else if ?@while {
 			@while.prepare(@scope.reference('Boolean'))
 
 			unless @while.type().canBeBoolean() {
@@ -103,7 +103,7 @@ class ForRangeStatement extends Statement {
 			}
 		}
 
-		if @when? {
+		if ?@when {
 			@when.prepare(@scope.reference('Boolean'))
 
 			unless @when.type().canBeBoolean() {
@@ -113,8 +113,8 @@ class ForRangeStatement extends Statement {
 
 		@body.prepare(target)
 
-		@bindingScope.releaseTempName(@boundName) if @boundName?
-		@bindingScope.releaseTempName(@byName) if @byName?
+		@bindingScope.releaseTempName(@boundName) if ?@boundName
+		@bindingScope.releaseTempName(@byName) if ?@byName
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -127,16 +127,16 @@ class ForRangeStatement extends Statement {
 		@from.translate()
 		@to.translate()
 
-		@by.translate() if @by?
+		@by.translate() if ?@by
 
-		if @until? {
+		if ?@until {
 			@until.translate()
 		}
-		else if @while? {
+		else if ?@while {
 			@while.translate()
 		}
 
-		@when.translate() if @when?
+		@when.translate() if ?@when
 
 		@body.translate()
 	} # }}}
@@ -160,26 +160,26 @@ class ForRangeStatement extends Statement {
 
 		ctrl.compile(@value).code($equals).compile(@from)
 
-		if @boundName? {
+		if ?@boundName {
 			ctrl.code(@boundName, $equals).compile(@to)
 		}
 
-		if @byName? {
+		if ?@byName {
 			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
 
 		ctrl.code('; ').compile(@value).code(' <= ').compile(@boundName ?? @to)
 
-		if @until? {
+		if ?@until {
 			ctrl.code(' && !(').compileBoolean(@until).code(')')
 		}
-		else if @while? {
+		else if ?@while {
 			ctrl.code(' && ').wrapBoolean(@while, Mode::None, Junction::AND)
 		}
 
 		ctrl.code('; ')
 
-		if @data.by? {
+		if ?@data.by {
 			if @data.by.kind == NodeKind::NumericExpression {
 				if @data.by.value == 1 {
 					ctrl.code('++').compile(@value)
@@ -198,7 +198,7 @@ class ForRangeStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		if @when? {
+		if ?@when {
 			ctrl
 				.newControl()
 				.code('if(')

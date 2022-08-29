@@ -6,8 +6,8 @@ class AnyType extends Type {
 		NullableUnexplicit = new AnyType(false, true)
 	}
 	private {
-		_explicit: Boolean	= true
-		_nullable: Boolean	= false
+		@explicit: Boolean	= true
+		@nullable: Boolean	= false
 	}
 	constructor() { # {{{
 		super(null)
@@ -40,7 +40,7 @@ class AnyType extends Type {
 			return 1
 		}
 	} # }}}
-	compareToRef(value: AnyType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
 		if @nullable == value.isNullable() {
 			return 0
 		}
@@ -51,8 +51,8 @@ class AnyType extends Type {
 			return -1
 		}
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][] = null) => -1
-	compareToRef(value: ReferenceType, equivalences: String[][] = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		if value.isAny() {
 			if @nullable == value.isNullable() {
 				return 0
@@ -118,6 +118,7 @@ class AnyType extends Type {
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => false
+	isIterable() => true
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{

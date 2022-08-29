@@ -10,7 +10,7 @@ func foobar() {
 	var dyn x = false
 	var dyn y = false
 
-	if test(x = '1') && test(y = x) && test(x = 3) {
+	if test(x <- '1') && test(y <- x) && test(x <- 3) {
 		console.log(x.toInt())
 		console.log(y.toInt())
 	}

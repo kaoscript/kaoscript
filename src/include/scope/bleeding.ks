@@ -13,7 +13,7 @@ class BleedingScope extends Scope {
 	block() => @parent.block()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)
-	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -33,7 +33,7 @@ class BleedingScope extends Scope {
 
 		@variables[name] = [@parent.line(), variable]
 
-		if var newName = @parent.declareVariable(name, this) {
+		if var newName ?= @parent.declareVariable(name, this) {
 			@renamedVariables[name] = newName
 
 			variable.renameAs(newName)
@@ -118,7 +118,7 @@ class BleedingScope extends Scope {
 
 		return false
 	} # }}}
-	hasVariable(name: String, line: Number = null) => @variables[name] is Array || @parent.hasVariable(name, line)
+	hasVariable(name: String, line: Number? = null) => @variables[name] is Array || @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
 	isRedeclaredVariable(name: String) { # {{{
@@ -147,9 +147,8 @@ class BleedingScope extends Scope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		var mut index = @parent.getRenamedIndex(name)
-
-		var mut newName = '__ks_' + name + '_' + (++index)
+		var index = @parent.getRenamedIndex(name) + 1
+		var newName = '__ks_' + name + '_' + index
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName

@@ -2,7 +2,7 @@ extern console
 
 func foobar() => 'foobar'
 
-if var x = foobar() {
+if var x ?= foobar() {
 	console.log(`\(x)`)
 }
 

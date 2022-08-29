@@ -132,7 +132,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -256,7 +256,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	override prepare(target) { # {{{
 		super(target)
 
-		if target? && !target.canBeEnum() {
+		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
 		}
 
@@ -475,45 +475,37 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private late {
 		@type: Type
 	}
-	analyse() { # {{{
-		@operands = []
-		for operand in @data.operands {
-			@operands.push(operand = $compile.expression(operand, this))
-
-			operand.analyse()
-		}
-	} # }}}
 	override prepare(target) { # {{{
 		var types = []
 		var last = @operands.length - 1
 
-		var mut operandType, type, ne
-		for operand, index in @operands {
-			operand.prepare()
+		for var operand, index in @operands {
+			operand.prepare(AnyType.NullableUnexplicit)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
+			var late operandType
+
 			if index < last {
 				operand.acquireReusable(true)
 				operand.releaseReusable()
 
-				operandType = operand.type()
-				if operandType.isNull() {
+				if operand.type().isNull() {
 					operandType = operand.getDeclaredType().setNullable(false)
 				}
 				else {
-					operandType = operandType.setNullable(false)
+					operandType = operand.type().setNullable(false)
 				}
 			}
 			else {
 				operandType = operand.type()
 			}
 
-			ne = true
+			var mut ne = true
 
-			for type in types while ne {
+			for var type in types while ne {
 				if type.equals(operandType) {
 					ne = false
 				}

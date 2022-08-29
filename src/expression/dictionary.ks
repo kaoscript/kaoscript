@@ -1,12 +1,12 @@
 class DictionaryExpression extends Expression {
 	private late {
-		_empty: Boolean				= true
-		_properties					= []
-		_reusable: Boolean			= false
-		_reuseName: String?			= null
-		_spread: Boolean			= false
-		_type: Type
-		_varname: String			= 'd'
+		@empty: Boolean				= true
+		@properties					= []
+		@reusable: Boolean			= false
+		@reuseName: String?			= null
+		@spread: Boolean			= false
+		@type: Type
+		@varname: String			= 'd'
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope, ScopeType::Hollow)
@@ -60,10 +60,12 @@ class DictionaryExpression extends Expression {
 		@empty = @properties.length == 0
 	} # }}}
 	override prepare(target) { # {{{
+		var subtarget = target.isDictionary() ? target.parameter() : AnyType.NullableUnexplicit
+
 		@type = new DictionaryType(@scope)
 
 		for var property in @properties {
-			property.prepare()
+			property.prepare(subtarget)
 
 			if property is DictionaryLiteralMember {
 				@type.addProperty(property.name(), property.type())
@@ -93,6 +95,7 @@ class DictionaryExpression extends Expression {
 			return @type.matchContentOf(type)
 		}
 	} # }}}
+	isNotEmpty() => @properties.length > 0
 	isSpread() => @spread
 	isUsingVariable(name) { # {{{
 		for var property in @properties {
@@ -224,7 +227,7 @@ class DictionaryExpression extends Expression {
 	validateType(type: DictionaryType) { # {{{
 		for var property in @properties {
 			if property is DictionaryLiteralMember {
-				if var propertyType = type.getProperty(property.name()) {
+				if var propertyType ?= type.getProperty(property.name()) {
 					property.validateType(propertyType)
 				}
 			}
@@ -246,13 +249,13 @@ class DictionaryExpression extends Expression {
 
 class DictionaryLiteralMember extends Expression {
 	private late {
-		_computed: Boolean		= true
-		_enumCasting: Boolean	= false
-		_function: Boolean		= false
-		_shorthand: Boolean		= true
-		_name
-		_value
-		_type: Type
+		@computed: Boolean		= true
+		@enumCasting: Boolean	= false
+		@function: Boolean		= false
+		@shorthand: Boolean		= true
+		@name
+		@value
+		@type: Type
 	}
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
@@ -287,7 +290,7 @@ class DictionaryLiteralMember extends Expression {
 		@value.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(target)
 
 		@type = @value.type().asReference()
 
@@ -338,8 +341,8 @@ class DictionaryLiteralMember extends Expression {
 
 class DictionaryComputedMember extends Expression {
 	private {
-		_name
-		_value
+		@name
+		@value
 	}
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
@@ -359,7 +362,7 @@ class DictionaryComputedMember extends Expression {
 	} # }}}
 	override prepare(target) { # {{{
 		@name.prepare()
-		@value.prepare()
+		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
 		@name.translate()
@@ -398,8 +401,8 @@ class DictionaryComputedMember extends Expression {
 
 class DictionaryThisMember extends Expression {
 	private {
-		_name
-		_value
+		@name
+		@value
 	}
 	analyse() { # {{{
 		@name = new Literal(@data.name.name, this, @scope:Scope, @data.name.name.name)
@@ -410,7 +413,7 @@ class DictionaryThisMember extends Expression {
 		this.reference(`.\(@name.value())`)
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
 		@value.translate()
@@ -436,7 +439,7 @@ class DictionaryThisMember extends Expression {
 
 class DictionarySpreadMember extends Expression {
 	private {
-		_value
+		@value
 	}
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
@@ -445,7 +448,7 @@ class DictionarySpreadMember extends Expression {
 		@value.analyse()
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
+		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
 		@value.translate()

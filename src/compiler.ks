@@ -110,6 +110,13 @@ var $ast = {
 			return name
 		}
 	} # }}}
+	parameter() { # {{{
+		return {
+			kind: NodeKind::Parameter
+			attributes: []
+			modifiers: []
+		}
+	} # }}}
 }
 
 var $runtime = {
@@ -164,8 +171,8 @@ var $runtime = {
 
 		return node._options.runtime.type.alias
 	} # }}}
-	typeof(type, node = null) { # {{{
-		if node? {
+	typeof(type, node? = null) { # {{{
+		if ?node {
 			if $typeofs[type] {
 				return $runtime.type(node) + '.is' + type
 			}
@@ -197,8 +204,8 @@ abstract class AbstractNode {
 		@scope = this.newScope(scope, kind)
 	} # }}}
 	abstract analyse()
-	// abstract prepare(target: Type = AnyType.NullableUnexplicit)
-	abstract prepare(target: Type = null)
+	// TODO remove default value
+	abstract prepare(target: Type = Type.Void)
 	abstract translate()
 	authority() => @parent.authority()
 	data() => @data
@@ -242,7 +249,7 @@ abstract class AbstractNode {
 		console.log(`\(this.file()):\(@data.start.line)`)
 	} # }}}
 	reference() { # {{{
-		if @parent?.reference()? {
+		if ?@parent?.reference() {
 			return @parent.reference() + @reference
 		}
 		else {
@@ -266,7 +273,7 @@ include {
 	'./include/parameter'
 	'./statement/struct'
 	'./statement/tuple'
-	'./include/operator'
+	'./operator/index'
 	'./include/block'
 	'./include/macro'
 	'./include/router'
@@ -277,19 +284,19 @@ var $compile = {
 	expression(data, parent, scope = parent.scope()) { # {{{
 		var dyn expression
 
-		if var clazz = $expressions[data.kind] {
+		if var clazz ?= $expressions[data.kind] {
 			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind::BinaryExpression {
 			if data.operator.kind == BinaryOperatorKind::Assignment {
-				if clazz = $assignmentOperators[data.operator.assignment] {
+				if var clazz ?= $assignmentOperators[data.operator.assignment] {
 					expression = new clazz(data, parent, scope)
 				}
 				else {
 					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
-			else if var clazz = $binaryOperators[data.operator.kind] {
+			else if var clazz ?= $binaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -297,7 +304,7 @@ var $compile = {
 			}
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
-			if var clazz = $polyadicOperators[data.operator.kind] {
+			if var clazz ?= $polyadicOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -305,7 +312,7 @@ var $compile = {
 			}
 		}
 		else if data.kind == NodeKind::UnaryExpression {
-			if var clazz = $unaryOperators[data.operator.kind] {
+			if var clazz ?= $unaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -338,15 +345,19 @@ var $assignmentOperators = {
 	`\(AssignmentOperatorKind::Addition)`			: AssignmentOperatorAddition
 	`\(AssignmentOperatorKind::And)`				: AssignmentOperatorAnd
 	`\(AssignmentOperatorKind::Division)`			: AssignmentOperatorDivision
-	`\(AssignmentOperatorKind::Equality)`			: AssignmentOperatorEquality
+	`\(AssignmentOperatorKind::Empty)`				: AssignmentOperatorEmpty
+	`\(AssignmentOperatorKind::EmptyCoalescing)`	: AssignmentOperatorEmptyCoalescing
+	`\(AssignmentOperatorKind::Equals)`				: AssignmentOperatorEquals
 	`\(AssignmentOperatorKind::Existential)`		: AssignmentOperatorExistential
 	`\(AssignmentOperatorKind::LeftShift)`			: AssignmentOperatorLeftShift
 	`\(AssignmentOperatorKind::Modulo)`				: AssignmentOperatorModulo
 	`\(AssignmentOperatorKind::Multiplication)`		: AssignmentOperatorMultiplication
+	`\(AssignmentOperatorKind::NonEmpty)`			: AssignmentOperatorNonEmpty
 	`\(AssignmentOperatorKind::NonExistential)`		: AssignmentOperatorNonExistential
 	`\(AssignmentOperatorKind::NullCoalescing)`		: AssignmentOperatorNullCoalescing
 	`\(AssignmentOperatorKind::Or)`					: AssignmentOperatorOr
 	`\(AssignmentOperatorKind::Quotient)`			: AssignmentOperatorQuotient
+	`\(AssignmentOperatorKind::Return)`				: AssignmentOperatorReturn
 	`\(AssignmentOperatorKind::RightShift)`			: AssignmentOperatorRightShift
 	`\(AssignmentOperatorKind::Subtraction)`		: AssignmentOperatorSubtraction
 	`\(AssignmentOperatorKind::Xor)`				: AssignmentOperatorXor
@@ -356,6 +367,7 @@ var $binaryOperators = {
 	`\(BinaryOperatorKind::Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperatorKind::And)`				: BinaryOperatorAnd
 	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
+	`\(BinaryOperatorKind::EmptyCoalescing)`	: BinaryOperatorEmptyCoalescing
 	`\(BinaryOperatorKind::Imply)`				: BinaryOperatorImply
 	`\(BinaryOperatorKind::LeftShift)`			: BinaryOperatorLeftShift
 	`\(BinaryOperatorKind::Match)`				: BinaryOperatorMatch
@@ -469,6 +481,7 @@ var $polyadicOperators = {
 	`\(BinaryOperatorKind::Addition)`			: PolyadicOperatorAddition
 	`\(BinaryOperatorKind::And)`				: PolyadicOperatorAnd
 	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
+	`\(BinaryOperatorKind::EmptyCoalescing)`	: PolyadicOperatorEmptyCoalescing
 	`\(BinaryOperatorKind::Modulo)`				: PolyadicOperatorModulo
 	`\(BinaryOperatorKind::Imply)`				: PolyadicOperatorImply
 	`\(BinaryOperatorKind::LeftShift)`			: PolyadicOperatorLeftShift
@@ -482,14 +495,11 @@ var $polyadicOperators = {
 }
 
 var $unaryOperators = {
-	`\(UnaryOperatorKind::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
-	`\(UnaryOperatorKind::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
 	`\(UnaryOperatorKind::Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperatorKind::ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
-	`\(UnaryOperatorKind::IncrementPostfix)`	: UnaryOperatorIncrementPostfix
-	`\(UnaryOperatorKind::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
 	`\(UnaryOperatorKind::Negation)`			: UnaryOperatorNegation
 	`\(UnaryOperatorKind::Negative)`			: UnaryOperatorNegative
+	`\(UnaryOperatorKind::NonEmpty)`			: UnaryOperatorNonEmpty
 	`\(UnaryOperatorKind::NullableTypeCasting)`	: UnaryOperatorNullableTypeCasting
 	`\(UnaryOperatorKind::Spread)`				: UnaryOperatorSpread
 }
@@ -501,7 +511,7 @@ func $expandOptions(options) { # {{{
 	}
 
 	if engine is Function {
-		if var opts = engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
+		if var opts ?= engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
 			return Dictionary.defaults(options, opts)
 		}
 		else {
@@ -608,7 +618,7 @@ export class Compiler {
 			}
 		} # }}}
 	}
-	constructor(@file, options = null, @hashes = {}, @hierarchy = [@file]) { # {{{
+	constructor(@file, options? = null, @hashes = {}, @hierarchy = [@file]) { # {{{
 		@options = Dictionary.merge({
 			target: 'ecma-v6'
 			register: true
@@ -679,14 +689,14 @@ export class Compiler {
 
 		@options = $expandOptions(@options)
 	} # }}}
-	initiate(data: String = null) { # {{{
+	initiate(data: String? = null) { # {{{
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
 
 		@module.initiate()
 
 		return this
 	} # }}}
-	compile(data: String = null) { # {{{
+	compile(data: String? = null) { # {{{
 		return this.initiate(data).finish()
 	} # }}}
 	createServant(file) { # {{{
@@ -704,9 +714,9 @@ export class Compiler {
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): @module
 	readFile() => fs.readFile(@file)
-	setArguments(arguments: Array, module: String = null, node: AbstractNode = null) => @module.setArguments(arguments, module, node)
-	sha256(file, data = null) { # {{{
-		return @hashes[file] ?? (@hashes[file] = fs.sha256(data ?? fs.readFile(file)))
+	setArguments(arguments: Array, module: String? = null, node: AbstractNode? = null) => @module.setArguments(arguments, module, node)
+	sha256(file, data? = null) { # {{{
+		return @hashes[file] ?? (@hashes[file] <- fs.sha256(data ?? fs.readFile(file)))
 	} # }}}
 	toExports() => @module.toExports()
 	toHashes() => @module.toHashes()
@@ -796,13 +806,13 @@ export class Compiler {
 	} # }}}
 }
 
-export func compileFile(file, options = null) { # {{{
+export func compileFile(file, options? = null) { # {{{
 	var compiler = new Compiler(file, options)
 
 	return compiler.compile().toSource()
 } # }}}
 
-export func getBinaryPath(file, variationId = null) => fs.hidden(file, variationId, $extensions.binary)
+export func getBinaryPath(file, variationId? = null) => fs.hidden(file, variationId, $extensions.binary)
 
 export func getExportsPath(file, variationId) => fs.hidden(file, variationId, $extensions.exports)
 

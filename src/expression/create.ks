@@ -16,10 +16,12 @@ class CreateExpression extends Expression {
 
 		var es5 = @options.format.spreads == 'es5'
 
-		for argument in @data.arguments {
-			@arguments.push(argument = $compile.expression(argument, this))
+		for var data in @data.arguments {
+			var argument = $compile.expression(data, this)
 
 			argument.analyse()
+
+			@arguments.push(argument)
 
 			if es5 && argument is UnaryOperatorSpread {
 				@flatten = true
@@ -27,10 +29,10 @@ class CreateExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@factory.prepare()
+		@factory.prepare(@scope.reference('Class'))
 
-		for argument in @arguments {
-			argument.prepare()
+		for var argument in @arguments {
+			argument.prepare(AnyType.NullableUnexplicit)
 		}
 
 		if type !?= @factory.type() {
@@ -47,7 +49,7 @@ class CreateExpression extends Expression {
 
 			var assessment = type.type().getConstructorAssessment(type.name(), this)
 
-			if var result = Router.matchArguments(assessment, @arguments, this) {
+			if var result ?= Router.matchArguments(assessment, @arguments, this) {
 				@result = result
 			}
 			else if type.type().isExhaustiveConstructor(this) {

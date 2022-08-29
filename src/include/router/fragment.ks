@@ -252,7 +252,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 				fragments.code(`\(helper.points()) = [\(leaf.index)], \(startIndex))`)
 			}
 			else {
-				++startIndex
+				startIndex += 1
 
 				fragments.code(`\(helper.points()), \(startIndex))`)
 			}
@@ -553,7 +553,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 				fragments.code(`\(helper.points()) = [\(branch.index)], \(startIndex))`)
 			}
 			else {
-				++startIndex
+				startIndex += 1
 
 				fragments.code(`\(helper.points()), \(startIndex))`)
 			}
@@ -635,13 +635,13 @@ func isVarargs(assessement: Assessement) { # {{{
 func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): string { # {{{
 	var hash = type.hashCode(true)
 
-	if var name = this.testers[hash] {
+	if var name ?= this.testers[hash] {
 		return name
 	}
 
-	var index = ++this.index
+	this.index += 1
 
-	var name = `t\(index)`
+	var name = `t\(this.index)`
 
 	var line = fragments.newLine()
 

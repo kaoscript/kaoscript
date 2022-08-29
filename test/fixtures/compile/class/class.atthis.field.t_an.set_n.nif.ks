@@ -1,6 +1,6 @@
 class ClassA {
 	private {
-		@x		= null
+		@x?		= null
 	}
 	foobar() {
 		@x = null

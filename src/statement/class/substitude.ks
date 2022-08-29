@@ -14,7 +14,7 @@ class CallThisConstructorSubstitude extends Substitude {
 
 		var assessement = class.type().getConstructorAssessment(class.name(), node)
 
-		if var result = Router.matchArguments(assessement, @arguments, node) {
+		if var result ?= Router.matchArguments(assessement, @arguments, node) {
 			@result = result
 		}
 		else {
@@ -103,7 +103,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		var extends = @class.type().extends()
 		var assessment = extends.type().getConstructorAssessment(extends.name(), node)
 
-		if var result = Router.matchArguments(assessment, @arguments, node) {
+		if var result ?= Router.matchArguments(assessment, @arguments, node) {
 			@result = result
 			@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
 		}
@@ -357,7 +357,7 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 
 		@extendsType = @class.type().extends()
 
-		if var property = @extendsType.type().getInstanceProperty(@property) {
+		if var property ?= @extendsType.type().getInstanceProperty(@property) {
 			@sealed = property.isSealed()
 		}
 	} # }}}
@@ -365,7 +365,7 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 	setCallMatchResult(@result)
 	toFragments(fragments, mode) { # {{{
 		if @sealed {
-			if var index = @extendsType.type().getSharedMethodIndex(@property) {
+			if var index ?= @extendsType.type().getSharedMethodIndex(@property) {
 				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@property)(this`)
 			}
 			else {

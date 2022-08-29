@@ -34,22 +34,22 @@ class ClassMethodType extends FunctionType {
 
 			type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
-			if data.overwrite? {
+			if ?data.overwrite {
 				type._overwrite = [...data.overwrite]
 			}
 
-			if data.forkedIndex? {
+			if ?data.forkedIndex {
 				type._forked = true
 				type._forkedIndex = data.forkedIndex
 			}
 
-			if data.inits? {
+			if ?data.inits {
 				for var name in data.inits {
 					type._initVariables[name] = true
 				}
 			}
 
-			if type.aliasPath? {
+			if ?type.aliasPath {
 				type._alias = true
 				type._aliasPath = data.aliasPath
 			}
@@ -73,7 +73,7 @@ class ClassMethodType extends FunctionType {
 		clone._initVariables = {...@initVariables}
 		clone._instance = @instance
 
-		if @overwrite? {
+		if ?@overwrite {
 			clone._overwrite = [...@overwrite]
 		}
 
@@ -98,7 +98,7 @@ class ClassMethodType extends FunctionType {
 			inits: Dictionary.keys(@initVariables)
 		}
 
-		if originalMethods? && @overwrite? {
+		if ?originalMethods && ?@overwrite {
 			var overwrite = @overwrite.filter((index, _, _) => originalMethods:Array.contains(index))
 
 			if overwrite.length > 0 {

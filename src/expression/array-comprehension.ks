@@ -1,4 +1,4 @@
-func $return(data = null) { # {{{
+func $return(data? = null) { # {{{
 	return {
 		kind: NodeKind::ReturnStatement
 		value: data
@@ -32,7 +32,7 @@ class ArrayComprehensionForFrom extends Expression {
 		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this, @scope)
 		@to.analyse()
 
-		if @data.loop.by? {
+		if ?@data.loop.by {
 			@by = $compile.expression(@data.loop.by, this, @scope)
 			@by.analyse()
 		}
@@ -41,27 +41,31 @@ class ArrayComprehensionForFrom extends Expression {
 		@body.initiate()
 		@body.analyse()
 
-		if @data.loop.when? {
+		if ?@data.loop.when {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@variable.prepare()
-		@from.prepare()
-		@to.prepare()
-		@by.prepare() if @by?
-		@body.prepare()
-		@when.prepare() if @when?
+		unless target.isAny() || target.isArray() {
+			TypeException.throwInvalidComprehensionType(target, this)
+		}
+
+		@variable.prepare(AnyType.NullableUnexplicit)
+		@from.prepare(@scope.reference('Number'))
+		@to.prepare(@scope.reference('Number'))
+		@by.prepare(@scope.reference('Number')) if ?@by
+		@when.prepare(@scope.reference('Boolean')) if ?@when
+		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
 	} # }}}
 	translate() { # {{{
 		@variable.translate()
 		@from.translate()
 		@to.translate()
-		@by.translate() if @by?
+		@by.translate() if ?@by
 		@body.translate()
-		@when.translate() if @when?
+		@when.translate() if ?@when
 	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
@@ -95,7 +99,7 @@ class ArrayComprehensionForFrom extends Expression {
 			fragments.code($comma).compile(@by)
 		}
 
-		fragments.code($comma, @data.loop.from?, $comma, @data.loop.to?, $comma)
+		fragments.code($comma, ?@data.loop.from, $comma, ?@data.loop.to, $comma)
 
 		fragments
 			.code(surround.beforeParameters)
@@ -107,7 +111,7 @@ class ArrayComprehensionForFrom extends Expression {
 
 		fragments.code(surround.footer)
 
-		if @when? {
+		if ?@when {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
@@ -162,7 +166,7 @@ class ArrayComprehensionForIn extends Expression {
 		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
-		if @data.loop.value? {
+		if ?@data.loop.value {
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
@@ -184,7 +188,7 @@ class ArrayComprehensionForIn extends Expression {
 			@valueName = @bindingScope.acquireTempName()
 		}
 
-		if @data.loop.index? {
+		if ?@data.loop.index {
 			var variable = @bindingScope.getVariable(@data.loop.index.name)
 
 			if @declaration || variable == null {
@@ -204,23 +208,27 @@ class ArrayComprehensionForIn extends Expression {
 		@body.initiate()
 		@body.analyse()
 
-		if @data.loop.when? {
+		if ?@data.loop.when {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
 
-		@bindingScope.releaseTempName(@valueName) if @valueName?
+		@bindingScope.releaseTempName(@valueName) if ?@valueName
 	} # }}}
 	override prepare(target) { # {{{
-		@expression.prepare()
+		unless target.isAny() || target.isArray() {
+			TypeException.throwInvalidComprehensionType(target, this)
+		}
+
+		@expression.prepare(@scope.reference('Array'))
 
 		var type = @expression.type()
-		if !(type.isAny() || type.isArray()) {
+		unless type.isAny() || type.isArray() {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
-		if @value? {
+		if ?@value {
 			var parameterType = type.parameter()
 
 			var valueType = Type.fromAST(@data.type, this)
@@ -245,15 +253,15 @@ class ArrayComprehensionForIn extends Expression {
 			}
 		}
 
-		if @index? {
+		if ?@index {
 			unless @declareIndex {
 				@bindingScope.replaceVariable(@data.loop.index.name, @bindingScope.reference('Number'), this)
 			}
 
-			@index.prepare()
+			@index.prepare(@scope.reference('Number'))
 		}
 
-		@body.prepare()
+		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
 
 		if @body.type().isAny() {
 			@type = @scope.reference('Array')
@@ -262,16 +270,16 @@ class ArrayComprehensionForIn extends Expression {
 			@type = Type.arrayOf(@body.type(), @scope)
 		}
 
-		if @when? {
-			@when.prepare()
+		if ?@when {
+			@when.prepare(@scope.reference('Boolean'))
 		}
 	} # }}}
 	translate() { # {{{
 		@expression.translate()
-		@value.translate() if @value?
-		@index.translate() if @index?
+		@value.translate() if ?@value
+		@index.translate() if ?@index
 		@body.translate()
-		@when.translate() if @when?
+		@when.translate() if ?@when
 	} # }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
@@ -295,7 +303,7 @@ class ArrayComprehensionForIn extends Expression {
 			.code(surround.beforeParameters)
 			.compile(@value ?? @valueName)
 
-		fragments.code($comma).compile(@index) if @index?
+		fragments.code($comma).compile(@index) if ?@index
 
 		fragments
 			.code(surround.afterParameters)
@@ -305,13 +313,13 @@ class ArrayComprehensionForIn extends Expression {
 
 		fragments.code(surround.footer)
 
-		if @when? {
+		if ?@when {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
 				.compile(@value ?? @valueName)
 
-			fragments.code($comma).compile(@index) if @index?
+			fragments.code($comma).compile(@index) if ?@index
 
 			fragments
 				.code(surround.afterParameters)
@@ -358,7 +366,7 @@ class ArrayComprehensionForOf extends Expression {
 		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
-		if @data.loop.key? {
+		if ?@data.loop.key {
 			var keyVariable = @scope.getVariable(@data.loop.key.name)
 
 			if @declaration || keyVariable == null {
@@ -377,7 +385,7 @@ class ArrayComprehensionForOf extends Expression {
 			@keyName = @bindingScope.acquireTempName()
 		}
 
-		if @data.loop.value? {
+		if ?@data.loop.value {
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
@@ -400,23 +408,27 @@ class ArrayComprehensionForOf extends Expression {
 		@body.initiate()
 		@body.analyse()
 
-		if @data.loop.when? {
+		if ?@data.loop.when {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
 
-		@bindingScope.releaseTempName(@keyName) if @keyName?
+		@bindingScope.releaseTempName(@keyName) if ?@keyName
 	} # }}}
 	override prepare(target) { # {{{
-		@expression.prepare()
+		unless target.isAny() || target.isArray() {
+			TypeException.throwInvalidComprehensionType(target, this)
+		}
+
+		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
 		if !(type.isAny() || type.isDictionary() || type.isObject()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 
-		if @value? {
+		if ?@value {
 			var parameterType = type.parameter()
 
 			var valueType = Type.fromAST(@data.type, this)
@@ -441,26 +453,26 @@ class ArrayComprehensionForOf extends Expression {
 			}
 		}
 
-		if @key? {
+		if ?@key {
 			unless @defineKey {
 				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
 			}
 
-			@key.prepare()
+			@key.prepare(@scope.reference('String'))
 		}
 
-		@body.prepare()
+		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
 
-		if @when? {
-			@when.prepare()
+		if ?@when {
+			@when.prepare(@scope.reference('Boolean'))
 		}
 	} # }}}
 	translate() { # {{{
 		@expression.translate()
-		@key.translate() if @key?
-		@value.translate() if @value?
+		@key.translate() if ?@key
+		@value.translate() if ?@value
 		@body.translate()
-		@when.translate() if @when?
+		@when.translate() if ?@when
 	} # }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
@@ -484,7 +496,7 @@ class ArrayComprehensionForOf extends Expression {
 			.code(surround.beforeParameters)
 			.compile(@key ?? @keyName)
 
-		fragments.code($comma).compile(@value) if @value?
+		fragments.code($comma).compile(@value) if ?@value
 
 		fragments
 			.code(surround.afterParameters)
@@ -494,13 +506,13 @@ class ArrayComprehensionForOf extends Expression {
 
 		fragments.code(surround.footer)
 
-		if @when? {
+		if ?@when {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
 				.compile(@key ?? @keyName)
 
-			fragments.code($comma).compile(@value) if @value?
+			fragments.code($comma).compile(@value) if ?@value
 
 			fragments
 				.code(surround.afterParameters)
@@ -542,7 +554,7 @@ class ArrayComprehensionForRange extends Expression {
 		@to = $compile.expression(@data.loop.to, this, @scope)
 		@to.analyse()
 
-		if @data.loop.by? {
+		if ?@data.loop.by {
 			@by = $compile.expression(@data.loop.by, this, @scope)
 			@body.analyse()
 		}
@@ -551,27 +563,31 @@ class ArrayComprehensionForRange extends Expression {
 		@body.initiate()
 		@body.analyse()
 
-		if @data.loop.when? {
+		if ?@data.loop.when {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@value.prepare()
-		@from.prepare()
-		@to.prepare()
-		@by.prepare() if @by?
-		@body.prepare()
-		@when.prepare() if @when?
+		unless target.isAny() || target.isArray() {
+			TypeException.throwInvalidComprehensionType(target, this)
+		}
+
+		@value.prepare(AnyType.NullableUnexplicit)
+		@from.prepare(@scope.reference('Number'))
+		@to.prepare(@scope.reference('Number'))
+		@by.prepare(@scope.reference('Number')) if ?@by
+		@when.prepare(@scope.reference('Boolean')) if ?@when
+		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
 	} # }}}
 	translate() { # {{{
 		@value.translate()
 		@from.translate()
 		@to.translate()
-		@by.translate() if @by?
+		@by.translate() if ?@by
 		@body.translate()
-		@when.translate() if @when?
+		@when.translate() if ?@when
 	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
@@ -598,7 +614,7 @@ class ArrayComprehensionForRange extends Expression {
 			.code($comma)
 			.compile(@to)
 
-		if @by? {
+		if ?@by {
 			fragments.code(', ').compile(@by)
 		}
 		else {
@@ -616,7 +632,7 @@ class ArrayComprehensionForRange extends Expression {
 
 		fragments.code(surround.footer)
 
-		if @when? {
+		if ?@when {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)

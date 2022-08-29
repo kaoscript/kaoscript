@@ -4,6 +4,6 @@ func foo() {
 	return false
 }
 
-until x = foo() {
+until x <- foo() {
 	console.log(x)
 }

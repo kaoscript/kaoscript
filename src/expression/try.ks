@@ -1,10 +1,10 @@
 class TryExpression extends Expression {
 	private late {
-		_argument: Expression
-		_defaultValue: Expression?		= null
-		_reusable: Boolean				= false
-		_reuseName: String?				= null
-		_unwrap: Boolean				= false
+		@argument: Expression
+		@defaultValue: Expression?		= null
+		@reusable: Boolean				= false
+		@reuseName: String?				= null
+		@unwrap: Boolean				= false
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
@@ -16,20 +16,20 @@ class TryExpression extends Expression {
 		@argument = $compile.expression(@data.argument, this)
 		@argument.analyse()
 
-		if @data.defaultValue? {
+		if ?@data.defaultValue {
 			@defaultValue = $compile.expression(@data.defaultValue, this)
 			@defaultValue.analyse()
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@argument.prepare()
+		@argument.prepare(target)
 
 		if @unwrap && @argument.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
 
 		if @defaultValue != null {
-			@defaultValue.prepare()
+			@defaultValue.prepare(target)
 		}
 	} # }}}
 	translate() { # {{{
@@ -108,6 +108,14 @@ class TryExpression extends Expression {
 			.compile(this)
 
 		@reusable = true
+	} # }}}
+	toQuote() { # {{{
+		if ?@defaultValue {
+			return `try \(@argument.toQuote()) ~ \(@defaultValue.toQuote())`
+		}
+		else {
+			return `try \(@argument.toQuote())`
+		}
 	} # }}}
 	type() => @argument.type()
 }

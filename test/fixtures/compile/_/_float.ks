@@ -3,5 +3,5 @@ extern {
 }
 
 export namespace Float {
-	export func parse(value = null): Number => parseFloat(value)
+	export func parse(value? = null): Number => parseFloat(value)
 }

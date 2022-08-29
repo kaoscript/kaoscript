@@ -1,9 +1,9 @@
 abstract class Statement extends AbstractNode {
 	private {
-		_afterwards: Array		= []
-		_assignments: Array		= []
-		_attributeDatas			= {}
-		_line: Number
+		@afterwards: Array		= []
+		@assignments: Array		= []
+		@attributeDatas			= {}
+		@line: Number
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -28,9 +28,9 @@ abstract class Statement extends AbstractNode {
 		scope.commitTempVariables(@assignments)
 	} # }}}
 	assignments() => @assignments
-	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
 		for var name in names {
-			if var variable = scope.getVariable(name) {
+			if var variable ?= scope.getVariable(name) {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
 				}
@@ -47,7 +47,7 @@ abstract class Statement extends AbstractNode {
 			}
 		}
 	} # }}}
-	defineVariables(left: AbstractNode, scope: Scope, expression = null, leftMost: Boolean = false) { # {{{
+	defineVariables(left: AbstractNode, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
 		this.defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
 	} # }}}
 	export(recipient)
