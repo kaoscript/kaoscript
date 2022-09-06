@@ -1148,7 +1148,7 @@ class ClassType extends Type {
 				return @instanceMethods[name][0]
 			}
 			else {
-				return new ClassMethodSetType(@scope, @instanceMethods[name])
+				return new ClassMethodGroupType(@scope, @instanceMethods[name])
 			}
 		}
 		else if @instanceVariables[name] is ClassVariableType {
@@ -1198,7 +1198,7 @@ class ClassType extends Type {
 				return @instanceMethods[name][0]
 			}
 			else {
-				return new ClassMethodSetType(@scope, @instanceMethods[name])
+				return new ClassMethodGroupType(@scope, @instanceMethods[name])
 			}
 		}
 
@@ -1208,7 +1208,7 @@ class ClassType extends Type {
 					return functions[0]
 				}
 				else {
-					return new ClassMethodSetType(@scope, functions)
+					return new ClassMethodGroupType(@scope, functions)
 				}
 			}
 		}
@@ -2037,7 +2037,7 @@ class ClassType extends Type {
 	} # }}}
 }
 
-class ClassMethodSetType extends OverloadedFunctionType {
+class ClassMethodGroupType extends OverloadedFunctionType {
 	constructor(@scope, @functions) { # {{{
 		super(scope)
 
@@ -2048,5 +2048,15 @@ class ClassMethodSetType extends OverloadedFunctionType {
 			}
 		}
 	} # }}}
+	clone() { # {{{
+		var that = new ClassMethodGroupType(@scope, [function.clone() for var function in @functions])
+
+		return that
+	} # }}}
 	isMethod() => true
+	setProxy(proxyPath: String, proxyName: String) { # {{{
+		for var function in @functions {
+			function.setProxy(proxyPath, proxyName)
+		}
+	} # }}}
 }

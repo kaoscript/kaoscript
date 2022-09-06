@@ -790,10 +790,9 @@ abstract class Importer extends Statement {
 
 		@variationId = compiler.toVariationId()
 	} # }}}
-	loadNodeFile(filename? = null, mut moduleName: String? = null) { # {{{
+	loadNodeFile(filename: String? = null, mut moduleName: String? = null) { # {{{
 		var module = this.module()
 
-		// TODO type not needed
 		var mut file: String? = null
 		if moduleName == null {
 			file = moduleName = module.path(filename, @data.source.value)
@@ -814,7 +813,6 @@ abstract class Importer extends Statement {
 		}
 
 		@isKSFile = false
-		// TODO remove !?
 		@moduleName = moduleName!?
 
 		if @data.specifiers.length == 0 {

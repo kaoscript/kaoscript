@@ -39,12 +39,6 @@ abstract class AssignmentOperatorExpression extends Expression {
 		@left.prepare(target)
 
 		if var variable ?= @left.variable() {
-			// if variable.isInitialized() {
-			// 	@type = variable.getRealType()
-			// }
-			// else {
-			// 	@type = variable.getDeclaredType()
-			// }
 			@type = variable.getDeclaredType()
 		}
 		else {
@@ -52,33 +46,24 @@ abstract class AssignmentOperatorExpression extends Expression {
 		}
 
 		if !target.isVoid() {
-			if target.isAssignableToVariable(@type, true, true, false) {
+			if @type.isAssignableToVariable(target, false, false, false) {
+				// do nothing
+			}
+			else if target.isAssignableToVariable(@type, true, true, false) {
 				@type = target
 			}
 			else {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 		}
-		// console.log(target.hashCode())
-		// console.log(@type.hashCode())
-		// if !target.isVoid() && target.isAssignableToVariable(@type, true, true, false) {
-		// 	@type = target
-		// }
 
 		@right.prepare(@type)
 
 		var type = @right.type()
-		// console.log(type.hashCode())
 
 		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
 		}
-		// else if type.isAssignableToVariable(@type, true, false, false) {
-		// 	@type = type
-		// }
-		// else if !target.isVoid() {
-		// 	TypeException.throwUnexpectedExpression(this, target, this)
-		// }
 	} # }}}
 	translate() { # {{{
 		@left.translate()
@@ -220,134 +205,6 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		fragments.compile(@left).code($space).code(this.symbol(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
-	type() => @type
-}
-
-abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExpression {
-	private late {
-		@native: Boolean		= false
-		@operand: OperandType	= OperandType::Any
-	}
-	override prepare(target) { # {{{
-		super(target)
-
-		var mut nullable = false
-		var mut boolean = true
-		var mut number = true
-		var mut native = true
-
-		if @type.isBoolean() {
-			number = false
-		}
-		else if @type.isNumber() {
-			if @type.isNullable() {
-				nullable = true
-				native = false
-			}
-
-			boolean = false
-		}
-		else if @type.isNull() {
-			nullable = true
-		}
-		else if @type.canBeBoolean() {
-			if @type.isNullable() {
-				nullable = true
-			}
-
-			if !@type.canBeNumber() {
-				number = false
-			}
-			else if !boolean {
-				native = false
-			}
-		}
-		else if @type.canBeNumber() {
-			if @type.isNullable() {
-				nullable = true
-			}
-
-			boolean = false
-			native = false
-		}
-		else {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
-			}
-		}
-
-		if !boolean && !number {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
-			}
-		}
-
-		if boolean {
-			if number {
-				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
-
-				if nullable {
-					@type = @type.setNullable(true)
-				}
-			}
-			else {
-				@type = @scope.reference('Boolean')
-				@operand = OperandType::Boolean
-				@native = true
-			}
-		}
-		else if number {
-			@type = @scope.reference('Number')
-			@operand = OperandType::Number
-			@native = native
-
-			if nullable {
-				@type = @type.setNullable(true)
-			}
-		}
-	} # }}}
-	abstract native(): String
-	abstract operator(): Operator
-	abstract runtime(): String
-	abstract symbol(): String
-	toFragments(fragments, mode) { # {{{
-		if @native {
-			@toNativeFragments(fragments)
-		}
-		else {
-			var late operator
-			if @operand == OperandType::Number {
-				operator = `\(@runtime())Num`
-			}
-			else {
-				operator = @runtime()
-			}
-
-			fragments
-				.compile(@left)
-				.code(' = ')
-				.code($runtime.operator(this), `.\(operator)(`)
-				.compile(@left)
-				.code($comma)
-				.compile(@right)
-				.code(')')
-		}
-	} # }}}
-	toNativeFragments(fragments) { # {{{
-		if @operand == OperandType::Boolean {
-			fragments.compile(@left).code(' = ').compile(@left).code(` \(@native()) `).compile(@right)
-		}
-		else {
-			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
-		}
-	} # }}}
-	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 	type() => @type
 }
 
@@ -505,292 +362,12 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	type() => @type
 }
 
-class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
-	isAcceptingEnum() => true
-	native() => @operand == OperandType::Boolean ? '&&' : '&='
-	operator() => Operator::And
-	runtime() => 'and'
-	symbol() => '&&='
-}
-
 class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 	operator() => Operator::Division
 	runtime() => 'division'
 	symbol() => '/='
 }
 
-class AssignmentOperatorEquals extends AssignmentOperatorExpression {
-	private late {
-		@condition: Boolean		= false
-		@ignorable: Boolean		= false
-		@lateinit: Boolean		= false
-	}
-	analyse() { # {{{
-		@condition = @statement() is IfStatement
-
-		super()
-	} # }}}
-	override prepare(target) { # {{{
-		super(target)
-
-		if @condition && @lateinit {
-			@statement.initializeLateVariable(@left.name(), @right.type(), true)
-		}
-		else {
-			@left.initializeVariables(@right.type(), this)
-		}
-
-		@type = @left.getDeclaredType()
-
-		if this.isInDestructor() {
-			@type = NullType.Explicit
-		}
-		else {
-			unless @right.type().matchContentOf(@type) || (@left is ObjectBinding && @right.type().isDictionary()) {
-				TypeException.throwInvalidAssignement(@left, @type, @right.type(), this)
-			}
-
-			if @left.isInferable() && @right.type().isMorePreciseThan(@type) {
-				@type = @right.type()
-			}
-		}
-	} # }}}
-	acquireReusable(acquire) { # {{{
-		@right.acquireReusable(@left.isSplitAssignment())
-	} # }}}
-	defineVariables(left) { # {{{
-		if @condition {
-			var names = []
-
-			for var name in left.listAssignments([]) {
-				if var variable ?= @scope.getVariable(name) {
-					if variable.isLateInit() {
-						throw new NotImplementedException(this)
-					}
-					else if variable.isImmutable() {
-						ReferenceException.throwImmutable(name, this)
-					}
-				}
-				else {
-					names.push(name)
-				}
-			}
-
-			if names.length > 0 {
-				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
-			}
-		}
-		else {
-			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
-		}
-	} # }}}
-	flagAssignable()
-	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
-	inferTypes(inferables) { # {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
-				type: @type
-			}
-		}
-
-		return inferables
-	} # }}}
-	initializeVariable(variable: VariableBrief) { # {{{
-		@parent.initializeVariable(variable, this)
-	} # }}}
-	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
-		@parent.initializeVariable(variable, expression)
-	} # }}}
-	initializeVariables(type: Type, node: Expression)
-	isAssigningBinding() => true
-	isDeclarable() => @left.isDeclarable()
-	isDeclararing() => true
-	isIgnorable() => @ignorable
-	private isInDestructor() { # {{{
-		if @parent is not ExpressionStatement {
-			return false
-		}
-
-		var dyn parent = @parent
-
-		while ?parent {
-			parent = parent.parent()
-
-			if parent is ClassDestructorDeclaration {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
-	releaseReusable() { # {{{
-		@right.releaseReusable()
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		if @right.isAwaiting() {
-			return @right.toFragments(fragments, mode)
-		}
-		else if @left.isUsingSetter() {
-			@left.toSetterFragments(fragments, @right)
-		}
-		else {
-			fragments.compile(@left).code($equals).compile(@right)
-		}
-	} # }}}
-	toAssignmentFragments(fragments) { # {{{
-		if ?@left.toAssignmentFragments {
-			@left.toAssignmentFragments(fragments, @right)
-		}
-		else {
-			fragments.compile(@left).code($equals).compile(@right)
-		}
-	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
-		fragments.compile(@left).code($equals).wrap(@right)
-	} # }}}
-	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
-	type() => @type
-	validate(target: Type) { # {{{
-		if !target.isVoid() && @parent is not AssignmentOperatorEquals {
-			SyntaxException.throwNoReturn(this)
-		}
-	} # }}}
-}
-
-class AssignmentOperatorExistential extends AssignmentOperatorExpression {
-	private {
-		@condition: Boolean		= false
-		@lateinit: Boolean		= false
-	}
-	analyse() { # {{{
-		@condition = @statement() is IfStatement
-
-		super()
-	} # }}}
-	override prepare(target) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
-
-		super(AnyType.NullableUnexplicit)
-
-		@right.acquireReusable(true)
-		@right.releaseReusable()
-
-		if @left is IdentifierLiteral {
-			var type = @right.type().setNullable(false)
-
-			if @condition {
-				if @lateinit {
-					@statement.initializeLateVariable(@left.name(), type, true)
-				}
-				else {
-					@left.type(type, @scope, this)
-				}
-			}
-			else {
-				@left.type(type, @scope, this)
-			}
-		}
-	} # }}}
-	defineVariables(left) { # {{{
-		if @condition {
-			var names = []
-
-			for var name in left.listAssignments([]) {
-				if var variable ?= @scope.getVariable(name) {
-					if variable.isLateInit() {
-						@statement.addInitializableVariable(variable, true, this)
-						@lateinit = true
-					}
-					else if variable.isImmutable() {
-						ReferenceException.throwImmutable(name, this)
-					}
-				}
-				else {
-					names.push(name)
-				}
-			}
-
-			if names.length > 0 {
-				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
-			}
-		}
-		else {
-			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
-		}
-	} # }}}
-	inferWhenTrueTypes(inferables) { # {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
-				type: @right.type().setNullable(false)
-			}
-		}
-
-		return inferables
-	} # }}}
-	isAssigningBinding() => true
-	isDeclararing() => true
-	toFragments(fragments, mode) { # {{{
-		if @right.isNullable() {
-			fragments
-				.wrapNullable(@right)
-				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-
-		fragments.code(' ? ')
-
-		if ?@left.toAssignmentFragments {
-			@left.toAssignmentFragments(fragments, @right)
-		}
-		else {
-			fragments.compile(@left).code($equals).wrap(@right)
-		}
-
-		fragments.code(' : null')
-	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
-		if @right.isNullable() {
-			fragments
-				.wrapNullable(@right)
-				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-
-		fragments.code(' ? (')
-
-		if ?@left.toAssignmentFragments {
-			@left.toAssignmentFragments(fragments, @right)
-		}
-		else {
-			fragments.compile(@left).code($equals).wrap(@right)
-		}
-
-		fragments.code(', true) : false')
-	} # }}}
-	toQuote() { # {{{
-		return `\(@left.toQuote()) ?= \(@right.toQuote())`
-	} # }}}
-	type() => @scope.reference('Boolean')
-	override validate(target)
-}
 
 class AssignmentOperatorLeftShift extends NumericAssignmentOperatorExpression {
 	operator() => Operator::LeftShift
@@ -810,204 +387,6 @@ class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpressi
 	symbol() => '*='
 }
 
-class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
-	private {
-		@condition: Boolean		= false
-		@lateinit: Boolean		= false
-	}
-	analyse() { # {{{
-		@condition = @statement() is IfStatement
-
-		super()
-	} # }}}
-	override prepare(target) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
-
-		super(AnyType.NullableUnexplicit)
-
-		@right.acquireReusable(true)
-		@right.releaseReusable()
-
-		if @left is IdentifierLiteral {
-			var type = @right.type().setNullable(false)
-
-			if @condition {
-				if @lateinit {
-					@statement.initializeLateVariable(@left.name(), type, false)
-				}
-				else if var scope ?= @statement.getWhenFalseScope() {
-					@left.type(type, scope, this)
-				}
-			}
-			else {
-				@left.type(type, @scope, this)
-			}
-		}
-	} # }}}
-	defineVariables(left) { # {{{
-		if @condition {
-			var scope = @statement.scope()
-			var names = []
-
-			for var name in left.listAssignments([]) {
-				if var variable ?= scope.getVariable(name) {
-					if variable.isLateInit() {
-						if @parent == @statement {
-							@statement.addInitializableVariable(variable, false, this)
-						}
-						else {
-							throw new NotImplementedException(this)
-						}
-
-						@lateinit = true
-					}
-					else if variable.isImmutable() {
-						ReferenceException.throwImmutable(name, this)
-					}
-				}
-				else {
-					names.push(name)
-				}
-			}
-
-			if names.length > 0 {
-				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
-			}
-		}
-		else {
-			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
-		}
-	} # }}}
-	inferWhenFalseTypes(inferables) { # {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
-				type: @right.type().setNullable(false)
-			}
-		}
-
-		return inferables
-	} # }}}
-	isAssigningBinding() => true
-	isDeclararing() => true
-	toFragments(fragments, mode) { # {{{
-		if @right.isNullable() {
-			fragments
-				.wrapNullable(@right)
-				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-
-		fragments
-			.code(' ? ')
-			.compile(@left)
-			.code($equals)
-			.wrap(@right)
-			.code(' : null')
-	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
-		if @right.isNullable() {
-			fragments
-				.wrapNullable(@right)
-				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
-		}
-
-		fragments
-			.code(' ? (')
-			.compile(@left)
-			.code($equals)
-			.wrap(@right)
-			.code(', false) : true')
-	} # }}}
-	type() => @scope.reference('Boolean')
-	override validate(target)
-}
-
-class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
-	toFragments(fragments, mode) { # {{{
-		if @left.isNullable() {
-			fragments.code('(')
-
-			@left.toNullableFragments(fragments)
-
-			fragments
-				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compile(@left)
-				.code('))')
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(')
-				.compile(@left)
-				.code(')')
-		}
-
-		fragments
-			.code(' ? null : ')
-			.compile(@left)
-			.code($equals)
-			.compile(@right)
-	} # }}}
-	toStatementFragments(fragments, mode) { # {{{
-		var mut ctrl = fragments.newControl()
-
-		ctrl.code('if(!')
-
-		if @left.isNullable() {
-			ctrl.code('(')
-
-			@left.toNullableFragments(ctrl)
-
-			ctrl
-				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compile(@left)
-				.code('))')
-		}
-		else {
-			ctrl
-				.code($runtime.type(this) + '.isValue(')
-				.compile(@left)
-				.code(')')
-		}
-
-		ctrl
-			.code(')')
-			.step()
-			.newLine()
-			.compile(@left)
-			.code($equals)
-			.compile(@right)
-			.done()
-
-		ctrl.done()
-	} # }}}
-	toQuote() => `\(@left.toQuote()) ??= \(@right.toQuote())`
-}
-
-class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
-	native() => @operand == OperandType::Boolean ? '||' : '|='
-	operator() => Operator::Or
-	runtime() => 'or'
-	symbol() => '||='
-}
-
 class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	operator() => Operator::Quotient
 	runtime() => 'quotient'
@@ -1016,12 +395,6 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 		fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
 	} # }}}
 }
-
-class AssignmentOperatorReturn extends AssignmentOperatorEquals {
-	override validate(target)
-	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
-}
-
 class AssignmentOperatorRightShift extends NumericAssignmentOperatorExpression {
 	operator() => Operator::RightShift
 	runtime() => 'rightShift'
@@ -1039,20 +412,5 @@ class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression 
 		@right.toOperandFragments(fragments, Operator::Subtraction, OperandType::Enum)
 
 		fragments.code(')')
-	} # }}}
-}
-
-class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
-	native() => '^='
-	operator() => Operator::Xor
-	runtime() => 'xor'
-	symbol() => '^^='
-	toNativeFragments(fragments) { # {{{
-		if @operand == OperandType::Boolean {
-			fragments.compile(@left).code(' = ').compile(@left).code(` !== `).compile(@right)
-		}
-		else {
-			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
-		}
 	} # }}}
 }

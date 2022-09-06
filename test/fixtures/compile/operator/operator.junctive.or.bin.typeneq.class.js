@@ -32,7 +32,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		if(!Type.isClassInstance(x, ClassB)) {
+		if(!Type.isClassInstance(x, ClassA)) {
 		}
 		if(!Type.isClassInstance(x, ClassA) || !Type.isClassInstance(x, ClassB)) {
 		}

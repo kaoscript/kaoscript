@@ -64,8 +64,8 @@ class SealableType extends Type {
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
-	
-	alias {
+
+	proxy {
 		toQuote = @type.toQuote
 	}
 }

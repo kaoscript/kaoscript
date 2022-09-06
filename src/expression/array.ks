@@ -22,7 +22,7 @@ class ArrayExpression extends Expression {
 	override prepare(target) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
-		var dyn type = null
+		var mut type = null
 
 		for var value, index in @values {
 			value.prepare(subtarget)

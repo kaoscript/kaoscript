@@ -42,8 +42,8 @@ module.exports = function() {
 			return 2;
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = value => Type.isNumber(value) || Type.isString(value);
-			const t1 = value => Type.isBoolean(value) || Type.isNull(value);
+			const t0 = value => Type.isBoolean(value) || Type.isNull(value);
+			const t1 = value => Type.isNumber(value) || Type.isString(value);
 			const t2 = value => Type.isNumber(value) || Type.isString(value) || Type.isNull(value);
 			const t3 = value => Type.isString(value) || Type.isDictionary(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
@@ -53,10 +53,10 @@ module.exports = function() {
 			}
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return proto.__ks_func_foobar_1.call(that, args[0], void 0);
+					return proto.__ks_func_foobar_0.call(that, args[0]);
 				}
 				if(t1(args[0])) {
-					return proto.__ks_func_foobar_0.call(that, args[0]);
+					return proto.__ks_func_foobar_1.call(that, args[0], void 0);
 				}
 				throw Helper.badArgs();
 			}
@@ -67,7 +67,7 @@ module.exports = function() {
 				throw Helper.badArgs();
 			}
 			if(args.length >= 3 && args.length <= 4) {
-				if(t0(args[0]) && t0(args[1]) && t3(args[2]) && Helper.isVarargs(args, 0, 1, t1, pts = [3], 0) && te(pts, 1)) {
+				if(t1(args[0]) && t1(args[1]) && t3(args[2]) && Helper.isVarargs(args, 0, 1, t0, pts = [3], 0) && te(pts, 1)) {
 					return proto.__ks_func_foobar_2.call(that, args[0], args[1], args[2], Helper.getVararg(args, 3, pts[1]));
 				}
 			}

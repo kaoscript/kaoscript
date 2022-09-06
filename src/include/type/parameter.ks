@@ -160,26 +160,30 @@ class ParameterType extends Type {
 	isNullable() => @type.isNullable()
 	isPositionalOnlyArgument() => @passing == PassingMode::POSITIONAL
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
-		if mode !~ MatchingMode::IgnoreName && @name != value.name() != null {
+		if mode !~ MatchingMode::IgnoreName && ?@name && ?value.name() && @name != value.name()  {
 			return false
 		}
 
 		if mode ~~ MatchingMode::MissingDefault && @default && !value.hasDefaultValue() {
 			return false unless @type.setNullable(false).isSubsetOf(value.type(), mode)
 		}
-		else if mode ~~ MatchingMode::NonNullToNull && !@type.isNullable() && value.type().isNullable() {
-			return false unless @type.setNullable(true).isSubsetOf(value.type(), mode)
+
+		var mut submode = mode
+		submode += MatchingMode::Missing - MatchingMode::MissingType if mode ~~ MatchingMode::MissingType
+
+		if mode ~~ MatchingMode::NonNullToNull && !@type.isNullable() && value.type().isNullable() {
+			return false unless @type.setNullable(true).isSubsetOf(value.type(), submode)
 		}
 		else if mode ~~ MatchingMode::NullToNonNull && @type.isNullable() && !value.type().isNullable() {
-			return false unless @type.setNullable(false).isSubsetOf(value.type(), mode)
+			return false unless @type.setNullable(false).isSubsetOf(value.type(), submode)
 		}
 		else if mode ~~ MatchingMode::Subset {
 			var oldType = @getArgumentType()
 			var newType = value.getArgumentType()
-			return false unless newType.isSubsetOf(oldType, mode) || oldType.isSubsetOf(newType, mode)
+			return false unless newType.isSubsetOf(oldType, submode) || oldType.isSubsetOf(newType, submode)
 		}
 		else {
-			return false unless @getArgumentType().isSubsetOf(value.getArgumentType(), mode)
+			return false unless @getArgumentType().isSubsetOf(value.getArgumentType(), submode)
 		}
 
 		if @max > 1 {

@@ -2,14 +2,14 @@ class ClassMethodType extends FunctionType {
 	private {
 		@abstract: Boolean						= false
 		@access: Accessibility					= Accessibility::Public
-		@alias: Boolean							= false
-		@aliasName: String						= ''
-		@aliasPath: String						= ''
 		@forked: Boolean						= false
 		@forkedIndex: Number?					= null
 		@initVariables: Dictionary<Boolean>		= {}
 		@instance: Boolean						= false
 		@overwrite: Array?						= null
+		@proxy: Boolean							= false
+		@proxyName: String						= ''
+		@proxyPath: String						= ''
 		@unknownReturnType: Boolean				= false
 	}
 	static {
@@ -49,9 +49,9 @@ class ClassMethodType extends FunctionType {
 				}
 			}
 
-			if ?type.aliasPath {
-				type._alias = true
-				type._aliasPath = data.aliasPath
+			if ?type.proxyPath {
+				type._proxy = true
+				type._proxyPath = data.proxyPath
 			}
 
 			type.updateParameters()
@@ -110,8 +110,8 @@ class ClassMethodType extends FunctionType {
 			export.forkedIndex = @forkedIndex
 		}
 
-		if @alias {
-			export.aliasPath = @aliasPath
+		if @proxy {
+			export.proxyPath = @proxyPath
 		}
 
 		return export
@@ -128,11 +128,10 @@ class ClassMethodType extends FunctionType {
 
 		return this
 	} # }}}
-	getAliasName() => @aliasName
-	getAliasPath() => @aliasPath
 	getForkedIndex() => @forkedIndex
+	getProxyName() => @proxyName
+	getProxyPath() => @proxyPath
 	isAbstract() => @abstract
-	isAlias() => @alias
 	isExportable() { # {{{
 		if !super() {
 			return false
@@ -155,6 +154,7 @@ class ClassMethodType extends FunctionType {
 
 		return true
 	} # }}}
+	isProxy() => @proxy
 	isSealable() => true
 	isSubsetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
 		for var method in methods {
@@ -199,8 +199,8 @@ class ClassMethodType extends FunctionType {
 			}
 		}
 	} # }}}
-	setAlias(@aliasPath, @aliasName) { # {{{
-		@alias = true
+	setProxy(@proxyPath, @proxyName) { # {{{
+		@proxy = true
 	} # }}}
 	setForkedIndex(@forkedIndex): this { # {{{
 		@forked = true

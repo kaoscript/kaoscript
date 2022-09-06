@@ -1,5 +1,6 @@
 class DictionaryType extends Type {
 	private {
+		@empty: Boolean					= false
 		@length: Number					= 0
 		@nullable: Boolean				= false
 		@properties: Dictionary<Type>	= {}
@@ -49,6 +50,26 @@ class DictionaryType extends Type {
 
 		return type
 	} # }}}
+	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
+		if @nullable != value.isNullable() {
+			return @nullable ? 1 : -1
+		}
+
+		if @rest {
+			if value.hasRest() {
+				return $weightTOFs['Dictionary'] - $weightTOFs['Array']
+			}
+			else {
+				return 1
+			}
+		}
+		else if value.hasRest() {
+			return -1
+		}
+		else {
+			return $weightTOFs['Dictionary'] - $weightTOFs['Array']
+		}
+	} # }}}
 	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
 		if @isSubsetOf(value, MatchingMode::Similar) {
 			if @isSubsetOf(value, MatchingMode::Exact) {
@@ -80,6 +101,9 @@ class DictionaryType extends Type {
 		else {
 			return this
 		}
+	} # }}}
+	flagEmpty(): this { # {{{
+		@empty = true
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if !@systemic && !@sealed && @length == 0 && !@rest {
@@ -198,7 +222,7 @@ class DictionaryType extends Type {
 	hasRest() => @rest
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
-			if this.isNullable() {
+			if @isNullable() {
 				return nullcast || value.isNullable()
 			}
 			else {
@@ -206,7 +230,7 @@ class DictionaryType extends Type {
 			}
 		}
 		else if value.isDictionary() {
-			if this.isNullable() && !nullcast && !value.isNullable() {
+			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
 			}
 
@@ -214,10 +238,10 @@ class DictionaryType extends Type {
 				return true
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value.isObject() {
-			if this.isNullable() && !nullcast && !value.isNullable() {
+			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
 			}
 
@@ -225,11 +249,11 @@ class DictionaryType extends Type {
 				return true
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
 			}
@@ -263,7 +287,7 @@ class DictionaryType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
-		return true if this == value
+		return true if this == value || @empty
 		return false unless @rest == value.hasRest()
 
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {

@@ -1,10 +1,10 @@
 class InlineBlockScope extends BlockScope {
 	private {
-		_tempParentNames	= {}
-		_upatedInferables	= {}
+		@tempParentNames	= {}
+		@upatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		if var name ?= this.acquireUnusedTempName() {
+		if var name ?= @acquireUnusedTempName() {
 			return name
 		}
 
@@ -32,7 +32,7 @@ class InlineBlockScope extends BlockScope {
 			return name
 		}
 
-		if var name ?= this.parent().acquireUnusedTempName() {
+		if var name ?= @parent().acquireUnusedTempName() {
 			@tempParentNames[name] = true
 
 			return name
@@ -41,8 +41,8 @@ class InlineBlockScope extends BlockScope {
 		return null
 	} # }}}
 	private declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && this.hasBleedingVariable(name)) {
-			var newName = this.getNewName(name)
+		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @hasBleedingVariable(name)) {
+			var newName = @getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -57,10 +57,10 @@ class InlineBlockScope extends BlockScope {
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{
-		var mut index = this.getRenamedIndex(name) + 1
+		var mut index = @getRenamedIndex(name) + 1
 		var mut newName = '__ks_' + name + '_' + index
 
-		while this.hasRenamedVariable(newName) {
+		while @hasRenamedVariable(newName) {
 			index += 1
 			newName = '__ks_' + name + '_' + index
 		}
@@ -79,13 +79,14 @@ class InlineBlockScope extends BlockScope {
 	} # }}}
 	hasBleedingVariable(name: String) => super(name) || @parent.hasBleedingVariable(name)
 	hasRenamedVariable(name: String): Boolean { # {{{
-		var mut parent = this
+		var mut parent: Scope = this
+
 		do {
 			if parent.hasDeclaredVariable(name) {
 				return true
 			}
 
-			parent = parent.parent()
+			parent = parent.parent()!?
 		}
 		while parent.isInline()
 
@@ -95,7 +96,7 @@ class InlineBlockScope extends BlockScope {
 	listUpdatedInferables() => @upatedInferables
 	releaseTempName(name) { # {{{
 		if @tempParentNames[name] == true {
-			this.parent().releaseTempName(name)
+			@parent().releaseTempName(name)
 
 			@tempParentNames[name] = false
 		}
@@ -110,7 +111,7 @@ class InlineBlockScope extends BlockScope {
 		var mut nf = !parent.hasDeclaredVariable(name)
 
 		while nf && parent.isInline() {
-			parent = parent.parent()
+			parent = parent.parent()!?
 
 			nf = !parent.hasDeclaredVariable(name)
 		}
@@ -119,12 +120,12 @@ class InlineBlockScope extends BlockScope {
 			@renamedIndexes[name] = parent.getRenamedIndex(name)
 		}
 
-		var newName = this.declareVariable(name, this)
+		var newName = @declareVariable(name, this)
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
 
-		var variable = this.getVariable(name)
+		var variable = @getVariable(name)
 
 		variable.renameAs(newName)
 
@@ -133,7 +134,7 @@ class InlineBlockScope extends BlockScope {
 	renameNext(name, line) { # {{{
 		return if @renamedVariables[name] is String
 
-		var newName = this.declareVariable(name, this)
+		var newName = @declareVariable(name, this)
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
@@ -177,8 +178,8 @@ class InlineBlockScope extends BlockScope {
 
 class LaxInlineBlockScope extends InlineBlockScope {
 	private declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || this.hasRenamedVariable(name) {
-			var newName = this.getNewName(name)
+		if $keywords[name] == true || @hasRenamedVariable(name) {
+			var newName = @getNewName(name)
 
 			if @variables[name] is not Variable {
 				@declarations[newName] = true

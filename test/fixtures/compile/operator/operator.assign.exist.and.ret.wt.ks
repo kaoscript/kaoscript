@@ -1,0 +1,1 @@
+func foobar(x, y): Boolean => (value ?= x()) && value.foobar()

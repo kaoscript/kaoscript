@@ -271,12 +271,12 @@ export class Module {
 			throw error
 		}
 	} # }}}
-	path(x? = null, name) { # {{{
+	path(x: String? = null, name: String): String { # {{{
 		if !?x || !?@output {
 			return name
 		}
 
-		var mut output = null
+		var mut output? = null
 		for rewire in @rewire {
 			if rewire.input == x {
 				output = path.relative(@output, rewire.output)

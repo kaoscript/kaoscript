@@ -28,18 +28,7 @@ class ConditionalExpression extends Expression {
 		var t = @whenTrue.type()
 		var f = @whenFalse.type()
 
-		if t.equals(f) {
-			@type = t
-		}
-		else if f.isNull() {
-			@type = t.setNullable(true)
-		}
-		else if t.isNull() {
-			@type = f.setNullable(true)
-		}
-		else {
-			@type = Type.union(@scope, t, f)
-		}
+		@type = Type.union(@scope, t, f)
 	} # }}}
 	translate() { # {{{
 		@condition.translate()
@@ -63,5 +52,6 @@ class ConditionalExpression extends Expression {
 			.code(' : ')
 			.compile(@whenFalse)
 	} # }}}
+	toQuote() => `\(@condition.toQuote()) ? \(@whenTrue.toQuote()) : \(@whenFalse.toQuote())`
 	type() => @type
 }

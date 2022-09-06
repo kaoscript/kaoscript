@@ -21,7 +21,7 @@ class BlockScope extends Scope {
 		super()
 
 		@authority = @parent.authority()
-		@module = @parent.module()
+		@module = @parent.module()!?
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {
@@ -89,7 +89,7 @@ class BlockScope extends Scope {
 	} # }}}
 	protected declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @declarations[name] == true {
-			var newName = this.getNewName(name)
+			var newName = @getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -104,13 +104,13 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
-		if this.hasDefinedVariable(name) {
+		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
 		var variable = new Variable(name, immutable, false, type, initialized)
 
-		this.defineVariable(variable, node)
+		@defineVariable(variable, node)
 
 		return variable
 	} # }}}
@@ -127,7 +127,7 @@ class BlockScope extends Scope {
 			variables.push(@line(), variable)
 		}
 		else {
-			if var newName ?= this.declareVariable(name, this) {
+			if var newName ?= @declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)
@@ -166,7 +166,7 @@ class BlockScope extends Scope {
 			var variables: Array = @variables[name]
 			var mut variable = null
 
-			if this.isAtLastLine() {
+			if @isAtLastLine() {
 				variable = variables.last()
 			}
 			else {
@@ -270,7 +270,7 @@ class BlockScope extends Scope {
 		return @parent.getVariable(name, -1)
 	} # }}}
 	hasDeclaredVariable(name: String) => @declarations[name] || ?@renamedVariables[name]
-	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line())
+	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -391,14 +391,14 @@ class BlockScope extends Scope {
 		if ?stash {
 			delete @stashes[name]
 
-			var mut variable = this.getVariable(name)
+			var mut variable = @getVariable(name)
 			for var mut fn in stash {
 				if fn[0](variable) {
 					break
 				}
 			}
 
-			variable = this.getVariable(name)
+			variable = @getVariable(name)
 			for var mut fn in stash {
 				fn[1](variable)
 			}
@@ -418,29 +418,6 @@ class BlockScope extends Scope {
 			reference.reset()
 		}
 	} # }}}
-	reference(value) { # {{{
-		switch value {
-			is AnyType => return this.resolveReference('Any')
-			is ClassVariableType => return this.reference(value.type())
-			is NamedType => {
-				if value.hasContainer() {
-					return value.container().scope().reference(value.name())
-				}
-				else {
-					return this.resolveReference(value.name())
-				}
-			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
-			is Variable => return this.resolveReference(value.name())
-			=> {
-				console.info(value)
-				throw new NotImplementedException()
-			}
-		}
-	} # }}}
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) { # {{{
-		return this.resolveReference(value, nullable, parameters)
-	} # }}}
 	releaseTempName(name) { # {{{
 		@tempNames[name] = true
 	} # }}}
@@ -455,13 +432,13 @@ class BlockScope extends Scope {
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
-		var index = this.getRenamedIndex(name) + 1
+		var index = @getRenamedIndex(name) + 1
 		var newName = '__ks_' + name + '_' + index
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
 
-		var variable = this.getVariable(name)
+		var variable = @getVariable(name)
 
 		variable.renameAs(newName)
 	} # }}}
@@ -469,7 +446,7 @@ class BlockScope extends Scope {
 		if newName != name {
 			@renamedVariables[name] = newName
 
-			var variable = this.getVariable(name)
+			var variable = @getVariable(name)
 
 			variable.renameAs(newName)
 		}

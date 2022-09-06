@@ -334,14 +334,14 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 		if cursor.spread {
 			var argument = cursor.argument.parameter()
 
-			if argument.isAssignableToVariable(node.type, false, false, false) {
+			if isPreciseMatch(argument, node.type) {
 				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
 
 				return { cursor, argMatches }
 			}
-			else if argument.isAssignableToVariable(node.type, true, false, false) {
+			else if isUnpreciseMatch(argument, node.type) {
 				argMatches.precise = false
 
 				cursor.used += 1
@@ -352,7 +352,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 			}
 		}
 		else {
-			if cursor.argument.isAssignableToVariable(node.type, false, false, false) {
+			if isPreciseMatch(cursor.argument, node.type) {
 				cursor.used += 1
 
 				argMatches.arguments.push([cursor.index])
@@ -361,7 +361,7 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 
 				return { cursor, argMatches }
 			}
-			else if cursor.argument.isAssignableToVariable(node.type, true, false, false) {
+			else if isUnpreciseMatch(cursor.argument, node.type) {
 				argMatches.precise = false
 
 				cursor.used += 1
@@ -470,27 +470,10 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, mut cursor: ArgCurso
 	}
 } # }}}
 
-func matchArguments(assessment: Assessement, arguments: Array<Expression>, excludes: Array<String>, node: AbstractNode) { # {{{
-	var mut combinations = [[]]
-
-	for var argument in arguments {
-		if argument.isUnion() {
-			var oldCombinations = combinations
-
-			combinations = []
-
-			for var oldCombination in oldCombinations {
-				for var type in argument.discardAlias().types() {
-					combinations.push([...oldCombination, type])
-				}
-			}
-		}
-		else {
-			for var combination in combinations {
-				combination.push(argument)
-			}
-		}
-	}
+// TODO active element testing
+// func matchArguments(assessment: Assessement, arguments: Array<Type>, excludes: Array<String>, node: AbstractNode) { # {{{
+func matchArguments(assessment: Assessement, arguments: Array, excludes: Array<String>, node: AbstractNode) { # {{{
+	var combinations = splitArguments(arguments)
 
 	if combinations.length == 1 {
 		var context = MatchContext(combinations[0], excludes, async: assessment.async, node)
@@ -597,57 +580,7 @@ func mergeResults(results: Array<CallMatchResult>) { # {{{
 } # }}}
 
 func matchNamedArguments3(assessment: Assessement, arguments: Array<Type>, nameds: Dictionary<NamingArgument>, shorthands: Dictionary<NamingArgument>, indexeds: Array<NamingArgument>, exhaustive: Boolean, node: AbstractNode) { # {{{
-	var mut combinations = [[]]
-
-	for var type in arguments {
-		if type.isUnion() {
-			var oldCombinations = combinations
-
-			combinations = []
-
-			var mut nullable = false
-
-			for var oldCombination in oldCombinations {
-				for var type in type.discardAlias().types() {
-					var combination = [...oldCombination]
-
-					if type.isNullable() && !(type.isAny() || type.isNull()) {
-						combination.push(type.setNullable(false))
-
-						nullable = true
-					}
-					else {
-						combination.push(type)
-					}
-
-					combinations.push(combination)
-				}
-
-				if nullable {
-					var combination = [...oldCombination, Type.Null]
-
-					combinations.push(combination)
-				}
-			}
-		}
-		else if type.isNullable() && !(type.isAny() || type.isNull()) {
-			var oldCombinations = combinations
-
-			combinations = []
-
-			for var oldCombination in oldCombinations {
-				var combination1 = [...oldCombination, type.setNullable(false)]
-				var combination2 = [...oldCombination, Type.Null]
-
-				combinations.push(combination1, combination2)
-			}
-		}
-		else {
-			for var combination in combinations {
-				combination.push(type)
-			}
-		}
-	}
+	var combinations = splitArguments(arguments)
 
 	var results = []
 
@@ -706,13 +639,13 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 			var matchedFunctions = []
 
 			for var { function, type, positional } in parameters {
-				if argumentType.isAssignableToVariable(type, false, false, false, true) {
+				if isPreciseMatch(argumentType, type) {
 					SyntaxException.throwPositionalOnlyParameter(name, node) if positional
 
 					matchedFunctions.push(function)
 
 				}
-				else if type.isAssignableToVariable(argumentType, true, false, false, true) {
+				else if isUnpreciseMatch(argumentType, type) {
 					SyntaxException.throwPositionalOnlyParameter(name, node) if positional
 
 					matchedFunctions.push(function)
@@ -774,12 +707,12 @@ func matchNamedArguments4(assessment: Assessement, argumentTypes: Array<Type>, n
 
 				for var function in possibleFunctions {
 					if var { type } ?= parameters.find((data, _, _) => data.function == function) {
-						if argumentType.isAssignableToVariable(type, false, false, false, true) {
+						if isPreciseMatch(argumentType, type) {
 							matched = true
 
 							perFunctions[function].shorthands[name] = argument
 						}
-						else if type.isAssignableToVariable(argumentType, true, true, false, true) {
+						else if isUnpreciseMatch(argumentType, type) {
 							matched = true
 
 							perFunctions[function].shorthands[name] = argument
@@ -1170,4 +1103,98 @@ func getMostPreciseFunction(mut functions: Array<FunctionType>, nameds: Dictiona
 	}
 
 	throw new NotSupportedException()
+} # }}}
+
+func isPreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
+	return argument.isAssignableToVariable(parameter, false, false, false)
+} # }}}
+
+func isUnpreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
+	if argument.isStrict() {
+		return argument.isAssignableToVariable(parameter, true, false, false)
+	}
+	else if parameter.isEnum() {
+		return argument.isAssignableToVariable(parameter, true, true, false)
+	}
+	else {
+		return parameter.isAssignableToVariable(argument, true, true, false)
+	}
+} # }}}
+
+func splitArguments(types: Array<Type>): Array<Array<Type>> { # {{{
+	var mut combinations = [[]]
+
+	for var type in types {
+		if type.isSpread() {
+			var parameters = splitArguments([type.parameter()])
+
+			if parameters.length > 1 {
+				var oldCombinations = combinations
+
+				combinations = []
+
+				for var oldCombination in oldCombinations {
+					for var parameter in parameters {
+						var ref = new ReferenceType(type.scope(), type.name(), type.isNullable(), parameter).flagSpread()
+
+						combinations.push([...oldCombination, ref])
+					}
+				}
+			}
+			else {
+				for var combination in combinations {
+					combination.push(type)
+				}
+			}
+		}
+		else if type.isUnion() {
+			var oldCombinations = combinations
+
+			combinations = []
+
+			var mut nullable = false
+
+			for var oldCombination in oldCombinations {
+				for var type in type.discardAlias().types() {
+					var combination = [...oldCombination]
+
+					if type.isNullable() && !(type.isAny() || type.isNull()) {
+						combination.push(type.setNullable(false))
+
+						nullable = true
+					}
+					else {
+						combination.push(type)
+					}
+
+					combinations.push(combination)
+				}
+
+				if nullable {
+					var combination = [...oldCombination, Type.Null]
+
+					combinations.push(combination)
+				}
+			}
+		}
+		else if type.isNullable() && !(type.isAny() || type.isNull()) {
+			var oldCombinations = combinations
+
+			combinations = []
+
+			for var oldCombination in oldCombinations {
+				var combination1 = [...oldCombination, type.setNullable(false)]
+				var combination2 = [...oldCombination, Type.Null]
+
+				combinations.push(combination1, combination2)
+			}
+		}
+		else {
+			for var combination in combinations {
+				combination.push(type)
+			}
+		}
+	}
+
+	return combinations
 } # }}}

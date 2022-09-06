@@ -1,1 +1,0 @@
-ReferenceException: The expression "x" is "null" (fixtures/compile/operator/operator.assign.eq.object.undef.ks:3)

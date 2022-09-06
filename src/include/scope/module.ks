@@ -1,22 +1,22 @@
 class ModuleScope extends Scope {
 	private {
-		_chunkTypes							= {}
-		_declarations						= {}
-		_lastLine: Boolean					= false
-		_line: Number						= 0
-		_lineOffset: Number					= 0
-		_macros								= {}
-		_matchingTypes: Dictionary<Array>	= {}
-		_predefined							= {}
-		_references							= {}
-		_renamedIndexes 					= {}
-		_renamedVariables					= {}
-		_reservedIndex		 				= -1
-		_stashes							= {}
-		_tempDeclarations: Array			= []
-		_tempIndex		 					= -1
-		_tempNames							= {}
-		_variables							= {}
+		@chunkTypes							= {}
+		@declarations						= {}
+		@lastLine: Boolean					= false
+		@line: Number						= 0
+		@lineOffset: Number					= 0
+		@macros								= {}
+		@matchingTypes: Dictionary<Array>	= {}
+		@predefined							= {}
+		@references							= {}
+		@renamedIndexes 					= {}
+		@renamedVariables					= {}
+		@reservedIndex		 				= -1
+		@stashes							= {}
+		@tempDeclarations: Array			= []
+		@tempIndex		 					= -1
+		@tempNames							= {}
+		@variables							= {}
 	}
 	constructor() { # {{{
 		super()
@@ -36,14 +36,14 @@ class ModuleScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
-		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
+		@predefined.__false = new Variable('false', true, true, @reference('Boolean'))
 		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
-		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
-		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
-		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
-		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, this.reference('Array'), this.reference('Boolean'), this.reference('Dictionary'), this.reference('Enum'), this.reference('Function'), this.reference('Namespace'), this.reference('Number'), this.reference('String'), this.reference('Struct'), this.reference('Tuple')])))
-		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
+		@predefined.__true = new Variable('true', true, true, @reference('Boolean'))
+		@predefined.__Infinity = new Variable('Infinity', true, true, @reference('Number'))
+		@predefined.__Math = new Variable('Math', true, true, @reference('Dictionary'))
+		@predefined.__NaN = new Variable('NaN', true, true, @reference('Number'))
+		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, @reference('Array'), @reference('Boolean'), @reference('Dictionary'), @reference('Enum'), @reference('Function'), @reference('Namespace'), @reference('Number'), @reference('String'), @reference('Struct'), @reference('Tuple')])))
+		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [@reference('Boolean'), @reference('Number'), @reference('String')])))
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {
@@ -111,7 +111,7 @@ class ModuleScope extends Scope {
 	} # }}}
 	private declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
-			var newName = this.getNewName(name)
+			var newName = @getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true
@@ -126,7 +126,7 @@ class ModuleScope extends Scope {
 		}
 	} # }}}
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
-		if this.hasDefinedVariable(name) {
+		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
@@ -138,7 +138,7 @@ class ModuleScope extends Scope {
 			variable.declaration(node)
 		}
 
-		this.defineVariable(variable, node)
+		@defineVariable(variable, node)
 
 		return variable
 	} # }}}
@@ -162,7 +162,7 @@ class ModuleScope extends Scope {
 			variables.push(@line, variable)
 		}
 		else {
-			if var newName ?= this.declareVariable(name, this) {
+			if var newName ?= @declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)
@@ -175,7 +175,7 @@ class ModuleScope extends Scope {
 			reference.reset()
 		}
 	} # }}}
-	getChunkType(name) => this.getChunkType(name, @line)
+	getChunkType(name) => @getChunkType(name, @line)
 	getChunkType(name, line: Number) { # {{{
 		if @chunkTypes[name] is Array {
 			var types: Array = @chunkTypes[name]
@@ -317,7 +317,7 @@ class ModuleScope extends Scope {
 		}
 	} # }}}
 	hasDeclaredVariable(name: String) => @declarations[name] == true
-	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line)
+	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @line)
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -441,14 +441,14 @@ class ModuleScope extends Scope {
 		if ?stash {
 			delete @stashes[name]
 
-			var mut variable = this.getVariable(name)
+			var mut variable = @getVariable(name)
 			for var mut fn in stash {
 				if fn[0](variable) {
 					break
 				}
 			}
 
-			variable = this.getVariable(name)
+			variable = @getVariable(name)
 			for var mut fn in stash {
 				fn[1](variable)
 			}
@@ -459,27 +459,6 @@ class ModuleScope extends Scope {
 			return false
 		}
 	} # }}}
-	reference(value) { # {{{
-		switch value {
-			is AnyType => return this.resolveReference('Any')
-			is ClassVariableType => return this.reference(value.type())
-			is NamedType => {
-				if value.hasContainer() {
-					return value.container().scope().reference(value.name())
-				}
-				else {
-					return this.resolveReference(value.name())
-				}
-			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull())
-			is Variable => return this.resolveReference(value.name())
-			=> {
-				console.info(value)
-				throw new NotImplementedException()
-			}
-		}
-	} # }}}
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) => this.resolveReference(value, nullable, parameters)
 	releaseTempName(name) { # {{{
 		@tempNames[name] = true
 	} # }}}
@@ -514,7 +493,7 @@ class ModuleScope extends Scope {
 		return variable
 	} # }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		var mut variable: Variable = this.getVariable(name)!?
+		var mut variable: Variable = @getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
@@ -559,7 +538,7 @@ class ModuleScope extends Scope {
 	setLineOffset(@lineOffset)
 	updateInferable(name, data, node) { # {{{
 		if data.isVariable {
-			this.replaceVariable(name, data.type, true, true, node)
+			@replaceVariable(name, data.type, true, true, node)
 		}
 		else {
 			if @chunkTypes[name] is Array {

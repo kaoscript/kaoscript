@@ -1,26 +1,21 @@
 // declare variable at parent
 class BleedingScope extends Scope {
 	private {
-		_parent: Scope
-		_renamedIndexes 			= {}
-		_renamedVariables			= {}
-		_variables					= {}
+		@parent: Scope
+		@renamedIndexes 			= {}
+		@renamedVariables			= {}
+		@variables					= {}
 	}
 	constructor(@parent)
-	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
-	acquireUnusedTempName() => @parent.acquireUnusedTempName()
-	authority() => @parent.authority()
-	block() => @parent.block()
-	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
-		if this.hasDefinedVariable(name) {
+		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
 		var variable = new Variable(name, immutable, false, type, initialized)
 
-		this.defineVariable(variable, node)
+		@defineVariable(variable, node)
 
 		return variable
 	} # }}}
@@ -39,7 +34,6 @@ class BleedingScope extends Scope {
 			variable.renameAs(newName)
 		}
 	} # }}}
-	getChunkType(name, line) => @parent.getChunkType(name, line)
 	getDefinedVariable(name: String) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -66,9 +60,7 @@ class BleedingScope extends Scope {
 
 		return null
 	} # }}}
-	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
-	getTempIndex() => @parent.getTempIndex()
 	getVariable(name, line: Number = @parent.line()): Variable? { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -95,7 +87,7 @@ class BleedingScope extends Scope {
 		return @parent.getVariable(name, line)
 	} # }}}
 	hasDeclaredVariable(name: String) => @variables[name] is Array || @parent.hasDeclaredVariable(name)
-	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @parent.line())
+	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @parent.line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -137,13 +129,7 @@ class BleedingScope extends Scope {
 			return @parent.isRenamedVariable(name)
 		}
 	} # }}}
-	line() => @parent.line()
-	line(line: Number) => @parent.line(line)
-	module() => @parent.module()
 	parent() => @parent
-	reference(value) => @parent.reference(value)
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(value, nullable, parameters)
-	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name) { # {{{
 		return if @renamedVariables[name] is String
 
@@ -153,9 +139,24 @@ class BleedingScope extends Scope {
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
 
-		var variable = this.getVariable(name)
+		var variable = @getVariable(name)
 
 		variable.renameAs(newName)
 	} # }}}
-	resolveReference(name: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(name, nullable, parameters)
+	proxy @parent {
+		acquireTempName
+		acquireUnusedTempName
+		authority
+		block
+		commitTempVariables
+		declareVariable
+		getChunkType
+		getRawLine
+		getTempIndex
+		line
+		module
+		releaseTempName
+		reference
+		resolveReference
+	}
 }

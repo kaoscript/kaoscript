@@ -25,7 +25,7 @@ class ThisExpression extends Expression {
 			if parent is CallExpression && parent.data().callee == @data {
 				@calling = true
 			}
-			else if parent is ClassMethodDeclaration | ClassVariableDeclaration | ClassAliasDeclaration {
+			else if parent is ClassMethodDeclaration | ClassVariableDeclaration | ClassProxyDeclaration | ClassProxyGroupDeclaration {
 				@instance = parent.isInstance()
 
 				@class = parent.parent().type()

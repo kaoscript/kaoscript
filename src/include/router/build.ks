@@ -204,9 +204,7 @@ func buildFlatTree(function: FunctionType, rows, n: Number, excludes: Array<Stri
 				function
 				arguments: []
 				rows: [row]
-				// TODO!
-				byNames: byNames
-				// byNames
+				byNames
 			)
 		}
 		else {
@@ -676,9 +674,7 @@ func addOneGroupRow(group: Group, name: String, ignoreIndistinguishable: Boolean
 						parameter: paramIndex
 					)
 				]
-				// TODO error when names=null
-				// names
-				names: names
+				names
 			)
 		}
 	}
@@ -851,8 +847,7 @@ func hasMin2(type: Type, index: Number, parameters: Array<ParameterType>): Boole
 	return false
 } # }}}
 
-// TODO names: Dictionary<String[]>?
-func expandParameter(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, rest: Boolean, argIndex: Number, key: String, types: Array<RowType>, mut names: Dictionary<Array<String>>?, type: Type): Void { # {{{
+func expandParameter(group: Group, name: String, ignoreIndistinguishable: Boolean, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, minAfter: Number, target: Number, remaining: Number, paramIndex: Number, stepIndex: Number, stepCount: Number, rest: Boolean, argIndex: Number, key: String, types: Array<RowType>, mut names: Dictionary<String[]>?, type: Type): Void { # {{{
 	if type.isUnion() {
 		for var value in type.discard():UnionType.types() {
 			expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
@@ -874,12 +869,6 @@ func expandParameter(group: Group, name: String, ignoreIndistinguishable: Boolea
 		if ?names {
 			var parameter = parameters[paramIndex]
 
-			// TODO
-			// names = {
-			// 	...names
-			// 	// [parameter.name()]: type.hashCode()
-			// 	// `\(parameter.name())`: type.hashCode()
-			// }
 			names = {...names}
 
 			var name = parameter.name()
@@ -1974,7 +1963,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 		}
 	}
 
-	return result
+	return result!!
 } # }}}
 
 func isRegroupeableBranch(branch: TreeBranch, node: AbstractNode): Boolean { # {{{

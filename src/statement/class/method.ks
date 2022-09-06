@@ -269,11 +269,17 @@ class ClassMethodDeclaration extends Statement {
 					@parent.addForkedMethod(@name, overridden, @type, true)
 				}
 			}
+			else if @override {
+				SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
+			}
 
 			for var method in overloaded {
 				var mut hidden = null
 
-				if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+				if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode::Default) {
+					SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
+				}
+				else if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = true
 				}
 				else if @type.isSubsetOf(method, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
@@ -370,11 +376,14 @@ class ClassMethodDeclaration extends Statement {
 
 				for var overload in overloaded when !overload.isMissingReturn() {
 					if ?type {
-						if type.isSubsetOf(overload.getReturnType()) {
+						if type.isSubsetOf(overload.getReturnType(), MatchingMode::Default) {
+							// do nothing
+						}
+						else if overload.getReturnType().isSubsetOf(type, MatchingMode::Default) {
 							type = overload.getReturnType()
 						}
-						else if !overload.getReturnType().isSubsetOf(type) {
-							throw new NotImplementedException()
+						else {
+							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
 						}
 					}
 					else {
@@ -457,7 +466,6 @@ class ClassMethodDeclaration extends Statement {
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	isAbstract() => @abstract
-	isAlias() => false
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -747,7 +755,7 @@ class ClassMethodDeclaration extends Statement {
 				return superclass.listInstantiableMethods(
 					@name
 					@type
-					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::MissingReturn + MatchingMode::MissingError
+					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 				)
 			}
 			else {
@@ -762,7 +770,7 @@ class ClassMethodDeclaration extends Statement {
 				return superclass.listClassMethods(
 					@name
 					@type
-					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::MissingReturn + MatchingMode::MissingError
+					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::MissingError
 				)
 			}
 		} # }}}

@@ -1,24 +1,19 @@
 class HollowScope extends Scope {
 	private {
-		_chunkTypes					= {}
-		_parent: Scope
-		_variables					= {}
+		@chunkTypes					= {}
+		@parent: Scope
+		@variables					= {}
 	}
 	constructor(@parent)
-	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
-	acquireUnusedTempName() => @parent.acquireUnusedTempName()
-	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
-	authority() => @parent.authority()
-	block() => @parent.block()
 	private declareVariable(name: String, scope: Scope): String? => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
-		if this.hasDefinedVariable(name) {
+		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
 		var variable = new Variable(name, immutable, false, type, initialized)
 
-		this.defineVariable(variable, node)
+		@defineVariable(variable, node)
 
 		return variable
 	} # }}}
@@ -29,8 +24,7 @@ class HollowScope extends Scope {
 
 		@variables[name] = [@parent.line(), variable]
 	} # }}}
-	getChunkType(name) => this.getChunkType(name, @line())
-	getChunkType(name, line: Number) { # {{{
+	getChunkType(name, line: Number = @line()) { # {{{
 		if @chunkTypes[name] is Array {
 			var types: Array = @chunkTypes[name]
 			var mut type = null
@@ -77,10 +71,6 @@ class HollowScope extends Scope {
 
 		return null
 	} # }}}
-	getMacro(data, parent) => @parent.getMacro(data, parent)
-	getRawLine() => @parent.getRawLine()
-	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
-	getTempIndex() => @parent.getTempIndex()
 	getVariable(name, line: Number = @parent.line()): Variable? { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -106,11 +96,8 @@ class HollowScope extends Scope {
 
 		return @parent.getVariable(name, line)
 	} # }}}
-	hasBleedingVariable(name: String) => @parent.hasBleedingVariable(name)
-	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name, @line())
-	hasDefinedVariable(name: String, line: Number): Boolean => @parent.hasDefinedVariable(name, line)
+	hasDefinedVariable(name: String, line: Number = @line()): Boolean => @parent.hasDefinedVariable(name, line)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
-	hasMacro(name) => @parent.hasMacro(name)
 	hasVariable(name: String, line: Number? = null) => @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
@@ -122,26 +109,20 @@ class HollowScope extends Scope {
 			return false
 		}
 	} # }}}
-	isRenamedVariable(name: String): Boolean => @parent.isRenamedVariable(name)
-	line() => @parent.line()
-	line(line: Number) => @parent.line(line)
-	module() => @parent.module()
 	parent() => @parent
 	reference(value) => @parent.reference(value)
 	reference(value: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(value, nullable, parameters)
-	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name, newName) { # {{{
 		if newName != name {
-			var variable = this.getVariable(name).clone()
+			var variable = @getVariable(name).clone()
 
 			variable.renameAs(newName)
 
 			@variables[name] = [@parent.line(), variable]
 		}
 	} # }}}
-	renameNext(name, line) => @parent.renameNext(name, line)
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
-		var mut variable = this.getVariable(name)!?
+		var mut variable = @getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
@@ -170,10 +151,9 @@ class HollowScope extends Scope {
 
 		return variable
 	} # }}}
-	resolveReference(name: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(name, nullable, parameters)
 	updateInferable(name, data, node) { # {{{
 		if data.isVariable {
-			this.replaceVariable(name, data.type, true, true, node)
+			@replaceVariable(name, data.type, true, true, node)
 		}
 		else {
 			if @chunkTypes[name] is Array {
@@ -184,4 +164,24 @@ class HollowScope extends Scope {
 			}
 		}
 	} # }}}
+	proxy @parent {
+		acquireTempName
+		acquireUnusedTempName
+		authority
+		block
+		commitTempVariables
+		declareVariable
+		getMacro
+		getRawLine
+		getRenamedIndex
+		getTempIndex
+		hasBleedingVariable
+		hasMacro
+		isRenamedVariable
+		line
+		module
+		releaseTempName
+		renameNext
+		resolveReference
+	}
 }

@@ -131,9 +131,7 @@ namespace Router {
 	}
 
 	struct TreeBranch extends TreeNode {
-		// TODO!
-		columns: Dictionary<TreeColumn>	= {}
-		// columns: TreeColumn{}			= {}
+		columns: TreeColumn{}			= {}
 		equivalences: String[][]?		= null
 	}
 

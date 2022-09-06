@@ -607,7 +607,14 @@ class CallExpression extends Expression {
 								}
 							}
 							else {
-								throw new NotImplementedException(this)
+								var functions = [match.function for var match in result.matches]
+
+								if functions.some((function, _, _) => function.isSealed()) {
+									this.addCallee(new SealedCallee(@data, name, false, functions, this))
+								}
+								else {
+									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+								}
 							}
 						}
 					}
@@ -791,7 +798,14 @@ class CallExpression extends Expression {
 								}
 							}
 							else {
-								throw new NotImplementedException(this)
+								var functions = [match.function for var match in result.matches]
+
+								if functions.some((function, _, _) => function.isSealed()) {
+									this.addCallee(new SealedCallee(@data, reference.type(), true, functions, this))
+								}
+								else {
+									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+								}
 							}
 						}
 					}
@@ -1051,6 +1065,9 @@ class CallExpression extends Expression {
 		}
 		else if @data.callee.kind == NodeKind::Identifier {
 			fragments += @data.callee.name
+		}
+		else if @data.callee.kind == NodeKind::ThisExpression {
+			fragments += `@\(@data.callee.name.name)`
 		}
 		else {
 			NotImplementedException.throw(this)

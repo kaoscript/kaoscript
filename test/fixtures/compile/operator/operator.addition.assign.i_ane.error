@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number?" or "String" (fixtures/compile/operator/operator.addition.assign.i_ane.ks:2)
+TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number", "Null" or "String" (fixtures/compile/operator/operator.addition.assign.i_ane.ks:2)

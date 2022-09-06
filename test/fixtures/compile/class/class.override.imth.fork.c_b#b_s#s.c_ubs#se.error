@@ -1,0 +1,1 @@
+SyntaxException: Method "foobar" of the class "ClassB" has an invalid return type (fixtures/compile/class/class.override.imth.fork.c_b#b_s#s.c_ubs#se.ks:7)

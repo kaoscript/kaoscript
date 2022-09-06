@@ -815,7 +815,10 @@ class Parameter extends AbstractNode {
 	type(): ParameterType => @type
 	type(@type) { # {{{
 		if @type.hasDefaultValue() {
-			if @type.isComprehensive() {
+			if @hasDefaultValue {
+				// do nothing
+			}
+			else if @type.isComprehensive() {
 				@defaultValue = $compile.expression(@type.getDefaultValue(), @parent)
 				@defaultValue.analyse()
 				@defaultValue.prepare()

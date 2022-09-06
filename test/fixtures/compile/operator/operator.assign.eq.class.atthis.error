@@ -1,0 +1,1 @@
+SyntaxException: The expression "x = @quxbaz()" doesn't return a value. (fixtures/compile/operator/operator.assign.eq.class.atthis.ks:3)

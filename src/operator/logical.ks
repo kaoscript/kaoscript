@@ -701,3 +701,161 @@ class BinaryOperatorXor extends PolyadicOperatorXor {
 		}
 	} # }}}
 }
+
+abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExpression {
+	private late {
+		@native: Boolean		= false
+		@operand: OperandType	= OperandType::Any
+	}
+	override prepare(target) { # {{{
+		super(target)
+
+		var mut nullable = false
+		var mut boolean = true
+		var mut number = true
+		var mut native = true
+
+		if @type.isBoolean() {
+			number = false
+		}
+		else if @type.isNumber() {
+			if @type.isNullable() {
+				nullable = true
+				native = false
+			}
+
+			boolean = false
+		}
+		else if @type.isNull() {
+			nullable = true
+		}
+		else if @type.canBeBoolean() {
+			if @type.isNullable() {
+				nullable = true
+			}
+
+			if !@type.canBeNumber() {
+				number = false
+			}
+			else if !boolean {
+				native = false
+			}
+		}
+		else if @type.canBeNumber() {
+			if @type.isNullable() {
+				nullable = true
+			}
+
+			boolean = false
+			native = false
+		}
+		else {
+			if !target.isVoid() {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+			else {
+				TypeException.throwInvalidOperation(this, @operator(), this)
+			}
+		}
+
+		if !boolean && !number {
+			if !target.isVoid() {
+				TypeException.throwUnexpectedExpression(this, target, this)
+			}
+			else {
+				TypeException.throwInvalidOperation(this, @operator(), this)
+			}
+		}
+
+		if boolean {
+			if number {
+				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+
+				if nullable {
+					@type = @type.setNullable(true)
+				}
+			}
+			else {
+				@type = @scope.reference('Boolean')
+				@operand = OperandType::Boolean
+				@native = true
+			}
+		}
+		else if number {
+			@type = @scope.reference('Number')
+			@operand = OperandType::Number
+			@native = native
+
+			if nullable {
+				@type = @type.setNullable(true)
+			}
+		}
+	} # }}}
+	abstract native(): String
+	abstract operator(): Operator
+	abstract runtime(): String
+	abstract symbol(): String
+	toFragments(fragments, mode) { # {{{
+		if @native {
+			@toNativeFragments(fragments)
+		}
+		else {
+			var late operator
+			if @operand == OperandType::Number {
+				operator = `\(@runtime())Num`
+			}
+			else {
+				operator = @runtime()
+			}
+
+			fragments
+				.compile(@left)
+				.code(' = ')
+				.code($runtime.operator(this), `.\(operator)(`)
+				.compile(@left)
+				.code($comma)
+				.compile(@right)
+				.code(')')
+		}
+	} # }}}
+	toNativeFragments(fragments) { # {{{
+		if @operand == OperandType::Boolean {
+			fragments.compile(@left).code(' = ').compile(@left).code(` \(@native()) `).compile(@right)
+		}
+		else {
+			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+		}
+	} # }}}
+	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
+	type() => @type
+}
+
+class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
+	isAcceptingEnum() => true
+	native() => @operand == OperandType::Boolean ? '&&' : '&='
+	operator() => Operator::And
+	runtime() => 'and'
+	symbol() => '&&='
+}
+
+class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
+	native() => @operand == OperandType::Boolean ? '||' : '|='
+	operator() => Operator::Or
+	runtime() => 'or'
+	symbol() => '||='
+}
+
+class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
+	native() => '^='
+	operator() => Operator::Xor
+	runtime() => 'xor'
+	symbol() => '^^='
+	toNativeFragments(fragments) { # {{{
+		if @operand == OperandType::Boolean {
+			fragments.compile(@left).code(' = ').compile(@left).code(` !== `).compile(@right)
+		}
+		else {
+			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+		}
+	} # }}}
+}

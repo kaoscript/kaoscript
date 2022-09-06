@@ -83,29 +83,82 @@ abstract class Scope {
 	static {
 		isTempName(name: String): Boolean => name.length > 5 && name.substr(0, 5) == '__ks_'
 	}
-	abstract acquireTempName(declare: Boolean = true): String
-	abstract authority(): Scope
-	abstract block(): Scope
-	private abstract declareVariable(name: String, scope: Scope): String?
-	abstract define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable
-	abstract defineVariable(variable: Variable, node: AbstractNode)
-	abstract getDefinedVariable(name: String): Variable?
+	acquireUnusedTempName(): String? => null
+	commitTempVariables(variables: Array): Void
+	getChunkType(name: String, line: Number?): Type? => null
 	getLineOffset(): Number => 0
-	abstract getRenamedIndex(name: String): Number
-	abstract getVariable(name: String, line: Number = -1): Variable?
-	hasBleedingVariable(name: String): Boolean => this.hasDefinedVariable(name)
-	abstract hasDeclaredVariable(name: String): Boolean
-	abstract hasDefinedVariable(name: String): Boolean
+	getMacro(data, parent): MacroDeclaration? => null
+	getRawLine(): Number => 0
+	getTempIndex(): Number => -1
+	hasBleedingVariable(name: String): Boolean => @hasDefinedVariable(name)
 	hasMacro(name: String): Boolean => false
-	abstract hasVariable(name: String, line: Number = -1): Boolean
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) => name == newName
+	isRenamedVariable(name: String): Boolean => false
 	line(): Number => 0
-	parent() => null
-	abstract reference(value): ReferenceType
-	abstract resolveReference(name: String): ReferenceType
+	module(): ModuleScope? => null
+	parent(): Scope? => null
+	reference(value: AnyType): ReferenceType => @resolveReference('Any')
+	reference(value: ArrayType): ReferenceType { # {{{
+		if value.hasProperties() {
+			throw new NotSupportedException()
+		}
+
+		if value.hasRest() {
+			return @resolveReference('Array', value.isNullable(), [value.parameter()])
+		}
+
+		return @resolveReference('Array', value.isNullable())
+	} # }}}
+	reference(value: ClassVariableType): ReferenceType => @reference(value.type())
+	reference(value: DictionaryType): ReferenceType { # {{{
+		if value.hasProperties() {
+			throw new NotSupportedException()
+		}
+
+		if value.hasRest() {
+			return @resolveReference('Dictionary', value.isNullable(), [value.parameter()])
+		}
+
+		return @resolveReference('Dictionary', value.isNullable())
+	} # }}}
+	reference(value: NamedType): ReferenceType { # {{{
+		if value.hasContainer() {
+			return value.container().scope().reference(value.name())
+		}
+		else {
+			return @resolveReference(value.name())
+		}
+	} # }}}
+	reference(value: ReferenceType): ReferenceType => @resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
+	reference(value: Variable): ReferenceType => @resolveReference(value.name())
+	reference(value: Type): ReferenceType { # {{{
+		throw new NotImplementedException()
+	} # }}}
+	reference(value: String, nullable: Boolean = false, parameters: Array = []): ReferenceType { # {{{
+		return @resolveReference(value, nullable, parameters)
+	} # }}}
+	renameNext(name: String, line: Number): Void
+	abstract {
+		acquireTempName(declare: Boolean = true): String
+		authority(): Scope
+		block(): Scope
+		define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable
+		defineVariable(variable: Variable, node: AbstractNode): Void
+		getDefinedVariable(name: String): Variable?
+		getRenamedIndex(name: String): Number
+		getVariable(name: String, line: Number = -1): Variable?
+		hasDeclaredVariable(name: String): Boolean
+		hasDefinedVariable(name: String): Boolean
+		hasVariable(name: String, line: Number = -1): Boolean
+		releaseTempName(name: String): Void
+		resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []): ReferenceType
+	}
+	private abstract {
+		declareVariable(name: String, scope: Scope): String?
+	}
 }
 
 struct VariableBrief {

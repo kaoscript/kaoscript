@@ -64,12 +64,17 @@ class DictionaryExpression extends Expression {
 
 		@type = new DictionaryType(@scope)
 
-		for var property in @properties {
-			property.prepare(subtarget)
+		if #@properties {
+			for var property in @properties {
+				property.prepare(subtarget)
 
-			if property is DictionaryLiteralMember {
-				@type.addProperty(property.name(), property.type())
+				if property is DictionaryLiteralMember {
+					@type.addProperty(property.name(), property.type())
+				}
 			}
+		}
+		else {
+			@type.flagEmpty()
 		}
 	} # }}}
 	translate() { # {{{
@@ -131,40 +136,92 @@ class DictionaryExpression extends Expression {
 			fragments.code('new ', $runtime.dictionary(this), '()')
 		}
 		else if @spread {
-			fragments.code($runtime.helper(this), '.concatDictionary(')
+			fragments.code($runtime.helper(this), '.newDictionary(')
 
-			var mut opened = false
+			var mut first = true
+			var mut spread = false
+			var mut arguments = []
 
 			for var property, index in @properties {
 				if property is DictionarySpreadMember {
-					if opened {
-						fragments.code('}, ')
+					if !spread {
+						if arguments.length > 0 {
+							if first {
+								first = false
+							}
+							else {
+								fragments.code($comma)
+							}
 
-						opened = false
-					}
-					else if index != 0 {
-						fragments.code($comma)
+							fragments.code(`\(arguments.length / 2)`)
+
+							for var i from 0 til arguments.length by 2 {
+								if arguments[i] is String {
+									fragments.code(`, "\(arguments[i])", `)
+								}
+								else {
+									fragments.code($comma).compile(arguments[i]).code($comma)
+								}
+
+								fragments.compile(arguments[i + 1])
+							}
+						}
+
+						spread = true
+						arguments.clear()
 					}
 
-					fragments.compile(property)
+					arguments.push(property)
 				}
 				else {
-					if index != 0 {
-						fragments.code($comma)
+					if spread {
+						if arguments.length > 0 {
+							if first {
+								first = false
+							}
+							else {
+								fragments.code($comma)
+							}
+
+							fragments.code(`-\(arguments.length)`)
+
+							for var argument in arguments {
+								fragments.code($comma).compile(argument)
+							}
+						}
+
+						spread = false
+						arguments.clear()
 					}
 
-					if !opened {
-						fragments.code('{')
-
-						opened = true
-					}
-
-					fragments.compile(property)
+					arguments.push(property.name(), property.value())
 				}
 			}
 
-			if opened {
-				fragments.code('}')
+			if arguments.length > 0 {
+				fragments.code($comma) unless first
+
+				if spread {
+					fragments.code(`-\(arguments.length)`)
+
+					for var argument in arguments {
+						fragments.code($comma).compile(argument)
+					}
+				}
+				else {
+					fragments.code(`\(arguments.length / 2)`)
+
+					for var i from 0 til arguments.length by 2 {
+						if arguments[i] is String {
+							fragments.code(`, "\(arguments[i])", `)
+						}
+						else {
+							fragments.code($comma).compile(arguments[i]).code($comma)
+						}
+
+						fragments.compile(arguments[i + 1])
+					}
+				}
 			}
 
 			fragments.code(')')
@@ -379,6 +436,7 @@ class DictionaryComputedMember extends Expression {
 
 		return variables
 	} # }}}
+	name() => @name
 	releaseReusable() { # {{{
 		@name.releaseReusable()
 		@value.releaseReusable()
@@ -420,6 +478,7 @@ class DictionaryThisMember extends Expression {
 	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
+	name() => @name.value()
 	toComputedFragments(fragments, name) { # {{{
 		fragments
 			.code(name)

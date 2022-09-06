@@ -6,5 +6,5 @@ module.exports = function() {
 		d.b = 2;
 		return d;
 	})();
-	const copy = Helper.concatDictionary(original, {c: 3});
+	const copy = Helper.newDictionary(-1, original, 1, "c", 3);
 };

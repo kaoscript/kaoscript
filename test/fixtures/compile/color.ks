@@ -990,7 +990,7 @@ export class Color {
 		}
 	} // }}}
 
-	scheme(functions: array<(color: Color): Color>): array<Color> { // {{{
+	scheme(functions: array<(color: Color)>): array { // {{{
 		return [fn(this.clone()) for fn in functions]
 	} // }}}
 

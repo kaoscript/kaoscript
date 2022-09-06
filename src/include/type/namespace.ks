@@ -384,7 +384,7 @@ class NamespacePropertyType extends Type {
 	} # }}}
 	type() => @type
 
-	alias {
+	proxy {
 		toQuote = @type.toQuote
 	}
 }

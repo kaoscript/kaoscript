@@ -115,6 +115,9 @@ flagged enum MatchingMode {
 	NullToNonNull
 	NullToNonNullParameter
 
+	Anycast
+	AnycastParameter
+
 	AdditionalParameter
 	// TODO reenable
 	// AdditionalDefault
@@ -553,11 +556,7 @@ abstract class Type {
 				return types[0]
 			}
 
-			var union = new UnionType(scope)
-
-			for var type in types {
-				union.addType(type)
-			}
+			var union = new UnionType(scope, types)
 
 			return union.type()
 		} # }}}
@@ -602,6 +601,7 @@ abstract class Type {
 	discardReference(): Type? => this
 	discardSpread(): Type => this
 	discardVariable(): Type => this
+	// TODO to remove
 	equals(value?): Boolean => ?value && this.isSubsetOf(value, MatchingMode::Exact)
 	flagAlien() { # {{{
 		@alien = true
@@ -738,6 +738,7 @@ abstract class Type {
 	isSealedAlien() => @alien && @sealed
 	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
+	isStrict() => false
 	isString() => false
 	isStruct() => false
 	isSubsetOf(value: Type, mode: MatchingMode) => false
@@ -747,13 +748,12 @@ abstract class Type {
 	isUnion() => false
 	isVirtual() => false
 	isVoid() => false
+	// TODO to remove
 	matchContentOf(value: Type?): Boolean => this.equals(value)
 	minorOriginal() => null
 	origin(): @origin
 	origin(@origin): this
 	reduce(type: Type) => this
-	// TODO support !?
-	// reference(scope = @scope!?) => scope.reference(this)
 	reference(scope? = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	resetReferences() { # {{{
@@ -918,6 +918,7 @@ abstract class Type {
 	unflagRequired(): this { # {{{
 		@required = false
 	} # }}}
+	unflagStrict(): this
 }
 
 include {

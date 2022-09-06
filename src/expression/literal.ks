@@ -1,6 +1,6 @@
 class Literal extends Expression {
 	private {
-		_value
+		@value
 	}
 	constructor(@value, @parent) { # {{{
 		super(false, parent)
@@ -34,13 +34,13 @@ class Literal extends Expression {
 
 class IdentifierLiteral extends Literal {
 	private late {
-		_assignable: Boolean		= false
-		_assignment: AssignmentType		= AssignmentType::Neither
-		_declaredType: Type
-		_isMacro: Boolean				= false
-		_isVariable: Boolean			= false
-		_line: Number
-		_realType: Type
+		@assignable: Boolean			= false
+		@assignment: AssignmentType		= AssignmentType::Neither
+		@declaredType: Type
+		@isMacro: Boolean				= false
+		@isVariable: Boolean			= false
+		@line: Number
+		@realType: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.name)
@@ -52,7 +52,7 @@ class IdentifierLiteral extends Literal {
 				@line = @scope.line()
 
 				if @value == 'Dictionary' {
-					this.module().flag('Dictionary')
+					@module().flag('Dictionary')
 				}
 			}
 			else if @scope.hasMacro(@value) {
@@ -223,7 +223,7 @@ class NumberLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.value)
 	} # }}}
-	getUnpreparedType() => this.type()
+	getUnpreparedType() => @type()
 	type() => @scope.reference('Number')
 }
 
@@ -231,7 +231,7 @@ class StringLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, $quote(data.value))
 	} # }}}
-	getUnpreparedType() => this.type()
+	getUnpreparedType() => @type()
 	isNotEmpty() => @value.length > 0
 	type() => @scope.reference('String')
 }

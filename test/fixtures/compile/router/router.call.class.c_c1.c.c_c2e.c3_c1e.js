@@ -75,7 +75,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x, y) {
-		if(x.__ks_func_foobar_0(y)) {
+		if(x.foobar(y)) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

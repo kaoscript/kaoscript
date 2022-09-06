@@ -212,7 +212,8 @@ func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: N
 			node.arguments.push(last)
 		}
 
-		from = to
+		// TODO remove forced casting
+		from = to!!
 	}
 
 	return unbounded

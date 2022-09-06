@@ -22,7 +22,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			const values = Helper.concatDictionary(this._values);
+			const values = Helper.newDictionary(-1, this._values);
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			if(args.length === 0) {

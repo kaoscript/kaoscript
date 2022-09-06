@@ -1,6 +1,5 @@
 class PreciseMethodCallee extends Callee {
 	private {
-		@alias: Boolean
 		@alien: Boolean
 		@arguments: Array<CallMatchArgument>
 		@expression
@@ -12,6 +11,7 @@ class PreciseMethodCallee extends Callee {
 		@node: CallExpression
 		@object
 		@property: String
+		@proxy: Boolean
 		@reference: ReferenceType
 		@scope: ScopeKind
 		@type: Type
@@ -32,9 +32,9 @@ class PreciseMethodCallee extends Callee {
 		@function = match.function
 		@functions = [@function]
 		@index = match.function.index()
-		@alias = match.function.isAlias()
 		@alien = match.function.isAlien()
 		@instance = match.function.isInstance()
+		@proxy = match.function.isProxy()
 		@arguments = match.arguments
 		@type = match.function.getReturnType()
 	} # }}}
@@ -104,8 +104,8 @@ class PreciseMethodCallee extends Callee {
 						fragments.code(`.\(@property)(`)
 					}
 					else if @instance {
-						if @alias {
-							fragments.code(`\(@function.getAliasPath()).__ks_func_\(@function.getAliasName())_\(@index)(`)
+						if @proxy {
+							fragments.code(`\(@function.getProxyPath()).__ks_func_\(@function.getProxyName())_\(@index)(`)
 						}
 						else {
 							fragments.code(`.__ks_func_\(@property)_\(@index)(`)

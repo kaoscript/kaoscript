@@ -54,6 +54,26 @@ class ArrayType extends Type {
 
 		return 1
 	} # }}}
+	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
+		if @nullable != value.isNullable() {
+			return @nullable ? 1 : -1
+		}
+
+		if @rest {
+			if value.hasRest() {
+				return $weightTOFs['Array'] - $weightTOFs['Dictionary']
+			}
+			else {
+				return 1
+			}
+		}
+		else if value.hasRest() {
+			return -1
+		}
+		else {
+			return $weightTOFs['Array'] - $weightTOFs['Dictionary']
+		}
+	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
@@ -245,7 +265,7 @@ class ArrayType extends Type {
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isArray()
 
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
 			return false unless @length == 0
 			return false unless @rest == value.hasParameters()
 

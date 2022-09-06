@@ -23,7 +23,6 @@ class ClassDeclaration extends Statement {
 	private {
 		_abstract: Boolean 					= false
 		_abstractMethods					= {}
-		_aliases							= {}
 		_classMethods						= {}
 		_classVariables						= {}
 		_constructors						= []
@@ -40,6 +39,7 @@ class ClassDeclaration extends Statement {
 		_instanceVariables					= {}
 		_instanceVariableScope
 		_macros								= {}
+		_proxies							= []
 		_references							= {}
 		_sealed: Boolean 					= false
 		_sharedMethods: Dictionary			= {}
@@ -221,11 +221,6 @@ class ClassDeclaration extends Statement {
 				}
 				NodeKind::MacroDeclaration => {
 				}
-				NodeKind::AliasDeclaration => {
-					var declaration = new ClassAliasDeclaration(data, this)
-
-					declaration.analyse()
-				}
 				NodeKind::MethodDeclaration => {
 					var late declaration
 
@@ -238,6 +233,16 @@ class ClassDeclaration extends Statement {
 					else {
 						declaration = new ClassMethodDeclaration(data, this)
 					}
+
+					declaration.analyse()
+				}
+				NodeKind::ProxyDeclaration => {
+					var declaration = new ClassProxyDeclaration(data, this)
+
+					declaration.analyse()
+				}
+				NodeKind::ProxyGroupDeclaration => {
+					var declaration = new ClassProxyGroupDeclaration(data, this)
 
 					declaration.analyse()
 				}
@@ -347,8 +352,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for var alias of @aliases {
-			alias.prepare()
+		for var proxy in @proxies {
+			proxy.prepare()
 		}
 
 		if @abstract {
@@ -459,7 +464,7 @@ class ClassDeclaration extends Statement {
 						if method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 							SyntaxException.throwHiddenMethod(name, @type, m.type(), @type, method.type(), method)
 						}
-						else if m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+						if m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 							SyntaxException.throwHiddenMethod(name, @type, method.type(), @type, m.type(), method)
 						}
 					}
@@ -549,8 +554,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for var alias of @aliases {
-			alias.translate()
+		for var proxy in @proxies {
+			proxy.translate()
 		}
 	} # }}}
 	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType, hidden: Boolean?) { # {{{
@@ -783,8 +788,8 @@ class ClassDeclaration extends Statement {
 			)
 		}
 
-		for var alias of @aliases {
-			alias.toFragments(clazz, Mode::None)
+		for var proxy in @proxies {
+			proxy.toFragments(clazz, Mode::None)
 		}
 
 		clazz.done()
@@ -1244,10 +1249,10 @@ class ClassDeclaration extends Statement {
 
 include {
 	'./substitude'
-	'./alias'
 	'./variable'
 	'./constructor'
 	'./destructor'
 	'./method'
 	'./forked-method'
+	'./proxy'
 }

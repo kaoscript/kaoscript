@@ -1,0 +1,1 @@
+SyntaxException: The method "ClassB.foobar(x: String|Boolean)" can't override a suitable method (fixtures/compile/class/class.override.imth.fork.c_b#b_s#s.c_kubs#ubse.ks:7)

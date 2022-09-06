@@ -104,7 +104,7 @@ class ClassVariableType extends Type {
 	type(): @type
 	type(@type): this
 
-	alias {
+	proxy {
 		hashCode	= @type.hashCode
 		toQuote		= @type.toQuote
 	}

@@ -14,8 +14,8 @@ module.exports = function() {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isNumber;
-		const t1 = value => Type.isString(value) || Type.isDictionary(value);
-		const t2 = value => Type.isBoolean(value) || Type.isNull(value);
+		const t1 = value => Type.isBoolean(value) || Type.isNull(value);
+		const t2 = value => Type.isString(value) || Type.isDictionary(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length === 1) {
@@ -23,14 +23,14 @@ module.exports = function() {
 				return foobar.__ks_0.call(that, [args[0]], void 0);
 			}
 			if(t1(args[0])) {
-				return foobar.__ks_1.call(that, args[0]);
+				return foobar.__ks_0.call(that, [], args[0]);
 			}
 			if(t2(args[0])) {
-				return foobar.__ks_0.call(that, [], args[0]);
+				return foobar.__ks_1.call(that, args[0]);
 			}
 			throw Helper.badArgs();
 		}
-		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && te(pts, 2)) {
+		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
 			return foobar.__ks_0.call(that, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
 		}
 		throw Helper.badArgs();

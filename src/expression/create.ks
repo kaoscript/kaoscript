@@ -58,7 +58,7 @@ class CreateExpression extends Expression {
 
 			@alien = type.isAlien()
 			@hybrid = type.isHybrid()
-			@type = @scope.reference(type)
+			@type = @scope.reference(type).flagStrict()
 		}
 		else if !(type.isAny() || type.isClass()) {
 			TypeException.throwNotClass(type.toQuote(), this)
@@ -205,5 +205,6 @@ class CreateExpression extends Expression {
 			}
 		}
 	} # }}}
+	toQuote() => `new \(@factory.toQuote())()`
 	type() => @type
 }

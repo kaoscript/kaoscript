@@ -474,21 +474,6 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 			@variable.setDeclaredType(@type, false).flagDefinitive()
 		}
-		// else if @parent.isAutoTyping() {
-		// 	// do nothing
-		// }
-		// else if !@lateInit || !@parent.isImmutable() {
-		// 	if @parent.isImmutable() {
-		// 		@type = @variable.getRealType()
-		// 	}
-		// 	else {
-		// 		@type = AnyType.NullableUnexplicit
-		// 	}
-
-		// 	@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
-		// }
-
-		// @identifier.prepare()
 	} # }}}
 	translate() { # {{{
 		@identifier.translate()

@@ -28,44 +28,14 @@ class UnionType extends Type {
 		super(scope)
 
 		for var type in types {
-			if type.isNull() {
-				if !@nullable {
-					@types.push(Type.Null)
-
-					@nullable = true
-				}
-
-				@explicitNullity = true
-			}
-			else if @any {
-				if type.isNullable() {
-					@nullable = true
-				}
-			}
-			else if type.isAny() {
-				@types = [type]
-
-				@any = true
-
-				if type.isNullable() {
-					@nullable = true
-				}
-			}
-			else {
-				@types.push(type)
-
-				if type.isNullable() {
-					@nullable = true
-				}
-			}
+			@addType(type)
 		}
 	} # }}}
-	addType(type: Type) { # {{{
+	addType(mut type: Type) { # {{{
 		if @any {
 			if !@nullable && type.isNullable() {
-				@types[0] = AnyType.NullableUnexplicit
-
 				@nullable = true
+				@types = [@types[0].setNullable(false), Type.Null]
 			}
 		}
 		else if type.isNull() {
@@ -78,12 +48,14 @@ class UnionType extends Type {
 			@explicitNullity = true
 		}
 		else if type.isAny() {
-			@types = [type]
-
 			@any = true
 
-			if type.isNullable() {
+			if @nullable || type.isNullable() {
 				@nullable = true
+				@types = [type.setNullable(false), Type.Null]
+			}
+			else {
+				@types = [type]
 			}
 		}
 		else if type.isUnion() {
@@ -91,42 +63,47 @@ class UnionType extends Type {
 				this.addType(type)
 			}
 		}
+		else if type.isNullable() {
+			type = type.setNullable(false)
+
+			var mut notMatched = true
+
+			for var t, i in @types while notMatched {
+				if type.isAssignableToVariable(t, false, false, false) {
+					notMatched = false
+
+					if t.isStrict() != type.isStrict() {
+						@types[i] = t.unflagStrict()
+					}
+				}
+			}
+
+			if notMatched {
+				@types.push(type)
+			}
+
+			if !@nullable {
+				@types.push(Type.Null)
+
+				@nullable = true
+				@explicitNullity = true
+			}
+		}
 		else {
 			var mut notMatched = true
 
-			if type.isNullable() {
-				for var t, i in @types while notMatched {
-					if t.matchContentOf(type) {
-						notMatched = false
+			for var t, i in @types while notMatched {
+				if type.isAssignableToVariable(t, false, false, false) {
+					notMatched = false
 
-						if !t.equals(type) {
-							@types[i] = type
-
-							@nullable = true
-						}
+					if t.isStrict() != type.isStrict() {
+						@types[i] = t.unflagStrict()
 					}
-				}
-
-				if notMatched {
-					@types.push(type)
-
-					@nullable = true
 				}
 			}
-			else {
-				for var t, i in @types while notMatched {
-					if type.matchContentOf(t) {
-						notMatched = false
 
-						if !t.equals(type) {
-							@types[i] = type
-						}
-					}
-				}
-
-				if notMatched {
-					@types.push(type)
-				}
+			if notMatched {
+				@types.push(type)
 			}
 		}
 
@@ -317,6 +294,15 @@ class UnionType extends Type {
 			return true
 		}
 	} # }}}
+	isAsync() { # {{{
+		for var type in @types {
+			if !type.isAsync() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	isDictionary() { # {{{
 		for var type in @types {
 			if !type.isDictionary() {
@@ -330,6 +316,15 @@ class UnionType extends Type {
 	isExportable() { # {{{
 		for type in @types {
 			if !type.isExportable() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
+	isFunction() { # {{{
+		for var type in @types {
+			if !type.isFunction() {
 				return false
 			}
 		}
@@ -482,18 +477,34 @@ class UnionType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
 	} # }}}
-	toQuote() => [type.toQuote() for var type in @types].join('|')
-	toQuote(double: Boolean): String { # {{{
-		var elements = [type.toQuote() for type in @types]
+	toQuote() { # {{{
+		if @nullable && @types.length == 2 {
+			if @types[0] == Type.Null {
+				return `\(@types[1].toQuote())?`
+			}
+			if @types[1] == Type.Null {
+				return `\(@types[0].toQuote())?`
+			}
+		}
 
+		return [type.toQuote() for var type in @types].join('|')
+	} # }}}
+	toQuote(double: Boolean): String { # {{{
+		var quote = double ? `"` : `'`
+
+		if @nullable && @types.length == 2 {
+			if @types[0] == Type.Null {
+				return `\(quote)\(@types[1].toQuote())?\(quote)`
+			}
+			if @types[1] == Type.Null {
+				return `\(quote)\(@types[0].toQuote())?\(quote)`
+			}
+		}
+
+		var elements = [type.toQuote() for type in @types]
 		var last = elements.pop()
 
-		if double {
-			return `"\(elements.join(`", "`))" or "\(last)"`
-		}
-		else {
-			return `'\(elements.join(`', '`))' or '\(last)'`
-		}
+		return `\(quote)\(elements.join(`\(quote), \(quote)`))\(quote) or \(quote)\(last)\(quote)`
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
@@ -597,13 +608,14 @@ class UnionType extends Type {
 	} # }}}
 	type() { # {{{
 		if @types.length == 1 {
-			var type = @types[0]
-
-			if @nullable == type.isNullable() {
-				return type
+			return @types[0]
+		}
+		if @types.length == 2 && @nullable {
+			if @types[0] == Type.Null {
+				return @types[1].setNullable(true)
 			}
-			else {
-				return type.setNullable(@nullable)
+			if @types[1] == Type.Null {
+				return @types[0].setNullable(true)
 			}
 		}
 

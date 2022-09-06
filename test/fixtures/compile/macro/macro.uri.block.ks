@@ -8,7 +8,7 @@ class URI {
 			macro {
 				class #w(name) extends URI {
 					private {
-						_e: Number	= #PI
+						_e: Number	= #(PI)
 					}
 				}
 			}

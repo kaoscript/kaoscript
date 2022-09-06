@@ -1,12 +1,12 @@
 /// natives
 class MacroScope extends Scope {
 	private {
-		_matchingTypes: Dictionary<Array>	= {}
-		_predefined							= {}
-		_references							= {}
-		_renamedIndexes					 	= {}
-		_renamedVariables					= {}
-		_variables							= {}
+		@matchingTypes: Dictionary<Array>	= {}
+		@predefined							= {}
+		@references							= {}
+		@renamedIndexes					 	= {}
+		@renamedVariables					= {}
+		@variables							= {}
 	}
 	constructor() { # {{{
 		super()
@@ -26,14 +26,14 @@ class MacroScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
-		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
+		@predefined.__false = new Variable('false', true, true, @reference('Boolean'))
 		@predefined.__null = new Variable('null', true, true, Type.Null)
-		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
-		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
-		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
-		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, this.reference('Array'), this.reference('Boolean'), this.reference('Dictionary'), this.reference('Enum'), this.reference('Function'), this.reference('Namespace'), this.reference('Number'), this.reference('String'), this.reference('Struct'), this.reference('Tuple')])))
-		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
+		@predefined.__true = new Variable('true', true, true, @reference('Boolean'))
+		@predefined.__Infinity = new Variable('Infinity', true, true, @reference('Number'))
+		@predefined.__Math = new Variable('Math', true, true, @reference('Dictionary'))
+		@predefined.__NaN = new Variable('NaN', true, true, @reference('Number'))
+		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, @reference('Array'), @reference('Boolean'), @reference('Dictionary'), @reference('Enum'), @reference('Function'), @reference('Namespace'), @reference('Number'), @reference('String'), @reference('Struct'), @reference('Tuple')])))
+		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [@reference('Boolean'), @reference('Number'), @reference('String')])))
 
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
@@ -69,7 +69,7 @@ class MacroScope extends Scope {
 
 		var variable = new Variable(name, immutable, false, type, initialized)
 
-		this.defineVariable(variable, node)
+		@defineVariable(variable, node)
 
 		return variable
 	} # }}}
@@ -82,7 +82,7 @@ class MacroScope extends Scope {
 
 		@variables[name] = variable
 
-		if var newName ?= this.declareVariable(name, this) {
+		if var newName ?= @declareVariable(name, this) {
 			@renamedVariables[name] = newName
 
 			variable.renameAs(newName)
@@ -139,28 +139,8 @@ class MacroScope extends Scope {
 
 		return match
 	} # }}}
-	reference(value) { # {{{
-		switch value {
-			is AnyType => return this.resolveReference('Any')
-			is ClassVariableType => return this.reference(value.type())
-			is NamedType => {
-				if value.hasContainer() {
-					return value.container().scope().reference(value.name())
-				}
-				else {
-					return this.resolveReference(value.name())
-				}
-			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
-			is Variable => return this.resolveReference(value.name())
-			=> {
-				console.info(value)
-				throw new NotImplementedException()
-			}
-		}
-	} # }}}
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) { # {{{
-		return this.resolveReference(value, nullable, parameters)
+	releaseTempName(name) { # {{{
+		throw new NotSupportedException()
 	} # }}}
 	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)

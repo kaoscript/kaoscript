@@ -1,6 +1,6 @@
 extern console
 
-export macro times_five(e) => 5 * #e
+export macro times_five(e) => 5 * #(e)
 
 console.log(times_five!(42))
 

@@ -10,7 +10,13 @@
       "evenHeroes"
     ],
     "references": [
-      "Array"
+      {
+        "kind": "reference",
+        "name": "Array",
+        "parameters": [
+          "String"
+        ]
+      }
     ],
     "macros": []
   }

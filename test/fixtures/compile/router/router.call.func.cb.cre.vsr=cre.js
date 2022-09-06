@@ -61,5 +61,5 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const x = SuperClass.__ks_new_0();
-	foobar(x);
+	foobar.__ks_1(x);
 };

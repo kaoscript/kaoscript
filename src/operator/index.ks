@@ -73,6 +73,9 @@ include {
 	'./binary'
 	'./unary'
 	'./comparison'
+	'./empty'
+	'./equals'
+	'./exists'
 	'./logical'
-	'./emptiness'
+	'./type'
 }

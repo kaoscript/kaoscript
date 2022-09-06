@@ -349,7 +349,14 @@ class FunctionType extends Type {
 	index(): @index
 	index(@index): this
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
-		if value.isAny() || value.isFunction() {
+		if value is FunctionType {
+			var mut mode = MatchingMode::FunctionSignature
+
+			mode += MatchingMode::AnycastParameter if anycast
+
+			return this.isSubsetOf(value, mode)
+		}
+		else if value.isAny() || value.isFunction() {
 			return true
 		}
 		else if value is UnionType {
@@ -499,6 +506,7 @@ class FunctionType extends Type {
 			return false
 		}
 	} # }}}
+	isProxy() => false
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return value.isFunction()
 	} # }}}
@@ -506,6 +514,7 @@ class FunctionType extends Type {
 		if @async != value._async {
 			return false
 		}
+
 		if mode ~~ MatchingMode::Exact {
 			mode += MatchingMode::ExactParameter + MatchingMode::ExactReturn
 		}
@@ -612,6 +621,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
 			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
 			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
+			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
 
 			if paramMode != 0 {
 				for var parameter, index in @parameters til value._parameters.length {
@@ -856,12 +866,12 @@ class FunctionType extends Type {
 
 class OverloadedFunctionType extends Type {
 	private {
-		_altering: Boolean					= false
-		_assessment							= null
-		_async: Boolean						= false
-		_functions: Array<FunctionType>		= []
-		_majorOriginal: Type?
-		_references: Array<Type>			= []
+		@altering: Boolean					= false
+		@assessment							= null
+		@async: Boolean						= false
+		@functions: Array<FunctionType>		= []
+		@majorOriginal: Type?
+		@references: Array<Type>			= []
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{

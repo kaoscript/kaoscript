@@ -15,20 +15,20 @@ var $weightTOFs = { # {{{
 	Tuple: 11
 } # }}}
 
-// TODO add strict flag for router.call.func.cb.cre.vsr=cre.ks
 class ReferenceType extends Type {
 	private late {
-		_type: Type
-		_variable: Variable
+		@type: Type
+		@variable: Variable
 	}
 	private {
-		_alias: String?
-		_explicitlyNull: Boolean
-		_name: String
-		_nullable: Boolean
-		_parameters: Array<Type>
-		_predefined: Boolean				= false
-		_spread: Boolean					= false
+		@alias: String?
+		@explicitlyNull: Boolean
+		@name: String
+		@nullable: Boolean
+		@parameters: Array<Type>
+		@predefined: Boolean				= false
+		@spread: Boolean					= false
+		@strict: Boolean					= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
@@ -80,8 +80,14 @@ class ReferenceType extends Type {
 	canBeFunction(any = true) => this.isUnion() ? @type.canBeFunction(any) : super(any)
 	canBeNumber(any = true) => this.isUnion() ? @type.canBeNumber(any) : super(any)
 	canBeString(any = true) => this.isUnion() ? @type.canBeString(any) : super(any)
-	clone() { # {{{
-		throw new NotSupportedException()
+	clone(): ReferenceType { # {{{
+		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
+
+		type._sealed = @sealed
+		type._spread = @spread
+		type._strict = @strict
+
+		return type
 	} # }}}
 	compareTo(value: Type) { # {{{
 		if this == value {
@@ -414,16 +420,29 @@ class ReferenceType extends Type {
 		return super.flagExported(explicitly)
 	} # }}}
 	flagSealed(): ReferenceType { # {{{
-		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
+		return this if @sealed
+
+		var type = @clone()
 
 		type._sealed = true
 
 		return type
 	} # }}}
 	flagSpread(): ReferenceType { # {{{
-		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
+		return this if @spread
+
+		var type = @clone()
 
 		type._spread = true
+
+		return type
+	} # }}}
+	flagStrict(): ReferenceType { # {{{
+		return this if @strict
+
+		var type = @clone()
+
+		type._strict = true
 
 		return type
 	} # }}}
@@ -583,9 +602,24 @@ class ReferenceType extends Type {
 				return false
 			}
 		}
-		// TODO duplicate?
 		else if value is ArrayType {
 			return false unless @isArray()
+			return false unless !@nullable || nullcast || value.isNullable()
+
+			if anycast {
+				return true if @parameters.length == 0
+
+				var parameter = @parameters[0]
+
+				if parameter.isAny() && !parameter.isExplicit() {
+					return true
+				}
+			}
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		}
+		else if value is DictionaryType {
+			return false unless @isDictionary()
 			return false unless !@nullable || nullcast || value.isNullable()
 
 			if anycast {
@@ -697,6 +731,7 @@ class ReferenceType extends Type {
 	isReference() => true
 	isReducible() => true
 	isSpread() => @spread
+	isStrict() => @strict
 	isString() => @name == 'String' || this.type().isString()
 	isStruct() => @name == 'Struct' || this.type().isStruct()
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
@@ -1417,5 +1452,14 @@ class ReferenceType extends Type {
 		this.resolveType()
 
 		return @type
+	} # }}}
+	unflagStrict(): ReferenceType { # {{{
+		return this unless @strict
+
+		var type = @clone()
+
+		type._strict = false
+
+		return type
 	} # }}}
 }
