@@ -158,14 +158,14 @@ abstract class Importer extends Statement {
 			var workerScope = @worker.scope()
 
 			for var def, name of @imports {
-				workerScope.rename(name, def.local, @scope)
+				workerScope.rename(name, def.internal, @scope)
 			}
 
 			for var def, name of @imports {
-				var variable = @scope.getVariable(def.local)
+				var variable = @scope.getVariable(def.internal)
 
 				if def.isAlias {
-					var type = new NamedContainerType(def.local, new NamespaceType(@scope:Scope))
+					var type = new NamedContainerType(def.internal, new NamespaceType(@scope:Scope))
 
 					for i from 1 til @metaExports.exports.length by 2 {
 						var name = @metaExports.exports[i]
@@ -182,14 +182,14 @@ abstract class Importer extends Statement {
 
 					var type = @worker.getType(name)
 					if def.type != null && !type.isSubsetOf(def.type, MatchingMode::Signature) {
-						TypeException.throwNotCompatibleDefinition(def.local, name, @data.source.value, this)
+						TypeException.throwNotCompatibleDefinition(def.internal, name, @data.source.value, this)
 					}
 
 					if def.newVariable {
 						variable.setDeclaredType(type ?? def.type)
 					}
-					else if !variable.isPredefined() && @arguments.fromLocal[def.local] is not Number {
-						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
+					else if !variable.isPredefined() && @arguments.fromLocal[def.internal] is not Number {
+						ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
 					}
 					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode::Signature + MatchingMode::Renamed) {
 						var alien = variable.getDeclaredType().isAlien()
@@ -201,19 +201,19 @@ abstract class Importer extends Statement {
 						}
 					}
 					else {
-						TypeException.throwNotCompatibleArgument(def.local, name, @data.source.value, this)
+						TypeException.throwNotCompatibleArgument(def.internal, name, @data.source.value, this)
 					}
 
 					if type.isNamed() {
-						type.name(def.local)
+						type.name(def.internal)
 
-						type.scope().reassignReference(name, def.local, @scope)
+						type.scope().reassignReference(name, def.internal, @scope)
 
 					}
 
 					if !type.isAlias() {
 						var var = ImportedVariable(
-							name: def.local
+							name: def.internal
 							sealed: type.isSealed() && !type.isSystemic()
 							systemic: type.isSystemic()
 						)
@@ -227,11 +227,11 @@ abstract class Importer extends Statement {
 							@count += 1
 						}
 
-						if type.isSystemic() && def.local == 'Dictionary' {
+						if type.isSystemic() && def.internal == 'Dictionary' {
 							module.flag('Dictionary')
 						}
 						else {
-							module.import(def.local)
+							module.import(def.internal)
 						}
 					}
 				}
@@ -245,7 +245,7 @@ abstract class Importer extends Statement {
 		}
 		else {
 			for var import of @imports {
-				module.import(import.local)
+				module.import(import.internal)
 			}
 		}
 
@@ -330,56 +330,56 @@ abstract class Importer extends Statement {
 
 		arguments.values.push(argument)
 	} # }}}
-	addImport(imported: String, local: String, isAlias: Boolean, type: Type? = null) { # {{{
-		var variable = @scope.getVariable(local)
+	addImport(external: String, internal: String, isAlias: Boolean, type: Type? = null) { # {{{
+		var variable = @scope.getVariable(internal)
 		var newVariable = !?variable || variable.isPredefined()
 
 		if newVariable {
-			@scope.define(local, true, null, true, this)
+			@scope.define(internal, true, null, true, this)
 		}
 		else if @parent.includePath() != null {
 			return
 		}
 		else if isAlias {
-			SyntaxException.throwAlreadyDeclared(local, this)
+			SyntaxException.throwAlreadyDeclared(internal, this)
 		}
 
-		@imports[imported] = {
-			local
+		@imports[external] = {
+			internal
 			isAlias
 			newVariable
 			type
 		}
 	} # }}}
-	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { # {{{
-		if (variable ?= @scope.getVariable(local)) && !variable.isPredefined() {
+	addVariable(external: String, internal: String, isVariable: Boolean, type: Type?) { # {{{
+		if (variable ?= @scope.getVariable(internal)) && !variable.isPredefined() {
 			if @parent.includePath() != null {
 				// TODO check & merge type
 				return
 			}
 			else if isVariable {
-				if @arguments.fromLocal[local] is not Number {
-					ReferenceException.throwNotPassed(local, @data.source.value, this)
+				if @arguments.fromLocal[internal] is not Number {
+					ReferenceException.throwNotPassed(internal, @data.source.value, this)
 				}
 				else if variable.getDeclared().isMergeable(type) {
 					variable.getDeclared().merge(type, this)
 				}
 				else {
-					ReferenceException.throwNotMergeable(local, @data.source.value, this)
+					ReferenceException.throwNotMergeable(internal, @data.source.value, this)
 				}
 			}
 			else {
-				SyntaxException.throwAlreadyDeclared(local, this)
+				SyntaxException.throwAlreadyDeclared(internal, this)
 			}
 		}
 		else {
-			@scope.define(local, true, type, true, this)
+			@scope.define(internal, true, type, true, this)
 		}
 
-		this.module().import(local)
+		this.module().import(internal)
 
 		if isVariable && type is not AliasType {
-			@variables[imported] = ImportedVariable(local)
+			@variables[external] = ImportedVariable(internal)
 			@count += 1
 		}
 	} # }}}
@@ -662,35 +662,35 @@ abstract class Importer extends Statement {
 					}
 				}
 				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					@alias = specifier.local.name
+					@alias = specifier.internal.name
 				}
 				else {
-					switch specifier.imported.kind {
+					switch specifier.external.kind {
 						NodeKind::ClassDeclaration => {
-							name = specifier.imported.name.name
-							type = Type.fromAST(specifier.imported, this)
+							name = specifier.external.name.name
+							type = Type.fromAST(specifier.external, this)
 						}
 						NodeKind::Identifier => {
-							name = specifier.imported.name
+							name = specifier.external.name
 							type = null
 						}
 						NodeKind::VariableDeclarator => {
-							name = specifier.imported.name.name
-							type = ?specifier.imported.type ? Type.fromAST(specifier.imported.type, this) : null
+							name = specifier.external.name.name
+							type = ?specifier.external.type ? Type.fromAST(specifier.external.type, this) : null
 						}
 						=> {
-							console.info(specifier.imported)
+							console.info(specifier.external)
 							throw new NotImplementedException()
 						}
 					}
 
 					if ?macros[name] {
 						for data in macros[name] {
-							new MacroDeclaration(data, this, null, specifier.local.name)
+							new MacroDeclaration(data, this, null, specifier.internal.name)
 						}
 					}
 					else {
-						this.addImport(name, specifier.local.name, false, type)
+						this.addImport(name, specifier.internal.name, false, type)
 					}
 				}
 			}
@@ -849,17 +849,17 @@ abstract class Importer extends Statement {
 					NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
 				}
 				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					@alias = specifier.local.name
+					@alias = specifier.internal.name
 
 					if specifier.specifiers?.length != 0 {
 						type = new NamespaceType(@scope:Scope)
 
 						for s in specifier.specifiers {
-							if s.imported.kind == NodeKind::Identifier {
-								type.addProperty(s.local.name, Type.Any)
+							if s.external.kind == NodeKind::Identifier {
+								type.addProperty(s.internal.name, Type.Any)
 							}
 							else {
-								type.addProperty(s.local.name, Type.fromAST(s.imported, this).flagAlien())
+								type.addProperty(s.internal.name, Type.fromAST(s.external, this).flagAlien())
 							}
 						}
 
@@ -870,13 +870,13 @@ abstract class Importer extends Statement {
 					}
 				}
 				else {
-					if specifier.imported.kind == NodeKind::Identifier {
-						this.addVariable(specifier.imported.name, specifier.local.name, true, null)
+					if specifier.external.kind == NodeKind::Identifier {
+						this.addVariable(specifier.external.name, specifier.internal.name, true, null)
 					}
 					else {
-						type = Type.fromAST(specifier.imported, this).flagAlien()
+						type = Type.fromAST(specifier.external, this).flagAlien()
 
-						this.addVariable(specifier.imported.name.name, specifier.local.name, true, type)
+						this.addVariable(specifier.external.name.name, specifier.internal.name, true, type)
 					}
 				}
 			}

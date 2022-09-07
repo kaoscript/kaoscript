@@ -121,12 +121,12 @@ class ExportNamedSpecifier extends AbstractNode {
 	}
 	analyse()
 	override prepare(target) { # {{{
-		@expression = $compile.expression(@data.local, @parent)
+		@expression = $compile.expression(@data.internal, @parent)
 		@expression.analyse()
 
 		if @expression.isMacro() {
 			for var macro in @scope.listMacros(@expression.name()) {
-				@parent.registerMacro(@data.exported.name, macro)
+				@parent.registerMacro(@data.external.name, macro)
 			}
 		}
 	} # }}}
@@ -136,11 +136,11 @@ class ExportNamedSpecifier extends AbstractNode {
 
 		if @expression.isMacro() {
 			for var macro in @scope.listMacros(@expression.name()) {
-				macro.export(recipient, @data.exported.name)
+				macro.export(recipient, @data.external.name)
 			}
 		}
 		else {
-			recipient.export(@data.exported.name, @expression)
+			recipient.export(@data.external.name, @expression)
 
 			var type = @expression.type()
 
@@ -148,7 +148,7 @@ class ExportNamedSpecifier extends AbstractNode {
 				var regex = new RegExp(`^\(@expression.name())`)
 
 				for var macro in @scope.listCompositeMacros(@expression.name()) {
-					macro.export(recipient, macro.name().replace(regex, @data.exported.name))
+					macro.export(recipient, macro.name().replace(regex, @data.external.name))
 				}
 			}
 		}
@@ -157,7 +157,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	toFragments(fragments, mode)
 	walk(fn) { # {{{
 		if !@expression.isMacro() {
-			fn(@data.exported.name, @expression.type())
+			fn(@data.external.name, @expression.type())
 		}
 	} # }}}
 }
@@ -176,7 +176,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 		@object.prepare()
 
 		for property in @data.properties {
-			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
+			recipient.export(property.external.name, new ExportProperty(@object, property.internal.name))
 		}
 	} # }}}
 	isEnhancementExport() => false
@@ -189,7 +189,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 	}
 	analyse()
 	override prepare(target) { # {{{
-		@expression = $compile.expression(@data.local, @parent)
+		@expression = $compile.expression(@data.internal, @parent)
 		@expression.analyse()
 	} # }}}
 	translate()
