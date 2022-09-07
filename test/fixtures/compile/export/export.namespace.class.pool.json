@@ -17,7 +17,7 @@
       {
         "kind": "namespace",
         "sealed": false,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "properties": {
           "Foobar": 1,
@@ -65,7 +65,7 @@
         "alien": false,
         "hybrid": false,
         "sealed": false,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {

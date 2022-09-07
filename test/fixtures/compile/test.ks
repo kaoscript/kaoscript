@@ -8,7 +8,7 @@
 
 
 
-// require|extern systemic class Array
+// require|extern system class Array
 
 // disclose Array {
 // 	length: Number
@@ -28,3 +28,12 @@
 // try {
 // 	var y = x + 2
 // }
+
+
+
+// import 'path' {
+// 	func basename(path: String): String
+// }
+
+// path.basename('')
+

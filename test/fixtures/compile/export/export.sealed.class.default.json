@@ -46,7 +46,7 @@
         "alien": false,
         "hybrid": false,
         "sealed": true,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "constructors": [
           {

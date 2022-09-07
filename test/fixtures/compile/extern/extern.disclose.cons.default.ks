@@ -1,4 +1,4 @@
-extern systemic class Date
+extern system class Date
 
 disclose Date {
 	constructor()

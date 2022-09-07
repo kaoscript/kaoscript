@@ -1,3 +1,3 @@
-require systemic class Dictionary
+require system class Dictionary
 
 export Dictionary

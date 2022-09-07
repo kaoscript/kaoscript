@@ -2,7 +2,7 @@ extern {
 	func parseFloat(...): Number
 
 	#[rules(non-exhaustive)]
-	systemic class Number {
+	system class Number {
 		toString(): String
 	}
 }

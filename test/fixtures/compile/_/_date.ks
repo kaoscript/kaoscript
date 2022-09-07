@@ -1,3 +1,3 @@
-extern systemic class Date
+extern system class Date
 
 export Date

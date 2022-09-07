@@ -1,3 +1,3 @@
-extern systemic class Dictionary
+extern system class Dictionary
 
 export Dictionary

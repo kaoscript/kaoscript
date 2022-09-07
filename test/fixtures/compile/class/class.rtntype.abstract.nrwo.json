@@ -22,7 +22,7 @@
         "alien": false,
         "hybrid": false,
         "sealed": false,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {
@@ -88,7 +88,7 @@
         "alien": false,
         "hybrid": false,
         "sealed": false,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},

@@ -1,8 +1,8 @@
-require|extern systemic class Number {
+require|extern system class Number {
 	toString(): String
 }
 
-require|extern systemic class String {
+require|extern system class String {
 }
 
 extern parseFloat, parseInt

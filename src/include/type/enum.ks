@@ -202,7 +202,7 @@ class EnumType extends Type {
 	copyFrom(src: EnumType) { # {{{
 		@alien = src._alien
 		@sealed = src._sealed
-		@systemic = src._systemic
+		@system = src._system
 		@requirement = src._requirement
 		@required = src._required
 

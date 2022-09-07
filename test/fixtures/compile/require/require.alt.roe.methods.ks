@@ -1,5 +1,5 @@
 #[rules(non-exhaustive)]
-require|extern systemic class Array {
+require|extern system class Array {
 	indexOf(...): Number
 	push(...): Number
 	slice(...): Array

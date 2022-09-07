@@ -1,4 +1,4 @@
-extern systemic class SyntaxError
+extern system class SyntaxError
 
 func foo() ~ SyntaxError {
 

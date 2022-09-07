@@ -23,7 +23,7 @@
         "alien": true,
         "hybrid": false,
         "sealed": true,
-        "systemic": true,
+        "system": true,
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
@@ -59,7 +59,7 @@
       {
         "kind": "namespace",
         "sealed": true,
-        "systemic": true,
+        "system": true,
         "exhaustive": false,
         "properties": {
           "PI": {

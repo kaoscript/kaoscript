@@ -1,1 +1,1 @@
-require|extern systemic class Dictionary
+require|extern system class Dictionary

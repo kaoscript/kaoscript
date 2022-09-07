@@ -1,4 +1,4 @@
-extern systemic class Array
+extern system class Array
 
 impl Array {
 	copy(x) => x

@@ -1,0 +1,1 @@
+TypeException: The definition for "template" and the variable "template" of the module "./import.system.function.source.ks" aren't compatible (fixtures/compile/import/import.system.function.filter.typed.badtype.ks:4)

@@ -1,4 +1,4 @@
-extern systemic namespace Math {
+extern system namespace Math {
 	abs(...): Number
 	max(...): Number
 	min(...): Number

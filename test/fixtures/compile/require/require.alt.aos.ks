@@ -1,5 +1,5 @@
-extern|require systemic class Array
-extern|require systemic class Dictionary
-extern|require systemic class String
+extern|require system class Array
+extern|require system class Dictionary
+extern|require system class String
 
 export Array, Dictionary, String

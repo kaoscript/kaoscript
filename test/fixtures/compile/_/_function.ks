@@ -1,5 +1,5 @@
 #[rules(non-exhaustive)]
-extern systemic class Function {
+extern system class Function {
 	toString(): String
 }
 

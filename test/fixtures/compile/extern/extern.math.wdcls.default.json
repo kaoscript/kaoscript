@@ -10,7 +10,7 @@
       {
         "kind": "namespace",
         "sealed": true,
-        "systemic": true,
+        "system": true,
         "exhaustive": false,
         "properties": {}
       }

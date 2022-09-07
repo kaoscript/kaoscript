@@ -1,4 +1,4 @@
-require|extern systemic class String
+require|extern system class String
 
 disclose String {
 	length: Number

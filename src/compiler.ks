@@ -17,19 +17,12 @@ import {
 	'./fs.js'
 	'path' => path {
 		// TODO var sep: String
-		sep: String
+		var sep: String
 		func basename(path: String): String
 		func dirname(path: String): String
 		func join(...paths: String): String
 		func relative(from: String, to: String): String
 	}
-	// 'path' as {
-	// 	var sep: String
-	// 	func basename(path: String): String
-	// 	func dirname(path: String): String
-	// 	func join(...paths: String): String
-	// 	func relative(from: String, to: String): String
-	// }
 }
 
 extern console, JSON

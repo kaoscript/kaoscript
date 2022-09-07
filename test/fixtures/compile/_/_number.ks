@@ -4,11 +4,11 @@ extern {
 	func isNaN(...): Boolean
 
 	#[rules(non-exhaustive)]
-	systemic class Number {
+	system class Number {
 		toFixed(...): Number
 	}
 
-	systemic namespace Math {
+	system namespace Math {
 		max(...): Number
 		min(...): Number
 		pow(...): Number

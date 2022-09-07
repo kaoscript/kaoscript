@@ -1,4 +1,4 @@
-require systemic class Array
+require system class Array
 
 impl Array {
 	static {

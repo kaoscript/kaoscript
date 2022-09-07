@@ -24,7 +24,7 @@ class Variable {
 			type = new ClassType(scope)
 			type.flagAlien()
 			type.flagPredefined()
-			type.flagSystemic()
+			type.flagSystem()
 
 			return new Variable(name, true, true, type)
 		} # }}}

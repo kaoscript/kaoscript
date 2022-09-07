@@ -1,5 +1,5 @@
-require|extern systemic class Array
-require|extern systemic class String
+require|extern system class Array
+require|extern system class String
 require class Foobar
 
 disclose Array {

@@ -1,4 +1,4 @@
-require systemic class String
+require system class String
 
 func corge(): Number => 42
 

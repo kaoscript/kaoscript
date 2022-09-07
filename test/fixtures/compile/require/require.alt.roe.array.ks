@@ -1,4 +1,4 @@
-require|extern systemic class Array
+require|extern system class Array
 
 impl Array {
 	contains(item, from = 0) { // {{{

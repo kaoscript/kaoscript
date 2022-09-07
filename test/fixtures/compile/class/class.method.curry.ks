@@ -1,5 +1,5 @@
 #[rules(non-exhaustive)]
-extern systemic class Array {
+extern system class Array {
 	join(...): String
 }
 

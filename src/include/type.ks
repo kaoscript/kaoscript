@@ -200,7 +200,7 @@ abstract class Type {
 		_requirement: Boolean			= false
 		_scope: Scope?
 		_sealed: Boolean				= false
-		_systemic: Boolean				= false
+		_system: Boolean				= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
@@ -634,8 +634,8 @@ abstract class Type {
 
 		return this
 	} # }}}
-	flagSystemic() { # {{{
-		@systemic = true
+	flagSystem() { # {{{
+		@system = true
 
 		return this.flagSealed()
 	} # }}}
@@ -704,7 +704,7 @@ abstract class Type {
 	isExplicitlyExported() => @exported
 	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequirement() || @referenceIndex != -1
 	isExportable(mode: ExportMode) => mode ~~ ExportMode::Requirement || this.isExportable()
-	isExportingFragment() => (!this.isVirtual() && !this.isSystemic()) || (this.isSealed() && this.isExtendable())
+	isExportingFragment() => (!this.isVirtual() && !this.isSystem()) || (this.isSealed() && this.isExtendable())
 	isExported() => @exported
 	isExtendable() => false
 	isFlexible() => false
@@ -742,7 +742,7 @@ abstract class Type {
 	isString() => false
 	isStruct() => false
 	isSubsetOf(value: Type, mode: MatchingMode) => false
-	isSystemic() => @systemic
+	isSystem() => @system
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
@@ -783,7 +783,7 @@ abstract class Type {
 		return types
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
-		if !this.isVirtual() && !this.isSystemic() {
+		if !this.isVirtual() && !this.isSystem() {
 			var varname = variable.name?()
 
 			if name == varname {

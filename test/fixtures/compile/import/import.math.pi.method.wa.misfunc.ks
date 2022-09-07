@@ -1,6 +1,6 @@
-extern systemic class Number
+extern system class Number
 
-extern systemic namespace Math {
+extern system namespace Math {
 	PI: Number
 }
 

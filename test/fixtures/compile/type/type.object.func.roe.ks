@@ -1,4 +1,4 @@
-require|extern systemic class Object
+require|extern system class Object
 
 class Foobar {
 }

@@ -1,5 +1,5 @@
 require|extern sealed class Foobar
-require|extern systemic class Error
+require|extern system class Error
 
 disclose Error {
 	message: String

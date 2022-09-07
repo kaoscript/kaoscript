@@ -12,8 +12,8 @@ class DictionaryType extends Type {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
 			var type = new DictionaryType(scope)
 
-			if data.systemic {
-				type.flagSystemic()
+			if data.system {
+				type.flagSystem()
 			}
 			else if data.sealed {
 				type.flagSealed()
@@ -106,7 +106,7 @@ class DictionaryType extends Type {
 		@empty = true
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if !@systemic && !@sealed && @length == 0 && !@rest {
+		if !@system && !@sealed && @length == 0 && !@rest {
 			return 'Dictionary'
 		}
 
@@ -114,8 +114,8 @@ class DictionaryType extends Type {
 			kind: TypeKind::Dictionary
 		}
 
-		if @systemic {
-			export.systemic = true
+		if @system {
+			export.system = true
 		}
 		else if @sealed {
 			export.sealed = true

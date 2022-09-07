@@ -1,6 +1,6 @@
 extern console
 
-require|extern systemic namespace JSON
+require|extern system namespace JSON
 
 impl JSON {
 	foobar(...args)

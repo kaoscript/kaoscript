@@ -1,9 +1,9 @@
-require|extern systemic class Number {
+require|extern system class Number {
 	toString(): String
 }
 
 #[rules(non-exhaustive)]
-require|extern systemic namespace Math {
+require|extern system namespace Math {
 	PI: Number
 	round(...): Number
 }

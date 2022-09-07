@@ -1,8 +1,8 @@
-extern systemic class Number {
+extern system class Number {
 	toString(): String
 }
 
-extern systemic namespace Math
+extern system namespace Math
 
 extern console
 

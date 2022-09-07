@@ -20,10 +20,10 @@ class SealableType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @systemic {
+		if @system {
 			return {
 				kind: TypeKind::Sealable
-				systemic: true
+				system: true
 				type: @type.toReference(references, indexDelta, mode, module)
 			}
 		}

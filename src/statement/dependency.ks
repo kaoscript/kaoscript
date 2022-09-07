@@ -27,8 +27,8 @@ abstract class DependencyStatement extends Statement {
 					else if modifier.kind == ModifierKind::Sealed {
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::Systemic {
-						type.flagSystemic()
+					else if modifier.kind == ModifierKind::System {
+						type.flagSystem()
 					}
 				}
 
@@ -106,8 +106,8 @@ abstract class DependencyStatement extends Statement {
 					if modifier.kind == ModifierKind::Sealed {
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::Systemic {
-						type.flagSystemic()
+					else if modifier.kind == ModifierKind::System {
+						type.flagSystem()
 					}
 				}
 
@@ -153,12 +153,12 @@ abstract class DependencyStatement extends Statement {
 
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::Systemic {
+					else if modifier.kind == ModifierKind::System {
 						if !type.isSealable() {
 							type = new SealableType(scope, type)
 						}
 
-						type.flagSystemic()
+						type.flagSystem()
 					}
 				}
 
@@ -527,7 +527,7 @@ class RequireOrImportDeclarator extends Importer {
 			if !?argument {
 				var ctrl = fragments.newControl()
 
-				if requirement.isSystemic() {
+				if requirement.isSystem() {
 					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.getSealedName(), '))').step()
 				}
 				else {
@@ -550,7 +550,7 @@ class RequireOrImportDeclarator extends Importer {
 				var argument = module.getArgument(requirement.index())
 
 				if !?argument {
-					if requirement.isSystemic() {
+					if requirement.isSystem() {
 						fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
 					}
 					else {
@@ -586,7 +586,7 @@ class RequireOrImportDeclarator extends Importer {
 					this.toImportFragments(ctrl, false)
 
 					for var requirement in notpasseds {
-						if requirement.isSystemic() {
+						if requirement.isSystem() {
 							ctrl.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
 						}
 						else {
@@ -601,7 +601,7 @@ class RequireOrImportDeclarator extends Importer {
 					for var requirement in unknowns {
 						var control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
 
-						if requirement.isSystemic() {
+						if requirement.isSystem() {
 							control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
 						}
 						else {
@@ -714,7 +714,7 @@ class ExternOrImportDeclarator extends Importer {
 
 			var ctrl = fragments.newControl()
 
-			if requirement.isSystemic() {
+			if requirement.isSystem() {
 				ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.getSealedName(), '))').step()
 			}
 			else {
@@ -727,7 +727,7 @@ class ExternOrImportDeclarator extends Importer {
 		}
 		else {
 			for var requirement in @requirements {
-				if requirement.isSystemic() {
+				if requirement.isSystem() {
 					fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
 				}
 				else {
@@ -752,7 +752,7 @@ class ExternOrImportDeclarator extends Importer {
 			for var requirement in @requirements {
 				var control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
 
-				if requirement.isSystemic() {
+				if requirement.isSystem() {
 					control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
 				}
 				else {
@@ -780,7 +780,7 @@ abstract class Requirement {
 		_type: Type
 	}
 	constructor(@name, @type, @node) { # {{{
-		if @type.isSystemic() && @name == 'Dictionary' {
+		if @type.isSystem() && @name == 'Dictionary' {
 			node.module().flag('Dictionary')
 		}
 	} # }}}
@@ -802,7 +802,7 @@ abstract class Requirement {
 	index(@index)
 	isRequired() => @type.isRequired()
 	isSealed() => @type.isSealed()
-	isSystemic() => @type.isSystemic()
+	isSystem() => @type.isSystem()
 	name() => @name
 	toNameFragments(fragments) { # {{{
 		if @type.isSealed() {
@@ -842,7 +842,7 @@ class StaticRequirement extends Requirement {
 		if !?argument {
 			fragments.code($comma) if comma
 
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				fragments.code(@type.getSealedName())
 			}
 			else {
@@ -858,7 +858,7 @@ class StaticRequirement extends Requirement {
 		else if argument is not Boolean {
 			fragments.code($comma) if comma
 
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				fragments.code(@type.getSealedName())
 			}
 			else {
@@ -895,7 +895,7 @@ abstract class DynamicRequirement extends Requirement {
 		if !?argument {
 			fragments.code($comma) if comma
 
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				fragments.code(@type.getSealedName())
 			}
 			else {
@@ -911,7 +911,7 @@ abstract class DynamicRequirement extends Requirement {
 		else if argument is not Boolean {
 			fragments.code($comma) if comma
 
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				fragments.code(@type.getSealedName())
 			}
 			else {
@@ -934,7 +934,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 	constructor(variable: Variable, @node) { # {{{
 		super(variable, node)
 
-		if !@type.isSystemic() {
+		if !@type.isSystem() {
 			@parameter = @node.module().scope().acquireTempName(false)
 		}
 	} # }}}
@@ -943,7 +943,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 		var argument = module.getArgument(@index)
 
 		if !?argument {
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				var ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', this.getSealedName(), '))').step()
 
 				ctrl.line(`\(this.getSealedName()) = {}`)
@@ -973,7 +973,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 	constructor(variable: Variable, @node) { # {{{
 		super(variable, node)
 
-		if !@type.isSystemic() {
+		if !@type.isSystem() {
 			@parameter = @node.module().scope().acquireTempName(false)
 		}
 	} # }}}
@@ -982,7 +982,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 		var argument = module.getArgument(@index)
 
 		if !?argument {
-			if @type.isSystemic() {
+			if @type.isSystem() {
 				var ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', @type.getSealedName(), '))').step()
 
 				ctrl.line(`\(@type.getSealedName()) = {}`)

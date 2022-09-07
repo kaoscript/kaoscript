@@ -1,6 +1,6 @@
 #![target(trident-v8)]
 
-extern systemic class String
+extern system class String
 
 #[if(none(trident, jsc-v8))]
 disclose String {

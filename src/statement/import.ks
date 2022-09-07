@@ -79,7 +79,7 @@ func $nodeModulesPaths(mut start) { # {{{
 struct ImportedVariable {
 	name: String
 	sealed: Boolean		= false
-	systemic: Boolean	= false
+	system: Boolean	= false
 }
 
 struct Arguments {
@@ -214,8 +214,8 @@ abstract class Importer extends Statement {
 					if !type.isAlias() {
 						var var = ImportedVariable(
 							name: def.internal
-							sealed: type.isSealed() && !type.isSystemic()
-							systemic: type.isSystemic()
+							sealed: type.isSealed() && !type.isSystem()
+							system: type.isSystem()
 						)
 
 						@variables[name] = var
@@ -227,7 +227,7 @@ abstract class Importer extends Statement {
 							@count += 1
 						}
 
-						if type.isSystemic() && def.internal == 'Dictionary' {
+						if type.isSystem() && def.internal == 'Dictionary' {
 							module.flag('Dictionary')
 						}
 						else {
@@ -953,7 +953,7 @@ abstract class Importer extends Statement {
 				for variable, name of @variables {
 				}
 
-				if variable.systemic {
+				if variable.system {
 					var line = fragments
 						.newLine()
 						.code(`var __ks_\(variable.name) = `)
@@ -1007,7 +1007,7 @@ abstract class Importer extends Statement {
 								line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
 							}
 							else {
-								if variable.systemic {
+								if variable.system {
 									line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
 								}
 								else {
@@ -1040,7 +1040,7 @@ abstract class Importer extends Statement {
 								line.code(`__ks_\(name)`)
 							}
 							else {
-								if variable.systemic {
+								if variable.system {
 									line.code(`__ks_\(name)`)
 								}
 								else {
@@ -1053,7 +1053,7 @@ abstract class Importer extends Statement {
 							}
 						}
 						else {
-							if variable.systemic {
+							if variable.system {
 								line.code(`__ks_\(name): __ks_\(variable.name)`)
 							}
 							else {
@@ -1223,7 +1223,7 @@ abstract class Importer extends Statement {
 						nf = true
 					}
 
-					if argument.isIdentifier && argument.type.isSystemic() {
+					if argument.isIdentifier && argument.type.isSystem() {
 						fragments.code(`__ks_\(argument.identifier)`)
 					}
 					else {

@@ -280,7 +280,7 @@ class NamedType extends Type {
 			}
 			else if value is NamedType {
 				if @type is ClassType && value.type() is ClassType {
-					if value.isSystemic() && !@type.isSystemic() {
+					if value.isSystem() && !@type.isSystem() {
 						return false
 					}
 					else if value.isSealed() && !@type.isSealed() {
@@ -336,7 +336,7 @@ class NamedType extends Type {
 			}
 		}
 	} # }}}
-	isSystemic() => @type.isSystemic()
+	isSystem() => @type.isSystem()
 	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()

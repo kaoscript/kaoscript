@@ -2,7 +2,7 @@ extern {
 	func parseFloat(...): Number
 	func parseInt(...): Number
 
-	systemic class String {
+	system class String {
 		length: Number
 		charAt(...): String
 		match(...): Array?

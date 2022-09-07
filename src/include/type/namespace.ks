@@ -27,8 +27,8 @@ class NamespaceType extends Type {
 				})
 			}
 			else {
-				if data.systemic {
-					type.flagSystemic()
+				if data.system {
+					type.flagSystem()
 				}
 				else if data.sealed {
 					type.flagSealed()
@@ -155,7 +155,7 @@ class NamespaceType extends Type {
 	copyFrom(src: NamespaceType) { # {{{
 		@alien = src._alien
 		@sealed = src._sealed
-		@systemic = src._systemic
+		@system = src._system
 		@requirement = src._requirement
 		@required = src._required
 
@@ -189,7 +189,7 @@ class NamespaceType extends Type {
 			var export = {
 				kind: TypeKind::Namespace
 				sealed: @sealed
-				systemic: @systemic
+				system: @system
 				exhaustive: this.isExhaustive()
 				properties: {}
 			}

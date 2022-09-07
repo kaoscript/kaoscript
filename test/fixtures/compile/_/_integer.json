@@ -35,7 +35,7 @@
       {
         "kind": "namespace",
         "sealed": false,
-        "systemic": false,
+        "system": false,
         "exhaustive": true,
         "properties": {
           "parse": {

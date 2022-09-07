@@ -1,4 +1,4 @@
-extern systemic class Error
+extern system class Error
 
 disclose Error {
 	message: String

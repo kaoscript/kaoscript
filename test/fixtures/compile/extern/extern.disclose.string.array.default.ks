@@ -1,5 +1,5 @@
-extern systemic class Array
-extern systemic class String
+extern system class Array
+extern system class String
 
 disclose String {
 	split(...): Array<String>
