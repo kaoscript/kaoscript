@@ -2,7 +2,7 @@ enum AttributeData {
 	Conditional
 }
 
-flagged enum AttributeTarget {
+bitmask AttributeTarget {
 	Class			= 1
 	Conditional
 	Constructor

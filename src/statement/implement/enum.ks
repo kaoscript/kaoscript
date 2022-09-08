@@ -25,7 +25,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 		var value = @data.value
 
 		switch @enum.kind() {
-			EnumTypeKind::Flags => {
+			EnumTypeKind::Bit => {
 				if ?value {
 					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true

@@ -111,6 +111,7 @@ include {
 	'../statement/do-until'
 	'../statement/do-while'
 	'../statement/enum'
+	'../statement/bitmask'
 	'../statement/export'
 	'../statement/expression'
 	'../statement/fallthrough'

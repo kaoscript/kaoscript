@@ -1,4 +1,4 @@
-flagged enum PassingMode {
+bitmask PassingMode {
 	NIL
 
 	NAMED

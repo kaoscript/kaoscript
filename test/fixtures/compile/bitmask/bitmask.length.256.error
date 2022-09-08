@@ -1,0 +1,1 @@
+ReferenceException: Bitmask of length 256 aren't supported (fixtures/compile/bitmask/bitmask.length.256.ks:3)

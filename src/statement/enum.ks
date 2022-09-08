@@ -16,20 +16,6 @@ class EnumDeclaration extends Statement {
 		if type.isString() {
 			@enum = new EnumType(@scope, EnumTypeKind::String)
 		}
-		else if @data.modifiers.length != 0 {
-			var mut nf = true
-			for var modifier in @data.modifiers while nf {
-				if modifier.kind == ModifierKind::Flagged {
-					@enum = new EnumType(@scope, EnumTypeKind::Flags)
-
-					nf = false
-				}
-			}
-
-			if nf {
-				@enum = new EnumType(@scope)
-			}
-		}
 		else {
 			@enum = new EnumType(@scope)
 		}
@@ -135,18 +121,20 @@ class EnumDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} # }}}
 	name() => @name
+	toMainTypeFragments(fragments) { # {{{
+		if @enum.isString() {
+			fragments.code('String')
+		}
+		else {
+			fragments.code('Number')
+		}
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		var line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
-		if @enum.isString() {
-			line.code('String, ')
-		}
-		else if @enum.isFlags() {
-			line.code('Object, ')
-		}
-		else {
-			line.code('Number, ')
-		}
+		@toMainTypeFragments(line)
+
+		line.code($comma)
 
 		var object = line.newObject()
 
@@ -251,7 +239,9 @@ class EnumVariableDeclaration extends AbstractNode {
 		var value = @data.value
 
 		switch enum.kind() {
-			EnumTypeKind::Flags => {
+			EnumTypeKind::Bit => {
+				var length = enum.length()
+
 				if ?value {
 					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
@@ -265,8 +255,8 @@ class EnumVariableDeclaration extends AbstractNode {
 					}
 					else {
 						if value.kind == NodeKind::NumericExpression {
-							if value.value > 53 {
-								SyntaxException.throwEnumOverflow(@parent.name(), this)
+							if value.value > length {
+								SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
 							}
 
 							enum.index(value.value)
@@ -275,15 +265,15 @@ class EnumVariableDeclaration extends AbstractNode {
 							SyntaxException.throwInvalidEnumValue(value, this)
 						}
 
-						@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))n`
+						@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
 					}
 				}
 				else {
-					if enum.step() > 53 {
-						SyntaxException.throwEnumOverflow(@parent.name(), this)
+					if enum.step() > length {
+						SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
 					}
 
-					@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))n`
+					@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
 				}
 
 				@type = @scope.reference('Number')

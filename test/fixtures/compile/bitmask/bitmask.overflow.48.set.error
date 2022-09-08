@@ -1,0 +1,1 @@
+SyntaxException: The bitmask "Foobar" can only have at most 48 bits. (fixtures/compile/bitmask/bitmask.overflow.48.set.ks:8)

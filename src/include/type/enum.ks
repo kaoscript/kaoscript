@@ -1,5 +1,5 @@
 enum EnumTypeKind<String> {
-	Flags
+	Bit
 	Number
 	String
 }
@@ -13,11 +13,12 @@ class EnumType extends Type {
 			instanceMethods: {}
 			staticMethods: {}
 		}
-		@function: FunctionType?							= null
+		@function: FunctionType?						= null
 		@index: Number									= -1
 		@instanceAssessments: Dictionary				= {}
 		@instanceMethods: Dictionary					= {}
 		@kind: EnumTypeKind
+		@length: Number?
 		@staticAssessments: Dictionary					= {}
 		@staticMethods: Dictionary						= {}
 		@type: Type
@@ -37,6 +38,10 @@ class EnumType extends Type {
 
 			if ?data.sequences {
 				type._sequences.defaults = data.sequences[0]
+			}
+
+			if ?data.length {
+				type._length = data.length
 			}
 
 			for var name in data.variables {
@@ -266,6 +271,10 @@ class EnumType extends Type {
 			staticMethods: {}
 		}
 
+		if @kind == EnumTypeKind::Bit {
+			export.length = @length
+		}
+
 		for var methods, name of @instanceMethods {
 			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
 		}
@@ -445,7 +454,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveStaticMethod(name)
-	isFlags() => @kind == EnumTypeKind::Flags
+	isFlags() => @kind == EnumTypeKind::Bit
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
@@ -458,6 +467,8 @@ class EnumType extends Type {
 		return false
 	} # }}}
 	kind() => @kind
+	length(): @length
+	length(@length): this
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
 		var results: Array = []
 

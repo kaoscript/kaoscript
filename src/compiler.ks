@@ -15,8 +15,8 @@
 import {
 	'../package.json' => metadata
 	'./fs.js'
+	// TODO remove path
 	'path' => path {
-		// TODO var sep: String
 		var sep: String
 		func basename(path: String): String
 		func dirname(path: String): String
@@ -441,6 +441,7 @@ var $expressions = {
 }
 
 var $statements = {
+	`\(NodeKind::BitmaskDeclaration)`			: BitmaskDeclaration
 	`\(NodeKind::BreakStatement)`				: BreakStatement
 	`\(NodeKind::CallMacroExpression)`	 		: CallMacroStatement
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration

@@ -90,7 +90,7 @@
           ]
         },
         "classMethods": {},
-        "origin": "BIGINT::16",
+        "origin": 16,
         "sequences": [
           -1,
           -1,
@@ -137,7 +137,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3OSwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjksImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6OSwiY29sdW1uIjoyNX19"
+                  "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjksImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6OSwiY29sdW1uIjoyNX19"
                 }
               ],
               "returns": "Boolean",

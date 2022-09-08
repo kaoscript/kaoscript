@@ -65,7 +65,7 @@ var $virtuals = {
 	Tuple: true
 }
 
-flagged enum ExportMode {
+bitmask ExportMode {
 	Default
 
 	Alien
@@ -75,7 +75,7 @@ flagged enum ExportMode {
 	OverloadedFunction
 }
 
-flagged enum MatchingMode {
+bitmask MatchingMode<u48> {
 	Default
 
 	Exact
@@ -148,7 +148,7 @@ flagged enum MatchingMode {
 		MissingParameterArity
 }
 
-flagged enum QuoteMode {
+bitmask QuoteMode {
 	None
 	Double
 	Single
@@ -178,7 +178,7 @@ enum Junction {
 	OR
 }
 
-flagged enum TypeOrigin {
+bitmask TypeOrigin {
 	None
 
 	Extern
@@ -912,7 +912,8 @@ abstract class Type {
 	} # }}}
 	toTestType() => this
 	toTypeQuote() => this.toQuote()
-	// TODO `: this`
+	// TODO
+	// type(): this
 	type() => this
 	unflagAltering(): this
 	unflagRequired(): this { # {{{

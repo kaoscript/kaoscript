@@ -171,6 +171,9 @@ export class NotSupportedException extends Exception {
 		throw(...arguments): Never ~ NotSupportedException { # {{{
 			throw new NotSupportedException(...arguments)
 		} # }}}
+		throwBitmaskLength(name, length, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`Bitmask of length \(length) aren't supported`, node)
+		} # }}}
 	}
 	constructor(message = 'Not Supported') { # {{{
 		super(message)
@@ -339,6 +342,9 @@ export class SyntaxException extends Exception {
 		throwAlreadyImported(name, module, line, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The variable "\(name)" has already been imported by "\(module)" at line \(line)`, node)
 		} # }}}
+		throwBitmaskOverflow(name, length, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The bitmask "\(name)" can only have at most \(length) bits.`, node)
+		} # }}}
 		throwDeadCode(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Dead code`, node)
 		} # }}}
@@ -356,9 +362,6 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwDuplicateMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(name)" is matching an existing method`, node)
-		} # }}}
-		throwEnumOverflow(name, node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
 		} # }}}
 		throwExcessiveRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The import don't require the argument "\(name)"`, node)

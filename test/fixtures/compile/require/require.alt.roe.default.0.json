@@ -24,7 +24,7 @@
         "classVariables": {},
         "instanceMethods": {},
         "classMethods": {},
-        "origin": "BIGINT::16",
+        "origin": 16,
         "sequences": [
           -1,
           -1,

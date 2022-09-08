@@ -1,0 +1,1 @@
+ReferenceException: Bitmask of length 64 aren't supported (fixtures/compile/bitmask/bitmask.length.64.ks:3)

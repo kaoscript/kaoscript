@@ -450,7 +450,7 @@ class BinaryOperatorMatch extends Expression {
 	} # }}}
 	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => true
-	operator() => '!=='
+	operator() => '!='
 	releaseReusable() { # {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)
@@ -537,7 +537,7 @@ class BinaryOperatorMatch extends Expression {
 		if @composite {
 			if assignable {
 				if native {
-					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0n`)
+					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0`)
 				}
 				else {
 					fragments
@@ -545,21 +545,21 @@ class BinaryOperatorMatch extends Expression {
 						.compile(@subject)
 						.code($comma)
 						.compile(operand)
-						.code(`) \(operator) 0n`)
+						.code(`) \(operator) 0`)
 				}
 			}
 			else {
 				if native {
-					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0n`)
+					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0`)
 				}
 				else {
-					fragments.code($runtime.operator(this), `.andNum(\(@reuseName), `).compile(operand).code(`) \(operator) 0n`)
+					fragments.code($runtime.operator(this), `.andNum(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
 				}
 			}
 		}
 		else {
 			if native {
-				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0n`)
+				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0`)
 			}
 			else {
 				fragments
@@ -567,7 +567,7 @@ class BinaryOperatorMatch extends Expression {
 					.compile(@subject)
 					.code($comma)
 					.compile(operand)
-					.code(`) \(operator) 0n`)
+					.code(`) \(operator) 0`)
 			}
 		}
 	} # }}}
@@ -575,7 +575,7 @@ class BinaryOperatorMatch extends Expression {
 }
 
 class BinaryOperatorMismatch extends BinaryOperatorMatch {
-	operator() => '==='
+	operator() => '=='
 }
 
 class BinaryOperatorModulo extends NumericBinaryOperatorExpression {
