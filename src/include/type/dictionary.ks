@@ -71,8 +71,8 @@ class DictionaryType extends Type {
 		}
 	} # }}}
 	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
-		if @isSubsetOf(value, MatchingMode::Similar) {
-			if @isSubsetOf(value, MatchingMode::Exact) {
+		if this.isSubsetOf(value, MatchingMode::Similar) {
+			if this.isSubsetOf(value, MatchingMode::Exact) {
 				return 0
 			}
 			else {
@@ -238,7 +238,7 @@ class DictionaryType extends Type {
 				return true
 			}
 
-			return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value.isObject() {
 			if @isNullable() && !nullcast && !value.isNullable() {
@@ -249,7 +249,7 @@ class DictionaryType extends Type {
 				return true
 			}
 
-			return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -373,7 +373,7 @@ class DictionaryType extends Type {
 
 		if value is UnionType {
 			for var type in value.types() {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return true
 				}
 			}
@@ -460,7 +460,7 @@ class DictionaryType extends Type {
 		return str
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		return this.export(references, indexDelta, mode, module)
+		return @export(references, indexDelta, mode, module)
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()

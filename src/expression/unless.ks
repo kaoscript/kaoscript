@@ -1,8 +1,8 @@
 class UnlessExpression extends Expression {
 	private late {
-		_condition
-		_type: Type
-		_whenFalse
+		@condition
+		@type: Type
+		@whenFalse
 	}
 	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)

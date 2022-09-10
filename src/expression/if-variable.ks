@@ -1,11 +1,11 @@
 class IfVariableDeclarationExpression extends Expression {
 	private late {
-		_autotype: Boolean
-		_await: Boolean
-		_declarators: Array			= []
-		_destructuring: Boolean		= false
-		_immutable: Boolean
-		_init
+		@autotype: Boolean
+		@await: Boolean
+		@declarators: Array			= []
+		@destructuring: Boolean		= false
+		@immutable: Boolean
+		@init
 	}
 	analyse() { # {{{
 		@immutable = !@data.rebindable

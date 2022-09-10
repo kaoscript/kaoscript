@@ -1,28 +1,28 @@
 class ForOfStatement extends Statement {
 	private late {
-		_bindingScope: Scope
-		_bindingValue						= null
-		_bleeding: Boolean					= false
-		_bodyScope: Scope
-		_body
-		_conditionalTempVariables: Array	= []
-		_declaration: Boolean				= false
-		_defineKey: Boolean					= false
-		_defineValue: Boolean				= false
-		_expression
-		_expressionName: String
-		_key								= null
-		_keyName: String
-		_immutable: Boolean					= false
-		_loopTempVariables: Array			= []
-		_until
-		_value								= null
-		_when
-		_while
+		@bindingScope: Scope
+		@bindingValue						= null
+		@bleeding: Boolean					= false
+		@bodyScope: Scope
+		@body
+		@conditionalTempVariables: Array	= []
+		@declaration: Boolean				= false
+		@defineKey: Boolean					= false
+		@defineValue: Boolean				= false
+		@expression
+		@expressionName: String
+		@key								= null
+		@keyName: String
+		@immutable: Boolean					= false
+		@loopTempVariables: Array			= []
+		@until
+		@value								= null
+		@when
+		@while
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
@@ -73,7 +73,7 @@ class ForOfStatement extends Statement {
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
-		this.checkForRenamedVariables(@expression, variables)
+		@checkForRenamedVariables(@expression, variables)
 
 		for var variable in variables {
 			@bindingScope.rename(variable)
@@ -152,7 +152,7 @@ class ForOfStatement extends Statement {
 			@bindingValue.acquireReusable(true)
 		}
 
-		this.assignTempVariables(@bindingScope)
+		@assignTempVariables(@bindingScope)
 
 		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
@@ -255,7 +255,7 @@ class ForOfStatement extends Statement {
 					.compile(@expression)
 					.done()
 
-				this.toLoopFragments(fragments, mode)
+				@toLoopFragments(fragments, mode)
 			}
 			else {
 				var block = fragments.newBlock()
@@ -266,13 +266,13 @@ class ForOfStatement extends Statement {
 					.compile(@expression)
 					.done()
 
-				this.toLoopFragments(block, mode)
+				@toLoopFragments(block, mode)
 
 				block.done()
 			}
 		}
 		else {
-			this.toLoopFragments(fragments, mode)
+			@toLoopFragments(fragments, mode)
 		}
 	} # }}}
 	toLoopFragments(fragments, mode) { # {{{
@@ -331,7 +331,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if ?@until {
-			this.toDeclarationFragments(@loopTempVariables, ctrl)
+			@toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
 				.newControl()
@@ -343,7 +343,7 @@ class ForOfStatement extends Statement {
 				.done()
 		}
 		else if ?@while {
-			this.toDeclarationFragments(@loopTempVariables, ctrl)
+			@toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
 				.newControl()
@@ -356,7 +356,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if ?@when {
-			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
+			@toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl
 				.newControl()

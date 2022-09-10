@@ -1,9 +1,9 @@
 class NamedType extends Type {
 	private {
-		_cloned: Boolean 				= false
-		_container: NamedContainerType?	= null
-		_name: String
-		_type: Type
+		@cloned: Boolean 				= false
+		@container: NamedContainerType?	= null
+		@name: String
+		@type: Type
 	}
 	constructor(@name, @type) { # {{{
 		super(type.scope())
@@ -28,7 +28,7 @@ class NamedType extends Type {
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
-	discardAlias() => this.isAlias() ? @type.discardAlias() : this
+	discardAlias() => @isAlias() ? @type.discardAlias() : this
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -103,25 +103,25 @@ class NamedType extends Type {
 		}
 		else if value is NamedType {
 			if value.isAlias() {
-				if this.isAlias() {
-					return @name == value.name() || this.discardAlias().isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
+				if @isAlias() {
+					return @name == value.name() || @discardAlias().isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 				}
 				else {
-					return this.isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
+					return @isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 				}
 			}
 			else if @type.isClass() && value.isClass() {
-				return @name == 'Class' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+				return @name == 'Class' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
 			else if @type.isEnum() {
 				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 				// return @name == 'Enum'
 			}
 			else if @type.isStruct() && value.isStruct() {
-				return @name == 'Struct' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+				return @name == 'Struct' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
 			else if @type.isTuple() && value.isTuple() {
-				return @name == 'Tuple' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+				return @name == 'Tuple' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
 			else {
 				return false
@@ -159,12 +159,12 @@ class NamedType extends Type {
 				return value.name() == 'Tuple'
 			}
 			else {
-				return this.isAssignableToVariable(value.type(), anycast, nullcast, downcast, limited)
+				return @isAssignableToVariable(value.type(), anycast, nullcast, downcast, limited)
 			}
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast, limited) {
+				if @isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast, limited) {
 					return true
 				}
 			}
@@ -174,12 +174,12 @@ class NamedType extends Type {
 		else if value is ExclusionType {
 			var types = value.types()
 
-			if !this.isAssignableToVariable(types[0].discardReference(), anycast, nullcast, downcast) {
+			if !@isAssignableToVariable(types[0].discardReference(), anycast, nullcast, downcast) {
 				return false
 			}
 
 			for var type in types from 1 {
-				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast) {
 					return false
 				}
 			}
@@ -198,7 +198,7 @@ class NamedType extends Type {
 	isEnum() => @type.isEnum()
 	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()
-	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
+	isExhaustive(node) => @isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicit() => true
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()
@@ -230,16 +230,16 @@ class NamedType extends Type {
 	isInstanceOf(value: Type) => @type.isInstanceOf(value)
 	isMorePreciseThan(value: Type) { # {{{
 		if value is NamedType {
-			if this.isClass() && value.isClass() {
-				return @name != value.name() && this.matchInheritanceOf(value)
+			if @isClass() && value.isClass() {
+				return @name != value.name() && @matchInheritanceOf(value)
 			}
 			else if value.isAlias() {
-				return this.isMorePreciseThan(value.discardAlias())
+				return @isMorePreciseThan(value.discardAlias())
 			}
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.matchContentOf(value) {
+				if @matchContentOf(value) {
 					return true
 				}
 			}
@@ -302,11 +302,11 @@ class NamedType extends Type {
 					}
 				}
 				else if value.type() is ClassType && value.name() == 'Enum' {
-					return this.isEnum()
+					return @isEnum()
 				}
 				else if value.isAlias() {
-					if this.isAlias() {
-						return @scope.isRenamed(@name, value.name(), value.scope(), mode) || this.discardAlias().isSubsetOf(value.discardAlias(), mode)
+					if @isAlias() {
+						return @scope.isRenamed(@name, value.name(), value.scope(), mode) || @discardAlias().isSubsetOf(value.discardAlias(), mode)
 					}
 					else {
 						return this.isSubsetOf(value.discardAlias(), mode)
@@ -316,8 +316,8 @@ class NamedType extends Type {
 					return @type.isSubsetOf(value.type(), mode)
 				}
 			}
-			else if this.isAlias() {
-				return this.discardAlias().isSubsetOf(value, mode)
+			else if @isAlias() {
+				return @discardAlias().isSubsetOf(value, mode)
 			}
 			else if value is UnionType {
 				for var type in value.types() {
@@ -352,7 +352,7 @@ class NamedType extends Type {
 			}
 		}
 		else if that is ReferenceType {
-			return @name == that.name() || this.matchClassName(that.discardReference())
+			return @name == that.name() || @matchClassName(that.discardReference())
 		}
 
 		return false
@@ -369,22 +369,22 @@ class NamedType extends Type {
 		}
 		else if value is NamedType {
 			if value.name() == 'Object' && value.type() is ClassType {
-				return this.matchContentOf(@scope.module().getPredefined('Object'))
+				return @matchContentOf(@scope.module().getPredefined('Object'))
 			}
 			else if @type is ClassType && value.type() is ClassType {
-				return this.matchInheritanceOf(value)
+				return @matchInheritanceOf(value)
 			}
 			else if value.type() is EnumType {
 				if @type is EnumType {
 					return @name == value.name()
 				}
 				else {
-					return this.matchContentOf(value.type())
+					return @matchContentOf(value.type())
 				}
 			}
 			else if value.type() is StructType {
 				if @type is StructType {
-					return this.matchInheritanceOf(value)
+					return @matchInheritanceOf(value)
 				}
 				else {
 					return @type.matchContentOf(value.type())
@@ -392,30 +392,30 @@ class NamedType extends Type {
 			}
 			else if value.type() is TupleType {
 				if @type is TupleType {
-					return this.matchInheritanceOf(value)
+					return @matchInheritanceOf(value)
 				}
 				else {
 					return @type.matchContentOf(value.type())
 				}
 			}
 			else if value.isAlias() {
-				if this.isAlias() {
+				if @isAlias() {
 					return @name == value.name() || @type.discardAlias().matchContentOf(value.discardAlias())
 				}
 				else {
-					return this.matchContentOf(value.discardAlias())
+					return @matchContentOf(value.discardAlias())
 				}
 			}
 			else {
 				return @type.matchContentOf(value)
 			}
 		}
-		else if this.isAlias() {
+		else if @isAlias() {
 			return @type.discardAlias().matchContentOf(value)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return true
 				}
 			}
@@ -425,12 +425,12 @@ class NamedType extends Type {
 		else if value is ExclusionType {
 			var types = value.types()
 
-			if !this.matchContentOf(types[0]) {
+			if !@matchContentOf(types[0]) {
 				return false
 			}
 
 			for var type in types from 1 {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return false
 				}
 			}
@@ -438,7 +438,7 @@ class NamedType extends Type {
 			return true
 		}
 		else if value is ReferenceType {
-			return @name == value.name() || this.matchContentOf(value.discardReference())
+			return @name == value.name() || @matchContentOf(value.discardReference())
 		}
 		else if value is DictionaryType {
 			return @name == 'Dictionary'
@@ -580,7 +580,7 @@ class NamedType extends Type {
 
 class NamedContainerType extends NamedType {
 	private {
-		_properties			= {}
+		@properties			= {}
 	}
 	constructor(@name, @type) { # {{{
 		super(name, type)
@@ -624,7 +624,7 @@ class NamedContainerType extends NamedType {
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return true
 				}
 			}
@@ -634,12 +634,12 @@ class NamedContainerType extends NamedType {
 		else if value is ExclusionType {
 			var types = value.types()
 
-			if !this.matchContentOf(types[0]) {
+			if !@matchContentOf(types[0]) {
 				return false
 			}
 
 			for var type in types from 1 {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return false
 				}
 			}
@@ -647,7 +647,7 @@ class NamedContainerType extends NamedType {
 			return true
 		}
 		else if value is ReferenceType {
-			return @name == value.name() || this.matchContentOf(value.discardReference())
+			return @name == value.name() || @matchContentOf(value.discardReference())
 		}
 		else {
 			return @type.matchContentOf(value)

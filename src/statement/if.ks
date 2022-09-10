@@ -20,7 +20,7 @@ class IfStatement extends Statement {
 	override initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
-			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope, ScopeType::Bleeding)
 
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
 
@@ -40,11 +40,11 @@ class IfStatement extends Statement {
 				@condition = @declaration.value()
 			}
 
-			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 		}
 		else {
-			@bindingScope = this.newScope(@scope, ScopeType::Hollow)
-			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope, ScopeType::Hollow)
+			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
@@ -56,7 +56,7 @@ class IfStatement extends Statement {
 		@whenTrueExpression.analyse()
 
 		if @hasWhenFalse {
-			@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
+			@whenFalseScope = @newScope(@scope, ScopeType::InlineBlock)
 
 			@scope.line(@data.whenFalse.start.line)
 
@@ -106,7 +106,7 @@ class IfStatement extends Statement {
 			@condition.releaseReusable()
 		}
 
-		this.assignTempVariables(@bindingScope)
+		@assignTempVariables(@bindingScope)
 
 		@scope.line(@data.whenTrue.start.line)
 
@@ -499,14 +499,14 @@ class IfStatement extends Statement {
 
 			var ctrl = fragments.newControl()
 
-			this.toIfFragments(ctrl, mode)
+			@toIfFragments(ctrl, mode)
 
 			ctrl.done()
 		}
 		else {
 			var ctrl = fragments.newControl()
 
-			this.toIfFragments(ctrl, mode)
+			@toIfFragments(ctrl, mode)
 
 			ctrl.done()
 		}

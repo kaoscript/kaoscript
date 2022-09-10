@@ -94,7 +94,7 @@ abstract class Scope {
 	hasMacro(name: String): Boolean => false
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
-	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
+	isPredefinedVariable(name: String): Boolean => (variable ?= @getVariable(name)) && variable.isPredefined()
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) => name == newName
 	isRenamedVariable(name: String): Boolean => false
 	line(): Number => 0
@@ -112,7 +112,7 @@ abstract class Scope {
 
 		return @resolveReference('Array', value.isNullable())
 	} # }}}
-	reference(value: ClassVariableType): ReferenceType => @reference(value.type())
+	reference(value: ClassVariableType): ReferenceType => this.reference(value.type())
 	reference(value: DictionaryType): ReferenceType { # {{{
 		if value.hasProperties() {
 			throw new NotSupportedException()

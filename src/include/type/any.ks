@@ -68,13 +68,13 @@ class AnyType extends Type {
 			return 1
 		}
 	} # }}}
-	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.toReference(references, indexDelta, mode, module)
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @toReference(references, indexDelta, mode, module)
 	flagAlien() { # {{{
 		if @alien {
 			return this
 		}
 
-		var type = this.clone()
+		var type = @clone()
 
 		type._alien = true
 
@@ -85,7 +85,7 @@ class AnyType extends Type {
 			return this
 		}
 
-		var type = this.clone()
+		var type = @clone()
 
 		type._required = true
 
@@ -177,7 +177,7 @@ class AnyType extends Type {
 	toFragments(fragments, node) { # {{{
 		fragments.code(@nullable ? `Any?` : `Any`)
 	} # }}}
-	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.toReference(references, indexDelta, mode, module)
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @toReference(references, indexDelta, mode, module)
 	toQuote(): String => @nullable ? `Any?` : `Any`
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @explicit {
@@ -203,7 +203,7 @@ class AnyType extends Type {
 			fragments.code(`\($runtime.type(node)).isValue(`).compile(node).code(`)`)
 		}
 	} # }}}
-	override toRouteTestFragments(fragments, node, junction) => this.toPositiveTestFragments(fragments, node, junction)
+	override toRouteTestFragments(fragments, node, junction) => @toPositiveTestFragments(fragments, node, junction)
 	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 

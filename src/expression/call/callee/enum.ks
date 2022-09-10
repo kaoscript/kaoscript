@@ -22,7 +22,7 @@ class EnumCallee extends Callee {
 		@function = match.function
 		@arguments = match.arguments
 
-		this.validate(@function, node)
+		@validate(@function, node)
 
 		@type = @function.getReturnType()
 	} # }}}

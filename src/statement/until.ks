@@ -1,13 +1,13 @@
 class UntilStatement extends Statement {
 	private late {
-		_bindingScope: Scope
-		_body
-		_bodyScope: Scope
-		_condition
+		@bindingScope: Scope
+		@body
+		@bodyScope: Scope
+		@condition
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::Hollow)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::Hollow)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @bindingScope)
 		@condition.analyse()
@@ -23,7 +23,7 @@ class UntilStatement extends Statement {
 			TypeException.throwInvalidCondition(@condition, this)
 		}
 
-		this.assignTempVariables(@scope)
+		@assignTempVariables(@scope)
 
 		@scope.line(@data.body.start.line)
 

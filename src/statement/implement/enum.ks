@@ -202,7 +202,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 						parameter.type(parameters[index])
 					}
 				}
-				else if this.isAssertingOverride() {
+				else if @isAssertingOverride() {
 					SyntaxException.throwNoOverridableMethod(@enumName, @name, @parameters, this)
 				}
 				else {
@@ -387,7 +387,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		block.done()
 		line.done()
 
-		this.toIndigentFragments(fragments)
+		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
 }

@@ -360,7 +360,7 @@ class ClassMethodDeclaration extends Statement {
 
 			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
 				if @override {
-					if this.isAssertingOverride() {
+					if @isAssertingOverride() {
 						SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
 					}
 					else {
@@ -528,7 +528,7 @@ class ClassMethodDeclaration extends Statement {
 			for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 				ctrl2.code(' && ') unless index == 0
 
-				var literal = new Literal(false, this, this.scope(), parameter.name())
+				var literal = new Literal(false, this, @scope(), parameter.name())
 
 				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
@@ -600,14 +600,14 @@ class ClassMethodDeclaration extends Statement {
 
 		ctrl.done() unless @parent._es5
 
-		this.toIndigentFragments(fragments)
+		@toIndigentFragments(fragments)
 	} # }}}
 	type() { # {{{
 		if @analysed {
 			return @type
 		}
 		else {
-			this.prepare()
+			@prepare()
 
 			return @type
 		}
@@ -677,7 +677,7 @@ class ClassMethodDeclaration extends Statement {
 						var newType = @type.getReturnType()
 
 						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
-							if this.isAssertingOverride() {
+							if @isAssertingOverride() {
 								SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 							}
 							else {
@@ -714,7 +714,7 @@ class ClassMethodDeclaration extends Statement {
 
 						if !matched {
 							if @override {
-								if this.isAssertingOverride() {
+								if @isAssertingOverride() {
 									SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 								}
 								else {
@@ -746,7 +746,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 			else if @override {
-				if this.isAssertingOverride() {
+				if @isAssertingOverride() {
 					SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 				}
 				else {

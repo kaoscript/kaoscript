@@ -1,38 +1,38 @@
 class ForInStatement extends Statement {
 	private late {
-		_bindingScope: Scope
-		_bindingValue						= null
-		_body
-		_bodyScope: Scope
-		_boundName: String
-		_by
-		_byName: String
-		_conditionalTempVariables: Array	= []
-		_declaration: Boolean				= false
-		_declared: Boolean					= false
-		_declaredVariables: Array			= []
-		_declareIndex: Boolean				= false
-		_declareValue: Boolean				= false
-		_descending: Boolean				= false
-		_expression
-		_expressionName: String
-		_from
-		_fromDesc: Boolean					= false
-		_immutable: Boolean					= false
-		_index								= null
-		_indexName: String
-		_loopTempVariables: Array			= []
-		_until
-		_useBreak: Boolean					= false
-		_value								= null
-		_when
-		_while
-		_til
-		_to
+		@bindingScope: Scope
+		@bindingValue						= null
+		@body
+		@bodyScope: Scope
+		@boundName: String
+		@by
+		@byName: String
+		@conditionalTempVariables: Array	= []
+		@declaration: Boolean				= false
+		@declared: Boolean					= false
+		@declaredVariables: Array			= []
+		@declareIndex: Boolean				= false
+		@declareValue: Boolean				= false
+		@descending: Boolean				= false
+		@expression
+		@expressionName: String
+		@from
+		@fromDesc: Boolean					= false
+		@immutable: Boolean					= false
+		@index								= null
+		@indexName: String
+		@loopTempVariables: Array			= []
+		@until
+		@useBreak: Boolean					= false
+		@value								= null
+		@when
+		@while
+		@til
+		@to
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
@@ -86,33 +86,33 @@ class ForInStatement extends Statement {
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
-		this.checkForRenamedVariables(@expression, variables)
+		@checkForRenamedVariables(@expression, variables)
 
 		if ?@data.from {
 			@from = $compile.expression(@data.from, this, @scope)
 			@from.analyse()
 
-			this.checkForRenamedVariables(@from, variables)
+			@checkForRenamedVariables(@from, variables)
 		}
 
 		if ?@data.til {
 			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
-			this.checkForRenamedVariables(@til, variables)
+			@checkForRenamedVariables(@til, variables)
 		}
 		else if ?@data.to {
 			@to = $compile.expression(@data.to, this, @scope)
 			@to.analyse()
 
-			this.checkForRenamedVariables(@to, variables)
+			@checkForRenamedVariables(@to, variables)
 		}
 
 		if ?@data.by {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
-			this.checkForRenamedVariables(@by, variables)
+			@checkForRenamedVariables(@by, variables)
 		}
 
 		for var variable in variables {
@@ -123,13 +123,13 @@ class ForInStatement extends Statement {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 
-			this.checkForBreak(@until)
+			@checkForBreak(@until)
 		}
 		else if ?@data.while {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 
-			this.checkForBreak(@while)
+			@checkForBreak(@while)
 		}
 
 		if ?@data.when {
@@ -219,7 +219,7 @@ class ForInStatement extends Statement {
 			@byName = @bindingScope.acquireTempName(false) if @by.isComposite()
 		}
 
-		this.assignTempVariables(@bindingScope)
+		@assignTempVariables(@bindingScope)
 
 		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
@@ -232,7 +232,7 @@ class ForInStatement extends Statement {
 				@bodyScope.commitTempVariables(@loopTempVariables)
 			}
 			else {
-				this.assignTempVariables(@bodyScope)
+				@assignTempVariables(@bodyScope)
 			}
 		}
 		else if ?@while {
@@ -246,7 +246,7 @@ class ForInStatement extends Statement {
 				@bodyScope.commitTempVariables(@loopTempVariables)
 			}
 			else {
-				this.assignTempVariables(@bodyScope)
+				@assignTempVariables(@bodyScope)
 			}
 		}
 
@@ -522,7 +522,7 @@ class ForInStatement extends Statement {
 				.compile(@index)
 				.code($equals)
 
-			this.toFromFragments(line)
+			@toFromFragments(line)
 
 			line.done()
 
@@ -537,7 +537,7 @@ class ForInStatement extends Statement {
 				.compile(@indexName ?? @index)
 				.code($equals)
 
-			this.toFromFragments(ctrl)
+			@toFromFragments(ctrl)
 
 			ctrl.code($comma)
 		}
@@ -548,7 +548,7 @@ class ForInStatement extends Statement {
 
 		ctrl.code(@boundName, $equals)
 
-		this.toBoundFragments(ctrl)
+		@toBoundFragments(ctrl)
 
 		if @declareValue {
 			for var variable in @declaredVariables {
@@ -628,7 +628,7 @@ class ForInStatement extends Statement {
 
 			if @useBreak {
 				if ?@until {
-					this.toDeclarationFragments(@loopTempVariables, ctrl)
+					@toDeclarationFragments(@loopTempVariables, ctrl)
 
 					ctrl
 						.newControl()
@@ -640,7 +640,7 @@ class ForInStatement extends Statement {
 						.done()
 				}
 				else if ?@while {
-					this.toDeclarationFragments(@loopTempVariables, ctrl)
+					@toDeclarationFragments(@loopTempVariables, ctrl)
 
 					ctrl
 						.newControl()
@@ -655,7 +655,7 @@ class ForInStatement extends Statement {
 		}
 
 		if ?@when {
-			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
+			@toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl
 				.newControl()

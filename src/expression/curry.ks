@@ -1,13 +1,13 @@
 class CurryExpression extends CallExpression {
 	makeCallee(type, name) { # {{{
-		this.addCallee(new DefaultCallee(@data, @object, null, this))
+		@addCallee(new DefaultCallee(@data, @object, null, this))
 	} # }}}
 	toCallFragments(fragments, mode) { # {{{
 		if @callees.length == 1 {
 			@callees[0].toCurryFragments(fragments, mode, this)
 		}
 		else if @callees.length == 2 {
-			this.module().flag('Type')
+			@module().flag('Type')
 
 			@callees[0].toPositiveTestFragments(fragments, this)
 

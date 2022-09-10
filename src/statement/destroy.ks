@@ -1,8 +1,8 @@
 class DestroyStatement extends Statement {
 	private late {
-		_expression
-		_identifier: Boolean		= false
-		_type: Type
+		@expression
+		@identifier: Boolean		= false
+		@type: Type
 	}
 	initiate() { # {{{
 		if @data.variable.kind == NodeKind::Identifier {

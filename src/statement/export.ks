@@ -1,7 +1,7 @@
 class ExportDeclaration extends Statement {
 	private {
-		_declarations	= []
-		_statements		= []
+		@declarations	= []
+		@statements		= []
 	}
 	override initiate() { # {{{
 		if @parent.includePath() == null {
@@ -99,7 +99,7 @@ class ExportDeclaration extends Statement {
 
 class ExportExclusionSpecifier extends AbstractNode {
 	private {
-		_expression
+		@expression
 	}
 	analyse()
 	override prepare(target)
@@ -117,7 +117,7 @@ class ExportExclusionSpecifier extends AbstractNode {
 
 class ExportNamedSpecifier extends AbstractNode {
 	private {
-		_expression
+		@expression
 	}
 	analyse()
 	override prepare(target) { # {{{
@@ -164,7 +164,7 @@ class ExportNamedSpecifier extends AbstractNode {
 
 class ExportPropertiesSpecifier extends AbstractNode {
 	private {
-		_object
+		@object
 	}
 	analyse()
 	override prepare(target) { # {{{
@@ -185,7 +185,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 
 class ExportWildcardSpecifier extends AbstractNode {
 	private {
-		_expression
+		@expression
 	}
 	analyse()
 	override prepare(target) { # {{{
@@ -206,8 +206,8 @@ class ExportWildcardSpecifier extends AbstractNode {
 
 class ExportProperty {
 	private {
-		_object
-		_property: String
+		@object
+		@property: String
 	}
 	constructor(@object, @property)
 	toFragments(fragments, mode) { # {{{

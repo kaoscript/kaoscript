@@ -1,10 +1,10 @@
 class UnionType extends Type {
 	private {
-		_any: Boolean				= false
-		_explicit: Boolean
-		_explicitNullity: Boolean	= false
-		_nullable: Boolean			= false
-		_types: Array<Type>			= []
+		@any: Boolean				= false
+		@explicit: Boolean
+		@explicitNullity: Boolean	= false
+		@nullable: Boolean			= false
+		@types: Array<Type>			= []
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
@@ -60,7 +60,7 @@ class UnionType extends Type {
 		}
 		else if type.isUnion() {
 			for var type in type.discard().types() {
-				this.addType(type)
+				@addType(type)
 			}
 		}
 		else if type.isNullable() {
@@ -268,7 +268,7 @@ class UnionType extends Type {
 	} # }}}
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
-			if this.isNullable() {
+			if @isNullable() {
 				return nullcast || limited || value.isNullable()
 			}
 			else {
@@ -433,10 +433,10 @@ class UnionType extends Type {
 			return this
 		}
 		else if nullable {
-			return this.clone().addType(Type.Null)
+			return @clone().addType(Type.Null)
 		}
 		else if @explicitNullity {
-			var that = this.clone()
+			var that = @clone()
 
 			that._types:Array.remove(Type.Null)
 			that._nullable = false
@@ -506,7 +506,7 @@ class UnionType extends Type {
 
 		return `\(quote)\(elements.join(`\(quote), \(quote)`))\(quote) or \(quote)\(last)\(quote)`
 	} # }}}
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 

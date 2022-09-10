@@ -1,10 +1,10 @@
 class SealedMethodCallee extends Callee {
 	private {
-		_instance: Boolean
-		_node
-		_object
-		_property: String
-		_variable: NamedType<ClassType>
+		@instance: Boolean
+		@node
+		@object
+		@property: String
+		@variable: NamedType<ClassType>
 	}
 	constructor(@data, @variable, @instance, @node) { # {{{
 		super(data)

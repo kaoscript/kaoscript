@@ -9,16 +9,16 @@ abstract class Expression extends AbstractNode {
 			ReferenceException.throwInvalidAssignment(this)
 		}
 	} # }}}
-	getDeclaredType() => this.type()
+	getDeclaredType() => @type()
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions() => true
 	// types after of the expression block
 	inferTypes(inferables) => inferables
 	// types if the condition is true
-	inferWhenTrueTypes(inferables) => this.inferTypes(inferables)
+	inferWhenTrueTypes(inferables) => @inferTypes(inferables)
 	// types if the condition is false
-	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
+	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
 	// if the expression can be an assignment
 	isAssignable() => false
@@ -27,8 +27,8 @@ abstract class Expression extends AbstractNode {
 	// if the expression is awaiting to be resolved
 	isAwaiting() => false
 	// if the generated code, to cast the expression has a boolean, requires to be wrapped inside parentheses
-	isBooleanComputed() => this.isComputed() || !this.type().isBoolean() || this.type().isNullable()
-	isBooleanComputed(junction: Junction) => this.isBooleanComputed()
+	isBooleanComputed() => @isComputed() || !@type().isBoolean() || @type().isNullable()
+	isBooleanComputed(junction: Junction) => @isBooleanComputed()
 	// if the expression contains a call
 	isCallable() => false
 	// if the expression needs to be assign to a temp variable to be reused
@@ -52,15 +52,15 @@ abstract class Expression extends AbstractNode {
 	// if the expression is a lateinit field
 	isLateInit() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
-	isLooseComposite() => this.isComposite()
+	isLooseComposite() => @isComposite()
 	// if the type is matching the given type
-	isMatchingType(type: Type) => this.type().matchContentOf(type)
+	isMatchingType(type: Type) => @type().matchContentOf(type)
 	// if the expression isn't empty
 	isNotEmpty() => false
 	// if the expression is nullable
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
-	isNullableComputed() => this.isComputed()
+	isNullableComputed() => @isComputed()
 	// if the expression should be skipped or not
 	isSkippable() => false
 	// if the expression is the given instance variable
@@ -96,12 +96,12 @@ abstract class Expression extends AbstractNode {
 		this.toFragments(fragments, mode)
 	} # }}}
 	toArgumentFragments(fragments, type: Type, mode = Mode::None) { # {{{
-		this.toArgumentFragments(fragments, mode)
+		@toArgumentFragments(fragments, mode)
 	} # }}}
 	toBooleanFragments(fragments, mode = Mode::None, junction = Junction::NONE) { # {{{
 		this.toFragments(fragments, mode)
 
-		if !this.type().isBoolean() || this.type().isNullable() {
+		if !@type().isBoolean() || @type().isNullable() {
 			fragments.code(' === true')
 		}
 	} # }}}
@@ -122,7 +122,7 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toStringFragments(fragments) { # {{{
-		var type = this.type()
+		var type = @type()
 		if type.isReference() && type.type().isEnum() {
 			fragments.compile(this).code('.value')
 		}
@@ -130,7 +130,7 @@ abstract class Expression extends AbstractNode {
 			fragments.wrap(this)
 		}
 	} # }}}
-	toTypeQuote() => this.type().toQuote()
+	toTypeQuote() => @type().toQuote()
 	type() => AnyType.NullableUnexplicit
 	unflagExpectingEnum()
 	validateType(type: Type)

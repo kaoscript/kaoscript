@@ -1,12 +1,12 @@
 class EnumMethodCallee extends Callee {
 	private {
-		_enum: NamedType<EnumType>
-		_expression
-		_flatten: Boolean
-		_methodName: String
-		_methods: Array<FunctionType>?
-		_scope: ScopeKind
-		_type: Type
+		@enum: NamedType<EnumType>
+		@expression
+		@flatten: Boolean
+		@methodName: String
+		@methods: Array<FunctionType>?
+		@scope: ScopeKind
+		@type: Type
 	}
 	constructor(@data, @enum, @methodName, @methods, node) { # {{{
 		super(data)
@@ -33,7 +33,7 @@ class EnumMethodCallee extends Callee {
 		}
 
 		for method in methods {
-			this.validate(method, node)
+			@validate(method, node)
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{

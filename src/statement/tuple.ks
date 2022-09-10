@@ -1,14 +1,14 @@
 class TupleDeclaration extends Statement {
 	private late {
-		_extending: Boolean						= false
-		_extendsName: String
-		_extendsType: NamedType<TupleType>
-		_fields: Array<TupleFieldDeclaration>	= []
-		_function: TupleFunction
-		_name: String
-		_tuple: TupleType
-		_type: NamedType<TupleType>
-		_variable: Variable
+		@extending: Boolean						= false
+		@extendsName: String
+		@extendsType: NamedType<TupleType>
+		@fields: Array<TupleFieldDeclaration>	= []
+		@function: TupleFunction
+		@name: String
+		@tuple: TupleType
+		@type: NamedType<TupleType>
+		@variable: Variable
 	}
 	override initiate() { # {{{
 		@name = @data.name.name
@@ -131,7 +131,7 @@ class TupleDeclaration extends Statement {
 			return fragments.code(')').step()
 		})
 
-		this.toArrayFragments(ctrl, mode)
+		@toArrayFragments(ctrl, mode)
 
 		ctrl.done()
 
@@ -163,8 +163,8 @@ class TupleDeclaration extends Statement {
 
 class TupleFunction extends AbstractNode {
 	private {
-		_parameters: Array<Parameter>	= []
-		_type: FunctionType
+		@parameters: Array<Parameter>	= []
+		@type: FunctionType
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
@@ -211,7 +211,7 @@ class TupleFunction extends AbstractNode {
 	translate()
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewTuple
-	isAssertingParameterType() => this.isAssertingParameter()
+	isAssertingParameterType() => @isAssertingParameter()
 	isOverridableFunction() => false
 	parameters() => @parameters
 	type() => @type
@@ -219,13 +219,13 @@ class TupleFunction extends AbstractNode {
 
 class TupleFieldDeclaration extends AbstractNode {
 	private late {
-		_index: Number
-		_name: String
-		_type: TupleFieldType
+		@index: Number
+		@name: String
+		@type: TupleFieldType
 	}
 	private {
-		_hasName: Boolean					= false
-		_parameter: TupleFieldParameter
+		@hasName: Boolean					= false
+		@parameter: TupleFieldParameter
 	}
 	constructor(data, parent) { # {{{
 		super(data, parent)
@@ -294,8 +294,8 @@ class TupleFieldDeclaration extends AbstractNode {
 
 class TupleFieldParameter extends Parameter {
 	private {
-		_field: TupleFieldDeclaration
-		_validation: Boolean			 = true
+		@field: TupleFieldDeclaration
+		@validation: Boolean			 = true
 	}
 	constructor(@field, parent) { # {{{
 		super(field._data, parent)

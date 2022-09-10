@@ -1,6 +1,6 @@
 class AliasType extends Type {
 	private late {
-		_type: Type
+		@type: Type
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{

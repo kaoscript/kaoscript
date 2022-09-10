@@ -303,14 +303,14 @@ class FunctionDeclaration extends Statement {
 				declarator.toStatementFragments(fragments)
 			}
 
-			this.toRouterFragments(fragments)
+			@toRouterFragments(fragments)
 		}
 		else if @extended {
 			var name = @variable.getSecureName()
 
 			fragments.line($const(this), @oldVariableName, $equals, name)
 
-			this.toMainFragments(fragments)
+			@toMainFragments(fragments)
 
 			fragments.line(`\(name).__ks_0 = \(@oldVariableName)`)
 
@@ -318,22 +318,22 @@ class FunctionDeclaration extends Statement {
 				declarator.toStatementFragments(fragments)
 			}
 
-			this.toRouterFragments(fragments)
+			@toRouterFragments(fragments)
 		}
 		else {
-			this.toMainFragments(fragments)
+			@toMainFragments(fragments)
 
 			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
-			this.toRouterFragments(fragments)
+			@toRouterFragments(fragments)
 		}
 	} # }}}
 	toRouterFragments(fragments) { # {{{
 		var name = @variable.getSecureName()
 
-		var assessment = this.type().assessment(@variable.name(), this)
+		var assessment = @type().assessment(@variable.name(), this)
 
 		var line = fragments.newLine()
 		var block = line.code(`\(name).__ks_rt = function(that, args)`).newBlock()

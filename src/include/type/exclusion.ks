@@ -1,6 +1,6 @@
 class ExclusionType extends Type {
 	private {
-		_types: Array<Type>
+		@types: Array<Type>
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
@@ -83,7 +83,7 @@ class ExclusionType extends Type {
 		throw new NotImplementedException(node)
 	} # }}}
 	toQuote() => [type.toQuote() for var type in @types].join('^')
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 

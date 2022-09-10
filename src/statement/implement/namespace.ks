@@ -1,11 +1,11 @@
 class ImplementNamespaceVariableDeclaration extends Statement {
 	private late {
-		_type: Type
-		_value
+		@type: Type
+		@value
 	}
 	private {
-		_namespace: NamespaceType
-		_variable: NamedType<NamespaceType>
+		@namespace: NamespaceType
+		@variable: NamedType<NamespaceType>
 	}
 	constructor(data, parent, @variable) { # {{{
 		super(data, parent)
@@ -57,22 +57,22 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 
 class ImplementNamespaceFunctionDeclaration extends Statement {
 	private late {
-		_block: Block
-		_internalName: String
-		_name: String
-		_type: FunctionType
+		@block: Block
+		@internalName: String
+		@name: String
+		@type: FunctionType
 	}
 	private {
-		_autoTyping: Boolean					= false
-		_awaiting: Boolean						= false
-		_exit: Boolean							= false
-		_main: Boolean							= false
-		_namespace: NamespaceType
-		_namespaceRef: ReferenceType
-		_parameters: Array						= []
-		_returnNull: Boolean					= false
-		_variable: NamedType<NamespaceType>
-		_topNodes: Array						= []
+		@autoTyping: Boolean					= false
+		@awaiting: Boolean						= false
+		@exit: Boolean							= false
+		@main: Boolean							= false
+		@namespace: NamespaceType
+		@namespaceRef: ReferenceType
+		@parameters: Array						= []
+		@returnNull: Boolean					= false
+		@variable: NamedType<NamespaceType>
+		@topNodes: Array						= []
 	}
 	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Block)
@@ -162,11 +162,11 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
-		this.toMainFragments(fragments)
+		@toMainFragments(fragments)
 
 		this.toStatementFragments(fragments, mode)
 
-		this.toRouterFragments(fragments)
+		@toRouterFragments(fragments)
 	} # }}}
 	toMainFragments(fragments) { # {{{
 		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
@@ -183,7 +183,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	toRouterFragments(fragments) { # {{{
 		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
 
-		var assessment = this.type().assessment(@name, this)
+		var assessment = @type().assessment(@name, this)
 
 		var line = fragments.newLine()
 		var block = line.code(`\(namespace).\(@name).__ks_rt = function(that, args)`).newBlock()

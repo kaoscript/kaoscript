@@ -568,27 +568,27 @@ abstract class Type {
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
 	abstract toVariations(variations: Array<String>): Void
 	asReference(): this
-	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
-	canBeEnum(any: Boolean = true): Boolean => (any && this.isAny()) || this.isEnum()
-	canBeFunction(any: Boolean = true): Boolean => (any && this.isAny()) || this.isFunction()
-	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
-	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
+	canBeBoolean(): Boolean => @isAny() || @isBoolean()
+	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
+	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()
+	canBeNumber(any: Boolean = true): Boolean => (any && @isAny()) || @isNumber()
+	canBeString(any: Boolean = true): Boolean => (any && @isAny()) || @isString()
 	canBeVirtual(name: String) { # {{{
-		if this.isAny() {
+		if @isAny() {
 			return true
 		}
 
 		switch name {
-			'Enum'		=> return this.isEnum()
-			'Namespace'	=> return this.isNamespace()
-			'Struct'	=> return this.isStruct()
-			'Tuple'		=> return this.isTuple()
+			'Enum'		=> return @isEnum()
+			'Namespace'	=> return @isNamespace()
+			'Struct'	=> return @isStruct()
+			'Tuple'		=> return @isTuple()
 		}
 
 		return false
 	} # }}}
 	clone(scope: Scope): Type { # {{{
-		var clone = this.clone()
+		var clone = @clone()
 
 		clone._scope = scope
 
@@ -637,14 +637,14 @@ abstract class Type {
 	flagSystem() { # {{{
 		@system = true
 
-		return this.flagSealed()
+		return @flagSealed()
 	} # }}}
 	getExhaustive() => @exhaustive
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getMajorReferenceIndex() => @referenceIndex
 	hashCode(): String => ''
-	hashCode(fattenNull: Boolean) => this.hashCode()
+	hashCode(fattenNull: Boolean) => @hashCode()
 	hasProperty(name: String): Boolean => false
 	isAlias() => false
 	isAlien() => @alien
@@ -652,22 +652,22 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
-	isAssignableToVariable(value: Type): Boolean => this.isAssignableToVariable(value, true, false, true)
-	isAssignableToVariable(value: Type, downcast: Boolean): Boolean => this.isAssignableToVariable(value, true, false, downcast)
+	isAssignableToVariable(value: Type): Boolean => @isAssignableToVariable(value, true, false, true)
+	isAssignableToVariable(value: Type, downcast: Boolean): Boolean => @isAssignableToVariable(value, true, false, downcast)
 	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		if this == value {
 			return true
 		}
 		else if value.isAny() {
-			if this.isNullable() {
+			if @isNullable() {
 				return nullcast || value.isNullable()
 			}
 			else {
 				return true
 			}
 		}
-		else if this.isAlias() {
-			return this.discardAlias().isAssignableToVariable(value, anycast, nullcast, downcast)
+		else if @isAlias() {
+			return @discardAlias().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 		else {
 			return false
@@ -680,7 +680,7 @@ abstract class Type {
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
 	isContainedIn(types) { # {{{
 		for type in types {
-			if this.equals(type) {
+			if @equals(type) {
 				return true
 			}
 		}
@@ -699,12 +699,12 @@ abstract class Type {
 			return @exhaustive
 		}
 	} # }}}
-	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
+	isExhaustive(node) => @isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicit() => true
 	isExplicitlyExported() => @exported
-	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequirement() || @referenceIndex != -1
-	isExportable(mode: ExportMode) => mode ~~ ExportMode::Requirement || this.isExportable()
-	isExportingFragment() => (!this.isVirtual() && !this.isSystem()) || (this.isSealed() && this.isExtendable())
+	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1
+	isExportable(mode: ExportMode) => mode ~~ ExportMode::Requirement || @isExportable()
+	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
 	isExported() => @exported
 	isExtendable() => false
 	isFlexible() => false
@@ -712,7 +712,7 @@ abstract class Type {
 	isFusion() => false
 	isHybrid() => false
 	isImmutable() => false
-	isInoperative() => this.isNever() || this.isVoid()
+	isInoperative() => @isNever() || @isVoid()
 	isInstance() => false
 	isIterable() => false
 	isMergeable(type) => false
@@ -749,7 +749,7 @@ abstract class Type {
 	isVirtual() => false
 	isVoid() => false
 	// TODO to remove
-	matchContentOf(value: Type?): Boolean => this.equals(value)
+	matchContentOf(value: Type?): Boolean => @equals(value)
 	minorOriginal() => null
 	origin(): @origin
 	origin(@origin): this
@@ -764,7 +764,7 @@ abstract class Type {
 	setNullable(nullable: Boolean) => this
 	setNullable(type: Type): Type { # {{{
 		if !type.isNullable() {
-			return this.setNullable(false)
+			return @setNullable(false)
 		}
 		else {
 			return this
@@ -783,7 +783,7 @@ abstract class Type {
 		return types
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
-		if !this.isVirtual() && !this.isSystem() {
+		if !@isVirtual() && !@isSystem() {
 			var varname = variable.name?()
 
 			if name == varname {
@@ -794,7 +794,7 @@ abstract class Type {
 			}
 		}
 
-		if this.isSealed() && this.isExtendable() {
+		if @isSealed() && @isExtendable() {
 			var varname = this.getSealedName()
 
 			if `__ks_\(name)` == varname {
@@ -809,40 +809,40 @@ abstract class Type {
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
-		else if this.isReferenced() {
-			return this.toMetadata(references, indexDelta, mode, module)
+		else if @isReferenced() {
+			return @toMetadata(references, indexDelta, mode, module)
 		}
 		else {
-			return this.export(references, indexDelta, mode, module)
+			return @export(references, indexDelta, mode, module)
 		}
 	} # }}}
 	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
-		else if this.isReferenced() {
+		else if @isReferenced() {
 			return {
-				reference: this.toMetadata(references, indexDelta, mode, module)
+				reference: @toMetadata(references, indexDelta, mode, module)
 			}
 		}
 		else {
-			return this.export(references, indexDelta, mode, module)
+			return @export(references, indexDelta, mode, module)
 		}
 	} # }}}
 	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		var reference = this.getMajorReferenceIndex()
+		var reference = @getMajorReferenceIndex()
 		if reference != -1 {
 			return {
 				reference
 			}
 		}
-		else if this.isReferenced() {
+		else if @isReferenced() {
 			return {
-				reference: this.toMetadata(references, indexDelta, mode, module)
+				reference: @toMetadata(references, indexDelta, mode, module)
 			}
 		}
 		else {
-			return this.export(references, indexDelta, mode, module)
+			return @export(references, indexDelta, mode, module)
 		}
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -854,25 +854,25 @@ abstract class Type {
 			// reserve position
 			references.push(null)
 
-			references[index] = this.export(references, indexDelta, mode, module)
+			references[index] = @export(references, indexDelta, mode, module)
 		}
 
 		return @referenceIndex
 	} # }}}
-	toNegativeTestFragments(fragments, node, junction: Junction = Junction::NONE) => this.toPositiveTestFragments(fragments.code('!'), node, junction)
+	toNegativeTestFragments(fragments, node, junction: Junction = Junction::NONE) => @toPositiveTestFragments(fragments.code('!'), node, junction)
 	toQuote(): String { # {{{
 		throw new NotSupportedException()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
 		if double {
-			return `"\(this.toQuote())"`
+			return `"\(@toQuote())"`
 		}
 		else {
-			return `'\(this.toQuote())'`
+			return `'\(@toQuote())'`
 		}
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { # {{{
-		reference: this.toMetadata(references, indexDelta, mode, module)
+		reference: @toMetadata(references, indexDelta, mode, module)
 	} # }}}
 	toRequiredMetadata(requirements: Array<Requirement>) { # {{{
 		if @required {
@@ -901,7 +901,7 @@ abstract class Type {
 			fragments.code('value => ')
 		}
 
-		this.toTestFunctionFragments(fragments, node, Junction::NONE)
+		@toTestFunctionFragments(fragments, node, Junction::NONE)
 
 		if node._options.format.functions == 'es5' {
 			fragments.code('; }')
@@ -911,7 +911,7 @@ abstract class Type {
 		NotImplementedException.throw()
 	} # }}}
 	toTestType() => this
-	toTypeQuote() => this.toQuote()
+	toTypeQuote() => @toQuote()
 	// TODO
 	// type(): this
 	type() => this

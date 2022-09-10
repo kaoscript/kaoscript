@@ -1,19 +1,19 @@
 class ComparisonExpression extends Expression {
 	private {
-		_await: Boolean				= false
-		_composite: Boolean			= false
-		_computed: Boolean			= true
-		_junction: String			= ' && '
-		_junctive: Boolean			= false
-		_operands					= []
-		_operators					= []
-		_reuseName: String?			= null
-		_tested: Boolean			= false
+		@await: Boolean				= false
+		@composite: Boolean			= false
+		@computed: Boolean			= true
+		@junction: String			= ' && '
+		@junctive: Boolean			= false
+		@operands					= []
+		@operators					= []
+		@reuseName: String?			= null
+		@tested: Boolean			= false
 	}
 	analyse() { # {{{
 		var mut operand1, operand2, operator
 
-		operand1 = this.addOperand(@data.values[0])
+		operand1 = @addOperand(@data.values[0])
 
 		if @data.values.length == 3 {
 			var value = @data.values[2]
@@ -22,7 +22,7 @@ class ComparisonExpression extends Expression {
 				@junctive = true
 
 				for var operand in value.operands {
-					this.addOperator(@data.values[1], operand1, this.addOperand(operand))
+					@addOperator(@data.values[1], operand1, @addOperand(operand))
 				}
 
 				if value.operator.kind == BinaryOperatorKind::And {
@@ -36,14 +36,14 @@ class ComparisonExpression extends Expression {
 				}
 			}
 			else {
-				this.addOperator(@data.values[1], operand1, this.addOperand(@data.values[2]))
+				@addOperator(@data.values[1], operand1, @addOperand(@data.values[2]))
 			}
 		}
 		else {
 			for var i from 1 til @data.values.length by 2 {
-				operand2 = this.addOperand(@data.values[i + 1])
+				operand2 = @addOperand(@data.values[i + 1])
 
-				this.addOperator(@data.values[i], operand1, operand2)
+				@addOperator(@data.values[i], operand1, operand2)
 
 				operand1 = operand2
 			}
@@ -113,7 +113,7 @@ class ComparisonExpression extends Expression {
 		return operand
 	} # }}}
 	private addOperator(data, operand1, operand2) { # {{{
-		var operator = this.getOperator(data, operand1, operand2)
+		var operator = @getOperator(data, operand1, operand2)
 
 		@operators.push(operator)
 	} # }}}
@@ -206,7 +206,7 @@ class ComparisonExpression extends Expression {
 			NotSupportedException.throw(this)
 		}
 
-		var test = this.isNullable() && !@tested
+		var test = @isNullable() && !@tested
 		if test {
 			fragments.wrapNullable(this).code(' ? ')
 		}
@@ -302,26 +302,26 @@ class ComparisonExpression extends Expression {
 
 abstract class ComparisonOperator {
 	private {
-		_left
-		_node
-		_right
+		@left
+		@node
+		@right
 	}
 	constructor(@node, @left, @right)
 	abstract symbol(): String
 	prepare()
 	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
-	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
-	inferWhenTrueTypes(inferables) => this.inferTypes(inferables)
+	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
+	inferWhenTrueTypes(inferables) => @inferTypes(inferables)
 	isComputed() => true
 }
 
 class EqualityOperator extends ComparisonOperator {
 	private {
-		_enumLeft: Boolean		= false
-		_enumRight: Boolean		= false
-		_infinity: Boolean		= false
-		_nanLeft: Boolean		= false
-		_nanRight: Boolean		= false
+		@enumLeft: Boolean		= false
+		@enumRight: Boolean		= false
+		@infinity: Boolean		= false
+		@nanLeft: Boolean		= false
+		@nanRight: Boolean		= false
 	}
 	override prepare() { # {{{
 		var leftType = @left.type()
@@ -540,11 +540,11 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.code($runtime.operator(@node), '.eq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
-			this.toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
+			@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
 
 			fragments.code(' === ')
 
-			this.toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
+			@toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
 		}
 	} # }}}
 	toRightFragments(fragments, reuseName?, reusable, assignable) { # {{{
@@ -611,18 +611,18 @@ class InequalityOperator extends EqualityOperator {
 			fragments.code($runtime.operator(@node), '.neq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
-			this.toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
+			@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
 
 			fragments.code(' !== ')
 
-			this.toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
+			@toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
 		}
 	} # }}}
 }
 
 abstract class NumericComparisonOperator extends ComparisonOperator {
 	private {
-		_isNative: Boolean		= false
+		@isNative: Boolean		= false
 	}
 	prepare() { # {{{
 		super()
@@ -653,7 +653,7 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 			fragments.wrap(@left)
 		}
 
-		fragments.code($space, this.symbol(), $space)
+		fragments.code($space, @symbol(), $space)
 
 		if rightReusable && reuseName != null {
 			fragments.code('(', reuseName, $equals).compile(@right).code(')')
@@ -664,10 +664,10 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 	} # }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { # {{{
 		if @isNative {
-			this.toNativeFragments(fragments, reuseName, leftReusable, rightReusable)
+			@toNativeFragments(fragments, reuseName, leftReusable, rightReusable)
 		}
 		else {
-			fragments.code($runtime.operator(@node), `.\(this.runtime())(`)
+			fragments.code($runtime.operator(@node), `.\(@runtime())(`)
 
 			if reuseName != null {
 				if leftReusable {

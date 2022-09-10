@@ -195,11 +195,11 @@ var $runtime = {
 
 abstract class AbstractNode {
 	private {
-		_data: Any?				= null
-		_options
-		_parent: AbstractNode?	= null
-		_reference
-		_scope: Scope?			= null
+		@data: Any?				= null
+		@options
+		@parent: AbstractNode?	= null
+		@reference
+		@scope: Scope?			= null
 	}
 	constructor()
 	constructor(@data, @parent, @scope = parent?.scope()) { # {{{
@@ -208,7 +208,7 @@ abstract class AbstractNode {
 	constructor(@data, @parent, scope: Scope, kind: ScopeType) { # {{{
 		@options = parent._options
 
-		@scope = this.newScope(scope, kind)
+		@scope = @newScope(scope, kind)
 	} # }}}
 	abstract analyse()
 	// TODO remove default value
@@ -222,7 +222,7 @@ abstract class AbstractNode {
 	getFunctionNode() => @parent?.getFunctionNode()
 	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
-	isIncluded(): Boolean => this.file() != this.module().file()
+	isIncluded(): Boolean => @file() != @module().file()
 	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { # {{{
 		switch type {
@@ -253,7 +253,7 @@ abstract class AbstractNode {
 	} # }}}
 	parent() => @parent
 	printDebug() { # {{{
-		console.log(`\(this.file()):\(@data.start.line)`)
+		console.log(`\(@file()):\(@data.start.line)`)
 	} # }}}
 	reference() { # {{{
 		if ?@parent?.reference() {
@@ -570,14 +570,14 @@ var $targets = {
 
 export class Compiler {
 	private late {
-		_module: Module
+		@module: Module
 	}
 	private {
-		_file: String
-		_fragments
-		_hashes: Dictionary
-		_hierarchy: Array
-		_options: Dictionary
+		@file: String
+		@fragments
+		@hashes: Dictionary
+		@hierarchy: Array
+		@options: Dictionary
 	}
 	static {
 		registerTarget(target: String, fn: Function) { # {{{
@@ -705,7 +705,7 @@ export class Compiler {
 		return this
 	} # }}}
 	compile(data: String? = null) { # {{{
-		return this.initiate(data).finish()
+		return @initiate(data).finish()
 	} # }}}
 	createServant(file) { # {{{
 		return new Compiler(file, Dictionary.defaults(@options, {
@@ -749,18 +749,18 @@ export class Compiler {
 		fs.mkdir(path.dirname(@file))
 
 		if @module.isBinary() {
-			this.writeBinaryFiles()
+			@writeBinaryFiles()
 		}
 		else {
-			this.writeModuleFiles()
+			@writeModuleFiles()
 		}
 	} # }}}
 	private writeBinaryFiles() { # {{{
 		var variationId = @module.toVariationId()
 
-		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
+		fs.writeFile(getBinaryPath(@file, variationId), @toSource())
 
-		this.writeHashFile(variationId)
+		@writeHashFile(variationId)
 	} # }}}
 	private writeHashFile(variationId: String) { # {{{
 		var hashPath = getHashPath(@file)
@@ -791,13 +791,13 @@ export class Compiler {
 	private writeModuleFiles() { # {{{
 		var variationId = @module.toVariationId()
 
-		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
+		fs.writeFile(getBinaryPath(@file, variationId), @toSource())
 
-		fs.writeFile(getRequirementsPath(@file), JSON.stringify(this.toRequirements(), fs.escapeJSON))
+		fs.writeFile(getRequirementsPath(@file), JSON.stringify(@toRequirements(), fs.escapeJSON))
 
-		fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(this.toExports(), fs.escapeJSON))
+		fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(@toExports(), fs.escapeJSON))
 
-		this.writeHashFile(variationId)
+		@writeHashFile(variationId)
 	} # }}}
 	writeOutput() { # {{{
 		if @options.output is not String {
@@ -808,7 +808,7 @@ export class Compiler {
 
 		var filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.js'
 
-		fs.writeFile(filename, this.toSource())
+		fs.writeFile(filename, @toSource())
 
 		return this
 	} # }}}

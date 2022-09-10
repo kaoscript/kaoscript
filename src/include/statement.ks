@@ -48,12 +48,12 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	defineVariables(left: AbstractNode, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
-		this.defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
+		@defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
 	} # }}}
 	export(recipient)
 	export(recipient, enhancement: Boolean) { # {{{
 		if !enhancement {
-			this.export(recipient)
+			@export(recipient)
 		}
 	} # }}}
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
@@ -85,7 +85,7 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		var variables = this.assignments()
+		var variables = @assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}

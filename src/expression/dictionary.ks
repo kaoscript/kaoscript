@@ -23,7 +23,7 @@ class DictionaryExpression extends Expression {
 
 				@spread = true
 
-				this.module().flag('Helper')
+				@module().flag('Helper')
 			}
 			else if data.name.kind == NodeKind::Identifier || data.name.kind == NodeKind::Literal {
 				property = new DictionaryLiteralMember(data, this)
@@ -227,11 +227,11 @@ class DictionaryExpression extends Expression {
 			fragments.code(')')
 		}
 		else {
-			if this.isUsingVariable('d') {
-				if !this.isUsingVariable('o') {
+			if @isUsingVariable('d') {
+				if !@isUsingVariable('o') {
 					@varname = 'o'
 				}
-				else if !this.isUsingVariable('_') {
+				else if !@isUsingVariable('_') {
 					@varname = '_'
 				}
 				else {
@@ -242,7 +242,7 @@ class DictionaryExpression extends Expression {
 			var mut usingThis = false
 
 			if @options.format.functions == 'es5' {
-				if this.isUsingVariable('this') {
+				if @isUsingVariable('this') {
 					usingThis = true
 
 					fragments.code('(function(that)')
@@ -315,7 +315,7 @@ class DictionaryLiteralMember extends Expression {
 		@type: Type
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
 
 		if @data.name.kind == NodeKind::Identifier	{
 			@name = new Literal(@data.name, this, @scope:Scope, @data.name.name)
@@ -402,7 +402,7 @@ class DictionaryComputedMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
 
 		if @data.name.kind == NodeKind::ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
@@ -501,7 +501,7 @@ class DictionarySpreadMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
 
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()

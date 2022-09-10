@@ -70,7 +70,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 		return array
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		var test = this.isNullable() && !@tested
+		var test = @isNullable() && !@tested
 		if test {
 			fragments
 				.compileNullable(this)
@@ -107,7 +107,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 
 		for var operand, index in @operands {
 			if index != 0 {
-				fragments += ` \(this.symbol()) `
+				fragments += ` \(@symbol()) `
 			}
 
 			if operand.isComputed() {
@@ -194,7 +194,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	toNativeFragments(fragments) { # {{{
 		for var operand, index in @operands {
 			if index != 0 {
-				fragments.code($space).code(this.symbol(), @data.operator).code($space)
+				fragments.code($space).code(@symbol(), @data.operator).code($space)
 			}
 
 			fragments.wrap(operand)
@@ -202,7 +202,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
 		if @enum {
-			this.toEnumFragments(fragments)
+			@toEnumFragments(fragments)
 		}
 		else if operator == this.operator() && type == OperandType::Number {
 			for var operand, index in @operands {
@@ -219,13 +219,13 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
 		if @enum {
-			this.toEnumFragments(fragments)
+			@toEnumFragments(fragments)
 		}
 		else if @native {
-			this.toNativeFragments(fragments)
+			@toNativeFragments(fragments)
 		}
 		else {
-			fragments.code($runtime.operator(this), `.\(this.runtime())(`)
+			fragments.code($runtime.operator(this), `.\(@runtime())(`)
 
 			for var operand, index in @operands {
 				if index != 0 {

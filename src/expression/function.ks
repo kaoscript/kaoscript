@@ -1,13 +1,13 @@
 class AnonymousFunctionExpression extends Expression {
 	private late {
-		_autoTyping: Boolean			= false
-		_awaiting: Boolean				= false
-		_block: Block
-		_exit: Boolean					= false
-		_isObjectMember: Boolean		= false
-		_parameters: Array<Parameter>
-		_topNodes: Array				= []
-		_type: Type
+		@autoTyping: Boolean			= false
+		@awaiting: Boolean				= false
+		@block: Block
+		@exit: Boolean					= false
+		@isObjectMember: Boolean		= false
+		@parameters: Array<Parameter>
+		@topNodes: Array				= []
+		@type: Type
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope, ScopeType::Function)
@@ -85,7 +85,7 @@ class AnonymousFunctionExpression extends Expression {
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
-		var assessment = this.type().assessment('__ks_rt', this)
+		var assessment = @type().assessment('__ks_rt', this)
 
 		var block = fragments.code('(() =>').newBlock()
 
@@ -160,17 +160,17 @@ class AnonymousFunctionExpression extends Expression {
 
 class ArrowFunctionExpression extends Expression {
 	private late {
-		_autoTyping: Boolean			= false
-		_awaiting: Boolean				= false
-		_block: Block
-		_es5: Boolean					= false
-		_exit: Boolean					= false
-		_name: String
-		_parameters: Array<Parameter>
-		_shiftToAuthority: Boolean		= false
-		_type: Type
-		_usingThis: Boolean				= false
-		_variables: Array<Variable>
+		@autoTyping: Boolean			= false
+		@awaiting: Boolean				= false
+		@block: Block
+		@es5: Boolean					= false
+		@exit: Boolean					= false
+		@name: String
+		@parameters: Array<Parameter>
+		@shiftToAuthority: Boolean		= false
+		@type: Type
+		@usingThis: Boolean				= false
+		@variables: Array<Variable>
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope, ScopeType::Block)
@@ -203,7 +203,7 @@ class ArrowFunctionExpression extends Expression {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
 
-		@usingThis = this.isUsingVariable('this')
+		@usingThis = @isUsingVariable('this')
 
 		if @es5 {
 			@variables = @block.listNonLocalVariables(@scope, [])
@@ -211,7 +211,7 @@ class ArrowFunctionExpression extends Expression {
 			if @usingThis || @variables.length != 0 {
 				@shiftToAuthority = true
 
-				var authority = this.authority()
+				var authority = @authority()
 
 				@name = authority.scope().getReservedName()
 

@@ -26,7 +26,7 @@ export class Module {
 		@variationId
 	}
 	constructor(data, @compiler, @file) { # {{{
-		@data = this.parse(data, file)
+		@data = @parse(data, file)
 
 		@directory = path.dirname(file)
 		@options = Attribute.configure(@data, @compiler._options, AttributeTarget::Global, file, true)
@@ -109,9 +109,9 @@ export class Module {
 		return this
 	} # }}}
 	compile() { # {{{
-		this.initiate()
+		@initiate()
 
-		this.finish()
+		@finish()
 	} # }}}
 	compiler() => @compiler
 	directory() => @directory
@@ -509,7 +509,7 @@ export class Module {
 	} # }}}
 	toExports() { # {{{
 		if @metaRequirements == null {
-			this.toRequirements()
+			@toRequirements()
 		}
 
 		if @metaExports == null {
@@ -650,7 +650,7 @@ class ModuleBlock extends AbstractNode {
 			statement.enhance()
 		}
 
-		var recipient = this.recipient()
+		var recipient = @recipient()
 		for var statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 

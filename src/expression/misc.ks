@@ -1,7 +1,7 @@
 class TempReusableExpression extends Expression {
 	private {
-		_count: Number			= 0
-		_value
+		@count: Number			= 0
+		@value
 	}
 	constructor(@value, parent) { # {{{
 		super({}, parent)
@@ -24,11 +24,11 @@ class TempReusableExpression extends Expression {
 
 class TempMemberExpression extends Expression {
 	private {
-		_computed: Boolean		= false
-		_object
-		_property
-		_reusable: Boolean		= false
-		_reuseName: String?		= null
+		@computed: Boolean		= false
+		@object
+		@property
+		@reusable: Boolean		= false
+		@reuseName: String?		= null
 	}
 	constructor(@object, @property, @computed, @parent, @scope) { # {{{
 		super({}, parent, scope)

@@ -1,13 +1,13 @@
 class ReturnStatement extends Statement {
 	private {
-		_await: Boolean			= false
-		_async: Boolean			= false
-		_enumCasting: Boolean	= false
-		_exceptions: Boolean	= false
-		_function				= null
-		_value					= null
-		_temp: String?			= null
-		_type: Type				= Type.Void
+		@await: Boolean			= false
+		@async: Boolean			= false
+		@enumCasting: Boolean	= false
+		@exceptions: Boolean	= false
+		@function				= null
+		@value					= null
+		@temp: String?			= null
+		@type: Type				= Type.Void
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
@@ -50,7 +50,7 @@ class ReturnStatement extends Statement {
 				@temp = @scope.acquireTempName(this)
 			}
 
-			this.assignTempVariables(@scope)
+			@assignTempVariables(@scope)
 
 			@type = @value.type().asReference()
 

@@ -26,14 +26,14 @@ class MacroScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
-		@predefined.__false = new Variable('false', true, true, @reference('Boolean'))
+		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
 		@predefined.__null = new Variable('null', true, true, Type.Null)
-		@predefined.__true = new Variable('true', true, true, @reference('Boolean'))
-		@predefined.__Infinity = new Variable('Infinity', true, true, @reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, @reference('Dictionary'))
-		@predefined.__NaN = new Variable('NaN', true, true, @reference('Number'))
-		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, @reference('Array'), @reference('Boolean'), @reference('Dictionary'), @reference('Enum'), @reference('Function'), @reference('Namespace'), @reference('Number'), @reference('String'), @reference('Struct'), @reference('Tuple')])))
-		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [@reference('Boolean'), @reference('Number'), @reference('String')])))
+		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
+		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
+		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
+		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
+		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, this.reference('Array'), this.reference('Boolean'), this.reference('Dictionary'), this.reference('Enum'), this.reference('Function'), this.reference('Namespace'), this.reference('Number'), this.reference('String'), this.reference('Struct'), this.reference('Tuple')])))
+		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)

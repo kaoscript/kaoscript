@@ -1,15 +1,15 @@
 class StructDeclaration extends Statement {
 	private late {
-		_array: Boolean							= false
-		_extending: Boolean						= false
-		_extendsName: String
-		_extendsType: NamedType<StructType>
-		_fields: Array<StructFieldDeclaration>	= []
-		_function: StructFunction
-		_name: String
-		_struct: StructType
-		_type: NamedType<StructType>
-		_variable: Variable
+		@array: Boolean							= false
+		@extending: Boolean						= false
+		@extendsName: String
+		@extendsType: NamedType<StructType>
+		@fields: Array<StructFieldDeclaration>	= []
+		@function: StructFunction
+		@name: String
+		@struct: StructType
+		@type: NamedType<StructType>
+		@variable: Variable
 	}
 	override initiate() { # {{{
 		@name = @data.name.name
@@ -120,7 +120,7 @@ class StructDeclaration extends Statement {
 			return fragments.code(')').step()
 		})
 
-		this.toObjectFragments(ctrl, mode)
+		@toObjectFragments(ctrl, mode)
 
 		ctrl.done()
 
@@ -152,8 +152,8 @@ class StructDeclaration extends Statement {
 
 class StructFunction extends AbstractNode {
 	private {
-		_parameters: Array<Parameter>	= []
-		_type: FunctionType
+		@parameters: Array<Parameter>	= []
+		@type: FunctionType
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
@@ -199,7 +199,7 @@ class StructFunction extends AbstractNode {
 	translate()
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewStruct
-	isAssertingParameterType() => this.isAssertingParameter()
+	isAssertingParameterType() => @isAssertingParameter()
 	isOverridableFunction() => false
 	parameters() => @parameters
 	type() => @type
@@ -207,12 +207,12 @@ class StructFunction extends AbstractNode {
 
 class StructFieldDeclaration extends AbstractNode {
 	private late {
-		_index: Number
-		_type: StructFieldType
+		@index: Number
+		@type: StructFieldType
 	}
 	private {
-		_name: String
-		_parameter: StructFieldParameter
+		@name: String
+		@parameter: StructFieldParameter
 	}
 	constructor(data, parent) { # {{{
 		super(data, parent)
@@ -274,8 +274,8 @@ class StructFieldDeclaration extends AbstractNode {
 
 class StructFieldParameter extends Parameter {
 	private {
-		_field: StructFieldDeclaration
-		_validation: Boolean			 = true
+		@field: StructFieldDeclaration
+		@validation: Boolean			 = true
 	}
 	constructor(@field, parent) { # {{{
 		super(field._data, parent)

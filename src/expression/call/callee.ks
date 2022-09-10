@@ -1,8 +1,8 @@
 abstract class Callee {
 	private {
-		_data
-		_nullable: Boolean			= false
-		_nullableProperty: Boolean	= false
+		@data
+		@nullable: Boolean			= false
+		@nullableProperty: Boolean	= false
 	}
 	constructor(@data) { # {{{
 		for var modifier in data.modifiers {

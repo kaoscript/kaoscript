@@ -34,7 +34,7 @@ class StructType extends Type {
 	} # }}}
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
-			@assessment = Router.assess([this.function(reference, node)], reference.name(), node)
+			@assessment = Router.assess([@function(reference, node)], reference.name(), node)
 		}
 
 		return @assessment
@@ -76,7 +76,7 @@ class StructType extends Type {
 
 			@function = new FunctionType(scope)
 
-			for var field, index in this.listAllFields([]) {
+			for var field, index in @listAllFields([]) {
 				if field.isRequired() {
 					@function.addParameter(field.type(), field.name(), 1, 1)
 				}
@@ -156,8 +156,8 @@ class StructType extends Type {
 		return list
 	} # }}}
 	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		var fields = this.getAllFieldsMap()
-		var count = this.count()
+		var fields = @getAllFieldsMap()
+		var count = @count()
 
 		var nameds = {}
 		var mut namedCount = 0
@@ -255,13 +255,13 @@ class StructType extends Type {
 
 		return true
 	} # }}}
-	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [this.toMetadata(references, indexDelta, mode, module), name]
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [@toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
 	sortArguments(arguments: Array, node) { # {{{
 		var order = []
 
-		var fields = this.getAllFieldsMap()
-		var count = this.count()
+		var fields = @getAllFieldsMap()
+		var count = @count()
 
 		var nameds = {}
 		var mut namedCount = 0

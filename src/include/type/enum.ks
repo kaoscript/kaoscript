@@ -142,10 +142,10 @@ class EnumType extends Type {
 				}
 
 				if instance {
-					this.dedupInstanceMethod(data.name.name!!, type)
+					@dedupInstanceMethod(data.name.name!!, type)
 				}
 				else {
-					this.dedupStaticMethod(data.name.name!!, type)
+					@dedupStaticMethod(data.name.name!!, type)
 				}
 			}
 			=> {
@@ -194,7 +194,7 @@ class EnumType extends Type {
 	} # }}}
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
-			@assessment = Router.assess([this.function(reference, node)], reference.name(), node)
+			@assessment = Router.assess([@function(reference, node)], reference.name(), node)
 		}
 
 		return @assessment
@@ -243,7 +243,7 @@ class EnumType extends Type {
 			}
 		}
 
-		return this.addInstanceMethod(name, type)
+		return @addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
 		if var index ?= type.index() {
@@ -256,10 +256,10 @@ class EnumType extends Type {
 			}
 		}
 
-		return this.addStaticMethod(name, type)
+		return @addStaticMethod(name, type)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		var exhaustive = this.isExhaustive()
+		var exhaustive = @isExhaustive()
 
 		var export = {
 			kind: TypeKind::Enum
@@ -425,10 +425,10 @@ class EnumType extends Type {
 	index() => @index
 	index(@index) => @index
 	override isComparableWith(type) { # {{{
-		if this.isNumber() {
+		if @isNumber() {
 			return type.canBeNumber()
 		}
-		else if this.isString() {
+		else if @isString() {
 			return type.canBeString()
 		}
 		else {
@@ -444,7 +444,7 @@ class EnumType extends Type {
 			return true
 		}
 	} # }}}
-	isExhaustiveInstanceMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveInstanceMethod(name)
+	isExhaustiveInstanceMethod(name, node) => @isExhaustive(node) && @isExhaustiveInstanceMethod(name)
 	isExhaustiveStaticMethod(name) { # {{{
 		if @exhaustiveness.staticMethods[name] == false {
 			return false
@@ -453,7 +453,7 @@ class EnumType extends Type {
 			return true
 		}
 	} # }}}
-	isExhaustiveStaticMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveStaticMethod(name)
+	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
 	isFlags() => @kind == EnumTypeKind::Bit
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()

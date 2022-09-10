@@ -1,8 +1,8 @@
 class ThrowStatement extends Statement {
 	private {
-		_function	= null
-		_inSource: Boolean	= true
-		_value		= null
+		@function	= null
+		@inSource: Boolean	= true
+		@value		= null
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
@@ -45,7 +45,7 @@ class ThrowStatement extends Statement {
 		else if !type.isAny() {
 			TypeException.throwRequireClass(this)
 		}
-		else if @inSource && !this.module().isBinary() {
+		else if @inSource && !@module().isBinary() {
 			SyntaxException.throwUnreportedError(this)
 		}
 	} # }}}

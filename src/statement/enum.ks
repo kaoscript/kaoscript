@@ -351,7 +351,7 @@ class EnumMethodDeclaration extends Statement {
 		@topNodes: Array				= []
 	}
 	constructor(data, parent) { # {{{
-		super(data, parent, this.newScope(parent.scope(), ScopeType::Function))
+		super(data, parent, @newScope(parent.scope(), ScopeType::Function))
 
 		@name = data.name.name
 
@@ -512,7 +512,7 @@ class EnumMethodDeclaration extends Statement {
 		ctrl.done()
 		line.done()
 
-		this.toIndigentFragments(fragments)
+		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
 }

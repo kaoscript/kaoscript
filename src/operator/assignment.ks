@@ -9,17 +9,17 @@ abstract class AssignmentOperatorExpression extends Expression {
 	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
 
-		if !this.isAssigningBinding() && (@left is ArrayBinding || @left is ObjectBinding) {
+		if !@isAssigningBinding() && (@left is ArrayBinding || @left is ObjectBinding) {
 			SyntaxException.throwUnsupportedDestructuringAssignment(this)
 		}
 
-		if this.isDeclararing() {
+		if @isDeclararing() {
 			@left.setAssignment(AssignmentType::Expression)
 		}
 
 		@left.analyse()
 
-		@bindingScope = this.newScope(@scope, ScopeType::Hollow)
+		@bindingScope = @newScope(@scope, ScopeType::Hollow)
 
 		@right = $compile.expression(@data.right, this, @bindingScope)
 
@@ -27,8 +27,8 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@await = @right.isAwait()
 
-		if this.isDeclararing() {
-			this.defineVariables(@left)
+		if @isDeclararing() {
+			@defineVariables(@left)
 		}
 	} # }}}
 	override prepare(target) { # {{{
@@ -79,7 +79,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
 	isDeclararing() => false
-	isDeclararingVariable(name: String) => this.isDeclararing() && @left.isDeclararingVariable(name)
+	isDeclararingVariable(name: String) => @isDeclararing() && @left.isDeclararingVariable(name)
 	isExpectingType() => @left.isExpectingType()
 	isImmutable(variable) => variable.isImmutable()
 	isNullable() => @right.isNullable()
@@ -182,16 +182,16 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 		}
 		else if @enum {
-			this.toEnumFragments(fragments)
+			@toEnumFragments(fragments)
 		}
 		else if @native {
-			this.toNativeFragments(fragments)
+			@toNativeFragments(fragments)
 		}
 		else {
 			fragments
 				.compile(@left)
 				.code(' = ')
-				.code($runtime.operator(this), `.\(this.runtime())(`)
+				.code($runtime.operator(this), `.\(@runtime())(`)
 				.compile(@left)
 				.code($comma)
 
@@ -202,9 +202,9 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	} # }}}
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
-		fragments.compile(@left).code($space).code(this.symbol(), @data.operator).code($space).compile(@right)
+		fragments.compile(@left).code($space).code(@symbol(), @data.operator).code($space).compile(@right)
 	} # }}}
-	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
+	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 	type() => @type
 }
 

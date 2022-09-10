@@ -1,20 +1,20 @@
 class ThisExpression extends Expression {
 	private late {
-		_assignable: Boolean		= false
-		_assignment: AssignmentType	= AssignmentType::Neither
-		_calling: Boolean			= false
-		_class: NamedType
-		_composite: Boolean			= false
-		_declaration
-		_fragment: String
-		_immutable: Boolean			= false
-		_instance: Boolean			= true
-		_lateInit: Boolean			= false
-		_name: String
-		_namesake: Boolean			= false
-		_sealed: Boolean			= false
-		_type: Type?				= null
-		_variableName: String?		= null
+		@assignable: Boolean		= false
+		@assignment: AssignmentType	= AssignmentType::Neither
+		@calling: Boolean			= false
+		@class: NamedType
+		@composite: Boolean			= false
+		@declaration
+		@fragment: String
+		@immutable: Boolean			= false
+		@instance: Boolean			= true
+		@lateInit: Boolean			= false
+		@name: String
+		@namesake: Boolean			= false
+		@sealed: Boolean			= false
+		@type: Type?				= null
+		@variableName: String?		= null
 	}
 	analyse() { # {{{
 		@name = @data.name.name
@@ -256,7 +256,7 @@ class ThisExpression extends Expression {
 	} # }}}
 	getVariableName() => @variableName
 	getUnpreparedType() { # {{{
-		this.prepare(AnyType.NullableUnexplicit)
+		@prepare(AnyType.NullableUnexplicit)
 
 		return @type
 	} # }}}

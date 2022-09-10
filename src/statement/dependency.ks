@@ -6,7 +6,7 @@ abstract class DependencyStatement extends Statement {
 
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
-				var type = this.applyFlags(new ClassType(scope))
+				var type = @applyFlags(new ClassType(scope))
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if ?declaration.extends {
@@ -56,7 +56,7 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				var type = this.applyFlags(new EnumType(scope, ekind))
+				var type = @applyFlags(new EnumType(scope, ekind))
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if options.rules.nonExhaustive || declaration.members.length == 0 {
@@ -82,10 +82,10 @@ abstract class DependencyStatement extends Statement {
 					type = new FunctionType(parameters, declaration, this)
 				}
 				else {
-					type = this.scope().reference('Function')
+					type = @scope().reference('Function')
 				}
 
-				type = this.applyFlags(type)
+				type = @applyFlags(type)
 
 				var variable = scope.define(declaration.name.name, true, type, true, this)
 
@@ -99,7 +99,7 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind::NamespaceDeclaration => {
-				var type = this.applyFlags(new NamespaceType(scope))
+				var type = @applyFlags(new NamespaceType(scope))
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				for modifier in declaration.modifiers {
@@ -162,7 +162,7 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				type = this.applyFlags(type)
+				type = @applyFlags(type)
 
 				if instance {
 					type = @scope.reference(type)
@@ -179,10 +179,10 @@ abstract class DependencyStatement extends Statement {
 
 class ExternDeclaration extends DependencyStatement {
 	private {
-		_lines = []
+		@lines = []
 	}
 	initiate() { # {{{
-		var module = this.module()
+		var module = @module()
 
 		var mut variable
 		for var declaration in @data.declarations {
@@ -214,7 +214,7 @@ class ExternDeclaration extends DependencyStatement {
 					}
 				}
 				else if @parent.includePath() == null {
-					variable = this.define(declaration)
+					variable = @define(declaration)
 
 					if variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
 						@lines.push(`var \(variable.getDeclaredType().getSealedName()) = {}`)
@@ -225,7 +225,7 @@ class ExternDeclaration extends DependencyStatement {
 				}
 			}
 			else {
-				variable = this.define(declaration)
+				variable = @define(declaration)
 
 				var type = variable.getDeclaredType()
 
@@ -256,7 +256,7 @@ class ExternDeclaration extends DependencyStatement {
 
 class RequireDeclaration extends DependencyStatement {
 	initiate() { # {{{
-		var module = this.module()
+		var module = @module()
 
 		if module.isBinary() {
 			SyntaxException.throwNotBinary('require', this)
@@ -294,14 +294,14 @@ class RequireDeclaration extends DependencyStatement {
 					}
 				}
 				else if @parent.includePath() == null {
-					this.addRequirement(declaration)
+					@addRequirement(declaration)
 				}
 				else {
 					// TODO check & merge type
 				}
 			}
 			else {
-				this.addRequirement(declaration)
+				@addRequirement(declaration)
 			}
 		}
 	} # }}}
@@ -309,10 +309,10 @@ class RequireDeclaration extends DependencyStatement {
 	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
-		var variable = this.define(declaration)
+		var variable = @define(declaration)
 		var requirement = new StaticRequirement(variable, this)
 
-		this.module().addRequirement(requirement)
+		@module().addRequirement(requirement)
 	} # }}}
 	override applyFlags(type) { # {{{
 		return type
@@ -324,7 +324,7 @@ class RequireDeclaration extends DependencyStatement {
 
 class ExternOrRequireDeclaration extends DependencyStatement {
 	initiate() { # {{{
-		var module = this.module()
+		var module = @module()
 
 		if module.isBinary() {
 			SyntaxException.throwNotBinary('extern|require', this)
@@ -339,13 +339,13 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 					// TODO check & merge type
 				}
 				else {
-					this.addRequirement(declaration)
+					@addRequirement(declaration)
 				}
 			}
 		}
 		else {
 			for declaration in @data.declarations {
-				this.addRequirement(declaration)
+				@addRequirement(declaration)
 			}
 		}
 	} # }}}
@@ -353,10 +353,10 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
-		var variable = this.define(declaration)
+		var variable = @define(declaration)
 		var requirement = new EORDynamicRequirement(variable, this)
 
-		this.module()
+		@module()
 			.addAlien(requirement.name(), requirement.type())
 			.addRequirement(requirement)
 	} # }}}
@@ -371,10 +371,10 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 
 class RequireOrExternDeclaration extends DependencyStatement {
 	private {
-		_requirements: Array<ROEDynamicRequirement>		= []
+		@requirements: Array<ROEDynamicRequirement>		= []
 	}
 	initiate() { # {{{
-		var module = this.module()
+		var module = @module()
 
 		if module.isBinary() {
 			SyntaxException.throwNotBinary('require|extern', this)
@@ -388,13 +388,13 @@ class RequireOrExternDeclaration extends DependencyStatement {
 					// TODO check & merge type
 				}
 				else {
-					this.addRequirement(data)
+					@addRequirement(data)
 				}
 			}
 		}
 		else {
 			for var data in @data.declarations {
-				this.addRequirement(data)
+				@addRequirement(data)
 			}
 		}
 	} # }}}
@@ -402,10 +402,10 @@ class RequireOrExternDeclaration extends DependencyStatement {
 	override prepare(target)
 	translate()
 	addRequirement(declaration) { # {{{
-		var variable = this.define(declaration)
+		var variable = @define(declaration)
 		var requirement = new ROEDynamicRequirement(variable, this)
 
-		this.module()
+		@module()
 			.addRequirement(requirement)
 			.addAlien(requirement.name(), requirement.type())
 	} # }}}
@@ -420,10 +420,10 @@ class RequireOrExternDeclaration extends DependencyStatement {
 
 class RequireOrImportDeclaration extends Statement {
 	private {
-		_declarators = []
+		@declarators = []
 	}
 	initiate() { # {{{
-		if this.module().isBinary() {
+		if @module().isBinary() {
 			SyntaxException.throwNotBinary('require|import', this)
 		}
 
@@ -459,16 +459,16 @@ class RequireOrImportDeclaration extends Statement {
 
 class RequireOrImportDeclarator extends Importer {
 	private {
-		_requirements: Array	= []
+		@requirements: Array	= []
 	}
 	initiate() { # {{{
 		super()
 
-		var module = this.module()
+		var module = @module()
 
 		if @count != 0 {
 			if @parent.includePath() == null {
-				var line = this.line()
+				var line = @line()
 
 				for var var of @variables {
 					if var variable ?= @scope.getVariable(var.name) {
@@ -515,10 +515,10 @@ class RequireOrImportDeclarator extends Importer {
 	flagForcefullyRebinded()
 	override mode() => ImportMode::RequireOrImport
 	toStatementFragments(fragments, mode) { # {{{
-		var module = this.module()
+		var module = @module()
 
 		if @requirements.length == 0 {
-			this.toImportFragments(fragments)
+			@toImportFragments(fragments)
 		}
 		else if @requirements.length == 1 {
 			var requirement = @requirements[0]
@@ -534,12 +534,12 @@ class RequireOrImportDeclarator extends Importer {
 					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
 				}
 
-				this.toImportFragments(ctrl)
+				@toImportFragments(ctrl)
 
 				ctrl.done()
 			}
 			else if argument is Boolean {
-				this.toImportFragments(fragments)
+				@toImportFragments(fragments)
 			}
 		}
 		else {
@@ -580,10 +580,10 @@ class RequireOrImportDeclarator extends Importer {
 				}
 
 				if notpasseds.length == @requirements.length {
-					this.toImportFragments(ctrl, true)
+					@toImportFragments(ctrl, true)
 				}
 				else {
-					this.toImportFragments(ctrl, false)
+					@toImportFragments(ctrl, false)
 
 					for var requirement in notpasseds {
 						if requirement.isSystem() {
@@ -626,10 +626,10 @@ class RequireOrImportDeclarator extends Importer {
 
 class ExternOrImportDeclaration extends Statement {
 	private {
-		_declarators = []
+		@declarators = []
 	}
 	initiate() { # {{{
-		if this.module().isBinary() {
+		if @module().isBinary() {
 			SyntaxException.throwNotBinary('extern|import', this)
 		}
 
@@ -665,12 +665,12 @@ class ExternOrImportDeclaration extends Statement {
 
 class ExternOrImportDeclarator extends Importer {
 	private {
-		_requirements: Array	= []
+		@requirements: Array	= []
 	}
 	override prepare(target) { # {{{
 		super(target)
 
-		var module = this.module()
+		var module = @module()
 
 		for var var of @variables {
 			if var variable ?= @scope.getVariable(var.name) {
@@ -707,7 +707,7 @@ class ExternOrImportDeclarator extends Importer {
 	override mode() => ImportMode::ExternOrImport
 	toStatementFragments(fragments, mode) { # {{{
 		if @requirements.length == 0 {
-			this.toImportFragments(fragments)
+			@toImportFragments(fragments)
 		}
 		else if @requirements.length == 1 {
 			var requirement = @requirements[0]
@@ -721,7 +721,7 @@ class ExternOrImportDeclarator extends Importer {
 				ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
 			}
 
-			this.toImportFragments(ctrl)
+			@toImportFragments(ctrl)
 
 			ctrl.done()
 		}
@@ -747,7 +747,7 @@ class ExternOrImportDeclarator extends Importer {
 
 			ctrl.code(')').step()
 
-			this.toImportFragments(ctrl, false)
+			@toImportFragments(ctrl, false)
 
 			for var requirement in @requirements {
 				var control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
@@ -773,11 +773,11 @@ class ExternOrImportDeclarator extends Importer {
 
 abstract class Requirement {
 	private {
-		_alternative: Type?
-		_index: Number				= -1
-		_name: String
-		_node: AbstractNode
-		_type: Type
+		@alternative: Type?
+		@index: Number				= -1
+		@name: String
+		@node: AbstractNode
+		@type: Type
 	}
 	constructor(@name, @type, @node) { # {{{
 		if @type.isSystem() && @name == 'Dictionary' {
@@ -886,7 +886,7 @@ class ImportingRequirement extends StaticRequirement {
 
 abstract class DynamicRequirement extends Requirement {
 	private late {
-		_parameter: String
+		@parameter: String
 	}
 	toParameterFragments(fragments, comma) { # {{{
 		var module = @node.module()
@@ -1015,8 +1015,8 @@ class ROEDynamicRequirement extends DynamicRequirement {
 
 class ROIDynamicRequirement extends StaticRequirement {
 	private late {
-		_importer
-		_tempName: String
+		@importer
+		@tempName: String
 	}
 	constructor(@name, @type, @node) { # {{{
 		super(name, type, node)

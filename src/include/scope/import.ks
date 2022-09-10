@@ -1,14 +1,14 @@
 class ImportScope extends BlockScope {
 	private {
-		_scopeRenames				= {}
+		@scopeRenames				= {}
 	}
 	addVariable(name: String, variable: Variable, node?) { # {{{
-		if this.hasDefinedVariable(name) {
+		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
-			var newName = this.getNewName(name)
+			var newName = @getNewName(name)
 
 			if @variables[name] is not Array {
 				@declarations[newName] = true

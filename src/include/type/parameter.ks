@@ -213,7 +213,7 @@ class ParameterType extends Type {
 			return false
 		}
 	} # }}}
-	matchArgument(value: Parameter) => this.matchArgument(value.type())
+	matchArgument(value: Parameter) => @matchArgument(value.type())
 	matchArgument(value: Type) => value.matchContentOf(@type)
 	max(): @max
 	min(): @min

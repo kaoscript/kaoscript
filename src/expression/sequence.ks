@@ -1,8 +1,8 @@
 class SequenceExpression extends Expression {
 	private late {
-		_expressions: Array<Expression>		= []
-		_last: Number
-		_type: Type
+		@expressions: Array<Expression>		= []
+		@last: Number
+		@type: Type
 	}
 	analyse() { # {{{
 		for var data in @data.expressions {

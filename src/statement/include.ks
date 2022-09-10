@@ -2,10 +2,10 @@ var $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
 
 class IncludeDeclaration extends Statement {
 	private {
-		_declarators			= []
+		@declarators			= []
 	}
 	initiate() { # {{{
-		var mut directory = this.directory()
+		var mut directory = @directory()
 
 		var mut x
 		for var data in @data.declarations {
@@ -15,8 +15,8 @@ class IncludeDeclaration extends Statement {
 				x = fs.resolve(directory, file)
 
 				if fs.isFile(x) || fs.isFile((x += $extensions.source, x)) {
-					if this.canLoadLocalFile(x) {
-						this.loadLocalFile(data, x)
+					if @canLoadLocalFile(x) {
+						@loadLocalFile(data, x)
 					}
 				}
 				else {
@@ -91,8 +91,8 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
 
-				if this.canLoadModuleFile(x, file, modulePath, moduleVersion) {
-					this.loadModuleFile(data, x, file, modulePath, moduleVersion)
+				if @canLoadModuleFile(x, file, modulePath, moduleVersion) {
+					@loadModuleFile(data, x, file, modulePath, moduleVersion)
 				}
 			}
 		}
@@ -117,9 +117,9 @@ class IncludeDeclaration extends Statement {
 			declarator.translate()
 		}
 	} # }}}
-	canLoadLocalFile(file) => !this.module().hasInclude(file)
+	canLoadLocalFile(file) => !@module().hasInclude(file)
 	canLoadModuleFile(file, name, path, version) { # {{{
-		if versions ?= this.module().listIncludeVersions(file, path) {
+		if versions ?= @module().listIncludeVersions(file, path) {
 			if versions.length > 1 || versions[0] == version {
 				return false
 			}
@@ -138,7 +138,7 @@ class IncludeDeclaration extends Statement {
 	} # }}}
 	isExportable() => true
 	loadLocalFile(declaration, path) { # {{{
-		var module = this.module()
+		var module = @module()
 
 		var mut data = fs.readFile(path)
 
@@ -161,7 +161,7 @@ class IncludeDeclaration extends Statement {
 		@declarators.push(declarator)
 	} # }}}
 	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { # {{{
-		var module = this.module()
+		var module = @module()
 
 		var mut data = fs.readFile(path)
 
@@ -198,12 +198,12 @@ class IncludeAgainDeclaration extends IncludeDeclaration {
 
 class IncludeDeclarator extends Statement {
 	private {
-		_directory: String
-		_file: String
-		_includePath: String
-		_offsetEnd: Number		= 0
-		_offsetStart: Number	= 0
-		_statements				= []
+		@directory: String
+		@file: String
+		@includePath: String
+		@offsetEnd: Number		= 0
+		@offsetStart: Number	= 0
+		@statements				= []
 	}
 	constructor(declaration, @data, @file, moduleName: String? = null, @parent) { # {{{
 		super(data, parent)
@@ -223,7 +223,7 @@ class IncludeDeclarator extends Statement {
 		}
 	} # }}}
 	initiate() { # {{{
-		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, this.file())
+		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, @file())
 
 		var offset = @scope.getLineOffset()
 
@@ -310,7 +310,7 @@ class IncludeDeclarator extends Statement {
 
 		return false
 	} # }}}
-	recipient() => this.module()
+	recipient() => @module()
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { # {{{
 		for var statement in @statements {

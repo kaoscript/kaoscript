@@ -1,10 +1,10 @@
 class ClassVariableType extends Type {
 	private {
-		_access: Accessibility	= Accessibility::Public
-		_default: Boolean		= false
-		_immutable: Boolean		= false
-		_lateInit: Boolean		= false
-		_type: Type
+		@access: Accessibility	= Accessibility::Public
+		@default: Boolean		= false
+		@immutable: Boolean		= false
+		@lateInit: Boolean		= false
+		@type: Type
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassVariableType { # {{{

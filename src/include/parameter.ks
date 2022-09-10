@@ -766,10 +766,10 @@ class Parameter extends AbstractNode {
 		fragments.compile(@internal)
 	} # }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer) { # {{{
-		@internal.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, this.isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
+		@internal.toAfterRestFragments(fragments, context, index, wrongdoer, @rest, @arity, @isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { # {{{
-		@internal.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
+		@internal.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, @isRequired(), @defaultValue, @header && @headedDefaultValue, @parent.type().isAsync())
 	} # }}}
 	toErrorFragments(fragments, async) { # {{{
 		@internal.toErrorFragments(fragments, async)
@@ -1727,7 +1727,7 @@ class AnonymousParameter extends AbstractNode {
 					.code(` = \(context.name)[++__ks_i]`)
 					.done()
 
-				this.toValidationFragments(fragments, rest, defaultValue, header, async)
+				@toValidationFragments(fragments, rest, defaultValue, header, async)
 			}
 
 			context.required -= 1
@@ -1752,7 +1752,7 @@ class ThisExpressionParameter extends ThisExpression {
 			throw new NotSupportedException(this)
 		}
 
-		var method = this.statement()
+		var method = @statement()
 
 		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
 			var class = method.parent()

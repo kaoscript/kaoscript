@@ -21,7 +21,7 @@ class SealedCallee extends Callee {
 
 		var types = []
 		for var method in methods {
-			this.validate(method, node)
+			@validate(method, node)
 
 			types.push(method.getReturnType())
 		}

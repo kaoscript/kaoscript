@@ -59,7 +59,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				native = false
 			}
 			else {
-				TypeException.throwInvalidOperand(operand, @operator(), this)
+				TypeException.throwInvalidOperand(operand, this.operator(), this)
 			}
 
 			for var data, name of operand.inferWhenTrueTypes({}) {
@@ -72,7 +72,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
+				TypeException.throwInvalidOperation(this, this.operator(), this)
 			}
 		}
 
@@ -111,7 +111,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	inferTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
-		var scope = this.statement().scope()
+		var scope = @statement().scope()
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferTypes({}) {
@@ -154,7 +154,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
-	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
+	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	inferWhenTrueTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
@@ -224,7 +224,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		@toFragments(fragments, mode)
+		this.toFragments(fragments, mode)
 	} # }}}
 	type(): @type
 }
@@ -302,7 +302,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				native = false
 			}
 			else {
-				TypeException.throwInvalidOperand(operand, @operator(), this)
+				TypeException.throwInvalidOperand(operand, this.operator(), this)
 			}
 
 			if boolean && index < lastIndex {
@@ -324,7 +324,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
+				TypeException.throwInvalidOperation(this, this.operator(), this)
 			}
 		}
 
@@ -367,7 +367,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	inferTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
-		var scope = this.statement().scope()
+		var scope = @statement().scope()
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferTypes({}) {
@@ -413,7 +413,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	inferWhenFalseTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
-		var scope = this.statement().scope()
+		var scope = @statement().scope()
 
 		for var operand, index in @operands {
 			for var data, name of operand.inferWhenFalseTypes({}) {
@@ -459,7 +459,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	inferWhenTrueTypes(inferables) { # {{{
 		return inferables unless @operand == OperandType::Boolean
 
-		var scope = this.statement().scope()
+		var scope = @statement().scope()
 
 		var whenTrue = {}
 
@@ -583,7 +583,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		@toFragments(fragments, mode)
+		this.toFragments(fragments, mode)
 	} # }}}
 	type(): @type
 }
@@ -628,7 +628,7 @@ class BinaryOperatorImply extends BinaryOperatorOr {
 }
 
 class PolyadicOperatorXor extends PolyadicOperatorAnd {
-	inferWhenFalseTypes(inferables) => this.inferWhenTrueTypes(inferables)
+	inferWhenFalseTypes(inferables) => @inferWhenTrueTypes(inferables)
 	operator() => Operator::Xor
 	symbol() => '^^'
 	toFragments(fragments, mode) { # {{{
@@ -754,7 +754,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
+				TypeException.throwInvalidOperation(this, this.operator(), this)
 			}
 		}
 
@@ -763,7 +763,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
-				TypeException.throwInvalidOperation(this, @operator(), this)
+				TypeException.throwInvalidOperation(this, this.operator(), this)
 			}
 		}
 

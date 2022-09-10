@@ -1,22 +1,22 @@
 class ForFromStatement extends Statement {
 	private late {
-		_bindingScope
-		_body
-		_bodyScope
-		_boundName: String
-		_by
-		_byName: String
-		_conditionalTempVariables: Array	= []
-		_declaration: Boolean				= false
-		_declared: Boolean					= false
-		_from
-		_immutable: Boolean					= false
-		_til
-		_to
-		_until
-		_variable
-		_when
-		_while
+		@bindingScope
+		@body
+		@bodyScope
+		@boundName: String
+		@by
+		@byName: String
+		@conditionalTempVariables: Array	= []
+		@declaration: Boolean				= false
+		@declared: Boolean					= false
+		@from
+		@immutable: Boolean					= false
+		@til
+		@to
+		@until
+		@variable
+		@when
+		@while
 	}
 	analyse() { # {{{
 		var mut rename = false
@@ -34,13 +34,13 @@ class ForFromStatement extends Statement {
 		@declared = @declaration || variable == null
 
 		if @declared {
-			@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
 		}
 		else {
 			@bindingScope = @scope
 		}
 
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@from = $compile.expression(@data.from, this, @scope)
 		@from.analyse()
@@ -152,7 +152,7 @@ class ForFromStatement extends Statement {
 			@byName = @bindingScope.acquireTempName(!@declared) if @by.isComposite()
 		}
 
-		this.assignTempVariables(@bindingScope)
+		@assignTempVariables(@bindingScope)
 
 		if ?@until {
 			@until.prepare(@scope.reference('Boolean'))
@@ -161,7 +161,7 @@ class ForFromStatement extends Statement {
 				TypeException.throwInvalidCondition(@until, this)
 			}
 
-			this.assignTempVariables(@bodyScope)
+			@assignTempVariables(@bodyScope)
 		}
 		else if ?@while {
 			@while.prepare(@scope.reference('Boolean'))
@@ -170,7 +170,7 @@ class ForFromStatement extends Statement {
 				TypeException.throwInvalidCondition(@while, this)
 			}
 
-			this.assignTempVariables(@bodyScope)
+			@assignTempVariables(@bodyScope)
 		}
 
 		if ?@when {
@@ -312,7 +312,7 @@ class ForFromStatement extends Statement {
 		ctrl.code(')').step()
 
 		if ?@data.when {
-			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
+			@toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl
 				.newControl()

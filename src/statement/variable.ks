@@ -89,7 +89,7 @@ class VariableDeclaration extends Statement {
 				@rebindable = ?@valueScope
 			}
 
-			@valueScope ??= this.newScope(@scope, ScopeType::Hollow)
+			@valueScope ??= @newScope(@scope, ScopeType::Hollow)
 
 			var line = @valueScope.getRawLine()
 
@@ -102,7 +102,7 @@ class VariableDeclaration extends Statement {
 
 			@await = @value.isAwait()
 
-			if @await && !?@function && !this.module().isBinary() {
+			if @await && !?@function && !@module().isBinary() {
 				SyntaxException.throwInvalidAwait(this)
 			}
 		}
@@ -193,7 +193,7 @@ class VariableDeclaration extends Statement {
 
 			alreadyDeclared = @scope.hasDeclaredVariable(name)
 
-			var variable = @scope.define(name, this.isImmutable(), null, this)
+			var variable = @scope.define(name, @isImmutable(), null, this)
 
 			if alreadyDeclared {
 				alreadyDeclared = !variable.isRenamed()
@@ -270,7 +270,7 @@ class VariableDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		var variables = this.assignments()
+		var variables = @assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}

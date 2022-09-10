@@ -186,7 +186,7 @@ class ClassMethodType extends FunctionType {
 				@abstract = true
 			}
 			else if modifier.kind == ModifierKind::Async {
-				this.async()
+				@async()
 			}
 			else if modifier.kind == ModifierKind::Internal {
 				@access = Accessibility::Internal

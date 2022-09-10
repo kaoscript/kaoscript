@@ -1,6 +1,6 @@
 class DestructurableObjectType extends ReferenceType {
 	private {
-		_properties: Dictionary			= {}
+		@properties: Dictionary			= {}
 	}
 	constructor() { # {{{
 		super(null, '__ks_DestructurableObject')

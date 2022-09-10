@@ -22,7 +22,7 @@ class AwaitExpression extends Expression {
 		if ?ancestor {
 			@function = ancestor
 		}
-		else if !this.module().isBinary() {
+		else if !@module().isBinary() {
 			SyntaxException.throwInvalidAwait(this)
 		}
 	} # }}}

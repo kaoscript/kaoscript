@@ -1,10 +1,10 @@
 class NamespaceType extends Type {
 	private late {
-		_altering: Boolean					= false
-		_alterations: Dictionary			= {}
-		_majorOriginal: NamespaceType?
-		_properties: Dictionary				= {}
-		_sealProperties: Dictionary			= {}
+		@altering: Boolean					= false
+		@alterations: Dictionary			= {}
+		@majorOriginal: NamespaceType?
+		@properties: Dictionary				= {}
+		@sealProperties: Dictionary			= {}
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
@@ -70,7 +70,7 @@ class NamespaceType extends Type {
 		else {
 			type.index(0)
 
-			this.addProperty(name, type)
+			@addProperty(name, type)
 		}
 
 		return type.index()
@@ -114,7 +114,7 @@ class NamespaceType extends Type {
 			type.index(0)
 		}
 
-		return this.addProperty(data.name.name, type)
+		return @addProperty(data.name.name, type)
 	} # }}}
 	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { # {{{
 		var type = Type.import(data, metadata, references, alterations, queue, @scope, node)
@@ -173,7 +173,7 @@ class NamespaceType extends Type {
 			var export = {
 				kind: TypeKind::Namespace
 				original: @majorOriginal.referenceIndex()
-				exhaustive: this.isExhaustive()
+				exhaustive: @isExhaustive()
 				properties: {}
 			}
 
@@ -190,7 +190,7 @@ class NamespaceType extends Type {
 				kind: TypeKind::Namespace
 				sealed: @sealed
 				system: @system
-				exhaustive: this.isExhaustive()
+				exhaustive: @isExhaustive()
 				properties: {}
 			}
 
@@ -295,7 +295,7 @@ class NamespaceType extends Type {
 
 class NamespacePropertyType extends Type {
 	private {
-		_type: Type
+		@type: Type
 	}
 	static {
 		fromAST(data, node) => new NamespacePropertyType(node.scope(), Type.fromAST(data, node))
@@ -322,7 +322,7 @@ class NamespacePropertyType extends Type {
 			}
 		}
 
-		export.sealed = this.isSealed()
+		export.sealed = @isSealed()
 
 		return export
 	} # }}}
@@ -369,12 +369,12 @@ class NamespacePropertyType extends Type {
 		}
 		else if @type.isReferenced() {
 			return {
-				sealed: this.isSealed()
+				sealed: @isSealed()
 				type: @type.toMetadata(references, indexDelta, mode, module)
 			}
 		}
 		else {
-			return this.export(references, indexDelta, mode, module)
+			return @export(references, indexDelta, mode, module)
 		}
 	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)

@@ -1,25 +1,25 @@
 class ForRangeStatement extends Statement {
 	private {
-		_bindingScope
-		_bodyScope
-		_body
-		_boundName
-		_by
-		_byName
-		_declaration: Boolean		= false
-		_defineVariable: Boolean	= false
-		_from
-		_immutable: Boolean			= false
-		_til
-		_to
-		_until
-		_value
-		_when
-		_while
+		@bindingScope
+		@bodyScope
+		@body
+		@boundName
+		@by
+		@byName
+		@declaration: Boolean		= false
+		@defineVariable: Boolean	= false
+		@from
+		@immutable: Boolean			= false
+		@til
+		@to
+		@until
+		@value
+		@when
+		@while
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Declarative {

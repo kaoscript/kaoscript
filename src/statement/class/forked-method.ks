@@ -121,7 +121,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 					for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 						ctrl2.code(' && ') unless index == 0
 
-						var literal = new Literal(false, this, this.scope(), `\(parameter.name())[0]`)
+						var literal = new Literal(false, this, @scope(), `\(parameter.name())[0]`)
 
 						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
@@ -154,7 +154,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 				for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
 					ctrl2.code(' && ') unless index == 0
 
-					var literal = new Literal(false, this, this.scope(), parameter.name())
+					var literal = new Literal(false, this, @scope(), parameter.name())
 
 					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 

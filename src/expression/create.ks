@@ -1,14 +1,14 @@
 class CreateExpression extends Expression {
 	private late {
-		_alien: Boolean				= false
-		_arguments: Array			= []
-		_computed: Boolean			= true
-		_factory: Expression
-		_flatten: Boolean			= false
-		_hybrid: Boolean			= false
-		_result: CallMatchResult?
-		_sealed: Boolean			= false
-		_type: Type					= Type.Any
+		@alien: Boolean				= false
+		@arguments: Array			= []
+		@computed: Boolean			= true
+		@factory: Expression
+		@flatten: Boolean			= false
+		@hybrid: Boolean			= false
+		@result: CallMatchResult?
+		@sealed: Boolean			= false
+		@type: Type					= Type.Any
 	}
 	analyse() { # {{{
 		@factory = $compile.expression(@data.class, this)
@@ -134,7 +134,7 @@ class CreateExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				this.module().flag('Helper')
+				@module().flag('Helper')
 
 				fragments.code(`\($runtime.helper(this)).create(`).compile(@factory)
 

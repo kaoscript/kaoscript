@@ -1,6 +1,6 @@
 class SealableType extends Type {
 	private {
-		_type: Type
+		@type: Type
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
@@ -30,7 +30,7 @@ class SealableType extends Type {
 		else {
 			return {
 				kind: TypeKind::Sealable
-				sealed: this.isSealed()
+				sealed: @isSealed()
 				type: @type.toReference(references, indexDelta, mode, module)
 			}
 		}

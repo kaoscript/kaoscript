@@ -25,7 +25,7 @@ class SealedPreciseMethodCallee extends Callee {
 		@function = match.function
 		@arguments = match.arguments
 
-		this.validate(@function, node)
+		@validate(@function, node)
 
 		@type = @function.getReturnType()
 	} # }}}
@@ -57,7 +57,7 @@ class SealedPreciseMethodCallee extends Callee {
 					if @function.isInstance() {
 						fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-						if var substitute ?= this.getContextSubstitute(@object) {
+						if var substitute ?= @getContextSubstitute(@object) {
 							substitute(fragments)
 						}
 						else {
@@ -92,7 +92,7 @@ class SealedPreciseMethodCallee extends Callee {
 						if @function.isInstance() {
 							fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-							if var substitute ?= this.getContextSubstitute(@object) {
+							if var substitute ?= @getContextSubstitute(@object) {
 								substitute(fragments)
 							}
 							else {

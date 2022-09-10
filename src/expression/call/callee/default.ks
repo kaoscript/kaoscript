@@ -43,7 +43,7 @@ class DefaultCallee extends Callee {
 			var types = []
 
 			for var tt in type {
-				this.validate(tt, node)
+				@validate(tt, node)
 
 				types.pushUniq(tt.getReturnType())
 			}
@@ -54,7 +54,7 @@ class DefaultCallee extends Callee {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
-			this.validate(type, node)
+			@validate(type, node)
 
 			@type = type.getReturnType()
 		}
@@ -77,7 +77,7 @@ class DefaultCallee extends Callee {
 		@scope = data.scope.kind
 
 		for method in methods {
-			this.validate(method, node)
+			@validate(method, node)
 		}
 
 		if @type.isClass() {
@@ -97,7 +97,7 @@ class DefaultCallee extends Callee {
 			var types = []
 
 			for var tt in type {
-				this.validate(tt, node)
+				@validate(tt, node)
 
 				types.pushUniq(tt.getReturnType())
 			}
@@ -108,7 +108,7 @@ class DefaultCallee extends Callee {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
-			this.validate(type, node)
+			@validate(type, node)
 
 			@type = type.getReturnType()
 		}

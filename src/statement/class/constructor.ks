@@ -1,20 +1,20 @@
 class ClassConstructorDeclaration extends Statement {
 	private late {
-		_block: Block
-		_internalName: String
-		_parameters: Array<Parameter>
-		_type: ClassConstructorType
+		@block: Block
+		@internalName: String
+		@parameters: Array<Parameter>
+		@type: ClassConstructorType
 	}
 	private {
-		_aliases: Array							= []
-		_abstract: Boolean
-		_forked: Boolean						= false
-		_forks: Array<ClassConstructorType>?	= null
-		_hiddenOverride: Boolean				= false
-		_indigentValues: Array					= []
-		_override: Boolean						= false
-		_overriding: Boolean					= false
-		_topNodes: Array						= []
+		@aliases: Array							= []
+		@abstract: Boolean
+		@forked: Boolean						= false
+		@forks: Array<ClassConstructorType>?	= null
+		@hiddenOverride: Boolean				= false
+		@indigentValues: Array					= []
+		@override: Boolean						= false
+		@overriding: Boolean					= false
+		@topNodes: Array						= []
 	}
 	static toCreatorFragments(class, constructor, fragments) { # {{{
 		var ctrl = fragments.newControl()
@@ -127,12 +127,12 @@ class ClassConstructorDeclaration extends Statement {
 		var mut index = 1
 		if @block.isEmpty() {
 			if @parent._extending {
-				this.addCallToParentConstructor()
+				@addCallToParentConstructor()
 
 				index = 0
 			}
 		}
-		else if (index <- this.getConstructorIndex(@block.statements())) == -1 && @parent._extending {
+		else if (index <- @getConstructorIndex(@block.statements())) == -1 && @parent._extending {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -244,7 +244,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if ?statement.whenFalse && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}
@@ -263,7 +263,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if ?statement.whenFalse && this.getSuperIndex(statement.whenTrue.statements) != -1 && this.getSuperIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && @getSuperIndex(statement.whenTrue.statements) != -1 && @getSuperIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}
@@ -299,7 +299,7 @@ class ClassConstructorDeclaration extends Statement {
 		})
 
 		if @parent._extendsType.isSealedAlien() {
-			var index = this.getSuperIndex(@block.statements())
+			var index = @getSuperIndex(@block.statements())
 
 			if index == -1 {
 				ctrl.line('super()')
@@ -347,7 +347,7 @@ class ClassConstructorDeclaration extends Statement {
 				return node.code(') =>').newBlock()
 			})
 
-			var index = this.getSuperIndex(@block.statements())
+			var index = @getSuperIndex(@block.statements())
 
 			if index == -1 {
 				block.compile(@block)
@@ -388,7 +388,7 @@ class ClassConstructorDeclaration extends Statement {
 			ctrl.done() unless @parent._es5
 		}
 
-		this.toIndigentFragments(fragments)
+		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
 	private {

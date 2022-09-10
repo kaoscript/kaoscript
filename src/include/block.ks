@@ -9,7 +9,7 @@ class Block extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, this.file())
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, @file())
 
 		if !?@data.statements {
 			@data.statements = []
@@ -278,7 +278,7 @@ class ConstructorBlock extends FunctionBlock {
 		if variable.instance {
 			name = `this.\(variable.name)`
 
-			this.parent().type().addInitializingInstanceVariable(variable.name)
+			@parent().type().addInitializingInstanceVariable(variable.name)
 		}
 		else {
 			name = variable.name
@@ -312,7 +312,7 @@ class ConstructorBlock extends FunctionBlock {
 class MethodBlock extends FunctionBlock {
 	override initializeVariable(variable, expression, node) { # {{{
 		if variable.instance {
-			 this.parent().type().addInitializingInstanceVariable(variable.name)
+			 @parent().type().addInitializingInstanceVariable(variable.name)
 		}
 		else {
 			super(variable, expression, node)

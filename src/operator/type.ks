@@ -235,7 +235,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			for var operand in @data.right.operands {
 				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
 					if var variable ?= @scope.getVariable(operand.typeName.name) {
-						type.addType(this.validateType(variable))
+						type.addType(@validateType(variable))
 					}
 					else {
 						ReferenceException.throwNotDefined(operand.typeName.name, this)
@@ -252,7 +252,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
 				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
-					@falseType = this.validateType(variable)
+					@falseType = @validateType(variable)
 				}
 				else {
 					ReferenceException.throwNotDefined(@data.right.typeName.name, this)

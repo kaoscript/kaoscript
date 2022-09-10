@@ -20,7 +20,7 @@ class FunctionCallee extends Callee {
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
-		this.validate(match.function, node)
+		@validate(match.function, node)
 
 		@functions = [match.function]
 		@index = match.function.getCallIndex()

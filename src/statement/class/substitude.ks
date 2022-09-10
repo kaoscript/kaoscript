@@ -4,10 +4,10 @@ class Substitude {
 
 class CallThisConstructorSubstitude extends Substitude {
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_result
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@result
 	}
 	constructor(@data, @arguments, @class, node) { # {{{
 		super()
@@ -91,11 +91,11 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 
 class CallSuperConstructorSubstitude extends Substitude {
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_result
-		_skippable: Boolean				= false
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@result
+		@skippable: Boolean				= false
 	}
 	constructor(@data, @arguments, @class, node) { # {{{
 		super()
@@ -199,16 +199,16 @@ class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubsti
 
 class CallSuperMethodES6Substitude extends Substitude {
 	private late {
-		_extendsName: String
-		_name: String
-		_precise: Boolean
-		_result: CallMatchResult
+		@extendsName: String
+		@name: String
+		@precise: Boolean
+		@result: CallMatchResult
 	}
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_method: ClassMethodDeclaration
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@method: ClassMethodDeclaration
 	}
 	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
@@ -276,13 +276,13 @@ class CallSuperMethodES6Substitude extends Substitude {
 
 class CallSealedSuperMethodSubstitude extends Substitude {
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_method: ClassMethodDeclaration
-		_name: String
-		_result: CallMatchResult
-		_sealed: Boolean					= false
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@method: ClassMethodDeclaration
+		@name: String
+		@result: CallMatchResult
+		@sealed: Boolean					= false
 	}
 	constructor(@data, @arguments, @method, @class) { # {{{
 		super()
@@ -343,14 +343,14 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 
 class MemberSealedSuperMethodSubstitude extends Substitude {
 	private late {
-		_result: CallMatchResult
+		@result: CallMatchResult
 	}
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_extendsType: NamedType<ClassType>
-		_property: String
-		_sealed: Boolean					= false
+		@arguments
+		@class: NamedType<ClassType>
+		@extendsType: NamedType<ClassType>
+		@property: String
+		@sealed: Boolean					= false
 	}
 	constructor(@property, @arguments, @class, node) { # {{{
 		super()

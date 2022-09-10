@@ -125,7 +125,7 @@ class ElseAttribute extends Attribute {
 
 class ErrorAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
@@ -169,7 +169,7 @@ class ErrorAttribute extends Attribute {
 
 class FormatAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
@@ -197,7 +197,7 @@ class FormatAttribute extends Attribute {
 
 class IfAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Conditional
@@ -237,7 +237,7 @@ class IfAttribute extends Attribute {
 			SyntaxException.throwTooMuchAttributesForIfAttribute()
 		}
 
-		var flag = this.evaluate(@data.arguments[0], node.target())
+		var flag = @evaluate(@data.arguments[0], node.target())
 
 		node.setAttributeData(AttributeData::Conditional, flag)
 
@@ -247,14 +247,14 @@ class IfAttribute extends Attribute {
 		if data.kind == NodeKind::AttributeExpression {
 			switch data.name.name {
 				'all' => {
-					for arg in data.arguments when !this.evaluate(arg, target) {
+					for arg in data.arguments when !@evaluate(arg, target) {
 						return false
 					}
 
 					return true
 				}
 				'any' => {
-					for arg in data.arguments when this.evaluate(arg, target) {
+					for arg in data.arguments when @evaluate(arg, target) {
 						return true
 					}
 
@@ -266,7 +266,7 @@ class IfAttribute extends Attribute {
 							return false
 						}
 
-						return this.compareVersion(target.version, match[2]) > 0
+						return @compareVersion(target.version, match[2]) > 0
 					}
 					else {
 						return false
@@ -281,7 +281,7 @@ class IfAttribute extends Attribute {
 							return true
 						}
 
-						return this.compareVersion(target.version, match[2]) >= 0
+						return @compareVersion(target.version, match[2]) >= 0
 					}
 					else {
 						return false
@@ -293,7 +293,7 @@ class IfAttribute extends Attribute {
 							return false
 						}
 
-						return this.compareVersion(target.version, match[2]) < 0
+						return @compareVersion(target.version, match[2]) < 0
 					}
 					else {
 						return false
@@ -308,14 +308,14 @@ class IfAttribute extends Attribute {
 							return true
 						}
 
-						return this.compareVersion(target.version, match[2]) <= 0
+						return @compareVersion(target.version, match[2]) <= 0
 					}
 					else {
 						return false
 					}
 				}
 				'none' => {
-					for arg in data.arguments when this.evaluate(arg, target) {
+					for arg in data.arguments when @evaluate(arg, target) {
 						return false
 					}
 
@@ -324,7 +324,7 @@ class IfAttribute extends Attribute {
 				'one' => {
 					var mut count = 0
 
-					for arg in data.arguments when this.evaluate(arg, target) {
+					for arg in data.arguments when @evaluate(arg, target) {
 						count += 1
 					}
 
@@ -354,7 +354,7 @@ class IfAttribute extends Attribute {
 
 class ParseAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
@@ -382,7 +382,7 @@ class ParseAttribute extends Attribute {
 
 class PreserveAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Parameter
@@ -412,7 +412,7 @@ class PreserveParametersAttribute extends PreserveAttribute {
 
 class RulesAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
@@ -447,7 +447,7 @@ class RulesAttribute extends Attribute {
 
 class RuntimeAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global
@@ -510,7 +510,7 @@ class RuntimeAttribute extends Attribute {
 
 class TargetAttribute extends Attribute {
 	private {
-		_data
+		@data
 	}
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Statement

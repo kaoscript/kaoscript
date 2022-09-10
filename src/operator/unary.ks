@@ -1,6 +1,6 @@
 class UnaryOperatorExpression extends Expression {
 	private {
-		_argument
+		@argument
 	}
 	analyse() { # {{{
 		@argument = $compile.expression(@data.argument, this)
@@ -25,14 +25,14 @@ class UnaryOperatorExpression extends Expression {
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	private late {
-		_isEnum: Boolean		= false
-		_isNative: Boolean		= false
-		_type: Type
+		@isEnum: Boolean		= false
+		@isNative: Boolean		= false
+		@type: Type
 	}
 	override prepare(target) { # {{{
 		super(target)
 
-		if this.isAcceptingEnum() && @argument.type().isEnum() {
+		if @isAcceptingEnum() && @argument.type().isEnum() {
 			@isEnum = true
 
 			@type = @argument.type()
@@ -58,16 +58,16 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	abstract symbol(): String
 	toFragments(fragments, mode) { # {{{
 		if @isEnum {
-			fragments.code(this.symbol(), @data.operator).wrap(@argument)
+			fragments.code(@symbol(), @data.operator).wrap(@argument)
 		}
 		else if @isNative {
-			fragments.code(this.symbol(), @data.operator).wrap(@argument)
+			fragments.code(@symbol(), @data.operator).wrap(@argument)
 		}
 		else {
-			fragments.code($runtime.operator(this), `.\(this.runtime())(`).compile(@argument).code(')')
+			fragments.code($runtime.operator(this), `.\(@runtime())(`).compile(@argument).code(')')
 		}
 	} # }}}
-	toQuote() => `\(this.symbol())\(@argument.toQuote())`
+	toQuote() => `\(@symbol())\(@argument.toQuote())`
 	type() => @type
 }
 

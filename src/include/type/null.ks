@@ -4,7 +4,7 @@ class NullType extends Type {
 		Unexplicit = new NullType(false)
 	}
 	private {
-		_explicit: Boolean	= false
+		@explicit: Boolean	= false
 	}
 	constructor() { # {{{
 		super(null)

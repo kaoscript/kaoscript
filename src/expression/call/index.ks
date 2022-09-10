@@ -1,21 +1,21 @@
 class CallExpression extends Expression {
 	private late {
-		_arguments: Array						= []
-		_await: Boolean							= false
-		_callees: Array<Callee>					= []
-		_calleeByHash: Dictionary<Callee>		= {}
-		_callScope
-		_flatten: Boolean						= false
-		_hasDefaultCallee: Boolean				= false
-		_named: Boolean							= false
-		_nullable: Boolean						= false
-		_nullableComputed: Boolean				= false
-		_object									= null
-		_property: String
-		_reusable: Boolean						= false
-		_reuseName: String?						= null
-		_tested: Boolean						= false
-		_type: Type
+		@arguments: Array						= []
+		@await: Boolean							= false
+		@callees: Array<Callee>					= []
+		@calleeByHash: Dictionary<Callee>		= {}
+		@callScope
+		@flatten: Boolean						= false
+		@hasDefaultCallee: Boolean				= false
+		@named: Boolean							= false
+		@nullable: Boolean						= false
+		@nullableComputed: Boolean				= false
+		@object									= null
+		@property: String
+		@reusable: Boolean						= false
+		@reuseName: String?						= null
+		@tested: Boolean						= false
+		@type: Type
 	}
 	static {
 		toFlattenArgumentsFragments(fragments, arguments, prefill? = null) { # {{{
@@ -124,7 +124,7 @@ class CallExpression extends Expression {
 
 			@property = @data.callee.property.name
 
-			this.makeMemberCallee(@object.type())
+			@makeMemberCallee(@object.type())
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier {
@@ -155,10 +155,10 @@ class CallExpression extends Expression {
 					}
 
 					if var substitute ?= variable.replaceCall?(@data, @arguments, this) {
-						this.addCallee(new SubstituteCallee(@data, substitute, this))
+						@addCallee(new SubstituteCallee(@data, substitute, this))
 					}
 					else {
-						this.makeCallee(type, variable.name())
+						@makeCallee(type, variable.name())
 					}
 				}
 				else {
@@ -179,12 +179,12 @@ class CallExpression extends Expression {
 
 				if var result ?= Router.matchArguments(assessment, @arguments, this) {
 					if result is LenientCallMatchResult {
-						this.addCallee(new DefaultCallee(@data, expression, this))
+						@addCallee(new DefaultCallee(@data, expression, this))
 					}
 					else {
 						var simplified = new SimplifiedArrowFunctionExpression(expression, result.matches[0])
 
-						this.addCallee(new DefaultCallee(@data, simplified, this))
+						@addCallee(new DefaultCallee(@data, simplified, this))
 					}
 				}
 				else {
@@ -204,11 +204,11 @@ class CallExpression extends Expression {
 
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
-							this.addCallee(new ThisCallee(@data, expression, @property, result.possibilities, this))
+							@addCallee(new ThisCallee(@data, expression, @property, result.possibilities, this))
 						}
 						else {
 							if result.matches.length == 1 {
-								this.addCallee(new PreciseThisCallee(@data, expression, @property, result.matches[0], this))
+								@addCallee(new PreciseThisCallee(@data, expression, @property, result.matches[0], this))
 							}
 							else {
 								throw new NotImplementedException(this)
@@ -220,7 +220,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else if type.isFunction() {
-					this.addCallee(new DefaultCallee(@data, null, null, this))
+					@addCallee(new DefaultCallee(@data, null, null, this))
 				}
 				else {
 					ReferenceException.throwUndefinedFunction(@property, this)
@@ -231,7 +231,7 @@ class CallExpression extends Expression {
 					NotImplementedException.throw(this)
 				}
 
-				this.addCallee(new DefaultCallee(@data, null, null, this))
+				@addCallee(new DefaultCallee(@data, null, null, this))
 			}
 		}
 
@@ -262,7 +262,7 @@ class CallExpression extends Expression {
 				}
 			}
 
-			@type = Type.union(this.scope(), ...types)
+			@type = Type.union(@scope(), ...types)
 
 		}
 		// console.log('-- callees --')
@@ -466,23 +466,23 @@ class CallExpression extends Expression {
 
 			if var result ?= Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
-					this.addCallee(new DefaultCallee(@data, @object, result.possibilities, result.arguments, this))
+					@addCallee(new DefaultCallee(@data, @object, result.possibilities, result.arguments, this))
 				}
 				else {
 					if result.matches.length == 1 {
 						var match = result.matches[0]
 
 						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
-							this.addCallee(new DefaultCallee(@data, @object, match.function, this))
+							@addCallee(new DefaultCallee(@data, @object, match.function, this))
 						}
 						else {
-							this.addCallee(new FunctionCallee(@data, match, this))
+							@addCallee(new FunctionCallee(@data, match, this))
 						}
 					}
 					else {
 						var functions = [match.function for var match in result.matches]
 
-						this.addCallee(new DefaultCallee(@data, @object, functions, this))
+						@addCallee(new DefaultCallee(@data, @object, functions, this))
 					}
 				}
 			}
@@ -491,7 +491,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 
@@ -501,10 +501,10 @@ class CallExpression extends Expression {
 
 			if var result ?= Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
-					this.addCallee(new DefaultCallee(@data, @object, type.setNullable(true), result.arguments, this))
+					@addCallee(new DefaultCallee(@data, @object, type.setNullable(true), result.arguments, this))
 				}
 				else {
-					this.addCallee(new EnumCallee(@data, result.matches[0], this))
+					@addCallee(new EnumCallee(@data, result.matches[0], this))
 				}
 			}
 			else {
@@ -512,7 +512,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingStruct(name, @arguments, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, type.setNullable(true), this))
+					@addCallee(new DefaultCallee(@data, @object, type.setNullable(true), this))
 				}
 			}
 		}
@@ -521,10 +521,10 @@ class CallExpression extends Expression {
 
 			if var result ?= Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
-					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
+					@addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
 				else {
-					this.addCallee(new StructCallee(@data, result.matches[0], this))
+					@addCallee(new StructCallee(@data, result.matches[0], this))
 				}
 			}
 			else {
@@ -532,7 +532,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingStruct(name, @arguments, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, type, this))
+					@addCallee(new DefaultCallee(@data, @object, type, this))
 				}
 			}
 		}
@@ -541,10 +541,10 @@ class CallExpression extends Expression {
 
 			if var result ?= Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
-					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
+					@addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
 				else {
-					this.addCallee(new TupleCallee(@data, result.matches[0], this))
+					@addCallee(new TupleCallee(@data, result.matches[0], this))
 				}
 			}
 			else {
@@ -552,12 +552,12 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingTuple(name, @arguments, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, type, this))
+					@addCallee(new DefaultCallee(@data, @object, type, this))
 				}
 			}
 		}
 		else {
-			this.addCallee(new DefaultCallee(@data, @object, null, this))
+			@addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 	} # }}}
 	makeMemberCallee(value, mut name: NamedType? = null) { # {{{
@@ -567,13 +567,13 @@ class CallExpression extends Expression {
 
 		switch value {
 			is AliasType => {
-				this.makeMemberCallee(value.type(), name)
+				@makeMemberCallee(value.type(), name)
 			}
 			is ArrayType => {
-				this.makeMemberCalleeFromReference(@scope.reference('Array'))
+				@makeMemberCalleeFromReference(@scope.reference('Array'))
 			}
 			is ClassVariableType => {
-				this.makeMemberCalleeFromReference(value.type())
+				@makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
 				name = name as NamedType
@@ -584,10 +584,10 @@ class CallExpression extends Expression {
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
-								this.addCallee(new SealedCallee(@data, name, false, result.possibilities, this))
+								@addCallee(new SealedCallee(@data, name, false, result.possibilities, this))
 							}
 							else {
-								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
+								@addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 						}
 						else {
@@ -595,7 +595,7 @@ class CallExpression extends Expression {
 								var match = result.matches[0]
 
 								if match.function.isSealed() {
-									this.addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, name, this))
+									@addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, name, this))
 								}
 								else {
 									@addCallee(new PreciseMethodCallee(@data, @object, @property, match, @scope().reference(name), this))
@@ -605,10 +605,10 @@ class CallExpression extends Expression {
 								var functions = [match.function for var match in result.matches]
 
 								if functions.some((function, _, _) => function.isSealed()) {
-									this.addCallee(new SealedCallee(@data, name, false, functions, this))
+									@addCallee(new SealedCallee(@data, name, false, functions, this))
 								}
 								else {
-									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+									@addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
 							}
 						}
@@ -618,10 +618,10 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingClassMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else if assessment.sealed {
-							this.addCallee(new SealedMethodCallee(@data, name, false, this))
+							@addCallee(new SealedMethodCallee(@data, name, false, this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, null, this))
+							@addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 				}
@@ -629,15 +629,15 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotFoundClassMethod(@property, name.name(), this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is DictionaryType => {
 				if var property ?= value.getProperty(@property) {
-					this.makeCallee(property, @property)
+					@makeCallee(property, @property)
 				}
 				else {
-					this.makeMemberCalleeFromReference(@scope.reference('Dictionary'))
+					@makeMemberCalleeFromReference(@scope.reference('Dictionary'))
 				}
 			}
 			is EnumType => {
@@ -648,7 +648,7 @@ class CallExpression extends Expression {
 
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
-							this.addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
+							@addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
 						}
 						else {
 							if result.matches.length == 1 {
@@ -664,7 +664,7 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), @arguments, this)
 						}
 						else {
-							this.addCallee(new EnumMethodCallee(@data, @object, @property, null, this))
+							@addCallee(new EnumMethodCallee(@data, @object, @property, null, this))
 						}
 					}
 				}
@@ -672,17 +672,17 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotFoundEnumMethod(@property, name.name(), this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is ExclusionType => {
-				this.makeMemberCallee(value.getMainType())
+				@makeMemberCallee(value.getMainType())
 			}
 			is FunctionType => {
-				this.makeMemberCalleeFromReference(@scope.reference('Function'))
+				@makeMemberCalleeFromReference(@scope.reference('Function'))
 			}
 			is NamedType => {
-				this.makeMemberCallee(value.type(), value)
+				@makeMemberCallee(value.type(), value)
 			}
 			is NamespaceType => {
 				if var property ?= value.getProperty(@property) {
@@ -691,23 +691,23 @@ class CallExpression extends Expression {
 
 						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
-								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
+								@addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 							else {
 								if result.matches.length == 1 {
 									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										this.addCallee(new DefaultCallee(@data, @object, match.function, this))
+										@addCallee(new DefaultCallee(@data, @object, match.function, this))
 									}
 									else {
-										this.addCallee(new FunctionCallee(@data, match, this))
+										@addCallee(new FunctionCallee(@data, match, this))
 									}
 								}
 								else {
 									var functions = [match.function for var match in result.matches]
 
-									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+									@addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
 							}
 						}
@@ -715,7 +715,7 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingFunctionInNamespace(@property, name, @arguments, this)
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, null, this))
+							@addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 					else if property is SealableType {
@@ -729,11 +729,11 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotDefinedProperty(@property, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is ParameterType => {
-				this.makeMemberCallee(value.type(), name)
+				@makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType => {
 				if value.isNullable() && !@options.rules.ignoreMisfit {
@@ -742,18 +742,18 @@ class CallExpression extends Expression {
 					}
 				}
 
-				this.makeMemberCalleeFromReference(value)
+				@makeMemberCalleeFromReference(value)
 			}
 			is SealableType => {
-				this.makeMemberCallee(value.type(), name)
+				@makeMemberCallee(value.type(), name)
 			}
 			is UnionType => {
 				for var type in value.types() {
-					this.makeMemberCallee(type)
+					@makeMemberCallee(type)
 				}
 			}
 			=> {
-				this.addCallee(new DefaultCallee(@data, @object, null, this))
+				@addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
 	} # }}}
@@ -764,7 +764,7 @@ class CallExpression extends Expression {
 
 		switch value {
 			is AliasType => {
-				this.makeMemberCalleeFromReference(value.type())
+				@makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
 				if value.hasInstantiableMethod(@property) {
@@ -773,10 +773,10 @@ class CallExpression extends Expression {
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
-								this.addCallee(new SealedCallee(@data, reference.type(), true, result.possibilities, this))
+								@addCallee(new SealedCallee(@data, reference.type(), true, result.possibilities, this))
 							}
 							else {
-								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
+								@addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 						}
 						else {
@@ -786,20 +786,20 @@ class CallExpression extends Expression {
 								if match.function.isSealed() {
 									var class = value.getClassWithInstanceMethod(@property, reference.type())
 
-									this.addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, class, this))
+									@addCallee(new SealedPreciseMethodCallee(@data, @object, @property, match, class, this))
 								}
 								else {
-									this.addCallee(new PreciseMethodCallee(@data, @object, @property, match, reference, this))
+									@addCallee(new PreciseMethodCallee(@data, @object, @property, match, reference, this))
 								}
 							}
 							else {
 								var functions = [match.function for var match in result.matches]
 
 								if functions.some((function, _, _) => function.isSealed()) {
-									this.addCallee(new SealedCallee(@data, reference.type(), true, functions, this))
+									@addCallee(new SealedCallee(@data, reference.type(), true, functions, this))
 								}
 								else {
-									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+									@addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
 							}
 						}
@@ -809,7 +809,7 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingClassMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, null, this))
+							@addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 				}
@@ -817,13 +817,13 @@ class CallExpression extends Expression {
 						(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 						(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 				{
-					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
+					@addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
 				else if value.isExhaustive(this) {
 					ReferenceException.throwNotFoundClassMethod(@property, reference.name(), this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is DictionaryType => {
@@ -833,23 +833,23 @@ class CallExpression extends Expression {
 
 						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
-								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
+								@addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
 							else {
 								if result.matches.length == 1 {
 									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										this.addCallee(new DefaultCallee(@data, @object, match.function, this))
+										@addCallee(new DefaultCallee(@data, @object, match.function, this))
 									}
 									else {
-										this.addCallee(new FunctionCallee(@data, match, this))
+										@addCallee(new FunctionCallee(@data, match, this))
 									}
 								}
 								else {
 									var functions = [match.function for var match in result.matches]
 
-									this.addCallee(new DefaultCallee(@data, @object, functions, this))
+									@addCallee(new DefaultCallee(@data, @object, functions, this))
 								}
 							}
 						}
@@ -857,7 +857,7 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingFunction(@property, reference.name(), @arguments, this)
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, null, this))
+							@addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 					else {
@@ -868,7 +868,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotDefinedProperty(@property, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is EnumType => {
@@ -877,18 +877,18 @@ class CallExpression extends Expression {
 
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
-							this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
+							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
 						else {
 							if result.matches.length == 1 {
 								var match = result.matches[0]
 
-								this.addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, match, this))
+								@addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, match, this))
 							}
 							else {
 								var functions = [match.function for var match in result.matches]
 
-								this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.functions, this))
+								@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.functions, this))
 							}
 						}
 					}
@@ -897,7 +897,7 @@ class CallExpression extends Expression {
 							ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
 						}
 						else {
-							this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
 						}
 					}
 				}
@@ -905,45 +905,45 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotFoundEnumMethod(@property, reference.name(), this)
 				}
 				else {
-					this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+					@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
 				}
 			}
 			is FunctionType => {
 				throw new NotImplementedException(this)
 			}
 			is NamedType => {
-				this.makeMemberCalleeFromReference(value.type(), reference)
+				@makeMemberCalleeFromReference(value.type(), reference)
 			}
 			is ParameterType => {
 				throw new NotImplementedException(this)
 			}
 			is ReferenceType => {
-				this.makeMemberCalleeFromReference(value.type(), value)
+				@makeMemberCalleeFromReference(value.type(), value)
 			}
 			is UnionType => {
 				for var type in value.types() {
-					this.makeMemberCallee(type)
+					@makeMemberCallee(type)
 				}
 			}
 			=> {
-				this.addCallee(new DefaultCallee(@data, @object, null, this))
+				@addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
 	} # }}}
 	makeNamespaceCallee(property, sealed, name) { # {{{
 		if property is FunctionType {
 			if sealed {
-				this.addCallee(new SealedFunctionCallee(@data, name, property, property.getReturnType(), this))
+				@addCallee(new SealedFunctionCallee(@data, name, property, property.getReturnType(), this))
 			}
 			else {
-				this.makeCallee(property, @property)
+				@makeCallee(property, @property)
 			}
 		}
 		else if property is OverloadedFunctionType {
-			this.makeCallee(property, @property)
+			@makeCallee(property, @property)
 		}
 		else {
-			this.addCallee(new DefaultCallee(@data, @object, property, this))
+			@addCallee(new DefaultCallee(@data, @object, property, this))
 		}
 	} # }}}
 	releaseReusable() { # {{{
@@ -963,7 +963,7 @@ class CallExpression extends Expression {
 				}
 			}
 
-			this.toCallFragments(fragments, mode)
+			@toCallFragments(fragments, mode)
 
 			fragments.code(', ') if @arguments.length != 0
 		}
@@ -971,7 +971,7 @@ class CallExpression extends Expression {
 			if @reusable {
 				fragments.code(@reuseName)
 			}
-			else if this.isNullable() && !@tested {
+			else if @isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
 
 				@tested = true
@@ -987,7 +987,7 @@ class CallExpression extends Expression {
 					}
 				}
 
-				this.toCallFragments(fragments, mode)
+				@toCallFragments(fragments, mode)
 
 				fragments.code(')')
 			}
@@ -995,7 +995,7 @@ class CallExpression extends Expression {
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
 		if mode == Mode::Async {
-			this.toCallFragments(fragments, mode)
+			@toCallFragments(fragments, mode)
 
 			fragments.code(', ') if @arguments.length != 0
 		}
@@ -1007,7 +1007,7 @@ class CallExpression extends Expression {
 					fragments.code(' === true')
 				}
 			}
-			else if this.isNullable() && !@tested {
+			else if @isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
 
 				@tested = true
@@ -1021,7 +1021,7 @@ class CallExpression extends Expression {
 				fragments.code(' : false')
 			}
 			else {
-				this.toCallFragments(fragments, mode)
+				@toCallFragments(fragments, mode)
 
 				fragments.code(')')
 
@@ -1036,7 +1036,7 @@ class CallExpression extends Expression {
 			@callees[0].toFragments(fragments, mode, this)
 		}
 		else {
-			this.module().flag('Type')
+			@module().flag('Type')
 
 			for var callee in @callees til -1 {
 				callee.toPositiveTestFragments(fragments, this)
@@ -1110,8 +1110,8 @@ class CallExpression extends Expression {
 
 class NamedArgument extends Expression {
 	private late {
-		_name: String
-		_value: Expression
+		@name: String
+		@value: Expression
 	}
 	analyse() { # {{{
 		@name = @data.name.name
@@ -1136,7 +1136,7 @@ class NamedArgument extends Expression {
 
 class SimplifiedArrowFunctionExpression extends Expression {
 	private {
-		_expression
+		@expression
 	}
 	constructor(@expression, match) {
 		super(expression.data(), expression.parent(), expression.scope(), ScopeType::Block)

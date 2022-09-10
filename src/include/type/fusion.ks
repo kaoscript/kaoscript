@@ -1,7 +1,7 @@
 class FusionType extends Type {
 	private {
-		_nullable: Boolean			= false
-		_types: Array<Type>
+		@nullable: Boolean			= false
+		@types: Array<Type>
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{

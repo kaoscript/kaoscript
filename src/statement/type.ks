@@ -1,7 +1,7 @@
 class TypeAliasDeclaration extends Statement {
 	private late {
-		_name: String
-		_variable: Variable
+		@name: String
+		@variable: Variable
 	}
 	override initiate() { # {{{
 		@name = @data.name.name

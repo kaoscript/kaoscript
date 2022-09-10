@@ -43,8 +43,8 @@ class ArrayType extends Type {
 		return type
 	} # }}}
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
-		if @isSubsetOf(value, MatchingMode::Similar) {
-			if @isSubsetOf(value, MatchingMode::Exact) {
+		if this.isSubsetOf(value, MatchingMode::Similar) {
+			if this.isSubsetOf(value, MatchingMode::Exact) {
 				return 0
 			}
 			else {
@@ -187,7 +187,7 @@ class ArrayType extends Type {
 	isArray() => true
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
-			if this.isNullable() {
+			if @isNullable() {
 				return nullcast || value.isNullable()
 			}
 			else {
@@ -195,7 +195,7 @@ class ArrayType extends Type {
 			}
 		}
 		else if value.isArray() {
-			if this.isNullable() && !nullcast && !value.isNullable() {
+			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
 			}
 
@@ -207,7 +207,7 @@ class ArrayType extends Type {
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
 			}
@@ -360,7 +360,7 @@ class ArrayType extends Type {
 		return str
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		return this.export(references, indexDelta, mode, module)
+		return @export(references, indexDelta, mode, module)
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()

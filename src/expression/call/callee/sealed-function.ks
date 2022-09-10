@@ -1,10 +1,10 @@
 class SealedFunctionCallee extends Callee {
 	private {
-		_function
-		_object
-		_property: String
-		_type: Type
-		_variable: NamedType<NamespaceType>
+		@function
+		@object
+		@property: String
+		@type: Type
+		@variable: NamedType<NamespaceType>
 	}
 	constructor(@data, @variable, @function, @type, node) { # {{{
 		super(data)
@@ -14,7 +14,7 @@ class SealedFunctionCallee extends Callee {
 
 		@nullableProperty = node._object.isNullable()
 
-		this.validate(function, node)
+		@validate(function, node)
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean => @function.isInitializingInstanceVariable(name)

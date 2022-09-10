@@ -1,17 +1,17 @@
 class ClassVariableDeclaration extends AbstractNode {
 	private late {
-		_type: ClassVariableType
+		@type: ClassVariableType
 	}
 	private {
-		_defaultValue: Boolean		= false
-		_dynamic: Boolean			= false
-		_immutable: Boolean			= false
-		_instance: Boolean			= true
-		_initialized: Boolean		= true
-		_lateInit: Boolean			= false
-		_name: String
-		_nullable: Boolean			= false
-		_value						= null
+		@defaultValue: Boolean		= false
+		@dynamic: Boolean			= false
+		@immutable: Boolean			= false
+		@instance: Boolean			= true
+		@initialized: Boolean		= true
+		@lateInit: Boolean			= false
+		@name: String
+		@nullable: Boolean			= false
+		@value						= null
 	}
 	constructor(data, parent) { # {{{
 		super(data, parent)

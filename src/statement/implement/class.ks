@@ -1,19 +1,19 @@
 class ImplementClassFieldDeclaration extends Statement {
 	private late {
-		_type: ClassVariableType
+		@type: ClassVariableType
 	}
 	private {
-		_class: ClassType
-		_classRef: ReferenceType
-		_defaultValue: Boolean				= false
-		_immutable: Boolean					= false
-		_init: Number						= -1
-		_instance: Boolean					= true
-		_internalName: String
-		_lateInit: Boolean					= false
-		_name: String
-		_value								= null
-		_variable: NamedType<ClassType>
+		@class: ClassType
+		@classRef: ReferenceType
+		@defaultValue: Boolean				= false
+		@immutable: Boolean					= false
+		@init: Number						= -1
+		@instance: Boolean					= true
+		@internalName: String
+		@lateInit: Boolean					= false
+		@name: String
+		@value								= null
+		@variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { # {{{
 		super(data, parent)
@@ -214,26 +214,26 @@ class ImplementClassFieldDeclaration extends Statement {
 
 class ImplementClassMethodDeclaration extends Statement {
 	private late {
-		_block: Block
-		_internalName: String
-		_name: String
-		_parameters: Array<Parameter>
-		_this: Variable
-		_type: ClassMethodType
+		@block: Block
+		@internalName: String
+		@name: String
+		@parameters: Array<Parameter>
+		@this: Variable
+		@type: ClassMethodType
 	}
 	private {
-		_aliases: Array						= []
-		_autoTyping: Boolean				= false
-		_class: ClassType
-		_classRef: ReferenceType
-		_exists: Boolean					= false
-		_hiddenOverride: Boolean			= false
-		_indigentValues: Array				= []
-		_instance: Boolean					= true
-		_override: Boolean					= false
-		_overwrite: Boolean					= false
-		_variable: NamedType<ClassType>
-		_topNodes: Array					= []
+		@aliases: Array						= []
+		@autoTyping: Boolean				= false
+		@class: ClassType
+		@classRef: ReferenceType
+		@exists: Boolean					= false
+		@hiddenOverride: Boolean			= false
+		@indigentValues: Array				= []
+		@instance: Boolean					= true
+		@override: Boolean					= false
+		@overwrite: Boolean					= false
+		@variable: NamedType<ClassType>
+		@topNodes: Array					= []
 	}
 	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -319,7 +319,7 @@ class ImplementClassMethodDeclaration extends Statement {
 						@parent.addForkedMethod(@name, method, @type)
 					}
 				}
-				else if this.isAssertingOverride() {
+				else if @isAssertingOverride() {
 					SyntaxException.throwNoOverridableMethod(@variable, @name, @parameters, this)
 				}
 				else {
@@ -420,7 +420,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
 				if @override {
-					if this.isAssertingOverride() {
+					if @isAssertingOverride() {
 						SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
 					}
 					else {
@@ -671,18 +671,18 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				this.toSealedInstanceFragments(fragments)
+				@toSealedInstanceFragments(fragments)
 			}
 			else {
-				this.toInstanceFragments(fragments)
+				@toInstanceFragments(fragments)
 			}
 		}
 		else {
 			if @class.isSealed() {
-				this.toSealedStaticFragments(fragments)
+				@toSealedStaticFragments(fragments)
 			}
 			else {
-				this.toStaticFragments(fragments)
+				@toStaticFragments(fragments)
 			}
 		}
 	} # }}}
@@ -716,7 +716,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		block.done()
 		line.done()
 
-		this.toIndigentFragments(fragments)
+		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
 	private {
@@ -781,7 +781,7 @@ class ImplementClassMethodDeclaration extends Statement {
 						var newType = @type.getReturnType()
 
 						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
-							if this.isAssertingOverride() {
+							if @isAssertingOverride() {
 								SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 							}
 							else {
@@ -815,7 +815,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 						if !matched {
 							if @override {
-								if this.isAssertingOverride() {
+								if @isAssertingOverride() {
 									SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 								}
 								else {
@@ -835,7 +835,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				return { method, type }
 			}
 			else if @override {
-				if this.isAssertingOverride() {
+				if @isAssertingOverride() {
 					SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 				}
 				else {
@@ -865,20 +865,20 @@ class ImplementClassMethodDeclaration extends Statement {
 
 class ImplementClassConstructorDeclaration extends Statement {
 	private late {
-		_block: Block
-		_internalName: String
-		_parameters: Array<Parameter>
-		_this: Variable
-		_type: ClassConstructorType
+		@block: Block
+		@internalName: String
+		@parameters: Array<Parameter>
+		@this: Variable
+		@type: ClassConstructorType
 	}
 	private {
-		_aliases: Array					= []
-		_class: ClassType
-		_classRef: ReferenceType
-		_dependent: Boolean				= false
-		_overwrite: Boolean				= false
-		_variable: NamedType<ClassType>
-		_topNodes: Array				= []
+		@aliases: Array					= []
+		@class: ClassType
+		@classRef: ReferenceType
+		@dependent: Boolean				= false
+		@overwrite: Boolean				= false
+		@variable: NamedType<ClassType>
+		@topNodes: Array				= []
 	}
 	constructor(data, parent, @variable) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -904,7 +904,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		var body = $ast.body(@data)
 
 		if @class.isSealed() {
-			if this.getConstructorIndex($ast.block(body).statements) != -1 {
+			if @getConstructorIndex($ast.block(body).statements) != -1 {
 				@scope.rename('this', 'that')
 
 				@this.replaceCall = (data, arguments, node) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
@@ -976,12 +976,12 @@ class ImplementClassConstructorDeclaration extends Statement {
 		var mut index = 1
 		if @block.isEmpty() {
 			if @class.isExtending() {
-				this.addCallToParentConstructor()
+				@addCallToParentConstructor()
 
 				index = 0
 			}
 		}
-		else if @class.isExtending() && (index <- this.getConstructorIndex(@block.statements())) == -1 {
+		else if @class.isExtending() && (index <- @getConstructorIndex(@block.statements())) == -1 {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -1020,7 +1020,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		@class.forEachInstanceVariables((name, variable) => {
 			if variable.isRequiringInitialization() && !variable.isAlien() && !variable.isAltering() {
-				this.checkVariableInitialization(name)
+				@checkVariableInitialization(name)
 			}
 		})
 	} # }}}
@@ -1079,7 +1079,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				}
 			}
 			else if statement.kind == NodeKind::IfStatement {
-				if ?statement.whenFalse && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
 			}
@@ -1201,7 +1201,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		this.toCreatorFragments(fragments)
+		@toCreatorFragments(fragments)
 
 		var line = fragments.newLine()
 
@@ -1237,15 +1237,15 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 class CallOverwrittenMethodSubstitude {
 	private late {
-		_instance: Boolean
+		@instance: Boolean
 	}
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_methods: Array<FunctionType>	= []
-		_name: String
-		_type: Type
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@methods: Array<FunctionType>	= []
+		@name: String
+		@type: Type
 	}
 	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance, node: AbstractNode) { # {{{
 		var types = []
@@ -1298,10 +1298,10 @@ class CallOverwrittenMethodSubstitude {
 
 class CallSealedConstructorSubstitude {
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_node
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@node
 	}
 	constructor(@data, @arguments, @class, @node)
 	isNullable() => false
@@ -1326,10 +1326,10 @@ class CallSealedConstructorSubstitude {
 
 class CallOverwrittenConstructorSubstitude {
 	private {
-		_arguments
-		_class: NamedType<ClassType>
-		_data
-		_node
+		@arguments
+		@class: NamedType<ClassType>
+		@data
+		@node
 	}
 	constructor(@data, @arguments, @class, @node)
 	isNullable() => false

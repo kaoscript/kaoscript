@@ -98,50 +98,50 @@ enum ImportMode {
 
 abstract class Importer extends Statement {
 	private late {
-		_alias: String?								= null
-		_arguments: Arguments						= Arguments()
-		_autofill: Boolean							= false
-		_count: Number								= 0
-		_extAddendum: String						= ''
-		_filename: String?							= null
-		_hasArguments: Boolean						= true
-		_imports									= {}
-		_isKSFile: Boolean							= false
-		_metaExports
-		_metaRequirements
-		_moduleName: String
-		_pathAddendum: String						= ''
-		_reusable: Boolean							= false
-		_reuseName: String
-		_variables: Dictionary<ImportedVariable>	= {}
-		_variationId: String
-		_worker: ImportWorker
+		@alias: String?								= null
+		@arguments: Arguments						= Arguments()
+		@autofill: Boolean							= false
+		@count: Number								= 0
+		@extAddendum: String						= ''
+		@filename: String?							= null
+		@hasArguments: Boolean						= true
+		@imports									= {}
+		@isKSFile: Boolean							= false
+		@metaExports
+		@metaRequirements
+		@moduleName: String
+		@pathAddendum: String						= ''
+		@reusable: Boolean							= false
+		@reuseName: String
+		@variables: Dictionary<ImportedVariable>	= {}
+		@variationId: String
+		@worker: ImportWorker
 	}
 	abstract mode(): ImportMode
 	initiate() { # {{{
 		var mut x = @data.source.value
-		var mut y = this.directory()
+		var mut y = @directory()
 
 		var mut metadata
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 
-			if !(this.loadFile(x, '', null) || this.loadDirectory(x, null)) {
+			if !(@loadFile(x, '', null) || @loadDirectory(x, null)) {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
 		else {
-			if !(this.loadNodeModule(x, y) || this.loadCoreModule(x)) {
+			if !(@loadNodeModule(x, y) || @loadCoreModule(x)) {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
 
-		var module = this.module()
+		var module = @module()
 
 		if @isKSFile {
 			@worker.prepare(@arguments)
 
-			@scope.line(this.line())
+			@scope.line(@line())
 
 			for var argument in @arguments.values when argument.required {
 				module.addRequirement(new ImportingRequirement(argument.name, argument.type, this))
@@ -376,7 +376,7 @@ abstract class Importer extends Statement {
 			@scope.define(internal, true, type, true, this)
 		}
 
-		this.module().import(internal)
+		@module().import(internal)
 
 		if isVariable && type is not AliasType {
 			@variables[external] = ImportedVariable(internal)
@@ -384,11 +384,11 @@ abstract class Importer extends Statement {
 		}
 	} # }}}
 	buildArguments(metadata, arguments: Arguments = Arguments()): Arguments { # {{{
-		@scope.line(this.line() - 1)
+		@scope.line(@line() - 1)
 
 		if @data.arguments?.length != 0 {
 			for var argument in @data.arguments {
-				this.addArgument(argument, false, arguments)
+				@addArgument(argument, false, arguments)
 			}
 
 			if @autofill {
@@ -397,7 +397,7 @@ abstract class Importer extends Statement {
 
 					if !?arguments.toImport[name] {
 						if @scope.hasVariable(name) {
-							this.addArgument({
+							@addArgument({
 								modifiers: []
 								value: {
 									kind: NodeKind::Identifier
@@ -406,7 +406,7 @@ abstract class Importer extends Statement {
 							}, true, arguments)
 						}
 						else {
-							this.validateRequirement(metadata.requirements[i + 2], name, metadata)
+							@validateRequirement(metadata.requirements[i + 2], name, metadata)
 						}
 					}
 				}
@@ -417,7 +417,7 @@ abstract class Importer extends Statement {
 				var name = metadata.requirements[i + 1]
 
 				if @scope.hasVariable(name) {
-					this.addArgument({
+					@addArgument({
 						modifiers: []
 						value: {
 							kind: NodeKind::Identifier
@@ -426,13 +426,13 @@ abstract class Importer extends Statement {
 					}, true, arguments)
 				}
 				else {
-					this.validateRequirement(metadata.requirements[i + 2], name, metadata)
+					@validateRequirement(metadata.requirements[i + 2], name, metadata)
 				}
 			}
 		}
 		else {
 			for var i from 0 til metadata.requirements.length by 3 {
-				this.validateRequirement(metadata.requirements[i + 2], metadata.requirements[i + 1], metadata)
+				@validateRequirement(metadata.requirements[i + 2], metadata.requirements[i + 1], metadata)
 			}
 		}
 
@@ -530,7 +530,7 @@ abstract class Importer extends Statement {
 	getModuleName() => @moduleName
 	loadCoreModule(moduleName) { # {{{
 		if $nodeModules[moduleName] == true {
-			return this.loadNodeFile(null, moduleName)
+			return @loadNodeFile(null, moduleName)
 		}
 
 		return false
@@ -550,42 +550,42 @@ abstract class Importer extends Statement {
 					var metadata = ?pkg.kaoscript.metadata ? path.join(dir, pkg.kaoscript.metadata) : null
 
 					if ?pkg.kaoscript.main {
-						if this.loadKSFile(path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
+						if @loadKSFile(path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
 							return true
 						}
 					}
 					else if ?metadata {
-						if this.loadKSFile(null, null, null, moduleName ?? dir, metadata) {
+						if @loadKSFile(null, null, null, moduleName ?? dir, metadata) {
 							return true
 						}
 					}
 				}
 
-				if pkg.main is String && (this.loadFile(path.join(dir, pkg.main), pkg.main, moduleName) || this.loadDirectory(path.join(dir, pkg.main), moduleName)) {
+				if pkg.main is String && (@loadFile(path.join(dir, pkg.main), pkg.main, moduleName) || @loadDirectory(path.join(dir, pkg.main), moduleName)) {
 					return true
 				}
 			}
 		}
 
-		return this.loadFile(path.join(dir, 'index'), 'index', moduleName)
+		return @loadFile(path.join(dir, 'index'), 'index', moduleName)
 	} # }}}
 	loadFile(filename, pathAddendum, moduleName? = null) { # {{{
 		if fs.isFile(filename) {
 			if filename.endsWith($extensions.source) {
-				return this.loadKSFile(filename, pathAddendum, null, moduleName)
+				return @loadKSFile(filename, pathAddendum, null, moduleName)
 			}
 			else {
-				return this.loadNodeFile(filename, moduleName)
+				return @loadNodeFile(filename, moduleName)
 			}
 		}
 
 		if fs.isFile(filename + $extensions.source) {
-			return this.loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
+			return @loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
 		}
 		else {
 			for var _, ext of require.extensions {
 				if fs.isFile(filename + ext) {
-					return this.loadNodeFile(filename, moduleName)
+					return @loadNodeFile(filename, moduleName)
 				}
 			}
 		}
@@ -593,7 +593,7 @@ abstract class Importer extends Statement {
 		return false
 	} # }}}
 	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', mut moduleName: String? = null, metadataPath? = null) { # {{{
-		var module = this.module()
+		var module = @module()
 
 		if moduleName == null {
 			moduleName = module.path(filename, @data.source.value) as String
@@ -619,7 +619,7 @@ abstract class Importer extends Statement {
 			}
 		}
 
-		this.loadMetadata()
+		@loadMetadata()
 
 		@worker = new ImportWorker(@metaRequirements, @metaExports, this)
 
@@ -628,13 +628,13 @@ abstract class Importer extends Statement {
 			macros[@metaExports.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metaExports.macros[i + 1]]
 		}
 
-		@scope.line(this.line())
+		@scope.line(@line())
 
 		if @data.specifiers.length == 0 {
 			for var i from 1 til @metaExports.exports.length by 2 {
 				name = @metaExports.exports[i]
 
-				this.addImport(name, name, false)
+				@addImport(name, name, false)
 			}
 
 			for var datas, name of macros {
@@ -652,7 +652,7 @@ abstract class Importer extends Statement {
 					for var i from 1 til @metaExports.exports.length by 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
 						name = @metaExports.exports[i]
 
-						this.addImport(name, name, false)
+						@addImport(name, name, false)
 					}
 
 					for var datas, name of macros when exclusions.indexOf(name) == -1 {
@@ -690,29 +690,29 @@ abstract class Importer extends Statement {
 						}
 					}
 					else {
-						this.addImport(name, specifier.internal.name, false, type)
+						@addImport(name, specifier.internal.name, false, type)
 					}
 				}
 			}
 
 			if @alias != null {
-				this.addImport(@alias, @alias, true)
+				@addImport(@alias, @alias, true)
 			}
 		}
 
-		@scope.line(this.line() - 1)
+		@scope.line(@line() - 1)
 
 		return true
 	} # }}}
 	loadMetadata() { # {{{
-		var module = this.module()
+		var module = @module()
 		var source = fs.readFile(@filename)
 		var target = @options.target
 
 		if var upto ?= module.isUpToDate(@filename, source) {
-			if var metadata ?= this.readMetadata(getRequirementsPath(@filename)) {
+			if var metadata ?= @readMetadata(getRequirementsPath(@filename)) {
 				var variations = [module._options.target.name, module._options.target.version]
-				var arguments = this.buildArguments(metadata)
+				var arguments = @buildArguments(metadata)
 
 				var mut next = 0
 				for var argument in [...arguments.values].sort((a, b) => a.index - b.index) {
@@ -741,7 +741,7 @@ abstract class Importer extends Statement {
 					@arguments = arguments
 					@variationId = variationId
 
-					if var metadata ?= this.readMetadata(getExportsPath(@filename, variationId)) {
+					if var metadata ?= @readMetadata(getExportsPath(@filename, variationId)) {
 						@metaExports = metadata
 
 						module.addHashes(@filename, upto.hashes)
@@ -758,7 +758,7 @@ abstract class Importer extends Statement {
 
 		@metaRequirements = compiler.toRequirements()
 
-		this.buildArguments(@metaRequirements, @arguments)
+		@buildArguments(@metaRequirements, @arguments)
 
 		var arguments = [false for var i from 0 til @metaRequirements.requirements.length / 3]
 
@@ -769,7 +769,7 @@ abstract class Importer extends Statement {
 			}
 		}
 
-		@scope.line(this.line())
+		@scope.line(@line())
 
 		for var argument in @arguments.values when argument.required {
 
@@ -791,7 +791,7 @@ abstract class Importer extends Statement {
 		@variationId = compiler.toVariationId()
 	} # }}}
 	loadNodeFile(filename: String? = null, mut moduleName: String? = null) { # {{{
-		var module = this.module()
+		var module = @module()
 
 		var mut file: String? = null
 		if moduleName == null {
@@ -804,7 +804,7 @@ abstract class Importer extends Statement {
 					SyntaxException.throwInvalidImportAliasArgument(this)
 				}
 				else {
-					this.addArgument(argument, false, @arguments)
+					@addArgument(argument, false, @arguments)
 				}
 			}
 		}
@@ -891,7 +891,7 @@ abstract class Importer extends Statement {
 		for dir in dirs {
 			file = path.join(dir, moduleName)
 
-			if this.loadFile(file, '', moduleName) || this.loadDirectory(file, moduleName) {
+			if @loadFile(file, '', moduleName) || @loadDirectory(file, moduleName) {
 				return true
 			}
 		}
@@ -911,10 +911,10 @@ abstract class Importer extends Statement {
 	} # }}}
 	toImportFragments(fragments, destructuring = true) { # {{{
 		if @isKSFile {
-			this.toKSFileFragments(fragments, destructuring)
+			@toKSFileFragments(fragments, destructuring)
 		}
 		else {
-			this.toNodeFileFragments(fragments, destructuring)
+			@toNodeFileFragments(fragments, destructuring)
 		}
 	} # }}}
 	toKSFileFragments(fragments, destructuring) { # {{{
@@ -924,14 +924,14 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.done()
 			}
 			else if @arguments.values.length != 0 {
 				var line = fragments.newLine()
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -942,7 +942,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -958,7 +958,7 @@ abstract class Importer extends Statement {
 						.newLine()
 						.code(`var __ks_\(variable.name) = `)
 
-					this.toRequireFragments(line)
+					@toRequireFragments(line)
 
 					line.code(`.__ks_\(name)`).done()
 				}
@@ -967,7 +967,7 @@ abstract class Importer extends Statement {
 						.newLine()
 						.code(`var \(variable.name) = `)
 
-					this.toRequireFragments(line)
+					@toRequireFragments(line)
 
 					line.code(`.\(name)`).done()
 				}
@@ -984,7 +984,7 @@ abstract class Importer extends Statement {
 							.newLine()
 							.code('var __ks__ = ')
 
-						this.toRequireFragments(line)
+						@toRequireFragments(line)
 
 						line.done()
 
@@ -1068,7 +1068,7 @@ abstract class Importer extends Statement {
 
 					line.code('} = ')
 
-					this.toRequireFragments(line)
+					@toRequireFragments(line)
 
 					line.done()
 				}
@@ -1082,7 +1082,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -1093,7 +1093,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -1109,7 +1109,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code(`var \(variable.name) = `)
 
-				this.toRequireFragments(line)
+				@toRequireFragments(line)
 
 				line.code(`.\(name)`).done()
 			}
@@ -1119,7 +1119,7 @@ abstract class Importer extends Statement {
 						.newLine()
 						.code(`var __ks__ = `)
 
-					this.toRequireFragments(line)
+					@toRequireFragments(line)
 
 					line.done()
 
@@ -1163,7 +1163,7 @@ abstract class Importer extends Statement {
 
 					line.code(`} = `)
 
-					this.toRequireFragments(line)
+					@toRequireFragments(line)
 
 					line.done()
 				}
@@ -1245,7 +1245,7 @@ abstract class Importer extends Statement {
 		if required {
 			SyntaxException.throwMissingRequirement(name, this)
 		}
-		else if this.mode() == ImportMode::Import && required is Number {
+		else if @mode() == ImportMode::Import && required is Number {
 			for var i from 0 til metadata.aliens.length by 3 {
 				if metadata.aliens[i] == required {
 					metadata.aliens[i + 2] = true
@@ -1258,7 +1258,7 @@ abstract class Importer extends Statement {
 
 class ImportDeclaration extends Statement {
 	private {
-		_declarators = []
+		@declarators = []
 	}
 	initiate() { # {{{
 		for var data in @data.declarations {
@@ -1294,16 +1294,16 @@ class ImportDeclarator extends Importer {
 	flagForcefullyRebinded()
 	override mode() => ImportMode::Import
 	toStatementFragments(fragments, mode) { # {{{
-		this.toImportFragments(fragments)
+		@toImportFragments(fragments)
 	} # }}}
 }
 
 class ImportWorker {
 	private {
-		_metaExports
-		_metaRequirements
-		_node
-		_scope: Scope
+		@metaExports
+		@metaRequirements
+		@node
+		@scope: Scope
 	}
 	constructor(@metaRequirements, @metaExports, @node) { # {{{
 		@scope = new ImportScope(node.scope())

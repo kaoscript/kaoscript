@@ -137,7 +137,7 @@ class FunctionType extends Type {
 		}
 
 		if ?data.modifiers {
-			this.processModifiers(data.modifiers)
+			@processModifiers(data.modifiers)
 		}
 
 		if ?data.throws {
@@ -153,7 +153,7 @@ class FunctionType extends Type {
 			}
 		}
 
-		this.updateParameters()
+		@updateParameters()
 	} # }}}
 	constructor(parameters: Array<ParameterType>, data, @index, node) { # {{{
 		this(parameters, data, node)
@@ -229,14 +229,14 @@ class FunctionType extends Type {
 			kind: TypeKind::Function
 		}
 
-		if !this.isAlien() && @index != -1 {
+		if !@isAlien() && @index != -1 {
 			result.index = @index
 		}
 
 		result.async = @async
 
 		if mode !~ ExportMode::OverloadedFunction {
-			result.exhaustive = this.isExhaustive()
+			result.exhaustive = @isExhaustive()
 		}
 
 		result.min = @min
@@ -361,7 +361,7 @@ class FunctionType extends Type {
 		}
 		else if value is UnionType {
 			for var type in value.types() {
-				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
 			}
@@ -418,7 +418,7 @@ class FunctionType extends Type {
 	} # }}}
 	isMorePreciseThan(value: Type) => value.isAny()
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
-	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => this.isParametersMatching(0, -1, arguments, 0, -1, mode)
+	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => @isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { # {{{
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
@@ -433,11 +433,11 @@ class FunctionType extends Type {
 			var parameter = @parameters[pIndex]
 
 			if parameter.max() == Infinity {
-				return this.isParametersMatching(pIndex, 1, arguments, aIndex, aStep, mode)
+				return @isParametersMatching(pIndex, 1, arguments, aIndex, aStep, mode)
 			}
 
 			for var i from 1 to parameter.min() {
-				if !this.isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
+				if !@isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
 					return false
 				}
 			}
@@ -447,7 +447,7 @@ class FunctionType extends Type {
 			}
 
 			for var i from parameter.min() + 1 to parameter.max() {
-				if this.isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
+				if @isParametersMatching(pIndex, i, arguments, aIndex, aStep, mode) {
 					return true
 				}
 			}
@@ -455,7 +455,7 @@ class FunctionType extends Type {
 			return false
 		}
 		else if pStep > @parameters[pIndex].max() {
-			return this.isParametersMatching(pIndex + 1, -1, arguments, aIndex, aStep, mode)
+			return @isParametersMatching(pIndex + 1, -1, arguments, aIndex, aStep, mode)
 		}
 		else if aStep == -1 {
 			if aIndex >= arguments.length {
@@ -465,11 +465,11 @@ class FunctionType extends Type {
 			var argument = arguments[aIndex]
 
 			if argument.max() == Infinity {
-				return this.isParametersMatching(pIndex, pStep, arguments, aIndex, 1, mode)
+				return @isParametersMatching(pIndex, pStep, arguments, aIndex, 1, mode)
 			}
 
 			for var i from 1 to argument.min() {
-				if !this.isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
+				if !@isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
 					return false
 				}
 			}
@@ -479,7 +479,7 @@ class FunctionType extends Type {
 			}
 
 			for var i from argument.min() + 1 to argument.max() {
-				if this.isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
+				if @isParametersMatching(pIndex, pStep, arguments, aIndex, i, mode) {
 					return true
 				}
 			}
@@ -487,7 +487,7 @@ class FunctionType extends Type {
 			return false
 		}
 		else if aStep > arguments[aIndex].max() {
-			return this.isParametersMatching(pIndex, pStep, arguments, aIndex + 1, -1, mode)
+			return @isParametersMatching(pIndex, pStep, arguments, aIndex + 1, -1, mode)
 		}
 		else if arguments[aIndex].isSubsetOf(@parameters[pIndex], mode) {
 			if @parameters[pIndex].max() == Infinity {
@@ -495,11 +495,11 @@ class FunctionType extends Type {
 					return true
 				}
 				else {
-					return this.isParametersMatching(pIndex, pStep, arguments, aIndex, aStep + 1, mode)
+					return @isParametersMatching(pIndex, pStep, arguments, aIndex, aStep + 1, mode)
 				}
 			}
 			else {
-				return this.isParametersMatching(pIndex, pStep + 1, arguments, aIndex, aStep + 1, mode)
+				return @isParametersMatching(pIndex, pStep + 1, arguments, aIndex, aStep + 1, mode)
 			}
 		}
 		else {
@@ -697,7 +697,7 @@ class FunctionType extends Type {
 
 		if value is UnionType {
 			for var type in value.types() {
-				if this.matchContentOf(type) {
+				if @matchContentOf(type) {
 					return true
 				}
 			}
@@ -978,7 +978,7 @@ class OverloadedFunctionType extends Type {
 
 		return {
 			kind: TypeKind::OverloadedFunction
-			exhaustive: this.isExhaustive()
+			exhaustive: @isExhaustive()
 			functions
 		}
 	} # }}}

@@ -8,18 +8,18 @@ func $return(data? = null) { # {{{
 
 class ArrayComprehensionForFrom extends Expression {
 	private {
-		_bindingScope
-		_body
-		_bodyScope
-		_by				= null
-		_from
-		_to
-		_variable
-		_when			= null
+		@bindingScope
+		@body
+		@bodyScope
+		@by				= null
+		@from
+		@to
+		@variable
+		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), true, this)
 
@@ -82,7 +82,7 @@ class ArrayComprehensionForFrom extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Helper')
+		@module().flag('Helper')
 
 		var surround = $function.surround(this)
 
@@ -131,25 +131,25 @@ class ArrayComprehensionForFrom extends Expression {
 
 class ArrayComprehensionForIn extends Expression {
 	private late {
-		_bindingScope
-		_body
-		_bodyScope
-		_declaration: Boolean				= false
-		_declaredVariables: Array			= []
-		_declareIndex: Boolean				= false
-		_declareValue: Boolean				= false
-		_descending: Boolean				= false
-		_expression
-		_index
-		_immutable: Boolean					= false
-		_type: Type
-		_value
-		_valueName: String
-		_when								= null
+		@bindingScope
+		@body
+		@bodyScope
+		@declaration: Boolean				= false
+		@declaredVariables: Array			= []
+		@declareIndex: Boolean				= false
+		@declareValue: Boolean				= false
+		@descending: Boolean				= false
+		@expression
+		@index
+		@immutable: Boolean					= false
+		@type: Type
+		@value
+		@valueName: String
+		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
@@ -290,7 +290,7 @@ class ArrayComprehensionForIn extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Helper')
+		@module().flag('Helper')
 
 		var surround = $function.surround(this)
 
@@ -337,22 +337,22 @@ class ArrayComprehensionForIn extends Expression {
 
 class ArrayComprehensionForOf extends Expression {
 	private late {
-		_bindingScope
-		_body
-		_bodyScope
-		_declaration: Boolean				= false
-		_defineKey: Boolean					= false
-		_defineValue: Boolean				= false
-		_expression
-		_key
-		_keyName
-		_immutable: Boolean					= false
-		_value
-		_when								= null
+		@bindingScope
+		@body
+		@bodyScope
+		@declaration: Boolean				= false
+		@defineKey: Boolean					= false
+		@defineValue: Boolean				= false
+		@expression
+		@key
+		@keyName
+		@immutable: Boolean					= false
+		@value
+		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
 			if modifier.kind == ModifierKind::Declarative {
@@ -483,7 +483,7 @@ class ArrayComprehensionForOf extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Helper')
+		@module().flag('Helper')
 
 		var surround = $function.surround(this)
 
@@ -530,18 +530,18 @@ class ArrayComprehensionForOf extends Expression {
 
 class ArrayComprehensionForRange extends Expression {
 	private {
-		_bindingScope
-		_body
-		_bodyScope
-		_by				= null
-		_from
-		_to
-		_value
-		_when			= null
+		@bindingScope
+		@body
+		@bodyScope
+		@by				= null
+		@from
+		@to
+		@value
+		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
-		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), true, this)
 
@@ -604,7 +604,7 @@ class ArrayComprehensionForRange extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Helper')
+		@module().flag('Helper')
 
 		var surround = $function.surround(this)
 

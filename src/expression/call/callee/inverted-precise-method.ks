@@ -1,12 +1,12 @@
 class InvertedPreciseMethodCallee extends Callee {
 	private {
-		_arguments: Array<CallMatchArgument>
-		_expression: MemberExpression
-		_function: FunctionType
-		_name: NamedType
-		_property: String
-		_scope: ScopeKind
-		_type: Type
+		@arguments: Array<CallMatchArgument>
+		@expression: MemberExpression
+		@function: FunctionType
+		@name: NamedType
+		@property: String
+		@scope: ScopeKind
+		@type: Type
 	}
 	constructor(@data, @name, @property, match: CallMatch, node) { # {{{
 		super(data)
@@ -21,7 +21,7 @@ class InvertedPreciseMethodCallee extends Callee {
 		@function = match.function
 		@arguments = match.arguments
 
-		this.validate(@function, node)
+		@validate(@function, node)
 
 		@type = @function.getReturnType()
 	} # }}}

@@ -1,6 +1,6 @@
 class FallthroughStatement extends Statement {
 	private late {
-		_switch: SwitchStatement
+		@switch: SwitchStatement
 	}
 	analyse() { # {{{
 		var mut parent = @parent

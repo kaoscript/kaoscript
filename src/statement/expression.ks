@@ -1,9 +1,9 @@
 class ExpressionStatement extends Statement {
 	private {
-		_declaration: Boolean	= false
-		_expression
-		_ignorable: Boolean		= false
-		_variable				= null
+		@declaration: Boolean	= false
+		@expression
+		@ignorable: Boolean		= false
+		@variable				= null
 	}
 	analyse() { # {{{
 		@expression = $compile.expression(@data, this)
@@ -23,7 +23,7 @@ class ExpressionStatement extends Statement {
 			@expression.releaseReusable()
 		}
 
-		this.assignTempVariables(@scope)
+		@assignTempVariables(@scope)
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

@@ -431,7 +431,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	operator() => Operator::NullCoalescing
 	symbol() => '??'
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Type')
+		@module().flag('Type')
 
 		var mut l = @operands.length - 1
 

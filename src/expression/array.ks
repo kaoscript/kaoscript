@@ -153,7 +153,7 @@ class ArrayRange extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		this.module().flag('Helper')
+		@module().flag('Helper')
 
 		fragments
 			.code($runtime.helper(this), '.newArrayRange(')

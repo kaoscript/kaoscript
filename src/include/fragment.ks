@@ -53,7 +53,7 @@ class FragmentBuilder extends Writer {
 		})
 	} # }}}
 	line(...args) { # {{{
-		var line = this.newLine(@indent)
+		var line = @newLine(@indent)
 
 		if args.length == 1 && args[0] is not Primitive {
 			line.compile(args[0])
@@ -152,7 +152,7 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		for arg, i in args {
 			if arg is Array {
-				this.code(...arg)
+				@code(...arg)
 			}
 			else if arg is not Primitive {
 				@writer.push(arg)
@@ -218,11 +218,11 @@ class ExpressionBuilder extends ExpressionWriter {
 	} # }}}
 	wrap(node, mode = Mode::None) { # {{{
 		if node.isComputed() {
-			this.code('(')
+			@code('(')
 
 			node.toFragments(this, mode)
 
-			this.code(')')
+			@code(')')
 		}
 		else {
 			node.toFragments(this, mode)
@@ -232,11 +232,11 @@ class ExpressionBuilder extends ExpressionWriter {
 	} # }}}
 	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
 		if node.isBooleanComputed(junction) {
-			this.code('(')
+			@code('(')
 
 			node.toBooleanFragments(this, mode, Junction::NONE)
 
-			this.code(')')
+			@code(')')
 		}
 		else {
 			node.toBooleanFragments(this, mode, junction)
@@ -246,11 +246,11 @@ class ExpressionBuilder extends ExpressionWriter {
 	} # }}}
 	wrapNullable(node) { # {{{
 		if node.isNullableComputed() {
-			this.code('(')
+			@code('(')
 
 			node.toNullableFragments(this)
 
-			this.code(')')
+			@code(')')
 		}
 		else {
 			node.toNullableFragments(this)
@@ -262,9 +262,9 @@ class ExpressionBuilder extends ExpressionWriter {
 
 class LineBuilder extends ExpressionBuilder {
 	private {
-		_whenDone: Function?	= null
+		@whenDone: Function?	= null
 	}
-	block() => this.newBlock()
+	block() => @newBlock()
 	done() { # {{{
 		if @notDone {
 			@writer.push(@writer.lineTerminator)

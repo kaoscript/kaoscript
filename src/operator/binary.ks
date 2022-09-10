@@ -75,7 +75,7 @@ class BinaryOperatorExpression extends Expression {
 				this.toOperatorFragments(fragments)
 			}
 		}
-		else if this.isNullable() && !@tested {
+		else if @isNullable() && !@tested {
 			fragments
 				.wrapNullable(this)
 				.code(' ? ')
@@ -166,7 +166,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	setOperands(@left, @right, @enum = false, @expectingEnum = false): this
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
-		fragments.wrap(@left).code($space).code(this.symbol(), @data.operator).code($space).wrap(@right)
+		fragments.wrap(@left).code($space).code(@symbol(), @data.operator).code($space).wrap(@right)
 	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == this.operator() && type == OperandType::Number {
@@ -178,21 +178,21 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
 		if @enum {
-			this.toEnumFragments(fragments)
+			@toEnumFragments(fragments)
 		}
 		else if @native {
-			this.toNativeFragments(fragments)
+			@toNativeFragments(fragments)
 		}
 		else {
 			fragments
-				.code($runtime.operator(this), `.\(this.runtime())(`)
+				.code($runtime.operator(this), `.\(@runtime())(`)
 				.compile(@left)
 				.code($comma)
 				.compile(@right)
 				.code(')')
 		}
 	} # }}}
-	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
+	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 	type() => @type
 	unflagExpectingEnum() { # {{{
 		@expectingEnum = false
@@ -376,7 +376,7 @@ class BinaryOperatorMatch extends Expression {
 			@junctive = true
 
 			for var operand in @data.right.operands {
-				this.addOperand(operand)
+				@addOperand(operand)
 			}
 
 			if @data.right.operator.kind == BinaryOperatorKind::And {
@@ -387,7 +387,7 @@ class BinaryOperatorMatch extends Expression {
 			}
 		}
 		else {
-			this.addOperand(@data.right)
+			@addOperand(@data.right)
 		}
 	} # }}}
 	override prepare(target) { # {{{
@@ -467,7 +467,7 @@ class BinaryOperatorMatch extends Expression {
 			NotSupportedException.throw(this)
 		}
 
-		var test = this.isNullable() && !@tested
+		var test = @isNullable() && !@tested
 		if test {
 			fragments.wrapNullable(this).code(' ? ')
 		}

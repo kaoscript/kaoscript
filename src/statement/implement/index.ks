@@ -1,11 +1,11 @@
 class ImplementDeclaration extends Statement {
 	private late {
-		_forkedMethods			= {}
-		_newSealedClass			= false
-		_properties				= []
-		_sharingProperties		= {}
-		_type: NamedType
-		_variable: Variable
+		@forkedMethods			= {}
+		@newSealedClass			= false
+		@properties				= []
+		@sharingProperties		= {}
+		@type: NamedType
+		@variable: Variable
 	}
 	analyse() { # {{{
 		if @variable !?= @scope.getVariable(@data.variable.name) {

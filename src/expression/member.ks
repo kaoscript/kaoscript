@@ -343,10 +343,10 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
-	isComputed() => this.isNullable() && !@tested
+	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
 	isInferable() => @inferable
-	isLooseComposite() => this.isCallable() || this.isNullable()
+	isLooseComposite() => @isCallable() || @isNullable()
 	isMacro() => false
 	isNullable() => @nullable || @object.isNullable() || (@computed && !@stringProperty && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && !@stringProperty && @property.isNullable() ? 1 : 0) > 1
@@ -376,7 +376,7 @@ class MemberExpression extends Expression {
 	} # }}}
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { # {{{
-		if this.isNullable() && !@tested {
+		if @isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
 
 			if @computed {
@@ -444,7 +444,7 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		if this.isNullable() && !@tested {
+		if @isNullable() && !@tested {
 			if @computed {
 				fragments
 					.compileNullable(this)

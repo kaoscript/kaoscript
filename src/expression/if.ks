@@ -1,9 +1,9 @@
 class IfExpression extends Expression {
 	private {
-		_condition
-		_type
-		_whenFalse
-		_whenTrue
+		@condition
+		@type
+		@whenFalse
+		@whenTrue
 	}
 	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)

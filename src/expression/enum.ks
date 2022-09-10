@@ -1,8 +1,8 @@
 class EnumExpression extends Expression {
 	private late {
-		_enum
-		_enumCasting: Boolean	= false
-		_type: Type
+		@enum
+		@enumCasting: Boolean	= false
+		@type: Type
 	}
 	analyse() { # {{{
 		@enum = $compile.expression(@data.enum, this)

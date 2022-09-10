@@ -1,6 +1,6 @@
 class ClassDestructorType extends FunctionType {
 	private {
-		_access: Accessibility	= Accessibility::Public
+		@access: Accessibility	= Accessibility::Public
 	}
 	constructor(data, node) { # {{{
 		super([], data, node)

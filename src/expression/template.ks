@@ -1,8 +1,8 @@
 class TemplateExpression extends Expression {
 	private {
-		_computing: Boolean		= false
-		_elements: Array		= []
-		_isString: Boolean		= true
+		@computing: Boolean		= false
+		@elements: Array		= []
+		@isString: Boolean		= true
 	}
 	analyse() { # {{{
 		for var data in @data.elements {

@@ -21,7 +21,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 
 		@type = @left.getDeclaredType()
 
-		if this.isInDestructor() {
+		if @isInDestructor() {
 			@type = NullType.Explicit
 		}
 		else {

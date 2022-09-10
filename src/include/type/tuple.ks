@@ -21,7 +21,7 @@ abstract class TupleType extends Type {
 	abstract addField(field: TupleFieldType): Void
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
-			@assessment = Router.assess([this.function(reference, node)], reference.name(), node)
+			@assessment = Router.assess([@function(reference, node)], reference.name(), node)
 		}
 
 		return @assessment
@@ -40,7 +40,7 @@ abstract class TupleType extends Type {
 			var scope = node.scope()
 			@function = new FunctionType(scope)
 
-			for var field in this.listAllFields([]) {
+			for var field in @listAllFields([]) {
 				if field.isRequired() {
 					@function.addParameter(field.type(), field.name(), 1, 1)
 				}
@@ -92,7 +92,7 @@ abstract class TupleType extends Type {
 
 		return list
 	} # }}}
-	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [this.toMetadata(references, indexDelta, mode, module), name]
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [@toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
@@ -195,8 +195,8 @@ class NamedTupleType extends TupleType {
 		return false
 	} # }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		var fields = this.getAllFieldsMap()
-		var count = this.length()
+		var fields = @getAllFieldsMap()
+		var count = @length()
 
 		var nameds = {}
 		var mut namedCount = 0
@@ -300,8 +300,8 @@ class NamedTupleType extends TupleType {
 	sortArguments(arguments: Array, node) { # {{{
 		var order = []
 
-		var fields = this.getAllFieldsMap()
-		var count = this.length()
+		var fields = @getAllFieldsMap()
+		var count = @length()
 
 		var nameds = {}
 		var mut namedCount = 0
@@ -478,7 +478,7 @@ class UnnamedTupleType extends TupleType {
 		return false
 	} # }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { # {{{
-		var fields = this.listAllFields()
+		var fields = @listAllFields()
 
 		var mut required = 0
 		var mut optional = 0

@@ -313,7 +313,7 @@ class MacroDeclaration extends AbstractNode {
 	} # }}}
 	execute(arguments: Array, parent) { # {{{
 		// console.log(@fn.toString())
-		var module = this.module()
+		var module = @module()
 		@executeCount += 1
 
 		var args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
@@ -561,7 +561,7 @@ class CallMacroStatement extends Statement {
 
 		@scope.setLineOffset(@offsetStart)
 
-		var file = `\(this.file())!#\(macro.name())`
+		var file = `\(@file())!#\(macro.name())`
 
 		@options = Attribute.configure(data, @options, AttributeTarget::Global, file)
 

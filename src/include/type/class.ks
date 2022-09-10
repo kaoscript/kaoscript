@@ -294,7 +294,7 @@ class ClassType extends Type {
 		return index
 	} # }}}
 	addClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		var root = this.ancestor()
+		var root = @ancestor()
 		var sequences = root._sequences.classMethods
 
 		@classMethods[name] = @classMethods[name] ?? []
@@ -366,7 +366,7 @@ class ClassType extends Type {
 		return index
 	} # }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
-		var root = this.ancestor()
+		var root = @ancestor()
 		var sequences = root._sequences.instanceMethods
 
 		@instanceMethods[name] = @instanceMethods[name] ?? []
@@ -428,23 +428,23 @@ class ClassType extends Type {
 				var type = ClassVariableType.fromAST(data, node)
 
 				if instance {
-					this.addInstanceVariable(data.name.name, type)
+					@addInstanceVariable(data.name.name, type)
 				}
 				else {
-					this.addClassVariable(data.name.name, type)
+					@addClassVariable(data.name.name, type)
 				}
 			}
 			NodeKind::MethodDeclaration => {
-				if this.isConstructor(data.name.name) {
+				if @isConstructor(data.name.name) {
 					var type = ClassConstructorType.fromAST(data, node)
 
 					if options.rules.nonExhaustive {
 						@exhaustiveness.constructor = false
 					}
 
-					this.addConstructor(type)
+					@addConstructor(type)
 				}
-				else if this.isDestructor(data.name.name) {
+				else if @isDestructor(data.name.name) {
 					throw new NotImplementedException(node)
 				}
 				else {
@@ -464,15 +464,15 @@ class ClassType extends Type {
 						}
 					}
 
-					if this.isAlien() {
+					if @isAlien() {
 						type.flagAlien()
 					}
 
 					if instance {
-						this.dedupInstanceMethod(data.name.name:String, type)
+						@dedupInstanceMethod(data.name.name:String, type)
 					}
 					else {
-						this.dedupClassMethod(data.name.name:String, type)
+						@dedupClassMethod(data.name.name:String, type)
 					}
 				}
 			}
@@ -550,7 +550,7 @@ class ClassType extends Type {
 		@sequences = Dictionary.clone(src._sequences)
 
 		if src._requirement || src._alien {
-			this.originals(src)
+			@originals(src)
 		}
 
 		return this
@@ -566,7 +566,7 @@ class ClassType extends Type {
 			}
 		}
 
-		return this.addAbstractMethod(name, type)
+		return @addAbstractMethod(name, type)
 	} # }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if var id ?= type.index() {
@@ -592,7 +592,7 @@ class ClassType extends Type {
 			type.overwrite(null)
 		}
 
-		return this.addClassMethod(name, type)
+		return @addClassMethod(name, type)
 	} # }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if var id ?= type.index() {
@@ -616,18 +616,18 @@ class ClassType extends Type {
 			}
 		}
 
-		return this.addInstanceMethod(name, type)
+		return @addInstanceMethod(name, type)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 
-		var exhaustive = this.isExhaustive()
+		var exhaustive = @isExhaustive()
 
 		var mut export
 
 		var mut exportSuper = false
 		if ?@majorOriginal {
 			if mode ~~ ExportMode::Export {
-				exportSuper = this.hasExportableOriginals()
+				exportSuper = @hasExportableOriginals()
 			}
 			else if mode ~~ ExportMode::Requirement {
 				var mut original? = @majorOriginal
@@ -650,7 +650,7 @@ class ClassType extends Type {
 			}
 
 			if mode ~~ ExportMode::Export {
-				var origin = this.origin()
+				var origin = @origin()
 				var extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
 				var require = ClassType.getRequireReference(@majorOriginal)
 
@@ -1093,7 +1093,7 @@ class ClassType extends Type {
 	} # }}}
 	getConstructorAssessment(name: String, node: AbstractNode) { # {{{
 		if @constructorAssessment == null {
-			var methods = this.listAccessibleConstructors()
+			var methods = @listAccessibleConstructors()
 
 			@constructorAssessment = Router.assess(methods, name, node)
 		}
@@ -1104,7 +1104,7 @@ class ClassType extends Type {
 	getDestructorCount() => @sequences.destructors + 1
 	getHierarchy(name) { # {{{
 		if @extending {
-			var mut class = this.extends()
+			var mut class = @extends()
 
 			var hierarchy = [name, class.name()]
 
@@ -1266,7 +1266,7 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getProperty(name: String) => this.getClassProperty(name)
+	getProperty(name: String) => @getClassProperty(name)
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
 	hasAbstractMethod(name) { # {{{
 		if @abstractMethods[name] is Array {
@@ -1491,7 +1491,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	isExhaustiveConstructor() => @exhaustiveness.constructor
-	isExhaustiveConstructor(node) => this.isExhaustive(node) && this.isExhaustiveConstructor()
+	isExhaustiveConstructor(node) => @isExhaustive(node) && @isExhaustiveConstructor()
 	isExhaustiveClassMethod(name) { # {{{
 		if ?@exhaustiveness.classMethods[name] {
 			return @exhaustiveness.classMethods[name]
@@ -1503,12 +1503,12 @@ class ClassType extends Type {
 			return @exhaustive
 		}
 	} # }}}
-	isExhaustiveClassMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveClassMethod(name)
+	isExhaustiveClassMethod(name, node) => @isExhaustive(node) && @isExhaustiveClassMethod(name)
 	isExhaustiveInstanceMethod(name) { # {{{
 		if ?@exhaustiveness.instanceMethods[name] {
 			return @exhaustiveness.instanceMethods[name]
 		}
-		else if @abstract && this.hasAbstractMethod(name) {
+		else if @abstract && @hasAbstractMethod(name) {
 			return true
 		}
 		else if @extending {
@@ -1518,7 +1518,7 @@ class ClassType extends Type {
 			return @exhaustive
 		}
 	} # }}}
-	isExhaustiveInstanceMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveInstanceMethod(name)
+	isExhaustiveInstanceMethod(name, node) => @isExhaustive(node) && @isExhaustiveInstanceMethod(name)
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending
@@ -1537,7 +1537,7 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
-	isInstanceOf(value: NamedType) => this.isInstanceOf(value.type())
+	isInstanceOf(value: NamedType) => @isInstanceOf(value.type())
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
@@ -1843,7 +1843,7 @@ class ClassType extends Type {
 			return name
 		}
 		else {
-			return [this.toMetadata(references, indexDelta, mode, module), name]
+			return [@toMetadata(references, indexDelta, mode, module), name]
 		}
 	} # }}}
 	minorOriginal() => @minorOriginal ?? @majorOriginal
@@ -1875,7 +1875,7 @@ class ClassType extends Type {
 			}
 		}
 
-		return this.addConstructor(type)
+		return @addConstructor(type)
 	} # }}}
 	overwriteInstanceMethod(name: String, type, methods) { # {{{
 		@instanceMethods[name]:Array.remove(...methods)
@@ -1891,7 +1891,7 @@ class ClassType extends Type {
 			}
 		}
 
-		return this.addInstanceMethod(name, type)
+		return @addInstanceMethod(name, type)
 	} # }}}
 	parameter() => AnyType.NullableUnexplicit
 	setExhaustive(@exhaustive) { # {{{
@@ -1951,7 +1951,7 @@ class ClassType extends Type {
 			return @majorOriginal.toAlterationReference(references, indexDelta, mode, module)
 		}
 		else {
-			return this.toReference(references, indexDelta, mode, module)
+			return @toReference(references, indexDelta, mode, module)
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
@@ -1996,7 +1996,7 @@ class ClassType extends Type {
 			}
 		}
 		else if mode ~~ ExportMode::Requirement {
-			if ?@majorOriginal && !this.isRequirement() {
+			if ?@majorOriginal && !@isRequirement() {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
 		}
@@ -2044,7 +2044,7 @@ class ClassType extends Type {
 		@altering = false
 	} # }}}
 	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { # {{{
-		var root = this.ancestor()
+		var root = @ancestor()
 
 		root._sequences.instanceMethods[name] += 1
 

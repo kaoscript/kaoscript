@@ -1,10 +1,10 @@
 class ClassConstructorType extends FunctionType {
 	private late {
-		_access: Accessibility					= Accessibility::Public
-		_class: ClassType
-		_dependent: Boolean						= false
-		_initVariables: Dictionary<Boolean>		= {}
-		_overwrite: Array?						= null
+		@access: Accessibility					= Accessibility::Public
+		@class: ClassType
+		@dependent: Boolean						= false
+		@initVariables: Dictionary<Boolean>		= {}
+		@overwrite: Array?						= null
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{

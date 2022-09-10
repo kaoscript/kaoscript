@@ -137,9 +137,9 @@ class ClassDeclaration extends Statement {
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope)
 
-		@constructorScope = this.newScope(@scope, ScopeType::Function)
-		@destructorScope = this.newScope(@scope, ScopeType::Function)
-		@instanceVariableScope = this.newScope(@scope, ScopeType::Function)
+		@constructorScope = @newScope(@scope, ScopeType::Function)
+		@destructorScope = @newScope(@scope, ScopeType::Function)
+		@instanceVariableScope = @newScope(@scope, ScopeType::Function)
 		@es5 = @options.format.classes == 'es5'
 	} # }}}
 	initiate() { # {{{
@@ -283,7 +283,7 @@ class ClassDeclaration extends Statement {
 
 			@instanceVariableScope.define('super', true, superType, true, this)
 
-			this.updateConstructorScope()
+			@updateConstructorScope()
 		}
 
 		for var variable, name of @classVariables {
@@ -604,7 +604,7 @@ class ClassDeclaration extends Statement {
 	level() => @class.level()
 	name() => @name
 	newInstanceMethodScope() { # {{{
-		var scope = this.newScope(@scope, ScopeType::Function)
+		var scope = @newScope(@scope, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
 
@@ -1149,7 +1149,7 @@ class ClassDeclaration extends Statement {
 				TargetException.throwNotSupported(@options.target, this)
 			}
 			else {
-				this.toSealedES6Fragments(fragments)
+				@toSealedES6Fragments(fragments)
 			}
 		}
 		else {
@@ -1157,10 +1157,10 @@ class ClassDeclaration extends Statement {
 				TargetException.throwNotSupported(@options.target, this)
 			}
 			else if @hybrid {
-				this.toHybridES6Fragments(fragments)
+				@toHybridES6Fragments(fragments)
 			}
 			else {
-				this.toContinousES6Fragments(fragments)
+				@toContinousES6Fragments(fragments)
 			}
 		}
 

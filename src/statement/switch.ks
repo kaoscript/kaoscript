@@ -48,7 +48,7 @@ class SwitchStatement extends Statement {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: this.newScope(@scope, ScopeType::InlineBlock)
+				scope: @newScope(@scope, ScopeType::InlineBlock)
 			}
 
 			@clauses.push(clause)
@@ -719,7 +719,7 @@ class SwitchConditionArray extends AbstractNode {
 	} # }}}
 	isEnum() => false
 	toBooleanFragments(fragments, name) { # {{{
-		this.module().flag('Type')
+		@module().flag('Type')
 
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
 
@@ -944,7 +944,7 @@ class SwitchFilter extends AbstractNode {
 		var mut mm
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
-				this.module().flag('Type')
+				@module().flag('Type')
 
 				if nf {
 					fragments.code(' && ')

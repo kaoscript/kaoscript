@@ -39,7 +39,7 @@ class TryStatement extends Statement {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
-				scope = this.newScope(@scope, ScopeType::InlineBlock)
+				scope = @newScope(@scope, ScopeType::InlineBlock)
 
 				if ?clause.binding {
 					scope.define(clause.binding.name, false, Type.Any, this)
@@ -59,7 +59,7 @@ class TryStatement extends Statement {
 		}
 
 		if @hasDefaultClause {
-			var scope = this.newScope(@scope, ScopeType::InlineBlock)
+			var scope = @newScope(@scope, ScopeType::InlineBlock)
 
 			if ?@data.catchClause.binding {
 				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
@@ -69,7 +69,7 @@ class TryStatement extends Statement {
 			@defaultClause.analyse()
 		}
 
-		@bodyScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
 
 		@body = $compile.block($ast.body(@data), this, @bodyScope)
 		@body.analyse()
@@ -77,7 +77,7 @@ class TryStatement extends Statement {
 		@await = @body.isAwait()
 
 		if @hasFinally {
-			var scope = this.newScope(@scope, ScopeType::InlineBlock)
+			var scope = @newScope(@scope, ScopeType::InlineBlock)
 
 			@finally = $compile.block(@data.finalizer, this, scope)
 			@finally.analyse()
@@ -618,7 +618,7 @@ class TryStatement extends Statement {
 
 			var block = line.newBlock()
 
-			this.toCatchFragments(block, @errorVarname)
+			@toCatchFragments(block, @errorVarname)
 
 			block.done()
 			line.done()
@@ -815,7 +815,7 @@ class TryStatement extends Statement {
 		var mut async = false
 
 		if @clauses.length != 0 {
-			this.module().flag('Type')
+			@module().flag('Type')
 
 			var mut ifs = fragments.newControl()
 
@@ -903,16 +903,16 @@ class TryStatement extends Statement {
 			if @hasClauses {
 				ctrl.code(`catch(\(@errorVarname))`).step()
 
-				this.toCatchFragments(ctrl, @errorVarname)
+				@toCatchFragments(ctrl, @errorVarname)
 
 				if @hasFinally {
 					ctrl.step()
 
-					this.toFinallyFragments(ctrl)
+					@toFinallyFragments(ctrl)
 				}
 			}
 			else if @hasFinally {
-				this.toFinallyFragments(ctrl)
+				@toFinallyFragments(ctrl)
 			}
 			else {
 				ctrl.code(`catch(\(@errorVarname))`).step()

@@ -1,7 +1,7 @@
 class SubstituteCallee extends Callee {
 	private {
-		_substitute
-		_type: Type
+		@substitute
+		@type: Type
 	}
 	constructor(@data, @substitute, node) { # {{{
 		super(data)

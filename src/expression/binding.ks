@@ -1,16 +1,16 @@
 class ArrayBinding extends Expression {
 	private {
-		_assignment: AssignmentType		= AssignmentType::Neither
-		_elements						= []
-		_flatten: Boolean				= false
-		_immutable: Boolean				= false
-		_type: Type?					= null
+		@assignment: AssignmentType		= AssignmentType::Neither
+		@elements						= []
+		@flatten: Boolean				= false
+		@immutable: Boolean				= false
+		@type: Type?					= null
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for var data, index in @data.elements {
-			var element = this.newElement(data)
+			var element = @newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -132,7 +132,7 @@ class ArrayBinding extends Expression {
 	} # }}}
 	toAssignmentFragments(fragments, value) { # {{{
 		if @flatten {
-			this.toFlatFragments(fragments, value)
+			@toFlatFragments(fragments, value)
 		}
 		else {
 			fragments
@@ -173,19 +173,19 @@ class ArrayBinding extends Expression {
 
 class ArrayBindingElement extends Expression {
 	private {
-		_assignment: AssignmentType		= AssignmentType::Neither
-		_defaultValue					= null
-		_hasDefaultValue: Boolean		= false
-		_index							= -1
-		_name							= null
-		_named: Boolean					= false
-		_rest: Boolean					= false
-		_thisAlias: Boolean				= false
-		_type: Type						= AnyType.NullableUnexplicit
+		@assignment: AssignmentType		= AssignmentType::Neither
+		@defaultValue					= null
+		@hasDefaultValue: Boolean		= false
+		@index							= -1
+		@name							= null
+		@named: Boolean					= false
+		@rest: Boolean					= false
+		@thisAlias: Boolean				= false
+		@type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { # {{{
 		if ?@data.name {
-			@name = this.compileVariable(@data.name)
+			@name = @compileVariable(@data.name)
 			@name.setAssignment(@assignment)
 			@name.analyse()
 
@@ -236,7 +236,7 @@ class ArrayBindingElement extends Expression {
 			}
 		}
 
-		this.statement().assignTempVariables(@scope)
+		@statement().assignTempVariables(@scope)
 	} # }}}
 	translate() { # {{{
 		if @named {
@@ -314,8 +314,8 @@ class ArrayBindingElement extends Expression {
 
 class FlatArrayBindingElement extends Expression {
 	private {
-		_array
-		_index
+		@array
+		@index
 	}
 	constructor(@array, @index, parent) { # {{{
 		super({}, parent)
@@ -335,8 +335,8 @@ class FlatArrayBindingElement extends Expression {
 
 class FlatObjectBindingElement extends Expression {
 	private {
-		_item
-		_property
+		@item
+		@property
 	}
 	constructor(@item, @property, parent) { # {{{
 		super({}, parent)
@@ -355,7 +355,7 @@ class FlatObjectBindingElement extends Expression {
 
 class FlatReusableBindingElement extends Expression {
 	private {
-		_value
+		@value
 	}
 	constructor(@value, parent) { # {{{
 		super({}, parent)
@@ -374,17 +374,17 @@ class FlatReusableBindingElement extends Expression {
 
 class ObjectBinding extends Expression {
 	private {
-		_assignment: AssignmentType		= AssignmentType::Neither
-		_elements						= []
-		_flatten: Boolean				= false
-		_immutable: Boolean				= false
-		_type: Type?					= null
+		@assignment: AssignmentType		= AssignmentType::Neither
+		@elements						= []
+		@flatten: Boolean				= false
+		@immutable: Boolean				= false
+		@type: Type?					= null
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for var data in @data.elements {
-			var element = this.newElement(data)
+			var element = @newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -514,7 +514,7 @@ class ObjectBinding extends Expression {
 	} # }}}
 	toAssignmentFragments(fragments, value) { # {{{
 		if @flatten {
-			this.toFlatFragments(fragments, value)
+			@toFlatFragments(fragments, value)
 		}
 		else if @assignment == AssignmentType::Declaration {
 			fragments
@@ -574,16 +574,16 @@ class ObjectBinding extends Expression {
 
 class ObjectBindingElement extends Expression {
 	private {
-		_alias							= null
-		_assignment: AssignmentType		= AssignmentType::Neither
-		_computed: Boolean				= false
-		_defaultValue					= null
-		_hasDefaultValue: Boolean		= false
-		_name
-		_rest: Boolean					= false
-		_sameName: Boolean				= false
-		_thisAlias: Boolean				= false
-		_type: Type						= AnyType.NullableUnexplicit
+		@alias							= null
+		@assignment: AssignmentType		= AssignmentType::Neither
+		@computed: Boolean				= false
+		@defaultValue					= null
+		@hasDefaultValue: Boolean		= false
+		@name
+		@rest: Boolean					= false
+		@sameName: Boolean				= false
+		@thisAlias: Boolean				= false
+		@type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
@@ -597,20 +597,20 @@ class ObjectBindingElement extends Expression {
 		if ?@data.alias {
 			@name = $compile.expression(@data.name, this)
 
-			@alias = this.compileVariable(@data.alias)
+			@alias = @compileVariable(@data.alias)
 
 			@thisAlias = @data.alias.kind == NodeKind::ThisExpression
 		}
 		else if @data.name.kind == NodeKind::ThisExpression {
 			@name = $compile.expression(@data.name.name, this)
 
-			@alias = this.compileVariable(@data.name)
+			@alias = @compileVariable(@data.name)
 
 			@thisAlias = true
 			@sameName = true
 		}
 		else {
-			@name = this.compileVariable(@data.name)
+			@name = @compileVariable(@data.name)
 
 			@alias = @name
 			@sameName = true
@@ -659,7 +659,7 @@ class ObjectBindingElement extends Expression {
 			@alias.type(@type)
 		}
 
-		this.statement().assignTempVariables(@scope)
+		@statement().assignTempVariables(@scope)
 	} # }}}
 	translate() { # {{{
 		@alias.translate()

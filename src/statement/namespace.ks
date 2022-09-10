@@ -1,11 +1,11 @@
 class NamespaceDeclaration extends Statement {
 	private late {
-		_exports									= {}
-		_name: String
-		_statements: Array
-		_topNodes: Array							= []
-		_type: NamedContainerType<NamespaceType>
-		_variable: Variable
+		@exports									= {}
+		@name: String
+		@statements: Array
+		@topNodes: Array							= []
+		@type: NamedContainerType<NamespaceType>
+		@variable: Variable
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, new NamespaceScope(scope))
@@ -122,7 +122,7 @@ class NamespaceDeclaration extends Statement {
 			block.compile(statement)
 		}
 
-		this.toExportFragements(block)
+		@toExportFragements(block)
 
 		block.done()
 		line.code(')').done()

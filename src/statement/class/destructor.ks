@@ -1,11 +1,11 @@
 class ClassDestructorDeclaration extends Statement {
 	private late {
-		_block: Block
-		_parameters: Array
-		_type: Type
+		@block: Block
+		@parameters: Array
+		@type: Type
 	}
 	private {
-		_internalName: String
+		@internalName: String
 	}
 	static toRouterFragments(node, fragments, variable) { # {{{
 		var mut ctrl = fragments.newControl()
