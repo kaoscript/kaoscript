@@ -570,12 +570,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is ArrayType => {
-				if var property ?= value.getProperty(@property) {
-					this.makeCallee(property, @property)
-				}
-				else {
-					this.makeMemberCalleeFromReference(@scope.reference('Array'))
-				}
+				this.makeMemberCalleeFromReference(@scope.reference('Array'))
 			}
 			is ClassVariableType => {
 				this.makeMemberCalleeFromReference(value.type())

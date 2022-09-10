@@ -21,40 +21,40 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function(__ks_cb) {
 		let d = null, e = null;
-		let __ks_2 = () => {
+		let __ks_0 = () => {
 			return __ks_cb(null, Operator.multiplication(d, e));
 		};
-		let __ks_3 = (__ks_4) => {
+		let __ks_1 = (__ks_2) => {
 			d = 0;
 			e = 1;
-			__ks_2();
+			__ks_0();
 		};
 		try {
-			foo.__ks_0(42, 24, (__ks_e, __ks_0) => {
+			foo.__ks_0(42, 24, (__ks_e, __ks_3) => {
 				if(__ks_e) {
-					__ks_3(__ks_e);
+					__ks_1(__ks_e);
 				}
 				else {
 					try {
-						d = __ks_0;
-						foo.__ks_0(4, 2, (__ks_e, __ks_1) => {
+						d = __ks_3;
+						foo.__ks_0(4, 2, (__ks_e, __ks_4) => {
 							if(__ks_e) {
-								__ks_3(__ks_e);
+								__ks_1(__ks_e);
 							}
 							else {
-								e = __ks_1;
-								__ks_2();
+								e = __ks_4;
+								__ks_0();
 							}
 						});
 					}
 					catch(__ks_e) {
-						return __ks_3(__ks_e);
+						return __ks_1(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_3(__ks_e);
+			__ks_1(__ks_e);
 		}
 	};
 	bar.__ks_rt = function(that, args) {

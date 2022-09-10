@@ -21,68 +21,68 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function(__ks_cb) {
 		let x = -1;
-		let __ks_5 = () => {
+		let __ks_0 = () => {
 			return __ks_cb(null, x);
 		};
-		let __ks_6 = () => {
-			foo(33, x, (__ks_e, __ks_4) => {
+		let __ks_2 = () => {
+			foo.__ks_0(33, x, (__ks_e, __ks_4) => {
 				if(__ks_e) {
-					__ks_5();
+					__ks_0();
 				}
 				else {
 					x = __ks_4;
-					__ks_5();
+					__ks_0();
 				}
 			});
 		};
-		let __ks_7 = (__ks_8) => {
-			foo.__ks_0(2, 4, (__ks_e, __ks_0) => {
+		let __ks_1 = (__ks_3) => {
+			foo.__ks_0(2, 4, (__ks_e, __ks_4) => {
 				if(__ks_e) {
-					__ks_6();
+					__ks_2();
 				}
 				else {
-					x = __ks_0;
-					__ks_6();
+					x = __ks_4;
+					__ks_2();
 				}
 			});
 		};
 		try {
-			foo.__ks_0(42, 24, (__ks_e, __ks_1) => {
+			foo.__ks_0(42, 24, (__ks_e, __ks_4) => {
 				if(__ks_e) {
-					__ks_7(__ks_e);
+					__ks_1(__ks_e);
 				}
 				else {
 					try {
-						foo.__ks_0(4, 2, (__ks_e, __ks_2) => {
+						foo.__ks_0(4, 2, (__ks_e, __ks_5) => {
 							if(__ks_e) {
-								__ks_7(__ks_e);
+								__ks_1(__ks_e);
 							}
 							else {
 								try {
-									foo(__ks_1, __ks_2, (__ks_e, __ks_3) => {
+									foo(__ks_4, __ks_5, (__ks_e, __ks_6) => {
 										if(__ks_e) {
-											__ks_7(__ks_e);
+											__ks_1(__ks_e);
 										}
 										else {
-											x = __ks_3;
-											__ks_6();
+											x = __ks_6;
+											__ks_2();
 										}
 									});
 								}
 								catch(__ks_e) {
-									return __ks_7(__ks_e);
+									return __ks_1(__ks_e);
 								}
 							}
 						});
 					}
 					catch(__ks_e) {
-						return __ks_7(__ks_e);
+						return __ks_1(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_7(__ks_e);
+			__ks_1(__ks_e);
 		}
 	};
 	bar.__ks_rt = function(that, args) {

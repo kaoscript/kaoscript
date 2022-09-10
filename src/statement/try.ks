@@ -6,36 +6,43 @@ enum TryState {
 
 class TryStatement extends Statement {
 	private late {
-		_await: Boolean				= false
-		_block: Block
-		_catchVarname: String
-		_catchClause				= null
-		_catchClauses: Array		= []
-		_continueVarname: String
-		_exit: Boolean				= false
-		_finalizer					= null
-		_finallyVarname: String
-		_hasCatch: Boolean			= false
-		_hasFinally: Boolean		= false
-		_state: TryState
+		@await: Boolean				= false
+		@body: Block
+		@bodyScope: Scope
+		@catchVarname: String
+		@clauses: Array				= []
+		@continueVarname: String
+		@defaultClause				= null
+		@errorVarname: String
+		@exit: Boolean				= false
+		@finally					= null
+		@finallyVarname: String
+		@hasClauses: Boolean		= false
+		@hasDefaultClause: Boolean	= false
+		@hasFinally: Boolean		= false
+		@initLateVariables			= {}
+		@initVariables: Dictionary	= {}
+		@state: TryState
 	}
 	analyse() { # {{{
-		var mut scope
+		@hasDefaultClause = ?@data.catchClause
+		@hasClauses = @hasDefaultClause
+		@hasFinally = ?@data.finalizer
 
 		if ?@data.catchClauses {
-			var mut variable, body, type
-			for clause in @data.catchClauses {
+			@hasClauses ||= #@data.catchClauses
+
+			var mut variable, scope, body, type
+
+			for var clause in @data.catchClauses {
 				if variable !?= @scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
-				if ?clause.binding {
-					scope = this.newScope(@scope, ScopeType::InlineBlock)
+				scope = this.newScope(@scope, ScopeType::InlineBlock)
 
+				if ?clause.binding {
 					scope.define(clause.binding.name, false, Type.Any, this)
-				}
-				else {
-					scope = @scope
 				}
 
 				body = $compile.block(clause.body, this, scope)
@@ -44,89 +51,494 @@ class TryStatement extends Statement {
 				type = $compile.expression(clause.type, this, scope)
 				type.analyse()
 
-				@catchClauses.push({
-					body: body
-					type: type
+				@clauses.push({
+					body
+					type
 				})
 			}
 		}
 
-		if ?@data.catchClause {
-			if ?@data.catchClause.binding {
-				scope = this.newScope(@scope, ScopeType::InlineBlock)
+		if @hasDefaultClause {
+			var scope = this.newScope(@scope, ScopeType::InlineBlock)
 
+			if ?@data.catchClause.binding {
 				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
 			}
-			else {
-				scope = @scope
-			}
 
-			@catchClause = $compile.block(@data.catchClause.body, this, scope)
-			@catchClause.analyse()
+			@defaultClause = $compile.block(@data.catchClause.body, this, scope)
+			@defaultClause.analyse()
 		}
 
-		@block = $compile.block($ast.body(@data), this)
-		@block.analyse()
+		@bodyScope = this.newScope(@scope, ScopeType::InlineBlock)
 
-		@await = @block.isAwait()
+		@body = $compile.block($ast.body(@data), this, @bodyScope)
+		@body.analyse()
 
-		if ?@data.finalizer {
-			@finalizer = $compile.block(@data.finalizer, this)
-			@finalizer.analyse()
+		@await = @body.isAwait()
+
+		if @hasFinally {
+			var scope = this.newScope(@scope, ScopeType::InlineBlock)
+
+			@finally = $compile.block(@data.finalizer, this, scope)
+			@finally.analyse()
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		@hasCatch = @catchClauses.length != 0
+		NotSupportedException.throw(this)
+	} # }}}
+	override prepare(target, index, length) { # {{{
+		if @await {
+			if index + 1 < length {
+				@continueVarname = @scope.acquireTempName(false)
+			}
 
-		for var clause in @catchClauses {
+			if @hasClauses {
+				@catchVarname = @scope.acquireTempName(false)
+			}
+
+			if @hasFinally {
+				@finallyVarname = @scope.acquireTempName(false)
+			}
+		}
+
+		if !@await || @hasClauses {
+			if !#@clauses && ?@data.catchClause?.binding {
+				@errorVarname = @data.catchClause.binding.name
+			}
+			else {
+				@errorVarname = @scope.acquireTempName(false)
+			}
+		}
+
+		var mut maxInferables = 1 + @clauses.length + (@hasDefaultClause ? 1 : 0)
+		var inferables = {}
+
+		for var clause in @clauses {
 			clause.body.prepare(target)
 			clause.type.prepare()
+
+			if clause.body.isExit() {
+				maxInferables -= 1
+			}
+			else {
+				for var data, name of clause.body.scope().listUpdatedInferables() {
+					if ?inferables[name] {
+						if inferables[name].union {
+							inferables[name].data.type.addType(data.type)
+						}
+						else if !data.type.equals(inferables[name].data.type) {
+							inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+							inferables[name].union = inferables[name].data.type.isUnion()
+						}
+
+						inferables[name].count += 1
+					}
+					else {
+						inferables[name] = {
+							count: 1
+							union: false
+							data
+						}
+					}
+				}
+			}
 		}
 
-		if @catchClause != null {
-			@catchClause.prepare(target)
+		@body.prepare(target)
 
-			@hasCatch = true
+		if @body.isExit() {
+			maxInferables -= 1
+		}
+		else {
+			for var data, name of @bodyScope.listUpdatedInferables() {
+				if ?inferables[name] {
+					if inferables[name].union {
+						inferables[name].data.type.addType(data.type)
+					}
+					else if !data.type.equals(inferables[name].data.type) {
+						inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+						inferables[name].union = inferables[name].data.type.isUnion()
+					}
+
+					inferables[name].count += 1
+				}
+				else {
+					inferables[name] = {
+						count: 1
+						union: false
+						data
+					}
+				}
+			}
 		}
 
-		@block.prepare(target)
+		if @hasDefaultClause {
+			@defaultClause.prepare(target)
 
-		@exit = @block.isExit() && @hasCatch && @catchClause.isExit()
+			if @defaultClause.isExit() {
+				maxInferables -= 1
+			}
+			else {
+				for var data, name of @defaultClause.scope().listUpdatedInferables() {
+					if ?inferables[name] {
+						if inferables[name].union {
+							inferables[name].data.type.addType(data.type)
+						}
+						else if !data.type.equals(inferables[name].data.type) {
+							inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+							inferables[name].union = inferables[name].data.type.isUnion()
+						}
 
-		if @finalizer != null {
-			@finalizer.prepare(target)
+						inferables[name].count += 1
+					}
+					else {
+						inferables[name] = {
+							count: 1
+							union: false
+							data
+						}
+					}
+				}
+			}
+		}
 
-			@hasFinally = true
+		if @hasFinally {
+			@finally.prepare(target)
 
-			if @finalizer.isExit() {
-				@exit = true
+			if @finally.isExit() {
+				SyntaxException.throwInvalidFinallyReturn(this)
+			}
+			else {
+				for var data, name of @finally.scope().listUpdatedInferables() {
+					if ?inferables[name] {
+						if inferables[name].union {
+							inferables[name].data.type.addType(data.type)
+						}
+						else if !data.type.equals(inferables[name].data.type) {
+							inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+							inferables[name].union = inferables[name].data.type.isUnion()
+						}
+
+						inferables[name].count = maxInferables
+					}
+					else {
+						inferables[name] = {
+							count: maxInferables
+							union: false
+							data
+						}
+					}
+				}
+			}
+		}
+
+		@exit = maxInferables == 0 && @hasDefaultClause
+
+		return if @exit
+
+		for var data, name of @initVariables {
+			var types = []
+			var mut initializable = true
+			var clauses = [data.body, ...data.clauses]
+			clauses.push(data.defaultClause) if ?data.defaultClause
+
+			if @hasFinally && data.finally.initializable {
+				for var clause in clauses {
+					if clause.initializable {
+						types.push(clause.type)
+					}
+				}
+
+				types.push(data.finally.type)
+			}
+			else {
+				for var clause in clauses {
+					if clause.initializable {
+						types.push(clause.type)
+					}
+					else if !clause.body.isExit() {
+						initializable = false
+
+						break
+					}
+				}
+			}
+
+			if initializable {
+				data.variable.type = Type.union(@scope, ...types)
+
+				@parent.initializeVariable(data.variable, this, this)
+			}
+		}
+
+		for var data, name of @initLateVariables {
+			var types = []
+			var clauses = [data.body, ...data.clauses]
+			clauses.push(data.defaultClause) if ?data.defaultClause
+
+			if @hasFinally && data.finally.initializable {
+				for var clause in clauses {
+					if clause.initializable {
+						types.push(clause.type)
+					}
+				}
+
+				types.push(data.finally.type)
+			}
+			else {
+				for var clause in clauses {
+					if clause.initializable {
+						types.push(clause.type)
+					}
+					else if !clause.body.isExit() {
+						SyntaxException.throwMissingAssignmentTryClause(name, clause.body)
+					}
+				}
+			}
+
+			var type = Type.union(@scope, ...types)
+
+			@parent.initializeVariable(VariableBrief(name, type), this, this)
+		}
+
+		for var inferable, name of inferables {
+			if inferable.count == maxInferables {
+				@scope.updateInferable(name, inferable.data, this)
+			}
+			else if inferable.data.isVariable {
+				@scope.replaceVariable(name, inferable.data.type, true, false, this)
 			}
 		}
 	} # }}}
 	translate() { # {{{
-		@block.translate()
+		@body.translate()
 
-		for clause in @catchClauses {
+		for clause in @clauses {
 			clause.body.translate()
 			clause.type.translate()
 		}
 
-		@catchClause.translate() if ?@catchClause
-		@finalizer.translate() if ?@finalizer
+		@defaultClause.translate() if ?@defaultClause
+		@finally.translate() if ?@finally
 	} # }}}
-	getErrorVarname() { # {{{
-		if @catchClauses.length == 0 && ?@data.catchClause?.binding {
-			return @data.catchClause.binding.name
+	addInitializableVariable(variable: Variable, node) { # {{{
+		var name = variable.name()
+
+		unless @hasDefaultClause || @hasFinally {
+			SyntaxException.throwMissingAssignmentTryClause(name, node)
+		}
+
+		if var map ?= @initLateVariables[name] {
+			if @body == node {
+				map.body.initializable = true
+			}
+			else if @hasDefaultClause && @defaultClause == node {
+				map.defaultClause.initializable = true
+			}
+			else if @hasFinally && @finally == node {
+				map.finally.initializable = true
+			}
+			else {
+				for var clause, index in @clauses {
+					if clause.body == node {
+						map.clauses[index].initializable = true
+
+						break
+					}
+				}
+			}
 		}
 		else {
-			return @scope.acquireTempName(false)
+			var map = {
+				variable
+				body: {
+					body: @body
+					initializable: @body == node
+					type: null
+				}
+				clauses: []
+				defaultClause: null
+				finally: null
+			}
+
+			for var clause, index in @clauses {
+				if clause.body == node {
+					map.clauses.push({
+						body: clause.body
+						initializable: true
+						type: null
+					})
+				}
+				else {
+					map.clauses.push({
+						body: clause.body
+						initializable: false
+						type: null
+					})
+				}
+			}
+
+			if @hasDefaultClause {
+				map.defaultClause = {
+					body: @defaultClause
+					initializable: @defaultClause == node
+					type: null
+				}
+			}
+			if @hasFinally {
+				map.finally = {
+					body: @finally
+					initializable: @finally == node
+					type: null
+				}
+			}
+
+			@initLateVariables[name] = map
+		}
+
+		@parent.addInitializableVariable(variable, node)
+	} # }}}
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
+		var {name, type} = variable
+
+		if var map ?= @initLateVariables[name] {
+			var mut branch = null
+
+			if @body == node {
+				branch = map.body
+			}
+			else if @hasDefaultClause && @defaultClause == node {
+				branch = map.defaultClause
+			}
+			else if @hasFinally && @finally == node {
+				branch = map.finally
+			}
+			else {
+				for var clause, index in @clauses {
+					if clause.body == node {
+						branch = map.clauses[index]
+
+						break
+					}
+				}
+			}
+
+			return unless ?branch
+
+			if branch.type != null {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, expression)
+				}
+				else if !type.matchContentOf(branch.type) {
+					TypeException.throwInvalidAssignement(name, branch.type, type, expression)
+				}
+			}
+			else {
+				branch.type = type
+			}
+
+			var clone = node.scope().getVariable(name).clone()
+
+			if clone.isDefinitive() {
+				clone.setRealType(type)
+			}
+			else {
+				clone.setDeclaredType(type, true).flagDefinitive()
+			}
+
+			node.scope().replaceVariable(name, clone)
+		}
+		else if var map ?= @initVariables[name] {
+			var mut branch = null
+
+			if @body == node {
+				branch = map.body
+			}
+			else if @hasDefaultClause && @defaultClause.body == node {
+				branch = map.defaultClause
+			}
+			else if @hasFinally && @finally.body == node {
+				branch = map.finally
+			}
+			else {
+				for var clause, index in @clauses {
+					if clause.body == node {
+						branch = map.clauses[index]
+
+						break
+					}
+				}
+			}
+
+			return unless ?branch
+
+			if branch.type != null {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, expression)
+				}
+				else if !type.matchContentOf(branch.type) {
+					TypeException.throwInvalidAssignement(name, branch.type, type, expression)
+				}
+			}
+			else {
+				branch.type = type
+			}
+
+			node.scope().updateInferable(name, variable, expression)
+		}
+		else {
+			var map = {
+				variable
+				body: {
+					body: @body
+					initializable: @body == node
+					type: null
+				}
+				clauses: []
+				defaultClause: null
+				finally: null
+			}
+
+			for var clause, index in @clauses {
+				if clause.body == node {
+					map.clauses.push({
+						body: clause.body
+						initializable: true
+						type: null
+					})
+				}
+				else {
+					map.clauses.push({
+						body: clause.body
+						initializable: false
+						type: null
+					})
+				}
+			}
+
+			if @hasDefaultClause {
+				map.defaultClause = {
+					body: @defaultClause
+					initializable: @defaultClause == node
+					type: null
+				}
+			}
+			if @hasFinally {
+				map.finally = {
+					body: @finally
+					initializable: @finally == node
+					type: null
+				}
+			}
+
+			@initVariables[name] = map
 		}
 	} # }}}
 	isAwait() => @await
 	isConsumedError(error): Boolean { # {{{
-		if @catchClauses.length > 0 {
-			for clause in @catchClauses {
-				if error.matchInheritanceOf(clause.type.type()) {
+		if @hasClauses && !@hasDefaultClause {
+			for var clause in @clauses {
+				if error.isAssignableToVariable(clause.type.type(), false, false, false) {
 					return true
 				}
 			}
@@ -139,27 +551,26 @@ class TryStatement extends Statement {
 	} # }}}
 	isExit() => @exit
 	isJumpable() => true
+	isLateInitializable() => true
 	isUsingVariable(name) { # {{{
-		if @block.isUsingVariable(name) {
+		if @body.isUsingVariable(name) {
 			return true
 		}
 
-		for var clause in @catchClauses {
+		for var clause in @clauses {
 			if clause.body.isUsingVariable(name) {
 				return true
 			}
 		}
 
-		if @catchClause != null && @catchClause.isUsingVariable(name) {
+		if @defaultClause != null && @defaultClause.isUsingVariable(name) {
 			return true
 		}
 
-		return @hasFinally && @finalizer.isUsingVariable(name)
+		return @hasFinally && @finally.isUsingVariable(name)
 	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		if statements.length != 0 {
-			@continueVarname = @scope.acquireTempName()
-
 			var line = fragments
 				.newLine()
 				.code($runtime.scope(this), @continueVarname, ` = () =>`)
@@ -183,10 +594,8 @@ class TryStatement extends Statement {
 			line.done()
 		}
 
-		if ?@finalizer {
+		if @hasFinally {
 			@state = TryState::Finally
-
-			@finallyVarname = @scope.acquireTempName()
 
 			var line = fragments
 				.newLine()
@@ -194,28 +603,22 @@ class TryStatement extends Statement {
 
 			line
 				.newBlock()
-				.compile(@finalizer)
+				.compile(@finally)
 				.done()
 
 			line.done()
 		}
 
-		if @catchClauses.length != 0 || ?@catchClause {
+		if @hasClauses {
 			@state = TryState::Catch
-
-			@catchVarname = @scope.acquireTempName()
-
-			var error = this.getErrorVarname()
 
 			var line = fragments
 				.newLine()
-				.code($runtime.scope(this), @catchVarname, ` = (\(error)) =>`)
+				.code($runtime.scope(this), @catchVarname, ` = (\(@errorVarname)) =>`)
 
 			var block = line.newBlock()
 
-			this.toCatchFragments(block, error)
-
-			@scope.releaseTempName(error)
+			this.toCatchFragments(block, @errorVarname)
 
 			block.done()
 			line.done()
@@ -228,7 +631,7 @@ class TryStatement extends Statement {
 			.code('try')
 			.step()
 
-		ctrl.compile(@block, Mode::None)
+		ctrl.compile(@body, Mode::None)
 
 		ctrl
 			.step()
@@ -411,7 +814,7 @@ class TryStatement extends Statement {
 	toCatchFragments(fragments, error) { # {{{
 		var mut async = false
 
-		if @catchClauses.length != 0 {
+		if @clauses.length != 0 {
 			this.module().flag('Type')
 
 			var mut ifs = fragments.newControl()
@@ -421,7 +824,7 @@ class TryStatement extends Statement {
 
 				ifs
 					.code('if(', $runtime.type(this), '.isClassInstance(', error, ', ')
-					.compile(@catchClauses[i].type)
+					.compile(@clauses[i].type)
 					.code('))')
 					.step()
 
@@ -429,23 +832,23 @@ class TryStatement extends Statement {
 					ifs.line($runtime.scope(this), clause.binding.name, ' = ', error)
 				}
 
-				ifs.compile(@catchClauses[i].body)
+				ifs.compile(@clauses[i].body)
 
-				if !@catchClauses[i].body.isAwait() && ?@continueVarname {
+				if !@clauses[i].body.isAwait() && ?@continueVarname {
 					ifs.line(`\(@continueVarname)()`)
 				}
 			}
 
-			if ?@catchClause {
+			if ?@defaultClause {
 				ifs.step().code('else').step()
 
 				if ?@data.catchClause.binding {
 					ifs.line($runtime.scope(this), @data.catchClause.binding.name, ' = ', error)
 				}
 
-				ifs.compile(@catchClause)
+				ifs.compile(@defaultClause)
 
-				if !@catchClause.isAwait() && ?@continueVarname {
+				if !@defaultClause.isAwait() && ?@continueVarname {
 					ifs.line(`\(@continueVarname)()`)
 				}
 			}
@@ -457,10 +860,10 @@ class TryStatement extends Statement {
 
 			ifs.done()
 		}
-		else if ?@catchClause {
-			fragments.compile(@catchClause)
+		else if ?@defaultClause {
+			fragments.compile(@defaultClause)
 
-			if !@catchClause.isAwait() {
+			if !@defaultClause.isAwait() {
 				if ?@finallyVarname {
 					fragments.line(`\(@finallyVarname)()`)
 				}
@@ -477,7 +880,7 @@ class TryStatement extends Statement {
 		}
 	} # }}}
 	toFinallyFragments(fragments) { # {{{
-		fragments.code('finally').step().compile(@finalizer)
+		fragments.code('finally').step().compile(@finally)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if @await {
@@ -489,7 +892,7 @@ class TryStatement extends Statement {
 				.code('try')
 				.step()
 
-			ctrl.compile(@block, Mode::None)
+			ctrl.compile(@body, Mode::None)
 
 			if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)
@@ -497,12 +900,10 @@ class TryStatement extends Statement {
 
 			ctrl.step()
 
-			var error = this.getErrorVarname()
+			if @hasClauses {
+				ctrl.code(`catch(\(@errorVarname))`).step()
 
-			if @hasCatch {
-				ctrl.code(`catch(\(error))`).step()
-
-				this.toCatchFragments(ctrl, error)
+				this.toCatchFragments(ctrl, @errorVarname)
 
 				if @hasFinally {
 					ctrl.step()
@@ -514,10 +915,8 @@ class TryStatement extends Statement {
 				this.toFinallyFragments(ctrl)
 			}
 			else {
-				ctrl.code(`catch(\(error))`).step()
+				ctrl.code(`catch(\(@errorVarname))`).step()
 			}
-
-			@scope.releaseTempName(error)
 
 			ctrl.done()
 		}

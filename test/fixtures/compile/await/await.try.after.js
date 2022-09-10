@@ -21,27 +21,27 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function(__ks_cb) {
 		let d = 0;
-		let __ks_1 = () => {
+		let __ks_0 = () => {
 			return __ks_cb(null, d);
 		};
 		try {
-			foo.__ks_0(42, 24, (__ks_e, __ks_0) => {
+			foo.__ks_0(42, 24, (__ks_e, __ks_1) => {
 				if(__ks_e) {
-					__ks_1();
+					__ks_0();
 				}
 				else {
 					try {
-						d = __ks_0;
+						d = __ks_1;
 						d = Operator.multiplication(d, 3);
 					}
 					catch(__ks_e) {
 					}
-					__ks_1();
+					__ks_0();
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_1();
+			__ks_0();
 		}
 	};
 	bar.__ks_rt = function(that, args) {

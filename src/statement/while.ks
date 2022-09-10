@@ -1,12 +1,12 @@
 class WhileStatement extends Statement {
 	private late {
-		_bindingDeclaration: Boolean		= false
-		_bindingScope: Scope
-		_body								= null
-		_bodyScope: Scope
-		_condition: Expression
-		_declared: Boolean					= false
-		_declaration: VariableDeclaration
+		@bindingDeclaration: Boolean		= false
+		@bindingScope: Scope
+		@body								= null
+		@bodyScope: Scope
+		@condition: Expression
+		@declared: Boolean					= false
+		@declaration: VariableDeclaration
 	}
 	initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {

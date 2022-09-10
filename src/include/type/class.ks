@@ -7,52 +7,52 @@ enum Accessibility {
 
 class ClassType extends Type {
 	private {
-		_abstract: Boolean					= false
-		_abstractMethods: Dictionary		= {}
-		_alterations						= {
+		@abstract: Boolean					= false
+		@abstractMethods: Dictionary		= {}
+		@alterations						= {
 			classMethods: {}
 			classVariables: {}
 			constructors: {}
 			instanceMethods: {}
 			instanceVariables: {}
 		}
-		_altering: Boolean					= false
-		_classAssessments: Dictionary		= {}
-		_classMethods: Dictionary			= {}
-		_classVariables: Dictionary			= {}
-		_constructors: Array				= []
-		_constructorAssessment				= null
-		_exhaustiveness						= {
+		@altering: Boolean					= false
+		@classAssessments: Dictionary		= {}
+		@classMethods: Dictionary			= {}
+		@classVariables: Dictionary			= {}
+		@constructors: Array				= []
+		@constructorAssessment				= null
+		@exhaustiveness						= {
 			constructor: false
 			classMethods: {}
 			instanceMethods: {}
 		}
-		_explicitlyExported: Boolean		= false
-		_extending: Boolean					= false
-		_extends: NamedType<ClassType>?		= null
-		_hybrid: Boolean					= false
-		_init: Number						= 0
-		_instanceAssessments: Dictionary	= {}
-		_instanceMethods: Dictionary		= {}
-		_instanceVariables: Dictionary		= {}
-		_level: Number						= 0
-		_majorOriginal: ClassType?
-		_minorOriginal: ClassType?
-		_overwritten						= {
+		@explicitlyExported: Boolean		= false
+		@extending: Boolean					= false
+		@extends: NamedType<ClassType>?		= null
+		@hybrid: Boolean					= false
+		@init: Number						= 0
+		@instanceAssessments: Dictionary	= {}
+		@instanceMethods: Dictionary		= {}
+		@instanceVariables: Dictionary		= {}
+		@level: Number						= 0
+		@majorOriginal: ClassType?
+		@minorOriginal: ClassType?
+		@overwritten						= {
 			constructors: null
 			classMethods: {}
 			instanceMethods: {}
 		}
-		_predefined: Boolean				= false
-		_sharedMethods: Dictionary<Number>	= {}
-		_seal								= {
+		@predefined: Boolean				= false
+		@sharedMethods: Dictionary<Number>	= {}
+		@seal								= {
 			constructors: false
 			classMethods: {}
 			classVariables: {}
 			instanceMethods: {}
 			instanceVariables: {}
 		}
-		_sequences	 						= {
+		@sequences	 						= {
 			constructors:		-1
 			defaults:			-1
 			destructors:		-1
@@ -1175,15 +1175,34 @@ class ClassType extends Type {
 			return assessment
 		}
 
-		var methods = this.listInstantiableMethods(name)
+		var methods = @listInstantiableMethods(name)
 
-		var mut that = this
-		while methods.length == 0 && that.isExtending() {
-			that = that.extends().type()
+		if @extending {
+			var keys = {}
 
-			for var method in that.listInstantiableMethods(name) {
-				method.pushTo(methods)
+			for var method in methods {
+				keys[method.index()] = true
+
+				if var indexes ?= method.overload() {
+					for var index in indexes {
+						keys[index] = true
+					}
+				}
 			}
+
+			var mut that = this
+			do {
+				that = that.extends().type()
+
+				for var method in that.listInstantiableMethods(name) {
+					if !keys[method.index()] {
+						methods.push(method)
+
+						keys[method.index()] = true
+					}
+				}
+			}
+			while that.isExtending()
 		}
 
 		var assessment = Router.assess(methods, name, node)

@@ -1,0 +1,1 @@
+SyntaxException: No "return" statements are allowed in a "finally" block (fixtures/compile/try/try.finally.return.return.ks:6)

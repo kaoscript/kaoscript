@@ -1,21 +1,21 @@
 class MemberExpression extends Expression {
 	private late {
-		_assignable: Boolean		= false
-		_assignment: AssignmentType	= AssignmentType::Neither
-		_callee
-		_computed: Boolean			= false
-		_inferable: Boolean			= false
-		_nullable: Boolean			= false
-		_object
-		_path: String
-		_prepareObject: Boolean		= true
-		_property
-		_sealed: Boolean			= false
-		_stringProperty: Boolean	= false
-		_tested: Boolean			= false
-		_type: Type					= AnyType.NullableUnexplicit
-		_usingGetter: Boolean		= false
-		_usingSetter: Boolean		= false
+		@assignable: Boolean		= false
+		@assignment: AssignmentType	= AssignmentType::Neither
+		@callee
+		@computed: Boolean			= false
+		@inferable: Boolean			= false
+		@nullable: Boolean			= false
+		@object
+		@path: String
+		@prepareObject: Boolean		= true
+		@property
+		@sealed: Boolean			= false
+		@stringProperty: Boolean	= false
+		@tested: Boolean			= false
+		@type: Type					= AnyType.NullableUnexplicit
+		@usingGetter: Boolean		= false
+		@usingSetter: Boolean		= false
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)

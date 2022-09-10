@@ -203,14 +203,14 @@ func $transformExpression(macro, node, data, writer) { # {{{
 
 class MacroDeclaration extends AbstractNode {
 	private {
-		_executeCount							= 0
-		_fn: Function
-		_line: Number
-		_marks:	Array							= []
-		_name: String
-		_parameters: Dictionary					= {}
-		_referenceIndex: Number					= -1
-		_type: MacroType
+		@executeCount							= 0
+		@fn: Function
+		@line: Number
+		@marks: Array							= []
+		@name: String
+		@parameters: Dictionary					= {}
+		@referenceIndex: Number					= -1
+		@type: MacroType
 	}
 	constructor(@data, @parent, _: Scope?, @name = data.name.name) { # {{{
 		super(data, parent, new MacroScope())
@@ -280,6 +280,7 @@ class MacroDeclaration extends AbstractNode {
 	} # }}}
 	analyse()
 	override prepare(target)
+	prepare(target: Type, index: Number, length: Number)
 	translate()
 	addMark(data, kind? = null) { # {{{
 		var index = @marks.length
@@ -459,7 +460,7 @@ class MacroType extends FunctionType {
 // TODO remove extended type
 class MacroArgument extends Type {
 	private {
-		_data
+		@data
 	}
 	static build(arguments: Array) => [new MacroArgument(argument) for var argument in arguments]
 	constructor(@data) { # {{{
@@ -545,9 +546,9 @@ func $callMacroExpression(data, parent, scope) { # {{{
 
 class CallMacroStatement extends Statement {
 	private {
-		_offsetEnd: Number		= 0
-		_offsetStart: Number	= 0
-		_statements: Array		= []
+		@offsetEnd: Number		= 0
+		@offsetStart: Number	= 0
+		@statements: Array		= []
 	}
 	initiate() { # {{{
 		var macro = @scope.getMacro(@data, this)

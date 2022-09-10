@@ -20,35 +20,35 @@ module.exports = function() {
 		return bar.__ks_rt(this, arguments);
 	};
 	bar.__ks_0 = function(__ks_cb) {
-		let __ks_2 = (__ks_3) => {
+		let __ks_0 = (__ks_1) => {
 			return __ks_cb(null, 0);
 		};
 		try {
-			foo.__ks_0(42, 24, (__ks_e, __ks_0) => {
+			foo.__ks_0(42, 24, (__ks_e, __ks_2) => {
 				if(__ks_e) {
-					__ks_2(__ks_e);
+					__ks_0(__ks_e);
 				}
 				else {
 					try {
-						let d = __ks_0;
-						foo.__ks_0(4, 2, (__ks_e, __ks_1) => {
+						let d = __ks_2;
+						foo.__ks_0(4, 2, (__ks_e, __ks_3) => {
 							if(__ks_e) {
-								__ks_2(__ks_e);
+								__ks_0(__ks_e);
 							}
 							else {
-								let e = __ks_1;
+								let e = __ks_3;
 								return __ks_cb(null, Operator.multiplication(d, e));
 							}
 						});
 					}
 					catch(__ks_e) {
-						return __ks_2(__ks_e);
+						return __ks_0(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_2(__ks_e);
+			__ks_0(__ks_e);
 		}
 	};
 	bar.__ks_rt = function(that, args) {

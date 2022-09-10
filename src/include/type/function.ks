@@ -1,24 +1,24 @@
 class FunctionType extends Type {
 	private late {
-		_assessment							= null
-		_async: Boolean						= false
-		_autoTyping: Boolean				= false
-		_dynamicReturn: Boolean				= false
-		_errors: Array<Type>				= []
-		_hasRest: Boolean					= false
-		_index: Number						= -1
-		_max: Number						= 0
-		_maxBefore: Number					= 0
-		_maxAfter: Number					= 0
-		_min: Number						= 0
-		_minBefore: Number					= 0
-		_minAfter: Number					= 0
-		_missingParameters: Boolean			= false
-		_missingReturn: Boolean				= true
-		_parameters: Array<ParameterType>	= []
-		_restIndex: Number					= -1
-		_returnData							= null
-		_returnType: Type					= AnyType.NullableUnexplicit
+		@assessment							= null
+		@async: Boolean						= false
+		@autoTyping: Boolean				= false
+		@dynamicReturn: Boolean				= false
+		@errors: Array<Type>				= []
+		@hasRest: Boolean					= false
+		@index: Number						= -1
+		@max: Number						= 0
+		@maxBefore: Number					= 0
+		@maxAfter: Number					= 0
+		@min: Number						= 0
+		@minBefore: Number					= 0
+		@minAfter: Number					= 0
+		@missingParameters: Boolean			= false
+		@missingReturn: Boolean				= true
+		@parameters: Array<ParameterType>	= []
+		@restIndex: Number					= -1
+		@returnData							= null
+		@returnType: Type					= AnyType.NullableUnexplicit
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{

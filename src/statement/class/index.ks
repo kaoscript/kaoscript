@@ -12,37 +12,37 @@ enum TypeStatus { # {{{
 
 class ClassDeclaration extends Statement {
 	private late {
-		_class: ClassType
-		_extendsName: String
-		_extendsType: NamedType<ClassType>
-		_initsId: String
-		_name: String
-		_type: NamedType<ClassType>
-		_variable: Variable
+		@class: ClassType
+		@extendsName: String
+		@extendsType: NamedType<ClassType>
+		@initsId: String
+		@name: String
+		@type: NamedType<ClassType>
+		@variable: Variable
 	}
 	private {
-		_abstract: Boolean 					= false
-		_abstractMethods					= {}
-		_classMethods						= {}
-		_classVariables						= {}
-		_constructors						= []
-		_constructorScope
-		_destructor							= null
-		_destructorScope
-		_es5: Boolean						= false
-		_extending: Boolean					= false
-		_forcefullyRebinded: Boolean		= false
-		_forkedMethods						= {}
-		_hybrid: Boolean					= false
-		_inits: Boolean						= false
-		_instanceMethods					= {}
-		_instanceVariables					= {}
-		_instanceVariableScope
-		_macros								= {}
-		_proxies							= []
-		_references							= {}
-		_sealed: Boolean 					= false
-		_sharedMethods: Dictionary			= {}
+		@abstract: Boolean 					= false
+		@abstractMethods					= {}
+		@classMethods						= {}
+		@classVariables						= {}
+		@constructors						= []
+		@constructorScope
+		@destructor							= null
+		@destructorScope
+		@es5: Boolean						= false
+		@extending: Boolean					= false
+		@forcefullyRebinded: Boolean		= false
+		@forkedMethods						= {}
+		@hybrid: Boolean					= false
+		@inits: Boolean						= false
+		@instanceMethods					= {}
+		@instanceVariables					= {}
+		@instanceVariableScope
+		@macros								= {}
+		@proxies							= []
+		@references							= {}
+		@sealed: Boolean 					= false
+		@sharedMethods: Dictionary			= {}
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { # {{{
 		if method.max() == 0 && !method.isAsync() {

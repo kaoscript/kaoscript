@@ -145,12 +145,12 @@ var $function = {
 
 class FunctionDeclaration extends Statement {
 	private late {
-		_continued: Boolean			= false
-		_extended: Boolean			= false
-		_main: Boolean				= false
-		_name: String
-		_oldVariableName: String
-		_variable: FunctionVariable
+		@continued: Boolean			= false
+		@extended: Boolean			= false
+		@main: Boolean				= false
+		@name: String
+		@oldVariableName: String
+		@variable: FunctionVariable
 	}
 	static toFlatWrongDoingFragments(block, ctrl?, argName, async, returns) { # {{{
 		if ctrl == null {
@@ -363,17 +363,17 @@ class FunctionDeclaration extends Statement {
 
 class FunctionDeclarator extends AbstractNode {
 	private late {
-		_autoTyping: Boolean			= false
-		_awaiting: Boolean				= false
-		_block: Block
-		_exit: Boolean					= false
-		_index: Number					= 0
-		_offset: Number
-		_parameters: Array<Parameter>	= []
-		_returnNull: Boolean			= false
-		_variable: FunctionVariable
-		_topNodes: Array				= []
-		_type: FunctionType
+		@autoTyping: Boolean			= false
+		@awaiting: Boolean				= false
+		@block: Block
+		@exit: Boolean					= false
+		@index: Number					= 0
+		@offset: Number
+		@parameters: Array<Parameter>	= []
+		@returnNull: Boolean			= false
+		@variable: FunctionVariable
+		@topNodes: Array				= []
+		@type: FunctionType
 	}
 	constructor(@variable, @data, @parent) { # {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -528,10 +528,10 @@ class FunctionDeclarator extends AbstractNode {
 
 class FunctionVariable extends Variable {
 	private {
-		_async: Boolean								= false
-		_extended: Boolean							= false
-		_declarators: Array<FunctionDeclarator>		= []
-		_indexDelta: Number							 = 0
+		@async: Boolean								= false
+		@extended: Boolean							= false
+		@declarators: Array<FunctionDeclarator>		= []
+		@indexDelta: Number							 = 0
 	}
 	constructor(scope: Scope, @name, @extended, @indexDelta = 0) { # {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
@@ -596,7 +596,7 @@ class FunctionVariable extends Variable {
 		}
 	} # }}}
 	translate() { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.translate()
 		}
 	} # }}}

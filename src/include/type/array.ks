@@ -134,6 +134,9 @@ class ArrayType extends Type {
 			return @properties[index]
 		}
 	} # }}}
+	getProperty(name: String): Type { # {{{
+		return @scope.reference('Array').getProperty(name)
+	} # }}}
 	getRestType(): @restType
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''

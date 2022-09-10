@@ -1,23 +1,23 @@
 class Variable {
 	private late {
 		// true: can be altered by `impl` declaration
-		_altereable: Boolean		= false
-		_class: Boolean				= false
-		_complete: Boolean			= false
-		_declaration: Statement?	= null
-		_declaredType: Type			= AnyType.NullableUnexplicit
+		@altereable: Boolean		= false
+		@class: Boolean				= false
+		@complete: Boolean			= false
+		@declaration: Statement?	= null
+		@declaredType: Type			= AnyType.NullableUnexplicit
 		// true: the type can't be changed
-		_definitive: Boolean		= false
+		@definitive: Boolean		= false
 		// true: the value can be set only once
-		_immutable: Boolean			= true
-		_initialized: Boolean		= false
-		_module: Boolean			= false
-		_name: String
-		_new: Boolean				= true
-		_lateInit: Boolean			= false
-		_predefined: Boolean		= false
-		_realType: Type				= Type.Null
-		_secureName: String
+		@immutable: Boolean			= true
+		@initialized: Boolean		= false
+		@module: Boolean			= false
+		@name: String
+		@new: Boolean				= true
+		@lateInit: Boolean			= false
+		@predefined: Boolean		= false
+		@realType: Type				= Type.Null
+		@secureName: String
 	}
 	static {
 		createPredefinedClass(name, scope) { # {{{

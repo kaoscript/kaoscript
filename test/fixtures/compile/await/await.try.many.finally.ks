@@ -1,7 +1,6 @@
 extern console
 
 async func foo(a, b) => a - b
-// async func foo(x, y) => x - y
 
 async func bar() {
 	var dyn x = -1

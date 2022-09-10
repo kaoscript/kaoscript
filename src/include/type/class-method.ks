@@ -6,6 +6,7 @@ class ClassMethodType extends FunctionType {
 		@forkedIndex: Number?					= null
 		@initVariables: Dictionary<Boolean>		= {}
 		@instance: Boolean						= false
+		@overload: Array?						= null
 		@overwrite: Array?						= null
 		@proxy: Boolean							= false
 		@proxyName: String						= ''
@@ -175,6 +176,8 @@ class ClassMethodType extends FunctionType {
 		return false
 	} # }}}
 	isUnknownReturnType() => @autoTyping || @unknownReturnType
+	overload() => @overload
+	overload(@overload)
 	overwrite() => @overwrite
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{

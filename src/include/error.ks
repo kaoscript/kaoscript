@@ -459,6 +459,9 @@ export class SyntaxException extends Exception {
 		throwInvalidEnumValue(data, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The enum's value isn't valid`, node, data)
 		} # }}}
+		throwInvalidFinallyReturn(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`No "return" statements are allowed in a "finally" block`, node)
+		} # }}}
 		throwInvalidForcedTypeCasting(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
 		} # }}}
@@ -511,6 +514,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwMissingAssignmentSwitchNoDefault(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing default clause`, node)
+		} # }}}
+		throwMissingAssignmentTryClause(name, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized by the clause at`, node)
 		} # }}}
 		throwMissingRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)

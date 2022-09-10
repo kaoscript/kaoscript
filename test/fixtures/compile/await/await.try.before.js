@@ -21,34 +21,34 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function(__ks_cb) {
 		let d = null;
-		let __ks_1 = () => {
+		let __ks_0 = () => {
 			return __ks_cb(null, d);
 		};
-		let __ks_2 = (__ks_3) => {
+		let __ks_1 = (__ks_2) => {
 			d = 0;
-			__ks_1();
+			__ks_0();
 		};
 		try {
 			let x = 42;
 			let y = 24;
-			foo.__ks_0(x, y, (__ks_e, __ks_0) => {
+			foo.__ks_0(x, y, (__ks_e, __ks_3) => {
 				if(__ks_e) {
-					__ks_2(__ks_e);
+					__ks_1(__ks_e);
 				}
 				else {
 					try {
-						d = __ks_0;
+						d = __ks_3;
 						d = Operator.multiplication(d, 3);
 					}
 					catch(__ks_e) {
-						return __ks_2(__ks_e);
+						return __ks_1(__ks_e);
 					}
-					__ks_1();
+					__ks_0();
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_2(__ks_e);
+			__ks_1(__ks_e);
 		}
 	};
 	bar.__ks_rt = function(that, args) {

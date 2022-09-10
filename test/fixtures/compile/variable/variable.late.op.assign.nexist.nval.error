@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "value" isn't fully initialized when the condition is true (fixtures/compile/variable/variable.late.op.assign.nexist.nval.ks:4)

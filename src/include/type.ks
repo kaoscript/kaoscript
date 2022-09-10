@@ -190,17 +190,17 @@ bitmask TypeOrigin {
 
 abstract class Type {
 	private {
-		_alien: Boolean					= false
-		_exhaustive: Boolean? 			= null
-		_exported: Boolean				= false
-		_origin: TypeOrigin?			= null
-		_referenced: Boolean			= false
-		_referenceIndex: Number			= -1
-		_required: Boolean 				= false
-		_requirement: Boolean			= false
-		_scope: Scope?
-		_sealed: Boolean				= false
-		_system: Boolean				= false
+		@alien: Boolean					= false
+		@exhaustive: Boolean? 			= null
+		@exported: Boolean				= false
+		@origin: TypeOrigin?			= null
+		@referenced: Boolean			= false
+		@referenceIndex: Number			= -1
+		@required: Boolean 				= false
+		@requirement: Boolean			= false
+		@scope: Scope?
+		@sealed: Boolean				= false
+		@system: Boolean				= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])

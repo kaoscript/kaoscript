@@ -22,18 +22,18 @@ var $switch = {
 
 class SwitchStatement extends Statement {
 	private late {
-		_castingEnum: Boolean				= false
-		_clauses							= []
-		_hasDefaultClause: Boolean			= false
-		_hasLateInitVariables: Boolean		= false
-		_initializedVariables: Dictionary	= {}
-		_lateInitVariables					= {}
-		_name: String?						= null
-		_nextClauseIndex: Number
-		_reusableValue: Boolean				= false
-		_usingFallthrough: Boolean			= false
-		_value								= null
-		_valueType: Type
+		@castingEnum: Boolean				= false
+		@clauses							= []
+		@hasDefaultClause: Boolean			= false
+		@hasLateInitVariables: Boolean		= false
+		@initializedVariables: Dictionary	= {}
+		@lateInitVariables					= {}
+		@name: String?						= null
+		@nextClauseIndex: Number
+		@reusableValue: Boolean				= false
+		@usingFallthrough: Boolean			= false
+		@value								= null
+		@valueType: Type
 	}
 	analyse() { # {{{
 		@value = $compile.expression(@data.expression, this)
@@ -219,7 +219,7 @@ class SwitchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !clause.body.isExit() {
+				else if !!@clauses[index].body.isExit() {
 					initializable = false
 
 					break
@@ -631,7 +631,7 @@ class SwitchStatement extends Statement {
 
 class SwitchBindingArray extends AbstractNode {
 	private {
-		_array
+		@array
 	}
 	analyse() { # {{{
 		@array = $compile.expression(@data, this)
@@ -681,9 +681,9 @@ class SwitchBindingValue extends AbstractNode {
 
 class SwitchConditionArray extends AbstractNode {
 	private {
-		_flatten: Boolean	= false
-		_name: String?		= null
-		_values				= []
+		@flatten: Boolean	= false
+		@name: String?		= null
+		@values				= []
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
@@ -797,10 +797,10 @@ class SwitchConditionArray extends AbstractNode {
 
 class SwitchConditionRange extends AbstractNode {
 	private {
-		_from	= true
-		_left
-		_right
-		_to		= true
+		@from	= true
+		@left
+		@right
+		@to		= true
 	}
 	analyse() { # {{{
 		if ?@data.from {
@@ -845,7 +845,7 @@ class SwitchConditionRange extends AbstractNode {
 
 class SwitchConditionType extends AbstractNode {
 	private late {
-		_type: Type
+		@type: Type
 	}
 	analyse()
 	override prepare(target) { # {{{
@@ -861,9 +861,9 @@ class SwitchConditionType extends AbstractNode {
 
 class SwitchConditionValue extends AbstractNode {
 	private late {
-		_castingEnum: Boolean	= false
-		_value
-		_type: Type
+		@castingEnum: Boolean	= false
+		@value
+		@type: Type
 	}
 	analyse() { # {{{
 		@value = $compile.expression(@data, this)
@@ -897,10 +897,10 @@ class SwitchConditionValue extends AbstractNode {
 
 class SwitchFilter extends AbstractNode {
 	private {
-		_bindings			= []
-		_filter				= null
-		_flatten: Boolean	= false
-		_name				= null
+		@bindings			= []
+		@filter				= null
+		@flatten: Boolean	= false
+		@name				= null
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'

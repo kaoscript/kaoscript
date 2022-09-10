@@ -20,27 +20,27 @@ module.exports = function() {
 		return bar.__ks_rt(this, arguments);
 	};
 	bar.__ks_0 = function(cb) {
-		let __ks_1 = (__ks_2) => {
+		let __ks_0 = (__ks_1) => {
 			cb(0);
 		};
 		try {
-			foo.__ks_0(42, 24, (__ks_e, __ks_0) => {
+			foo.__ks_0(42, 24, (__ks_e, __ks_2) => {
 				if(__ks_e) {
-					__ks_1(__ks_e);
+					__ks_0(__ks_e);
 				}
 				else {
 					try {
-						let d = __ks_0;
+						let d = __ks_2;
 						cb(d);
 					}
 					catch(__ks_e) {
-						return __ks_1(__ks_e);
+						return __ks_0(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_1(__ks_e);
+			__ks_0(__ks_e);
 		}
 	};
 	bar.__ks_rt = function(that, args) {

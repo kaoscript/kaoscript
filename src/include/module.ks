@@ -602,6 +602,7 @@ export class Module {
 class ModuleBlock extends AbstractNode {
 	private {
 		@attributeDatas				= {}
+		@length: Number				= 0
 		@module: Module
 		@statements: Array			= []
 		@topNodes: Array			= []
@@ -632,6 +633,8 @@ class ModuleBlock extends AbstractNode {
 				statement.initiate()
 			}
 		}
+
+		@length = @data.body.length
 	} # }}}
 	analyse() { # {{{
 		for var statement in @statements {
@@ -655,14 +658,14 @@ class ModuleBlock extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target) { # {{{
-		for var statement in @statements {
+		for var statement, index in @statements {
 			@scope.line(statement.line())
 
 			if statement is ReturnStatement {
-				statement.prepare(target)
+				statement.prepare(target, index, @length)
 			}
 			else {
-				statement.prepare(Type.Void)
+				statement.prepare(Type.Void, index, @length)
 			}
 		}
 

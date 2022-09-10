@@ -1,10 +1,10 @@
 class AwaitExpression extends Expression {
 	private {
-		_awaiting: Boolean		= true
-		_function
-		_operation
-		_reuseName: String?		= null
-		_try
+		@awaiting: Boolean		= true
+		@function
+		@operation
+		@reuseName: String?		= null
+		@try
 	}
 	constructor(@data, @parent, @scope = null) { # {{{
 		super(data, parent, scope)
@@ -66,17 +66,17 @@ class AwaitExpression extends Expression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @awaiting {
-			if item ?= @operation.toFragments(fragments, Mode::Async) {
+			if var item ?= @operation.toFragments(fragments, Mode::Async) {
 				return item
 			}
 			else {
 				@awaiting = false
 
 				if ?@try {
-					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName:String, this)])
+					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName!?, this)])
 				}
 				else if @function?.type().isAsync() {
-					return @function.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName:String, this)])
+					return @function.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName!?, this)])
 				}
 				else {
 					return this.toAwaitExpressionFragments^@(fragments)

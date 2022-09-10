@@ -1,28 +1,28 @@
 class ClassMethodDeclaration extends Statement {
 	private late {
-		_block: FunctionBlock
-		_internalName: String
-		_type: Type
+		@block: FunctionBlock
+		@internalName: String
+		@type: Type
 	}
 	private {
-		_abstract: Boolean					= false
-		_aliases: Array						= []
-		_analysed: Boolean					= false
-		_autoTyping: Boolean				= false
-		_awaiting: Boolean					= false
-		_exact: Boolean						= false
-		_exit: Boolean						= false
-		_forked: Boolean					= false
-		_forks: Array<ClassMethodType>?		= null
-		_hiddenOverride: Boolean			= false
-		_indigentValues: Array				= []
-		_instance: Boolean					= true
-		_name: String
-		_override: Boolean					= false
-		_overriding: Boolean				= false
-		_parameters: Array<Parameter>		= []
-		_returnNull: Boolean				= false
-		_topNodes: Array					= []
+		@abstract: Boolean					= false
+		@aliases: Array						= []
+		@analysed: Boolean					= false
+		@autoTyping: Boolean				= false
+		@awaiting: Boolean					= false
+		@exact: Boolean						= false
+		@exit: Boolean						= false
+		@forked: Boolean					= false
+		@forks: Array<ClassMethodType>?		= null
+		@hiddenOverride: Boolean			= false
+		@indigentValues: Array				= []
+		@instance: Boolean					= true
+		@name: String
+		@override: Boolean					= false
+		@overriding: Boolean				= false
+		@parameters: Array<Parameter>		= []
+		@returnNull: Boolean				= false
+		@topNodes: Array					= []
 	}
 	static toClassRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
 		var classname = variable.name()
@@ -256,14 +256,20 @@ class ClassMethodDeclaration extends Statement {
 
 			overloaded = @listOverloadedMethods(superclass)
 
+			var overload = []
+
 			if @overriding {
 				if @exact {
 					overloaded:Array.remove(overridden)
+
+					overload.push(overridden.index())
 				}
 				else if overloaded:Array.contains(overridden) {
 					@parent.addForkedMethod(@name, overridden, @type, true)
 
 					overloaded:Array.remove(overridden)
+
+					overload.push(overridden.index())
 				}
 				else {
 					@parent.addForkedMethod(@name, overridden, @type, true)
@@ -281,12 +287,20 @@ class ClassMethodDeclaration extends Statement {
 				}
 				else if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = true
+
+					overload.push(method.index())
 				}
 				else if @type.isSubsetOf(method, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = false
+
+					overload.push(method.index())
 				}
 
 				@parent.addForkedMethod(@name, method, @type, hidden)
+			}
+
+			if #overload {
+				@type.overload(overload)
 			}
 
 			if var sealedclass ?= superclass.getHybridMethod(@name, @parent.extends()) {

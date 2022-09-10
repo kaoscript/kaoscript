@@ -3,6 +3,7 @@ class Block extends AbstractNode {
 		@awaiting: Boolean	= false
 		@empty: Boolean		= false
 		@exit: Boolean		= false
+		@length: Number		= 0
 		@statements: Array	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
@@ -14,7 +15,8 @@ class Block extends AbstractNode {
 			@data.statements = []
 		}
 
-		@empty = @data.statements.length == 0
+		@length = @data.statements.length
+		@empty = @length == 0
 	} # }}}
 	analyse() { # {{{
 		for var data in @data.statements {
@@ -34,27 +36,27 @@ class Block extends AbstractNode {
 	} # }}}
 	override prepare(target) { # {{{
 		if !target.isVoid() && !target.isAny() {
-			for var statement in @statements {
+			for var statement, index in @statements {
 				@scope.line(statement.line())
 
 				if @exit {
 					SyntaxException.throwDeadCode(statement)
 				}
 
-				statement.prepare(target)
+				statement.prepare(target, index, @length)
 
 				@exit = statement.isExit()
 			}
 		}
 		else {
-			for var statement in @statements {
+			for var statement, index in @statements {
 				@scope.line(statement.line())
 
 				if @exit {
 					SyntaxException.throwDeadCode(statement)
 				}
 
-				statement.prepare(target)
+				statement.prepare(target, index, @length)
 
 				@exit = statement.isExit()
 			}
