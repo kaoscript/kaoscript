@@ -42,7 +42,7 @@ class SwitchStatement extends Statement {
 		@reusableValue = @value is not IdentifierLiteral
 		@hasDefaultClause = false
 
-		var mut condition, binding
+		var dyn condition, binding
 		for var data, index in @data.clauses {
 			var clause = {
 				hasTest: ?data.filter
@@ -290,7 +290,7 @@ class SwitchStatement extends Statement {
 			SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
 		}
 
-		var mut clauseIndex
+		var mut clauseIndex = -1
 		for var clause, index in @clauses {
 			if clause.body == node {
 				clauseIndex = index
@@ -334,8 +334,6 @@ class SwitchStatement extends Statement {
 		@parent.addInitializableVariable(variable, node)
 	} # }}}
 	defineVariables(left, scope) { # {{{
-		var mut alreadyDeclared
-
 		for var name in left.listAssignments([]) {
 			if scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
@@ -941,7 +939,6 @@ class SwitchFilter extends AbstractNode {
 		}
 	} # }}}
 	toBooleanFragments(fragments, mut nf) { # {{{
-		var mut mm
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
 				@module().flag('Type')
@@ -955,7 +952,7 @@ class SwitchFilter extends AbstractNode {
 
 				fragments.code($runtime.typeof('Array', this), '(', @parent._name, ')')
 
-				mm = $switch.length(binding.elements)
+				var mm = $switch.length(binding.elements)
 				if mm.min == mm.max {
 					if mm.min != Infinity {
 						fragments.code(' && ', @parent._name, '.length === ', mm.min)

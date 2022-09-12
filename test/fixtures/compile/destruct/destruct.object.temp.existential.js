@@ -28,7 +28,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(lines) {
-		let tokens = null, rules = null;
+		let tokens, rules;
 		for(let __ks_0 = 0, __ks_1 = lines.length, line; __ks_0 < __ks_1; ++__ks_0) {
 			line = lines[__ks_0];
 			let __ks_2;

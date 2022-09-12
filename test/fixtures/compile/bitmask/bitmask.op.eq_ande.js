@@ -7,6 +7,6 @@ module.exports = function() {
 		EatsFish: 4,
 		Endangered: 8
 	});
-	let animal = null;
+	let animal;
 	animal = AnimalFlags(AnimalFlags.HasClaws & ~AnimalFlags.CanFlyAnimalFlags);
 };

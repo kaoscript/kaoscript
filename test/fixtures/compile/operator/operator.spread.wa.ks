@@ -1,4 +1,4 @@
-var dyn foo: array = (() => [1, 2])()
-var dyn bar = []
+var foo: array = (() => [1, 2])()
+var bar = []
 
 bar.push(...foo)

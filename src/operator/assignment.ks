@@ -335,7 +335,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		else {
 			fragments.compile(@left).code($equals)
 
-			var mut type
+			var late type
 			if @number {
 				fragments.code($runtime.operator(this), '.addNum(')
 

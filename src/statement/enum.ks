@@ -25,7 +25,6 @@ class EnumDeclaration extends Statement {
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	analyse() { # {{{
-		var mut declaration
 		for var data in @data.members {
 			switch data.kind {
 				NodeKind::CommentBlock => {
@@ -33,12 +32,12 @@ class EnumDeclaration extends Statement {
 				NodeKind::CommentLine => {
 				}
 				NodeKind::FieldDeclaration => {
-					declaration = new EnumVariableDeclaration(data, this)
+					var declaration = new EnumVariableDeclaration(data, this)
 
 					declaration.analyse()
 				}
 				NodeKind::MethodDeclaration => {
-					declaration = new EnumMethodDeclaration(data, this)
+					var declaration = new EnumMethodDeclaration(data, this)
 
 					declaration.analyse()
 				}

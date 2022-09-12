@@ -30,7 +30,7 @@ impl Shape {
 	}
 }
 
-var dyn shape: Shape = Shape.makeRed()
+var mut shape: Shape = Shape.makeRed()
 console.log(shape.draw())
 
 shape = Shape.makeBlue()

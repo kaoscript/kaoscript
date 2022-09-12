@@ -660,7 +660,6 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		var mut ctrl
 		if !@extending {
 			clazz
 				.newControl()
@@ -672,7 +671,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @inits {
-			ctrl = clazz
+			var ctrl = clazz
 				.newControl()
 				.code(`__ks_init()`)
 				.step()
@@ -806,9 +805,8 @@ class ClassDeclaration extends Statement {
 
 		var m = []
 
-		var mut ctrl
 		if @constructors.length == 0 {
-			ctrl = clazz
+			var ctrl = clazz
 				.newControl()
 				.code('constructor()')
 				.step()
@@ -824,7 +822,7 @@ class ClassDeclaration extends Statement {
 			@constructors[0].toHybridConstructorFragments(clazz)
 		}
 		else {
-			ctrl = clazz
+			var ctrl = clazz
 				.newControl()
 				.code('constructor()')
 				.step()
@@ -862,7 +860,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @inits {
-			ctrl = clazz
+			var ctrl = clazz
 				.newControl()
 				.code(`__ks_init_\(@initsId)()`)
 				.step()
@@ -1010,9 +1008,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		var mut ctrl
 		if @extending && !@extendsType.isSealedAlien() {
-			ctrl = clazz
+			var ctrl = clazz
 				.newControl()
 				.code('__ks_init()')
 				.step()
@@ -1028,7 +1025,7 @@ class ClassDeclaration extends Statement {
 			ctrl.done()
 		}
 		else {
-			ctrl = clazz
+			var mut ctrl = clazz
 				.newControl()
 				.code('constructor()')
 				.step()

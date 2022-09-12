@@ -16,7 +16,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let x = null;
+	let x;
 	if(true) {
 		x = "foobar";
 		console.log(__ks_String.__ks_func_toString_0.call(x));

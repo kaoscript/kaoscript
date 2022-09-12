@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
-		let x = null;
+		let x;
 		let __ks_0;
 		if(Type.isValue(__ks_0 = quxbaz.__ks_0()) ? (x = __ks_0, true) : false) {
 		}

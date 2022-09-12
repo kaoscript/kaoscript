@@ -7,11 +7,11 @@ extern console: {
 
 type T = number | string
 
-var dyn n: T = 0
+var mut n: T = 0
 
 console.log(n.toInt())
 
-var dyn s: T = ''
+var mut s: T = ''
 
 console.log(s.toInt())
 

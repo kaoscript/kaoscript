@@ -514,7 +514,7 @@ class ForInStatement extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		var mut ctrl
+		var late ctrl
 
 		if @index != null && !@declaration && !@declareIndex {
 			var line = fragments

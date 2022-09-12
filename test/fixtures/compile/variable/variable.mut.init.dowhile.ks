@@ -1,9 +1,10 @@
 func foobar(): String {
-	var dyn name: String
+	var mut name: String
 
-	until true {
+	do {
 		name = 'foobar'
 	}
+	while false
 
 	return name
 }

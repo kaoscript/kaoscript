@@ -20,7 +20,7 @@ module.exports = function() {
 		return bar.__ks_rt(this, arguments);
 	};
 	bar.__ks_0 = function(__ks_cb) {
-		let d = null;
+		let d;
 		let __ks_0 = () => {
 			return __ks_cb(null, d);
 		};

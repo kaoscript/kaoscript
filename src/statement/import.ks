@@ -122,7 +122,6 @@ abstract class Importer extends Statement {
 		var mut x = @data.source.value
 		var mut y = @directory()
 
-		var mut metadata
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 
@@ -538,14 +537,11 @@ abstract class Importer extends Statement {
 	loadDirectory(dir, moduleName? = null) { # {{{
 		var mut pkgfile = path.join(dir, 'package.json')
 		if fs.isFile(pkgfile) {
-			var mut pkg
-			try {
-				pkg = JSON.parse(fs.readFile(pkgfile))
-			}
+			// TODO
+			// if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
+			var pkg = try JSON.parse(fs.readFile(pkgfile))
 
 			if ?pkg {
-				var mut metadata
-
 				if ?pkg.kaoscript {
 					var metadata = ?pkg.kaoscript.metadata ? path.join(dir, pkg.kaoscript.metadata) : null
 
@@ -644,8 +640,9 @@ abstract class Importer extends Statement {
 			}
 		}
 		else {
-			var mut name, type
 			for var specifier in @data.specifiers {
+				var dyn name, type
+
 				if specifier.kind == NodeKind::ImportExclusionSpecifier {
 					var exclusions = [exclusion.name for exclusion in specifier.exclusions]
 
@@ -843,7 +840,6 @@ abstract class Importer extends Statement {
 			this.addVariable(@alias, @alias, false, null)
 		}
 		else {
-			var mut type
 			for var specifier in @data.specifiers {
 				if specifier.kind == NodeKind::ImportExclusionSpecifier {
 					NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
@@ -852,9 +848,9 @@ abstract class Importer extends Statement {
 					@alias = specifier.internal.name
 
 					if specifier.specifiers?.length != 0 {
-						type = new NamespaceType(@scope:Scope)
+						var type = new NamespaceType(@scope:Scope)
 
-						for s in specifier.specifiers {
+						for var s in specifier.specifiers {
 							if s.external.kind == NodeKind::Identifier {
 								type.addProperty(s.internal.name, Type.Any)
 							}
@@ -874,7 +870,7 @@ abstract class Importer extends Statement {
 						this.addVariable(specifier.external.name, specifier.internal.name, true, null)
 					}
 					else {
-						type = Type.fromAST(specifier.external, this).flagAlien()
+						var type = Type.fromAST(specifier.external, this).flagAlien()
 
 						this.addVariable(specifier.external.name.name, specifier.internal.name, true, type)
 					}
@@ -887,9 +883,8 @@ abstract class Importer extends Statement {
 	loadNodeModule(moduleName, start) { # {{{
 		var mut dirs = $nodeModulesPaths(start)
 
-		var mut file, metadata
-		for dir in dirs {
-			file = path.join(dir, moduleName)
+		for var dir in dirs {
+			var file = path.join(dir, moduleName)
 
 			if @loadFile(file, '', moduleName) || @loadDirectory(file, moduleName) {
 				return true
@@ -948,7 +943,7 @@ abstract class Importer extends Statement {
 			}
 
 			if @count == 1 {
-				var mut variable, name
+				var dyn variable, name
 
 				for variable, name of @variables {
 				}
@@ -1098,9 +1093,8 @@ abstract class Importer extends Statement {
 				line.done()
 			}
 
-			var mut name, alias
 			if @count == 1 {
-				var mut variable, name
+				var dyn variable, name
 
 				for variable, name of @variables {
 				}
@@ -1186,7 +1180,7 @@ abstract class Importer extends Statement {
 				}
 				else if $localFileRegex.test(@moduleName) {
 					var basename = path.basename(@moduleName)
-					var mut dirname
+					var late dirname
 
 					if @parent.includePath() == null {
 						dirname = path.dirname(@moduleName)
@@ -1326,7 +1320,7 @@ class ImportWorker {
 		for var i from 0 til @metaRequirements.aliens.length by 3 {
 			var index = @metaRequirements.aliens[i]
 			var name = @metaRequirements.aliens[i + 1]
-			var mut type
+			var mut type = null
 
 			if !?references[index] {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
@@ -1466,7 +1460,7 @@ class ImportWorker {
 		for var i from 0 til @metaExports.exports.length by 2 {
 			var index = @metaExports.exports[i]
 			var name = @metaExports.exports[i + 1]
-			var mut type
+			var mut type = null
 
 			if !?references[index] {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)

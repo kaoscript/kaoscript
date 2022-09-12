@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let view = null;
+	let view;
 	if(Type.isClassInstance(view, UIImageView)) {
 		console.log("It's an image view");
 	}

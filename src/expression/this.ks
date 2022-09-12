@@ -74,7 +74,7 @@ class ThisExpression extends Expression {
 			var name = @scope.getVariable('this').getSecureName()
 
 			if @calling {
-				var mut variable
+				var mut variable = null
 
 				if variable ?= type.getInstanceVariable(@name) {
 					@variableName = @name
@@ -134,7 +134,7 @@ class ThisExpression extends Expression {
 				}
 			}
 			else {
-				var mut variable
+				var mut variable = null
 
 				if variable ?= type.getInstanceVariable(@name) {
 					@variableName = @name

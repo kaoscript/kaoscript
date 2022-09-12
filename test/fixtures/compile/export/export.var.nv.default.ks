@@ -1,3 +1,3 @@
-var dyn x: Number
+var mut x: Number
 
 export x

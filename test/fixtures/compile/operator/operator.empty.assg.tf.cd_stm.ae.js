@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let t = null;
+		let t;
 		if(Type.isNotEmpty(x) ? (t = x, false) : true) {
 		}
 	};

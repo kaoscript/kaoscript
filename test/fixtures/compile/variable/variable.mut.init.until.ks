@@ -1,7 +1,7 @@
 func foobar(): String {
-	var dyn name: String
+	var mut name: String
 
-	while false {
+	until true {
 		name = 'foobar'
 	}
 

@@ -105,7 +105,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
 
-		var mut overridden
+		var dyn overridden
 
 		if @parent.isExtending() {
 			var superclass = @parent.extends().type()

@@ -422,7 +422,7 @@ module.exports = function() {
 		let source = new Dictionary();
 		let i = 0;
 		const l = args.length;
-		let src = null;
+		let src;
 		while((i < l) && !((Type.isValue(args[i]) ? (src = args[i], true) : false) && Type.isDictionary(src))) {
 			i += 1;
 		}

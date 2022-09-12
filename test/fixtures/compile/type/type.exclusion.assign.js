@@ -18,7 +18,7 @@ module.exports = function() {
 			}
 		}
 	}
-	let x = null;
+	let x;
 	x = Foobar.__ks_new_0();
 	x = new Date();
 };

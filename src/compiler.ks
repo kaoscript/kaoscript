@@ -480,7 +480,7 @@ var $statements = {
 	`\(NodeKind::TypeAliasDeclaration)`			: TypeAliasDeclaration
 	`\(NodeKind::UnlessStatement)`				: UnlessStatement
 	`\(NodeKind::UntilStatement)`				: UntilStatement
-	`\(NodeKind::VariableDeclaration)`			: VariableDeclaration
+	`\(NodeKind::VariableStatement)`			: VariableStatement
 	`\(NodeKind::WhileStatement)`				: WhileStatement
 	`default`									: ExpressionStatement
 }

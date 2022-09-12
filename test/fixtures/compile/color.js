@@ -7,10 +7,10 @@ module.exports = function() {
 	var __ks_Math = require("./_/._math.ks.j5k8r9.ksb")().__ks_Math;
 	var __ks_Number = require("./_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	var __ks_String = require("./_/._string.ks.j5k8r9.ksb")().__ks_String;
-	let $spaces = new Dictionary();
-	let $aliases = new Dictionary();
-	let $components = new Dictionary();
-	let $formatters = new Dictionary();
+	const $spaces = new Dictionary();
+	const $aliases = new Dictionary();
+	const $components = new Dictionary();
+	const $formatters = new Dictionary();
 	const $names = (() => {
 		const d = new Dictionary();
 		d["aliceblue"] = "f0f8ff";
@@ -182,8 +182,8 @@ module.exports = function() {
 		return $binder.__ks_rt(this, arguments);
 	};
 	$binder.__ks_0 = function(last, components, first, firstArgs) {
-		let that = first.call(null, ...firstArgs);
-		let lastArgs = Helper.mapDictionary(components, function(name, component) {
+		const that = first.call(null, ...firstArgs);
+		const lastArgs = Helper.mapDictionary(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
@@ -301,7 +301,7 @@ module.exports = function() {
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
-			let args = Helper.mapDictionary(s.components, function(name, component) {
+			const args = Helper.mapDictionary(s.components, function(name, component) {
 				return that[component.field];
 			});
 			args.push(result);
@@ -384,13 +384,13 @@ module.exports = function() {
 		return $hex.__ks_rt(this, arguments);
 	};
 	$hex.__ks_0 = function(that) {
-		let chars = "0123456789abcdef";
-		let r1 = that._red >> 4;
-		let g1 = that._green >> 4;
-		let b1 = that._blue >> 4;
-		let r2 = that._red & 15;
-		let g2 = that._green & 15;
-		let b2 = that._blue & 15;
+		const chars = "0123456789abcdef";
+		const r1 = that._red >> 4;
+		const g1 = that._green >> 4;
+		const b1 = that._blue >> 4;
+		const r2 = that._red & 15;
+		const g2 = that._green & 15;
+		const b2 = that._blue & 15;
 		if(that._alpha === 1) {
 			if(((r1 ^ r2) | (g1 ^ g2) | (b1 ^ b2)) === 0) {
 				return "#" + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1);
@@ -416,7 +416,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let $parsers = (() => {
+	const $parsers = (() => {
 		const d = new Dictionary();
 		d.srgb = (() => {
 			const __ks_rt = (...args) => {
@@ -472,7 +472,7 @@ module.exports = function() {
 							return true;
 						}
 						else if("rand" === color) {
-							let c = (Math.random() * 16777215) | 0;
+							const c = (Math.random() * 16777215) | 0;
 							that._space = Space.SRGB;
 							that._alpha = 1;
 							that._red = (c >> 16) & 255;
@@ -590,7 +590,7 @@ module.exports = function() {
 						return true;
 					}
 					else if(Type.isString(args[0])) {
-						let color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
+						const color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
 						let match, __ks_0;
 						if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
 							that._space = Space.SRGB;
@@ -698,8 +698,8 @@ module.exports = function() {
 				alpha = false;
 			}
 			if(alpha) {
-				let w = (percentage * 2) - 1;
-				let a = color._alpha - this._alpha;
+				const w = (percentage * 2) - 1;
+				const a = color._alpha - this._alpha;
 				this._alpha = __ks_Number.__ks_func_round_0.call($blend.__ks_0(this._alpha, color._alpha, percentage), 2);
 				if((w * a) === -1) {
 					percentage = w;
@@ -711,7 +711,7 @@ module.exports = function() {
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			this.__ks_func_space_1(space);
 			color = color.__ks_func_like_0(space);
-			let components = $spaces[space].components;
+			const components = $spaces[space].components;
 			for(let name in components) {
 				let component = components[name];
 				if(component.loop === true) {
@@ -777,13 +777,13 @@ module.exports = function() {
 			return this.__ks_func_contrast_rt.call(null, this, this, arguments);
 		}
 		__ks_func_contrast_0(color) {
-			let a = this._alpha;
+			const a = this._alpha;
 			if(a === 1) {
 				if(color._alpha !== 1) {
 					color = color.__ks_func_clone_0().__ks_func_blend_0(this, 0.5, Space.SRGB, true);
 				}
-				let l1 = this.__ks_func_luminance_0() + 0.05;
-				let l2 = color.__ks_func_luminance_0() + 0.05;
+				const l1 = this.__ks_func_luminance_0() + 0.05;
+				const l2 = color.__ks_func_luminance_0() + 0.05;
 				let ratio = l1 / l2;
 				if(l2 > l1) {
 					ratio = 1 / ratio;
@@ -799,10 +799,10 @@ module.exports = function() {
 				})();
 			}
 			else {
-				let black = this.__ks_func_clone_0().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
-				let white = this.__ks_func_clone_0().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio;
+				const black = this.__ks_func_clone_0().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
+				const white = this.__ks_func_clone_0().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio;
 				const max = Math.max(black, white);
-				let closest = Color.__ks_new_0([__ks_Number.__ks_func_limit_0.call((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._blue - (this._blue * a)) / (1 - a), 0, 255)]);
+				const closest = Color.__ks_new_0([__ks_Number.__ks_func_limit_0.call((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._blue - (this._blue * a)) / (1 - a), 0, 255)]);
 				const min = this.__ks_func_clone_0().__ks_func_blend_0(closest, 0.5, Space.SRGB, true).__ks_func_contrast_0(color).ratio;
 				return (() => {
 					const d = new Dictionary();
@@ -827,8 +827,8 @@ module.exports = function() {
 			return this.__ks_func_copy_rt.call(null, this, this, arguments);
 		}
 		__ks_func_copy_0(target) {
-			let s1 = this._space;
-			let s2 = target._space;
+			const s1 = this._space;
+			const s2 = target._space;
 			this.__ks_func_space_1(Space.SRGB.value);
 			target.__ks_func_space_1(Space.SRGB.value);
 			target._red = this._red;
@@ -950,14 +950,14 @@ module.exports = function() {
 			return this.__ks_func_gradient_rt.call(null, this, this, arguments);
 		}
 		__ks_func_gradient_0(endColor, length) {
-			let gradient = [this];
+			const gradient = [this];
 			if(length > 0) {
 				this.__ks_func_space_1(Space.SRGB.value);
 				endColor.__ks_func_space_1(Space.SRGB.value);
 				length += 1;
-				let red = endColor._red - this._red;
-				let green = endColor._green - this._green;
-				let blue = endColor._blue - this._blue;
+				const red = endColor._red - this._red;
+				const green = endColor._green - this._green;
+				const blue = endColor._blue - this._blue;
 				for(let i = 1; i < length; ++i) {
 					const offset = i / length;
 					const color = this.__ks_func_clone_0();
@@ -1032,7 +1032,7 @@ module.exports = function() {
 			return this.__ks_func_isBlack_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isBlack_0() {
-			let that = this.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB.value);
 			return (that._red === 0) && (that._green === 0) && (that._blue === 0);
 		}
 		__ks_func_isBlack_rt(that, proto, args) {
@@ -1046,7 +1046,7 @@ module.exports = function() {
 		}
 		__ks_func_isTransparent_0() {
 			if(this._alpha === 0) {
-				let that = this.__ks_func_like_0(Space.SRGB.value);
+				const that = this.__ks_func_like_0(Space.SRGB.value);
 				return (that._red === 0) && (that._green === 0) && (that._blue === 0);
 			}
 			else {
@@ -1063,7 +1063,7 @@ module.exports = function() {
 			return this.__ks_func_isWhite_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isWhite_0() {
-			let that = this.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB.value);
 			return (that._red === 255) && (that._green === 255) && (that._blue === 255);
 		}
 		__ks_func_isWhite_rt(that, proto, args) {
@@ -1316,7 +1316,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 		static __ks_sttc_from_0(args) {
-			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color;
 		}
 		static from() {
@@ -1336,7 +1336,7 @@ module.exports = function() {
 			else {
 				model = null;
 			}
-			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color.greyscale(model);
 		}
 		static greyscale() {
@@ -1349,7 +1349,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 		static __ks_sttc_hex_0(args) {
-			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color.__ks_func_hex_0();
 		}
 		static hex() {
@@ -1362,7 +1362,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 		static __ks_sttc_negative_0(args) {
-			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color.__ks_func_negative_0();
 		}
 		static negative() {
@@ -1405,7 +1405,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerSpace_0(space) {
-			let spaces = Dictionary.keys($spaces);
+			const spaces = Dictionary.keys($spaces);
 			$space(space.name);
 			if(Type.isValue(space.parser)) {
 				$parsers[space.name] = space.parser;
@@ -1649,7 +1649,7 @@ module.exports = function() {
 	Color.prototype.blue = function() {
 		return this.__ks_func_blue_rt.call(null, this, this, arguments);
 	};
-	let $static = (() => {
+	const $static = (() => {
 		const d = new Dictionary();
 		d.black = Color.__ks_sttc_from_0(["#000"]);
 		d.gray = Color.__ks_sttc_from_0(["#808080"]);

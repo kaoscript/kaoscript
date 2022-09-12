@@ -6,10 +6,12 @@
   },
   {
     "exports": [
-      "Any?",
+      0,
       "x"
     ],
-    "references": [],
+    "references": [
+      "Number?"
+    ],
     "macros": []
   }
 ]

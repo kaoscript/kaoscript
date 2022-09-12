@@ -1,4 +1,4 @@
-var dyn x = null
+var mut x = null
 
 export x
 

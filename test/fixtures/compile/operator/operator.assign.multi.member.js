@@ -12,7 +12,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let x = null;
+	let x;
 	let y = new Dictionary();
 	x = y.x = foobar.__ks_0();
 };

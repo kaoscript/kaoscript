@@ -6,7 +6,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(text, pattern) {
 		let founds = [];
-		let data = null;
+		let data;
 		let __ks_0;
 		while(Type.isValue(__ks_0 = pattern.exec(text)) ? (data = __ks_0, true) : false) {
 			founds.push(data);

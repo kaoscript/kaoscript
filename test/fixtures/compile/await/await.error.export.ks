@@ -1,3 +1,3 @@
 async func min() => 'female'
 
-export var dyn gender: String = await min()
+export var mut gender: String = await min()

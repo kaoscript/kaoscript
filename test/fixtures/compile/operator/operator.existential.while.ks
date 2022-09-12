@@ -12,8 +12,8 @@ disclose RegExp {
 }
 
 func foobar(text: String, pattern: RegExp) {
-	var dyn founds: Array<RegExpExecArray> = []
-	var dyn data: RegExpExecArray
+	var mut founds: Array<RegExpExecArray> = []
+	var mut data: RegExpExecArray
 
 	while data ?= pattern.exec(text) {
 		founds.push(data)

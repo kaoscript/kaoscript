@@ -213,7 +213,7 @@ export class Module {
 	} # }}}
 	isBinary() => @binary
 	isUpToDate(file: String, source: String) { # {{{
-		var mut data
+		var late data
 		try {
 			data = JSON.parse(fs.readFile(getHashPath(file)))
 		}
@@ -522,7 +522,7 @@ export class Module {
 			var delta = @metaRequirements.references.length
 
 			for var { variable }, name of @exports {
-				var mut type
+				var late type
 
 				if variable is IdentifierLiteral | Variable {
 					type = variable.getDeclaredType()
@@ -751,7 +751,7 @@ class ModuleBlock extends AbstractNode {
 		}
 
 		var mut index = -1
-		var mut item
+		var mut item = null
 
 		for statement, i in @statements while index == -1 {
 			if item ?= statement.toFragments(fragments, Mode::None) {

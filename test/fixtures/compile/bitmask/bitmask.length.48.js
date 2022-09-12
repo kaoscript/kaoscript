@@ -69,21 +69,21 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(x) {
-		let abex = null;
+		let abex;
 		if(x === true) {
 			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 		}
 		else {
 			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
 		}
-		let abey = null;
+		let abey;
 		if(x === true) {
 			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 		}
 		else {
 			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
 		}
-		let abez = null;
+		let abez;
 		if(x === true) {
 			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered;
 		}

@@ -4,10 +4,12 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
-		let i = null;
-		for(i = 0; i < 10; ++i) {
+		let name;
+		do {
+			name = "foobar";
 		}
-		return i;
+		while(false)
+		return name;
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 0) {

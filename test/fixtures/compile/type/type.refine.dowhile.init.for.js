@@ -1,5 +1,5 @@
 module.exports = function() {
-	let i = null;
+	let i;
 	do {
 		for(i = 0; i <= 10; ++i) {
 			break;

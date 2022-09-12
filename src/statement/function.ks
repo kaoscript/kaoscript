@@ -484,9 +484,9 @@ class FunctionDeclarator extends AbstractNode {
 			.step()
 
 		var mut index = -1
-		var mut item
+		var mut item = null
 
-		for statement, i in statements while index == -1 {
+		for var statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(ctrl, Mode::None) {
 				index = i
 			}
@@ -545,12 +545,10 @@ class FunctionVariable extends Variable {
 	} # }}}
 	prepare() { # {{{
 		if @extended {
-			var mut type
-
 			for var declarator in @declarators {
 				declarator.prepare()
 
-				type = declarator.type()
+				var type = declarator.type()
 
 				if type.isAsync() != @async {
 					SyntaxException.throwMixedOverloadedFunction(declarator)

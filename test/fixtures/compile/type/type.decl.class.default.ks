@@ -7,7 +7,7 @@ impl Foobar {
 }
 
 func foo(x: Boolean) {
-	var dyn y: Foobar? = null
+	var mut y: Foobar? = null
 
 	y = bar()
 

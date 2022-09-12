@@ -4,7 +4,7 @@ module.exports = function() {
 		return print.__ks_rt(this, arguments);
 	};
 	print.__ks_0 = function(heroes) {
-		let hero = null;
+		let hero;
 		for(let __ks_0 in heroes) {
 			hero = heroes[__ks_0];
 			console.log(hero.name);

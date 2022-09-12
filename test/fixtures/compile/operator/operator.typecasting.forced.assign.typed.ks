@@ -1,7 +1,7 @@
 extern console
 
 func foobar() {
-	var dyn values: Array<String>
+	var mut values: Array<String>
 
 	values = quxbaz()!!
 

@@ -70,7 +70,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let shape = Shape.__ks_new_0("yellow");
+	const shape = Shape.__ks_new_0("yellow");
 	console.log(shape.__ks_func_draw_1("rectangle"));
 	console.log(__ks_Shape.__ks_func_draw_2.call(shape, "red", "rectangle"));
 };

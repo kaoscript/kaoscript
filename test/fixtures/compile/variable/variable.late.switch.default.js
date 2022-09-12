@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let value = null;
+		let value;
 		if(x === 1 || x === 2 || x === 3) {
 			value = 0;
 		}

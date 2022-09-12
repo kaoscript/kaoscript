@@ -1,5 +1,5 @@
 func foobar(i: Number, b: Boolean) {
-	var dyn x: Number
+	var mut x: Number
 
 	unless b {
 		x = 42

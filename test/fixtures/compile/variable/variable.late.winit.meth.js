@@ -21,7 +21,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			let x = null;
+			let x;
 			x = "foobar";
 			let y = x;
 		}

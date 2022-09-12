@@ -1,1 +1,1 @@
-var dyn a : Array
+var mut a : Array

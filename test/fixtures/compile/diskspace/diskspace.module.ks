@@ -4,10 +4,11 @@ import 'child_process' for exec
 var df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
 
 async func disks() {
-	var dyn stdout: string, stderr = await exec('df -k')
+	var disks = []
 
-	var dyn disks = []
-	var dyn matches: Array<String>
+	var stdout: string, stderr = await exec('df -k')
+
+	var mut matches: Array<String>
 	for line in stdout.lines() {
 		if matches ?= df_regex.exec(line) {
 			disks.push({

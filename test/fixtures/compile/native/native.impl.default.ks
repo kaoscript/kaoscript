@@ -11,7 +11,7 @@ impl String {
 	}
 }
 
-var dyn foo: string = 'HELLO!'
+var foo: string = 'HELLO!'
 
 console.log(foo)
 console.log(foo.lowerFirst())

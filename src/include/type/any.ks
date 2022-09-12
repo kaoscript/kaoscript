@@ -146,7 +146,7 @@ class AnyType extends Type {
 	parameter() => AnyType.NullableUnexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { # {{{
-		var mut type
+		var late type
 
 		if @nullable == nullable {
 			return this

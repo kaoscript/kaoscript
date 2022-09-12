@@ -114,7 +114,7 @@ func $serialize(macro, data, context) { # {{{
 	}
 	else {
 		var mut empty = true
-		var mut computed, name
+		var dyn computed, name
 
 		context.data += '{'
 

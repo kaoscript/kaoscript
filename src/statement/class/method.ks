@@ -243,7 +243,7 @@ class ClassMethodDeclaration extends Statement {
 		var returnData = @type.getReturnData()
 		var unknownReturnType = @type.isUnknownReturnType()
 
-		var mut overridden
+		var mut overridden = null
 		var mut overloaded = []
 
 		if @parent.isExtending() {

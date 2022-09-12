@@ -2,7 +2,7 @@ extern console
 
 func foo(): Number => 42
 
-var dyn x: String = ''
+var mut x: String = ''
 
 console.log(`\(x)`)
 

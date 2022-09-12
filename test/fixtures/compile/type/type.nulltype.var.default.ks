@@ -1,1 +1,1 @@
-var dyn x: Null = null
+var mut x: Null = null

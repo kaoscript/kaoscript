@@ -1,3 +1,3 @@
-var dyn x: Object
+var mut x: Object
 
 x = {}

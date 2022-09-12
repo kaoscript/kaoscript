@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		let key = null;
+		let key;
 		key = 0;
 		for(let __ks_0 = values.length; key < __ks_0; ++key) {
 			console.log(Helper.toString(key));

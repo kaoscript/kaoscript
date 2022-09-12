@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		let key = null;
+		let key;
 		for(key in values) {
 			console.log(key);
 		}

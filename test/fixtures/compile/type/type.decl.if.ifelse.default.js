@@ -4,7 +4,7 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x) {
-		let y = null;
+		let y;
 		if(x) {
 			y = "42 * x";
 		}

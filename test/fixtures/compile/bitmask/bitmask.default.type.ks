@@ -62,7 +62,7 @@ printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags
 printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags::HasClaws - AnimalFlags::CanFly)
 
 func quxbaz(x) {
-	var dyn abex
+	var late abex
 	if x {
 		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}
@@ -70,7 +70,7 @@ func quxbaz(x) {
 		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly
 	}
 
-	var dyn abey: AnimalFlags
+	var late abey: AnimalFlags
 	if x {
 		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}
@@ -78,7 +78,7 @@ func quxbaz(x) {
 		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly
 	}
 
-	var dyn abez: Number
+	var late abez: Number
 	if x {
 		abez = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
 	}

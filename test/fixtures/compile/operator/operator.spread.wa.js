@@ -1,7 +1,7 @@
 module.exports = function() {
-	let foo = (() => {
+	const foo = (() => {
 		return [1, 2];
 	})();
-	let bar = [];
+	const bar = [];
 	bar.push(...foo);
 };

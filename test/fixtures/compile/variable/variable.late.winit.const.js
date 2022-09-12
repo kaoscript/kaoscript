@@ -14,7 +14,7 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0() {
-			let x = null;
+			let x;
 			x = "foobar";
 			let y = x;
 		}

@@ -6,7 +6,7 @@ disclose String {
 }
 
 func foobar(text: String): String {
-	var dyn data: Array<String>? = null
+	var mut data: Array<String>? = null
 
 	return text.slice(1 + data[0].length)
 }

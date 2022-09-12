@@ -122,7 +122,7 @@ func updateUnboundedTree4(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: N
 	var row = node.rows[0]
 
 	var mut from = { variadic: false, index: 0 }
-	var mut to
+	var mut to = null
 	var mut last = null
 
 	var rests = {}

@@ -1862,7 +1862,7 @@ func buildBranchFromRows(rows: Array, pIndex: Number, node: AbstractNode): TreeB
 
 	var lastParameter = keys.length - 1
 
-	var mut branch
+	var mut branch = null
 	var mut result = null
 	var mut index = pIndex
 

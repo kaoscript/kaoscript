@@ -435,9 +435,8 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 
 		var mut l = @operands.length - 1
 
-		var mut operand
-		for i from 0 til l {
-			operand = @operands[i]
+		for var i from 0 til l {
+			var operand = @operands[i]
 
 			if operand.isNullable() {
 				fragments.code('(')

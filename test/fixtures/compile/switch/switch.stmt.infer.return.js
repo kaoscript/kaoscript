@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let value = null;
+		let value;
 		if(x === 0 || x === 1) {
 			value = "binary";
 		}

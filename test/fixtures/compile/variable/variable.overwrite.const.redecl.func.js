@@ -5,7 +5,7 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function() {
-		let x = null;
+		let x;
 		let __ks_0;
 		if(Type.isValue(__ks_0 = bar()) ? (x = __ks_0, true) : false) {
 			console.log(x);

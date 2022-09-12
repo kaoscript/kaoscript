@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values) {
-	var dyn value: Number
+	var mut value: Number
 
 	for value from 0 til 10 {
 		console.log(`\(value)`)

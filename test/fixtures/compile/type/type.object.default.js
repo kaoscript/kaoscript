@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let x = null;
+	let x;
 	x = new Date();
 	class Foobar {
 		static __ks_new_0() {

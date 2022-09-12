@@ -7,9 +7,9 @@ class IncludeDeclaration extends Statement {
 	initiate() { # {{{
 		var mut directory = @directory()
 
-		var mut x
 		for var data in @data.declarations {
 			var file = data.file
+			var dyn x
 
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)

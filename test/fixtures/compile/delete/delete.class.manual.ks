@@ -3,6 +3,6 @@ class Foo {
 	}
 }
 
-var dyn foo: Foo = new Foo()
+var mut foo: Foo = new Foo()
 
 delete foo

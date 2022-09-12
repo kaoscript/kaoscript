@@ -4,13 +4,13 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x) {
-		let y = null;
+		let y;
 		if(x) {
-			let y = null;
+			let y;
 			y = "42 * x";
 		}
 		else {
-			let y = null;
+			let y;
 			y = "24 * x";
 		}
 		return Helper.toString(y);

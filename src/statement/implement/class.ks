@@ -107,7 +107,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		if @class.isSealed() {
 			if @instance {
-				var mut line, block, ctrl
+				var dyn line, block, ctrl
 
 				// get()
 				line = fragments.newLine()
@@ -300,7 +300,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		var returnData = @type.getReturnData()
 		var unknownReturnType = @type.isUnknownReturnType()
 
-		var mut overridden
+		var mut overridden = null
 
 		if @instance {
 			if @override {

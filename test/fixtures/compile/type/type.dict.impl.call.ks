@@ -10,7 +10,7 @@ type T = {
 	PI: Number
 }
 
-var dyn Math: T = {
+var mut Math: T = {
 	PI: 3.14
 }
 

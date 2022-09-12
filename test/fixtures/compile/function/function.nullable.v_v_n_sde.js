@@ -27,7 +27,7 @@ module.exports = function() {
 		return corge.__ks_rt(this, arguments);
 	};
 	corge.__ks_0 = function(metadatas) {
-		let name = null;
+		let name;
 		for(name in metadatas) {
 			let data = metadatas[name];
 			foobar(data.x, data.y, null, name);

@@ -225,7 +225,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, l
 			}
 		}
 		else {
-			var mut max
+			var late max
 			if leaf.max == Infinity {
 				if tree.min > 0 {
 					max = `\(args).length - \(tree.min - leaf.min)`
@@ -526,7 +526,7 @@ func toTreeFragments(buildPath: FunctionPathBuilder, args: String, tree: Tree, b
 			}
 		}
 		else {
-			var mut max
+			var late max
 			if branch.max == Infinity {
 				if tree.min > 0 {
 					max = `\(args).length - \(tree.min - branch.min)`

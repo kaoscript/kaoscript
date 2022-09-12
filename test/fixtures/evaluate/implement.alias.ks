@@ -16,13 +16,13 @@ sealed class Shape {
 	}
 }
 
-var dyn form = 'rectangle'
+var form = 'rectangle'
 
 impl Shape {
 	drawing() => this.draw(form)
 }
 
-var dyn shape: Shape = new Shape('yellow')
+var shape: Shape = new Shape('yellow')
 
 expect(shape.draw()).to.equals(`I'm drawing with a yellow pencil.`)
 expect(shape.draw('rectangle')).to.equals(`I'm drawing a yellow rectangle.`)

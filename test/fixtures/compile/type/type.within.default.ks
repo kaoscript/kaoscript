@@ -1,1 +1,1 @@
-var dyn foobar: Array<Array<String?>> = []
+var mut foobar: Array<Array<String?>> = []

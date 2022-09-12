@@ -622,7 +622,7 @@ class ClassType extends Type {
 
 		var exhaustive = @isExhaustive()
 
-		var mut export
+		var late export
 
 		var mut exportSuper = false
 		if ?@majorOriginal {
@@ -964,9 +964,8 @@ class ClassType extends Type {
 
 		var matchables = []
 
-		var mut method, index
 		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for method, index in methods desc {
+			for var method, index in methods desc {
 				if method.isSubsetOf(@instanceMethods[name], MatchingMode::FunctionSignature) {
 					methods.splice(index, 1)
 				}
@@ -1779,9 +1778,8 @@ class ClassType extends Type {
 
 		var matchables = []
 
-		var mut method, index
 		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for method, index in methods desc {
+			for var method, index in methods desc {
 				if method.isSubsetOf(@instanceMethods[name], mode) {
 					methods.splice(index, 1)
 				}

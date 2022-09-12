@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(a, b, c) {
-		let x = null;
+		let x;
 		if(a === true) {
 			x = (() => {
 				const d = new Dictionary();

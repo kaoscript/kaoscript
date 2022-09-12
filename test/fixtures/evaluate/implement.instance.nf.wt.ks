@@ -32,7 +32,7 @@ impl Action {
 	}
 }
 
-var dyn shape = new Action('red')
+var shape = new Action('red')
 expect(shape.draw()).to.equals(`I'm drawing with a red pen.`)
 expect(shape.draw('rectangle')).to.equals(`I'm drawing a red rectangle.`)
 expect(shape.draw(new Shape('circle'))).to.equals(`I'm drawing a red circle.`)

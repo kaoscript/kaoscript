@@ -1,20 +1,9 @@
-class VariableDeclaration extends Statement {
-	private late {
-		@autotype: Boolean			= true
-		@await: Boolean				= false
-		@cascade: Boolean			= false
-		@declarators: Array			= []
-		@function					= null
-		@hasValue: Boolean			= false
-		@immutable: Boolean			= true
-		@lateInit: Boolean			= false
-		@rebindable: Boolean		= false
-		@redeclared: Boolean		= false
-		@toDeclareAll: Boolean		= true
-		@try						= null
-		@type: Type					= Type.Null
-		@value
-		@valueScope: Scope
+class VariableStatement extends Statement {
+	private {
+		@await: Boolean								= false
+		@declarations: VariableDeclaration[]		= []
+		@function									= null
+		@try: TryStatement?							= null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -40,27 +29,153 @@ class VariableDeclaration extends Statement {
 			@function = ancestor
 		}
 	} # }}}
+	override initiate() { # {{{
+		var modifing = #@data.modifiers
+		var modifier = modifing ? @data.modifiers[0].kind : null
+
+		for var data in @data.declarations {
+			var declaration = new VariableDeclaration(data, this, @scope)
+
+			if modifing {
+				declaration.setModifier(modifier)
+			}
+
+			declaration.initiate()
+
+			@declarations.push(declaration)
+		}
+	} # }}}
+	override analyse() { # {{{
+		for var declaration in @declarations {
+			declaration.analyse()
+
+			@await ||= declaration.isAwait()
+		}
+	} # }}}
+	override prepare(target) { # {{{
+		for var declaration in @declarations {
+			declaration.prepare(target)
+		}
+	} # }}}
+	override translate() { # {{{
+		for var declaration in @declarations {
+			declaration.translate()
+		}
+	} # }}}
+	export(recipient) { # {{{
+		for var declaration in @declarations {
+			declaration.export(recipient)
+		}
+	} # }}}
+	function(): @function
+	isAwait() => @await
+	isDeclararingVariable(name: String) { # {{{
+		for var declaration in @declarations {
+			if declaration.isDeclararingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isUsingVariable(name) { # {{{
+		for var declaration in @declarations {
+			if declaration.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isUsingInstanceVariable(name) { # {{{
+		for var declaration in @declarations {
+			if declaration.isUsingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isUsingStaticVariable(class, varname) { # {{{
+		for var declaration in @declarations {
+			if declaration.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
+		for var declaration in @declarations {
+			declaration.listNonLocalVariables(scope, variables)
+		}
+
+		return variables
+	} # }}}
+	toAwaitStatementFragments(fragments, statements) { # {{{
+		for var declaration in @declarations {
+			if declaration.isAwait() {
+				declaration.toAwaitStatementFragments(fragments, statements)
+			}
+		}
+	} # }}}
+	override toFragments(fragments, mode) { # {{{
+		var variables = @assignments()
+		if variables.length != 0 {
+			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
+		}
+
+		if @declarations.length == 1 {
+			return @declarations[0].toFragments(fragments, mode)
+		}
+
+		for var declaration in @declarations {
+			fragments.compile(declaration)
+		}
+	} # }}}
+	try(): @try
+	walk(fn) { # {{{
+		for var declaration in @declarations {
+			declaration.walk(fn)
+		}
+	} # }}}
+}
+
+class VariableDeclaration extends AbstractNode {
+	private late {
+		@autotype: Boolean			= true
+		@await: Boolean				= false
+		@cascade: Boolean			= false
+		@declarators: Array			= []
+		@hasValue: Boolean			= false
+		@immutable: Boolean			= true
+		@lateInit: Boolean			= false
+		@rebindable: Boolean		= false
+		@redeclared: Boolean		= false
+		@toDeclareAll: Boolean		= true
+		@type: Type					= Type.Null
+		@value
+		@valueScope: Scope?
+	}
+	constructor(@data, @parent, @scope = parent.scope()) { # {{{
+		super(data, parent, scope)
+	} # }}}
 	constructor(@data, @parent, @scope, @valueScope, @cascade) { # {{{
 		this(data, parent, scope)
 	} # }}}
 	override initiate() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Dynamic {
-				@autotype = false
+			if modifier.kind == ModifierKind::Mutable {
 				@immutable = false
 				@rebindable = true
-			}
-			else if modifier.kind == ModifierKind::Mutable {
-				@immutable = false
-				@rebindable = true
-			}
-			else if modifier.kind == ModifierKind::LateInit {
-				@lateInit = true
 			}
 		}
 
-		var mut declarator
-		for data in @data.variables {
+		@hasValue = ?@data.value
+
+		for var data in @data.variables {
+			var late declarator
+
 			switch data.name.kind {
 				NodeKind::ArrayBinding => {
 					declarator = new VariableBindingDeclarator(data, this)
@@ -81,10 +196,8 @@ class VariableDeclaration extends Statement {
 			@declarators.push(declarator)
 		}
 	} # }}}
-	analyse() { # {{{
-		if ?@data.value {
-			@hasValue = true
-
+	override analyse() { # {{{
+		if @hasValue {
 			if @immutable {
 				@rebindable = ?@valueScope
 			}
@@ -102,7 +215,7 @@ class VariableDeclaration extends Statement {
 
 			@await = @value.isAwait()
 
-			if @await && !?@function && !@module().isBinary() {
+			if @await && !?@parent.function() && !@module().isBinary() {
 				SyntaxException.throwInvalidAwait(this)
 			}
 		}
@@ -154,7 +267,7 @@ class VariableDeclaration extends Statement {
 
 			declarator.setRealType(@type)
 
-			@assignTempVariables(@valueScope)
+			@parent.assignTempVariables(@valueScope)
 
 			if declarator is VariableIdentifierDeclarator {
 				if var type ?= declarator.type() {
@@ -171,7 +284,7 @@ class VariableDeclaration extends Statement {
 			@type = declarator.variable().getRealType()
 		}
 	} # }}}
-	translate() { # {{{
+	override translate() { # {{{
 		if @hasValue {
 			@value.translate()
 		}
@@ -182,8 +295,6 @@ class VariableDeclaration extends Statement {
 	} # }}}
 	declarator() => @declarators[0]
 	defineVariables(declarator) { # {{{
-		var mut alreadyDeclared
-
 		var assignments = []
 
 		for var name in declarator.listAssignments([]) {
@@ -191,7 +302,7 @@ class VariableDeclaration extends Statement {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
 
-			alreadyDeclared = @scope.hasDeclaredVariable(name)
+			var mut alreadyDeclared = @scope.hasDeclaredVariable(name)
 
 			var variable = @scope.define(name, @isImmutable(), null, this)
 
@@ -210,13 +321,16 @@ class VariableDeclaration extends Statement {
 		if @cascade {
 			@parent.addAssignments(assignments)
 		}
+		else if !@hasValue {
+			@parent.addAssignments(assignments)
+		}
 	} # }}}
 	export(recipient) { # {{{
 		for var declarator in @declarators {
 			declarator.export(recipient)
 		}
 	} # }}}
-	hasInit() => @hasValue
+	hasValue() => @hasValue
 	getIdentifierVariable() { # {{{
 		if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
 			return @declarators[0]._variable
@@ -258,6 +372,20 @@ class VariableDeclaration extends Statement {
 
 		return variables
 	} # }}}
+	setModifier(modifier: ModifierKind) { # {{{
+		if modifier == ModifierKind::Dynamic {
+			@autotype = false
+			@immutable = false
+			@rebindable = true
+		}
+		else if modifier == ModifierKind::Mutable {
+			@immutable = false
+			@rebindable = true
+		}
+		else if modifier == ModifierKind::LateInit {
+			@lateInit = true
+		}
+	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 
@@ -270,11 +398,6 @@ class VariableDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		var variables = @assignments()
-		if variables.length != 0 {
-			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
-		}
-
 		if @hasValue {
 			if @value.isAwaiting() {
 				return this.toAwaitStatementFragments^@(fragments)
@@ -282,7 +405,7 @@ class VariableDeclaration extends Statement {
 			else {
 				var declarator = @declarators[0]
 
-				var mut line = fragments.newLine()
+				var line = fragments.newLine()
 
 				if @toDeclareAll {
 					if @options.format.variables == 'es5' {
@@ -301,17 +424,8 @@ class VariableDeclaration extends Statement {
 				line.done()
 			}
 		}
-		else {
-			var mut line = fragments.newLine()
-
-			if @toDeclareAll {
-				if @options.format.variables == 'es5' {
-					line.code('var ')
-				}
-				else {
-					line.code('let ')
-				}
-			}
+		else if @redeclared {
+			var line = fragments.newLine()
 
 			for declarator, index in @declarators {
 				line.code($comma) if index != 0
@@ -361,7 +475,7 @@ class VariableBindingDeclarator extends AbstractNode {
 		if ?@data.type {
 			@setDeclaredType(Type.fromAST(@data.type, this))
 		}
-		else if @parent.hasInit() {
+		else if @parent.hasValue() {
 			// do nothing
 		}
 		else if @parent.isImmutable() {
@@ -431,11 +545,14 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@lateInit: Boolean					= false
 		@name: String
 		@nullable: Boolean					= false
+		@redeclared: Boolean				= false
 		@type: Type?						= null
 		@variable: Variable
 	}
 	analyse() { # {{{
 		@name = @data.name.name
+
+		@redeclared = @scope.hasDeclaredVariable(@name)
 
 		@identifier = new IdentifierLiteral(@data.name, this, @scope)
 		@identifier.setAssignment(AssignmentType::Declaration)
@@ -464,9 +581,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 				TypeException.throwNullTypeVariable(@name, this)
 			}
 
-			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
+			@variable.setDeclaredType(@type, @parent.hasValue()).flagDefinitive()
 		}
-		else if @parent.hasInit() {
+		else if @parent.hasValue() {
 			// do nothing
 		}
 		else {
@@ -504,7 +621,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		return false
 	} # }}}
 	isDeclararingVariable(name: String) => @name == name
-	isRedeclared() => @scope.isRedeclaredVariable(@name)
+	isRedeclared() => @redeclared || @scope.isRedeclaredVariable(@name)
 	isSplitAssignment() => false
 	isStronglyTyped() => ?@data.type
 	name() => @name

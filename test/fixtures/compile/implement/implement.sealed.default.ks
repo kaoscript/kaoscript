@@ -24,6 +24,6 @@ impl Shape {
 	}
 }
 
-var dyn shape: Shape = new Shape('yellow')
+var shape: Shape = new Shape('yellow')
 console.log(shape.draw('rectangle'))
 console.log(shape.draw('red', 'rectangle'))

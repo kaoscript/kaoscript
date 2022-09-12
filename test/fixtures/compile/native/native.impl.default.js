@@ -16,7 +16,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let foo = "HELLO!";
+	const foo = "HELLO!";
 	console.log(foo);
 	console.log(__ks_String.__ks_func_lowerFirst_0.call(foo));
 };

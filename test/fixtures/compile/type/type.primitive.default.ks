@@ -1,4 +1,4 @@
-var dyn x: Primitive
+var mut x: Primitive
 
 x = 42
 

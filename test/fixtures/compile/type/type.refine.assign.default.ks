@@ -27,7 +27,7 @@ func grault(mut x) {
 	console.log(`\(x)`)
 }
 
-var dyn x: String = ''
+var mut x: String = ''
 
 console.log(`\(x)`)
 

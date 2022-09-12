@@ -75,7 +75,7 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind::FunctionDeclaration => {
-				var mut type
+				var mut type = null
 				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 
@@ -184,11 +184,11 @@ class ExternDeclaration extends DependencyStatement {
 	initiate() { # {{{
 		var module = @module()
 
-		var mut variable
+		var dyn variable
 		for var declaration in @data.declarations {
 			if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
 				if declaration.kind == NodeKind::FunctionDeclaration {
-					var mut parameters
+					var late parameters
 					if declaration.parameters?.length != 0 {
 						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
@@ -267,7 +267,7 @@ class RequireDeclaration extends DependencyStatement {
 				if declaration.kind == NodeKind::FunctionDeclaration {
 					var requirement = module.getRequirement(declaration.name.name)
 
-					var mut parameters
+					var late parameters
 					if declaration.parameters?.length != 0 {
 						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
@@ -333,9 +333,8 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 		module.flag('Type')
 
 		if @parent.includePath() != null {
-			var mut variable
-			for declaration in @data.declarations {
-				if variable ?= @scope.getVariable(declaration.name.name) {
+			for var declaration in @data.declarations {
+				if var variable ?= @scope.getVariable(declaration.name.name) {
 					// TODO check & merge type
 				}
 				else {

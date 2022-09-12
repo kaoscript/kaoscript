@@ -32,7 +32,7 @@ class ReferenceType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
-			var mut name
+			var late name
 			if data.name is Number {
 				var reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
 

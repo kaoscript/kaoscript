@@ -141,7 +141,7 @@ class FunctionType extends Type {
 		}
 
 		if ?data.throws {
-			var mut type
+			var dyn type
 
 			for var throw in data.throws {
 				if (type ?= Type.fromAST(throw, node).discardReference()) && type.isNamed() && type.isClass() {
@@ -1037,11 +1037,10 @@ class OverloadedFunctionType extends Type {
 			return false
 		}
 
-		var mut nf
-		for fb in value.functions() {
-			nf = true
+		for var fb in value.functions() {
+			var mut nf = true
 
-			for fn in @functions while nf {
+			for var fn in @functions while nf {
 				if fn.isSubsetOf(fb, mode) {
 					nf = false
 				}

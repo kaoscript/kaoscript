@@ -1,8 +1,8 @@
 extern console
 
 namespace Float {
-	export var dyn PI: Number = 3.14
-	export var dyn name: String = 'john'
+	export var mut PI: Number = 3.14
+	export var mut name: String = 'john'
 }
 
 console.log(Float.PI)

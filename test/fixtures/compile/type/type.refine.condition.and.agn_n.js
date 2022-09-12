@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(lines) {
-		let line = null;
+		let line;
 		for(let i = 0, __ks_0 = lines.length; i < __ks_0; ++i) {
 			if((line = lines[i].trim()).length !== 0) {
 				if(line.startsWith("foobar")) {

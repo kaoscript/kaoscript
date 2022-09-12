@@ -32,7 +32,7 @@ class TryStatement extends Statement {
 		if ?@data.catchClauses {
 			@hasClauses ||= #@data.catchClauses
 
-			var mut variable, scope, body, type
+			var dyn variable, scope, body, type
 
 			for var clause in @data.catchClauses {
 				if variable !?= @scope.getVariable(clause.type.name) {
@@ -578,7 +578,7 @@ class TryStatement extends Statement {
 			var block = line.newBlock()
 
 			var mut index = -1
-			var mut item
+			var mut item = null
 
 			for statement, i in statements while index == -1 {
 				if item ?= statement.toFragments(block, Mode::None) {
@@ -728,7 +728,7 @@ class TryStatement extends Statement {
 					.step()
 
 				var mut index = -1
-				var mut item
+				var mut item = null
 
 				for i from 0 til statements.length - 1 while index == -1 {
 					if item ?= statements[i].toFragments(ctrl2, Mode::None) {
@@ -778,7 +778,7 @@ class TryStatement extends Statement {
 		}
 		else {
 			var mut index = -1
-			var mut item
+			var mut item = null
 
 			for i from 0 til statements.length while index == -1 {
 				if item ?= statements[i].toFragments(ctrl, Mode::None) {

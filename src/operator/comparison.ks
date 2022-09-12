@@ -11,7 +11,7 @@ class ComparisonExpression extends Expression {
 		@tested: Boolean			= false
 	}
 	analyse() { # {{{
-		var mut operand1, operand2, operator
+		var dyn operand1, operand2, operator
 
 		operand1 = @addOperand(@data.values[0])
 

@@ -307,7 +307,7 @@ class NamespacePropertyType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		var mut export
+		var dyn export
 
 		if @type is ReferenceType {
 			export = @type.toReference(references, indexDelta, mode, module)

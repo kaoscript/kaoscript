@@ -12,7 +12,7 @@ class Bar extends Foo {
 
 func bar(): Bar => new Bar()
 
-var dyn x: Foo = new Foo()
+var mut x: Foo = new Foo()
 
 console.log(`\(x.foo())`)
 console.log(`\(x.bar())`)
@@ -22,12 +22,12 @@ x = bar()
 console.log(`\(x.foo())`)
 console.log(`\(x.bar())`)
 
-var dyn y: Foo = new Bar()
+var mut y: Foo = new Bar()
 
 console.log(`\(y.foo())`)
 console.log(`\(y.bar())`)
 
-var dyn z: Bar = new Bar()
+var mut z: Bar = new Bar()
 
 console.log(`\(z.foo())`)
 console.log(`\(z.bar())`)

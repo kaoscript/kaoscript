@@ -32,12 +32,12 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let x = null;
+	let x;
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
-		let x = null;
+		let x;
 		x = "foobar";
 		console.log(__ks_String.__ks_func_toString_0.call(x));
 	};
