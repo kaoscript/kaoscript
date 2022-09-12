@@ -468,6 +468,7 @@ var $statements = {
 	`\(NodeKind::IncludeAgainDeclaration)`		: IncludeAgainDeclaration
 	`\(NodeKind::MacroDeclaration)`				: MacroDeclaration
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
+	`\(NodeKind::PassStatement)`				: PassStatement
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration

@@ -375,7 +375,7 @@ func buildZeroTree(group: Group, name: String, node: AbstractNode): Tree { # {{{
 
 		for var function in sameLength {
 			if function.isMorePreciseThan(master) {
-				// do nothing
+				pass
 			}
 			else if master.isMorePreciseThan(function) {
 				master = function
@@ -1257,7 +1257,7 @@ func regroupTreeByIndex(tree: Tree | TreeBranch, node: AbstractNode) { # {{{
 } # }}}
 
 func regroupTreeByIndex(tree: TreeLeaf) { # {{{
-	// do nothing
+	pass
 } # }}}
 
 func getIndexHash(tree: TreeLeaf) { # {{{

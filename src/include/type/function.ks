@@ -523,7 +523,7 @@ class FunctionType extends Type {
 		}
 
 		if mode ~~ MatchingMode::MissingParameter && @missingParameters {
-			// do nothing
+			pass
 		}
 		else if mode ~~ MatchingMode::ShiftableParameters {
 			var mut parameterMode: MatchingMode
@@ -631,7 +631,7 @@ class FunctionType extends Type {
 		}
 
 		if mode ~~ MatchingMode::IgnoreReturn {
-			// do nothing
+			pass
 		}
 		else if !?@returnType {
 			return false unless value.isMissingReturn()
@@ -651,7 +651,7 @@ class FunctionType extends Type {
 		}
 
 		if mode ~~ MatchingMode::IgnoreError {
-			// do nothing
+			pass
 		}
 		else if @errors.length == 0 {
 			return false unless value.isMissingError()

@@ -6,7 +6,7 @@ class OperationScope extends InlineBlockScope {
 
 		if variable.isDefinitive() {
 			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
-				// do nothing
+				pass
 			}
 			else if variable.isInitialized() {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)

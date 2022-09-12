@@ -662,7 +662,7 @@ class Parameter extends AbstractNode {
 		if ?@data.defaultValue {
 			if @explicitlyRequired && type.isNullable() {
 				if @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
-					// do nothing
+					pass
 				}
 				else if @internal is IdentifierLiteral {
 					SyntaxException.throwDeadCodeParameter(@internal.name(), this)
@@ -816,7 +816,7 @@ class Parameter extends AbstractNode {
 	type(@type) { # {{{
 		if @type.hasDefaultValue() {
 			if @hasDefaultValue {
-				// do nothing
+				pass
 			}
 			else if @type.isComprehensive() {
 				@defaultValue = $compile.expression(@type.getDefaultValue(), @parent)

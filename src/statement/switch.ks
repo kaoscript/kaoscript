@@ -190,7 +190,7 @@ class SwitchStatement extends Statement {
 
 		if enumConditions != 0 || enumValue {
 			if enumValue && enumConditions == maxConditions {
-				// do nothing
+				pass
 			}
 			else {
 				for var clause in @clauses {
@@ -393,7 +393,7 @@ class SwitchStatement extends Statement {
 			node.scope().replaceVariable(name, clone)
 		}
 		else if !@hasDefaultClause {
-			// do nothing
+			pass
 		}
 		else if var map ?= @initializedVariables[name] {
 			var mut clause = null

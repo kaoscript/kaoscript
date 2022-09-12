@@ -115,7 +115,6 @@ class NamedType extends Type {
 			}
 			else if @type.isEnum() {
 				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
-				// return @name == 'Enum'
 			}
 			else if @type.isStruct() && value.isStruct() {
 				return @name == 'Struct' || @isInheriting(value) || (downcast && value.isInheriting(this))

@@ -391,7 +391,7 @@ class ClassMethodDeclaration extends Statement {
 				for var overload in overloaded when !overload.isMissingReturn() {
 					if ?type {
 						if type.isSubsetOf(overload.getReturnType(), MatchingMode::Default) {
-							// do nothing
+							pass
 						}
 						else if overload.getReturnType().isSubsetOf(type, MatchingMode::Default) {
 							type = overload.getReturnType()

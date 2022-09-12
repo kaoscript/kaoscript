@@ -127,6 +127,7 @@ include {
 	'../statement/dependency'
 	'../statement/include'
 	'../statement/namespace'
+	'../statement/pass'
 	'../statement/return'
 	'../statement/switch'
 	'../statement/throw'

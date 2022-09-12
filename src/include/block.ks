@@ -258,7 +258,7 @@ class FunctionBlock extends Block {
 				TypeException.throwExpectedThrownError(this)
 			}
 			else if target.isAny() && !target.isExplicit() {
-				// do nothing
+				pass
 			}
 			else if @statements.length == 0 || !@statements.last().isExit() {
 				TypeException.throwExpectedReturnedValue(target, this)

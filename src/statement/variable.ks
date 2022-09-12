@@ -476,7 +476,7 @@ class VariableBindingDeclarator extends AbstractNode {
 			@setDeclaredType(Type.fromAST(@data.type, this))
 		}
 		else if @parent.hasValue() {
-			// do nothing
+			pass
 		}
 		else if @parent.isImmutable() {
 			@setDeclaredType(@parent.type())
@@ -584,7 +584,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			@variable.setDeclaredType(@type, @parent.hasValue()).flagDefinitive()
 		}
 		else if @parent.hasValue() {
-			// do nothing
+			pass
 		}
 		else {
 			@type = AnyType.NullableUnexplicit

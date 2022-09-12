@@ -55,16 +55,16 @@ class ReturnStatement extends Statement {
 			@type = @value.type().asReference()
 
 			if @type == target {
-				// do nothing
+				pass
 			}
 			else if target.isVoid() {
 				TypeException.throwUnexpectedReturnedValue(this) unless @type.isVoid()
 			}
 			else if !@type.isExplicit() && @type.isAny() {
-				// do nothing
+				pass
 			}
 			else if @type.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
-				// do nothing
+				pass
 			}
 			else if @type.isEnum() && @type.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast) {
 				@type = target!?
@@ -75,13 +75,13 @@ class ReturnStatement extends Statement {
 
 				for var tt in @type.types() {
 					if tt.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
-						// do nothing
+						pass
 					}
 					else if tt.isEnum() && tt.discard().type().isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
 						cast = true
 					}
 					else if tt.isAssignableToVariable(target, true, false, false) {
-						// do nothing
+						pass
 					}
 					else {
 						TypeException.throwUnexpectedReturnType(target, @type, this)
@@ -94,7 +94,7 @@ class ReturnStatement extends Statement {
 				}
 			}
 			else if @type.isAssignableToVariable(target, true, false, false) {
-				// do nothing
+				pass
 			}
 			else {
 				TypeException.throwUnexpectedReturnType(target, @type, this)

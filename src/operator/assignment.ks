@@ -47,7 +47,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		if !target.isVoid() {
 			if @type.isAssignableToVariable(target, false, false, false) {
-				// do nothing
+				pass
 			}
 			else if target.isAssignableToVariable(@type, true, true, false) {
 				@type = target

@@ -117,7 +117,7 @@ class ExpressionStatement extends Statement {
 		return if @ignorable
 
 		if @expression.isSkippable() {
-			// do nothing
+			pass
 		}
 		else if @expression.isAwaiting() {
 			return this.toAwaitStatementFragments^@(fragments)
