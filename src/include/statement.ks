@@ -137,4 +137,5 @@ include {
 	'../statement/until'
 	'../statement/variable'
 	'../statement/while'
+	'../statement/with'
 }

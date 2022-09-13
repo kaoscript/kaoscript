@@ -483,6 +483,7 @@ var $statements = {
 	`\(NodeKind::UntilStatement)`				: UntilStatement
 	`\(NodeKind::VariableStatement)`			: VariableStatement
 	`\(NodeKind::WhileStatement)`				: WhileStatement
+	`\(NodeKind::WithStatement)`				: WithStatement
 	`default`									: ExpressionStatement
 }
 

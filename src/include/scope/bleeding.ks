@@ -143,6 +143,38 @@ class BleedingScope extends Scope {
 
 		variable.renameAs(newName)
 	} # }}}
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
+		var mut variable = @getVariable(name)!?
+
+		if variable.isDefinitive() {
+			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
+				pass
+			}
+			else if variable.isInitialized() {
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+			}
+			else if type.isNullable() {
+				unless type.setNullable(false).isAssignableToVariable(variable.getDeclaredType(), downcast) {
+					TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+				}
+			}
+		}
+
+		if !type.equals(variable.getRealType()) {
+			if @variables[name] is Array {
+				variable = variable.setRealType(type, absolute, this)
+
+				@variables[name].push(@line(), variable)
+			}
+			else {
+				variable = variable.clone().setRealType(type, absolute, this)
+
+				@variables[name] = [@line(), variable]
+			}
+		}
+
+		return variable
+	} # }}}
 	proxy @parent {
 		acquireTempName
 		acquireUnusedTempName

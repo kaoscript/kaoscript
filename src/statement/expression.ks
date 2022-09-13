@@ -1,7 +1,7 @@
 class ExpressionStatement extends Statement {
-	private {
+	private late {
 		@declaration: Boolean	= false
-		@expression
+		@expression: Expression
 		@ignorable: Boolean		= false
 		@variable				= null
 	}

@@ -449,7 +449,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
-		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
+		if !ClassDeclaration.isAssigningAlias(@block.getDataStatements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} # }}}

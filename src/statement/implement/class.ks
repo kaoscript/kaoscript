@@ -457,7 +457,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		@block.translate()
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
-		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
+		if !ClassDeclaration.isAssigningAlias(@block.getDataStatements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} # }}}
@@ -981,7 +981,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				index = 0
 			}
 		}
-		else if @class.isExtending() && (index <- @getConstructorIndex(@block.statements())) == -1 {
+		else if @class.isExtending() && (index <- @getConstructorIndex(@block.getDataStatements())) == -1 {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -1025,7 +1025,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		})
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
-		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
+		if !ClassDeclaration.isAssigningAlias(@block.getDataStatements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} # }}}
@@ -1035,7 +1035,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
-				@block.addStatement({
+				@block.addDataStatement({
 					kind: NodeKind::CallExpression
 					attributes: []
 					modifiers: []

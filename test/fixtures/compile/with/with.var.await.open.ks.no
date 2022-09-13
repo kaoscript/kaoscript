@@ -1,0 +1,19 @@
+async func open(): Number ~ Error {
+	return 0
+}
+
+func read(id: Number): String ~ Error {
+	return ''
+}
+
+func close(id: Number) ~ Error {
+}
+
+async func foobar() ~ Error {
+	with var file = await open() {
+		return read(file)
+	}
+	finally {
+		close(file)
+	}
+}

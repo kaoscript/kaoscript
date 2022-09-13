@@ -76,7 +76,7 @@ class Block extends AbstractNode {
 			@parent.addInitializableVariable(variable, this)
 		}
 	} # }}}
-	addStatement(statement) { # {{{
+	addDataStatement(statement) { # {{{
 		@data.statements.push(statement)
 	} # }}}
 	analyse(from: Number, to: Number = @data.statements.length:Number + 1) { # {{{
@@ -107,6 +107,7 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	checkExit(target?)
+	getDataStatements() => @data.statements
 	getUnpreparedType() { # {{{
 		var types = []
 
@@ -185,7 +186,7 @@ class Block extends AbstractNode {
 
 		return variables
 	} # }}}
-	statements() => @data.statements
+	statements() => @statements
 	toFragments(fragments, mode) { # {{{
 		if @awaiting {
 			var mut index = -1

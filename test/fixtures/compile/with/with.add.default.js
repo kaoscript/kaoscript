@@ -1,0 +1,20 @@
+module.exports = function(expect) {
+	let mode = 2;
+	let index = 0;
+	index += 1;
+	expect(mode).to.eql(2);
+	expect(index).to.eql(1);
+	let __ks_0 = mode;
+	mode += 12;
+	index += 1;
+	expect(mode).to.eql(14);
+	expect(index).to.eql(2);
+	mode -= 4;
+	index += 1;
+	expect(mode).to.eql(10);
+	expect(index).to.eql(3);
+	mode = __ks_0;
+	index += 1;
+	expect(mode).to.eql(2);
+	expect(index).to.eql(4);
+};

@@ -132,7 +132,7 @@ class ClassConstructorDeclaration extends Statement {
 				index = 0
 			}
 		}
-		else if (index <- @getConstructorIndex(@block.statements())) == -1 && @parent._extending {
+		else if (index <- @getConstructorIndex(@block.getDataStatements())) == -1 && @parent._extending {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
@@ -179,7 +179,7 @@ class ClassConstructorDeclaration extends Statement {
 		@internalName = `__ks_cons_\(@type.index())`
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
-		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), true, @parent._extending) {
+		if !ClassDeclaration.isAssigningAlias(@block.getDataStatements(), statement.name(), true, @parent._extending) {
 			@aliases.push(statement)
 		}
 	} # }}}
@@ -189,7 +189,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		if extendsType.matchArguments([], this) {
 			if extendsType.hasConstructors() || extendsType.isSealed() {
-				@block.addStatement({
+				@block.addDataStatement({
 					kind: NodeKind::CallExpression
 					attributes: []
 					modifiers: []
@@ -299,7 +299,7 @@ class ClassConstructorDeclaration extends Statement {
 		})
 
 		if @parent._extendsType.isSealedAlien() {
-			var index = @getSuperIndex(@block.statements())
+			var index = @getSuperIndex(@block.getDataStatements())
 
 			if index == -1 {
 				ctrl.line('super()')
@@ -347,7 +347,7 @@ class ClassConstructorDeclaration extends Statement {
 				return node.code(') =>').newBlock()
 			})
 
-			var index = @getSuperIndex(@block.statements())
+			var index = @getSuperIndex(@block.getDataStatements())
 
 			if index == -1 {
 				block.compile(@block)

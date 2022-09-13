@@ -1,0 +1,19 @@
+func open(): Number {
+	return 0
+}
+
+func read(id: Number): String ~ Error {
+	return ''
+}
+
+func close(id: Number) {
+}
+
+func foobar() ~ Error {
+	with var file = open() {
+		var text = read(file)
+	}
+	finally {
+		close(file)
+	}
+}

@@ -238,4 +238,5 @@ class ReturnStatement extends Statement {
 		}
 	} # }}}
 	type() => @type
+	value() => @value
 }
