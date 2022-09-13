@@ -41,7 +41,7 @@ class NamespaceType extends Type {
 				})
 			}
 
-			return type
+			return type.flagComplete()
 		} # }}}
 	}
 	constructor(scope: Scope) { # {{{
@@ -154,6 +154,7 @@ class NamespaceType extends Type {
 	} # }}}
 	copyFrom(src: NamespaceType) { # {{{
 		@alien = src._alien
+		@complete = src._complete
 		@sealed = src._sealed
 		@system = src._system
 		@requirement = src._requirement

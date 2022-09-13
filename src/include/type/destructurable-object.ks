@@ -8,6 +8,7 @@ class DestructurableObjectType extends ReferenceType {
 	addProperty(name: String, type: Type) { # {{{
 		@properties[name] = type
 	} # }}}
+	isComplete() => true
 	isDictionary() => false
 	isExplicit() => true
 	isFunction() => false

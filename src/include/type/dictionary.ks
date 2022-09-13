@@ -31,7 +31,7 @@ class DictionaryType extends Type {
 				}
 			})
 
-			return type
+			return type.flagComplete()
 		} # }}}
 	}
 	addProperty(name: String, type: Type) { # {{{
@@ -41,6 +41,7 @@ class DictionaryType extends Type {
 	clone() { # {{{
 		var type = new DictionaryType(@scope)
 
+		type._complete = @complete
 		type._nullable = @nullable
 		type._length = @length
 		type._properties = {...@properties}

@@ -51,6 +51,7 @@ class ExclusionType extends Type {
 		return this
 	} # }}}
 	getMainType() => @types[0]
+	isComplete() => true
 	isExclusion() => true
 	isExportable() { # {{{
 		for type in @types {

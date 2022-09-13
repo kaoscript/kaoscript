@@ -98,6 +98,8 @@ class EnumDeclaration extends Statement {
 				@enum.addStaticMethod(name, method.type())
 			}
 		}
+
+		@enum.flagComplete()
 	} # }}}
 	translate() { # {{{
 		for var variable of @variables {

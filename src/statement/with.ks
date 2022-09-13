@@ -139,15 +139,14 @@ class WithStatement extends Statement {
 			return @body.isUsingInstanceVariable(name)
 		}
 	} # }}}
-	// TODO
-	// override isUsingStaticVariable(name, varname) { # {{{
-	// 	if @hasFinally {
-	// 		return @body.isUsingStaticVariable(name, varname) || @finally.isUsingStaticVariable(name, varname)
-	// 	}
-	// 	else {
-	// 		return @body.isUsingStaticVariable(name, varname)
-	// 	}
-	// } # }}}
+	override isUsingStaticVariable(class, varname) { # {{{
+		if @hasFinally {
+			return @body.isUsingStaticVariable(class, varname) || @finally.isUsingStaticVariable(class, varname)
+		}
+		else {
+			return @body.isUsingStaticVariable(class, varname)
+		}
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		for var { name, temp } in @variables {
 			fragments.newLine().code($runtime.scope(this), temp, $equals).compile(name).done()
@@ -213,8 +212,4 @@ class WithStatement extends Statement {
 			}
 		}
 	} # }}}
-	// TODO
-	// proxy @body {
-	// 	isExit
-	// }
 }

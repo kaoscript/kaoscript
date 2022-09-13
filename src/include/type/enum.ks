@@ -72,7 +72,7 @@ class EnumType extends Type {
 				}
 			})
 
-			return type
+			return type.flagComplete()
 		} # }}}
 	}
 	constructor(@scope, @kind = EnumTypeKind::Number) { # {{{

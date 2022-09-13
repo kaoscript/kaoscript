@@ -17,7 +17,7 @@ class StructType extends Type {
 				}
 			})
 
-			return value
+			return value.flagComplete()
 		} # }}}
 	}
 	private {

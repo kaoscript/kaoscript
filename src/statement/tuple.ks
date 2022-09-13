@@ -78,6 +78,8 @@ class TupleDeclaration extends Statement {
 		for var field in @fields {
 			@tuple.addField(field.type())
 		}
+
+		@tuple.flagComplete()
 	} # }}}
 	override translate() { # {{{
 		for var field in @fields {

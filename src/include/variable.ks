@@ -23,6 +23,7 @@ class Variable {
 		createPredefinedClass(name, scope) { # {{{
 			type = new ClassType(scope)
 			type.flagAlien()
+			type.flagComplete()
 			type.flagPredefined()
 			type.flagSystem()
 

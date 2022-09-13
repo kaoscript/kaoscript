@@ -84,20 +84,20 @@ module.exports = function() {
 		g() {
 			return this._component.__ks_func_goodbye_rt.call(null, this._component, this._component, arguments);
 		}
-		__ks_func_g_rt() {
-			return this._component.__ks_func_goodbye_rt.apply(null, arguments);
+		__ks_func_g_rt(that, proto, args) {
+			return proto.goodbye.apply(that, args);
 		}
 		h() {
 			return this._component.__ks_func_hello_rt.call(null, this._component, this._component, arguments);
 		}
-		__ks_func_h_rt() {
-			return this._component.__ks_func_hello_rt.apply(null, arguments);
+		__ks_func_h_rt(that, proto, args) {
+			return proto.hello.apply(that, args);
 		}
 		w() {
 			return this._component.__ks_func_welcome_rt.call(null, this._component, this._component, arguments);
 		}
-		__ks_func_w_rt() {
-			return this._component.__ks_func_welcome_rt.apply(null, arguments);
+		__ks_func_w_rt(that, proto, args) {
+			return proto.welcome.apply(that, args);
 		}
 	}
 	const proxy = Proxy.__ks_new_0();

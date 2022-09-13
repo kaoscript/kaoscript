@@ -24,6 +24,7 @@ class NullType extends Type {
 	override getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => 'Null'
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => value.isNullable()
+	isComplete() => true
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => true

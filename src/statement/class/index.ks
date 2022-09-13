@@ -481,6 +481,8 @@ class ClassDeclaration extends Statement {
 		if !@class.isHybrid() {
 			@class.setExhaustive(true)
 		}
+
+		@class.flagComplete()
 	} # }}}
 	translate() { # {{{
 		for var variable of @classVariables {

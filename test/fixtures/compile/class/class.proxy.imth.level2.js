@@ -66,8 +66,8 @@ module.exports = function() {
 		__ks_func_foobar_0() {
 			return this._parent.__ks_func_foobar_0(...arguments);
 		}
-		__ks_func_foobar_rt() {
-			return this._parent.__ks_func_foobar_rt.apply(null, arguments);
+		__ks_func_foobar_rt(that, proto, args) {
+			return proto.foobar.apply(that, args);
 		}
 	}
 	function foobar() {

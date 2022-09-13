@@ -643,6 +643,7 @@ class ReferenceType extends Type {
 	isClass() => @name == 'Class'
 	isClassInstance() => @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
+	override isComplete() => @type().isComplete()
 	isDictionary() => @name == 'Dictionary' || @type().isDictionary()
 	isEnum() => @name == 'Enum' || @type().isEnum()
 	isExhaustive() => @type().isExhaustive()

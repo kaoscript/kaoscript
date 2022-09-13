@@ -68,8 +68,8 @@ module.exports = function() {
 		hello() {
 			return this._component.__ks_func_hello_rt.call(null, this._component, this._component, arguments);
 		}
-		__ks_func_hello_rt() {
-			return this._component.__ks_func_hello_rt.apply(null, arguments);
+		__ks_func_hello_rt(that, proto, args) {
+			return proto.hello.apply(that, args);
 		}
 	}
 	const proxy = Proxy.__ks_new_0();

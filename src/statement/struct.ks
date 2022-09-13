@@ -64,6 +64,8 @@ class StructDeclaration extends Statement {
 		for var field in @fields {
 			@struct.addField(field.type())
 		}
+
+		@struct.flagComplete()
 	} # }}}
 	override translate() { # {{{
 		for var field in @fields {

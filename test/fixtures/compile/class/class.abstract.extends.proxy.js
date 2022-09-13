@@ -88,8 +88,8 @@ module.exports = function() {
 		__ks_func_greet_0() {
 			return this._greeting.__ks_func_greet_0(...arguments);
 		}
-		__ks_func_greet_rt() {
-			return this._greeting.__ks_func_greet_rt.apply(null, arguments);
+		__ks_func_greet_rt(that, proto, args) {
+			return proto.greet.apply(that, args);
 		}
 	}
 	const greetings = ProxyGreetings.__ks_new_0(Greetings.__ks_new_0());

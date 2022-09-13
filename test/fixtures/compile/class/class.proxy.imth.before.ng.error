@@ -1,0 +1,1 @@
+ReferenceException: The type "Quxbaz" needs to be declared before "@quxbaz.quxbaz" (fixtures/compile/class/class.proxy.imth.before.ng.ks:5)

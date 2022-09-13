@@ -109,9 +109,9 @@ class ClassProxyDeclaration extends Statement {
 
 				ctrl = fragments.newControl()
 
-				ctrl.code(`__ks_func_\(@name)_rt()`).step()
+				ctrl.code(`__ks_func_\(@name)_rt(that, proto, args)`).step()
 
-				ctrl.line(`return this\(@externalPath).__ks_func_\(@externalName)_rt.apply(null, arguments)`)
+				ctrl.line(`return proto.\(@externalName).apply(that, args)`)
 
 				ctrl.done()
 			}
@@ -169,6 +169,10 @@ class ClassProxyGroupDeclaration extends Statement {
 		@recipientPath = '.' + @recipient.path().split('.').slice(1).join('.')
 
 		var type = @recipient.type()
+
+		unless type.isComplete() {
+			ReferenceException.throwUncompleteType(type, @parent.type(), this)
+		}
 
 		if @instance {
 			for var data in @data.elements {
@@ -256,9 +260,9 @@ class ClassProxyGroupDeclaration extends Statement {
 
 					ctrl = fragments.newControl()
 
-					ctrl.code(`__ks_func_\(internal)_rt()`).step()
+					ctrl.code(`__ks_func_\(internal)_rt(that, proto, args)`).step()
 
-					ctrl.line(`return this\(@recipientPath).__ks_func_\(external)_rt.apply(null, arguments)`)
+					ctrl.line(`return proto.\(external).apply(that, args)`)
 
 					ctrl.done()
 				}

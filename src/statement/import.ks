@@ -172,7 +172,7 @@ abstract class Importer extends Statement {
 						type.addProperty(name, @worker.getType(name))
 					}
 
-					variable.setDeclaredType(type)
+					variable.setDeclaredType(type.flagComplete())
 				}
 				else {
 					if !@worker.hasType(name) {
@@ -537,11 +537,7 @@ abstract class Importer extends Statement {
 	loadDirectory(dir, moduleName? = null) { # {{{
 		var mut pkgfile = path.join(dir, 'package.json')
 		if fs.isFile(pkgfile) {
-			// TODO
-			// if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
-			var pkg = try JSON.parse(fs.readFile(pkgfile))
-
-			if ?pkg {
+			if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
 				if ?pkg.kaoscript {
 					var metadata = ?pkg.kaoscript.metadata ? path.join(dir, pkg.kaoscript.metadata) : null
 
@@ -859,7 +855,7 @@ abstract class Importer extends Statement {
 							}
 						}
 
-						this.addVariable(@alias, @alias, false, type)
+						this.addVariable(@alias, @alias, false, type.flagComplete())
 					}
 					else {
 						this.addVariable(@alias, @alias, false, null)

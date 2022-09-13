@@ -7,6 +7,7 @@ class VoidType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Void'
 	hashCode() => `Void`
+	isComplete() => true
 	isExportable() => true
 	isSubsetOf(value: VoidType, mode: MatchingMode) => true
 	isVoid() => true

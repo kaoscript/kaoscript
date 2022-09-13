@@ -80,4 +80,8 @@ class AliasType extends Type {
 
 		@type.toVariations(variations)
 	} # }}}
+
+	proxy @type {
+		isComplete
+	}
 }

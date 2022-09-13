@@ -414,6 +414,8 @@ class FunctionDeclarator extends AbstractNode {
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
 		}
+
+		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
 		@scope.module().setLineOffset(@offset)

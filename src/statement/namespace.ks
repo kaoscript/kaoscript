@@ -59,6 +59,8 @@ class NamespaceDeclaration extends Statement {
 
 			statement.export(this, false)
 		}
+
+		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
 		for statement in @statements {

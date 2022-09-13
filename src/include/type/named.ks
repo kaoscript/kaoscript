@@ -47,6 +47,9 @@ class NamedType extends Type {
 	flagAltering(): this { # {{{
 		@type.flagAltering()
 	} # }}}
+	flagComplete(): this { # {{{
+		@type.flagComplete()
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		@type.flagExported(explicitly)
 
@@ -575,6 +578,10 @@ class NamedType extends Type {
 			throw new NotSupportedException()
 		}
 	} # }}}
+
+	proxy @type {
+		isComplete
+	}
 }
 
 class NamedContainerType extends NamedType {

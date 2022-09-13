@@ -278,4 +278,8 @@ class ParameterType extends Type {
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
+
+	proxy @type {
+		isComplete
+	}
 }

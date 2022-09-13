@@ -45,6 +45,8 @@ abstract class DependencyStatement extends Statement {
 					type.setExhaustive(true)
 				}
 
+				type.flagComplete()
+
 				return variable
 			}
 			NodeKind::EnumDeclaration => {
@@ -72,6 +74,8 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
+				type.flagComplete()
+
 				return variable
 			}
 			NodeKind::FunctionDeclaration => {
@@ -95,6 +99,8 @@ abstract class DependencyStatement extends Statement {
 				else {
 					type.setExhaustive(true)
 				}
+
+				type.flagComplete()
 
 				return variable
 			}
@@ -123,6 +129,8 @@ abstract class DependencyStatement extends Statement {
 						type.addPropertyFromAST(statement, this)
 					}
 				}
+
+				type.flagComplete()
 
 				return variable
 			}
@@ -163,6 +171,8 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				type = @applyFlags(type)
+
+				type.flagComplete()
 
 				if instance {
 					type = @scope.reference(type)

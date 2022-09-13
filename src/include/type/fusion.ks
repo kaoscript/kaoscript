@@ -67,6 +67,7 @@ class FusionType extends Type {
 			return false
 		}
 	} # }}}
+	isComplete() => true
 	isDictionary() { # {{{
 		if @types.length != 0 {
 			return @types[0].isDictionary()

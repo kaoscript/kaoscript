@@ -1,0 +1,1 @@
+ReferenceException: The type "Quxbaz" needs to be declared before "Foobar" (fixtures/compile/class/class.proxy.imth.before.wg.ks:5)

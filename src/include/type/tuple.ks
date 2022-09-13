@@ -121,7 +121,7 @@ class NamedTupleType extends TupleType {
 				}
 			})
 
-			return value
+			return value.flagComplete()
 		} # }}}
 	}
 	private {
@@ -428,7 +428,7 @@ class UnnamedTupleType extends TupleType {
 				}
 			})
 
-			return value
+			return value.flagComplete()
 		} # }}}
 	}
 	private {

@@ -218,7 +218,7 @@ class ClassType extends Type {
 				})
 			}
 
-			return type
+			return type.flagComplete()
 		} # }}}
 		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode) { # {{{
 			type.copyFrom(original)
@@ -516,6 +516,7 @@ class ClassType extends Type {
 	copyFrom(src: ClassType) { # {{{
 		@abstract = src._abstract
 		@alien = src._alien
+		@complete = src._complete
 		@extending = src._extending
 		@extends = src._extends
 		@hybrid = src._hybrid

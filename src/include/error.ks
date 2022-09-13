@@ -310,8 +310,11 @@ export class ReferenceException extends Exception {
 		throwNullableProxy(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`A proxy can't be null`, node)
 		} # }}}
-		throwNullExpression(expression, node): Never ~ TypeException { # {{{
+		throwNullExpression(expression, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
+		} # }}}
+		throwUncompleteType(type, mainType, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The type \(type.toQuote(true)) needs to be declared before \(mainType.toQuote(true))`, node)
 		} # }}}
 		throwUndefinedBindingVariable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)

@@ -45,6 +45,7 @@ class SealableType extends Type {
 
 		return this
 	} # }}}
+	isComplete() => true
 	isSealable() => true
 	isSealed() => @sealed || @type.isSealed()
 	isSubsetOf(value: SealableType, mode: MatchingMode) => @type.isSubsetOf(value.type(), mode)

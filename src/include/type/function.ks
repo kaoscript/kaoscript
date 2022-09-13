@@ -65,7 +65,7 @@ class FunctionType extends Type {
 				type.updateParameters()
 			})
 
-			return type
+			return type.flagComplete()
 		} # }}}
 		isOptional(parameters, index, step) { # {{{
 			if index >= parameters.length {

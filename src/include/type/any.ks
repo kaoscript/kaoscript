@@ -13,7 +13,7 @@ class AnyType extends Type {
 		super(null)
 	} # }}}
 	constructor(@explicit, @nullable) { # {{{
-		super(null)
+		this()
 	} # }}}
 	clone() { # {{{
 		var that = new AnyType(@explicit, @nullable)
@@ -115,6 +115,7 @@ class AnyType extends Type {
 			return false
 		}
 	} # }}}
+	isComplete() => true
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => false

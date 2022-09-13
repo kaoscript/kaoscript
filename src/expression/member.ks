@@ -52,6 +52,10 @@ class MemberExpression extends Expression {
 
 			var type = @object.type()
 
+			unless type.isComplete() {
+				ReferenceException.throwUncompleteType(type, this, this)
+			}
+
 			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
 				ReferenceException.throwNullExpression(@object, this)
 			}
@@ -535,7 +539,7 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			fragments += `.\(@property)`
+			fragments += `.\(@data.property.name)`
 		}
 
 		return fragments

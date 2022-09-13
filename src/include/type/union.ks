@@ -303,6 +303,13 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
+	isComplete() { # {{{
+		for var type in @types {
+			return false unless type.isComplete()
+		}
+
+		return true
+	} # }}}
 	isDictionary() { # {{{
 		for var type in @types {
 			if !type.isDictionary() {

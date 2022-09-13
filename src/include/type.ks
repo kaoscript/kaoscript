@@ -191,6 +191,7 @@ bitmask TypeOrigin {
 abstract class Type {
 	private {
 		@alien: Boolean					= false
+		@complete: Boolean				= false
 		@exhaustive: Boolean? 			= null
 		@exported: Boolean				= false
 		@origin: TypeOrigin?			= null
@@ -241,21 +242,21 @@ abstract class Type {
 						}
 					}
 
-					return new NamedType(data.name.name, type)
+					return new NamedType(data.name.name, type.flagComplete())
 				}
 				NodeKind::ExclusionType => {
 					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if ?data.parameters {
-						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
+						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
-						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node)
+						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
 				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
-					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
 				NodeKind::FusionType => {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
@@ -295,7 +296,7 @@ abstract class Type {
 						}
 					}
 
-					return type
+					return type.flagComplete()
 				}
 				NodeKind::TypeReference => {
 					if ?data.elements {
@@ -324,7 +325,7 @@ abstract class Type {
 							}
 						}
 
-						return type
+						return type.flagComplete()
 					}
 					else if ?data.typeName {
 						var mut nullable = false
@@ -609,6 +610,11 @@ abstract class Type {
 		return this
 	} # }}}
 	flagAltering(): this
+	flagComplete() { # {{{
+		@complete = true
+
+		return this
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		@exported = true
 
@@ -678,6 +684,7 @@ abstract class Type {
 	isClass() => false
 	isClassInstance() => false
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
+	isComplete() => @complete
 	isContainedIn(types) { # {{{
 		for type in types {
 			if @equals(type) {

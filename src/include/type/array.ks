@@ -215,6 +215,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
+	isComplete() => true
 	isMorePreciseThan(value) => true
 	isNullable() => @nullable
 	isSealable() => true
