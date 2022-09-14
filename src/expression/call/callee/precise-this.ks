@@ -49,40 +49,25 @@ class PreciseThisCallee extends Callee {
 	toFragments(fragments, mode, node) { # {{{
 		var name = @node.scope().getVariable('this').getSecureName()
 
-		if @flatten {
-			switch @scope {
-				ScopeKind::Argument => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::Null => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::This => {
-					throw new NotImplementedException(node)
-				}
+		switch @scope {
+			ScopeKind::Argument => {
+				throw new NotImplementedException(node)
 			}
-		}
-		else {
-			switch @scope {
-				ScopeKind::Argument => {
-					throw new NotImplementedException(node)
+			ScopeKind::Null => {
+				throw new NotImplementedException(node)
+			}
+			ScopeKind::This => {
+				if @alien {
+					fragments.code(`\(name).\(@property)(`)
 				}
-				ScopeKind::Null => {
-					throw new NotImplementedException(node)
+				else if @instance {
+					fragments.code(`\(name).__ks_func_\(@property)_\(@index)(`)
 				}
-				ScopeKind::This => {
-					if @alien {
-						fragments.code(`\(name).\(@property)(`)
-					}
-					else if @instance {
-						fragments.code(`\(name).__ks_func_\(@property)_\(@index)(`)
-					}
-					else {
-						fragments.code(`\(name).__ks_sttc_\(@property)_\(@index)(`)
-					}
+				else {
+					fragments.code(`\(name).__ks_sttc_\(@property)_\(@index)(`)
+				}
 
-					Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], false, fragments, mode)
-				}
+				Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], false, fragments, mode)
 			}
 		}
 	} # }}}

@@ -61,11 +61,11 @@ class WithStatement extends Statement {
 	} # }}}
 	override prepare(target) { # {{{
 		for var declaration in @declarations {
-			declaration.prepare(target)
+			declaration.prepare(Type.Void)
 		}
 
 		for var expression in @expressions {
-			expression.prepare(target)
+			expression.prepare(Type.Void)
 		}
 
 		@body.prepare(target)
@@ -73,7 +73,7 @@ class WithStatement extends Statement {
 		@exit = @body.isExit()
 
 		if @hasFinally {
-			@finally.prepare(target)
+			@finally.prepare(Type.Void)
 
 			if @finally.isExit() {
 				SyntaxException.throwInvalidFinallyReturn(this)

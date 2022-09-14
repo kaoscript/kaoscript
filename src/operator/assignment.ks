@@ -360,6 +360,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 			fragments.code(')')
 		}
 	} # }}}
+	toQuote() => `\(@left.toQuote()) += \(@right.toQuote())`
 	type() => @type
 }
 
