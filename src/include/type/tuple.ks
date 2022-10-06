@@ -35,6 +35,7 @@ abstract class TupleType extends Type {
 
 		@extendedLength = @extends.type().length()
 	} # }}}
+	function(): @function
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()

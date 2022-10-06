@@ -42,8 +42,6 @@
         "index": 0,
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": 0,
         "parameters": [],
         "returns": "Any?",
         "errors": [
@@ -66,8 +64,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "String",
               "errors": [],

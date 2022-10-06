@@ -72,6 +72,9 @@ class ThisCallee extends Callee {
 			}
 		}
 	} # }}}
+	toNullableFragments(fragments, node) { # {{{
+		throw new NotImplementedException(node)
+	} # }}}
 	translate() { # {{{
 		@expression.translate()
 	} # }}}

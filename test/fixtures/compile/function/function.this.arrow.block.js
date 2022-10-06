@@ -5,19 +5,15 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function() {
 		this.foobar = true;
-		return (() => {
-			const __ks_rt = (...args) => {
-				if(args.length === 0) {
-					return __ks_rt.__ks_0.call(this);
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = () => {
-				this.arrow = true;
-				return this;
-			};
-			return __ks_rt;
-		})();
+		return Helper.function(() => {
+			this.arrow = true;
+			return this;
+		}, (fn, ...args) => {
+			if(args.length === 0) {
+				return fn.call(this);
+			}
+			throw Helper.badArgs();
+		});
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 0) {

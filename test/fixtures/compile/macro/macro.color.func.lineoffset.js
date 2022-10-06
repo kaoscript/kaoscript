@@ -90,44 +90,36 @@ module.exports = function() {
 			const d = new Dictionary();
 			d["from"] = (() => {
 				const d = new Dictionary();
-				d.srgb = (() => {
-					const __ks_rt = (...args) => {
-						const t0 = Type.isValue;
-						if(args.length === 4) {
-							if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
-								return __ks_rt.__ks_0.call(null, args[0], args[1], args[2], args[3]);
-							}
+				d.srgb = Helper.function(function(red, green, blue, that) {
+					that._cyan = blue;
+					that._magenta = red;
+					that._yellow = green;
+				}, (fn, ...args) => {
+					const t0 = Type.isValue;
+					if(args.length === 4) {
+						if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
+							return fn.call(null, args[0], args[1], args[2], args[3]);
 						}
-						throw Helper.badArgs();
-					};
-					__ks_rt.__ks_0 = function(red, green, blue, that) {
-						that._cyan = blue;
-						that._magenta = red;
-						that._yellow = green;
-					};
-					return __ks_rt;
-				})();
+					}
+					throw Helper.badArgs();
+				});
 				return d;
 			})();
 			d["to"] = (() => {
 				const d = new Dictionary();
-				d.srgb = (() => {
-					const __ks_rt = (...args) => {
-						const t0 = Type.isValue;
-						if(args.length === 4) {
-							if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
-								return __ks_rt.__ks_0.call(null, args[0], args[1], args[2], args[3]);
-							}
+				d.srgb = Helper.function(function(cyan, magenta, yellow, that) {
+					that._red = magenta;
+					that._green = yellow;
+					that._blue = cyan;
+				}, (fn, ...args) => {
+					const t0 = Type.isValue;
+					if(args.length === 4) {
+						if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
+							return fn.call(null, args[0], args[1], args[2], args[3]);
 						}
-						throw Helper.badArgs();
-					};
-					__ks_rt.__ks_0 = function(cyan, magenta, yellow, that) {
-						that._red = magenta;
-						that._green = yellow;
-						that._blue = cyan;
-					};
-					return __ks_rt;
-				})();
+					}
+					throw Helper.badArgs();
+				});
 				return d;
 			})();
 			return d;

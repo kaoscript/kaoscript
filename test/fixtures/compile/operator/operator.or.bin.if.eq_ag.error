@@ -1,1 +1,1 @@
-ReferenceException: Any value can't be assigned to the expression "(x == 0) || y" (fixtures/compile/operator/operator.or.bin.if.eq_ag.ks:2)
+ReferenceException: No value can be assigned to the expression "(x == 0) || y" (fixtures/compile/operator/operator.or.bin.if.eq_ag.ks:2)

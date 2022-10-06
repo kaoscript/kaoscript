@@ -4,18 +4,14 @@ module.exports = function() {
 		return quzbaz.__ks_rt(this, arguments);
 	};
 	quzbaz.__ks_0 = function() {
-		const foobar = (() => {
-			const __ks_rt = (...args) => {
-				if(args.length === 0) {
-					return __ks_rt.__ks_0.call(this);
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = () => {
-				return "foobar";
-			};
-			return __ks_rt;
-		})();
+		const foobar = Helper.function(() => {
+			return "foobar";
+		}, (fn, ...args) => {
+			if(args.length === 0) {
+				return fn.call(this);
+			}
+			throw Helper.badArgs();
+		});
 		console.log(foobar.__ks_0());
 	};
 	quzbaz.__ks_rt = function(that, args) {

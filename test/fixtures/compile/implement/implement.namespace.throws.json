@@ -32,8 +32,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Any?",
             "errors": [

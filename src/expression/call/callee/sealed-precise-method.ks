@@ -1,49 +1,13 @@
-class SealedPreciseMethodCallee extends Callee {
+class SealedPreciseMethodCallee extends MethodCallee {
 	private {
-		@arguments: Array<CallMatchArgument>
-		@expression
-		@flatten: Boolean
-		@function: FunctionType
-		@node: CallExpression
 		@object
 		@property: String
-		@scope: ScopeKind
-		@type: Type
 		@variable: NamedType<ClassType>
 	}
-	constructor(@data, @object, @property, match: CallMatch, @variable, @node) { # {{{
-		super(data)
-
-		@expression = new MemberExpression(data.callee, node, node.scope(), object)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
-
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-
-		@function = match.function
-		@arguments = match.arguments
-
-		@validate(@function, node)
-
-		@type = @function.getReturnType()
+	constructor(@data, @object, @property, assessment, match: CallMatch, @variable, @node) { # {{{
+		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, match, node)
 	} # }}}
-	getContextSubstitute(expression) { # {{{
-		if expression is IdentifierLiteral {
-			var variable = expression.variable()
-
-			if var substitute ?= variable.replaceContext?() {
-				return substitute
-			}
-		}
-
-		return null
-	} # }}}
-	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		return @function.isInitializingInstanceVariable(name)
-	} # }}}
+	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			switch node._data.scope.kind {
@@ -64,14 +28,12 @@ class SealedPreciseMethodCallee extends Callee {
 							fragments.compile(@object)
 						}
 
-						fragments.code($comma)
-
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
+						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 					}
 					else {
 						fragments.code(`\(@variable.getSealedPath()).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
 
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
+						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 					}
 				}
 			}
@@ -99,46 +61,32 @@ class SealedPreciseMethodCallee extends Callee {
 								fragments.compile(@object)
 							}
 
-							Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
+							Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 						}
 						else {
 							fragments.code(`\(@variable.getSealedPath()).__ks_sttc_\(@property)_\(@function.index())(`)
 
-							Router.toArgumentsFragments(@arguments, node._arguments, @function, false, fragments, mode)
+							Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
 						}
 					}
 				}
 			}
 		}
 	} # }}}
-	toNullableFragments(fragments, node) { # {{{
-		if @nullable {
-			if @expression.isNullable() {
-				fragments
-					.compileNullable(@expression)
-					.code(' && ')
-			}
-
-			fragments
-				.code($runtime.type(node) + '.isFunction(')
-				.compileReusable(@expression)
-				.code(')')
-		}
-		else if @expression.isNullable() {
-			fragments.compileNullable(@expression)
-		}
-		else {
-			fragments
-				.code($runtime.type(node) + '.isValue(')
-				.compileReusable(@expression)
-				.code(')')
-		}
-	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
 		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
 	} # }}}
-	translate() { # {{{
-		@expression.translate()
-	} # }}}
-	type() => @type
+	private {
+		getContextSubstitute(expression) { # {{{
+			if expression is IdentifierLiteral {
+				var variable = expression.variable()
+
+				if var substitute ?= variable.replaceContext?() {
+					return substitute
+				}
+			}
+
+			return null
+		} # }}}
+	}
 }

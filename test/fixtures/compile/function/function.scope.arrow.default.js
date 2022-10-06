@@ -6,19 +6,15 @@ module.exports = function(expect) {
 		__ks_case_1 = cases[__ks_0];
 		for(let i = 0, __ks_2 = [1992, 2000], __ks_3 = __ks_2.length, year; i < __ks_3; ++i) {
 			year = __ks_2[i];
-			functions.push((() => {
-				const __ks_rt = (...args) => {
-					if(args.length === 0) {
-						return __ks_rt.__ks_0.call(this);
-					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = () => {
-					const d = new Date(year, __ks_case_1[0], __ks_case_1[1]);
-					expect(d.getDay()).to.equal(__ks_case_1[i + 2]);
-				};
-				return __ks_rt;
-			})());
+			functions.push(Helper.function(() => {
+				const d = new Date(year, __ks_case_1[0], __ks_case_1[1]);
+				expect(d.getDay()).to.equal(__ks_case_1[i + 2]);
+			}, (fn, ...args) => {
+				if(args.length === 0) {
+					return fn.call(this);
+				}
+				throw Helper.badArgs();
+			}));
 		}
 	}
 	for(let __ks_0 = 0, __ks_1 = functions.length, fn; __ks_0 < __ks_1; ++__ks_0) {

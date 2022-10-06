@@ -418,198 +418,190 @@ module.exports = function() {
 	};
 	const $parsers = (() => {
 		const d = new Dictionary();
-		d.srgb = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = value => Type.isClassInstance(value, Color);
-				const t1 = Type.isArray;
-				if(args.length === 2) {
-					if(t0(args[0]) && t1(args[1])) {
-						return __ks_rt.__ks_0.call(null, args[0], args[1]);
-					}
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(that, args) {
-				if(args.length === 1) {
-					if(Type.isNumber(args[0])) {
-						that._space = Space.SRGB;
-						that._alpha = $caster.alpha.__ks_0(((args[0] >> 24) & 255) / 255);
-						that._red = (args[0] >> 16) & 255;
-						that._green = (args[0] >> 8) & 255;
-						that._blue = args[0] & 255;
-						return true;
-					}
-					else if(Type.isArray(args[0])) {
-						that._space = Space.SRGB;
-						that._alpha = (args[0].length === 4) ? $caster.alpha.__ks_0(args[0][3]) : 1;
-						that._red = $caster.ff(args[0][0]);
-						that._green = $caster.ff(args[0][1]);
-						that._blue = $caster.ff(args[0][2]);
-						return true;
-					}
-					else if(Type.isDictionary(args[0])) {
-						if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
-							that._space = Space.SRGB;
-							that._alpha = $caster.alpha.__ks_0(args[0].a);
-							that._red = $caster.ff(args[0].r);
-							that._green = $caster.ff(args[0].g);
-							that._blue = $caster.ff(args[0].b);
-							return true;
-						}
-						if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
-							that._space = Space.SRGB;
-							that._alpha = $caster.alpha.__ks_0(args[0].alpha);
-							that._red = $caster.ff(args[0].red);
-							that._green = $caster.ff(args[0].green);
-							that._blue = $caster.ff(args[0].blue);
-							return true;
-						}
-					}
-					else if(Type.isString(args[0])) {
-						let color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-						if("transparent" === color) {
-							that._alpha = that._red = that._green = that._blue = 0;
-							return true;
-						}
-						else if("rand" === color) {
-							const c = (Math.random() * 16777215) | 0;
-							that._space = Space.SRGB;
-							that._alpha = 1;
-							that._red = (c >> 16) & 255;
-							that._green = (c >> 8) & 255;
-							that._blue = c & 255;
-							return true;
-						}
-						if(Type.isValue($names[color])) {
-							color = Helper.concatString("#", $names[color]);
-						}
-						let match, __ks_0;
-						if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(match[1], 16);
-							that._green = Integer.parse.__ks_0(match[2], 16);
-							that._blue = Integer.parse.__ks_0(match[3], 16);
-							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(match[4], 16) / 255);
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(match[1], 16);
-							that._green = Integer.parse.__ks_0(match[2], 16);
-							that._blue = Integer.parse.__ks_0(match[3], 16);
-							that._alpha = 1;
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
-							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.add(match[4], match[4]), 16) / 255);
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
-							that._alpha = 1;
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = $caster.ff(match[1]);
-							that._green = $caster.ff(match[2]);
-							that._blue = $caster.ff(match[3]);
-							that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Math.round(2.55 * $caster.percentage(match[1]));
-							that._green = Math.round(2.55 * $caster.percentage(match[2]));
-							that._blue = Math.round(2.55 * $caster.percentage(match[3]));
-							that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(match[1], 16);
-							that._green = Integer.parse.__ks_0(match[2], 16);
-							that._blue = Integer.parse.__ks_0(match[3], 16);
-							that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
-							that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
-							that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
-							that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = $caster.ff(match[1]);
-							that._green = $caster.ff(match[2]);
-							that._blue = $caster.ff(match[3]);
-							that._alpha = $caster.alpha.__ks_0(match[4]);
-							return true;
-						}
-					}
-				}
-				else if(args.length >= 3) {
+		d.srgb = Helper.function(function(that, args) {
+			if(args.length === 1) {
+				if(Type.isNumber(args[0])) {
 					that._space = Space.SRGB;
-					that._alpha = (args.length >= 4) ? $caster.alpha.__ks_0(args[3]) : 1;
-					that._red = $caster.ff(args[0]);
-					that._green = $caster.ff(args[1]);
-					that._blue = $caster.ff(args[2]);
+					that._alpha = $caster.alpha.__ks_0(((args[0] >> 24) & 255) / 255);
+					that._red = (args[0] >> 16) & 255;
+					that._green = (args[0] >> 8) & 255;
+					that._blue = args[0] & 255;
 					return true;
 				}
-				return false;
-			};
-			return __ks_rt;
-		})();
-		d.gray = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = value => Type.isClassInstance(value, Color);
-				const t1 = Type.isArray;
-				if(args.length === 2) {
-					if(t0(args[0]) && t1(args[1])) {
-						return __ks_rt.__ks_0.call(null, args[0], args[1]);
-					}
+				else if(Type.isArray(args[0])) {
+					that._space = Space.SRGB;
+					that._alpha = (args[0].length === 4) ? $caster.alpha.__ks_0(args[0][3]) : 1;
+					that._red = $caster.ff(args[0][0]);
+					that._green = $caster.ff(args[0][1]);
+					that._blue = $caster.ff(args[0][2]);
+					return true;
 				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(that, args) {
-				if(args.length >= 1) {
-					if(Number.isFinite(Float.parse.__ks_0(args[0])) === true) {
+				else if(Type.isDictionary(args[0])) {
+					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
 						that._space = Space.SRGB;
-						that._red = that._green = that._blue = $caster.ff(args[0]);
-						that._alpha = (args.length >= 2) ? $caster.alpha.__ks_0(args[1]) : 1;
+						that._alpha = $caster.alpha.__ks_0(args[0].a);
+						that._red = $caster.ff(args[0].r);
+						that._green = $caster.ff(args[0].g);
+						that._blue = $caster.ff(args[0].b);
 						return true;
 					}
-					else if(Type.isString(args[0])) {
-						const color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-						let match, __ks_0;
-						if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = that._green = that._blue = $caster.ff(match[1]);
-							that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
-							return true;
-						}
-						else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-							that._space = Space.SRGB;
-							that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
-							that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
-							return true;
-						}
+					if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
+						that._space = Space.SRGB;
+						that._alpha = $caster.alpha.__ks_0(args[0].alpha);
+						that._red = $caster.ff(args[0].red);
+						that._green = $caster.ff(args[0].green);
+						that._blue = $caster.ff(args[0].blue);
+						return true;
 					}
 				}
-				return false;
-			};
-			return __ks_rt;
-		})();
+				else if(Type.isString(args[0])) {
+					let color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
+					if("transparent" === color) {
+						that._alpha = that._red = that._green = that._blue = 0;
+						return true;
+					}
+					else if("rand" === color) {
+						const c = (Math.random() * 16777215) | 0;
+						that._space = Space.SRGB;
+						that._alpha = 1;
+						that._red = (c >> 16) & 255;
+						that._green = (c >> 8) & 255;
+						that._blue = c & 255;
+						return true;
+					}
+					if(Type.isValue($names[color])) {
+						color = Helper.concatString("#", $names[color]);
+					}
+					let match, __ks_0;
+					if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(match[1], 16);
+						that._green = Integer.parse.__ks_0(match[2], 16);
+						that._blue = Integer.parse.__ks_0(match[3], 16);
+						that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(match[4], 16) / 255);
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(match[1], 16);
+						that._green = Integer.parse.__ks_0(match[2], 16);
+						that._blue = Integer.parse.__ks_0(match[3], 16);
+						that._alpha = 1;
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+						that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
+						that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.add(match[4], match[4]), 16) / 255);
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+						that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
+						that._alpha = 1;
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = $caster.ff(match[1]);
+						that._green = $caster.ff(match[2]);
+						that._blue = $caster.ff(match[3]);
+						that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Math.round(2.55 * $caster.percentage(match[1]));
+						that._green = Math.round(2.55 * $caster.percentage(match[2]));
+						that._blue = Math.round(2.55 * $caster.percentage(match[3]));
+						that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(match[1], 16);
+						that._green = Integer.parse.__ks_0(match[2], 16);
+						that._blue = Integer.parse.__ks_0(match[3], 16);
+						that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
+						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
+						that._blue = Integer.parse.__ks_0(Operator.add(match[3], match[3]), 16);
+						that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = $caster.ff(match[1]);
+						that._green = $caster.ff(match[2]);
+						that._blue = $caster.ff(match[3]);
+						that._alpha = $caster.alpha.__ks_0(match[4]);
+						return true;
+					}
+				}
+			}
+			else if(args.length >= 3) {
+				that._space = Space.SRGB;
+				that._alpha = (args.length >= 4) ? $caster.alpha.__ks_0(args[3]) : 1;
+				that._red = $caster.ff(args[0]);
+				that._green = $caster.ff(args[1]);
+				that._blue = $caster.ff(args[2]);
+				return true;
+			}
+			return false;
+		}, (fn, ...args) => {
+			const t0 = value => Type.isClassInstance(value, Color);
+			const t1 = Type.isArray;
+			if(args.length === 2) {
+				if(t0(args[0]) && t1(args[1])) {
+					return fn.call(null, args[0], args[1]);
+				}
+			}
+			throw Helper.badArgs();
+		});
+		d.gray = Helper.function(function(that, args) {
+			if(args.length >= 1) {
+				if(Number.isFinite(Float.parse.__ks_0(args[0])) === true) {
+					that._space = Space.SRGB;
+					that._red = that._green = that._blue = $caster.ff(args[0]);
+					that._alpha = (args.length >= 2) ? $caster.alpha.__ks_0(args[1]) : 1;
+					return true;
+				}
+				else if(Type.isString(args[0])) {
+					const color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
+					let match, __ks_0;
+					if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = that._green = that._blue = $caster.ff(match[1]);
+						that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
+						return true;
+					}
+					else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+						that._space = Space.SRGB;
+						that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
+						that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
+						return true;
+					}
+				}
+			}
+			return false;
+		}, (fn, ...args) => {
+			const t0 = value => Type.isClassInstance(value, Color);
+			const t1 = Type.isArray;
+			if(args.length === 2) {
+				if(t0(args[0]) && t1(args[1])) {
+					return fn.call(null, args[0], args[1]);
+				}
+			}
+			throw Helper.badArgs();
+		});
 		return d;
 	})();
 	function $space() {
@@ -1433,7 +1425,7 @@ module.exports = function() {
 				for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
 					alias = space.alias[__ks_0];
 					$spaces[space.name].alias[alias] = true;
-					$aliases[alias] = Space(space.name);
+					$aliases[alias] = Space.__ks_from(space.name);
 				}
 				if(Type.isValue($parsers[space.name])) {
 					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
@@ -1521,41 +1513,33 @@ module.exports = function() {
 		d["alias"] = ["rgb"];
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.hex = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = value => Type.isClassInstance(value, Color);
-					if(args.length === 1) {
-						if(t0(args[0])) {
-							return __ks_rt.__ks_0.call(null, args[0]);
-						}
+			d.hex = Helper.function(function(that) {
+				return $hex.__ks_0(that);
+			}, (fn, ...args) => {
+				const t0 = value => Type.isClassInstance(value, Color);
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return fn.call(null, args[0]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function(that) {
-					return $hex.__ks_0(that);
-				};
-				return __ks_rt;
-			})();
-			d.srgb = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = value => Type.isClassInstance(value, Color);
-					if(args.length === 1) {
-						if(t0(args[0])) {
-							return __ks_rt.__ks_0.call(null, args[0]);
-						}
+				}
+				throw Helper.badArgs();
+			});
+			d.srgb = Helper.function(function(that) {
+				if(that._alpha === 1) {
+					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
+				}
+				else {
+					return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
+				}
+			}, (fn, ...args) => {
+				const t0 = value => Type.isClassInstance(value, Color);
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return fn.call(null, args[0]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function(that) {
-					if(that._alpha === 1) {
-						return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
-					}
-					else {
-						return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
-					}
-				};
-				return __ks_rt;
-			})();
+				}
+				throw Helper.badArgs();
+			});
 			return d;
 		})();
 		d["components"] = (() => {

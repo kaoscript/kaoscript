@@ -21,21 +21,17 @@ module.exports = function() {
 			return this.__ks_func_qux_rt.call(null, this, this, arguments);
 		}
 		__ks_func_qux_0() {
-			const test = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = Type.isValue;
-					if(args.length === 2) {
-						if(t0(args[0]) && t0(args[1])) {
-							return __ks_rt.__ks_0.call(this, args[0], args[1]);
-						}
+			const test = Helper.function((x, y) => {
+				return x === y;
+			}, (fn, ...args) => {
+				const t0 = Type.isValue;
+				if(args.length === 2) {
+					if(t0(args[0]) && t0(args[1])) {
+						return fn.call(this, args[0], args[1]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = (x, y) => {
-					return x === y;
-				};
-				return __ks_rt;
-			})();
+				}
+				throw Helper.badArgs();
+			});
 		}
 		__ks_func_qux_rt(that, proto, args) {
 			if(args.length === 0) {

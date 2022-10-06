@@ -1,1 +1,0 @@
-TypeException: The return type must be "Color" and not "Color?" (fixtures/compile/enum/enum.cast.create.nn.nmatch.ret.ks:8)

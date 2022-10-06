@@ -70,6 +70,7 @@ class StructType extends Type {
 	extends(@extends) { # {{{
 		@extending = true
 	} # }}}
+	function(): @function
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()

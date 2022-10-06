@@ -6,18 +6,14 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		return (() => {
-			const __ks_rt = (...args) => {
-				if(args.length === 0) {
-					return __ks_rt.__ks_0.call(this);
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = () => {
-				return x;
-			};
-			return __ks_rt;
-		})();
+		return Helper.function(() => {
+			return x;
+		}, (fn, ...args) => {
+			if(args.length === 0) {
+				return fn.call(this);
+			}
+			throw Helper.badArgs();
+		});
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;

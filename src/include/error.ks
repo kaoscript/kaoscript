@@ -213,7 +213,7 @@ export class ReferenceException extends Exception {
 			throw new ReferenceException(`The variable "\(argname)" must be complete before passing it to the module "\(modname)"`, node)
 		} # }}}
 		throwInvalidAssignment(node): Never ~ ReferenceException { # {{{
-			throw new ReferenceException(`Any value can't be assigned to the expression \(node.toQuote(true))`, node)
+			throw new ReferenceException(`No value can be assigned to the expression \(node.toQuote(true))`, node)
 		} # }}}
 		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)

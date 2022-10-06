@@ -1,1 +1,0 @@
-ReferenceException: The method "foo" can't be found in the class "Foobar" (fixtures/compile/class/class.method.missing.ks:8)

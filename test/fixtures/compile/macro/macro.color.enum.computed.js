@@ -70,18 +70,14 @@ module.exports = function() {
 			const d = new Dictionary();
 			d["from"] = (() => {
 				const d = new Dictionary();
-				d[Space.YUV] = (() => {
-					const __ks_rt = (...args) => {
-						if(args.length === 0) {
-							return __ks_rt.__ks_0.call(null);
-						}
-						throw Helper.badArgs();
-					};
-					__ks_rt.__ks_0 = function() {
-						return "RGB -> UYV";
-					};
-					return __ks_rt;
-				})();
+				d[Space.YUV] = Helper.function(function() {
+					return "RGB -> UYV";
+				}, (fn, ...args) => {
+					if(args.length === 0) {
+						return fn.call(null);
+					}
+					throw Helper.badArgs();
+				});
 				return d;
 			})();
 			return d;

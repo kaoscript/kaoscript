@@ -55,7 +55,7 @@ class ImplementDeclaration extends Statement {
 
 		if type is ClassType {
 			for var data in @data.properties {
-				var mut property: Statement
+				var late property
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -84,7 +84,7 @@ class ImplementDeclaration extends Statement {
 		}
 		else if type is EnumType {
 			for var data in @data.properties {
-				var mut property: Statement
+				var late property
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -105,7 +105,7 @@ class ImplementDeclaration extends Statement {
 		}
 		else if type is NamespaceType {
 			for data in @data.properties {
-				var mut property: Statement
+				var late property
 
 				switch data.kind {
 					NodeKind::FieldDeclaration => {
@@ -191,7 +191,7 @@ class ImplementDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for property in @properties {
+		for var property in @properties {
 			property.translate()
 		}
 	} # }}}

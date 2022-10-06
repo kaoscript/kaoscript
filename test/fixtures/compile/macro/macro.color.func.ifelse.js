@@ -23,25 +23,21 @@ module.exports = function() {
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.srgb = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = value => Type.isClassInstance(value, Color);
-					if(args.length === 1) {
-						if(t0(args[0])) {
-							return __ks_rt.__ks_0.call(null, args[0]);
-						}
+			d.srgb = Helper.function(function(that) {
+				if(that._foo === true) {
+				}
+				else if(that._bar === true) {
+				}
+				return "";
+			}, (fn, ...args) => {
+				const t0 = value => Type.isClassInstance(value, Color);
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return fn.call(null, args[0]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function(that) {
-					if(that._foo === true) {
-					}
-					else if(that._bar === true) {
-					}
-					return "";
-				};
-				return __ks_rt;
-			})();
+				}
+				throw Helper.badArgs();
+			});
 			return d;
 		})();
 		return d;

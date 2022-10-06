@@ -86,7 +86,7 @@ class ArrayExpression extends Expression {
 		else {
 			fragments.code('[')
 
-			for value, index in @values {
+			for var value, index in @values {
 				if index != 0 {
 					fragments.code($comma)
 				}
@@ -96,6 +96,21 @@ class ArrayExpression extends Expression {
 
 			fragments.code(']')
 		}
+	} # }}}
+	toQuote() { # {{{
+		var mut fragments = '['
+
+		for var value, index in @values {
+				if index != 0 {
+					fragments += ', '
+				}
+
+				fragments += value.toQuote()
+			}
+
+		fragments += ']'
+
+		return fragments
 	} # }}}
 	type() => @type
 	validateType(type: ReferenceType) { # {{{

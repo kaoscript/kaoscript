@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("String", "String"), the function "foobar" can be matched with "foobar(x: String, z: String)" or "foobar(x: String, y: String)" (fixtures/compile/router/router.func.s_n1=s.s_n2=se.ks:1)

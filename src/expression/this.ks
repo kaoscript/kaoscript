@@ -164,7 +164,7 @@ class ThisExpression extends Expression {
 				}
 				else if type.isExhaustive(this) {
 					if @assignable {
-						ReferenceException.throwInvalidAssignment(this)
+						ReferenceException.throwUndefinedInstanceField(@name, this)
 					}
 					else {
 						ReferenceException.throwNotDefinedProperty(@name, this)

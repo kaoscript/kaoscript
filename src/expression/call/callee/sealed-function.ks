@@ -54,6 +54,9 @@ class SealedFunctionCallee extends Callee {
 			}
 		}
 	} # }}}
+	toNullableFragments(fragments, node) { # {{{
+		throw new NotImplementedException(node)
+	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
 		@type.toPositiveTestFragments(fragments, @object)
 	} # }}}

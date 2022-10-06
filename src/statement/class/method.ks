@@ -24,12 +24,12 @@ class ClassMethodDeclaration extends Statement {
 		@returnNull: Boolean				= false
 		@topNodes: Array					= []
 	}
-	static toClassRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
+	static toClassRouterFragments(node, fragments, variable, methods, overflow, name: String, class: ClassType, header, footer) { # {{{
 		var classname = variable.name()
-
+		var labelable = class.isLabelableClassMethod(name)
 		var assessment = Router.assess(methods, name, node)
 
-		header(node, fragments)
+		header(node, fragments, labelable)
 
 		if variable.type().isExtending() {
 			var extends = variable.type().extends()
@@ -41,21 +41,33 @@ class ClassMethodDeclaration extends Statement {
 
 					return false
 				}
-				`arguments`
+				labelable ? 'args' : `arguments`
 				assessment
 				fragments.block()
-				extends.type().hasInstanceMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
+				extends.type().hasClassMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
 				(fragments, _) => {
-					if extends.type().hasInstanceMethod(name) {
-						fragments.line(`return \(parent).\(name).apply(null, arguments)`)
+					if extends.type().hasClassMethod(name) {
+						if labelable {
+							fragments.line(`return \(parent).\(name).call(null, kws, ...args)`)
+						}
+						else {
+							fragments.line(`return \(parent).\(name).apply(null, arguments)`)
+						}
 					}
 					else {
-						fragments
+						var ctrl = fragments
 							.newControl()
 							.code(`if(\(parent).\(name))`)
 							.step()
-							.line(`return \(parent).\(name).apply(null, arguments)`)
-							.done()
+
+						if labelable {
+							ctrl.line(`return \(parent).\(name).call(null, kws, ...args)`)
+						}
+						else {
+							ctrl.line(`return \(parent).\(name).apply(null, arguments)`)
+						}
+
+						ctrl.done()
 
 						fragments.line(`throw \($runtime.helper(node)).badArgs()`)
 					}
@@ -70,7 +82,7 @@ class ClassMethodDeclaration extends Statement {
 
 					return false
 				}
-				`arguments`
+				labelable ? 'args' : `arguments`
 				assessment
 				fragments.block()
 				node
@@ -79,21 +91,28 @@ class ClassMethodDeclaration extends Statement {
 
 		footer(fragments)
 	} # }}}
-	static toInstanceHeadFragments(name, fragments) { # {{{
+	static toInstanceHeadFragments(name: String, class: ClassType, fragments) { # {{{
 		var ctrl = fragments.newControl()
 
-		ctrl.code(`\(name)()`).step()
+		if class.isLabelableInstanceMethod(name) {
+			ctrl.code(`\(name)(kws, ...args)`).step()
 
-		ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this, arguments)`)
+			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this, kws, args)`)
+		}
+		else {
+			ctrl.code(`\(name)()`).step()
+
+			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this, arguments)`)
+		}
 
 		ctrl.done()
 	} # }}}
-	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name, header, footer) { # {{{
+	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name: String, class: ClassType, header, footer) { # {{{
 		var classname = variable.name()
-
+		var labelable = class.isLabelableInstanceMethod(name)
 		var assessment = Router.assess(methods, name, node)
 
-		header(node, fragments)
+		header(node, fragments, labelable)
 
 		if variable.type().isExtending() {
 			var extends = variable.type().extends()
@@ -550,16 +569,11 @@ class ClassMethodDeclaration extends Statement {
 		for var {name, value, parameters} in @indigentValues {
 			var ctrl = fragments.newControl()
 
-			if @parent._es5 {
-				ctrl.code(`\(name): function(\(parameters.join(', ')))`).step()
-			}
-			else {
-				ctrl.code(`\(name)(\(parameters.join(', ')))`).step()
-			}
+			ctrl.code(`\(name)(\(parameters.join(', ')))`).step()
 
 			ctrl.newLine().code('return ').compile(value).done()
 
-			ctrl.done() unless @parent._es5
+			ctrl.done()
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{

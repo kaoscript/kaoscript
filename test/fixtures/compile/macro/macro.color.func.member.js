@@ -64,41 +64,33 @@ module.exports = function() {
 	}
 	const $util = (() => {
 		const d = new Dictionary();
-		d.formatToHex = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = value => Type.isClassInstance(value, Color);
-				if(args.length === 1) {
-					if(t0(args[0])) {
-						return __ks_rt.__ks_0.call(null, args[0]);
-					}
+		d.formatToHex = Helper.function(function(that) {
+			return $hex(that);
+		}, (fn, ...args) => {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return fn.call(null, args[0]);
 				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(that) {
-				return $hex(that);
-			};
-			return __ks_rt;
-		})();
-		d.formatToSRGB = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = value => Type.isClassInstance(value, Color);
-				if(args.length === 1) {
-					if(t0(args[0])) {
-						return __ks_rt.__ks_0.call(null, args[0]);
-					}
+			}
+			throw Helper.badArgs();
+		});
+		d.formatToSRGB = Helper.function(function(that) {
+			if(that._alpha === 1) {
+				return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
+			}
+			else {
+				return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
+			}
+		}, (fn, ...args) => {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return fn.call(null, args[0]);
 				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(that) {
-				if(that._alpha === 1) {
-					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
-				}
-				else {
-					return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
-				}
-			};
-			return __ks_rt;
-		})();
+			}
+			throw Helper.badArgs();
+		});
 		return d;
 	})();
 	Color.__ks_sttc_registerSpace_0((() => {

@@ -3,18 +3,14 @@ module.exports = function() {
 	let x = "y";
 	let foo = (() => {
 		const d = new Dictionary();
-		d[x] = (() => {
-			const __ks_rt = (...args) => {
-				if(args.length === 0) {
-					return __ks_rt.__ks_0.call(null);
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function() {
-				return 42;
-			};
-			return __ks_rt;
-		})();
+		d[x] = Helper.function(function() {
+			return 42;
+		}, (fn, ...args) => {
+			if(args.length === 0) {
+				return fn.call(null);
+			}
+			throw Helper.badArgs();
+		});
 		return d;
 	})();
 };

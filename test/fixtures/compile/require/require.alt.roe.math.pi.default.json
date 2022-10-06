@@ -38,8 +38,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "String",
               "errors": [],
@@ -73,8 +71,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": false,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -115,8 +111,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 1,
               "parameters": [
                 {
                   "name": "precision",

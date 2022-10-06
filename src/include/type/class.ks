@@ -38,6 +38,11 @@ class ClassType extends Type {
 		@level: Number						= 0
 		@majorOriginal: ClassType?
 		@minorOriginal: ClassType?
+		@labelables							= {
+			constructors: null
+			classMethods: {}
+			instanceMethods: {}
+		}
 		@overwritten						= {
 			constructors: null
 			classMethods: {}
@@ -327,6 +332,8 @@ class ClassType extends Type {
 		@alterations.classMethods[name] ??= {}
 		@alterations.classMethods[name][index] = true
 
+		@labelables.classMethods[name] ||= type.hasOnlyLabeledParameter()
+
 		return index
 	} # }}}
 	addClassVariable(name: String, type: ClassVariableType) { # {{{
@@ -362,6 +369,8 @@ class ClassType extends Type {
 		}
 
 		@alterations.constructors[index] = true
+
+		@labelables.constructors ||= type.hasOnlyLabeledParameter()
 
 		return index
 	} # }}}
@@ -399,6 +408,8 @@ class ClassType extends Type {
 
 		@alterations.instanceMethods[name] ??= {}
 		@alterations.instanceMethods[name][index] = true
+
+		@labelables.instanceMethods[name] ||= type.hasOnlyLabeledParameter()
 
 		return index
 	} # }}}
@@ -620,7 +631,6 @@ class ClassType extends Type {
 		return @addInstanceMethod(name, type)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-
 		var exhaustive = @isExhaustive()
 
 		var late export
@@ -1064,12 +1074,15 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getClassWithInstanceMethod(name: String, that: NamedType): NamedType { # {{{
+	getClassWithInstantiableMethod(name: String, that: NamedType): NamedType { # {{{
 		if @instanceMethods[name] is Array {
 			return that
 		}
+		else if @abstract && @abstractMethods[name] is Array {
+			return that
+		}
 
-		return @extends.type().getClassWithInstanceMethod(name, @extends)
+		return @extends.type().getClassWithInstantiableMethod(name, @extends)
 	} # }}}
 	getConstructor(type: FunctionType, mode: MatchingMode) { # {{{
 		if @constructors.length == 0 && @extending {
@@ -1538,6 +1551,8 @@ class ClassType extends Type {
 		return false
 	} # }}}
 	isInstanceOf(value: NamedType) => @isInstanceOf(value.type())
+	isLabelableClassMethod(name: String): Boolean => @labelables.classMethods[name] ?? false
+	isLabelableInstanceMethod(name: String): Boolean => @labelables.instanceMethods[name] ?? false
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true

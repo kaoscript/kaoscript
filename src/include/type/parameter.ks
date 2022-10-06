@@ -1,13 +1,16 @@
 bitmask PassingMode {
 	NIL
 
-	NAMED
+	LABELED
 	POSITIONAL
 
-	BOTH = NAMED + POSITIONAL
+	BOTH = LABELED + POSITIONAL
 }
 
 class ParameterType extends Type {
+	private late {
+		@index: Number
+	}
 	private {
 		@comprehensive: Boolean				= true
 		@default: Boolean
@@ -17,6 +20,7 @@ class ParameterType extends Type {
 		@name: String?						= null
 		@nullableByDefault: Boolean
 		@passing: PassingMode
+		@preserved: Boolean					= false
 		@type: Type
 		@variableType: Type
 	}
@@ -36,7 +40,7 @@ class ParameterType extends Type {
 				min = 0
 			}
 
-			for modifier in data.modifiers {
+			for var modifier in data.modifiers {
 				switch modifier.kind {
 					ModifierKind::Nullable => {
 						type = type.setNullable(true)
@@ -68,6 +72,12 @@ class ParameterType extends Type {
 				parameter.setDefaultValue(data.defaultValue, true)
 			}
 
+			for var attribute in data.attributes {
+				if attribute.kind == NodeKind::AttributeDeclaration && attribute.declaration.kind == NodeKind::Identifier && attribute.declaration.name == 'preserve' {
+					parameter.flagPreserved()
+				}
+			}
+
 			return parameter
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
@@ -83,6 +93,10 @@ class ParameterType extends Type {
 					type.setDefaultValue(data.defaultValue, false)
 				}
 
+			}
+
+			if data.preserved {
+				type.flagPreserved()
 			}
 
 			return type
@@ -109,7 +123,18 @@ class ParameterType extends Type {
 			@type = @type.setNullable(true)
 		}
 	} # }}}
-	clone() => new ParameterType(@scope, @name, @passing, @type, @min, @max, @default)
+	clone(): ParameterType { # {{{
+		var that = new ParameterType(@scope, @name, @passing, @type, @min, @max, @default)
+
+		if @preserved {
+			that.flagPreserved()
+		}
+
+		return that
+	} # }}}
+	flagPreserved(): this { # {{{
+		@preserved = true
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {}
 
@@ -133,6 +158,10 @@ class ParameterType extends Type {
 			}
 		}
 
+		if @preserved {
+			export.preserved = true
+		}
+
 		return export
 	} # }}}
 	getArgumentType(): Type { # {{{
@@ -149,17 +178,25 @@ class ParameterType extends Type {
 	getDefaultValue() => @defaultValue
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
+	index(): @index
+	index(@index): this
 	isAny() => @type.isAny()
 	isComprehensive() => @comprehensive
 	isExportable() => @type.isExportable()
+	isLabeled() => @passing ~~ PassingMode::LABELED
+	isLimited() => @max != Infinity
 	isMorePreciseThan(value: ParameterType) => @type.isMorePreciseThan(value.type())
 	isMorePreciseThan(value: Type) => @type.isMorePreciseThan(value)
 	isMissingType() => !@type.isExplicit()
-	isNamedArgument() => @passing ~~ PassingMode::NAMED
-	isNamedOnlyArgument() => @passing == PassingMode::NAMED
 	isNullable() => @type.isNullable()
-	isPositionalOnlyArgument() => @passing == PassingMode::POSITIONAL
+	isOnlyLabeled() => @passing == PassingMode::LABELED
+	isOnlyPositional() => @passing == PassingMode::POSITIONAL
+	isPositional() => @passing ~~ PassingMode::POSITIONAL
+	isPreserved() => @preserved
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
+		if mode !~ MatchingMode::IgnorePreserved && @preserved && !value.isPreserved() {
+			return false
+		}
 		if mode !~ MatchingMode::IgnoreName && ?@name && ?value.name() && @name != value.name()  {
 			return false
 		}
@@ -220,6 +257,13 @@ class ParameterType extends Type {
 	name() => @name
 	setDefaultValue(@defaultValue, @comprehensive = true) { # {{{
 		@default = true
+
+		@nullableByDefault = @max == 1 && !@type.isNullable()
+
+		if @nullableByDefault {
+			@min = 0
+			@type = @type.setNullable(true)
+		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)

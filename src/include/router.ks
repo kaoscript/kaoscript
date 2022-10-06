@@ -2,31 +2,47 @@ type CallMatchArgument = Number | Array<Number> | Null
 
 struct CallMatch {
 	function: FunctionType
-	arguments: Array<CallMatchArgument>
+	positions: CallMatchArgument[]
 }
 
 struct PreciseCallMatchResult {
-	matches: Array<CallMatch>
+	matches: CallMatch[]
 }
 
 struct LenientCallMatchResult {
-	possibilities: Array<FunctionType>
-	arguments: Array<Number>?			= null
+	possibilities: FunctionType[]
+	positions: Number[]				= []
+	labels: Number{}				= {}
 }
 
 type CallMatchResult = PreciseCallMatchResult | LenientCallMatchResult
 
 namespace Router {
-	struct Assessement {
+	struct Assessment {
 		name: String
-		min: Number
-		max: Number
 		async: Boolean
-		rest: Boolean
-		trees: Array<Tree>
-		functions: Dictionary<FunctionType>
+		emptiable: Boolean
+		labelable: Boolean
 		macro: Boolean
 		sealed: Boolean
+		rest: Boolean
+		length: Number
+		functions: FunctionType{}
+		labels: Label{}
+		routes: Route{}
+		mainRoutes: String[]
+	}
+
+	struct Label {
+		all: Number[]
+		mandatories: Number[]
+	}
+
+	struct Route {
+		functions: FunctionType{}
+		trees: Tree[]
+		labelable: Boolean			= false
+		labels: Type{}				= {}
 	}
 
 	struct NamedLength {
@@ -50,6 +66,7 @@ namespace Router {
 		name: String?		= null
 		type: Type
 		strict: Boolean
+		value: Expression?	= null
 	}
 
 	struct Tree {
@@ -57,8 +74,8 @@ namespace Router {
 		max: Number								= min
 		variadic: Boolean						= false
 		rest: Boolean							= false
-		columns: Dictionary<TreeColumn>			= {}
-		order: Array<String>					= []
+		columns: TreeColumn{}					= {}
+		order: String[]							= []
 		equivalences: String[][]?				= null
 		function: FunctionType?					= null
 	}
@@ -103,12 +120,6 @@ namespace Router {
 		isNode: Boolean
 		order: Array<String>					= []
 		rows: Array<Row>
-		backtracks: Array<BackTrack>			= []
-	}
-
-	struct BackTrack {
-		index: Number
-		type: Type
 	}
 
 	struct TreeParameter {
@@ -144,10 +155,11 @@ namespace Router {
 		excludes: Array<String>
 		matches: Array<CallMatch>			= []
 		possibilities: Array<FunctionType>	= []
+		indexeds: NamingArgument[]
 		node: AbstractNode
 	}
 
-	type FunctionPathBuilder = (function: FunctionType, line: LineBuilder): Boolean
+	type PathBuilder = (function: FunctionType, line: LineBuilder): Boolean
 
 	include {
 		'./router/build'
@@ -164,128 +176,166 @@ namespace Router {
 			NO_THROW
 		}
 
-		func assess(functions: Array<FunctionType>, name: String, node: AbstractNode): Assessement { # {{{
-			if functions.length == 0 {
-				return Assessement(
+		func assess(functions: FunctionType[], name: String, node: AbstractNode): Assessment { # {{{
+			if !#functions {
+				return Assessment(
 					name
-					functions: {}
-					min: 0
-					max: 0
 					async: false
-					rest: false
-					trees: []
+					emptiable: true
+					labelable: false
 					macro: false
+					rest: false
 					sealed: false
+					functions: {}
+					labels: {}
+					routes: {}
+					mainRoutes: []
+					length: 0
 				)
 			}
 
-			var parameters = {
-				functions: {}
-				names: {}
-			}
-
 			var async = functions[0].isAsync()
-			var asyncMin = async ? 1 : 0
-
-			var mut min = Infinity
-			var mut max = 0
-			var mut maxRest = 0
+			var mut emptiable = false
+			var mut labelable = false
 			var mut rest = false
 			var mut sealed = false
-
-			for var function in functions {
-				if var parameter ?= function.getRestParameter() {
-					rest = true
-
-					min = Math.min(function.getMinBefore() + parameter.min() + function.getMinAfter() + asyncMin, min)
-					maxRest = Math.max(function.getMaxBefore() + parameter.min() + 1 + function.getMaxAfter() + asyncMin, maxRest)
-				}
-				else {
-					min = Math.min(function.min() + asyncMin, min)
-					max = Math.max(function.max() + asyncMin, max)
-				}
-
-				if function.isSealed() {
-					sealed = true
-				}
-			}
-
-			var groups: Dictionary<Group> = {}
-
-			if rest {
-				if max == 0 {
-					max = maxRest
-				}
-				else if max < maxRest {
-					max = maxRest
-				}
-				else {
-					max += 1
-				}
-			}
-
-			for var n from min to max {
-				groups[n] = Group(n)
-			}
-
-			for var function in functions {
-				if function.max() == Infinity {
-					for var n from function.min() + asyncMin to max {
-						groups[n].functions.push(function)
-					}
-				}
-				else {
-					for var n from function.min() + asyncMin to function.max() + asyncMin {
-						groups[n].functions.push(function)
-					}
-				}
-
-				parameters.functions[function.index()] = function
-
-				for var parameter in function.parameters() {
-					var name = parameter.name() ?? '_'
-
-					if var group ?= parameters.names[name] {
-						group.push(`\(function.index())`)
-					}
-					else {
-						parameters.names[name] = [`\(function.index())`]
-					}
-				}
-			}
-
-			var trees: Array<Tree> = []
-
-			for var group of groups when group.functions.length > 0 {
-				trees.push(buildTree(group, name, false, null, node))
-			}
-
-			regroupTrees(trees, node)
-
-			expandUnboundeds(trees, node)
-
+			var perLabels = {}
 			var functionMap = {}
+			var labelMap = {}
 
 			for var function in functions {
+				rest ||= function.hasRestParameter()
+				sealed ||= function.isSealed()
+				emptiable ||= function.min() == 0
+
+				var labels = []
+				var types = {}
+
+				for var parameter, index in function.parameters() {
+					if parameter.isOnlyLabeled() {
+						labelable ||= true
+
+						var label = parameter.name()
+
+						if var data ?= labelMap[label] {
+							data.all.push(function.index())
+
+							if parameter.min() > 0 {
+								data.mandatories.push(function.index())
+							}
+						}
+						else {
+							var data = Label(
+								all: [function.index()]
+								mandatories: []
+							)
+
+							if parameter.min() > 0 {
+								data.mandatories.push(function.index())
+							}
+
+							labelMap[label] = data
+						}
+
+						labels.push(label)
+
+						types[label] = parameter.type()
+					}
+				}
+
+				labels.sort((a, b) => a.localeCompare(b))
+
+				var mut key = ''
+
+				for var label in labels {
+					key += `\(label):\(types[label].hashCode());`
+				}
+
+				if var perLabel ?= perLabels[key] {
+					perLabel.functions.push(function)
+				}
+				else {
+					perLabels[key] = {
+						labels
+						types
+						functions: [function]
+					}
+				}
+
 				functionMap[function.index()] = function
 			}
 
-			return Assessement(
+			var labelKeys = Dictionary.keys(perLabels).sort((a, b) => {
+				var perLabelA = perLabels[a]
+				var perLabelB = perLabels[b]
+
+				for var i from 0 til Math.min(perLabelA.labels.length, perLabelB.labels.length) {
+					var labelA = perLabelA.labels[i]
+					var labelB = perLabelB.labels[i]
+
+					var ld = labelA.localeCompare(labelB)
+					// TODO
+					// return ld unless ld == 0
+					if ld != 0 {
+						return ld
+					}
+
+					var td = perLabelA.types[labelA].compareToRef(perLabelB.types[labelB])
+					// TODO
+					// return td unless td == 0
+					if td != 0 {
+						return td
+					}
+				}
+
+				return perLabelA.labels.length < perLabelB.labels.length ? -1 : 1
+			})
+
+			var routes = {}
+			var mainRoutes = []
+
+			for var labelKey in labelKeys {
+				var { labels, types, functions } = perLabels[labelKey]
+				var functionKeys = [function.index() for var function in functions]
+
+				var key = `|\(functionKeys.sort((a, b) => a - b).join(','))`
+
+				var route = Build.buildRoute(functions, name, false, labels, node)
+
+				routes[key] = route
+
+				if #labels {
+					route.labelable = true
+					route.labels = types
+				}
+
+				mainRoutes.push(key)
+			}
+
+			return Assessment(
 				name
-				functions: functionMap
 				async
-				min
-				max: rest ? Infinity : max
-				rest
-				trees
+				emptiable
+				labelable
 				macro: false
+				rest
 				sealed
+				functions: functionMap
+				labels: labelMap
+				routes
+				mainRoutes
+				length: functions.length
 			)
 		} # }}}
 
-		func matchArguments(assessment: Assessement, arguments: Array<Expression>, exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { # {{{
-			if assessment.trees.length == 0 && arguments.length == 0 {
-				return PreciseCallMatchResult([])
+		func matchArguments(assessment: Assessment, arguments: Expression[], exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { # {{{
+			if assessment.length == 0 {
+				if !#arguments {
+					return PreciseCallMatchResult([])
+				}
+				else {
+					return LenientCallMatchResult([])
+				}
 			}
 
 			var nameds = {}
@@ -380,6 +430,7 @@ namespace Router {
 							index
 							type: argument.type()
 							strict: false
+							value: argument
 						))
 					}
 
@@ -387,20 +438,44 @@ namespace Router {
 				}
 			}
 
+			var mut functions: Array = Dictionary.keys(assessment.functions).map((i, ...) => parseInt(i))
+			var labels = []
+
+			for var data, label of assessment.labels {
+				if ?nameds[label] || ?shorthands[label] {
+					functions = functions.intersection(data.all)
+				}
+				else {
+					functions = functions.remove(...data.mandatories)
+				}
+
+				unless #functions {
+					SyntaxException.throwNamedOnlyParameters([label], node)
+				}
+			}
+
+			var functionList = [assessment.functions[index] for var index in functions]
+
+			var route = Build.getRoute(assessment, labels, functionList, node)
+
 			if namedCount > 0 || shortCount > 0 {
-				return matchNamedArguments3(assessment, types, nameds, shorthands, indexeds, exhaustive, node)
+				return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, exhaustive, node)
 			}
 			else {
-				return matchArguments(assessment, types, [], node)
+				return Matching.matchArguments(assessment, route, types, [], indexeds, node)
 			}
 		} # }}}
 
-		func toFragments(buildPath: FunctionPathBuilder, args!: String = 'args', assessment: Assessement, fragments: BlockBuilder, footerType: FooterType = FooterType::MUST_THROW, footer: Function = toDefaultFooter, node: AbstractNode): Void { # {{{
-			var mark = fragments.mark()
-			var helper = buildHelper(mark, args, node)
-			var fallback = footerType != FooterType::MUST_THROW
-
-			if assessment.trees.length == 0 {
+		func toFragments(
+			buildPath: PathBuilder
+			args!: String = 'args'
+			assessment: Assessment
+			fragments: BlockBuilder
+			footerType: FooterType = FooterType::MUST_THROW
+			footer: Function = Fragment.toDefaultFooter
+			node: AbstractNode
+		): Void { # {{{
+			if !#assessment.mainRoutes {
 				if footerType == FooterType::NO_THROW {
 					footer(fragments, node)
 				}
@@ -414,107 +489,329 @@ namespace Router {
 
 					ctrl.done()
 				}
+
+				return
 			}
-			else if assessment.trees.length == 1 && assessment.trees[0].min == 0 && assessment.trees[0].rest {
-				var tree = assessment.trees[0]
 
-				if tree.order.length == 1 && isNeedingTestings(tree.columns[tree.order[0]]) {
-					toTreeFragments(buildPath, args, tree, 0, 1, true, fallback, helper, fragments, node)
+			var mark = fragments.mark()
+			var helper = Fragment.buildHelper(mark, args, node)
+			var fallback = footerType != FooterType::MUST_THROW
+			var mut continuous = true
+			var mut useAllArgs = false
 
-					footer(fragments, node)
+			for var route in assessment.mainRoutes {
+				var { trees, labelable, labels } = assessment.routes[route]
+				var mut block = fragments
+
+				if labelable {
+					block = Fragment.toLabelFragments(labels, helper, fragments, node)
+				}
+
+				if trees.length == 1 && trees[0].min == 0 && trees[0].rest {
+					var tree = trees[0]
+
+					if tree.order.length == 1 && Fragment.isNeedingTestings(tree.columns[tree.order[0]]) {
+						Fragment.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, fallback, helper, block, node)
+					}
+					else {
+						Fragment.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, false, helper, block, node)
+
+						useAllArgs = true
+					}
 				}
 				else {
-					toTreeFragments(buildPath, args, tree, 0, 1, true, false, helper, fragments, node)
+					var mut previous = -1
+
+					for var tree, i in trees {
+						if continuous {
+							if previous + 1 != tree.min {
+								continuous = false
+							}
+							else {
+								previous = tree.max
+							}
+						}
+
+						useAllArgs = Fragment.toTreeFragments(buildPath, args, tree, labels, i, trees.length, continuous, fallback, helper, block, node)
+					}
+				}
+
+				if labelable {
+					block.done()
 				}
 			}
-			else {
-				var mut continuous = true
-				var mut previous = -1
-				var mut useAllArgs = false
 
-				for var tree, i in assessment.trees {
-					if continuous {
-						if previous + 1 != tree.min {
-							continuous = false
-						}
-						else {
-							previous = tree.max
-						}
-					}
-
-					useAllArgs = toTreeFragments(buildPath, args, tree, i, assessment.trees.length, continuous, fallback, helper, fragments, node)
-				}
-
-				if continuous {
-					if !useAllArgs {
-						if footerType == FooterType::MUST_THROW {
-							toDefaultFooter(fragments, node)
-						}
-						else {
-							footer(fragments, node)
-						}
-					}
-				}
-				else if assessment.min != 0 || !assessment.rest || !useAllArgs {
+			if continuous {
+				if !useAllArgs {
 					if footerType == FooterType::MUST_THROW {
-						toDefaultFooter(fragments, node)
+						Fragment.toDefaultFooter(fragments, node)
 					}
 					else {
 						footer(fragments, node)
 					}
 				}
 			}
+			else if !assessment.emptiable || !assessment.rest || !useAllArgs {
+				if footerType == FooterType::MUST_THROW {
+					Fragment.toDefaultFooter(fragments, node)
+				}
+				else {
+					footer(fragments, node)
+				}
+			}
 		} # }}}
 
-		func toArgumentsFragments(matchArguments: Array<CallMatchArgument>, expressions: Array<Expression>, function: FunctionType, hasContext: Boolean, fragments, mode) { # {{{
-			var arguments = [...matchArguments]
-			for var argument in arguments desc while !?argument {
-				arguments.pop()
-			}
-
-			return if arguments.length == 0
-
-			if hasContext {
-				fragments.code($comma)
-			}
-
-			var parameters = function.parameters()
-
-			for var argument, index in arguments {
-				fragments.code($comma) if index != 0
-
-				var parameter = parameters[index].type()
-
-				if !?argument {
-					fragments.code('void 0')
+		namespace Argument {
+			export func toFragments(
+				positions: CallMatchArgument[]
+				labels: Number{}?
+				expressions: Expression[]
+				function: FunctionType
+				labelable: Boolean
+				isUsingScope: Boolean
+				fragments
+				mode
+			): Void { # {{{
+				var arguments = [...positions]
+				for var argument in arguments desc while !?argument {
+					arguments.pop()
 				}
-				else if argument is Number {
-					expressions[argument].toArgumentFragments(fragments, parameter, mode)
+
+				if !#arguments && !#labels {
+					if #expressions {
+						if isUsingScope {
+							fragments.code($comma)
+						}
+
+						for var expression, i in expressions {
+							fragments.code($comma) if i != 0
+
+							expression.toArgumentFragments(fragments, mode)
+						}
+					}
+
+					return
 				}
-				else if function.isAlien() {
-					for var arg, i in argument {
-						fragments.code($comma) if i != 0
+
+				if isUsingScope {
+					fragments.code($comma)
+				}
+
+				if #labels {
+					fragments.code('{')
+
+					var mut nf = false
+
+					for var arg, label of labels {
+						if nf {
+							fragments.code($comma)
+						}
+						else {
+							nf = true
+						}
+
+						fragments.code(`\(label): `)
 
 						expressions[arg].toArgumentFragments(fragments, mode)
 					}
-				}
-				else {
-					if argument.length == 1 && expressions[argument[0]] is UnaryOperatorSpread && expressions[argument[0]].type().isArray() {
-						expressions[argument[0]].argument().toArgumentFragments(fragments, mode)
-					}
-					else {
-						fragments.code('[')
 
+					fragments.code('}')
+
+					if #arguments {
+						fragments.code($comma)
+					}
+				}
+				else if labelable {
+					fragments.code('{}')
+
+					if #arguments {
+						fragments.code($comma)
+					}
+				}
+
+				var parameters = function.parameters()
+
+				for var argument, index in arguments {
+					fragments.code($comma) if index != 0
+
+					var parameter = parameters[index].type()
+
+					if !?argument {
+						fragments.code('void 0')
+					}
+					else if argument is Number {
+						expressions[argument].toArgumentFragments(fragments, parameter, mode)
+					}
+					else if function.isAlien() {
 						for var arg, i in argument {
 							fragments.code($comma) if i != 0
 
 							expressions[arg].toArgumentFragments(fragments, mode)
 						}
+					}
+					else {
+						if argument.length == 1 && expressions[argument[0]] is UnaryOperatorSpread && expressions[argument[0]].type().isArray() {
+							expressions[argument[0]].argument().toArgumentFragments(fragments, mode)
+						}
+						else {
+							fragments.code('[')
 
-						fragments.code(']')
+							for var arg, i in argument {
+								fragments.code($comma) if i != 0
+
+								expressions[arg].toArgumentFragments(fragments, mode)
+							}
+
+							fragments.code(']')
+						}
 					}
 				}
-			}
-		} # }}}
+			} # }}}
+
+			export func toFlatFragments(
+				positions: CallMatchArgument[]
+				labels: Number{}?
+				expressions: Expression[]
+				function: FunctionType
+				labelable: Boolean
+				isUsingScope: Boolean
+				fragments
+				mode
+			): Void { # {{{
+				var arguments = [...positions]
+				for var argument in arguments desc while !?argument {
+					arguments.pop()
+				}
+
+				if isUsingScope {
+					fragments.code($comma)
+				}
+
+				fragments.code(`[].concat(`)
+
+				if !#arguments && !#labels {
+					for var expression, i in expressions {
+						fragments.code($comma) if i != 0
+
+						if expression is UnaryOperatorSpread && expression.type().isArray() {
+							expression.argument().toArgumentFragments(fragments, mode)
+						}
+						else {
+							expression.toArgumentFragments(fragments, mode)
+						}
+					}
+
+					fragments.code(')')
+
+					return
+				}
+
+				if #labels {
+					fragments.code('{')
+
+					var mut nf = false
+
+					for var arg, label of labels {
+						if nf {
+							fragments.code($comma)
+						}
+						else {
+							nf = true
+						}
+
+						fragments.code(`\(label): `)
+
+						expressions[arg].toArgumentFragments(fragments, mode)
+					}
+
+					fragments.code('}')
+
+					if #arguments {
+						fragments.code($comma)
+					}
+				}
+				else if labelable {
+					fragments.code('{}')
+
+					if #arguments {
+						fragments.code($comma)
+					}
+				}
+
+				var parameters = function.parameters()
+				var mut opened = false
+
+				for var argIndex, index in arguments {
+					var parameter = parameters[argIndex].type()
+
+					if !?argIndex {
+						if index == 0 {
+							fragments.code('void 0')
+						}
+						else {
+							fragments.code(', void 0')
+						}
+					}
+					else if argIndex is Number {
+						var argument = expressions[argIndex]
+
+						if argument is UnaryOperatorSpread {
+							if opened {
+								fragments.code('], ')
+
+								opened = false
+							}
+							else if index != 0 {
+								fragments.code($comma)
+							}
+
+							argument.argument().toArgumentFragments(fragments)
+						}
+						else {
+							if index != 0 {
+								fragments.code($comma)
+							}
+
+							if !opened {
+								fragments.code('[')
+
+								opened = true
+							}
+
+							argument.toArgumentFragments(fragments)
+						}
+					}
+					else if function.isAlien() {
+						for var arg, i in argIndex {
+							fragments.code($comma) if i != 0
+
+							expressions[arg].toArgumentFragments(fragments, mode)
+						}
+					}
+					else {
+						if argIndex.length == 1 && expressions[argIndex[0]] is UnaryOperatorSpread && expressions[argIndex[0]].type().isArray() {
+							expressions[argIndex[0]].argument().toArgumentFragments(fragments, mode)
+						}
+						else {
+							fragments.code('[')
+
+							for var arg, i in argIndex {
+								fragments.code($comma) if i != 0
+
+								expressions[arg].toArgumentFragments(fragments, mode)
+							}
+
+							fragments.code(']')
+						}
+					}
+				}
+
+				if opened {
+					fragments.code(']')
+				}
+
+				fragments.code(')')
+			} # }}}
+		}
 	}
 }

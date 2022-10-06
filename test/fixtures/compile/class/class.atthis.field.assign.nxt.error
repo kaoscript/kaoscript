@@ -1,0 +1,1 @@
+ReferenceException: The instance field "x" isn't defined (fixtures/compile/class/class.atthis.field.assign.nxt.ks:3)

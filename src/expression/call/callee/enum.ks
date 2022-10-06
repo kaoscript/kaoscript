@@ -1,44 +1,46 @@
 class EnumCallee extends Callee {
 	private {
-		@arguments: Array<CallMatchArgument>
+		@argument
+		@bitmask: Boolean
+		@enum: NamedType<EnumType>
 		@expression
-		@flatten: Boolean
-		@function: FunctionType
 		@node: CallExpression
-		@scope: ScopeKind
 		@type: Type
+		@useFrom: Boolean
 	}
-	constructor(@data, match: CallMatch, @node) { # {{{
+	constructor(@data, @enum, @argument, @node) { # {{{
 		super(data)
 
 		@expression = $compile.expression(data.callee, node)
 		@expression.analyse()
 		@expression.prepare(AnyType.NullableUnexplicit)
 
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
+		@bitmask = enum.type().kind() == EnumTypeKind::Bit
+		@type = node.scope().reference(enum)
 
-		@function = match.function
-		@arguments = match.arguments
-
-		@validate(@function, node)
-
-		@type = @function.getReturnType()
+		if !@bitmask || !argument.type().isAssignableToVariable(enum.type().type(), false, false, false) {
+			@type = @type.setNullable(true)
+			@useFrom = true
+		}
+		else {
+			@useFrom = false
+		}
 	} # }}}
-	override hashCode() { # {{{
-		return `enum:\(@arguments)`
-	} # }}}
-	mergeWith(that: Callee) { # {{{
-		@type = Type.union(@node.scope(), @type, that.type())
-	} # }}}
-	toFragments(fragments, mode, node) { # {{{
-		fragments.wrap(@expression, mode).code(`.__ks_from`).code('(')
-
-		Router.toArgumentsFragments(@arguments, node._arguments, @function, false, fragments, mode)
-	} # }}}
-	translate() { # {{{
-		@expression.translate()
-	} # }}}
-	type() => @type
+	override {
+		hashCode() => null
+		toFragments(fragments, mode, node) { # {{{
+			if @useFrom {
+				fragments.wrap(@expression, mode).code('.__ks_from(').compile(@argument)
+			}
+			else {
+				fragments.wrap(@expression, mode).code('(').compile(@argument)
+			}
+		} # }}}
+		toNullableFragments(fragments, node) { # {{{
+		} # }}}
+		translate() { # {{{
+			@expression.translate()
+		} # }}}
+		type() => @type
+	}
 }

@@ -1,21 +1,23 @@
 class MemberExpression extends Expression {
 	private late {
-		@assignable: Boolean		= false
-		@assignment: AssignmentType	= AssignmentType::Neither
+		@assignable: Boolean			= false
+		@assignment: AssignmentType		= AssignmentType::Neither
 		@callee
-		@computed: Boolean			= false
-		@inferable: Boolean			= false
-		@nullable: Boolean			= false
+		@computed: Boolean				= false
+		@inferable: Boolean				= false
+		@liberal: Boolean				= false
+		@nullable: Boolean				= false
 		@object
+		@objectType: DictionaryType?
 		@path: String
-		@prepareObject: Boolean		= true
+		@prepareObject: Boolean			= true
 		@property
-		@sealed: Boolean			= false
-		@stringProperty: Boolean	= false
-		@tested: Boolean			= false
-		@type: Type					= AnyType.NullableUnexplicit
-		@usingGetter: Boolean		= false
-		@usingSetter: Boolean		= false
+		@sealed: Boolean				= false
+		@stringProperty: Boolean		= false
+		@tested: Boolean				= false
+		@type: Type						= AnyType.NullableUnexplicit
+		@usingGetter: Boolean			= false
+		@usingSetter: Boolean			= false
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
@@ -206,17 +208,19 @@ class MemberExpression extends Expression {
 
 						@type = property.discardVariable()
 					}
-					else {
-						if type.isEnum() {
-							SyntaxException.throwInvalidEnumAccess(this)
+					else if type.isEnum() {
+						SyntaxException.throwInvalidEnumAccess(this)
+					}
+					else if @assignable && type.isLiberal() {
+						@liberal = true
+						@objectType = type
+					}
+					else if type.isExhaustive(this) {
+						if @assignable {
+							ReferenceException.throwInvalidAssignment(this)
 						}
-						else if type.isExhaustive(this) {
-							if @assignable {
-								ReferenceException.throwInvalidAssignment(this)
-							}
-							else {
-								ReferenceException.throwNotDefinedProperty(@property, this)
-							}
+						else {
+							ReferenceException.throwNotDefinedProperty(@property, this)
 						}
 					}
 
@@ -350,6 +354,7 @@ class MemberExpression extends Expression {
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
 	isInferable() => @inferable
+	isLiberal() => @liberal
 	isLooseComposite() => @isCallable() || @isNullable()
 	isMacro() => false
 	isNullable() => @nullable || @object.isNullable() || (@computed && !@stringProperty && @property.isNullable())
@@ -379,6 +384,18 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	setAssignment(@assignment)
+	setPropertyType(type: Type) { # {{{
+		if @objectType.isNamed() {
+			var newType = @objectType.clone()
+
+			newType.addProperty(@property, type)
+
+			@scope.replaceVariable(newType.name(), newType, this)
+		}
+		else {
+			@objectType.addProperty(@property, type)
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)

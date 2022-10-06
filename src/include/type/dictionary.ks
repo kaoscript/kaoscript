@@ -2,6 +2,7 @@ class DictionaryType extends Type {
 	private {
 		@empty: Boolean					= false
 		@length: Number					= 0
+		@liberal: Boolean				= false
 		@nullable: Boolean				= false
 		@properties: Dictionary<Type>	= {}
 		@rest: Boolean					= false
@@ -103,9 +104,6 @@ class DictionaryType extends Type {
 			return this
 		}
 	} # }}}
-	flagEmpty(): this { # {{{
-		@empty = true
-	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if !@system && !@sealed && @length == 0 && !@rest {
 			return 'Dictionary'
@@ -144,6 +142,12 @@ class DictionaryType extends Type {
 		}
 
 		return this
+	} # }}}
+	flagEmpty(): this { # {{{
+		@empty = true
+	} # }}}
+	flagLiberal(): this { # {{{
+		@liberal = true
 	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
@@ -267,11 +271,18 @@ class DictionaryType extends Type {
 			return true
 		}
 
+		var type = value.discard()
+
+		if type.isDictionary() {
+			return true if type.hasRest()
+		}
+
 		return false
 	} # }}}
 	isNullable() => @nullable
 	isDictionary() => true
 	isExportable() => true
+	isLiberal() => @liberal
 	isSealable() => true
 	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
 		for var type, name of value.properties() {

@@ -6,21 +6,17 @@ module.exports = function() {
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	const $caster = (() => {
 		const d = new Dictionary();
-		d.percentage = (() => {
-			const __ks_rt = (...args) => {
-				const t0 = Type.isValue;
-				if(args.length === 1) {
-					if(t0(args[0])) {
-						return __ks_rt.__ks_0.call(null, args[0]);
-					}
+		d.percentage = Helper.function(function(n) {
+			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
+		}, (fn, ...args) => {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return fn.call(null, args[0]);
 				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function(n) {
-				return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
-			};
-			return __ks_rt;
-		})();
+			}
+			throw Helper.badArgs();
+		});
 		return d;
 	})();
 	function srgb() {

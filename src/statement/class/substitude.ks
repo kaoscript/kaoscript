@@ -12,9 +12,9 @@ class CallThisConstructorSubstitude extends Substitude {
 	constructor(@data, @arguments, @class, node) { # {{{
 		super()
 
-		var assessement = class.type().getConstructorAssessment(class.name(), node)
+		var assessment = class.type().getConstructorAssessment(class.name(), node)
 
-		if var result ?= Router.matchArguments(assessement, @arguments, node) {
+		if var result ?= Router.matchArguments(assessment, @arguments, node) {
 			@result = result
 		}
 		else {
@@ -47,11 +47,11 @@ class CallThisConstructorSubstitude extends Substitude {
 		}
 		else {
 			if @result.matches.length == 1 {
-				var { function, arguments } = @result.matches[0]
+				var { function, positions } = @result.matches[0]
 
 				fragments.code(`\(@class.path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
-				Router.toArgumentsFragments(arguments, @arguments, function, true, fragments, mode)
+				Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
 			}
 			else {
 				throw new NotImplementedException()
@@ -76,11 +76,11 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 		}
 		else {
 			if @result.matches.length == 1 {
-				var { function, arguments } = @result.matches[0]
+				var { function, positions } = @result.matches[0]
 
 				fragments.code(`__ks_cons_\(function.index())`).code('(')
 
-				Router.toArgumentsFragments(arguments, @arguments, function, false, fragments, mode)
+				Router.Argument.toFragments(positions, null, @arguments, function, false, false, fragments, mode)
 			}
 			else {
 				throw new NotImplementedException()
@@ -153,27 +153,11 @@ class CallSuperConstructorSubstitude extends Substitude {
 		}
 		else {
 			if @result.matches.length == 1 {
-				var { function, arguments } = @result.matches[0]
+				var { function, positions } = @result.matches[0]
 
 				fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
-				for var argument, index in arguments {
-					fragments.code($comma)
-
-					if !?argument {
-						fragments.code('void 0')
-					}
-					else if argument is Number {
-						@arguments[argument].toArgumentFragments(fragments, mode)
-					}
-					else {
-						for var arg, i in argument {
-							fragments.code($comma)
-
-							@arguments[arg].toArgumentFragments(fragments, mode)
-						}
-					}
-				}
+				Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
 			}
 			else {
 				throw new NotImplementedException()

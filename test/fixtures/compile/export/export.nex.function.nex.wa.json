@@ -14,8 +14,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": false,
-        "min": 0,
-        "max": 0,
         "parameters": [],
         "returns": "String",
         "errors": []

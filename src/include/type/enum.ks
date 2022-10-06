@@ -308,6 +308,7 @@ class EnumType extends Type {
 
 		return export
 	} # }}}
+	function(): @function
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()
@@ -548,17 +549,15 @@ class EnumMethodType extends FunctionType {
 			type._identifier = data.id
 			type._access = data.access
 			type._async = data.async
-			type._min = data.min
-			type._max = data.max
 
 			queue.push(() => {
 				type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for error in data.errors]
 
 				type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 
-				type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
-
-				type.updateParameters()
+				for var parameter in data.parameters {
+					type.addParameter(ParameterType.import(parameter, metadata, references, alterations, queue, scope, node), node)
+				}
 			})
 
 			return type
@@ -580,8 +579,6 @@ class EnumMethodType extends FunctionType {
 			index: @index
 			access: @access
 			async: @async
-			min: @min
-			max: @max
 			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
 			returns: @returnType.toReference(references, indexDelta, mode, module)
 			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]

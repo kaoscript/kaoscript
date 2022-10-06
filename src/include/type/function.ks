@@ -1,3 +1,12 @@
+bitmask MinMax {
+	AFTER_REST = 1
+	ASYNC
+	DEFAULT
+	LABELED_ONLY
+	POSITIONAL
+	REST
+}
+
 class FunctionType extends Type {
 	private late {
 		@assessment							= null
@@ -7,12 +16,8 @@ class FunctionType extends Type {
 		@errors: Array<Type>				= []
 		@hasRest: Boolean					= false
 		@index: Number						= -1
-		@max: Number						= 0
-		@maxBefore: Number					= 0
-		@maxAfter: Number					= 0
-		@min: Number						= 0
-		@minBefore: Number					= 0
-		@minAfter: Number					= 0
+		@maxs: Number{}						= {}
+		@mins: Number{}						= {}
 		@missingParameters: Boolean			= false
 		@missingReturn: Boolean				= true
 		@parameters: Array<ParameterType>	= []
@@ -22,12 +27,20 @@ class FunctionType extends Type {
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
-			for var key in ['_async', '_hasRest', '_index', '_max', '_maxBefore', '_maxAfter', '_min', '_minBefore', '_minAfter', '_missingParameters', '_missingReturn', '_restIndex', '_returnType'] {
-				target[key] = source[key]
-			}
-
-			target._parameters = [...source._parameters]
+			target._async = source._async
+			target._autoTyping = source._autoTyping
+			target._dynamicReturn = source._dynamicReturn
 			target._errors = [...source._errors]
+			target._hasRest = source._hasRest
+			target._index = source._index
+			target._maxs = {...source._maxs}
+			target._mins = {...source._mins}
+			target._missingParameters = source._missingParameters
+			target._missingReturn = source._missingReturn
+			target._parameters = [...source._parameters]
+			target._restIndex = source._restIndex
+			target._returnData = source._returnData
+			target._returnType = source._returnType
 
 			return target
 		} # }}}
@@ -45,24 +58,22 @@ class FunctionType extends Type {
 
 			type._index = data.index ?? -1
 			type._async = data.async
-			type._min = data.min
-			type._max = data.max
 
 			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
 			}
 
 			queue.push(() => {
-				type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
+				type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for var throw in data.errors]
 
 				if ?data.returns {
 					type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 					type._missingReturn = false
 				}
 
-				type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
-
-				type.updateParameters()
+				for var parameter in data.parameters {
+					type.addParameter(ParameterType.import(parameter, metadata, references, alterations, queue, scope, node), node)
+				}
 			})
 
 			return type.flagComplete()
@@ -119,21 +130,7 @@ class FunctionType extends Type {
 		}
 
 		for var parameter in parameters {
-			if parameter.max() == Infinity {
-				if @max == Infinity {
-					SyntaxException.throwTooMuchRestParameter(node)
-				}
-				else {
-					@max = Infinity
-				}
-			}
-			else {
-				@max += parameter.max()
-			}
-
-			@min += parameter.min()
-
-			@parameters.push(parameter)
+			@addParameter(parameter, node)
 		}
 
 		if ?data.modifiers {
@@ -152,64 +149,38 @@ class FunctionType extends Type {
 				}
 			}
 		}
-
-		@updateParameters()
 	} # }}}
 	constructor(parameters: Array<ParameterType>, data, @index, node) { # {{{
 		this(parameters, data, node)
 	} # }}}
-	absoluteMax() => @async ? @max + 1 : @max
-	absoluteMin() => @async ? @min + 1 : @min
 	addError(...types: Type) { # {{{
 		@errors.pushUniq(...types)
 	} # }}}
 	addParameter(type: Type, name: String?, min, max) { # {{{
-		@parameters.push(new ParameterType(@scope, name, type, min, max))
+		var parameter = new ParameterType(@scope, name, type, min, max)
 
-		if @hasRest {
-			@max += max
+		parameter.index(@parameters.length)
 
-			@minAfter += min
-			@maxAfter += max
-		}
-		else if max == Infinity {
-			@max = Infinity
+		@parameters.push(parameter)
 
+		if max == Infinity && !@hasRest {
 			@restIndex = @parameters.length - 1
 			@hasRest = true
 		}
-		else {
-			@max += max
-
-			@minBefore += min
-			@maxBefore += max
-		}
-
-		@min += min
 	} # }}}
-	addParameter(type: ParameterType) { # {{{
+	addParameter(type: ParameterType, node) { # {{{
+		type.index(@parameters.length)
+
 		@parameters.push(type)
 
-		if @hasRest {
-			@max += type.max()
-
-			@minAfter += type.min()
-			@maxAfter += type.max()
-		}
-		else if type.max() == Infinity {
-			@max = Infinity
+		if type.max() == Infinity {
+			if @hasRest {
+				SyntaxException.throwTooMuchRestParameter(node)
+			}
 
 			@restIndex = @parameters.length - 1
 			@hasRest = true
 		}
-		else {
-			@max += type.max()
-
-			@minBefore += type.min()
-			@maxBefore += type.max()
-		}
-
-		@min += type.min()
 	} # }}}
 	assessment(name: String, node: AbstractNode) { # {{{
 		if @assessment == null {
@@ -239,8 +210,6 @@ class FunctionType extends Type {
 			result.exhaustive = @isExhaustive()
 		}
 
-		result.min = @min
-		result.max = @max
 		result.parameters = [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
 		result.returns = @returnType.toReference(references, indexDelta, mode, module)
 		result.errors = [throw.toReference(references, indexDelta, mode, module) for var throw in @errors]
@@ -264,74 +233,6 @@ class FunctionType extends Type {
 	} # }}}
 	functions() => [this]
 	getCallIndex() => @alien ? 0 : @index
-	getMaxAfter(): @maxAfter
-	getMaxAfter(excludes: Array<String>?): Number { # {{{
-		return 0 unless @hasRest
-
-		if ?excludes {
-			var mut max = 0
-
-			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
-				max += parameter.max()
-			}
-
-			return max
-		}
-		else {
-			return @maxAfter
-		}
-	} # }}}
-	getMaxBefore(): @maxBefore
-	getMaxBefore(excludes: Array<String>?): Number { # {{{
-		return 0 unless @hasRest
-
-		if ?excludes {
-			var mut max = 0
-
-			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
-				max += parameter.max()
-			}
-
-			return max
-		}
-		else {
-			return @maxBefore
-		}
-	} # }}}
-	getMinAfter(): @minAfter
-	getMinAfter(excludes: Array<String>?): Number { # {{{
-		return 0 unless @hasRest
-
-		if ?excludes {
-			var mut min = 0
-
-			for var parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
-				min += parameter.min()
-			}
-
-			return min
-		}
-		else {
-			return @minAfter
-		}
-	} # }}}
-	getMinBefore(): @minBefore
-	getMinBefore(excludes: Array<String>?): Number { # {{{
-		return 0 unless @hasRest
-
-		if ?excludes {
-			var mut min = 0
-
-			for var parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
-				min += parameter.min()
-			}
-
-			return min
-		}
-		else {
-			return @minBefore
-		}
-	} # }}}
 	getProperty(name: String) => Type.Any
 	getRestIndex(): @restIndex
 	getRestParameter() => @parameters[@restIndex]
@@ -346,13 +247,22 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
+	hasOnlyLabeledParameter() { # {{{
+		for var parameter in @parameters {
+			return true if parameter.isOnlyLabeled()
+		}
+
+		return false
+	} # }}}
 	index(): @index
 	index(@index): this
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is FunctionType {
 			var mut mode = MatchingMode::FunctionSignature
 
-			mode += MatchingMode::AnycastParameter if anycast
+			if anycast {
+				mode += MatchingMode::AnycastParameter + MatchingMode::MissingReturn
+			}
 
 			return this.isSubsetOf(value, mode)
 		}
@@ -549,7 +459,7 @@ class FunctionType extends Type {
 		else {
 			if mode ~~ MatchingMode::AdditionalParameter {
 				if @parameters.length < value._parameters.length {
-					if mode !~ MatchingMode::MissingParameterDefault && @min < value._min {
+					if mode !~ MatchingMode::MissingParameterDefault && @min() < value.min() {
 						return false
 					}
 
@@ -561,11 +471,11 @@ class FunctionType extends Type {
 				}
 				else {
 					if mode !~ MatchingMode::MissingParameterArity {
-						if @max < value._max {
+						if @max() < value.max() {
 							return false
 						}
 
-						if mode !~ MatchingMode::MissingParameterDefault && @min < value._min {
+						if mode !~ MatchingMode::MissingParameterDefault && @min() < value.min() {
 							return false
 						}
 					}
@@ -590,7 +500,7 @@ class FunctionType extends Type {
 					return false
 				}
 
-				if mode !~ MatchingMode::MissingParameterDefault && @min != value._min {
+				if mode !~ MatchingMode::MissingParameterDefault && @min() != value.min() {
 					return false
 				}
 			}
@@ -603,7 +513,7 @@ class FunctionType extends Type {
 					return false
 				}
 
-				if mode !~ MatchingMode::MissingParameterDefault && (@min != value._min || @max != value._max) {
+				if mode !~ MatchingMode::MissingParameterDefault && (@min() != value.min() || @max() != value.max()) {
 					return false
 				}
 			}
@@ -621,11 +531,40 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
 			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
 			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
+			paramMode += MatchingMode::IgnorePreserved if mode ~~ MatchingMode::IgnorePreserved
 			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
 
 			if paramMode != 0 {
-				for var parameter, index in @parameters til value._parameters.length {
-					return false unless parameter.isSubsetOf(value._parameters[index], paramMode)
+				var valLabels = {}
+				var valPositions = []
+
+				for var parameter in value._parameters {
+					if parameter.isLabeled() {
+						valLabels[parameter.name()] = parameter
+					}
+					if parameter.isPositional() {
+						valPositions.push(parameter)
+					}
+				}
+
+				var mut index = 0
+				var testLabel = mode !~ MatchingMode::IgnoreName
+
+				for var parameter in @parameters {
+					if testLabel && parameter.isLabeled() {
+						if var valParam ?= valLabels[parameter.name()] {
+							return false unless parameter.isSubsetOf(valParam, paramMode)
+						}
+						else {
+							return false unless parameter.min() == 0
+						}
+					}
+
+					if parameter.isPositional() && index < valPositions.length {
+						return false unless parameter.isSubsetOf(valPositions[index], paramMode)
+
+						index += 1
+					}
 				}
 			}
 		}
@@ -705,35 +644,101 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	max(): @max
-	max(excludes: Array<String>?): Number { # {{{
-		if ?excludes {
-			var mut max = 0
+	max(mode: MinMax = MinMax::DEFAULT, mut excludes: String[]? = null) { # {{{
+		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
+		if var max ?= @maxs[key] {
+			return max
+		}
+
+		excludes ??= []
+
+		var mut max = 0
+
+		if mode ~~ MinMax::AFTER_REST {
+			if @hasRest {
+				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.name()) {
+					max += parameter.max()
+				}
+			}
+		}
+		else if mode ~~ MinMax::DEFAULT {
 			for var parameter in @parameters when !excludes.contains(parameter.name()) {
 				max += parameter.max()
 			}
+		}
+		else if mode ~~ MinMax::LABELED_ONLY {
+			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.name()) {
+				max += parameter.max()
+			}
+		}
+		else if mode ~~ MinMax::POSITIONAL {
+			if @hasRest && mode ~~ MinMax::REST {
+				max = Infinity
+			}
+			else {
+				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.name()) {
+					max += parameter.max()
+				}
+			}
+		}
 
-			return max
+		if @async && mode ~~ MinMax::ASYNC {
+			max += 1
 		}
-		else {
-			return @max
-		}
+
+		@maxs[key] = max
+
+		return max
 	} # }}}
-	min(): @min
-	min(excludes: Array<String>?): Number { # {{{
-		if ?excludes {
-			var mut min = 0
+	min(mode: MinMax = MinMax::DEFAULT, mut excludes: String[]? = null) { # {{{
+		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
+		if var min ?= @mins[key] {
+			return min
+		}
+
+		excludes ??= []
+
+		var mut min = 0
+
+		if mode ~~ MinMax::AFTER_REST {
+			if @hasRest {
+				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.name()) {
+					min += parameter.min()
+				}
+			}
+		}
+		else if mode ~~ MinMax::DEFAULT {
 			for var parameter in @parameters when !excludes.contains(parameter.name()) {
 				min += parameter.min()
 			}
+		}
+		else if mode ~~ MinMax::LABELED_ONLY {
+			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.name()) {
+				min += parameter.min()
+			}
+		}
+		else if mode ~~ MinMax::POSITIONAL {
+			if mode ~~ MinMax::REST {
+				for var parameter in @parameters when parameter.isPositional() && !excludes.contains(parameter.name()) {
+					min += parameter.min()
+				}
+			}
+			else {
+				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.name()) {
+					min += parameter.min()
+				}
+			}
+		}
 
-			return min
+		if @async && mode ~~ MinMax::ASYNC {
+			min += 1
 		}
-		else {
-			return @min
-		}
+
+		@mins[key] = min
+
+		return min
 	} # }}}
 	parameter(index) => @parameters[index]
 	parameters(): Array<ParameterType> => @parameters
@@ -845,22 +850,6 @@ class FunctionType extends Type {
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('func', 1)
-	} # }}}
-	updateParameters() { # {{{
-		for var parameter, i in @parameters {
-			if @hasRest {
-				@minAfter += parameter.min()
-				@maxAfter += parameter.max()
-			}
-			else if parameter.max() == Infinity {
-				@restIndex = i
-				@hasRest = true
-			}
-			else {
-				@minBefore += parameter.min()
-				@maxBefore += parameter.max()
-			}
-		}
 	} # }}}
 }
 

@@ -29,8 +29,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -65,8 +63,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 2,
-            "max": 3,
             "parameters": [
               {
                 "name": "x",

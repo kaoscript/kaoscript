@@ -4,18 +4,14 @@ module.exports = function() {
 		const d = new Dictionary();
 		d.bar = (() => {
 			const d = new Dictionary();
-			d.qux = (() => {
-				const __ks_rt = (...args) => {
-					if(args.length === 0) {
-						return __ks_rt.__ks_0.call(null);
-					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function() {
-					let i = 1;
-				};
-				return __ks_rt;
-			})();
+			d.qux = Helper.function(function() {
+				let i = 1;
+			}, (fn, ...args) => {
+				if(args.length === 0) {
+					return fn.call(null);
+				}
+				throw Helper.badArgs();
+			});
 			return d;
 		})();
 		return d;

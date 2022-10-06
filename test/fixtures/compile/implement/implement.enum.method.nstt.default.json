@@ -30,8 +30,6 @@
               "index": 0,
               "access": 4,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Boolean",
               "errors": []

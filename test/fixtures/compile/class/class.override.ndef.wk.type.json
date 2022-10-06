@@ -20,8 +20,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": "Infinity",
         "parameters": [
           {
             "type": "Any?",
@@ -37,8 +35,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": "Infinity",
         "parameters": [
           {
             "type": "Any?",
@@ -77,8 +73,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -100,8 +94,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -121,8 +113,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -144,8 +134,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -167,8 +155,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -188,8 +174,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 2
@@ -204,8 +188,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 2
@@ -249,8 +231,6 @@
             "index": 0,
             "access": 4,
             "sealed": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "color",
@@ -281,8 +261,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "text",
@@ -318,8 +296,6 @@
             "index": 0,
             "access": 4,
             "sealed": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "color",
@@ -341,8 +317,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "text",

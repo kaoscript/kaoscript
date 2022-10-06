@@ -68,12 +68,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		if !boolean && !number {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, this.operator(), this)
-			}
+			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
 		if boolean {
@@ -320,12 +315,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 
 		if !boolean && !number {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, this.operator(), this)
-			}
+			TypeException.throwInvalidOperation(this, this.operator(), this)
 		}
 
 		if boolean {
@@ -750,21 +740,11 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			native = false
 		}
 		else {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, this.operator(), this)
-			}
+			TypeException.throwInvalidOperation(this, this.operator(), this)
 		}
 
 		if !boolean && !number {
-			if !target.isVoid() {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
-			else {
-				TypeException.throwInvalidOperation(this, this.operator(), this)
-			}
+			TypeException.throwInvalidOperation(this, this.operator(), this)
 		}
 
 		if boolean {

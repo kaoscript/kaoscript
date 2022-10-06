@@ -4,4 +4,5 @@ abstract class Foobar {
 
 class Quxbaz extends Foobar {
 	override foobar(x: Number, y: Number)
+	// foobar(x: Number, y: Number = 42)
 }

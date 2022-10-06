@@ -728,7 +728,7 @@ class ClassDeclaration extends Statement {
 			var m = []
 
 			if !@extending || !@extendsType.type().hasInstanceMethod(name) {
-				ClassMethodDeclaration.toInstanceHeadFragments(name, clazz)
+				ClassMethodDeclaration.toInstanceHeadFragments(name, @class, clazz)
 			}
 
 			var overrides = []
@@ -761,7 +761,15 @@ class ClassDeclaration extends Statement {
 					// overflow
 					false
 					name
-					(node, fragments) => fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
+					@class
+					(node, fragments, labelable) => {
+						if labelable {
+							fragments.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
+						}
+						else {
+							fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
+						}
+					}
 					(fragments) => fragments.done()
 				)
 			}
@@ -784,7 +792,15 @@ class ClassDeclaration extends Statement {
 				// overflow
 				false
 				name
-				(node, fragments) => fragments.code(`static \(name)()`).step()
+				@class
+				(node, fragments, labelable) => {
+					if labelable {
+						fragments.code(`static \(name)(kws, ...args)`).step()
+					}
+					else {
+						fragments.code(`static \(name)()`).step()
+					}
+				}
 				(fragments) => fragments.done()
 			)
 		}
@@ -930,7 +946,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceHeadFragments(name, clazz)
+			ClassMethodDeclaration.toInstanceHeadFragments(name, @class, clazz)
 
 			for var method in methods {
 				method.toFragments(clazz, Mode::None)
@@ -945,7 +961,15 @@ class ClassDeclaration extends Statement {
 				m
 				overflow
 				name
-				(node, fragments) => fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
+				@class
+				(node, fragments, labelable) => {
+					if labelable {
+						fragments.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
+					}
+					else {
+						fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
+					}
+				}
 				(fragments) => fragments.done()
 			)
 		}
@@ -972,9 +996,24 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toClassRouterFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
-				fragments.done()
-			})
+			ClassMethodDeclaration.toClassRouterFragments(
+				this
+				clazz.newControl()
+				@type
+				m
+				overflow
+				name
+				@class
+				(node, fragments, labelable) => {
+					if labelable {
+						fragments.code(`static \(name)(kws, ...args)`).step()
+					}
+					else {
+						fragments.code(`static \(name)()`).step()
+					}
+				}
+				(fragments) => fragments.done()
+			)
 		}
 
 		clazz.done()
@@ -1108,7 +1147,15 @@ class ClassDeclaration extends Statement {
 				m
 				overflow
 				name
-				(node, fragments) => fragments.code(`\(name)()`).step()
+				@class
+				(node, fragments, labelable) => {
+					if labelable {
+						fragments.code(`\(name)(kws, ...args)`).step()
+					}
+					else {
+						fragments.code(`\(name)()`).step()
+					}
+				}
 				(fragments) => fragments.done()
 			)
 		}
@@ -1135,9 +1182,24 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toClassRouterFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
-				fragments.done()
-			})
+			ClassMethodDeclaration.toClassRouterFragments(
+				this
+				clazz.newControl()
+				@type
+				m
+				overflow
+				name
+				@class
+				(node, fragments, labelable) => {
+					if labelable {
+						fragments.code(`static \(name)(kws, ...args)`).step()
+					}
+					else {
+						fragments.code(`static \(name)()`).step()
+					}
+				}
+				(fragments) => fragments.done()
+			)
 		}
 
 		clazz.done()

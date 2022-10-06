@@ -1,14 +1,17 @@
 class CreateExpression extends Expression {
 	private late {
-		@alien: Boolean				= false
-		@arguments: Array			= []
-		@computed: Boolean			= true
+		@alien: Boolean					= false
+		@arguments: Array				= []
+		// TODO
+		// @assessment: Router.Assessment?
+		@assessment?					= null
+		@computed: Boolean				= true
 		@factory: Expression
-		@flatten: Boolean			= false
-		@hybrid: Boolean			= false
+		@flatten: Boolean				= false
+		@hybrid: Boolean				= false
 		@result: CallMatchResult?
-		@sealed: Boolean			= false
-		@type: Type					= Type.Any
+		@sealed: Boolean				= false
+		@type: Type						= Type.Any
 	}
 	analyse() { # {{{
 		@factory = $compile.expression(@data.class, this)
@@ -47,9 +50,9 @@ class CreateExpression extends Expression {
 				@sealed = true
 			}
 
-			var assessment = type.type().getConstructorAssessment(type.name(), this)
+			@assessment = type.type().getConstructorAssessment(type.name(), this)
 
-			if var result ?= Router.matchArguments(assessment, @arguments, this) {
+			if var result ?= Router.matchArguments(@assessment, @arguments, this) {
 				@result = result
 			}
 			else if type.type().isExhaustiveConstructor(this) {
@@ -83,7 +86,7 @@ class CreateExpression extends Expression {
 				@computed = @alien
 			}
 			else if @result.matches.length == 1 {
-				var { function, arguments } = @result.matches[0]
+				var { function } = @result.matches[0]
 
 				if @sealed && !function.isSealed() {
 					@computed = true
@@ -181,7 +184,7 @@ class CreateExpression extends Expression {
 					}
 				}
 				else if @result.matches.length == 1 {
-					var { function, arguments } = @result.matches[0]
+					var { function, positions } = @result.matches[0]
 
 					if @sealed {
 						if function.isSealed() {
@@ -195,7 +198,7 @@ class CreateExpression extends Expression {
 						fragments.code(`\(@type.type().path()).__ks_new_\(function.index())`).code('(')
 					}
 
-					Router.toArgumentsFragments(arguments, @arguments, function, false, fragments, mode)
+					Router.Argument.toFragments(positions, null, @arguments, function, @assessment.labelable, false, fragments, mode)
 
 					fragments.code(')')
 				}

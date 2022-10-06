@@ -63,8 +63,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Number",
               "errors": [],
@@ -75,8 +73,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "luma",

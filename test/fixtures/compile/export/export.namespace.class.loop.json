@@ -22,8 +22,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Any?",
             "errors": [],
@@ -34,8 +32,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Any?",
             "errors": [],
@@ -46,8 +42,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Any?",
             "errors": [],
@@ -82,8 +76,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 1
@@ -98,8 +90,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "String",
               "errors": [],
@@ -110,8 +100,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "name",

@@ -51,10 +51,7 @@ module.exports = function() {
 					return Quxbaz.__ks_sttc_foobar_1(arguments[0], arguments[1], arguments[2]);
 				}
 			}
-			if(Foobar.foobar) {
-				return Foobar.foobar.apply(null, arguments);
-			}
-			throw Helper.badArgs();
+			return Foobar.foobar.apply(null, arguments);
 		}
 	}
 };

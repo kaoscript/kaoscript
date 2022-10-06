@@ -30,24 +30,20 @@ module.exports = function() {
 		d.paul = "chani";
 		d.duncan = "murbella";
 		return d;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			const t0 = Type.isValue;
-			if(args.length === 2) {
-				if(t0(args[0]) && t0(args[1])) {
-					return __ks_rt.__ks_0.call(this, args[0], args[1]);
-				}
+	})(), Helper.function((item, name) => {
+		return (() => {
+			const d = new Dictionary();
+			d.name = name;
+			d.item = item;
+			return d;
+		})();
+	}, (fn, ...args) => {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return fn.call(this, args[0], args[1]);
 			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = (item, name) => {
-			return (() => {
-				const d = new Dictionary();
-				d.name = name;
-				d.item = item;
-				return d;
-			})();
-		};
-		return __ks_rt;
-	})()));
+		}
+		throw Helper.badArgs();
+	})));
 };

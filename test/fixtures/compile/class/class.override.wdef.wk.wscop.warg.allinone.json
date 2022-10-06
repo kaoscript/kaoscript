@@ -32,8 +32,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 2,
               "parameters": [
                 {
                   "name": "x",
@@ -82,8 +80,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 2,
               "parameters": [
                 {
                   "name": "x",

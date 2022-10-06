@@ -17,8 +17,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -35,8 +33,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -53,8 +49,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -71,8 +65,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",
@@ -89,8 +81,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Number",
             "errors": [],
@@ -100,8 +90,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any?",

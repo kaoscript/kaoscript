@@ -17,115 +17,75 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0((() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 1;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 2;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 2;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 3;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 3;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 2;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 1;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 1;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 3;
-		};
-		return __ks_rt;
-	})(), (() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return 5;
-		};
-		return __ks_rt;
-	})());
+	foobar.__ks_0(Helper.function(() => {
+		return 1;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 2;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 2;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 3;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 3;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 2;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 1;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 1;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 3;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}), Helper.function(() => {
+		return 5;
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	}));
 };

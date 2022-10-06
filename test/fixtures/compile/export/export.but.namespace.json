@@ -14,8 +14,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": "Infinity",
         "parameters": [
           {
             "type": "Any?",
@@ -47,8 +45,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "String",
               "errors": [],
@@ -83,8 +79,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "value",
@@ -103,8 +97,6 @@
             "index": 0,
             "async": false,
             "exhaustive": true,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "value",

@@ -1,0 +1,1 @@
+TypeException: The return type must be "AnimalFlags" and not "AnimalFlags?" (fixtures/compile/bitmask/bitmask.create.nn.ae.ks:13)

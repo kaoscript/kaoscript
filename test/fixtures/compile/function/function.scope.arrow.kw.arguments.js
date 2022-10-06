@@ -25,19 +25,15 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const builder = (() => {
-		const __ks_rt = (...args) => {
-			const t0 = Type.isValue;
-			if(args.length === 2) {
-				if(t0(args[0]) && t0(args[1])) {
-					return __ks_rt.__ks_0.call(this, args[0], args[1]);
-				}
+	const builder = Helper.function((data, __ks_arguments_1) => {
+		return Foobar.__ks_new_0(data, __ks_arguments_1);
+	}, (fn, ...args) => {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return fn.call(this, args[0], args[1]);
 			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = (data, __ks_arguments_1) => {
-			return Foobar.__ks_new_0(data, __ks_arguments_1);
-		};
-		return __ks_rt;
-	})();
+		}
+		throw Helper.badArgs();
+	});
 };

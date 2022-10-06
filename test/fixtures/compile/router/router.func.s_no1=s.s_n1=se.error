@@ -1,0 +1,1 @@
+SyntaxException: The function "foobar(x: String, y: String)" is a duplicate (fixtures/compile/router/router.func.s_no1=s.s_n1=se.ks:5)

@@ -19,23 +19,22 @@ class ClassConstructorType extends FunctionType {
 			type._index = data.index
 			type._access = data.access
 			type._sealed = data.sealed
-			type._min = data.min
-			type._max = data.max
 
 			if data.dependent {
 				type._dependent = true
 			}
 
-			type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for error in data.errors]
-			type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
+			type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for var error in data.errors]
+
+			for var parameter in data.parameters {
+				type.addParameter(ParameterType.import(parameter, metadata, references, alterations, queue, scope, node), node)
+			}
 
 			if ?data.inits {
 				for var name in data.inits {
 					type._initVariables[name] = true
 				}
 			}
-
-			type.updateParameters()
 
 			return type
 		} # }}}

@@ -73,5 +73,20 @@ class SequenceExpression extends Expression {
 
 		fragments.code(')')
 	} # }}}
+	toQuote() { # {{{
+		var mut fragments = '('
+
+		for var expression, index in @expressions {
+				if index != 0 {
+					fragments += ', '
+				}
+
+				fragments += expression.toQuote()
+			}
+
+		fragments += ')'
+
+		return fragments
+	} # }}}
 	type() => @type
 }

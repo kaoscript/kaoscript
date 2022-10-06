@@ -1172,7 +1172,7 @@ abstract class Importer extends Statement {
 					var dirname = path.dirname(@pathAddendum)
 					var basename = path.basename(@pathAddendum)
 
-					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
+					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
 				}
 				else if $localFileRegex.test(@moduleName) {
 					var basename = path.basename(@moduleName)

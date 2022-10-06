@@ -18,8 +18,6 @@
             "kind": "function",
             "index": 0,
             "async": false,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "name": "args",
@@ -36,8 +34,6 @@
             "kind": "function",
             "index": 1,
             "async": false,
-            "min": 0,
-            "max": "Infinity",
             "parameters": [
               {
                 "name": "args",

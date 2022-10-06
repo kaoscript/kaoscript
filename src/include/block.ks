@@ -25,13 +25,24 @@ class Block extends AbstractNode {
 			var statement = $compile.statement(data, this)
 
 			statement.initiate()
-			statement.analyse()
 
 			@statements.push(statement)
+		}
+
+		for var statement in @statements {
+			@scope.line(statement.line())
+
+			statement.analyse()
 
 			if statement.isAwait() {
 				@awaiting = true
 			}
+		}
+
+		for var statement in @statements {
+			@scope.line(statement.line())
+
+			statement.enhance()
 		}
 	} # }}}
 	override prepare(target) { # {{{

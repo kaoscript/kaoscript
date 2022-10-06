@@ -20,8 +20,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": "Infinity",
         "parameters": [
           {
             "type": "Any?",
@@ -37,8 +35,6 @@
         "kind": "function",
         "async": false,
         "exhaustive": true,
-        "min": 0,
-        "max": "Infinity",
         "parameters": [
           {
             "type": "Any?",
@@ -77,8 +73,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -100,8 +94,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -121,8 +113,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -144,8 +134,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -167,8 +155,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "type": "Any?",
@@ -188,8 +174,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 2
@@ -204,8 +188,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 2
@@ -243,8 +225,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": "Number",
             "errors": []
@@ -253,8 +233,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "n",
@@ -271,8 +249,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "s",
@@ -293,8 +269,6 @@
             "kind": "function",
             "async": false,
             "exhaustive": true,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "returns": {
               "reference": 4
@@ -317,8 +291,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 1,
               "parameters": [
                 {
                   "name": "emptyLines",
@@ -341,8 +313,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 4
@@ -357,8 +327,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Number",
               "errors": [],
@@ -371,8 +339,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 1,
               "parameters": [
                 {
                   "name": "base",

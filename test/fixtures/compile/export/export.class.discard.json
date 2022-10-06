@@ -23,8 +23,6 @@
             "index": 0,
             "access": 4,
             "sealed": false,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "errors": []
           },
@@ -32,8 +30,6 @@
             "index": 1,
             "access": 4,
             "sealed": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "name",
@@ -49,8 +45,6 @@
             "index": 2,
             "access": 4,
             "sealed": false,
-            "min": 2,
-            "max": 2,
             "parameters": [
               {
                 "name": "name",
@@ -100,8 +94,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Any?",
               "errors": [],
@@ -112,8 +104,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "color",
@@ -138,8 +128,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Any?",
               "errors": [],
@@ -150,8 +138,6 @@
               "access": 4,
               "sealed": false,
               "async": false,
-              "min": 1,
-              "max": 1,
               "parameters": [
                 {
                   "name": "name",

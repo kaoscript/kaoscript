@@ -4,9 +4,6 @@ class ClassDestructorType extends FunctionType {
 	}
 	constructor(data, node) { # {{{
 		super([], data, node)
-
-		@min = 1
-		@max = 1
 	} # }}}
 	access(@access) => this
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { # {{{

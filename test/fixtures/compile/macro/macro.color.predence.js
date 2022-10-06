@@ -36,36 +36,28 @@ module.exports = function() {
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.foo = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = Type.isNumber;
-					if(args.length === 3) {
-						if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
-							return __ks_rt.__ks_0.call(null, args[0], args[1], args[2]);
-						}
+			d.foo = Helper.function(function(t1, t2, t3) {
+				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
+			}, (fn, ...args) => {
+				const t0 = Type.isNumber;
+				if(args.length === 3) {
+					if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
+						return fn.call(null, args[0], args[1], args[2]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function(t1, t2, t3) {
-					return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
-				};
-				return __ks_rt;
-			})();
-			d.bar = (() => {
-				const __ks_rt = (...args) => {
-					const t0 = Type.isNumber;
-					if(args.length === 2) {
-						if(t0(args[0]) && t0(args[1])) {
-							return __ks_rt.__ks_0.call(null, args[0], args[1]);
-						}
+				}
+				throw Helper.badArgs();
+			});
+			d.bar = Helper.function(function(h, i) {
+				return h + ((1 / 3) * -(i - 1));
+			}, (fn, ...args) => {
+				const t0 = Type.isNumber;
+				if(args.length === 2) {
+					if(t0(args[0]) && t0(args[1])) {
+						return fn.call(null, args[0], args[1]);
 					}
-					throw Helper.badArgs();
-				};
-				__ks_rt.__ks_0 = function(h, i) {
-					return h + ((1 / 3) * -(i - 1));
-				};
-				return __ks_rt;
-			})();
+				}
+				throw Helper.badArgs();
+			});
 			return d;
 		})();
 		return d;

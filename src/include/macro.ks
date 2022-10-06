@@ -409,12 +409,9 @@ class MacroType extends FunctionType {
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
 		var type = new MacroType(scope)
 
-		type._min = data.min
-		type._max = data.max
-
-		type._parameters = [ParameterType.import(parameter, false, references, scope, node) for parameter in data.parameters]
-
-		type.updateParameters()
+		for var parameter in data.parameters {
+			type.addParameter(ParameterType.import(parameter, false, references, scope, node), node)
+		}
 
 		return type
 	} # }}}
@@ -428,12 +425,10 @@ class MacroType extends FunctionType {
 		return @assessment
 	} # }}}
 	export() => { # {{{
-		min: @min
-		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
 	} # }}}
 	matchContentOf(value: MacroType): Boolean { # {{{
-		if value.min() < @min || value.max() > @max {
+		if value.min() < @min() || value.max() > @max() {
 			return false
 		}
 

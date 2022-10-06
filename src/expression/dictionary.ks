@@ -77,6 +77,7 @@ class DictionaryExpression extends Expression {
 			@type.flagEmpty()
 		}
 
+		@type.flagLiberal()
 		@type.flagComplete()
 	} # }}}
 	translate() { # {{{

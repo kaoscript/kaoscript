@@ -190,7 +190,7 @@ class TupleFunction extends AbstractNode {
 
 				@parameters.push(parameter)
 
-				@type.addParameter(parameter.type())
+				@type.addParameter(parameter.type(), this)
 			}
 
 			index += parent.length()
@@ -207,7 +207,7 @@ class TupleFunction extends AbstractNode {
 
 			@parameters.push(parameter)
 
-			@type.addParameter(parameter.type())
+			@type.addParameter(parameter.type(), this)
 		}
 	} # }}}
 	translate()

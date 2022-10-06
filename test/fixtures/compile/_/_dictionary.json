@@ -50,8 +50,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 2,
-              "max": 2,
               "parameters": [
                 {
                   "name": "dict",
@@ -79,8 +77,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 3,
-              "max": 3,
               "parameters": [
                 {
                   "name": "dict",

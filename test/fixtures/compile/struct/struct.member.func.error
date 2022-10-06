@@ -1,1 +1,1 @@
-ReferenceException: Any value can't be assigned to the expression "Foobar.test" (fixtures/compile/struct/struct.member.func.ks:6)
+ReferenceException: No value can be assigned to the expression "Foobar.test" (fixtures/compile/struct/struct.member.func.ks:6)

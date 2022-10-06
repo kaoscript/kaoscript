@@ -1,4 +1,8 @@
-extern console, parseFloat(...): Number
+extern {
+	func parseFloat(...): Number
+
+	console
+}
 
 namespace Float {
 	export var PI = 3.14

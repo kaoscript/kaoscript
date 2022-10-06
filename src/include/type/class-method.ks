@@ -27,13 +27,13 @@ class ClassMethodType extends FunctionType {
 			type._access = data.access
 			type._sealed = data.sealed
 			type._async = data.async
-			type._min = data.min
-			type._max = data.max
 			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
 
 			type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 
-			type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
+			for var parameter in data.parameters {
+				type.addParameter(ParameterType.import(parameter, metadata, references, alterations, queue, scope, node), node)
+			}
 
 			if ?data.overwrite {
 				type._overwrite = [...data.overwrite]
@@ -54,8 +54,6 @@ class ClassMethodType extends FunctionType {
 				type._proxy = true
 				type._proxyPath = data.proxyPath
 			}
-
-			type.updateParameters()
 
 			return type
 		} # }}}
@@ -91,8 +89,6 @@ class ClassMethodType extends FunctionType {
 			access: @access
 			sealed: @sealed
 			async: @async
-			min: @min
-			max: @max
 			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
 			returns: @returnType.toReference(references, indexDelta, mode, module)
 			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]

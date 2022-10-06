@@ -624,7 +624,7 @@ class Parameter extends AbstractNode {
 		for var modifier in @data.modifiers {
 			switch modifier.kind {
 				ModifierKind::NameOnly => {
-					passing = PassingMode::NAMED
+					passing = PassingMode::LABELED
 				}
 				ModifierKind::Nullable => {
 					type ??= AnyType.NullableUnexplicit
@@ -712,6 +712,10 @@ class Parameter extends AbstractNode {
 			}
 		}
 
+		if @preserved {
+			@type.flagPreserved()
+		}
+
 		type = @type.getVariableType()
 
 		@internal.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
@@ -748,7 +752,6 @@ class Parameter extends AbstractNode {
 	isAssertingParameter() => @parent.isAssertingParameter()
 	isAssertingParameterType() => @parent.isAssertingParameterType()
 	isComprehensive() => @comprehensive
-	isPreserved() => @preserved
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
@@ -833,10 +836,18 @@ class Parameter extends AbstractNode {
 			@hasDefaultValue = false
 		}
 
+		if @preserved {
+			@type.flagPreserved()
+		}
+
 		var t = @type.getVariableType()
 
 		@internal.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
 	} # }}}
+
+	proxy @type {
+		isPreserved
+	}
 }
 
 class AliasStatement extends Statement {

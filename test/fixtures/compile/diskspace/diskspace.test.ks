@@ -1,8 +1,9 @@
 #![bin]
 
 extern {
-	describe:	func
-	it:			func
+	func describe(title: String, fn: (): Void): Void
+	func it(title: string, fn: (#[preserve] done: Function): Void): Void
+
 	console
 }
 
@@ -13,12 +14,12 @@ import {
 
 describe('diskspace', func() {
 	it('print', func(done) { // {{{
-		var dyn d = await disks()
-		
+		var d = await disks()
+
 		expect(d).to.have.length.above(0)
-		
+
 		console.log(d)
-		
+
 		done()
 	}) // }}}
 })

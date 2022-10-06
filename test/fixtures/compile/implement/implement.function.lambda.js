@@ -16,16 +16,12 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	console.log(__ks_Function.__ks_func_foo_0.call((() => {
-		const __ks_rt = (...args) => {
-			if(args.length === 0) {
-				return __ks_rt.__ks_0.call(this);
-			}
-			throw Helper.badArgs();
-		};
-		__ks_rt.__ks_0 = () => {
-			return "bar";
-		};
-		return __ks_rt;
-	})()));
+	console.log(__ks_Function.__ks_func_foo_0.call(Helper.function(() => {
+		return "bar";
+	}, (fn, ...args) => {
+		if(args.length === 0) {
+			return fn.call(this);
+		}
+		throw Helper.badArgs();
+	})));
 };

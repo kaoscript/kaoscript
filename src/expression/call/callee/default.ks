@@ -1,6 +1,5 @@
 class DefaultCallee extends Callee {
 	private {
-		@arguments: Array<Number>?
 		@expression: Expression?
 		@flatten: Boolean
 		@methods: Array<FunctionType>?
@@ -19,8 +18,7 @@ class DefaultCallee extends Callee {
 			}
 		} # }}}
 	}
-
-	constructor(@data, @object, mut type: Type | Array<Type> | Null, @arguments = null, @node) { # {{{
+	constructor(@data, @object, mut type: Type | Array<Type> | Null, @node) { # {{{
 		super(data)
 
 		if object == null {
@@ -65,7 +63,7 @@ class DefaultCallee extends Callee {
 			@type = AnyType.NullableUnexplicit
 		}
 	} # }}}
-	constructor(@data, @object, @methods, @type, @arguments = null, @node) { # {{{
+	constructor(@data, @object, @methods, @type, @node) { # {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
@@ -144,8 +142,6 @@ class DefaultCallee extends Callee {
 		@expression.releaseReusable()
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
-		var arguments = @prepareArguments(node)
-
 		if @flatten {
 			if @scope == ScopeKind::Argument {
 				fragments
@@ -165,14 +161,14 @@ class DefaultCallee extends Callee {
 					.compile(@expression.caller(), mode)
 			}
 
-			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), arguments)
+			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node._arguments)
 		}
 		else {
 			switch @scope {
 				ScopeKind::Argument => {
 					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
 
-					for var argument in arguments {
+					for var argument in node._arguments {
 						fragments.code($comma)
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -181,7 +177,7 @@ class DefaultCallee extends Callee {
 				ScopeKind::Null => {
 					fragments.wrap(@expression, mode).code('.call(null')
 
-					for var argument in arguments {
+					for var argument in node._arguments {
 						fragments.code($comma)
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -190,7 +186,7 @@ class DefaultCallee extends Callee {
 				ScopeKind::This => {
 					fragments.wrap(@expression, mode).code('(')
 
-					for var argument, index in arguments {
+					for var argument, index in node._arguments {
 						fragments.code($comma) if index != 0
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -201,8 +197,6 @@ class DefaultCallee extends Callee {
 	} # }}}
 	toCurryFragments(fragments, mode, node) { # {{{
 		node.module().flag('Helper')
-
-		var arguments = @prepareArguments(node)
 
 		if @flatten {
 			switch @scope {
@@ -228,7 +222,7 @@ class DefaultCallee extends Callee {
 				}
 			}
 
-			for argument in arguments {
+			for argument in node._arguments {
 				fragments.code($comma)
 
 				DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -258,7 +252,7 @@ class DefaultCallee extends Callee {
 				}
 			}
 
-			for argument in arguments {
+			for argument in node._arguments {
 				fragments.code($comma)
 
 				DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -299,15 +293,4 @@ class DefaultCallee extends Callee {
 	} # }}}
 	type() => @type
 	type(@type) => this
-
-	private {
-		prepareArguments(node) { # {{{
-			if ?@arguments {
-				return [node._arguments[index] for var index in @arguments]
-			}
-			else {
-				return node._arguments
-			}
-		} # }}}
-	}
 }

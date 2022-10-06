@@ -246,7 +246,7 @@ module.exports = function() {
 		throw KSHelper.badArgs();
 	};
 	__ks_Array._sm_same = function() {
-		const t0 = KSType.isValue;
+		const t0 = KSType.isArray;
 		if(arguments.length === 2) {
 			if(t0(arguments[0]) && t0(arguments[1])) {
 				return __ks_Array.__ks_sttc_same_0(arguments[0], arguments[1]);
@@ -418,6 +418,9 @@ module.exports = function() {
 	__ks_Dictionary.__ks_sttc_length_0 = function(dict) {
 		return Dictionary.keys(dict).length;
 	};
+	__ks_Dictionary.__ks_sttc_map_0 = function(dict, fn) {
+		return Dictionary.entries(dict).map(fn);
+	};
 	__ks_Dictionary.__ks_sttc_merge_0 = function(args) {
 		let source = new Dictionary();
 		let i = 0;
@@ -440,6 +443,18 @@ module.exports = function() {
 			i += 1;
 		}
 		return source;
+	};
+	__ks_Dictionary.__ks_sttc_same_0 = function(a, b) {
+		if(!__ks_Array.__ks_sttc_same_0(Dictionary.keys(a), Dictionary.keys(b))) {
+			return false;
+		}
+		for(const key in a) {
+			const value = a[key];
+			if(value !== b[key]) {
+				return false;
+			}
+		}
+		return true;
 	};
 	__ks_Dictionary.__ks_sttc_value_0 = function(dict, index) {
 		let i = 0;
@@ -513,8 +528,33 @@ module.exports = function() {
 		}
 		throw KSHelper.badArgs();
 	};
+	__ks_Dictionary._sm_map = function() {
+		const t0 = KSType.isDictionary;
+		const t1 = KSType.isFunction;
+		if(arguments.length === 2) {
+			if(t0(arguments[0]) && t1(arguments[1])) {
+				return __ks_Dictionary.__ks_sttc_map_0(arguments[0], arguments[1]);
+			}
+		}
+		if(Dictionary.map) {
+			return Dictionary.map(...arguments);
+		}
+		throw KSHelper.badArgs();
+	};
 	__ks_Dictionary._sm_merge = function() {
 		return __ks_Dictionary.__ks_sttc_merge_0(Array.from(arguments));
+	};
+	__ks_Dictionary._sm_same = function() {
+		const t0 = KSType.isDictionary;
+		if(arguments.length === 2) {
+			if(t0(arguments[0]) && t0(arguments[1])) {
+				return __ks_Dictionary.__ks_sttc_same_0(arguments[0], arguments[1]);
+			}
+		}
+		if(Dictionary.same) {
+			return Dictionary.same(...arguments);
+		}
+		throw KSHelper.badArgs();
 	};
 	__ks_Dictionary._sm_value = function() {
 		const t0 = KSType.isDictionary;

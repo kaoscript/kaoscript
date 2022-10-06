@@ -64,6 +64,10 @@ abstract class AssignmentOperatorExpression extends Expression {
 		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
 		}
+
+		if @left.isLiberal() {
+			@left.setPropertyType(type)
+		}
 	} # }}}
 	translate() { # {{{
 		@left.translate()

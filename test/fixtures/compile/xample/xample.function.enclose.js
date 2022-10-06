@@ -3,21 +3,17 @@ module.exports = function() {
 	var __ks_Function = {};
 	__ks_Function.__ks_func_enclose_0 = function(enclosure) {
 		let f = this;
-		return (() => {
-			const __ks_rt = (...args) => {
-				const t0 = Type.isValue;
-				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
-				let pts;
-				if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
-					return __ks_rt.__ks_0.call(this, Helper.getVarargs(args, 0, pts[1]));
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = (args) => {
-				return enclosure(f, ...args);
-			};
-			return __ks_rt;
-		})();
+		return Helper.function((args) => {
+			return enclosure(f, ...args);
+		}, (fn, ...args) => {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return fn.call(this, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		});
 	};
 	__ks_Function._im_enclose = function(that, ...args) {
 		return __ks_Function.__ks_func_enclose_rt(that, args);

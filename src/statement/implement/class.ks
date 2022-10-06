@@ -522,11 +522,19 @@ class ImplementClassMethodDeclaration extends Statement {
 	} # }}}
 	toInstanceFragments(fragments) { # {{{
 		var name = @variable.name()
-
+		var labelable = @class.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
 
 		var line = fragments.newLine()
-		var block = line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`).newBlock()
+
+		if labelable {
+			line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, kws, args)`)
+		}
+		else {
+			line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`)
+		}
+
+		var block = line.newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -546,22 +554,42 @@ class ImplementClassMethodDeclaration extends Statement {
 		if !@exists {
 			var line = fragments.newLine()
 
-			line
-				.code(`\(name).prototype.\(@name) = function()`)
-				.newBlock()
-				.line(`return this.__ks_func_\(@name)_rt.call(null, this, this, arguments)`)
-				.done()
+			if labelable {
+				line.code(`\(name).prototype.\(@name) = function(kws, ...args)`)
+			}
+			else {
+				line.code(`\(name).prototype.\(@name) = function()`)
+			}
+
+			var block = line.newBlock()
+
+			if labelable {
+				block.line(`return this.__ks_func_\(@name)_rt.call(null, this, this, kws, args)`)
+			}
+			else {
+				block.line(`return this.__ks_func_\(@name)_rt.call(null, this, this, arguments)`)
+			}
+
+			block.done()
 
 			line.done()
 		}
 	} # }}}
 	toStaticFragments(fragments) { # {{{
 		var name = @variable.name()
-
+		var labelable = @class.isLabelableClassMethod(@name)
 		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
 
 		var line = fragments.newLine()
-		var block = line.code(`\(name).\(@name) = function()`).newBlock()
+
+		if labelable {
+			line.code(`\(name).\(@name) = function(kws, ...args)`)
+		}
+		else {
+			line.code(`\(name).\(@name) = function()`)
+		}
+
+		var block = line.newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -569,7 +597,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				return false
 			}
-			'arguments'
+			labelable ? 'args' : 'arguments'
 			assessment
 			block
 			this
@@ -581,22 +609,43 @@ class ImplementClassMethodDeclaration extends Statement {
 	toSealedInstanceFragments(fragments) { # {{{
 		var name = @variable.name()
 		var sealedName = @variable.getSealedName()
-
+		var labelable = @class.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
 		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
 
 		if !@exists {
 			var line = fragments.newLine()
-			var block = line.code(`\(sealedName)._im_\(@name) = function(that, ...args)`).newBlock()
 
-			block.line(`return \(sealedName).__ks_func_\(@name)_rt(that, args)`)
+			if labelable {
+				line.code(`\(sealedName)._im_\(@name) = function(that, kws, ...args)`)
+			}
+			else {
+				line.code(`\(sealedName)._im_\(@name) = function(that, ...args)`)
+			}
+
+			var block = line.newBlock()
+
+			if labelable {
+				block.line(`return \(sealedName).__ks_func_\(@name)_rt(that, kws, args)`)
+			}
+			else {
+				block.line(`return \(sealedName).__ks_func_\(@name)_rt(that, args)`)
+			}
 
 			block.done()
 			line.done()
 		}
 
 		var line = fragments.newLine()
-		var block = line.code(`\(sealedName).__ks_func_\(@name)_rt = function(that, args)`).newBlock()
+
+		if labelable {
+			line.code(`\(sealedName).__ks_func_\(@name)_rt = function(that, kws, args)`)
+		}
+		else {
+			line.code(`\(sealedName).__ks_func_\(@name)_rt = function(that, args)`)
+		}
+
+		var block = line.newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -616,12 +665,14 @@ class ImplementClassMethodDeclaration extends Statement {
 			block
 			exhaustive ? null : Router.FooterType::NO_THROW
 			exhaustive ? null : (fragments, _) => {
-				fragments
-					.newControl()
-					.code(`if(that.\(@name))`)
-					.step()
-					.line(`return that.\(@name)(...args)`)
-					.done()
+				if !labelable {
+					fragments
+						.newControl()
+						.code(`if(that.\(@name))`)
+						.step()
+						.line(`return that.\(@name)(...args)`)
+						.done()
+				}
 
 				fragments.line(`throw \($runtime.helper(this)).badArgs()`)
 			}
@@ -633,12 +684,20 @@ class ImplementClassMethodDeclaration extends Statement {
 	} # }}}
 	toSealedStaticFragments(fragments) { # {{{
 		var name = @variable.getSealedName()
-
-		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
+		var labelable = @class.isLabelableClassMethod(@name)
 		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
+		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
 
 		var line = fragments.newLine()
-		var block = line.code(`\(name)._sm_\(@name) = function()`).newBlock()
+
+		if labelable {
+			line.code(`\(name)._sm_\(@name) = function(kws, ...args)`)
+		}
+		else {
+			line.code(`\(name)._sm_\(@name) = function()`)
+		}
+
+		var block = line.newBlock()
 
 		Router.toFragments(
 			(function, line) => {
@@ -646,17 +705,19 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				return false
 			}
-			'arguments'
+			labelable ? 'args' : 'arguments'
 			assessment
 			block
 			exhaustive ? null : Router.FooterType::NO_THROW
 			exhaustive ? null : (fragments, _) => {
-				fragments
-					.newControl()
-					.code(`if(\(@variable.name()).\(@name))`)
-					.step()
-					.line(`return \(@variable.name()).\(@name)(...arguments)`)
-					.done()
+				if !labelable {
+					fragments
+						.newControl()
+						.code(`if(\(@variable.name()).\(@name))`)
+						.step()
+						.line(`return \(@variable.name()).\(@name)(...arguments)`)
+						.done()
+				}
 
 				fragments.line(`throw \($runtime.helper(this)).badArgs()`)
 			}

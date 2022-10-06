@@ -275,42 +275,53 @@ class FunctionDeclaration extends Statement {
 	} # }}}
 	initializeVariable(variable, expression, node)
 	name() => @name
-	toMainFragments(fragments) { # {{{
-		var declarators = @variable.declarators()
-		var name = @variable.getSecureName()
-		var line = fragments.newLine().code(`function \(name)(`)
+	toMainFragments(fragments, name: String, assessment) { # {{{
+		if assessment.labelable {
+			var line = fragments.newLine().code(`function \(name)(kws, ...args)`)
+			var block = line.newBlock()
 
-		if declarators.length == 1 && declarators[0].hasPreservedParameter() {
-			for var parameter, index in declarators[0].parameters() {
-				line.code($comma) unless index == 0
+			block.line(`return \(name).__ks_rt(this, args, kws)`)
 
-				line.compile(parameter)
-			}
+			block.done()
+			line.done()
 		}
+		else {
+			var declarators = @variable.declarators()
+			var line = fragments.newLine().code(`function \(name)(`)
 
-		var block = line.code(`)`).newBlock()
+			if declarators.length == 1 && declarators[0].hasPreservedParameter() {
+				for var parameter, index in declarators[0].parameters() {
+					line.code($comma) unless index == 0
 
-		block.line(`return \(name).__ks_rt(this, arguments)`)
+					line.compile(parameter)
+				}
+			}
 
-		block.done()
-		line.done()
+			var block = line.code(`)`).newBlock()
+
+			block.line(`return \(name).__ks_rt(this, arguments)`)
+
+			block.done()
+			line.done()
+		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		return unless @main
+
+		var name = @variable.getSecureName()
+		var assessment = @type().assessment(@variable.name(), this)
 
 		if @continued {
 			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
-			@toRouterFragments(fragments)
+			@toRouterFragments(fragments, name, assessment)
 		}
 		else if @extended {
-			var name = @variable.getSecureName()
-
 			fragments.line($const(this), @oldVariableName, $equals, name)
 
-			@toMainFragments(fragments)
+			@toMainFragments(fragments, name, assessment)
 
 			fragments.line(`\(name).__ks_0 = \(@oldVariableName)`)
 
@@ -318,25 +329,29 @@ class FunctionDeclaration extends Statement {
 				declarator.toStatementFragments(fragments)
 			}
 
-			@toRouterFragments(fragments)
+			@toRouterFragments(fragments, name, assessment)
 		}
 		else {
-			@toMainFragments(fragments)
+			@toMainFragments(fragments, name, assessment)
 
 			for var declarator in @variable.declarators() {
 				declarator.toStatementFragments(fragments)
 			}
 
-			@toRouterFragments(fragments)
+			@toRouterFragments(fragments, name, assessment)
 		}
 	} # }}}
-	toRouterFragments(fragments) { # {{{
-		var name = @variable.getSecureName()
-
-		var assessment = @type().assessment(@variable.name(), this)
-
+	toRouterFragments(fragments, name: String, assessment) { # {{{
 		var line = fragments.newLine()
-		var block = line.code(`\(name).__ks_rt = function(that, args)`).newBlock()
+
+		if assessment.labelable {
+			line.code(`\(name).__ks_rt = function(that, args, kws)`)
+		}
+		else {
+			line.code(`\(name).__ks_rt = function(that, args)`)
+		}
+
+		var block = line.newBlock()
 
 		Router.toFragments(
 			(function, line) => {

@@ -1,66 +1,20 @@
-class PreciseMethodCallee extends Callee {
+class PreciseMethodCallee extends MethodCallee {
 	private {
 		@alien: Boolean
-		@arguments: Array<CallMatchArgument>
-		@expression
-		@flatten: Boolean
-		@function: FunctionType
-		@functions: Array<FunctionType>
-		@index: Number
 		@instance: Boolean
-		@node: CallExpression
 		@object
 		@property: String
 		@proxy: Boolean
 		@reference: ReferenceType
-		@scope: ScopeKind
-		@type: Type
 	}
-	constructor(@data, @object, @property, match: CallMatch, @reference, @node) { # {{{
-		super(data)
+	constructor(@data, @object, @property, assessment, match, @reference, @node) { # {{{
+		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, match, node)
 
-		@expression = new MemberExpression(data.callee, node, node.scope(), object)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
-
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-
-		@validate(match.function, node)
-
-		@function = match.function
-		@functions = [@function]
-		@index = match.function.index()
 		@alien = match.function.isAlien()
 		@instance = match.function.isInstance()
 		@proxy = match.function.isProxy()
-		@arguments = match.arguments
-		@type = match.function.getReturnType()
 	} # }}}
-	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(@flatten && @scope == ScopeKind::This)
-	} # }}}
-	functions() => @functions
-	override hashCode() { # {{{
-		return `method:\(@property):\(@index):\(@alien):\(@instance):\(@arguments)`
-	} # }}}
-	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for var function in @functions {
-			if function.isInitializingInstanceVariable(name) {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
-	mergeWith(that: Callee) { # {{{
-		@type = Type.union(@node.scope(), @type, that.type())
-		@functions.push(...that.functions())
-	} # }}}
-	releaseReusable() { # {{{
-		@expression.releaseReusable()
-	} # }}}
+	override buildHashCode() => `method:\(@property):\(@index):\(@alien):\(@instance):\(@positions.join(','))`
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			switch @scope {
@@ -85,7 +39,7 @@ class PreciseMethodCallee extends Callee {
 
 					fragments.compile(@object, mode)
 
-					Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
+					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 				}
 			}
 		}
@@ -115,14 +69,12 @@ class PreciseMethodCallee extends Callee {
 						fragments.code(`.__ks_sttc_\(@property)_\(@index)(`)
 					}
 
-					Router.toArgumentsFragments(@arguments, node._arguments, @function, false, fragments, mode)
+					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
 				}
 			}
 		}
 	} # }}}
 	toCurryFragments(fragments, mode, node) { # {{{
-		node.module().flag('Helper')
-
 		if @flatten {
 			throw new NotImplementedException(this)
 		}
@@ -151,38 +103,10 @@ class PreciseMethodCallee extends Callee {
 				}
 			}
 
-			Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
-		}
-	} # }}}
-	toNullableFragments(fragments, node) { # {{{
-		if @nullable {
-			if @expression.isNullable() {
-				fragments
-					.compileNullable(@expression)
-					.code(' && ')
-			}
-
-			fragments
-				.code($runtime.type(node) + '.isFunction(')
-				.compileReusable(@expression)
-				.code(')')
-		}
-		else if @expression.isNullable() {
-			fragments.compileNullable(@expression)
-		}
-		else {
-			fragments
-				.code($runtime.type(node) + '.isValue(')
-				.compileReusable(@expression)
-				.code(')')
+			Router.Argument.toFragments(@positions, null, node._arguments, @function, true, fragments, mode)
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
 		@reference.toPositiveTestFragments(fragments, @object)
 	} # }}}
-	translate() { # {{{
-		@object.translate()
-		@expression.translate()
-	} # }}}
-	type() => @type
 }

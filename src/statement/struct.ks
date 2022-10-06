@@ -176,7 +176,7 @@ class StructFunction extends AbstractNode {
 
 				@parameters.push(parameter)
 
-				@type.addParameter(parameter.type())
+				@type.addParameter(parameter.type(), this)
 
 				if field.index() > index {
 					index = field.index()
@@ -195,7 +195,7 @@ class StructFunction extends AbstractNode {
 
 			@parameters.push(parameter)
 
-			@type.addParameter(parameter.type())
+			@type.addParameter(parameter.type(), this)
 		}
 	} # }}}
 	translate()

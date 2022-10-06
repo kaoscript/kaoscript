@@ -2,18 +2,14 @@ const {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let foo = (() => {
 		const d = new Dictionary();
-		d.foo = (() => {
-			const __ks_rt = (...args) => {
-				if(args.length === 0) {
-					return __ks_rt.__ks_0.call(null);
-				}
-				throw Helper.badArgs();
-			};
-			__ks_rt.__ks_0 = function() {
-				let i = 0;
-			};
-			return __ks_rt;
-		})();
+		d.foo = Helper.function(function() {
+			let i = 0;
+		}, (fn, ...args) => {
+			if(args.length === 0) {
+				return fn.call(null);
+			}
+			throw Helper.badArgs();
+		});
 		return d;
 	})();
 	function bar() {

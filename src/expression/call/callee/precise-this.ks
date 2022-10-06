@@ -1,51 +1,16 @@
-class PreciseThisCallee extends Callee {
+class PreciseThisCallee extends MethodCallee {
 	private {
 		@alien: Boolean
-		@arguments: Array<CallMatchArgument>
-		@expression
-		@flatten: Boolean
-		@functions: Array<FunctionType>
-		@index: Number
 		@instance: Boolean
-		@node: CallExpression
-		@object
 		@property: String
-		@scope: ScopeKind
-		@type: Type
 	}
-	constructor(@data, @expression, @property, match: CallMatch, @node) { # {{{
-		super(data)
+	constructor(@data, @expression, @property, assessment, match: CallMatch, @node) { # {{{
+		super(data, expression, true, assessment, match, node)
 
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-
-		@validate(match.function, node)
-
-		@functions = [match.function]
-		@index = match.function.index()
 		@alien = match.function.isAlien()
 		@instance = match.function.isInstance()
-		@arguments = match.arguments
-		@type = match.function.getReturnType()
 	} # }}}
-	functions() => @functions
-	override hashCode() { # {{{
-		return `this:\(@property):\(@index):\(@alien):\(@instance):\(@arguments)`
-	} # }}}
-	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		for var function in @functions {
-			if function.isInitializingInstanceVariable(name) {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
-	mergeWith(that: Callee) { # {{{
-		@type = Type.union(@node.scope(), @type, that.type())
-		@functions.push(...that.functions())
-	} # }}}
+	override buildHashCode() => `this:\(@property):\(@index):\(@alien):\(@instance):\(@positions.join(','))`
 	toFragments(fragments, mode, node) { # {{{
 		var name = @node.scope().getVariable('this').getSecureName()
 
@@ -67,12 +32,8 @@ class PreciseThisCallee extends Callee {
 					fragments.code(`\(name).__ks_sttc_\(@property)_\(@index)(`)
 				}
 
-				Router.toArgumentsFragments(@arguments, node._arguments, @functions[0], false, fragments, mode)
+				Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
 			}
 		}
 	} # }}}
-	translate() { # {{{
-		@expression.translate()
-	} # }}}
-	type() => @type
 }

@@ -22,8 +22,6 @@
             "kind": "function",
             "index": 0,
             "async": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "value",
@@ -40,8 +38,6 @@
             "kind": "function",
             "index": 1,
             "async": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "value",
@@ -58,8 +54,6 @@
             "kind": "function",
             "index": 2,
             "async": false,
-            "min": 1,
-            "max": 1,
             "parameters": [
               {
                 "name": "value",

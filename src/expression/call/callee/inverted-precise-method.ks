@@ -1,34 +1,12 @@
-class InvertedPreciseMethodCallee extends Callee {
+class InvertedPreciseMethodCallee extends MethodCallee {
 	private {
-		@arguments: Array<CallMatchArgument>
-		@expression: MemberExpression
-		@function: FunctionType
 		@name: NamedType
 		@property: String
-		@scope: ScopeKind
-		@type: Type
 	}
-	constructor(@data, @name, @property, match: CallMatch, node) { # {{{
-		super(data)
-
-		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
-
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-
-		@function = match.function
-		@arguments = match.arguments
-
-		@validate(@function, node)
-
-		@type = @function.getReturnType()
+	constructor(@data, @name, @property, assessment, match: CallMatch, node) { # {{{
+		super(data, new MemberExpression(data.callee, node, node.scope(), node._object), false, assessment, match, node)
 	} # }}}
-	override hashCode() => null
-	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		return @function.isInitializingInstanceVariable(name)
-	} # }}}
+	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		switch @scope {
 			ScopeKind::Argument => {
@@ -49,12 +27,8 @@ class InvertedPreciseMethodCallee extends Callee {
 
 				fragments.wrap(@expression._object, mode)
 
-				Router.toArgumentsFragments(@arguments, node._arguments, @function, true, fragments, mode)
+				Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 			}
 		}
 	} # }}}
-	translate() { # {{{
-		@expression.translate()
-	} # }}}
-	type() => @type
 }

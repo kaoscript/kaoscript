@@ -7,7 +7,7 @@ class AnonymousFunctionExpression extends Expression {
 		@isObjectMember: Boolean		= false
 		@parameters: Array<Parameter>
 		@topNodes: Array				= []
-		@type: Type
+		@type: FunctionType
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope, ScopeType::Function)
@@ -82,40 +82,37 @@ class AnonymousFunctionExpression extends Expression {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isOverridableFunction() => false
+	isRefinable() => true
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
-		var assessment = @type().assessment('__ks_rt', this)
+		fragments.code(`\($runtime.helper(this)).function(`)
 
-		var block = fragments.code('(() =>').newBlock()
+		var blockFunction = Parameter.toFragments(this, fragments.code('function('), ParameterMode::Default, (fragments) => fragments.code(')').newBlock())
 
-		var lineRouter = block.newLine().code(`const __ks_rt = (`)
+		blockFunction.compile(@block, Mode::None)
 
-		var preserved = @hasPreservedParameter()
-
-		if preserved {
-			for var parameter in @parameters {
-				lineRouter.compile(parameter).code($comma)
-			}
+		if !@awaiting && !@exit && @type.isAsync() {
+			blockFunction.line('__ks_cb()')
 		}
 
-		var blockRouter = lineRouter.code(`...args) =>`).newBlock()
+		blockFunction.done()
 
-		if preserved {
-			var line = blockRouter.newLine().code(`args.unshift(`)
+		fragments.code($comma)
 
-			for var parameter, index in @parameters {
-				line.code($comma) unless index == 0
+		var assessment = @type.assessment('<router>', this)
 
-				line.compile(parameter)
-			}
+		fragments.code(`(fn, `)
 
-			line.code(')').done()
+		if assessment.labelable {
+			fragments.code('kws, ')
 		}
+
+		var blockRouter = fragments.code(`...args) =>`).newBlock()
 
 		Router.toFragments(
 			(function, line) => {
-				line.code(`__ks_rt.__ks_\(function.index()).call(null`)
+				line.code(`fn.call(null`)
 
 				return true
 			}
@@ -126,36 +123,19 @@ class AnonymousFunctionExpression extends Expression {
 		)
 
 		blockRouter.done()
-		lineRouter.done()
 
-		var lineFunction = block.newLine()
-
-		lineFunction.code('__ks_rt.__ks_0 = function(')
-
-		var blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
-			return fragments.code(')').newBlock()
-		})
-
-		for var node in @topNodes {
-			blockFunction.toAuthorityFragments(block)
+		if @hasPreservedParameter() {
+			fragments.code(', true')
 		}
 
-		blockFunction.compile(@block, Mode::None)
-
-		if !@awaiting && !@exit && @type.isAsync() {
-			blockFunction.line('__ks_cb()')
-		}
-
-		blockFunction.done()
-		lineFunction.done()
-
-		block.line('return __ks_rt')
-
-		block.done()
-
-		fragments.code(')()')
+		fragments.code(')')
 	} # }}}
 	type() => @type
+	type(@type) { # {{{
+		for var parameter, index in @type.parameters() {
+			@parameters[index].type(parameter)
+		}
+	} # }}}
 }
 
 class ArrowFunctionExpression extends Expression {
@@ -168,7 +148,7 @@ class ArrowFunctionExpression extends Expression {
 		@name: String
 		@parameters: Array<Parameter>
 		@shiftToAuthority: Boolean		= false
-		@type: Type
+		@type: FunctionType
 		@usingThis: Boolean				= false
 		@variables: Array<Variable>
 	}
@@ -262,6 +242,7 @@ class ArrowFunctionExpression extends Expression {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isOverridableFunction() => false
+	isRefinable() => true
 	isUsingVariable(name) { # {{{
 		for parameter in @parameters {
 			if parameter.isUsingVariable(name) {
@@ -295,76 +276,49 @@ class ArrowFunctionExpression extends Expression {
 			}
 		}
 		else {
-			if @es5 {
-				throw new NotImplementedException(this)
+			fragments.code(`\($runtime.helper(this)).function(`)
+
+			var blockFunction = Parameter.toFragments(this, fragments.code('('), ParameterMode::Default, (fragments) => fragments.code(') =>').newBlock())
+
+			blockFunction.compile(@block, Mode::None)
+
+			if !@awaiting && !@exit && @type.isAsync() {
+				blockFunction.line('__ks_cb()')
 			}
-			else {
-				var assessment = @type.assessment('__ks_rt', this)
 
-				var block = fragments.code('(() =>').newBlock()
+			blockFunction.done()
 
-				var lineRouter = block.newLine().code(`const __ks_rt = (`)
+			fragments.code($comma)
 
-				var preserved = @hasPreservedParameter()
+			var assessment = @type.assessment(@name ?? '<router>', this)
 
-				if preserved {
-					for var parameter in @parameters {
-						lineRouter.compile(parameter).code($comma)
-					}
-				}
+			fragments.code(`(fn, `)
 
-				var blockRouter = lineRouter.code(`...args) =>`).newBlock()
-
-				if preserved {
-					var line = blockRouter.newLine().code(`args.unshift(`)
-
-					for var parameter, index in @parameters {
-						line.code($comma) unless index == 0
-
-						line.compile(parameter)
-					}
-
-					line.code(')').done()
-				}
-
-				Router.toFragments(
-					(function, line) => {
-						line.code(`__ks_rt.__ks_\(function.index()).call(this`)
-
-						return true
-					}
-					null
-					assessment
-					blockRouter
-					this
-				)
-
-				blockRouter.done()
-				lineRouter.done()
-
-				var lineFunction = block.newLine()
-
-				lineFunction.code('__ks_rt.__ks_0 = (')
-
-				var blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
-					return fragments.code(') =>').newBlock()
-				})
-
-				blockFunction.compile(@block, Mode::None)
-
-				if !@awaiting && !@exit && @type.isAsync() {
-					blockFunction.line('__ks_cb()')
-				}
-
-				blockFunction.done()
-				lineFunction.done()
-
-				block.line('return __ks_rt')
-
-				block.done()
-
-				fragments.code(')()')
+			if assessment.labelable {
+				fragments.code('kws, ')
 			}
+
+			var blockRouter = fragments.code(`...args) =>`).newBlock()
+
+			Router.toFragments(
+				(function, line) => {
+					line.code(`fn.call(this`)
+
+					return true
+				}
+				null
+				assessment
+				blockRouter
+				this
+			)
+
+			blockRouter.done()
+
+			if @hasPreservedParameter() {
+				fragments.code(', true')
+			}
+
+			fragments.code(')')
 		}
 	} # }}}
 	toAuthorityFragments(fragments) { # {{{
@@ -391,4 +345,9 @@ class ArrowFunctionExpression extends Expression {
 		ctrl.done()
 	} # }}}
 	type() => @type
+	type(@type) { # {{{
+		for var parameter, index in @type.parameters() {
+			@parameters[index].type(parameter)
+		}
+	} # }}}
 }

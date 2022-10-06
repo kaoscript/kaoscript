@@ -51,6 +51,8 @@ abstract class Expression extends AbstractNode {
 	isInferable() => false
 	// if the expression is a lateinit field
 	isLateInit() => false
+	// if the expression can be freely assigned
+	isLiberal() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
 	isLooseComposite() => @isComposite()
 	// if the type is matching the given type
@@ -61,6 +63,8 @@ abstract class Expression extends AbstractNode {
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => @isComputed()
+	// if the expression's type can refined
+	isRefinable() => false
 	// if the expression should be skipped or not
 	isSkippable() => false
 	// if the expression is the given instance variable

@@ -54,8 +54,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": "Any?",
               "errors": [],

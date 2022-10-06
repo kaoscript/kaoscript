@@ -43,10 +43,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Quxbaz.__ks_sttc_foobar_0();
 			}
-			if(Foobar.foobar) {
-				return Foobar.foobar.apply(null, arguments);
-			}
-			throw Helper.badArgs();
+			return Foobar.foobar.apply(null, arguments);
 		}
 	}
 };

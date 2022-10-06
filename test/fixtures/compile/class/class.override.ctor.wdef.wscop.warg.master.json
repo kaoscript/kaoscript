@@ -23,8 +23,6 @@
             "index": 0,
             "access": 4,
             "sealed": false,
-            "min": 0,
-            "max": 0,
             "parameters": [],
             "errors": []
           },
@@ -32,8 +30,6 @@
             "index": 1,
             "access": 4,
             "sealed": false,
-            "min": 0,
-            "max": 2,
             "parameters": [
               {
                 "name": "x",

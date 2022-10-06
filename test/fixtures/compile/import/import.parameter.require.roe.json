@@ -53,8 +53,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 1,
-              "max": 2,
               "parameters": [
                 {
                   "name": "item",
@@ -84,8 +82,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": 0,
               "parameters": [],
               "returns": {
                 "reference": 1
@@ -100,8 +96,6 @@
               "access": 4,
               "sealed": true,
               "async": false,
-              "min": 0,
-              "max": "Infinity",
               "parameters": [
                 {
                   "name": "args",

@@ -131,6 +131,7 @@ bitmask MatchingMode<u48> {
 
 	IgnoreError
 	IgnoreName
+	IgnorePreserved
 	IgnoreReturn
 
 	AutoCast
@@ -220,12 +221,18 @@ abstract class Type {
 				NodeKind::ArrayType => {
 					var mut type = new ArrayType(scope)
 
-					type.setRestType(Type.fromAST(data.element, scope, defined, node))
-
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind::Nullable {
 							type = type.setNullable(true)
 						}
+					}
+
+					for var property in data.properties {
+						type.addProperty(Type.fromAST(property.type, scope, defined, node))
+					}
+
+					if ?data.rest {
+						type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
 					}
 
 					return type
@@ -288,91 +295,67 @@ abstract class Type {
 				NodeKind::ObjectType => {
 					var mut type = new DictionaryType(scope)
 
-					type.setRestType(Type.fromAST(data.element, scope, defined, node))
-
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind::Nullable {
 							type = type.setNullable(true)
 						}
 					}
 
+					for var property in data.properties {
+						type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+					}
+
+					if ?data.rest {
+						type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
+					}
+
 					return type.flagComplete()
 				}
 				NodeKind::TypeReference => {
-					if ?data.elements {
-						var type = new ArrayType(scope)
+					var mut nullable = false
 
-						for var element in data.elements {
-							if element.modifiers.length == 1 && element.modifiers[0].kind == ModifierKind::Rest {
-								type.setRestType(Type.fromAST(element, scope, defined, node))
+					for var modifier in data.modifiers {
+						if modifier.kind == ModifierKind::Nullable {
+							nullable = true
+						}
+					}
+
+					if data.typeName.kind == NodeKind::Identifier {
+						var name = Type.renameNative(data.typeName.name)
+
+						if name == 'Any' {
+							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
+						}
+						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
+							if ?data.typeParameters {
+								var type = new ReferenceType(scope, name, nullable)
+
+								for parameter in data.typeParameters {
+									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
+								}
+
+								return type
 							}
 							else {
-								type.addProperty(Type.fromAST(element, scope, defined, node))
+								return scope.reference(name, nullable)
+							}
+						}
+						else {
+							ReferenceException.throwNotDefinedType(data.typeName.name, node)
+						}
+					}
+					else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
+						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
+
+						var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
+
+						if ?data.typeParameters {
+							for parameter in data.typeParameters {
+								type._parameters.push(Type.fromAST(parameter, scope, defined, node))
 							}
 						}
 
 						return type
-					}
-					else if ?data.properties {
-						var type = new DictionaryType(scope)
-
-						for var property in data.properties {
-							if ?property.name {
-								type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
-							}
-							else {
-								type.setRestType(Type.fromAST(property.type, scope, defined, node))
-							}
-						}
-
-						return type.flagComplete()
-					}
-					else if ?data.typeName {
-						var mut nullable = false
-
-						for var modifier in data.modifiers {
-							if modifier.kind == ModifierKind::Nullable {
-								nullable = true
-							}
-						}
-
-						if data.typeName.kind == NodeKind::Identifier {
-							var name = Type.renameNative(data.typeName.name)
-
-							if name == 'Any' {
-								return nullable ? AnyType.NullableExplicit : AnyType.Explicit
-							}
-							else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
-								if ?data.typeParameters {
-									var type = new ReferenceType(scope, name, nullable)
-
-									for parameter in data.typeParameters {
-										type._parameters.push(Type.fromAST(parameter, scope, defined, node))
-									}
-
-									return type
-								}
-								else {
-									return scope.reference(name, nullable)
-								}
-							}
-							else {
-								ReferenceException.throwNotDefinedType(data.typeName.name, node)
-							}
-						}
-						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
-							var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
-
-							var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
-
-							if ?data.typeParameters {
-								for parameter in data.typeParameters {
-									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
-								}
-							}
-
-							return type
-						}
 					}
 				}
 				NodeKind::UnionType => {
@@ -722,6 +705,7 @@ abstract class Type {
 	isInoperative() => @isNever() || @isVoid()
 	isInstance() => false
 	isIterable() => false
+	isLiberal() => false
 	isMergeable(type) => false
 	isMethod() => false
 	isMorePreciseThan(value: Type): Boolean => false

@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments ((x: Number)) (fixtures/compile/function/function.arrow.cast.s#se.i%s.ks:4)
