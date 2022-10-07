@@ -131,7 +131,7 @@ bitmask MatchingMode<u48> {
 
 	IgnoreError
 	IgnoreName
-	IgnorePreserved
+	IgnoreRetained
 	IgnoreReturn
 
 	AutoCast

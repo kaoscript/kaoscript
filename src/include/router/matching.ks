@@ -418,7 +418,7 @@ namespace Matching {
 							return { cursor, argMatches }
 						}
 						else if var value ?= getRefinableValue(cursor, context) {
-							if node.type.isSubsetOf(cursor.argument, MatchingMode::FunctionSignature + MatchingMode::AnycastParameter + MatchingMode::MissingReturn + MatchingMode::IgnorePreserved) {
+							if node.type.isSubsetOf(cursor.argument, MatchingMode::FunctionSignature + MatchingMode::AnycastParameter + MatchingMode::MissingReturn + MatchingMode::IgnoreRetained) {
 								value.type(node.type)
 
 								cursor.used += 1

@@ -2,7 +2,7 @@
 
 extern {
 	func describe(title: String, fn: (): Void): Void
-	func it(title: string, fn: (#[preserve] done: Function): Void): Void
+	func it(title: string, fn: (#[retain] done: Function): Void): Void
 
 	console
 }

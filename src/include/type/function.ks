@@ -531,7 +531,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
 			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
 			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
-			paramMode += MatchingMode::IgnorePreserved if mode ~~ MatchingMode::IgnorePreserved
+			paramMode += MatchingMode::IgnoreRetained if mode ~~ MatchingMode::IgnoreRetained
 			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
 
 			if paramMode != 0 {

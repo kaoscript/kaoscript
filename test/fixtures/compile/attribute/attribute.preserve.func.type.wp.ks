@@ -1,8 +1,8 @@
 extern {
-	func it(title: String, fn: (#[preserve] done: Function): Void)
+	func it(title: String, fn: (#[retain] done: Function): Void)
 }
 
-func test(#[preserve] done) {
+func test(#[retain] done) {
 	done()
 }
 

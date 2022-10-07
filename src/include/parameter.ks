@@ -26,7 +26,7 @@ class Parameter extends AbstractNode {
 		@header: Boolean					= false
 		@internal
 		@nullable: Boolean					= false
-		@preserved: Boolean
+		@retained: Boolean
 		@rest: Boolean						= false
 		@tempVariables: Array				= []
 		@type: ParameterType
@@ -563,7 +563,7 @@ class Parameter extends AbstractNode {
 		super(data, parent, scope)
 
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Parameter, super.file())
-		@preserved = @options.parameters.preserve
+		@retained = @options.parameters.retain
 	} # }}}
 	analyse() { # {{{
 		@anonymous = !?@data.internal
@@ -712,8 +712,8 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		if @preserved {
-			@type.flagPreserved()
+		if @retained {
+			@type.flagRetained()
 		}
 
 		type = @type.getVariableType()
@@ -836,8 +836,8 @@ class Parameter extends AbstractNode {
 			@hasDefaultValue = false
 		}
 
-		if @preserved {
-			@type.flagPreserved()
+		if @retained {
+			@type.flagRetained()
 		}
 
 		var t = @type.getVariableType()
@@ -846,7 +846,7 @@ class Parameter extends AbstractNode {
 	} # }}}
 
 	proxy @type {
-		isPreserved
+		isRetained
 	}
 }
 

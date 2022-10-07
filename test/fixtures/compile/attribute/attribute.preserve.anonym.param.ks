@@ -2,6 +2,6 @@ extern {
 	func it(...)
 }
 
-it('print', func(#[preserve] done) {
+it('print', func(#[retain] done) {
 	done()
 })

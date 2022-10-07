@@ -20,7 +20,7 @@ class ParameterType extends Type {
 		@name: String?						= null
 		@nullableByDefault: Boolean
 		@passing: PassingMode
-		@preserved: Boolean					= false
+		@retained: Boolean					= false
 		@type: Type
 		@variableType: Type
 	}
@@ -73,8 +73,8 @@ class ParameterType extends Type {
 			}
 
 			for var attribute in data.attributes {
-				if attribute.kind == NodeKind::AttributeDeclaration && attribute.declaration.kind == NodeKind::Identifier && attribute.declaration.name == 'preserve' {
-					parameter.flagPreserved()
+				if attribute.kind == NodeKind::AttributeDeclaration && attribute.declaration.kind == NodeKind::Identifier && attribute.declaration.name == 'retain' {
+					parameter.flagRetained()
 				}
 			}
 
@@ -95,8 +95,8 @@ class ParameterType extends Type {
 
 			}
 
-			if data.preserved {
-				type.flagPreserved()
+			if data.retained {
+				type.flagRetained()
 			}
 
 			return type
@@ -126,14 +126,14 @@ class ParameterType extends Type {
 	clone(): ParameterType { # {{{
 		var that = new ParameterType(@scope, @name, @passing, @type, @min, @max, @default)
 
-		if @preserved {
-			that.flagPreserved()
+		if @retained {
+			that.flagRetained()
 		}
 
 		return that
 	} # }}}
-	flagPreserved(): this { # {{{
-		@preserved = true
+	flagRetained(): this { # {{{
+		@retained = true
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {}
@@ -158,8 +158,8 @@ class ParameterType extends Type {
 			}
 		}
 
-		if @preserved {
-			export.preserved = true
+		if @retained {
+			export.retained = true
 		}
 
 		return export
@@ -192,9 +192,9 @@ class ParameterType extends Type {
 	isOnlyLabeled() => @passing == PassingMode::LABELED
 	isOnlyPositional() => @passing == PassingMode::POSITIONAL
 	isPositional() => @passing ~~ PassingMode::POSITIONAL
-	isPreserved() => @preserved
+	isRetained() => @retained
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
-		if mode !~ MatchingMode::IgnorePreserved && @preserved && !value.isPreserved() {
+		if mode !~ MatchingMode::IgnoreRetained && @retained && !value.isRetained() {
 			return false
 		}
 		if mode !~ MatchingMode::IgnoreName && ?@name && ?value.name() && @name != value.name()  {

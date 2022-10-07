@@ -643,7 +643,7 @@ export class Compiler {
 			}
 			format: {}
 			parameters: {
-				preserve: false
+				retain: false
 			}
 			rules: {
 				assertNewStruct: true

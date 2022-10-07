@@ -1,3 +1,3 @@
-func test(#[preserve] done) {
+func test(#[retain] done) {
 	done()
 }

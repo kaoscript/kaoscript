@@ -12,7 +12,7 @@ import {
 }
 
 describe('diskspace', func() {
-	it('print', func(#[preserve] done) { // {{{
+	it('print', func(#[retain] done) { // {{{
 		var d = await disks()
 
 		console.log(d)

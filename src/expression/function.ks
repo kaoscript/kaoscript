@@ -68,9 +68,9 @@ class AnonymousFunctionExpression extends Expression {
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
-	hasPreservedParameter() { # {{{
+	hasRetainedParameters() { # {{{
 		for var parameter in @parameters {
-			return true if parameter.isPreserved()
+			return true if parameter.isRetained()
 		}
 
 		return false
@@ -124,7 +124,7 @@ class AnonymousFunctionExpression extends Expression {
 
 		blockRouter.done()
 
-		if @hasPreservedParameter() {
+		if @hasRetainedParameters() {
 			fragments.code(', true')
 		}
 
@@ -228,9 +228,9 @@ class ArrowFunctionExpression extends Expression {
 			return 0
 		}
 	} # }}}
-	hasPreservedParameter() { # {{{
+	hasRetainedParameters() { # {{{
 		for var parameter in @parameters {
-			return true if parameter.isPreserved()
+			return true if parameter.isRetained()
 		}
 
 		return false
@@ -314,7 +314,7 @@ class ArrowFunctionExpression extends Expression {
 
 			blockRouter.done()
 
-			if @hasPreservedParameter() {
+			if @hasRetainedParameters() {
 				fragments.code(', true')
 			}
 

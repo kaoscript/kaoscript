@@ -1,4 +1,4 @@
-#![preserve-parameters]
+#![retain-parameters]
 
 func test(done) {
 	done()

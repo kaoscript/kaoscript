@@ -380,7 +380,7 @@ class ParseAttribute extends Attribute {
 	} # }}}
 }
 
-class PreserveAttribute extends Attribute {
+class RetainAttribute extends Attribute {
 	private {
 		@data
 	}
@@ -398,13 +398,13 @@ class PreserveAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
-		options.parameters.preserve = true
+		options.parameters.retain = true
 
 		return options
 	} # }}}
 }
 
-class PreserveParametersAttribute extends PreserveAttribute {
+class RetainParametersAttribute extends RetainAttribute {
 	static {
 		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
@@ -560,9 +560,9 @@ Attribute.register(ErrorAttribute)
 Attribute.register(FormatAttribute)
 Attribute.register(IfAttribute)
 Attribute.register(ParseAttribute)
-Attribute.register(PreserveAttribute)
-Attribute.register(PreserveParametersAttribute)
 Attribute.register(ParseAttribute)
+Attribute.register(RetainAttribute)
+Attribute.register(RetainParametersAttribute)
 Attribute.register(RulesAttribute)
 Attribute.register(RuntimeAttribute)
 Attribute.register(TargetAttribute)
