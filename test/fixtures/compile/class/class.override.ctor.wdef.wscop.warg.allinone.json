@@ -34,7 +34,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "x",
+                "external": "x",
+                "internal": "x",
                 "type": "String",
                 "min": 0,
                 "max": 1,
@@ -43,7 +44,8 @@
                 "defaultValue": "eyJraW5kIjo3MCwidmFsdWUiOiIiLCJzdGFydCI6eyJsaW5lIjo1LCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjUsImNvbHVtbiI6Mjh9fQ=="
               },
               {
-                "name": "y",
+                "external": "y",
+                "internal": "y",
                 "type": "String",
                 "min": 0,
                 "max": 1,
@@ -80,7 +82,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "x",
+                "external": "x",
+                "internal": "x",
                 "type": "String",
                 "min": 0,
                 "max": 1,
@@ -89,7 +92,8 @@
                 "defaultValue": "eyJraW5kIjo3MCwidmFsdWUiOiIiLCJzdGFydCI6eyJsaW5lIjo1LCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjUsImNvbHVtbiI6Mjh9fQ=="
               },
               {
-                "name": "y",
+                "external": "y",
+                "internal": "y",
                 "type": "String",
                 "min": 0,
                 "max": 1,

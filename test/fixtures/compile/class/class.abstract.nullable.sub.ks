@@ -3,7 +3,7 @@ abstract class Type {
 }
 
 class FunctionType extends Type {
-	equals(b?): Boolean { // {{{
+	equals(b?): Boolean { # {{{
 		return true
 	}
 }

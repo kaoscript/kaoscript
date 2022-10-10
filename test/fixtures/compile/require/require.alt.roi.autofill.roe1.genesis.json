@@ -116,7 +116,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "values",
+                  "external": "values",
+                  "internal": "values",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -138,14 +139,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "callback",
+                  "external": "callback",
+                  "internal": "callback",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "thisArg",
+                  "external": "thisArg",
+                  "internal": "thisArg",
                   "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
@@ -167,14 +170,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "callback",
+                  "external": "callback",
+                  "internal": "callback",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "thisArg",
+                  "external": "thisArg",
+                  "internal": "thisArg",
                   "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
@@ -196,14 +201,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "searchElement",
+                  "external": "searchElement",
+                  "internal": "searchElement",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "fromIndex",
+                  "external": "fromIndex",
+                  "internal": "fromIndex",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -225,7 +232,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "separator",
+                  "external": "separator",
+                  "internal": "separator",
                   "type": {
                     "reference": 4
                   },
@@ -263,7 +271,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "elements",
+                  "external": "elements",
+                  "internal": "elements",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -295,7 +304,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "begin",
+                  "external": "begin",
+                  "internal": "begin",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -304,7 +314,8 @@
                   "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjI1fX0="
                 },
                 {
-                  "name": "end",
+                  "external": "end",
+                  "internal": "end",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -326,14 +337,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "callback",
+                  "external": "callback",
+                  "internal": "callback",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "thisArg",
+                  "external": "thisArg",
+                  "internal": "thisArg",
                   "type": "Dictionary?",
                   "min": 0,
                   "max": 1,
@@ -355,7 +368,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "compare",
+                  "external": "compare",
+                  "internal": "compare",
                   "type": "Function?",
                   "min": 0,
                   "max": 1,
@@ -379,14 +393,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "start",
+                  "external": "start",
+                  "internal": "start",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "delete",
+                  "external": "delete",
+                  "internal": "delete",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -395,7 +411,8 @@
                   "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0M319"
                 },
                 {
-                  "name": "items",
+                  "external": "items",
+                  "internal": "items",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -431,7 +448,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "elements",
+                  "external": "elements",
+                  "internal": "elements",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -451,7 +469,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "index",
+                  "external": "index",
+                  "internal": "index",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -502,7 +521,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "index",
+                  "external": "index",
+                  "internal": "index",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
@@ -524,7 +544,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "index",
+                  "external": "index",
+                  "internal": "index",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
@@ -544,7 +565,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "strings",
+                  "external": "strings",
+                  "internal": "strings",
                   "type": {
                     "kind": "reference",
                     "name": 3,
@@ -574,7 +596,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "numbers",
+                  "external": "numbers",
+                  "internal": "numbers",
                   "type": {
                     "kind": "reference",
                     "name": 3,
@@ -602,7 +625,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "search",
+                  "external": "search",
+                  "internal": "search",
                   "type": {
                     "reference": 4
                   },
@@ -611,7 +635,8 @@
                   "default": false
                 },
                 {
-                  "name": "fromIndex",
+                  "external": "fromIndex",
+                  "internal": "fromIndex",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -633,7 +658,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "search",
+                  "external": "search",
+                  "internal": "search",
                   "type": {
                     "reference": 4
                   },
@@ -642,7 +668,8 @@
                   "default": false
                 },
                 {
-                  "name": "fromIndex",
+                  "external": "fromIndex",
+                  "internal": "fromIndex",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -664,7 +691,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "regexp",
+                  "external": "regexp",
+                  "internal": "regexp",
                   "type": "RegExp",
                   "min": 1,
                   "max": 1,
@@ -693,7 +721,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "pattern",
+                  "external": "pattern",
+                  "internal": "pattern",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -708,7 +737,8 @@
                   "default": false
                 },
                 {
-                  "name": "replacement",
+                  "external": "replacement",
+                  "internal": "replacement",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -738,7 +768,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "regexp",
+                  "external": "regexp",
+                  "internal": "regexp",
                   "type": "RegExp",
                   "min": 1,
                   "max": 1,
@@ -758,14 +789,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "beginIndex",
+                  "external": "beginIndex",
+                  "internal": "beginIndex",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "endIndex",
+                  "external": "endIndex",
+                  "internal": "endIndex",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -789,7 +822,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "separator",
+                  "external": "separator",
+                  "internal": "separator",
                   "type": {
                     "kind": "union",
                     "nullable": true,
@@ -808,7 +842,8 @@
                   "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo0OH19"
                 },
                 {
-                  "name": "limit",
+                  "external": "limit",
+                  "internal": "limit",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -838,14 +873,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "start",
+                  "external": "start",
+                  "internal": "start",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "length",
+                  "external": "length",
+                  "internal": "length",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -869,14 +906,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "indexStart",
+                  "external": "indexStart",
+                  "internal": "indexStart",
                   "type": "Number",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "indexEnd",
+                  "external": "indexEnd",
+                  "internal": "indexEnd",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -970,7 +1009,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "emptyLines",
+                  "external": "emptyLines",
+                  "internal": "emptyLines",
                   "type": "Boolean",
                   "min": 0,
                   "max": 1,

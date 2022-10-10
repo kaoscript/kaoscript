@@ -60,7 +60,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "search",
+                  "external": "search",
+                  "internal": "search",
                   "type": {
                     "reference": 1
                   },
@@ -69,7 +70,8 @@
                   "default": false
                 },
                 {
-                  "name": "length",
+                  "external": "length",
+                  "internal": "length",
                   "type": "Number",
                   "min": 0,
                   "max": 1,

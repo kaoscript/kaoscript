@@ -85,7 +85,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": {
                     "reference": 1
                   },
@@ -119,7 +120,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "luma",
+                  "external": "luma",
+                  "internal": "luma",
                   "type": "Number",
                   "min": 1,
                   "max": 1,

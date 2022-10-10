@@ -30,7 +30,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "text",
+                  "external": "text",
+                  "internal": "text",
                   "type": "String",
                   "min": 1,
                   "max": 1,

@@ -7,12 +7,12 @@ import {
 type float = Number
 
 var $caster = {
-	percentage(n): float { // {{{
+	percentage(n): float { # {{{
 		return Float.parse(n).limit(0, 100).round(1)
-	} // }}}
+	} # }}}
 }
 
-func srgb(that, color): bool { // {{{
+func srgb(that, color): bool { # {{{
 	if var match ?= /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color) {
 		that._red = Math.round(2.55 * $caster.percentage(match[1]))
 		that._green = Math.round(2.55 * $caster.percentage(match[2]))

@@ -25,7 +25,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "messages",
+                "external": "messages",
+                "internal": "messages",
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",

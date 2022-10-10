@@ -60,7 +60,7 @@ namespace Build {
 				parameters.functions[function.index()] = function
 
 				for var parameter in function.parameters() when !parameter.isOnlyLabeled() {
-					var name = parameter.name() ?? '_'
+					var name = parameter.getExternalName() ?? '_'
 
 					if var group ?= parameters.names[name] {
 						group.push(`\(function.index())`)
@@ -326,7 +326,7 @@ namespace Build {
 
 					if parameter.isLabeled() {
 						names = {
-							[parameter.name()]: [type.hashCode()]
+							[parameter.getExternalName()]: [type.hashCode()]
 						}
 					}
 
@@ -509,7 +509,7 @@ namespace Build {
 				if ?names {
 					names = {...names}
 
-					var name = parameter.name()
+					var name = parameter.getExternalName()
 
 					if var hashes ?= names[name] {
 						names[name] = [...hashes, type.hashCode()]
@@ -701,7 +701,7 @@ namespace Build {
 				}
 
 				if parameter.isOnlyLabeled() && parameter.min() > 0 {
-					byNames.push(parameter.name())
+					byNames.push(parameter.getExternalName())
 				}
 			}
 

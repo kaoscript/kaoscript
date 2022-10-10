@@ -57,7 +57,8 @@
         "exhaustive": true,
         "parameters": [
           {
-            "name": "x",
+            "external": "x",
+            "internal": "x",
             "type": "String",
             "min": 1,
             "max": 1,
@@ -99,7 +100,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "self",
+                  "external": "self",
+                  "internal": "self",
                   "type": {
                     "reference": 2
                   },
@@ -108,7 +110,8 @@
                   "default": false
                 },
                 {
-                  "name": "bind",
+                  "external": "bind",
+                  "internal": "bind",
                   "type": "Any?",
                   "min": 0,
                   "max": 1,
@@ -117,7 +120,8 @@
                   "defaultValue": "eyJraW5kIjo1NCwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjMwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6MzR9fQ=="
                 },
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",

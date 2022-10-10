@@ -51,7 +51,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "quote",
+                  "external": "quote",
+                  "internal": "quote",
                   "type": {
                     "reference": 1
                   },
@@ -60,7 +61,8 @@
                   "default": false
                 },
                 {
-                  "name": "escape",
+                  "external": "escape",
+                  "internal": "escape",
                   "type": {
                     "reference": 1
                   },
@@ -84,7 +86,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "quote",
+                  "external": "quote",
+                  "internal": "quote",
                   "type": {
                     "kind": "array",
                     "rest": "String"
@@ -96,7 +99,8 @@
                   "defaultValue": "eyJraW5kIjo0LCJ2YWx1ZXMiOlt7ImtpbmQiOjcwLCJ2YWx1ZSI6IlwiIiwic3RhcnQiOnsibGluZSI6NSwiY29sdW1uIjoyOX0sImVuZCI6eyJsaW5lIjo1LCJjb2x1bW4iOjMyfX0seyJraW5kIjo3MCwidmFsdWUiOiInIiwic3RhcnQiOnsibGluZSI6NSwiY29sdW1uIjozNH0sImVuZCI6eyJsaW5lIjo1LCJjb2x1bW4iOjM3fX1dLCJzdGFydCI6eyJsaW5lIjo1LCJjb2x1bW4iOjI4fSwiZW5kIjp7ImxpbmUiOjUsImNvbHVtbiI6Mzh9fQ=="
                 },
                 {
-                  "name": "escape",
+                  "external": "escape",
+                  "internal": "escape",
                   "type": {
                     "reference": 1
                   },

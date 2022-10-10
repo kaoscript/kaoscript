@@ -214,7 +214,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "min",
+                  "external": "min",
+                  "internal": "min",
                   "type": {
                     "reference": 5
                   },
@@ -223,7 +224,8 @@
                   "default": false
                 },
                 {
-                  "name": "max",
+                  "external": "max",
+                  "internal": "max",
                   "type": {
                     "reference": 5
                   },
@@ -247,7 +249,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "max",
+                  "external": "max",
+                  "internal": "max",
                   "type": {
                     "reference": 5
                   },
@@ -271,7 +274,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "precision",
+                  "external": "precision",
+                  "internal": "precision",
                   "type": {
                     "reference": 5
                   },
@@ -311,7 +315,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "base",
+                  "external": "base",
+                  "internal": "base",
                   "type": {
                     "reference": 5
                   },

@@ -37,7 +37,8 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "value",
+                "external": "value",
+                "internal": "value",
                 "type": "Number",
                 "min": 1,
                 "max": 1,

@@ -82,7 +82,8 @@
             "sealed": true,
             "parameters": [
               {
-                "name": "year",
+                "external": "year",
+                "internal": "year",
                 "type": {
                   "reference": 3
                 },
@@ -91,7 +92,8 @@
                 "default": false
               },
               {
-                "name": "month",
+                "external": "month",
+                "internal": "month",
                 "type": {
                   "reference": 3
                 },
@@ -100,7 +102,8 @@
                 "default": false
               },
               {
-                "name": "day",
+                "external": "day",
+                "internal": "day",
                 "type": {
                   "reference": 3
                 },
@@ -111,7 +114,8 @@
                 "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjU1fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjU2fX0="
               },
               {
-                "name": "hours",
+                "external": "hours",
+                "internal": "hours",
                 "type": {
                   "reference": 3
                 },
@@ -122,7 +126,8 @@
                 "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjcxfX0="
               },
               {
-                "name": "minutes",
+                "external": "minutes",
+                "internal": "minutes",
                 "type": {
                   "reference": 3
                 },
@@ -133,7 +138,8 @@
                 "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjg3fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjg4fX0="
               },
               {
-                "name": "seconds",
+                "external": "seconds",
+                "internal": "seconds",
                 "type": {
                   "reference": 3
                 },
@@ -144,7 +150,8 @@
                 "defaultValue": "eyJraW5kIjo4MCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjEwNH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjoxMDV9fQ=="
               },
               {
-                "name": "milliseconds",
+                "external": "milliseconds",
+                "internal": "milliseconds",
                 "type": {
                   "reference": 3
                 },

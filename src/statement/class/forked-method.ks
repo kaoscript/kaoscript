@@ -50,11 +50,11 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 				parameters += ', '
 			}
 
-			ctrl.code(parameter.name())
+			ctrl.code(parameter.getExternalName())
 
-			parameters += parameter.name()
+			parameters += parameter.getExternalName()
 
-			names[parameter.name()] = true
+			names[parameter.getExternalName()] = true
 		}
 
 		ctrl.code(')').step()
@@ -75,7 +75,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 						comma = true
 					}
 
-					var name = parameter.name()
+					var name = parameter.getExternalName()
 
 					if parameter.isVarargs() {
 						if names[name] {
@@ -109,7 +109,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 				var ctrl3 = ctrl.newControl()
 
-				ctrl3.code(`if(\(parameter.name()).length === 1)`).step()
+				ctrl3.code(`if(\(parameter.getExternalName()).length === 1)`).step()
 
 				for var fork in @forks {
 					var ctrl2 = ctrl3.newControl()
@@ -118,10 +118,10 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 					var mut index = 0
 
-					for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+					for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 						ctrl2.code(' && ') unless index == 0
 
-						var literal = new Literal(false, this, @scope(), `\(parameter.name())[0]`)
+						var literal = new Literal(false, this, @scope(), `\(parameter.getExternalName())[0]`)
 
 						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 
@@ -130,7 +130,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 					ctrl2.code(`)`).step()
 
-					ctrl2.line(`return this.__ks_func_\(@name)_\(fork.index())(\(parameter.name())[0])`)
+					ctrl2.line(`return this.__ks_func_\(@name)_\(fork.index())(\(parameter.getExternalName())[0])`)
 
 					ctrl2.done()
 				}
@@ -151,10 +151,10 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 				var mut index = 0
 
-				for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+				for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 					ctrl2.code(' && ') unless index == 0
 
-					var literal = new Literal(false, this, @scope(), parameter.name())
+					var literal = new Literal(false, this, @scope(), parameter.getExternalName())
 
 					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 

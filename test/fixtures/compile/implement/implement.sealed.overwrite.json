@@ -68,7 +68,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "hours",
+                  "external": "hours",
+                  "internal": "hours",
                   "type": "Number",
                   "min": 1,
                   "max": 1,

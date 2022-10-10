@@ -32,7 +32,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "sat",
+                  "external": "sat",
+                  "internal": "sat",
                   "type": "Boolean",
                   "min": 0,
                   "max": 1,

@@ -48,14 +48,14 @@ export class Color {
 
 var $util = {
 	formatToHex(that: Color): String => $hex(that)
-	formatToSRGB(that: Color): String { // {{{
+	formatToSRGB(that: Color): String { # {{{
 		if that._alpha == 1 {
 			return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 		}
 		else {
 			return 'rgba(' + that._red + ', ' + that._green + ', ' + that._blue + ', ' + that._alpha + ')'
 		}
-	} // }}}
+	} # }}}
 }
 
 Color.registerSpace!({

@@ -17,7 +17,8 @@
         "exhaustive": true,
         "parameters": [
           {
-            "name": "coord",
+            "external": "coord",
+            "internal": "coord",
             "type": {
               "kind": "dictionary",
               "properties": {

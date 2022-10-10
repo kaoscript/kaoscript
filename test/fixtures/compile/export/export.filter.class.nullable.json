@@ -56,7 +56,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "foo",
+                "external": "foo",
+                "internal": "foo",
                 "type": {
                   "kind": "reference",
                   "name": 2,

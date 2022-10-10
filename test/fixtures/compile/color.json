@@ -567,7 +567,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "args",
+                "external": "args",
+                "internal": "args",
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
@@ -653,7 +654,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -683,7 +685,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 7
                   },
@@ -692,7 +695,8 @@
                   "default": false
                 },
                 {
-                  "name": "percentage",
+                  "external": "percentage",
+                  "internal": "percentage",
                   "type": {
                     "reference": 10
                   },
@@ -701,7 +705,8 @@
                   "default": false
                 },
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": {
                     "reference": 8
                   },
@@ -712,7 +717,8 @@
                   "defaultValue": "eyJraW5kIjozNCwiZW51bSI6eyJraW5kIjo1NCwibmFtZSI6IlNwYWNlIiwic3RhcnQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjY4fSwiZW5kIjp7ImxpbmUiOjcwNiwiY29sdW1uIjo3M319LCJtZW1iZXIiOnsia2luZCI6NTQsIm5hbWUiOiJTUkdCIiwic3RhcnQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjc1fSwiZW5kIjp7ImxpbmUiOjcwNiwiY29sdW1uIjo3OX19LCJzdGFydCI6eyJsaW5lIjo3MDYsImNvbHVtbiI6Njh9LCJlbmQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjc5fX0="
                 },
                 {
-                  "name": "alpha",
+                  "external": "alpha",
+                  "internal": "alpha",
                   "type": "Boolean",
                   "min": 0,
                   "max": 1,
@@ -736,7 +742,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -778,7 +785,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 7
                   },
@@ -800,7 +808,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "target",
+                  "external": "target",
+                  "internal": "target",
                   "type": {
                     "reference": 7
                   },
@@ -824,7 +833,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 7
                   },
@@ -848,7 +858,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 7
                   },
@@ -870,7 +881,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "format",
+                  "external": "format",
+                  "internal": "format",
                   "type": "String",
                   "min": 0,
                   "max": 1,
@@ -892,7 +904,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -914,7 +927,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "name",
+                  "external": "name",
+                  "internal": "name",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
@@ -934,7 +948,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "endColor",
+                  "external": "endColor",
+                  "internal": "endColor",
                   "type": {
                     "reference": 7
                   },
@@ -943,7 +958,8 @@
                   "default": false
                 },
                 {
-                  "name": "length",
+                  "external": "length",
+                  "internal": "length",
                   "type": {
                     "reference": 9
                   },
@@ -973,7 +989,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "model",
+                  "external": "model",
+                  "internal": "model",
                   "type": "String",
                   "min": 0,
                   "max": 1,
@@ -1045,7 +1062,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": "String",
                   "min": 1,
                   "max": 1,
@@ -1091,7 +1109,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -1119,7 +1138,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 7
                   },
@@ -1128,7 +1148,8 @@
                   "default": false
                 },
                 {
-                  "name": "tripleA",
+                  "external": "tripleA",
+                  "internal": "tripleA",
                   "type": "Boolean",
                   "min": 0,
                   "max": 1,
@@ -1150,7 +1171,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "functions",
+                  "external": "functions",
+                  "internal": "functions",
                   "type": {
                     "kind": "reference",
                     "name": "Array",
@@ -1161,7 +1183,8 @@
                         "exhaustive": true,
                         "parameters": [
                           {
-                            "name": "color",
+                            "external": "color",
+                            "internal": "color",
                             "type": {
                               "reference": 7
                             },
@@ -1193,14 +1216,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "name",
+                  "external": "name",
+                  "internal": "name",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": {
                     "kind": "union",
                     "types": [
@@ -1228,7 +1253,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "percentage",
+                  "external": "percentage",
+                  "internal": "percentage",
                   "type": {
                     "reference": 10
                   },
@@ -1264,7 +1290,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": "String",
                   "min": 1,
                   "max": 1,
@@ -1286,7 +1313,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "percentage",
+                  "external": "percentage",
+                  "internal": "percentage",
                   "type": {
                     "reference": 10
                   },
@@ -1310,7 +1338,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "percentage",
+                  "external": "percentage",
+                  "internal": "percentage",
                   "type": {
                     "reference": 10
                   },
@@ -1344,7 +1373,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
@@ -1374,7 +1404,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
@@ -1404,7 +1435,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "value",
+                  "external": "value",
+                  "internal": "value",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
@@ -1426,7 +1458,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -1454,7 +1487,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -1482,7 +1516,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -1508,7 +1543,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
@@ -1536,14 +1572,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "format",
+                  "external": "format",
+                  "internal": "format",
                   "type": "String",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "formatter",
+                  "external": "formatter",
+                  "internal": "formatter",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
@@ -1563,14 +1601,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "format",
+                  "external": "format",
+                  "internal": "format",
                   "type": "String",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "parser",
+                  "external": "parser",
+                  "internal": "parser",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
@@ -1590,7 +1630,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": "Dictionary",
                   "min": 1,
                   "max": 1,

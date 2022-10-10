@@ -65,7 +65,7 @@ local:
 	@make restore
 
 dev: export DEBUG = 1
-dev: export XARGS = 0
+dev: export XARGS = 1
 dev:
 	@# clear terminal
 	@make cls
@@ -74,13 +74,11 @@ dev:
 	@# @make clean
 
 	@# compile compiler
-	@make comp
+	@# @make comp
 
 	@# tests
-	node test/compile.dev.js "compile "
+	@# node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
-	@# node test/compile.dev.js "compile class."
-	@# node test/compile.dev.js "compile operator.spread.func.args.type.sfe"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

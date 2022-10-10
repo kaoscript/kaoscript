@@ -20,7 +20,7 @@ var $aliases = {}
 var $components = {}
 var $formatters = {}
 
-var $names = { // {{{
+var $names = { # {{{
 	'aliceblue': 'f0f8ff'
 	'antiquewhite': 'faebd7'
 	'aqua': '0ff'
@@ -169,13 +169,13 @@ var $names = { // {{{
 	'whitesmoke': 'f5f5f5'
 	'yellow': 'ff0'
 	'yellowgreen': '9acd32'
-} // }}}
+} # }}}
 
-func $blend(x: float, y: float, percentage: float): float { // {{{
+func $blend(x: float, y: float, percentage: float): float { # {{{
 	return (1 - percentage) * x + percentage * y
-} // }}}
+} # }}}
 
-func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
+func $binder(last: func, components, first: func, ...firstArgs): func { # {{{
 	var that = first**(...firstArgs)
 
 	var lastArgs = [that[component.field] for component, name of components]
@@ -183,27 +183,27 @@ func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
 	lastArgs.push(that)
 
 	return last**(...lastArgs)
-} // }}}
+} # }}}
 
 namespace $caster {
-	func alpha(n? = null, percentage: bool = false): float { // {{{
+	func alpha(n? = null, percentage: bool = false): float { # {{{
 		var mut i: Number = Float.parse(n)
 
 		return 1 if i == NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
-	} // }}}
+	} # }}}
 
-	func ff(n): int { // {{{
+	func ff(n): int { # {{{
 		return Float.parse(n).limit(0, 255).round()
-	} // }}}
+	} # }}}
 
-	func percentage(n): float { // {{{
+	func percentage(n): float { # {{{
 		return Float.parse(n).limit(0, 100).round(1)
-	} // }}}
+	} # }}}
 
 	export *
 }
 
-func $component(component, name: string, space: string): void { // {{{
+func $component(component, name: string, space: string): void { # {{{
 	component.field = '_' + name
 
 	$spaces[space].components[name] = component
@@ -216,9 +216,9 @@ func $component(component, name: string, space: string): void { // {{{
 
 	$components[name].families.push(space)
 	$components[name].spaces[space] = true
-} // }}}
+} # }}}
 
-func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): Color | dict ~ Error { // {{{
+func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): Color | dict ~ Error { # {{{
 	if ?(s = $spaces[that._space]).converters[space] {
 		var args = [that[component.field] for component, name of s.components]
 
@@ -233,9 +233,9 @@ func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): C
 	else {
 		throw new Error(`It can't convert a color from '\(that._space)' to '\(space)' spaces.`)
 	}
-} // }}}
+} # }}}
 
-func $find(from: string, to: string): void { // {{{
+func $find(from: string, to: string): void { # {{{
 	for var _, name of $spaces[from].converters {
 		if ?$spaces[name].converters[to] {
 			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
@@ -243,9 +243,9 @@ func $find(from: string, to: string): void { // {{{
 			return
 		}
 	}
-} // }}}
+} # }}}
 
-func $from(that: Color, args: array): Color { // {{{
+func $from(that: Color, args: array): Color { # {{{
 	that._dummy = false
 
 	if args.length == 0 {
@@ -263,9 +263,9 @@ func $from(that: Color, args: array): Color { // {{{
 	that._dummy = true
 
 	return that
-} // }}}
+} # }}}
 
-func $hex(that: Color) { // {{{
+func $hex(that: Color) { # {{{
 	var chars = '0123456789abcdef'
 
 	var r1 = that._red >> 4
@@ -294,10 +294,10 @@ func $hex(that: Color) { // {{{
 
 		return '#' + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2) + chars.charAt(a1) + chars.charAt(a2)
 	}
-} // }}}
+} # }}}
 
 var $parsers = {
-	srgb(that: Color, args: array): bool { // {{{
+	srgb(that: Color, args: array): bool { # {{{
 		if args.length == 1 {
 			if args[0] is number {
 				that._space = Space::SRGB
@@ -450,8 +450,8 @@ var $parsers = {
 		}
 
 		return false
-	} // }}}
-	gray(that: Color, args: array): bool { // {{{
+	} # }}}
+	gray(that: Color, args: array): bool { # {{{
 		if args.length >= 1 {
 			if Number.isFinite(Float.parse(args[0])) {
 				that._space = Space::SRGB
@@ -480,16 +480,16 @@ var $parsers = {
 		}
 
 		return false
-	} // }}}
+	} # }}}
 }
 
-func $space(name: string): void { // {{{
+func $space(name: string): void { # {{{
 	$spaces[name] = $spaces[name] ?? {
 		alias: {}
 		converters: {}
 		components: {}
 	}
-} // }}}
+} # }}}
 
 export enum Space<string> {
 }
@@ -551,13 +551,13 @@ export class Color {
 	}
 
 	static {
-		from(...args): Color | bool { // {{{
+		from(...args): Color | bool { # {{{
 			var color = $from(new Color(), args)
 
 			return false if color._dummy else color
-		} // }}}
+		} # }}}
 
-		greyscale(...args): Color | bool { // {{{
+		greyscale(...args): Color | bool { # {{{
 			var mut model = args.last()
 			if model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY' {
 				args.pop()
@@ -569,31 +569,31 @@ export class Color {
 			var color = $from(new Color(), args)
 
 			return false if color._dummy else color.greyscale(model)
-		} // }}}
+		} # }}}
 
-		hex(...args): String | bool { // {{{
+		hex(...args): String | bool { # {{{
 			var color = $from(new Color(), args)
 
 			return false if color._dummy else color.hex()
-		} // }}}
+		} # }}}
 
-		negative(...args): Color | bool { // {{{
+		negative(...args): Color | bool { # {{{
 			var color = $from(new Color(), args)
 
 			return false if color._dummy else color.negative()
-		} // }}}
+		} # }}}
 
-		registerFormatter(format: string, formatter: func): void { // {{{
+		registerFormatter(format: string, formatter: func): void { # {{{
 			$formatters[format] = {
 				formatter: formatter
 			}
-		} // }}}
+		} # }}}
 
-		registerParser(format: string, parser: func): void { // {{{
+		registerParser(format: string, parser: func): void { # {{{
 			$parsers[format] = parser
-		} // }}}
+		} # }}}
 
-		registerSpace(space: Dictionary) { // {{{
+		registerSpace(space: Dictionary) { # {{{
 			var spaces = Dictionary.keys($spaces)
 
 			$space(space.name)
@@ -688,22 +688,22 @@ export class Color {
 			}
 			//console.log($spaces[space.name])
 			//console.log($components)
-		} // }}}
+		} # }}}
 	}
 
-	constructor(...args) { // {{{
+	constructor(...args) { # {{{
 		$from(this, args)
-	} // }}}
+	} # }}}
 
 	alpha(): int => this._alpha
 
-	alpha(value: string | number): Color { // {{{
+	alpha(value: string | number): Color { # {{{
 		this._alpha = $caster.alpha(value)
 
 		return this
-	} // }}}
+	} # }}}
 
-	blend(mut color: Color, mut percentage: float, mut space: Space = Space::SRGB, alpha: bool = false): Color { // {{{
+	blend(mut color: Color, mut percentage: float, mut space: Space = Space::SRGB, alpha: bool = false): Color { # {{{
 		if alpha {
 			var w = (percentage * 2) - 1
 			var a = color._alpha - this._alpha
@@ -740,22 +740,22 @@ export class Color {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 
-	clearer(value: string | number): Color { // {{{
+	clearer(value: string | number): Color { # {{{
 		if value is String && value.endsWith('%') {
 			return this.alpha(this._alpha * ((100 - value.toFloat()) / 100))
 		}
 		else {
 			return this.alpha(this._alpha - value.toFloat())
 		}
-	} // }}}
+	} # }}}
 
-	clone(): Color { // {{{
+	clone(): Color { # {{{
 		return this.copy(new Color())
-	} // }}}
+	} # }}}
 
-	contrast(mut color: Color) { // {{{
+	contrast(mut color: Color) { # {{{
 		var a = this._alpha
 
 		if a == 1 {
@@ -801,9 +801,9 @@ export class Color {
 				max: max
 			}
 		}
-	} // }}}
+	} # }}}
 
-	copy(target: Color): Color { // {{{
+	copy(target: Color): Color { # {{{
 		var s1 = this._space
 		var s2 = target._space
 
@@ -820,33 +820,33 @@ export class Color {
 		target.space(s2)
 
 		return target
-	} // }}}
+	} # }}}
 
-	distance(mut color: Color): float { // {{{
+	distance(mut color: Color): float { # {{{
 		var that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
 
 		return Math.sqrt(3 * (color._red - that._red) * (color._red - that._red) + 4 * (color._green - that._green) * (color._green - that._green) + 2 * (color._blue - that._blue) * (color._blue - that._blue))
-	} // }}}
+	} # }}}
 
-	equals(color: Color): bool { // {{{
+	equals(color: Color): bool { # {{{
 		return this.hex() == color.hex()
-	} // }}}
+	} # }}}
 
-	format(format: string = this._space) { // {{{
+	format(format: string = this._space) { # {{{
 		if var format ?= $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 
-	from(...args): Color { // {{{
+	from(...args): Color { # {{{
 		return $from(this, args)
-	} // }}}
+	} # }}}
 
-	private getField(name) { // {{{
+	private getField(name) { # {{{
 		var component = $components[name]
 
 		if ?component.spaces[this._space] {
@@ -858,9 +858,9 @@ export class Color {
 		else {
 			return this.like(component.families[0])[component.field]
 		}
-	} // }}}
+	} # }}}
 
-	gradient(endColor: Color, mut length: int): array<Color> { // {{{
+	gradient(endColor: Color, mut length: int): array<Color> { # {{{
 		var gradient: array<Color> = [this]
 
 		if length > 0 {
@@ -887,9 +887,9 @@ export class Color {
 		gradient.push(endColor)
 
 		return gradient
-	} // }}}
+	} # }}}
 
-	greyscale(model: string = 'BT709'): Color { // {{{
+	greyscale(model: string = 'BT709'): Color { # {{{
 		this.space(Space::SRGB)
 
 		if model == 'BT709' {
@@ -909,18 +909,18 @@ export class Color {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 
-	hex(): string { // {{{
+	hex(): string { # {{{
 		return $hex(this.like(Space::SRGB))
-	} // }}}
+	} # }}}
 
-	isBlack(): bool { // {{{
+	isBlack(): bool { # {{{
 		var that = this.like(Space::SRGB)
 		return that._red == 0 && that._green == 0 && that._blue == 0
-	} // }}}
+	} # }}}
 
-	isTransparent(): bool { // {{{
+	isTransparent(): bool { # {{{
 		if this._alpha == 0 {
 			var that = this.like(Space::SRGB)
 			return that._red == 0 && that._green == 0 && that._blue == 0
@@ -928,14 +928,14 @@ export class Color {
 		else {
 			return false
 		}
-	} // }}}
+	} # }}}
 
-	isWhite(): bool { // {{{
+	isWhite(): bool { # {{{
 		var that = this.like(Space::SRGB)
 		return that._red == 255 && that._green == 255 && that._blue == 255
-	} // }}}
+	} # }}}
 
-	like(mut space: string) { // {{{
+	like(mut space: string) { # {{{
 		space = $aliases[space] ?? space
 
 		if var value ?= Space(space) {
@@ -945,9 +945,9 @@ export class Color {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 
-	luminance(): Number { // {{{
+	luminance(): Number { # {{{
 		var that = this.like(Space::SRGB)
 
 		var mut r: float = that._red:!float / 255
@@ -960,9 +960,9 @@ export class Color {
 		b = b / 12.92 if b < 0.03928 else Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
-	} // }}}
+	} # }}}
 
-	negative(): Color { // {{{
+	negative(): Color { # {{{
 		this.space(Space::SRGB)
 
 		this._red ^^= 0xff
@@ -970,31 +970,31 @@ export class Color {
 		this._blue ^^= 0xff
 
 		return this
-	} // }}}
+	} # }}}
 
-	opaquer(value: string | number): Color { // {{{
+	opaquer(value: string | number): Color { # {{{
 		if value is String && value.endsWith('%') {
 			return this.alpha(this._alpha * ((100 + value.toFloat()) / 100))
 		}
 		else {
 			return this.alpha(this._alpha + value.toFloat())
 		}
-	} // }}}
+	} # }}}
 
-	readable(color: Color, tripleA: bool = false): bool { // {{{
+	readable(color: Color, tripleA: bool = false): bool { # {{{
 		if tripleA {
 			return this.contrast(color).ratio >= 7
 		}
 		else {
 			return this.contrast(color).ratio >= 4.5
 		}
-	} // }}}
+	} # }}}
 
-	scheme(functions: array<(color: Color)>): array { // {{{
+	scheme(functions: array<(color: Color)>): array { # {{{
 		return [fn(this.clone()) for fn in functions]
-	} // }}}
+	} # }}}
 
-	private setField(name, value: number | string): Color { // {{{
+	private setField(name, value: number | string): Color { # {{{
 		var mut component = $components[name]
 
 		if ?component.spaces[this._space] {
@@ -1020,15 +1020,15 @@ export class Color {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 
-	shade(percentage: float): Color { // {{{
+	shade(percentage: float): Color { # {{{
 		return this.blend($static.black, percentage)
-	} // }}}
+	} # }}}
 
 	space(): Space => this._space
 
-	space(mut space: string): Color { // {{{
+	space(mut space: string): Color { # {{{
 		space = $aliases[space] ?? space
 
 		if !?$spaces[space] && ?$components[space] {
@@ -1053,32 +1053,32 @@ export class Color {
 		}
 
 		return this
-	} // }}}
+	} # }}}
 
-	tint(percentage: float): Color { // {{{
+	tint(percentage: float): Color { # {{{
 		return this.blend($static.white, percentage)
-	} // }}}
+	} # }}}
 
-	tone(percentage: float): Color { // {{{
+	tone(percentage: float): Color { # {{{
 		return this.blend($static.gray, percentage)
-	} // }}}
+	} # }}}
 }
 
 Color.registerSpace!({
 	name: 'srgb'
 	alias: ['rgb']
 	formatters: {
-		hex(that: Color): string { // {{{
+		hex(that: Color): string { # {{{
 			return $hex(that)
-		} // }}}
-		srgb(that: Color): string { // {{{
+		} # }}}
+		srgb(that: Color): string { # {{{
 			if that._alpha == 1 {
 				return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 			}
 			else {
 				return 'rgba(' + that._red + ', ' + that._green + ', ' + that._blue + ', ' + that._alpha + ')'
 			}
-		} // }}}
+		} # }}}
 	}
 	components: {
 		red: {
@@ -1093,8 +1093,8 @@ Color.registerSpace!({
 	}
 })
 
-var $static = { // {{{
+var $static = { # {{{
 	black: Color.from('#000')
 	gray: Color.from('#808080')
 	white: Color.from('#fff')
-} // }}}
+} # }}}

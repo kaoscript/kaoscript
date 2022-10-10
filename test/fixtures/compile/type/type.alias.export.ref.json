@@ -205,7 +205,8 @@
         "exhaustive": true,
         "parameters": [
           {
-            "name": "n",
+            "external": "n",
+            "internal": "n",
             "type": {
               "reference": 6
             },

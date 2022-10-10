@@ -43,7 +43,8 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "value",
+                "external": "value",
+                "internal": "value",
                 "type": "Any?",
                 "min": 0,
                 "max": 1,

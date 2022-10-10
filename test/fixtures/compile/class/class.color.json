@@ -77,7 +77,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "space",
+                  "external": "space",
+                  "internal": "space",
                   "type": {
                     "reference": 1
                   },

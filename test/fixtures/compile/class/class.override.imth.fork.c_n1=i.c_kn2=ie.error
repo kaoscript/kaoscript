@@ -1,0 +1,1 @@
+SyntaxException: The method "Quxbaz.foobar(y: Number)" can't override a suitable method (fixtures/compile/class/class.override.imth.fork.c_n1=i.c_kn2=ie.ks:8)

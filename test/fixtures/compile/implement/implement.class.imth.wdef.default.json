@@ -30,7 +30,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "text",
+                  "external": "text",
+                  "internal": "text",
                   "type": "String",
                   "min": 0,
                   "max": 1,
@@ -52,7 +53,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "text",
+                  "external": "text",
+                  "internal": "text",
                   "type": "String",
                   "min": 0,
                   "max": 1,

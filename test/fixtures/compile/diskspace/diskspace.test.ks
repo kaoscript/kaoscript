@@ -13,7 +13,7 @@ import {
 }
 
 describe('diskspace', func() {
-	it('print', func(done) { // {{{
+	it('print', func(done) { # {{{
 		var d = await disks()
 
 		expect(d).to.have.length.above(0)
@@ -21,5 +21,5 @@ describe('diskspace', func() {
 		console.log(d)
 
 		done()
-	}) // }}}
+	}) # }}}
 })

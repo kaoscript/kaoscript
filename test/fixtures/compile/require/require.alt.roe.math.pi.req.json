@@ -111,7 +111,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "precision",
+                  "external": "precision",
+                  "internal": "precision",
                   "type": {
                     "reference": 2
                   },

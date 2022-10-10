@@ -53,7 +53,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "Date",
+                "external": "Date",
+                "internal": "Date",
                 "type": {
                   "reference": 1
                 },

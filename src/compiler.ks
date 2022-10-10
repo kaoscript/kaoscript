@@ -432,6 +432,7 @@ var $expressions = {
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
 	`\(NodeKind::ObjectExpression)`				: DictionaryExpression
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
+	`\(NodeKind::PositionalArgument)`			: PositionalArgument
 	`\(NodeKind::RegularExpression)`			: RegularExpression
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression
 	`\(NodeKind::TemplateExpression)`			: TemplateExpression

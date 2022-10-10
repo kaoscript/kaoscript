@@ -55,7 +55,8 @@
                   "async": false,
                   "parameters": [
                     {
-                      "name": "name",
+                      "external": "name",
+                      "internal": "name",
                       "type": "String",
                       "min": 1,
                       "max": 1,

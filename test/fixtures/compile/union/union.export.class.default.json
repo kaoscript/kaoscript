@@ -38,7 +38,8 @@
         "exhaustive": true,
         "parameters": [
           {
-            "name": "x",
+            "external": "x",
+            "internal": "x",
             "type": {
               "kind": "union",
               "types": [

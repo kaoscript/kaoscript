@@ -153,10 +153,10 @@ namespace Fragment {
 							comma = true
 						}
 
-						if parameter.isOnlyLabeled() && ?labels[parameter.name()] {
-							line.code(`kws.\(parameter.name())`)
+						if parameter.isOnlyLabeled() && ?labels[parameter.getExternalName()] {
+							line.code(`kws.\(parameter.getExternalName())`)
 
-							todoLabels.remove(parameter.name())
+							todoLabels.remove(parameter.getExternalName())
 
 							if !#todoLabels && !varargs {
 								break
@@ -307,7 +307,7 @@ namespace Fragment {
 
 			for var param in parameters from lastParameter + 1 til parameter {
 				if param.isOnlyLabeled() {
-					line.code(`kws.\(param.name()), `)
+					line.code(`kws.\(param.getExternalName()), `)
 				}
 				else if param.isVarargs() {
 					line.code('[], ')
@@ -451,7 +451,7 @@ namespace Fragment {
 
 		for var parameter in parameters from lastParameter + 1 {
 			if parameter.isOnlyLabeled() {
-				line.code(`, kws.\(parameter.name())`)
+				line.code(`, kws.\(parameter.getExternalName())`)
 			}
 			else if parameter.isVarargs() {
 				line.code(', []')

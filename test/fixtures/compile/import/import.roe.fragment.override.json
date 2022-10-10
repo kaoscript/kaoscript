@@ -278,7 +278,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "emptyLines",
+                  "external": "emptyLines",
+                  "internal": "emptyLines",
                   "type": "Any",
                   "min": 0,
                   "max": 1,
@@ -328,7 +329,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "base",
+                  "external": "base",
+                  "internal": "base",
                   "type": "Any",
                   "min": 0,
                   "max": 1,

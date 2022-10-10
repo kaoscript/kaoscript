@@ -30,7 +30,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "b",
+                  "external": "b",
+                  "internal": "b",
                   "type": {
                     "reference": 0
                   },

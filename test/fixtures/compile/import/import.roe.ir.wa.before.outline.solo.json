@@ -51,7 +51,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "x",
+                  "external": "x",
+                  "internal": "x",
                   "type": "Any",
                   "min": 1,
                   "max": 1,

@@ -94,7 +94,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "name",
+                  "external": "name",
+                  "internal": "name",
                   "type": "Any",
                   "min": 1,
                   "max": 1,

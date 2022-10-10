@@ -14,23 +14,6 @@
 
 
 
-
-// extern system class Function
-
-// impl Function {
-// 	static curry(fn: Function, ...args, *bind? = null): Function => (...newArgs) => fn*$(bind, ...args, ...newArgs)
-// }
-
-// var dyn fn = func(prefix, name) {
-// 	return prefix + name
-// }
-
-// fn = Function.curry(fn, 'Hello ')
-
-
-
-
-
 // func foobar(props, key, value) {
 // 	props[key] ||= value
 // }
@@ -54,3 +37,19 @@
 // var f = new Foobar()
 
 // console.log(`\(f.value('foobar').value())`)
+
+
+
+// class Color {
+// 	static {
+// 		from(...args): Color | Boolean {
+// 			return false
+// 		}
+// 	}
+
+// 	readable(color: Color, tripleA: Boolean = false): Boolean {
+// 		return false
+// 	}
+// }
+
+// Color.from('#abc').readable(Color.from('#963')!!)

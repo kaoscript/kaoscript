@@ -1,0 +1,1 @@
+SyntaxError: Expecting ",", ")" or "NewLine" but got "%" (/Users/baptiste/Development/Projects/Kaoscript/kaoscript/test/fixtures/compile/parameter/parameter.return.xy_in.ie.ks:1:15)

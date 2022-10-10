@@ -8,19 +8,19 @@ export class Exception extends Error {
 		name: String
 	}
 
-	constructor(@message) { // {{{
+	constructor(@message) { # {{{
 		super()
 
 		@name = this.constructor.name
-	} // }}}
+	} # }}}
 
-	constructor(@message, @fileName, @lineNumber) { // {{{
+	constructor(@message, @fileName, @lineNumber) { # {{{
 		this(message)
-	} // }}}
+	} # }}}
 
-	constructor(@message, node: AbstractNode) { // {{{
+	constructor(@message, node: AbstractNode) { # {{{
 		this(message, node.file(), node._data.start.line)
-	} // }}}
+	} # }}}
 }
 
 abstract class AbstractNode {

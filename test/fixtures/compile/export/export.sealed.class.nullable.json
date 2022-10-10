@@ -16,7 +16,8 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "args",
+                "external": "args",
+                "internal": "args",
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
@@ -53,7 +54,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "shape",
+                "external": "shape",
+                "internal": "shape",
                 "type": "String",
                 "min": 1,
                 "max": 1,
@@ -83,7 +85,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": "Any?",
                   "min": 1,
                   "max": 1,

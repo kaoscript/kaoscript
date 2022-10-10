@@ -1131,6 +1131,27 @@ class NamedArgument extends Expression {
 	} # }}}
 }
 
+class PositionalArgument extends Expression {
+	private late {
+		@value: Expression
+	}
+	analyse() { # {{{
+		@value = $compile.expression(@data.value, this)
+		@value.analyse()
+	} # }}}
+	override prepare(target) { # {{{
+		@value.prepare(target)
+	} # }}}
+	translate() { # {{{
+		@value.translate()
+	} # }}}
+	isAwait() => @value.isAwait()
+	type() => @value.type()
+	toFragments(fragments, mode) { # {{{
+		@value.toFragments(fragments, mode)
+	} # }}}
+}
+
 class SimplifiedArrowFunctionExpression extends Expression {
 	private {
 		@expression

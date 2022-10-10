@@ -15,7 +15,7 @@ extern {
 }
 
 impl String {
-	lines(emptyLines = false): Array { // {{{
+	lines(emptyLines = false): Array { # {{{
 		if this.length == 0 {
 			return []
 		}
@@ -25,7 +25,7 @@ impl String {
 		else {
 			return this.match(/[^\r\n]+/g) ?? []
 		}
-	} // }}}
+	} # }}}
 	lower(): String => this.toLowerCase()
 	toFloat(): Number => parseFloat(this)
 	toInt(base = 10): Number => parseInt(this, base)

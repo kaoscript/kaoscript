@@ -12,12 +12,14 @@ class ParameterType extends Type {
 		@index: Number
 	}
 	private {
+		@anonymous: Boolean					= false
 		@comprehensive: Boolean				= true
 		@default: Boolean
 		@defaultValue: Any?
+		@externalName: String?				= null
+		@internalName: String?				= null
 		@min: Number
 		@max: Number
-		@name: String?						= null
 		@nullableByDefault: Boolean
 		@passing: PassingMode
 		@retained: Boolean					= false
@@ -58,15 +60,14 @@ class ParameterType extends Type {
 				}
 			}
 
-			var mut name = null
-			if ?data.external {
-				name = data.external.name
-			}
-			else if min == 0 {
+			var externalName = data.external?.name
+			var internalName = data.internal?.name
+
+			if !?internalName && min == 0 {
 				type = type.setNullable(true)
 			}
 
-			var parameter = new ParameterType(scope, name, type, min, max, default)
+			var parameter = new ParameterType(scope, externalName, internalName, type, min, max, default)
 
 			if default && overridable {
 				parameter.setDefaultValue(data.defaultValue, true)
@@ -83,7 +84,7 @@ class ParameterType extends Type {
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
 			var data = index
 			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
-			var type = new ParameterType(scope, data.name, subtype, data.min, data.max, data.default)
+			var type = new ParameterType(scope, data.external, data.internal, subtype, data.min, data.max, data.default)
 
 			if data.default {
 				if data.comprehensive {
@@ -113,7 +114,7 @@ class ParameterType extends Type {
 			@type = @type.setNullable(true)
 		}
 	} # }}}
-	constructor(@scope, @name, @passing = PassingMode::BOTH, @type, @min = 1, @max = 1, @default = false) { # {{{
+	constructor(@scope, @externalName, @internalName, @passing = PassingMode::BOTH, @type, @min = 1, @max = 1, @default = false) { # {{{
 		super(scope)
 
 		@variableType = @type
@@ -122,9 +123,15 @@ class ParameterType extends Type {
 		if @nullableByDefault {
 			@type = @type.setNullable(true)
 		}
+
+		@anonymous = !?@externalName
+
+		if @anonymous {
+			@passing -= PassingMode::LABELED
+		}
 	} # }}}
 	clone(): ParameterType { # {{{
-		var that = new ParameterType(@scope, @name, @passing, @type, @min, @max, @default)
+		var that = new ParameterType(@scope, @externalName, @internalName, @passing, @type, @min, @max, @default)
 
 		if @retained {
 			that.flagRetained()
@@ -138,8 +145,11 @@ class ParameterType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {}
 
-		if @name != null {
-			export.name = @name
+		if @externalName != null {
+			export.external = @externalName
+		}
+		if @internalName != null {
+			export.internal = @internalName
 		}
 
 		export.type = @variableType.toReference(references, indexDelta, mode, module)
@@ -176,10 +186,13 @@ class ParameterType extends Type {
 		}
 	} # }}}
 	getDefaultValue() => @defaultValue
+	getExternalName() => @externalName
+	getInternalName() => @internalName
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
 	index(): @index
 	index(@index): this
+	isAnonymous(): @anonymous
 	isAny() => @type.isAny()
 	isComprehensive() => @comprehensive
 	isExportable() => @type.isExportable()
@@ -197,8 +210,16 @@ class ParameterType extends Type {
 		if mode !~ MatchingMode::IgnoreRetained && @retained && !value.isRetained() {
 			return false
 		}
-		if mode !~ MatchingMode::IgnoreName && ?@name && ?value.name() && @name != value.name()  {
-			return false
+
+		if mode ~~ MatchingMode::IgnoreName {
+			if ?@externalName != ?value.getExternalName() {
+				return false
+			}
+		}
+		else {
+			if ?@externalName && ?value.getExternalName() && @externalName != value.getExternalName()  {
+				return false
+			}
 		}
 
 		if mode ~~ MatchingMode::MissingDefault && @default && !value.hasDefaultValue() {
@@ -254,7 +275,6 @@ class ParameterType extends Type {
 	matchArgument(value: Type) => value.matchContentOf(@type)
 	max(): @max
 	min(): @min
-	name() => @name
 	setDefaultValue(@defaultValue, @comprehensive = true) { # {{{
 		@default = true
 
@@ -293,11 +313,18 @@ class ParameterType extends Type {
 			}
 		}
 
-		if @name != null {
-			fragments += @name
+		if @externalName != @internalName {
+			if @externalName != null {
+				fragments += @externalName
+			}
+			else {
+				fragments += '_'
+			}
+
+			fragments += `\(@externalName ?? '_') % \(@internalName ?? '_')`
 		}
 		else {
-			fragments += '_'
+			fragments += @externalName ?? '_'
 		}
 
 		fragments += ': '
@@ -317,7 +344,7 @@ class ParameterType extends Type {
 		@type.toPositiveTestFragments(fragments, node, junction)
 	} # }}}
 	override toVariations(variations) { # {{{
-		variations.push('param', @name, @min, @max, @default)
+		variations.push('param', @externalName, @internalName, @min, @max, @default)
 
 		@type.toVariations(variations)
 	} # }}}

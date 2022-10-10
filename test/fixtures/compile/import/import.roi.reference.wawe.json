@@ -229,7 +229,8 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "n",
+                "external": "n",
+                "internal": "n",
                 "type": "Number",
                 "min": 1,
                 "max": 1,
@@ -245,7 +246,8 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "s",
+                "external": "s",
+                "internal": "s",
                 "type": {
                   "reference": 2
                 },
@@ -297,7 +299,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "emptyLines",
+                  "external": "emptyLines",
+                  "internal": "emptyLines",
                   "type": "Any",
                   "min": 0,
                   "max": 1,
@@ -345,7 +348,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "base",
+                  "external": "base",
+                  "internal": "base",
                   "type": "Any",
                   "min": 0,
                   "max": 1,

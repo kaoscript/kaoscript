@@ -19,7 +19,8 @@
         "exhaustive": true,
         "parameters": [
           {
-            "name": "coord",
+            "external": "coord",
+            "internal": "coord",
             "type": {
               "reference": 1
             },

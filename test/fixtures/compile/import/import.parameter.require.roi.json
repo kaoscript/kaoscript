@@ -171,7 +171,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "index",
+                  "external": "index",
+                  "internal": "index",
                   "type": "Number",
                   "min": 0,
                   "max": 1,
@@ -195,7 +196,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "array",
+                  "external": "array",
+                  "internal": "array",
                   "type": {
                     "reference": 1
                   },
@@ -204,7 +206,8 @@
                   "default": false
                 },
                 {
-                  "name": "iterator",
+                  "external": "iterator",
+                  "internal": "iterator",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
@@ -222,7 +225,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "array",
+                  "external": "array",
+                  "internal": "array",
                   "type": {
                     "reference": 1
                   },
@@ -231,14 +235,16 @@
                   "default": false
                 },
                 {
-                  "name": "iterator",
+                  "external": "iterator",
+                  "internal": "iterator",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "condition",
+                  "external": "condition",
+                  "internal": "condition",
                   "type": "Function",
                   "min": 1,
                   "max": 1,
@@ -285,14 +291,16 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "item",
+                  "external": "item",
+                  "internal": "item",
                   "type": "Any",
                   "min": 1,
                   "max": 1,
                   "default": false
                 },
                 {
-                  "name": "from",
+                  "external": "from",
+                  "internal": "from",
                   "type": "Any",
                   "min": 0,
                   "max": 1,
@@ -314,7 +322,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "args",
+                  "external": "args",
+                  "internal": "args",
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",

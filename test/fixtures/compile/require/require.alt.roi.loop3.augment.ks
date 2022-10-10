@@ -12,11 +12,11 @@ disclose Date {
 }
 
 impl Date {
-	overwrite constructor(year: NS, month: NS, day: NS = 1, hours: NS = 0, minutes: NS = 0, seconds: NS = 0, milliseconds: NS = 0) { // {{{
+	overwrite constructor(year: NS, month: NS, day: NS = 1, hours: NS = 0, minutes: NS = 0, seconds: NS = 0, milliseconds: NS = 0) { # {{{
 		precursor(year, month - 1, day, hours, minutes, seconds, milliseconds)
 
 		this.setUTCMinutes(this.getUTCMinutes() - this.getTimezoneOffset())
-	} // }}}
+	} # }}}
 	fromAugment() {
 	}
 }

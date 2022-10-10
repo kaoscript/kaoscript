@@ -14,13 +14,11 @@ enum ParameterWrongDoing {
 
 class Parameter extends AbstractNode {
 	private late {
-		@anonymous: Boolean					= false
 		@arity								= null
 		@comprehensive: Boolean				= true
 		@defaultValue						= null
 		@existential: Boolean				= false
 		@explicitlyRequired: Boolean		= false
-		@external: String?					= null
 		@hasDefaultValue: Boolean			= false
 		@headedDefaultValue: Boolean		= false
 		@header: Boolean					= false
@@ -566,8 +564,6 @@ class Parameter extends AbstractNode {
 		@retained = @options.parameters.retain
 	} # }}}
 	analyse() { # {{{
-		@anonymous = !?@data.internal
-
 		var mut immutable = true
 
 		for var modifier in @data.modifiers {
@@ -578,10 +574,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		if @anonymous {
-			@internal = new AnonymousParameter(@data, this)
-		}
-		else {
+		if ?@data.internal {
 			@internal = Parameter.compileExpression(@data.internal, this)
 			@internal.setAssignment(AssignmentType::Parameter)
 
@@ -598,6 +591,9 @@ class Parameter extends AbstractNode {
 
 				@scope.define(name, immutable, null, this)
 			}
+		}
+		else {
+			@internal = new AnonymousParameter(@data, this)
 		}
 	} # }}}
 	override prepare(target) { # {{{
@@ -687,9 +683,10 @@ class Parameter extends AbstractNode {
 			@scope.commitTempVariables(@tempVariables)
 		}
 
-		var name: String? = @internal.name()
+		var internal: String? = @internal.name()
+		var external: String? = @data.external?.name ?? internal
 
-		@type = new ParameterType(@scope, name, passing, type!?, min, max, @hasDefaultValue)
+		@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
 
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			var scope = @parent.scope()
@@ -748,7 +745,6 @@ class Parameter extends AbstractNode {
 	arity() => @arity
 	getReturnType() => @type.getReturnType()
 	hasDefaultValue() => @hasDefaultValue
-	isAnonymous() => @anonymous
 	isAssertingParameter() => @parent.isAssertingParameter()
 	isAssertingParameterType() => @parent.isAssertingParameterType()
 	isComprehensive() => @comprehensive

@@ -50,17 +50,17 @@ Color.registerSpace!({
 	name: Space::SRGB
 	alias: [Space::RGB]
 	formatters: {
-		hex(that: Color): String { // {{{
+		hex(that: Color): String { # {{{
 			return $hex(that)
-		} // }}}
-		srgb(that: Color): String { // {{{
+		} # }}}
+		srgb(that: Color): String { # {{{
 			if that._alpha == 1 {
 				return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 			}
 			else {
 				return 'rgba(' + that._red + ', ' + that._green + ', ' + that._blue + ', ' + that._alpha + ')'
 			}
-		} // }}}
+		} # }}}
 	}
 	components: {
 		red: {

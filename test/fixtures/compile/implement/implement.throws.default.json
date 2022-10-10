@@ -25,7 +25,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "color",
+                "external": "color",
+                "internal": "color",
                 "type": "String",
                 "min": 1,
                 "max": 1,
@@ -67,7 +68,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": "String",
                   "min": 1,
                   "max": 1,
@@ -91,7 +93,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "canvas",
+                  "external": "canvas",
+                  "internal": "canvas",
                   "type": "Any",
                   "min": 1,
                   "max": 1,

@@ -34,7 +34,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "x",
+                "external": "x",
+                "internal": "x",
                 "type": "String",
                 "min": 0,
                 "max": 1,
@@ -71,7 +72,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "x",
+                "external": "x",
+                "internal": "x",
                 "type": "String",
                 "min": 0,
                 "max": 1,

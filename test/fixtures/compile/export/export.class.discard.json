@@ -32,7 +32,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "name",
+                "external": "name",
+                "internal": "name",
                 "type": "String",
                 "min": 1,
                 "max": 1,
@@ -47,14 +48,16 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "name",
+                "external": "name",
+                "internal": "name",
                 "type": "String",
                 "min": 1,
                 "max": 1,
                 "default": false
               },
               {
-                "name": "color",
+                "external": "color",
+                "internal": "color",
                 "type": {
                   "reference": 1
                 },
@@ -106,7 +109,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "color",
+                  "external": "color",
+                  "internal": "color",
                   "type": {
                     "reference": 1
                   },
@@ -140,7 +144,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "name",
+                  "external": "name",
+                  "internal": "name",
                   "type": "String",
                   "min": 1,
                   "max": 1,

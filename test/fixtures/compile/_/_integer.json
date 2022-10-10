@@ -43,14 +43,16 @@
             "exhaustive": true,
             "parameters": [
               {
-                "name": "value",
+                "external": "value",
+                "internal": "value",
                 "type": "Any?",
                 "min": 0,
                 "max": 1,
                 "default": true
               },
               {
-                "name": "radix",
+                "external": "radix",
+                "internal": "radix",
                 "type": "Any?",
                 "min": 0,
                 "max": 1,

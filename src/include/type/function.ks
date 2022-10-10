@@ -157,7 +157,7 @@ class FunctionType extends Type {
 		@errors.pushUniq(...types)
 	} # }}}
 	addParameter(type: Type, name: String?, min, max) { # {{{
-		var parameter = new ParameterType(@scope, name, type, min, max)
+		var parameter = new ParameterType(@scope, name, name, type, min, max)
 
 		parameter.index(@parameters.length)
 
@@ -540,7 +540,7 @@ class FunctionType extends Type {
 
 				for var parameter in value._parameters {
 					if parameter.isLabeled() {
-						valLabels[parameter.name()] = parameter
+						valLabels[parameter.getExternalName()] = parameter
 					}
 					if parameter.isPositional() {
 						valPositions.push(parameter)
@@ -552,8 +552,11 @@ class FunctionType extends Type {
 
 				for var parameter in @parameters {
 					if testLabel && parameter.isLabeled() {
-						if var valParam ?= valLabels[parameter.name()] {
+						if var valParam ?= valLabels[parameter.getExternalName()] {
 							return false unless parameter.isSubsetOf(valParam, paramMode)
+						}
+						else if parameter.isPositional() && index < valPositions.length {
+							return false unless parameter.min() == 0 || valPositions[index].isAnonymous()
 						}
 						else {
 							return false unless parameter.min() == 0
@@ -657,18 +660,18 @@ class FunctionType extends Type {
 
 		if mode ~~ MinMax::AFTER_REST {
 			if @hasRest {
-				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.name()) {
+				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					max += parameter.max()
 				}
 			}
 		}
 		else if mode ~~ MinMax::DEFAULT {
-			for var parameter in @parameters when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when !excludes.contains(parameter.getExternalName()) {
 				max += parameter.max()
 			}
 		}
 		else if mode ~~ MinMax::LABELED_ONLY {
-			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.getExternalName()) {
 				max += parameter.max()
 			}
 		}
@@ -677,7 +680,7 @@ class FunctionType extends Type {
 				max = Infinity
 			}
 			else {
-				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.name()) {
+				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.getExternalName()) {
 					max += parameter.max()
 				}
 			}
@@ -704,29 +707,29 @@ class FunctionType extends Type {
 
 		if mode ~~ MinMax::AFTER_REST {
 			if @hasRest {
-				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.name()) {
+				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					min += parameter.min()
 				}
 			}
 		}
 		else if mode ~~ MinMax::DEFAULT {
-			for var parameter in @parameters when !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when !excludes.contains(parameter.getExternalName()) {
 				min += parameter.min()
 			}
 		}
 		else if mode ~~ MinMax::LABELED_ONLY {
-			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.name()) {
+			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.getExternalName()) {
 				min += parameter.min()
 			}
 		}
 		else if mode ~~ MinMax::POSITIONAL {
 			if mode ~~ MinMax::REST {
-				for var parameter in @parameters when parameter.isPositional() && !excludes.contains(parameter.name()) {
+				for var parameter in @parameters when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					min += parameter.min()
 				}
 			}
 			else {
-				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.name()) {
+				for var parameter in @parameters when parameter.isPositional() && parameter.isLimited() && !excludes.contains(parameter.getExternalName()) {
 					min += parameter.min()
 				}
 			}
@@ -744,7 +747,7 @@ class FunctionType extends Type {
 	parameters(): Array<ParameterType> => @parameters
 	parameters(excludes: Array<String>?): Array<ParameterType> { # {{{
 		if ?excludes {
-			return [parameter for var parameter in @parameters when !excludes.contains(parameter.name())]
+			return [parameter for var parameter in @parameters when !excludes.contains(parameter.getExternalName())]
 		}
 		else {
 			return @parameters

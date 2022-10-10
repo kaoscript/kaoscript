@@ -528,11 +528,11 @@ class ClassMethodDeclaration extends Statement {
 				parameters += ', '
 			}
 
-			ctrl.code(parameter.name())
+			ctrl.code(parameter.getExternalName())
 
-			parameters += parameter.name()
+			parameters += parameter.getExternalName()
 
-			names[parameter.name()] = true
+			names[parameter.getExternalName()] = true
 		}
 
 		ctrl.code(')').step()
@@ -544,10 +544,10 @@ class ClassMethodDeclaration extends Statement {
 
 			var mut index = 0
 
-			for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.name()] {
+			for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 				ctrl2.code(' && ') unless index == 0
 
-				var literal = new Literal(false, this, @scope(), parameter.name())
+				var literal = new Literal(false, this, @scope(), parameter.getExternalName())
 
 				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
 

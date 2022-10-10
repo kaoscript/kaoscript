@@ -10,22 +10,22 @@ import {
 	'./fixtures/compile/color.ks'
 }
 
-Color.registerSpace!({ // {{{ rvb
+Color.registerSpace!({ # {{{ rvb
 	name: 'rvb',
 	converters: {
 		from: {
-			srgb(red, green, blue, that) { // {{{
+			srgb(red, green, blue, that) { # {{{
 				that._rouge = red
 				that._vert = green
 				that._blue = blue
-			} // }}}
+			} # }}}
 		},
 		to: {
-			srgb(rouge, vert, blue, that) { // {{{
+			srgb(rouge, vert, blue, that) { # {{{
 				that._red = rouge
 				that._green = vert
 				that._blue = blue
-			} // }}}
+			} # }}}
 		}
 	},
 	components: {
@@ -39,24 +39,24 @@ Color.registerSpace!({ // {{{ rvb
 			max: 255
 		}
 	}
-}) // }}}
+}) # }}}
 
-Color.registerSpace!({ // {{{ cmy
+Color.registerSpace!({ # {{{ cmy
 	name: 'cmy',
 	converters: {
 		from: {
-			srgb: func(red, green, blue, that) { // {{{
+			srgb: func(red, green, blue, that) { # {{{
 				that._cyan = blue
 				that._magenta = red
 				that._yellow = green
-			} // }}}
+			} # }}}
 		},
 		to: {
-			srgb: func(cyan, magenta, yellow, that) { // {{{
+			srgb: func(cyan, magenta, yellow, that) { # {{{
 				that._red = magenta
 				that._green = yellow
 				that._blue = cyan
-			} // }}}
+			} # }}}
 		}
 	},
 	components: {
@@ -70,17 +70,17 @@ Color.registerSpace!({ // {{{ cmy
 			max: 255
 		}
 	}
-}) // }}}
+}) # }}}
 
 describe('color.space', func() {
 	describe('space', func() {
-		it('get', func() { // {{{
+		it('get', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
-		}) // }}}
+		}) # }}}
 
-		it('set :rgb', func() { // {{{
+		it('set :rgb', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -88,9 +88,9 @@ describe('color.space', func() {
 			c.space('rgb')
 
 			expect(c.space()).to.equal(Space::SRGB)
-		}) // }}}
+		}) # }}}
 
-		it('set :green', func() { // {{{
+		it('set :green', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -98,9 +98,9 @@ describe('color.space', func() {
 			c.space('green')
 
 			expect(c.space()).to.equal(Space::SRGB)
-		}) // }}}
+		}) # }}}
 
-		it('set :hsb', func() { // {{{
+		it('set :hsb', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -115,9 +115,9 @@ describe('color.space', func() {
 
 			expect(error).to.exist
 			expect(error?.message).to.equal('It can\'t convert a color from \'srgb\' to \'hsb\' spaces.')
-		}) // }}}
+		}) # }}}
 
-		it('like :rgb', func() { // {{{
+		it('like :rgb', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -125,11 +125,11 @@ describe('color.space', func() {
 			expect(c.like('rgb').space()).to.equal(Space::SRGB)
 
 			expect(c.space()).to.equal(Space::SRGB)
-		}) // }}}
+		}) # }}}
 	})
 
 	describe('rvb', func() {
-		it('set :rvb', func() { // {{{
+		it('set :rvb', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -141,9 +141,9 @@ describe('color.space', func() {
 			expect(c.rouge()).to.equal(255)
 			expect(c.vert()).to.equal(255)
 			expect(c.blue()).to.equal(0)
-		}) // }}}
+		}) # }}}
 
-		it('set :rouge', func() { // {{{
+		it('set :rouge', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -151,9 +151,9 @@ describe('color.space', func() {
 			c.space('rouge')
 
 			expect(c.space()).to.equal(Space::RVB)
-		}) // }}}
+		}) # }}}
 
-		it('like :rvb', func() { // {{{
+		it('like :rvb', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -167,11 +167,11 @@ describe('color.space', func() {
 			})
 
 			expect(c.space()).to.equal(Space::SRGB)
-		}) // }}}
+		}) # }}}
 	})
 
 	describe('cmy', func() {
-		it('set :blue', func() { // {{{
+		it('set :blue', func() { # {{{
 			var c = new Color('#ff0')
 
 			expect(c.space()).to.equal(Space::SRGB)
@@ -190,6 +190,6 @@ describe('color.space', func() {
 
 			expect(error).to.exist
 			expect(error?.message).to.equal('The component \'blue\' has a conflict between the spaces \'srgb\', \'rvb\'')
-		}) // }}}
+		}) # }}}
 	})
 })

@@ -765,7 +765,7 @@ namespace Matching {
 
 			for var function, key of route.functions {
 				for var parameter, index in function.parameters() {
-					var name = parameter.name()
+					var name = parameter.getExternalName()
 					var type = parameter.type()
 					var positional = parameter.isOnlyPositional()
 
@@ -983,7 +983,7 @@ namespace Matching {
 
 		func getMostPreciseFunction(mut functions: FunctionType[], nameds: NamingArgument{}, shorthands: NamingArgument{}): FunctionType { # {{{
 			for var parameter in functions[0].parameters() {
-				var name = parameter.name()
+				var name = parameter.getExternalName()
 
 				if ?nameds[name] || ?shorthands[name] {
 					var types = []
@@ -991,7 +991,7 @@ namespace Matching {
 
 					for var function in functions {
 						for var parameter in function.parameters() {
-							if parameter.name() == name {
+							if parameter.getExternalName() == name {
 								types.push(parameter.type())
 
 								var key = parameter.type().hashCode()
@@ -1061,7 +1061,7 @@ namespace Matching {
 					var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
 
 					for var parameter in function.parameters() {
-						var name = parameter.name()
+						var name = parameter.getExternalName()
 
 						if var argument ?= nameds[name] {
 							positions.push(argument.index)
@@ -1099,7 +1099,7 @@ namespace Matching {
 						var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
 
 						for var parameter in function.parameters() {
-							var name = parameter.name()
+							var name = parameter.getExternalName()
 
 							if parameter.isOnlyLabeled() {
 								if var argument ?= nameds[name] {
@@ -1163,7 +1163,7 @@ namespace Matching {
 									var positions = []
 
 									for var parameter in match.function.parameters() {
-										var name = parameter.name()
+										var name = parameter.getExternalName()
 
 										if var argument ?= nameds[name] {
 											positions.push(argument.index)
@@ -1238,7 +1238,7 @@ namespace Matching {
 								var mut lastIndexed = null
 
 								for var parameter, index in function.parameters() {
-									var name = parameter.name()
+									var name = parameter.getExternalName()
 
 									if parameter.isOnlyLabeled() {
 										if var argument ?= nameds[name] {

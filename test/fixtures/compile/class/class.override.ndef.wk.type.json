@@ -233,7 +233,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "color",
+                "external": "color",
+                "internal": "color",
                 "type": "String",
                 "min": 1,
                 "max": 1,
@@ -263,7 +264,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "text",
+                  "external": "text",
+                  "internal": "text",
                   "type": "String",
                   "min": 1,
                   "max": 1,
@@ -298,7 +300,8 @@
             "sealed": false,
             "parameters": [
               {
-                "name": "color",
+                "external": "color",
+                "internal": "color",
                 "type": "String",
                 "min": 1,
                 "max": 1,
@@ -319,7 +322,8 @@
               "async": false,
               "parameters": [
                 {
-                  "name": "text",
+                  "external": "text",
+                  "internal": "text",
                   "type": "String",
                   "min": 1,
                   "max": 1,

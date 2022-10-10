@@ -215,7 +215,7 @@ namespace Router {
 					if parameter.isOnlyLabeled() {
 						labelable ||= true
 
-						var label = parameter.name()
+						var label = parameter.getExternalName()
 
 						if var data ?= labelMap[label] {
 							data.all.push(function.index())
