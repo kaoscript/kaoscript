@@ -2,19 +2,19 @@ extern console
 
 class Shape {
 	private {
-		_color: string
+		_color: String
 	}
 
 	constructor(@color)
 
-	draw(): string {
+	draw(): String {
 		return @color
 	}
 }
 
 class Rectangle extends Shape {
 	private {
-		_backgroundColor
+		_backgroundColor: String
 	}
 
 	constructor(@color, @backgroundColor) {

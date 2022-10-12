@@ -11,6 +11,7 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
+			this._class = null;
 			this._default = -1;
 		}
 		__ks_cons_rt(that, args) {

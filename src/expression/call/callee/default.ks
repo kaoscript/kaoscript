@@ -2,9 +2,10 @@ class DefaultCallee extends Callee {
 	private {
 		@expression: Expression?
 		@flatten: Boolean
-		@methods: Array<FunctionType>?
+		// @methods: Array<FunctionType>?
 		@node: CallExpression
 		@object: Expression?
+		@objectType: ReferenceType?
 		@scope: ScopeKind
 		@type: Type
 	}
@@ -18,7 +19,7 @@ class DefaultCallee extends Callee {
 			}
 		} # }}}
 	}
-	constructor(@data, @object, mut type: Type | Array<Type> | Null, @node) { # {{{
+	constructor(@data, @object, @objectType, mut type: Type | Array<Type> | Null = null, @node) { # {{{
 		super(data)
 
 		if object == null {
@@ -63,25 +64,25 @@ class DefaultCallee extends Callee {
 			@type = AnyType.NullableUnexplicit
 		}
 	} # }}}
-	constructor(@data, @object, @methods, @type, @node) { # {{{
-		super(data)
+	// constructor(@data, @object, @methods, @type, @node) { # {{{
+	// 	super(data)
 
-		@expression = new MemberExpression(data.callee, node, node.scope(), object)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
+	// 	@expression = new MemberExpression(data.callee, node, node.scope(), object)
+	// 	@expression.analyse()
+	// 	@expression.prepare(AnyType.NullableUnexplicit)
 
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
+	// 	@flatten = node._flatten
+	// 	@nullableProperty = @expression.isNullable()
+	// 	@scope = data.scope.kind
 
-		for method in methods {
-			@validate(method, node)
-		}
+	// 	for method in methods {
+	// 		@validate(method, node)
+	// 	}
 
-		if @type.isClass() {
-			TypeException.throwConstructorWithoutNew(@type.name(), node)
-		}
-	} # }}}
+	// 	if @type.isClass() {
+	// 		TypeException.throwConstructorWithoutNew(@type.name(), node)
+	// 	}
+	// } # }}}
 	constructor(@data, @expression, @node) { # {{{
 		super(data)
 
@@ -118,22 +119,23 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
+		@expression.acquireReusable(acquire || @nullable || (@flatten && @scope == ScopeKind::This))
 	} # }}}
 	override hashCode() => `default`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		if ?@methods {
-			for var method in @methods {
-				if !method.isInitializingInstanceVariable(name) {
-					return false
-				}
-			}
+	// 	if ?@methods {
+	// 		for var method in @methods {
+	// 			if !method.isInitializingInstanceVariable(name) {
+	// 				return false
+	// 			}
+	// 		}
 
-			return true
-		}
-		else {
-			return false
-		}
+	// 		return true
+	// 	}
+	// 	else {
+	// 		return false
+	// 	}
+		return false
 	} # }}}
 	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
@@ -147,7 +149,7 @@ class DefaultCallee extends Callee {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(')
-					.compile(node._callScope, mode)
+					.compile(node.getCallScope(), mode)
 			}
 			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
 				fragments
@@ -161,14 +163,14 @@ class DefaultCallee extends Callee {
 					.compile(@expression.caller(), mode)
 			}
 
-			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node._arguments)
+			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
 		}
 		else {
 			switch @scope {
 				ScopeKind::Argument => {
-					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
+					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
-					for var argument in node._arguments {
+					for var argument in node.arguments() {
 						fragments.code($comma)
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -177,7 +179,7 @@ class DefaultCallee extends Callee {
 				ScopeKind::Null => {
 					fragments.wrap(@expression, mode).code('.call(null')
 
-					for var argument in node._arguments {
+					for var argument in node.arguments() {
 						fragments.code($comma)
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -186,7 +188,7 @@ class DefaultCallee extends Callee {
 				ScopeKind::This => {
 					fragments.wrap(@expression, mode).code('(')
 
-					for var argument, index in node._arguments {
+					for var argument, index in node.arguments() {
 						fragments.code($comma) if index != 0
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -205,7 +207,7 @@ class DefaultCallee extends Callee {
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
-						.compile(node._callScope)
+						.compile(node.getCallScope())
 				}
 				ScopeKind::Null => {
 					fragments
@@ -222,7 +224,7 @@ class DefaultCallee extends Callee {
 				}
 			}
 
-			for argument in node._arguments {
+			for argument in node.arguments() {
 				fragments.code($comma)
 
 				DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -235,7 +237,7 @@ class DefaultCallee extends Callee {
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
-						.compile(node._callScope)
+						.compile(node.getCallScope())
 				}
 				ScopeKind::Null => {
 					fragments
@@ -252,7 +254,7 @@ class DefaultCallee extends Callee {
 				}
 			}
 
-			for argument in node._arguments {
+			for argument in node.arguments() {
 				fragments.code($comma)
 
 				DefaultCallee.toArgumentFragments(argument, fragments, mode)
@@ -283,10 +285,12 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
-		fragments
-			.code($runtime.type(node) + '.isValue(')
-			.compileReusable(@object)
-			.code(')')
+		// console.log(@type.hashCode())
+		// fragments
+		// 	.code($runtime.type(node) + '.isValue(')
+		// 	.compileReusable(@object)
+		// 	.code(')')
+		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

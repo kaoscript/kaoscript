@@ -43,7 +43,7 @@ class SealedFunctionCallee extends Callee {
 				ScopeKind::This => {
 					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
 
-					for var argument, index in node._arguments {
+					for var argument, index in node.arguments() {
 						if index != 0 {
 							fragments.code($comma)
 						}

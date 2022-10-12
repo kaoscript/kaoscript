@@ -116,6 +116,9 @@ class BinaryOperatorTypeEquality extends Expression {
 
 			@trueType = type.type()
 			@computed = true
+			
+			@subject.acquireReusable(true)
+			@subject.releaseReusable()
 		}
 		else {
 			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {

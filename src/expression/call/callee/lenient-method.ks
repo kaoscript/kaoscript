@@ -2,13 +2,13 @@ class LenientMethodCallee extends LenientFunctionCallee {
 	private {
 		@instance: Boolean
 		@object
+		@objectType: ReferenceType
 		@property: String
 		@sealed: Boolean					= false
-		@variable: NamedType<ClassType>
 	}
 	// TODO
-	// constructor(@data, @object, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @variable, @node) { # {{{
-	constructor(@data, @object, @property, assessment, result: LenientCallMatchResult, @variable, @node) { # {{{
+	// constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
+	constructor(@data, @object, @objectType, @property, assessment, result: LenientCallMatchResult, @node) { # {{{
 		super(data, assessment, result, node)
 
 		@instance = @function.isInstance()
@@ -20,6 +20,12 @@ class LenientMethodCallee extends LenientFunctionCallee {
 				break
 			}
 		}
+	} # }}}
+	acquireReusable(acquire) { # {{{
+		@object.acquireReusable(acquire)
+	} # }}}
+	releaseReusable() { # {{{
+		@object.releaseReusable()
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
@@ -40,10 +46,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		else {
 			if @sealed {
 				if @instance {
-					fragments.code(`\(@variable.getSealedPath())._im_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath())._im_\(@property)`)
 				}
 				else {
-					fragments.code(`\(@variable.getSealedPath())._sm_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)`)
 				}
 			}
 			else {
@@ -80,6 +86,9 @@ class LenientMethodCallee extends LenientFunctionCallee {
 				}
 			}
 		}
+	} # }}}
+	toPositiveTestFragments(fragments, node) { # {{{
+		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 	private {
 		getContextSubstitute(expression) { # {{{

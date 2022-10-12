@@ -4,6 +4,7 @@ module.exports = function() {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);
 			o.__ks_init();
+			o.__ks_cons_0();
 			return o;
 		}
 		constructor() {
@@ -11,14 +12,15 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			this.x = null;
+		}
+		__ks_cons_0() {
+			this._x = null;
 		}
 		__ks_cons_rt(that, args) {
-			if(args.length !== 0) {
-				throw Helper.badArgs();
+			if(args.length === 0) {
+				return Foobar.prototype.__ks_cons_0.call(that);
 			}
+			throw Helper.badArgs();
 		}
 	}
-	const f = Foobar.__ks_new_0();
-	f.x = null;
 };

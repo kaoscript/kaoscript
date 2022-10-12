@@ -1,5 +1,6 @@
 class ClassA {
-	private _x
+	private @x
+	constructor(@x)
 	foo() {
 		@x.foobar()
 	}

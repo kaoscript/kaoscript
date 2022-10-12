@@ -54,12 +54,12 @@ class SealedCallee extends Callee {
 					if @instance {
 						fragments.code(`\(@variable.getSealedPath())._im_\(@property).apply(null, `)
 
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments, @object)
+						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments(), @object)
 					}
 					else {
 						fragments.code(`\(@variable.getSealedPath())._sm_\(@property).apply(null, `)
 
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
+						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments())
 					}
 				}
 			}
@@ -78,7 +78,7 @@ class SealedCallee extends Callee {
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
-						for var argument in node._arguments {
+						for var argument in node.arguments() {
 							fragments.code($comma)
 
 							argument.toArgumentFragments(fragments, mode)
@@ -87,7 +87,7 @@ class SealedCallee extends Callee {
 					else {
 						fragments.code(`\(@variable.getSealedPath())._sm_\(@property)(`)
 
-						for var argument, index in node._arguments {
+						for var argument, index in node.arguments() {
 							if index != 0 {
 								fragments.code($comma)
 							}

@@ -69,7 +69,7 @@ class ThisExpression extends Expression {
 		return unless @type == null
 
 		var type = @class.type()
-
+		
 		if @instance {
 			var name = @scope.getVariable('this').getSecureName()
 

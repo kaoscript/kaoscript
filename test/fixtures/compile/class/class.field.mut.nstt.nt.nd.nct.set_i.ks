@@ -2,5 +2,7 @@ class Foobar {
 	private {
 		@x
 	}
-	foobar() => @x <- 42
+	reset() {
+		@x = 0
+	}
 }

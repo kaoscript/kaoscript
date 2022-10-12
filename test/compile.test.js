@@ -64,14 +64,15 @@ describe('compile', function() {
 
 					expect(ex.fileName).to.exist;
 
-					ex.fileName = path.relative(__dirname, ex.fileName);
+					var relativePath = path.relative(__dirname, ex.fileName);
+					var message = ex.toString().replace(ex.fileName, relativePath);
 
 					try {
-						expect(ex.toString()).to.equal(error);
+						expect(message).to.equal(error);
 					}
 					catch(ex2) {
 						if(debug) {
-							console.log(ex.toString());
+							console.log(message);
 						}
 
 						throw ex2;

@@ -6,7 +6,7 @@ class LenientFunctionCallee extends Callee {
 		@functions: FunctionType[]
 		@hash: String
 		@labelable: Boolean
-		@labels: Number{}
+		@labels: Number{}?
 		@node: CallExpression
 		@positions: Number[]
 		@scope: ScopeKind
@@ -14,6 +14,10 @@ class LenientFunctionCallee extends Callee {
 	}
 	// TODO
 	// constructor(@data, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
+	// TODO!
+	// constructor(@data, assessment, result: LenientCallMatchResult, @node) { # {{{
+	// 	this(data, assessment, result.possibilities, result.positions, result.labels, node)
+	// } # }}}
 	constructor(@data, assessment, result: LenientCallMatchResult, @node) { # {{{
 		super(data)
 
@@ -49,6 +53,41 @@ class LenientFunctionCallee extends Callee {
 		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`
 		@hash += `:\(@positions.join(','))`
 		@hash += `:\(Dictionary.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
+	} # }}}
+	constructor(@data, assessment, @functions, @positions = [], @labels = null, @node) { # {{{
+		super(data)
+
+		// TODO
+		// { @labelable } = assessment
+		@labelable = assessment.labelable
+
+		@expression = $compile.expression(data.callee, node)
+		@expression.analyse()
+		@expression.prepare(AnyType.NullableUnexplicit)
+
+		@flatten = node._flatten
+		@nullableProperty = @expression.isNullable()
+		@scope = data.scope.kind
+		@function = @functions[0]
+
+		var types = []
+
+		for var function in @functions {
+			@validate(function, node)
+
+			types.pushUniq(function.getReturnType())
+		}
+
+		@type = Type.union(node.scope(), ...types)
+
+		@hash = 'lenient'
+		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`
+		if ?@positions {
+			@hash += `:\(@positions.join(','))`
+		}
+		if ?@labels {
+			@hash += `:\(Dictionary.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
+		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@flatten)
@@ -88,7 +127,7 @@ class LenientFunctionCallee extends Callee {
 		else {
 			switch @scope {
 				ScopeKind::Argument => {
-					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
+					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}

@@ -11,21 +11,22 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
+			this._x = 0;
 		}
 		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
 				throw Helper.badArgs();
 			}
 		}
-		reset() {
-			return this.__ks_func_reset_rt.call(null, this, this, arguments);
+		foobar() {
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
-		__ks_func_reset_0() {
-			this._x = null;
+		__ks_func_foobar_0() {
+			return this._x = 42;
 		}
-		__ks_func_reset_rt(that, proto, args) {
+		__ks_func_foobar_rt(that, proto, args) {
 			if(args.length === 0) {
-				return proto.__ks_func_reset_0.call(that);
+				return proto.__ks_func_foobar_0.call(that);
 			}
 			throw Helper.badArgs();
 		}

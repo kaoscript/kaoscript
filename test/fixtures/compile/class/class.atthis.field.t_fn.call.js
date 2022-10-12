@@ -33,17 +33,24 @@ module.exports = function() {
 		x() {
 			return this.__ks_func_x_rt.call(null, this, this, arguments);
 		}
-		__ks_func_x_0(x) {
+		__ks_func_x_0() {
+			return this._x;
+		}
+		__ks_func_x_1(x) {
 			if(x === void 0) {
 				x = null;
 			}
 			this._x = x;
+			return this;
 		}
 		__ks_func_x_rt(that, proto, args) {
 			const t0 = value => Type.isFunction(value) || Type.isNull(value);
+			if(args.length === 0) {
+				return proto.__ks_func_x_0.call(that);
+			}
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return proto.__ks_func_x_0.call(that, args[0]);
+					return proto.__ks_func_x_1.call(that, args[0]);
 				}
 			}
 			throw Helper.badArgs();

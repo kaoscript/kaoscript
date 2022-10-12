@@ -1,5 +1,5 @@
 class Foobar {
-	public x
+	public x	= null
 }
 
 var f = new Foobar()

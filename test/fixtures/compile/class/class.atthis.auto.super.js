@@ -46,17 +46,13 @@ module.exports = function() {
 			return o;
 		}
 		__ks_cons_0(color, backgroundColor) {
-			if(backgroundColor === void 0) {
-				backgroundColor = null;
-			}
 			Shape.prototype.__ks_cons_0.call(this, color);
 			this._backgroundColor = backgroundColor;
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;
-			const t1 = Type.isValue;
 			if(args.length === 2) {
-				if(t0(args[0]) && t1(args[1])) {
+				if(t0(args[0]) && t0(args[1])) {
 					return Rectangle.prototype.__ks_cons_0.call(that, args[0], args[1]);
 				}
 			}

@@ -96,8 +96,8 @@ class ClassVariableDeclaration extends AbstractNode {
 			@value.prepare()
 
 			var type = @value.type().asReference()
-
-			if ?@data.type {
+			
+			if @type.type().isExplicit() {
 				unless type.isAssignableToVariable(@type.type(), true, true, false) {
 					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 				}

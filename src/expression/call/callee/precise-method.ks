@@ -3,11 +3,11 @@ class PreciseMethodCallee extends MethodCallee {
 		@alien: Boolean
 		@instance: Boolean
 		@object
+		@objectType: ReferenceType
 		@property: String
 		@proxy: Boolean
-		@reference: ReferenceType
 	}
-	constructor(@data, @object, @property, assessment, match, @reference, @node) { # {{{
+	constructor(@data, @object, @objectType, @property, assessment, match, @node) { # {{{
 		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, match, node)
 
 		@alien = match.function.isAlien()
@@ -93,7 +93,7 @@ class PreciseMethodCallee extends MethodCallee {
 
 			switch @scope {
 				ScopeKind::Argument => {
-					fragments.compile(node._callScope)
+					fragments.compile(node.getCallScope())
 				}
 				ScopeKind::Null => {
 					fragments.code('null')
@@ -103,10 +103,10 @@ class PreciseMethodCallee extends MethodCallee {
 				}
 			}
 
-			Router.Argument.toFragments(@positions, null, node._arguments, @function, true, fragments, mode)
+			Router.Argument.toFragments(@positions, null, node.arguments(), @function, true, fragments, mode)
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
-		@reference.toPositiveTestFragments(fragments, @object)
+		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 }

@@ -5,5 +5,6 @@ class ClassA {
 	foobar() {
 		@x()
 	}
-	x(@x)
+	x(): @x
+	x(@x): this
 }

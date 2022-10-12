@@ -1,6 +1,6 @@
 class ClassA {
 	private {
-		@x: String?
+		@x: String?	= null
 	}
 	foobar(x? ??= this._x) {
 	}

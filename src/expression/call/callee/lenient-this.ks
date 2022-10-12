@@ -1,4 +1,4 @@
-class ThisCallee extends Callee {
+class LenientThisCallee extends Callee {
 	private {
 		@expression
 		@flatten: Boolean
@@ -63,7 +63,7 @@ class ThisCallee extends Callee {
 				ScopeKind::This => {
 					fragments.code(`\(name).\(@property)(`)
 
-					for var argument, index in node._arguments {
+					for var argument, index in node.arguments() {
 						fragments.code($comma) if index != 0
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)

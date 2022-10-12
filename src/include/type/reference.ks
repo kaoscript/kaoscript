@@ -490,6 +490,7 @@ class ReferenceType extends Type {
 			return type.getProperty(name)
 		}
 	} # }}}
+	getSealedPath() => @type().getSealedPath()
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut hash = ''
 
@@ -1286,7 +1287,7 @@ class ReferenceType extends Type {
 		}
 
 		if tof ?= $runtime.typeof(@name, node) {
-			fragments.code(`\(tof)(`).compile(node)
+			fragments.code(`\(tof)(`).compileReusable(node)
 		}
 		else {
 			fragments.code(`\($runtime.type(node)).`)
@@ -1304,7 +1305,7 @@ class ReferenceType extends Type {
 				fragments.code(`isTupleInstance`)
 			}
 
-			fragments.code(`(`).compile(node).code(`, `)
+			fragments.code(`(`).compileReusable(node).code(`, `)
 
 			if @type is NamedType {
 				fragments.code(@type.path())

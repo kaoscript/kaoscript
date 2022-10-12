@@ -1,10 +1,10 @@
 class SealedPreciseMethodCallee extends MethodCallee {
 	private {
 		@object
+		@objectType: ReferenceType
 		@property: String
-		@variable: NamedType<ClassType>
 	}
-	constructor(@data, @object, @property, assessment, match: CallMatch, @variable, @node) { # {{{
+	constructor(@data, @object, @objectType, @property, assessment, match: CallMatch, @node) { # {{{
 		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, match, node)
 	} # }}}
 	override buildHashCode() => null
@@ -19,7 +19,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 				}
 				ScopeKind::This => {
 					if @function.isInstance() {
-						fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
+						fragments.code(`\(@objectType.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
 						if var substitute ?= @getContextSubstitute(@object) {
 							substitute(fragments)
@@ -31,7 +31,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 					}
 					else {
-						fragments.code(`\(@variable.getSealedPath()).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
+						fragments.code(`\(@objectType.getSealedPath()).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
 
 						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 					}
@@ -50,31 +50,29 @@ class SealedPreciseMethodCallee extends MethodCallee {
 					if @function.isAlien() {
 						throw new NotImplementedException(node)
 					}
-					else {
-						if @function.isInstance() {
-							fragments.code(`\(@variable.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
+					else if @function.isInstance() {
+						fragments.code(`\(@objectType.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
-							if var substitute ?= @getContextSubstitute(@object) {
-								substitute(fragments)
-							}
-							else {
-								fragments.compile(@object)
-							}
-
-							Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						if var substitute ?= @getContextSubstitute(@object) {
+							substitute(fragments)
 						}
 						else {
-							fragments.code(`\(@variable.getSealedPath()).__ks_sttc_\(@property)_\(@function.index())(`)
-
-							Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
+							fragments.compile(@object)
 						}
+
+						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+					}
+					else {
+						fragments.code(`\(@objectType.getSealedPath()).__ks_sttc_\(@property)_\(@function.index())(`)
+
+						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
 					}
 				}
 			}
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
-		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
+		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 	private {
 		getContextSubstitute(expression) { # {{{

@@ -11,7 +11,7 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			this.x = null;
+			this._x = null;
 		}
 		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
@@ -19,6 +19,4 @@ module.exports = function() {
 			}
 		}
 	}
-	const f = Foobar.__ks_new_0();
-	f.x = null;
 };

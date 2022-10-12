@@ -40,16 +40,12 @@
 
 
 
-// class Color {
-// 	static {
-// 		from(...args): Color | Boolean {
-// 			return false
-// 		}
-// 	}
-
-// 	readable(color: Color, tripleA: Boolean = false): Boolean {
-// 		return false
-// 	}
+// class ClassA {
+// }
+// class ClassB extends ClassA {
 // }
 
-// Color.from('#abc').readable(Color.from('#963')!!)
+// func foobar(x: ClassB? = null, y: ClassA) {
+// }
+
+// foobar(new ClassB())

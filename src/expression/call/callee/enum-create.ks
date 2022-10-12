@@ -1,4 +1,4 @@
-class EnumCallee extends Callee {
+class EnumCreateCallee extends Callee {
 	private {
 		@argument
 		@bitmask: Boolean

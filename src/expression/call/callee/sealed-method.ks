@@ -3,14 +3,11 @@ class SealedMethodCallee extends Callee {
 		@instance: Boolean
 		@node
 		@object
+		@objectType: ReferenceType
 		@property: String
-		@variable: NamedType<ClassType>
 	}
-	constructor(@data, @variable, @instance, @node) { # {{{
+	constructor(@data, @object, @objectType, @property, @instance, @node) { # {{{
 		super(data)
-
-		@object = node._object
-		@property = node._property
 
 		@nullableProperty = data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable)
 	} # }}}
@@ -19,7 +16,7 @@ class SealedMethodCallee extends Callee {
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-		var mut class = @variable.type()
+		var mut class = @objectType.discard()
 
 		if @instance {
 			while true {
@@ -71,14 +68,14 @@ class SealedMethodCallee extends Callee {
 				}
 				ScopeKind::This => {
 					if @instance {
-						fragments.code(`\(@variable.getSealedPath())._im_\(@property).apply(null, `)
+						fragments.code(`\(@objectType.getSealedPath())._im_\(@property).apply(null, `)
 
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments, @object)
+						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments(), @object)
 					}
 					else {
-						fragments.code(`\(@variable.getSealedPath())._sm_\(@property).apply(null, `)
+						fragments.code(`\(@objectType.getSealedPath())._sm_\(@property).apply(null, `)
 
-						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
+						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments())
 					}
 				}
 			}
@@ -94,19 +91,19 @@ class SealedMethodCallee extends Callee {
 				ScopeKind::This => {
 					if @instance {
 						fragments
-							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
+							.code(`\(@objectType.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
-						for var argument in node._arguments {
+						for var argument in node.arguments() {
 							fragments.code($comma)
 
 							argument.toArgumentFragments(fragments, mode)
 						}
 					}
 					else {
-						fragments.code(`\(@variable.getSealedPath())._sm_\(@property)(`)
+						fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)(`)
 
-						for var argument, index in node._arguments {
+						for var argument, index in node.arguments() {
 							if index != 0 {
 								fragments.code($comma)
 							}
@@ -125,7 +122,7 @@ class SealedMethodCallee extends Callee {
 			.code(')')
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
-		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
+		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 	type() => AnyType.NullableUnexplicit
 }

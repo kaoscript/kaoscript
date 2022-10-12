@@ -74,7 +74,7 @@ class EnumMethodCallee extends Callee {
 
 					fragments.wrap(@expression._object, mode)
 
-					for var argument, index in node._arguments {
+					for var argument, index in node.arguments() {
 						fragments.code($comma)
 
 						argument.toArgumentFragments(fragments, mode)
