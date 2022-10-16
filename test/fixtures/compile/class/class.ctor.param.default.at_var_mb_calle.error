@@ -1,0 +1,1 @@
+SyntaxException: The variable "@x" isn't yet defined (fixtures/compile/class/class.ctor.param.default.at_var_mb_calle.ks:6)

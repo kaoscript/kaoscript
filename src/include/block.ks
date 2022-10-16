@@ -240,6 +240,15 @@ class Block extends AbstractNode {
 			return Type.Never
 		}
 	} # }}}
+	walkNode(fn) { # {{{
+		return false unless fn(this)
+
+		for var statement in @statements {
+			return false unless statement.walkNode(fn)
+		}
+
+		return true
+	} # }}}
 }
 
 class FunctionBlock extends Block {
@@ -290,7 +299,7 @@ class ConstructorBlock extends FunctionBlock {
 		if variable.instance {
 			name = `this.\(variable.name)`
 
-			@parent().type().addInitializingInstanceVariable(variable.name)
+			@parent().type().flagInitializingInstanceVariable(variable.name)
 		}
 		else {
 			name = variable.name
@@ -324,7 +333,7 @@ class ConstructorBlock extends FunctionBlock {
 class MethodBlock extends FunctionBlock {
 	override initializeVariable(variable, expression, node) { # {{{
 		if variable.instance {
-			 @parent().type().addInitializingInstanceVariable(variable.name)
+			@parent().type().flagInitializingInstanceVariable(variable.name)
 		}
 		else {
 			super(variable, expression, node)

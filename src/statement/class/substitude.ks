@@ -22,11 +22,14 @@ class CallThisConstructorSubstitude extends Substitude {
 		}
 	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
-		if @result is not LenientCallMatchResult {
-			for var {function} in @result.matches {
-				if !function.isInitializingInstanceVariable(name) {
-					return false
-				}
+		if @result is PreciseCallMatchResult {
+			for var { function } in @result.matches {
+				return false unless function.isInitializingInstanceVariable(name)
+			}
+		}
+		else {
+			for var function in @result.possibilities {
+				return false unless function.isInitializingInstanceVariable(name)
 			}
 		}
 

@@ -571,10 +571,10 @@ class ForInStatement extends Statement {
 
 		if !@useBreak {
 			if ?@until {
-				ctrl.code(' && !(').compileBoolean(@until).code(')')
+				ctrl.code(' && !(').compileCondition(@until).code(')')
 			}
 			else if ?@while {
-				ctrl.code(' && ').wrapBoolean(@while, Mode::None, Junction::AND)
+				ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
 			}
 		}
 
@@ -633,7 +633,7 @@ class ForInStatement extends Statement {
 					ctrl
 						.newControl()
 						.code('if(')
-						.compileBoolean(@until)
+						.compileCondition(@until)
 						.code(')')
 						.step()
 						.line('break')
@@ -645,7 +645,7 @@ class ForInStatement extends Statement {
 					ctrl
 						.newControl()
 						.code('if(!(')
-						.compileBoolean(@while)
+						.compileCondition(@while)
 						.code('))')
 						.step()
 						.line('break')
@@ -660,7 +660,7 @@ class ForInStatement extends Statement {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(@when)
+				.compileCondition(@when)
 				.code(')')
 				.step()
 				.compile(@body)

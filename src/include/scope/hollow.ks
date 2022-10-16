@@ -164,6 +164,7 @@ class HollowScope extends Scope {
 			}
 		}
 	} # }}}
+
 	proxy @parent {
 		acquireTempName
 		acquireUnusedTempName
@@ -177,6 +178,7 @@ class HollowScope extends Scope {
 		getTempIndex
 		hasBleedingVariable
 		hasMacro
+		isMatchingType
 		isRenamedVariable
 		line
 		module

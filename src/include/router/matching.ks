@@ -621,16 +621,14 @@ namespace Matching {
 			return null
 		} # }}}
 
-		// TODO
-		// func getZeroBranch(tree: Tree | TreeBranch): TreeLeaf { # {{{
-		func getZeroBranch(tree: Tree | TreeBranch) { # {{{
+		func getZeroBranch(tree: Tree | TreeBranch): TreeLeaf { # {{{
 			var column = tree.columns[tree.order.last()]
 
 			if column.isNode {
 				return getZeroBranch(column)
 			}
 			else {
-				return column
+				return column!!
 			}
 		} # }}}
 

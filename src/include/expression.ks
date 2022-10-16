@@ -102,19 +102,19 @@ abstract class Expression extends AbstractNode {
 	toArgumentFragments(fragments, type: Type, mode = Mode::None) { # {{{
 		@toArgumentFragments(fragments, mode)
 	} # }}}
-	toBooleanFragments(fragments, mode = Mode::None, junction = Junction::NONE) { # {{{
-		this.toFragments(fragments, mode)
-
-		if !@type().isBoolean() || @type().isNullable() {
-			fragments.code(' === true')
-		}
-	} # }}}
 	toCastingFragments(fragments, mode) { # {{{
 		fragments.code($runtime.helper(this), '.valueOf(')
 
 		this.toFragments(fragments, mode)
 
 		fragments.code(')')
+	} # }}}
+	toConditionFragments(fragments, mode = Mode::None, junction = Junction::NONE) { # {{{
+		this.toFragments(fragments, mode)
+
+		if !@type().isBoolean() || @type().isNullable() {
+			fragments.code(' === true')
+		}
 	} # }}}
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode::None)

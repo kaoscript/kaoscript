@@ -1,0 +1,1 @@
+SyntaxException: The variable "this" isn't yet defined (fixtures/compile/class/class.ctor.param.default.this_mth_calle.ks:6)

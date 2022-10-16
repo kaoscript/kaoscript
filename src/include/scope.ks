@@ -153,6 +153,7 @@ abstract class Scope {
 		hasDeclaredVariable(name: String): Boolean
 		hasDefinedVariable(name: String): Boolean
 		hasVariable(name: String, line: Number = -1): Boolean
+		isMatchingType(a: Type, b: Type, mode: MatchingMode): Boolean
 		releaseTempName(name: String): Void
 		resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []): ReferenceType
 	}

@@ -18,6 +18,7 @@ class SubstituteCallee extends Callee {
 	isInitializingInstanceVariable(name: String): Boolean => @substitute.isInitializingInstanceVariable(name)
 	isSkippable() => @substitute.isSkippable()
 	override hashCode() => null
+	substitute(): @substitute
 	toFragments(fragments, mode, node) { # {{{
 		@substitute.toFragments(fragments, mode)
 	} # }}}
@@ -26,4 +27,11 @@ class SubstituteCallee extends Callee {
 	} # }}}
 	translate()
 	type() => @type
+
+	// TODO
+	// proxy @substitute {
+	// 	isInitializingInstanceVariable
+	// 	isSkippable
+	// 	toFragments
+	// }
 }

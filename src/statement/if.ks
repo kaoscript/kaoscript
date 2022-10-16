@@ -531,7 +531,7 @@ class IfStatement extends Statement {
 				if @cascade {
 					var mut first = true
 
-					@declaration.walk((name, _) => {
+					@declaration.walkVariable((name, _) => {
 						if first {
 							fragments.code($runtime.type(this), @existential ? '.isValue((' : '.isNotEmpty((')
 
@@ -549,7 +549,7 @@ class IfStatement extends Statement {
 				else {
 					var mut first = true
 
-					@declaration.walk((name, _) => {
+					@declaration.walkVariable((name, _) => {
 						if first {
 							first = false
 						}
@@ -563,7 +563,7 @@ class IfStatement extends Statement {
 			}
 		}
 		else {
-			fragments.compileBoolean(@condition)
+			fragments.compileCondition(@condition)
 		}
 
 		fragments.code(')').step()

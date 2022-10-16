@@ -82,9 +82,9 @@ class TryExpression extends Expression {
 			fragments.code(')')
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		if @unwrap {
-			fragments.compileBoolean(@argument)
+			fragments.compileCondition(@argument)
 		}
 		else if @defaultValue == null {
 			fragments.code($runtime.helper(this), '.tryTest(')

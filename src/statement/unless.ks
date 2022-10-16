@@ -60,12 +60,12 @@ class UnlessStatement extends Statement {
 		@body.translate()
 	} # }}}
 	isJumpable() => true
-	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
+	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable(name)
 	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()
 			.code('if(!')
-			.wrapBoolean(@condition)
+			.wrapCondition(@condition)
 			.code(')')
 			.step()
 			.compile(@body)

@@ -129,7 +129,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 			fragments.compile(@left).code($equals).compile(@right)
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		fragments.compile(@left).code($equals).wrap(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`

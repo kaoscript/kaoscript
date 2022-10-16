@@ -84,6 +84,16 @@ namespace RegroupTree {
 			i2p[type.index] = type.parameter
 		}
 
+		var shadow = shadows.shift()
+
+		if ?shadow && shadow.length > 1 {
+			if var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1]) {
+				if node.index >= 0 && node.max - max != 0 {
+					node.max = node.max - max
+				}
+			}
+		}
+
 		if data.length == 0 {
 			for var node in nodes {
 				node.min = 0
@@ -91,6 +101,9 @@ namespace RegroupTree {
 		}
 		else {
 			var d = data.shift()
+
+			var mut lastType = null
+			var mut lastMin = 0
 
 			for var node in nodes {
 				if d.length == 0 {
@@ -105,15 +118,19 @@ namespace RegroupTree {
 				else {
 					node.min = 0
 				}
-			}
-		}
 
-		var shadow = shadows.shift()
+				if node.min == 0 {
+					if ?lastType && node.index >= 0 && node.max > 0 && node.max - max != 0  {
+						if node.type.isAssignableToVariable(lastType, true, true, false) {
+							node.max = node.max - max
+						}
+					}
 
-		if ?shadow && shadow.length > 1 {
-			if var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1]) {
-				if node.index >= 0 && node.max - max != 0 {
-					node.max = node.max - max
+					lastType = null
+				}
+				else {
+					lastType = node.type
+					lastMin = node.min
 				}
 			}
 		}
@@ -545,7 +562,9 @@ namespace RegroupTree {
 
 		trees.remove(...group)
 
+		// console.log(RegroupTree.toSignature(tree))
 		applyMin(tree, first, mins, shadows)
+		// console.log(RegroupTree.toSignature(tree))
 	} # }}}
 
 	func replaceOrder(equivalences: String[], orders: String[][]): String[][] { # {{{

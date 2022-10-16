@@ -12,13 +12,11 @@ class LenientFunctionCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	// TODO
-	// constructor(@data, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
 	// TODO!
 	// constructor(@data, assessment, result: LenientCallMatchResult, @node) { # {{{
 	// 	this(data, assessment, result.possibilities, result.positions, result.labels, node)
 	// } # }}}
-	constructor(@data, assessment, result: LenientCallMatchResult, @node) { # {{{
+	constructor(@data, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
 		super(data)
 
 		// TODO
@@ -54,7 +52,7 @@ class LenientFunctionCallee extends Callee {
 		@hash += `:\(@positions.join(','))`
 		@hash += `:\(Dictionary.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
 	} # }}}
-	constructor(@data, assessment, @functions, @positions = [], @labels = null, @node) { # {{{
+	constructor(@data, assessment: Router.Assessment, @functions, @positions = [], @labels = null, @node) { # {{{
 		super(data)
 
 		// TODO

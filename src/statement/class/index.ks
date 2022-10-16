@@ -503,6 +503,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
+		var variables = @class.listInstanceVariables((_, type) => type.isRequiringInitialization() && !type.isAlien() && !type.isAltering())
+
 		if @constructors.length == 0 {
 			if @extending {
 				var mut extends = @class.extends()
@@ -513,30 +515,65 @@ class ClassDeclaration extends Statement {
 
 				if ?extends {
 					for var constructor in extends.type().listConstructors() {
-						constructor.checkVariablesInitializations(this, @class)
+						constructor.checkVariableInitialization(variables, this)
 					}
 				}
 				else {
-					@class.checkVariablesInitializations(this)
+					if #variables {
+						SyntaxException.throwNotInitializedFields(variables, this)
+					}
 				}
 			}
 			else if !@abstract {
-				@class.forEachInstanceVariables((name, variable) => {
-					if variable.isRequiringInitialization() {
-						SyntaxException.throwNotInitializedField(name, this)
-					}
-				})
+				if #variables {
+					SyntaxException.throwNotInitializedFields(variables, this)
+				}
 			}
 		}
 		else {
+			var roots = []
+			var nonroots = []
+
 			for var constructor in @constructors {
 				constructor.translate()
 
-				@class.forEachInstanceVariables((name, variable) => {
-					if variable.isRequiringInitialization() && !variable.isAlien() && !variable.isAltering() {
-						constructor.checkVariableInitialization(name)
+				var mut root = true
+
+				constructor.walkNode((node) => {
+					if node is CallExpression {
+						for var callee in node.callees() {
+							if callee is SubstituteCallee && callee.substitute() is CallThisConstructorSubstitude {
+								root = false
+
+								return false
+							}
+						}
 					}
+
+					return true
 				})
+
+				if root {
+					roots.push(constructor)
+				}
+				else {
+					nonroots.push(constructor)
+				}
+			}
+
+			for var constructor in roots {
+				constructor.checkVariableInitialization(variables)
+			}
+
+			if @abstract {
+				for var constructor in nonroots {
+					constructor.checkVariableInitialization(variables)
+				}
+			}
+			else {
+				for var constructor in nonroots {
+					constructor.type().flagInitializingInstanceVariable(...variables)
+				}
 			}
 		}
 

@@ -206,8 +206,7 @@ abstract class Type {
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
-		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope(), true, node)
-		fromAST(mut data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
+		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
 			}
@@ -347,15 +346,20 @@ abstract class Type {
 					else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
 						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
-						var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
+						if !defined || namespace.scope().hasVariable(data.typeName.property.name, -1) {
+							var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
 
-						if ?data.typeParameters {
-							for parameter in data.typeParameters {
-								type._parameters.push(Type.fromAST(parameter, scope, defined, node))
+							if ?data.typeParameters {
+								for parameter in data.typeParameters {
+									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
+								}
 							}
-						}
 
-						return type
+							return type
+						}
+						else {
+							ReferenceException.throwNotDefinedType(Type.getPathFromAST(data.typeName), node)
+						}
 					}
 				}
 				NodeKind::UnionType => {
@@ -368,6 +372,19 @@ abstract class Type {
 
 			console.info(data)
 			throw new NotImplementedException(node)
+		} # }}}
+		getPathFromAST(data): String { # {{{
+			switch data.kind {
+				NodeKind::Identifier => {
+					return data.name
+				}
+				NodeKind::MemberExpression => {
+					return `\(Type.getPathFromAST(data.object)).\(data.property.name)`
+				}
+			}
+
+			console.info(data)
+			throw new NotImplementedException()
 		} # }}}
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index

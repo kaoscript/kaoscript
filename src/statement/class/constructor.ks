@@ -101,6 +101,28 @@ class ClassConstructorDeclaration extends Statement {
 	override prepare(target) { # {{{
 		for var parameter in @parameters {
 			parameter.prepare()
+
+			if var value ?= parameter.getDefaultValue() {
+				value.walkNode((node) => {
+					switch node {
+						is CallExpression => {
+							var data = node.data()
+
+							if data.callee.kind == NodeKind::ThisExpression {
+								SyntaxException.throwNotYetDefined(`@\(data.callee.name.name)`, node)
+							}
+						}
+						is IdentifierLiteral => {
+							if node.name() == 'this' {
+								SyntaxException.throwNotYetDefined('this', node)
+							}
+						}
+						is ThisExpression => SyntaxException.throwNotYetDefined(`@\(node.name())`, node)
+					}
+
+					return true
+				})
+			}
 		}
 
 		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
@@ -162,6 +184,7 @@ class ClassConstructorDeclaration extends Statement {
 				}
 			}
 		}
+
 	} # }}}
 	translate() { # {{{
 		for parameter in @parameters {
@@ -228,12 +251,14 @@ class ClassConstructorDeclaration extends Statement {
 		@topNodes.push(node)
 	} # }}}
 	authority() => this
-	checkVariableInitialization(name) { # {{{
-		if @block.isInitializingInstanceVariable(name) {
-			@type.addInitializingInstanceVariable(name)
-		}
-		else if !@abstract {
-			SyntaxException.throwNotInitializedField(name, this)
+	checkVariableInitialization(variables: String[]): Void { # {{{
+		for var variable in variables {
+			if @block.isInitializingInstanceVariable(variable) {
+				@type.flagInitializingInstanceVariable(variable)
+			}
+			else if !@abstract {
+				SyntaxException.throwNotInitializedField(variable, this)
+			}
 		}
 	} # }}}
 	private getConstructorIndex(body: Array) { # {{{
@@ -391,6 +416,9 @@ class ClassConstructorDeclaration extends Statement {
 		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
+	// TODO
+	// override walkNode(fn) => fn(this) && @block.walkNode(fn)
+	walkNode(fn) => fn(this) && @block.walkNode(fn)
 	private {
 		getOveriddenConstructor(superclass: ClassType) { # {{{
 			var mut mode = MatchingMode::FunctionSignature

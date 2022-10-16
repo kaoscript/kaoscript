@@ -212,7 +212,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { # {{{
 		if @native {
 			if @operand == OperandType::Boolean {
-				fragments.code('!', @data.operator).wrapBoolean(@argument)
+				fragments.code('!', @data.operator).wrapCondition(@argument)
 			}
 			else {
 				fragments.code('~', @data.operator).compile(@argument)

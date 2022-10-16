@@ -46,7 +46,7 @@ class UntilStatement extends Statement {
 		fragments
 			.newControl()
 			.code('while(!')
-			.wrapBoolean(@condition)
+			.wrapCondition(@condition)
 			.code(')')
 			.step()
 			.compile(@body)

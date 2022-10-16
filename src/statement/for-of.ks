@@ -336,7 +336,7 @@ class ForOfStatement extends Statement {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(@until)
+				.compileCondition(@until)
 				.code(')')
 				.step()
 				.line('break')
@@ -348,7 +348,7 @@ class ForOfStatement extends Statement {
 			ctrl
 				.newControl()
 				.code('if(!(')
-				.compileBoolean(@while)
+				.compileCondition(@while)
 				.code('))')
 				.step()
 				.line('break')
@@ -361,7 +361,7 @@ class ForOfStatement extends Statement {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(@when)
+				.compileCondition(@when)
 				.code(')')
 				.step()
 				.compile(@body)

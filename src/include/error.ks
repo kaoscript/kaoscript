@@ -10,7 +10,7 @@ Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
 	return message
 } # }}}
 
-func $joinQuote(values: String[]): String { # {{{
+func $joinQuote(values: String[], conjunction: String = 'or'): String { # {{{
 	var last = values.length - 1
 
 	if last > 0 {
@@ -18,7 +18,7 @@ func $joinQuote(values: String[]): String { # {{{
 
 		for var value, index in values {
 			if index == last {
-				result += '" or "'
+				result += `" \(conjunction) "`
 			}
 			else if index > 0 {
 				result += '", "'
@@ -592,6 +592,14 @@ export class SyntaxException extends Exception {
 		throwNotInitializedField(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class variable "\(name)" isn't initialized`, node)
 		} # }}}
+		throwNotInitializedFields(names, node): Never ~ SyntaxException { # {{{
+			if names.length == 1 {
+				throw new SyntaxException(`The class variable "\(names[0])" isn't initialized`, node)
+			}
+			else {
+				throw new SyntaxException(`The class variables \($joinQuote(names, 'and')) aren't initialized`, node)
+			}
+		} # }}}
 		throwNotInitializedVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't initialized`, node)
 		} # }}}
@@ -603,6 +611,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwNotSealedOverwrite(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`A method can be overwritten only in a sealed class`, node)
+		} # }}}
+		throwNotYetDefined(name, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The variable "\(name)" isn't yet defined`, node)
 		} # }}}
 		throwOnlyStaticImport(modname, node): Never ~ ReferenceException { # {{{
 			throw new TypeException(`The arguments of the module "\(modname)" must have unmodified types`, node)

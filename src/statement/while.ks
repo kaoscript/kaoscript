@@ -128,7 +128,7 @@ class WhileStatement extends Statement {
 			else {
 				var mut first = true
 
-				@declaration.walk((name, _) => {
+				@declaration.walkVariable((name, _) => {
 					if first {
 						ctrl.code($runtime.type(this) + '.isValue(')
 
@@ -145,7 +145,7 @@ class WhileStatement extends Statement {
 			}
 		}
 		else {
-			ctrl.compileBoolean(@condition)
+			ctrl.compileCondition(@condition)
 		}
 
 		ctrl.code(')').step().compile(@body).done()

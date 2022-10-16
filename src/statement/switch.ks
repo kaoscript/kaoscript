@@ -557,10 +557,10 @@ class SwitchStatement extends Statement {
 				for var condition, i in clause.conditions {
 					ctrl.code(' || ') if i != 0
 
-					condition.toBooleanFragments(ctrl, @name)
+					condition.toConditionFragments(ctrl, @name)
 				}
 
-				clause.filter.toBooleanFragments(ctrl, true)
+				clause.filter.toConditionFragments(ctrl, true)
 
 				ctrl.code(')').step()
 
@@ -583,7 +583,7 @@ class SwitchStatement extends Statement {
 					ctrl.code('if(')
 				}
 
-				clause.filter.toBooleanFragments(ctrl, false)
+				clause.filter.toConditionFragments(ctrl, false)
 
 				ctrl.code(')').step()
 
@@ -716,7 +716,7 @@ class SwitchConditionArray extends AbstractNode {
 		}
 	} # }}}
 	isEnum() => false
-	toBooleanFragments(fragments, name) { # {{{
+	toConditionFragments(fragments, name) { # {{{
 		@module().flag('Type')
 
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
@@ -781,7 +781,7 @@ class SwitchConditionArray extends AbstractNode {
 							line.code(' && ')
 						}
 
-						@values[index].toBooleanFragments(line, '__ks_' + i)
+						@values[index].toConditionFragments(line, '__ks_' + i)
 
 						index += 1
 					}
@@ -829,7 +829,7 @@ class SwitchConditionRange extends AbstractNode {
 		@right.translate()
 	} # }}}
 	isEnum() => false
-	toBooleanFragments(fragments, name) { # {{{
+	toConditionFragments(fragments, name) { # {{{
 		fragments
 			.code(name, @from ? ' >= ' : '>')
 			.compile(@left)
@@ -851,7 +851,7 @@ class SwitchConditionType extends AbstractNode {
 	} # }}}
 	translate()
 	isEnum() => false
-	toBooleanFragments(fragments, name) { # {{{
+	toConditionFragments(fragments, name) { # {{{
 		@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 	} # }}}
 	toStatementFragments(fragments)
@@ -877,7 +877,7 @@ class SwitchConditionValue extends AbstractNode {
 	} # }}}
 	isEnum() => @type.isEnum()
 	setCastingEnum(@castingEnum)
-	toBooleanFragments(fragments, name) { # {{{
+	toConditionFragments(fragments, name) { # {{{
 		fragments.code(name, ' === ').compile(@value)
 
 		if @castingEnum {
@@ -938,7 +938,7 @@ class SwitchFilter extends AbstractNode {
 			@filter.translate()
 		}
 	} # }}}
-	toBooleanFragments(fragments, mut nf) { # {{{
+	toConditionFragments(fragments, mut nf) { # {{{
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
 				@module().flag('Type')
@@ -977,10 +977,10 @@ class SwitchFilter extends AbstractNode {
 		}
 		else if ?@filter {
 			if nf {
-				fragments.code(' && ').wrapBoolean(@filter, Mode::None, Junction::AND)
+				fragments.code(' && ').wrapCondition(@filter, Mode::None, Junction::AND)
 			}
 			else {
-				fragments.compileBoolean(@filter)
+				fragments.compileCondition(@filter)
 			}
 		}
 	} # }}}

@@ -109,8 +109,8 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	compileBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
-		@step.compileBoolean(node, mode, junction)
+	compileCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+		@step.compileCondition(node, mode, junction)
 
 		return this
 	} # }}}
@@ -134,8 +134,8 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
-		@step.wrapBoolean(node, mode, junction)
+	wrapCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+		@step.wrapCondition(node, mode, junction)
 
 		return this
 	} # }}}
@@ -186,9 +186,9 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	compileBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	compileCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
 		if node is not Primitive {
-			node.toBooleanFragments(this, mode, junction)
+			node.toConditionFragments(this, mode, junction)
 		}
 		else {
 			@writer.push(@writer.newFragment(node))
@@ -230,16 +230,16 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	wrapBoolean(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	wrapCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
 		if node.isBooleanComputed(junction) {
 			@code('(')
 
-			node.toBooleanFragments(this, mode, Junction::NONE)
+			node.toConditionFragments(this, mode, Junction::NONE)
 
 			@code(')')
 		}
 		else {
-			node.toBooleanFragments(this, mode, junction)
+			node.toConditionFragments(this, mode, junction)
 		}
 
 		return this

@@ -175,6 +175,7 @@ class BleedingScope extends Scope {
 
 		return variable
 	} # }}}
+
 	proxy @parent {
 		acquireTempName
 		acquireUnusedTempName
@@ -185,6 +186,7 @@ class BleedingScope extends Scope {
 		getChunkType
 		getRawLine
 		getTempIndex
+		isMatchingType
 		line
 		module
 		releaseTempName

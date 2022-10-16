@@ -1,10 +1,10 @@
 class ArrayBinding extends Expression {
 	private {
-		@assignment: AssignmentType		= AssignmentType::Neither
-		@elements						= []
-		@flatten: Boolean				= false
-		@immutable: Boolean				= false
-		@type: Type?					= null
+		@assignment: AssignmentType			= AssignmentType::Neither
+		@elements: ArrayBindingElement[]	= []
+		@flatten: Boolean					= false
+		@immutable: Boolean					= false
+		@type: Type?						= null
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
@@ -164,9 +164,9 @@ class ArrayBinding extends Expression {
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walk(fn) { # {{{
-		for element in @elements {
-			element.walk(fn)
+	walkVariable(fn) { # {{{
+		for var element in @elements {
+			element.walkVariable(fn)
 		}
 	} # }}}
 }
@@ -177,7 +177,7 @@ class ArrayBindingElement extends Expression {
 		@defaultValue					= null
 		@hasDefaultValue: Boolean		= false
 		@index							= -1
-		@name							= null
+		@name: Expression?				= null
 		@named: Boolean					= false
 		@rest: Boolean					= false
 		@thisAlias: Boolean				= false
@@ -305,9 +305,9 @@ class ArrayBindingElement extends Expression {
 	} # }}}
 	type() => @type
 	type(@type) => this
-	walk(fn) { # {{{
+	walkVariable(fn) { # {{{
 		if @named {
-			@name.walk(fn)
+			@name.walkVariable(fn)
 		}
 	} # }}}
 }
@@ -374,11 +374,11 @@ class FlatReusableBindingElement extends Expression {
 
 class ObjectBinding extends Expression {
 	private {
-		@assignment: AssignmentType		= AssignmentType::Neither
-		@elements						= []
-		@flatten: Boolean				= false
-		@immutable: Boolean				= false
-		@type: Type?					= null
+		@assignment: AssignmentType			= AssignmentType::Neither
+		@elements: ObjectBindingElement[]	= []
+		@flatten: Boolean					= false
+		@immutable: Boolean					= false
+		@type: Type?						= null
 	}
 	analyse() { # {{{
 		@flatten = @options.format.destructuring == 'es5'
@@ -401,7 +401,7 @@ class ObjectBinding extends Expression {
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
 		if @type == null {
-			@type = new DestructurableObjectType()
+			@type = new DestructurableObjectType(@scope())
 
 			for var element in @elements {
 				element.prepare(subtarget)
@@ -565,21 +565,21 @@ class ObjectBinding extends Expression {
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walk(fn) { # {{{
-		for element in @elements {
-			element.walk(fn)
+	walkVariable(fn) { # {{{
+		for var element in @elements {
+			element.walkVariable(fn)
 		}
 	} # }}}
 }
 
 class ObjectBindingElement extends Expression {
 	private {
-		@alias							= null
+		@alias: Expression?				= null
 		@assignment: AssignmentType		= AssignmentType::Neither
 		@computed: Boolean				= false
 		@defaultValue					= null
 		@hasDefaultValue: Boolean		= false
-		@name
+		@name: Expression?				= null
 		@rest: Boolean					= false
 		@sameName: Boolean				= false
 		@thisAlias: Boolean				= false
@@ -655,7 +655,10 @@ class ObjectBindingElement extends Expression {
 				variable.setRealType(@defaultValue.type())
 			}
 		}
-		else if @alias is not ThisExpression {
+		else if @alias is ThisExpression {
+			@type = @alias.type()
+		}
+		else {
 			@alias.type(@type)
 		}
 
@@ -786,7 +789,7 @@ class ObjectBindingElement extends Expression {
 	} # }}}
 	type() => @type
 	type(@type) => this
-	walk(fn) { # {{{
-		@alias.walk(fn)
+	walkVariable(fn) { # {{{
+		@alias.walkVariable(fn)
 	} # }}}
 }

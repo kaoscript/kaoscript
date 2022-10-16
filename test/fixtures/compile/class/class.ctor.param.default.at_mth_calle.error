@@ -1,0 +1,1 @@
+SyntaxException: The variable "@foobar" isn't yet defined (fixtures/compile/class/class.ctor.param.default.at_mth_calle.ks:6)

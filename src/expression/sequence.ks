@@ -58,7 +58,7 @@ class SequenceExpression extends Expression {
 
 		fragments.code(')')
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		fragments.code('(')
 
 		for var expression, index in @expressions til @last {
@@ -69,7 +69,7 @@ class SequenceExpression extends Expression {
 			fragments.compile(expression)
 		}
 
-		fragments.code($comma).compileBoolean(@expressions[@last])
+		fragments.code($comma).compileCondition(@expressions[@last])
 
 		fragments.code(')')
 	} # }}}

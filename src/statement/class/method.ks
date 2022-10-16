@@ -349,7 +349,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		for var alias in @aliases {
-			@type.addInitializingInstanceVariable(alias.getVariableName())
+			@type.flagInitializingInstanceVariable(alias.getVariableName())
 		}
 
 		@block.analyse(@aliases)

@@ -7,7 +7,7 @@ class MemberExpression extends Expression {
 		@inferable: Boolean				= false
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
-		@object
+		@object: Expression
 		@objectType: DictionaryType?
 		@path: String
 		@prepareObject: Boolean			= true
@@ -464,7 +464,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		if @isNullable() && !@tested {
 			if @computed {
 				fragments
@@ -608,4 +608,5 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	type() => @type
+	walkNode(fn) => fn(this) && @object.walkNode(fn)
 }

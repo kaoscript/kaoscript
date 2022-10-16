@@ -2,9 +2,7 @@ class CreateExpression extends Expression {
 	private late {
 		@alien: Boolean					= false
 		@arguments: Array				= []
-		// TODO
-		// @assessment: Router.Assessment?
-		@assessment?					= null
+		@assessment: Router.Assessment?
 		@computed: Boolean				= true
 		@factory: Expression
 		@flatten: Boolean				= false

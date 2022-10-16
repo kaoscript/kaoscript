@@ -66,7 +66,7 @@ class IfExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		if ?@whenFalse {
 			fragments
-				.wrapBoolean(@condition)
+				.wrapCondition(@condition)
 				.code(' ? ')
 				.compile(@whenTrue)
 				.code(' : ')
@@ -74,7 +74,7 @@ class IfExpression extends Expression {
 		}
 		else {
 			fragments
-				.wrapBoolean(@condition)
+				.wrapCondition(@condition)
 				.code(' ? ')
 				.compile(@whenTrue)
 				.code(' : null')
@@ -85,7 +85,7 @@ class IfExpression extends Expression {
 
 		ctrl.code('if(')
 
-		ctrl.compileBoolean(@condition)
+		ctrl.compileCondition(@condition)
 
 		ctrl.code(')').step().line(@whenTrue).done()
 	} # }}}

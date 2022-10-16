@@ -175,7 +175,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 							.code($space)
 					}
 
-					fragments.wrapBoolean(operand, Mode::None, Junction::AND)
+					fragments.wrapCondition(operand, Mode::None, Junction::AND)
 				}
 			}
 			else {
@@ -526,7 +526,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 							.code($space)
 					}
 
-					fragments.wrapBoolean(operand, Mode::None, Junction::OR)
+					fragments.wrapCondition(operand, Mode::None, Junction::OR)
 				}
 			}
 			else {
@@ -597,13 +597,13 @@ class PolyadicOperatorImply extends PolyadicOperatorOr {
 		var l = @operands.length - 2
 		fragments.code('!('.repeat(l))
 
-		fragments.code('!').wrapBoolean(@operands[0])
+		fragments.code('!').wrapCondition(@operands[0])
 
 		for var operand in @operands from 1 til -1 {
-			fragments.code(' || ').wrapBoolean(operand).code(')')
+			fragments.code(' || ').wrapCondition(operand).code(')')
 		}
 
-		fragments.code(' || ').wrapBoolean(@operands[@operands.length - 1])
+		fragments.code(' || ').wrapCondition(@operands[@operands.length - 1])
 	} # }}}
 }
 
@@ -611,9 +611,9 @@ class BinaryOperatorImply extends BinaryOperatorOr {
 	toFragments(fragments, mode) { # {{{
 		fragments
 			.code('!')
-			.wrapBoolean(@operands[0])
+			.wrapCondition(@operands[0])
 			.code(' || ')
-			.wrapBoolean(@operands[1])
+			.wrapCondition(@operands[1])
 	} # }}}
 }
 
@@ -629,21 +629,21 @@ class PolyadicOperatorXor extends PolyadicOperatorAnd {
 				if l > 0 {
 					fragments.code('('.repeat(l))
 
-					fragments.wrapBoolean(@operands[0])
+					fragments.wrapCondition(@operands[0])
 
 					for var operand in @operands from 1 til -1 {
-						fragments.code(' !== ').wrapBoolean(operand).code(')')
+						fragments.code(' !== ').wrapCondition(operand).code(')')
 					}
 
-					fragments.code(' !== ').wrapBoolean(@operands[@operands.length - 1])
+					fragments.code(' !== ').wrapCondition(@operands[@operands.length - 1])
 				}
 				else {
 					fragments
-						.wrapBoolean(@operands[0])
+						.wrapCondition(@operands[0])
 						.code($space)
 						.code('!==', @data.operator)
 						.code($space)
-						.wrapBoolean(@operands[1])
+						.wrapCondition(@operands[1])
 				}
 			}
 			else {
@@ -697,6 +697,13 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		@native: Boolean		= false
 		@operand: OperandType	= OperandType::Any
 	}
+	abstract {
+		native(): String
+		operator(): Operator
+		runtime(): String
+		symbol(): String
+		toBooleanFragments(fragments): Boolean
+	}
 	override prepare(target) { # {{{
 		super(target)
 
@@ -723,13 +730,11 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			if @type.isNullable() {
 				nullable = true
 			}
-
 			if !@type.canBeNumber() {
 				number = false
 			}
-			else if !boolean {
-				native = false
-			}
+
+			native = false
 		}
 		else if @type.canBeNumber() {
 			if @type.isNullable() {
@@ -758,7 +763,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			else {
 				@type = @scope.reference('Boolean')
 				@operand = OperandType::Boolean
-				@native = true
+				@native = native
 			}
 		}
 		else if number {
@@ -770,18 +775,29 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 				@type = @type.setNullable(true)
 			}
 		}
-	} # }}}
-	abstract native(): String
-	abstract operator(): Operator
-	abstract runtime(): String
-	abstract symbol(): String
-	toFragments(fragments, mode) { # {{{
-		if @native {
-			@toNativeFragments(fragments)
+
+		if @operand == OperandType::Boolean || !@native {
+			@left.acquireReusable(true)
+			@left.releaseReusable()
 		}
-		else {
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		var mut next = true
+
+		if @operand == OperandType::Boolean {
+			next = @toBooleanFragments(fragments)
+		}
+
+		if next && @native {
+			next = @toNativeFragments(fragments)
+		}
+
+		if next {
 			var late operator
-			if @operand == OperandType::Number {
+			if @operand == OperandType::Boolean {
+				operator = `\(@runtime())Bool`
+			}
+			else if @operand == OperandType::Number {
 				operator = `\(@runtime())Num`
 			}
 			else {
@@ -789,22 +805,17 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 
 			fragments
-				.compile(@left)
+				.compileReusable(@left)
 				.code(' = ')
 				.code($runtime.operator(this), `.\(operator)(`)
-				.compile(@left)
+				.compileReusable(@left)
 				.code($comma)
 				.compile(@right)
 				.code(')')
 		}
 	} # }}}
 	toNativeFragments(fragments) { # {{{
-		if @operand == OperandType::Boolean {
-			fragments.compile(@left).code(' = ').compile(@left).code(` \(@native()) `).compile(@right)
-		}
-		else {
-			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
-		}
+		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 	type() => @type
@@ -816,6 +827,27 @@ class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 	operator() => Operator::And
 	runtime() => 'and'
 	symbol() => '&&='
+	toBooleanFragments(fragments) { # {{{
+		if @left.type().isBoolean() {
+			fragments.compileReusable(@left)
+		}
+		else {
+			fragments.code('(').compileReusable(@left).code(' === true)')
+		}
+
+		fragments.code(' && (').compileReusable(@left).code(' = ')
+
+		if @right.type().isBoolean() {
+			fragments.compile(@right)
+		}
+		else {
+			fragments.compile(@right).code(' === true')
+		}
+
+		fragments.code(')')
+
+		return false
+	} # }}}
 }
 
 class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
@@ -823,6 +855,27 @@ class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
 	operator() => Operator::Or
 	runtime() => 'or'
 	symbol() => '||='
+	toBooleanFragments(fragments) { # {{{
+		if @left.type().isBoolean() {
+			fragments.code('!').compileReusable(@left)
+		}
+		else {
+			fragments.code('(').compileReusable(@left).code(' !== true)')
+		}
+
+		fragments.code(' && (').compileReusable(@left).code(' = ')
+
+		if @right.type().isBoolean() {
+			fragments.compile(@right)
+		}
+		else {
+			fragments.compile(@right).code(' === true')
+		}
+
+		fragments.code(')')
+
+		return false
+	} # }}}
 }
 
 class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
@@ -830,9 +883,10 @@ class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
 	operator() => Operator::Xor
 	runtime() => 'xor'
 	symbol() => '^^='
+	toBooleanFragments(fragments) => true
 	toNativeFragments(fragments) { # {{{
 		if @operand == OperandType::Boolean {
-			fragments.compile(@left).code(' = ').compile(@left).code(` !== `).compile(@right)
+			fragments.compileReusable(@left).code(' = ').compileReusable(@left).code(` !== `).compile(@right)
 		}
 		else {
 			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)

@@ -59,9 +59,6 @@ class ClassMethodType extends FunctionType {
 		} # }}}
 	}
 	access(@access) => this
-	addInitializingInstanceVariable(name: String) { # {{{
-		@initVariables[name] = true
-	} # }}}
 	clone() { # {{{
 		var clone = new ClassMethodType(@scope)
 
@@ -119,6 +116,9 @@ class ClassMethodType extends FunctionType {
 	flagForked(hidden: Boolean) { # {{{
 		@forked = true
 		@forkedIndex = @index
+	} # }}}
+	flagInitializingInstanceVariable(name: String) { # {{{
+		@initVariables[name] = true
 	} # }}}
 	flagInstance() { # {{{
 		@instance = true

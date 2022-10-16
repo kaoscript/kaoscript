@@ -13,5 +13,5 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	});
-	const foo = Foobar([]);
+	const foo = Foobar.__ks_new([]);
 };

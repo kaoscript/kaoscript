@@ -2,8 +2,10 @@ class DestructurableObjectType extends ReferenceType {
 	private {
 		@properties: Dictionary			= {}
 	}
-	constructor() { # {{{
-		super(null, '__ks_DestructurableObject')
+	constructor(@scope) { # {{{
+		super(scope, '__ks_DestructurableObject')
+
+		@type = scope.reference('Object')
 	} # }}}
 	addProperty(name: String, type: Type) { # {{{
 		@properties[name] = type
@@ -17,6 +19,7 @@ class DestructurableObjectType extends ReferenceType {
 	isUnion() => false
 	matchContentOf(value) => false
 	properties() => @properties
+	override resolve()
 	toQuote() { # {{{
 		var mut str = '{'
 		var mut first = true

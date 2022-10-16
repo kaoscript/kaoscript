@@ -1,0 +1,1 @@
+ReferenceException: Type "NS.Foobar" is not defined (fixtures/compile/namespace/namespace.var.type.ndef.ks:4)

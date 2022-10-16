@@ -500,19 +500,6 @@ class ClassType extends Type {
 			return this
 		}
 	} # }}}
-	checkVariablesInitializations(node) { # {{{
-		return if @alien
-
-		for var variable, name of @instanceVariables {
-			if variable.isRequiringInitialization() {
-				SyntaxException.throwNotInitializedField(name, node)
-			}
-		}
-
-		if @extending {
-			@extends.type().checkVariablesInitializations(node)
-		}
-	} # }}}
 	clone() { # {{{
 		var that = new ClassType(@scope)
 
@@ -1004,15 +991,6 @@ class ClassType extends Type {
 		@sealed = true
 
 		return this
-	} # }}}
-	forEachInstanceVariables(fn) { # {{{
-		for var variable, name of @instanceVariables {
-			fn(name, variable)
-		}
-
-		if @extending {
-			@extends.type().forEachInstanceVariables(fn)
-		}
 	} # }}}
 	getAbstractMethod(name: String, type: Type) { # {{{
 		if @abstractMethods[name] is Array {
@@ -1698,6 +1676,19 @@ class ClassType extends Type {
 		}
 
 		return null
+	} # }}}
+	listInstanceVariables(filter: (name: String, type: Type): Boolean, result: String[] = []): String[] { # {{{
+		for var type, name of @instanceVariables {
+			if filter(name, type) {
+				result.push(name)
+			}
+		}
+
+		if @extending {
+			@extends.type().listInstanceVariables(filter, result)
+		}
+
+		return result
 	} # }}}
 	listInstantiableMethods(name: String) { # {{{
 		var methods = []

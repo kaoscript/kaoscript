@@ -1079,11 +1079,9 @@ class ImplementClassConstructorDeclaration extends Statement {
 		@block.prepare()
 		@block.translate()
 
-		@class.forEachInstanceVariables((name, variable) => {
-			if variable.isRequiringInitialization() && !variable.isAlien() && !variable.isAltering() {
-				@checkVariableInitialization(name)
-			}
-		})
+		var variables = @class.listInstanceVariables((_, type) => type.isRequiringInitialization() && !type.isAlien() && !type.isAltering())
+
+		@checkVariableInitialization(variables)
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{
 		if !ClassDeclaration.isAssigningAlias(@block.getDataStatements(), statement.name(), false, false) {
@@ -1123,12 +1121,14 @@ class ImplementClassConstructorDeclaration extends Statement {
 		@topNodes.push(node)
 	} # }}}
 	authority() => this
-	checkVariableInitialization(name) { # {{{
-		if @block.isInitializingInstanceVariable(name) {
-			@type.addInitializingInstanceVariable(name)
-		}
-		else {
-			SyntaxException.throwNotInitializedField(name, this)
+	checkVariableInitialization(variables: String[]): Void { # {{{
+		for var variable in variables {
+			if @block.isInitializingInstanceVariable(variable) {
+				@type.flagInitializingInstanceVariable(variable)
+			}
+			else {
+				SyntaxException.throwNotInitializedField(variable, this)
+			}
 		}
 	} # }}}
 	class() => @variable

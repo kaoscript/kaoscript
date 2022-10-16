@@ -266,6 +266,9 @@ abstract class AbstractNode {
 	reference(@reference)
 	scope() => @scope
 	statement() => @parent?.statement()
+	walkNode(fn: (node: AbstractNode): Boolean): Boolean => fn(this)
+	// TODO
+	// walkVariable(fn: (name: String, type: Type): Void): Void
 }
 
 include {
@@ -275,6 +278,7 @@ include {
 	'./include/variable'
 	'./include/scope'
 	'./include/module'
+	'./include/router'
 	'./include/statement'
 	'./include/expression'
 	'./include/parameter'
@@ -283,7 +287,6 @@ include {
 	'./operator/index'
 	'./include/block'
 	'./include/macro'
-	'./include/router'
 }
 
 var $compile = {

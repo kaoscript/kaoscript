@@ -167,7 +167,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 
 		fragments.code(' : null')
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		if @right.isNullable() {
 			fragments
 				.wrapNullable(@right)
@@ -202,7 +202,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEmpty extends AssignmentOperatorNonEmpty {
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toConditionFragments(fragments, mode, junction) { # {{{
 		if @right.isNullable() {
 			fragments
 				.wrapNullable(@right)

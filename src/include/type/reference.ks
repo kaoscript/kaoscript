@@ -456,7 +456,7 @@ class ReferenceType extends Type {
 			return AnyType.NullableUnexplicit
 		}
 
-		@resolveType()
+		@resolve()
 
 		if @type.isArray() || @type.isTuple() {
 			return @discard().getProperty(index)
@@ -544,6 +544,20 @@ class ReferenceType extends Type {
 			else {
 				return true
 			}
+		}
+		else if value is DestructurableObjectType {
+			if @isDictionary() || @isObject() || @isStruct() {
+				for var dType, name of value.properties() {
+					if var sType ?= @getProperty(name) {
+						return false unless sType.isAssignableToVariable(dType, anycast, nullcast, downcast)
+					}
+					else {
+						return false
+					}
+				}
+			}
+
+			return true
 		}
 		else if value is ReferenceType {
 			if @name == value.name() {
@@ -661,7 +675,7 @@ class ReferenceType extends Type {
 	isInstance() => @type().isClass() || @type().isStruct() || @type().isTuple()
 	isInstanceOf(value: AnyType) => false
 	isInstanceOf(value: ReferenceType) { # {{{
-		@resolveType()
+		@resolve()
 
 		return false unless @type.isClass()
 
@@ -724,7 +738,7 @@ class ReferenceType extends Type {
 	isNever() => @name == 'Never' || @type().isNever()
 	isNull() => @name == 'Null'
 	isNullable() { # {{{
-		@resolveType()
+		@resolve()
 
 		return @nullable
 	} # }}}
@@ -756,15 +770,6 @@ class ReferenceType extends Type {
 				var parameter = @parameters[0]
 
 				return false unless parameter.isSubsetOf(value.getRestType(), mode)
-			}
-			else {
-				if value.hasRest() {
-					return false unless value.getRestType().isNullable()
-				}
-
-				for var type, index in value.properties() {
-					return false unless type.isNullable()
-				}
 			}
 
 			return true
@@ -964,7 +969,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	resolveType() { # {{{
+	resolve(): Void { # {{{
 		if !?@type || @type.isCloned() {
 			if @name == 'Any' {
 				@type = AnyType.Unexplicit
@@ -1000,21 +1005,22 @@ class ReferenceType extends Type {
 						}
 					}
 					else {
-						console.info(this)
-						throw new NotImplementedException()
+						NotSupportedException.throw()
 					}
 				}
 				else {
-					var mut type = @scope.getVariable(names[0], -1)?.getRealType()
+					var mut fullname = names[0]
+					var mut type = @scope.getVariable(fullname, -1)?.getRealType()
+
 					if !?type {
-						console.info(this)
-						throw new NotImplementedException()
+						NotSupportedException.throw()
 					}
 
 					for var name in names from 1 {
+						fullname += name
+
 						if type !?= type.getProperty(name) {
-							console.info(this)
-							throw new NotImplementedException()
+							NotSupportedException.throw()
 						}
 					}
 
@@ -1050,7 +1056,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			@resolveType()
+			@resolve()
 
 			if @nullable == nullable {
 				return this
@@ -1092,7 +1098,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	split(types: Array) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @type.isAlias() || @type.isUnion() {
 			return @type.split(types)
@@ -1106,7 +1112,7 @@ class ReferenceType extends Type {
 			fragments.code($comma, 'null', $comma, $quote(@name))
 		}
 		else {
-			@resolveType()
+			@resolve()
 
 			if @type.isClass() {
 				fragments.code($comma, @name, $comma, '"Class"')
@@ -1141,7 +1147,7 @@ class ReferenceType extends Type {
 		fragments.code(@name)
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @referenceIndex != -1 {
 			return @referenceIndex
@@ -1170,7 +1176,7 @@ class ReferenceType extends Type {
 	} # }}}
 	toQuote() => ReferenceType.toQuote(@name, @explicitlyNull, @parameters)
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @predefined {
 			return @export(references, indexDelta, mode, module)
@@ -1215,7 +1221,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
 			@type.toNegativeTestFragments(fragments, node, junction)
@@ -1225,7 +1231,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
 			@type.toPositiveTestFragments(fragments, node, junction)
@@ -1246,7 +1252,7 @@ class ReferenceType extends Type {
 		fragments.code(')') if @nullable && junction == Junction::AND
 	} # }}}
 	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
-		@resolveType()
+		@resolve()
 
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
@@ -1360,7 +1366,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toTestFunctionFragments(fragments, node, junction) { # {{{
-		@resolveType()
+		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
 			if var tof ?= $runtime.typeof(@name, node) {
@@ -1439,7 +1445,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	override toVariations(variations) { # {{{
-		@resolveType()
+		@resolve()
 
 		variations.push('ref', @name, @spread, @nullable)
 
@@ -1451,7 +1457,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	type() { # {{{
-		@resolveType()
+		@resolve()
 
 		return @type
 	} # }}}

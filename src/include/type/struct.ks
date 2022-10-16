@@ -423,4 +423,9 @@ class StructFieldType extends Type {
 	} # }}}
 	override toVariations(variations)
 	type() => @type
+
+	proxy @type {
+		isSubsetOf
+		isAssignableToVariable
+	}
 }

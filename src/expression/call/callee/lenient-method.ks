@@ -6,9 +6,7 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		@property: String
 		@sealed: Boolean					= false
 	}
-	// TODO
-	// constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
-	constructor(@data, @object, @objectType, @property, assessment, result: LenientCallMatchResult, @node) { # {{{
+	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
 		super(data, assessment, result, node)
 
 		@instance = @function.isInstance()

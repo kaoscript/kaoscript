@@ -46,7 +46,7 @@ class DoUntilStatement extends Statement {
 			.compile(@body)
 			.step()
 			.code('while(!(')
-			.compileBoolean(@condition)
+			.compileCondition(@condition)
 			.code('))')
 			.done()
 	} # }}}

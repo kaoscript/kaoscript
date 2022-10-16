@@ -134,9 +134,9 @@ class VariableStatement extends Statement {
 		}
 	} # }}}
 	try(): @try
-	walk(fn) { # {{{
+	walkVariable(fn) { # {{{
 		for var declaration in @declarations {
-			declaration.walk(fn)
+			declaration.walkVariable(fn)
 		}
 	} # }}}
 }
@@ -446,9 +446,9 @@ class VariableDeclaration extends AbstractNode {
 	} # }}}
 	type() => @type
 	value() => @value
-	walk(fn) { # {{{
-		for declarator in @declarators {
-			declarator.walk(fn)
+	walkVariable(fn) { # {{{
+		for var declarator in @declarators {
+			declarator.walkVariable(fn)
 		}
 	} # }}}
 }
@@ -534,8 +534,8 @@ class VariableBindingDeclarator extends AbstractNode {
 	} # }}}
 	toAssignmentFragments(fragments, value) => @binding.toAssignmentFragments(fragments, value)
 	type() => @type
-	walk(fn) { # {{{
-		@binding.walk(fn)
+	walkVariable(fn) { # {{{
+		@binding.walkVariable(fn)
 	} # }}}
 }
 
@@ -664,7 +664,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} # }}}
 	type() => @type
 	variable() => @variable
-	walk(fn) { # {{{
+	walkVariable(fn) { # {{{
 		fn(@variable.getSecureName(), @variable.getRealType())
 	} # }}}
 }

@@ -2,7 +2,6 @@ class DefaultCallee extends Callee {
 	private {
 		@expression: Expression?
 		@flatten: Boolean
-		// @methods: Array<FunctionType>?
 		@node: CallExpression
 		@object: Expression?
 		@objectType: ReferenceType?
@@ -64,25 +63,6 @@ class DefaultCallee extends Callee {
 			@type = AnyType.NullableUnexplicit
 		}
 	} # }}}
-	// constructor(@data, @object, @methods, @type, @node) { # {{{
-	// 	super(data)
-
-	// 	@expression = new MemberExpression(data.callee, node, node.scope(), object)
-	// 	@expression.analyse()
-	// 	@expression.prepare(AnyType.NullableUnexplicit)
-
-	// 	@flatten = node._flatten
-	// 	@nullableProperty = @expression.isNullable()
-	// 	@scope = data.scope.kind
-
-	// 	for method in methods {
-	// 		@validate(method, node)
-	// 	}
-
-	// 	if @type.isClass() {
-	// 		TypeException.throwConstructorWithoutNew(@type.name(), node)
-	// 	}
-	// } # }}}
 	constructor(@data, @expression, @node) { # {{{
 		super(data)
 
@@ -123,18 +103,6 @@ class DefaultCallee extends Callee {
 	} # }}}
 	override hashCode() => `default`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
-	// 	if ?@methods {
-	// 		for var method in @methods {
-	// 			if !method.isInitializingInstanceVariable(name) {
-	// 				return false
-	// 			}
-	// 		}
-
-	// 		return true
-	// 	}
-	// 	else {
-	// 		return false
-	// 	}
 		return false
 	} # }}}
 	mergeWith(that: Callee) { # {{{
@@ -285,11 +253,6 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
-		// console.log(@type.hashCode())
-		// fragments
-		// 	.code($runtime.type(node) + '.isValue(')
-		// 	.compileReusable(@object)
-		// 	.code(')')
 		@objectType.toPositiveTestFragments(fragments, @object)
 	} # }}}
 	translate() { # {{{

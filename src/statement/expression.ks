@@ -162,4 +162,5 @@ class ExpressionStatement extends Statement {
 			afterward.toAfterwardFragments(fragments)
 		}
 	} # }}}
+	walkNode(fn) => fn(this) && @expression.walkNode(fn)
 }

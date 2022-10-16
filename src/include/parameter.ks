@@ -30,14 +30,14 @@ class Parameter extends AbstractNode {
 		@type: ParameterType
 	}
 	static {
-		compileExpression(data, node) {
+		compileExpression(data, node) { # {{{
 			switch data.kind {
 				NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
 				NodeKind::Identifier => return new IdentifierParameter(data, node)
 				NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
 				NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
 			}
-		}
+		} # }}}
 		getUntilDifferentTypeIndex(parameters, index) { # {{{
 			var activeType = parameters[index].type().type().setNullable(false)
 
@@ -743,6 +743,7 @@ class Parameter extends AbstractNode {
 		return @scope.reference(alias.type())
 	} # }}}
 	arity() => @arity
+	getDefaultValue(): @defaultValue
 	getReturnType() => @type.getReturnType()
 	hasDefaultValue() => @hasDefaultValue
 	isAssertingParameter() => @parent.isAssertingParameter()

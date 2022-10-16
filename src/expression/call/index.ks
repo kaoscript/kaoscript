@@ -313,6 +313,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	arguments() => @arguments
+	callees() => @callees
 	getCallScope(): @callScope
 	inferTypes(inferables) { # {{{
 		if @object != null {
@@ -487,7 +488,6 @@ class CallExpression extends Expression {
 						var match = result.matches[0]
 
 						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
-							// @addCallee(new DefaultCallee(@data, @object, match.function, this))
 							@addCallee(new LenientFunctionCallee(@data, assessment, [match.function], this))
 						}
 						else {
@@ -497,7 +497,6 @@ class CallExpression extends Expression {
 					else {
 						var functions = [match.function for var match in result.matches]
 
-						// @addCallee(new DefaultCallee(@data, @object, functions, this))
 						@addCallee(new LenientFunctionCallee(@data, assessment, functions, this))
 					}
 				}
@@ -618,7 +617,6 @@ class CallExpression extends Expression {
 									@addCallee(new SealedCallee(@data, name, false, functions, this))
 								}
 								else {
-									// @addCallee(new DefaultCallee(@data, @object, functions, this))
 									@addCallee(new LenientFunctionCallee(@data, assessment, functions, this))
 								}
 							}
@@ -704,7 +702,6 @@ class CallExpression extends Expression {
 
 						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
-								// @addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 								@addCallee(new LenientFunctionCallee(@data, assessment, result, this))
 							}
 							else {
@@ -712,7 +709,6 @@ class CallExpression extends Expression {
 									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										// @addCallee(new DefaultCallee(@data, @object, match.function, this))
 										@addCallee(new LenientFunctionCallee(@data, assessment, [match.function], this))
 									}
 									else {
@@ -722,7 +718,6 @@ class CallExpression extends Expression {
 								else {
 									var functions = [match.function for var match in result.matches]
 
-									// @addCallee(new DefaultCallee(@data, @object, functions, this))
 									@addCallee(new LenientFunctionCallee(@data, assessment, functions, this))
 								}
 							}
@@ -847,7 +842,6 @@ class CallExpression extends Expression {
 
 						if var result ?= Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
-								// @addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 								@addCallee(new LenientFunctionCallee(@data, assessment, result, this))
 							}
 							else {
@@ -855,7 +849,6 @@ class CallExpression extends Expression {
 									var match = result.matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										// @addCallee(new DefaultCallee(@data, @object, match.function, this))
 										@addCallee(new LenientFunctionCallee(@data, assessment, [match.function], this))
 									}
 									else {
@@ -865,7 +858,6 @@ class CallExpression extends Expression {
 								else {
 									var functions = [match.function for var match in result.matches]
 
-									// @addCallee(new DefaultCallee(@data, @object, functions, this))
 									@addCallee(new LenientFunctionCallee(@data, assessment, functions, this))
 								}
 							}
@@ -1010,7 +1002,28 @@ class CallExpression extends Expression {
 			}
 		}
 	} # }}}
-	toBooleanFragments(fragments, mode, junction) { # {{{
+	toCallFragments(fragments, mode) { # {{{
+		if @callees.length == 1 {
+			@callees[0].toFragments(fragments, mode, this)
+		}
+		else {
+			@module().flag('Type')
+
+			for var callee in @callees til -1 {
+				callee.toPositiveTestFragments(fragments, this)
+
+				fragments.code(' ? ')
+
+				callee.toFragments(fragments, mode, this)
+
+				fragments.code(') : ')
+
+			}
+
+			@callees.last().toFragments(fragments, mode, this)
+		}
+	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
 		if mode == Mode::Async {
 			@toCallFragments(fragments, mode)
 
@@ -1046,27 +1059,6 @@ class CallExpression extends Expression {
 					fragments.code(' === true')
 				}
 			}
-		}
-	} # }}}
-	toCallFragments(fragments, mode) { # {{{
-		if @callees.length == 1 {
-			@callees[0].toFragments(fragments, mode, this)
-		}
-		else {
-			@module().flag('Type')
-
-			for var callee in @callees til -1 {
-				callee.toPositiveTestFragments(fragments, this)
-
-				fragments.code(' ? ')
-
-				callee.toFragments(fragments, mode, this)
-
-				fragments.code(') : ')
-
-			}
-
-			@callees.last().toFragments(fragments, mode, this)
 		}
 	} # }}}
 	toQuote() { # {{{
@@ -1114,6 +1106,19 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	type() => @type
+	walkNode(fn) { # {{{
+		return false unless fn(this)
+
+		if ?@object {
+			return false unless @object.walkNode(fn)
+		}
+
+		for var argument in @arguments {
+			return false unless argument.walkNode(fn)
+		}
+
+		return true
+	} # }}}
 	private addCallee(callee: Callee) { # {{{
 		if var hash ?= callee.hashCode() {
 			if var main ?= @calleeByHash[hash] {

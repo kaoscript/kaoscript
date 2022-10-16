@@ -46,7 +46,7 @@ class ConditionalExpression extends Expression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments
-			.wrapBoolean(@condition)
+			.wrapCondition(@condition)
 			.code(' ? ')
 			.compile(@whenTrue)
 			.code(' : ')

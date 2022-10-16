@@ -40,15 +40,12 @@ class ClassConstructorType extends FunctionType {
 		} # }}}
 	}
 	access(@access) => this
-	addInitializingInstanceVariable(name: String) { # {{{
-		@initVariables[name] = true
-	} # }}}
-	checkVariablesInitializations(node: AbstractNode, class: ClassType = @class) { # {{{
-		class.forEachInstanceVariables((name, variable) => {
-			if variable.isRequiringInitialization() && !@initVariables[name] {
-				SyntaxException.throwNotInitializedField(name, node)
+	checkVariableInitialization(variables: String[], node: AbstractNode): Void { # {{{
+		for var variable in variables {
+			unless @initVariables[variable] {
+				SyntaxException.throwNotInitializedField(variable, node)
 			}
-		})
+		}
 	} # }}}
 	clone() { # {{{
 		var clone = new ClassConstructorType(@scope)
@@ -100,6 +97,11 @@ class ClassConstructorType extends FunctionType {
 		@dependent = true
 
 		return this
+	} # }}}
+	flagInitializingInstanceVariable(...variables: String): Void { # {{{
+		for var variable in variables {
+			@initVariables[variable] = true
+		}
 	} # }}}
 	isDependent() => @dependent
 	isInitializingInstanceVariable(name) => @initVariables[name]

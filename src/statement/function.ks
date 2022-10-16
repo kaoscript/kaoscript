@@ -369,7 +369,7 @@ class FunctionDeclaration extends Statement {
 		line.done()
 	} # }}}
 	type() => @variable.getDeclaredType()
-	walk(fn) { # {{{
+	walkVariable(fn) { # {{{
 		if @main {
 			fn(@name, @variable.getDeclaredType())
 		}

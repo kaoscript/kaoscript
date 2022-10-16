@@ -80,13 +80,12 @@ class ClassVariableType extends Type {
 
 		return data
 	} # }}}
-	flagNullable() { # {{{
+	flagNullable(): this { # {{{
 		@type = @type.setNullable(true)
 	} # }}}
 	hasDefaultValue() => @default
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
-	isNullable() => @type.isNullable()
 	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
 	isSubsetOf(value: ClassVariableType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact {
@@ -98,14 +97,16 @@ class ClassVariableType extends Type {
 	} # }}}
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
-	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations)
 	type(): @type
 	type(@type): this
 
-	proxy {
-		hashCode	= @type.hashCode
-		toQuote		= @type.toQuote
+	proxy @type {
+		hashCode
+		isAssignableToVariable
+		isNullable
+		toFragments
+		toPositiveTestFragments
+		toQuote
 	}
 }

@@ -1,4 +1,4 @@
-/// natives
+// natives
 class MacroScope extends Scope {
 	private {
 		@matchingTypes: Dictionary<Array>	= {}

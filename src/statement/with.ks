@@ -12,10 +12,8 @@ class WithStatement extends Statement {
 		@useTry: Boolean		= false
 		@variables				= []
 	}
-	// TODO
-	// constructor(@data, @parent, @scope = @parent.scope()) { # {{{
-	constructor(@data, @parent, scope: Scope = @parent.scope()) { # {{{
-		super(data, parent, scope!?, ScopeType::Bleeding)
+	constructor(@data, @parent, scope: Scope = parent.scope()!?) { # {{{
+		super(data, parent, scope, ScopeType::Bleeding)
 	} # }}}
 	override initiate() { # {{{
 		@hasFinally = ?@data.finalizer

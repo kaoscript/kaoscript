@@ -31,7 +31,7 @@ class UnlessExpression extends Expression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments
-			.wrapBoolean(@condition)
+			.wrapCondition(@condition)
 			.code(' ? null : ')
 			.compile(@whenFalse)
 	} # }}}
@@ -39,7 +39,7 @@ class UnlessExpression extends Expression {
 		fragments
 			.newControl()
 			.code('if(!')
-			.wrapBoolean(@condition)
+			.wrapCondition(@condition)
 			.code(')')
 			.step()
 			.line(@whenFalse)
