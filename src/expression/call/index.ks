@@ -802,14 +802,7 @@ class CallExpression extends Expression {
 							else {
 								var functions = [match.function for var match in result.matches]
 
-								if functions.some((function, _, _) => function.isSealed()) {
-									@addCallee(new SealedCallee(@data, reference.type(), true, functions, this))
-								}
-								else {
-									// TODO!
-									// @addCallee(new LenientFunctionCallee(@data, @object, reference, assessment, functions, this))
-									@addCallee(new DefaultCallee(@data, @object, reference, this))
-								}
+								@addCallee(new LenientMethodCallee(@data, @object, reference, @property, assessment, functions, this))
 							}
 						}
 					}
@@ -827,6 +820,9 @@ class CallExpression extends Expression {
 						(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 				{
 					@addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
+				}
+				else if value.hasInstanceVariable(@property) {
+					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 				else if value.isExhaustive(this) {
 					ReferenceException.throwNotFoundClassMethod(@property, reference.name(), this)

@@ -212,14 +212,13 @@ class ParameterType extends Type {
 		}
 
 		if mode ~~ MatchingMode::IgnoreName {
-			if ?@externalName != ?value.getExternalName() {
-				return false
-			}
+			return false unless ?@externalName == ?value.getExternalName()
+		}
+		else if mode ~~ MatchingMode::IgnoreAnonymous {
+			return false if ?@externalName && ?value.getExternalName() && @externalName != value.getExternalName()
 		}
 		else {
-			if ?@externalName && ?value.getExternalName() && @externalName != value.getExternalName()  {
-				return false
-			}
+			return false unless @externalName == value.getExternalName()
 		}
 
 		if mode ~~ MatchingMode::MissingDefault && @default && !value.hasDefaultValue() {

@@ -69,7 +69,7 @@ class ThisExpression extends Expression {
 		return unless @type == null
 
 		var type = @class.type()
-		
+
 		if @instance {
 			var name = @scope.getVariable('this').getSecureName()
 
@@ -120,7 +120,7 @@ class ThisExpression extends Expression {
 								@type = Type.union(@scope, ...result.possibilities)
 							}
 						}
-						else if type.isExhaustive(this) {
+						else if type.isExhaustive(this) && @parent is not CurryExpression {
 							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
 						}
 						else {
@@ -224,6 +224,7 @@ class ThisExpression extends Expression {
 		}
 	} # }}}
 	translate()
+	caller() => 'this'
 	declaration() { # {{{
 		if var node ?= @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {

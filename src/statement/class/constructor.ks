@@ -416,9 +416,7 @@ class ClassConstructorDeclaration extends Statement {
 		@toIndigentFragments(fragments)
 	} # }}}
 	type() => @type
-	// TODO
-	// override walkNode(fn) => fn(this) && @block.walkNode(fn)
-	walkNode(fn) => fn(this) && @block.walkNode(fn)
+	override walkNode(fn) => fn(this) && @block.walkNode(fn)
 	private {
 		getOveriddenConstructor(superclass: ClassType) { # {{{
 			var mut mode = MatchingMode::FunctionSignature

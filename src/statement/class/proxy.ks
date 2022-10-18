@@ -31,8 +31,8 @@ class ClassProxyDeclaration extends Statement {
 
 		var mut parent = @external
 		do {
-			if parent.type().isNullable() {
-				ReferenceException.throwNullableProxy(@name, this)
+			if parent.type().isExplicit() && parent.type().isNullable() {
+				ReferenceException.throwNotNullableProxy(@name, this)
 			}
 
 			if parent is MemberExpression {
@@ -56,7 +56,7 @@ class ClassProxyDeclaration extends Statement {
 		}
 
 		@type = @external.type()
-
+		
 		if @type.isFunction() {
 			if @instance {
 				for var function in @type.functions() {
@@ -77,8 +77,11 @@ class ClassProxyDeclaration extends Statement {
 				throw new NotImplementedException()
 			}
 		}
+		else if @type.isAny() {
+			ReferenceException.throwNoTypeProxy(@external.toQuote(), this)
+		}
 		else {
-			throw new NotImplementedException()
+			class.addInstanceVariable(@name, new ClassVariableType(@scope(), @type))
 		}
 	} # }}}
 	translate() { # {{{
@@ -120,7 +123,21 @@ class ClassProxyDeclaration extends Statement {
 			}
 		}
 		else {
-			throw new NotImplementedException()
+			var mut ctrl = fragments.newControl()
+
+			ctrl.code(`get \(@name)()`).step()
+
+			ctrl.line(`return this\(@externalPath).\(@externalName)`)
+
+			ctrl.done()
+
+			ctrl = fragments.newControl()
+
+			ctrl.code(`set \(@name)(value)`).step()
+
+			ctrl.line(`this\(@externalPath).\(@externalName) = value`)
+
+			ctrl.done()
 		}
 	} # }}}
 }
@@ -153,8 +170,8 @@ class ClassProxyGroupDeclaration extends Statement {
 
 		var mut parent = @recipient
 		do {
-			if parent.type().isNullable() {
-				throw new NotSupportedException()
+			if parent.type().isExplicit() && parent.type().isNullable() {
+				ReferenceException.throwNotNullableProxy(parent.toQuote(), this)
 			}
 
 			if parent is MemberExpression {
@@ -172,6 +189,10 @@ class ClassProxyGroupDeclaration extends Statement {
 
 		unless type.isComplete() {
 			ReferenceException.throwUncompleteType(type, @parent.type(), this)
+		}
+		
+		if type.isAny() {
+			ReferenceException.throwNoTypeProxy(@recipient.toQuote(), this)
 		}
 
 		if @instance {
@@ -219,8 +240,16 @@ class ClassProxyGroupDeclaration extends Statement {
 							overloads
 						}
 					}
+					else if type.isAny() {
+						ReferenceException.throwNoTypeProxy(@recipient.toQuote(), external, this)
+					}
 					else {
-						throw new NotImplementedException()
+						class.addInstanceVariable(internal, new ClassVariableType(@scope(), type))
+
+						@elements[internal] = {
+							external
+							type
+						}
 					}
 				}
 				else {
@@ -267,7 +296,21 @@ class ClassProxyGroupDeclaration extends Statement {
 					ctrl.done()
 				}
 				else {
-					throw new NotImplementedException()
+					var mut ctrl = fragments.newControl()
+
+					ctrl.code(`get \(internal)()`).step()
+
+					ctrl.line(`return this\(@recipientPath).\(external)`)
+
+					ctrl.done()
+
+					ctrl = fragments.newControl()
+
+					ctrl.code(`set \(internal)(value)`).step()
+
+					ctrl.line(`this\(@recipientPath).\(external) = value`)
+
+					ctrl.done()
 				}
 			}
 		}

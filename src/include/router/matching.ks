@@ -164,9 +164,7 @@ namespace Matching {
 		return LenientCallMatchResult(possibilities)
 	} # }}}
 
-	// TODO
-	// func splitArguments(types: Type[]): Type[][] { # {{{
-	func splitArguments(types: Type[]): Array<Array<Type>> { # {{{
+	func splitArguments(types: Type[]): Type[][] { # {{{
 		var mut combinations = [[]]
 
 		for var type in types {

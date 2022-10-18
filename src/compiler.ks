@@ -267,8 +267,7 @@ abstract class AbstractNode {
 	scope() => @scope
 	statement() => @parent?.statement()
 	walkNode(fn: (node: AbstractNode): Boolean): Boolean => fn(this)
-	// TODO
-	// walkVariable(fn: (name: String, type: Type): Void): Void
+	walkVariable(fn: (name: String, type: Type): Void): Void
 }
 
 include {

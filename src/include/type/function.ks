@@ -417,6 +417,13 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	isProxy() => false
+	isSubsetOf(value: AnyType, mode: MatchingMode) { # {{{
+		if mode ~~ MatchingMode::Missing {
+			return true
+		}
+
+		return false
+	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return value.isFunction()
 	} # }}}
@@ -433,7 +440,7 @@ class FunctionType extends Type {
 		}
 
 		if mode ~~ MatchingMode::MissingParameter && @missingParameters {
-			pass
+			return true
 		}
 		else if mode ~~ MatchingMode::ShiftableParameters {
 			var mut parameterMode: MatchingMode
@@ -533,6 +540,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
 			paramMode += MatchingMode::IgnoreRetained if mode ~~ MatchingMode::IgnoreRetained
 			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
+			paramMode += MatchingMode::IgnoreAnonymous if mode ~~ MatchingMode::IgnoreAnonymous
 
 			if paramMode != 0 {
 				var valLabels = {}
@@ -984,6 +992,34 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} # }}}
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+		if value.isAny() {
+			if @isNullable() {
+				return nullcast || limited || value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if limited {
+			for var function in @functions {
+				if function.isAssignableToVariable(value, anycast, nullcast, downcast) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else {
+			for var function in @functions {
+				if !function.isAssignableToVariable(value, anycast, nullcast, downcast) {
+					return false
+				}
+			}
+
+			return true
+		}
+	} # }}}
 	isAsync() => @async
 	isExportable() { # {{{
 		for var reference in @references {
@@ -1066,6 +1102,9 @@ class OverloadedFunctionType extends Type {
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
+	} # }}}
+	toQuote() { # {{{
+		return [function.toQuote() for var function in @functions].join('|')
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('func', @functions.length)

@@ -30,6 +30,7 @@ class ClassType extends Type {
 		@explicitlyExported: Boolean		= false
 		@extending: Boolean					= false
 		@extends: NamedType<ClassType>?		= null
+		@fullyImplementedMethods: Boolean{}	= {}
 		@hybrid: Boolean					= false
 		@init: Number						= 0
 		@instanceAssessments: Dictionary	= {}
@@ -719,7 +720,7 @@ class ClassType extends Type {
 					}
 				}
 
-				if exportedMethods.length != 0 {
+				if #exportedMethods {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
@@ -734,7 +735,7 @@ class ClassType extends Type {
 					}
 				}
 
-				if exportedMethods.length != 0 {
+				if #exportedMethods {
 					export.classMethods[name] = exportedMethods
 				}
 			}
@@ -1514,6 +1515,34 @@ class ClassType extends Type {
 	isExtendable() => true
 	isExtending() => @extending
 	isFlexible() => @sealed
+	isFullyImplementedMethods(name: String): Boolean { # {{{
+		if ?@fullyImplementedMethods[name] {
+			return @fullyImplementedMethods[name]
+		}
+		if !@extending {
+			if @abstract && ?@abstractMethods[name] {
+				return @fullyImplementedMethods[name] <- false
+			}
+
+			return @fullyImplementedMethods[name] <- ?@instanceMethods[name]
+		}
+		if !@abstract || !@hasAbstractMethod(name) {
+			return @fullyImplementedMethods[name] <- @hasInstanceMethod(name)
+		}
+		if !?@abstractMethods[name] && @extends.type().isFullyImplementedMethods(name) {
+			return @fullyImplementedMethods[name] <- true
+		}
+
+		@fullyImplementedMethods[name] = false
+
+		var mode = MatchingMode::Signature - MatchingMode::MissingParameterType
+
+		for var method in @listAbstractMethods(name, MatchingScope::Global) {
+			return false unless method.isSubsetOf(@listInstanceMethods(name, MatchingScope::Global), mode)
+		}
+
+		return @fullyImplementedMethods[name] <- true
+	} # }}}
 	isHybrid() => @hybrid
 	isInitializing() => @sequences.initializations != -1
 	// TODO rename to `isSubclassOf`
@@ -1611,6 +1640,21 @@ class ClassType extends Type {
 	} # }}}
 	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
+	listAbstractMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
+		if scope == MatchingScope::Element {
+			return @abstractMethods[name] ?? []
+		}
+
+		if ?@abstractMethods[name] {
+			result.push(...@abstractMethods[name])
+		}
+
+		if @extending {
+			@extends.type().listAbstractMethods(name, scope, result)
+		}
+
+		return result
+	} # }}}
 	listAccessibleConstructors() { # {{{
 		if @constructors.length != 0 {
 			return @constructors
@@ -1676,6 +1720,21 @@ class ClassType extends Type {
 		}
 
 		return null
+	} # }}}
+	listInstanceMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
+		if scope == MatchingScope::Element {
+			return @instanceMethods[name] ?? []
+		}
+
+		if ?@instanceMethods[name] {
+			result.push(...@instanceMethods[name])
+		}
+
+		if @extending {
+			@extends.type().listInstanceMethods(name, scope, result)
+		}
+
+		return result
 	} # }}}
 	listInstanceVariables(filter: (name: String, type: Type): Boolean, result: String[] = []): String[] { # {{{
 		for var type, name of @instanceVariables {

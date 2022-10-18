@@ -1,0 +1,1 @@
+TypeException: A method can only be curried with "^@" (fixtures/compile/curry/curry.imth.this.null.ks:6)

@@ -358,9 +358,7 @@ namespace RegroupTree {
 		return hashes
 	} # }}}
 
-	// TODO
-	// func listShadows(tree: Tree, data: Array, ceiling: Number): Array { # {{{
-	func listShadows(tree: Tree, data: Array, ceiling: Number) { # {{{
+	func listShadows(tree: Tree, data: Array, ceiling: Number): Array { # {{{
 		var newData = data.clone()
 		var results = [ShadowKind::None]
 

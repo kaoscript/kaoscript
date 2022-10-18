@@ -164,7 +164,7 @@ class ArrayBinding extends Expression {
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		for var element in @elements {
 			element.walkVariable(fn)
 		}
@@ -305,7 +305,7 @@ class ArrayBindingElement extends Expression {
 	} # }}}
 	type() => @type
 	type(@type) => this
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		if @named {
 			@name.walkVariable(fn)
 		}
@@ -565,7 +565,7 @@ class ObjectBinding extends Expression {
 	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		for var element in @elements {
 			element.walkVariable(fn)
 		}
@@ -789,7 +789,7 @@ class ObjectBindingElement extends Expression {
 	} # }}}
 	type() => @type
 	type(@type) => this
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		@alias.walkVariable(fn)
 	} # }}}
 }

@@ -12,52 +12,13 @@ class LenientFunctionCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	// TODO!
-	// constructor(@data, assessment, result: LenientCallMatchResult, @node) { # {{{
-	// 	this(data, assessment, result.possibilities, result.positions, result.labels, node)
-	// } # }}}
 	constructor(@data, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
-		super(data)
-
-		// TODO
-		// { @labelable } = assessment
-		@labelable = assessment.labelable
-		// TODO
-		// { possibilities: @functions, @positions, @labels } = result
-		@functions = result.possibilities
-		@positions = result.positions
-		@labels = result.labels
-
-		@expression = $compile.expression(data.callee, node)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
-
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-		@function = @functions[0]
-
-		var types = []
-
-		for var function in @functions {
-			@validate(function, node)
-
-			types.pushUniq(function.getReturnType())
-		}
-
-		@type = Type.union(node.scope(), ...types)
-
-		@hash = 'lenient'
-		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`
-		@hash += `:\(@positions.join(','))`
-		@hash += `:\(Dictionary.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
+		this(data, assessment, result.possibilities, result.positions, result.labels, node)
 	} # }}}
 	constructor(@data, assessment: Router.Assessment, @functions, @positions = [], @labels = null, @node) { # {{{
 		super(data)
 
-		// TODO
-		// { @labelable } = assessment
-		@labelable = assessment.labelable
+		{ @labelable } = assessment
 
 		@expression = $compile.expression(data.callee, node)
 		@expression.analyse()

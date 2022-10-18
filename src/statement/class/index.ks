@@ -392,25 +392,35 @@ class ClassDeclaration extends Statement {
 				var mut found = false
 
 				if instance {
-					for var method in @instanceMethods[name] until found {
-						if index == method.type().index() {
-							if hidden == false {
-								method.flagForked(@class, forks)
-							}
+					if #@instanceMethods[name] {
+						for var method in @instanceMethods[name] until found {
+							if index == method.type().index() {
+								if hidden == false {
+									method.flagForked(@class, forks)
+								}
 
-							found = true
+								found = true
+							}
 						}
+					}
+					else {
+						continue
 					}
 				}
 				else {
-					for var method in @classMethods[name] until found {
-						if index == method.type().index() {
-							if hidden == false {
-								method.flagForked(@class, forks)
-							}
+					if #@classMethods[name] {
+						for var method in @classMethods[name] until found {
+							if index == method.type().index() {
+								if hidden == false {
+									method.flagForked(@class, forks)
+								}
 
-							found = true
+								found = true
+							}
 						}
+					}
+					else {
+						continue
 					}
 				}
 

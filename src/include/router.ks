@@ -273,18 +273,12 @@ namespace Router {
 				var labelB = perLabelB.labels[i]
 
 				var ld = labelA.localeCompare(labelB)
-				// TODO
-				// return ld unless ld == 0
-				if ld != 0 {
-					return ld
-				}
+
+				return ld unless ld == 0
 
 				var td = perLabelA.types[labelA].compareToRef(perLabelB.types[labelB])
-				// TODO
-				// return td unless td == 0
-				if td != 0 {
-					return td
-				}
+
+				return td unless td == 0
 			}
 
 			return perLabelA.labels.length < perLabelB.labels.length ? -1 : 1

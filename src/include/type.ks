@@ -129,6 +129,7 @@ bitmask MatchingMode<u48> {
 
 	Renamed
 
+	IgnoreAnonymous
 	IgnoreError
 	IgnoreName
 	IgnoreRetained
@@ -146,7 +147,13 @@ bitmask MatchingMode<u48> {
 		// AdditionalParameterDefault +
 		// AdditionalDefault +
 		MissingParameterType +
-		MissingParameterArity
+		MissingParameterArity +
+		IgnoreAnonymous
+}
+
+enum MatchingScope {
+	Element
+	Global
 }
 
 bitmask QuoteMode {

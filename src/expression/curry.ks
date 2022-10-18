@@ -15,13 +15,21 @@ class CurryExpression extends CallExpression {
 		}
 
 		if ?@object {
+			@property = @data.callee.property.name
+
 			@object.prepare(AnyType.NullableUnexplicit)
 
-			@property = @data.callee.property.name
+			if @object.type().isInstance() && @data.scope.kind != ScopeKind::This {
+				SyntaxException.throwOnlyThisScope(this)
+			}
 
 			@addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 		else {
+			if @data.callee.kind == NodeKind::ThisExpression && @data.scope.kind != ScopeKind::This {
+				SyntaxException.throwOnlyThisScope(this)
+			}
+
 			@addCallee(new DefaultCallee(@data, null, null, this))
 		}
 	} # }}}

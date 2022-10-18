@@ -307,8 +307,14 @@ export class ReferenceException extends Exception {
 		throwNotPassed(name, module, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} # }}}
-		throwNullableProxy(name, node): Never ~ ReferenceException { # {{{
-			throw new ReferenceException(`A proxy can't be null`, node)
+		throwNotNullableProxy(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The proxy "\(name)" can't be null`, node)
+		} # }}}
+		throwNoTypeProxy(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The proxy "\(name)" must be typed`, node)
+		} # }}}
+		throwNoTypeProxy(name, property, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The property "\(property)" of the proxy "\(name)" must be typed`, node)
 		} # }}}
 		throwNullExpression(expression, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
@@ -615,11 +621,14 @@ export class SyntaxException extends Exception {
 		throwNotYetDefined(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The variable "\(name)" isn't yet defined`, node)
 		} # }}}
-		throwOnlyStaticImport(modname, node): Never ~ ReferenceException { # {{{
+		throwOnlyStaticImport(modname, node): Never ~ SyntaxException { # {{{
 			throw new TypeException(`The arguments of the module "\(modname)" must have unmodified types`, node)
 		} # }}}
-		throwOnlyStaticImport(argname, modname, node): Never ~ ReferenceException { # {{{
+		throwOnlyStaticImport(argname, modname, node): Never ~ SyntaxException { # {{{
 			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" must have an unmodified type`, node)
+		} # }}}
+		throwOnlyThisScope(node): Never ~ SyntaxException { # {{{
+			throw new TypeException(`A method can only be curried with "^@"`, node)
 		} # }}}
 		throwPositionalOnlyParameter(name: String, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The parameter "\(name)" must be passed by position`, node)

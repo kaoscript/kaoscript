@@ -7,7 +7,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		@sealed: Boolean					= false
 	}
 	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
-		super(data, assessment, result, node)
+		this(data, object, objectType, property, assessment, result.possibilities, result.positions, result.labels, node)
+	} # }}}
+	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @functions, @positions = [], @labels = null, @node) { # {{{
+		super(data, assessment, functions, positions, labels, node)
 
 		@instance = @function.isInstance()
 

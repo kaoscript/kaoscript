@@ -1296,7 +1296,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 }
 
 
-class CallOverwrittenMethodSubstitude {
+class CallOverwrittenMethodSubstitude extends Substitude {
 	private late {
 		@instance: Boolean
 	}
@@ -1309,6 +1309,8 @@ class CallOverwrittenMethodSubstitude {
 		@type: Type
 	}
 	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance, node: AbstractNode) { # {{{
+		super()
+
 		var types = []
 
 		for var method in methods {
@@ -1357,7 +1359,7 @@ class CallOverwrittenMethodSubstitude {
 	type() => @type
 }
 
-class CallSealedConstructorSubstitude {
+class CallSealedConstructorSubstitude extends Substitude {
 	private {
 		@arguments
 		@class: NamedType<ClassType>
@@ -1385,7 +1387,7 @@ class CallSealedConstructorSubstitude {
 	type() => Type.Void
 }
 
-class CallOverwrittenConstructorSubstitude {
+class CallOverwrittenConstructorSubstitude extends Substitude {
 	private {
 		@arguments
 		@class: NamedType<ClassType>

@@ -304,7 +304,7 @@ class ClassMethodDeclaration extends Statement {
 				if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode::Default) {
 					SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
 				}
-				else if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+				else if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreAnonymous + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = true
 
 					overload.push(method.index())
@@ -637,24 +637,25 @@ class ClassMethodDeclaration extends Statement {
 				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
 			}
 
-			var methods = @instance ? superclass.listInstantiableMethods(@name, @type, mode) : superclass.listClassMethods(@name, @type, mode)
-
 			var mut method = null
 			var mut exact = false
-			if methods.length == 1 {
-				method = methods[0]
-			}
-			else if methods.length > 0 {
-				for var m in methods {
-					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
-						method = m
-						exact = true
 
-						break
-					}
+			var list = @instance ? superclass.listInstantiableMethods : superclass.listClassMethods
+
+			if var methods #= list(@name, @type, MatchingMode::ExactParameter) {
+				if methods.length == 1 {
+					method = methods[0]
+					exact = true
 				}
-
-				if !?method {
+				else {
+					return null
+				}
+			}
+			else if var methods #= list(@name, @type, mode) {
+				if methods.length == 1 {
+					method = methods[0]
+				}
+				else {
 					return null
 				}
 			}

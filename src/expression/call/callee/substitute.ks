@@ -1,6 +1,6 @@
 class SubstituteCallee extends Callee {
 	private {
-		@substitute
+		@substitute: Substitude
 		@type: Type
 	}
 	constructor(@data, @substitute, node) { # {{{
@@ -15,8 +15,6 @@ class SubstituteCallee extends Callee {
 
 		@nullableProperty = substitute.isNullable()
 	} # }}}
-	isInitializingInstanceVariable(name: String): Boolean => @substitute.isInitializingInstanceVariable(name)
-	isSkippable() => @substitute.isSkippable()
 	override hashCode() => null
 	substitute(): @substitute
 	toFragments(fragments, mode, node) { # {{{
@@ -28,10 +26,8 @@ class SubstituteCallee extends Callee {
 	translate()
 	type() => @type
 
-	// TODO
-	// proxy @substitute {
-	// 	isInitializingInstanceVariable
-	// 	isSkippable
-	// 	toFragments
-	// }
+	proxy @substitute {
+		isInitializingInstanceVariable
+		isSkippable
+	}
 }

@@ -90,7 +90,7 @@ class ExportDeclaration extends Statement {
 			statement.toFragments(fragments, Mode::None)
 		}
 	} # }}}
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		for var statement in @statements {
 			statement.walkVariable(fn)
 		}
@@ -155,7 +155,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)
-	walkVariable(fn) { # {{{
+	override walkVariable(fn) { # {{{
 		if !@expression.isMacro() {
 			fn(@data.external.name, @expression.type())
 		}
