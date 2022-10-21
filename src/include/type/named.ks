@@ -208,6 +208,7 @@ class NamedType extends Type {
 	isExportingFragment() => @type.isExportingFragment()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
+	isFusion() => @type.isFusion()
 	isHybrid() => @type.isHybrid()
 	isInheriting(superclass: NamedType) { # {{{
 		var mut name = superclass.name()

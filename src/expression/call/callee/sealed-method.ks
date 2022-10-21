@@ -9,7 +9,7 @@ class SealedMethodCallee extends Callee {
 	constructor(@data, @object, @objectType, @property, @instance, @node) { # {{{
 		super(data)
 
-		@nullableProperty = data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable)
+		@nullableProperty = data.callee.modifiers?.some(modifier => modifier.kind == ModifierKind::Nullable)
 	} # }}}
 	translate() { # {{{
 		@object.translate()

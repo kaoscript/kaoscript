@@ -44,6 +44,7 @@ class AliasType extends Type {
 	isExportable() => @type.isExportable()
 	isExportingFragment() => false
 	isFunction() => @type.isFunction()
+	isFusion() => @type.isFusion()
 	isNamespace() => @type.isNamespace()
 	isNullable() => @type?.isNullable()
 	isNumber() => @type.isNumber()

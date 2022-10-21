@@ -111,13 +111,22 @@ class ThisExpression extends Expression {
 						var assessment = type.getInstantiableAssessment(@name, this)
 
 						if var result ?= Router.matchArguments(assessment, @parent.arguments(), this) {
-							@fragment = `\(name).\(@name)`
+							var late functions: FunctionType[]
 
 							if result is PreciseCallMatchResult {
-								@type = Type.union(@scope, ...[match.function for var match in result.matches])
+								functions = [match.function for var match in result.matches]
 							}
 							else {
-								@type = Type.union(@scope, ...result.possibilities)
+								functions = result.possibilities
+							}
+
+							@type = Type.union(@scope, ...functions)
+
+							if functions.some((fn, ...) => fn.isSealed()) {
+								@sealed = true
+							}
+							else {
+								@fragment = `\(name).\(@name)`
 							}
 						}
 						else if type.isExhaustive(this) && @parent is not CurryExpression {

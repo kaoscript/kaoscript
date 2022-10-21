@@ -450,7 +450,7 @@ abstract class Type {
 			}
 			else if ?data.reference {
 				if var reference ?= references[data.reference] {
-					if reference is ArrayType | DictionaryType | ReferenceType {
+					if reference is ArrayType | DictionaryType | FunctionType | ReferenceType {
 						return reference
 					}
 					else {

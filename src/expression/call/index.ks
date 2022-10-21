@@ -224,7 +224,17 @@ class CallExpression extends Expression {
 					}
 				}
 				else if type.isFunction() {
-					@addCallee(new DefaultCallee(@data, null, null, this))
+					if expression.isSealed() {
+						var object = new IdentifierLiteral($ast.identifier('this'), this, @scope)
+						var class = expression.getClass()
+						var reference = @scope.reference(class)
+
+						@addCallee(new SealedMethodCallee(@data, object, reference, @property, true, this))
+
+					}
+					else {
+						@addCallee(new DefaultCallee(@data, null, null, this))
+					}
 				}
 				else {
 					ReferenceException.throwUndefinedFunction(@property, this)

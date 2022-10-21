@@ -19,7 +19,7 @@ module.exports = function() {
 		if(missingValue === void 0 || missingValue === null) {
 			missingValue = "";
 		}
-		return "";
+		return this;
 	};
 	__ks_String.__ks_func_substringBefore_2 = function(pattern, position, missingValue) {
 		if(position === void 0 || position === null) {
@@ -28,7 +28,7 @@ module.exports = function() {
 		if(missingValue === void 0 || missingValue === null) {
 			missingValue = "";
 		}
-		return "";
+		return this;
 	};
 	__ks_String._im_substringBefore = function(that, ...args) {
 		return __ks_String.__ks_func_substringBefore_rt(that, args);
@@ -41,10 +41,10 @@ module.exports = function() {
 		const t4 = value => Type.isString(value) || Type.isNull(value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return __ks_String.__ks_func_substringBefore_2.call(that, args[0], void 0, void 0);
+				return __ks_String.__ks_func_substringBefore_1.call(that, args[0], void 0, void 0);
 			}
 			if(t1(args[0])) {
-				return __ks_String.__ks_func_substringBefore_1.call(that, args[0], void 0, void 0);
+				return __ks_String.__ks_func_substringBefore_2.call(that, args[0], void 0, void 0);
 			}
 		}
 		if(args.length === 2) {
@@ -53,10 +53,10 @@ module.exports = function() {
 					return __ks_String.__ks_func_substringBefore_0.call(that, args[0], args[1], void 0);
 				}
 				if(t3(args[1])) {
-					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], args[1], void 0);
+					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], args[1], void 0);
 				}
 				if(t4(args[1])) {
-					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], void 0, args[1]);
+					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], void 0, args[1]);
 				}
 				throw Helper.badArgs();
 			}
@@ -65,10 +65,10 @@ module.exports = function() {
 					return __ks_String.__ks_func_substringBefore_0.call(that, args[0], args[1], void 0);
 				}
 				if(t3(args[1])) {
-					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], args[1], void 0);
+					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], args[1], void 0);
 				}
 				if(t4(args[1])) {
-					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], void 0, args[1]);
+					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], void 0, args[1]);
 				}
 				throw Helper.badArgs();
 			}
@@ -82,7 +82,7 @@ module.exports = function() {
 					throw Helper.badArgs();
 				}
 				if(t3(args[1]) && t4(args[2])) {
-					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], args[1], args[2]);
+					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], args[1], args[2]);
 				}
 				throw Helper.badArgs();
 			}
@@ -94,7 +94,7 @@ module.exports = function() {
 					throw Helper.badArgs();
 				}
 				if(t3(args[1]) && t4(args[2])) {
-					return __ks_String.__ks_func_substringBefore_1.call(that, args[0], args[1], args[2]);
+					return __ks_String.__ks_func_substringBefore_2.call(that, args[0], args[1], args[2]);
 				}
 				throw Helper.badArgs();
 			}

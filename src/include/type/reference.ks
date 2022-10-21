@@ -530,6 +530,7 @@ class ReferenceType extends Type {
 		return hash
 	} # }}}
 	hasParameters() => @parameters.length > 0
+	isAlias() => @type().isAlias()
 	isAlien() => @type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || @type().isArray()
@@ -621,7 +622,7 @@ class ReferenceType extends Type {
 			return false unless @isArray()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			if anycast {
+			if anycast && !@isFusion() && !@isUnion() {
 				return true if @parameters.length == 0
 
 				var parameter = @parameters[0]
@@ -637,7 +638,7 @@ class ReferenceType extends Type {
 			return false unless @isDictionary()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			if anycast {
+			if anycast && !@isFusion() && !@isUnion() {
 				return true if @parameters.length == 0
 
 				var parameter = @parameters[0]
@@ -670,6 +671,7 @@ class ReferenceType extends Type {
 	isExportingFragment() => !@isVirtual()
 	isExtendable() => @name == 'Function'
 	isFunction() => @name == 'Function' || @type().isFunction()
+	isFusion() => @type().isFusion()
 	isHybrid() => @type().isHybrid()
 	isInheriting(superclass) => @type().isInheriting(superclass)
 	isInstance() => @type().isClass() || @type().isStruct() || @type().isTuple()
@@ -760,8 +762,6 @@ class ReferenceType extends Type {
 			if @hasParameters() {
 				return @parameters[0].isSubsetOf(value.getRestType(), mode)
 			}
-
-			return true
 		}
 		else {
 			if @hasParameters() {
@@ -771,9 +771,15 @@ class ReferenceType extends Type {
 
 				return false unless parameter.isSubsetOf(value.getRestType(), mode)
 			}
-
-			return true
 		}
+
+		if @isAlias() {
+			var unalias = @discardAlias()
+
+			return unalias.isSubsetOf(value, mode)
+		}
+
+		return true
 	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
@@ -1385,7 +1391,7 @@ class ReferenceType extends Type {
 
 		var unalias = @discardAlias()
 
-		if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {
+		if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
 			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
 		}
 		else {

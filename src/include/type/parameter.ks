@@ -84,7 +84,8 @@ class ParameterType extends Type {
 		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
 			var data = index
 			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
-			var type = new ParameterType(scope, data.external, data.internal, subtype, data.min, data.max, data.default)
+			var passing = ?data.passing ? PassingMode(data.passing) : PassingMode::BOTH
+			var type = new ParameterType(scope, data.external, data.internal, passing, subtype, data.min, data.max, data.default)
 
 			if data.default {
 				if data.comprehensive {
@@ -166,6 +167,10 @@ class ParameterType extends Type {
 			else {
 				export.defaultValue = @defaultValue
 			}
+		}
+
+		if !@anonymous && @passing != PassingMode::BOTH {
+			export.passing = @passing
 		}
 
 		if @retained {

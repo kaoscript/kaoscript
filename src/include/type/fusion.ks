@@ -85,8 +85,8 @@ class FusionType extends Type {
 		}
 
 		var mut match = 0
-		for aType in @types {
-			for bType in value._types {
+		for var aType in @types {
+			for var bType in value._types {
 				if aType.isSubsetOf(bType, mode) {
 					match += 1
 					break
@@ -95,6 +95,15 @@ class FusionType extends Type {
 		}
 
 		return match == @types.length
+	} # }}}
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+		for var type in @types {
+			if type.isSubsetOf(value, mode) {
+				return true
+			}
+		}
+
+		return false
 	} # }}}
 	parameter() { # {{{
 		for var type in @types when type.isArray() {
