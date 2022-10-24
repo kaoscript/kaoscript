@@ -7,6 +7,6 @@ abstract class ClassB extends ClassA {
 }
 
 class ClassC extends ClassB {
-	foobar(x) => 1
+	foobar(x) => super(x)
 	foobar(x, y? = null) => 2
 }

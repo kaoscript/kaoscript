@@ -53,7 +53,7 @@ namespace RegroupTree {
 			return s
 		} # }}}
 		func toSignature(tree: TreeLeaf, prefix: String): String { # {{{
-			return `/\(prefix)=\(tree.index),\(tree.type.hashCode())(\(tree.min),\(tree.max))`
+			return `/\(prefix)=\(tree.index),\(tree.type.hashCode())(\(tree.min),\(tree.max))>>\(tree.function.index())`
 		} # }}}
 	}
 
@@ -560,9 +560,7 @@ namespace RegroupTree {
 
 		trees.remove(...group)
 
-		// console.log(RegroupTree.toSignature(tree))
 		applyMin(tree, first, mins, shadows)
-		// console.log(RegroupTree.toSignature(tree))
 	} # }}}
 
 	func replaceOrder(equivalences: String[], orders: String[][]): String[][] { # {{{

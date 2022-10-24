@@ -790,8 +790,11 @@ class CallExpression extends Expression {
 			is ClassType => {
 				if value.hasInstantiableMethod(@property) {
 					var assessment = value.getInstantiableAssessment(@property, this)
+					// console.log(assessment)
+					// console.log(assessment.routes['|0,1'])
 
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
+						// console.log(result)
 						var class = value.getClassWithInstantiableMethod(@property, reference.type())
 						var reference = @scope.reference(class)
 

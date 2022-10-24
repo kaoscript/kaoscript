@@ -309,6 +309,11 @@ class ClassMethodDeclaration extends Statement {
 
 					overload.push(method.index())
 				}
+				else if method.isSubsetOf(@type, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+					hidden = true
+
+					overload.push(method.index())
+				}
 				else if @type.isSubsetOf(method, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
 					hidden = false
 

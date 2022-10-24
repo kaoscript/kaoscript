@@ -136,6 +136,12 @@ class AnonymousFunctionExpression extends Expression {
 			@parameters[index].type(parameter)
 		}
 	} # }}}
+	type(type: AnyType)
+	type(type: ReferenceType) { # {{{
+		if type.isAlias() {
+			@type(type.discardAlias())
+		}
+	} # }}}
 }
 
 class ArrowFunctionExpression extends Expression {
@@ -348,6 +354,12 @@ class ArrowFunctionExpression extends Expression {
 	type(@type) { # {{{
 		for var parameter, index in @type.parameters() {
 			@parameters[index].type(parameter)
+		}
+	} # }}}
+	type(type: AnyType)
+	type(type: ReferenceType) { # {{{
+		if type.isAlias() {
+			@type(type.discardAlias())
 		}
 	} # }}}
 }

@@ -799,6 +799,22 @@ class ReferenceType extends Type {
 			return @discard().isSubsetOf(value, mode)
 		}
 	} # }}}
+	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
+		if @isAlias() {
+			return @discardAlias().isSubsetOf(value, mode)
+		}
+
+		return false unless @isFunction()
+
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false if @name == 'Function'
+		}
+		else {
+			return true if @name == 'Function'
+		}
+
+		return @discard().isSubsetOf(value, mode)
+	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		if this == value {
 			return true
@@ -870,6 +886,10 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+		if @isAlias() {
+			return @discardAlias().isSubsetOf(value, mode)
+		}
+
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode::Missing {
 				return true

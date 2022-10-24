@@ -5,10 +5,8 @@ class ClassB extends ClassA {
 }
 
 class ClassX {
-	foobar(x: ClassB) {
-	}
-	foobar(x: ClassA) {
-	}
+	foobar(x: ClassB) => 1
+	foobar(x: ClassA) => 2
 }
 
 func foobar(a: ClassA) {

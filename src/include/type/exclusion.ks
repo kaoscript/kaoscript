@@ -63,8 +63,9 @@ class ExclusionType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		console.error(value)
-		NotImplementedException.throw()
+		return false if value.isNull()
+
+		return true
 	} # }}}
 	length() => @types.length
 	matchContentOf(value: Type?) { # {{{

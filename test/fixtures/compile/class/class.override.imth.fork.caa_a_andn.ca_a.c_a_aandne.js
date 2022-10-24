@@ -23,9 +23,6 @@ module.exports = function() {
 		__ks_func_foobar_1(x) {
 			return 1;
 		}
-		__ks_func_foobar_0(x, y) {
-			return this.__ks_func_foobar_1(x, y);
-		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
@@ -49,7 +46,7 @@ module.exports = function() {
 			super.__ks_cons_rt.call(null, that, args);
 		}
 		__ks_func_foobar_1(x) {
-			return 1;
+			return super.__ks_func_foobar_1(x);
 		}
 		__ks_func_foobar_0(x, y = null) {
 			return 2;

@@ -109,11 +109,8 @@ namespace Matching {
 		if argument.isStrict() {
 			return argument.isAssignableToVariable(parameter, true, false, false)
 		}
-		else if parameter.isEnum() {
-			return argument.isAssignableToVariable(parameter, true, true, false)
-		}
 		else {
-			return parameter.isAssignableToVariable(argument, true, true, false)
+			return argument.isAssignableToVariable(parameter, true, true, true)
 		}
 	} # }}}
 
@@ -407,16 +404,67 @@ namespace Matching {
 					}
 					else {
 						if isPreciseMatch(cursor.argument, node.type) {
-							cursor.used += 1
+							var mut matched = true
 
-							argMatches.arguments.push([cursor.index])
+							if var value ?= getRefinableValue(cursor, context) {
+								if node.type.isUnion() {
+									var mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreRetained
+									var types = []
 
-							cursor = getNextCursor(cursor, arguments)
+									for var type in node.type.types() {
+										if type.isSubsetOf(cursor.argument, mode) {
+											types.push(type)
+										}
+									}
 
-							return { cursor, argMatches }
+									matched = #types
+
+									if matched {
+										value.type(Type.union(context.node.scope(), ...types))
+									}
+								}
+								else {
+									value.type(node.type)
+								}
+							}
+
+							if matched {
+								cursor.used += 1
+
+								argMatches.arguments.push([cursor.index])
+
+								cursor = getNextCursor(cursor, arguments)
+
+								return { cursor, argMatches }
+							}
 						}
-						else if var value ?= getRefinableValue(cursor, context) {
-							if node.type.isSubsetOf(cursor.argument, MatchingMode::FunctionSignature + MatchingMode::AnycastParameter + MatchingMode::MissingReturn + MatchingMode::IgnoreRetained) {
+
+						if var value ?= getRefinableValue(cursor, context) {
+							var mode = MatchingMode::FunctionSignature + MatchingMode::AnycastParameter + MatchingMode::MissingReturn + MatchingMode::IgnoreRetained
+
+							if node.type.isUnion() {
+								var types = []
+
+								for var type in node.type.types() {
+									if type.isSubsetOf(cursor.argument, mode) {
+										types.push(type)
+									}
+								}
+
+								if #types {
+									value.type(Type.union(context.node.scope(), ...types))
+
+									cursor.used += 1
+
+									argMatches.arguments.push([cursor.index])
+
+									cursor = getNextCursor(cursor, arguments)
+
+									return { cursor, argMatches }
+								}
+							}
+
+							else if node.type.isSubsetOf(cursor.argument, mode) {
 								value.type(node.type)
 
 								cursor.used += 1
@@ -428,7 +476,8 @@ namespace Matching {
 								return { cursor, argMatches }
 							}
 						}
-						else if isUnpreciseMatch(cursor.argument, node.type) {
+
+						if isUnpreciseMatch(cursor.argument, node.type) {
 							argMatches.precise = false
 
 							cursor.used += 1

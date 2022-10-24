@@ -49,8 +49,10 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(x) {
+			return 1;
 		}
 		__ks_func_foobar_1(x) {
+			return 2;
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = value => Type.isClassInstance(value, ClassB);

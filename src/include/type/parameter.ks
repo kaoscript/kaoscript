@@ -69,7 +69,7 @@ class ParameterType extends Type {
 
 			var parameter = new ParameterType(scope, externalName, internalName, type, min, max, default)
 
-			if default && overridable {
+			if default {
 				parameter.setDefaultValue(data.defaultValue, true)
 			}
 
@@ -212,7 +212,7 @@ class ParameterType extends Type {
 	isPositional() => @passing ~~ PassingMode::POSITIONAL
 	isRetained() => @retained
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
-		if mode !~ MatchingMode::IgnoreRetained && @retained && !value.isRetained() {
+		if mode !~ MatchingMode::IgnoreRetained && @retained != value.isRetained() {
 			return false
 		}
 

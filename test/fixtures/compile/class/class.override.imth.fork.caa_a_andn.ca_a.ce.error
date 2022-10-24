@@ -1,0 +1,1 @@
+SyntaxException: Class "ClassC" doesn't implement the following abstract method: "foobar(x: Any, y: Any?)" (fixtures/compile/class/class.override.imth.fork.caa_a_andn.ca_a.ce.ks:9)

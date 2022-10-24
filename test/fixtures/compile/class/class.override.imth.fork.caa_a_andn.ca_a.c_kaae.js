@@ -23,9 +23,6 @@ module.exports = function() {
 		__ks_func_foobar_1(x) {
 			return 1;
 		}
-		__ks_func_foobar_0(x, y) {
-			return this.__ks_func_foobar_1(x, y);
-		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
@@ -37,6 +34,34 @@ module.exports = function() {
 				return super.__ks_func_foobar_rt.call(null, that, ClassA.prototype, args);
 			}
 			throw Helper.badArgs();
+		}
+	}
+	class ClassC extends ClassB {
+		static __ks_new_0() {
+			const o = Object.create(ClassC.prototype);
+			o.__ks_init();
+			return o;
+		}
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
+		}
+		__ks_func_foobar_0(x, y) {
+			if(y === void 0) {
+				y = null;
+			}
+			return 2;
+		}
+		__ks_func_foobar_1(x) {
+			return this.__ks_func_foobar_0(x);
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length >= 1 && args.length <= 2) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foobar_0.call(that, args[0], args[1]);
+				}
+			}
+			return super.__ks_func_foobar_rt.call(null, that, ClassB.prototype, args);
 		}
 	}
 };

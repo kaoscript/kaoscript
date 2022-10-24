@@ -5,3 +5,6 @@ abstract class ClassA {
 abstract class ClassB extends ClassA {
 	foobar(x) => 1
 }
+
+class ClassC extends ClassB {
+}

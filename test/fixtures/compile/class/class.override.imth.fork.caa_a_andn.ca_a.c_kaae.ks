@@ -7,6 +7,5 @@ abstract class ClassB extends ClassA {
 }
 
 class ClassC extends ClassB {
-	override foobar(x) => super(x)
 	override foobar(x, y) => 2
 }

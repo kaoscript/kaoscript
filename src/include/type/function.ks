@@ -195,6 +195,15 @@ class FunctionType extends Type {
 	clone() { # {{{
 		throw new NotSupportedException()
 	} # }}}
+	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
+		return -1
+	} # }}}
+	compareToRef(value: FunctionType, equivalences: String[][]? = null) { # {{{
+		return value.max() - @max()
+	} # }}}
+	compareToRef(value: Type, equivalences: String[][]? = null) { # {{{
+		return 1
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var result = {
 			kind: TypeKind::Function
@@ -238,7 +247,31 @@ class FunctionType extends Type {
 	getRestParameter() => @parameters[@restIndex]
 	getReturnData(): @returnData
 	getReturnType(): @returnType
-	hashCode() => `Function`
+	hashCode() { # {{{
+		var mut fragments = ''
+
+		fragments += '('
+
+		for var parameter, index in @parameters {
+			if index != 0 {
+				fragments += ', '
+			}
+
+			fragments += parameter.toQuote()
+
+			if parameter.hasDefaultValue() {
+				fragments += ' = ?'
+			}
+		}
+
+		fragments += ')'
+
+		if !@returnType.isAny() {
+			fragments += ': ' + @returnType.toQuote()
+		}
+
+		return fragments
+	} # }}}
 	hasRestParameter(): @hasRest
 	hasVarargsParameter() { # {{{
 		for var parameter in @parameters {
@@ -264,10 +297,13 @@ class FunctionType extends Type {
 				mode += MatchingMode::AnycastParameter + MatchingMode::MissingReturn
 			}
 
-			return this.isSubsetOf(value, mode)
+			return value.isSubsetOf(this, mode)
 		}
-		else if value.isAny() || value.isFunction() {
+		else if value.isAny() {
 			return true
+		}
+		else if value.isAlias() {
+			return @isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -275,6 +311,9 @@ class FunctionType extends Type {
 					return true
 				}
 			}
+		}
+		else if value.isFunction() {
+			return true
 		}
 
 		return false
@@ -425,6 +464,10 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+		if value.isAlias() {
+			return @isSubsetOf(value.discardAlias(), mode)
+		}
+
 		return value.isFunction()
 	} # }}}
 	isSubsetOf(value: FunctionType, mut mode: MatchingMode) { # {{{
@@ -844,7 +887,7 @@ class FunctionType extends Type {
 
 		fragments += ')'
 
-		if !@returnType.isAny() || !@returnType.isNullable() {
+		if !@returnType.isAny() {
 			fragments += ': ' + @returnType.toQuote()
 		}
 
