@@ -133,7 +133,7 @@ class AnonymousFunctionExpression extends Expression {
 	type() => @type
 	type(@type) { # {{{
 		for var parameter, index in @type.parameters() {
-			@parameters[index].type(parameter)
+			@parameters[index]?.type(parameter)
 		}
 	} # }}}
 	type(type: AnyType)
@@ -353,7 +353,7 @@ class ArrowFunctionExpression extends Expression {
 	type() => @type
 	type(@type) { # {{{
 		for var parameter, index in @type.parameters() {
-			@parameters[index].type(parameter)
+			@parameters[index]?.type(parameter)
 		}
 	} # }}}
 	type(type: AnyType)

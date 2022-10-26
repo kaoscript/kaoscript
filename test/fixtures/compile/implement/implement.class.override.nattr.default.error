@@ -1,1 +1,1 @@
-SyntaxException: The method "Shape.draw(text: Any)" can't override a suitable method (fixtures/compile/implement/implement.class.override.nattr.default.ks:5)
+SyntaxException: The method "Shape.draw(text)" can't override a suitable method (fixtures/compile/implement/implement.class.override.nattr.default.ks:5)

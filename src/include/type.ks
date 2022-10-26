@@ -132,6 +132,7 @@ bitmask MatchingMode<u48> {
 	IgnoreAnonymous
 	IgnoreError
 	IgnoreName
+	IgnoreNullable
 	IgnoreRetained
 	IgnoreReturn
 
@@ -142,7 +143,6 @@ bitmask MatchingMode<u48> {
 		SubclassParameter +
 		NonNullToNullParameter +
 		MissingParameterDefault +
-		// AdditionalParameter +
 		// TODO reenable
 		// AdditionalParameterDefault +
 		// AdditionalDefault +

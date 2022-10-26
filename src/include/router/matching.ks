@@ -440,7 +440,13 @@ namespace Matching {
 						}
 
 						if var value ?= getRefinableValue(cursor, context) {
-							var mode = MatchingMode::FunctionSignature + MatchingMode::AnycastParameter + MatchingMode::MissingReturn + MatchingMode::IgnoreRetained
+							var mode = MatchingMode::FunctionSignature
+								+ MatchingMode::AnycastParameter
+								+ MatchingMode::MissingReturn
+								+ MatchingMode::IgnoreRetained
+								+ MatchingMode::ShiftableParameters
+								+ MatchingMode::RequireAllParameters
+								+ MatchingMode::IgnoreNullable
 
 							if node.type.isUnion() {
 								var types = []
@@ -463,7 +469,6 @@ namespace Matching {
 									return { cursor, argMatches }
 								}
 							}
-
 							else if node.type.isSubsetOf(cursor.argument, mode) {
 								value.type(node.type)
 

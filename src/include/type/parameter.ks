@@ -239,6 +239,9 @@ class ParameterType extends Type {
 		else if mode ~~ MatchingMode::NullToNonNull && @type.isNullable() && !value.type().isNullable() {
 			return false unless @type.setNullable(false).isSubsetOf(value.type(), submode)
 		}
+		else if mode ~~ MatchingMode::IgnoreNullable && @type.isNullable() && !value.type().isExplicit() {
+			return false unless @type.setNullable(false).isSubsetOf(value.type(), submode)
+		}
 		else if mode ~~ MatchingMode::Subset {
 			var oldType = @getArgumentType()
 			var newType = value.getArgumentType()
@@ -327,13 +330,15 @@ class ParameterType extends Type {
 
 			fragments += `\(@externalName ?? '_') % \(@internalName ?? '_')`
 		}
-		else {
+		else if !@anonymous {
 			fragments += @externalName ?? '_'
 		}
 
-		fragments += ': '
+		if @type.isExplicit() {
+			fragments += ': '
 
-		fragments += @type.toQuote()
+			fragments += @type.toQuote()
+		}
 
 		if @min == 0 && @max != Infinity && !@type.isNullable() {
 			fragments += '?'

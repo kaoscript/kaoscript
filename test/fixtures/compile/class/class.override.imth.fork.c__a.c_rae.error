@@ -1,1 +1,1 @@
-SyntaxException: The method "Waldo.foobar(x: Any)" hides the method "Waldo.foobar(...args: Any)" (fixtures/compile/class/class.override.imth.fork.c__a.c_rae.ks:7)
+SyntaxException: The method "Waldo.foobar(x)" hides the method "Waldo.foobar(...args)" (fixtures/compile/class/class.override.imth.fork.c__a.c_rae.ks:7)

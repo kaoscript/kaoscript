@@ -1,1 +1,1 @@
-ReferenceException: The function "it" can't be matched to given arguments (String, (done: Any)) (fixtures/compile/attribute/attribute.retain.func.type.np.ks:9)
+ReferenceException: The function "it" can't be matched to given arguments (String, (done)) (fixtures/compile/attribute/attribute.retain.func.type.np.ks:9)

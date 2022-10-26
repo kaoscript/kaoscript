@@ -369,6 +369,7 @@ class FunctionType extends Type {
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => @isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { # {{{
+		// console.log(pIndex, pStep, @parameters[pIndex]?.toQuote(), aIndex, aStep, arguments[aIndex]?.toQuote())
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
 				if mode !~ MatchingMode::RequireAllParameters {
@@ -483,26 +484,29 @@ class FunctionType extends Type {
 		}
 
 		if mode ~~ MatchingMode::MissingParameter && @missingParameters {
-			return true
+			pass
 		}
 		else if mode ~~ MatchingMode::ShiftableParameters {
-			var mut parameterMode: MatchingMode
+			var mut paramMode = MatchingMode::Default
 
-			if mode ~~ MatchingMode::ExactParameter {
-				parameterMode = MatchingMode::Exact
-			}
-			else if mode ~~ MatchingMode::MissingParameterType {
-				parameterMode = MatchingMode::Similar + MatchingMode::Missing
-			}
-			else {
-				parameterMode = MatchingMode::Similar
-			}
+			paramMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactParameter
+			paramMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarParameter
+			paramMode += MatchingMode::MissingType if mode ~~ MatchingMode::MissingParameterType
+			paramMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassParameter
+			paramMode += MatchingMode::Subset if mode ~~ MatchingMode::SubsetParameter
+			paramMode += MatchingMode::NonNullToNull if mode ~~ MatchingMode::NonNullToNullParameter
+			paramMode += MatchingMode::NullToNonNull if mode ~~ MatchingMode::NullToNonNullParameter
+			paramMode += MatchingMode::MissingDefault if mode ~~ MatchingMode::MissingParameterDefault
+			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
+			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
+			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
+			paramMode += MatchingMode::IgnoreRetained if mode ~~ MatchingMode::IgnoreRetained
+			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
+			paramMode += MatchingMode::IgnoreAnonymous if mode ~~ MatchingMode::IgnoreAnonymous
+			paramMode += MatchingMode::IgnoreNullable if mode ~~ MatchingMode::IgnoreNullable
+			paramMode += MatchingMode::RequireAllParameters if mode ~~ MatchingMode::RequireAllParameters
 
-			if mode ~~ MatchingMode::RequireAllParameters {
-				parameterMode += MatchingMode::RequireAllParameters
-			}
-
-			if !value.isParametersMatching(@parameters, parameterMode) {
+			if !value.isParametersMatching(@parameters, paramMode) {
 				return false
 			}
 		}

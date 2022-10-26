@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments ((x)) (fixtures/compile/router/router.call.func.fn1=ae.fn2=ae.ks:5)

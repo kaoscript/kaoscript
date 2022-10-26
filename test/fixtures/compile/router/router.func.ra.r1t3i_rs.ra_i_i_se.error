@@ -1,1 +1,1 @@
-SyntaxException: When the arguments are ("Number", "Number", "String"), the function "foobar" can be matched with "foobar(...{1,3}values: Number, ...args: String)" or "foobar(...value: Any, x: Number, y: Number, z: String)" (fixtures/compile/router/router.func.ra.r1t3i_rs.ra_i_i_se.ks:1)
+SyntaxException: When the arguments are ("Number", "Number", "String"), the function "foobar" can be matched with "foobar(...{1,3}values: Number, ...args: String)" or "foobar(...value, x: Number, y: Number, z: String)" (fixtures/compile/router/router.func.ra.r1t3i_rs.ra_i_i_se.ks:1)

@@ -1,1 +1,1 @@
-ReferenceException: The function "it" can't be matched to given arguments (String, (done: Any, x: Any)) (fixtures/compile/attribute/attribute.retain.arrow.type_fndne.faae.ks:5)
+ReferenceException: The function "it" can't be matched to given arguments (String, (done, x)) (fixtures/compile/attribute/attribute.retain.arrow.type_fndne.faae.ks:5)
