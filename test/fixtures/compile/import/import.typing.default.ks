@@ -3,7 +3,7 @@ import '@kaoscript/runtime' {
 	sealed class Lexer
 	sealed class Parser
 	sealed class Token
-}
+} for *
 
 class WHITESPACE extends Token {
 	static PATTERN	= /[^\r\n\S]+/

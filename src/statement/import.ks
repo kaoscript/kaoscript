@@ -622,7 +622,7 @@ abstract class Importer extends Statement {
 
 		@scope.line(@line())
 
-		if @data.specifiers.length == 0 {
+		if !#@data.specifiers {
 			for var i from 1 til @metaExports.exports.length by 2 {
 				name = @metaExports.exports[i]
 
@@ -636,54 +636,108 @@ abstract class Importer extends Statement {
 			}
 		}
 		else {
-			for var specifier in @data.specifiers {
-				var dyn name, type
+			for var data in @data.specifiers {
+				switch data.kind {
+					NodeKind::GroupSpecifier => {
+						var mut alias = false
+						var mut exclusion = false
 
-				if specifier.kind == NodeKind::ImportExclusionSpecifier {
-					var exclusions = [exclusion.name for exclusion in specifier.exclusions]
+						for var modifier in data.modifiers {
+							if modifier.kind == ModifierKind::Alias {
+								alias = true
+							}
+							else if modifier.kind == ModifierKind::Exclusion {
+								exclusion = true
+							}
+						}
 
-					for var i from 1 til @metaExports.exports.length by 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
-						name = @metaExports.exports[i]
+						if alias {
+							for var data in data.elements {
+								switch data.kind {
+									NodeKind::NamedSpecifier => {
+										switch data.internal.kind {
+											NodeKind::Identifier => {
+												if ?@alias {
+													throw new NotSupportedException(this)
+												}
 
-						@addImport(name, name, false)
+												@alias = data.internal.name
+											}
+											NodeKind::ObjectBinding => {
+												for var data in data.internal.elements {
+													var internal = data.name.name
+
+													@addImport(internal, internal, false, null)
+												}
+											}
+											=> {
+												throw new NotImplementedException()
+											}
+										}
+									}
+									=> {
+										throw new NotImplementedException()
+									}
+								}
+							}
+						}
+						else if exclusion {
+							var exclusions = []
+							for var data in data.elements {
+								exclusions.push(data.internal.name)
+							}
+
+							for var i from 1 til @metaExports.exports.length by 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
+								var name = @metaExports.exports[i]
+
+								@addImport(name, name, false)
+							}
+
+							for var datas, name of macros when exclusions.indexOf(name) == -1 {
+								for var data in datas {
+									new MacroDeclaration(data, this, null, name)
+								}
+							}
+						}
+						else {
+							for var data in data.elements {
+								switch data.kind {
+									NodeKind::NamedSpecifier => {
+										var internal = data.internal.name
+										var external = ?data.external ? data.external.name : internal
+
+										if ?macros[external] {
+											for var data in macros[external] {
+												new MacroDeclaration(data, this, null, internal)
+											}
+										}
+										else {
+											@addImport(external, internal, false)
+										}
+									}
+									NodeKind::TypedSpecifier => {
+										if data.type.kind == NodeKind::TypeAliasDeclaration {
+											var name = data.type.name.name
+											var type = Type.fromAST(data.type.type, this)
+
+											@addImport(name, name, false, type)
+										}
+									}
+									=> {
+										throw new NotImplementedException()
+									}
+								}
+							}
+						}
 					}
+					NodeKind::NamedSpecifier => {
+						var internal = data.internal.name
+						var external = ?data.external ? data.external.name : internal
 
-					for var datas, name of macros when exclusions.indexOf(name) == -1 {
-						for data in datas {
-							new MacroDeclaration(data, this, null, name)
-						}
+						@addImport(external, internal, true, null)
 					}
-				}
-				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					@alias = specifier.internal.name
-				}
-				else {
-					switch specifier.external.kind {
-						NodeKind::ClassDeclaration => {
-							name = specifier.external.name.name
-							type = Type.fromAST(specifier.external, this)
-						}
-						NodeKind::Identifier => {
-							name = specifier.external.name
-							type = null
-						}
-						NodeKind::VariableDeclarator => {
-							name = specifier.external.name.name
-							type = ?specifier.external.type ? Type.fromAST(specifier.external.type, this) : null
-						}
-						=> {
-							console.info(specifier.external)
-							throw new NotImplementedException()
-						}
-					}
-
-					if ?macros[name] {
-						for data in macros[name] {
-							new MacroDeclaration(data, this, null, specifier.internal.name)
-						}
-					}
-					else {
-						@addImport(name, specifier.internal.name, false, type)
+					=> {
+						throw new NotImplementedException()
 					}
 				}
 			}
@@ -765,7 +819,6 @@ abstract class Importer extends Statement {
 		@scope.line(@line())
 
 		for var argument in @arguments.values when argument.required {
-
 			if !@scope.hasVariable(argument.name) {
 				@scope.define(argument.name, true, argument.type, true, this)
 			}
@@ -808,7 +861,16 @@ abstract class Importer extends Statement {
 		@isKSFile = false
 		@moduleName = moduleName!?
 
-		if @data.specifiers.length == 0 {
+		var type = Type.fromAST(@data.type, this)
+		var container = type is DictionaryType | NamespaceType
+
+		if container {
+			for var type of type.properties() {
+				type.flagAlien().flagComplete()
+			}
+		}
+
+		if !#@data.specifiers {
 			var parts = @data.source.value.split('/')
 
 			for var part in parts desc while @alias == null when !/(?:^\.+$|^@)/.test(part) {
@@ -833,42 +895,76 @@ abstract class Importer extends Statement {
 				SyntaxException.throwUnnamedWildcardImport(this)
 			}
 
-			this.addVariable(@alias, @alias, false, null)
+			@addVariable(@alias, @alias, false, type)
 		}
 		else {
-			for var specifier in @data.specifiers {
-				if specifier.kind == NodeKind::ImportExclusionSpecifier {
-					NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
-				}
-				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					@alias = specifier.internal.name
+			for var data in @data.specifiers {
+				switch data.kind {
+					NodeKind::GroupSpecifier => {
+						var mut alias = false
 
-					if specifier.specifiers?.length != 0 {
-						var type = new NamespaceType(@scope:Scope)
-
-						for var s in specifier.specifiers {
-							if s.external.kind == NodeKind::Identifier {
-								type.addProperty(s.internal.name, Type.Any)
+						for var modifier in data.modifiers {
+							if modifier.kind == ModifierKind::Alias {
+								alias = true
 							}
-							else {
-								type.addProperty(s.internal.name, Type.fromAST(s.external, this).flagAlien())
+							else if modifier.kind == ModifierKind::Exclusion {
+								NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
 							}
 						}
 
-						this.addVariable(@alias, @alias, false, type.flagComplete())
-					}
-					else {
-						this.addVariable(@alias, @alias, false, null)
-					}
-				}
-				else {
-					if specifier.external.kind == NodeKind::Identifier {
-						this.addVariable(specifier.external.name, specifier.internal.name, true, null)
-					}
-					else {
-						var type = Type.fromAST(specifier.external, this).flagAlien()
+						if #data.elements {
+							for var data in data.elements {
+								switch data.kind {
+									NodeKind::NamedSpecifier => {
+										switch data.internal.kind {
+											NodeKind::Identifier => {
+												var internal = data.internal.name
+												var external = ?data.external ? data.external.name : internal
 
-						this.addVariable(specifier.external.name.name, specifier.internal.name, true, type)
+												if alias {
+													@addVariable(external, internal, false, type)
+
+													@alias = internal
+												}
+												else {
+													@addVariable(external, internal, true, null)
+												}
+											}
+											NodeKind::ObjectBinding => {
+												for var data in data.internal.elements {
+													var internal = data.name.name
+
+													@addVariable(internal, internal, true, null)
+												}
+											}
+											=> {
+												throw new NotImplementedException()
+											}
+										}
+									}
+									=> {
+										throw new NotImplementedException()
+									}
+								}
+							}
+						}
+						else if container {
+							for var type, name of type.properties() {
+								@addVariable(name, name, true, type.type())
+							}
+						}
+						else {
+							throw new NotImplementedException()
+						}
+					}
+					NodeKind::NamedSpecifier => {
+						var internal = data.internal.name
+						var external = ?data.external ? data.external.name : internal
+
+						@addVariable(external, internal, true, type.getProperty(external))
+					}
+					=> {
+						throw new NotImplementedException()
 					}
 				}
 			}

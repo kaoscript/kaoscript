@@ -1,4 +1,4 @@
-import './import.req2exp1.adequate.pivot.ks' {
+import './import.req2exp1.adequate.pivot.ks' for {
 	Foobar
 	Quxbaz => Corge
 }

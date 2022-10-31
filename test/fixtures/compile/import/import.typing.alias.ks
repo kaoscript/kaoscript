@@ -1,8 +1,13 @@
 import '@kaoscript/runtime' {
-	func createToken	=> createChevrotainToken
-	sealed class Lexer	=> ChevrotainLexer
-	sealed class Parser	=> ChevrotainParser
-	sealed class Token	=> ChevrotainToken
+	func createToken
+	sealed class Lexer
+	sealed class Parser
+	sealed class Token
+} for {
+	createToken => createChevrotainToken
+	Lexer => ChevrotainLexer
+	Parser => ChevrotainParser
+	Token => ChevrotainToken
 }
 
 class WHITESPACE extends ChevrotainToken {

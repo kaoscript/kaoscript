@@ -1,8 +1,4 @@
-import '../export/export.sealed.class.default.ks' {
-	* => T
-
-	Shape
-}
+import '../export/export.sealed.class.default.ks' => T, { Shape }
 
 var shape = new Shape('yellow')
 

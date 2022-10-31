@@ -1,6 +1,1 @@
-import {
-	'chai' {
-		* => chai
-		expect
-	}
-}
+import 'chai' => chai, { expect }

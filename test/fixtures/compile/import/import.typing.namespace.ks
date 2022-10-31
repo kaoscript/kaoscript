@@ -1,9 +1,9 @@
-import '@kaoscript/runtime' => RT {
+import '@kaoscript/runtime' {
 	func createToken
 	sealed class Lexer
 	sealed class Parser
 	sealed class Token
-}
+} => RT
 
 class WHITESPACE extends RT.Token {
 	static PATTERN	= /[^\r\n\S]+/

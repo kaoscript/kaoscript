@@ -1,8 +1,8 @@
 extern console
 
 import '../_/_function.ks'
-require|import './import.system.function.source.ks' {
-	template: {
+require|import './import.system.function.source.ks' for {
+	type template = {
 		render(...): String
 	}
 }

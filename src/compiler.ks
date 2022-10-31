@@ -15,8 +15,7 @@
 import {
 	'../package.json' => metadata
 	'./fs.js'
-	// TODO remove path
-	'path' => path {
+	'path' {
 		var sep: String
 		func basename(path: String): String
 		func dirname(path: String): String

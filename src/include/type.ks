@@ -317,6 +317,15 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
+				NodeKind::TypeList => {
+					var mut type = new NamespaceType(scope)
+
+					for var property in data.types {
+						type.addProperty(property.name.name, Type.fromAST(property, scope, defined, node))
+					}
+
+					return type.flagComplete()
+				}
 				NodeKind::TypeReference => {
 					var mut nullable = false
 

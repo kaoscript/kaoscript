@@ -9,20 +9,17 @@ class ExportDeclaration extends Statement {
 				var late statement
 
 				switch declaration.kind {
-					NodeKind::ExportDeclarationSpecifier => {
+					NodeKind::DeclarationSpecifier => {
 						statement = $compile.statement(declaration.declaration, this)
 					}
-					NodeKind::ExportExclusionSpecifier => {
-						statement = new ExportExclusionSpecifier(declaration, this)
+					NodeKind::GroupSpecifier => {
+						statement = new ExportGroupSpecifier(declaration, this)
 					}
-					NodeKind::ExportNamedSpecifier => {
+					NodeKind::NamedSpecifier => {
 						statement = new ExportNamedSpecifier(declaration, this)
 					}
-					NodeKind::ExportPropertiesSpecifier => {
+					NodeKind::PropertiesSpecifier => {
 						statement = new ExportPropertiesSpecifier(declaration, this)
-					}
-					NodeKind::ExportWildcardSpecifier => {
-						statement = new ExportWildcardSpecifier(declaration, this)
 					}
 					=> {
 						console.info(declaration)
@@ -37,7 +34,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 		else {
-			for var declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
+			for var declaration in @data.declarations when declaration.kind == NodeKind::DeclarationSpecifier {
 				var statement = $compile.statement(declaration.declaration, this)
 
 				statement.initiate()
@@ -97,18 +94,42 @@ class ExportDeclaration extends Statement {
 	} # }}}
 }
 
-class ExportExclusionSpecifier extends AbstractNode {
+class ExportGroupSpecifier extends AbstractNode {
 	private {
-		@expression
+		@elements: Array			= []
+		@exclusion: Boolean		= false
+		@wildcard: Boolean		= false
 	}
-	analyse()
-	override prepare(target)
+	analyse() { # {{{
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Exclusion {
+				@exclusion = true
+			}
+			else if modifier.kind == ModifierKind::Wildcard {
+				@wildcard = true
+			}
+		}
+	} # }}}
+	override prepare(target) {
+		if @exclusion {
+			for var element in @data.elements {
+				@elements.push(element.internal.name)
+			}
+		}
+	}
 	translate()
 	export(recipient) { # {{{
-		var exclusions = [exclusion.name for exclusion in @data.exclusions]
-
-		for var variable in @parent.parent().scope().listDefinedVariables() when exclusions.indexOf(variable.name()) == -1 {
-			recipient.export(variable.name(), variable)
+		if @exclusion {
+			for var variable in @parent.parent().scope().listDefinedVariables() when @elements.indexOf(variable.name()) == -1 {
+				recipient.export(variable.name(), variable)
+			}
+		}
+		else if @wildcard {
+			for var variable in @parent.parent().scope().listDefinedVariables() {
+				recipient.export(variable.name(), variable)
+			}
+		}
+		else {
 		}
 	} # }}}
 	isEnhancementExport() => false
@@ -118,15 +139,27 @@ class ExportExclusionSpecifier extends AbstractNode {
 class ExportNamedSpecifier extends AbstractNode {
 	private {
 		@expression
+		@externalName: String?
+		@wildcard: Boolean		= false
 	}
-	analyse()
+	analyse() { # {{{
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Wildcard {
+				@wildcard = true
+			}
+		}
+	} # }}}
 	override prepare(target) { # {{{
 		@expression = $compile.expression(@data.internal, @parent)
 		@expression.analyse()
 
+		if !@wildcard {
+			@externalName = ?@data.external ? @data.external.name : @expression.name()
+		}
+
 		if @expression.isMacro() {
 			for var macro in @scope.listMacros(@expression.name()) {
-				@parent.registerMacro(@data.external.name, macro)
+				@parent.registerMacro(@externalName, macro)
 			}
 		}
 	} # }}}
@@ -136,11 +169,16 @@ class ExportNamedSpecifier extends AbstractNode {
 
 		if @expression.isMacro() {
 			for var macro in @scope.listMacros(@expression.name()) {
-				macro.export(recipient, @data.external.name)
+				macro.export(recipient, @externalName)
 			}
 		}
+		else if @wildcard {
+			@expression.type().walk((name, _) => {
+				recipient.export(name, new ExportProperty(@expression, name))
+			})
+		}
 		else {
-			recipient.export(@data.external.name, @expression)
+			recipient.export(@externalName, @expression)
 
 			var type = @expression.type()
 
@@ -148,7 +186,7 @@ class ExportNamedSpecifier extends AbstractNode {
 				var regex = new RegExp(`^\(@expression.name())`)
 
 				for var macro in @scope.listCompositeMacros(@expression.name()) {
-					macro.export(recipient, macro.name().replace(regex, @data.external.name))
+					macro.export(recipient, macro.name().replace(regex, @externalName))
 				}
 			}
 		}
@@ -157,7 +195,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	toFragments(fragments, mode)
 	override walkVariable(fn) { # {{{
 		if !@expression.isMacro() {
-			fn(@data.external.name, @expression.type())
+			fn(@externalName, @expression.type())
 		}
 	} # }}}
 }
@@ -175,30 +213,14 @@ class ExportPropertiesSpecifier extends AbstractNode {
 	export(recipient) { # {{{
 		@object.prepare()
 
-		for property in @data.properties {
-			recipient.export(property.external.name, new ExportProperty(@object, property.internal.name))
+		for var property in @data.properties {
+			if ?property.external {
+				recipient.export(property.external.name, new ExportProperty(@object, property.internal.name))
+			}
+			else {
+				recipient.export(property.internal.name, new ExportProperty(@object, property.internal.name))
+			}
 		}
-	} # }}}
-	isEnhancementExport() => false
-	toFragments(fragments, mode)
-}
-
-class ExportWildcardSpecifier extends AbstractNode {
-	private {
-		@expression
-	}
-	analyse()
-	override prepare(target) { # {{{
-		@expression = $compile.expression(@data.internal, @parent)
-		@expression.analyse()
-	} # }}}
-	translate()
-	export(recipient) { # {{{
-		@expression.prepare()
-
-		@expression.type().walk((name, _) => {
-			recipient.export(name, new ExportProperty(@expression, name))
-		})
 	} # }}}
 	isEnhancementExport() => false
 	toFragments(fragments, mode)

@@ -264,6 +264,7 @@ class NamespaceType extends Type {
 	originals(@majorOriginal): this { # {{{
 		@altering = true
 	} # }}}
+	properties() => @properties
 	setExhaustive(@exhaustive) { # {{{
 		for var property of @properties {
 			property.setExhaustive(@exhaustive)
@@ -326,6 +327,11 @@ class NamespacePropertyType extends Type {
 		export.sealed = @isSealed()
 
 		return export
+	} # }}}
+	flagAlien() { # {{{
+		@type.flagAlien()
+
+		return this
 	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		@type.flagExported(explicitly)
