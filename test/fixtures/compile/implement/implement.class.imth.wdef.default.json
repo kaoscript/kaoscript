@@ -20,7 +20,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -69,7 +69,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           1,

@@ -50,7 +50,7 @@
             "sealed": false
           }
         },
-        "classVariables": {
+        "staticVariables": {
           "bar": {
             "access": 4,
             "type": "String",
@@ -83,7 +83,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

@@ -21,9 +21,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "origin": 16,
         "sequences": [
           -1,
@@ -46,7 +46,7 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "contains": [
             {
@@ -115,7 +115,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

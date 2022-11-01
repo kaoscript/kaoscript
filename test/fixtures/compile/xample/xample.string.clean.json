@@ -21,7 +21,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "split": [
             {
@@ -86,7 +86,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "origin": 16,
         "sequences": [
           -1,
@@ -112,7 +112,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "clean": [
             {
@@ -129,7 +129,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

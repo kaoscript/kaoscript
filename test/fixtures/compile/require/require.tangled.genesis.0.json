@@ -27,9 +27,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "origin": 16,
         "sequences": [
           -1,
@@ -48,9 +48,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "origin": 16,
         "sequences": [
           -1,
@@ -94,7 +94,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toString": [
             {
@@ -109,7 +109,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -130,7 +130,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toString": [
             {
@@ -145,7 +145,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           2,
           "Error"

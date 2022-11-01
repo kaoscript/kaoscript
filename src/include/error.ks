@@ -242,20 +242,20 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingClassMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
-			if arguments.length == 0 {
-				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
-			}
-			else {
-				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
-			}
-		} # }}}
 		throwNoMatchingEnumMethod(method, enum, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to no arguments`, node)
 			}
 			else {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
+			}
+		} # }}}
+		throwNoMatchingStaticMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwUnrecognizedNamedArgument(name, node): Never ~ ReferenceException { # {{{
@@ -298,11 +298,11 @@ export class ReferenceException extends Exception {
 		throwNotExportable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
 		} # }}}
-		throwNotFoundClassMethod(method, class, node): Never ~ ReferenceException { # {{{
-			throw new ReferenceException(`The method "\(method)" can't be found in the class "\(class)"`, node)
-		} # }}}
 		throwNotFoundEnumMethod(method, enum, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The method "\(method)" can't be found in the enum "\(enum)"`, node)
+		} # }}}
+		throwNotFoundStaticMethod(method, class, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The method "\(method)" can't be found in the class "\(class)"`, node)
 		} # }}}
 		throwNotPassed(name, module, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
@@ -325,14 +325,14 @@ export class ReferenceException extends Exception {
 		throwUndefinedBindingVariable(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
 		} # }}}
-		throwUndefinedClassField(name, node): Never ~ ReferenceException { # {{{
-			throw new ReferenceException(`The class field "\(name)" isn't defined`, node)
-		} # }}}
 		throwUndefinedInstanceField(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The instance field "\(name)" isn't defined`, node)
 		} # }}}
 		throwUndefinedFunction(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The function "\(name)" can't be found`, node)
+		} # }}}
+		throwUndefinedStaticField(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The class field "\(name)" isn't defined`, node)
 		} # }}}
 	}
 }
@@ -633,10 +633,10 @@ export class SyntaxException extends Exception {
 		throwPositionalOnlyParameter(name: String, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The parameter "\(name)" must be passed by position`, node)
 		} # }}}
-		throwReservedClassMethod(name, node): Never ~ SyntaxException { # {{{
+		throwReservedStaticMethod(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class method "\(name)" is reserved`, node)
 		} # }}}
-		throwReservedClassVariable(name, node): Never ~ SyntaxException { # {{{
+		throwReservedStaticVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class variable "\(name)" is reserved`, node)
 		} # }}}
 		throwShadowFunction(name, function, node): Never ~ SyntaxException { # {{{

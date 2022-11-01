@@ -17,9 +17,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -83,9 +83,9 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           0,
           "ClassA"
@@ -140,9 +140,9 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           1,
           "ClassB"

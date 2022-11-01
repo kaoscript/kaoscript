@@ -21,9 +21,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -55,7 +55,7 @@
             "sealed": true
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "culture": [
             {
@@ -89,7 +89,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           0,
           -1,

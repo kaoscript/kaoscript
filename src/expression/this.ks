@@ -130,7 +130,7 @@ class ThisExpression extends Expression {
 							}
 						}
 						else if type.isExhaustive(this) && @parent is not CurryExpression {
-							ReferenceException.throwNoMatchingClassMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
+							ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
 						}
 						else {
 							@fragment = `\(name).\(@name)`
@@ -193,14 +193,14 @@ class ThisExpression extends Expression {
 			else {
 				var late variable
 
-				if variable ?= type.getClassVariable(@name) {
+				if variable ?= type.getStaticVariable(@name) {
 					@variableName = @name
 				}
-				else if variable ?= type.getClassVariable(`_\(@name)`) {
+				else if variable ?= type.getStaticVariable(`_\(@name)`) {
 					@variableName = `_\(@name)`
 				}
 				else {
-					ReferenceException.throwUndefinedClassField(@name, this)
+					ReferenceException.throwUndefinedStaticField(@name, this)
 				}
 
 				if ?variable {
@@ -212,7 +212,7 @@ class ThisExpression extends Expression {
 					@sealed = variable.isSealed()
 				}
 				else {
-					ReferenceException.throwUndefinedClassField(@name, this)
+					ReferenceException.throwUndefinedStaticField(@name, this)
 				}
 			}
 		}
@@ -256,7 +256,7 @@ class ThisExpression extends Expression {
 				}
 			}
 			else {
-				if var variable ?= @class.type().getClassVariable(@variableName) {
+				if var variable ?= @class.type().getStaticVariable(@variableName) {
 					return variable.type()
 				}
 			}

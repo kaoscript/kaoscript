@@ -15,7 +15,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 			parent._instanceMethods[@name].push(this)
 		}
 		else {
-			parent._classMethods[@name].push(this)
+			parent._staticMethods[@name].push(this)
 		}
 	} # }}}
 	analyse()

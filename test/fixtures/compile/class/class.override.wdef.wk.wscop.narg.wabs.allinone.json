@@ -22,9 +22,9 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "abstractMethods": {
           "foobar": [
             {
@@ -66,7 +66,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "foobar": [
             {
@@ -92,7 +92,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           0,
           "Foobar"

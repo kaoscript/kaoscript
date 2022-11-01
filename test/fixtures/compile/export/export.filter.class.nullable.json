@@ -28,9 +28,9 @@
           }
         ],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           1,
           "Bar"
@@ -85,7 +85,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "foo": [
             {
@@ -104,7 +104,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -121,7 +121,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toString": [
             {
@@ -136,7 +136,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

@@ -35,9 +35,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "extends": "Error",
         "sequences": [
           -1,

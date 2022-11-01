@@ -218,7 +218,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 			}
 		}
 		else {
-			ReferenceException.throwNoMatchingClassMethod(@method.name(), @class.name(), [argument.type() for var argument in @arguments], @method)
+			ReferenceException.throwNoMatchingStaticMethod(@method.name(), @class.name(), [argument.type() for var argument in @arguments], @method)
 		}
 
 		@extendsName = @class.type().extends().name()

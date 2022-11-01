@@ -75,7 +75,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -99,7 +99,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           0,
           -1,

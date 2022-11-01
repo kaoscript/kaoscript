@@ -48,9 +48,9 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "abstractMethods": {},
         "sequences": [
           -1,

@@ -26,7 +26,7 @@ class ClassMethodDeclaration extends Statement {
 	}
 	static toClassRouterFragments(node, fragments, variable, methods, overflow, name: String, class: ClassType, header, footer) { # {{{
 		var classname = variable.name()
-		var labelable = class.isLabelableClassMethod(name)
+		var labelable = class.isLabelableStaticMethod(name)
 		var assessment = Router.assess(methods, name, node)
 
 		header(node, fragments, labelable)
@@ -44,9 +44,9 @@ class ClassMethodDeclaration extends Statement {
 				labelable ? 'args' : `arguments`
 				assessment
 				fragments.block()
-				extends.type().hasClassMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
+				extends.type().hasStaticMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
 				(fragments, _) => {
-					if extends.type().hasClassMethod(name) {
+					if extends.type().hasStaticMethod(name) {
 						if labelable {
 							fragments.line(`return \(parent).\(name).call(null, kws, ...args)`)
 						}
@@ -220,14 +220,14 @@ class ClassMethodDeclaration extends Statement {
 			}
 		}
 		else if @name == 'name' || @name == 'version' {
-			SyntaxException.throwReservedClassMethod(@name, parent)
+			SyntaxException.throwReservedStaticMethod(@name, parent)
 		}
 		else {
-			if parent._classMethods[@name] is Array {
-				parent._classMethods[@name].push(this)
+			if parent._staticMethods[@name] is Array {
+				parent._staticMethods[@name].push(this)
 			}
 			else {
-				parent._classMethods[@name] = [this]
+				parent._staticMethods[@name] = [this]
 			}
 		}
 	} # }}}
@@ -347,7 +347,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 			else {
-				if @parent.class().hasMatchingClassMethod(@name, @type, mode) {
+				if @parent.class().hasMatchingStaticMethod(@name, @type, mode) {
 					SyntaxException.throwIdenticalMethod(@name, this)
 				}
 			}
@@ -645,7 +645,7 @@ class ClassMethodDeclaration extends Statement {
 			var mut method = null
 			var mut exact = false
 
-			var list = @instance ? superclass.listInstantiableMethods : superclass.listClassMethods
+			var list = @instance ? superclass.listInstantiableMethods : superclass.listStaticMethods
 
 			if var methods #= list(@name, @type, MatchingMode::ExactParameter) {
 				if methods.length == 1 {
@@ -793,7 +793,7 @@ class ClassMethodDeclaration extends Statement {
 				)
 			}
 			else {
-				if var methods ?= superclass.listClassMethods(@name) {
+				if var methods ?= superclass.listStaticMethods(@name) {
 					for var method in methods {
 						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
 							return []
@@ -801,7 +801,7 @@ class ClassMethodDeclaration extends Statement {
 					}
 				}
 
-				return superclass.listClassMethods(
+				return superclass.listStaticMethods(
 					@name
 					@type
 					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::MissingError

@@ -23,8 +23,8 @@ class ClassDeclaration extends Statement {
 	private {
 		@abstract: Boolean 					= false
 		@abstractMethods					= {}
-		@classMethods						= {}
-		@classVariables						= {}
+		@staticMethods						= {}
+		@staticVariables						= {}
 		@constructors						= []
 		@constructorScope
 		@destructor							= null
@@ -286,14 +286,14 @@ class ClassDeclaration extends Statement {
 			@updateConstructorScope()
 		}
 
-		for var variable, name of @classVariables {
+		for var variable, name of @staticVariables {
 			variable.prepare()
 
-			@class.addClassVariable(name, variable.type())
+			@class.addStaticVariable(name, variable.type())
 		}
 
-		for var methods, name of @classMethods {
-			var async = @extendsType?.type().isAsyncClassMethod(name) ?? methods[0].type().isAsync()
+		for var methods, name of @staticMethods {
+			var async = @extendsType?.type().isAsyncStaticMethod(name) ?? methods[0].type().isAsync()
 
 			for method in methods {
 				method.prepare()
@@ -302,11 +302,11 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingClassMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
-				@class.addClassMethod(name, method.type())
+				@class.addStaticMethod(name, method.type())
 			}
 		}
 
@@ -408,8 +408,8 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				else {
-					if #@classMethods[name] {
-						for var method in @classMethods[name] until found {
+					if #@staticMethods[name] {
+						for var method in @staticMethods[name] until found {
 							if index == method.type().index() {
 								if hidden == false {
 									method.flagForked(@class, forks)
@@ -455,7 +455,7 @@ class ClassDeclaration extends Statement {
 							@class.addInstanceMethod(name, method)
 						}
 						else {
-							@class.addClassMethod(name, method)
+							@class.addStaticMethod(name, method)
 						}
 					}
 
@@ -495,7 +495,7 @@ class ClassDeclaration extends Statement {
 		@class.flagComplete()
 	} # }}}
 	translate() { # {{{
-		for var variable of @classVariables {
+		for var variable of @staticVariables {
 			variable.translate()
 
 			if variable.isRequiringInitialization() && !variable.isInitialized() {
@@ -597,7 +597,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for var methods of @classMethods {
+		for var methods of @staticMethods {
 			for var method in methods {
 				method.translate()
 			}
@@ -643,7 +643,7 @@ class ClassDeclaration extends Statement {
 	flagForcefullyRebinded() { # {{{
 		@forcefullyRebinded = true
 	} # }}}
-	getClassVariable(name: String) => @classVariables[name]
+	getStaticVariable(name: String) => @staticVariables[name]
 	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
 	isAbstract() => @abstract
@@ -822,7 +822,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for var methods, name of @classMethods {
+		for var methods, name of @staticMethods {
 			var m = []
 
 			for method in methods {
@@ -1021,7 +1021,7 @@ class ClassDeclaration extends Statement {
 			)
 		}
 
-		for var methods, name of @classMethods {
+		for var methods, name of @staticMethods {
 			m.clear()
 
 			for method in methods {
@@ -1033,7 +1033,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listClassMethods(name) {
+				if var methods ?= @extendsType.type().listStaticMethods(name) {
 					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -1207,7 +1207,7 @@ class ClassDeclaration extends Statement {
 			)
 		}
 
-		for var methods, name of @classMethods {
+		for var methods, name of @staticMethods {
 			m.clear()
 
 			for method in methods {
@@ -1219,7 +1219,7 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listClassMethods(name) {
+				if var methods ?= @extendsType.type().listStaticMethods(name) {
 					for var method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
@@ -1272,7 +1272,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for var variable of @classVariables {
+		for var variable of @staticVariables {
 			variable.toFragments(fragments)
 		}
 

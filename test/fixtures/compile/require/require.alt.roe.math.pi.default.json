@@ -30,7 +30,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toString": [
             {
@@ -45,7 +45,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "origin": 16,
         "sequences": [
           -1,
@@ -103,7 +103,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "round": [
             {
@@ -133,7 +133,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

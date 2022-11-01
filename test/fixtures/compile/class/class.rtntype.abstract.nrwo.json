@@ -35,9 +35,9 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "abstractMethods": {
           "value": [
             {
@@ -89,7 +89,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "value": [
             {
@@ -127,7 +127,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           0,
           "Master"

@@ -712,7 +712,7 @@ class ModuleBlock extends AbstractNode {
 		if variable.static {
 			var class = @scope.getVariable(variable.class).declaration()
 
-			if var var ?= class.getClassVariable(variable.name) {
+			if var var ?= class.getStaticVariable(variable.name) {
 				var.initialize(variable.type, expression)
 			}
 		}

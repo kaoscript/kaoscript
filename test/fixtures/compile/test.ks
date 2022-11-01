@@ -1,65 +1,62 @@
-// import 'path' as {
-// 	var sep: String
+// type Foobar = {
+// 	x: Number
+// 	y: Number
 // }
 
-// func foobar(): String => path.sep
+// var f: Foobar = { x: '', y: 0 }
+// var f = Foobar(x: '', y: 0)
 
 
 
-// import 'path' {
-// 	func basename(path: String): String
+// func foobar() ~ String {
+// 	throw('')
 // }
 
-// path.basename('')
 
 
-
-
-
-// disclose Dictionary {
-// }
-
-// impl Dictionary {
-// 	static map(item: Dictionary, fn: (value: Any?, key: String, dict: Dictionary): Any?, bind? = null): Dictionary {
-// 		return item
+// func foobar(x, items) {
+// 	switch x {
+// 		0 => {
+// 			for var item of items() {
+// 			}
+// 		}
 // 	}
 // }
-
-// var o = {
-// 	name: 'White',
-// 	honorific: 'miss'
-// }
-
-// Dictionary.map(o, (value) => value.toUpperCase())
-
-
-
-// disclose Array {
-// }
-
-// impl Array {
-// 	foobar(sorted: Boolean = false, fn: (element: Any?, index: Number, array: Array): Any || Null = null, *bind? = null): Array {
-// 		return this
-// 	}
-// }
-
-// var a = []
-
-// a.foobar(false, (element, ...) => 1)
 
 
 
 // class Foobar {
-// 	foobar(sorted: Boolean = false, fn: (element: Any?, index: Number, array: Array): Any || Null = null, *bind? = null) {
+// 	foobar(items) {
+// 		@quxbaz(...items)
+// 		// @quxbaz(...(items as String[]))
+// 		// @quxbaz(...(items as Array<String>))
 // 	}
+// 	quxbaz(values: String)
+// 	quxbaz(...values: String)
 // }
 
-// var f = new Foobar()
-// f.foobar(false, (element, ...) => 1)
 
 
-
-// func foobar(fn: (element?, index, array)) {
+// class Foobar {
+// 	foobar(items) {
+// 		@quxbaz(...(items as String[]))
+// 	}
+// 	quxbaz(values: String)
+// 	quxbaz(...values: String)
 // }
 
-// foobar((element, ...) => 1)
+
+
+
+
+
+
+// class Foobar {
+// 	foobar(items: String[]) {
+// 		// @quxbaz(...items)
+// 		// @quxbaz(...(items as String[]))
+// 		// @quxbaz(...(items as Array<String>))
+// 	}
+// 	quxbaz(values: String)
+// 	quxbaz(...values: String)
+// }

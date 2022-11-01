@@ -33,7 +33,7 @@
             "sealed": false
           }
         },
-        "classVariables": {
+        "staticVariables": {
           "_instance": {
             "access": 2,
             "type": {
@@ -82,7 +82,7 @@
             }
           ]
         },
-        "classMethods": {
+        "staticMethods": {
           "instance": [
             {
               "index": 0,

@@ -302,7 +302,7 @@ class MemberExpression extends Expression {
 
 		if var declaration ?= @object.variable()?.declaration() {
 			if declaration is ClassDeclaration {
-				return declaration.getClassVariable(@property)
+				return declaration.getStaticVariable(@property)
 			}
 		}
 		else if var node ?= @parent.getFunctionNode() {

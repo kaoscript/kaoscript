@@ -10,22 +10,19 @@ class ClassType extends Type {
 		@abstract: Boolean					= false
 		@abstractMethods: Dictionary		= {}
 		@alterations						= {
-			classMethods: {}
-			classVariables: {}
-			constructors: {}
-			instanceMethods: {}
-			instanceVariables: {}
+			staticMethods:		{}
+			staticVariables:	{}
+			constructors:		{}
+			instanceMethods:	{}
+			instanceVariables:	{}
 		}
 		@altering: Boolean					= false
-		@classAssessments: Dictionary		= {}
-		@classMethods: Dictionary			= {}
-		@classVariables: Dictionary			= {}
 		@constructors: Array				= []
 		@constructorAssessment				= null
 		@exhaustiveness						= {
-			constructor: false
-			classMethods: {}
-			instanceMethods: {}
+			constructor:		false
+			staticMethods:		{}
+			instanceMethods:	{}
 		}
 		@explicitlyExported: Boolean		= false
 		@extending: Boolean					= false
@@ -40,32 +37,35 @@ class ClassType extends Type {
 		@majorOriginal: ClassType?
 		@minorOriginal: ClassType?
 		@labelables							= {
-			constructors: null
-			classMethods: {}
-			instanceMethods: {}
+			constructors:		null
+			instanceMethods:	{}
+			staticMethods:		{}
 		}
 		@overwritten						= {
-			constructors: null
-			classMethods: {}
-			instanceMethods: {}
+			constructors:		null
+			instanceMethods:	{}
+			staticMethods:		{}
 		}
 		@predefined: Boolean				= false
 		@sharedMethods: Dictionary<Number>	= {}
 		@seal								= {
-			constructors: false
-			classMethods: {}
-			classVariables: {}
-			instanceMethods: {}
-			instanceVariables: {}
+			constructors:		false
+			instanceMethods:	{}
+			instanceVariables:	{}
+			staticMethods:		{}
+			staticVariables:	{}
 		}
 		@sequences	 						= {
 			constructors:		-1
 			defaults:			-1
 			destructors:		-1
 			initializations:	-1
-			classMethods:		{}
 			instanceMethods:	{}
+			staticMethods:		{}
 		}
+		@staticAssessments: Dictionary		= {}
+		@staticMethods: Dictionary			= {}
+		@staticVariables: Dictionary		= {}
 	}
 	static {
 		getExternReference(...types?): Number? { # {{{
@@ -124,8 +124,8 @@ class ClassType extends Type {
 					type._exhaustiveness.constructor = data.exhaustiveness.constructor
 				}
 
-				if ?data.exhaustiveness.classMethods {
-					type._exhaustiveness.classMethods = data.exhaustiveness.classMethods
+				if ?data.exhaustiveness.staticMethods {
+					type._exhaustiveness.staticMethods = data.exhaustiveness.staticMethods
 				}
 
 				if ?data.exhaustiveness.instanceMethods {
@@ -202,9 +202,9 @@ class ClassType extends Type {
 						}
 					}
 
-					for var vtype, name of data.classVariables {
-						if !type.hasClassVariable(name) {
-							type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+					for var vtype, name of data.staticVariables {
+						if !type.hasStaticVariable(name) {
+							type.addStaticVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
@@ -214,9 +214,9 @@ class ClassType extends Type {
 						}
 					}
 
-					for var methods, name of data.classMethods {
+					for var methods, name of data.staticMethods {
 						for method in methods {
-							type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
+							type.dedupStaticMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
@@ -247,9 +247,9 @@ class ClassType extends Type {
 				}
 			}
 
-			for var vtype, name of data.classVariables {
-				if !type.hasClassVariable(name) {
-					type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+			for var vtype, name of data.staticVariables {
+				if !type.hasStaticVariable(name) {
+					type.addStaticVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
@@ -259,9 +259,9 @@ class ClassType extends Type {
 				}
 			}
 
-			for var methods, name of data.classMethods {
+			for var methods, name of data.staticMethods {
 				for var method in methods {
-					type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
+					type.dedupStaticMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
@@ -298,53 +298,6 @@ class ClassType extends Type {
 		type.flagInstance()
 
 		return index
-	} # }}}
-	addClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		var root = @ancestor()
-		var sequences = root._sequences.classMethods
-
-		@classMethods[name] = @classMethods[name] ?? []
-		sequences[name] = sequences[name] ?? -1
-
-		var mut index = type.index()
-
-		if index == -1 {
-			sequences[name] += 1
-
-			index = sequences[name]
-
-			type.index(index)
-		}
-		else {
-			if index > sequences[name] {
-				sequences[name] = index
-			}
-		}
-
-		@classMethods[name].push(type)
-
-		if type.isSealed() {
-			@seal.classMethods[name] = true
-		}
-		else if @alien {
-			type.flagAlien()
-		}
-
-		@alterations.classMethods[name] ??= {}
-		@alterations.classMethods[name][index] = true
-
-		@labelables.classMethods[name] ||= type.hasOnlyLabeledParameter()
-
-		return index
-	} # }}}
-	addClassVariable(name: String, type: ClassVariableType) { # {{{
-		@classVariables[name] = type
-
-		if type.isSealed() {
-			@seal.classVariables[name] = true
-		}
-
-		@alterations.classVariables[name] = true
 	} # }}}
 	addConstructor(type: ClassConstructorType) { # {{{
 		var mut index = type.index()
@@ -443,7 +396,7 @@ class ClassType extends Type {
 					@addInstanceVariable(data.name.name, type)
 				}
 				else {
-					@addClassVariable(data.name.name, type)
+					@addStaticVariable(data.name.name, type)
 				}
 			}
 			NodeKind::MethodDeclaration => {
@@ -472,7 +425,7 @@ class ClassType extends Type {
 							@exhaustiveness.instanceMethods[data.name.name] = false
 						}
 						else {
-							@exhaustiveness.classMethods[data.name.name] = false
+							@exhaustiveness.staticMethods[data.name.name] = false
 						}
 					}
 
@@ -484,7 +437,7 @@ class ClassType extends Type {
 						@dedupInstanceMethod(data.name.name:String, type)
 					}
 					else {
-						@dedupClassMethod(data.name.name:String, type)
+						@dedupStaticMethod(data.name.name:String, type)
 					}
 				}
 			}
@@ -492,6 +445,53 @@ class ClassType extends Type {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
 		}
+	} # }}}
+	addStaticMethod(name: String, type: ClassMethodType): Number? { # {{{
+		var root = @ancestor()
+		var sequences = root._sequences.staticMethods
+
+		@staticMethods[name] = @staticMethods[name] ?? []
+		sequences[name] = sequences[name] ?? -1
+
+		var mut index = type.index()
+
+		if index == -1 {
+			sequences[name] += 1
+
+			index = sequences[name]
+
+			type.index(index)
+		}
+		else {
+			if index > sequences[name] {
+				sequences[name] = index
+			}
+		}
+
+		@staticMethods[name].push(type)
+
+		if type.isSealed() {
+			@seal.staticMethods[name] = true
+		}
+		else if @alien {
+			type.flagAlien()
+		}
+
+		@alterations.staticMethods[name] ??= {}
+		@alterations.staticMethods[name][index] = true
+
+		@labelables.staticMethods[name] ||= type.hasOnlyLabeledParameter()
+
+		return index
+	} # }}}
+	addStaticVariable(name: String, type: ClassVariableType) { # {{{
+		@staticVariables[name] = type
+
+		if type.isSealed() {
+			@seal.staticVariables[name] = true
+		}
+
+		@alterations.staticVariables[name] = true
 	} # }}}
 	ancestor() { # {{{
 		if @extending {
@@ -525,15 +525,15 @@ class ClassType extends Type {
 		for var methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
 		}
-		for var methods, name of src._classMethods {
-			@classMethods[name] = [].concat(methods)
+		for var methods, name of src._staticMethods {
+			@staticMethods[name] = [].concat(methods)
 		}
 		for var methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
 		}
 
-		for var variable, name of src._classVariables {
-			@classVariables[name] = variable
+		for var variable, name of src._staticVariables {
+			@staticVariables[name] = variable
 		}
 		for var variable, name of src._instanceVariables {
 			@instanceVariables[name] = variable
@@ -568,32 +568,6 @@ class ClassType extends Type {
 
 		return @addAbstractMethod(name, type)
 	} # }}}
-	dedupClassMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id ?= type.index() {
-			if @classMethods[name] is Array {
-				for var method in @classMethods[name] {
-					if method.index() == id {
-						return id
-					}
-				}
-			}
-		}
-
-		if var overwrite ?= type.overwrite() {
-			var methods = @classMethods[name]
-
-			for var data in overwrite {
-				for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
-					methods.splice(i, 1)
-					break
-				}
-			}
-
-			type.overwrite(null)
-		}
-
-		return @addClassMethod(name, type)
-	} # }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
 		if var id ?= type.index() {
 			if @instanceMethods[name] is Array {
@@ -617,6 +591,32 @@ class ClassType extends Type {
 		}
 
 		return @addInstanceMethod(name, type)
+	} # }}}
+	dedupStaticMethod(name: String, type: ClassMethodType): Number? { # {{{
+		if var id ?= type.index() {
+			if @staticMethods[name] is Array {
+				for var method in @staticMethods[name] {
+					if method.index() == id {
+						return id
+					}
+				}
+			}
+		}
+
+		if var overwrite ?= type.overwrite() {
+			var methods = @staticMethods[name]
+
+			for var data in overwrite {
+				for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+					methods.splice(i, 1)
+					break
+				}
+			}
+
+			type.overwrite(null)
+		}
+
+		return @addStaticMethod(name, type)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var exhaustive = @isExhaustive()
@@ -680,9 +680,9 @@ class ClassType extends Type {
 			export.exhaustive = exhaustive
 			export.constructors = []
 			export.instanceVariables = {}
-			export.classVariables = {}
+			export.staticVariables = {}
 			export.instanceMethods = {}
-			export.classMethods = {}
+			export.staticMethods = {}
 
 			@majorOriginal.exportProperties(export, references, indexDelta, mode, module, @overwritten)
 
@@ -704,9 +704,9 @@ class ClassType extends Type {
 				}
 			}
 
-			for var variable, name of @classVariables {
-				if @alterations.classVariables[name] {
-					export.classVariables[name] = variable.export(references, indexDelta, mode, module)
+			for var variable, name of @staticVariables {
+				if @alterations.staticVariables[name] {
+					export.staticVariables[name] = variable.export(references, indexDelta, mode, module)
 				}
 			}
 
@@ -725,18 +725,18 @@ class ClassType extends Type {
 				}
 			}
 
-			for var methods, name of @classMethods {
-				var exportedMethods = export.classMethods[name] ?? []
-				var originalMethods = original?.listClassMethods(name)?.map((method, _, _) => method.index())
+			for var methods, name of @staticMethods {
+				var exportedMethods = export.staticMethods[name] ?? []
+				var originalMethods = original?.listStaticMethods(name)?.map((method, _, _) => method.index())
 
 				for var method in methods when method.isExportable(mode) {
-					if @alterations.classMethods[name]?[method.index()] {
+					if @alterations.staticMethods[name]?[method.index()] {
 						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
 					}
 				}
 
 				if #exportedMethods {
-					export.classMethods[name] = exportedMethods
+					export.staticMethods[name] = exportedMethods
 				}
 			}
 		}
@@ -751,17 +751,17 @@ class ClassType extends Type {
 				exhaustive
 				constructors: [constructor.export(references, indexDelta, mode, module, null) for var constructor in @constructors]
 				instanceVariables: {}
-				classVariables: {}
+				staticVariables: {}
 				instanceMethods: {}
-				classMethods: {}
+				staticMethods: {}
 			}
 
 			for var variable, name of @instanceVariables {
 				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
-			for var variable, name of @classVariables {
-				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
+			for var variable, name of @staticVariables {
+				export.staticVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
 			for var methods, name of @instanceMethods {
@@ -772,11 +772,11 @@ class ClassType extends Type {
 				}
 			}
 
-			for var methods, name of @classMethods {
+			for var methods, name of @staticMethods {
 				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
 
 				if exportedMethods.length != 0 {
-					export.classMethods[name] = exportedMethods
+					export.staticMethods[name] = exportedMethods
 				}
 			}
 
@@ -817,9 +817,9 @@ class ClassType extends Type {
 			exhaustiveness.constructor = @exhaustiveness.constructor
 		}
 
-		for var value, name of @exhaustiveness.classMethods when value != exhaustive {
-			exhaustiveness.classMethods ??= {}
-			exhaustiveness.classMethods[name] = value
+		for var value, name of @exhaustiveness.staticMethods when value != exhaustive {
+			exhaustiveness.staticMethods ??= {}
+			exhaustiveness.staticMethods[name] = value
 		}
 
 		for var value, name of @exhaustiveness.instanceMethods when value != exhaustive {
@@ -848,9 +848,9 @@ class ClassType extends Type {
 			}
 		}
 
-		for var variable, name of @classVariables {
-			if @alterations.classVariables[name] {
-				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
+		for var variable, name of @staticVariables {
+			if @alterations.staticVariables[name] {
+				export.staticVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 		}
 
@@ -876,17 +876,17 @@ class ClassType extends Type {
 			}
 		}
 
-		for var methods, name of @classMethods {
-			var exportedMethods = export.classMethods[name] ?? []
+		for var methods, name of @staticMethods {
+			var exportedMethods = export.staticMethods[name] ?? []
 
 			for var method in methods when method.isExportable(mode) {
-				if @alterations.classMethods[name]?[method.index()] {
+				if @alterations.staticMethods[name]?[method.index()] {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
 			}
 
 			if exportedMethods.length != 0 {
-				export.classMethods[name] = exportedMethods
+				export.staticMethods[name] = exportedMethods
 			}
 		}
 	} # }}}
@@ -900,7 +900,7 @@ class ClassType extends Type {
 			@hybrid = true
 		}
 
-		@sequences.classMethods = Dictionary.clone(type._sequences.classMethods)
+		@sequences.staticMethods = Dictionary.clone(type._sequences.staticMethods)
 		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
 
 		@level = type.level():Number + 1
@@ -924,7 +924,7 @@ class ClassType extends Type {
 			variable.type().flagExported(false)
 		}
 
-		for var variable of @classVariables {
+		for var variable of @staticVariables {
 			variable.type().flagExported(false)
 		}
 
@@ -934,7 +934,7 @@ class ClassType extends Type {
 			}
 		}
 
-		for var methods of @classMethods when methods is Array {
+		for var methods of @staticMethods when methods is Array {
 			for method in methods {
 				method.flagExported(false)
 			}
@@ -1008,50 +1008,6 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} # }}}
-	getClassAssessment(name: String, node: AbstractNode) { # {{{
-		if @classMethods[name] is not Array {
-			if @extending {
-				return @extends.type().getClassAssessment(name, node)
-			}
-			else {
-				return null
-			}
-		}
-
-		if @classAssessments[name] is not Dictionary {
-			var methods = [...@classMethods[name]]
-
-			var mut that = this
-			while methods.length == 0 && that.isExtending() {
-				that = that.extends().type()
-
-				if var m ?= that.listClassMethods(name) {
-					for var method in m {
-						method.pushTo(methods)
-					}
-				}
-			}
-
-			@classAssessments[name] = Router.assess(methods, name, node)
-		}
-
-		return @classAssessments[name]
-	} # }}}
-	getClassProperty(name: String): Type { # {{{
-		if @classMethods[name] is Array {
-			return @scope.reference('Function')
-		}
-		else {
-			return @classVariables[name] ?? Type.Any
-		}
-	} # }}}
-	getClassVariable(name: String) { # {{{
-		if var variable ?= @classVariables[name] {
-			return variable
-		}
-
-		return null
 	} # }}}
 	getClassWithInstantiableMethod(name: String, that: NamedType): NamedType { # {{{
 		if @instanceMethods[name] is Array {
@@ -1258,8 +1214,52 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getProperty(name: String) => @getClassProperty(name)
+	getProperty(name: String) => @getStaticProperty(name)
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
+	getStaticAssessment(name: String, node: AbstractNode) { # {{{
+		if @staticMethods[name] is not Array {
+			if @extending {
+				return @extends.type().getStaticAssessment(name, node)
+			}
+			else {
+				return null
+			}
+		}
+
+		if @staticAssessments[name] is not Dictionary {
+			var methods = [...@staticMethods[name]]
+
+			var mut that = this
+			while methods.length == 0 && that.isExtending() {
+				that = that.extends().type()
+
+				if var m ?= that.listStaticMethods(name) {
+					for var method in m {
+						method.pushTo(methods)
+					}
+				}
+			}
+
+			@staticAssessments[name] = Router.assess(methods, name, node)
+		}
+
+		return @staticAssessments[name]
+	} # }}}
+	getStaticProperty(name: String): Type { # {{{
+		if @staticMethods[name] is Array {
+			return @scope.reference('Function')
+		}
+		else {
+			return @staticVariables[name] ?? Type.Any
+		}
+	} # }}}
+	getStaticVariable(name: String) { # {{{
+		if var variable ?= @staticVariables[name] {
+			return variable
+		}
+
+		return null
+	} # }}}
 	hasAbstractMethod(name) { # {{{
 		if @abstractMethods[name] is Array {
 			return true
@@ -1267,30 +1267,6 @@ class ClassType extends Type {
 
 		if @extending {
 			return @extends.type().hasAbstractMethod(name)
-		}
-		else {
-			return false
-		}
-	} # }}}
-	hasClassMethod(name) { # {{{
-		if @classMethods[name] is Array {
-			return true
-		}
-
-		if @extending {
-			return @extends.type().hasClassMethod(name)
-		}
-		else {
-			return false
-		}
-	} # }}}
-	hasClassVariable(name) { # {{{
-		if @classVariables[name] is ClassVariableType {
-			return true
-		}
-
-		if @extending {
-			return @extends.type().hasClassVariable(name)
 		}
 		else {
 			return false
@@ -1348,21 +1324,6 @@ class ClassType extends Type {
 			return false
 		}
 	} # }}}
-	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
-		if @classMethods[name] is Array {
-			for var method in @classMethods[name] {
-				if method.isSubsetOf(type, mode) {
-					return true
-				}
-			}
-		}
-
-		if @extending && mode ~~ MatchingMode::Superclass {
-			return @extends.type().hasMatchingClassMethod(name, type, mode)
-		}
-
-		return false
-	} # }}}
 	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { # {{{
 		if @constructors.length != 0 {
 			for var constructor in @constructors {
@@ -1397,6 +1358,21 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
+	hasMatchingStaticMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
+		if @staticMethods[name] is Array {
+			for var method in @staticMethods[name] {
+				if method.isSubsetOf(type, mode) {
+					return true
+				}
+			}
+		}
+
+		if @extending && mode ~~ MatchingMode::Superclass {
+			return @extends.type().hasMatchingStaticMethod(name, type, mode)
+		}
+
+		return false
+	} # }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
 	hasSealedInstanceMethod(name) { # {{{
 		if @seal.instanceMethods[name] {
@@ -1405,6 +1381,30 @@ class ClassType extends Type {
 
 		if @extending {
 			return @extends.type().hasSealedInstanceMethod(name)
+		}
+		else {
+			return false
+		}
+	} # }}}
+	hasStaticMethod(name) { # {{{
+		if @staticMethods[name] is Array {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasStaticMethod(name)
+		}
+		else {
+			return false
+		}
+	} # }}}
+	hasStaticVariable(name) { # {{{
+		if @staticVariables[name] is ClassVariableType {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasStaticVariable(name)
 		}
 		else {
 			return false
@@ -1437,17 +1437,6 @@ class ClassType extends Type {
 	} # }}}
 	isAbstract() => @abstract
 	isAltering() => @altering
-	isAsyncClassMethod(name) { # {{{
-		if @classMethods[name] is Array {
-			return @classMethods[name][0].isAsync()
-		}
-		else if @extending {
-			return @extends.type().isAsyncClassMethod(name)
-		}
-		else {
-			return null
-		}
-	} # }}}
 	isAsyncInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name][0].isAsync()
@@ -1462,6 +1451,17 @@ class ClassType extends Type {
 		}
 
 		return null
+	} # }}}
+	isAsyncStaticMethod(name) { # {{{
+		if @staticMethods[name] is Array {
+			return @staticMethods[name][0].isAsync()
+		}
+		else if @extending {
+			return @extends.type().isAsyncStaticMethod(name)
+		}
+		else {
+			return null
+		}
 	} # }}}
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
@@ -1484,18 +1484,6 @@ class ClassType extends Type {
 	} # }}}
 	isExhaustiveConstructor() => @exhaustiveness.constructor
 	isExhaustiveConstructor(node) => @isExhaustive(node) && @isExhaustiveConstructor()
-	isExhaustiveClassMethod(name) { # {{{
-		if ?@exhaustiveness.classMethods[name] {
-			return @exhaustiveness.classMethods[name]
-		}
-		else if @extending {
-			return @extends.type().isExhaustiveClassMethod(name)
-		}
-		else {
-			return @exhaustive
-		}
-	} # }}}
-	isExhaustiveClassMethod(name, node) => @isExhaustive(node) && @isExhaustiveClassMethod(name)
 	isExhaustiveInstanceMethod(name) { # {{{
 		if ?@exhaustiveness.instanceMethods[name] {
 			return @exhaustiveness.instanceMethods[name]
@@ -1511,6 +1499,18 @@ class ClassType extends Type {
 		}
 	} # }}}
 	isExhaustiveInstanceMethod(name, node) => @isExhaustive(node) && @isExhaustiveInstanceMethod(name)
+	isExhaustiveStaticMethod(name) { # {{{
+		if ?@exhaustiveness.staticMethods[name] {
+			return @exhaustiveness.staticMethods[name]
+		}
+		else if @extending {
+			return @extends.type().isExhaustiveStaticMethod(name)
+		}
+		else {
+			return @exhaustive
+		}
+	} # }}}
+	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending
@@ -1558,8 +1558,8 @@ class ClassType extends Type {
 		return false
 	} # }}}
 	isInstanceOf(value: NamedType) => @isInstanceOf(value.type())
-	isLabelableClassMethod(name: String): Boolean => @labelables.classMethods[name] ?? false
 	isLabelableInstanceMethod(name: String): Boolean => @labelables.instanceMethods[name] ?? false
+	isLabelableStaticMethod(name: String): Boolean => @labelables.staticMethods[name] ?? false
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
@@ -1584,8 +1584,8 @@ class ClassType extends Type {
 				}
 			}
 
-			for var variable, name of value._classVariables {
-				if !@classVariables[name]?.isSubsetOf(variable, mode) {
+			for var variable, name of value._staticVariables {
+				if !@staticVariables[name]?.isSubsetOf(variable, mode) {
 					return false
 				}
 			}
@@ -1605,13 +1605,13 @@ class ClassType extends Type {
 				}
 			}
 
-			for var methods, name of value._classMethods {
-				if @classMethods[name] is not Array {
+			for var methods, name of value._staticMethods {
+				if @staticMethods[name] is not Array {
 					return false
 				}
 
 				for var method in methods {
-					if !method.isSupersetOf(@classMethods[name], functionMode) {
+					if !method.isSupersetOf(@staticMethods[name], functionMode) {
 						return false
 					}
 				}
@@ -1665,34 +1665,6 @@ class ClassType extends Type {
 		else {
 			return []
 		}
-	} # }}}
-	listClassMethods(name: String) { # {{{
-		if @classMethods[name] is Array {
-			return @classMethods[name]
-		}
-
-		return null
-	} # }}}
-	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
-		var result = []
-
-		if var methods ?= @classMethods[name] {
-			for method in methods {
-				if method.isSubsetOf(type, mode) {
-					result.push(method)
-				}
-			}
-		}
-
-		if result.length > 0 {
-			return result
-		}
-
-		if @extending {
-			return @extends.type().listClassMethods(name, type, mode)
-		}
-
-		return result
 	} # }}}
 	listConstructors() => @constructors
 	listConstructors(type: FunctionType, mode: MatchingMode): Array { # {{{
@@ -1858,6 +1830,34 @@ class ClassType extends Type {
 
 		return abstractMethods
 	} # }}}
+	listStaticMethods(name: String) { # {{{
+		if @staticMethods[name] is Array {
+			return @staticMethods[name]
+		}
+
+		return null
+	} # }}}
+	listStaticMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
+		var result = []
+
+		if var methods ?= @staticMethods[name] {
+			for method in methods {
+				if method.isSubsetOf(type, mode) {
+					result.push(method)
+				}
+			}
+		}
+
+		if result.length > 0 {
+			return result
+		}
+
+		if @extending {
+			return @extends.type().listStaticMethods(name, type, mode)
+		}
+
+		return result
+	} # }}}
 	majorOriginal() => @majorOriginal
 	matchArguments(arguments: Array<Type>, node: AbstractNode) { # {{{
 		if @constructors.length == 0 {
@@ -1969,8 +1969,8 @@ class ClassType extends Type {
 					@exhaustiveness.instanceMethods[name] = extends.isExhaustiveInstanceMethod(name)
 				}
 
-				for var _, name of @classMethods {
-					@exhaustiveness.classMethods[name] = extends.isExhaustiveClassMethod(name)
+				for var _, name of @staticMethods {
+					@exhaustiveness.staticMethods[name] = extends.isExhaustiveStaticMethod(name)
 				}
 			}
 			else {
@@ -1985,8 +1985,8 @@ class ClassType extends Type {
 					@exhaustiveness.instanceMethods[name] ??= true
 				}
 
-				for var _, name of @classMethods {
-					@exhaustiveness.classMethods[name] ??= true
+				for var _, name of @staticMethods {
+					@exhaustiveness.staticMethods[name] ??= true
 				}
 			}
 		}
@@ -1997,8 +1997,8 @@ class ClassType extends Type {
 				@exhaustiveness.instanceMethods[name] ??= false
 			}
 
-			for var _, name of @classMethods {
-				@exhaustiveness.classMethods[name] ??= false
+			for var _, name of @staticMethods {
+				@exhaustiveness.staticMethods[name] ??= false
 			}
 		}
 
@@ -2073,7 +2073,7 @@ class ClassType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)
 
-		for var sequence, name of @sequences.classMethods {
+		for var sequence, name of @sequences.staticMethods {
 			variations.push(name, sequence)
 		}
 
@@ -2087,7 +2087,7 @@ class ClassType extends Type {
 				method.unflagAltering()
 			}
 		}
-		for var methods of this._classMethods {
+		for var methods of this._staticMethods {
 			for var method in methods {
 				method.unflagAltering()
 			}
@@ -2098,7 +2098,7 @@ class ClassType extends Type {
 			}
 		}
 
-		for var variable of this._classVariables {
+		for var variable of this._staticVariables {
 			variable.unflagAltering()
 		}
 		for var variable of this._instanceVariables {

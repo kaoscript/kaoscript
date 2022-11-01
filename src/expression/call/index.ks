@@ -220,7 +220,7 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
-						ReferenceException.throwNoMatchingClassMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
+						ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
 					}
 				}
 				else if type.isFunction() {
@@ -602,8 +602,8 @@ class CallExpression extends Expression {
 
 				var reference = @scope().reference(name)
 
-				if value.hasClassMethod(@property) {
-					var assessment = value.getClassAssessment(@property, this)
+				if value.hasStaticMethod(@property) {
+					var assessment = value.getStaticAssessment(@property, this)
 
 					if var result ?= Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
@@ -633,8 +633,8 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
-						if value.isExhaustiveClassMethod(@property, this) {
-							ReferenceException.throwNoMatchingClassMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
+						if value.isExhaustiveStaticMethod(@property, this) {
+							ReferenceException.throwNoMatchingStaticMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else if assessment.sealed {
 							@addCallee(new SealedMethodCallee(@data, @object, reference, @property, false, this))
@@ -645,7 +645,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else if value.isExhaustive(this) {
-					ReferenceException.throwNotFoundClassMethod(@property, name.name(), this)
+					ReferenceException.throwNotFoundStaticMethod(@property, name.name(), this)
 				}
 				else {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
@@ -818,7 +818,7 @@ class CallExpression extends Expression {
 					}
 					else {
 						if value.isExhaustiveInstanceMethod(@property, this) {
-							ReferenceException.throwNoMatchingClassMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
+							ReferenceException.throwNoMatchingStaticMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
 						}
 						else {
 							@addCallee(new DefaultCallee(@data, @object, reference, this))
@@ -835,7 +835,7 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 				else if value.isExhaustive(this) {
-					ReferenceException.throwNotFoundClassMethod(@property, reference.name(), this)
+					ReferenceException.throwNotFoundStaticMethod(@property, reference.name(), this)
 				}
 				else {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))

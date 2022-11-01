@@ -26,7 +26,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "concat": [
             {
@@ -163,7 +163,7 @@
             }
           ]
         },
-        "classMethods": {
+        "staticMethods": {
           "map": [
             {
               "index": 0,
@@ -262,7 +262,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "concat": [
             {
@@ -376,7 +376,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

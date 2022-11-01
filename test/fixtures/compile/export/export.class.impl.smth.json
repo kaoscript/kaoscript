@@ -46,9 +46,9 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {
+        "staticMethods": {
           "draw": [
             {
               "index": 0,

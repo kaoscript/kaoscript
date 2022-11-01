@@ -55,10 +55,10 @@ class ClassVariableDeclaration extends AbstractNode {
 			parent._instanceVariables[@name] = this
 		}
 		else if @name == 'name' || @name == 'version' {
-			SyntaxException.throwReservedClassVariable(@name, parent)
+			SyntaxException.throwReservedStaticVariable(@name, parent)
 		}
 		else {
-			parent._classVariables[@name] = this
+			parent._staticVariables[@name] = this
 		}
 	} # }}}
 	analyse() { # {{{
@@ -77,7 +77,7 @@ class ClassVariableDeclaration extends AbstractNode {
 				}
 			}
 			else {
-				if type.hasClassVariable(@name) {
+				if type.hasStaticVariable(@name) {
 					ReferenceException.throwAlreadyDefinedField(@name, this)
 				}
 			}
@@ -96,7 +96,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			@value.prepare()
 
 			var type = @value.type().asReference()
-			
+
 			if @type.type().isExplicit() {
 				unless type.isAssignableToVariable(@type.type(), true, true, false) {
 					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)

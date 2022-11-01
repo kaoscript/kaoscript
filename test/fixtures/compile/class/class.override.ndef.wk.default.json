@@ -52,7 +52,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -67,7 +67,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -101,7 +101,7 @@
           }
         ],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -116,7 +116,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           0,
           "Shape"

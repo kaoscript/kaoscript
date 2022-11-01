@@ -17,7 +17,7 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toString": [
             {
@@ -32,7 +32,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -76,7 +76,7 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "toSource": [
             {
@@ -91,7 +91,7 @@
             }
           ]
         },
-        "classMethods": {
+        "staticMethods": {
           "vcurry": [
             {
               "index": 0,

@@ -20,7 +20,7 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {
+        "staticVariables": {
           "PI": {
             "access": 4,
             "type": "Number",
@@ -31,7 +31,7 @@
           }
         },
         "instanceMethods": {},
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,

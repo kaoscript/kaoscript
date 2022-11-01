@@ -65,7 +65,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "charAt": [
             {
@@ -197,7 +197,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -254,7 +254,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -278,7 +278,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "sequences": [
           -1,
           -1,
@@ -312,7 +312,7 @@
           }
         ],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "draw": [
             {
@@ -336,7 +336,7 @@
             }
           ]
         },
-        "classMethods": {},
+        "staticMethods": {},
         "extends": [
           3,
           "Shape"

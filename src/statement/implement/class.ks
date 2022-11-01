@@ -76,7 +76,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			@class.addInstanceVariable(@internalName, @type)
 		}
 		else {
-			@class.addClassVariable(@internalName, @type)
+			@class.addStaticVariable(@internalName, @type)
 		}
 
 		if @defaultValue {
@@ -364,7 +364,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					NotImplementedException.throw(this)
 				}
 
-				var methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameters)
+				var methods = @class.listMatchingStaticMethods(@name, @type, MatchingMode::ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -379,11 +379,11 @@ class ImplementClassMethodDeclaration extends Statement {
 				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, false, this)
 			}
 			else {
-				if @class.hasMatchingClassMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @class.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
-					@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
+					@internalName = `__ks_sttc_\(@name)_\(@class.addStaticMethod(@name, @type))`
 				}
 			}
 		}
@@ -577,8 +577,8 @@ class ImplementClassMethodDeclaration extends Statement {
 	} # }}}
 	toStaticFragments(fragments) { # {{{
 		var name = @variable.name()
-		var labelable = @class.isLabelableClassMethod(@name)
-		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
+		var labelable = @class.isLabelableStaticMethod(@name)
+		var assessment = Router.assess(@class.listStaticMethods(@name), @name, this)
 
 		var line = fragments.newLine()
 
@@ -684,9 +684,9 @@ class ImplementClassMethodDeclaration extends Statement {
 	} # }}}
 	toSealedStaticFragments(fragments) { # {{{
 		var name = @variable.getSealedName()
-		var labelable = @class.isLabelableClassMethod(@name)
+		var labelable = @class.isLabelableStaticMethod(@name)
 		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
-		var assessment = Router.assess(@class.listClassMethods(@name), @name, this)
+		var assessment = Router.assess(@class.listStaticMethods(@name), @name, this)
 
 		var line = fragments.newLine()
 

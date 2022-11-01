@@ -24,9 +24,9 @@
         "exhaustive": true,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {
+        "staticMethods": {
           "get": [
             {
               "index": 0,

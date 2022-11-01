@@ -57,7 +57,7 @@
             "sealed": false
           }
         },
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {
           "getField": [
             {
@@ -203,7 +203,7 @@
             }
           ]
         },
-        "classMethods": {
+        "staticMethods": {
           "registerSpace": [
             {
               "index": 0,

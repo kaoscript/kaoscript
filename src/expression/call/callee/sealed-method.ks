@@ -38,7 +38,7 @@ class SealedMethodCallee extends Callee {
 		}
 		else {
 			while true {
-				if var methods ?= class.listClassMethods(@property) {
+				if var methods ?= class.listStaticMethods(@property) {
 					for var method in methods {
 						if !method.isInitializingInstanceVariable(name) {
 							return false

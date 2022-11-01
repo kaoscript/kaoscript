@@ -20,9 +20,9 @@
         "exhaustive": false,
         "constructors": [],
         "instanceVariables": {},
-        "classVariables": {},
+        "staticVariables": {},
         "instanceMethods": {},
-        "classMethods": {
+        "staticMethods": {
           "curry": [
             {
               "index": 0,

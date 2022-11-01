@@ -1771,7 +1771,7 @@ class ThisExpressionParameter extends ThisExpression {
 				variable = class.type().type().getInstanceVariable(@variableName)
 			}
 			else {
-				variable = class.type().type().getClassVariable(@variableName)
+				variable = class.type().type().getStaticVariable(@variableName)
 			}
 
 			if variable.isImmutable() {
