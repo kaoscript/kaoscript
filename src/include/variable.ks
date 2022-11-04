@@ -20,12 +20,16 @@ class Variable {
 		@secureName: String
 	}
 	static {
-		createPredefinedClass(name, scope) { # {{{
+		createPredefinedClass(name: String, features: ClassFeature? = null, scope: Scope): Variable { # {{{
 			type = new ClassType(scope)
 			type.flagAlien()
 			type.flagComplete()
 			type.flagPredefined()
 			type.flagSystem()
+
+			if ?features {
+				type.features(features)
+			}
 
 			return new Variable(name, true, true, type)
 		} # }}}

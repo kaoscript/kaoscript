@@ -696,7 +696,7 @@ export class TargetException extends Exception {
 
 export class TypeException extends Exception {
 	static {
-		throwCannotBeInstantiated(name, node): Never ~ TypeException { # {{{
+		throwAbstractInstantiation(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Class "\(name)" is abstract so it can't be instantiated`, node)
 		} # }}}
 		throwConstructorWithoutNew(name, node): Never ~ TypeException { # {{{
@@ -708,8 +708,20 @@ export class TypeException extends Exception {
 		throwExpectedThrownError(node): Never ~ TypeException { # {{{
 			throw new TypeException(`An error is expected to be thrown`, node)
 		} # }}}
+		throwInvalidInstantiation(name, node): Never ~ TypeException { # {{{
+			throw new TypeException(`Class "\(name)" can't be instantiated`, node)
+		} # }}}
 		throwImplFieldToSealedType(node): Never ~ TypeException { # {{{
 			throw new TypeException(`impl can add field to only non-sealed type`, node)
+		} # }}}
+		throwImplInvalidField(name: String, node): Never ~ TypeException { # {{{
+			throw new TypeException(`Class "\(name)" doesn't accept new field`, node)
+		} # }}}
+		throwImplInvalidInstanceMethod(name: String, node): Never ~ TypeException { # {{{
+			throw new TypeException(`Class "\(name)" doesn't accept new instance method`, node)
+		} # }}}
+		throwImplInvalidStaticMethod(name: String, node): Never ~ TypeException { # {{{
+			throw new TypeException(`Class "\(name)" doesn't accept new static method`, node)
 		} # }}}
 		throwImplInvalidType(node): Never ~ TypeException { # {{{
 			throw new TypeException(`impl has an invalid type`, node)

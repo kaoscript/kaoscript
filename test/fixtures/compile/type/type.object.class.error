@@ -1,0 +1,1 @@
+SyntaxException: Identifier "Object" has already been declared (fixtures/compile/type/type.object.class.ks:1)

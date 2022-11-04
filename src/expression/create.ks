@@ -40,28 +40,36 @@ class CreateExpression extends Expression {
 			ReferenceException.throwNotDefined(@factory.toQuote(), this)
 		}
 		else if type.isNamed() && type.type() is ClassType {
-			if type.type().isAbstract() {
-				TypeException.throwCannotBeInstantiated(type.name(), this)
+			var class = type.type()
+
+			if type.isVirtual() {
+				TypeException.throwNotClass(type.name(), this)
+			}
+			if class.isAbstract() {
+				TypeException.throwAbstractInstantiation(type.name(), this)
+			}
+			if class.features() !~ ClassFeature::Constructor {
+				TypeException.throwInvalidInstantiation(type.name(), this)
 			}
 
-			if type.type().hasSealedConstructors() {
+			if class.hasSealedConstructors() {
 				@sealed = true
 			}
 
-			@assessment = type.type().getConstructorAssessment(type.name(), this)
+			@assessment = class.getConstructorAssessment(type.name(), this)
 
 			if var result ?= Router.matchArguments(@assessment, @arguments, this) {
 				@result = result
 			}
-			else if type.type().isExhaustiveConstructor(this) {
+			else if class.isExhaustiveConstructor(this) {
 				ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
 			}
 
-			@alien = type.isAlien()
-			@hybrid = type.isHybrid()
+			@alien = class.isAlien()
+			@hybrid = class.isHybrid()
 			@type = @scope.reference(type).flagStrict()
 		}
-		else if !(type.isAny() || type.isClass()) {
+		else if !(type.isAny() || type.isClass()) || type.isVirtual() {
 			TypeException.throwNotClass(type.toQuote(), this)
 		}
 

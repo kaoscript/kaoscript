@@ -1,8 +1,8 @@
-require class Date {
+require class Foobar {
 	setDate(value: Number): Number
 }
 
-impl Date {
+impl Foobar {
 	overwrite setDate(value: Number): Date {
 		precursor(value)
 

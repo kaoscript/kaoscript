@@ -1,0 +1,1 @@
+SyntaxException: Identifier "Array" has already been declared (fixtures/compile/type/type.array.class.ks:1)

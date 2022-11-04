@@ -25,6 +25,9 @@ class ImplementDeclaration extends Statement {
 		unless @type is NamedType {
 			TypeException.throwImplInvalidType(this)
 		}
+		if @type.isClass() && @type.isVirtual() {
+			TypeException.throwImplInvalidType(this)
+		}
 
 		if @variable.isPredefined() {
 			@variable = @scope.define(@variable.name(), true, @type.clone().unflagAltering(), this)

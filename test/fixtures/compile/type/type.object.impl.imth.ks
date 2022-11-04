@@ -1,0 +1,4 @@
+impl Object {
+	foobar() {
+	}
+}

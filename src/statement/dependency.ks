@@ -7,6 +7,19 @@ abstract class DependencyStatement extends Statement {
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
 				var type = @applyFlags(new ClassType(scope))
+
+				for var modifier in declaration.modifiers {
+					if modifier.kind == ModifierKind::Abstract {
+						type.flagAbstract()
+					}
+					else if modifier.kind == ModifierKind::Sealed {
+						type.flagSealed()
+					}
+					else if modifier.kind == ModifierKind::System {
+						type.flagSystem()
+					}
+				}
+
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if ?declaration.extends {
@@ -20,20 +33,8 @@ abstract class DependencyStatement extends Statement {
 					type.extends(superVar.getDeclaredType())
 				}
 
-				for modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind::Abstract {
-						type.flagAbstract()
-					}
-					else if modifier.kind == ModifierKind::Sealed {
-						type.flagSealed()
-					}
-					else if modifier.kind == ModifierKind::System {
-						type.flagSystem()
-					}
-				}
-
 				if declaration.members.length != 0 {
-					for member in declaration.members {
+					for var member in declaration.members {
 						type.addPropertyFromAST(member, this)
 					}
 				}
@@ -81,7 +82,7 @@ abstract class DependencyStatement extends Statement {
 			NodeKind::FunctionDeclaration => {
 				var mut type = null
 				if ?declaration.parameters {
-					var parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
+					var parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
 
 					type = new FunctionType(parameters, declaration, this)
 				}
@@ -106,9 +107,8 @@ abstract class DependencyStatement extends Statement {
 			}
 			NodeKind::NamespaceDeclaration => {
 				var type = @applyFlags(new NamespaceType(scope))
-				var variable = scope.define(declaration.name.name, true, type, this)
 
-				for modifier in declaration.modifiers {
+				for var modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Sealed {
 						type.flagSealed()
 					}
@@ -116,6 +116,8 @@ abstract class DependencyStatement extends Statement {
 						type.flagSystem()
 					}
 				}
+
+				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if options.rules.nonExhaustive || declaration.statements.length == 0 {
 					type.setExhaustive(false)
@@ -125,7 +127,7 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				if declaration.statements.length != 0 {
-					for statement in declaration.statements {
+					for var statement in declaration.statements {
 						type.addPropertyFromAST(statement, this)
 					}
 				}
@@ -153,7 +155,7 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				for modifier in declaration.modifiers {
+				for var modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Sealed {
 						if !type.isSealable() {
 							type = new SealableType(scope, type)

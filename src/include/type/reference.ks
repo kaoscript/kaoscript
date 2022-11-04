@@ -745,7 +745,8 @@ class ReferenceType extends Type {
 		return @nullable
 	} # }}}
 	isNumber() => @name == 'Number' || @type().isNumber()
-	isObject() => @name == 'Object' || (@type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct' || @name == 'Tuple'))
+	isObject() => @name == 'Object' || @isDictionary() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+	isPrimitive() => @isBoolean() || @isNumber() || @isString()
 	isReference() => true
 	isReducible() => true
 	isSpread() => @spread
@@ -1381,7 +1382,7 @@ class ReferenceType extends Type {
 		var name = unalias.name?() ?? @name
 		var tof = $runtime.typeof(name, node)
 
-		if @parameters.length == 0 && ?tof && !@nullable {
+		if !#@parameters && ?tof && !@nullable {
 			fragments.code(`\(tof)`)
 		}
 		else if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {

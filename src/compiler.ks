@@ -50,6 +50,7 @@ var $typeofs = { # {{{
 	Dictionary: true
 	Enum: true
 	Function: true
+	// Instance: true
 	Namespace: true
 	Number: true
 	Object: true

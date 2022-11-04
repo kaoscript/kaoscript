@@ -10,6 +10,16 @@ class HollowScope extends Scope {
 		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
+		else if @hasPredefinedVariable(name) {
+			var variable = @getPredefinedType(name)
+
+			if variable.isVirtual() {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
+			else if ?type && !(type.isAlien() || type.isSystem()) {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
+		}
 
 		var variable = new Variable(name, immutable, false, type, initialized)
 
@@ -174,10 +184,12 @@ class HollowScope extends Scope {
 		declareVariable
 		getMacro
 		getRawLine
+		getPredefinedType
 		getRenamedIndex
 		getTempIndex
 		hasBleedingVariable
 		hasMacro
+		hasPredefinedVariable
 		isMatchingType
 		isRenamedVariable
 		line

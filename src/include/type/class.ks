@@ -5,6 +5,17 @@ enum Accessibility {
 	Public
 }
 
+bitmask ClassFeature {
+	None
+
+	Constructor
+	Field
+	InstanceMethod
+	StaticMethod
+
+	All = Constructor + Field + InstanceMethod + StaticMethod
+}
+
 class ClassType extends Type {
 	private {
 		@abstract: Boolean					= false
@@ -27,6 +38,7 @@ class ClassType extends Type {
 		@explicitlyExported: Boolean		= false
 		@extending: Boolean					= false
 		@extends: NamedType<ClassType>?		= null
+		@features: ClassFeature				= ClassFeature::All
 		@fullyImplementedMethods: Boolean{}	= {}
 		@hybrid: Boolean					= false
 		@init: Number						= 0
@@ -177,6 +189,10 @@ class ClassType extends Type {
 				}
 				else if data.sealed {
 					type.flagSealed()
+				}
+
+				if data.features {
+					type._features = data.features
 				}
 
 				queue.push(() => {
@@ -518,6 +534,7 @@ class ClassType extends Type {
 		@complete = src._complete
 		@extending = src._extending
 		@extends = src._extends
+		@features = src._features
 		@hybrid = src._hybrid
 		@sealed = src._sealed
 		@system = src._system
@@ -795,6 +812,10 @@ class ClassType extends Type {
 			if @extending {
 				export.extends = @extends.metaReference(references, indexDelta, mode, module)
 			}
+
+			if @features != ClassFeature::All {
+				export.features = @features
+			}
 		}
 
 		if mode !~ ExportMode::Export && ?@origin && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
@@ -905,6 +926,8 @@ class ClassType extends Type {
 
 		@level = type.level():Number + 1
 	} # }}}
+	features(): @features
+	features(@features): this
 	flagAbstract() { # {{{
 		@abstract = true
 	} # }}}

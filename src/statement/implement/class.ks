@@ -54,6 +54,10 @@ class ImplementClassFieldDeclaration extends Statement {
 				@name = @name.substr(1)
 			}
 		}
+
+		if @class.features() !~ ClassFeature::Field {
+			TypeException.throwImplInvalidField(@variable.name(), this)
+		}
 	} # }}}
 	analyse() { # {{{
 		if ?@data.value {
@@ -240,9 +244,6 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)
-	} # }}}
-	analyse() { # {{{
-		@scope.line(@data.start.line)
 
 		@name = @data.name.name
 
@@ -257,6 +258,20 @@ class ImplementClassMethodDeclaration extends Statement {
 				@instance = false
 			}
 		}
+
+		if @instance {
+			if @class.features() !~ ClassFeature::InstanceMethod {
+				TypeException.throwImplInvalidInstanceMethod(@variable.name(), this)
+			}
+		}
+		else {
+			if @class.features() !~ ClassFeature::StaticMethod {
+				TypeException.throwImplInvalidStaticMethod(@variable.name(), this)
+			}
+		}
+	} # }}}
+	analyse() { # {{{
+		@scope.line(@data.start.line)
 
 		@this = @scope.define('this', true, @classRef, true, this)
 
@@ -948,6 +963,9 @@ class ImplementClassConstructorDeclaration extends Statement {
 		@classRef = @scope.reference(@variable)
 
 		if @class.isHybrid() {
+			NotSupportedException.throw(this)
+		}
+		if @class.features() !~ ClassFeature::Constructor {
 			NotSupportedException.throw(this)
 		}
 	} # }}}

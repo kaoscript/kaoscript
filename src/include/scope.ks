@@ -112,7 +112,7 @@ abstract class Scope {
 
 		return @resolveReference('Array', value.isNullable())
 	} # }}}
-	reference(value: ClassVariableType): ReferenceType => this.reference(value.type())
+	reference(value: ClassVariableType): ReferenceType => @reference(value.type())
 	reference(value: DictionaryType): ReferenceType { # {{{
 		if value.hasProperties() {
 			throw new NotSupportedException()
@@ -148,10 +148,12 @@ abstract class Scope {
 		define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable
 		defineVariable(variable: Variable, node: AbstractNode): Void
 		getDefinedVariable(name: String): Variable?
+		getPredefinedType(name: String): Type?
 		getRenamedIndex(name: String): Number
 		getVariable(name: String, line: Number = -1): Variable?
 		hasDeclaredVariable(name: String): Boolean
 		hasDefinedVariable(name: String): Boolean
+		hasPredefinedVariable(name: String): Boolean
 		hasVariable(name: String, line: Number = -1): Boolean
 		isMatchingType(a: Type, b: Type, mode: MatchingMode): Boolean
 		releaseTempName(name: String): Void

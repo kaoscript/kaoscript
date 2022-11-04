@@ -239,7 +239,7 @@ class DictionaryType extends Type {
 				return false
 			}
 
-			if anycast && @length == 0 && !@rest {
+			if @length == 0 && !@rest {
 				return true
 			}
 
@@ -250,7 +250,7 @@ class DictionaryType extends Type {
 				return false
 			}
 
-			if anycast && @length == 0 && !@rest {
+			if @length == 0 && !@rest {
 				return true
 			}
 

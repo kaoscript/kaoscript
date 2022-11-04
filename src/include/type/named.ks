@@ -343,7 +343,7 @@ class NamedType extends Type {
 	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
-	isVirtual() => $virtuals[@name]
+	isVirtual() => $virtuals[@name] ?? false
 	majorOriginal() => @type.majorOriginal()
 	matchClassName(that: Type?) { # {{{
 		if that == null {
@@ -368,11 +368,11 @@ class NamedType extends Type {
 			return true
 		}
 		else if @name == 'Object' && @type is ClassType {
-			return @scope.module().getPredefined('Object')!?.matchContentOf(value)
+			return @scope.module().getPredefinedType('Object')!?.matchContentOf(value)
 		}
 		else if value is NamedType {
 			if value.name() == 'Object' && value.type() is ClassType {
-				return @matchContentOf(@scope.module().getPredefined('Object'))
+				return @matchContentOf(@scope.module().getPredefinedType('Object'))
 			}
 			else if @type is ClassType && value.type() is ClassType {
 				return @matchInheritanceOf(value)

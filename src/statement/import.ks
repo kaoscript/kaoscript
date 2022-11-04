@@ -180,7 +180,7 @@ abstract class Importer extends Statement {
 					}
 
 					var type = @worker.getType(name)
-					if def.type != null && !type.isSubsetOf(def.type, MatchingMode::Signature) {
+					if ?def.type && !type.isSubsetOf(def.type, MatchingMode::Signature) {
 						TypeException.throwNotCompatibleDefinition(def.internal, name, @data.source.value, this)
 					}
 

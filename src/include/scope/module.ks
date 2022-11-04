@@ -42,8 +42,8 @@ class ModuleScope extends Scope {
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
-		@predefined.__Object = new Variable('Object', true, true, new AliasType(this, new ExclusionType(this, [AnyType.Explicit, this.reference('Array'), this.reference('Boolean'), this.reference('Dictionary'), this.reference('Enum'), this.reference('Function'), this.reference('Namespace'), this.reference('Number'), this.reference('String'), this.reference('Struct'), this.reference('Tuple')])))
 		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
+		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature::StaticMethod, this)
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {
@@ -128,6 +128,16 @@ class ModuleScope extends Scope {
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
+		}
+		else if @hasPredefinedVariable(name) {
+			var variable = @getPredefinedType(name)
+
+			if variable.isVirtual() {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
+			else if ?type && !(type.isAlien() || type.isSystem()) {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
 		}
 
 		var variable = new Variable(name, immutable, false, type, initialized)
@@ -267,7 +277,7 @@ class ModuleScope extends Scope {
 
 		return newName
 	} # }}}
-	getPredefined(name: String): Type? { # {{{
+	override getPredefinedType(name) { # {{{
 		if ?@predefined[`__\(name)`] {
 			return @predefined[`__\(name)`].getDeclaredType()
 		}
@@ -347,6 +357,9 @@ class ModuleScope extends Scope {
 		return false
 	} # }}}
 	hasMacro(name) => @macros[name] is Array
+	override hasPredefinedVariable(name) { # {{{
+		return @predefined[`__\(name)`] is Variable
+	} # }}}
 	hasVariable(name: String, line: Number = @line) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
