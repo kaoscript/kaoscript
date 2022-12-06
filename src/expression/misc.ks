@@ -7,7 +7,7 @@ class TempReusableExpression extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	isComputed() => @count == 0 && @value.isComposite()
 	toFragments(fragments, mode) { # {{{
@@ -34,7 +34,7 @@ class TempMemberExpression extends Expression {
 		super({}, parent, scope)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	acquireReusable(acquire) { # {{{
 		if acquire {

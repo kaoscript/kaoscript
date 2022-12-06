@@ -61,7 +61,7 @@ class TupleDeclaration extends Statement {
 
 		@function.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @extending {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
@@ -174,7 +174,7 @@ class TupleFunction extends AbstractNode {
 		@type = new FunctionType(@scope)
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		// TODO move to `var mut`
 		var dyn index = -1
 
@@ -252,7 +252,7 @@ class TupleFieldDeclaration extends AbstractNode {
 		@parameter.unflagValidation()
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@parameter.analyse()
 		@parameter.prepare()
 

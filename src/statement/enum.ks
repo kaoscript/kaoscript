@@ -47,7 +47,7 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
@@ -311,7 +311,7 @@ class EnumVariableDeclaration extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	isComposite() => @composite
 	name() => @name
@@ -390,7 +390,7 @@ class EnumMethodDeclaration extends Statement {
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var enumName = @parent.name()
 		var enumRef = @scope.reference(enumName)
 

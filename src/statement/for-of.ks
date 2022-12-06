@@ -2,7 +2,6 @@ class ForOfStatement extends Statement {
 	private late {
 		@bindingScope: Scope
 		@bindingValue						= null
-		@bleeding: Boolean					= false
 		@bodyScope: Scope
 		@body
 		@conditionalTempVariables: Array	= []
@@ -96,7 +95,7 @@ class ForOfStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
@@ -106,8 +105,6 @@ class ForOfStatement extends Statement {
 
 		if @expression.isLooseComposite() {
 			@expressionName = @bindingScope.acquireTempName(false)
-
-			@bleeding = @bindingScope.isBleeding()
 		}
 
 		if @value != null {
@@ -248,28 +245,13 @@ class ForOfStatement extends Statement {
 	# }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if ?@expressionName {
-			if @bleeding {
-				fragments
-					.newLine()
-					.code($runtime.scope(this), @expressionName, $equals)
-					.compile(@expression)
-					.done()
+			fragments
+				.newLine()
+				.code($runtime.scope(this), @expressionName, $equals)
+				.compile(@expression)
+				.done()
 
-				@toLoopFragments(fragments, mode)
-			}
-			else {
-				var block = fragments.newBlock()
-
-				block
-					.newLine()
-					.code($runtime.scope(this), @expressionName, $equals)
-					.compile(@expression)
-					.done()
-
-				@toLoopFragments(block, mode)
-
-				block.done()
-			}
+			@toLoopFragments(fragments, mode)
 		}
 		else {
 			@toLoopFragments(fragments, mode)

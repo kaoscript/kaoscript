@@ -31,12 +31,12 @@ abstract class AssignmentOperatorExpression extends Expression {
 			@defineVariables(@left)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@left.flagAssignable()
 
 		@validate(target)
 
-		@left.prepare(target)
+		@left.prepare(target, targetMode)
 
 		if var variable ?= @left.variable() {
 			@type = variable.getDeclaredType()
@@ -57,7 +57,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 			}
 		}
 
-		@right.prepare(@type)
+		@right.prepare(@type, targetMode)
 
 		var type = @right.type()
 
@@ -109,8 +109,8 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		@expectingEnum: Boolean		= true
 		@native: Boolean			= false
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -222,8 +222,8 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		@number: Boolean			= false
 		@string: Boolean			= false
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false

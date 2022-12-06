@@ -71,9 +71,6 @@ class AliasType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
 	} # }}}
-	toCastFragments(fragments) { # {{{
-		@type.toCastFragments(fragments)
-	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) => @type.toNegativeTestFragments(fragments, node, junction)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{

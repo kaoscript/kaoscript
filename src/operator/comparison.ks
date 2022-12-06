@@ -49,7 +49,7 @@ class ComparisonExpression extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if !target.isVoid() && !target.canBeBoolean() {
 			TypeException.throwUnexpectedExpression(this, target, this)
 		}

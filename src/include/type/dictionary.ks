@@ -300,7 +300,11 @@ class DictionaryType extends Type {
 	} # }}}
 	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
 		return true if this == value || @empty
-		return false unless @rest == value.hasRest()
+
+		var type = mode !~ MatchingMode::Reference
+		if type {
+			return false unless @rest == value.hasRest()
+		}
 
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
 			return false unless @length == value.length()
@@ -318,7 +322,7 @@ class DictionaryType extends Type {
 			}
 		}
 		else {
-			if @rest {
+			if type && @rest {
 				return false unless value.hasRest()
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)
 
@@ -332,7 +336,7 @@ class DictionaryType extends Type {
 				}
 			}
 			else {
-				if value.hasRest() {
+				if type && value.hasRest() {
 					return false unless value.getRestType().isNullable()
 				}
 
@@ -351,6 +355,10 @@ class DictionaryType extends Type {
 	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isDictionary()
+
+		if value.name() != 'Dictionary' {
+			return this.isSubsetOf(value.discard(), mode + MatchingMode::Reference)
+		}
 
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
 			return false unless @length == 0

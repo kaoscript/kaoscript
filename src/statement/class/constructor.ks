@@ -98,7 +98,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var parameter in @parameters {
 			parameter.prepare()
 

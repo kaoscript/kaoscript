@@ -7,8 +7,8 @@ module.exports = function() {
 	foobar.__ks_0 = function(lines) {
 		let line;
 		for(let i = 0, __ks_0 = lines.length; i < __ks_0; ++i) {
-			if(((line = lines[i].trim()).length !== 0) || (line = true)) {
-				if(line === true) {
+			if(((line = lines[i].trim()).length !== 0) && (line = true)) {
+				if(line) {
 				}
 			}
 		}

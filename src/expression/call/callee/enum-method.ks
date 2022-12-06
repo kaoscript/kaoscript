@@ -19,10 +19,12 @@ class EnumMethodCallee extends Callee {
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
-		if ?@methods {
+		if #methods {
 			var union = new UnionType(node.scope())
 
-			for var method in @methods {
+			for var method in methods {
+				@validate(method, node)
+
 				union.addType(method.getReturnType())
 			}
 
@@ -30,10 +32,6 @@ class EnumMethodCallee extends Callee {
 		}
 		else {
 			@type = @expression.type()
-		}
-
-		for method in methods {
-			@validate(method, node)
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{

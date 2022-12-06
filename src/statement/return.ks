@@ -35,13 +35,13 @@ class ReturnStatement extends Statement {
 			@exceptions = @value.hasExceptions()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if target.isNever() {
 			TypeException.throwUnexpectedReturnedValue(this)
 		}
 
 		if ?@value {
-			@value.prepare(target)
+			@value.prepare(target, TargetMode::Permissive)
 
 			@value.acquireReusable(false)
 			@value.releaseReusable()

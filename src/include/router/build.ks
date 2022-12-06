@@ -73,7 +73,7 @@ namespace Build {
 
 			var trees: Tree[] = []
 
-			for var group of groups when group.functions.length > 0 {
+			for var group of groups when group.functions.length > 0/*  && group.n == 1 */ {
 				var tree = buildTree(group, name, ignoreIndistinguishable, excludes, node)
 
 				trees.push(tree)
@@ -1889,14 +1889,13 @@ namespace Build {
 
 			if d == 0 {
 				// console.log(a.key, b.key, a.type.compareToRef(b.type))
-				return a.type.compareToRef(b.type, equivalences)
+				return a.type.compareToRef(b.type)
 			}
 			else {
 				// console.log(a.key, b.key, d)
 				return d
 			}
 		})
-		// console.log([item.key for var item in items])
 
 		tree.order = [item.key for var item in items]
 

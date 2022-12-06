@@ -22,7 +22,7 @@ class ClassProxyDeclaration extends Statement {
 		parent._proxies.push(this)
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var class = @parent.type().type()
 
 		@external = $compile.expression(@data.external, this)
@@ -56,7 +56,7 @@ class ClassProxyDeclaration extends Statement {
 		}
 
 		@type = @external.type()
-		
+
 		if @type.isFunction() {
 			if @instance {
 				for var function in @type.functions() {
@@ -161,7 +161,7 @@ class ClassProxyGroupDeclaration extends Statement {
 		parent._proxies.push(this)
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var class = @parent.type().type()
 
 		@recipient = $compile.expression(@data.recipient, this)
@@ -190,7 +190,7 @@ class ClassProxyGroupDeclaration extends Statement {
 		unless type.isComplete() {
 			ReferenceException.throwUncompleteType(type, @parent.type(), this)
 		}
-		
+
 		if type.isAny() {
 			ReferenceException.throwNoTypeProxy(@recipient.toQuote(), this)
 		}

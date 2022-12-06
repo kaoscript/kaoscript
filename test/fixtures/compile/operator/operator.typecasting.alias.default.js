@@ -4,7 +4,7 @@ module.exports = function() {
 		return toNS.__ks_rt(this, arguments);
 	};
 	toNS.__ks_0 = function(x) {
-		return Helper.cast(x, "N", true, null, "Number");
+		return Helper.cast(x, "N", true, Type.isNumber);
 	};
 	toNS.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

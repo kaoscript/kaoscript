@@ -69,7 +69,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
@@ -235,7 +235,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 	private late {
 		@type: Type
 	}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var types = []
 		var last = @operands.length - 1
 
@@ -307,7 +307,7 @@ class BinaryOperatorEmptyCoalescing extends PolyadicOperatorEmptyCoalescing {
 }
 
 class UnaryOperatorEmpty extends UnaryOperatorExpression {
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@argument.prepare()
 
 		var type = @argument.type()
@@ -330,7 +330,10 @@ class UnaryOperatorEmpty extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
-	override prepare(target) { # {{{
+	private late {
+		@type: Type
+	}
+	override prepare(target, targetMode) { # {{{
 		@argument.prepare()
 
 		var type = @argument.type()
@@ -342,6 +345,20 @@ class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 		unless type.isIterable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
 			TypeException.throwNotIterable(@argument, this)
 		}
+
+		@type = type.setNullable(false)
+	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
+		@argument.inferTypes(inferables)
+
+		if @argument.isInferable() {
+			inferables[@argument.path()] = {
+				isVariable: @argument is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments

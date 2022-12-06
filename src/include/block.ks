@@ -45,7 +45,7 @@ class Block extends AbstractNode {
 			statement.enhance()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if !target.isVoid() && !target.isAny() {
 			for var statement, index in @statements {
 				@scope.line(statement.line())

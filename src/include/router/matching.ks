@@ -102,7 +102,6 @@ namespace Matching {
 	}
 
 	func isPreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
-		// console.log(argument.hashCode(), parameter.hashCode(), argument is DictionaryType, argument.isAssignableToVariable(parameter, false, false, false))
 		return argument.isAssignableToVariable(parameter, false, false, false)
 	} # }}}
 

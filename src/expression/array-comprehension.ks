@@ -47,7 +47,7 @@ class ArrayComprehensionForFrom extends Expression {
 			@when.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		unless target.isAny() || target.isArray() {
 			TypeException.throwInvalidComprehensionType(target, this)
 		}
@@ -216,7 +216,7 @@ class ArrayComprehensionForIn extends Expression {
 
 		@bindingScope.releaseTempName(@valueName) if ?@valueName
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		unless target.isAny() || target.isArray() {
 			TypeException.throwInvalidComprehensionType(target, this)
 		}
@@ -416,7 +416,7 @@ class ArrayComprehensionForOf extends Expression {
 
 		@bindingScope.releaseTempName(@keyName) if ?@keyName
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		unless target.isAny() || target.isArray() {
 			TypeException.throwInvalidComprehensionType(target, this)
 		}
@@ -569,7 +569,7 @@ class ArrayComprehensionForRange extends Expression {
 			@when.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		unless target.isAny() || target.isArray() {
 			TypeException.throwInvalidComprehensionType(target, this)
 		}

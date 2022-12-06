@@ -88,7 +88,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@variable = @enum.addVariable(@name)
 
 		@variable.flagAlteration()
@@ -167,7 +167,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@block = $compile.function($ast.body(@data), this)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@scope.line(@data.start.line)
 
 		if @instance {

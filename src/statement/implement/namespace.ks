@@ -16,7 +16,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare()
 
 		var property = NamespacePropertyType.fromAST(@data.type, this)
@@ -91,7 +91,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@parameters.push(parameter)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var parameter in @parameters {
 			parameter.prepare()
 		}

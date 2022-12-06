@@ -53,7 +53,7 @@ class ExportDeclaration extends Statement {
 			statement.enhance()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var statement in @statements {
 			statement.prepare()
 		}
@@ -110,7 +110,7 @@ class ExportGroupSpecifier extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target) {
+	override prepare(target, targetMode) {
 		if @exclusion {
 			for var element in @data.elements {
 				@elements.push(element.internal.name)
@@ -149,7 +149,7 @@ class ExportNamedSpecifier extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@expression = $compile.expression(@data.internal, @parent)
 		@expression.analyse()
 
@@ -205,7 +205,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 		@object
 	}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@object = $compile.expression(@data.object, @parent)
 		@object.analyse()
 	} # }}}

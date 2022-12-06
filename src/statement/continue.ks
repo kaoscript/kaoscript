@@ -14,7 +14,7 @@ class ContinueStatement extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
 		fragments.line('continue', this._data)

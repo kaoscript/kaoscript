@@ -51,34 +51,82 @@ class FusionType extends Type {
 		return null
 	} # }}}
 	getProperty(name: String): Type? { # {{{
+		var mut undecided = false
+
 		for var type in @types {
 			if var property ?= type.getProperty(name) {
-				return property
+				if property == Type.Undecided {
+					undecided = true
+				}
+				else {
+					return property
+				}
 			}
+		}
+
+		if undecided {
+			return AnyType.NullableUnexplicit
 		}
 
 		return null
 	} # }}}
-	isArray() { # {{{
-		if @types.length != 0 {
-			return @types[0].isArray()
+	hashCode(fattenNull: Boolean = false): String { # {{{
+		var types = [type for var type in @types when !type.isDictionary()]
+
+		if types.length == 1 {
+			return types[0].hashCode(fattenNull)
 		}
-		else {
+
+		console.log(this)
+		throw new NotImplementedException()
+	} # }}}
+	isArray() { # {{{
+		for var type in @types {
+			if type.isArray() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+		if value.isAny() {
+			if @isNullable() {
+				return nullcast || value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+
+		if @isNullable() && !nullcast && !value.isNullable() {
 			return false
 		}
+
+		return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 	} # }}}
 	isComplete() => true
 	isDictionary() { # {{{
-		if @types.length != 0 {
-			return @types[0].isDictionary()
+		for var type in @types {
+			if type.isDictionary() {
+				return true
+			}
 		}
-		else {
-			return false
-		}
+
+		return false
 	} # }}}
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable
+	isObject() { # {{{
+		for var type in @types {
+			if type.isObject() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isSubsetOf(value: FusionType, mode: MatchingMode) { # {{{
 		if @types.length != value._types.length {
 			return false
@@ -141,6 +189,7 @@ class FusionType extends Type {
 
 		fragments.code(')') if junction == Junction::OR
 	} # }}}
+	toQuote() => @hashCode()
 	toTestFunctionFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction::OR
 

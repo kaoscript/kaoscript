@@ -128,6 +128,7 @@ bitmask MatchingMode<u48> {
 	RequireAllParameters
 
 	Renamed
+	Reference
 
 	IgnoreAnonymous
 	IgnoreError
@@ -213,6 +214,7 @@ abstract class Type {
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
+		dictionaryOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Dictionary', false, [parameter])
 		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
@@ -665,6 +667,7 @@ abstract class Type {
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getMajorReferenceIndex() => @referenceIndex
+	// TODO merge
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
 	hasProperty(name: String): Boolean => false
@@ -977,4 +980,5 @@ include {
 Type.Any = AnyType.Unexplicit
 Type.Never = new NeverType()
 Type.Null = NullType.Unexplicit
+Type.Undecided = new AnyType(false, true)
 Type.Void = new VoidType()

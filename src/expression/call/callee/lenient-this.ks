@@ -48,9 +48,11 @@ class LenientThisCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
-					throw new NotImplementedException(node)
+					fragments.code(`\(name).\(@property).apply(\(name)`)
 				}
 			}
+
+			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
 		}
 		else {
 			switch @scope {

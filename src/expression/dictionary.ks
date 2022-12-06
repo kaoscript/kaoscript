@@ -59,17 +59,57 @@ class DictionaryExpression extends Expression {
 
 		@empty = @properties.length == 0
 	} # }}}
-	override prepare(target) { # {{{
-		var subtarget = target.isDictionary() ? target.parameter() : AnyType.NullableUnexplicit
+	override prepare(mut target, targetMode) { # {{{
+		while target.isAlias() {
+			target = target.discardAlias()
+		}
 
 		@type = new DictionaryType(@scope)
 
 		if #@properties {
-			for var property in @properties {
-				property.prepare(subtarget)
+			if target is DictionaryType {
+				var type = target.getRestType()
+				var rest: Type[] = []
 
-				if property is DictionaryLiteralMember {
-					@type.addProperty(property.name(), property.type())
+				for var property in @properties {
+					if property is DictionaryComputedMember {
+						if target.length() > 0 {
+							property.prepare(AnyType.NullableUnexplicit)
+						}
+						else {
+							property.prepare(type)
+						}
+					}
+					else if property is DictionaryLiteralMember {
+						property.prepare(target.getProperty(property.name()))
+
+						@type.addProperty(property.name(), property.type())
+					}
+					else if property is DictionarySpreadMember {
+						property.prepare(type)
+
+						rest.push(property.type())
+					}
+					else if property is DictionaryThisMember {
+						property.prepare(target.getProperty(property.name()))
+
+						@type.addProperty(property.name(), property.type())
+					}
+				}
+
+				if #rest {
+					@type.setRestType(Type.union(@scope, ...rest))
+				}
+			}
+			else {
+				var type = target.isReference() ? target.parameter() : AnyType.NullableUnexplicit
+
+				for var property in @properties {
+					property.prepare(type)
+
+					if property is DictionaryLiteralMember {
+						@type.addProperty(property.name(), property.type())
+					}
 				}
 			}
 		}
@@ -349,8 +389,8 @@ class DictionaryLiteralMember extends Expression {
 
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
-		@value.prepare(target)
+	override prepare(target, targetMode) { # {{{
+		@value.prepare(target, targetMode)
 
 		@type = @value.type().asReference()
 
@@ -420,9 +460,9 @@ class DictionaryComputedMember extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@name.prepare()
-		@value.prepare(target)
+		@value.prepare(target, targetMode)
 	} # }}}
 	translate() { # {{{
 		@name.translate()
@@ -473,8 +513,8 @@ class DictionaryThisMember extends Expression {
 
 		this.reference(`.\(@name.value())`)
 	} # }}}
-	override prepare(target) { # {{{
-		@value.prepare(target)
+	override prepare(target, targetMode) { # {{{
+		@value.prepare(target, targetMode)
 	} # }}}
 	translate() { # {{{
 		@value.translate()
@@ -501,6 +541,7 @@ class DictionaryThisMember extends Expression {
 
 class DictionarySpreadMember extends Expression {
 	private {
+		@type: Type		= AnyType.NullableUnexplicit
 		@value
 	}
 	analyse() { # {{{
@@ -509,8 +550,19 @@ class DictionarySpreadMember extends Expression {
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
-		@value.prepare(target)
+	override prepare(target, targetMode) { # {{{
+		var targetDict = Type.dictionaryOf(target, @scope)
+
+		@value.prepare(targetDict, targetMode)
+
+		var type = @value.type()
+
+		if type.isDictionary() {
+			@type = type.parameter()
+		}
+		else {
+			@type = target
+		}
 	} # }}}
 	translate() { # {{{
 		@value.translate()
@@ -520,5 +572,6 @@ class DictionarySpreadMember extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@value)
 	} # }}}
+	type(): @type
 	value() => @value
 }

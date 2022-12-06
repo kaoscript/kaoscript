@@ -47,7 +47,7 @@ class NamespaceDeclaration extends Statement {
 			statement.export(this, true)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var statement in @statements {
 			@scope.line(statement.line())
 

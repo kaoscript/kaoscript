@@ -217,9 +217,11 @@ class ArrayType extends Type {
 	} # }}}
 	isComplete() => true
 	isExportable() => true
+	isIterable() => true
 	isMorePreciseThan(value) => true
 	isNullable() => @nullable
 	isSealable() => true
+	isSpread() => @spread
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		return true if this == value
 		return false unless @rest == value.hasRest()
@@ -279,9 +281,11 @@ class ArrayType extends Type {
 			}
 		}
 		else {
-			return true if !value.hasParameters()
+			return true unless value.hasParameters()
 
 			var parameter = value.parameter(0)
+
+			return true unless parameter.isExplicit()
 
 			for var type in @properties {
 				return false unless type.isSubsetOf(parameter, mode)

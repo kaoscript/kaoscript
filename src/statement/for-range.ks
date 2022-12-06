@@ -71,7 +71,7 @@ class ForRangeStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		unless @defineVariable {
 			@bindingScope.replaceVariable(@data.value.name, @bindingScope.reference('Number'), this)
 		}

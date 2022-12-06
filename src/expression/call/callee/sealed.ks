@@ -2,7 +2,7 @@ class SealedCallee extends Callee {
 	private {
 		@flatten: Boolean
 		@instance: Boolean
-		@methods: Array<FunctionType>?
+		@methods: Array<FunctionType>
 		@node: CallExpression
 		@object
 		@property: String
@@ -19,14 +19,15 @@ class SealedCallee extends Callee {
 		@nullableProperty = data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Nullable)
 		@scope = data.scope.kind
 
-		var types = []
+		var union = new UnionType(node.scope())
+
 		for var method in methods {
 			@validate(method, node)
 
-			types.push(method.getReturnType())
+			union.addType(method.getReturnType())
 		}
 
-		@type = Type.union(node.scope(), ...types)
+		@type = union.type()
 	} # }}}
 	override hashCode() => `sealed`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{

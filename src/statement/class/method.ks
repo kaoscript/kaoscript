@@ -246,7 +246,7 @@ class ClassMethodDeclaration extends Statement {
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		return if @analysed
 
 		@parent.updateMethodScope(this)

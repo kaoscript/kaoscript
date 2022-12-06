@@ -121,7 +121,7 @@ class SwitchStatement extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare(AnyType.NullableUnexplicit)
 
 		@valueType = @value.type()
@@ -140,7 +140,7 @@ class SwitchStatement extends Statement {
 
 		for var clause, index in @clauses {
 			for var condition in clause.conditions {
-				condition.prepare(@scope.reference('Boolean'))
+				condition.prepare(@valueType)
 
 				if condition.isEnum() {
 					enumConditions += 1
@@ -638,7 +638,7 @@ class SwitchBindingArray extends AbstractNode {
 
 		@parent.defineVariables(@array, @scope)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@array.prepare()
 	} # }}}
 	translate() { # {{{
@@ -659,7 +659,7 @@ class SwitchBindingType extends AbstractNode {
 	analyse() { # {{{
 		@scope.define(@data.name.name, false, Type.fromAST(@data.type, this), true, this)
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name.name, ' = ', @parent._name)
@@ -670,7 +670,7 @@ class SwitchBindingValue extends AbstractNode {
 	analyse() { # {{{
 		@scope.define(@data.name, false, this)
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	toFragments(fragments) { # {{{
 		fragments.line($runtime.scope(this), @data.name, ' = ', @parent._name)
@@ -701,7 +701,7 @@ class SwitchConditionArray extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @values.length > 0 {
 			@name = @scope.parent().acquireTempName(false)
 		}
@@ -820,7 +820,7 @@ class SwitchConditionRange extends AbstractNode {
 		@left.analyse()
 		@right.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@left.prepare()
 		@right.prepare()
 	} # }}}
@@ -846,7 +846,7 @@ class SwitchConditionType extends AbstractNode {
 		@type: Type
 	}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@type = Type.fromAST(@data.type, this)
 	} # }}}
 	translate()
@@ -867,7 +867,7 @@ class SwitchConditionValue extends AbstractNode {
 		@value = $compile.expression(@data, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare(target)
 
 		@type = @value.type()
@@ -920,7 +920,7 @@ class SwitchFilter extends AbstractNode {
 			@filter.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @filter != null {
 			for binding in @bindings {
 				binding.prepare()

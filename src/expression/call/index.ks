@@ -95,7 +95,7 @@ class CallExpression extends Expression {
 			@object.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var argument in @arguments {
 			argument.prepare(AnyType.NullableUnexplicit)
 
@@ -578,8 +578,19 @@ class CallExpression extends Expression {
 				}
 			}
 		}
-		else {
+		else if type.isClass() {
+			TypeException.throwConstructorWithoutNew(name, this)
+		}
+		else if type.canBeFunction() {
 			@addCallee(new DefaultCallee(@data, @object, null, this))
+		}
+		else {
+			if type.isExhaustive(this) {
+				TypeException.throwNotFunction(name, this)
+			}
+			else {
+				@addCallee(new DefaultCallee(@data, @object, null, this))
+			}
 		}
 	} # }}}
 	makeMemberCallee(value, mut name: NamedType? = null) { # {{{
@@ -1152,7 +1163,7 @@ class NamedArgument extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
@@ -1175,7 +1186,7 @@ class PositionalArgument extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare(target)
 	} # }}}
 	translate() { # {{{
@@ -1197,7 +1208,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	}
 	analyse() { # {{{
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

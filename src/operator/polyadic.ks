@@ -16,9 +16,9 @@ abstract class PolyadicOperatorExpression extends Expression {
 			@operands.push(operand)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var operand in @operands {
-			operand.prepare(target)
+			operand.prepare(target, targetMode)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -129,8 +129,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		@native: Boolean			= false
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -253,8 +253,8 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		@string: Boolean			= false
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false

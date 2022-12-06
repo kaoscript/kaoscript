@@ -42,7 +42,7 @@ class WhileStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @declared {
 			@declaration.prepare(AnyType.NullableUnexplicit)
 
@@ -56,7 +56,7 @@ class WhileStatement extends Statement {
 			}
 		}
 		else {
-			@condition.prepare(@scope.reference('Boolean'))
+			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
 			unless @condition.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@condition, this)

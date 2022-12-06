@@ -6,7 +6,7 @@ module.exports = function() {
 		return lines.__ks_rt(this, arguments);
 	};
 	lines.__ks_0 = function(value) {
-		return __ks_String.__ks_func_lines_0.call(Helper.cast(value, "String", false, null, "String"));
+		return __ks_String.__ks_func_lines_0.call(Helper.cast(value, "String", false, Type.isString));
 	};
 	lines.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

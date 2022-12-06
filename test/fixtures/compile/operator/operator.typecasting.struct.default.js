@@ -31,7 +31,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		const d3 = Helper.cast(p, "Point3D", false, Point3D, "Struct");
+		const d3 = Helper.cast(p, "Point3D", false, value => Type.isStructInstance(value, Point3D));
 		console.log(d3.x + 1, d3.y + 2, d3.z + 3);
 	};
 	foobar.__ks_rt = function(that, args) {

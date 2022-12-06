@@ -25,7 +25,7 @@ class ArrayBinding extends Expression {
 			@elements.push(element)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
 		if @type == null {
@@ -207,7 +207,7 @@ class ArrayBindingElement extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 		}
@@ -321,7 +321,7 @@ class FlatArrayBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -342,7 +342,7 @@ class FlatObjectBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -361,7 +361,7 @@ class FlatReusableBindingElement extends Expression {
 		super({}, parent)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	isComposite() => false
 	toFragments(fragments, mode) { # {{{
@@ -397,7 +397,7 @@ class ObjectBinding extends Expression {
 			@elements.push(element)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
 		if @type == null {
@@ -632,7 +632,7 @@ class ObjectBindingElement extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 		}

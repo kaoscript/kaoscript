@@ -6,8 +6,8 @@ class UnaryOperatorExpression extends Expression {
 		@argument = $compile.expression(@data.argument, this)
 		@argument.analyse()
 	} # }}}
-	override prepare(target) { # {{{
-		@argument.prepare(target)
+	override prepare(target, targetMode) { # {{{
+		@argument.prepare(target, targetMode)
 
 		if @argument.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@argument, this)
@@ -29,8 +29,8 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		@isNative: Boolean		= false
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if @isAcceptingEnum() && @argument.type().isEnum() {
 			@isEnum = true
@@ -71,76 +71,14 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	type() => @type
 }
 
-class UnaryOperatorExistential extends UnaryOperatorExpression {
-	private late {
-		@type: Type
-	}
-	override prepare(target) { # {{{
-		@argument.prepare()
-
-		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
-			TypeException.throwNotNullableExistential(@argument, this)
-		}
-
-		@type = @argument.type().setNullable(false)
-	} # }}}
-	inferWhenTrueTypes(inferables) { # {{{
-		@argument.inferTypes(inferables)
-
-		if @argument.isInferable() {
-			inferables[@argument.path()] = {
-				isVariable: @argument is IdentifierLiteral
-				type: @type
-			}
-		}
-
-		return inferables
-	} # }}}
-	isComputed() => @argument.isNullable()
-	toFragments(fragments, mode) { # {{{
-		if @argument.isNullable() {
-			fragments
-				.wrapNullable(@argument)
-				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compile(@argument)
-				.code(')', @data.operator)
-		}
-		else {
-			fragments
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compile(@argument)
-				.code(')', @data.operator)
-		}
-	} # }}}
-	type() => @scope.reference('Boolean')
-}
-
-class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
-	private {
-		@type: Type		= AnyType.Unexplicit
-	}
-	override prepare(target) { # {{{
-		super(target)
-
-		if !@parent.isExpectingType() {
-			SyntaxException.throwInvalidForcedTypeCasting(this)
-		}
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		fragments.compile(@argument)
-	} # }}}
-	type() => @type
-}
-
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	private late {
 		@native: Boolean		= false
 		@operand: OperandType	= OperandType::Any
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		var mut boolean = true
 		var mut number = true
@@ -240,38 +178,39 @@ class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
 	symbol() => '-'
 }
 
-class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
-	private late {
-		@type: Type
-	}
-	override prepare(target) { # {{{
-		super(target)
-
-		@type = @argument.type().setNullable(false)
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		fragments.compile(@argument)
-	} # }}}
-	type() => @type
-}
-
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private late {
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		if @parent is ArrayExpression {
+			var targetArray = Type.arrayOf(target, @scope)
 
-		var type = @argument.type()
+			super(targetArray, targetMode)
 
-		if type.isArray() {
-			@type = type.flagSpread()
-		}
-		else if type.isAny() {
-			@type = @scope.reference('Array').flagSpread()
+			var type = @argument.type()
+
+			if type.isArray() {
+				@type = type.flagSpread()
+			}
+			else {
+				@type = targetArray.flagSpread()
+			}
 		}
 		else {
-			TypeException.throwInvalidSpread(this)
+			super(target, targetMode)
+
+			var type = @argument.type()
+
+			if type.isArray() {
+				@type = type.flagSpread()
+			}
+			else if type.isAny() {
+				@type = @scope.reference('Array').flagSpread()
+			}
+			else {
+				TypeException.throwInvalidSpread(this)
+			}
 		}
 	} # }}}
 	isExpectingType() => true

@@ -67,7 +67,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			@lateInit = false
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @parent.isExtending() {
 			var type = @parent._extendsType.type()
 

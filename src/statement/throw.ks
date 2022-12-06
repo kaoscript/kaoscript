@@ -33,7 +33,7 @@ class ThrowStatement extends Statement {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@value.prepare(AnyType.NullableUnexplicit)
 
 		if type !?= @value.type().discardReference() {

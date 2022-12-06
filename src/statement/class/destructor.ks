@@ -47,7 +47,7 @@ class ClassDestructorDeclaration extends Statement {
 
 		@parameters = [parameter]
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@parameters[0].prepare()
 
 		@type = new ClassDestructorType(@data, this)

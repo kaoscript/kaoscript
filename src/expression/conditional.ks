@@ -15,15 +15,15 @@ class ConditionalExpression extends Expression {
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
 	} # }}}
-	override prepare(target) { # {{{
-		@condition.prepare(@scope.reference('Boolean'))
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
 		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)
 		}
 
-		@whenTrue.prepare(target)
-		@whenFalse.prepare(target)
+		@whenTrue.prepare(target, targetMode)
+		@whenFalse.prepare(target, targetMode)
 
 		var t = @whenTrue.type()
 		var f = @whenFalse.type()

@@ -279,7 +279,7 @@ class MacroDeclaration extends AbstractNode {
 		@parent.registerMacro(@name, this)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	prepare(target: Type, index: Number, length: Number)
 	translate()
 	addMark(data, kind? = null) { # {{{
@@ -597,7 +597,7 @@ class CallMacroStatement extends Statement {
 
 		@scope.setLineOffset(@offsetEnd)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@scope.setLineOffset(@offsetStart)
 
 		for var statement in @statements {

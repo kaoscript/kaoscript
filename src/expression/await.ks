@@ -30,7 +30,7 @@ class AwaitExpression extends Expression {
 		@operation = $compile.expression(@data.operation, this)
 		@operation.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@operation.prepare(target)
 
 		@reuseName = @scope.acquireTempName(false)

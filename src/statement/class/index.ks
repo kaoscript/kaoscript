@@ -268,7 +268,7 @@ class ClassDeclaration extends Statement {
 			@class.extends(@extendsType)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @extending {
 			@constructorScope.flagExtending()
 			@instanceVariableScope.flagExtending()

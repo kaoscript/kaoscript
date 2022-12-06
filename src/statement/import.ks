@@ -269,7 +269,7 @@ abstract class Importer extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	addArgument(data, autofill, arguments) { # {{{
 		var argument = {
@@ -1360,7 +1360,7 @@ class ImportDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for declarator in @declarators {
 			declarator.prepare()
 		}

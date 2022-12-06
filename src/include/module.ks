@@ -657,7 +657,7 @@ class ModuleBlock extends AbstractNode {
 			statement.export(recipient, true)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var statement, index in @statements {
 			@scope.line(statement.line())
 

@@ -52,7 +52,7 @@ class VariableStatement extends Statement {
 			@await ||= declaration.isAwait()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var declaration in @declarations {
 			declaration.prepare(target)
 		}
@@ -227,7 +227,7 @@ class VariableDeclaration extends AbstractNode {
 		}
 
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var declarator in @declarators {
 			declarator.prepare()
 
@@ -471,7 +471,7 @@ class VariableBindingDeclarator extends AbstractNode {
 
 		@parent.defineVariables(@binding)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if ?@data.type {
 			@setDeclaredType(Type.fromAST(@data.type, this))
 		}
@@ -573,7 +573,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 

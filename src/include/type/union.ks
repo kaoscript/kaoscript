@@ -476,11 +476,6 @@ class UnionType extends Type {
 
 		return types
 	} # }}}
-	toCastFragments(fragments) { # {{{
-		for var type in @types {
-			type.toCastFragments(fragments)
-		}
-	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException(node)
 	} # }}}

@@ -574,7 +574,7 @@ module.exports = function() {
 		return this.replace(/([A-Z])/g, "-$1").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase();
 	};
 	__ks_String.__ks_func_toFirstLowerCase_0 = function() {
-		return Helper.cast(this.charAt(0).toLowerCase(), "String", false, null, "String") + Helper.cast(this.substring(1), "String", false, null, "String");
+		return Helper.cast(this.charAt(0).toLowerCase(), "String", false, Type.isString) + Helper.cast(this.substring(1), "String", false, Type.isString);
 	};
 	__ks_String._im_dasherize = function(that, ...args) {
 		return __ks_String.__ks_func_dasherize_rt(that, args);

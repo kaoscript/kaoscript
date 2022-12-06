@@ -332,6 +332,10 @@ class NamedType extends Type {
 				return false
 			}
 			else if value is ReferenceType {
+				if @type.isClass() && value.name() == 'Class' {
+					return true
+				}
+
 				return @scope.isRenamed(@name, value.name(), value.scope(), mode) || this.isSubsetOf(value.discardReference(), mode)
 			}
 			else {
@@ -524,9 +528,6 @@ class NamedType extends Type {
 		else {
 			throw new NotSupportedException()
 		}
-	} # }}}
-	toCastFragments(fragments) { # {{{
-		@type.toCastFragments(fragments)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if @type.isExportingFragment() {

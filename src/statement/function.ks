@@ -259,7 +259,7 @@ class FunctionDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @main || @scope.processStash(@name) {
 			@variable.prepare()
 		}
@@ -408,13 +408,13 @@ class FunctionDeclarator extends AbstractNode {
 			@parameters.push(parameter)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@scope.module().setLineOffset(@offset)
 
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {
-			parameter.prepare(AnyType.NullableUnexplicit)
+			parameter.prepare()
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, @index, this)

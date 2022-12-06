@@ -26,20 +26,55 @@ class AnonymousFunctionExpression extends Expression {
 
 		@isObjectMember = @parent.parent() is DictionaryExpression
 	} # }}}
-	override prepare(target) { # {{{
-		for var parameter in @parameters {
-			parameter.prepare(AnyType.NullableUnexplicit)
+	override prepare(target, targetMode) { # {{{
+		unless target.isAny() || target.isFunction() {
+			TypeException.throwInvalidFunctionType(target, this)
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+		if target.isAny() || target.isReference() {
+			for var parameter in @parameters {
+				parameter.prepare()
+			}
 
-		@block = $compile.function($ast.body(@data), this)
-		@block.analyse()
+			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
 
-		@autoTyping = @type.isAutoTyping()
+			@block = $compile.function($ast.body(@data), this)
+			@block.analyse()
 
-		if @autoTyping {
-			@type.setReturnType(@block.getUnpreparedType())
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				@type.setReturnType(@block.getUnpreparedType())
+			}
+		}
+		else {
+			var targetParameters = target.parameters()
+
+			unless @parameters.length == targetParameters.length {
+				TypeException.throwInvalidFunctionType(target, this)
+			}
+
+			for var parameter, index in @parameters {
+				parameter.prepare(targetParameters[index])
+			}
+
+			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type.setReturnType(target.getReturnType())
+
+			@block = $compile.function($ast.body(@data), this)
+			@block.analyse()
+
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				var type = @block.getUnpreparedType()
+
+				unless type.isSubsetOf(@type.getReturnType(), MatchingMode::FunctionSignature) {
+					SyntaxException.throwInvalidFunctionReturn(@type.toString(), type.toString(), this)
+				}
+
+				@type.setReturnType(type)
+			}
 		}
 	} # }}}
 	translate() { # {{{
@@ -174,19 +209,53 @@ class ArrowFunctionExpression extends Expression {
 			@parameters.push(parameter)
 		}
 	} # }}}
-	override prepare(target) { # {{{
-		for var parameter in @parameters {
-			parameter.prepare(AnyType.NullableUnexplicit)
+	override prepare(target, targetMode) { # {{{
+		unless target.isAny() || target.isFunction() {
+			TypeException.throwInvalidFunctionType(target, this)
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+		if target.isAny() || target.isReference() {
+			for var parameter in @parameters {
+				parameter.prepare()
+			}
 
-		@block.analyse()
+			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
 
-		@autoTyping = @type.isAutoTyping()
+			@block.analyse()
 
-		if @autoTyping {
-			@type.setReturnType(@block.getUnpreparedType())
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				@type.setReturnType(@block.getUnpreparedType())
+			}
+		}
+		else {
+			var targetParameters = target.parameters()
+
+			unless @parameters.length == targetParameters.length {
+				TypeException.throwInvalidFunctionType(target, this)
+			}
+
+			for var parameter, index in @parameters {
+				parameter.prepare(targetParameters[index].type())
+			}
+
+			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type.setReturnType(target.getReturnType())
+
+			@block.analyse()
+
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				var type = @block.getUnpreparedType()
+
+				unless type.isSubsetOf(@type.getReturnType(), MatchingMode::FunctionSignature) {
+					SyntaxException.throwInvalidFunctionReturn(@type.toString(), type.toString(), this)
+				}
+
+				@type.setReturnType(type)
+			}
 		}
 
 		@usingThis = @isUsingVariable('this')

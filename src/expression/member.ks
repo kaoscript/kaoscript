@@ -48,7 +48,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @prepareObject {
 			@object.prepare()
 
@@ -63,7 +63,7 @@ class MemberExpression extends Expression {
 			}
 
 			if @computed {
-				@property.prepare(target)
+				@property.prepare(AnyType.NullableUnexplicit)
 
 				var mut nf = true
 
@@ -153,7 +153,7 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				if type.isDictionary() {
+				if type.isObject() {
 					@type = type.parameter()
 				}
 
@@ -261,7 +261,7 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property = $compile.expression(@data.property, this)
 				@property.analyse()
-				@property.prepare(target)
+				@property.prepare(AnyType.NullableUnexplicit)
 			}
 			else {
 				@property = @data.property.name

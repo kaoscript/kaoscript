@@ -8,7 +8,7 @@ class EnumExpression extends Expression {
 		@enum = $compile.expression(@data.enum, this)
 		@enum.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@enum.prepare()
 
 		var named = @enum.type()

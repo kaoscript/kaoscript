@@ -16,8 +16,8 @@ class UntilStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} # }}}
-	override prepare(target) { # {{{
-		@condition.prepare(@scope.reference('Boolean'))
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)

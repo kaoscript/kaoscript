@@ -1,5 +1,5 @@
 class CurryExpression extends CallExpression {
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var argument in @arguments {
 			argument.prepare(AnyType.NullableUnexplicit)
 

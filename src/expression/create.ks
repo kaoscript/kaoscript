@@ -29,7 +29,7 @@ class CreateExpression extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@factory.prepare(@scope.reference('Class'))
 
 		for var argument in @arguments {

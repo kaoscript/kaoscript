@@ -13,7 +13,7 @@ class DoUntilStatement extends Statement {
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@body.prepare(target)
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
@@ -22,7 +22,7 @@ class DoUntilStatement extends Statement {
 			}
 		}
 
-		@condition.prepare(@scope.reference('Boolean'))
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)

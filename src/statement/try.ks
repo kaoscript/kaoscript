@@ -83,7 +83,7 @@ class TryStatement extends Statement {
 			@finally.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		NotSupportedException.throw(this)
 	} # }}}
 	override prepare(target, index, length) { # {{{

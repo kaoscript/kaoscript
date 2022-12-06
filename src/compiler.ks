@@ -193,6 +193,12 @@ var $runtime = {
 	} # }}}
 }
 
+enum TargetMode {
+	Ignore
+	Permissive
+	Strict
+}
+
 abstract class AbstractNode {
 	private {
 		@data: Any?				= null
@@ -212,7 +218,7 @@ abstract class AbstractNode {
 	} # }}}
 	abstract analyse()
 	// TODO remove default value
-	abstract prepare(target: Type = Type.Void)
+	abstract prepare(target: Type = Type.Void, targetMode: TargetMode = TargetMode::Strict)
 	abstract translate()
 	authority() => @parent.authority()
 	data() => @data

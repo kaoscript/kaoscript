@@ -47,7 +47,7 @@ class StructDeclaration extends Statement {
 
 		@function.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @extending {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
@@ -163,7 +163,7 @@ class StructFunction extends AbstractNode {
 		@type = new FunctionType(@scope)
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var mut index = -1
 
 		if @parent.isExtending() {
@@ -233,7 +233,7 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter.unflagValidation()
 	} # }}}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@parameter.analyse()
 		@parameter.prepare()
 

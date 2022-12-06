@@ -19,7 +19,7 @@ class ArrayExpression extends Expression {
 			@values.push(value)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
 		var mut type = null
@@ -144,7 +144,7 @@ class ArrayRange extends Expression {
 		}
 
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@type = Type.arrayOf(@scope.reference('Number'), @scope)
 
 		@from.prepare(@scope.reference('Number'))

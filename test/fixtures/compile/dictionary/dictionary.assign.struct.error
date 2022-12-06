@@ -1,0 +1,1 @@
+TypeException: Identifier "Foobar" is not a function (fixtures/compile/dictionary/dictionary.assign.struct.ks:6)

@@ -22,7 +22,7 @@ class BinaryOperatorTypeCasting extends Expression {
 			}
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@left.prepare(AnyType.NullableUnexplicit)
 
 		var type = @left.type()
@@ -54,9 +54,11 @@ class BinaryOperatorTypeCasting extends Expression {
 			fragments.code($runtime.helper(this), '.notNull(').compile(@left).code(')')
 		}
 		else if @type.isAssignableToVariable(@left.type(), true, @nullable, true) {
-			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, $quote(@type.name()), $comma, @nullable)
+			var type = @type.setNullable(false)
 
-			@type.toCastFragments(fragments)
+			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, type.toQuote(true), $comma, @nullable, $comma)
+
+			type.toTestFunctionFragments(fragments, this)
 
 			fragments.code(')')
 		}
@@ -79,7 +81,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {
@@ -214,7 +216,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		@subject.analyse()
 
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {
@@ -334,4 +336,36 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return type.reference()
 	} # }}}
+}
+
+class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
+	private {
+		@type: Type		= AnyType.Unexplicit
+	}
+	override prepare(target, targetMode) { # {{{
+		super(target, targetMode)
+
+		if !@parent.isExpectingType() {
+			SyntaxException.throwInvalidForcedTypeCasting(this)
+		}
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		fragments.compile(@argument)
+	} # }}}
+	type() => @type
+}
+
+class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
+	private late {
+		@type: Type
+	}
+	override prepare(target, targetMode) { # {{{
+		super(target, targetMode)
+
+		@type = @argument.type().setNullable(false)
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		fragments.compile(@argument)
+	} # }}}
+	type() => @type
 }

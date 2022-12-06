@@ -5,7 +5,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		@operand: OperandType	= OperandType::Any
 		@type: Type
 	}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var mut nullable = false
 		var mut boolean = target.canBeBoolean()
 		var mut number = target.canBeNumber()
@@ -16,7 +16,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		for var operand in @operands {
-			operand.prepare(target)
+			operand.prepare(target, TargetMode::Permissive)
 
 			var type = operand.type()
 
@@ -243,7 +243,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		@operand: OperandType		= OperandType::Any
 		@type: Type
 	}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var mut nullable = false
 		var mut boolean = target.canBeBoolean()
 		var mut number = target.canBeNumber()
@@ -704,8 +704,8 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		symbol(): String
 		toBooleanFragments(fragments): Boolean
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		var mut nullable = false
 		var mut boolean = true

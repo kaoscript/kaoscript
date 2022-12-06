@@ -14,14 +14,14 @@ class BinaryOperatorExpression extends Expression {
 
 		@await = @left.isAwait() || @right.isAwait()
 	} # }}}
-	override prepare(target) { # {{{
-		@left.prepare(target)
+	override prepare(target, targetMode) { # {{{
+		@left.prepare(target, targetMode)
 
 		if @left.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		@right.prepare(target)
+		@right.prepare(target, targetMode)
 
 		if @right.type().isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
@@ -118,8 +118,8 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		runtime(): String
 		symbol(): String
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -208,8 +208,8 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		@string: Boolean			= false
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -390,7 +390,7 @@ class BinaryOperatorMatch extends Expression {
 			@addOperand(@data.right)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@subject.prepare(AnyType.NullableUnexplicit)
 
 		if @subject.type().isInoperative() {

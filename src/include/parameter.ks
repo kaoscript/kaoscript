@@ -596,7 +596,7 @@ class Parameter extends AbstractNode {
 			@internal = new AnonymousParameter(@data, this)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@internal.prepare()
 
 		var mut type: Type? = @internal.type()?.asReference()
@@ -686,7 +686,20 @@ class Parameter extends AbstractNode {
 		var internal: String? = @internal.name()
 		var external: String? = @data.external?.name ?? internal
 
-		@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
+		if target.isVoid() {
+			@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
+		}
+		else {
+			if !type.isExplicit() {
+				type = target.type()
+			}
+
+			@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
+
+			unless @type.isSubsetOf(target, MatchingMode::Signature) {
+				TypeException.throwInvalidParameterType(@type, target, this)
+			}
+		}
 
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			var scope = @parent.scope()
@@ -861,7 +874,7 @@ class AliasStatement extends Statement {
 		parent.addAtThisParameter(this)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
@@ -1708,7 +1721,7 @@ class AnonymousParameter extends AbstractNode {
 		@type: Type
 	}
 	analyse()
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@name = @scope.acquireTempName(false)
 	} # }}}
 	translate()
@@ -1753,7 +1766,7 @@ class ThisExpressionParameter extends ThisExpression {
 	private {
 		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
 	}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		super(target)
 
 		unless ?@variableName {

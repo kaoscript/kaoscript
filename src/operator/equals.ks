@@ -9,8 +9,8 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		if @condition && @lateinit {
 			@statement.initializeLateVariable(@left.name(), @right.type(), true)

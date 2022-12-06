@@ -9,7 +9,7 @@ class Literal extends Expression {
 		super(data, parent, scope)
 	} # }}}
 	analyse()
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	hasExceptions() => false
 	isComposite() => false
@@ -71,7 +71,7 @@ class IdentifierLiteral extends Literal {
 			@line = @scope.line()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		if @isVariable {
 			var variable = @scope.getVariable(@value, @line)
 
@@ -98,6 +98,10 @@ class IdentifierLiteral extends Literal {
 
 			@declaredType = variable.getDeclaredType()
 			@realType = variable.getRealType()
+		}
+
+		unless targetMode == TargetMode::Permissive || target.isVoid() || !@realType.isExplicit() || !target.isExplicit() || @realType.isSubsetOf(target, MatchingMode::Signature) {
+			TypeException.throwInvalidIdentifierType(@value, @realType, target, this)
 		}
 	} # }}}
 	export(recipient) { # {{{
@@ -220,18 +224,38 @@ class IdentifierLiteral extends Literal {
 }
 
 class NumberLiteral extends Literal {
+	private {
+		@type: Type
+	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.value)
+
+		@type = @scope.reference('Number')
 	} # }}}
-	getUnpreparedType() => @type()
-	type() => @scope.reference('Number')
+	override prepare(target, targetMode) { # {{{
+		unless targetMode == TargetMode::Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode::Signature) {
+			TypeException.throwInvalidLiteralType(`"\(@value)"`, @type, target, this)
+		}
+	} # }}}
+	getUnpreparedType(): @type
+	type(): @type
 }
 
 class StringLiteral extends Literal {
+	private {
+		@type: Type
+	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, $quote(data.value))
+
+		@type = @scope.reference('String')
 	} # }}}
-	getUnpreparedType() => @type()
+	override prepare(target, targetMode) { # {{{
+		unless targetMode == TargetMode::Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode::Signature) {
+			TypeException.throwInvalidLiteralType(@value, @type, target, this)
+		}
+	} # }}}
+	getUnpreparedType(): @type
 	isNotEmpty() => @value.length > 0
-	type() => @scope.reference('String')
+	type(): @type
 }

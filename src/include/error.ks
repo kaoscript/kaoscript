@@ -474,6 +474,9 @@ export class SyntaxException extends Exception {
 		throwInvalidForcedTypeCasting(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
 		} # }}}
+		throwInvalidFunctionReturn(function, expectedReturn, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`Function "\(function)" is expected to return the type "\(expectedReturn)"`, node)
+		} # }}}
 		throwInvalidLateInitAssignment(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" can't be initialized by the statement at`, node)
 		} # }}}
@@ -774,11 +777,23 @@ export class TypeException extends Exception {
 		throwInvalidForOfExpression(node): Never ~ TypeException { # {{{
 			throw new TypeException(`"for..of" must be used with a dictionary`, node)
 		} # }}}
+		throwInvalidFunctionType(expected: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The function can't be of type \(expected.toQuote(true))`, node)
+		} # }}}
+		throwInvalidIdentifierType(name: String, current: Type, expected: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The identifier "\(name)" of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
+		} # }}}
+		throwInvalidLiteralType(value: String, current: Type, expected: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The literal \(value) of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
+		} # }}}
 		throwInvalidOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type \($joinQuote($operatorTypes[operator]))`, node)
 		} # }}}
 		throwInvalidOperation(expression, operator, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The elements of \(expression.toQuote(true)) are expected to be of type \($joinQuote($operatorTypes[operator]))`, node)
+		} # }}}
+		throwInvalidParameterType(current: Type, expected: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The parameter \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
 		} # }}}
 		throwInvalidSpread(node): Never ~ TypeException { # {{{
 			throw new TypeException(`Spread operator require an array`, node)
@@ -798,17 +813,20 @@ export class TypeException extends Exception {
 		throwNotClass(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
 		} # }}}
-		throwNotCompatibleArgument(argname, modname, node): Never ~ ReferenceException { # {{{
+		throwNotCompatibleArgument(argname, modname, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" isn't compatible`, node)
 		} # }}}
-		throwNotCompatibleArgument(varname, argname, modname, node): Never ~ ReferenceException { # {{{
+		throwNotCompatibleArgument(varname, argname, modname, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} # }}}
-		throwNotCompatibleDefinition(varname, argname, modname, node): Never ~ ReferenceException { # {{{
+		throwNotCompatibleDefinition(varname, argname, modname, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The definition for "\(varname)" and the variable "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} # }}}
 		throwNotEnum(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Identifier "\(name)" is not an enum`, node)
+		} # }}}
+		throwNotFunction(name, node): Never ~ TypeException { # {{{
+			throw new TypeException(`Identifier "\(name)" is not a function`, node)
 		} # }}}
 		throwNotIterable(expression, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The non-emptiness test of \(expression.toQuote(true)) is always negative`, node)

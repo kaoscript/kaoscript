@@ -8,7 +8,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
@@ -142,7 +142,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 
 		super()
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
@@ -327,8 +327,8 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	private late {
 		@type: Type
 	}
-	override prepare(target) { # {{{
-		super(target)
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode::Permissive)
 
 		@left.acquireReusable(true)
 		@left.releaseReusable()
@@ -380,12 +380,12 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private late {
 		@type: Type
 	}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		var types = []
 		var last = @operands.length - 1
 
 		for var operand, index in @operands {
-			operand.prepare(AnyType.NullableUnexplicit)
+			operand.prepare(target, TargetMode::Permissive)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -464,4 +464,50 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		fragments.compile(@operands[l])
 	} # }}}
 	type() => @type
+}
+
+
+class UnaryOperatorExistential extends UnaryOperatorExpression {
+	private late {
+		@type: Type
+	}
+	override prepare(target, targetMode) { # {{{
+		@argument.prepare()
+
+		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
+			TypeException.throwNotNullableExistential(@argument, this)
+		}
+
+		@type = @argument.type().setNullable(false)
+	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
+		@argument.inferTypes(inferables)
+
+		if @argument.isInferable() {
+			inferables[@argument.path()] = {
+				isVariable: @argument is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
+	} # }}}
+	isComputed() => @argument.isNullable()
+	toFragments(fragments, mode) { # {{{
+		if @argument.isNullable() {
+			fragments
+				.wrapNullable(@argument)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compile(@argument)
+				.code(')', @data.operator)
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compile(@argument)
+				.code(')', @data.operator)
+		}
+	} # }}}
+	type() => @scope.reference('Boolean')
 }

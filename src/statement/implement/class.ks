@@ -67,7 +67,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			@value.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@type = ClassVariableType.fromAST(@data!?, this)
 
 		@type.flagAltering()
@@ -286,7 +286,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@block = $compile.function($ast.body(@data), this)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {
@@ -1006,7 +1006,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		@block = new ConstructorBlock($ast.block(body), this, @scope)
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@scope.line(@data.start.line)
 
 		for var parameter in @parameters {

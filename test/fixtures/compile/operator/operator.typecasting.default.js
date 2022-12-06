@@ -4,7 +4,7 @@ module.exports = function() {
 		return toArray.__ks_rt(this, arguments);
 	};
 	toArray.__ks_0 = function(x) {
-		return Helper.cast(x, "Array", true, null, "Array");
+		return Helper.cast(x, "Array", true, Type.isArray);
 	};
 	toArray.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -19,7 +19,7 @@ module.exports = function() {
 		return toBoolean.__ks_rt(this, arguments);
 	};
 	toBoolean.__ks_0 = function(x) {
-		return Helper.cast(x, "Boolean", true, null, "Boolean");
+		return Helper.cast(x, "Boolean", true, Type.isBoolean);
 	};
 	toBoolean.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -34,7 +34,7 @@ module.exports = function() {
 		return toClass.__ks_rt(this, arguments);
 	};
 	toClass.__ks_0 = function(x) {
-		return Helper.cast(x, "Class", true, null, "Class");
+		return Helper.cast(x, "Class", true, Type.isClass);
 	};
 	toClass.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -49,7 +49,7 @@ module.exports = function() {
 		return toDictionary.__ks_rt(this, arguments);
 	};
 	toDictionary.__ks_0 = function(x) {
-		return Helper.cast(x, "Dictionary", true, null, "Dictionary");
+		return Helper.cast(x, "Dictionary", true, Type.isDictionary);
 	};
 	toDictionary.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -64,7 +64,7 @@ module.exports = function() {
 		return toEnum.__ks_rt(this, arguments);
 	};
 	toEnum.__ks_0 = function(x) {
-		return Helper.cast(x, "Enum", true, null, "Enum");
+		return Helper.cast(x, "Enum", true, Type.isEnum);
 	};
 	toEnum.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -79,7 +79,7 @@ module.exports = function() {
 		return toFunction.__ks_rt(this, arguments);
 	};
 	toFunction.__ks_0 = function(x) {
-		return Helper.cast(x, "Function", true, null, "Function");
+		return Helper.cast(x, "Function", true, Type.isFunction);
 	};
 	toFunction.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -94,7 +94,7 @@ module.exports = function() {
 		return toNamespace.__ks_rt(this, arguments);
 	};
 	toNamespace.__ks_0 = function(x) {
-		return Helper.cast(x, "Namespace", true, null, "Namespace");
+		return Helper.cast(x, "Namespace", true, Type.isNamespace);
 	};
 	toNamespace.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -109,7 +109,7 @@ module.exports = function() {
 		return toNumber.__ks_rt(this, arguments);
 	};
 	toNumber.__ks_0 = function(x) {
-		return Helper.cast(x, "Number", true, null, "Number");
+		return Helper.cast(x, "Number", true, Type.isNumber);
 	};
 	toNumber.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -124,7 +124,7 @@ module.exports = function() {
 		return toObject.__ks_rt(this, arguments);
 	};
 	toObject.__ks_0 = function(x) {
-		return Helper.cast(x, "Object", true, null, "Object");
+		return Helper.cast(x, "Object", true, Type.isObject);
 	};
 	toObject.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -139,7 +139,7 @@ module.exports = function() {
 		return toPrimitive.__ks_rt(this, arguments);
 	};
 	toPrimitive.__ks_0 = function(x) {
-		return Helper.cast(x, "Primitive", true, null, "Primitive");
+		return Helper.cast(x, "Primitive", true, Type.isPrimitive);
 	};
 	toPrimitive.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -154,7 +154,7 @@ module.exports = function() {
 		return toRegExp.__ks_rt(this, arguments);
 	};
 	toRegExp.__ks_0 = function(x) {
-		return Helper.cast(x, "RegExp", true, null, "RegExp");
+		return Helper.cast(x, "RegExp", true, Type.isRegExp);
 	};
 	toRegExp.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -169,7 +169,7 @@ module.exports = function() {
 		return toString.__ks_rt(this, arguments);
 	};
 	toString.__ks_0 = function(x) {
-		return Helper.cast(x, "String", true, null, "String");
+		return Helper.cast(x, "String", true, Type.isString);
 	};
 	toString.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -184,7 +184,7 @@ module.exports = function() {
 		return toStruct.__ks_rt(this, arguments);
 	};
 	toStruct.__ks_0 = function(x) {
-		return Helper.cast(x, "Struct", true, null, "Struct");
+		return Helper.cast(x, "Struct", true, Type.isStruct);
 	};
 	toStruct.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -217,7 +217,7 @@ module.exports = function() {
 		return toClassInstance.__ks_rt(this, arguments);
 	};
 	toClassInstance.__ks_0 = function(x) {
-		return Helper.cast(x, "Foobar", true, Foobar, "Class");
+		return Helper.cast(x, "Foobar", true, value => Type.isClassInstance(value, Foobar));
 	};
 	toClassInstance.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -233,7 +233,7 @@ module.exports = function() {
 		return toEnumInstance.__ks_rt(this, arguments);
 	};
 	toEnumInstance.__ks_0 = function(x) {
-		return Helper.cast(x, "Quxbaz", true, Quxbaz, "Enum");
+		return Helper.cast(x, "Quxbaz", true, value => Type.isEnumInstance(value, Quxbaz));
 	};
 	toEnumInstance.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -256,7 +256,7 @@ module.exports = function() {
 		return toStructInstance.__ks_rt(this, arguments);
 	};
 	toStructInstance.__ks_0 = function(x) {
-		return Helper.cast(x, "Corge", true, Corge, "Struct");
+		return Helper.cast(x, "Corge", true, value => Type.isStructInstance(value, Corge));
 	};
 	toStructInstance.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

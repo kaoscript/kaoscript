@@ -146,7 +146,7 @@ class ForInStatement extends Statement {
 			@descending = @fromDesc = false
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@expression.prepare(@scope.reference('Array'))
 
 		var type = @expression.type()

@@ -57,7 +57,7 @@ class WithStatement extends Statement {
 			@finally.analyse()
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		for var declaration in @declarations {
 			declaration.prepare(Type.Void)
 		}

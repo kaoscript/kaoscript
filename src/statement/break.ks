@@ -14,7 +14,7 @@ class BreakStatement extends Statement {
 			}
 		}
 	} # }}}
-	override prepare(target)
+	override prepare(target, targetMode)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
 		fragments.line('break', this._data)

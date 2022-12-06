@@ -13,7 +13,7 @@ class SequenceExpression extends Expression {
 			@expressions.push(expression)
 		}
 	} # }}}
-	override prepare(target) { # {{{
+	override prepare(target, targetMode) { # {{{
 		@last = @expressions.length - 1
 
 		for var expression in @expressions til -1 {

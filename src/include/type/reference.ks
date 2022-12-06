@@ -474,7 +474,7 @@ class ReferenceType extends Type {
 				return @parameters[0]
 			}
 
-			return AnyType.NullableUnexplicit
+			return Type.Undecided
 		}
 
 		var mut type: Type = @type()
@@ -745,7 +745,7 @@ class ReferenceType extends Type {
 		return @nullable
 	} # }}}
 	isNumber() => @name == 'Number' || @type().isNumber()
-	isObject() => @name == 'Object' || @isDictionary() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+	isObject() => @name == 'Object' || @type().isObject() || @isDictionary() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
 	isPrimitive() => @isBoolean() || @isNumber() || @isString()
 	isReference() => true
 	isReducible() => true
@@ -881,6 +881,10 @@ class ReferenceType extends Type {
 				if @type().isEnum() {
 					return @type().discard().type().isSubsetOf(value, mode)
 				}
+			}
+
+			if @isAlias() {
+				return @discardAlias().isSubsetOf(value, mode)
 			}
 
 			return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
@@ -1134,30 +1138,6 @@ class ReferenceType extends Type {
 			return super(types)
 		}
 	} # }}}
-	toCastFragments(fragments) { # {{{
-		if @isTypeOf() {
-			fragments.code($comma, 'null', $comma, $quote(@name))
-		}
-		else {
-			@resolve()
-
-			if @type.isClass() {
-				fragments.code($comma, @name, $comma, '"Class"')
-			}
-			else if @type.isEnum() {
-				fragments.code($comma, @name, $comma, '"Enum"')
-			}
-			else if @type.isStruct() {
-				fragments.code($comma, @name, $comma, '"Struct"')
-			}
-			else if @type.isTuple() {
-				fragments.code($comma, @name, $comma, '"Tuple"')
-			}
-			else {
-				@type.toCastFragments(fragments)
-			}
-		}
-	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() {
 			var varname = variable.name?()
@@ -1385,7 +1365,7 @@ class ReferenceType extends Type {
 		if !#@parameters && ?tof && !@nullable {
 			fragments.code(`\(tof)`)
 		}
-		else if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {
+		else if unalias.isExclusion() || unalias.isFunction() || unalias.isObject() || unalias.isUnion() {
 			unalias.toTestFunctionFragments(fragments, node)
 		}
 		else {
