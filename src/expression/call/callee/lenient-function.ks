@@ -45,7 +45,7 @@ class LenientFunctionCallee extends Callee {
 			@hash += `:\(@positions.join(','))`
 		}
 		if ?@labels {
-			@hash += `:\(Dictionary.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
+			@hash += `:\(Object.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{

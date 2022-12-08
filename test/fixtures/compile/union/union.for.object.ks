@@ -1,9 +1,9 @@
 struct Foobar {
-	values: Dictionary<String>
+	values: Object<String>
 }
 
 struct Quxbaz {
-	values: Dictionary<Number>
+	values: Object<Number>
 }
 
 func foobar(item: Foobar | Quxbaz) {

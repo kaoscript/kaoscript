@@ -1,4 +1,4 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function equals() {
 		return equals.__ks_rt(this, arguments);

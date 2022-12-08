@@ -6,7 +6,7 @@ enum Color {
 
 class Foobar {
 	private {
-		_colors: Dictionary	= {}
+		_colors: Object	= {}
 	}
 	isRed(name) => @colors[name] == Color::Red
 }

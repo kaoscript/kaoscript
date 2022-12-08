@@ -1,5 +1,5 @@
 export class Foobar {
 	public {
-		values: Dictionary<Number>		= {}
+		values: Object<Number>		= {}
 	}
 }

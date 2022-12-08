@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Space = Helper.enum(String, {
 		RGB: "rgb",
@@ -63,13 +63,13 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.name = Space.SRGB;
 		d["alias"] = [Space.RGB];
 		d["parsers"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["from"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d[Space.YUV] = Helper.function(function() {
 					return "RGB -> UYV";
 				}, (fn, ...args) => {
@@ -83,21 +83,21 @@ module.exports = function() {
 			return d;
 		})();
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["red"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_red";
 				return d;
 			})();
 			d["green"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_green";
 				return d;
 			})();
 			d["blue"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_blue";
 				return d;

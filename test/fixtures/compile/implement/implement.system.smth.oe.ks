@@ -1,6 +1,6 @@
-impl Dictionary {
+impl Object {
 	static {
-		clone(dict: Dictionary): Dictionary {
+		clone(dict: Object): Object {
 			var dyn clone = {}
 
 			return clone
@@ -8,4 +8,4 @@ impl Dictionary {
 	}
 }
 
-func foobar(value?) => Dictionary.clone(value)
+func foobar(value?) => Object.clone(value)

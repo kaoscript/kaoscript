@@ -99,7 +99,7 @@ class ForOfStatement extends Statement {
 		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
-		if !(type.isAny() || type.isDictionary() || type.isObject()) {
+		unless type.canBeObject(true) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 

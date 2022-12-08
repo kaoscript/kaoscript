@@ -1,7 +1,7 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Unit = Helper.struct(function() {
-		return new Dictionary;
+		return new OBJ;
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();

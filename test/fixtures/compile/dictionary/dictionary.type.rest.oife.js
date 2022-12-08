@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		static __ks_new_0() {
@@ -11,7 +11,7 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			this.args = new Dictionary();
+			this.args = new OBJ();
 		}
 		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
@@ -24,7 +24,7 @@ module.exports = function() {
 	};
 	clone.__ks_0 = function(source) {
 		const clone = Foobar.__ks_new_0();
-		clone.args = Helper.newDictionary(-1, source.args);
+		clone.args = Helper.newObject(-1, source.args);
 		return clone;
 	};
 	clone.__ks_rt = function(that, args) {

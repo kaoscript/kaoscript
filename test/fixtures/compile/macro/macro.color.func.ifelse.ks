@@ -1,7 +1,7 @@
 #![rules(ignore-misfit)]
 
 export class Color {
-	macro registerSpace(@expression: Dictionary) {
+	macro registerSpace(@expression: Object) {
 		macro Color.registerSpace(#(expression))
 	}
 }

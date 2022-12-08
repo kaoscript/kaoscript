@@ -12,7 +12,7 @@ module.exports = function() {
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;
 		const t1 = Type.isNumber;
-		const t2 = Type.isDictionary;
+		const t2 = Type.isObject;
 		const t3 = Type.isBoolean;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

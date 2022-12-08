@@ -4,7 +4,7 @@ class BlockScope extends Scope {
 		@chunkTypes							= {}
 		@declarations						= {}
 		@macros								= {}
-		@matchingTypes: Dictionary<Array>	= {}
+		@matchingTypes: Object<Array>		= {}
 		@module: ModuleScope
 		@parent: Scope
 		@references							= {}

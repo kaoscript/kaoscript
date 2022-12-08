@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_0 = 0, __ks_1 = Helper.mapDictionary(values, function(__ks_0, value) {
+		for(let __ks_0 = 0, __ks_1 = Helper.mapObject(values, function(__ks_0, value) {
 			return value.values();
 		}), __ks_2 = __ks_1.length, __ks_values_1; __ks_0 < __ks_2; ++__ks_0) {
 			__ks_values_1 = __ks_1[__ks_0];

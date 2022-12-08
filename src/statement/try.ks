@@ -21,7 +21,7 @@ class TryStatement extends Statement {
 		@hasDefaultClause: Boolean	= false
 		@hasFinally: Boolean		= false
 		@initLateVariables			= {}
-		@initVariables: Dictionary	= {}
+		@initVariables: Object		= {}
 		@state: TryState
 	}
 	analyse() { # {{{

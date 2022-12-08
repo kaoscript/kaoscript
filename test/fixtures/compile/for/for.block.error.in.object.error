@@ -1,1 +1,1 @@
-TypeException: The identifier "foo" of type "Dictionary" is expected to be of type "Array" (fixtures/compile/for/for.block.error.in.object.ks:5)
+TypeException: The identifier "foo" of type "Object" is expected to be of type "Array" (fixtures/compile/for/for.block.error.in.object.ks:5)

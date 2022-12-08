@@ -775,7 +775,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`"for..in" must be used with an array`, node)
 		} # }}}
 		throwInvalidForOfExpression(node): Never ~ TypeException { # {{{
-			throw new TypeException(`"for..of" must be used with a dictionary`, node)
+			throw new TypeException(`"for..of" must be used with an object`, node)
 		} # }}}
 		throwInvalidFunctionType(expected: Type, node): Never ~ TypeException { # {{{
 			throw new TypeException(`The function can't be of type \(expected.toQuote(true))`, node)

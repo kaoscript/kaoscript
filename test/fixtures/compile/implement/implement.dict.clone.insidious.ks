@@ -1,6 +1,6 @@
-extern sealed class Dictionary
+extern sealed class Object
 
-impl Dictionary {
+impl Object {
 	static clone(dict) {
 		if dict.constructor.clone is Function && dict.constructor.clone != this {
 			return dict.constructor.clone(dict)
@@ -16,7 +16,7 @@ impl Dictionary {
 				clone[key] = value.clone()
 			}
 			else if value is dict {
-				clone[key] = Dictionary.clone(value)
+				clone[key] = Object.clone(value)
 			}
 			else {
 				clone[key] = value

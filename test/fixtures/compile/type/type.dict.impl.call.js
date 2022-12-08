@@ -1,4 +1,4 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function() {
@@ -14,7 +14,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let Math = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.PI = 3.14;
 		return d;
 	})();

@@ -1,1 +1,1 @@
-require|extern system class Dictionary
+require|extern system class Object

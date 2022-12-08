@@ -1,4 +1,4 @@
-func foobar(values: Dictionary<String>, key: String) {
+func foobar(values: Object<String>, key: String) {
 	var late value: String
 
 	if (value = '') == '' {

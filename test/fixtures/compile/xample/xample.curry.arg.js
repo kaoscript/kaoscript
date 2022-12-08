@@ -1,7 +1,7 @@
-const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let o = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.name = "White";
 		return d;
 	})();

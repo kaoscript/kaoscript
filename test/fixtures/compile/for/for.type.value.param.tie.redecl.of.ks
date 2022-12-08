@@ -1,6 +1,6 @@
 extern console
 
-func foobar(values: Dictionary<Number>) {
+func foobar(values: Object<Number>) {
 	var mut value: String = ''
 
 	for value of values {

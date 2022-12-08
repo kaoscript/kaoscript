@@ -218,7 +218,7 @@ func $component(component, name: string, space: string): void { # {{{
 	$components[name].spaces[space] = true
 } # }}}
 
-func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): Color | dict ~ Error { # {{{
+func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}): Color | object ~ Error { # {{{
 	if ?(s = $spaces[that._space]).converters[space] {
 		var args = [that[component.field] for component, name of s.components]
 
@@ -315,7 +315,7 @@ var $parsers = {
 				that._blue = $caster.ff(args[0][2])
 				return true
 			}
-			else if args[0] is dict {
+			else if args[0] is object {
 				if ?args[0].r && ?args[0].g && ?args[0].b {
 					that._space = Space::SRGB
 					that._alpha = $caster.alpha(args[0].a)
@@ -504,7 +504,7 @@ export class Color {
 		_blue: int = 0
 	}
 
-	macro registerSpace(@space: Dictionary) {
+	macro registerSpace(@space: Object) {
 		var spaces: Array = [space.name.toUpperCase()]
 
 		if ?space.alias {
@@ -593,8 +593,8 @@ export class Color {
 			$parsers[format] = parser
 		} # }}}
 
-		registerSpace(space: Dictionary) { # {{{
-			var spaces = Dictionary.keys($spaces)
+		registerSpace(space: Object) { # {{{
+			var spaces = Object.keys($spaces)
 
 			$space(space.name)
 

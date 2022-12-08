@@ -1,6 +1,6 @@
-const {Dictionary} = require("@kaoscript/runtime");
-module.exports = function(__ks_Dictionary) {
+const {OBJ} = require("@kaoscript/runtime");
+module.exports = function(__ks_Object) {
 	return {
-		__ks_Dictionary
+		__ks_Object
 	};
 };

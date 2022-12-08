@@ -1,11 +1,11 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	function likes() {
 		return likes.__ks_rt(this, arguments);
 	};
 	likes.__ks_0 = function() {
 		return (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.leto = "spice";
 			d.paul = "chani";
 			d.duncan = "murbella";

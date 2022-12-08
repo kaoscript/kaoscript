@@ -1,9 +1,9 @@
-const {Dictionary, Type} = require("@kaoscript/runtime");
-module.exports = function(__ks_Dictionary) {
-	if(!Type.isValue(__ks_Dictionary)) {
-		__ks_Dictionary = {};
+const {OBJ, Type} = require("@kaoscript/runtime");
+module.exports = function(__ks_Object) {
+	if(!Type.isValue(__ks_Object)) {
+		__ks_Object = {};
 	}
 	return {
-		__ks_Dictionary
+		__ks_Object
 	};
 };

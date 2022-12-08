@@ -1,11 +1,11 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/._float.ks.j5k8r9.ksb")().Float;
 	var __ks_Math = require("../_/._math.ks.j5k8r9.ksb")().__ks_Math;
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	const $caster = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.percentage = Helper.function(function(n) {
 			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
 		}, (fn, ...args) => {

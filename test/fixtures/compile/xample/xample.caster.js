@@ -1,9 +1,9 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	let $caster = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.hex = Helper.function(function(n) {
 			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse(n), 0, 255));
 		}, (fn, ...args) => {

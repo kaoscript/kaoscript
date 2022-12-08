@@ -1,9 +1,9 @@
-extern system class Dictionary {
+extern system class Object {
 }
 
-impl Dictionary {
+impl Object {
 	static {
-		map(dict: Dictionary, iterator: Function) {
+		map(dict: Object, iterator: Function) {
 			var dyn results = []
 
 			for item, index of dict {
@@ -13,7 +13,7 @@ impl Dictionary {
 			return results
 		}
 
-		map(dict: Dictionary, iterator: Function, condition: Function) {
+		map(dict: Object, iterator: Function, condition: Function) {
 			var dyn results = []
 
 			for item, index of dict when condition(item, index) {
@@ -25,4 +25,4 @@ impl Dictionary {
 	}
 }
 
-export Dictionary
+export Object

@@ -6,7 +6,7 @@ class ModuleScope extends Scope {
 		@line: Number						= 0
 		@lineOffset: Number					= 0
 		@macros								= {}
-		@matchingTypes: Dictionary<Array>	= {}
+		@matchingTypes: Object<Array>		= {}
 		@predefined							= {}
 		@references							= {}
 		@renamedIndexes 					= {}
@@ -25,12 +25,12 @@ class ModuleScope extends Scope {
 		@predefined.__Boolean = Variable.createPredefinedClass('Boolean', this)
 		@predefined.__Class = Variable.createPredefinedClass('Class', this)
 		@predefined.__Date = Variable.createPredefinedClass('Date', this)
-		@predefined.__Dictionary = Variable.createPredefinedClass('Dictionary', this)
 		@predefined.__Enum = Variable.createPredefinedClass('Enum', this)
 		@predefined.__Error = Variable.createPredefinedClass('Error', this)
 		@predefined.__Function = Variable.createPredefinedClass('Function', this)
 		@predefined.__Namespace = Variable.createPredefinedClass('Namespace', this)
 		@predefined.__Number = Variable.createPredefinedClass('Number', this)
+		@predefined.__Object = Variable.createPredefinedClass('Object', this)
 		@predefined.__String = Variable.createPredefinedClass('String', this)
 		@predefined.__Struct = Variable.createPredefinedClass('Struct', this)
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
@@ -40,7 +40,7 @@ class ModuleScope extends Scope {
 		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
 		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
+		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature::StaticMethod, this)

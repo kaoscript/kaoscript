@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const foo = t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 	const bar = h + ((1 / 3) * -(i - 1));
@@ -32,10 +32,10 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.foo = Helper.function(function(t1, t2, t3) {
 				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 			}, (fn, ...args) => {

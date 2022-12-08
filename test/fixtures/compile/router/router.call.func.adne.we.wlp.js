@@ -10,7 +10,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = Type.isDictionary;
+		const t0 = Type.isObject;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

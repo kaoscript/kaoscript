@@ -1,3 +1,3 @@
-require system class Dictionary
+require system class Object
 
-export Dictionary
+export Object

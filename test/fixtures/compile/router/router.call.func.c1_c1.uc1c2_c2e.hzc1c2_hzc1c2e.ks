@@ -3,7 +3,7 @@ class ClassA {
 }
 
 class ClassB {
-	nodes: Dictionary<Classes> = {}
+	nodes: Object<Classes> = {}
 }
 
 type Classes = ClassA | ClassB

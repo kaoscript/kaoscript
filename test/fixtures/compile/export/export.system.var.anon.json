@@ -8,13 +8,13 @@
     "requirements": [],
     "references": [
       {
-        "kind": "dictionary",
+        "kind": "object",
         "system": true,
         "properties": {
           "innerHeight": "Number",
           "innerWidth": "Number",
           "console": {
-            "kind": "dictionary",
+            "kind": "object",
             "properties": {
               "log": {
                 "kind": "function",

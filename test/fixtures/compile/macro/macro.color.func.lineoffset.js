@@ -1,25 +1,25 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Color, Space} = require("../.color.ks.j5k8r9.ksb")();
 	Space.RVB = Space("rvb");
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "rvb";
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["rouge"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["vert"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["blue"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
@@ -84,12 +84,12 @@ module.exports = function() {
 	};
 	Space.CMY = Space("cmy");
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "cmy";
 		d["converters"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["from"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.srgb = Helper.function(function(red, green, blue, that) {
 					that._cyan = blue;
 					that._magenta = red;
@@ -106,7 +106,7 @@ module.exports = function() {
 				return d;
 			})();
 			d["to"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.srgb = Helper.function(function(cyan, magenta, yellow, that) {
 					that._red = magenta;
 					that._green = yellow;
@@ -125,19 +125,19 @@ module.exports = function() {
 			return d;
 		})();
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["cyan"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["magenta"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["yellow"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();

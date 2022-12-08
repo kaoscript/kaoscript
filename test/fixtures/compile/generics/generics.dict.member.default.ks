@@ -1,4 +1,4 @@
-var map: Dictionary<Number> = {
+var map: Object<Number> = {
 	pi: 3.14
 }
 

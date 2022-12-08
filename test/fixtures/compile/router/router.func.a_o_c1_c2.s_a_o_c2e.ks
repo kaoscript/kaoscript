@@ -3,9 +3,9 @@ class Foobar {
 class Quxbaz {
 }
 
-func foobar(a, b: Dictionary, c: Foobar, d: Quxbaz) {
+func foobar(a, b: Object, c: Foobar, d: Quxbaz) {
 	return a
 }
-func foobar(a: String, b, c: Dictionary, d: Quxbaz) {
+func foobar(a: String, b, c: Object, d: Quxbaz) {
 	return b
 }

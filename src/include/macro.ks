@@ -208,7 +208,7 @@ class MacroDeclaration extends AbstractNode {
 		@line: Number
 		@marks: Array							= []
 		@name: String
-		@parameters: Dictionary					= {}
+		@parameters: Object						= {}
 		@referenceIndex: Number					= -1
 		@type: MacroType
 	}
@@ -491,9 +491,6 @@ class MacroArgument extends Type {
 			'Array' => {
 				return @data.kind == NodeKind::ArrayExpression
 			}
-			'Dictionary' => {
-				return @data.kind == NodeKind::ObjectExpression
-			}
 			'Expression' => {
 				return	@data.kind == NodeKind::UnaryExpression ||
 						@data.kind == NodeKind::BinaryExpression ||
@@ -505,6 +502,9 @@ class MacroArgument extends Type {
 			}
 			'Number' => {
 				return @data.kind == NodeKind::NumericExpression
+			}
+			'Object' => {
+				return @data.kind == NodeKind::ObjectExpression
 			}
 			'String' => {
 				return @data.kind == NodeKind::Literal

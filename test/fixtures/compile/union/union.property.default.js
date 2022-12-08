@@ -8,7 +8,7 @@ module.exports = function() {
 	};
 	foo.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		const t1 = value => Type.isString(value) || Type.isDictionary(value);
+		const t1 = value => Type.isString(value) || Type.isObject(value);
 		if(args.length === 2) {
 			if(t0(args[0]) && t1(args[1])) {
 				return foo.__ks_0.call(that, args[0], args[1]);

@@ -2,7 +2,7 @@
   {
     "aliens": [
       0,
-      "Dictionary",
+      "Object",
       true
     ],
     "requirements": [],
@@ -32,7 +32,7 @@
   {
     "exports": [
       1,
-      "Dictionary"
+      "Object"
     ],
     "references": [
       {

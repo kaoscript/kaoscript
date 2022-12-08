@@ -11,8 +11,6 @@ var $natives = { # {{{
 	class: true
 	Date: true
 	date: true
-	Dictionary: true
-	dict: true
 	Enum: true
 	enum: true
 	Error: true
@@ -46,7 +44,6 @@ var $types = { # {{{
 	bool: 'Boolean'
 	class: 'Class'
 	date: 'Date'
-	dict: 'Dictionary'
 	enum: 'Enum'
 	func: 'Function'
 	never: 'Never'
@@ -167,12 +164,12 @@ enum TypeKind<String> {
 	Alias
 	Array
 	Class
-	Dictionary
 	Enum
 	Exclusion
 	Function
 	Fusion
 	Namespace
+	Object
 	OverloadedFunction
 	Reference
 	Sealable
@@ -214,7 +211,6 @@ abstract class Type {
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
-		dictionaryOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Dictionary', false, [parameter])
 		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
@@ -301,7 +297,7 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind::ObjectType => {
-					var mut type = new DictionaryType(scope)
+					var mut type = new ObjectType(scope)
 
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind::Nullable {
@@ -404,7 +400,7 @@ abstract class Type {
 			console.info(data)
 			throw new NotImplementedException()
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
 
 			// console.log('-- import --')
@@ -461,7 +457,7 @@ abstract class Type {
 			}
 			else if ?data.reference {
 				if var reference ?= references[data.reference] {
-					if reference is ArrayType | DictionaryType | FunctionType | ReferenceType {
+					if reference is ArrayType | FunctionType | ObjectType | ReferenceType {
 						return reference
 					}
 					else {
@@ -492,9 +488,6 @@ abstract class Type {
 					TypeKind::Class => {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Dictionary => {
-						return DictionaryType.import(index, data, metadata, references, alterations, queue, scope, node)
-					}
 					TypeKind::Enum => {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -506,6 +499,9 @@ abstract class Type {
 					}
 					TypeKind::Namespace => {
 						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Object => {
+						return ObjectType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
@@ -550,6 +546,7 @@ abstract class Type {
 			throw new NotImplementedException(node)
 		} # }}}
 		isNative(name: String) => $natives[name] == true
+		objectOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Object', false, [parameter])
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
@@ -591,6 +588,7 @@ abstract class Type {
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
 	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && @isAny()) || @isNumber()
+	canBeObject(any: Boolean = true): Boolean => (any && @isAny()) || @isObject()
 	canBeString(any: Boolean = true): Boolean => (any && @isAny()) || @isString()
 	canBeVirtual(name: String) { # {{{
 		if @isAny() {
@@ -714,7 +712,6 @@ abstract class Type {
 		return false
 	} # }}}
 	isContainer() => false
-	isDictionary() => false
 	isEnum() => false
 	isExclusion() => false
 	isExhaustive() { # {{{
@@ -967,7 +964,7 @@ include {
 	'./type/namespace'
 	'./type/never'
 	'./type/null'
-	'./type/dictionary'
+	'./type/object'
 	'./type/parameter'
 	'./type/struct'
 	'./type/tuple'

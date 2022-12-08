@@ -145,7 +145,7 @@ class ClassProxyDeclaration extends Statement {
 class ClassProxyGroupDeclaration extends Statement {
 	private late {
 		@instance: Boolean					= true
-		@elements: Dictionary<Dictionary>	= {}
+		@elements: Object<Object>			= {}
 		@recipient: Expression
 		@recipientPath: String
 	}

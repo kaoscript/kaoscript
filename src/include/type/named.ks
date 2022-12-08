@@ -196,7 +196,6 @@ class NamedType extends Type {
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	override isComparableWith(type) => @type.isComparableWith(type)
-	isDictionary() => @type.isDictionary()
 	isEnum() => @type.isEnum()
 	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()
@@ -257,6 +256,7 @@ class NamedType extends Type {
 	isNative() => $natives[@name] == true
 	isNullable() => @type.isNullable()
 	isNumber() => @type.isNumber()
+	isObject() => @type.isObject()
 	isPredefined() => @type.isPredefined()
 	isReducible() => true
 	isReferenced() => @type.isReferenced()
@@ -371,14 +371,15 @@ class NamedType extends Type {
 		else if value.isAny() {
 			return true
 		}
-		else if @name == 'Object' && @type is ClassType {
-			return @scope.module().getPredefinedType('Object')!?.matchContentOf(value)
-		}
+		// else if @name == 'Object' && @type is ClassType {
+		// 	return @scope.module().getPredefinedType('Object')!?.matchContentOf(value)
+		// }
 		else if value is NamedType {
-			if value.name() == 'Object' && value.type() is ClassType {
-				return @matchContentOf(@scope.module().getPredefinedType('Object'))
-			}
-			else if @type is ClassType && value.type() is ClassType {
+			// if value.name() == 'Object' && value.type() is ClassType {
+			// 	return @matchContentOf(@scope.module().getPredefinedType('Object'))
+			// }
+			// else
+			if @type is ClassType && value.type() is ClassType {
 				return @matchInheritanceOf(value)
 			}
 			else if value.type() is EnumType {
@@ -447,8 +448,8 @@ class NamedType extends Type {
 		else if value is ReferenceType {
 			return @name == value.name() || @matchContentOf(value.discardReference())
 		}
-		else if value is DictionaryType {
-			return @name == 'Dictionary'
+		else if value is ObjectType {
+			return @name == 'Object'
 		}
 		else {
 			return @type.matchContentOf(value)
@@ -573,7 +574,7 @@ class NamedType extends Type {
 		@type.unflagAltering()
 	} # }}}
 	walk(fn) { # {{{
-		if @type is DictionaryType || @type is NamespaceType {
+		if @type is ObjectType || @type is NamespaceType {
 			@type.walk(fn)
 		}
 		else {

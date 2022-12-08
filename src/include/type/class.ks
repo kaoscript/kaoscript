@@ -19,7 +19,7 @@ bitmask ClassFeature {
 class ClassType extends Type {
 	private {
 		@abstract: Boolean					= false
-		@abstractMethods: Dictionary		= {}
+		@abstractMethods: Object			= {}
 		@alterations						= {
 			staticMethods:		{}
 			staticVariables:	{}
@@ -42,9 +42,9 @@ class ClassType extends Type {
 		@fullyImplementedMethods: Boolean{}	= {}
 		@hybrid: Boolean					= false
 		@init: Number						= 0
-		@instanceAssessments: Dictionary	= {}
-		@instanceMethods: Dictionary		= {}
-		@instanceVariables: Dictionary		= {}
+		@instanceAssessments: Object		= {}
+		@instanceMethods: Object			= {}
+		@instanceVariables: Object			= {}
 		@level: Number						= 0
 		@majorOriginal: ClassType?
 		@minorOriginal: ClassType?
@@ -59,7 +59,7 @@ class ClassType extends Type {
 			staticMethods:		{}
 		}
 		@predefined: Boolean				= false
-		@sharedMethods: Dictionary<Number>	= {}
+		@sharedMethods: Object<Number>		= {}
 		@seal								= {
 			constructors:		false
 			instanceMethods:	{}
@@ -75,9 +75,9 @@ class ClassType extends Type {
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
-		@staticAssessments: Dictionary		= {}
-		@staticMethods: Dictionary			= {}
-		@staticVariables: Dictionary		= {}
+		@staticAssessments: Object			= {}
+		@staticMethods: Object				= {}
+		@staticVariables: Object			= {}
 	}
 	static {
 		getExternReference(...types?): Number? { # {{{
@@ -122,7 +122,7 @@ class ClassType extends Type {
 				return null
 			}
 		} # }}}
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassType { # {{{
 			var type = new ClassType(scope)
 
 			type._sequences.initializations = data.sequences[0]
@@ -242,7 +242,7 @@ class ClassType extends Type {
 
 			return type.flagComplete()
 		} # }}}
-		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode) { # {{{
+		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode) { # {{{
 			type.copyFrom(original)
 
 			if type.isAbstract() {
@@ -559,12 +559,12 @@ class ClassType extends Type {
 		@constructors.push(...src._constructors)
 
 		if src._sealed {
-			@seal = Dictionary.clone(src._seal)
+			@seal = Object.clone(src._seal)
 		}
 
 		@exhaustive = src._exhaustive
-		@exhaustiveness = Dictionary.clone(src._exhaustiveness)
-		@sequences = Dictionary.clone(src._sequences)
+		@exhaustiveness = Object.clone(src._exhaustiveness)
+		@sequences = Object.clone(src._sequences)
 
 		if src._requirement || src._alien {
 			@originals(src)
@@ -848,7 +848,7 @@ class ClassType extends Type {
 			exhaustiveness.instanceMethods[name] = value
 		}
 
-		if !Dictionary.isEmpty(exhaustiveness) {
+		if !Object.isEmpty(exhaustiveness) {
 			export.exhaustiveness = exhaustiveness
 		}
 
@@ -921,8 +921,8 @@ class ClassType extends Type {
 			@hybrid = true
 		}
 
-		@sequences.staticMethods = Dictionary.clone(type._sequences.staticMethods)
-		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
+		@sequences.staticMethods = Object.clone(type._sequences.staticMethods)
+		@sequences.instanceMethods = Object.clone(type._sequences.instanceMethods)
 
 		@level = type.level():Number + 1
 	} # }}}
@@ -1249,7 +1249,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @staticAssessments[name] is not Dictionary {
+		if @staticAssessments[name] is not Object {
 			var methods = [...@staticMethods[name]]
 
 			var mut that = this
@@ -1645,7 +1645,7 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
-	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
+	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		if value.hasRest() {
 			return false unless value.getRestType().isNullable()
 		}
@@ -1901,7 +1901,7 @@ class ClassType extends Type {
 			return false
 		}
 	} # }}}
-	matchInstanceWith(object: DictionaryType, matchables) { # {{{
+	matchInstanceWith(object: ObjectType, matchables) { # {{{
 		for var property, name of object._properties {
 			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode::Signature) {
 			}

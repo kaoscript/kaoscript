@@ -1,6 +1,6 @@
 abstract class TupleType extends Type {
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): TupleType { # {{{
 			if data.named {
 				return NamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
 			}
@@ -10,13 +10,13 @@ abstract class TupleType extends Type {
 		} # }}}
 	}
 	private {
-		@assessment?						= null
-		@length: Number						= 0
-		@extending: Boolean					= false
-		@extends: NamedType<TupleType>?		= null
-		@extendedLength: Number				= 0
-		@fieldsByIndex: Dictionary<TupleFieldType>	= {}
-		@function: FunctionType?			= null
+		@assessment?							= null
+		@length: Number							= 0
+		@extending: Boolean						= false
+		@extends: NamedType<TupleType>?			= null
+		@extendedLength: Number					= 0
+		@fieldsByIndex: Object<TupleFieldType>	= {}
+		@function: FunctionType?				= null
 	}
 	abstract addField(field: TupleFieldType): Void
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
@@ -108,7 +108,7 @@ abstract class TupleType extends Type {
 
 class NamedTupleType extends TupleType {
 	static {
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { # {{{
 			var data = index
 			var value = new NamedTupleType(scope)
 
@@ -126,7 +126,7 @@ class NamedTupleType extends TupleType {
 		} # }}}
 	}
 	private {
-		@fieldsByName: Dictionary<TupleFieldType>	= {}
+		@fieldsByName: Object<TupleFieldType>	= {}
 	}
 	override addField(field) { # {{{
 		@fieldsByName[field.name()] = field
@@ -415,7 +415,7 @@ class NamedTupleType extends TupleType {
 
 class UnnamedTupleType extends TupleType {
 	static {
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { # {{{
 			var data = index
 			var value = new UnnamedTupleType(scope)
 
@@ -529,7 +529,7 @@ class TupleFieldType extends Type {
 		@type: Type
 	}
 	static {
-		import(name?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
+		import(name?, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
 			return new TupleFieldType(scope, name, data.index, fieldType, data.required)

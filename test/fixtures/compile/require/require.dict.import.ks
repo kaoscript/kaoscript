@@ -1,3 +1,3 @@
 import './require.dict.genesis.ks'
 
-export Dictionary
+export Object

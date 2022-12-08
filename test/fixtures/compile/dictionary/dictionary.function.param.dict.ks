@@ -1,4 +1,4 @@
-func foobar(x: Dictionary) {
+func foobar(x: Object) {
 }
 
 foobar({

@@ -47,12 +47,12 @@ namespace Router {
 
 	struct NamedLength {
 		functions: Array<String>
-		parameters: Dictionary<NamedParameter>
+		parameters: Object<NamedParameter>
 	}
 
 	struct NamedParameter {
-		indexes: Dictionary<Number>
-		types: Dictionary<NamedType>
+		indexes: Object<Number>
+		types: Object<NamedType>
 		order: Array<String>
 	}
 
@@ -83,7 +83,7 @@ namespace Router {
 	struct Group {
 		n: Number
 		functions: Array<FunctionType>		= []
-		rows: Dictionary<Row>				= {}
+		rows: Object<Row>					= {}
 		rowCount: Number					= 0
 	}
 
@@ -106,7 +106,7 @@ namespace Router {
 		types: Array<RowType>
 		alternative: Boolean			= false
 		union: UnionMatch?				= null
-		names: Dictionary<String[]>?	= null
+		names: Object<String[]>?		= null
 	}
 
 	struct TreeNode {
@@ -116,7 +116,7 @@ namespace Router {
 		variadic: Boolean						= false
 		min: Number								= 1
 		max: Number								= 1
-		parameters: Dictionary<TreeParameter>	= {}
+		parameters: Object<TreeParameter>		= {}
 		isNode: Boolean
 		order: Array<String>					= []
 		rows: Array<Row>
@@ -264,7 +264,7 @@ namespace Router {
 			functionMap[function.index()] = function
 		}
 
-		var labelKeys = Dictionary.keys(perLabels).sort((a, b) => {
+		var labelKeys = Object.keys(perLabels).sort((a, b) => {
 			var perLabelA = perLabels[a]
 			var perLabelB = perLabels[b]
 
@@ -431,7 +431,7 @@ namespace Router {
 			}
 		}
 
-		var mut functions: Array = Dictionary.keys(assessment.functions).map((i, ...) => parseInt(i))
+		var mut functions: Array = Object.keys(assessment.functions).map((i, ...) => parseInt(i))
 		var labels = []
 
 		for var data, label of assessment.labels {

@@ -291,7 +291,7 @@ class FunctionBlock extends Block {
 
 class ConstructorBlock extends FunctionBlock {
 	private {
-		@initializedVariables: Dictionary<Boolean>		= {}
+		@initializedVariables: Object<Boolean>		= {}
 	}
 	override initializeVariable(variable, expression, node) { # {{{
 		var late name

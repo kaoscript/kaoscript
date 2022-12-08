@@ -22,7 +22,7 @@
         "instanceVariables": {
           "values": {
             "access": 4,
-            "type": "Dictionary",
+            "type": "Object",
             "default": true,
             "immutable": false,
             "lateInit": false,

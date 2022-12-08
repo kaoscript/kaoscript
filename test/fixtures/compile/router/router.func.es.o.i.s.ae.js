@@ -13,7 +13,7 @@ module.exports = function() {
 		return "card";
 	};
 	foobar.__ks_1 = function(x) {
-		return "dictionary";
+		return "object";
 	};
 	foobar.__ks_2 = function(x) {
 		return "number";
@@ -28,7 +28,7 @@ module.exports = function() {
 		const t0 = Type.isNumber;
 		const t1 = value => Type.isEnumInstance(value, CardSuit);
 		const t2 = Type.isString;
-		const t3 = Type.isDictionary;
+		const t3 = Type.isObject;
 		const t4 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {

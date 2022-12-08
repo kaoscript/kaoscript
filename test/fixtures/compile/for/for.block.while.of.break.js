@@ -1,7 +1,7 @@
-const {Dictionary, Helper, Operator} = require("@kaoscript/runtime");
+const {Helper, OBJ, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	let likes = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.leto = "spice";
 		d.paul = "chani";
 		d.duncan = "murbella";

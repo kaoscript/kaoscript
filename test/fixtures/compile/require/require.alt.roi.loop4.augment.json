@@ -115,12 +115,12 @@
                 {
                   "external": "thisArg",
                   "internal": "thisArg",
-                  "type": "Dictionary?",
+                  "type": "Object?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjUxfSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NTV9fQ=="
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjQ3fSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NTF9fQ=="
                 }
               ],
               "returns": "Boolean",
@@ -146,12 +146,12 @@
                 {
                   "external": "thisArg",
                   "internal": "thisArg",
-                  "type": "Dictionary?",
+                  "type": "Object?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUzfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTd9fQ=="
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjQ5fSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTN9fQ=="
                 }
               ],
               "returns": "Void",
@@ -313,12 +313,12 @@
                 {
                   "external": "thisArg",
                   "internal": "thisArg",
-                  "type": "Dictionary?",
+                  "type": "Object?",
                   "min": 0,
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1MH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1NH19"
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0Nn0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo1MH19"
                 }
               ],
               "returns": "Boolean",

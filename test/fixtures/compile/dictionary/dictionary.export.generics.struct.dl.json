@@ -16,7 +16,7 @@
           "item": {
             "required": true,
             "type": {
-              "kind": "dictionary",
+              "kind": "object",
               "properties": {
                 "values": {
                   "kind": "reference",

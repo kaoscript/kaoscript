@@ -1,11 +1,11 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
 		return (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.foobar = Helper.function(function() {
 				return "";
 			}, (fn, ...args) => {

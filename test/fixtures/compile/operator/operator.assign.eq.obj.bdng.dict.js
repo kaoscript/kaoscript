@@ -1,11 +1,11 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	function reset() {
 		return reset.__ks_rt(this, arguments);
 	};
 	reset.__ks_0 = function() {
 		return (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.x = 0;
 			d.y = 0;
 			return d;
@@ -18,7 +18,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let point = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.x = 1;
 		d.y = 1;
 		return d;

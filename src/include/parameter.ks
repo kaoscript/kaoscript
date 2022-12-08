@@ -608,7 +608,7 @@ class Parameter extends AbstractNode {
 		if ?@data.type {
 			var declaredType = Type.fromAST(@data.type, this)
 
-			if !?type || (type.isObject() && declaredType.isDictionary()) || declaredType.isMorePreciseThan(type) {
+			if !?type || (type.isObject() && declaredType.isObject()) || declaredType.isMorePreciseThan(type) {
 				type = declaredType
 			}
 		}
@@ -1620,7 +1620,7 @@ class ObjectBindingParameter extends ObjectBinding {
 				element.setDeclaredType(type, definitive)
 			}
 		}
-		else if type.isDictionary() {
+		else if type.isObject() {
 			if type.isReference() {
 				var elementType = type.parameter()
 

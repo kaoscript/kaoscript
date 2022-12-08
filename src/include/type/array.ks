@@ -8,7 +8,7 @@ class ArrayType extends Type {
 		@spread: Boolean				= false
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ArrayType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ArrayType { # {{{
 			var type = new ArrayType(scope)
 
 			queue.push(() => {
@@ -54,14 +54,15 @@ class ArrayType extends Type {
 
 		return 1
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
+	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
 		if @nullable != value.isNullable() {
 			return @nullable ? 1 : -1
 		}
 
 		if @rest {
 			if value.hasRest() {
-				return $weightTOFs['Array'] - $weightTOFs['Dictionary']
+				return $weightTOFs['Array'] - $weightTOFs['Object']
 			}
 			else {
 				return 1
@@ -71,10 +72,9 @@ class ArrayType extends Type {
 			return -1
 		}
 		else {
-			return $weightTOFs['Array'] - $weightTOFs['Dictionary']
+			return $weightTOFs['Array'] - $weightTOFs['Object']
 		}
 	} # }}}
-	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return -value.compareToRef(this, equivalences)
 	} # }}}

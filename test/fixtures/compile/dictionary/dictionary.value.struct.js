@@ -1,7 +1,7 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Position = Helper.struct(function(x, y) {
-		const _ = new Dictionary();
+		const _ = new OBJ();
 		_.x = x;
 		_.y = y;
 		return _;
@@ -38,7 +38,7 @@ module.exports = function() {
 		}
 		__ks_func_position_0() {
 			return (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.start = Position.__ks_new(this._x, this._y);
 				return d;
 			})();
@@ -54,7 +54,7 @@ module.exports = function() {
 		}
 		__ks_func_position_dict_0() {
 			return (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.x = this._x;
 				d.y = this._y;
 				return d;

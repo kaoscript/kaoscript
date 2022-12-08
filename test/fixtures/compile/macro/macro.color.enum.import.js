@@ -1,5 +1,5 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Space = require("../export/.export.enum.space.ks.j5k8r9.ksb")().Space;
 	class Color {
@@ -62,24 +62,24 @@ module.exports = function() {
 	Space.HSB = Space("hsb");
 	Space.HSL = Space("hsl");
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.name = Space.HSL;
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["hue"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.family = Space.HSB;
 				d["field"] = "_hue";
 				return d;
 			})();
 			d["saturation"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.family = Space.HSB;
 				d["field"] = "_saturation";
 				return d;
 			})();
 			d["lightness"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 100;
 				d["round"] = 1;
 				d["field"] = "_lightness";

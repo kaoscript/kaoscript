@@ -21,7 +21,7 @@ namespace RegroupTree {
 				}
 			}
 
-			var values = Dictionary.values(groups).sort((a, b) => b.length - a.length)
+			var values = Object.values(groups).sort((a, b) => b.length - a.length)
 
 			for var value, index in values when value.length > 0{
 				for var val in values from index + 1 when val.length > 0 {
@@ -147,7 +147,7 @@ namespace RegroupTree {
 
 		return result
 	} # }}}
-	func buildMax(tree: TreeBranch, last: Boolean, result: Array, nodes: Dictionary): Void { # {{{
+	func buildMax(tree: TreeBranch, last: Boolean, result: Array, nodes: Object): Void { # {{{
 		nodes[tree.index] = {
 			index: tree.index
 			type: tree.type
@@ -160,7 +160,7 @@ namespace RegroupTree {
 			buildMax(tree.columns[key], last, result, nodes)
 		}
 	} # }}}
-	func buildMax(tree: TreeLeaf, last: Boolean, result: Array, nodes: Dictionary): Void { # {{{
+	func buildMax(tree: TreeLeaf, last: Boolean, result: Array, nodes: Object): Void { # {{{
 		nodes[tree.index] = {
 			index: tree.index
 			type: tree.type
@@ -243,11 +243,11 @@ namespace RegroupTree {
 		return `\(index);`
 	} # }}}
 
-	func getValidNode(index: Number, data: Dictionary, parameters: Dictionary): Number { # {{{
+	func getValidNode(index: Number, data: Object, parameters: Object): Number { # {{{
 		return getValidNodeLoop(index, data, parameters) ?? index
 	} # }}}
 
-	func getValidNodeLoop(index: Number, data: Dictionary, parameters: Dictionary): Number? { # {{{
+	func getValidNodeLoop(index: Number, data: Object, parameters: Object): Number? { # {{{
 		if var maximus ?= data[index] {
 			if maximus.min != maximus.max || maximus.rest {
 				return index
@@ -359,7 +359,7 @@ namespace RegroupTree {
 	} # }}}
 
 	func listShadows(tree: Tree, data: Array, ceiling: Number): Array { # {{{
-		var newData = data.clone()
+		var newData = [...data]
 		var results = [ShadowKind::None]
 
 		for var key in tree.order {
@@ -368,7 +368,7 @@ namespace RegroupTree {
 
 		return results
 	} # }}}
-	func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array): Void { # {{{
+	func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, nodes: Object, results: Array): Void { # {{{
 		nodes[tree.index] = {
 			type: tree.type
 			min: tree.min
@@ -379,7 +379,7 @@ namespace RegroupTree {
 			listShadows(tree.columns[key], max, ceiling, data, nodes, results)
 		}
 	} # }}}
-	func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, nodes: Dictionary, results: Array): Void { # {{{
+	func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, nodes: Object, results: Array): Void { # {{{
 		nodes[tree.index] = {
 			type: tree.type
 			min: tree.min
@@ -592,7 +592,7 @@ namespace RegroupTree {
 		return result
 	} # }}}
 
-	func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Number, ceiling: Number, data: Dictionary, parameters: Dictionary): Void { # {{{
+	func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Number, ceiling: Number, data: Object, parameters: Object): Void { # {{{
 		index = getValidNode(index, data, parameters)
 
 		if kind == ShadowKind::Soft {

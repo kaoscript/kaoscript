@@ -4,7 +4,7 @@ class ClassMethodType extends FunctionType {
 		@access: Accessibility					= Accessibility::Public
 		@forked: Boolean						= false
 		@forkedIndex: Number?					= null
-		@initVariables: Dictionary<Boolean>		= {}
+		@initVariables: Object<Boolean>			= {}
 		@instance: Boolean						= false
 		@overload: Array?						= null
 		@overwrite: Array?						= null
@@ -19,7 +19,7 @@ class ClassMethodType extends FunctionType {
 
 			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
 			var data = index
 			var type = new ClassMethodType(scope)
 
@@ -89,7 +89,7 @@ class ClassMethodType extends FunctionType {
 			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
 			returns: @returnType.toReference(references, indexDelta, mode, module)
 			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]
-			inits: Dictionary.keys(@initVariables)
+			inits: Object.keys(@initVariables)
 		}
 
 		if ?originalMethods && ?@overwrite {

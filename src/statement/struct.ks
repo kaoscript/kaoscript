@@ -80,7 +80,7 @@ class StructDeclaration extends Statement {
 	isExtending() => @extending
 	toObjectFragments(fragments, mode) { # {{{
 		if !@extending && @fields.length == 0 {
-			fragments.line(`return new \($runtime.dictionary(this))`)
+			fragments.line(`return new \($runtime.object(this))`)
 		}
 		else {
 			var mut varname = '_'
@@ -103,7 +103,7 @@ class StructDeclaration extends Statement {
 				line.code(')').done()
 			}
 			else {
-				fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
+				fragments.line($const(this), varname, ' = new ', $runtime.object(this), '()')
 			}
 
 			for var field in @fields {

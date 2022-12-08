@@ -143,7 +143,7 @@ namespace Fragment {
 
 				var mut varargs = tree.function.hasVarargsParameter()
 				if varargs || #labels {
-					var todoLabels = Dictionary.keys(labels)
+					var todoLabels = Object.keys(labels)
 
 					for var parameter in tree.function.parameters() {
 						if comma {

@@ -27,7 +27,7 @@ namespace Build {
 				}
 			}
 
-			var groups: Dictionary<Group> = {}
+			var groups: Object<Group> = {}
 
 			if rest {
 				if max == 0 {
@@ -820,7 +820,7 @@ namespace Build {
 
 	namespace Pyramid {
 		export func buildNode(tree: Tree, mut branch: TreeBranch, pIndex: Number, max: Number, name: String, node: AbstractNode): TreeColumn { # {{{
-			var usages: Dictionary<Number> = {}
+			var usages: Object<Number> = {}
 			for var row in branch.rows {
 				var index = row.function.index()
 
@@ -934,7 +934,7 @@ namespace Build {
 		export func createTree(rows: Row{}, min: Number): Tree { # {{{
 			var tree = Tree(min)
 
-			var usages: Dictionary<Number> = {}
+			var usages: Object<Number> = {}
 			for var _, key of rows {
 				var index = rows[key].function.index()
 
@@ -1051,11 +1051,11 @@ namespace Build {
 
 					if column.node {
 						hash =	`:\(column.min):\(column.max):\(column.variadic):\(column.rest)`
-								+ ';' + Dictionary.keys(column.parameters).sort((a, b) => a.localeCompare(b)).join(';')
+								+ ';' + Object.keys(column.parameters).sort((a, b) => a.localeCompare(b)).join(';')
 								+ ';' + getForkHash(column, 0)
 					}
 					else {
-						hash = Dictionary.keys(column.parameters).sort((a, b) => a.localeCompare(b)).join(';')
+						hash = Object.keys(column.parameters).sort((a, b) => a.localeCompare(b)).join(';')
 					}
 
 					if var group ?= groups[hash] {
@@ -1138,12 +1138,12 @@ namespace Build {
 			} # }}}
 
 			func regroupBranch_EqParameter(branch: TreeBranch): TreeBranch { # {{{
-				var columns = Dictionary.values(branch.columns)
+				var columns = Object.values(branch.columns)
 
 				if	columns.length == 1 &&
-					Dictionary.length(branch.parameters) == 1 &&
-					Dictionary.length(columns[0].parameters) == 1 &&
-					Dictionary.value(branch.parameters, 0).key == Dictionary.value(columns[0].parameters, 0).key &&
+					Object.length(branch.parameters) == 1 &&
+					Object.length(columns[0].parameters) == 1 &&
+					Object.value(branch.parameters, 0).key == Object.value(columns[0].parameters, 0).key &&
 					branch.type.hashCode() == branch.order[0]
 				{
 					var child = columns[0]
@@ -1187,7 +1187,7 @@ namespace Build {
 						branch.order.remove(type)
 					}
 					else if !column.isNode {
-						if var column2 ?= Dictionary.values(branch.columns).find((c, _, _) => c != column && !c.isNode && c.index > 0 && isSameFunction(column, c)) {
+						if var column2 ?= Object.values(branch.columns).find((c, _, _) => c != column && !c.isNode && c.index > 0 && isSameFunction(column, c)) {
 							branch.max += column.max
 							branch.variadic = true
 
@@ -1278,7 +1278,7 @@ namespace Build {
 						continue
 					}
 
-					if Array.same(Dictionary.keys(column.parameters), Dictionary.keys(column2.parameters)) {
+					if Array.same(Object.keys(column.parameters), Object.keys(column2.parameters)) {
 						if ?groups[index + 1] {
 							groups[index] = groups[index + 1]
 
@@ -1789,7 +1789,7 @@ namespace Build {
 		var perNames = {}
 
 		for var row of group.rows when ?row.names {
-			var names = Dictionary.keys(row.names).sort()
+			var names = Object.keys(row.names).sort()
 			var key = names.map((name, _, _) => `;\(name);\(row.names[name].sort().join('|'))`).join(',')
 
 			if var function ?= perNames[key] {
@@ -1896,6 +1896,7 @@ namespace Build {
 				return d
 			}
 		})
+		// console.log([item.key for var item in items])
 
 		tree.order = [item.key for var item in items]
 

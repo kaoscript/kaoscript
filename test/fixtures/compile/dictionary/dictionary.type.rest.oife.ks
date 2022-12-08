@@ -1,5 +1,5 @@
 class Foobar {
-	public args: Dictionary<Number>	= {}
+	public args: Object<Number>	= {}
 }
 
 func clone(source: Foobar): Foobar {

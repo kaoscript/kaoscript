@@ -1,1 +1,1 @@
-var values: Dictionary<String> = {}
+var values: Object<String> = {}

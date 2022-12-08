@@ -1,10 +1,10 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function({x, y} = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.x = "foo";
 		d.y = "bar";
 		return d;
@@ -12,7 +12,7 @@ module.exports = function() {
 		console.log(x + "." + y);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDictionary(value, Type.isString) || Type.isNull(value);
+		const t0 = value => Type.isObject(value, Type.isString) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 1) {

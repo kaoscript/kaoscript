@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(args) {
 		let src;
-		if(!((Type.isValue(args[0]) ? (src = args[0], true) : false) && Type.isDictionary(src))) {
+		if(!((Type.isValue(args[0]) ? (src = args[0], true) : false) && Type.isObject(src))) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

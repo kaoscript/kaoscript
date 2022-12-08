@@ -3,7 +3,7 @@ class ClassConstructorType extends FunctionType {
 		@access: Accessibility					= Accessibility::Public
 		@class: ClassType
 		@dependent: Boolean						= false
-		@initVariables: Dictionary<Boolean>		= {}
+		@initVariables: Object<Boolean>			= {}
 		@overwrite: Array?						= null
 	}
 	static {
@@ -12,7 +12,7 @@ class ClassConstructorType extends FunctionType {
 
 			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
 			var data = index
 			var type = new ClassConstructorType(scope)
 
@@ -76,7 +76,7 @@ class ClassConstructorType extends FunctionType {
 		}
 
 		if @class.isAbstract() {
-			export.inits = Dictionary.keys(@initVariables)
+			export.inits = Object.keys(@initVariables)
 		}
 
 		if @dependent {

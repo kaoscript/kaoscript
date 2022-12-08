@@ -41,15 +41,15 @@ export class Compiler {
 	private {
 		@file: String
 		@fragments
-		@hashes: Dictionary
+		@hashes: Object
 		@hierarchy: Array
-		@options: Dictionary
+		@options: Object
 	}
 	static {
 		registerTarget(target: String, fn: Function) { # {{{
 			$targets[target] = fn
 		} # }}}
-		registerTarget(mut target: String, options: Dictionary) { # {{{
+		registerTarget(mut target: String, options: Object) { # {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
@@ -93,7 +93,7 @@ export class Compiler {
 		} # }}}
 	}
 	constructor(@file, options? = null, @hashes = {}, @hierarchy = [@file]) { # {{{
-		@options = Dictionary.merge({
+		@options = Object.merge({
 			target: 'ecma-v6'
 			register: true
 			header: true
@@ -119,11 +119,6 @@ export class Compiler {
 				ignoreMisfit: false
 			}
 			runtime: {
-				dictionary: {
-					alias: 'Dictionary'
-					member: 'Dictionary'
-					package: '@kaoscript/runtime'
-				}
 				helper: {
 					alias: 'Helper'
 					member: 'Helper'
@@ -132,6 +127,11 @@ export class Compiler {
 				initFlag: {
 					alias: 'initFlag'
 					member: 'initFlag'
+					package: '@kaoscript/runtime'
+				}
+				object: {
+					alias: 'OBJ'
+					member: 'OBJ'
 					package: '@kaoscript/runtime'
 				}
 				operator: {
@@ -157,7 +157,7 @@ export class Compiler {
 				version: target[2]
 			}
 		}
-		else if !(@options.target is Dictionary || @options.target is Object) || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
+		else if @options.target is not Object || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
 			throw new Error(`Undefined target`)
 		}
 
@@ -174,7 +174,7 @@ export class Compiler {
 		return @initiate(data).finish()
 	} # }}}
 	createServant(file) { # {{{
-		return new Compiler(file, Dictionary.defaults(@options, {
+		return new Compiler(file, Object.defaults(@options, {
 			register: false
 		}), @hashes, [...@hierarchy, file])
 	} # }}}

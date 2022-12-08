@@ -8,12 +8,12 @@ bitmask Foobar {
 
 func foobar(x: Foobar) => 'enum'
 func foobar(x: Number) => 'number'
-func foobar(x: Dictionary) => 'dictionary'
+func foobar(x: Object) => 'object'
 
 expect(foobar(Foobar::foo)).to.equal('enum')
 expect(foobar(Foobar::foo + Foobar::bar)).to.equal('enum')
 expect(foobar(0)).to.equal('number')
-expect(foobar({})).to.equal('dictionary')
+expect(foobar({})).to.equal('object')
 
 func testIf(x: Foobar, y: Number, z) {
 	var results = []

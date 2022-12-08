@@ -52,7 +52,7 @@ module.exports = function() {
 		}
 	};
 	parse.__ks_rt = function(that, args) {
-		const t0 = value => Type.isString(value) || Type.isDictionary(value);
+		const t0 = value => Type.isString(value) || Type.isObject(value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return parse.__ks_0.call(that, args[0]);

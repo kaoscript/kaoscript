@@ -54,7 +54,7 @@ module.exports = function() {
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;
 		const t1 = Type.isValue;
-		const t2 = Type.isDictionary;
+		const t2 = Type.isObject;
 		const t3 = value => Type.isClassInstance(value, Quxbaz);
 		const t4 = value => Type.isClassInstance(value, Foobar);
 		const t5 = value => Type.isString(value) || Type.isNull(value);

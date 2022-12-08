@@ -136,16 +136,11 @@ var $compile = {
 }
 
 var $runtime = {
-	dictionary(node) { # {{{
-		node.module?().flag('Dictionary')
-
-		return node._options.runtime.dictionary.alias
-	} # }}}
 	getVariable(name, node) { # {{{
-		if node._options.runtime.dictionary.alias == name || (node.isIncluded() && name == 'Dictionary') {
-			node.module?().flag('Dictionary')
+		if node._options.runtime.object.alias == name || (node.isIncluded() && name == 'Object') {
+			node.module?().flag('Object')
 
-			return node._options.runtime.dictionary.alias
+			return node._options.runtime.object.alias
 		}
 		else if node._options.runtime.helper.alias == name || (node.isIncluded() && name == 'Helper') {
 			node.module?().flag('Helper')
@@ -173,6 +168,11 @@ var $runtime = {
 		node.module?().flag('initFlag')
 
 		return node._options.runtime.initFlag.alias
+	} # }}}
+	object(node) { # {{{
+		node.module?().flag('Object')
+
+		return node._options.runtime.object.alias
 	} # }}}
 	operator(node) { # {{{
 		node.module?().flag('Operator')
@@ -241,10 +241,8 @@ var $typeofs = { # {{{
 	Array: true
 	Boolean: true
 	Class: true
-	Dictionary: true
 	Enum: true
 	Function: true
-	// Instance: true
 	Namespace: true
 	Number: true
 	Object: true
@@ -255,7 +253,6 @@ var $typeofs = { # {{{
 	Tuple: true
 } # }}}
 
-
 func $expandOptions(options) { # {{{
 	var engine = $targets[options.target.name]
 	if !?engine {
@@ -264,7 +261,7 @@ func $expandOptions(options) { # {{{
 
 	if engine is Function {
 		if var opts ?= engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
-			return Dictionary.defaults(options, opts)
+			return Object.defaults(options, opts)
 		}
 		else {
 			throw new Error(`Undefined target's version '\(options.target.version)'`)
@@ -275,6 +272,6 @@ func $expandOptions(options) { # {{{
 			throw new Error(`Undefined target's version '\(options.target.version)'`)
 		}
 
-		return Dictionary.defaults(options, engine[options.target.version])
+		return Object.defaults(options, engine[options.target.version])
 	}
 } # }}}

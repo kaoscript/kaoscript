@@ -16,7 +16,7 @@ expect(pair.1).to.equal(0.1)
 func foobar(x: Tuple) => 'tuple'
 func foobar(x: Pair) => 'tuple-instance'
 func foobar(x: Number) => 'number'
-func foobar(x: Dictionary) => 'dictionary'
+func foobar(x: Object) => 'object'
 func foobar(x: String) => 'string'
 func foobar(x) => 'any'
 
@@ -25,6 +25,6 @@ expect(foobar(pair)).to.equal('tuple-instance')
 expect(foobar(pair.0)).to.equal('string')
 expect(foobar(pair.1)).to.equal('number')
 expect(foobar(0)).to.equal('number')
-expect(foobar({})).to.equal('dictionary')
+expect(foobar({})).to.equal('object')
 expect(foobar('foo')).to.equal('string')
 expect(foobar([])).to.equal('any')

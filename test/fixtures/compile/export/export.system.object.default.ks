@@ -1,7 +1,7 @@
-extern system class Dictionary
+extern system class Object
 
-impl Dictionary {
-	static clone(): Dictionary => this
+impl Object {
+	static clone(): Object => this
 }
 
 export var foobar = {

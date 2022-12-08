@@ -1,1 +1,1 @@
-ReferenceException: The function "curry" can't be matched to given arguments (Dictionary, String) (fixtures/compile/router/router.call.func.no=adn_se.i=o_se.ks:4)
+ReferenceException: The function "curry" can't be matched to given arguments (Object, String) (fixtures/compile/router/router.call.func.no=adn_se.i=o_se.ks:4)

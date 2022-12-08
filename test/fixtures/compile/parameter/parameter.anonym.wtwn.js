@@ -11,7 +11,7 @@ module.exports = function() {
 	};
 	foo.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		const t1 = value => Type.isDictionary(value) || Type.isNull(value);
+		const t1 = value => Type.isObject(value) || Type.isNull(value);
 		const t2 = value => Type.isString(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

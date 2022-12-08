@@ -4,7 +4,7 @@ type Coord = {
 	z: Number
 }
 
-func foobar(values: Dictionary<Coord>) {
+func foobar(values: Object<Coord>) {
 	var mut r = 0
 
 	for var {x, y, z} of values {

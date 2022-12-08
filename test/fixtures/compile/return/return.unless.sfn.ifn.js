@@ -1,10 +1,10 @@
-const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values, fn) {
-		const keys = Dictionary.keys(values).sort(Helper.function((a, b) => {
+		const keys = Object.keys(values).sort(Helper.function((a, b) => {
 			const x = fn(0);
 			if(!Operator.gt(x, 0)) {
 				return 0;

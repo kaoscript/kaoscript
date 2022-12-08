@@ -4,7 +4,7 @@ class FusionType extends Type {
 		@types: Array<Type>
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
 			var fusion = new FusionType(scope)
 
 			queue.push(() => {
@@ -71,7 +71,7 @@ class FusionType extends Type {
 		return null
 	} # }}}
 	hashCode(fattenNull: Boolean = false): String { # {{{
-		var types = [type for var type in @types when !type.isDictionary()]
+		var types = [type for var type in @types when !type.isObject()]
 
 		if types.length == 1 {
 			return types[0].hashCode(fattenNull)
@@ -106,15 +106,6 @@ class FusionType extends Type {
 		return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 	} # }}}
 	isComplete() => true
-	isDictionary() { # {{{
-		for var type in @types {
-			if type.isDictionary() {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable

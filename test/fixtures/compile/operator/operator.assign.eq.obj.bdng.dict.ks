@@ -1,4 +1,4 @@
-func reset(): Dictionary {
+func reset(): Object {
 	return {
 		x: 0
 		y: 0

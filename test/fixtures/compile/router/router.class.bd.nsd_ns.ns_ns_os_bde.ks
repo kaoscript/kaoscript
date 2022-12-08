@@ -6,7 +6,7 @@ class Foobar {
 	foobar(c: Number | String = 0, d: Number | String) {
 		return 1
 	}
-	foobar(c: Number | String, d: Number | String, e: Dictionary | String, f: Boolean = true) {
+	foobar(c: Number | String, d: Number | String, e: Object | String, f: Boolean = true) {
 		return 2
 	}
 }

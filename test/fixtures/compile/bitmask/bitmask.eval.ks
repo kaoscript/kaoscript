@@ -8,7 +8,7 @@ bitmask Foobar {
 
 func foobar(x: Foobar) => 'enum'
 func foobar(x: Number) => 'number'
-func foobar(x: Dictionary) => 'dictionary'
+func foobar(x: Object) => 'dictionary'
 
 expect(foobar(Foobar::foo)).to.equal('enum')
 expect(foobar(Foobar::foo + Foobar::bar)).to.equal('enum')

@@ -12,7 +12,7 @@
     ],
     "references": [
       {
-        "kind": "dictionary",
+        "kind": "object",
         "properties": {
           "waldo": {
             "kind": "function",

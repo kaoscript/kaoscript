@@ -8,7 +8,7 @@ module.exports = function() {
 		props[__ks_0 = key()] = Operator.xorBool(props[__ks_0], value);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDictionary(value, value => Type.isBoolean(value) || Type.isString(value));
+		const t0 = value => Type.isObject(value, value => Type.isBoolean(value) || Type.isString(value));
 		const t1 = Type.isFunction;
 		const t2 = value => Type.isBoolean(value) || Type.isString(value);
 		if(args.length === 3) {

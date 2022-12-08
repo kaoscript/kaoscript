@@ -1,7 +1,7 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	let likes = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.leto = "spice";
 		d.paul = "chani";
 		d.duncan = "murbella";
@@ -11,7 +11,7 @@ module.exports = function() {
 		return spicyHeroes.__ks_rt(this, arguments);
 	};
 	spicyHeroes.__ks_0 = function() {
-		return Helper.mapDictionary(likes, function(hero, like) {
+		return Helper.mapObject(likes, function(hero, like) {
 			return hero;
 		}, function(hero, like) {
 			return like === "spice";

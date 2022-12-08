@@ -42,7 +42,7 @@ class ClassDeclaration extends Statement {
 		@proxies							= []
 		@references							= {}
 		@sealed: Boolean 					= false
-		@sharedMethods: Dictionary			= {}
+		@sharedMethods: Object				= {}
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { # {{{
 		if method.max() == 0 && !method.isAsync() {
@@ -381,7 +381,7 @@ class ClassDeclaration extends Statement {
 			@class.incDestructorSequence()
 		}
 
-		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented <- @class.listMissingAbstractMethods()) {
+		if @extending && !@abstract && !Object.isEmpty(notImplemented <- @class.listMissingAbstractMethods()) {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 

@@ -27,7 +27,7 @@ module.exports = function() {
 		static import() {
 			const t0 = Type.isString;
 			const t1 = Type.isValue;
-			const t2 = Type.isDictionary;
+			const t2 = Type.isObject;
 			const t3 = value => Type.isClassInstance(value, AbstractNode);
 			const t4 = value => Type.isClassInstance(value, Domain);
 			const t5 = value => Type.isString(value) || Type.isNull(value);

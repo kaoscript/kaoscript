@@ -30,7 +30,7 @@ expect(JSON.stringify({
 func foobar(x: Enum) => 'enum'
 func foobar(x: CardSuit) => 'enum-member'
 func foobar(x: Number) => 'number'
-func foobar(x: Dictionary) => 'dictionary'
+func foobar(x: Object) => 'dictionary'
 func foobar(x: String) => 'string'
 func foobar(x) => 'any'
 

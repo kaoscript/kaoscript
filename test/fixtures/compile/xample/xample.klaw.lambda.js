@@ -1,7 +1,7 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	for(let __ks_0 = 0, __ks_1 = klaw(path.join(__dirname, "fixtures"), (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.nodir = true;
 		d.traverseAll = true;
 		d.filter = Helper.function((item) => {

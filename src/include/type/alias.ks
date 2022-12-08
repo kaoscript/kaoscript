@@ -3,7 +3,7 @@ class AliasType extends Type {
 		@type: Type
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
 			var type = new AliasType(scope)
 
 			queue.push(() => {
@@ -39,7 +39,6 @@ class AliasType extends Type {
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
-	isDictionary() => @type.isDictionary()
 	isExclusion() => @type.isExclusion()
 	isExportable() => @type.isExportable()
 	isExportingFragment() => false

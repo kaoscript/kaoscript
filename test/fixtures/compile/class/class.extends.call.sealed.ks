@@ -1,6 +1,6 @@
-impl Dictionary {
+impl Object {
 	static {
-		merge(...args): Dictionary => {}
+		merge(...args): Object => {}
 	}
 }
 
@@ -15,7 +15,7 @@ class Foobar {
 
 class Quxbaz extends Foobar {
 	constructor(options? = null) {
-		super(Dictionary.merge({
+		super(Object.merge({
 			x: 0
 			y: 0
 		}, options))

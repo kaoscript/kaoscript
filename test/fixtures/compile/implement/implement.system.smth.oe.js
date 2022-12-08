@@ -1,19 +1,19 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ks_Dictionary = {};
-	__ks_Dictionary.__ks_sttc_clone_0 = function(dict) {
-		let clone = new Dictionary();
+	const __ks_Object = {};
+	__ks_Object.__ks_sttc_clone_0 = function(dict) {
+		let clone = new OBJ();
 		return clone;
 	};
-	__ks_Dictionary._sm_clone = function() {
-		const t0 = Type.isDictionary;
+	__ks_Object._sm_clone = function() {
+		const t0 = Type.isObject;
 		if(arguments.length === 1) {
 			if(t0(arguments[0])) {
-				return __ks_Dictionary.__ks_sttc_clone_0(arguments[0]);
+				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Dictionary.clone) {
-			return Dictionary.clone(...arguments);
+		if(Object.clone) {
+			return Object.clone(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -24,7 +24,7 @@ module.exports = function() {
 		if(value === void 0) {
 			value = null;
 		}
-		return __ks_Dictionary._sm_clone(value);
+		return __ks_Object._sm_clone(value);
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 1) {

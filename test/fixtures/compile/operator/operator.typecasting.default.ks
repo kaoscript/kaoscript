@@ -1,7 +1,7 @@
 func toArray(x) => x as? Array
 func toBoolean(x) => x as? Boolean
 func toClass(x) => x as? Class
-func toDictionary(x) => x as? Dictionary
+func toDictionary(x) => x as? Object
 func toEnum(x) => x as? Enum
 func toFunction(x) => x as? Function
 func toNamespace(x) => x as? Namespace

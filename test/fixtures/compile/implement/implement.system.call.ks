@@ -1,7 +1,7 @@
-impl Dictionary {
+impl Object {
 	static {
-		length(dict: Dictionary): Number => Dictionary.keys(dict).length
+		length(dict: Object): Number => Object.keys(dict).length
 	}
 }
 
-func length(data) => Dictionary.length(data)
+func length(data) => Object.length(data)

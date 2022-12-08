@@ -42,7 +42,7 @@ module.exports = function() {
 			const t0 = value => Type.isBoolean(value) || Type.isNull(value);
 			const t1 = value => Type.isNumber(value) || Type.isString(value);
 			const t2 = value => Type.isNumber(value) || Type.isString(value) || Type.isNull(value);
-			const t3 = value => Type.isString(value) || Type.isDictionary(value);
+			const t3 = value => Type.isString(value) || Type.isObject(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length === 0) {

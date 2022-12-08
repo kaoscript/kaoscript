@@ -105,7 +105,7 @@ namespace Unbounded {
 		}
 	} # }}}
 
-	func update(tree: Tree, node: TreeBranch, unlimited: Boolean, mut min: Number, mut arguments: Dictionary): Boolean { # {{{
+	func update(tree: Tree, node: TreeBranch, unlimited: Boolean, mut min: Number, mut arguments: Object): Boolean { # {{{
 		var mut unbounded = updateArguments(node, unlimited, min, arguments <- {...arguments})
 
 		min += node.min
@@ -119,7 +119,7 @@ namespace Unbounded {
 		return unbounded
 	} # }}}
 
-	func update(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, mut arguments: Dictionary): Boolean { # {{{
+	func update(tree: Tree, node: TreeLeaf, unlimited: Boolean, min: Number, mut arguments: Object): Boolean { # {{{
 		var unbounded = updateArguments(node, unlimited, min, arguments <- {...arguments})
 
 		var function = node.function.index()
@@ -223,7 +223,7 @@ namespace Unbounded {
 		return unbounded
 	} # }}}
 
-	func updateArguments(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: Number, arguments: Dictionary): Boolean { # {{{
+	func updateArguments(tree: TreeBranch | TreeLeaf, unlimited: Boolean, min: Number, arguments: Object): Boolean { # {{{
 		var parameter = getRowType(tree.rows[0], tree).parameter
 		var mut unbounded = unlimited && tree.rest
 

@@ -53,7 +53,7 @@ class Attribute {
 				var cloned = {}
 
 				if force {
-					options = Dictionary.clone(options)
+					options = Object.clone(options)
 				}
 				else if clone {
 					var original = options
@@ -133,7 +133,7 @@ class ErrorAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.error {
-			options.error = Dictionary.clone(options.error)
+			options.error = Object.clone(options.error)
 
 			cloned.error = true
 		}
@@ -177,7 +177,7 @@ class FormatAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.format {
-			options.format = Dictionary.clone(options.format)
+			options.format = Object.clone(options.format)
 
 			cloned.format = true
 		}
@@ -362,7 +362,7 @@ class ParseAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.parse {
-			options.parse = Dictionary.clone(options.parse)
+			options.parse = Object.clone(options.parse)
 
 			cloned.parse = true
 		}
@@ -390,7 +390,7 @@ class RetainAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.parameters {
-			options.parameters = Dictionary.clone(options.parameters)
+			options.parameters = Object.clone(options.parameters)
 
 			cloned.parameters = true
 		}
@@ -420,7 +420,7 @@ class RulesAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.rules {
-			options.rules = Dictionary.clone(options.rules)
+			options.rules = Object.clone(options.rules)
 
 			cloned.rules = true
 		}
@@ -518,17 +518,17 @@ class TargetAttribute extends Attribute {
 	constructor(@data)
 	clone(options, cloned) { # {{{
 		if !?cloned.target {
-			options.target = Dictionary.clone(options.target)
+			options.target = Object.clone(options.target)
 
 			cloned.target = true
 		}
 		if !?cloned.parse {
-			options.parse = Dictionary.clone(options.parse)
+			options.parse = Object.clone(options.parse)
 
 			cloned.parse = true
 		}
 		if !?cloned.format {
-			options.format = Dictionary.clone(options.format)
+			options.format = Object.clone(options.format)
 
 			cloned.format = true
 		}

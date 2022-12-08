@@ -53,7 +53,7 @@ class FunctionType extends Type {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 			}
 		} # }}}
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
 			var type = new FunctionType(scope)
 
 			type._index = data.index ?? -1
@@ -921,7 +921,7 @@ class OverloadedFunctionType extends Type {
 		@references: Array<Type>			= []
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
 			var type = new OverloadedFunctionType(scope)
 
 			if ?data.exhaustive {

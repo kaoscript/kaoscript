@@ -24,7 +24,7 @@
           "elevation": {
             "required": true,
             "type": {
-              "kind": "dictionary",
+              "kind": "object",
               "properties": {
                 "unit": "String",
                 "value": "Number"

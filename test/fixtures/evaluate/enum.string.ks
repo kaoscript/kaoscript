@@ -33,7 +33,7 @@ expect(JSON.stringify({
 func foobar(x: Enum) => 'enum'
 func foobar(x: CardSuit) => 'enum-member'
 func foobar(x: Number) => 'number'
-func foobar(x: Dictionary) => 'dictionary'
+func foobar(x: Object) => 'object'
 func foobar(x: String) => 'string'
 func foobar(x) => 'any'
 
@@ -41,7 +41,7 @@ expect(foobar(CardSuit)).to.equal('enum')
 expect(foobar(CardSuit::Clubs)).to.equal('enum-member')
 expect(foobar(CardSuit::Clubs.value)).to.equal('string')
 expect(foobar(0)).to.equal('number')
-expect(foobar({})).to.equal('dictionary')
+expect(foobar({})).to.equal('object')
 expect(foobar('foo')).to.equal('string')
 expect(foobar([])).to.equal('any')
 

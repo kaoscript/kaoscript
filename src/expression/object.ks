@@ -1,4 +1,4 @@
-class DictionaryExpression extends Expression {
+class ObjectExpression extends Expression {
 	private late {
 		@empty: Boolean				= true
 		@properties					= []
@@ -18,7 +18,7 @@ class DictionaryExpression extends Expression {
 			var late property
 
 			if data.kind == NodeKind::UnaryExpression {
-				property = new DictionarySpreadMember(data, this)
+				property = new ObjectSpreadMember(data, this)
 				property.analyse()
 
 				@spread = true
@@ -26,7 +26,7 @@ class DictionaryExpression extends Expression {
 				@module().flag('Helper')
 			}
 			else if data.name.kind == NodeKind::Identifier || data.name.kind == NodeKind::Literal {
-				property = new DictionaryLiteralMember(data, this)
+				property = new ObjectLiteralMember(data, this)
 				property.analyse()
 
 				if names[property.reference()] {
@@ -36,7 +36,7 @@ class DictionaryExpression extends Expression {
 				names[property.reference()] = true
 			}
 			else if data.name.kind == NodeKind::ThisExpression {
-				property = new DictionaryThisMember(data, this)
+				property = new ObjectThisMember(data, this)
 				property.analyse()
 
 				if names[property.reference()] {
@@ -46,7 +46,7 @@ class DictionaryExpression extends Expression {
 				names[property.reference()] = true
 			}
 			else {
-				property = new DictionaryComputedMember(data, this)
+				property = new ObjectComputedMember(data, this)
 				property.analyse()
 			}
 
@@ -64,15 +64,15 @@ class DictionaryExpression extends Expression {
 			target = target.discardAlias()
 		}
 
-		@type = new DictionaryType(@scope)
+		@type = new ObjectType(@scope)
 
 		if #@properties {
-			if target is DictionaryType {
+			if target is ObjectType {
 				var type = target.getRestType()
 				var rest: Type[] = []
 
 				for var property in @properties {
-					if property is DictionaryComputedMember {
+					if property is ObjectComputedMember {
 						if target.length() > 0 {
 							property.prepare(AnyType.NullableUnexplicit)
 						}
@@ -80,17 +80,17 @@ class DictionaryExpression extends Expression {
 							property.prepare(type)
 						}
 					}
-					else if property is DictionaryLiteralMember {
+					else if property is ObjectLiteralMember {
 						property.prepare(target.getProperty(property.name()))
 
 						@type.addProperty(property.name(), property.type())
 					}
-					else if property is DictionarySpreadMember {
+					else if property is ObjectSpreadMember {
 						property.prepare(type)
 
 						rest.push(property.type())
 					}
-					else if property is DictionaryThisMember {
+					else if property is ObjectThisMember {
 						property.prepare(target.getProperty(property.name()))
 
 						@type.addProperty(property.name(), property.type())
@@ -107,7 +107,7 @@ class DictionaryExpression extends Expression {
 				for var property in @properties {
 					property.prepare(type)
 
-					if property is DictionaryLiteralMember {
+					if property is ObjectLiteralMember {
 						@type.addProperty(property.name(), property.type())
 					}
 				}
@@ -137,7 +137,7 @@ class DictionaryExpression extends Expression {
 	isComputed() => true
 	isMatchingType(type: Type) { # {{{
 		if @properties.length == 0 {
-			return type.isAny() || type.isDictionary()
+			return type.isAny() || type.isObject()
 		}
 		else {
 			return @type.matchContentOf(type)
@@ -176,17 +176,17 @@ class DictionaryExpression extends Expression {
 			fragments.code(@reuseName)
 		}
 		else if @empty {
-			fragments.code('new ', $runtime.dictionary(this), '()')
+			fragments.code('new ', $runtime.object(this), '()')
 		}
 		else if @spread {
-			fragments.code($runtime.helper(this), '.newDictionary(')
+			fragments.code($runtime.helper(this), '.newObject(')
 
 			var mut first = true
 			var mut spread = false
 			var mut arguments = []
 
 			for var property, index in @properties {
-				if property is DictionarySpreadMember {
+				if property is ObjectSpreadMember {
 					if !spread {
 						if arguments.length > 0 {
 							if first {
@@ -300,7 +300,7 @@ class DictionaryExpression extends Expression {
 
 			var block = fragments.newBlock()
 
-			block.line($const(this), @varname, ' = new ', $runtime.dictionary(this), '()')
+			block.line($const(this), @varname, ' = new ', $runtime.object(this), '()')
 
 			for var property in @properties {
 				block.newLine().compile(property).done()
@@ -324,9 +324,9 @@ class DictionaryExpression extends Expression {
 		@reusable = true
 	} # }}}
 	type() => @type
-	validateType(type: DictionaryType) { # {{{
+	validateType(type: ObjectType) { # {{{
 		for var property in @properties {
-			if property is DictionaryLiteralMember {
+			if property is ObjectLiteralMember {
 				if var propertyType ?= type.getProperty(property.name()) {
 					property.validateType(propertyType)
 				}
@@ -338,7 +338,7 @@ class DictionaryExpression extends Expression {
 			var parameter = type.parameter(0)
 
 			for var property in @properties {
-				if property is DictionaryLiteralMember {
+				if property is ObjectLiteralMember {
 					property.validateType(parameter)
 				}
 			}
@@ -347,7 +347,7 @@ class DictionaryExpression extends Expression {
 	varname() => @varname
 }
 
-class DictionaryLiteralMember extends Expression {
+class ObjectLiteralMember extends Expression {
 	private late {
 		@computed: Boolean		= true
 		@enumCasting: Boolean	= false
@@ -439,7 +439,7 @@ class DictionaryLiteralMember extends Expression {
 	value() => @value
 }
 
-class DictionaryComputedMember extends Expression {
+class ObjectComputedMember extends Expression {
 	private {
 		@name
 		@value
@@ -500,7 +500,7 @@ class DictionaryComputedMember extends Expression {
 	value() => @value
 }
 
-class DictionaryThisMember extends Expression {
+class ObjectThisMember extends Expression {
 	private {
 		@name
 		@value
@@ -539,7 +539,7 @@ class DictionaryThisMember extends Expression {
 	value() => @value
 }
 
-class DictionarySpreadMember extends Expression {
+class ObjectSpreadMember extends Expression {
 	private {
 		@type: Type		= AnyType.NullableUnexplicit
 		@value
@@ -551,13 +551,13 @@ class DictionarySpreadMember extends Expression {
 		@value.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var targetDict = Type.dictionaryOf(target, @scope)
+		var targetObj = Type.objectOf(target, @scope)
 
-		@value.prepare(targetDict, targetMode)
+		@value.prepare(targetObj, targetMode)
 
 		var type = @value.type()
 
-		if type.isDictionary() {
+		if type.isObject() {
 			@type = type.parameter()
 		}
 		else {

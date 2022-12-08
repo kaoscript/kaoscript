@@ -411,7 +411,7 @@ class ObjectBinding extends Expression {
 				}
 			}
 		}
-		else if @type is DictionaryType {
+		else if @type is ObjectType {
 			for var element in @elements {
 				if element.isRequired() {
 					if var property ?= @type.getProperty(element.name()) {

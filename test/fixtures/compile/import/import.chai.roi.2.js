@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(assert, Assertion, config, expect, should, Should, use) {
 	var __ks_0_valuable = Type.isValue(assert);
 	var __ks_1_valuable = Type.isValue(Assertion);
@@ -80,7 +80,7 @@ module.exports = function(assert, Assertion, config, expect, should, Should, use
 				flag(this, "message", msg);
 			}
 			this.assert(deepEql(obj, this._obj, (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.comparator = comparator;
 				return d;
 			})()), "expected #{this} to deeply equal #{exp}", "expected #{this} to not deeply equal #{exp}", obj, this._obj, true);

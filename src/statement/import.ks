@@ -84,8 +84,8 @@ struct ImportedVariable {
 
 struct Arguments {
 	values: Array					= []
-	fromLocal: Dictionary			= {}
-	toImport: Dictionary			= {}
+	fromLocal: Object				= {}
+	toImport: Object				= {}
 }
 
 enum ImportMode {
@@ -113,7 +113,7 @@ abstract class Importer extends Statement {
 		@pathAddendum: String						= ''
 		@reusable: Boolean							= false
 		@reuseName: String
-		@variables: Dictionary<ImportedVariable>	= {}
+		@variables: Object<ImportedVariable>	= {}
 		@variationId: String
 		@worker: ImportWorker
 	}
@@ -226,8 +226,8 @@ abstract class Importer extends Statement {
 							@count += 1
 						}
 
-						if type.isSystem() && def.internal == 'Dictionary' {
-							module.flag('Dictionary')
+						if type.isSystem() && def.internal == 'Object' {
+							module.flag('Object')
 						}
 						else {
 							module.import(def.internal)
@@ -862,7 +862,7 @@ abstract class Importer extends Statement {
 		@moduleName = moduleName!?
 
 		var type = Type.fromAST(@data.type, this)
-		var container = type is DictionaryType | NamespaceType
+		var container = type is ObjectType | NamespaceType
 
 		if container {
 			for var type of type.properties() {

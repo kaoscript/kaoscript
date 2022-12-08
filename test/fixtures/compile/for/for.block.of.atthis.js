@@ -1,4 +1,4 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Matcher {
 		static __ks_new_0() {
@@ -12,7 +12,7 @@ module.exports = function() {
 		}
 		__ks_init() {
 			this._likes = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.leto = "spice";
 				d.paul = "chani";
 				d.duncan = "murbella";

@@ -113,17 +113,6 @@ abstract class Scope {
 		return @resolveReference('Array', value.isNullable())
 	} # }}}
 	reference(value: ClassVariableType): ReferenceType => @reference(value.type())
-	reference(value: DictionaryType): ReferenceType { # {{{
-		if value.hasProperties() {
-			throw new NotSupportedException()
-		}
-
-		if value.hasRest() {
-			return @resolveReference('Dictionary', value.isNullable(), [value.parameter()])
-		}
-
-		return @resolveReference('Dictionary', value.isNullable())
-	} # }}}
 	reference(value: NamedType): ReferenceType { # {{{
 		if value.hasContainer() {
 			return value.container().scope().reference(value.name())
@@ -131,6 +120,17 @@ abstract class Scope {
 		else {
 			return @resolveReference(value.name())
 		}
+	} # }}}
+	reference(value: ObjectType): ReferenceType { # {{{
+		if value.hasProperties() {
+			throw new NotSupportedException()
+		}
+
+		if value.hasRest() {
+			return @resolveReference('Object', value.isNullable(), [value.parameter()])
+		}
+
+		return @resolveReference('Object', value.isNullable())
 	} # }}}
 	reference(value: ReferenceType): ReferenceType => @resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
 	reference(value: Variable): ReferenceType => @resolveReference(value.name())

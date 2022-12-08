@@ -1,4 +1,4 @@
-const {Dictionary, Helper: KSHelper, Type: KSType} = require("@kaoscript/runtime");
+const {Helper: KSHelper, OBJ, Type: KSType} = require("@kaoscript/runtime");
 module.exports = function() {
 	var TimSort = require("timsort");
 	function $clone() {
@@ -11,8 +11,8 @@ module.exports = function() {
 		else if(KSType.isArray(value)) {
 			return __ks_Array.__ks_func_clone_0.call(value);
 		}
-		else if(KSType.isDictionary(value)) {
-			return __ks_Dictionary.__ks_sttc_clone_0(value);
+		else if(KSType.isObject(value)) {
+			return __ks_Object.__ks_sttc_clone_0(value);
 		}
 		else {
 			return value;
@@ -32,7 +32,7 @@ module.exports = function() {
 			source[key] = __ks_Array.__ks_func_clone_0.call(value);
 		}
 		else if(!KSType.isPrimitive(value)) {
-			if(KSType.isDictionary(source[key]) || KSType.isObject(source[key])) {
+			if(KSType.isObject(source[key])) {
 				$mergeObject(source[key], value);
 			}
 			else {
@@ -76,7 +76,7 @@ module.exports = function() {
 		throw KSHelper.badArgs();
 	};
 	var __ks_Array = {};
-	var __ks_Dictionary = {};
+	var __ks_Object = {};
 	__ks_Array.__ks_sttc_merge_0 = function(args) {
 		const l = args.length;
 		let source = [];
@@ -384,30 +384,30 @@ module.exports = function() {
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary.__ks_sttc_clone_0 = function(dict) {
-		if(KSType.isFunction(dict.clone)) {
-			return dict.clone();
+	__ks_Object.__ks_sttc_clone_0 = function(object) {
+		if(KSType.isFunction(object.clone)) {
+			return object.clone();
 		}
-		const clone = new Dictionary();
-		for(const key in dict) {
-			const value = dict[key];
+		const clone = new OBJ();
+		for(const key in object) {
+			const value = object[key];
 			clone[key] = $clone.__ks_0(value);
 		}
 		return clone;
 	};
-	__ks_Dictionary.__ks_sttc_defaults_0 = function(args) {
-		return __ks_Dictionary.__ks_sttc_merge_0([new Dictionary(), ...args]);
+	__ks_Object.__ks_sttc_defaults_0 = function(args) {
+		return __ks_Object.__ks_sttc_merge_0([new OBJ(), ...args]);
 	};
-	__ks_Dictionary.__ks_sttc_isEmpty_0 = function(dict) {
-		for(let __ks_0 in dict) {
-			const value = dict[__ks_0];
+	__ks_Object.__ks_sttc_isEmpty_0 = function(object) {
+		for(let __ks_0 in object) {
+			const value = object[__ks_0];
 			return false;
 		}
 		return true;
 	};
-	__ks_Dictionary.__ks_sttc_key_0 = function(dict, index) {
+	__ks_Object.__ks_sttc_key_0 = function(object, index) {
 		let i = 0;
-		for(const key in dict) {
+		for(const key in object) {
 			if(i === index) {
 				return key;
 			}
@@ -415,26 +415,26 @@ module.exports = function() {
 		}
 		return null;
 	};
-	__ks_Dictionary.__ks_sttc_length_0 = function(dict) {
-		return Dictionary.keys(dict).length;
+	__ks_Object.__ks_sttc_length_0 = function(object) {
+		return Object.keys(object).length;
 	};
-	__ks_Dictionary.__ks_sttc_map_0 = function(dict, fn) {
-		return Dictionary.entries(dict).map(fn);
+	__ks_Object.__ks_sttc_map_0 = function(object, fn) {
+		return Object.entries(object).map(fn);
 	};
-	__ks_Dictionary.__ks_sttc_merge_0 = function(args) {
-		let source = new Dictionary();
+	__ks_Object.__ks_sttc_merge_0 = function(args) {
+		let source = new OBJ();
 		let i = 0;
 		const l = args.length;
 		let src;
-		while((i < l) && !((KSType.isValue(args[i]) ? (src = args[i], true) : false) && KSType.isDictionary(src))) {
+		while((i < l) && !((KSType.isValue(args[i]) ? (src = args[i], true) : false) && KSType.isObject(src))) {
 			i += 1;
 		}
 		i += 1;
-		if(KSType.isValue(src) && KSType.isDictionary(src)) {
+		if(KSType.isValue(src) && KSType.isObject(src)) {
 			source = src;
 		}
 		while(i < l) {
-			if(KSType.isDictionary(args[i]) || KSType.isObject(args[i])) {
+			if(KSType.isObject(args[i])) {
 				for(const key in args[i]) {
 					const value = args[i][key];
 					$merge(source, key, value);
@@ -444,8 +444,8 @@ module.exports = function() {
 		}
 		return source;
 	};
-	__ks_Dictionary.__ks_sttc_same_0 = function(a, b) {
-		if(!__ks_Array.__ks_sttc_same_0(Dictionary.keys(a), Dictionary.keys(b))) {
+	__ks_Object.__ks_sttc_same_0 = function(a, b) {
+		if(!__ks_Array.__ks_sttc_same_0(Object.keys(a), Object.keys(b))) {
 			return false;
 		}
 		for(const key in a) {
@@ -456,10 +456,10 @@ module.exports = function() {
 		}
 		return true;
 	};
-	__ks_Dictionary.__ks_sttc_value_0 = function(dict, index) {
+	__ks_Object.__ks_sttc_value_0 = function(object, index) {
 		let i = 0;
-		for(let __ks_0 in dict) {
-			const value = dict[__ks_0];
+		for(let __ks_0 in object) {
+			const value = object[__ks_0];
 			if(i === index) {
 				return value;
 			}
@@ -467,105 +467,105 @@ module.exports = function() {
 		}
 		return null;
 	};
-	__ks_Dictionary._sm_clone = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_clone = function() {
+		const t0 = KSType.isObject;
 		if(arguments.length === 1) {
 			if(t0(arguments[0])) {
-				return __ks_Dictionary.__ks_sttc_clone_0(arguments[0]);
+				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Dictionary.clone) {
-			return Dictionary.clone(...arguments);
+		if(Object.clone) {
+			return Object.clone(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_defaults = function() {
+	__ks_Object._sm_defaults = function() {
 		const t0 = KSType.isValue;
 		const te = (pts, idx) => KSHelper.isUsingAllArgs(arguments, pts, idx);
 		let pts;
 		if(KSHelper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-			return __ks_Dictionary.__ks_sttc_defaults_0(KSHelper.getVarargs(arguments, 0, pts[1]));
+			return __ks_Object.__ks_sttc_defaults_0(KSHelper.getVarargs(arguments, 0, pts[1]));
 		}
-		if(Dictionary.defaults) {
-			return Dictionary.defaults(...arguments);
+		if(Object.defaults) {
+			return Object.defaults(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_isEmpty = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_isEmpty = function() {
+		const t0 = KSType.isObject;
 		if(arguments.length === 1) {
 			if(t0(arguments[0])) {
-				return __ks_Dictionary.__ks_sttc_isEmpty_0(arguments[0]);
+				return __ks_Object.__ks_sttc_isEmpty_0(arguments[0]);
 			}
 		}
-		if(Dictionary.isEmpty) {
-			return Dictionary.isEmpty(...arguments);
+		if(Object.isEmpty) {
+			return Object.isEmpty(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_key = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_key = function() {
+		const t0 = KSType.isObject;
 		const t1 = KSType.isNumber;
 		if(arguments.length === 2) {
 			if(t0(arguments[0]) && t1(arguments[1])) {
-				return __ks_Dictionary.__ks_sttc_key_0(arguments[0], arguments[1]);
+				return __ks_Object.__ks_sttc_key_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Dictionary.key) {
-			return Dictionary.key(...arguments);
+		if(Object.key) {
+			return Object.key(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_length = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_length = function() {
+		const t0 = KSType.isObject;
 		if(arguments.length === 1) {
 			if(t0(arguments[0])) {
-				return __ks_Dictionary.__ks_sttc_length_0(arguments[0]);
+				return __ks_Object.__ks_sttc_length_0(arguments[0]);
 			}
 		}
-		if(Dictionary.length) {
-			return Dictionary.length(...arguments);
+		if(Object.length) {
+			return Object.length(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_map = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_map = function() {
+		const t0 = KSType.isObject;
 		const t1 = KSType.isFunction;
 		if(arguments.length === 2) {
 			if(t0(arguments[0]) && t1(arguments[1])) {
-				return __ks_Dictionary.__ks_sttc_map_0(arguments[0], arguments[1]);
+				return __ks_Object.__ks_sttc_map_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Dictionary.map) {
-			return Dictionary.map(...arguments);
+		if(Object.map) {
+			return Object.map(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_merge = function() {
-		return __ks_Dictionary.__ks_sttc_merge_0(Array.from(arguments));
+	__ks_Object._sm_merge = function() {
+		return __ks_Object.__ks_sttc_merge_0(Array.from(arguments));
 	};
-	__ks_Dictionary._sm_same = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_same = function() {
+		const t0 = KSType.isObject;
 		if(arguments.length === 2) {
 			if(t0(arguments[0]) && t0(arguments[1])) {
-				return __ks_Dictionary.__ks_sttc_same_0(arguments[0], arguments[1]);
+				return __ks_Object.__ks_sttc_same_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Dictionary.same) {
-			return Dictionary.same(...arguments);
+		if(Object.same) {
+			return Object.same(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};
-	__ks_Dictionary._sm_value = function() {
-		const t0 = KSType.isDictionary;
+	__ks_Object._sm_value = function() {
+		const t0 = KSType.isObject;
 		const t1 = KSType.isNumber;
 		if(arguments.length === 2) {
 			if(t0(arguments[0]) && t1(arguments[1])) {
-				return __ks_Dictionary.__ks_sttc_value_0(arguments[0], arguments[1]);
+				return __ks_Object.__ks_sttc_value_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Dictionary.value) {
-			return Dictionary.value(...arguments);
+		if(Object.value) {
+			return Object.value(...arguments);
 		}
 		throw KSHelper.badArgs();
 	};

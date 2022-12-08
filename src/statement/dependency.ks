@@ -791,8 +791,8 @@ abstract class Requirement {
 		@type: Type
 	}
 	constructor(@name, @type, @node) { # {{{
-		if @type.isSystem() && @name == 'Dictionary' {
-			node.module().flag('Dictionary')
+		if @type.isSystem() && @name == 'Object' {
+			node.module().flag('Object')
 		}
 	} # }}}
 	constructor(variable: Variable, @node) { # {{{

@@ -1,6 +1,6 @@
 class StructType extends Type {
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): StructType { # {{{
 			var value = new StructType(scope)
 
 			queue.push(() => {
@@ -25,7 +25,7 @@ class StructType extends Type {
 		@count: Number							= 0
 		@extending: Boolean						= false
 		@extends: NamedType<StructType>?		= null
-		@fields: Dictionary<StructFieldType>	= {}
+		@fields: Object<StructFieldType>		= {}
 		@function: FunctionType?				= null
 	}
 	addField(field: StructFieldType) { # {{{
@@ -392,7 +392,7 @@ class StructFieldType extends Type {
 		@type: Type
 	}
 	static {
-		import(index: Number, name: String?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { # {{{
+		import(index: Number, name: String?, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
 			return new StructFieldType(scope, name, index, fieldType, data.required)

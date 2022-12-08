@@ -1,3 +1,3 @@
-func foobar(x: Dictionary) {
-	var keys = Dictionary.keys(x)
+func foobar(x: Object) {
+	var keys = Object.keys(x)
 }

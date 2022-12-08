@@ -26,7 +26,7 @@ class SwitchStatement extends Statement {
 		@clauses							= []
 		@hasDefaultClause: Boolean			= false
 		@hasLateInitVariables: Boolean		= false
-		@initializedVariables: Dictionary	= {}
+		@initializedVariables: Object		= {}
 		@lateInitVariables					= {}
 		@name: String?						= null
 		@nextClauseIndex: Number

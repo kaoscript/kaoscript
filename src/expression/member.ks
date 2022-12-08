@@ -8,7 +8,7 @@ class MemberExpression extends Expression {
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
 		@object: Expression
-		@objectType: DictionaryType?
+		@objectType: ObjectType?
 		@path: String
 		@prepareObject: Boolean			= true
 		@property
@@ -103,7 +103,7 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				if nf && type.isDictionary() {
+				if nf && type.isObject() {
 					if @property is NumberLiteral | StringLiteral {
 						if var property ?= type.getProperty(@property.value()) {
 							@type = property

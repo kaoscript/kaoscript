@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
 		static __ks_new_0() {
@@ -58,31 +58,31 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "srgb";
 		d["alias"] = ["rgb"];
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["red"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_red";
 				return d;
 			})();
 			d["green"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_green";
 				return d;
 			})();
 			d["blue"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				d["field"] = "_blue";
 				return d;
 			})();
 			d["alpha"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["mutator"] = true;
 				d["field"] = "_alpha";
 				return d;

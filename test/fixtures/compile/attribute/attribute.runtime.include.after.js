@@ -18,7 +18,7 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x) {
-		if($ksType.isDictionary(x)) {
+		if($ksType.isObject(x)) {
 			return $ksType.isEmptyObject(x);
 		}
 		else {

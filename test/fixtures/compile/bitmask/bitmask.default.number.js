@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const AnimalFlags = Helper.enum(Number, {
 		None: 0,
@@ -34,7 +34,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let animal = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.flags = AnimalFlags.None;
 		return d;
 	})();

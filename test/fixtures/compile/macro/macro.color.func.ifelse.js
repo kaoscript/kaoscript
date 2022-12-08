@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
 		static __ks_new_0() {
@@ -19,10 +19,10 @@ module.exports = function() {
 		}
 	}
 	Color.registerSpace((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.srgb = Helper.function(function(that) {
 				if(that._foo === true) {
 				}

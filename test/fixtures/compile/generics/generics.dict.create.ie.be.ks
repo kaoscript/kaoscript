@@ -1,3 +1,3 @@
-var map: Dictionary<Number> = {
+var map: Object<Number> = {
 	foobar: true
 }

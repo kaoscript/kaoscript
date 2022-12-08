@@ -1,4 +1,4 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Object) {
 	if(!Type.isValue(__ks_Object)) {
 		__ks_Object = {};

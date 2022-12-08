@@ -1,13 +1,13 @@
 class NamespaceType extends Type {
 	private late {
 		@altering: Boolean					= false
-		@alterations: Dictionary			= {}
+		@alterations: Object				= {}
 		@majorOriginal: NamespaceType?
-		@properties: Dictionary				= {}
-		@sealProperties: Dictionary			= {}
+		@properties: Object					= {}
+		@sealProperties: Object				= {}
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
 			var type = new NamespaceType(scope)
 
 			if ?data.exhaustive {

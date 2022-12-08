@@ -24,7 +24,7 @@
             "access": 4,
             "type": {
               "kind": "reference",
-              "name": "Dictionary",
+              "name": "Object",
               "parameters": [
                 "Number"
               ]

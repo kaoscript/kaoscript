@@ -1,8 +1,8 @@
 extern console
 
-extern sealed class Dictionary
+extern sealed class Object
 
-impl Dictionary {
+impl Object {
 	map(iterator: func) {
 		var dyn results = []
 

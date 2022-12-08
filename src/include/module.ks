@@ -83,7 +83,7 @@ export class Module {
 			@includePaths[path] = modulePath
 		}
 
-		if @includeModules[modulePath] is Dictionary {
+		if @includeModules[modulePath] is Object {
 			@includeModules[modulePath].paths:Array.pushUniq(path)
 			@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
 		}
@@ -250,7 +250,7 @@ export class Module {
 		return true
 	} # }}}
 	listIncludeVersions(path, modulePath) { # {{{
-		if @includeModules[modulePath] is Dictionary {
+		if @includeModules[modulePath] is Object {
 			return @includeModules[modulePath].versions
 		}
 		else if @includePaths[path] == true {
@@ -421,15 +421,15 @@ export class Module {
 			line.done()
 		}
 
-		var dictionary = $runtime.dictionary(this)
 		var helper = $runtime.helper(this)
 		var initFlag = $runtime.initFlag(this)
+		var object = $runtime.object(this)
 		var operator = $runtime.operator(this)
 		var type = $runtime.type(this)
 
-		var mut hasDictionary = @flags.Dictionary == true && !@imports[dictionary]
 		var mut hasHelper = @flags.Helper == true && !@imports[helper]
 		var mut hasInitFlag = @flags.initFlag == true
+		var mut hasObject = @flags.Object == true && !@imports[object]
 		var mut hasOperator = @flags.Operator == true && !@imports[operator]
 		var mut hasType = @flags.Type == true && !@imports[type]
 
@@ -445,14 +445,6 @@ export class Module {
 		}
 
 		var packages = {}
-		if hasDictionary {
-			packages[@options.runtime.dictionary.package] ??= []
-
-			packages[@options.runtime.dictionary.package].push({
-				name: dictionary
-				options: @options.runtime.dictionary
-			})
-		}
 		if hasHelper {
 			packages[@options.runtime.helper.package] ??= []
 
@@ -467,6 +459,14 @@ export class Module {
 			packages[@options.runtime.initFlag.package].push({
 				name: initFlag
 				options: @options.runtime.initFlag
+			})
+		}
+		if hasObject {
+			packages[@options.runtime.object.package] ??= []
+
+			packages[@options.runtime.object.package].push({
+				name: object
+				options: @options.runtime.object
 			})
 		}
 		if hasOperator {

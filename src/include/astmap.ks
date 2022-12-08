@@ -80,7 +80,7 @@ var $expressions = {
 	`\(NodeKind::NamedArgument)`				: NamedArgument
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
-	`\(NodeKind::ObjectExpression)`				: DictionaryExpression
+	`\(NodeKind::ObjectExpression)`				: ObjectExpression
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::PositionalArgument)`			: PositionalArgument
 	`\(NodeKind::RegularExpression)`			: RegularExpression

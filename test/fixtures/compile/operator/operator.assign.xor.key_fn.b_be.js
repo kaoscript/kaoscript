@@ -8,7 +8,7 @@ module.exports = function() {
 		props[__ks_0 = key()] = props[__ks_0] !== value;
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDictionary(value, Type.isBoolean);
+		const t0 = value => Type.isObject(value, Type.isBoolean);
 		const t1 = Type.isFunction;
 		const t2 = Type.isBoolean;
 		if(args.length === 3) {

@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	const Foobar = Helper.enum(Number, {
 		foo: 1,
@@ -20,7 +20,7 @@ module.exports = function(expect) {
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isEnumInstance(value, Foobar);
 		const t1 = Type.isNumber;
-		const t2 = Type.isDictionary;
+		const t2 = Type.isObject;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
@@ -37,7 +37,7 @@ module.exports = function(expect) {
 	expect(foobar.__ks_0(Foobar.foo)).to.equal("enum");
 	expect(foobar.__ks_0(Foobar(Foobar.foo | Foobar.bar))).to.equal("enum");
 	expect(foobar.__ks_1(0)).to.equal("number");
-	expect(foobar.__ks_2(new Dictionary())).to.equal("dictionary");
+	expect(foobar.__ks_2(new OBJ())).to.equal("dictionary");
 	function testIf() {
 		return testIf.__ks_rt(this, arguments);
 	};

@@ -13,7 +13,7 @@
       {
         "kind": "alias",
         "of": {
-          "kind": "dictionary",
+          "kind": "object",
           "properties": {
             "x": "Number",
             "y": "Number",

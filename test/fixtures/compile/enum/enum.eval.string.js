@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	const CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
@@ -13,12 +13,12 @@ module.exports = function(expect) {
 	expect(">>> " + x).to.equal(">>> clubs");
 	expect(x.value).to.equal("clubs");
 	expect(JSON.stringify((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.id = x;
 		return d;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	expect(JSON.stringify((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.id = x.value;
 		return d;
 	})())).to.equal("{\"id\":\"clubs\"}");
@@ -48,7 +48,7 @@ module.exports = function(expect) {
 		const t1 = Type.isNumber;
 		const t2 = value => Type.isEnumInstance(value, CardSuit);
 		const t3 = Type.isString;
-		const t4 = Type.isDictionary;
+		const t4 = Type.isObject;
 		const t5 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
@@ -76,7 +76,7 @@ module.exports = function(expect) {
 	expect(foobar.__ks_1(CardSuit.Clubs)).to.equal("enum-member");
 	expect(foobar.__ks_4(CardSuit.Clubs.value)).to.equal("string");
 	expect(foobar.__ks_2(0)).to.equal("number");
-	expect(foobar.__ks_3(new Dictionary())).to.equal("dictionary");
+	expect(foobar.__ks_3(new OBJ())).to.equal("dictionary");
 	expect(foobar.__ks_4("foo")).to.equal("string");
 	function testIf() {
 		return testIf.__ks_rt(this, arguments);

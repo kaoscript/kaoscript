@@ -17,7 +17,7 @@ module.exports = function() {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isNumber;
-		const t1 = value => Type.isString(value) || Type.isDictionary(value);
+		const t1 = value => Type.isString(value) || Type.isObject(value);
 		const t2 = Type.isString;
 		const t3 = value => Type.isNumber(value) || Type.isString(value);
 		const t4 = value => Type.isClassInstance(value, Date);

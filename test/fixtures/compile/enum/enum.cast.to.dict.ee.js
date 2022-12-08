@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Color = Helper.enum(String, {
 		Red: "red",
@@ -6,7 +6,7 @@ module.exports = function() {
 		Blue: "blue"
 	});
 	const aliases = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.r = Color.Red;
 		return d;
 	})();

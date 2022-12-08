@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Color = Helper.enum(Number, {
 		Red: 0,
@@ -16,7 +16,7 @@ module.exports = function() {
 			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			this._colors = new Dictionary();
+			this._colors = new OBJ();
 		}
 		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {

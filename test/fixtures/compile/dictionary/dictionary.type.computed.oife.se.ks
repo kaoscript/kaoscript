@@ -1,5 +1,5 @@
 class Foobar {
-	public values: Dictionary<Number>	= {}
+	public values: Object<Number>	= {}
 }
 
 func set(name: String, value: String): Foobar {

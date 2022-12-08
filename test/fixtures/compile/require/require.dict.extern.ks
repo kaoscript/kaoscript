@@ -1,3 +1,3 @@
-extern system class Dictionary
+extern system class Object
 
-export Dictionary
+export Object

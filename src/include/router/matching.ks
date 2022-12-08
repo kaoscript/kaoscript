@@ -704,7 +704,7 @@ namespace Matching {
 
 		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
 			if !leaf.function.isAsync() {
-				// console.log('leaf', toString(cursor))
+				// console.log('leaf', toString(cursor), leaf.function.hashCode())
 				{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
 				// console.log(toString(cursor), argMatches, context.arguments.length)
 				return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
@@ -838,10 +838,10 @@ namespace Matching {
 				}
 			}
 
-			var mut possibleFunctions: Array = Dictionary.keys(route.functions)
+			var mut possibleFunctions: Array = Object.keys(route.functions)
 
 			var preciseness = {}
-			var excludes = Dictionary.keys(nameds)
+			var excludes = Object.keys(nameds)
 
 			for var key in possibleFunctions {
 				preciseness[key] = true
@@ -889,7 +889,7 @@ namespace Matching {
 				}
 			}
 
-			if Dictionary.isEmpty(shorthands) {
+			if Object.isEmpty(shorthands) {
 				return matchIndex(
 					assessment
 					route
@@ -953,7 +953,7 @@ namespace Matching {
 
 				var perArguments = {}
 				for var { shorthands, indexeds, preciseness }, key of perFunctions {
-					var hash = Dictionary.keys(shorthands).join()
+					var hash = Object.keys(shorthands).join()
 
 					if hash.length > 0 {
 						if var perArgument ?= perArguments[hash] {
@@ -973,7 +973,7 @@ namespace Matching {
 					}
 				}
 
-				if Dictionary.isEmpty(perArguments) {
+				if Object.isEmpty(perArguments) {
 					return matchIndex(
 						assessment
 						route
@@ -1003,7 +1003,7 @@ namespace Matching {
 							newIndexeds
 							perArgument.functions
 							perArgument.preciseness
-							[...excludes, ...Dictionary.keys(perArgument.shorthands)]
+							[...excludes, ...Object.keys(perArgument.shorthands)]
 							node
 						) {
 							return result
@@ -1108,7 +1108,7 @@ namespace Matching {
 					var function = getMostPreciseFunction([route.functions[key] for var key in shortestFunctions], nameds, shorthands)
 					var positions = []
 
-					var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
+					var mut namedLefts = Object.length(nameds) + Object.length(shorthands)
 
 					for var parameter in function.parameters() {
 						var name = parameter.getExternalName()
@@ -1146,7 +1146,7 @@ namespace Matching {
 						var newPositions = []
 						var newLabels = {}
 
-						var mut namedLefts = Dictionary.length(nameds) + Dictionary.length(shorthands)
+						var mut namedLefts = Object.length(nameds) + Object.length(shorthands)
 
 						for var parameter in function.parameters() {
 							var name = parameter.getExternalName()

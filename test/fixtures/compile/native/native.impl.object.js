@@ -1,7 +1,7 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Dictionary = {};
-	__ks_Dictionary.__ks_func_map_0 = function(iterator) {
+	var __ks_Object = {};
+	__ks_Object.__ks_func_map_0 = function(iterator) {
 		let results = [];
 		for(let index in this) {
 			let item = this[index];
@@ -9,14 +9,14 @@ module.exports = function() {
 		}
 		return results;
 	};
-	__ks_Dictionary._im_map = function(that, ...args) {
-		return __ks_Dictionary.__ks_func_map_rt(that, args);
+	__ks_Object._im_map = function(that, ...args) {
+		return __ks_Object.__ks_func_map_rt(that, args);
 	};
-	__ks_Dictionary.__ks_func_map_rt = function(that, args) {
+	__ks_Object.__ks_func_map_rt = function(that, args) {
 		const t0 = Type.isFunction;
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return __ks_Dictionary.__ks_func_map_0.call(that, args[0]);
+				return __ks_Object.__ks_func_map_0.call(that, args[0]);
 			}
 		}
 		if(that.map) {
@@ -24,15 +24,15 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	console.log(__ks_Dictionary.__ks_func_map_0.call((() => {
-		const d = new Dictionary();
+	console.log(__ks_Object.__ks_func_map_0.call((() => {
+		const d = new OBJ();
 		d.leto = "spice";
 		d.paul = "chani";
 		d.duncan = "murbella";
 		return d;
 	})(), Helper.function((item, name) => {
 		return (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.name = name;
 			d.item = item;
 			return d;

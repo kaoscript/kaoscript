@@ -424,7 +424,7 @@ class ArrayComprehensionForOf extends Expression {
 		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
-		if !(type.isAny() || type.isDictionary() || type.isObject()) {
+		if !(type.isAny() || type.isObject()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 
@@ -488,7 +488,7 @@ class ArrayComprehensionForOf extends Expression {
 		var surround = $function.surround(this)
 
 		fragments
-			.code($runtime.helper(this), '.mapDictionary(')
+			.code($runtime.helper(this), '.mapObject(')
 			.compile(@expression)
 			.code(', ')
 

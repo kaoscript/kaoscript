@@ -1,4 +1,4 @@
-func foobar(dict: Dictionary) {
+func foobar(dict: Object) {
 	for var item of dict {
 		quxbaz(item)
 	}

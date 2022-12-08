@@ -11,7 +11,7 @@
     ],
     "references": [
       {
-        "kind": "dictionary",
+        "kind": "object",
         "properties": {
           "corge": {
             "kind": "function",

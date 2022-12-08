@@ -17,9 +17,9 @@ module.exports = function() {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;
-		const t1 = value => Type.isDictionary(value, Type.isBoolean);
-		const t2 = value => Type.isDictionary(value, Type.isNumber);
-		const t3 = value => Type.isDictionary(value, Type.isString);
+		const t1 = value => Type.isObject(value, Type.isBoolean);
+		const t2 = value => Type.isObject(value, Type.isNumber);
+		const t3 = value => Type.isObject(value, Type.isString);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_3.call(that, args[0]);

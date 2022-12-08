@@ -1,5 +1,5 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = require("./_/._array.ks.j5k8r9.ksb")().__ks_Array;
 	var Float = require("./_/._float.ks.j5k8r9.ksb")().Float;
@@ -7,12 +7,12 @@ module.exports = function() {
 	var __ks_Math = require("./_/._math.ks.j5k8r9.ksb")().__ks_Math;
 	var __ks_Number = require("./_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	var __ks_String = require("./_/._string.ks.j5k8r9.ksb")().__ks_String;
-	const $spaces = new Dictionary();
-	const $aliases = new Dictionary();
-	const $components = new Dictionary();
-	const $formatters = new Dictionary();
+	const $spaces = new OBJ();
+	const $aliases = new OBJ();
+	const $components = new OBJ();
+	const $formatters = new OBJ();
 	const $names = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["aliceblue"] = "f0f8ff";
 		d["antiquewhite"] = "faebd7";
 		d["aqua"] = "0ff";
@@ -183,7 +183,7 @@ module.exports = function() {
 	};
 	$binder.__ks_0 = function(last, components, first, firstArgs) {
 		const that = first.call(null, ...firstArgs);
-		const lastArgs = Helper.mapDictionary(components, function(name, component) {
+		const lastArgs = Helper.mapObject(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
@@ -268,9 +268,9 @@ module.exports = function() {
 		$spaces[space].components[name] = component;
 		if(!Type.isValue($components[name])) {
 			$components[name] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.field = component.field;
-				d.spaces = new Dictionary();
+				d.spaces = new OBJ();
 				d.families = [];
 				return d;
 			})();
@@ -294,14 +294,14 @@ module.exports = function() {
 	$convert.__ks_0 = function(that, space, result) {
 		if(result === void 0 || result === null) {
 			result = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d._alpha = 0;
 				return d;
 			})();
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
-			const args = Helper.mapDictionary(s.components, function(name, component) {
+			const args = Helper.mapObject(s.components, function(name, component) {
 				return that[component.field];
 			});
 			args.push(result);
@@ -316,7 +316,7 @@ module.exports = function() {
 	$convert.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Color);
 		const t1 = Type.isString;
-		const t2 = value => Type.isDictionary(value) || Type.isClassInstance(value, Color) || Type.isNull(value);
+		const t2 = value => Type.isClassInstance(value, Color) || Type.isObject(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length >= 2 && args.length <= 3) {
@@ -417,7 +417,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const $parsers = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.srgb = Helper.function(function(that, args) {
 			if(args.length === 1) {
 				if(Type.isNumber(args[0])) {
@@ -436,7 +436,7 @@ module.exports = function() {
 					that._blue = $caster.ff(args[0][2]);
 					return true;
 				}
-				else if(Type.isDictionary(args[0])) {
+				else if(Type.isObject(args[0])) {
 					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha.__ks_0(args[0].a);
@@ -609,10 +609,10 @@ module.exports = function() {
 	};
 	$space.__ks_0 = function(name) {
 		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : (() => {
-			const d = new Dictionary();
-			d.alias = new Dictionary();
-			d.converters = new Dictionary();
-			d.components = new Dictionary();
+			const d = new OBJ();
+			d.alias = new OBJ();
+			d.converters = new OBJ();
+			d.components = new OBJ();
 			return d;
 		})();
 	};
@@ -782,7 +782,7 @@ module.exports = function() {
 				}
 				ratio = __ks_Number.__ks_func_round_0.call(ratio, 2);
 				return (() => {
-					const d = new Dictionary();
+					const d = new OBJ();
 					d.ratio = ratio;
 					d.error = 0;
 					d.min = ratio;
@@ -797,7 +797,7 @@ module.exports = function() {
 				const closest = Color.__ks_new_0([__ks_Number.__ks_func_limit_0.call((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._blue - (this._blue * a)) / (1 - a), 0, 255)]);
 				const min = this.__ks_func_clone_0().__ks_func_blend_0(closest, 0.5, Space.SRGB, true).__ks_func_contrast_0(color).ratio;
 				return (() => {
-					const d = new Dictionary();
+					const d = new OBJ();
 					d.ratio = __ks_Number.__ks_func_round_0.call((min + max) / 2, 2);
 					d.error = __ks_Number.__ks_func_round_0.call((max - min) / 2, 2);
 					d.min = min;
@@ -1368,7 +1368,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_registerFormatter_0(format, formatter) {
 			$formatters[format] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.formatter = formatter;
 				return d;
 			})();
@@ -1397,14 +1397,14 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerSpace_0(space) {
-			const spaces = Dictionary.keys($spaces);
+			const spaces = Object.keys($spaces);
 			$space(space.name);
 			if(Type.isValue(space.parser)) {
 				$parsers[space.name] = space.parser;
 			}
 			if(Type.isValue(space.formatter)) {
 				$formatters[space.name] = (() => {
-					const d = new Dictionary();
+					const d = new OBJ();
 					d.space = space.name;
 					d.formatter = space.formatter;
 					return d;
@@ -1414,7 +1414,7 @@ module.exports = function() {
 				for(let name in space.formatters) {
 					let formatter = space.formatters[name];
 					$formatters[name] = (() => {
-						const d = new Dictionary();
+						const d = new OBJ();
 						d.space = space.name;
 						d.formatter = formatter;
 						return d;
@@ -1496,7 +1496,7 @@ module.exports = function() {
 			}
 		}
 		static registerSpace() {
-			const t0 = Type.isDictionary;
+			const t0 = Type.isObject;
 			if(arguments.length === 1) {
 				if(t0(arguments[0])) {
 					return Color.__ks_sttc_registerSpace_0(arguments[0]);
@@ -1508,11 +1508,11 @@ module.exports = function() {
 	Space.SRGB = Space("srgb");
 	Space.RGB = Space("rgb");
 	Color.__ks_sttc_registerSpace_0((() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d["name"] = "srgb";
 		d["alias"] = ["rgb"];
 		d["formatters"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.hex = Helper.function(function(that) {
 				return $hex.__ks_0(that);
 			}, (fn, ...args) => {
@@ -1543,19 +1543,19 @@ module.exports = function() {
 			return d;
 		})();
 		d["components"] = (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d["red"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["green"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
 			d["blue"] = (() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d["max"] = 255;
 				return d;
 			})();
@@ -1634,7 +1634,7 @@ module.exports = function() {
 		return this.__ks_func_blue_rt.call(null, this, this, arguments);
 	};
 	const $static = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.black = Color.__ks_sttc_from_0(["#000"]);
 		d.gray = Color.__ks_sttc_from_0(["#808080"]);
 		d.white = Color.__ks_sttc_from_0(["#fff"]);

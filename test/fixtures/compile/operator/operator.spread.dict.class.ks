@@ -1,6 +1,6 @@
 class Foobar {
 	private {
-		@values: Dictionary = {}
+		@values: Object = {}
 	}
 	foobar() {
 		var values = {...@values}

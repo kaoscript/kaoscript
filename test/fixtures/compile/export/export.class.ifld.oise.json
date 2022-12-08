@@ -23,7 +23,7 @@
           "values": {
             "access": 4,
             "type": {
-              "kind": "dictionary",
+              "kind": "object",
               "rest": "Number"
             },
             "default": true,

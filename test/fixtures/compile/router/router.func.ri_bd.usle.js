@@ -15,7 +15,7 @@ module.exports = function() {
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isNumber;
 		const t1 = value => Type.isBoolean(value) || Type.isNull(value);
-		const t2 = value => Type.isString(value) || Type.isDictionary(value);
+		const t2 = value => Type.isString(value) || Type.isObject(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length === 1) {

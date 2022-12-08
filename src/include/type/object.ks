@@ -1,17 +1,17 @@
-class DictionaryType extends Type {
+class ObjectType extends Type {
 	private {
 		@empty: Boolean					= false
 		@length: Number					= 0
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
-		@properties: Dictionary<Type>	= {}
+		@properties: Object<Type>		= {}
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { # {{{
-			var type = new DictionaryType(scope)
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ObjectType { # {{{
+			var type = new ObjectType(scope)
 
 			if data.system {
 				type.flagSystem()
@@ -40,7 +40,7 @@ class DictionaryType extends Type {
 		@length += 1
 	} # }}}
 	clone() { # {{{
-		var type = new DictionaryType(@scope)
+		var type = new ObjectType(@scope)
 
 		type._complete = @complete
 		type._nullable = @nullable
@@ -59,7 +59,7 @@ class DictionaryType extends Type {
 
 		if @rest {
 			if value.hasRest() {
-				return $weightTOFs['Dictionary'] - $weightTOFs['Array']
+				return $weightTOFs['Object'] - $weightTOFs['Array']
 			}
 			else {
 				return 1
@@ -69,10 +69,10 @@ class DictionaryType extends Type {
 			return -1
 		}
 		else {
-			return $weightTOFs['Dictionary'] - $weightTOFs['Array']
+			return $weightTOFs['Object'] - $weightTOFs['Array']
 		}
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
+	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
 		if this.isSubsetOf(value, MatchingMode::Similar) {
 			if this.isSubsetOf(value, MatchingMode::Exact) {
 				return 0
@@ -106,11 +106,11 @@ class DictionaryType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if !@system && !@sealed && @length == 0 && !@rest {
-			return 'Dictionary'
+			return 'Object'
 		}
 
 		var export = {
-			kind: TypeKind::Dictionary
+			kind: TypeKind::Object
 		}
 
 		if @system {
@@ -182,7 +182,7 @@ class DictionaryType extends Type {
 				str = `\(@restType.hashCode(fattenNull)){}`
 			}
 			else {
-				str = `Dictionary`
+				str = `Object`
 			}
 		}
 		else {
@@ -234,17 +234,6 @@ class DictionaryType extends Type {
 				return true
 			}
 		}
-		else if value.isDictionary() {
-			if @isNullable() && !nullcast && !value.isNullable() {
-				return false
-			}
-
-			if @length == 0 && !@rest {
-				return true
-			}
-
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
-		}
 		else if value.isObject() {
 			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
@@ -273,14 +262,14 @@ class DictionaryType extends Type {
 
 		var type = value.discard()
 
-		if type.isDictionary() {
+		if type.isObject() {
 			return true if type.hasRest()
 		}
 
 		return false
 	} # }}}
 	isNullable() => @nullable
-	isDictionary() => true
+	isObject() => true
 	isExportable() => true
 	isLiberal() => @liberal
 	isSealable() => true
@@ -298,7 +287,7 @@ class DictionaryType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
+	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		return true if this == value || @empty
 
 		var type = mode !~ MatchingMode::Reference
@@ -311,7 +300,7 @@ class DictionaryType extends Type {
 
 			var properties = value.properties()
 
-			return false unless Array.same(Dictionary.keys(@properties), Dictionary.keys(properties))
+			return false unless Array.same(Object.keys(@properties), Object.keys(properties))
 
 			for var type, name of properties {
 				return false unless @properties[name].isSubsetOf(type, mode)
@@ -354,9 +343,9 @@ class DictionaryType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
-		return false unless value.isDictionary()
+		return false unless value.isObject()
 
-		if value.name() != 'Dictionary' {
+		if value.name() != 'Object' {
 			return this.isSubsetOf(value.discard(), mode + MatchingMode::Reference)
 		}
 
@@ -387,7 +376,7 @@ class DictionaryType extends Type {
 	isMatching(value: Type, mode: MatchingMode) => false
 	length(): @length
 	matchContentOf(value: Type) { # {{{
-		if value.isAny() || value.isDictionary() {
+		if value.isAny() || value.isObject() {
 			return true
 		}
 
@@ -443,7 +432,7 @@ class DictionaryType extends Type {
 				str = `\(@restType.toQuote()){}`
 			}
 			else {
-				str = `Dictionary`
+				str = `Object`
 			}
 		}
 		else {
@@ -490,7 +479,7 @@ class DictionaryType extends Type {
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
-			fragments.code($runtime.type(node), '.isDictionary')
+			fragments.code($runtime.type(node), '.isObject')
 		}
 		else {
 			fragments.code(`value => `)
@@ -503,7 +492,7 @@ class DictionaryType extends Type {
 			fragments.code('(')
 		}
 
-		fragments.code($runtime.type(node), '.isDictionary(value')
+		fragments.code($runtime.type(node), '.isObject(value')
 
 		var literal = new Literal(false, node, node.scope(), 'value')
 

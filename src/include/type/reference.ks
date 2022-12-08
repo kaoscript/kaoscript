@@ -1,8 +1,7 @@
 var $weightTOFs = { # {{{
 	Array: 1
 	Boolean: 2
-	Class: 12
-	Dictionary: 10
+	Class: 11
 	Enum: 4
 	Function: 3
 	Namespace: 8
@@ -11,8 +10,8 @@ var $weightTOFs = { # {{{
 	Primitive: 7
 	RegExp: 9
 	String: 6
-	Struct: 11
-	Tuple: 11
+	Struct: 10
+	Tuple: 10
 } # }}}
 
 class ReferenceType extends Type {
@@ -31,7 +30,7 @@ class ReferenceType extends Type {
 		@strict: Boolean					= false
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
 			var late name
 			if data.name is Number {
 				var reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
@@ -79,6 +78,17 @@ class ReferenceType extends Type {
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
 	canBeFunction(any = true) => @isUnion() ? @type.canBeFunction(any) : super(any)
 	canBeNumber(any = true) => @isUnion() ? @type.canBeNumber(any) : super(any)
+	canBeObject(any = true) { # {{{
+		if @isUnion() {
+			return @type.canBeNumber(any)
+		}
+		else if any && @isAny() {
+			return true
+		}
+		else {
+			return @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+		}
+	} # }}}
 	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
 	clone(): ReferenceType { # {{{
 		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
@@ -169,8 +179,16 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Array'), equivalences)
 		}
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
-		if @name == 'Dictionary' {
+	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
+		if @isNull() {
+			return 0
+		}
+		else {
+			return -1
+		}
+	} # }}}
+	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
+		if @isObject() {
 			if @parameters.length == 0 {
 				if value.hasRest() {
 					return -1
@@ -191,18 +209,10 @@ class ReferenceType extends Type {
 
 
 		if value.hasRest() {
-			return @compareToRef(@scope.resolveReference('Dictionary', false, [value.getRestType()]), equivalences)
+			return @compareToRef(@scope.resolveReference('Object', false, [value.getRestType()]), equivalences)
 		}
 		else {
-			return @compareToRef(@scope.reference('Dictionary'), equivalences)
-		}
-	} # }}}
-	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
-		if @isNull() {
-			return 0
-		}
-		else {
-			return -1
+			return @compareToRef(@scope.reference('Object'), equivalences)
 		}
 	} # }}}
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
@@ -260,7 +270,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return -1
+			return @isObject() ? 1 : -1
 		}
 
 		if value.isTypeOf() {
@@ -469,7 +479,7 @@ class ReferenceType extends Type {
 		if @isAny() {
 			return AnyType.NullableUnexplicit
 		}
-		else if @name == 'Dictionary' {
+		else if @name == 'Object' {
 			if @parameters.length > 0 {
 				return @parameters[0]
 			}
@@ -497,7 +507,7 @@ class ReferenceType extends Type {
 		if @name == 'Array' && @parameters.length == 1 {
 			hash = `\(@parameters[0].hashCode())[]`
 		}
-		else if @name == 'Dictionary' && @parameters.length == 1 {
+		else if @name == 'Object' && @parameters.length == 1 {
 			hash = `\(@parameters[0].hashCode()){}`
 		}
 		else {
@@ -547,7 +557,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else if value is DestructurableObjectType {
-			if @isDictionary() || @isObject() || @isStruct() {
+			if @canBeObject() {
 				for var dType, name of value.properties() {
 					if var sType ?= @getProperty(name) {
 						return false unless sType.isAssignableToVariable(dType, anycast, nullcast, downcast)
@@ -589,7 +599,7 @@ class ReferenceType extends Type {
 			else if (value.name() == 'Tuple' && @type().isTuple()) || (@name == 'Tuple' && value.type().isTuple()) {
 				return false
 			}
-			else if value.name() == 'Object' && @isObject() {
+			else if value.name() == 'Object' && @canBeObject() {
 				if @nullable && !nullcast && !value.isNullable() {
 					return false
 				}
@@ -634,8 +644,8 @@ class ReferenceType extends Type {
 
 			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
-		else if value is DictionaryType {
-			return false unless @isDictionary()
+		else if value is ObjectType {
+			return false unless @isObject()
 			return false unless !@nullable || nullcast || value.isNullable()
 
 			if anycast && !@isFusion() && !@isUnion() {
@@ -660,7 +670,6 @@ class ReferenceType extends Type {
 	isClassInstance() => @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
 	override isComplete() => @type().isComplete()
-	isDictionary() => @name == 'Dictionary' || @type().isDictionary()
 	isEnum() => @name == 'Enum' || @type().isEnum()
 	isExhaustive() => @type().isExhaustive()
 	isExplicit() => @type().isExplicit()
@@ -709,7 +718,7 @@ class ReferenceType extends Type {
 
 		return false
 	} # }}}
-	isIterable() => @type().isIterable() || @isArray() || @isDictionary() || @isString()
+	isIterable() => @type().isIterable() || @isArray() || @isObject() || @isString()
 	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return !@isAny() || (value.isNullable() && !@nullable)
@@ -745,7 +754,8 @@ class ReferenceType extends Type {
 		return @nullable
 	} # }}}
 	isNumber() => @name == 'Number' || @type().isNumber()
-	isObject() => @name == 'Object' || @type().isObject() || @isDictionary() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+	isObject() => @name == 'Object' || @type().isObject()
+	// isObject() => @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
 	isPrimitive() => @isBoolean() || @isNumber() || @isString()
 	isReference() => true
 	isReducible() => true
@@ -782,9 +792,9 @@ class ReferenceType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: DictionaryType, mode: MatchingMode) { # {{{
+	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
-			return false unless @isDictionary()
+			return false unless @isObject()
 			return false unless !value.hasProperties()
 			return false unless @hasParameters() == value.hasRest()
 
@@ -795,7 +805,7 @@ class ReferenceType extends Type {
 			return true
 		}
 		else {
-			return false unless @isDictionary() || @isInstance()
+			return false unless @isObject() || @isInstance()
 
 			return @discard().isSubsetOf(value, mode)
 		}
@@ -904,7 +914,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			if value.isDictionary() && @type().isClass() {
+			if value.isObject() && @type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
 			else if value is UnionType {
@@ -1392,7 +1402,7 @@ class ReferenceType extends Type {
 
 		var unalias = @discardAlias()
 
-		if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+		if unalias.isObject() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
 			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
 		}
 		else {

@@ -8,7 +8,7 @@
     "requirements": [],
     "references": [
       {
-        "kind": "dictionary",
+        "kind": "object",
         "properties": {
           "log": {
             "kind": "function",

@@ -1,12 +1,12 @@
 extern console
 
-extern sealed class Dictionary
+extern sealed class Object
 
-impl Dictionary {
-	static size(item: Dictionary): Number => 0
+impl Object {
+	static size(item: Object): Number => 0
 }
 
-console.log(Dictionary.size({
+console.log(Object.size({
 	name: 'White'
 	honorific: 'miss'
 }))

@@ -1,7 +1,7 @@
-extern sealed class Dictionary
+extern sealed class Object
 
-impl Dictionary {
-	static clone(): Dictionary => this
+impl Object {
+	static clone(): Object => this
 }
 
 export var foobar = {

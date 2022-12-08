@@ -48,7 +48,7 @@ class ClassVariableType extends Type {
 
 			return type
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
 			var data = index
 			var type = new ClassVariableType(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 

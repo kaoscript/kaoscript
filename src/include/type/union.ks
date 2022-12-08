@@ -7,7 +7,7 @@ class UnionType extends Type {
 		@types: Array<Type>			= []
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
 			var type = new UnionType(scope)
 
 			if ?data.nullable {
@@ -171,11 +171,11 @@ class UnionType extends Type {
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
-	compareToRef(value: DictionaryType, equivalences: String[][]? = null) { # {{{
-		return 1
-	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
 		return -1
+	} # }}}
+	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
+		return 1
 	} # }}}
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		return 1
@@ -310,15 +310,6 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
-	isDictionary() { # {{{
-		for var type in @types {
-			if !type.isDictionary() {
-				return false
-			}
-		}
-
-		return true
-	} # }}}
 	isExplicit() => @explicit
 	isExportable() { # {{{
 		for type in @types {
@@ -380,6 +371,15 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	isNullable() => @nullable
+	isObject() { # {{{
+		for var type in @types {
+			if !type.isObject() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	isReducible() => true
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {

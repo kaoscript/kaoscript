@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function rewire() {
 		return rewire.__ks_rt(this, arguments);
@@ -9,7 +9,7 @@ module.exports = function() {
 			item = __ks_1[__ks_0];
 			item = item.split("=");
 			files.push((() => {
-				const d = new Dictionary();
+				const d = new OBJ();
 				d.input = item[0];
 				d.output = item[1];
 				return d;

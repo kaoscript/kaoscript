@@ -2,7 +2,7 @@
   {
     "aliens": [
       0,
-      "Dictionary",
+      "Object",
       true
     ],
     "requirements": [],
@@ -36,7 +36,7 @@
     ],
     "references": [
       {
-        "kind": "dictionary",
+        "kind": "object",
         "properties": {
           "qux": "Number"
         }

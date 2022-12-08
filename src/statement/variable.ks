@@ -505,8 +505,8 @@ class VariableBindingDeclarator extends AbstractNode {
 					}
 				}
 				else {
-					unless type.isDictionary() || type.isStruct() {
-						TypeException.throwInvalidBinding('Dictionary', this)
+					unless type.isObject() || type.isStruct() {
+						TypeException.throwInvalidBinding('Object', this)
 					}
 				}
 			}
@@ -523,8 +523,8 @@ class VariableBindingDeclarator extends AbstractNode {
 				}
 			}
 			else {
-				unless type.isDictionary() || type.isStruct() {
-					TypeException.throwInvalidBinding('Dictionary', this)
+				unless type.isObject() || type.isStruct() {
+					TypeException.throwInvalidBinding('Object', this)
 				}
 			}
 		}

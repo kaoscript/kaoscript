@@ -1,11 +1,11 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	function min() {
 		return min.__ks_rt(this, arguments);
 	};
 	min.__ks_0 = function() {
 		return (() => {
-			const d = new Dictionary();
+			const d = new OBJ();
 			d.gender = "female";
 			d.age = 24;
 			return d;

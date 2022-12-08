@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	var JS = require("@kaoscript/test-import/src/external.js");
 	class ClassA {
@@ -20,7 +20,7 @@ module.exports = function(expect) {
 		}
 	}
 	const StructA = Helper.struct(function() {
-		return new Dictionary;
+		return new OBJ;
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();
@@ -84,8 +84,8 @@ module.exports = function(expect) {
 	expect(test(id.__ks_0(/foobar/))).to.equal("object", "id(regex)");
 	expect(test.__ks_1([])).to.equal("any", "array");
 	expect(test(id.__ks_0([]))).to.equal("any", "id(array)");
-	expect(test.__ks_0(new Dictionary())).to.equal("object", "dict");
-	expect(test(id.__ks_0(new Dictionary()))).to.equal("object", "id(dict)");
+	expect(test.__ks_0(new OBJ())).to.equal("object", "dict");
+	expect(test(id.__ks_0(new OBJ()))).to.equal("object", "id(dict)");
 	expect(test.__ks_1(test)).to.equal("any", "func");
 	expect(test(id.__ks_0(test))).to.equal("any", "id(func)");
 	expect(test.__ks_1(ClassA)).to.equal("any", "class");

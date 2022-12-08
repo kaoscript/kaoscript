@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Point = Helper.struct(function(x, y) {
 		if(x === void 0 || x === null) {
@@ -7,7 +7,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			y = 0;
 		}
-		const _ = new Dictionary();
+		const _ = new OBJ();
 		_.x = x;
 		_.y = y;
 		return _;

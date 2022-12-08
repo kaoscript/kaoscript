@@ -1,12 +1,12 @@
 class EnumDeclaration extends Statement {
 	private late {
 		@enum: EnumType
-		@instanceMethods: Dictionary	= {}
+		@instanceMethods: Object	= {}
 		@name: String
-		@staticMethods: Dictionary		= {}
+		@staticMethods: Object		= {}
 		@type: NamedType<EnumType>
 		@variable: Variable
-		@variables: Dictionary			= {}
+		@variables: Object			= {}
 	}
 	initiate() { # {{{
 		@name = @data.name.name

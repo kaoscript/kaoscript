@@ -1,4 +1,4 @@
-const {Dictionary} = require("@kaoscript/runtime");
+const {OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	let $foo = new Dictionary();
+	let $foo = new OBJ();
 };

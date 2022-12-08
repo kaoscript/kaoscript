@@ -3,7 +3,7 @@ class CallExpression extends Expression {
 		@arguments: Array						= []
 		@await: Boolean							= false
 		@callees: Array<Callee>					= []
-		@calleeByHash: Dictionary<Callee>		= {}
+		@calleeByHash: Object<Callee>			= {}
 		@callScope
 		@flatten: Boolean						= false
 		@hasDefaultCallee: Boolean				= false
@@ -662,14 +662,6 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is DictionaryType => {
-				if var property ?= value.getProperty(@property) {
-					@makeCallee(property, @property)
-				}
-				else {
-					@makeMemberCalleeFromReference(@scope.reference('Dictionary'))
-				}
-			}
 			is EnumType => {
 				name = name as NamedType
 
@@ -764,6 +756,14 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
+			is ObjectType => {
+				if var property ?= value.getProperty(@property) {
+					@makeCallee(property, @property)
+				}
+				else {
+					@makeMemberCalleeFromReference(@scope.reference('Object'))
+				}
+			}
 			is ParameterType => {
 				@makeMemberCallee(value.type(), name)
 			}
@@ -852,7 +852,50 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is DictionaryType => {
+			is EnumType => {
+				if value.hasInstanceMethod(@property) {
+					var assessment = value.getInstanceAssessment(@property, this)
+
+					if var result ?= Router.matchArguments(assessment, @arguments, this) {
+						if result is LenientCallMatchResult {
+							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
+						}
+						else {
+							if result.matches.length == 1 {
+								var match = result.matches[0]
+
+								@addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, assessment, match, this))
+							}
+							else {
+								var functions = [match.function for var match in result.matches]
+
+								@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.functions, this))
+							}
+						}
+					}
+					else {
+						if value.isExhaustiveInstanceMethod(@property, this) {
+							ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
+						}
+						else {
+							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+						}
+					}
+				}
+				else if reference.isExhaustive(this) {
+					ReferenceException.throwNotFoundEnumMethod(@property, reference.name(), this)
+				}
+				else {
+					@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+				}
+			}
+			is FunctionType => {
+				throw new NotImplementedException(this)
+			}
+			is NamedType => {
+				@makeMemberCalleeFromReference(value.type(), reference)
+			}
+			is ObjectType => {
 				if var property ?= value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
 						var assessment = property.assessment(@property, this)
@@ -896,49 +939,6 @@ class CallExpression extends Expression {
 				else {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
-			}
-			is EnumType => {
-				if value.hasInstanceMethod(@property) {
-					var assessment = value.getInstanceAssessment(@property, this)
-
-					if var result ?= Router.matchArguments(assessment, @arguments, this) {
-						if result is LenientCallMatchResult {
-							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
-						}
-						else {
-							if result.matches.length == 1 {
-								var match = result.matches[0]
-
-								@addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, assessment, match, this))
-							}
-							else {
-								var functions = [match.function for var match in result.matches]
-
-								@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.functions, this))
-							}
-						}
-					}
-					else {
-						if value.isExhaustiveInstanceMethod(@property, this) {
-							ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
-						}
-						else {
-							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
-						}
-					}
-				}
-				else if reference.isExhaustive(this) {
-					ReferenceException.throwNotFoundEnumMethod(@property, reference.name(), this)
-				}
-				else {
-					@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
-				}
-			}
-			is FunctionType => {
-				throw new NotImplementedException(this)
-			}
-			is NamedType => {
-				@makeMemberCalleeFromReference(value.type(), reference)
 			}
 			is ParameterType => {
 				throw new NotImplementedException(this)

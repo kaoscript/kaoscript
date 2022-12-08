@@ -1,5 +1,5 @@
 extern console
 
-func foobar(o: Dictionary<String>) {
+func foobar(o: Object<String>) {
 	console.log(`\(o.name)`)
 }

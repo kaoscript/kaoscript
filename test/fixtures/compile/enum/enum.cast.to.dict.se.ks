@@ -4,7 +4,7 @@ enum Color<String> {
 	Blue
 }
 
-var aliases: Dictionary<String> = {
+var aliases: Object<String> = {
 	r: Color::Red
 }
 

@@ -1,8 +1,8 @@
-const {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_SyntaxError = {};
 	const foobar = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.corge = Helper.function(function() {
 			throw new SyntaxError();
 		}, (fn, ...args) => {

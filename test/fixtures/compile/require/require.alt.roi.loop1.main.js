@@ -1,5 +1,5 @@
 require("kaoscript/register");
-const {Type} = require("@kaoscript/runtime");
+const {OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_Object, clone) {
 	var __ks_0_valuable = Type.isValue(__ks_Array);
 	var __ks_1_valuable = Type.isValue(__ks_Object);

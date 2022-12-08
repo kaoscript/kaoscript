@@ -9,7 +9,7 @@ class IfStatement extends Statement {
 		@declaration: VariableDeclaration
 		@declared: Boolean									= false
 		@existential: Boolean								= false
-		@initializedVariables: Dictionary					= {}
+		@initializedVariables: Object						= {}
 		@lateInitVariables									= {}
 		@hasWhenFalse: Boolean								= false
 		@whenFalseExpression								= null

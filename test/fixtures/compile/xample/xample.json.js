@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_JSON) {
 	if(!Type.isValue(__ks_JSON)) {
 		__ks_JSON = {};
@@ -18,7 +18,7 @@ module.exports = function(__ks_JSON) {
 		throw Helper.badArgs();
 	};
 	let coord = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.x = 1;
 		d.y = 1;
 		return d;

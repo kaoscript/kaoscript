@@ -51,8 +51,8 @@ class IdentifierLiteral extends Literal {
 				@isVariable = true
 				@line = @scope.line()
 
-				if @value == 'Dictionary' {
-					@module().flag('Dictionary')
+				if @value == 'Object' {
+					@module().flag('Object')
 				}
 			}
 			else if @scope.hasMacro(@value) {

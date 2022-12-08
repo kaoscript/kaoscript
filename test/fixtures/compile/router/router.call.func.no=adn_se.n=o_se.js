@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function curry(kws, ...args) {
 		return curry.__ks_rt(this, args, kws);
@@ -17,5 +17,5 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	curry.__ks_0(new Dictionary(), "");
+	curry.__ks_0(new OBJ(), "");
 };

@@ -1,18 +1,18 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ks_Dictionary = {};
-	__ks_Dictionary.__ks_sttc_merge_0 = function(args) {
-		return new Dictionary();
+	const __ks_Object = {};
+	__ks_Object.__ks_sttc_merge_0 = function(args) {
+		return new OBJ();
 	};
-	__ks_Dictionary._sm_merge = function() {
+	__ks_Object._sm_merge = function() {
 		const t0 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
 		let pts;
 		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-			return __ks_Dictionary.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
+			return __ks_Object.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
 		}
-		if(Dictionary.merge) {
-			return Dictionary.merge(...arguments);
+		if(Object.merge) {
+			return Object.merge(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -50,8 +50,8 @@ module.exports = function() {
 			return o;
 		}
 		__ks_cons_0(options = null) {
-			Foobar.prototype.__ks_cons_0.call(this, __ks_Dictionary.__ks_sttc_merge_0([(() => {
-				const d = new Dictionary();
+			Foobar.prototype.__ks_cons_0.call(this, __ks_Object.__ks_sttc_merge_0([(() => {
+				const d = new OBJ();
 				d.x = 0;
 				d.y = 0;
 				return d;

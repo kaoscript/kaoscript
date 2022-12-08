@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(NewString) {
 	function corge() {
 		return corge.__ks_rt(this, arguments);
@@ -55,7 +55,7 @@ module.exports = function(NewString) {
 		throw Helper.badArgs();
 	};
 	const foobar = (() => {
-		const d = new Dictionary();
+		const d = new OBJ();
 		d.corge = corge;
 		d.grault = grault;
 		d.garply = garply;

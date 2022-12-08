@@ -81,7 +81,7 @@ class ParameterType extends Type {
 
 			return parameter
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
 			var data = index
 			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			var passing = ?data.passing ? PassingMode(data.passing) : PassingMode::BOTH

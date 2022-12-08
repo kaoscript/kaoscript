@@ -1,4 +1,4 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function toArray() {
 		return toArray.__ks_rt(this, arguments);
@@ -49,7 +49,7 @@ module.exports = function() {
 		return toDictionary.__ks_rt(this, arguments);
 	};
 	toDictionary.__ks_0 = function(x) {
-		return Helper.cast(x, "Dictionary", true, Type.isDictionary);
+		return Helper.cast(x, "Object", true, Type.isObject);
 	};
 	toDictionary.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -245,7 +245,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const Corge = Helper.struct(function() {
-		return new Dictionary;
+		return new OBJ;
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();

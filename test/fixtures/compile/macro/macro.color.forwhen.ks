@@ -1,5 +1,5 @@
 export class Color {
-	macro registerSpace(@expression: Dictionary) {
+	macro registerSpace(@expression: Object) {
 		var fields: Array = []
 		var methods: Array = []
 

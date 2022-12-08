@@ -39,7 +39,7 @@
           "elevation": {
             "access": 4,
             "type": {
-              "kind": "dictionary",
+              "kind": "object",
               "properties": {
                 "unit": "String",
                 "value": "Number"

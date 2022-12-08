@@ -1,8 +1,8 @@
 require("kaoscript/register");
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
-	const $formatters = new Dictionary();
+	const $formatters = new OBJ();
 	function format() {
 		return format.__ks_rt(this, arguments);
 	};

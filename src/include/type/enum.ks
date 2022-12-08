@@ -15,14 +15,14 @@ class EnumType extends Type {
 		}
 		@function: FunctionType?						= null
 		@index: Number									= -1
-		@instanceAssessments: Dictionary				= {}
-		@instanceMethods: Dictionary					= {}
+		@instanceAssessments: Object					= {}
+		@instanceMethods: Object						= {}
 		@kind: EnumTypeKind
 		@length: Number?
-		@staticAssessments: Dictionary					= {}
-		@staticMethods: Dictionary						= {}
+		@staticAssessments: Object						= {}
+		@staticMethods: Object							= {}
 		@type: Type
-		@variables: Dictionary<EnumVariableType>		= {}
+		@variables: Object<EnumVariableType>			= {}
 		@sequences	 									= {
 			defaults:			-1
 			instanceMethods:	{}
@@ -30,7 +30,7 @@ class EnumType extends Type {
 		}
 	}
 	static {
-		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): EnumType { # {{{
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumType { # {{{
 			var type = new EnumType(scope, EnumTypeKind(data.type))
 
 			type._exhaustive = data.exhaustive
@@ -223,8 +223,8 @@ class EnumType extends Type {
 		}
 
 		@exhaustive = src._exhaustive
-		@exhaustiveness = Dictionary.clone(src._exhaustiveness)
-		@sequences = Dictionary.clone(src._sequences)
+		@exhaustiveness = Object.clone(src._exhaustiveness)
+		@sequences = Object.clone(src._sequences)
 
 		if @requirement || @alien {
 			this.setAlterationReference(src)
@@ -291,12 +291,12 @@ class EnumType extends Type {
 			var exhaustiveness = {}
 			var mut notEmpty = false
 
-			if !Dictionary.isEmpty(@exhaustiveness.staticMethods) {
+			if !Object.isEmpty(@exhaustiveness.staticMethods) {
 				exhaustiveness.staticMethods = @exhaustiveness.staticMethods
 				notEmpty = true
 			}
 
-			if !Dictionary.isEmpty(@exhaustiveness.instanceMethods) {
+			if !Object.isEmpty(@exhaustiveness.instanceMethods) {
 				exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
 				notEmpty = true
 			}
@@ -542,7 +542,7 @@ class EnumMethodType extends FunctionType {
 
 			return new EnumMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
-		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
 			var data = index
 			var type = new EnumMethodType(scope)
 

@@ -1,21 +1,21 @@
-const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Dictionary = {};
-	__ks_Dictionary.__ks_sttc_clone_0 = function(object) {
+	var __ks_Object = {};
+	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
 			return object.constructor.clone(object);
 		}
 		if(Type.isFunction(object.constructor.prototype.clone)) {
 			return object.clone();
 		}
-		let clone = new Dictionary();
+		let clone = new OBJ();
 		for(let key in object) {
 			let value = object[key];
 			if(Type.isArray(value)) {
 				clone[key] = value.clone();
 			}
-			else if(Type.isDictionary(value)) {
-				clone[key] = __ks_Dictionary.__ks_sttc_clone_0(value);
+			else if(Type.isObject(value)) {
+				clone[key] = __ks_Object.__ks_sttc_clone_0(value);
 			}
 			else {
 				clone[key] = value;
@@ -23,15 +23,15 @@ module.exports = function() {
 		}
 		return clone;
 	};
-	__ks_Dictionary._sm_clone = function() {
+	__ks_Object._sm_clone = function() {
 		const t0 = Type.isValue;
 		if(arguments.length === 1) {
 			if(t0(arguments[0])) {
-				return __ks_Dictionary.__ks_sttc_clone_0(arguments[0]);
+				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Dictionary.clone) {
-			return Dictionary.clone(...arguments);
+		if(Object.clone) {
+			return Object.clone(...arguments);
 		}
 		throw Helper.badArgs();
 	};

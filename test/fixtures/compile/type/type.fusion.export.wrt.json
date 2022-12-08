@@ -30,7 +30,7 @@
               ]
             },
             {
-              "kind": "dictionary",
+              "kind": "object",
               "properties": {
                 "index": "Number",
                 "input": "String"

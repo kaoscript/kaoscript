@@ -24,7 +24,7 @@ class AnonymousFunctionExpression extends Expression {
 			@parameters.push(parameter)
 		}
 
-		@isObjectMember = @parent.parent() is DictionaryExpression
+		@isObjectMember = @parent.parent() is ObjectExpression
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		unless target.isAny() || target.isFunction() {
