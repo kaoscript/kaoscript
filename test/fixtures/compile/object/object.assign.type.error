@@ -1,0 +1,1 @@
+TypeException: The literal "" of type "String" is expected to be of type "Number" (fixtures/compile/object/object.assign.type.ks:1)

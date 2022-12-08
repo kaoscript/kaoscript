@@ -1,1 +1,0 @@
-TypeException: The literal "" of type "String" is expected to be of type "Number" (fixtures/compile/dictionary/dictionary.assign.type.ks:1)

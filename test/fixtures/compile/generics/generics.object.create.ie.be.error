@@ -1,0 +1,1 @@
+TypeException: The identifier "true" of type "Boolean" is expected to be of type "Number" (fixtures/compile/generics/generics.object.create.ie.be.ks:2)

@@ -1,1 +1,0 @@
-TypeException: The identifier "true" of type "Boolean" is expected to be of type "Number" (fixtures/compile/generics/generics.dict.create.ie.be.ks:2)
