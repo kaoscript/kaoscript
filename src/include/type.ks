@@ -777,6 +777,7 @@ abstract class Type {
 	minorOriginal() => null
 	origin(): @origin
 	origin(@origin): this
+	parameter() => AnyType.NullableUnexplicit
 	reduce(type: Type) => this
 	reference(scope? = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex

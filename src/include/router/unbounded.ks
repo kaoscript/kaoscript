@@ -61,7 +61,7 @@ namespace Unbounded {
 		return function.min(MinMax::AFTER_REST + MinMax::ASYNC)
 	} # }}}
 
-	func getRowType(row, tree: TreeBranch | TreeLeaf): Type? { # {{{
+	func getRowType(row: Row, tree: TreeBranch | TreeLeaf): RowType? { # {{{
 		for var type in row.types {
 			if type.index == tree.index {
 				return type

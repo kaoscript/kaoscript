@@ -19,7 +19,7 @@ import {
 	'vm'
 }
 
-func rewire(option) { # {{{
+func rewire(option, defaultValue?) { # {{{
 	var files = []
 
 	for item in option.split(',') {
@@ -117,8 +117,8 @@ else {
 	sandbox.__dirname = path.dirname(file)
 	sandbox.__filename = file
 
-	var _module = sandbox.module = new Module('eval')
-	var _require = sandbox.require = (path) => Module._load(path, _module, true)
+	var _module = sandbox.module <- new Module('eval')
+	var _require = sandbox.require <- (path) => Module._load(path, _module, true)
 
 	_module.filename = file
 

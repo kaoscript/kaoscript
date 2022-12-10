@@ -76,6 +76,8 @@ class AnonymousFunctionExpression extends Expression {
 				@type.setReturnType(type)
 			}
 		}
+
+		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
 		for parameter in @parameters {
@@ -257,6 +259,8 @@ class ArrowFunctionExpression extends Expression {
 				@type.setReturnType(type)
 			}
 		}
+
+		@type.flagComplete()
 
 		@usingThis = @isUsingVariable('this')
 

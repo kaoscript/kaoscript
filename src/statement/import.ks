@@ -1272,16 +1272,22 @@ abstract class Importer extends Statement {
 				}
 				else if $localFileRegex.test(@moduleName) {
 					var basename = path.basename(@moduleName)
-					var late dirname
 
-					if @parent.includePath() == null {
-						dirname = path.dirname(@moduleName)
+					if basename.endsWith($extensions.source) {
+						var late dirname
+
+						if @parent.includePath() == null {
+							dirname = path.dirname(@moduleName)
+						}
+						else {
+							dirname = path.dirname(@parent.includePath())
+						}
+
+						modulePath = `\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
 					}
 					else {
-						dirname = path.dirname(@parent.includePath())
+						modulePath = @moduleName
 					}
-
-					modulePath = `\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
 				}
 				else {
 					var dirname = path.dirname(@moduleName)

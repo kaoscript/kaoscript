@@ -271,21 +271,21 @@ export class Module {
 			throw error
 		}
 	} # }}}
-	path(x: String? = null, name: String): String { # {{{
-		if !?x || !?@output {
+	path(filename: String? = null, name: String): String { # {{{
+		unless ?filename && ?@output {
 			return name
 		}
 
 		var mut output? = null
-		for rewire in @rewire {
-			if rewire.input == x {
+		for var rewire in @rewire {
+			if rewire.input == filename {
 				output = path.relative(@output, rewire.output)
 				break
 			}
 		}
 
 		if !?output {
-			output = path.relative(@output, x)
+			output = path.relative(@output, filename)
 		}
 
 		if output[0] != '.' {
