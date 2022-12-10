@@ -599,23 +599,10 @@ class Parameter extends AbstractNode {
 	override prepare(target, targetMode) { # {{{
 		@internal.prepare()
 
-		var mut type: Type? = @internal.type()?.asReference()
-
-		if !type?.isExplicit() {
-			type = null
-		}
-
-		if ?@data.type {
-			var declaredType = Type.fromAST(@data.type, this)
-
-			if !?type || (type.isObject() && declaredType.isObject()) || declaredType.isMorePreciseThan(type) {
-				type = declaredType
-			}
-		}
-
 		var mut min: Number = 1
 		var mut max: Number = 1
 		var mut passing = null
+		var mut nullable = false
 
 		for var modifier in @data.modifiers {
 			switch modifier.kind {
@@ -623,7 +610,7 @@ class Parameter extends AbstractNode {
 					passing = PassingMode::LABELED
 				}
 				ModifierKind::Nullable => {
-					type ??= AnyType.NullableUnexplicit
+					nullable = true
 				}
 				ModifierKind::PositionOnly => {
 					passing = PassingMode::POSITIONAL
@@ -646,6 +633,36 @@ class Parameter extends AbstractNode {
 					@explicitlyRequired = true
 				}
 			}
+		}
+
+		var mut type: Type?
+
+		if @internal is ThisExpressionParameter {
+			if @rest {
+				type = @internal.type().parameter()
+			}
+			else {
+				type = @internal.type().asReference()
+			}
+		}
+		else {
+			type = @internal.type()?.asReference()
+		}
+
+		if !type?.isExplicit() {
+			type = null
+		}
+
+		if ?@data.type {
+			var declaredType = Type.fromAST(@data.type, this)
+
+			if !?type || (type.isObject() && declaredType.isObject()) || declaredType.isMorePreciseThan(type) {
+				type = declaredType
+			}
+		}
+
+		if nullable {
+			type ??= AnyType.NullableUnexplicit
 		}
 
 		if type == null {

@@ -945,6 +945,9 @@ class ReferenceType extends Type {
 		else if value.isAny() {
 			return true
 		}
+		else if this.isSubsetOf(value, MatchingMode::Exact) {
+			return true
+		}
 		else if @isFunction() {
 			return value.isFunction()
 		}
