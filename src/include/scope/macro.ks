@@ -140,7 +140,7 @@ class MacroScope extends Scope {
 		var hash = a.toQuote()
 
 		if var matches ?= @matchingTypes[hash] {
-			for var type, i in matches by 2 {
+			for var type, i in matches step 2 {
 				if type == b {
 					return matches[i + 1]
 				}

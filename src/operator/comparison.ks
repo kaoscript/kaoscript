@@ -40,7 +40,7 @@ class ComparisonExpression extends Expression {
 			}
 		}
 		else {
-			for var i from 1 til @data.values.length by 2 {
+			for var i from 1 to~ @data.values.length step 2 {
 				operand2 = @addOperand(@data.values[i + 1])
 
 				@addOperator(@data.values[i], operand1, operand2)
@@ -85,7 +85,7 @@ class ComparisonExpression extends Expression {
 		}
 		else {
 			if @operators.length > 1 {
-				for var operand in @operands from 1 til -1 until @composite {
+				for var operand in @operands from 1 to~ -1 until @composite {
 					@composite = operand.isComposite()
 				}
 
@@ -239,7 +239,7 @@ class ComparisonExpression extends Expression {
 			@operators[0].toOperatorFragments(fragments, @reuseName, false, false, true, true)
 
 			if @operators.length > 1 {
-				for var operator in @operators from 1 til -1 {
+				for var operator in @operators from 1 to~ -1 {
 					fragments.code(@junction)
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, true, true)
@@ -284,7 +284,7 @@ class ComparisonExpression extends Expression {
 			fragments += @operands[0].toQuote()
 		}
 
-		for var i from 0 til @operators.length {
+		for var i from 0 to~ @operators.length {
 			fragments += ` \(@operators[i].symbol()) `
 
 			if @operands[i + 1].isComputed() {

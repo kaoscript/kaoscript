@@ -171,7 +171,7 @@ namespace RegroupTree {
 
 		var parameters = {}
 
-		for var type in tree.rows[0].types desc {
+		for var type in tree.rows[0].types down {
 			if var parameter ?= nodes[type.index] {
 				parameters[type.parameter] = parameter
 			}
@@ -201,7 +201,7 @@ namespace RegroupTree {
 
 		var mins = []
 
-		for var type in tree.rows[0].types desc {
+		for var type in tree.rows[0].types down {
 			if parameters[0] == type.index {
 				parameters.shift()
 
@@ -274,7 +274,7 @@ namespace RegroupTree {
 	func isSameShadows(a: Array, b: Array): Boolean { # {{{
 		return false unless a.length == b.length
 
-		for var i from 0 til a.length {
+		for var i from 0 to~ a.length {
 			return false unless a[i].length == b[i].length
 			return false unless a[i][0] == b[i][0]
 			return false unless a[i][1] == b[i][1]
@@ -411,7 +411,7 @@ namespace RegroupTree {
 				length += 1
 			}
 
-			for var index from 0 til length {
+			for var index from 0 to~ length {
 				if var maximus ?= data[index] {
 					if var parameter ?= parameters[index] {
 
@@ -470,14 +470,14 @@ namespace RegroupTree {
 							}
 						}
 
-						for var i from parameter.min til maximus.max {
+						for var i from parameter.min to~ maximus.max {
 							arguments.unshift(parameter.type)
 						}
 
 						canNegLength0 = false
 					}
 					else {
-						for var i from 0 til maximus.max {
+						for var i from 0 to~ maximus.max {
 							arguments.unshift(maximus.type)
 						}
 
@@ -515,7 +515,7 @@ namespace RegroupTree {
 		var maxs = buildMax(tree, tree == last)
 		var mut lastMatches = null
 
-		for var tree, index in group desc {
+		for var tree, index in group down {
 			var mut [kind, ...matches] = listShadows(tree, maxs, max)
 
 			if kind == ShadowKind::Soft {

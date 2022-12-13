@@ -16,7 +16,7 @@ class SequenceExpression extends Expression {
 	override prepare(target, targetMode) { # {{{
 		@last = @expressions.length - 1
 
-		for var expression in @expressions til -1 {
+		for var expression in @expressions to~ -1 {
 			expression.prepare(Type.Void)
 		}
 
@@ -61,7 +61,7 @@ class SequenceExpression extends Expression {
 	toConditionFragments(fragments, mode, junction) { # {{{
 		fragments.code('(')
 
-		for var expression, index in @expressions til @last {
+		for var expression, index in @expressions to~ @last {
 			if index != 0 {
 				fragments.code($comma)
 			}

@@ -61,7 +61,7 @@ func $nodeModulesPaths(mut start) { # {{{
 	var mut parts = start.split(splitRe)
 
 	var mut dirs = []
-	for i from parts.length - 1 to 0 by -1 {
+	for i from parts.length - 1 to 0 step -1 {
 		if parts[i] == 'node_modules' {
 			continue
 		}
@@ -166,7 +166,7 @@ abstract class Importer extends Statement {
 				if def.isAlias {
 					var type = new NamedContainerType(def.internal, new NamespaceType(@scope:Scope))
 
-					for i from 1 til @metaExports.exports.length by 2 {
+					for i from 1 to~ @metaExports.exports.length step 2 {
 						var name = @metaExports.exports[i]
 
 						type.addProperty(name, @worker.getType(name))
@@ -391,7 +391,7 @@ abstract class Importer extends Statement {
 			}
 
 			if @autofill {
-				for var i from 0 til metadata.requirements.length by 3 {
+				for var i from 0 to~ metadata.requirements.length step 3 {
 					var name = metadata.requirements[i + 1]
 
 					if !?arguments.toImport[name] {
@@ -412,7 +412,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else if @autofill {
-			for var i from 0 til metadata.requirements.length by 3 {
+			for var i from 0 to~ metadata.requirements.length step 3 {
 				var name = metadata.requirements[i + 1]
 
 				if @scope.hasVariable(name) {
@@ -430,7 +430,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else {
-			for var i from 0 til metadata.requirements.length by 3 {
+			for var i from 0 to~ metadata.requirements.length step 3 {
 				@validateRequirement(metadata.requirements[i + 2], metadata.requirements[i + 1], metadata)
 			}
 		}
@@ -443,7 +443,7 @@ abstract class Importer extends Statement {
 			var reqReferences = {}
 			var alterations = {}
 
-			for var i from 0 til metadata.aliens.length by 3 {
+			for var i from 0 to~ metadata.aliens.length step 3 {
 				var index = metadata.aliens[i]
 				var name = metadata.aliens[i + 1]
 				var late type
@@ -458,7 +458,7 @@ abstract class Importer extends Statement {
 				reqReferences[index] = Type.toNamedType(name, type)
 			}
 
-			for var i from 0 til metadata.requirements.length by 3 {
+			for var i from 0 to~ metadata.requirements.length step 3 {
 				var index = metadata.requirements[i]
 				var name = metadata.requirements[i + 1]
 
@@ -616,14 +616,14 @@ abstract class Importer extends Statement {
 		@worker = new ImportWorker(@metaRequirements, @metaExports, this)
 
 		var macros = {}
-		for var i from 0 til @metaExports.macros.length by 2 {
+		for var i from 0 to~ @metaExports.macros.length step 2 {
 			macros[@metaExports.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metaExports.macros[i + 1]]
 		}
 
 		@scope.line(@line())
 
 		if !#@data.specifiers {
-			for var i from 1 til @metaExports.exports.length by 2 {
+			for var i from 1 to~ @metaExports.exports.length step 2 {
 				name = @metaExports.exports[i]
 
 				@addImport(name, name, false)
@@ -687,7 +687,7 @@ abstract class Importer extends Statement {
 								exclusions.push(data.internal.name)
 							}
 
-							for var i from 1 til @metaExports.exports.length by 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
+							for var i from 1 to~ @metaExports.exports.length step 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
 								var name = @metaExports.exports[i]
 
 								@addImport(name, name, false)
@@ -807,7 +807,7 @@ abstract class Importer extends Statement {
 
 		@buildArguments(@metaRequirements, @arguments)
 
-		var arguments = [false for var i from 0 til @metaRequirements.requirements.length / 3]
+		var arguments = [false for var i from 0 to~ @metaRequirements.requirements.length / 3]
 
 		for var argument in @arguments.values {
 			arguments[argument.index] = {
@@ -873,7 +873,7 @@ abstract class Importer extends Statement {
 		if !#@data.specifiers {
 			var parts = @data.source.value.split('/')
 
-			for var part in parts desc while @alias == null when !/(?:^\.+$|^@)/.test(part) {
+			for var part in parts down while @alias == null when !/(?:^\.+$|^@)/.test(part) {
 				var dots = part.split('.')
 				var last = dots.length - 1
 
@@ -1338,7 +1338,7 @@ abstract class Importer extends Statement {
 			SyntaxException.throwMissingRequirement(name, this)
 		}
 		else if @mode() == ImportMode::Import && required is Number {
-			for var i from 0 til metadata.aliens.length by 3 {
+			for var i from 0 to~ metadata.aliens.length step 3 {
 				if metadata.aliens[i] == required {
 					metadata.aliens[i + 2] = true
 					break
@@ -1415,7 +1415,7 @@ class ImportWorker {
 		var newAliens = {}
 		var oldAliens = []
 
-		for var i from 0 til @metaRequirements.aliens.length by 3 {
+		for var i from 0 to~ @metaRequirements.aliens.length step 3 {
 			var index = @metaRequirements.aliens[i]
 			var name = @metaRequirements.aliens[i + 1]
 			var mut type = null
@@ -1457,7 +1457,7 @@ class ImportWorker {
 			queue.shift()()
 		}
 
-		for var name, index in oldAliens by 3 {
+		for var name, index in oldAliens step 3 {
 			var newType = oldAliens[index + 1]
 			var oldType = oldAliens[index + 1]
 
@@ -1469,7 +1469,7 @@ class ImportWorker {
 		if @metaRequirements.requirements.length > 0 {
 			var reqReferences = {...references}
 
-			for var i from 0 til @metaRequirements.requirements.length by 3 {
+			for var i from 0 to~ @metaRequirements.requirements.length step 3 {
 				var index = @metaRequirements.requirements[i]
 				var name = @metaRequirements.requirements[i + 1]
 				var type = references[index] ?? Type.import(index, metadata, reqReferences, alterations, queue, @scope, @node)
@@ -1481,7 +1481,7 @@ class ImportWorker {
 				queue.shift()()
 			}
 
-			for var i from 0 til @metaRequirements.requirements.length by 3 {
+			for var i from 0 to~ @metaRequirements.requirements.length step 3 {
 				var name = @metaRequirements.requirements[i + 1]
 				var type = reqReferences[@metaRequirements.requirements[i]]
 
@@ -1499,7 +1499,7 @@ class ImportWorker {
 				}
 			}
 
-			for var i from 0 til @metaRequirements.requirements.length by 3 {
+			for var i from 0 to~ @metaRequirements.requirements.length step 3 {
 				var reqIndex = @metaRequirements.requirements[i]
 				var name = @metaRequirements.requirements[i + 1]
 
@@ -1530,7 +1530,7 @@ class ImportWorker {
 			module.addAlien(name, references[index])
 		}
 
-		for var i from 0 til @metaRequirements.requirements.length by 3 {
+		for var i from 0 to~ @metaRequirements.requirements.length step 3 {
 			var index = @metaRequirements.requirements[i]
 			var name = @metaRequirements.requirements[i + 1]
 			var late type
@@ -1555,7 +1555,7 @@ class ImportWorker {
 			references[index] = Type.toNamedType(name, type)
 		}
 
-		for var i from 0 til @metaExports.exports.length by 2 {
+		for var i from 0 to~ @metaExports.exports.length step 2 {
 			var index = @metaExports.exports[i]
 			var name = @metaExports.exports[i + 1]
 			var mut type = null
@@ -1581,7 +1581,7 @@ class ImportWorker {
 			references[index] = type
 		}
 
-		for var i from 0 til @metaRequirements.aliens.length by 3 {
+		for var i from 0 to~ @metaRequirements.aliens.length step 3 {
 			var index = @metaRequirements.aliens[i]
 			var name = @metaRequirements.aliens[i + 1]
 

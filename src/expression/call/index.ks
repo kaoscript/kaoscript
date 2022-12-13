@@ -261,7 +261,7 @@ class CallExpression extends Expression {
 
 			var types = [@callees[0].type()]
 
-			for var i from 1 til @callees.length {
+			for var i from 1 to~ @callees.length {
 				var type = @callees[i].type()
 
 				if !types.any((item, _, _) => type.equals(item)) {
@@ -306,7 +306,7 @@ class CallExpression extends Expression {
 		}
 
 		if @callees.length > 1 {
-			for callee in @callees til -1 {
+			for callee in @callees to~ -1 {
 				callee.acquireReusable(true)
 			}
 
@@ -1026,7 +1026,7 @@ class CallExpression extends Expression {
 		else {
 			@module().flag('Type')
 
-			for var callee in @callees til -1 {
+			for var callee in @callees to~ -1 {
 				callee.toPositiveTestFragments(fragments, this)
 
 				fragments.code(' ? ')

@@ -305,7 +305,7 @@ namespace Fragment {
 				comma = true
 			}
 
-			for var param in parameters from lastParameter + 1 til parameter {
+			for var param in parameters from lastParameter + 1 to~ parameter {
 				if param.isOnlyLabeled() {
 					line.code(`kws.\(param.getExternalName()), `)
 				}
@@ -357,7 +357,7 @@ namespace Fragment {
 					if varargs {
 						line.code(`[`)
 
-						for var i from 0 til to.index - from.index {
+						for var i from 0 to~ to.index - from.index {
 							if i != 0 {
 								line.code($comma)
 							}
@@ -519,7 +519,7 @@ namespace Fragment {
 			if startIndex == -1 && branch.min == branch.max != 0 {
 				if branch.min <= 5 {
 					if branch.index >= 0 {
-						for var i from branch.index til branch.index + branch.min {
+						for var i from branch.index to~ branch.index + branch.min {
 							if i != branch.index {
 								fragments.code(' && ')
 							}
@@ -530,7 +530,7 @@ namespace Fragment {
 					else if tree.min == tree.max {
 						var index = tree.min + branch.index
 
-						for var i from index til index + branch.min {
+						for var i from index to~ index + branch.min {
 							if i != index {
 								fragments.code(' && ')
 							}
@@ -661,7 +661,7 @@ namespace Fragment {
 			if startIndex == -1 && leaf.min == leaf.max != 0 {
 				if leaf.min <= 5 {
 					if leaf.index >= 0 {
-						for var i from leaf.index til leaf.index + leaf.min {
+						for var i from leaf.index to~ leaf.index + leaf.min {
 							if i != leaf.index {
 								fragments.code(' && ')
 							}
@@ -672,7 +672,7 @@ namespace Fragment {
 					else if tree.min == tree.max {
 						var index = tree.min + leaf.index
 
-						for var i from index til index + leaf.min {
+						for var i from index to~ index + leaf.min {
 							if i != index {
 								fragments.code(' && ')
 							}
@@ -683,7 +683,7 @@ namespace Fragment {
 					else {
 						var index = tree.min + leaf.index
 
-						for var i from index til 0 by -1 {
+						for var i from index to~ 0 step -1 {
 							if i != index {
 								fragments.code(' && ')
 							}

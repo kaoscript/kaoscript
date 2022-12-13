@@ -77,7 +77,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0Nn19"
+                  "defaultValue": "eyJraW5kIjo3NCwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0Nn19"
                 }
               ],
               "returns": "Boolean",

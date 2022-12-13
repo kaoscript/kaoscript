@@ -4,7 +4,7 @@ extern console: {
 
 heroes = ['leto', 'duncan', 'goku', 'batman', 'asterix', 'naruto', 'totoro']
 
-for hero, index in heroes desc from 2 to 5 by -1 {
+for hero, index in heroes from 2 down to 5 step -1 {
 	console.log('The hero at index %d is %s', index, hero)
 }
 

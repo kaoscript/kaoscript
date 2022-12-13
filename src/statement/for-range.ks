@@ -4,13 +4,12 @@ class ForRangeStatement extends Statement {
 		@bodyScope
 		@body
 		@boundName
-		@by
-		@byName
 		@declaration: Boolean		= false
 		@defineVariable: Boolean	= false
 		@from
 		@immutable: Boolean			= false
-		@til
+		@step
+		@stepName
 		@to
 		@until
 		@value
@@ -49,9 +48,9 @@ class ForRangeStatement extends Statement {
 		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
-		if ?@data.by {
-			@by = $compile.expression(@data.by, this, @scope)
-			@by.analyse()
+		if ?@data.step {
+			@step = $compile.expression(@data.step, this, @scope)
+			@step.analyse()
 		}
 
 		if ?@data.until {
@@ -82,10 +81,10 @@ class ForRangeStatement extends Statement {
 
 		@boundName = @bindingScope.acquireTempName() if @to.isComposite()
 
-		if ?@by {
-			@by.prepare(@scope.reference('Number'))
+		if ?@step {
+			@step.prepare(@scope.reference('Number'))
 
-			@byName = @bindingScope.acquireTempName() if @by.isComposite()
+			@stepName = @bindingScope.acquireTempName() if @step.isComposite()
 		}
 
 		if ?@until {
@@ -114,7 +113,7 @@ class ForRangeStatement extends Statement {
 		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@boundName) if ?@boundName
-		@bindingScope.releaseTempName(@byName) if ?@byName
+		@bindingScope.releaseTempName(@stepName) if ?@stepName
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -127,7 +126,7 @@ class ForRangeStatement extends Statement {
 		@from.translate()
 		@to.translate()
 
-		@by.translate() if ?@by
+		@step.translate() if ?@step
 
 		if ?@until {
 			@until.translate()
@@ -145,7 +144,7 @@ class ForRangeStatement extends Statement {
 	isUsingVariable(name) => # {{{
 			@from.isUsingVariable(name)
 		||	@to.isUsingVariable(name)
-		||	@by?.isUsingVariable(name)
+		||	@step?.isUsingVariable(name)
 		||	@until?.isUsingVariable(name)
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
@@ -164,8 +163,8 @@ class ForRangeStatement extends Statement {
 			ctrl.code(@boundName, $equals).compile(@to)
 		}
 
-		if ?@byName {
-			ctrl.code($comma, @byName, $equals).compile(@by)
+		if ?@stepName {
+			ctrl.code($comma, @stepName, $equals).compile(@step)
 		}
 
 		ctrl.code('; ').compile(@value).code(' <= ').compile(@boundName ?? @to)
@@ -179,17 +178,17 @@ class ForRangeStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if ?@data.by {
-			if @data.by.kind == NodeKind::NumericExpression {
-				if @data.by.value == 1 {
+		if ?@data.step {
+			if @data.step.kind == NodeKind::NumericExpression {
+				if @data.step.value == 1 {
 					ctrl.code('++').compile(@value)
 				}
 				else {
-					ctrl.compile(@value).code(' += ').compile(@by)
+					ctrl.compile(@value).code(' += ').compile(@step)
 				}
 			}
 			else {
-				ctrl.compile(@value).code(' += ').compile(@byName ?? @by)
+				ctrl.compile(@value).code(' += ').compile(@stepName ?? @step)
 			}
 		}
 		else {

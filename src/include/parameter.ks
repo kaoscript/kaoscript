@@ -151,7 +151,7 @@ class Parameter extends AbstractNode {
 			fragments = fn(fragments)
 
 			if mode != ParameterMode::HelperConstructor {
-				for var parameter in parameters til lastHeaderParameterIndex {
+				for var parameter in parameters to~ lastHeaderParameterIndex {
 					parameter.toValidationFragments(fragments)
 				}
 			}
@@ -551,7 +551,7 @@ class Parameter extends AbstractNode {
 				}
 			}
 			else {
-				for var parameter, i in parameters from nextIndex til restIndex {
+				for var parameter, i in parameters from nextIndex to~ restIndex {
 					parameter.toBeforeRestFragments(fragments, context, i, true, wrongdoer)
 				}
 			}

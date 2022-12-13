@@ -4,7 +4,7 @@ extern console: {
 
 var dyn x = 3.14
 
-for var x from 0 to 10 by 2 {
+for var x from 0 to 10 step 2 {
 	console.log(x)
 }
 

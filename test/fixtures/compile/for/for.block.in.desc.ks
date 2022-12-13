@@ -4,6 +4,6 @@ extern console: {
 
 heroes = ['leto', 'duncan', 'goku']
 
-for hero in heroes desc {
+for hero in heroes down {
 	console.log(hero)
 }

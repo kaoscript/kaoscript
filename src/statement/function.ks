@@ -75,7 +75,7 @@ var $function = {
 				}
 			}
 			NodeKind::ComparisonExpression => {
-				for var operand in data.values by 2 {
+				for var operand in data.values step 2 {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}

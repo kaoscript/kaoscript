@@ -268,7 +268,7 @@ namespace Router {
 			var perLabelA = perLabels[a]
 			var perLabelB = perLabels[b]
 
-			for var i from 0 til Math.min(perLabelA.labels.length, perLabelB.labels.length) {
+			for var i from 0 to~ Math.min(perLabelA.labels.length, perLabelB.labels.length) {
 				var labelA = perLabelA.labels[i]
 				var labelB = perLabelB.labels[i]
 
@@ -566,7 +566,7 @@ namespace Router {
 			mode
 		): Void { # {{{
 			var arguments = [...positions]
-			for var argument in arguments desc while !?argument {
+			for var argument in arguments down while !?argument {
 				arguments.pop()
 			}
 
@@ -672,7 +672,7 @@ namespace Router {
 			mode
 		): Void { # {{{
 			var arguments = [...positions]
-			for var argument in arguments desc while !?argument {
+			for var argument in arguments down while !?argument {
 				arguments.pop()
 			}
 

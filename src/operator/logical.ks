@@ -599,7 +599,7 @@ class PolyadicOperatorImply extends PolyadicOperatorOr {
 
 		fragments.code('!').wrapCondition(@operands[0])
 
-		for var operand in @operands from 1 til -1 {
+		for var operand in @operands from 1 to~ -1 {
 			fragments.code(' || ').wrapCondition(operand).code(')')
 		}
 
@@ -631,7 +631,7 @@ class PolyadicOperatorXor extends PolyadicOperatorAnd {
 
 					fragments.wrapCondition(@operands[0])
 
-					for var operand in @operands from 1 til -1 {
+					for var operand in @operands from 1 to~ -1 {
 						fragments.code(' !== ').wrapCondition(operand).code(')')
 					}
 

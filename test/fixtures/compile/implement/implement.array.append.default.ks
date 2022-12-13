@@ -24,7 +24,7 @@ impl Array {
 			this.pushUniq(...args[0])
 		}
 		else {
-			for i from 0 til args.length {
+			for i from 0 to~ args.length {
 				this.pushUniq(...args[i])
 			}
 		}

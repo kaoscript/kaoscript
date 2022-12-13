@@ -43,7 +43,7 @@ class HollowScope extends Scope {
 				type = types.last()
 			}
 			else {
-				for var i from 0 til types.length by 2 while types[i] <= line {
+				for var i from 0 to~ types.length step 2 while types[i] <= line {
 					type = types[i + 1]
 				}
 			}
@@ -66,7 +66,7 @@ class HollowScope extends Scope {
 			else {
 				var line = @parent.line()
 
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -91,7 +91,7 @@ class HollowScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}

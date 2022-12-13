@@ -198,7 +198,7 @@ class ObjectExpression extends Expression {
 
 							fragments.code(`\(arguments.length / 2)`)
 
-							for var i from 0 til arguments.length by 2 {
+							for var i from 0 to~ arguments.length step 2 {
 								if arguments[i] is String {
 									fragments.code(`, "\(arguments[i])", `)
 								}
@@ -254,7 +254,7 @@ class ObjectExpression extends Expression {
 				else {
 					fragments.code(`\(arguments.length / 2)`)
 
-					for var i from 0 til arguments.length by 2 {
+					for var i from 0 to~ arguments.length step 2 {
 						if arguments[i] is String {
 							fragments.code(`, "\(arguments[i])", `)
 						}

@@ -5,8 +5,6 @@ class ForInStatement extends Statement {
 		@body
 		@bodyScope: Scope
 		@boundName: String
-		@by
-		@byName: String
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
 		@declared: Boolean					= false
@@ -22,12 +20,13 @@ class ForInStatement extends Statement {
 		@index								= null
 		@indexName: String
 		@loopTempVariables: Array			= []
+		@step
+		@stepName: String
 		@until
 		@useBreak: Boolean					= false
 		@value								= null
 		@when
 		@while
-		@til
 		@to
 	}
 	analyse() { # {{{
@@ -95,24 +94,18 @@ class ForInStatement extends Statement {
 			@checkForRenamedVariables(@from, variables)
 		}
 
-		if ?@data.til {
-			@til = $compile.expression(@data.til, this, @scope)
-			@til.analyse()
-
-			@checkForRenamedVariables(@til, variables)
-		}
-		else if ?@data.to {
+		if ?@data.to {
 			@to = $compile.expression(@data.to, this, @scope)
 			@to.analyse()
 
 			@checkForRenamedVariables(@to, variables)
 		}
 
-		if ?@data.by {
-			@by = $compile.expression(@data.by, this, @scope)
-			@by.analyse()
+		if ?@data.step {
+			@step = $compile.expression(@data.step, this, @scope)
+			@step.analyse()
 
-			@checkForRenamedVariables(@by, variables)
+			@checkForRenamedVariables(@step, variables)
 		}
 
 		for var variable in variables {
@@ -140,7 +133,7 @@ class ForInStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 
-		@fromDesc = @data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0
+		@fromDesc = @data.step?.kind == NodeKind::NumericExpression && @data.step.value < 0
 
 		if @descending && @fromDesc {
 			@descending = @fromDesc = false
@@ -206,17 +199,14 @@ class ForInStatement extends Statement {
 			@from.prepare(@scope.reference('Number'))
 		}
 
-		if ?@til {
-			@til.prepare(@scope.reference('Number'))
-		}
-		else if ?@to {
+		if ?@to {
 			@to.prepare(@scope.reference('Number'))
 		}
 
-		if ?@by {
-			@by.prepare(@scope.reference('Number'))
+		if ?@step {
+			@step.prepare(@scope.reference('Number'))
 
-			@byName = @bindingScope.acquireTempName(false) if @by.isComposite()
+			@stepName = @bindingScope.acquireTempName(false) if @step.isComposite()
 		}
 
 		@assignTempVariables(@bindingScope)
@@ -290,14 +280,11 @@ class ForInStatement extends Statement {
 			@from.translate()
 		}
 
-		if ?@til {
-			@til.translate()
-		}
-		else if ?@to {
+		if ?@to {
 			@to.translate()
 		}
 
-		@by.translate() if ?@by
+		@step.translate() if ?@step
 
 		if ?@until {
 			@until.translate()
@@ -349,9 +336,8 @@ class ForInStatement extends Statement {
 	isUsingVariable(name) => # {{{
 			@expression.isUsingVariable(name)
 		||	@from?.isUsingVariable(name)
-		||	@til?.isUsingVariable(name)
 		||	@to?.isUsingVariable(name)
-		||	@by?.isUsingVariable(name)
+		||	@step?.isUsingVariable(name)
 		||	@until?.isUsingVariable(name)
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
@@ -375,52 +361,32 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if ?@til {
-				if @fromDesc {
-					fragments.compile(@til)
-				}
-				else {
-					if @til is NumberLiteral && @til.value() < 0 {
-						fragments
-							.compile(@expressionName ?? @expression)
-							.code(`.length - \(-@til.value())`)
-					}
-					else {
-						fragments
-							.code('Math.min(')
-							.compile(@expressionName ?? @expression)
-							.code('.length, ')
-							.compile(@til)
-							.code(')')
-					}
-				}
-			}
-			else if ?@to {
+			if ?@to {
+				var ballpark = $ast.hasModifier(@data.to, ModifierKind::Ballpark)
+
 				if @fromDesc {
 					fragments.compile(@to)
 				}
-				else {
-					if @to is NumberLiteral {
-						if @to.value() < 0 {
-							fragments
-								.compile(@expressionName ?? @expression)
-								.code(`.length - \(-@to.value() - 1)`)
-						}
-						else {
-							fragments
-								.code('Math.min(')
-								.compile(@expressionName ?? @expression)
-								.code(`.length, \(@to.value() + 1))`)
-						}
+				else if @to is NumberLiteral {
+					if @to.value() < 0 {
+						fragments
+							.compile(@expressionName ?? @expression)
+							.code(`.length - \(ballpark ? -@to.value() : -@to.value() - 1)`)
 					}
 					else {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code('.length, ')
-							.compile(@to)
-							.code(' + 1)')
+							.code(`.length, \(ballpark ? @to.value() : @to.value() + 1))`)
 					}
+				}
+				else {
+					fragments
+						.code('Math.min(')
+						.compile(@expressionName ?? @expression)
+						.code('.length, ')
+						.compile(@to)
+						.code(ballpark ? ')' : ' + 1)')
 				}
 			}
 			else {
@@ -437,33 +403,20 @@ class ForInStatement extends Statement {
 	} # }}}
 	toFromFragments(fragments) { # {{{
 		if @descending {
-			if ?@til {
-				if @til is NumberLiteral && @til.value() < 0 {
-					fragments
-						.compile(@expressionName ?? @expression)
-						.code(`.length - \(-@til.value() + 1)`)
-				}
-				else {
-					fragments
-						.code('Math.min(')
-						.compile(@expressionName ?? @expression)
-						.code('.length, ')
-						.compile(@til)
-						.code(') - 1')
-				}
-			}
-			else if ?@to {
+			if ?@to {
+				var ballpark = $ast.hasModifier(@data.to, ModifierKind::Ballpark)
+
 				if @to is NumberLiteral {
 					if @to.value() < 0 {
 						fragments
 							.compile(@expressionName ?? @expression)
-							.code(`.length - \(-@to.value())`)
+							.code(`.length - \(ballpark ? -@to.value() + 1 : -@to.value())`)
 					}
 					else {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code(`.length - 1, \(@to.value()))`)
+							.code(`.length - 1, \(ballpark ? @to.value() - 1 : @to.value()))`)
 					}
 				}
 				else {
@@ -472,7 +425,7 @@ class ForInStatement extends Statement {
 						.compile(@expressionName ?? @expression)
 						.code('.length - 1, ')
 						.compile(@to)
-						.code(')')
+						.code(ballpark ? ') - 1' : ')')
 				}
 			}
 			else {
@@ -581,17 +534,17 @@ class ForInStatement extends Statement {
 		ctrl.code('; ')
 
 		if @descending || @fromDesc {
-			if ?@data.by {
-				if @data.by.kind == NodeKind::NumericExpression {
-					if Math.abs(@data.by.value) == 1 {
+			if ?@data.step {
+				if @data.step.kind == NodeKind::NumericExpression {
+					if Math.abs(@data.step.value) == 1 {
 						ctrl.code('--').compile(@indexName ?? @index)
 					}
 					else {
-						ctrl.compile(@indexName ?? @index).code(' -= ', Math.abs(@data.by.value))
+						ctrl.compile(@indexName ?? @index).code(' -= ', Math.abs(@data.step.value))
 					}
 				}
 				else {
-					ctrl.compile(@indexName ?? @index).code(' -= ').compile(@byName ?? @by)
+					ctrl.compile(@indexName ?? @index).code(' -= ').compile(@stepName ?? @step)
 				}
 			}
 			else {
@@ -599,17 +552,17 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if ?@data.by {
-				if @data.by.kind == NodeKind::NumericExpression {
-					if Math.abs(@data.by.value) == 1 {
+			if ?@data.step {
+				if @data.step.kind == NodeKind::NumericExpression {
+					if Math.abs(@data.step.value) == 1 {
 						ctrl.code('++').compile(@indexName ?? @index)
 					}
 					else {
-						ctrl.compile(@indexName ?? @index).code(' += ', Math.abs(@data.by.value))
+						ctrl.compile(@indexName ?? @index).code(' += ', Math.abs(@data.step.value))
 					}
 				}
 				else {
-					ctrl.compile(@indexName ?? @index).code(' += ').compile(@byName ?? @by)
+					ctrl.compile(@indexName ?? @index).code(' += ').compile(@stepName ?? @step)
 				}
 			}
 			else {

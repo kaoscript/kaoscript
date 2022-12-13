@@ -18,15 +18,17 @@ class IfStatement extends Statement {
 		@whenTrueScope: Scope?								= null
 	}
 	override initiate() { # {{{
-		if @data.condition.kind == NodeKind::VariableDeclaration {
+		if @data.conditions[0].kind == NodeKind::VariableDeclaration {
+			var condition = @data.conditions[0]
+
 			@declared = true
 			@bindingScope = @newScope(@scope, ScopeType::Bleeding)
 
-			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
+			@bindingDeclaration = condition.variables[0].name.kind != NodeKind::Identifier
 
-			@existential =  @data.condition.operator.assignment == AssignmentOperatorKind::Existential
+			@existential =  condition.operator.assignment == AssignmentOperatorKind::Existential
 
-			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
+			@declaration = new VariableDeclaration(condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
 			@declaration.initiate()
 		}
 	} # }}}
@@ -46,7 +48,7 @@ class IfStatement extends Statement {
 			@bindingScope = @newScope(@scope, ScopeType::Hollow)
 			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
-			@condition = $compile.expression(@data.condition, this, @bindingScope)
+			@condition = $compile.expression(@data.conditions[0], this, @bindingScope)
 			@condition.analyse()
 		}
 

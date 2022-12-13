@@ -91,7 +91,7 @@ func $serialize(macro, data, context) { # {{{
 
 			$serialize(macro, data[0], context)
 
-			for i from 1 til data.length {
+			for i from 1 to~ data.length {
 				context.data += ', '
 
 				$serialize(macro, data[i], context)

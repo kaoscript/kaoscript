@@ -7,7 +7,7 @@ disclose Array {
 
 impl Array {
 	append(...args): Array {
-		for var i from 0 til args.length {
+		for var i from 0 to~ args.length {
 			@push(...args[i])
 		}
 

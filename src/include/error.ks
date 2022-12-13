@@ -3,7 +3,7 @@ extern sealed class Error
 Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
 	var mut message = error.toString()
 
-	for i from 0 til Math.min(12, stack.length) {
+	for i from 0 to~ Math.min(12, stack.length) {
 		message += '\n    ' + stack[i].toString()
 	}
 

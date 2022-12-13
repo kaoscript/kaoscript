@@ -4,14 +4,13 @@ class ForFromStatement extends Statement {
 		@body
 		@bodyScope
 		@boundName: String
-		@by
-		@byName: String
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
 		@declared: Boolean					= false
 		@from
 		@immutable: Boolean					= false
-		@til
+		@step
+		@stepName: String
 		@to
 		@until
 		@variable
@@ -54,38 +53,23 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if ?@data.til {
-			@til = $compile.expression(@data.til, this, @scope)
-			@til.analyse()
+		@to = $compile.expression(@data.to, this, @scope)
+		@to.analyse()
 
-			if @til.isUsingVariable(@data.variable.name) {
-				if @declared {
-					rename = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
-				}
+		if @to.isUsingVariable(@data.variable.name) {
+			if @declared {
+				rename = true
 			}
-		}
-		else {
-			@to = $compile.expression(@data.to, this, @scope)
-			@to.analyse()
-
-			if @to.isUsingVariable(@data.variable.name) {
-				if @declared {
-					rename = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
-				}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
 			}
 		}
 
-		if ?@data.by {
-			@by = $compile.expression(@data.by, this, @scope)
-			@by.analyse()
+		if ?@data.step {
+			@step = $compile.expression(@data.step, this, @scope)
+			@step.analyse()
 
-			if @by.isUsingVariable(@data.variable.name) {
+			if @step.isUsingVariable(@data.variable.name) {
 				if @declared {
 					rename = true
 				}
@@ -135,21 +119,14 @@ class ForFromStatement extends Statement {
 
 		@from.prepare(@scope.reference('Number'))
 
-		if ?@til {
-			@til.prepare(@scope.reference('Number'))
+		@to.prepare(@scope.reference('Number'))
 
-			@boundName = @bindingScope.acquireTempName(!@declared) if @til.isComposite()
-		}
-		else {
-			@to.prepare(@scope.reference('Number'))
+		@boundName = @bindingScope.acquireTempName(!@declared) if @to.isComposite()
 
-			@boundName = @bindingScope.acquireTempName(!@declared) if @to.isComposite()
-		}
+		if ?@step {
+			@step.prepare(@scope.reference('Number'))
 
-		if ?@by {
-			@by.prepare(@scope.reference('Number'))
-
-			@byName = @bindingScope.acquireTempName(!@declared) if @by.isComposite()
+			@stepName = @bindingScope.acquireTempName(!@declared) if @step.isComposite()
 		}
 
 		@assignTempVariables(@bindingScope)
@@ -186,7 +163,7 @@ class ForFromStatement extends Statement {
 		@body.prepare(target)
 
 		@bindingScope.releaseTempName(@boundName) if ?@boundName
-		@bindingScope.releaseTempName(@byName) if ?@byName
+		@bindingScope.releaseTempName(@stepName) if ?@stepName
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
@@ -197,15 +174,9 @@ class ForFromStatement extends Statement {
 	translate() { # {{{
 		@variable.translate()
 		@from.translate()
+		@to.translate()
 
-		if ?@til {
-			@til.translate()
-		}
-		else {
-			@to.translate()
-		}
-
-		@by.translate() if ?@by
+		@step.translate() if ?@step
 
 		if ?@until {
 			@until.translate()
@@ -222,9 +193,8 @@ class ForFromStatement extends Statement {
 	isLoop() => true
 	isUsingVariable(name) => # {{{
 			@from.isUsingVariable(name)
-		||	@til?.isUsingVariable(name)
-		||	@to?.isUsingVariable(name)
-		||	@by?.isUsingVariable(name)
+		||	@to.isUsingVariable(name)
+		||	@step?.isUsingVariable(name)
 		||	@until?.isUsingVariable(name)
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
@@ -240,39 +210,27 @@ class ForFromStatement extends Statement {
 		ctrl.compile(@variable).code($equals).compile(@from)
 
 		if ?@boundName {
-			ctrl.code($comma, @boundName, $equals).compile(@til ?? @to)
+			ctrl.code($comma, @boundName, $equals).compile(@to)
 		}
 
-		if ?@byName {
-			ctrl.code($comma, @byName, $equals).compile(@by)
+		if ?@stepName {
+			ctrl.code($comma, @stepName, $equals).compile(@step)
 		}
 
 		ctrl.code('; ')
 
 		ctrl.compile(@variable)
 
-		var mut desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
+		var mut desc = (@data.step?.kind == NodeKind::NumericExpression && @data.step.value < 0) || (@data.from.kind == NodeKind::NumericExpression && @data.to.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value)
 
-		if ?@data.til {
-			if desc {
-				ctrl.code(' > ')
-			}
-			else {
-				ctrl.code(' < ')
-			}
-
-			ctrl.compile(@boundName ?? @til)
+		if $ast.hasModifier(@data.to, ModifierKind::Ballpark) {
+			ctrl.code(desc ? ' > ' : ' < ')
 		}
 		else {
-			if desc {
-				ctrl.code(' >= ')
-			}
-			else {
-				ctrl.code(' <= ')
-			}
-
-			ctrl.compile(@boundName ?? @to)
+			ctrl.code(desc ? ' >= ' : ' <= ')
 		}
+
+		ctrl.compile(@boundName ?? @to)
 
 		if ?@until {
 			ctrl.code(' && !(').compileCondition(@until).code(')')
@@ -283,23 +241,23 @@ class ForFromStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if ?@data.by {
-			if @data.by.kind == NodeKind::NumericExpression {
-				if @data.by.value == 1 {
+		if ?@data.step {
+			if @data.step.kind == NodeKind::NumericExpression {
+				if @data.step.value == 1 {
 					ctrl.code('++').compile(@variable)
 				}
-				else if @data.by.value == -1 {
+				else if @data.step.value == -1 {
 					ctrl.code('--').compile(@variable)
 				}
-				else if @data.by.value >= 0 {
-					ctrl.compile(@variable).code(' += ').compile(@by)
+				else if @data.step.value >= 0 {
+					ctrl.compile(@variable).code(' += ').compile(@step)
 				}
 				else {
-					ctrl.compile(@variable).code(' -= ', -@data.by.value)
+					ctrl.compile(@variable).code(' -= ', -@data.step.value)
 				}
 			}
 			else {
-				ctrl.compile(@variable).code(' += ').compile(@byName ?? @by)
+				ctrl.compile(@variable).code(' += ').compile(@stepName ?? @step)
 			}
 		}
 		else if desc {

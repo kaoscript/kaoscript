@@ -801,7 +801,7 @@ namespace Build {
 
 			return true unless count > 1
 
-			for var parameter, index in parameters til -1 {
+			for var parameter, index in parameters to~ -1 {
 				var nextParameter = parameters[index + 1]
 				var currType = parameters[index].type()
 				var nextType = nextParameter.type()
@@ -1203,7 +1203,7 @@ namespace Build {
 			} # }}}
 
 			func regroupBranch_SiblingsEqChildren(branch: TreeBranch): Void { # {{{
-				for var type, index in branch.order from branch.order.length - 2 by -1 {
+				for var type, index in branch.order from branch.order.length - 2 step -1 {
 					var column = branch.columns[type]
 
 					if getForkHash(branch, index + 1) == getForkHash(column, 0) && isSameParameter2(column, branch.columns[branch.order[index + 1]]) {
@@ -1264,7 +1264,7 @@ namespace Build {
 			func regroupLeaf_SiblingsEq(branch: TreeBranch | Tree, node: AbstractNode): Void { # {{{
 				var groups = {}
 
-				for var type, index in branch.order from branch.order.length - 2 by -1 {
+				for var type, index in branch.order from branch.order.length - 2 step -1 {
 					var column = branch.columns[type]
 
 					if column.isNode {

@@ -873,7 +873,7 @@ export class Color {
 			var green = endColor._green - this._green
 			var blue = endColor._blue - this._blue
 
-			for var i from 1 til length {
+			for var i from 1 to~ length {
 				var offset = i / length
 
 				var color = this.clone()

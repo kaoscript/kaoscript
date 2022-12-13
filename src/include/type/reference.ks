@@ -576,7 +576,7 @@ class ReferenceType extends Type {
 					return false
 				}
 
-				for var index from 0 til Math.max(@parameters.length, value.parameters().length) {
+				for var index from 0 to~ Math.max(@parameters.length, value.parameters().length) {
 					if !@parameter(index).isAssignableToVariable(value.parameter(index), true, nullcast, downcast) {
 						return false
 					}

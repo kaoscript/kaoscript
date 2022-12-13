@@ -730,7 +730,7 @@ class TryStatement extends Statement {
 				var mut index = -1
 				var mut item = null
 
-				for i from 0 til statements.length - 1 while index == -1 {
+				for i from 0 to~ statements.length - 1 while index == -1 {
 					if item ?= statements[i].toFragments(ctrl2, Mode::None) {
 						index = i
 					}
@@ -780,7 +780,7 @@ class TryStatement extends Statement {
 			var mut index = -1
 			var mut item = null
 
-			for i from 0 til statements.length while index == -1 {
+			for i from 0 to~ statements.length while index == -1 {
 				if item ?= statements[i].toFragments(ctrl, Mode::None) {
 					index = i
 				}

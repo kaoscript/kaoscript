@@ -402,7 +402,7 @@ class ClassType extends Type {
 		switch data.kind {
 			NodeKind::FieldDeclaration => {
 				var mut instance = true
-				for i from 0 til data.modifiers.length while instance {
+				for i from 0 to~ data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind::Static
 				}
 
@@ -430,7 +430,7 @@ class ClassType extends Type {
 				}
 				else {
 					var mut instance = true
-					for i from 0 til data.modifiers.length while instance {
+					for i from 0 to~ data.modifiers.length while instance {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 
@@ -599,7 +599,7 @@ class ClassType extends Type {
 		if var overwrite ?= type.overwrite() {
 			if var methods ?= @instanceMethods[name] {
 				for var data in overwrite {
-					for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+					for var i from methods.length - 1 to 0 step -1 when methods[i].index() == data {
 						methods.splice(i, 1)
 						break
 					}
@@ -624,7 +624,7 @@ class ClassType extends Type {
 			var methods = @staticMethods[name]
 
 			for var data in overwrite {
-				for var i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+				for var i from methods.length - 1 to 0 step -1 when methods[i].index() == data {
 					methods.splice(i, 1)
 					break
 				}
@@ -987,7 +987,7 @@ class ClassType extends Type {
 		var matchables = []
 
 		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for var method, index in methods desc {
+			for var method, index in methods down {
 				if method.isSubsetOf(@instanceMethods[name], MatchingMode::FunctionSignature) {
 					methods.splice(index, 1)
 				}
@@ -1840,7 +1840,7 @@ class ClassType extends Type {
 		var matchables = []
 
 		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for var method, index in methods desc {
+			for var method, index in methods down {
 				if method.isSubsetOf(@instanceMethods[name], mode) {
 					methods.splice(index, 1)
 				}

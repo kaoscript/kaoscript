@@ -11,9 +11,9 @@ class ArrayComprehensionForFrom extends Expression {
 		@bindingScope
 		@body
 		@bodyScope
-		@by				= null
 		@from
 		@to
+		@step				= null
 		@variable
 		@when			= null
 	}
@@ -29,12 +29,12 @@ class ArrayComprehensionForFrom extends Expression {
 		@from = $compile.expression(@data.loop.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this, @scope)
+		@to = $compile.expression(@data.loop.to, this, @scope)
 		@to.analyse()
 
-		if ?@data.loop.by {
-			@by = $compile.expression(@data.loop.by, this, @scope)
-			@by.analyse()
+		if ?@data.loop.step {
+			@step = $compile.expression(@data.loop.step, this, @scope)
+			@step.analyse()
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
@@ -55,27 +55,27 @@ class ArrayComprehensionForFrom extends Expression {
 		@variable.prepare(AnyType.NullableUnexplicit)
 		@from.prepare(@scope.reference('Number'))
 		@to.prepare(@scope.reference('Number'))
-		@by.prepare(@scope.reference('Number')) if ?@by
-		@when.prepare(@scope.reference('Boolean')) if ?@when
+		@step?.prepare(@scope.reference('Number'))
+		@when?.prepare(@scope.reference('Boolean'))
 		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
 	} # }}}
 	translate() { # {{{
 		@variable.translate()
 		@from.translate()
 		@to.translate()
-		@by.translate() if ?@by
+		@step?.translate()
 		@body.translate()
-		@when.translate() if ?@when
+		@when?.translate()
 	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
-								(@by != null && @by.isUsingVariable(name)) ||
-								(@when != null && @when.isUsingVariable(name)) ||
+								@step?.isUsingVariable(name) ||
+								@when?.isUsingVariable(name) ||
 								@body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@from.listNonLocalVariables(scope, variables)
 		@to.listNonLocalVariables(scope, variables)
-		@by?.listNonLocalVariables(scope, variables)
+		@step?.listNonLocalVariables(scope, variables)
 		@when?.listNonLocalVariables(scope, variables)
 		@body?.listNonLocalVariables(scope, variables)
 
@@ -92,14 +92,14 @@ class ArrayComprehensionForFrom extends Expression {
 			.code($comma)
 			.compile(@to)
 
-		if @by == null {
-			fragments.code(', 1')
+		if ?@step {
+			fragments.code($comma).compile(@step)
 		}
 		else {
-			fragments.code($comma).compile(@by)
+			fragments.code(', 1')
 		}
 
-		fragments.code($comma, ?@data.loop.from, $comma, ?@data.loop.to, $comma)
+		fragments.code($comma, !$ast.hasModifier(@data.loop.from, ModifierKind::Ballpark), $comma, !$ast.hasModifier(@data.loop.to, ModifierKind::Ballpark), $comma)
 
 		fragments
 			.code(surround.beforeParameters)

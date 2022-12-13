@@ -126,7 +126,7 @@ class EnumType extends Type {
 			}
 			NodeKind::MethodDeclaration => {
 				var mut instance = true
-				for i from 0 til data.modifiers.length while instance {
+				for i from 0 to~ data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind::Static
 				}
 

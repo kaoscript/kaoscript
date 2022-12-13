@@ -55,7 +55,7 @@ class BleedingScope extends Scope {
 			else {
 				var line = @parent.line()
 
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -81,7 +81,7 @@ class BleedingScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -108,7 +108,7 @@ class BleedingScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}

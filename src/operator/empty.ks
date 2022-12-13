@@ -280,7 +280,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 	operator() => Operator::EmptyCoalescing
 	symbol() => '##'
 	toFragments(fragments, mode) { # {{{
-		for var operand in @operands til -1 {
+		for var operand in @operands to~ -1 {
 			fragments
 				.code($runtime.type(this) + '.isNotEmpty(')
 				.compileReusable(operand)

@@ -53,6 +53,15 @@ var $ast = {
 			}
 		}
 	} # }}}
+	hasModifier(data, target: ModifierKind): Boolean { # {{{
+		for var modifier in data.modifiers {
+			if modifier.kind == target {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	identifier(name) { # {{{
 		if name is String {
 			return {

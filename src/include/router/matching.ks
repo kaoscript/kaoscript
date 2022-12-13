@@ -261,7 +261,7 @@ namespace Matching {
 						var parameters = function.parameters()
 						var positions = []
 
-						for var type in branch.rows[0].types til -1 {
+						for var type in branch.rows[0].types to~ -1 {
 							if parameters[type.parameter].isVarargs() {
 								positions[type.parameter] = []
 							}

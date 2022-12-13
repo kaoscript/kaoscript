@@ -195,7 +195,7 @@ class ModuleScope extends Scope {
 				type = types.last()
 			}
 			else {
-				for var i from 0 til types.length by 2 while types[i] <= line {
+				for var i from 0 to~ types.length step 2 while types[i] <= line {
 					type = types[i + 1]
 				}
 			}
@@ -218,7 +218,7 @@ class ModuleScope extends Scope {
 			else {
 				var line = @line
 
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -306,7 +306,7 @@ class ModuleScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -337,7 +337,7 @@ class ModuleScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -369,7 +369,7 @@ class ModuleScope extends Scope {
 				variable = variables.last()
 			}
 			else {
-				for var i from 0 til variables.length by 2 while variables[i] <= line {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
 					variable = variables[i + 1]
 				}
 			}
@@ -386,7 +386,7 @@ class ModuleScope extends Scope {
 		var hash = a.toQuote()
 
 		if var matches ?= @matchingTypes[hash] {
-			for var type, i in matches by 2 {
+			for var type, i in matches step 2 {
 				if type == b {
 					return matches[i + 1]
 				}

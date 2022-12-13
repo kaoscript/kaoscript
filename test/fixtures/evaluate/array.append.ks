@@ -4,7 +4,7 @@ require expect: func
 
 impl Array {
 	append(...args): Array {
-		for i from 0 til args.length {
+		for i from 0 to~ args.length {
 			this.push(...args[i])
 		}
 

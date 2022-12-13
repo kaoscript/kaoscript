@@ -1,7 +1,7 @@
 namespace Unbounded {
 	export {
 		func expandUnboundeds(trees: Array<Tree>, node: AbstractNode): Void { # {{{
-			for var tree in trees til -1 {
+			for var tree in trees to~ -1 {
 				update(tree, false)
 			}
 

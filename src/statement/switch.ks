@@ -311,7 +311,7 @@ class SwitchStatement extends Statement {
 				clauses: []
 			}
 
-			for var i from 0 til @data.clauses.length {
+			for var i from 0 to~ @data.clauses.length {
 				if i == clauseIndex {
 					map.clauses[i] = {
 						initializable: true

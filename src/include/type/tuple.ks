@@ -87,7 +87,7 @@ abstract class TupleType extends Type {
 			@extends.type().listAllFields(list)
 		}
 
-		for var index from @extendedLength til @extendedLength + @length {
+		for var index from @extendedLength to~ @extendedLength + @length {
 			list.push(@fieldsByIndex[index])
 		}
 

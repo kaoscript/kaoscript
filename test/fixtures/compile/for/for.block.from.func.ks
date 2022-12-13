@@ -7,7 +7,7 @@ var dyn foo = {
 }
 
 func bar() {
-	for i from 0 til 10 {
+	for i from 0 to~ 10 {
 		console.log(i)
 	}
 }
