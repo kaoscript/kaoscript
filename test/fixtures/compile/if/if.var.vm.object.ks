@@ -5,6 +5,6 @@ func foobar() => {
 	y: 2
 }
 
-if var {x, y} ?= foobar() {
+if var mut {x, y} ?= foobar() {
 	console.log(`\(x)`)
 }

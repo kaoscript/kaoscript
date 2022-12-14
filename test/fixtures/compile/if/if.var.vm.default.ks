@@ -2,10 +2,10 @@ extern console
 
 func foobar(): String => 'foobar'
 
-if var x ?= foobar() {
+if var mut x ?= foobar() {
 	console.log(`\(x)`)
 }
 
-if var x ?= foobar() {
+if var mut x ?= foobar() {
 	console.log(`\(x)`)
 }

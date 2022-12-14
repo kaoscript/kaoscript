@@ -2,8 +2,6 @@ extern console
 
 func foobar(): String => 'foobar'
 
-if var x ?= foobar() {
+if var mut x: String ?= foobar() {
 	console.log(`\(x)`)
 }
-
-console.log(`\(x)`)

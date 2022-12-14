@@ -2,10 +2,12 @@ extern console
 
 func foobar() => 'foobar'
 
-if var x ?= foobar() {
+var x = 'barfoo'
+
+console.log(`\(x)`)
+
+if var mut x ?= foobar() {
 	console.log(`\(x)`)
 }
-
-var dyn x
 
 console.log(`\(x)`)

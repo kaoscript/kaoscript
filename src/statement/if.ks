@@ -2,15 +2,17 @@ class IfStatement extends Statement {
 	private late {
 		@analyzeStep: Boolean								= true
 		@assignedInstanceVariables							= {}
-		@bindingDeclaration: Boolean						= false
+		@bindingVariable: Expression?
 		@bindingScope: Scope
 		@cascade: Boolean									= false
 		@condition: Expression
 		@declaration: VariableDeclaration
-		@declared: Boolean									= false
 		@existential: Boolean								= false
 		@initializedVariables: Object						= {}
 		@lateInitVariables									= {}
+		@hasBinding: Boolean								= false
+		@hasCondition: Boolean								= true
+		@hasDeclaration: Boolean							= false
 		@hasWhenFalse: Boolean								= false
 		@whenFalseExpression								= null
 		@whenFalseScope: Scope?								= null
@@ -18,37 +20,43 @@ class IfStatement extends Statement {
 		@whenTrueScope: Scope?								= null
 	}
 	override initiate() { # {{{
-		if @data.conditions[0].kind == NodeKind::VariableDeclaration {
-			var condition = @data.conditions[0]
-
-			@declared = true
+		if ?@data.declaration {
+			@hasDeclaration = true
 			@bindingScope = @newScope(@scope, ScopeType::Bleeding)
 
-			@bindingDeclaration = condition.variables[0].name.kind != NodeKind::Identifier
+			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind::Identifier
 
-			@existential =  condition.operator.assignment == AssignmentOperatorKind::Existential
+			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind::Existential
 
-			@declaration = new VariableDeclaration(condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
+			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @cascade || @hasBinding)
 			@declaration.initiate()
 		}
 	} # }}}
 	override analyse() { # {{{
 		@hasWhenFalse = ?@data.whenFalse
 
-		if @declared {
+		if @hasDeclaration {
 			@declaration.analyse()
 
-			if @bindingDeclaration {
-				@condition = @declaration.value()
+			if @hasBinding {
+				@bindingVariable = @declaration.value()
 			}
 
 			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+			
+			if ?@data.condition {
+				@condition = $compile.expression(@data.condition, this, @bindingScope)
+				@condition.analyse()
+			}
+			else {
+				@hasCondition = false
+			}
 		}
 		else {
 			@bindingScope = @newScope(@scope, ScopeType::Hollow)
 			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
-			@condition = $compile.expression(@data.conditions[0], this, @bindingScope)
+			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
 		}
 
@@ -75,19 +83,20 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if @declared {
+		if @hasDeclaration {
 			@declaration.prepare(AnyType.NullableUnexplicit)
 
-			if @bindingDeclaration {
-				@condition.acquireReusable(true)
-				@condition.releaseReusable()
+			if @hasBinding {
+				@bindingVariable.acquireReusable(true)
+				@bindingVariable.releaseReusable()
 			}
 
 			if var variable ?= @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
-		else {
+		
+		if @hasCondition {
 			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
 			unless @condition.type().canBeBoolean() {
@@ -114,10 +123,10 @@ class IfStatement extends Statement {
 
 		@whenTrueExpression.prepare(target)
 
-		if @whenFalseExpression == null {
+		if !@hasWhenFalse {
 			@scope.line(@data.end.line)
 
-			if !@declared {
+			if !@hasDeclaration {
 				if @whenTrueExpression.isExit() {
 					for var map, name of @lateInitVariables {
 						if map.false.initializable {
@@ -284,10 +293,10 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		if @declared {
+		if @hasDeclaration {
 			@declaration.translate()
 		}
-		else {
+		if @hasCondition {
 			@condition.translate()
 		}
 
@@ -298,7 +307,7 @@ class IfStatement extends Statement {
 		if @cascade {
 			@parent.addAssignments(variables)
 		}
-		else if @declared && !@bindingDeclaration {
+		else if @hasDeclaration && !@hasBinding {
 			for var variable in variables {
 				if !@declaration.isDeclararingVariable(variable) {
 					@assignments.pushUniq(variable)
@@ -477,7 +486,7 @@ class IfStatement extends Statement {
 	isJumpable() => true
 	isLateInitializable() => true
 	isUsingVariable(name) { # {{{
-		if @declared {
+		if @hasDeclaration {
 			if @declaration.isUsingVariable(name) {
 				return true
 			}
@@ -492,11 +501,11 @@ class IfStatement extends Statement {
 			return true
 		}
 
-		return @whenFalseExpression != null && @whenFalseExpression.isUsingVariable(name)
+		return @hasWhenFalse && @whenFalseExpression.isUsingVariable(name)
 	} # }}}
 	setCascade(@cascade)
 	toStatementFragments(fragments, mode) { # {{{
-		if @declared && !@bindingDeclaration {
+		if @hasDeclaration && !@hasBinding {
 			fragments.compile(@declaration)
 
 			var ctrl = fragments.newControl()
@@ -516,16 +525,16 @@ class IfStatement extends Statement {
 	toIfFragments(fragments, mode) { # {{{
 		fragments.code('if(')
 
-		if @declared {
-			if @bindingDeclaration {
+		if @hasDeclaration {
+			if @hasBinding {
 				fragments
 					.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
-					.compileReusable(@condition)
+					.compileReusable(@bindingVariable)
 					.code(')')
 
 				fragments.code(' ? (')
 
-				@declaration.declarator().toAssignmentFragments(fragments, @condition)
+				@declaration.declarator().toAssignmentFragments(fragments, @bindingVariable)
 
 				fragments.code(', true) : false')
 			}
@@ -563,6 +572,10 @@ class IfStatement extends Statement {
 					})
 				}
 			}
+			
+			if @hasCondition {
+				fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+			}
 		}
 		else {
 			fragments.compileCondition(@condition)
@@ -572,7 +585,7 @@ class IfStatement extends Statement {
 
 		fragments.compile(@whenTrueExpression, mode)
 
-		if ?@whenFalseExpression {
+		if @hasWhenFalse {
 			if @whenFalseExpression is IfStatement {
 				fragments.step().code('else ')
 

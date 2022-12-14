@@ -6,7 +6,7 @@ var dyn x = 'barfoo'
 
 console.log(`\(x)`)
 
-if var x ?= foobar() {
+if var mut x ?= foobar() {
 	console.log(`\(x)`)
 }
 
