@@ -12,12 +12,12 @@ module.exports = function() {
 		if(args.length > 1) {
 			if(index !== 0) {
 				if(index >= this.length) {
-					for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+					for(let i = 0; i < args.length; ++i) {
 						this.push.call(this, ...args[i]);
 					}
 				}
 				else {
-					for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+					for(let i = 0; i < args.length; ++i) {
 						this.splice.call(this, index, 0, ...args[i]);
 						index += [].concat(args[i]).length;
 					}

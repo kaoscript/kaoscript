@@ -4,7 +4,7 @@ module.exports = function() {
 	var __ks_Array = require("../_/._array.ks.j5k8r9.ksb")().__ks_Array;
 	__ks_Array.__ks_func_appendAny_0 = function(args) {
 		console.log(__ks_Array.__ks_func_last_0.call(args));
-		for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		for(let i = 0; i < args.length; ++i) {
 			console.log(args[i].last());
 			this.push.call(this, ...args[i]);
 		}
@@ -12,7 +12,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_appendArray_0 = function(args) {
 		console.log(__ks_Array.__ks_func_last_0.call(args));
-		for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		for(let i = 0; i < args.length; ++i) {
 			console.log(__ks_Array.__ks_func_last_0.call(args[i]));
 			this.push(...args[i]);
 		}

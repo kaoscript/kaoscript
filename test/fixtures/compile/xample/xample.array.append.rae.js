@@ -2,7 +2,7 @@ const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_func_append_0 = function(args) {
-		for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		for(let i = 0; i < args.length; ++i) {
 			this.push(...args[i]);
 		}
 		return this;

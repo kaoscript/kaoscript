@@ -6,7 +6,7 @@ impl Array {
 	appendAny(...args): Array {
 		console.log(args.last())
 
-		for i from 0 to~ args.length {
+		for i from 0 up to~ args.length {
 			console.log(args[i].last())
 
 			this.push(...args[i])
@@ -18,7 +18,7 @@ impl Array {
 	appendArray(...args: Array): Array {
 		console.log(args.last())
 
-		for i from 0 to~ args.length {
+		for i from 0 up to~ args.length {
 			console.log(args[i].last())
 
 			this.push(...args[i])

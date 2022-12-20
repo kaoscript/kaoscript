@@ -12,12 +12,12 @@ impl Array {
 		if args.length > 1 {
 			if index != 0 {
 				if index >= this.length {
-					for i from 0 to~ args.length {
+					for i from 0 up to~ args.length {
 						this.push(...args[i])
 					}
 				}
 				else {
-					for i from 0 to~ args.length {
+					for i from 0 up to~ args.length {
 						this.splice(index, 0, ...args[i])
 
 						index += [].concat(args[i]).length
@@ -25,7 +25,7 @@ impl Array {
 				}
 			}
 			else {
-				for i from args.length - 1 to 0 step -1 {
+				for i from~ args.length down to 0 {
 					this.unshift(...args[i])
 				}
 			}

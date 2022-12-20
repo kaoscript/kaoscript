@@ -100,7 +100,10 @@ module.exports = function() {
 		if(a.length !== b.length) {
 			return false;
 		}
-		for(let i = 0, __ks_0 = a.length; i < __ks_0; ++i) {
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = KSHelper.assertLoop(0, "", 0, "", a.length, "", 1);
+		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			i = __ks_3(__ks_4);
 			if(a[i] !== b[i]) {
 				return false;
 			}
@@ -108,7 +111,10 @@ module.exports = function() {
 		return true;
 	};
 	__ks_Array.__ks_func_append_0 = function(args) {
-		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = KSHelper.assertLoop(0, "", 0, "", args.length, "", 1);
+		for(let __ks_4 = __ks_0, k; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			k = __ks_3(__ks_4);
 			const arg = KSHelper.array(args[k]);
 			const l = arg.length;
 			if(l > 50000) {
@@ -131,7 +137,10 @@ module.exports = function() {
 			__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[0]));
 		}
 		else {
-			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+			let __ks_0, __ks_1, __ks_2, __ks_3;
+			[__ks_0, __ks_1, __ks_2, __ks_3] = KSHelper.assertLoop(0, "", 0, "", args.length, "", 1);
+			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+				i = __ks_3(__ks_4);
 				__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[i]));
 			}
 		}

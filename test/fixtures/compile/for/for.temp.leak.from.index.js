@@ -5,8 +5,10 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function(args) {
 		let i = 42;
-		let __ks_0;
-		for(i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, "", 1);
+		for(let __ks_4 = __ks_0; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			i = __ks_3(__ks_4);
 			console.log(args[i]);
 		}
 	};

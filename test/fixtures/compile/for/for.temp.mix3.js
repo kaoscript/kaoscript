@@ -9,7 +9,10 @@ module.exports = function() {
 				value = x.foo[__ks_0];
 				let __ks_2 = value.kind;
 				if(__ks_2 === 42) {
-					for(let i = 0, __ks_3 = value.values.length; i < __ks_3; ++i) {
+					let __ks_3, __ks_4, __ks_5, __ks_6;
+					[__ks_3, __ks_4, __ks_5, __ks_6] = Helper.assertLoop(0, "", 0, "value.values.length", value.values.length, "", 1);
+					for(let __ks_7 = __ks_3, i; __ks_7 < __ks_4; __ks_7 += __ks_5) {
+						i = __ks_6(__ks_7);
 						console.log(value.values[i]);
 					}
 				}

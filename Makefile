@@ -68,6 +68,9 @@ local:
 dev: export DEBUG = 1
 dev: export XARGS = 1
 dev:
+	@# use 4-length tabs
+	@# @tabs -4
+
 	@# clear terminal
 	@make cls
 

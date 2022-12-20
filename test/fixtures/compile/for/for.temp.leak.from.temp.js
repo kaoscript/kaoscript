@@ -4,15 +4,21 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(args) {
-		for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, "", 1);
+		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			i = __ks_3(__ks_4);
 			console.log(args[i]);
 		}
 		let j = 42;
-		let __ks_0;
-		for(j = 0, __ks_0 = args.length; j < __ks_0; ++j) {
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, "", 1);
+		for(let __ks_4 = __ks_0; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			j = __ks_3(__ks_4);
 			console.log(args[j]);
 		}
-		for(j = 0, __ks_0 = args.length; j < __ks_0; ++j) {
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, "", 1);
+		for(let __ks_5 = __ks_0; __ks_5 < __ks_1; __ks_5 += __ks_2) {
+			j = __ks_3(__ks_5);
 			console.log(args[j]);
 		}
 	};

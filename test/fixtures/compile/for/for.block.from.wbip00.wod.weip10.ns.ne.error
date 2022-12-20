@@ -1,0 +1,1 @@
+SyntaxException: The for/from loop can never be executed due to bad low/high limits (fixtures/compile/for/for.block.from.wbip00.wod.weip10.ns.ne.ks:5)

@@ -1,0 +1,1 @@
+TypeException: In the statement "for/from", the argument "from" must be of type "Number" and not "String" (fixtures/compile/for/for.block.from.wbvs.no.wevi.ns.ne.ks:2)

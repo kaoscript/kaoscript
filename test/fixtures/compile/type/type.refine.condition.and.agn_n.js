@@ -6,7 +6,10 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(lines) {
 		let line;
-		for(let i = 0, __ks_0 = lines.length; i < __ks_0; ++i) {
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "lines.length", lines.length, "", 1);
+		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			i = __ks_3(__ks_4);
 			if((line = lines[i].trim()).length !== 0) {
 				if(line.startsWith("foobar")) {
 				}

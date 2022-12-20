@@ -1,6 +1,5 @@
 module.exports = function() {
-	let y = 2;
-	for(let x = 0; x <= 10; x += y) {
+	for(let x = 0; x <= 10; ++x) {
 		console.log(x);
 	}
 };

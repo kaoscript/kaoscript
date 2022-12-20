@@ -950,7 +950,10 @@ module.exports = function() {
 				const red = endColor._red - this._red;
 				const green = endColor._green - this._green;
 				const blue = endColor._blue - this._blue;
-				for(let i = 1; i < length; ++i) {
+				let __ks_0, __ks_1, __ks_2, __ks_3;
+				[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 1, "", length, "", 1);
+				for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+					i = __ks_3(__ks_4);
 					const offset = i / length;
 					const color = this.__ks_func_clone_0();
 					color._red += Math.round(red * offset);

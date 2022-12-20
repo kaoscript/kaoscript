@@ -28,7 +28,10 @@ module.exports = function() {
 			__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[0]));
 		}
 		else {
-			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+			let __ks_0, __ks_1, __ks_2, __ks_3;
+			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, "", 1);
+			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+				i = __ks_3(__ks_4);
 				__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[i]));
 			}
 		}
