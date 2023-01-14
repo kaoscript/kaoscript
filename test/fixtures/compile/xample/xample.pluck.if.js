@@ -4,8 +4,8 @@ module.exports = function() {
 	__ks_Array.__ks_func_pluck_0 = function(name) {
 		let result = [];
 		let value;
-		for(let __ks_0 = 0, __ks_1 = this.length, item; __ks_0 < __ks_1; ++__ks_0) {
-			item = this[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = this.length, item; __ks_1 < __ks_0; ++__ks_1) {
+			item = this[__ks_1];
 			if(Type.isValue(item) && Type.isValue(item[name]) ? (value = item[name], true) : false) {
 				if(Type.isFunction(value)) {
 					let __ks_2;

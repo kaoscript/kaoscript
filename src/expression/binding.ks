@@ -74,6 +74,7 @@ class ArrayBinding extends Expression {
 			element.translate()
 		}
 	} # }}}
+	elements(): @elements
 	export(recipient) { # {{{
 		for var element in @elements {
 			element.export(recipient)
@@ -265,6 +266,14 @@ class ArrayBindingElement extends Expression {
 	max() => @rest ? Infinity : 1
 	min() => @rest ? 0 : 1
 	setAssignment(@assignment)
+	toAssignmentFragments(fragments, value) { # {{{
+		if @named {
+			fragments
+				.compile(@name)
+				.code($equals)
+				.compile(value)
+		}
+	} # }}}
 	toFragments(fragments) { # {{{
 		if @rest {
 			fragments.code('...')

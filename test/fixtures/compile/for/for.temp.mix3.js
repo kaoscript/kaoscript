@@ -5,12 +5,12 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function(x) {
 		if(Type.isValue(x.foo)) {
-			for(let __ks_0 = 0, __ks_1 = x.foo.length, value; __ks_0 < __ks_1; ++__ks_0) {
-				value = x.foo[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = x.foo.length, value; __ks_1 < __ks_0; ++__ks_1) {
+				value = x.foo[__ks_1];
 				let __ks_2 = value.kind;
 				if(__ks_2 === 42) {
 					let __ks_3, __ks_4, __ks_5, __ks_6;
-					[__ks_3, __ks_4, __ks_5, __ks_6] = Helper.assertLoop(0, "", 0, "value.values.length", value.values.length, "", 1);
+					[__ks_3, __ks_4, __ks_5, __ks_6] = Helper.assertLoop(0, "", 0, "value.values.length", value.values.length, Infinity, "", 1);
 					for(let __ks_7 = __ks_3, i; __ks_7 < __ks_4; __ks_7 += __ks_5) {
 						i = __ks_6(__ks_7);
 						console.log(value.values[i]);

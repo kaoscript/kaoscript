@@ -1,0 +1,1 @@
+SyntaxException: In for/in loop, the undetermined argument "split" can't be associated with a destructuring array (fixtures/compile/for/for.block.in.from.wsxa.wd.nb.no.ne.ns.ne.ks:4)

@@ -6,8 +6,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_0 = 0, __ks_1 = values.length, vals; __ks_0 < __ks_1; ++__ks_0) {
-			vals = values[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = values.length, vals; __ks_1 < __ks_0; ++__ks_1) {
+			vals = values[__ks_1];
 			const last = __ks_Array.__ks_func_last_0.call(vals);
 		}
 	};

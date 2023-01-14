@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		let line;
-		for(let __ks_0 = 0, __ks_1 = values.length, element; __ks_0 < __ks_1; ++__ks_0) {
-			({line, element} = values[__ks_0]);
+		for(let __ks_1 = 0, __ks_0 = values.length, element; __ks_1 < __ks_0; ++__ks_1) {
+			({line, element} = values[__ks_1]);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

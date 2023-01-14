@@ -4,12 +4,12 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x, y, z) {
-		for(let __ks_0 = 0, __ks_1 = y.length, value; __ks_0 < __ks_1; ++__ks_0) {
-			value = y[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = y.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = y[__ks_1];
 			console.log(value);
 		}
-		for(let __ks_0 = 0, __ks_1 = z.length, value; __ks_0 < __ks_1; ++__ks_0) {
-			value = z[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = z.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = z[__ks_1];
 			console.log(value);
 		}
 		if(Type.isValue(x.bar)) {

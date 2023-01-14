@@ -26,6 +26,7 @@ class TempMemberExpression extends Expression {
 	private {
 		@computed: Boolean		= false
 		@object
+		@offset: Number			= 0
 		@property
 		@reusable: Boolean		= false
 		@reuseName: String?		= null
@@ -42,6 +43,7 @@ class TempMemberExpression extends Expression {
 		}
 	} # }}}
 	isComposite() => true
+	offset(@offset): this
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
@@ -52,11 +54,20 @@ class TempMemberExpression extends Expression {
 			fragments.code(@reuseName)
 		}
 		else if @computed {
-			fragments
-				.compile(@object)
-				.code('[')
-				.compile(@property)
-				.code(']')
+			if @offset > 0 {
+				fragments
+					.compile(@object)
+					.code('[')
+					.compile(@property)
+					.code(` + \(@offset)]`)
+			}
+			else {
+				fragments
+					.compile(@object)
+					.code('[')
+					.compile(@property)
+					.code(']')
+			}
 		}
 		else {
 			fragments

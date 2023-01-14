@@ -18,8 +18,8 @@ module.exports = function(__ks_Array) {
 			}
 		}
 		else {
-			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = args[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = args.length, item; __ks_1 < __ks_0; ++__ks_1) {
+				item = args[__ks_1];
 				if(!(__ks_Array.__ks_func_contains_0.call(this, item) === true)) {
 					this.push(item);
 				}

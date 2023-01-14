@@ -14,8 +14,8 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(name, rules) {
-			for(let __ks_0 = 0, __ks_1 = rules.length, rule; __ks_0 < __ks_1; ++__ks_0) {
-				rule = rules[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = rules.length, rule; __ks_1 < __ks_0; ++__ks_1) {
+				rule = rules[__ks_1];
 			}
 		}
 		__ks_cons_rt(that, args) {

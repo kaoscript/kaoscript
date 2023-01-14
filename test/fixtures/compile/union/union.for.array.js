@@ -30,8 +30,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(item) {
-		for(let __ks_0 = 0, __ks_1 = item.values.length, value; __ks_0 < __ks_1; ++__ks_0) {
-			value = item.values[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = item.values.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = item.values[__ks_1];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(values, step) {
 		let __ks_0;
 		__ks_0 = values.length();
-		Helper.assertLoop(1, "values.length()", __ks_0, "", 0, "", 0);
+		Helper.assertLoop(1, "values.length()", __ks_0, "", 0, 0, "", 0);
 		for(let i = __ks_0 - 1; i >= 0; --i) {
 		}
 	};

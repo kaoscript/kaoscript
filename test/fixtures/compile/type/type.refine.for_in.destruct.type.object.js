@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		let r = 0;
-		for(let __ks_0 = 0, __ks_1 = values.length, x, y, z; __ks_0 < __ks_1; ++__ks_0) {
-			({x, y, z} = values[__ks_0]);
+		for(let __ks_1 = 0, __ks_0 = values.length, x, y, z; __ks_1 < __ks_0; ++__ks_1) {
+			({x, y, z} = values[__ks_1]);
 			r += Number.parseInt((x * y) / z);
 		}
 		return r;

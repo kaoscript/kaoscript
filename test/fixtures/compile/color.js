@@ -951,7 +951,7 @@ module.exports = function() {
 				const green = endColor._green - this._green;
 				const blue = endColor._blue - this._blue;
 				let __ks_0, __ks_1, __ks_2, __ks_3;
-				[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 1, "", length, "", 1);
+				[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 1, "", length, Infinity, "", 1);
 				for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 					i = __ks_3(__ks_4);
 					const offset = i / length;
@@ -1425,20 +1425,20 @@ module.exports = function() {
 				}
 			}
 			if(Type.isValue(space.alias)) {
-				for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-					alias = space.alias[__ks_0];
+				for(let __ks_1 = 0, __ks_0 = space.alias.length, alias; __ks_1 < __ks_0; ++__ks_1) {
+					alias = space.alias[__ks_1];
 					$spaces[space.name].alias[alias] = true;
 					$aliases[alias] = Space.__ks_from(space.name);
 				}
 				if(Type.isValue($parsers[space.name])) {
-					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-						alias = space.alias[__ks_0];
+					for(let __ks_1 = 0, __ks_0 = space.alias.length, alias; __ks_1 < __ks_0; ++__ks_1) {
+						alias = space.alias[__ks_1];
 						$parsers[alias] = $parsers[space.name];
 					}
 				}
 				if(Type.isValue($formatters[space.name])) {
-					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-						alias = space.alias[__ks_0];
+					for(let __ks_1 = 0, __ks_0 = space.alias.length, alias; __ks_1 < __ks_0; ++__ks_1) {
+						alias = space.alias[__ks_1];
 						$formatters[alias] = $formatters[space.name];
 					}
 				}
@@ -1460,8 +1460,8 @@ module.exports = function() {
 					}
 				}
 			}
-			for(let __ks_0 = 0, __ks_1 = spaces.length, name; __ks_0 < __ks_1; ++__ks_0) {
-				name = spaces[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = spaces.length, name; __ks_1 < __ks_0; ++__ks_1) {
+				name = spaces[__ks_1];
 				if(!Type.isValue($spaces[name].converters[space.name])) {
 					$find(name, space.name);
 				}

@@ -14,8 +14,8 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	for(let __ks_0 = 0, __ks_1 = foo.__ks_0(), __ks_2 = __ks_1.length, item; __ks_0 < __ks_2; ++__ks_0) {
-		item = __ks_1[__ks_0];
+	for(let __ks_2 = foo.__ks_0(), __ks_1 = 0, __ks_0 = __ks_2.length, item; __ks_1 < __ks_0; ++__ks_1) {
+		item = __ks_2[__ks_1];
 		console.log(__ks_String.__ks_func_toInt_0.call(item, 16));
 	}
 };

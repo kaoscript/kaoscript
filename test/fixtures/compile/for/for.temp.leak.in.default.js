@@ -5,14 +5,14 @@ module.exports = function() {
 	};
 	init.__ks_0 = function(data, builder) {
 		const block = builder.newBlock();
-		for(let __ks_0 = 0, __ks_1 = data.block(data.body).statements, __ks_2 = __ks_1.length, statement; __ks_0 < __ks_2; ++__ks_0) {
-			statement = __ks_1[__ks_0];
+		for(let __ks_2 = data.block(data.body).statements, __ks_1 = 0, __ks_0 = __ks_2.length, statement; __ks_1 < __ks_0; ++__ks_1) {
+			statement = __ks_2[__ks_1];
 			block.statement(statement);
 		}
 		block.done();
 		let source = "";
-		for(let __ks_0 = 0, __ks_1 = builder.toArray(), __ks_2 = __ks_1.length, fragment; __ks_0 < __ks_2; ++__ks_0) {
-			fragment = __ks_1[__ks_0];
+		for(let __ks_2 = builder.toArray(), __ks_1 = 0, __ks_0 = __ks_2.length, fragment; __ks_1 < __ks_0; ++__ks_1) {
+			fragment = __ks_2[__ks_1];
 			source = Helper.concatString(source, fragment.code);
 		}
 		return source;

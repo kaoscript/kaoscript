@@ -16,8 +16,8 @@ module.exports = function() {
 			else {
 				const stdout = __ks_0;
 				let matches;
-				for(let __ks_1 = 0, __ks_2 = __ks_String.__ks_func_lines_0.call(stdout), __ks_3 = __ks_2.length, line; __ks_1 < __ks_3; ++__ks_1) {
-					line = __ks_2[__ks_1];
+				for(let __ks_3 = __ks_String.__ks_func_lines_0.call(stdout), __ks_2 = 0, __ks_1 = __ks_3.length, line; __ks_2 < __ks_1; ++__ks_2) {
+					line = __ks_3[__ks_2];
 					let __ks_4;
 					if(Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false) {
 						disks.push((() => {

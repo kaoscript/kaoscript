@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	rewire.__ks_0 = function(option) {
 		let files = [];
-		for(let __ks_0 = 0, __ks_1 = option.split(","), __ks_2 = __ks_1.length, item; __ks_0 < __ks_2; ++__ks_0) {
-			item = __ks_1[__ks_0];
+		for(let __ks_2 = option.split(","), __ks_1 = 0, __ks_0 = __ks_2.length, item; __ks_1 < __ks_0; ++__ks_1) {
+			item = __ks_2[__ks_1];
 			item = item.split("=");
 			files.push((() => {
 				const d = new OBJ();

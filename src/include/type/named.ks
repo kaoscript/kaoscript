@@ -371,14 +371,7 @@ class NamedType extends Type {
 		else if value.isAny() {
 			return true
 		}
-		// else if @name == 'Object' && @type is ClassType {
-		// 	return @scope.module().getPredefinedType('Object')!?.matchContentOf(value)
-		// }
 		else if value is NamedType {
-			// if value.name() == 'Object' && value.type() is ClassType {
-			// 	return @matchContentOf(@scope.module().getPredefinedType('Object'))
-			// }
-			// else
 			if @type is ClassType && value.type() is ClassType {
 				return @matchInheritanceOf(value)
 			}

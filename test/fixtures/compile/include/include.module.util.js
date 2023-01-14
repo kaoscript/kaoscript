@@ -87,8 +87,8 @@ module.exports = function() {
 		i += 1;
 		while(i < l) {
 			if(Type.isArray(args[i])) {
-				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
-					value = args[i][__ks_0];
+				for(let __ks_1 = 0, __ks_0 = args[i].length, value; __ks_1 < __ks_0; ++__ks_1) {
+					value = args[i][__ks_1];
 					__ks_Array.__ks_func_pushUniq_0.call(source, [value]);
 				}
 			}
@@ -101,7 +101,7 @@ module.exports = function() {
 			return false;
 		}
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", a.length, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", a.length, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			i = __ks_3(__ks_4);
 			if(a[i] !== b[i]) {
@@ -112,7 +112,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_append_0 = function(args) {
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, k; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			k = __ks_3(__ks_4);
 			const arg = Helper.array(args[k]);
@@ -138,7 +138,7 @@ module.exports = function() {
 		}
 		else {
 			let __ks_0, __ks_1, __ks_2, __ks_3;
-			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, "", 1);
+			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
 			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 				i = __ks_3(__ks_4);
 				__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[i]));
@@ -180,11 +180,11 @@ module.exports = function() {
 	__ks_Array.__ks_func_intersection_0 = function(arrays) {
 		const result = [];
 		let seen = false;
-		for(let __ks_0 = 0, __ks_1 = this.length, value; __ks_0 < __ks_1; ++__ks_0) {
-			value = this[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = this.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = this[__ks_1];
 			seen = true;
-			for(let __ks_2 = 0, __ks_3 = arrays.length, array; __ks_2 < __ks_3 && seen; ++__ks_2) {
-				array = arrays[__ks_2];
+			for(let __ks_3 = 0, __ks_2 = arrays.length, array; __ks_3 < __ks_2 && seen; ++__ks_3) {
+				array = arrays[__ks_3];
 				if(array.indexOf(value) === -1) {
 					seen = false;
 				}
@@ -208,8 +208,8 @@ module.exports = function() {
 			}
 		}
 		else {
-			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = args[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = args.length, item; __ks_1 < __ks_0; ++__ks_1) {
+				item = args[__ks_1];
 				if(!__ks_Array.__ks_func_contains_0.call(this, item)) {
 					this.push(item);
 				}
@@ -227,8 +227,8 @@ module.exports = function() {
 			}
 		}
 		else {
-			for(let __ks_0 = 0, __ks_1 = items.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = items[__ks_0];
+			for(let __ks_1 = 0, __ks_0 = items.length, item; __ks_1 < __ks_0; ++__ks_1) {
+				item = items[__ks_1];
 				for(let i = this.length - 1; i >= 0; --i) {
 					if(this[i] === item) {
 						this.splice(i, 1);

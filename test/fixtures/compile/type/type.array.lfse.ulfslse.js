@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	filter.__ks_0 = function(match) {
 		const result = [];
-		for(let __ks_0 = 0, __ks_1 = match.length, line; __ks_0 < __ks_1; ++__ks_0) {
-			line = match[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = match.length, line; __ks_1 < __ks_0; ++__ks_1) {
+			line = match[__ks_1];
 			if(Type.isValue(line)) {
 				result.push(line);
 			}

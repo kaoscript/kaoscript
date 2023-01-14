@@ -1,0 +1,1 @@
+SyntaxException: In for/in loop, the argument "step" must be greater or equals to argument "split" (fixtures/compile/for/for.block.in.from.wsip2.wd.ea.nb.no.ne.wsip1.ne.ks:4)

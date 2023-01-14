@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(x, y) {
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "x", x, "y", y, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "x", x, "y", y, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, i; __ks_4 <= __ks_1; __ks_4 += __ks_2) {
 			i = __ks_3(__ks_4);
 			console.log(i);

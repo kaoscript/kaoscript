@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		let value;
-		for(let __ks_0 = 0, __ks_1 = values.length; __ks_0 < __ks_1; ++__ks_0) {
-			value = values[__ks_0];
+		for(let __ks_1 = 0, __ks_0 = values.length; __ks_1 < __ks_0; ++__ks_1) {
+			value = values[__ks_1];
 			console.log(value);
 		}
 		console.log(Helper.toString(value));

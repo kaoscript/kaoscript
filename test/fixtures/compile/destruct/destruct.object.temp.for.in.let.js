@@ -4,8 +4,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_0 = 0, __ks_1 = values.length, line, element; __ks_0 < __ks_1; ++__ks_0) {
-			({line, element} = values[__ks_0]);
+		for(let __ks_1 = 0, __ks_0 = values.length, line, element; __ks_1 < __ks_0; ++__ks_1) {
+			({line, element} = values[__ks_1]);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

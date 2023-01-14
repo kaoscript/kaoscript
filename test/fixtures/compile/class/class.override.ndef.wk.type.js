@@ -64,8 +64,8 @@ module.exports = function() {
 		}
 		__ks_func_draw_0(text) {
 			let fragments = "";
-			for(let __ks_0 = 0, __ks_1 = __ks_String.__ks_func_lines_0.call(text), __ks_2 = __ks_1.length, line; __ks_0 < __ks_2; ++__ks_0) {
-				line = __ks_1[__ks_0];
+			for(let __ks_2 = __ks_String.__ks_func_lines_0.call(text), __ks_1 = 0, __ks_0 = __ks_2.length, line; __ks_1 < __ks_0; ++__ks_1) {
+				line = __ks_2[__ks_1];
 			}
 			return fragments;
 		}

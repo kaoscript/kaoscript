@@ -4,10 +4,10 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_0 = 0, __ks_1 = Helper.mapRange(0, 10, 1, true, true, function(i) {
+		for(let __ks_2 = Helper.mapRange(0, 10, 1, true, true, function(i) {
 			return values[i].values();
-		}), __ks_2 = __ks_1.length, __ks_values_1; __ks_0 < __ks_2; ++__ks_0) {
-			__ks_values_1 = __ks_1[__ks_0];
+		}), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
+			__ks_values_1 = __ks_2[__ks_1];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -755,7 +755,6 @@ class ReferenceType extends Type {
 	} # }}}
 	isNumber() => @name == 'Number' || @type().isNumber()
 	isObject() => @name == 'Object' || @type().isObject()
-	// isObject() => @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
 	isPrimitive() => @isBoolean() || @isNumber() || @isString()
 	isReference() => true
 	isReducible() => true

@@ -65,14 +65,11 @@ class ForFromStatement extends Statement {
 
 		@declared = @declaration || variable == null
 
-		// @outerScope = @newScope(@scope, ScopeType::Hollow)
-
 		if @declared {
 			@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
 		}
 		else {
 			@bindingScope = @scope
-			// @bindingScope = @newScope(@scope, ScopeType::Bleeding)
 		}
 
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
@@ -170,7 +167,7 @@ class ForFromStatement extends Statement {
 
 		if @from is NumberLiteral && @to is NumberLiteral {
 			if ?@else {
-				SyntaxException.throwForFromDeadElse(this)
+				SyntaxException.throwForDeadElse('for/from', this)
 			}
 
 			if !?@step || @step is NumberLiteral {
@@ -179,16 +176,16 @@ class ForFromStatement extends Statement {
 				if @order == OrderKind::None {
 					if ?@step {
 						if @step.value() == 0 {
-							SyntaxException.throwForFromBadStep(this)
+							SyntaxException.throwForBadStep('for/from', this)
 						}
 						else if @step.value() > 0 {
 							unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
-								SyntaxException.throwForFromNoMatch(this)
+								SyntaxException.throwForNoMatch('for/from', this)
 							}
 						}
 						else {
 							unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
-								SyntaxException.throwForFromNoMatch(this)
+								SyntaxException.throwForNoMatch('for/from', this)
 							}
 
 							@ascending = false
@@ -202,17 +199,17 @@ class ForFromStatement extends Statement {
 				}
 				else {
 					if @step?.value() <= 0 {
-						SyntaxException.throwForFromBadStep(this)
+						SyntaxException.throwForBadStep('for/from', this)
 					}
 
 					if @order == OrderKind::Ascending {
 						unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
-							SyntaxException.throwForFromNoMatch(this)
+							SyntaxException.throwForNoMatch('for/from', this)
 						}
 					}
 					else {
 						unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
-							SyntaxException.throwForFromNoMatch(this)
+							SyntaxException.throwForNoMatch('for/from', this)
 						}
 
 						@ascending = false
@@ -295,9 +292,6 @@ class ForFromStatement extends Statement {
 			else if @to.isLooseComposite() {
 				@toName = @bindingScope.acquireTempName()
 			}
-			// if @loopKind == LoopKind::Unknown || @to.isLooseComposite() {
-			// 	@toName = @bindingScope.acquireTempName()
-			// }
 
 			if @loopKind == LoopKind::Unknown {
 				@stepName ??= @scope.acquireTempName()
@@ -344,7 +338,7 @@ class ForFromStatement extends Statement {
 			@else.prepare(target)
 		}
 
-		@scope.releaseTempName(@fromName) if ?@toName
+		@scope.releaseTempName(@fromName) if ?@fromName
 		@scope.releaseTempName(@stepName) if ?@stepName
 		@scope.releaseTempName(@unknownTranslator) if ?@unknownTranslator
 
@@ -437,12 +431,10 @@ class ForFromStatement extends Statement {
 		}
 	} # }}}
 	toOrderedFragments(fragments, mode) { # {{{
-		// var mut fromDecl = !?@fromName
 		var mut toDecl = !?@toName
 		var mut stepDecl = !?@stepName
 
 		var assert = @fromAssert || @toAssert || @stepAssert
-		// console.log(assert, @fromName)
 
 		if assert {
 			if !@fromAssert && !@toAssert && @stepAssert {
@@ -486,10 +478,10 @@ class ForFromStatement extends Statement {
 				}
 
 				if @toAssert {
-					line.code(`, \(@to.toQuote(true)), `).compile(@toName ?? @to)
+					line.code(`, \(@to.toQuote(true)), `).compile(@toName ?? @to).code(`, 0`)
 				}
 				else {
-					line.code(`, "", 0`)
+					line.code(`, "", 0, 0`)
 				}
 
 				if @stepAssert {
@@ -502,10 +494,6 @@ class ForFromStatement extends Statement {
 				line.code(')').done()
 			}
 		}
-
-		// if !fromDecl {
-		// 	ctrl.line(@fromName, $equals).compile(@from)
-		// }
 
 		var late comparator: String
 		if @toBallpark {
@@ -641,129 +629,6 @@ class ForFromStatement extends Statement {
 		else {
 			@toOrderedFragments(fragments, mode)
 		}
-		// var mut fromDecl = false
-		// var mut toDecl = false
-		// var mut stepDecl = false
-
-		// if @fromAssert {
-		// 	if ?@fromName {
-		// 		fragments.newLine().compile(@fromName).code($equals).compile(@from).done()
-
-		// 		fromDecl = true
-		// 	}
-
-		// 	fragments.newLine().code(`\($runtime.helper(this)).assertNumber(\(@from.toQuote(true)), `).compile(@fromName ?? @from).code(')').done()
-		// }
-
-		// if @toAssert {
-		// 	if ?@toName {
-		// 		fragments.newLine().compile(@toName).code($equals).compile(@to).done()
-
-		// 		toDecl = true
-		// 	}
-
-		// 	fragments.newLine().code(`\($runtime.helper(this)).assertNumber(\(@to.toQuote(true)), `).compile(@toName ?? @to).code(')').done()
-		// }
-
-		// if @stepAssert {
-		// 	if ?@stepName {
-		// 		fragments.newLine().compile(@stepName).code($equals).compile(@step).done()
-
-		// 		stepDecl = true
-		// 	}
-
-		// 	if @order == OrderKind::None {
-		// 		fragments.newLine().code(`\($runtime.helper(this)).assertNumber(\(@step.toQuote(true)), `).compile(@stepName ?? @step).code(')').done()
-		// 	}
-		// 	else {
-		// 		fragments.newLine().code(`\($runtime.helper(this)).assertNonNegative(\(@step.toQuote(true)), `).compile(@stepName ?? @step).code(')').done()
-		// 	}
-		// }
-
-		// var mut ctrl = fragments.newControl().code('for(')
-
-		// if @declared {
-		// 	ctrl.code($runtime.scope(this))
-		// }
-
-		// ctrl.compile(@variable).code($equals).compile(@from)
-
-		// if ?@toName {
-		// 	ctrl.code($comma, @toName, $equals).compile(@to)
-		// }
-
-		// if ?@stepName {
-		// 	ctrl.code($comma, @stepName, $equals).compile(@step)
-		// }
-
-		// ctrl.code('; ')
-
-		// ctrl.compile(@variable)
-
-		// if $ast.hasModifier(@data.to, ModifierKind::Ballpark) {
-		// 	ctrl.code(@ascending ? ' < ' : ' > ')
-		// }
-		// else {
-		// 	ctrl.code(@ascending ? ' <= ' : ' >= ')
-		// }
-
-		// ctrl.compile(@toName ?? @to)
-
-		// if ?@until {
-		// 	ctrl.code(' && !(').compileCondition(@until).code(')')
-		// }
-		// else if ?@while {
-		// 	ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
-		// }
-
-		// ctrl.code('; ')
-
-		// if @order == OrderKind::None {
-		// 	if ?@step {
-		// 		if @data.step.kind == NodeKind::NumericExpression {
-		// 			if @data.step.value == 1 {
-		// 				ctrl.code('++').compile(@variable)
-		// 			}
-		// 			else if @data.step.value == -1 {
-		// 				ctrl.code('--').compile(@variable)
-		// 			}
-		// 			else if @data.step.value >= 0 {
-		// 				ctrl.compile(@variable).code(' += ').compile(@step)
-		// 			}
-		// 			else {
-		// 				ctrl.compile(@variable).code(' -= ', -@data.step.value)
-		// 			}
-		// 		}
-		// 		else {
-		// 			ctrl.compile(@variable).code(' += ').compile(@stepName ?? @step)
-		// 		}
-		// 	}
-		// 	else if @ascending {
-		// 		ctrl.code('++').compile(@variable)
-		// 	}
-		// 	else {
-		// 		ctrl.code('--').compile(@variable)
-		// 	}
-		// }
-		// else {
-		// 	if ?@step {
-		// 		if @data.step.kind == NodeKind::NumericExpression && @data.step.value == 1 {
-		// 			ctrl.code(@ascending ? '++' : '--').compile(@variable)
-		// 		}
-		// 		else {
-		// 			ctrl.compile(@variable).code(@ascending ? ' += ' : ' -= ').compile(@stepName ?? @step)
-		// 		}
-		// 	}
-		// 	else {
-		// 		ctrl.code(@ascending ? '++' : '--').compile(@variable)
-		// 	}
-		// }
-
-		// ctrl.code(')').step()
-
-		// @toBodyFragments(ctrl)
-
-		// ctrl.done()
 	} # }}}
 	toStaticFragments(fragments, mode) { # {{{
 		var mut ctrl = fragments.newControl().code('for(')
@@ -845,8 +710,8 @@ class ForFromStatement extends Statement {
 			.compile(@from)
 			.code(`, \(@toAssert ? @to.toQuote(true) : '""'), `)
 			.compile(@to)
-			.code(`, \(@stepAssert ? @step.toQuote(true) : '""'), `)
-			.compile(@step ?? '1')
+			.code(`, \(@to is NumberLiteral ? @to.value() : 'Infinity'), \(@stepAssert ? @step.toQuote(true) : '""'), `)
+			.compile(@step ?? 1)
 			.code(')')
 			.done()
 

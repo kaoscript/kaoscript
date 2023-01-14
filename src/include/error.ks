@@ -375,14 +375,23 @@ export class SyntaxException extends Exception {
 		throwExcessiveRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The import don't require the argument "\(name)"`, node)
 		} # }}}
-		throwForFromBadStep(node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The for/from loop can never be executed due to bad step`, node)
+		throwForBadSplit(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`In \(kind) loop, the argument "split" must be greater than 0`, node)
 		} # }}}
-		throwForFromDeadElse(node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The else block of the for/from loop can never called`, node)
+		throwForBadStep(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The \(kind) loop can never be executed due to bad step`, node)
 		} # }}}
-		throwForFromNoMatch(node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The for/from loop can never be executed due to bad low/high limits`, node)
+		throwForDeadElse(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The else block of the \(kind) loop can never called`, node)
+		} # }}}
+		throwForNoMatch(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The \(kind) loop can never be executed due to bad low/high limits`, node)
+		} # }}}
+		throwForStepLtSplit(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`In \(kind) loop, the argument "step" must be greater or equals to argument "split"`, node)
+		} # }}}
+		throwForUndeterminedSplit(kind, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`In \(kind) loop, the undetermined argument "split" can't be associated with a destructuring array`, node)
 		} # }}}
 		throwHiddenMethod(name, class1, method1, class2, method2, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The method "\(class1.toQuote()).\(name)\(method1.toQuote())" hides the method "\(class2.toQuote()).\(name)\(method2.toQuote())"`, node)
