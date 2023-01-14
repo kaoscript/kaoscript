@@ -128,6 +128,7 @@ include {
 	'../statement/include'
 	'../statement/namespace'
 	'../statement/pass'
+	'../statement/repeat'
 	'../statement/return'
 	'../statement/switch'
 	'../statement/throw'

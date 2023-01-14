@@ -120,6 +120,7 @@ var $statements = {
 	`\(NodeKind::MacroDeclaration)`				: MacroDeclaration
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::PassStatement)`				: PassStatement
+	`\(NodeKind::RepeatStatement)`				: RepeatStatement
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration
