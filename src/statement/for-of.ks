@@ -8,6 +8,8 @@ class ForOfStatement extends Statement {
 		@declaration: Boolean				= false
 		@defineKey: Boolean					= false
 		@defineValue: Boolean				= false
+		@else
+		@elseScope
 		@expression
 		@expressionName: String
 		@key								= null
@@ -94,6 +96,13 @@ class ForOfStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
+
+		if ?@data.else {
+			@elseScope = @newScope(@scope, ScopeType::InlineBlock)
+
+			@else = $compile.block(@data.else, this, @elseScope)
+			@else.analyse()
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@expression.prepare(AnyType.NullableUnexplicit)
@@ -186,6 +195,8 @@ class ForOfStatement extends Statement {
 
 		@body.prepare(target)
 
+		@else?.prepare(target)
+
 		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
 		@bindingScope.releaseTempName(@keyName) if ?@keyName
 
@@ -210,6 +221,8 @@ class ForOfStatement extends Statement {
 		@when.translate() if ?@when
 
 		@body.translate()
+
+		@else?.translate()
 	} # }}}
 	checkForRenamedVariables(expression, variables: Array) { # {{{
 		if @key != null && expression.isUsingVariable(@data.key.name) {
@@ -242,6 +255,7 @@ class ForOfStatement extends Statement {
 		||	@while?.isUsingVariable(name)
 		||	@when?.isUsingVariable(name)
 		||	@body.isUsingVariable(name)
+		||	@else?.isUsingVariable(name)
 	# }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if ?@expressionName {
@@ -258,7 +272,17 @@ class ForOfStatement extends Statement {
 		}
 	} # }}}
 	toLoopFragments(fragments, mode) { # {{{
-		var mut ctrl = fragments.newControl().code('for(')
+		var mut ifCtrl = null
+		if ?@else {
+			ifCtrl = fragments
+				.newControl()
+				.code(`if(\($runtime.type(this)).isNotEmpty(`)
+				.compile(@expressionName ?? @expression)
+				.code('))')
+				.step()
+		}
+
+		var ctrl = (ifCtrl ?? fragments).newControl().code('for(')
 
 		if @key != null {
 			if @declaration || @defineKey {
@@ -354,5 +378,14 @@ class ForOfStatement extends Statement {
 		}
 
 		ctrl.done()
+
+		if ?ifCtrl {
+			ifCtrl
+				.step()
+				.code('else')
+				.step()
+				.compile(@else)
+				.done()
+		}
 	} # }}}
 }
