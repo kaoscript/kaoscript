@@ -142,8 +142,8 @@ class ErrorAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
-			switch arg.kind {
-				NodeKind::AttributeExpression => {
+			match arg.kind {
+				NodeKind::AttributeExpression {
 					if arg.name.name == 'ignore' {
 						for a in arg.arguments {
 							options.error.ignore.push(a.name)
@@ -155,8 +155,8 @@ class ErrorAttribute extends Attribute {
 						}
 					}
 				}
-				NodeKind::Identifier => {
-					switch arg.name {
+				NodeKind::Identifier {
+					match arg.name {
 						'off' => options.error.level = 'off'
 					}
 				}
@@ -245,22 +245,22 @@ class IfAttribute extends Attribute {
 	} # }}}
 	evaluate(data, target) { # {{{
 		if data.kind == NodeKind::AttributeExpression {
-			switch data.name.name {
-				'all' => {
+			match data.name.name {
+				'all' {
 					for arg in data.arguments when !@evaluate(arg, target) {
 						return false
 					}
 
 					return true
 				}
-				'any' => {
+				'any' {
 					for arg in data.arguments when @evaluate(arg, target) {
 						return true
 					}
 
 					return false
 				}
-				'gt' => {
+				'gt' {
 					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
@@ -272,7 +272,7 @@ class IfAttribute extends Attribute {
 						return false
 					}
 				}
-				'gte' => {
+				'gte' {
 					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
@@ -287,7 +287,7 @@ class IfAttribute extends Attribute {
 						return false
 					}
 				}
-				'lt' => {
+				'lt' {
 					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name || !?match[2] {
 							return false
@@ -299,7 +299,7 @@ class IfAttribute extends Attribute {
 						return false
 					}
 				}
-				'lte' => {
+				'lte' {
 					if var match ?= $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
@@ -314,14 +314,14 @@ class IfAttribute extends Attribute {
 						return false
 					}
 				}
-				'none' => {
+				'none' {
 					for arg in data.arguments when @evaluate(arg, target) {
 						return false
 					}
 
 					return true
 				}
-				'one' => {
+				'one' {
 					var mut count = 0
 
 					for arg in data.arguments when @evaluate(arg, target) {
@@ -330,7 +330,7 @@ class IfAttribute extends Attribute {
 
 					return count == 1
 				}
-				=> {
+				else {
 					console.info(data)
 					throw new NotImplementedException()
 				}
@@ -471,7 +471,7 @@ class RuntimeAttribute extends Attribute {
 				if arg.name.name == 'helper' {
 					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
-							switch arg.name.name {
+							match arg.name.name {
 								'alias' => options.runtime.helper.alias = arg.value.value
 								'member' => options.runtime.helper.member = arg.value.value
 								'package' => options.runtime.helper.package = arg.value.value
@@ -482,7 +482,7 @@ class RuntimeAttribute extends Attribute {
 				else if arg.name.name == 'operator' {
 					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
-							switch arg.name.name {
+							match arg.name.name {
 								'alias' => options.runtime.operator.alias = arg.value.value
 								'member' => options.runtime.operator.member = arg.value.value
 								'package' => options.runtime.operator.package = arg.value.value
@@ -493,7 +493,7 @@ class RuntimeAttribute extends Attribute {
 				else if arg.name.name == 'type' {
 					for var arg in arg.arguments {
 						if arg.kind == NodeKind::AttributeOperation {
-							switch arg.name.name {
+							match arg.name.name {
 								'alias' => options.runtime.type.alias = arg.value.value
 								'member' => options.runtime.type.member = arg.value.value
 								'package' => options.runtime.type.package = arg.value.value

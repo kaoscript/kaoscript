@@ -4,8 +4,8 @@ abstract class DependencyStatement extends Statement {
 		var options = Attribute.configure(declaration, @options, AttributeTarget::Statement, @file())
 		var scope = @parent.scope()
 
-		switch declaration.kind {
-			NodeKind::ClassDeclaration => {
+		match declaration.kind {
+			NodeKind::ClassDeclaration {
 				var type = @applyFlags(new ClassType(scope))
 
 				for var modifier in declaration.modifiers {
@@ -50,7 +50,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::EnumDeclaration => {
+			NodeKind::EnumDeclaration {
 				var mut ekind = EnumTypeKind::Number
 
 				if ?declaration.type {
@@ -79,7 +79,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::FunctionDeclaration => {
+			NodeKind::FunctionDeclaration {
 				var mut type = null
 				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
@@ -105,7 +105,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::NamespaceDeclaration => {
+			NodeKind::NamespaceDeclaration {
 				var type = @applyFlags(new NamespaceType(scope))
 
 				for var modifier in declaration.modifiers {
@@ -136,7 +136,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::VariableDeclarator => {
+			NodeKind::VariableDeclarator {
 				var mut type = Type.fromAST(declaration.type, this)
 
 				var mut instance = type is ClassType
@@ -182,7 +182,7 @@ abstract class DependencyStatement extends Statement {
 
 				return scope.define(declaration.name.name, true, type, true, this)
 			}
-			=> {
+			else {
 				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, this)
 			}
 		}

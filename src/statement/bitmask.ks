@@ -9,23 +9,23 @@ class BitmaskDeclaration extends EnumDeclaration {
 		@variable = @scope.define(@name, true, @type, this)
 
 		if ?@data.type {
-			switch @data.type.name {
-				'u8' => {
+			match @data.type.name {
+				'u8' {
 					@length = 8
 				}
-				'u32' => {
+				'u32' {
 					@length = 32
 				}
-				'u48' => {
+				'u48' {
 					@length = 48
 				}
-				'u64' => {
+				'u64' {
 					@length = 64
 				}
-				'u128' => {
+				'u128' {
 					@length = 128
 				}
-				'u256' => {
+				'u256' {
 					@length = 256
 				}
 			}

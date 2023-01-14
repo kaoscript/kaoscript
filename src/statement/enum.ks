@@ -26,22 +26,24 @@ class EnumDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		for var data in @data.members {
-			switch data.kind {
-				NodeKind::CommentBlock => {
+			match data.kind {
+				NodeKind::CommentBlock {
+					pass
 				}
-				NodeKind::CommentLine => {
+				NodeKind::CommentLine {
+					pass
 				}
-				NodeKind::FieldDeclaration => {
+				NodeKind::FieldDeclaration {
 					var declaration = new EnumVariableDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind::MethodDeclaration => {
+				NodeKind::MethodDeclaration {
 					var declaration = new EnumMethodDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				=> {
+				else {
 					throw new NotSupportedException(`Unknow kind \(data.kind)`, this)
 				}
 			}
@@ -239,8 +241,8 @@ class EnumVariableDeclaration extends AbstractNode {
 		var enum = @parent.type().type()
 		var value = @data.value
 
-		switch enum.kind() {
-			EnumTypeKind::Bit => {
+		match enum.kind() {
+			EnumTypeKind::Bit {
 				var length = enum.length()
 
 				if ?value {
@@ -279,7 +281,7 @@ class EnumVariableDeclaration extends AbstractNode {
 
 				@type = @scope.reference('Number')
 			}
-			EnumTypeKind::String => {
+			EnumTypeKind::String {
 				if ?value {
 					if value.kind == NodeKind::Literal {
 						@value = $quote(value.value)
@@ -294,7 +296,7 @@ class EnumVariableDeclaration extends AbstractNode {
 
 				@type = @scope.reference('String')
 			}
-			EnumTypeKind::Number => {
+			EnumTypeKind::Number {
 				if ?value {
 					if value.kind == NodeKind::NumericExpression {
 						@value = `\(enum.index(value.value))`

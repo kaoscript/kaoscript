@@ -27,20 +27,20 @@ class ImplementClassFieldDeclaration extends Statement {
 		var mut alias = false
 
 		for var modifier in data.modifiers {
-			switch modifier.kind {
-				ModifierKind::Immutable => {
+			match modifier.kind {
+				ModifierKind::Immutable {
 					@immutable = true
 				}
-				ModifierKind::LateInit => {
+				ModifierKind::LateInit {
 					@lateInit = true
 				}
-				ModifierKind::Private => {
+				ModifierKind::Private {
 					private = true
 				}
-				ModifierKind::Static => {
+				ModifierKind::Static {
 					@instance = false
 				}
-				ModifierKind::ThisAlias => {
+				ModifierKind::ThisAlias {
 					alias = true
 				}
 			}

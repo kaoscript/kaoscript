@@ -76,22 +76,22 @@ expect(testIf(CardSuit::Diamonds, CardSuit::Clubs.value, CardSuit::Clubs.value))
 func testSwitch(x: CardSuit, y: String, z) {
 	var results = []
 
-	switch x {
+	match x {
 		CardSuit::Clubs		=> results.push('c')
 		CardSuit::Diamonds	=> results.push('d')
-							=> results.push(null)
+		else				=> results.push(null)
 	}
 
-	switch y {
+	match y {
 		CardSuit::Clubs		=> results.push('c')
 		CardSuit::Diamonds	=> results.push('d')
-							=> results.push(null)
+		else				=> results.push(null)
 	}
 
-	switch z {
+	match z {
 		CardSuit::Clubs		=> results.push('c')
 		CardSuit::Diamonds	=> results.push('d')
-							=> results.push(null)
+		else				=> results.push(null)
 	}
 
 	return results

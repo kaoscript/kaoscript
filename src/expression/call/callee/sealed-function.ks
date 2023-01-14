@@ -20,27 +20,27 @@ class SealedFunctionCallee extends Callee {
 	isInitializingInstanceVariable(name: String): Boolean => @function.isInitializingInstanceVariable(name)
 	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
+			match node._data.scope.kind {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					throw new NotImplementedException(node)
 				}
 			}
 		}
 		else {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
+			match node._data.scope.kind {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
 
 					for var argument, index in node.arguments() {

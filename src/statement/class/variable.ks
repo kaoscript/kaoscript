@@ -22,26 +22,26 @@ class ClassVariableDeclaration extends AbstractNode {
 		var mut alias = false
 
 		for var modifier in data.modifiers {
-			switch modifier.kind {
-				ModifierKind::Dynamic => {
+			match modifier.kind {
+				ModifierKind::Dynamic {
 					@dynamic = true
 				}
-				ModifierKind::Immutable => {
+				ModifierKind::Immutable {
 					@immutable = true
 				}
-				ModifierKind::LateInit => {
+				ModifierKind::LateInit {
 					@lateInit = true
 				}
-				ModifierKind::Nullable => {
+				ModifierKind::Nullable {
 					@nullable = true
 				}
-				ModifierKind::Public => {
+				ModifierKind::Public {
 					public = true
 				}
-				ModifierKind::Static => {
+				ModifierKind::Static {
 					@instance = false
 				}
-				ModifierKind::ThisAlias => {
+				ModifierKind::ThisAlias {
 					alias = true
 				}
 			}

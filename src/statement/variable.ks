@@ -176,17 +176,17 @@ class VariableDeclaration extends AbstractNode {
 		for var data in @data.variables {
 			var late declarator
 
-			switch data.name.kind {
-				NodeKind::ArrayBinding => {
+			match data.name.kind {
+				NodeKind::ArrayBinding {
 					declarator = new VariableBindingDeclarator(data, this)
 				}
-				NodeKind::Identifier => {
+				NodeKind::Identifier {
 					declarator = new VariableIdentifierDeclarator(data, this)
 				}
-				NodeKind::ObjectBinding => {
+				NodeKind::ObjectBinding {
 					declarator = new VariableBindingDeclarator(data, this)
 				}
-				=> {
+				else {
 					throw new NotImplementedException(this)
 				}
 			}

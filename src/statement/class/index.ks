@@ -61,8 +61,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		else {
-			switch data.kind {
-				NodeKind::BinaryExpression => {
+			match data.kind {
+				NodeKind::BinaryExpression {
 					if data.operator.kind == BinaryOperatorKind::Assignment {
 						if data.left.kind == NodeKind::ThisExpression && data.left.name.name == name {
 							return true
@@ -72,7 +72,7 @@ class ClassDeclaration extends Statement {
 						}
 					}
 				}
-				NodeKind::CallExpression => {
+				NodeKind::CallExpression {
 					if constructor && data.callee.kind == NodeKind::Identifier {
 						if data.callee.name == 'this' || (extending && data.callee.name == 'super') {
 							for arg in data.arguments {
@@ -83,7 +83,7 @@ class ClassDeclaration extends Statement {
 						}
 					}
 				}
-				NodeKind::ReturnStatement => {
+				NodeKind::ReturnStatement {
 					return ClassDeclaration.isAssigningAlias(data.value, name, constructor, extending)
 				}
 			}
@@ -205,12 +205,12 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var data in @data.members {
-			switch data.kind {
-				NodeKind::CommentBlock => {
+			match data.kind {
+				NodeKind::CommentBlock {
 				}
-				NodeKind::CommentLine => {
+				NodeKind::CommentLine {
 				}
-				NodeKind::FieldDeclaration => {
+				NodeKind::FieldDeclaration {
 					var declaration = new ClassVariableDeclaration(data, this)
 
 					declaration.analyse()
@@ -219,9 +219,9 @@ class ClassDeclaration extends Statement {
 						@inits = true
 					}
 				}
-				NodeKind::MacroDeclaration => {
+				NodeKind::MacroDeclaration {
 				}
-				NodeKind::MethodDeclaration => {
+				NodeKind::MethodDeclaration {
 					var late declaration
 
 					if @class.isConstructor(data.name.name) {
@@ -236,17 +236,17 @@ class ClassDeclaration extends Statement {
 
 					declaration.analyse()
 				}
-				NodeKind::ProxyDeclaration => {
+				NodeKind::ProxyDeclaration {
 					var declaration = new ClassProxyDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind::ProxyGroupDeclaration => {
+				NodeKind::ProxyGroupDeclaration {
 					var declaration = new ClassProxyGroupDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				=> {
+				else {
 					throw new NotSupportedException(`Unknow kind \(data.kind)`, this)
 				}
 			}

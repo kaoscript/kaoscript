@@ -37,8 +37,8 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 		})
 	}
 	else {
-		switch reification {
-			ReificationKind::Argument => {
+		match reification {
+			ReificationKind::Argument {
 				if data is Array {
 					return data.join(', ')
 				}
@@ -46,7 +46,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Expression => {
+			ReificationKind::Expression {
 				var context = {
 					data: ''
 				}
@@ -55,7 +55,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 
 				return context.data
 			}
-			ReificationKind::Join => {
+			ReificationKind::Join {
 				if data is Array {
 					return data.join(separator)
 				}
@@ -63,7 +63,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Statement => {
+			ReificationKind::Statement {
 				if data is Array {
 					return data.join('\n') + '\n'
 				}
@@ -71,7 +71,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Write => {
+			ReificationKind::Write {
 				return data
 			}
 		}
@@ -169,17 +169,17 @@ func $serialize(macro, data, context) { # {{{
 } # }}}
 
 func $transformExpression(macro, node, data, writer) { # {{{
-	switch data.kind {
-		NodeKind::EnumExpression => {
+	match data.kind {
+		NodeKind::EnumExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::FunctionExpression => {
+		NodeKind::FunctionExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::LambdaExpression => {
+		NodeKind::LambdaExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::ObjectMember => {
+		NodeKind::ObjectMember {
 			var name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
 			var value = 	data.value.kind == NodeKind::EnumExpression ||
 							(data.value.kind == NodeKind::Identifier && !node.scope().isPredefinedVariable(data.value.name)) ||
@@ -348,8 +348,8 @@ class MacroDeclaration extends AbstractNode {
 					fragments.code(' + ')
 				}
 
-				switch element.kind {
-					MacroElementKind::Expression => {
+				match element.kind {
+					MacroElementKind::Expression {
 						if element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
 						}
@@ -360,7 +360,7 @@ class MacroDeclaration extends AbstractNode {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
 						}
 					}
-					MacroElementKind::Literal => {
+					MacroElementKind::Literal {
 						if element.value[0] == '\\' {
 							fragments.code($quote(element.value.substr(1).replace(/\\/g, '\\\\')))
 						}
@@ -368,7 +368,7 @@ class MacroDeclaration extends AbstractNode {
 							fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
 						}
 					}
-					MacroElementKind::NewLine => {
+					MacroElementKind::NewLine {
 						fragments.code('"\\n"')
 					}
 				}
@@ -487,26 +487,26 @@ class MacroArgument extends Type {
 			return true
 		}
 
-		switch value.name() {
-			'Array' => {
+		match value.name() {
+			'Array' {
 				return @data.kind == NodeKind::ArrayExpression
 			}
-			'Expression' => {
+			'Expression' {
 				return	@data.kind == NodeKind::UnaryExpression ||
 						@data.kind == NodeKind::BinaryExpression ||
 						@data.kind == NodeKind::PolyadicExpression ||
 						?$expressions[@data.kind]
 			}
-			'Identifier' => {
+			'Identifier' {
 				return @data.kind == NodeKind::Identifier
 			}
-			'Number' => {
+			'Number' {
 				return @data.kind == NodeKind::NumericExpression
 			}
-			'Object' => {
+			'Object' {
 				return @data.kind == NodeKind::ObjectExpression
 			}
-			'String' => {
+			'String' {
 				return @data.kind == NodeKind::Literal
 			}
 		}

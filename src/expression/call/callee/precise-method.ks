@@ -17,14 +17,14 @@ class PreciseMethodCallee extends MethodCallee {
 	override buildHashCode() => `method:\(@property):\(@index):\(@alien):\(@instance):\(@positions.join(','))`
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.compileReusable(@object)
 
 					if @alien {
@@ -44,14 +44,14 @@ class PreciseMethodCallee extends MethodCallee {
 			}
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.wrap(@object)
 
 					if @alien {
@@ -91,14 +91,14 @@ class PreciseMethodCallee extends MethodCallee {
 				fragments.compile(@object).code(`.__ks_sttc_\(@property)_\(@index)`).code($comma)
 			}
 
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments.compile(node.getCallScope())
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments.code('null')
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.compile(@object.caller())
 				}
 			}

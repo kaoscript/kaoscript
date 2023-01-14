@@ -59,14 +59,14 @@ class SealedMethodCallee extends Callee {
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
+			match node._data.scope.kind {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					if @instance {
 						fragments.code(`\(@objectType.getSealedPath())._im_\(@property).apply(null, `)
 
@@ -81,14 +81,14 @@ class SealedMethodCallee extends Callee {
 			}
 		}
 		else {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
+			match node._data.scope.kind {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					if @instance {
 						fragments
 							.code(`\(@objectType.getSealedPath())._im_\(@property)(`)

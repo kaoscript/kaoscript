@@ -1,1 +1,0 @@
-SyntaxException: The statement "fallthrough" is illegal (fixtures/compile/switch/switch.stmt.fallthrough.notin.ks:4)

@@ -8,7 +8,7 @@
     SUNDAY
 
     static fromString(value: String): Weekday ~ Error {
-        switch value {
+        match value {
             'monday' => return MONDAY
         }
 

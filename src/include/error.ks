@@ -539,10 +539,10 @@ export class SyntaxException extends Exception {
 		throwMissingAssignmentIfTrue(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is true`, node)
 		} # }}}
-		throwMissingAssignmentSwitchClause(name, node): Never ~ SyntaxException { # {{{
+		throwMissingAssignmentMatchClause(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized by the clause at`, node)
 		} # }}}
-		throwMissingAssignmentSwitchNoDefault(name, node): Never ~ SyntaxException { # {{{
+		throwMissingAssignmentMatchNoDefault(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing default clause`, node)
 		} # }}}
 		throwMissingAssignmentTryClause(name, node): Never ~ SyntaxException { # {{{

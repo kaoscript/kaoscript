@@ -60,14 +60,14 @@ class EnumMethodCallee extends Callee {
 			NotImplementedException.throw(node)
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					NotImplementedException.throw(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					NotImplementedException.throw(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.code(`\(@enum.name()).\(@methodName)(`)
 
 					fragments.wrap(@expression._object, mode)

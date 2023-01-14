@@ -3,8 +3,8 @@ class Foobar {
 		@x: Number
 	}
 	constructor(data) {
-		switch data {
-			'x' => {
+		match data {
+			'x' {
 				@x = 1
 			}
 		}

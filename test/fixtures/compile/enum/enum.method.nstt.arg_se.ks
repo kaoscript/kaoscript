@@ -8,7 +8,7 @@ enum Weekday {
     SUNDAY
 
     isSameAs(day: String): Boolean {
-		switch this {
+		match this {
 			MONDAY => return day == 'monday'
 		}
 

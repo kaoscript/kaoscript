@@ -637,8 +637,8 @@ abstract class Importer extends Statement {
 		}
 		else {
 			for var data in @data.specifiers {
-				switch data.kind {
-					NodeKind::GroupSpecifier => {
+				match data.kind {
+					NodeKind::GroupSpecifier {
 						var mut alias = false
 						var mut exclusion = false
 
@@ -653,29 +653,29 @@ abstract class Importer extends Statement {
 
 						if alias {
 							for var data in data.elements {
-								switch data.kind {
-									NodeKind::NamedSpecifier => {
-										switch data.internal.kind {
-											NodeKind::Identifier => {
+								match data.kind {
+									NodeKind::NamedSpecifier {
+										match data.internal.kind {
+											NodeKind::Identifier {
 												if ?@alias {
 													throw new NotSupportedException(this)
 												}
 
 												@alias = data.internal.name
 											}
-											NodeKind::ObjectBinding => {
+											NodeKind::ObjectBinding {
 												for var data in data.internal.elements {
 													var internal = data.name.name
 
 													@addImport(internal, internal, false, null)
 												}
 											}
-											=> {
+											else {
 												throw new NotImplementedException()
 											}
 										}
 									}
-									=> {
+									else {
 										throw new NotImplementedException()
 									}
 								}
@@ -701,8 +701,8 @@ abstract class Importer extends Statement {
 						}
 						else {
 							for var data in data.elements {
-								switch data.kind {
-									NodeKind::NamedSpecifier => {
+								match data.kind {
+									NodeKind::NamedSpecifier {
 										var internal = data.internal.name
 										var external = ?data.external ? data.external.name : internal
 
@@ -715,7 +715,7 @@ abstract class Importer extends Statement {
 											@addImport(external, internal, false)
 										}
 									}
-									NodeKind::TypedSpecifier => {
+									NodeKind::TypedSpecifier {
 										if data.type.kind == NodeKind::TypeAliasDeclaration {
 											var name = data.type.name.name
 											var type = Type.fromAST(data.type.type, this)
@@ -723,20 +723,20 @@ abstract class Importer extends Statement {
 											@addImport(name, name, false, type)
 										}
 									}
-									=> {
+									else {
 										throw new NotImplementedException()
 									}
 								}
 							}
 						}
 					}
-					NodeKind::NamedSpecifier => {
+					NodeKind::NamedSpecifier {
 						var internal = data.internal.name
 						var external = ?data.external ? data.external.name : internal
 
 						@addImport(external, internal, true, null)
 					}
-					=> {
+					else {
 						throw new NotImplementedException()
 					}
 				}
@@ -899,8 +899,8 @@ abstract class Importer extends Statement {
 		}
 		else {
 			for var data in @data.specifiers {
-				switch data.kind {
-					NodeKind::GroupSpecifier => {
+				match data.kind {
+					NodeKind::GroupSpecifier {
 						var mut alias = false
 
 						for var modifier in data.modifiers {
@@ -914,10 +914,10 @@ abstract class Importer extends Statement {
 
 						if #data.elements {
 							for var data in data.elements {
-								switch data.kind {
-									NodeKind::NamedSpecifier => {
-										switch data.internal.kind {
-											NodeKind::Identifier => {
+								match data.kind {
+									NodeKind::NamedSpecifier {
+										match data.internal.kind {
+											NodeKind::Identifier {
 												var internal = data.internal.name
 												var external = ?data.external ? data.external.name : internal
 
@@ -930,19 +930,19 @@ abstract class Importer extends Statement {
 													@addVariable(external, internal, true, null)
 												}
 											}
-											NodeKind::ObjectBinding => {
+											NodeKind::ObjectBinding {
 												for var data in data.internal.elements {
 													var internal = data.name.name
 
 													@addVariable(internal, internal, true, null)
 												}
 											}
-											=> {
+											else {
 												throw new NotImplementedException()
 											}
 										}
 									}
-									=> {
+									else {
 										throw new NotImplementedException()
 									}
 								}
@@ -957,13 +957,13 @@ abstract class Importer extends Statement {
 							throw new NotImplementedException()
 						}
 					}
-					NodeKind::NamedSpecifier => {
+					NodeKind::NamedSpecifier {
 						var internal = data.internal.name
 						var external = ?data.external ? data.external.name : internal
 
 						@addVariable(external, internal, true, type.getProperty(external))
 					}
-					=> {
+					else {
 						throw new NotImplementedException()
 					}
 				}

@@ -832,28 +832,28 @@ class FunctionType extends Type {
 		}
 
 		if data.kind == NodeKind::TypeReference && data.typeName.kind == NodeKind::Identifier {
-			switch data.typeName.name {
-				'auto' => {
+			match data.typeName.name {
+				'auto' {
 					@dynamicReturn = true
 					@autoTyping = true
 
 					return
 				}
-				'false', 'true' => {
+				'false', 'true' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Boolean')
 					@returnData = data.typeName
 
 					return
 				}
-				'Infinity', 'NaN' => {
+				'Infinity', 'NaN' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Number')
 					@returnData = data.typeName
 
 					return
 				}
-				'null' => {
+				'null' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Null')
 					@returnData = data.typeName

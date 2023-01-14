@@ -60,11 +60,11 @@ class ImplementDeclaration extends Statement {
 			for var data in @data.properties {
 				var late property
 
-				switch data.kind {
-					NodeKind::FieldDeclaration => {
+				match data.kind {
+					NodeKind::FieldDeclaration {
 						property = new ImplementClassFieldDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration => {
+					NodeKind::MethodDeclaration {
 						if type.isConstructor(data.name.name) {
 							property = new ImplementClassConstructorDeclaration(data, this, @type)
 						}
@@ -75,7 +75,7 @@ class ImplementDeclaration extends Statement {
 							property = new ImplementClassMethodDeclaration(data, this, @type)
 						}
 					}
-					=> {
+					else {
 						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
 					}
 				}
@@ -89,14 +89,14 @@ class ImplementDeclaration extends Statement {
 			for var data in @data.properties {
 				var late property
 
-				switch data.kind {
-					NodeKind::FieldDeclaration => {
+				match data.kind {
+					NodeKind::FieldDeclaration {
 						property = new ImplementEnumFieldDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration => {
+					NodeKind::MethodDeclaration {
 						property = new ImplementEnumMethodDeclaration(data, this, @type)
 					}
-					=> {
+					else {
 						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
 					}
 				}
@@ -110,14 +110,14 @@ class ImplementDeclaration extends Statement {
 			for data in @data.properties {
 				var late property
 
-				switch data.kind {
-					NodeKind::FieldDeclaration => {
+				match data.kind {
+					NodeKind::FieldDeclaration {
 						property = new ImplementNamespaceVariableDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration => {
+					NodeKind::MethodDeclaration {
 						property = new ImplementNamespaceFunctionDeclaration(data, this, @type)
 					}
-					=> {
+					else {
 						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
 					}
 				}

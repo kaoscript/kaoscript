@@ -1,6 +1,6 @@
 class FallthroughStatement extends Statement {
 	private late {
-		@switch: SwitchStatement
+		@match: MatchStatement
 	}
 	analyse() { # {{{
 		var mut parent = @parent
@@ -9,7 +9,7 @@ class FallthroughStatement extends Statement {
 			SyntaxException.throwIllegalStatement('fallthrough', this)
 		}
 
-		while parent is not SwitchStatement {
+		while parent is not MatchStatement {
 			parent = parent.parent()
 
 			unless parent?.isJumpable() {
@@ -17,13 +17,13 @@ class FallthroughStatement extends Statement {
 			}
 		}
 
-		@switch = parent!!
+		@match = parent!!
 
-		@switch.flagUsingFallthrough()
+		@match.flagUsingFallthrough()
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
-		@switch.toFallthroughFragments(fragments)
+		@match.toFallthroughFragments(fragments)
 	} # }}}
 }

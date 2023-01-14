@@ -43,27 +43,27 @@ var $function = {
 		}
 	} # }}}
 	useThisVariable(data, node) { # {{{
-		switch data.kind {
-			NodeKind::ArrayExpression => {
+		match data.kind {
+			NodeKind::ArrayExpression {
 				for value in data.values {
 					if $function.useThisVariable(value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::BinaryExpression => {
+			NodeKind::BinaryExpression {
 				if $function.useThisVariable(data.left, node) || $function.useThisVariable(data.right, node) {
 					return true
 				}
 			}
-			NodeKind::Block => {
+			NodeKind::Block {
 				for statement in data.statements {
 					if $function.useThisVariable(statement, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::CallExpression => {
+			NodeKind::CallExpression {
 				if $function.useThisVariable(data.callee, node) {
 					return true
 				}
@@ -74,14 +74,14 @@ var $function = {
 					}
 				}
 			}
-			NodeKind::ComparisonExpression => {
+			NodeKind::ComparisonExpression {
 				for var operand in data.values step 2 {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::CreateExpression => {
+			NodeKind::CreateExpression {
 				if $function.useThisVariable(data.class, node) {
 					return true
 				}
@@ -94,7 +94,7 @@ var $function = {
 			}
 			NodeKind::EnumExpression => return false
 			NodeKind::Identifier => return data.name == 'this'
-			NodeKind::IfStatement => {
+			NodeKind::IfStatement {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
 					return true
 				}
@@ -106,14 +106,14 @@ var $function = {
 			NodeKind::Literal => return false
 			NodeKind::MemberExpression => return $function.useThisVariable(data.object, node)
 			NodeKind::NumericExpression => return false
-			NodeKind::ObjectExpression => {
+			NodeKind::ObjectExpression {
 				for property in data.properties {
 					if $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::PolyadicExpression => {
+			NodeKind::PolyadicExpression {
 				for operand in data.operands {
 					if $function.useThisVariable(operand, node) {
 						return true
@@ -121,7 +121,7 @@ var $function = {
 				}
 			}
 			NodeKind::ReturnStatement => return $function.useThisVariable(data.value, node)
-			NodeKind::TemplateExpression => {
+			NodeKind::TemplateExpression {
 				for element in data.elements {
 					if $function.useThisVariable(element, node) {
 						return true
@@ -131,10 +131,10 @@ var $function = {
 			NodeKind::ThisExpression => return true
 			NodeKind::ThrowStatement => return $function.useThisVariable(data.value, node)
 			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
-			NodeKind::VariableDeclaration => {
+			NodeKind::VariableDeclaration {
 				return ?data.init && $function.useThisVariable(data.init, node)
 			}
-			=> {
+			else {
 				throw new NotImplementedException(`Unknow kind \(data.kind)`, node)
 			}
 		}

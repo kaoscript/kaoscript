@@ -598,17 +598,17 @@ class CallExpression extends Expression {
 		// console.log(value)
 		// console.log(@property)
 
-		switch value {
-			is AliasType => {
+		match value {
+			is AliasType {
 				@makeMemberCallee(value.type(), name)
 			}
-			is ArrayType => {
+			is ArrayType {
 				@makeMemberCalleeFromReference(@scope.reference('Array'))
 			}
-			is ClassVariableType => {
+			is ClassVariableType {
 				@makeMemberCalleeFromReference(value.type())
 			}
-			is ClassType => {
+			is ClassType {
 				name = name as NamedType
 
 				var reference = @scope().reference(name)
@@ -662,7 +662,7 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is EnumType => {
+			is EnumType {
 				name = name as NamedType
 
 				var reference = @scope().reference(name)
@@ -699,16 +699,16 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is ExclusionType => {
+			is ExclusionType {
 				@makeMemberCallee(value.getMainType())
 			}
-			is FunctionType => {
+			is FunctionType {
 				@makeMemberCalleeFromReference(@scope.reference('Function'))
 			}
-			is NamedType => {
+			is NamedType {
 				@makeMemberCallee(value.type(), value)
 			}
-			is NamespaceType => {
+			is NamespaceType {
 				if var property ?= value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
 						var assessment = property.assessment(@property, this)
@@ -756,7 +756,7 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
-			is ObjectType => {
+			is ObjectType {
 				if var property ?= value.getProperty(@property) {
 					@makeCallee(property, @property)
 				}
@@ -764,10 +764,10 @@ class CallExpression extends Expression {
 					@makeMemberCalleeFromReference(@scope.reference('Object'))
 				}
 			}
-			is ParameterType => {
+			is ParameterType {
 				@makeMemberCallee(value.type(), name)
 			}
-			is ReferenceType => {
+			is ReferenceType {
 				if value.isNullable() && !@options.rules.ignoreMisfit {
 					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Nullable) {
 						TypeException.throwNullableCaller(@property, this)
@@ -776,15 +776,15 @@ class CallExpression extends Expression {
 
 				@makeMemberCalleeFromReference(value)
 			}
-			is SealableType => {
+			is SealableType {
 				@makeMemberCallee(value.type(), name)
 			}
-			is UnionType => {
+			is UnionType {
 				for var type in value.types() {
 					@makeMemberCallee(type)
 				}
 			}
-			=> {
+			else {
 				@addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
@@ -794,11 +794,11 @@ class CallExpression extends Expression {
 		// console.log(value)
 		// console.log(@property)
 
-		switch value {
-			is AliasType => {
+		match value {
+			is AliasType {
 				@makeMemberCalleeFromReference(value.type())
 			}
-			is ClassType => {
+			is ClassType {
 				if value.hasInstantiableMethod(@property) {
 					var assessment = value.getInstantiableAssessment(@property, this)
 
@@ -852,7 +852,7 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is EnumType => {
+			is EnumType {
 				if value.hasInstanceMethod(@property) {
 					var assessment = value.getInstanceAssessment(@property, this)
 
@@ -889,13 +889,13 @@ class CallExpression extends Expression {
 					@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
 				}
 			}
-			is FunctionType => {
+			is FunctionType {
 				throw new NotImplementedException(this)
 			}
-			is NamedType => {
+			is NamedType {
 				@makeMemberCalleeFromReference(value.type(), reference)
 			}
-			is ObjectType => {
+			is ObjectType {
 				if var property ?= value.getProperty(@property) {
 					if property is FunctionType || property is OverloadedFunctionType {
 						var assessment = property.assessment(@property, this)
@@ -940,18 +940,18 @@ class CallExpression extends Expression {
 					@addCallee(new DefaultCallee(@data, @object, reference, this))
 				}
 			}
-			is ParameterType => {
+			is ParameterType {
 				throw new NotImplementedException(this)
 			}
-			is ReferenceType => {
+			is ReferenceType {
 				@makeMemberCalleeFromReference(value.type(), value)
 			}
-			is UnionType => {
+			is UnionType {
 				for var type in value.types() {
 					@makeMemberCallee(type)
 				}
 			}
-			=> {
+			else {
 				@addCallee(new DefaultCallee(@data, @object, reference, this))
 			}
 		}

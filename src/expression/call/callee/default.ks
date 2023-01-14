@@ -134,8 +134,8 @@ class DefaultCallee extends Callee {
 			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
 					for var argument in node.arguments() {
@@ -144,7 +144,7 @@ class DefaultCallee extends Callee {
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments.wrap(@expression, mode).code('.call(null')
 
 					for var argument in node.arguments() {
@@ -153,7 +153,7 @@ class DefaultCallee extends Callee {
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.wrap(@expression, mode).code('(')
 
 					for var argument, index in node.arguments() {
@@ -169,21 +169,21 @@ class DefaultCallee extends Callee {
 		node.module().flag('Helper')
 
 		if @flatten {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(', null')
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
@@ -199,21 +199,21 @@ class DefaultCallee extends Callee {
 			}
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(', null')
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)

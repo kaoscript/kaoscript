@@ -16,8 +16,8 @@ class TupleDeclaration extends Statement {
 		var mut named = false
 
 		for var modifier in @data.modifiers {
-			switch modifier.kind {
-				ModifierKind::Named => {
+			match modifier.kind {
+				ModifierKind::Named {
 					named = true
 				}
 			}

@@ -8,20 +8,20 @@ class ExportDeclaration extends Statement {
 			for var declaration in @data.declarations {
 				var late statement
 
-				switch declaration.kind {
-					NodeKind::DeclarationSpecifier => {
+				match declaration.kind {
+					NodeKind::DeclarationSpecifier {
 						statement = $compile.statement(declaration.declaration, this)
 					}
-					NodeKind::GroupSpecifier => {
+					NodeKind::GroupSpecifier {
 						statement = new ExportGroupSpecifier(declaration, this)
 					}
-					NodeKind::NamedSpecifier => {
+					NodeKind::NamedSpecifier {
 						statement = new ExportNamedSpecifier(declaration, this)
 					}
-					NodeKind::PropertiesSpecifier => {
+					NodeKind::PropertiesSpecifier {
 						statement = new ExportPropertiesSpecifier(declaration, this)
 					}
-					=> {
+					else {
 						console.info(declaration)
 						throw new NotImplementedException(this)
 					}

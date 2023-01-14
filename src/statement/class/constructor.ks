@@ -104,15 +104,15 @@ class ClassConstructorDeclaration extends Statement {
 
 			if var value ?= parameter.getDefaultValue() {
 				value.walkNode((node) => {
-					switch node {
-						is CallExpression => {
+					match node {
+						is CallExpression {
 							var data = node.data()
 
 							if data.callee.kind == NodeKind::ThisExpression {
 								SyntaxException.throwNotYetDefined(`@\(data.callee.name.name)`, node)
 							}
 						}
-						is IdentifierLiteral => {
+						is IdentifierLiteral {
 							if node.name() == 'this' {
 								SyntaxException.throwNotYetDefined('this', node)
 							}

@@ -43,11 +43,11 @@ class ParameterType extends Type {
 			}
 
 			for var modifier in data.modifiers {
-				switch modifier.kind {
-					ModifierKind::Nullable => {
+				match modifier.kind {
+					ModifierKind::Nullable {
 						type = type.setNullable(true)
 					}
-					ModifierKind::Rest => {
+					ModifierKind::Rest {
 						if modifier.arity {
 							min = modifier.arity.min
 							max = modifier.arity.max

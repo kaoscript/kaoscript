@@ -1,0 +1,1 @@
+SyntaxException: The statement "fallthrough" is illegal (fixtures/compile/match/match.stmt.fallthrough.notin.ks:4)

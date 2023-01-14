@@ -221,8 +221,8 @@ abstract class Type {
 
 			data = data as Any
 
-			switch data.kind {
-				NodeKind::ArrayType => {
+			match data.kind {
+				NodeKind::ArrayType {
 					var mut type = new ArrayType(scope)
 
 					for var modifier in data.modifiers {
@@ -241,7 +241,7 @@ abstract class Type {
 
 					return type
 				}
-				NodeKind::ClassDeclaration => {
+				NodeKind::ClassDeclaration {
 					var type = new ClassType(scope)
 
 					for modifier in data.modifiers {
@@ -255,10 +255,10 @@ abstract class Type {
 
 					return new NamedType(data.name.name, type.flagComplete())
 				}
-				NodeKind::ExclusionType => {
+				NodeKind::ExclusionType {
 					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
-				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
+				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration {
 					if ?data.parameters {
 						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
 					}
@@ -266,13 +266,13 @@ abstract class Type {
 						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
-				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
+				NodeKind::FunctionExpression, NodeKind::MethodDeclaration {
 					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
-				NodeKind::FusionType => {
+				NodeKind::FusionType {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
-				NodeKind::Identifier => {
+				NodeKind::Identifier {
 					if var variable ?= scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
@@ -283,7 +283,7 @@ abstract class Type {
 						ReferenceException.throwNotDefinedType(data.name, node)
 					}
 				}
-				NodeKind::MemberExpression => {
+				NodeKind::MemberExpression {
 					var object = Type.fromAST(data.object, scope, defined, node)
 
 					if object.isAny() {
@@ -293,10 +293,10 @@ abstract class Type {
 						return object.getProperty(data.property.name)
 					}
 				}
-				NodeKind::NumericExpression => {
+				NodeKind::NumericExpression {
 					return scope.reference('Number')
 				}
-				NodeKind::ObjectType => {
+				NodeKind::ObjectType {
 					var mut type = new ObjectType(scope)
 
 					for var modifier in data.modifiers {
@@ -315,7 +315,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind::TypeList => {
+				NodeKind::TypeList {
 					var mut type = new NamespaceType(scope)
 
 					for var property in data.types {
@@ -324,7 +324,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind::TypeReference => {
+				NodeKind::TypeReference {
 					var mut nullable = false
 
 					for var modifier in data.modifiers {
@@ -376,10 +376,10 @@ abstract class Type {
 						}
 					}
 				}
-				NodeKind::UnionType => {
+				NodeKind::UnionType {
 					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
-				NodeKind::VariableDeclarator, NodeKind::FieldDeclaration => {
+				NodeKind::VariableDeclarator, NodeKind::FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, node)
 				}
 			}
@@ -388,11 +388,11 @@ abstract class Type {
 			throw new NotImplementedException(node)
 		} # }}}
 		getPathFromAST(data): String { # {{{
-			switch data.kind {
-				NodeKind::Identifier => {
+			match data.kind {
+				NodeKind::Identifier {
 					return data.name
 				}
-				NodeKind::MemberExpression => {
+				NodeKind::MemberExpression {
 					return `\(Type.getPathFromAST(data.object)).\(data.property.name)`
 				}
 			}
@@ -478,44 +478,44 @@ abstract class Type {
 				}
 			}
 			else if ?data.kind {
-				switch data.kind {
-					TypeKind::Alias => {
+				match data.kind {
+					TypeKind::Alias {
 						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Array => {
+					TypeKind::Array {
 						return ArrayType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Class => {
+					TypeKind::Class {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Enum => {
+					TypeKind::Enum {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Function => {
+					TypeKind::Function {
 						return FunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Fusion => {
+					TypeKind::Fusion {
 						return FusionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Namespace => {
+					TypeKind::Namespace {
 						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Object => {
+					TypeKind::Object {
 						return ObjectType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::OverloadedFunction => {
+					TypeKind::OverloadedFunction {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Reference => {
+					TypeKind::Reference {
 						return ReferenceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Struct => {
+					TypeKind::Struct {
 						return StructType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Tuple => {
+					TypeKind::Tuple {
 						return TupleType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Union => {
+					TypeKind::Union {
 						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 				}
@@ -595,7 +595,7 @@ abstract class Type {
 			return true
 		}
 
-		switch name {
+		match name {
 			'Enum'		=> return @isEnum()
 			'Namespace'	=> return @isNamespace()
 			'Struct'	=> return @isStruct()

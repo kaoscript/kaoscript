@@ -84,18 +84,18 @@ class LenientFunctionCallee extends Callee {
 			Router.Argument.toFlatFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments.wrap(@expression, mode).code('.call(null')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.wrap(@expression, mode).code('(')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, false, fragments, mode)

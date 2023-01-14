@@ -399,8 +399,8 @@ class ClassType extends Type {
 	addPropertyFromAST(data, node) { # {{{
 		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
-		switch data.kind {
-			NodeKind::FieldDeclaration => {
+		match data.kind {
+			NodeKind::FieldDeclaration {
 				var mut instance = true
 				for i from 0 to~ data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind::Static
@@ -415,7 +415,7 @@ class ClassType extends Type {
 					@addStaticVariable(data.name.name, type)
 				}
 			}
-			NodeKind::MethodDeclaration => {
+			NodeKind::MethodDeclaration {
 				if @isConstructor(data.name.name) {
 					var type = ClassConstructorType.fromAST(data, node)
 
@@ -457,7 +457,7 @@ class ClassType extends Type {
 					}
 				}
 			}
-			=> {
+			else {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
 		}

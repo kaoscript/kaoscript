@@ -118,7 +118,7 @@ class ComparisonExpression extends Expression {
 		@operators.push(operator)
 	} # }}}
 	private getOperator(data, operand1, operand2) { # {{{
-		switch data.kind {
+		match data.kind {
 			BinaryOperatorKind::Equality => return new EqualityOperator(this, operand1, operand2)
 			BinaryOperatorKind::GreaterThan => return new GreaterThanOperator(this, operand1, operand2)
 			BinaryOperatorKind::GreaterThanOrEqual => return new GreaterThanOrEqualOperator(this, operand1, operand2)

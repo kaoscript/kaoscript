@@ -24,8 +24,8 @@ class ImplementEnumFieldDeclaration extends Statement {
 	analyse() { # {{{
 		var value = @data.value
 
-		switch @enum.kind() {
-			EnumTypeKind::Bit => {
+		match @enum.kind() {
+			EnumTypeKind::Bit {
 				if ?value {
 					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
 						@composite = true
@@ -60,7 +60,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 					@value = `\(@enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1))`
 				}
 			}
-			EnumTypeKind::String => {
+			EnumTypeKind::String {
 				if ?value {
 					if value.kind == NodeKind::Literal {
 						@value = $quote(value.value)
@@ -73,7 +73,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 					@value = $quote(@name.toLowerCase())
 				}
 			}
-			EnumTypeKind::Number => {
+			EnumTypeKind::Number {
 				if ?value {
 					if value.kind == NodeKind::NumericExpression {
 						@value = `\(@enum.index(value.value))`

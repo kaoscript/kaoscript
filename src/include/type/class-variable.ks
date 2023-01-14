@@ -21,20 +21,20 @@ class ClassVariableType extends Type {
 
 			if ?data.modifiers {
 				for var modifier in data.modifiers {
-					switch modifier.kind {
-						ModifierKind::Immutable => {
+					match modifier.kind {
+						ModifierKind::Immutable {
 							type._immutable = true
 						}
-						ModifierKind::Internal => {
+						ModifierKind::Internal {
 							type.access(Accessibility::Internal)
 						}
-						ModifierKind::LateInit => {
+						ModifierKind::LateInit {
 							type._lateInit = true
 						}
-						ModifierKind::Private => {
+						ModifierKind::Private {
 							type.access(Accessibility::Private)
 						}
-						ModifierKind::Protected => {
+						ModifierKind::Protected {
 							type.access(Accessibility::Protected)
 						}
 					}

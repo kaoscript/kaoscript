@@ -34,11 +34,11 @@ class Variable {
 			return new Variable(name, true, true, type)
 		} # }}}
 		fromAST(data, scope) { # {{{
-			switch data.kind {
-				NodeKind::Identifier => {
+			match data.kind {
+				NodeKind::Identifier {
 					return scope.getVariable(data.name)
 				}
-				=> {
+				else {
 					console.error(data)
 					throw new NotImplementedException()
 				}

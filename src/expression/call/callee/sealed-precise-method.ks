@@ -10,14 +10,14 @@ class SealedPreciseMethodCallee extends MethodCallee {
 	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
+			match node._data.scope.kind {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					if @function.isInstance() {
 						fragments.code(`\(@objectType.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
 
@@ -39,14 +39,14 @@ class SealedPreciseMethodCallee extends MethodCallee {
 			}
 		}
 		else {
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					if @function.isAlien() {
 						throw new NotImplementedException(node)
 					}

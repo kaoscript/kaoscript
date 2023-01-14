@@ -31,7 +31,7 @@ class Parameter extends AbstractNode {
 	}
 	static {
 		compileExpression(data, node) { # {{{
-			switch data.kind {
+			match data.kind {
 				NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
 				NodeKind::Identifier => return new IdentifierParameter(data, node)
 				NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
@@ -605,17 +605,17 @@ class Parameter extends AbstractNode {
 		var mut nullable = false
 
 		for var modifier in @data.modifiers {
-			switch modifier.kind {
-				ModifierKind::NameOnly => {
+			match modifier.kind {
+				ModifierKind::NameOnly {
 					passing = PassingMode::LABELED
 				}
-				ModifierKind::Nullable => {
+				ModifierKind::Nullable {
 					nullable = true
 				}
-				ModifierKind::PositionOnly => {
+				ModifierKind::PositionOnly {
 					passing = PassingMode::POSITIONAL
 				}
-				ModifierKind::Rest => {
+				ModifierKind::Rest {
 					@rest = true
 
 					if ?modifier.arity {
@@ -629,7 +629,7 @@ class Parameter extends AbstractNode {
 						max = Infinity
 					}
 				}
-				ModifierKind::Required => {
+				ModifierKind::Required {
 					@explicitlyRequired = true
 				}
 			}

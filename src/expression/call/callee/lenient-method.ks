@@ -57,18 +57,18 @@ class LenientMethodCallee extends LenientFunctionCallee {
 				fragments.wrap(@object).code(`.\(@property)`)
 			}
 
-			switch @scope {
-				ScopeKind::Argument => {
+			match @scope {
+				ScopeKind::Argument {
 					fragments.code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::Null => {
+				ScopeKind::Null {
 					fragments.code('.call(null')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::This => {
+				ScopeKind::This {
 					fragments.code('(')
 
 					if @sealed && @instance {

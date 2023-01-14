@@ -126,7 +126,7 @@ var $statements = {
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration
 	`\(NodeKind::ReturnStatement)`				: ReturnStatement
 	`\(NodeKind::StructDeclaration)`			: StructDeclaration
-	`\(NodeKind::SwitchStatement)`				: SwitchStatement
+	`\(NodeKind::MatchStatement)`				: MatchStatement
 	`\(NodeKind::ThrowStatement)`				: ThrowStatement
 	`\(NodeKind::TryStatement)`					: TryStatement
 	`\(NodeKind::TupleDeclaration)`				: TupleDeclaration
