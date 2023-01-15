@@ -1,8 +1,7 @@
 class RepeatStatement extends Statement {
 	private late {
-		@body								= null
+		@body
 		@bodyScope: Scope
-		@index								= null
 		@indexName: String
 		@to
 		@toAssert: Boolean					= false

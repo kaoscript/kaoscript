@@ -57,6 +57,9 @@ var $expressions = {
 		else if data.loop.kind == NodeKind::ForRangeStatement {
 			return new ArrayComprehensionForRange(data, parent, scope)
 		}
+		else if data.loop.kind == NodeKind::RepeatStatement {
+			return new ArrayComprehensionRepeat(data, parent, scope)
+		}
 		else {
 			throw new NotSupportedException(`Unexpected kind \(data.loop.kind)`, parent)
 		}

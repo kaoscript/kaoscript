@@ -649,3 +649,61 @@ class ArrayComprehensionForRange extends Expression {
 	} # }}}
 	type() => @scope.reference('Array')
 }
+
+class ArrayComprehensionRepeat extends Expression {
+	private late {
+		@body
+		@bodyScope: Scope
+		@to
+		@toName: String
+	}
+	analyse() { # {{{
+		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+
+		@to = $compile.expression(@data.loop.expression, this, @scope)
+		@to.analyse()
+
+		@body = $compile.block($return(@data.body), this, @bodyScope)
+		@body.analyse()
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		unless target.isAny() || target.isArray() {
+			TypeException.throwInvalidComprehensionType(target, this)
+		}
+
+		@to.prepare(@scope.reference('Number'))
+		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
+	} # }}}
+	translate() { # {{{
+		@to.translate()
+		@body.translate()
+	} # }}}
+	isUsingVariable(name) => @to.isUsingVariable(name) || @body.isUsingVariable(name)
+	override listNonLocalVariables(scope, variables) { # {{{
+		@to.listNonLocalVariables(scope, variables)
+		@body?.listNonLocalVariables(scope, variables)
+
+		return variables
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		@module().flag('Helper')
+
+		var surround = $function.surround(this)
+
+		fragments
+			.code($runtime.helper(this), '.mapRange(0, ')
+			.compile(@to)
+			.code(', 1')
+			.code($comma, 'true', $comma, 'true', $comma)
+			.code(surround.beforeParameters)
+			.code(surround.afterParameters)
+			.newBlock()
+			.compile(@body)
+			.done()
+
+		fragments.code(surround.footer)
+
+		fragments.code(')')
+	} # }}}
+	type() => @scope.reference('Array')
+}

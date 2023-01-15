@@ -1,0 +1,1 @@
+var values = ['Hello world!' repeat 10 times]
