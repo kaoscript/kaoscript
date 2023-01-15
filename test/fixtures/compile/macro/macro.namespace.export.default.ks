@@ -4,4 +4,4 @@ export namespace NS {
 	}
 }
 
-func foo() => NS.foobar!('42')
+func foo() => NS.foobar('42')

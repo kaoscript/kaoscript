@@ -1,3 +1,3 @@
 include './macro.times.ks'
 
-console.log(times_five!(42))
+console.log(times_five(42))

@@ -18,7 +18,7 @@ module.exports = function() {
 			}
 		}
 	}
-	Color.registerSpace((() => {
+	Color.addSpace((() => {
 		const d = new OBJ();
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {

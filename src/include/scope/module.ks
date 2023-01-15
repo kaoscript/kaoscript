@@ -246,7 +246,7 @@ class ModuleScope extends Scope {
 				}
 			}
 
-			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
+			return null
 		}
 		else {
 			var path = Generator.generate(data.callee)
@@ -261,7 +261,7 @@ class ModuleScope extends Scope {
 				}
 			}
 
-			SyntaxException.throwUnmatchedMacro(path, parent, data)
+			return null
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{

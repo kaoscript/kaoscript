@@ -4,10 +4,10 @@ export namespace NS {
 			macro #(x)
 		}
 
-		func foo() => foobar!('42')
+		func foo() => foobar('42')
 	}
 
-	func foo() => MD.foobar!('42')
+	func foo() => MD.foobar('42')
 }
 
-func foo() => NS.MD.foobar!('42')
+func foo() => NS.MD.foobar('42')

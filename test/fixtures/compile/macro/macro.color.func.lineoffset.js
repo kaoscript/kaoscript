@@ -3,7 +3,7 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Color, Space} = require("../.color.ks.j5k8r9.ksb")();
 	Space.RVB = Space("rvb");
-	Color.__ks_sttc_registerSpace_0((() => {
+	Color.__ks_sttc_addSpace_0((() => {
 		const d = new OBJ();
 		d["name"] = "rvb";
 		d["components"] = (() => {
@@ -83,7 +83,7 @@ module.exports = function() {
 		return this.__ks_func_vert_rt.call(null, this, this, arguments);
 	};
 	Space.CMY = Space("cmy");
-	Color.__ks_sttc_registerSpace_0((() => {
+	Color.__ks_sttc_addSpace_0((() => {
 		const d = new OBJ();
 		d["name"] = "cmy";
 		d["converters"] = (() => {

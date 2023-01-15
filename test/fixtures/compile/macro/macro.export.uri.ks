@@ -14,4 +14,4 @@ export class URI {
 	}
 }
 
-URI.register!('file', '[ "//" [ host ] ] path_absolute')
+URI.register('file', '[ "//" [ host ] ] path_absolute')

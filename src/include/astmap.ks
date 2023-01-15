@@ -67,8 +67,7 @@ var $expressions = {
 	`\(NodeKind::ArrayExpression)`				: ArrayExpression
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::AwaitExpression)`				: AwaitExpression
-	`\(NodeKind::CallExpression)`				: CallExpression
-	`\(NodeKind::CallMacroExpression)`	 		: $callMacroExpression
+	`\(NodeKind::CallExpression)`				: $callExpression
 	`\(NodeKind::ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression
@@ -97,7 +96,7 @@ var $expressions = {
 var $statements = {
 	`\(NodeKind::BitmaskDeclaration)`			: BitmaskDeclaration
 	`\(NodeKind::BreakStatement)`				: BreakStatement
-	`\(NodeKind::CallMacroExpression)`	 		: CallMacroStatement
+	`\(NodeKind::CallExpression)`	 			: $callStatement
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
 	`\(NodeKind::ContinueStatement)`			: ContinueStatement
 	`\(NodeKind::DestroyStatement)`				: DestroyStatement

@@ -1,6 +1,6 @@
 import '../color'
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'rvb',
 	converters: {
 		from: {

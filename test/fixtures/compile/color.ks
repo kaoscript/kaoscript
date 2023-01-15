@@ -537,7 +537,7 @@ export class Color {
 			macro {
 				#![rules(dont-assert-override)]
 
-				Color.registerSpace(#(space))
+				Color.addSpace(#(space))
 
 				impl Color {
 					#s(fields)
@@ -546,54 +546,12 @@ export class Color {
 			}
 		}
 		else {
-			macro Color.registerSpace(#(space))
+			macro Color.addSpace(#(space))
 		}
 	}
 
 	static {
-		from(...args): Color | bool { # {{{
-			var color = $from(new Color(), args)
-
-			return false if color._dummy else color
-		} # }}}
-
-		greyscale(...args): Color | bool { # {{{
-			var mut model = args.last()
-			if model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY' {
-				args.pop()
-			}
-			else {
-				model = null
-			}
-
-			var color = $from(new Color(), args)
-
-			return false if color._dummy else color.greyscale(model)
-		} # }}}
-
-		hex(...args): String | bool { # {{{
-			var color = $from(new Color(), args)
-
-			return false if color._dummy else color.hex()
-		} # }}}
-
-		negative(...args): Color | bool { # {{{
-			var color = $from(new Color(), args)
-
-			return false if color._dummy else color.negative()
-		} # }}}
-
-		registerFormatter(format: string, formatter: func): void { # {{{
-			$formatters[format] = {
-				formatter: formatter
-			}
-		} # }}}
-
-		registerParser(format: string, parser: func): void { # {{{
-			$parsers[format] = parser
-		} # }}}
-
-		registerSpace(space: Object) { # {{{
+		addSpace(space: Object) { # {{{
 			var spaces = Object.keys($spaces)
 
 			$space(space.name)
@@ -688,6 +646,48 @@ export class Color {
 			}
 			//console.log($spaces[space.name])
 			//console.log($components)
+		} # }}}
+
+		from(...args): Color | bool { # {{{
+			var color = $from(new Color(), args)
+
+			return false if color._dummy else color
+		} # }}}
+
+		greyscale(...args): Color | bool { # {{{
+			var mut model = args.last()
+			if model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY' {
+				args.pop()
+			}
+			else {
+				model = null
+			}
+
+			var color = $from(new Color(), args)
+
+			return false if color._dummy else color.greyscale(model)
+		} # }}}
+
+		hex(...args): String | bool { # {{{
+			var color = $from(new Color(), args)
+
+			return false if color._dummy else color.hex()
+		} # }}}
+
+		negative(...args): Color | bool { # {{{
+			var color = $from(new Color(), args)
+
+			return false if color._dummy else color.negative()
+		} # }}}
+
+		registerFormatter(format: string, formatter: func): void { # {{{
+			$formatters[format] = {
+				formatter: formatter
+			}
+		} # }}}
+
+		registerParser(format: string, parser: func): void { # {{{
+			$parsers[format] = parser
 		} # }}}
 	}
 
@@ -1064,7 +1064,7 @@ export class Color {
 	} # }}}
 }
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'srgb'
 	alias: ['rgb']
 	formatters: {

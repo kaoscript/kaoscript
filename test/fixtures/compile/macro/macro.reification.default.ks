@@ -8,4 +8,4 @@ macro build(@name: String, @amount: Number, @operator: String) {
 	}
 }
 
-build!('add', 3, ' + ')
+build('add', 3, ' + ')

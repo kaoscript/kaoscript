@@ -4,4 +4,4 @@ macro foobar(@x: Array) {
 	macro #(x)
 }
 
-console.log(foobar!([4, 2]))
+console.log(foobar([4, 2]))

@@ -8,5 +8,5 @@ export namespace NS {
 	}
 }
 
-func foo() => foobar!('42')
-func qux() => NS.foobar!('42')
+func foo() => foobar('42')
+func qux() => NS.foobar('42')

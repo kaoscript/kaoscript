@@ -183,7 +183,10 @@ class FunctionDeclaration extends Statement {
 	initiate() { # {{{
 		@name = @data.name.name
 
-		if @variable ?= @scope.getDefinedVariable(@name) {
+		if @scope.hasMacro(@name) {
+			SyntaxException.throwIdenticalMacro(@name, this)
+		}
+		else if @variable ?= @scope.getDefinedVariable(@name) {
 			if @variable is FunctionVariable {
 				@continued = true
 			}

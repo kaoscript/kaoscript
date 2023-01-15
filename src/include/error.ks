@@ -408,6 +408,12 @@ export class SyntaxException extends Exception {
 		throwIllegalStatement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
 		} # }}}
+		throwIdenticalIdentifier(name, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The identifier "\(name)" is already used`, node)
+		} # }}}
+		throwIdenticalMacro(name, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`A macro, named "\(name)", already exists`, node)
+		} # }}}
 		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node): Never ~ SyntaxException { # {{{
 			var last = functions.length - 1
 			var mut fragments = ''
@@ -682,9 +688,6 @@ export class SyntaxException extends Exception {
 			var fragments = [`"\(name)"` for var name in names]
 
 			throw new SyntaxException(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
-		} # }}}
-		throwUnmatchedMacro(name, node, data): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`The macro "\(name)" can't be matched`, node, data)
 		} # }}}
 		throwUnnamedWildcardImport(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Wilcard import can't be named`, node)

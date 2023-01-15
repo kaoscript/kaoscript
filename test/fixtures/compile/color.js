@@ -1310,96 +1310,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-		static __ks_sttc_from_0(args) {
-			const color = $from.__ks_0(Color.__ks_new_0([]), args);
-			return color._dummy ? false : color;
-		}
-		static from() {
-			const t0 = Type.isValue;
-			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-			let pts;
-			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-				return Color.__ks_sttc_from_0(Helper.getVarargs(arguments, 0, pts[1]));
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_greyscale_0(args) {
-			let model = __ks_Array.__ks_func_last_0.call(args);
-			if((model === "BT709") || (model === "average") || (model === "lightness") || (model === "Y") || (model === "RMY")) {
-				args.pop();
-			}
-			else {
-				model = null;
-			}
-			const color = $from.__ks_0(Color.__ks_new_0([]), args);
-			return color._dummy ? false : color.greyscale(model);
-		}
-		static greyscale() {
-			const t0 = Type.isValue;
-			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-			let pts;
-			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-				return Color.__ks_sttc_greyscale_0(Helper.getVarargs(arguments, 0, pts[1]));
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_hex_0(args) {
-			const color = $from.__ks_0(Color.__ks_new_0([]), args);
-			return color._dummy ? false : color.__ks_func_hex_0();
-		}
-		static hex() {
-			const t0 = Type.isValue;
-			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-			let pts;
-			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-				return Color.__ks_sttc_hex_0(Helper.getVarargs(arguments, 0, pts[1]));
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_negative_0(args) {
-			const color = $from.__ks_0(Color.__ks_new_0([]), args);
-			return color._dummy ? false : color.__ks_func_negative_0();
-		}
-		static negative() {
-			const t0 = Type.isValue;
-			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-			let pts;
-			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-				return Color.__ks_sttc_negative_0(Helper.getVarargs(arguments, 0, pts[1]));
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_registerFormatter_0(format, formatter) {
-			$formatters[format] = (() => {
-				const d = new OBJ();
-				d.formatter = formatter;
-				return d;
-			})();
-		}
-		static registerFormatter() {
-			const t0 = Type.isString;
-			const t1 = Type.isFunction;
-			if(arguments.length === 2) {
-				if(t0(arguments[0]) && t1(arguments[1])) {
-					return Color.__ks_sttc_registerFormatter_0(arguments[0], arguments[1]);
-				}
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_registerParser_0(format, parser) {
-			$parsers[format] = parser;
-		}
-		static registerParser() {
-			const t0 = Type.isString;
-			const t1 = Type.isFunction;
-			if(arguments.length === 2) {
-				if(t0(arguments[0]) && t1(arguments[1])) {
-					return Color.__ks_sttc_registerParser_0(arguments[0], arguments[1]);
-				}
-			}
-			throw Helper.badArgs();
-		}
-		static __ks_sttc_registerSpace_0(space) {
+		static __ks_sttc_addSpace_0(space) {
 			const spaces = Object.keys($spaces);
 			$space(space.name);
 			if(Type.isValue(space.parser)) {
@@ -1498,11 +1409,100 @@ module.exports = function() {
 				}
 			}
 		}
-		static registerSpace() {
+		static addSpace() {
 			const t0 = Type.isObject;
 			if(arguments.length === 1) {
 				if(t0(arguments[0])) {
-					return Color.__ks_sttc_registerSpace_0(arguments[0]);
+					return Color.__ks_sttc_addSpace_0(arguments[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_from_0(args) {
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color;
+		}
+		static from() {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_from_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_greyscale_0(args) {
+			let model = __ks_Array.__ks_func_last_0.call(args);
+			if((model === "BT709") || (model === "average") || (model === "lightness") || (model === "Y") || (model === "RMY")) {
+				args.pop();
+			}
+			else {
+				model = null;
+			}
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color.greyscale(model);
+		}
+		static greyscale() {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_greyscale_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_hex_0(args) {
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color.__ks_func_hex_0();
+		}
+		static hex() {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_hex_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_negative_0(args) {
+			const color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color.__ks_func_negative_0();
+		}
+		static negative() {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_negative_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_registerFormatter_0(format, formatter) {
+			$formatters[format] = (() => {
+				const d = new OBJ();
+				d.formatter = formatter;
+				return d;
+			})();
+		}
+		static registerFormatter() {
+			const t0 = Type.isString;
+			const t1 = Type.isFunction;
+			if(arguments.length === 2) {
+				if(t0(arguments[0]) && t1(arguments[1])) {
+					return Color.__ks_sttc_registerFormatter_0(arguments[0], arguments[1]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_registerParser_0(format, parser) {
+			$parsers[format] = parser;
+		}
+		static registerParser() {
+			const t0 = Type.isString;
+			const t1 = Type.isFunction;
+			if(arguments.length === 2) {
+				if(t0(arguments[0]) && t1(arguments[1])) {
+					return Color.__ks_sttc_registerParser_0(arguments[0], arguments[1]);
 				}
 			}
 			throw Helper.badArgs();
@@ -1510,7 +1510,7 @@ module.exports = function() {
 	}
 	Space.SRGB = Space("srgb");
 	Space.RGB = Space("rgb");
-	Color.__ks_sttc_registerSpace_0((() => {
+	Color.__ks_sttc_addSpace_0((() => {
 		const d = new OBJ();
 		d["name"] = "srgb";
 		d["alias"] = ["rgb"];

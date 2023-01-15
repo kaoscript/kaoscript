@@ -301,6 +301,9 @@ class VariableDeclaration extends AbstractNode {
 			if @scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
+			else if @scope.hasMacro(name) {
+				SyntaxException.throwIdenticalMacro(name, this)
+			}
 
 			var mut alreadyDeclared = @scope.hasDeclaredVariable(name)
 

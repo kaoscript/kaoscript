@@ -7,6 +7,6 @@ macro test(@from: Number, @to: Number) {
 }
 
 func foobar(x) {
-	if test!(1, 4) {
+	if test(1, 4) {
 	}
 }

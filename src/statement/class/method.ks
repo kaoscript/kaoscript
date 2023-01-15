@@ -223,6 +223,10 @@ class ClassMethodDeclaration extends Statement {
 			SyntaxException.throwReservedStaticMethod(@name, parent)
 		}
 		else {
+			if parent.hasMacro(@name) {
+				SyntaxException.throwIdenticalMacro(@name, this)
+			}
+
 			if parent._staticMethods[@name] is Array {
 				parent._staticMethods[@name].push(this)
 			}

@@ -1,6 +1,6 @@
 import '../color'
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'rvb',
 	components: {
 		rouge: {
@@ -15,7 +15,7 @@ Color.registerSpace!({
 	}
 })
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'cmy',
 	converters: {
 		from: {

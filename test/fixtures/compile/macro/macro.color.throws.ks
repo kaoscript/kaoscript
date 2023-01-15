@@ -19,7 +19,7 @@ export class Color {
 			}
 
 			macro {
-				Color.registerSpace(#(expression))
+				Color.addSpace(#(expression))
 
 				impl Color {
 					#s(fields)
@@ -28,11 +28,11 @@ export class Color {
 			}
 		}
 		else {
-			macro Color.registerSpace(#(expression))
+			macro Color.addSpace(#(expression))
 		}
 	}
 
-	static registerSpace(data)
+	static addSpace(data)
 
 	getField(name) ~ Error {
 		throw new Error('Not Implemented')
@@ -43,7 +43,7 @@ export class Color {
 	}
 }
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'srgb'
 	alias: ['rgb']
 	components: {

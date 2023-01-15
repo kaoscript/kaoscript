@@ -2,11 +2,11 @@
 
 export class Color {
 	macro registerSpace(@expression: Object) {
-		macro Color.registerSpace(#(expression))
+		macro Color.addSpace(#(expression))
 	}
 }
 
-Color.registerSpace!({
+Color.registerSpace({
 	name: 'FBQ'
 	formatters: {
 		srgb(that: Color): String {

@@ -213,7 +213,7 @@ class BlockScope extends Scope {
 				return @parent.getMacro(data, parent)
 			}
 
-			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
+			return null
 		}
 		else {
 			var path = Generator.generate(data.callee)
@@ -231,7 +231,7 @@ class BlockScope extends Scope {
 				return @parent.getMacro(data, parent)
 			}
 
-			SyntaxException.throwUnmatchedMacro(path, parent, data)
+			return null
 		}
 	} # }}}
 	getNewName(name: String): String { # {{{

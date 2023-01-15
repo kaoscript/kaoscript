@@ -49,19 +49,19 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-		static __ks_sttc_registerSpace_0(data) {
+		static __ks_sttc_addSpace_0(data) {
 		}
-		static registerSpace() {
+		static addSpace() {
 			const t0 = Type.isValue;
 			if(arguments.length === 1) {
 				if(t0(arguments[0])) {
-					return Color.__ks_sttc_registerSpace_0(arguments[0]);
+					return Color.__ks_sttc_addSpace_0(arguments[0]);
 				}
 			}
 			throw Helper.badArgs();
 		}
 	}
-	Color.__ks_sttc_registerSpace_0((() => {
+	Color.__ks_sttc_addSpace_0((() => {
 		const d = new OBJ();
 		d.name = Space.SRGB;
 		d["alias"] = [Space.RGB];

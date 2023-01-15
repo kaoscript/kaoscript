@@ -215,6 +215,10 @@ class MacroDeclaration extends AbstractNode {
 	constructor(@data, @parent, _: Scope?, @name = data.name.name) { # {{{
 		super(data, parent, new MacroScope())
 
+		if @parent.scope().hasDefinedVariable(@name) {
+			SyntaxException.throwIdenticalIdentifier(@name, this)
+		}
+
 		@type = MacroType.fromAST(data!?, this)
 		@line = data.start?.line ?? -1
 
@@ -526,29 +530,43 @@ class MacroArgument extends Type {
 	isUnion() => false
 }
 
-func $callMacroExpression(data, parent, scope) { # {{{
-	var macro = scope.getMacro(data, parent)
+func $callExpression(data, parent, scope) { # {{{
+	if var macro ?= scope.getMacro(data, parent) {
+		var result = macro.execute(data.arguments, parent)
 
-	var result = macro.execute(data.arguments, parent)
-
-	if result.body.length == 1 {
-		return $compile.expression(result.body[0], parent)
+		if result.body.length == 1 {
+			return $compile.expression(result.body[0], parent)
+		}
+		else {
+			throw new NotImplementedException(parent)
+		}
 	}
 	else {
-		throw new NotImplementedException(parent)
+		return new CallExpression(data, parent, scope)
+	}
+} # }}}
+
+func $callStatement(data, parent, scope) { # {{{
+	if var macro ?= scope.getMacro(data, parent) {
+		return new CallMacroStatement(data, parent, scope, macro)
+	}
+	else {
+		return new ExpressionStatement(data, parent, scope)
 	}
 } # }}}
 
 class CallMacroStatement extends Statement {
 	private {
+		@macro: MacroDeclaration
 		@offsetEnd: Number		= 0
 		@offsetStart: Number	= 0
 		@statements: Array		= []
 	}
+	constructor(@data, @parent, @scope = parent.scope(), @macro) { # {{{
+		super(data, parent, scope)
+	} # }}}
 	initiate() { # {{{
-		var macro = @scope.getMacro(@data, this)
-
-		var data = macro.execute(@data.arguments, this)
+		var data = @macro.execute(@data.arguments, this)
 
 		var offset = @scope.getLineOffset()
 
@@ -556,7 +574,7 @@ class CallMacroStatement extends Statement {
 
 		@scope.setLineOffset(@offsetStart)
 
-		var file = `\(@file())!#\(macro.name())`
+		var file = `\(@file())!#\(@macro.name())`
 
 		@options = Attribute.configure(data, @options, AttributeTarget::Global, file)
 

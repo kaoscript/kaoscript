@@ -7,4 +7,4 @@ macro using(id: Identifier, exp: Expression) {
 	}
 }
 
-var dyn four = using!(a, a / 10)
+var dyn four = using(a, a / 10)

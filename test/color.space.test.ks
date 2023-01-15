@@ -10,7 +10,7 @@ import {
 	'./fixtures/compile/color.ks'
 }
 
-Color.registerSpace!({ # {{{ rvb
+Color.registerSpace({ # {{{ rvb
 	name: 'rvb',
 	converters: {
 		from: {
@@ -41,7 +41,7 @@ Color.registerSpace!({ # {{{ rvb
 	}
 }) # }}}
 
-Color.registerSpace!({ # {{{ cmy
+Color.registerSpace({ # {{{ cmy
 	name: 'cmy',
 	converters: {
 		from: {

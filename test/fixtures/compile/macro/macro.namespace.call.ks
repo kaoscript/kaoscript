@@ -3,7 +3,7 @@ namespace NS {
 		macro #(x)
 	}
 
-	func foo() => foobar!('42')
+	func foo() => foobar('42')
 }
 
 export NS

@@ -646,6 +646,7 @@ class ClassDeclaration extends Statement {
 	getStaticVariable(name: String) => @staticVariables[name]
 	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
+	hasMacro(name) => @scope.hasMacro(name)
 	isAbstract() => @abstract
 	isEnhancementExport() => true
 	isExtending() => @extending
