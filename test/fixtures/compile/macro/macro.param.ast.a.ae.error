@@ -1,0 +1,1 @@
+SyntaxException: AST parameter doesn't support reification (fixtures/compile/macro/macro.param.ast.a.ae.ks:3)

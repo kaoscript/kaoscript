@@ -198,41 +198,8 @@ class BlockScope extends Scope {
 		return null
 	} # }}}
 	getLineOffset() => @module.getLineOffset()
-	getMacro(data, parent) { # {{{
-		if data.callee.kind == NodeKind::Identifier {
-			if ?@macros[data.callee.name] {
-				var arguments = MacroArgument.build(data.arguments)
-
-				for macro in @macros[data.callee.name] {
-					if macro.matchArguments(arguments) {
-						return macro
-					}
-				}
-			}
-			else {
-				return @parent.getMacro(data, parent)
-			}
-
-			return null
-		}
-		else {
-			var path = Generator.generate(data.callee)
-
-			if ?@macros[path] {
-				var arguments = MacroArgument.build(data.arguments)
-
-				for macro in @macros[path] {
-					if macro.matchArguments(arguments) {
-						return macro
-					}
-				}
-			}
-			else {
-				return @parent.getMacro(data, parent)
-			}
-
-			return null
-		}
+	getMacro(name) { # {{{
+		return @macros[name] ?? @parent.getMacro(name)
 	} # }}}
 	getNewName(name: String): String { # {{{
 		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1

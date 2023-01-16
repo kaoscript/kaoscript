@@ -21,6 +21,14 @@ func $evaluate(source) { # {{{
 	return eval(compiler.toSource())(MacroMarker)
 } # }}}
 
+func $generate(macro, node, data) { # {{{
+	return Generator.generate(data, {
+		transformers: {
+			expression: $transformExpression^^(macro, node)
+		}
+	})
+} # }}}
+
 class MacroMarker {
 	public {
 		index: Number
@@ -30,11 +38,14 @@ class MacroMarker {
 
 func $reificate(macro, node, data, ast, reification? = null, separator? = null) { # {{{
 	if ast {
-		return Generator.generate(data, {
-			transformers: {
-				expression: $transformExpression^^(macro, node)
-			}
-		})
+		if data is Array {
+			var result = [$generate(macro, node, item) for var item in data]
+
+			return result.join(', ')
+		}
+		else {
+			return $generate(macro, node, data)
+		}
 	}
 	else {
 		match reification {
@@ -233,21 +244,22 @@ class MacroDeclaration extends AbstractNode {
 
 		for var data in @data.parameters {
 			var mut auto = false
+			var mut rest = false
 
 			for var modifier in data.modifiers until auto {
-				if modifier.kind == ModifierKind::AutoEvaluate {
-					auto = true
+				match modifier.kind {
+					ModifierKind::AutoEvaluate {
+						auto = true
+					}
+					ModifierKind::Rest {
+						rest = true
+					}
 				}
 			}
 
 			@parameters[data.internal.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
 
-			if auto {
-				line.code(', mut ', data.internal.name)
-			}
-			else {
-				line.code(', ', data.internal.name)
-			}
+			line.code(`,\(auto ? ' mut' : '')\(rest ? ' ...' : '') \(data.internal.name)`)
 
 			if ?data.defaultValue {
 				line.code(' = ').expression(data.defaultValue)
@@ -355,7 +367,14 @@ class MacroDeclaration extends AbstractNode {
 				match element.kind {
 					MacroElementKind::Expression {
 						if element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST {
+							unless !?element.reification {
+								SyntaxException.throwInvalidASTReification(this)
+							}
+
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
+						}
+						else if !?element.reification {
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(ReificationKind::Expression))`)
 						}
 						else if element.reification.kind == ReificationKind::Join {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
@@ -528,18 +547,45 @@ class MacroArgument extends Type {
 	} # }}}
 	isSpread() => false
 	isUnion() => false
+	toQuote() { # {{{
+		match @data.kind {
+			NodeKind::ArrayExpression => return 'Array'
+			NodeKind::Identifier => return 'Identifier'
+			NodeKind::NumericExpression => return 'Number'
+			NodeKind::ObjectExpression => return 'Object'
+			NodeKind::Literal => return 'String'
+			else => return 'Expression'
+		}
+	} # }}}
 }
 
 func $callExpression(data, parent, scope) { # {{{
-	if var macro ?= scope.getMacro(data, parent) {
-		var result = macro.execute(data.arguments, parent)
+	var late name: String
 
-		if result.body.length == 1 {
-			return $compile.expression(result.body[0], parent)
+	if data.callee.kind == NodeKind::Identifier {
+		name = data.callee.name
+	}
+	else {
+		name = Generator.generate(data.callee)
+	}
+
+	if var macros ?= scope.getMacro(name) {
+		var arguments = MacroArgument.build(data.arguments)
+
+		for var macro in macros {
+			if macro.matchArguments(arguments) {
+				var result = macro.execute(data.arguments, parent)
+
+				if result.body.length == 1 {
+					return $compile.expression(result.body[0], parent)
+				}
+				else {
+					throw new NotImplementedException(parent)
+				}
+			}
 		}
-		else {
-			throw new NotImplementedException(parent)
-		}
+
+		ReferenceException.throwNoMatchingMacro(name, arguments, parent)
 	}
 	else {
 		return new CallExpression(data, parent, scope)
@@ -547,8 +593,25 @@ func $callExpression(data, parent, scope) { # {{{
 } # }}}
 
 func $callStatement(data, parent, scope) { # {{{
-	if var macro ?= scope.getMacro(data, parent) {
-		return new CallMacroStatement(data, parent, scope, macro)
+	var late name: String
+
+	if data.callee.kind == NodeKind::Identifier {
+		name = data.callee.name
+	}
+	else {
+		name = Generator.generate(data.callee)
+	}
+
+	if var macros ?= scope.getMacro(name) {
+		var arguments = MacroArgument.build(data.arguments)
+
+		for var macro in macros {
+			if macro.matchArguments(arguments) {
+				return new CallMacroStatement(data, parent, scope, macro)
+			}
+		}
+
+		ReferenceException.throwNoMatchingMacro(name, arguments, parent)
 	}
 	else {
 		return new ExpressionStatement(data, parent, scope)

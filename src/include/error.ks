@@ -250,6 +250,14 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
+		throwNoMatchingMacro(name, arguments, node): Never ~ ReferenceException { # {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The macro "\(name)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The macro "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
+			}
+		} # }}}
 		throwNoMatchingStaticMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
@@ -482,6 +490,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwInheritanceLoop(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`An inheritance loop is occurring the class "\(name)"`, node)
+		} # }}}
+		throwInvalidASTReification(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`AST parameter doesn't support reification`, node)
 		} # }}}
 		throwInvalidAwait(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
