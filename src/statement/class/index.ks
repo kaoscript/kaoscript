@@ -137,9 +137,9 @@ class ClassDeclaration extends Statement {
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope)
 
-		@constructorScope = @newScope(@scope, ScopeType::Function)
-		@destructorScope = @newScope(@scope, ScopeType::Function)
-		@instanceVariableScope = @newScope(@scope, ScopeType::Function)
+		@constructorScope = @newScope(@scope!?, ScopeType::Function)
+		@destructorScope = @newScope(@scope!?, ScopeType::Function)
+		@instanceVariableScope = @newScope(@scope!?, ScopeType::Function)
 		@es5 = @options.format.classes == 'es5'
 	} # }}}
 	initiate() { # {{{
@@ -654,7 +654,7 @@ class ClassDeclaration extends Statement {
 	level() => @class.level()
 	name() => @name
 	newInstanceMethodScope() { # {{{
-		var scope = @newScope(@scope, ScopeType::Function)
+		var scope = @newScope(@scope!?, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
 

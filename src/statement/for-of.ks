@@ -22,7 +22,7 @@ class ForOfStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {
@@ -98,7 +98,7 @@ class ForOfStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()

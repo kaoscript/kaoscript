@@ -44,7 +44,7 @@ class ForInStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {
@@ -163,7 +163,7 @@ class ForInStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()
@@ -424,7 +424,7 @@ class ForInStatement extends Statement {
 
 		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 		@assignTempVariables(@bindingScope)
 
 		if ?@until {

@@ -11,7 +11,7 @@ class WhileStatement extends Statement {
 	initiate() { # {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
-			@bindingScope = @newScope(@scope, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
 
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
 
@@ -30,7 +30,7 @@ class WhileStatement extends Statement {
 			@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 		}
 		else {
-			@bindingScope = @newScope(@scope, ScopeType::Hollow)
+			@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
 			@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
@@ -70,7 +70,7 @@ class WhileStatement extends Statement {
 			@condition.releaseReusable()
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 
 		@scope.line(@data.body.start.line)
 

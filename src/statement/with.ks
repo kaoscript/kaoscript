@@ -47,7 +47,7 @@ class WithStatement extends Statement {
 			})
 		}
 
-		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()

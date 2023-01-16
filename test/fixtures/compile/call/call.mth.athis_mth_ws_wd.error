@@ -1,0 +1,1 @@
+ReferenceException: The method "corge" can't be found in the class "Function" (fixtures/compile/call/call.mth.athis_mth_ws_wd.ks:12)

@@ -5,7 +5,7 @@ class UnlessStatement extends Statement {
 		@condition
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
@@ -20,7 +20,7 @@ class UnlessStatement extends Statement {
 			TypeException.throwInvalidCondition(@condition, this)
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 
 		@body.prepare(target)
 

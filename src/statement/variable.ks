@@ -202,7 +202,7 @@ class VariableDeclaration extends AbstractNode {
 				@rebindable = ?@valueScope
 			}
 
-			@valueScope ??= @newScope(@scope, ScopeType::Hollow)
+			@valueScope ??= @newScope(@scope!?, ScopeType::Hollow)
 
 			var line = @valueScope.getRawLine()
 

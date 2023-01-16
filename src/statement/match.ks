@@ -48,7 +48,7 @@ class MatchStatement extends Statement {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: @newScope(@scope, ScopeType::InlineBlock)
+				scope: @newScope(@scope!?, ScopeType::InlineBlock)
 			}
 
 			@clauses.push(clause)

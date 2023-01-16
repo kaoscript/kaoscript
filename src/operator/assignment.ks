@@ -19,7 +19,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@left.analyse()
 
-		@bindingScope = @newScope(@scope, ScopeType::Hollow)
+		@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
 
 		@right = $compile.expression(@data.right, this, @bindingScope)
 

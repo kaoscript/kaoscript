@@ -6,7 +6,7 @@ class UntilStatement extends Statement {
 		@condition
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::Hollow)
+		@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @bindingScope)
@@ -23,7 +23,7 @@ class UntilStatement extends Statement {
 			TypeException.throwInvalidCondition(@condition, this)
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 
 		@scope.line(@data.body.start.line)
 

@@ -66,7 +66,7 @@ class ForFromStatement extends Statement {
 		@declared = @declaration || variable == null
 
 		if @declared {
-			@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		}
 		else {
 			@bindingScope = @scope
@@ -148,7 +148,7 @@ class ForFromStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()
@@ -300,7 +300,7 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 		@assignTempVariables(@bindingScope)
 
 		if ?@until {

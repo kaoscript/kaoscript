@@ -50,7 +50,7 @@ class ReturnStatement extends Statement {
 				@temp = @scope.acquireTempName(this)
 			}
 
-			@assignTempVariables(@scope)
+			@assignTempVariables(@scope!?)
 
 			@type = @value.type().asReference()
 

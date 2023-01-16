@@ -5,7 +5,7 @@ class DoUntilStatement extends Statement {
 		@condition
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
@@ -28,7 +28,7 @@ class DoUntilStatement extends Statement {
 			TypeException.throwInvalidCondition(@condition, this)
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 	} # }}}
 	translate() { # {{{
 		@condition.translate()

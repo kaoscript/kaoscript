@@ -17,7 +17,7 @@ class ForRangeStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.modifiers {

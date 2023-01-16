@@ -23,7 +23,7 @@ class ExpressionStatement extends Statement {
 			@expression.releaseReusable()
 		}
 
-		@assignTempVariables(@scope)
+		@assignTempVariables(@scope!?)
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

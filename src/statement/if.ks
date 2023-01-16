@@ -22,7 +22,7 @@ class IfStatement extends Statement {
 	override initiate() { # {{{
 		if ?@data.declaration {
 			@hasDeclaration = true
-			@bindingScope = @newScope(@scope, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
 
 			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind::Identifier
 
@@ -53,7 +53,7 @@ class IfStatement extends Statement {
 			}
 		}
 		else {
-			@bindingScope = @newScope(@scope, ScopeType::Hollow)
+			@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
 			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
@@ -66,7 +66,7 @@ class IfStatement extends Statement {
 		@whenTrueExpression.analyse()
 
 		if @hasWhenFalse {
-			@whenFalseScope = @newScope(@scope, ScopeType::InlineBlock)
+			@whenFalseScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			@scope.line(@data.whenFalse.start.line)
 

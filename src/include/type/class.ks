@@ -1148,34 +1148,6 @@ class ClassType extends Type {
 
 		var methods = @listInstantiableMethods(name)
 
-		if @extending {
-			var keys = {}
-
-			for var method in methods {
-				keys[method.index()] = true
-
-				if var indexes ?= method.overload() {
-					for var index in indexes {
-						keys[index] = true
-					}
-				}
-			}
-
-			var mut that = this
-			do {
-				that = that.extends().type()
-
-				for var method in that.listInstantiableMethods(name) {
-					if !keys[method.index()] {
-						methods.push(method)
-
-						keys[method.index()] = true
-					}
-				}
-			}
-			while that.isExtending()
-		}
-
 		var assessment = Router.assess(methods, name, node)
 
 		@instanceAssessments[name] = assessment
@@ -1744,7 +1716,7 @@ class ClassType extends Type {
 
 		return result
 	} # }}}
-	listInstantiableMethods(name: String) { # {{{
+	listInstantiableMethods(name: String): ClassMethodType[] { # {{{
 		var methods = []
 
 		if var functions ?= @instanceMethods[name] {
@@ -1757,8 +1729,53 @@ class ClassType extends Type {
 			}
 		}
 
+		if @extending {
+			var keys = {}
+
+			for var method in methods {
+				keys[method.index()] = true
+
+				if var indexes ?= method.overload() {
+					for var index in indexes {
+						keys[index] = true
+					}
+				}
+			}
+
+			@extends.type().listInstantiableMethods(name, methods, keys)
+		}
+
 		return methods
 	} # }}}
+	// TODO
+	// listInstantiableMethods(name: String, methods: ClassMethodType[], keys: Number{}): Void {
+	listInstantiableMethods(name: String, methods: ClassMethodType[], keys): Void {
+		if var functions ?= @instanceMethods[name] {
+			for var method in functions {
+				if !?keys[method.index()] {
+					methods.push(method)
+
+					keys[method.index()] = true
+				}
+			}
+		}
+
+		if @abstract {
+			if var functions ?= @abstractMethods[name] {
+				for var method in functions {
+					if !?keys[method.index()] {
+						methods.push(method)
+
+						keys[method.index()] = true
+					}
+				}
+			}
+		}
+
+		if @extending {
+			@extends.type().listInstantiableMethods(name, methods, keys)
+		}
+	}
 	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		var result = []
 

@@ -18,7 +18,7 @@ class ArrayComprehensionForFrom extends Expression {
 		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), true, this)
@@ -148,7 +148,7 @@ class ArrayComprehensionForIn extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
@@ -351,7 +351,7 @@ class ArrayComprehensionForOf extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
@@ -540,7 +540,7 @@ class ArrayComprehensionForRange extends Expression {
 		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), true, this)
@@ -658,7 +658,7 @@ class ArrayComprehensionRepeat extends Expression {
 		@toName: String
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 		@to = $compile.expression(@data.loop.expression, this, @scope)
 		@to.analyse()

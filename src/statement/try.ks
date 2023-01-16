@@ -39,7 +39,7 @@ class TryStatement extends Statement {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
-				scope = @newScope(@scope, ScopeType::InlineBlock)
+				scope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 				if ?clause.binding {
 					scope.define(clause.binding.name, false, Type.Any, this)
@@ -59,7 +59,7 @@ class TryStatement extends Statement {
 		}
 
 		if @hasDefaultClause {
-			var scope = @newScope(@scope, ScopeType::InlineBlock)
+			var scope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			if ?@data.catchClause.binding {
 				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
@@ -69,7 +69,7 @@ class TryStatement extends Statement {
 			@defaultClause.analyse()
 		}
 
-		@bodyScope = @newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 		@body = $compile.block($ast.body(@data), this, @bodyScope)
 		@body.analyse()
@@ -77,7 +77,7 @@ class TryStatement extends Statement {
 		@await = @body.isAwait()
 
 		if @hasFinally {
-			var scope = @newScope(@scope, ScopeType::InlineBlock)
+			var scope = @newScope(@scope!?, ScopeType::InlineBlock)
 
 			@finally = $compile.block(@data.finalizer, this, scope)
 			@finally.analyse()
