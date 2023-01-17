@@ -18,13 +18,14 @@ var $attributes = {}
 var $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
 
 var $rules = {
+	'assert-override':				['assertOverride', true]
+	'dont-assert-override':			['assertOverride', false]
+	'ignore-error':					['ignoreError', true]
+	'ignore-misfit':				['ignoreMisfit', true]
+	'dont-ignore-misfit':			['ignoreMisfit', false]
 	// TODO should be by default
 	'no-undefined':					['noUndefined', true]
 	'non-exhaustive':				['nonExhaustive', true]
-	'ignore-misfit':				['ignoreMisfit', true]
-	'dont-ignore-misfit':			['ignoreMisfit', false]
-	'assert-override':				['assertOverride', true]
-	'dont-assert-override':			['assertOverride', false]
 }
 
 class Attribute {
@@ -49,7 +50,7 @@ class Attribute {
 				}
 			}
 
-			if data.attributes?.length > 0 {
+			if #data.attributes {
 				var cloned = {}
 
 				if force {

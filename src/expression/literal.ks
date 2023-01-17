@@ -62,6 +62,9 @@ class IdentifierLiteral extends Literal {
 				@value = name
 				@realType = @declaredType = Type.Any
 			}
+			else if @options.rules.ignoreError {
+				@realType = @declaredType = Type.Any
+			}
 			else {
 				ReferenceException.throwNotDefined(@value, this)
 			}

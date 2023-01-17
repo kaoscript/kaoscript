@@ -116,6 +116,7 @@ export class Compiler {
 				assertParameter: true
 				assertParameterType: true
 				noUndefined: false
+				ignoreError: false
 				ignoreMisfit: false
 			}
 			runtime: {
