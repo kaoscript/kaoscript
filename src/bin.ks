@@ -52,7 +52,7 @@ if program.clean {
 	execSync(`find -L \(process.cwd()) -type f \\( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksr" -o -name "*.kse" \\) -exec rm {} \\;`)
 
 	if program.args.length == 0 {
-		console.log('all clean!')
+		echo('all clean!')
 		process.exit(0)
 	}
 }
@@ -91,7 +91,7 @@ if program.compile {
 	compiler.compile()
 
 	if program.print {
-		console.log(compiler.toSource())
+		echo(compiler.toSource())
 	}
 
 	compiler.writeOutput()
@@ -101,7 +101,7 @@ else if program.print {
 
 	compiler.compile()
 
-	console.log(compiler.toSource())
+	echo(compiler.toSource())
 }
 else {
 	var compiler = new Compiler(file, options)

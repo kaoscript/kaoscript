@@ -83,6 +83,7 @@ class NamespaceDeclaration extends Statement {
 		@exports[name] = variable
 	} # }}}
 	exportMacro(name, macro) { # {{{
+		@parent.registerMacro(`\(@name).\(name)`, macro)
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} # }}}
 	includePath() => null
@@ -92,11 +93,6 @@ class NamespaceDeclaration extends Statement {
 		}
 	} # }}}
 	name() => @name
-	publishMacro(name, macro) { # {{{
-		@scope.addMacro(name, macro)
-
-		@parent.registerMacro(`\(@name).\(name)`, macro)
-	} # }}}
 	recipient() => this
 	registerMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)

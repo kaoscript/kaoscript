@@ -62,7 +62,7 @@ var loadFile = function(module, filename) { // {{{
 	return module._compile(data, filename);
 }; // }}}
 
-if(require.extensions) {
+if(require.extensions && _.extensions) {
 	require.extensions[_.extensions.source] = loadFile;
 
 	var Module = require('module');

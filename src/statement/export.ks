@@ -80,7 +80,7 @@ class ExportDeclaration extends Statement {
 		@parent.exportMacro(name, macro)
 	} # }}}
 	registerMacro(name, macro) { # {{{
-		@parent.publishMacro(name, macro)
+		@parent.registerMacro(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		for statement in @statements {
@@ -155,12 +155,6 @@ class ExportNamedSpecifier extends AbstractNode {
 
 		if !@wildcard {
 			@externalName = ?@data.external ? @data.external.name : @expression.name()
-		}
-
-		if @expression.isMacro() {
-			for var macro in @scope.listMacros(@expression.name()) {
-				@parent.registerMacro(@externalName, macro)
-			}
 		}
 	} # }}}
 	translate()

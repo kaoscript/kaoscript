@@ -82,7 +82,7 @@ dev:
 
 	@# tests
 	@# node test/compile.dev.js "compile "
-	node test/compile.dev.js "compile test"
+	@# node test/compile.dev.js "compile test"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

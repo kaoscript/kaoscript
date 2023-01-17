@@ -44,6 +44,7 @@ export class Compiler {
 		@hashes: Object
 		@hierarchy: Array
 		@options: Object
+		@standardLibrary: Boolean	= false
 	}
 	static {
 		registerTarget(target: String, fn: Function) { # {{{
@@ -167,6 +168,10 @@ export class Compiler {
 	initiate(data: String? = null) { # {{{
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
 
+		if @standardLibrary {
+			@module.flagStandardLibrary()
+		}
+
 		@module.initiate()
 
 		return this
@@ -185,6 +190,9 @@ export class Compiler {
 		@fragments = @module.toFragments()
 
 		return this
+	} # }}}
+	private flagStandardLibrary() { # {{{
+		@standardLibrary = true
 	} # }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): @module

@@ -113,6 +113,7 @@ abstract class Importer extends Statement {
 		@pathAddendum: String						= ''
 		@reusable: Boolean							= false
 		@reuseName: String
+		@standardLibrary: Boolean					= false
 		@variables: Object<ImportedVariable>	= {}
 		@variationId: String
 		@worker: ImportWorker
@@ -122,8 +123,16 @@ abstract class Importer extends Statement {
 		var mut x = @data.source.value
 		var mut y = @directory()
 
+		@standardLibrary = @module().isStandardLibrary(x)
+
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
-			x = fs.resolve(y, x)
+			if !@standardLibrary {
+				x = fs.resolve(y, x)
+
+				if @module().isStandardLibrary() {
+					@standardLibrary = true
+				}
+			}
 
 			if !(@loadFile(x, '', null) || @loadDirectory(x, null)) {
 				IOException.throwNotFoundModule(x, y, this)
@@ -631,7 +640,7 @@ abstract class Importer extends Statement {
 
 			for var datas, name of macros {
 				for data in datas {
-					new MacroDeclaration(data, this, null, name)
+					new MacroDeclaration(data, this, null, name, @standardLibrary)
 				}
 			}
 		}
@@ -695,7 +704,7 @@ abstract class Importer extends Statement {
 
 							for var datas, name of macros when exclusions.indexOf(name) == -1 {
 								for var data in datas {
-									new MacroDeclaration(data, this, null, name)
+									new MacroDeclaration(data, this, null, name, @standardLibrary)
 								}
 							}
 						}
@@ -708,7 +717,7 @@ abstract class Importer extends Statement {
 
 										if ?macros[external] {
 											for var data in macros[external] {
-												new MacroDeclaration(data, this, null, internal)
+												new MacroDeclaration(data, this, null, internal, @standardLibrary)
 											}
 										}
 										else {

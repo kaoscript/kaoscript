@@ -1,6 +1,6 @@
 extern console
 
-import './macro.export.alias'
+import './macro.export.named.wa'
 
 console.log(t5(42))
 

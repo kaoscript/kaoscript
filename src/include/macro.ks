@@ -7,13 +7,17 @@ enum MacroVariableKind {
 
 var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
-func $evaluate(source) { # {{{
+func $evaluate(source: String, standardLibrary: Boolean = false): Function { # {{{
 	// console.log('--> ', source)
 
 	var compiler = new Compiler('__ks__', {
 		register: false
 		target: $target
 	})
+
+	if standardLibrary {
+		compiler.flagStandardLibrary()
+	}
 
 	compiler.compile('extern console, JSON\nrequire __ks_marker\nreturn ' + source)
 	// console.log('=- ', compiler.toSource())
@@ -215,16 +219,22 @@ func $transformExpression(macro, node, data, writer) { # {{{
 class MacroDeclaration extends AbstractNode {
 	private {
 		@executeCount							= 0
-		@fn: Function
+		@fn: Function?
 		@line: Number
 		@marks: Array							= []
 		@name: String
 		@parameters: Object						= {}
 		@referenceIndex: Number					= -1
+		@standardLibrary: Boolean
 		@type: MacroType
 	}
-	constructor(@data, @parent, _: Scope?, @name = data.name.name) { # {{{
+	constructor(@data, @parent, _: Scope?, @name = data.name.name, @standardLibrary = false) { # {{{
 		super(data, parent, new MacroScope())
+
+		// TODO!
+		// @standardLibrary ||= @parent.module().isStandardLibrary()
+		// @standardLibrary = @standardLibrary || @parent.module().isStandardLibrary()
+		@standardLibrary = standardLibrary || @parent.module().isStandardLibrary()
 
 		if @parent.scope().hasDefinedVariable(@name) {
 			SyntaxException.throwIdenticalIdentifier(@name, this)
@@ -233,6 +243,10 @@ class MacroDeclaration extends AbstractNode {
 		@type = MacroType.fromAST(data!?, this)
 		@line = data.start?.line ?? -1
 
+		@parent.registerMacro(@name, this)
+	} # }}}
+	analyse()
+	private buildFunction() { # {{{
 		var builder = new Generator.KSWriter({
 			filters: {
 				expression: this.filter^@(false)
@@ -290,11 +304,8 @@ class MacroDeclaration extends AbstractNode {
 			source += fragment.code
 		}
 
-		@fn = $evaluate(source)
-
-		@parent.registerMacro(@name, this)
+		@fn = $evaluate(source, @standardLibrary)
 	} # }}}
-	analyse()
 	override prepare(target, targetMode)
 	prepare(target: Type, index: Number, length: Number)
 	translate()
@@ -328,6 +339,10 @@ class MacroDeclaration extends AbstractNode {
 		}
 	} # }}}
 	execute(arguments: Array, parent) { # {{{
+		if !?@fn {
+			@buildFunction()
+		}
+
 		// console.log(@fn.toString())
 		var module = @module()
 		@executeCount += 1
@@ -411,6 +426,7 @@ class MacroDeclaration extends AbstractNode {
 	isEnhancementExport() => false
 	isExportable() => false
 	isInstanceMethod() => false
+	isStandardLibrary(): @standardLibrary
 	line() => @line
 	matchArguments(arguments: Array) => @type.matchArguments(arguments, this)
 	name() => @name

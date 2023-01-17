@@ -1,0 +1,1 @@
+ReferenceException: "console" is not defined (fixtures/compile/echo/echo.nc.ks:3)

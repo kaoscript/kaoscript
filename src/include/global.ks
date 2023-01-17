@@ -211,6 +211,8 @@ var $runtime = {
 	} # }}}
 }
 
+var $standardLibraryDirectory = fs.getStandardLibraryDirectory()
+
 var $targets = {
 	ecma: { # {{{
 		'5': {
