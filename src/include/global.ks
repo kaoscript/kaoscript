@@ -73,12 +73,42 @@ var $ast = {
 			return name
 		}
 	} # }}}
+	isThisField(name: String, data): Boolean { # {{{
+		match data.kind {
+			NodeKind::ThisExpression {
+				return data.name.name == name
+			}
+			NodeKind::MemberExpression {
+				return data.object.kind == NodeKind::Identifier && data.object.name == 'this' && data.property.kind == NodeKind::Identifier && (data.property.name == name || data.property.name == `_\(name)`)
+			}
+		}
+
+		return false
+	} # }}}
 	parameter() { # {{{
 		return {
 			kind: NodeKind::Parameter
 			attributes: []
 			modifiers: []
 		}
+	} # }}}
+	some(data, filter): Boolean { # {{{
+		match data.kind {
+			NodeKind::BinaryExpression {
+				if filter(data.left) || filter(data.right) || $ast.some(data.left, filter) || $ast.some(data.right, filter) {
+					return true
+				}
+			}
+			NodeKind::CallExpression {
+				for var argument in data.arguments {
+					if filter(argument) || $ast.some(argument, filter) {
+						return true
+					}
+				}
+			}
+		}
+
+		return false
 	} # }}}
 }
 

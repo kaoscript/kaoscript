@@ -63,12 +63,9 @@ class ClassDeclaration extends Statement {
 		else {
 			match data.kind {
 				NodeKind::BinaryExpression {
-					if data.operator.kind == BinaryOperatorKind::Assignment {
-						if data.left.kind == NodeKind::ThisExpression && data.left.name.name == name {
-							return true
-						}
-						else if data.left.kind == NodeKind::MemberExpression && data.left.object.kind == NodeKind::Identifier && data.left.object.name == 'this' && data.left.property.kind == NodeKind::Identifier && (data.left.property.name == name || data.left.property.name == `_\(name)`) {
-							return true
+					if data.operator.kind == BinaryOperatorKind::Assignment && data.operator.assignment == AssignmentOperatorKind::Equals {
+						if $ast.isThisField(name, data.left) {
+							return !$ast.some(data.right, $ast.isThisField^^(name))
 						}
 					}
 				}

@@ -231,10 +231,7 @@ class MacroDeclaration extends AbstractNode {
 	constructor(@data, @parent, _: Scope?, @name = data.name.name, @standardLibrary = false) { # {{{
 		super(data, parent, new MacroScope())
 
-		// TODO!
-		// @standardLibrary ||= @parent.module().isStandardLibrary()
-		// @standardLibrary = @standardLibrary || @parent.module().isStandardLibrary()
-		@standardLibrary = standardLibrary || @parent.module().isStandardLibrary()
+		@standardLibrary ||= @parent.module().isStandardLibrary()
 
 		if @parent.scope().hasDefinedVariable(@name) {
 			SyntaxException.throwIdenticalIdentifier(@name, this)
