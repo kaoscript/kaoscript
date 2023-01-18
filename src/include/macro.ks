@@ -7,6 +7,14 @@ enum MacroVariableKind {
 
 var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
+func $autoEvaluate(macro, node, data) { # {{{
+	return $evaluate(Generator.generate(data, {
+		transformers: {
+			expression: $transformExpression^^(macro, node)
+		}
+	}))
+} # }}}
+
 func $evaluate(source: String, standardLibrary: Boolean = false): Function { # {{{
 	// console.log('--> ', source)
 
@@ -26,11 +34,7 @@ func $evaluate(source: String, standardLibrary: Boolean = false): Function { # {
 } # }}}
 
 func $generate(macro, node, data) { # {{{
-	return Generator.generate(data, {
-		transformers: {
-			expression: $transformExpression^^(macro, node)
-		}
-	})
+	return Generator.generate(data)
 } # }}}
 
 class MacroMarker {
@@ -251,7 +255,7 @@ class MacroDeclaration extends AbstractNode {
 			}
 		})
 
-		var line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
+		var line = builder.newLine().code('func(__ks_auto, __ks_reificate')
 
 		for var data in @data.parameters {
 			var mut auto = false
@@ -281,7 +285,7 @@ class MacroDeclaration extends AbstractNode {
 
 		for var kind, name of @parameters {
 			if kind == MacroVariableKind::AutoEvaluated {
-				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, \(ReificationKind::Expression.value)))`)
+				block.line(`\(name) = __ks_auto(\(name))`)
 			}
 		}
 
@@ -344,7 +348,7 @@ class MacroDeclaration extends AbstractNode {
 		var module = @module()
 		@executeCount += 1
 
-		var args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
+		var args = [$autoEvaluate^^(this, parent), $reificate^^(this, parent)].concat(arguments)
 
 		// console.log(args)
 		var mut data = @fn(...args)

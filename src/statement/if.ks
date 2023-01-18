@@ -43,7 +43,7 @@ class IfStatement extends Statement {
 			}
 
 			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
-			
+
 			if ?@data.condition {
 				@condition = $compile.expression(@data.condition, this, @bindingScope)
 				@condition.analyse()
@@ -95,7 +95,7 @@ class IfStatement extends Statement {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
-		
+
 		if @hasCondition {
 			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
 
@@ -572,7 +572,7 @@ class IfStatement extends Statement {
 					})
 				}
 			}
-			
+
 			if @hasCondition {
 				fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
 			}

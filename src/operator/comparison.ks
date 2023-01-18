@@ -141,6 +141,37 @@ class ComparisonExpression extends Expression {
 			return @operators[0].inferWhenFalseTypes(inferables)
 		}
 		else {
+			var shares = {}
+
+			for var { isVariable, type }, name of @operators[0].inferWhenFalseTypes({}) {
+				shares[name] = {
+					isVariable,
+					types: [type]
+				}
+			}
+
+			for var operator in @operators from 1 {
+				var newInfers = operator.inferWhenFalseTypes({})
+
+				for var share, name of shares {
+					if var { type } ?= newInfers[name] {
+						share.types.push(type)
+					}
+					else {
+						delete shares[name]
+					}
+				}
+
+				return inferables unless #shares
+			}
+
+			for var { isVariable, types }, name of shares {
+				inferables[name] = {
+					isVariable
+					type: Type.union(@scope, ...types)
+				}
+			}
+
 			return inferables
 		}
 	} # }}}
@@ -149,6 +180,37 @@ class ComparisonExpression extends Expression {
 			return @operators[0].inferWhenTrueTypes(inferables)
 		}
 		else {
+			var shares = {}
+
+			for var { isVariable, type }, name of @operators[0].inferWhenTrueTypes({}) {
+				shares[name] = {
+					isVariable,
+					types: [type]
+				}
+			}
+
+			for var operator in @operators from 1 {
+				var newInfers = operator.inferWhenTrueTypes({})
+
+				for var share, name of shares {
+					if var { type } ?= newInfers[name] {
+						share.types.push(type)
+					}
+					else {
+						delete shares[name]
+					}
+				}
+
+				return inferables unless #shares
+			}
+
+			for var { isVariable, types }, name of shares {
+				inferables[name] = {
+					isVariable
+					type: Type.union(@scope, ...types)
+				}
+			}
+
 			return inferables
 		}
 	} # }}}
