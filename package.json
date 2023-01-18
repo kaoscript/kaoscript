@@ -30,7 +30,8 @@
 		"lib/compiler.json",
 		"scripts/install.js",
 		"src/fs.js",
-		"src/register.js"
+		"src/register.js",
+		"src/std"
 	],
 	"main": "lib/compiler.js",
 	"bin": {
