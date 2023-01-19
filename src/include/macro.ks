@@ -355,7 +355,7 @@ class MacroDeclaration extends AbstractNode {
 		// console.log('execute =>', data)
 
 		try {
-			data = Parser.parse(data)
+			data = Parser.parseStatements(data + '\n', Parser.FunctionMode::Method)
 		}
 		catch error {
 			error.fileName = `\(@parent.file())$\(@name)$\(@executeCount)`
