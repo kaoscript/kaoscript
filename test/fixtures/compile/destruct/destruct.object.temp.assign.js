@@ -9,10 +9,10 @@ module.exports = function() {
 		}
 		const tokens = [];
 		return (() => {
-			const d = new OBJ();
-			d.tokens = tokens;
-			d.rules = rules;
-			return d;
+			const o = new OBJ();
+			o.tokens = tokens;
+			o.rules = rules;
+			return o;
 		})();
 	};
 	parse.__ks_rt = function(that, args) {

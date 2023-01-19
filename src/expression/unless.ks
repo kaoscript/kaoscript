@@ -32,7 +32,7 @@ class UnlessExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments
 			.wrapCondition(@condition)
-			.code(' ? null : ')
+			.code(' ? ', @whenFalse.getDefaultValue(), ' : ')
 			.compile(@whenFalse)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{

@@ -24,7 +24,11 @@ module.exports = function() {
 	};
 	clone.__ks_0 = function(source) {
 		const clone = Foobar.__ks_new_0();
-		clone.args = Helper.newObject(-1, source.args);
+		clone.args = (() => {
+			const o = new OBJ();
+			Helper.concatObject(o, source.args);
+			return o;
+		})();
 		return clone;
 	};
 	clone.__ks_rt = function(that, args) {

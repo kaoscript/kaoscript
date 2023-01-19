@@ -17,9 +17,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	console.log(__ks_Object.__ks_sttc_size_0((() => {
-		const d = new OBJ();
-		d.name = "White";
-		d.honorific = "miss";
-		return d;
+		const o = new OBJ();
+		o.name = "White";
+		o.honorific = "miss";
+		return o;
 	})()));
 };

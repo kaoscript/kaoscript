@@ -1,11 +1,11 @@
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	const likes = (() => {
-		const d = new OBJ();
-		d.leto = "spice";
-		d.paul = "chani";
-		d.duncan = "murbella";
-		return d;
+		const o = new OBJ();
+		o.leto = "spice";
+		o.paul = "chani";
+		o.duncan = "murbella";
+		return o;
 	})();
 	for(let key in likes) {
 		let value = likes[key];

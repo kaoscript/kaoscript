@@ -4,9 +4,9 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x = (() => {
-		const d = new OBJ();
-		d.y = 42;
-		return d;
+		const o = new OBJ();
+		o.y = 42;
+		return o;
 	})()) {
 	};
 	foobar.__ks_rt = function(that, args) {

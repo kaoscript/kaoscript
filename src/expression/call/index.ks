@@ -1169,6 +1169,7 @@ class NamedArgument extends Expression {
 	translate() { # {{{
 		@value.translate()
 	} # }}}
+	getDefaultValue() => 'void 0'
 	isAwait() => @value.isAwait()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	name() => @name

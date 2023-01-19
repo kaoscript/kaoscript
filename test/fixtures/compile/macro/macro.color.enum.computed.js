@@ -63,14 +63,14 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d.name = Space.SRGB;
-		d["alias"] = [Space.RGB];
-		d["parsers"] = (() => {
-			const d = new OBJ();
-			d["from"] = (() => {
-				const d = new OBJ();
-				d[Space.YUV] = Helper.function(function() {
+		const o = new OBJ();
+		o.name = Space.SRGB;
+		o["alias"] = [Space.RGB];
+		o["parsers"] = (() => {
+			const o = new OBJ();
+			o["from"] = (() => {
+				const o = new OBJ();
+				o[Space.YUV] = Helper.function(function() {
 					return "RGB -> UYV";
 				}, (fn, ...args) => {
 					if(args.length === 0) {
@@ -78,33 +78,33 @@ module.exports = function() {
 					}
 					throw Helper.badArgs();
 				});
-				return d;
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["red"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_red";
-				return d;
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["red"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_red";
+				return o;
 			})();
-			d["green"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_green";
-				return d;
+			o["green"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_green";
+				return o;
 			})();
-			d["blue"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_blue";
-				return d;
+			o["blue"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_blue";
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.__ks_func_getField_0("red");

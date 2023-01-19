@@ -4,10 +4,10 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function({x, y} = (() => {
-		const d = new OBJ();
-		d.x = "foo";
-		d.y = "bar";
-		return d;
+		const o = new OBJ();
+		o.x = "foo";
+		o.y = "bar";
+		return o;
 	})()) {
 		console.log(x + "." + y);
 	};

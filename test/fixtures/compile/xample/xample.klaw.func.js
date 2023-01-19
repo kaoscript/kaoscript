@@ -1,10 +1,10 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	for(let __ks_2 = klaw(path.join(__dirname, "fixtures"), (() => {
-		const d = new OBJ();
-		d.nodir = true;
-		d.traverseAll = true;
-		d.filter = Helper.function(function(item) {
+		const o = new OBJ();
+		o.nodir = true;
+		o.traverseAll = true;
+		o.filter = Helper.function(function(item) {
 			return item.path.slice(-5) === ".json";
 		}, (fn, ...args) => {
 			const t0 = Type.isValue;
@@ -15,7 +15,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		return d;
+		return o;
 	})()), __ks_1 = 0, __ks_0 = __ks_2.length, file; __ks_1 < __ks_0; ++__ks_1) {
 		file = __ks_2[__ks_1];
 		prepare(file.path);

@@ -5,10 +5,10 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.bar = "hello";
-			d.baz = 3;
-			return d;
+			const o = new OBJ();
+			o.bar = "hello";
+			o.baz = 3;
+			return o;
 		})();
 	};
 	foo.__ks_rt = function(that, args) {

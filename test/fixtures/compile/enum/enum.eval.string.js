@@ -13,14 +13,14 @@ module.exports = function(expect) {
 	expect(">>> " + x).to.equal(">>> clubs");
 	expect(x.value).to.equal("clubs");
 	expect(JSON.stringify((() => {
-		const d = new OBJ();
-		d.id = x;
-		return d;
+		const o = new OBJ();
+		o.id = x;
+		return o;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	expect(JSON.stringify((() => {
-		const d = new OBJ();
-		d.id = x.value;
-		return d;
+		const o = new OBJ();
+		o.id = x.value;
+		return o;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

@@ -34,9 +34,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let animal = (() => {
-		const d = new OBJ();
-		d.flags = AnimalFlags.None;
-		return d;
+		const o = new OBJ();
+		o.flags = AnimalFlags.None;
+		return o;
 	})();
 	printAnimalAbilities.__ks_0(animal);
 	animal.flags = AnimalFlags(animal.flags | AnimalFlags.HasClaws);

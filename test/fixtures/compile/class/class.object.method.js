@@ -22,9 +22,9 @@ module.exports = function() {
 		}
 		__ks_func_xy_0() {
 			return (() => {
-				const d = new OBJ();
-				d.xy = this.xy(this._x, this._y);
-				return d;
+				const o = new OBJ();
+				o.xy = this.xy(this._x, this._y);
+				return o;
 			})();
 		}
 		__ks_func_xy_1(x, y) {

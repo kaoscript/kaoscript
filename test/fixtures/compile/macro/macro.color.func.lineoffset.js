@@ -4,28 +4,28 @@ module.exports = function() {
 	var {Color, Space} = require("../.color.ks.j5k8r9.ksb")();
 	Space.RVB = Space("rvb");
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d["name"] = "rvb";
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["rouge"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+		const o = new OBJ();
+		o["name"] = "rvb";
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["rouge"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["vert"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["vert"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["blue"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["blue"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_rouge_0 = function() {
 		return this.__ks_func_getField_0("rouge");
@@ -84,13 +84,13 @@ module.exports = function() {
 	};
 	Space.CMY = Space("cmy");
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d["name"] = "cmy";
-		d["converters"] = (() => {
-			const d = new OBJ();
-			d["from"] = (() => {
-				const d = new OBJ();
-				d.srgb = Helper.function(function(red, green, blue, that) {
+		const o = new OBJ();
+		o["name"] = "cmy";
+		o["converters"] = (() => {
+			const o = new OBJ();
+			o["from"] = (() => {
+				const o = new OBJ();
+				o.srgb = Helper.function(function(red, green, blue, that) {
 					that._cyan = blue;
 					that._magenta = red;
 					that._yellow = green;
@@ -103,11 +103,11 @@ module.exports = function() {
 					}
 					throw Helper.badArgs();
 				});
-				return d;
+				return o;
 			})();
-			d["to"] = (() => {
-				const d = new OBJ();
-				d.srgb = Helper.function(function(cyan, magenta, yellow, that) {
+			o["to"] = (() => {
+				const o = new OBJ();
+				o.srgb = Helper.function(function(cyan, magenta, yellow, that) {
 					that._red = magenta;
 					that._green = yellow;
 					that._blue = cyan;
@@ -120,30 +120,30 @@ module.exports = function() {
 					}
 					throw Helper.badArgs();
 				});
-				return d;
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["cyan"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["cyan"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["magenta"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["magenta"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["yellow"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["yellow"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_cyan_0 = function() {
 		return this.__ks_func_getField_0("cyan");

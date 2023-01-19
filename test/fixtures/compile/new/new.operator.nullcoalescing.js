@@ -19,10 +19,10 @@ module.exports = function() {
 		}
 	}
 	const $map = (() => {
-		const d = new OBJ();
-		d.default = Foobar;
-		d.foobar = Foobar;
-		return d;
+		const o = new OBJ();
+		o.default = Foobar;
+		o.foobar = Foobar;
+		return o;
 	})();
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

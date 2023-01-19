@@ -14,9 +14,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let Math = (() => {
-		const d = new OBJ();
-		d.PI = 3.14;
-		return d;
+		const o = new OBJ();
+		o.PI = 3.14;
+		return o;
 	})();
 	__ks_Number.__ks_func_zeroPad_0.call(Math.PI);
 };

@@ -63,12 +63,12 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d.name = Space.SRGB;
-		d["alias"] = [Space.RGB];
-		d["formatters"] = (() => {
-			const d = new OBJ();
-			d.hex = Helper.function((that) => {
+		const o = new OBJ();
+		o.name = Space.SRGB;
+		o["alias"] = [Space.RGB];
+		o["formatters"] = (() => {
+			const o = new OBJ();
+			o.hex = Helper.function((that) => {
 				return $hex(that);
 			}, (fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
@@ -79,7 +79,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			d.srgb = Helper.function((that) => {
+			o.srgb = Helper.function((that) => {
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
 				}
@@ -95,31 +95,31 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			return d;
+			return o;
 		})();
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["red"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_red";
-				return d;
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["red"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_red";
+				return o;
 			})();
-			d["green"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_green";
-				return d;
+			o["green"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_green";
+				return o;
 			})();
-			d["blue"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_blue";
-				return d;
+			o["blue"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_blue";
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.__ks_func_getField_0("red");

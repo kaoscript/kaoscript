@@ -5,8 +5,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.foobar = Helper.function(function(x) {
+			const o = new OBJ();
+			o.foobar = Helper.function(function(x) {
 				return x;
 			}, (fn, ...args) => {
 				const t0 = Type.isString;
@@ -17,7 +17,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			return d;
+			return o;
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {

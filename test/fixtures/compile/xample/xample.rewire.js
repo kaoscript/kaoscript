@@ -9,10 +9,10 @@ module.exports = function() {
 			item = __ks_2[__ks_1];
 			item = item.split("=");
 			files.push((() => {
-				const d = new OBJ();
-				d.input = item[0];
-				d.output = item[1];
-				return d;
+				const o = new OBJ();
+				o.input = item[0];
+				o.output = item[1];
+				return o;
 			})());
 		}
 		return files;

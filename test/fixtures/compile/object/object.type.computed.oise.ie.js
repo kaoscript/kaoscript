@@ -25,9 +25,9 @@ module.exports = function() {
 	set.__ks_0 = function(name, value) {
 		const clone = Foobar.__ks_new_0();
 		clone.values = (() => {
-			const d = new OBJ();
-			d[name] = value;
-			return d;
+			const o = new OBJ();
+			o[name] = value;
+			return o;
 		})();
 		return clone;
 	};

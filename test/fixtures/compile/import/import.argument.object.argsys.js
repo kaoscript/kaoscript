@@ -55,12 +55,12 @@ module.exports = function(__ks_String) {
 		throw Helper.badArgs();
 	};
 	const foobar = (() => {
-		const d = new OBJ();
-		d.corge = corge;
-		d.grault = grault;
-		d.garply = garply;
-		d.waldo = waldo;
-		return d;
+		const o = new OBJ();
+		o.corge = corge;
+		o.grault = grault;
+		o.garply = garply;
+		o.waldo = waldo;
+		return o;
 	})();
 	return {
 		foobar

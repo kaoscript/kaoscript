@@ -1,9 +1,9 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const map = (() => {
-		const d = new OBJ();
-		d.pi = 3.14;
-		return d;
+		const o = new OBJ();
+		o.pi = 3.14;
+		return o;
 	})();
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

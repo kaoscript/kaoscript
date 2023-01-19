@@ -58,32 +58,32 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d["name"] = "srgb";
-		d["alias"] = ["rgb"];
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["red"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_red";
-				return d;
+		const o = new OBJ();
+		o["name"] = "srgb";
+		o["alias"] = ["rgb"];
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["red"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_red";
+				return o;
 			})();
-			d["green"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_green";
-				return d;
+			o["green"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_green";
+				return o;
 			})();
-			d["blue"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				d["field"] = "_blue";
-				return d;
+			o["blue"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				o["field"] = "_blue";
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.__ks_func_getField_0("red");

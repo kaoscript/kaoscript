@@ -1,9 +1,9 @@
 const {OBJ, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	let foo = (() => {
-		const d = new OBJ();
-		d.message = "hello";
-		return d;
+		const o = new OBJ();
+		o.message = "hello";
+		return o;
 	})();
 	let message;
 	if(Operator.gt((message = foo.message).length, 0)) {

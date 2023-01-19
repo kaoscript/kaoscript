@@ -5,10 +5,10 @@ module.exports = function() {
 	};
 	reset.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.x = 0;
-			d.y = 0;
-			return d;
+			const o = new OBJ();
+			o.x = 0;
+			o.y = 0;
+			return o;
 		})();
 	};
 	reset.__ks_rt = function(that, args) {
@@ -18,10 +18,10 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let point = (() => {
-		const d = new OBJ();
-		d.x = 1;
-		d.y = 1;
-		return d;
+		const o = new OBJ();
+		o.x = 1;
+		o.y = 1;
+		return o;
 	})();
 	point = reset.__ks_0();
 };

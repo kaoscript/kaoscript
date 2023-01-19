@@ -12,11 +12,11 @@ module.exports = function() {
 		}
 		__ks_init() {
 			this._likes = (() => {
-				const d = new OBJ();
-				d.leto = "spice";
-				d.paul = "chani";
-				d.duncan = "murbella";
-				return d;
+				const o = new OBJ();
+				o.leto = "spice";
+				o.paul = "chani";
+				o.duncan = "murbella";
+				return o;
 			})();
 		}
 		__ks_cons_rt(that, args) {

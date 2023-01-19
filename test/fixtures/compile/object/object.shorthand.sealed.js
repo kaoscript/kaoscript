@@ -5,9 +5,9 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(__ks_sealed_1) {
 		return (() => {
-			const d = new OBJ();
-			d.sealed = __ks_sealed_1;
-			return d;
+			const o = new OBJ();
+			o.sealed = __ks_sealed_1;
+			return o;
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {

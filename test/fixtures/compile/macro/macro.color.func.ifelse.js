@@ -19,11 +19,11 @@ module.exports = function() {
 		}
 	}
 	Color.addSpace((() => {
-		const d = new OBJ();
-		d["name"] = "FBQ";
-		d["formatters"] = (() => {
-			const d = new OBJ();
-			d.srgb = Helper.function(function(that) {
+		const o = new OBJ();
+		o["name"] = "FBQ";
+		o["formatters"] = (() => {
+			const o = new OBJ();
+			o.srgb = Helper.function(function(that) {
 				if(that._foo === true) {
 				}
 				else if(that._bar === true) {
@@ -38,9 +38,9 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	return {
 		Color

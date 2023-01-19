@@ -18,10 +18,10 @@ module.exports = function(__ks_JSON) {
 		throw Helper.badArgs();
 	};
 	let coord = (() => {
-		const d = new OBJ();
-		d.x = 1;
-		d.y = 1;
-		return d;
+		const o = new OBJ();
+		o.x = 1;
+		o.y = 1;
+		return o;
 	})();
 	console.log(JSON.stringify(coord));
 };

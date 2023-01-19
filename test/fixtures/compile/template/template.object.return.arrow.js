@@ -6,9 +6,9 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d[x] = 42;
-			return d;
+			const o = new OBJ();
+			o[x] = 42;
+			return o;
 		})();
 	};
 	foo.__ks_rt = function(that, args) {

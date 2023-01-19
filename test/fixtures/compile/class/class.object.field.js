@@ -22,9 +22,9 @@ module.exports = function() {
 		}
 		__ks_func_data_0(values) {
 			values.push((() => {
-				const d = new OBJ();
-				d.value = this._value.name();
-				return d;
+				const o = new OBJ();
+				o.value = this._value.name();
+				return o;
 			})());
 		}
 		__ks_func_data_rt(that, proto, args) {

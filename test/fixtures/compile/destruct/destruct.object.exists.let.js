@@ -1,10 +1,10 @@
 const {OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	const foo = (() => {
-		const d = new OBJ();
-		d.bar = "hello";
-		d.baz = 3;
-		return d;
+		const o = new OBJ();
+		o.bar = "hello";
+		o.baz = 3;
+		return o;
 	})();
 	let bar = "foo";
 	let baz;

@@ -15,10 +15,10 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	foobar.__ks_0((() => {
-		const d = new OBJ();
-		d.x = 0;
-		d.y = 0;
-		d.z = new OBJ();
-		return d;
+		const o = new OBJ();
+		o.x = 0;
+		o.y = 0;
+		o.z = new OBJ();
+		return o;
 	})());
 };

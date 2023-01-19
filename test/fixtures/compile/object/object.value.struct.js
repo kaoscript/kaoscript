@@ -38,9 +38,9 @@ module.exports = function() {
 		}
 		__ks_func_position_0() {
 			return (() => {
-				const d = new OBJ();
-				d.start = Position.__ks_new(this._x, this._y);
-				return d;
+				const o = new OBJ();
+				o.start = Position.__ks_new(this._x, this._y);
+				return o;
 			})();
 		}
 		__ks_func_position_rt(that, proto, args) {
@@ -54,10 +54,10 @@ module.exports = function() {
 		}
 		__ks_func_position_dict_0() {
 			return (() => {
-				const d = new OBJ();
-				d.x = this._x;
-				d.y = this._y;
-				return d;
+				const o = new OBJ();
+				o.x = this._x;
+				o.y = this._y;
+				return o;
 			})();
 		}
 		__ks_func_position_dict_rt(that, proto, args) {

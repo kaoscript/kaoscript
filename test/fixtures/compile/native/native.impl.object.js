@@ -25,17 +25,17 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	console.log(__ks_Object.__ks_func_map_0.call((() => {
-		const d = new OBJ();
-		d.leto = "spice";
-		d.paul = "chani";
-		d.duncan = "murbella";
-		return d;
+		const o = new OBJ();
+		o.leto = "spice";
+		o.paul = "chani";
+		o.duncan = "murbella";
+		return o;
 	})(), Helper.function((item, name) => {
 		return (() => {
-			const d = new OBJ();
-			d.name = name;
-			d.item = item;
-			return d;
+			const o = new OBJ();
+			o.name = name;
+			o.item = item;
+			return o;
 		})();
 	}, (fn, ...args) => {
 		const t0 = Type.isValue;

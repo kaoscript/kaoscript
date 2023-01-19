@@ -6,9 +6,9 @@ module.exports = function() {
 		Blue: "blue"
 	});
 	const aliases = (() => {
-		const d = new OBJ();
-		d.r = Color.Red.value;
-		return d;
+		const o = new OBJ();
+		o.r = Color.Red.value;
+		return o;
 	})();
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

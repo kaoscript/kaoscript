@@ -23,15 +23,15 @@ module.exports = function() {
 		__ks_func_data_0() {
 			this._z = 1;
 			return (() => {
-				const d = new OBJ();
-				x: this._x;
-				y: this._y;
-				d.power = (() => {
-					const d = new OBJ();
-					z: this._z;
-					return d;
+				const o = new OBJ();
+				o.x = this._x;
+				o.y = this._y;
+				o.power = (() => {
+					const o = new OBJ();
+					o.z = this._z;
+					return o;
 				})();
-				return d;
+				return o;
 			})();
 		}
 		__ks_func_data_rt(that, proto, args) {

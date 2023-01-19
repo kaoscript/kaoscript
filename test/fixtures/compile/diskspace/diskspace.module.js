@@ -21,13 +21,13 @@ module.exports = function() {
 					let __ks_4;
 					if(Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false) {
 						disks.push((() => {
-							const d = new OBJ();
-							d.device = matches[1].trim();
-							d.mount = matches[9];
-							d.total = __ks_String.__ks_func_toInt_0.call(matches[2]) * 1024;
-							d.used = __ks_String.__ks_func_toInt_0.call(matches[3]) * 1024;
-							d.available = __ks_String.__ks_func_toInt_0.call(matches[4]) * 1024;
-							return d;
+							const o = new OBJ();
+							o.device = matches[1].trim();
+							o.mount = matches[9];
+							o.total = __ks_String.__ks_func_toInt_0.call(matches[2]) * 1024;
+							o.used = __ks_String.__ks_func_toInt_0.call(matches[3]) * 1024;
+							o.available = __ks_String.__ks_func_toInt_0.call(matches[4]) * 1024;
+							return o;
 						})());
 					}
 				}

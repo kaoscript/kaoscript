@@ -5,11 +5,11 @@ module.exports = function() {
 	};
 	likes.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.leto = "spice";
-			d.paul = "chani";
-			d.duncan = "murbella";
-			return d;
+			const o = new OBJ();
+			o.leto = "spice";
+			o.paul = "chani";
+			o.duncan = "murbella";
+			return o;
 		})();
 	};
 	likes.__ks_rt = function(that, args) {

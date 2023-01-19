@@ -1,10 +1,15 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(names, name, value) {
-		const result = Helper.newObject(-1, names, 1, name, value);
+		const result = (() => {
+			const o = new OBJ();
+			Helper.concatObject(o, names);
+			o[name] = value;
+			return o;
+		})();
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isObject(value, value => Type.isArray(value, Type.isString));

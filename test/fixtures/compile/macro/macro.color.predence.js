@@ -32,11 +32,11 @@ module.exports = function() {
 		}
 	}
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d["name"] = "FBQ";
-		d["formatters"] = (() => {
-			const d = new OBJ();
-			d.foo = Helper.function(function(t1, t2, t3) {
+		const o = new OBJ();
+		o["name"] = "FBQ";
+		o["formatters"] = (() => {
+			const o = new OBJ();
+			o.foo = Helper.function(function(t1, t2, t3) {
 				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 			}, (fn, ...args) => {
 				const t0 = Type.isNumber;
@@ -47,7 +47,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			d.bar = Helper.function(function(h, i) {
+			o.bar = Helper.function(function(h, i) {
 				return h + ((1 / 3) * -(i - 1));
 			}, (fn, ...args) => {
 				const t0 = Type.isNumber;
@@ -58,9 +58,9 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	return {
 		Color

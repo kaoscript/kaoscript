@@ -5,10 +5,10 @@ module.exports = function() {
 	};
 	min.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.gender = "female";
-			d.age = 24;
-			return d;
+			const o = new OBJ();
+			o.gender = "female";
+			o.age = 24;
+			return o;
 		})();
 	};
 	min.__ks_rt = function(that, args) {

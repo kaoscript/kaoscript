@@ -4,10 +4,10 @@ module.exports = function() {
 	let y = -1;
 	let z = 1;
 	const foo = (() => {
-		const d = new OBJ();
-		d.x = x;
-		d.y = y;
-		d.z = z;
-		return d;
+		const o = new OBJ();
+		o.x = x;
+		o.y = y;
+		o.z = z;
+		return o;
 	})();
 };

@@ -4,9 +4,8 @@ class ObjectExpression extends Expression {
 		@properties					= []
 		@reusable: Boolean			= false
 		@reuseName: String?			= null
-		@spread: Boolean			= false
 		@type: Type
-		@varname: String			= 'd'
+		@varname: String			= 'o'
 	}
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope, ScopeType::Hollow)
@@ -17,44 +16,96 @@ class ObjectExpression extends Expression {
 		for var data in @data.properties {
 			var late property
 
-			if data.kind == NodeKind::UnaryExpression {
-				property = new ObjectSpreadMember(data, this)
-				property.analyse()
+			match data.kind {
+				NodeKind::IfExpression {
+					property = new ObjectIfMember(data, this)
+					property.analyse()
 
-				@spread = true
+					if var reference ?= property.reference() {
+						if names[reference] {
+							SyntaxException.throwDuplicateKey(property)
+						}
 
-				@module().flag('Helper')
-			}
-			else if data.name.kind == NodeKind::Identifier || data.name.kind == NodeKind::Literal {
-				property = new ObjectLiteralMember(data, this)
-				property.analyse()
-
-				if names[property.reference()] {
-					SyntaxException.throwDuplicateKey(property)
+						names[reference] = true
+					}
 				}
+				NodeKind::ObjectMember {
+					match data.name.kind {
+						NodeKind::Identifier, NodeKind::Literal {
+							property = new ObjectLiteralMember(data, this)
+							property.analyse()
 
-				names[property.reference()] = true
-			}
-			else if data.name.kind == NodeKind::ThisExpression {
-				property = new ObjectThisMember(data, this)
-				property.analyse()
+							if names[property.reference()] {
+								SyntaxException.throwDuplicateKey(property)
+							}
 
-				if names[property.reference()] {
-					SyntaxException.throwDuplicateKey(property)
+							names[property.reference()] = true
+						}
+						NodeKind::ThisExpression {
+							property = new ObjectThisMember(data, this)
+							property.analyse()
+
+							if names[property.reference()] {
+								SyntaxException.throwDuplicateKey(property)
+							}
+
+							names[property.reference()] = true
+						}
+						else {
+							property = new ObjectComputedMember(data, this)
+							property.analyse()
+						}
+					}
 				}
+				NodeKind::ShorthandProperty {
+					match data.name.kind {
+						NodeKind::Identifier {
+							property = new ObjectLiteralMember(data, this)
+							property.analyse()
 
-				names[property.reference()] = true
-			}
-			else {
-				property = new ObjectComputedMember(data, this)
-				property.analyse()
+							if names[property.reference()] {
+								SyntaxException.throwDuplicateKey(property)
+							}
+
+							names[property.reference()] = true
+						}
+						NodeKind::ThisExpression {
+							property = new ObjectThisMember(data, this)
+							property.analyse()
+
+							if names[property.reference()] {
+								SyntaxException.throwDuplicateKey(property)
+							}
+
+							names[property.reference()] = true
+						}
+						else {
+							NotSupportedException.throw(this)
+						}
+					}
+				}
+				NodeKind::UnaryExpression {
+					property = new ObjectSpreadMember(data, this)
+					property.analyse()
+				}
+				NodeKind::UnlessExpression {
+					property = new ObjectUnlessMember(data, this)
+					property.analyse()
+
+					if var reference ?= property.reference() {
+						if names[reference] {
+							SyntaxException.throwDuplicateKey(property)
+						}
+
+						names[reference] = true
+					}
+				}
+				else {
+					NotSupportedException.throw(this)
+				}
 			}
 
 			@properties.push(property)
-		}
-
-		if @options.format.functions == 'es5' && !@spread && @scope.hasVariable('this') {
-			@scope.rename('this', 'that')
 		}
 
 		@empty = @properties.length == 0
@@ -144,7 +195,6 @@ class ObjectExpression extends Expression {
 		}
 	} # }}}
 	isNotEmpty() => @properties.length > 0
-	isSpread() => @spread
 	isUsingVariable(name) { # {{{
 		for var property in @properties {
 			if property.isUsingVariable(name) {
@@ -178,101 +228,10 @@ class ObjectExpression extends Expression {
 		else if @empty {
 			fragments.code('new ', $runtime.object(this), '()')
 		}
-		else if @spread {
-			fragments.code($runtime.helper(this), '.newObject(')
-
-			var mut first = true
-			var mut spread = false
-			var mut arguments = []
-
-			for var property, index in @properties {
-				if property is ObjectSpreadMember {
-					if !spread {
-						if arguments.length > 0 {
-							if first {
-								first = false
-							}
-							else {
-								fragments.code($comma)
-							}
-
-							fragments.code(`\(arguments.length / 2)`)
-
-							for var i from 0 to~ arguments.length step 2 {
-								if arguments[i] is String {
-									fragments.code(`, "\(arguments[i])", `)
-								}
-								else {
-									fragments.code($comma).compile(arguments[i]).code($comma)
-								}
-
-								fragments.compile(arguments[i + 1])
-							}
-						}
-
-						spread = true
-						arguments.clear()
-					}
-
-					arguments.push(property)
-				}
-				else {
-					if spread {
-						if arguments.length > 0 {
-							if first {
-								first = false
-							}
-							else {
-								fragments.code($comma)
-							}
-
-							fragments.code(`-\(arguments.length)`)
-
-							for var argument in arguments {
-								fragments.code($comma).compile(argument)
-							}
-						}
-
-						spread = false
-						arguments.clear()
-					}
-
-					arguments.push(property.name(), property.value())
-				}
-			}
-
-			if arguments.length > 0 {
-				fragments.code($comma) unless first
-
-				if spread {
-					fragments.code(`-\(arguments.length)`)
-
-					for var argument in arguments {
-						fragments.code($comma).compile(argument)
-					}
-				}
-				else {
-					fragments.code(`\(arguments.length / 2)`)
-
-					for var i from 0 to~ arguments.length step 2 {
-						if arguments[i] is String {
-							fragments.code(`, "\(arguments[i])", `)
-						}
-						else {
-							fragments.code($comma).compile(arguments[i]).code($comma)
-						}
-
-						fragments.compile(arguments[i + 1])
-					}
-				}
-			}
-
-			fragments.code(')')
-		}
 		else {
-			if @isUsingVariable('d') {
-				if !@isUsingVariable('o') {
-					@varname = 'o'
+			if @isUsingVariable('o') {
+				if !@isUsingVariable('d') {
+					@varname = 'd'
 				}
 				else if !@isUsingVariable('_') {
 					@varname = '_'
@@ -303,7 +262,7 @@ class ObjectExpression extends Expression {
 			block.line($const(this), @varname, ' = new ', $runtime.object(this), '()')
 
 			for var property in @properties {
-				block.newLine().compile(property).done()
+				block.compile(property)
 			}
 
 			block.line(`return \(@varname)`).done()
@@ -345,6 +304,154 @@ class ObjectExpression extends Expression {
 		}
 	} # }}}
 	varname() => @varname
+}
+
+class ObjectComputedMember extends Expression {
+	private {
+		@name
+		@value
+	}
+	analyse() { # {{{
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
+
+		if @data.name.kind == NodeKind::ComputedPropertyName {
+			@name = $compile.expression(@data.name.expression, this)
+		}
+		else {
+			@name = new TemplateExpression(@data.name, this)
+			@name.computing(true)
+		}
+
+		@name.analyse()
+
+		@value = $compile.expression(@data.value, this)
+		@value.analyse()
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@name.prepare()
+		@value.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@name.translate()
+		@value.translate()
+	} # }}}
+	acquireReusable(acquire) { # {{{
+		@name.acquireReusable(acquire)
+		@value.acquireReusable(acquire)
+	} # }}}
+	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
+	override listNonLocalVariables(scope, variables) { # {{{
+		@name.listNonLocalVariables(scope, variables)
+		@value.listNonLocalVariables(scope, variables)
+
+		return variables
+	} # }}}
+	name() => @name
+	releaseReusable() { # {{{
+		@name.releaseReusable()
+		@value.releaseReusable()
+	} # }}}
+	toComputedFragments(fragments, name) { # {{{
+		fragments
+			.code(name)
+			.code('[')
+			.compile(@name)
+			.code(']')
+			.code($equals)
+			.compile(@value)
+			.code($comma)
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		fragments
+			.newLine()
+			.code(@parent.varname(), '[')
+			.compile(@name)
+			.code(']', $equals)
+			.compile(@value)
+			.done()
+	} # }}}
+	value() => @value
+}
+
+class ObjectIfMember extends Expression {
+	private late {
+		@condition
+		@property
+	}
+	analyse() { # {{{
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+
+		match @data.whenTrue.kind {
+			NodeKind::ObjectMember {
+				match @data.whenTrue.name.kind {
+					NodeKind::Identifier, NodeKind::Literal {
+						@property = new ObjectLiteralMember(@data.whenTrue, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.whenTrue, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						@property = new ObjectComputedMember(@data.whenTrue, this)
+						@property.analyse()
+					}
+				}
+			}
+			NodeKind::ShorthandProperty {
+				match @data.whenTrue.name.kind {
+					NodeKind::Identifier {
+						@property = new ObjectLiteralMember(@data.whenTrue, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.whenTrue, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						NotSupportedException.throw(this)
+					}
+				}
+			}
+			NodeKind::UnaryExpression {
+				@property = new ObjectSpreadMember(@data.whenTrue, this)
+				@property.analyse()
+			}
+			else {
+				NotSupportedException.throw(this)
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+
+		@property.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@condition.translate()
+		@property.translate()
+	} # }}}
+	name() => @property.name()
+	toFragments(fragments, mode) { # {{{
+		var ctrl = fragments.newControl()
+
+		ctrl.code('if(')
+
+		ctrl.compileCondition(@condition)
+
+		ctrl.code(')').step().compile(@property).done()
+	} # }}}
+	value() => @property.value()
+	varname() => @parent.varname()
 }
 
 class ObjectLiteralMember extends Expression {
@@ -407,134 +514,29 @@ class ObjectLiteralMember extends Expression {
 	name() => @name.value()
 	releaseReusable() => @value.releaseReusable()
 	toFragments(fragments, mode) { # {{{
-		if @parent.isSpread() {
-			fragments.compile(@name)
+		var line = fragments.newLine()
 
-			if !@shorthand || @value.isRenamed() {
-				if !@function {
-					fragments.code(': ')
-				}
-			}
-		}
-		else if @computed {
-			fragments.code(@parent.varname(), '[').compile(@name).code(']', $equals)
+		if @computed {
+			line.code(@parent.varname(), '[').compile(@name).code(']', $equals)
 		}
 		else {
-			fragments.code(@parent.varname(), '.').compile(@name).code($equals)
+			line.code(@parent.varname(), '.').compile(@name).code($equals)
 		}
 
 		if @enumCasting {
-			@value.toCastingFragments(fragments, mode)
+			@value.toCastingFragments(line, mode)
 		}
 		else {
-			fragments.compile(@value)
+			line.compile(@value)
 		}
+
+		line.done()
 	} # }}}
 	type() => @type
 	validateType(type: Type) { # {{{
 		if @type.isEnum() && !type.isEnum() {
 			@enumCasting = true
 		}
-	} # }}}
-	value() => @value
-}
-
-class ObjectComputedMember extends Expression {
-	private {
-		@name
-		@value
-	}
-	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
-
-		if @data.name.kind == NodeKind::ComputedPropertyName {
-			@name = $compile.expression(@data.name.expression, this)
-		}
-		else {
-			@name = new TemplateExpression(@data.name, this)
-			@name.computing(true)
-		}
-
-		@name.analyse()
-
-		@value = $compile.expression(@data.value, this)
-		@value.analyse()
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@name.prepare()
-		@value.prepare(target, targetMode)
-	} # }}}
-	translate() { # {{{
-		@name.translate()
-		@value.translate()
-	} # }}}
-	acquireReusable(acquire) { # {{{
-		@name.acquireReusable(acquire)
-		@value.acquireReusable(acquire)
-	} # }}}
-	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { # {{{
-		@name.listNonLocalVariables(scope, variables)
-		@value.listNonLocalVariables(scope, variables)
-
-		return variables
-	} # }}}
-	name() => @name
-	releaseReusable() { # {{{
-		@name.releaseReusable()
-		@value.releaseReusable()
-	} # }}}
-	toComputedFragments(fragments, name) { # {{{
-		fragments
-			.code(name)
-			.code('[')
-			.compile(@name)
-			.code(']')
-			.code($equals)
-			.compile(@value)
-			.code($comma)
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		fragments.code(@parent.varname(), '[').compile(@name).code(']', $equals).compile(@value)
-	} # }}}
-	value() => @value
-}
-
-class ObjectThisMember extends Expression {
-	private {
-		@name
-		@value
-	}
-	analyse() { # {{{
-		@name = new Literal(@data.name.name, this, @scope:Scope, @data.name.name.name)
-
-		@value = $compile.expression(@data.name, this)
-		@value.analyse()
-
-		this.reference(`.\(@name.value())`)
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@value.prepare(target, targetMode)
-	} # }}}
-	translate() { # {{{
-		@value.translate()
-	} # }}}
-	isUsingVariable(name) => @value.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
-	name() => @name.value()
-	toComputedFragments(fragments, name) { # {{{
-		fragments
-			.code(name)
-			.code(@reference)
-			.code($equals)
-			.compile(@value)
-			.code($comma)
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		fragments
-			.compile(@name)
-			.code(': ')
-			.compile(@value)
 	} # }}}
 	value() => @value
 }
@@ -570,8 +572,136 @@ class ObjectSpreadMember extends Expression {
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@value)
+		fragments
+			.newLine()
+			.code($runtime.helper(this), '.concatObject(', @parent.varname(), $comma)
+			.compile(@value)
+			.code(')')
+			.done()
 	} # }}}
 	type(): @type
 	value() => @value
+}
+
+class ObjectThisMember extends Expression {
+	private {
+		@name
+		@value
+	}
+	analyse() { # {{{
+		@name = new Literal(@data.name.name, this, @scope:Scope, @data.name.name.name)
+
+		@value = $compile.expression(@data.name, this)
+		@value.analyse()
+
+		this.reference(`.\(@name.value())`)
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@value.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@value.translate()
+	} # }}}
+	isUsingVariable(name) => @value.isUsingVariable(name)
+	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
+	name() => @name.value()
+	toComputedFragments(fragments, name) { # {{{
+		fragments
+			.code(name)
+			.code(@reference)
+			.code($equals)
+			.compile(@value)
+			.code($comma)
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		fragments
+			.newLine()
+			.code(@parent.varname(), '.')
+			.compile(@name)
+			.code($equals)
+			.compile(@value)
+			.done()
+	} # }}}
+	value() => @value
+}
+
+class ObjectUnlessMember extends Expression {
+	private late {
+		@condition
+		@property
+	}
+	analyse() { # {{{
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+
+		match @data.whenFalse.kind {
+			NodeKind::ObjectMember {
+				match @data.whenFalse.name.kind {
+					NodeKind::Identifier, NodeKind::Literal {
+						@property = new ObjectLiteralMember(@data.whenFalse, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.whenFalse, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						@property = new ObjectComputedMember(@data.whenFalse, this)
+						@property.analyse()
+					}
+				}
+			}
+			NodeKind::ShorthandProperty {
+				match @data.whenFalse.name.kind {
+					NodeKind::Identifier {
+						@property = new ObjectLiteralMember(@data.whenFalse, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.whenFalse, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						NotSupportedException.throw(this)
+					}
+				}
+			}
+			NodeKind::UnaryExpression {
+				@property = new ObjectSpreadMember(@data.whenFalse, this)
+				@property.analyse()
+			}
+			else {
+				NotSupportedException.throw(this)
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+
+		@property.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@condition.translate()
+		@property.translate()
+	} # }}}
+	name() => @property.name()
+	toFragments(fragments, mode) { # {{{
+		var ctrl = fragments.newControl()
+
+		ctrl.code('if(!')
+
+		ctrl.wrapCondition(@condition)
+
+		ctrl.code(')').step().compile(@property).done()
+	} # }}}
+	value() => @property.value()
+	varname() => @parent.varname()
 }

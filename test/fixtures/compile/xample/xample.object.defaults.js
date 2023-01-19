@@ -36,9 +36,9 @@ module.exports = function() {
 	};
 	init.__ks_0 = function(data) {
 		return __ks_Object.__ks_sttc_defaults_0([data, (() => {
-			const d = new OBJ();
-			d.foo = "bar";
-			return d;
+			const o = new OBJ();
+			o.foo = "bar";
+			return o;
 		})()]);
 	};
 	init.__ks_rt = function(that, args) {

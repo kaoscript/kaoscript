@@ -77,7 +77,7 @@ class IfExpression extends Expression {
 				.wrapCondition(@condition)
 				.code(' ? ')
 				.compile(@whenTrue)
-				.code(' : null')
+				.code(' : ', @whenTrue.getDefaultValue())
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{

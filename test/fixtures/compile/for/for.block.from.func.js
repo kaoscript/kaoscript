@@ -1,8 +1,8 @@
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	let foo = (() => {
-		const d = new OBJ();
-		d.foo = Helper.function(function() {
+		const o = new OBJ();
+		o.foo = Helper.function(function() {
 			let i = 0;
 		}, (fn, ...args) => {
 			if(args.length === 0) {
@@ -10,7 +10,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		return d;
+		return o;
 	})();
 	function bar() {
 		return bar.__ks_rt(this, arguments);

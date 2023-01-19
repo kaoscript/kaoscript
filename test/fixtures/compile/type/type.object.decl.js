@@ -5,18 +5,18 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(x, y, z) {
 		const xyz = (() => {
-			const d = new OBJ();
-			d.x = x;
-			d.y = y;
-			d.z = z;
-			return d;
+			const o = new OBJ();
+			o.x = x;
+			o.y = y;
+			o.z = z;
+			return o;
 		})();
 		return (() => {
-			const d = new OBJ();
-			d.x = xyz.x;
-			d.y = xyz.y + 42;
-			d.z = !xyz.z;
-			return d;
+			const o = new OBJ();
+			o.x = xyz.x;
+			o.y = xyz.y + 42;
+			o.z = !xyz.z;
+			return o;
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {

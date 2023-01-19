@@ -14,9 +14,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const foobar = (() => {
-		const d = new OBJ();
-		d.qux = 42;
-		return d;
+		const o = new OBJ();
+		o.qux = 42;
+		return o;
 	})();
 	return {
 		foobar

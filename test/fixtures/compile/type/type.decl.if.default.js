@@ -29,9 +29,9 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.z = 42;
-			return d;
+			const o = new OBJ();
+			o.z = 42;
+			return o;
 		})();
 	};
 	bar.__ks_rt = function(that, args) {

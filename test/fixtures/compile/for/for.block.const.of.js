@@ -3,11 +3,11 @@ module.exports = function() {
 	let key = "you";
 	let value = 42;
 	let likes = (() => {
-		const d = new OBJ();
-		d.leto = "spice";
-		d.paul = "chani";
-		d.duncan = "murbella";
-		return d;
+		const o = new OBJ();
+		o.leto = "spice";
+		o.paul = "chani";
+		o.duncan = "murbella";
+		return o;
 	})();
 	for(const key in likes) {
 		const value = likes[key];

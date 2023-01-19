@@ -10,6 +10,7 @@ abstract class Expression extends AbstractNode {
 		}
 	} # }}}
 	getDeclaredType() => @type()
+	getDefaultValue(): String => 'null'
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions() => true

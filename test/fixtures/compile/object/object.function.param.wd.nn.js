@@ -6,9 +6,9 @@ module.exports = function() {
 	foobar.__ks_0 = function(x) {
 		if(x === void 0 || x === null) {
 			x = (() => {
-				const d = new OBJ();
-				d.y = 42;
-				return d;
+				const o = new OBJ();
+				o.y = 42;
+				return o;
 			})();
 		}
 	};

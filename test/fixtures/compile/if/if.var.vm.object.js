@@ -5,10 +5,10 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function() {
 		return (() => {
-			const d = new OBJ();
-			d.x = 1;
-			d.y = 2;
-			return d;
+			const o = new OBJ();
+			o.x = 1;
+			o.y = 2;
+			return o;
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {

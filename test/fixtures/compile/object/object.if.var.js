@@ -7,10 +7,10 @@ module.exports = function() {
 		let x;
 		if(a === true) {
 			x = (() => {
-				const d = new OBJ();
-				d.b = b;
-				d.c = c;
-				return d;
+				const o = new OBJ();
+				o.b = b;
+				o.c = c;
+				return o;
 			})();
 		}
 	};

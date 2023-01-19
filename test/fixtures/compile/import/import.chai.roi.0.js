@@ -50,9 +50,9 @@ module.exports = function() {
 				flag(this, "message", msg);
 			}
 			this.assert(deepEql(obj, this._obj, (() => {
-				const d = new OBJ();
-				d.comparator = comparator;
-				return d;
+				const o = new OBJ();
+				o.comparator = comparator;
+				return o;
 			})()), "expected #{this} to deeply equal #{exp}", "expected #{this} to not deeply equal #{exp}", obj, this._obj, true);
 		};
 		assertEql.__ks_rt = function(that, args) {

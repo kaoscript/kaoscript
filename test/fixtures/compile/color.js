@@ -12,156 +12,156 @@ module.exports = function() {
 	const $components = new OBJ();
 	const $formatters = new OBJ();
 	const $names = (() => {
-		const d = new OBJ();
-		d["aliceblue"] = "f0f8ff";
-		d["antiquewhite"] = "faebd7";
-		d["aqua"] = "0ff";
-		d["aquamarine"] = "7fffd4";
-		d["azure"] = "f0ffff";
-		d["beige"] = "f5f5dc";
-		d["bisque"] = "ffe4c4";
-		d["black"] = "000";
-		d["blanchedalmond"] = "ffebcd";
-		d["blue"] = "00f";
-		d["blueviolet"] = "8a2be2";
-		d["brown"] = "a52a2a";
-		d["burlywood"] = "deb887";
-		d["burntsienna"] = "ea7e5d";
-		d["cadetblue"] = "5f9ea0";
-		d["chartreuse"] = "7fff00";
-		d["chocolate"] = "d2691e";
-		d["coral"] = "ff7f50";
-		d["cornflowerblue"] = "6495ed";
-		d["cornsilk"] = "fff8dc";
-		d["crimson"] = "dc143c";
-		d["cyan"] = "0ff";
-		d["darkblue"] = "00008b";
-		d["darkcyan"] = "008b8b";
-		d["darkgoldenrod"] = "b8860b";
-		d["darkgray"] = "a9a9a9";
-		d["darkgreen"] = "006400";
-		d["darkgrey"] = "a9a9a9";
-		d["darkkhaki"] = "bdb76b";
-		d["darkmagenta"] = "8b008b";
-		d["darkolivegreen"] = "556b2f";
-		d["darkorange"] = "ff8c00";
-		d["darkorchid"] = "9932cc";
-		d["darkred"] = "8b0000";
-		d["darksalmon"] = "e9967a";
-		d["darkseagreen"] = "8fbc8f";
-		d["darkslateblue"] = "483d8b";
-		d["darkslategray"] = "2f4f4f";
-		d["darkslategrey"] = "2f4f4f";
-		d["darkturquoise"] = "00ced1";
-		d["darkviolet"] = "9400d3";
-		d["deeppink"] = "ff1493";
-		d["deepskyblue"] = "00bfff";
-		d["dimgray"] = "696969";
-		d["dimgrey"] = "696969";
-		d["dodgerblue"] = "1e90ff";
-		d["firebrick"] = "b22222";
-		d["floralwhite"] = "fffaf0";
-		d["forestgreen"] = "228b22";
-		d["fuchsia"] = "f0f";
-		d["gainsboro"] = "dcdcdc";
-		d["ghostwhite"] = "f8f8ff";
-		d["gold"] = "ffd700";
-		d["goldenrod"] = "daa520";
-		d["gray"] = "808080";
-		d["green"] = "008000";
-		d["greenyellow"] = "adff2f";
-		d["grey"] = "808080";
-		d["honeydew"] = "f0fff0";
-		d["hotpink"] = "ff69b4";
-		d["indianred"] = "cd5c5c";
-		d["indigo"] = "4b0082";
-		d["ivory"] = "fffff0";
-		d["khaki"] = "f0e68c";
-		d["lavender"] = "e6e6fa";
-		d["lavenderblush"] = "fff0f5";
-		d["lawngreen"] = "7cfc00";
-		d["lemonchiffon"] = "fffacd";
-		d["lightblue"] = "add8e6";
-		d["lightcoral"] = "f08080";
-		d["lightcyan"] = "e0ffff";
-		d["lightgoldenrodyellow"] = "fafad2";
-		d["lightgray"] = "d3d3d3";
-		d["lightgreen"] = "90ee90";
-		d["lightgrey"] = "d3d3d3";
-		d["lightpink"] = "ffb6c1";
-		d["lightsalmon"] = "ffa07a";
-		d["lightseagreen"] = "20b2aa";
-		d["lightskyblue"] = "87cefa";
-		d["lightslategray"] = "789";
-		d["lightslategrey"] = "789";
-		d["lightsteelblue"] = "b0c4de";
-		d["lightyellow"] = "ffffe0";
-		d["lime"] = "0f0";
-		d["limegreen"] = "32cd32";
-		d["linen"] = "faf0e6";
-		d["magenta"] = "f0f";
-		d["maroon"] = "800000";
-		d["mediumaquamarine"] = "66cdaa";
-		d["mediumblue"] = "0000cd";
-		d["mediumorchid"] = "ba55d3";
-		d["mediumpurple"] = "9370db";
-		d["mediumseagreen"] = "3cb371";
-		d["mediumslateblue"] = "7b68ee";
-		d["mediumspringgreen"] = "00fa9a";
-		d["mediumturquoise"] = "48d1cc";
-		d["mediumvioletred"] = "c71585";
-		d["midnightblue"] = "191970";
-		d["mintcream"] = "f5fffa";
-		d["mistyrose"] = "ffe4e1";
-		d["moccasin"] = "ffe4b5";
-		d["navajowhite"] = "ffdead";
-		d["navy"] = "000080";
-		d["oldlace"] = "fdf5e6";
-		d["olive"] = "808000";
-		d["olivedrab"] = "6b8e23";
-		d["orange"] = "ffa500";
-		d["orangered"] = "ff4500";
-		d["orchid"] = "da70d6";
-		d["palegoldenrod"] = "eee8aa";
-		d["palegreen"] = "98fb98";
-		d["paleturquoise"] = "afeeee";
-		d["palevioletred"] = "db7093";
-		d["papayawhip"] = "ffefd5";
-		d["peachpuff"] = "ffdab9";
-		d["peru"] = "cd853f";
-		d["pink"] = "ffc0cb";
-		d["plum"] = "dda0dd";
-		d["powderblue"] = "b0e0e6";
-		d["purple"] = "800080";
-		d["red"] = "f00";
-		d["rosybrown"] = "bc8f8f";
-		d["royalblue"] = "4169e1";
-		d["saddlebrown"] = "8b4513";
-		d["salmon"] = "fa8072";
-		d["sandybrown"] = "f4a460";
-		d["seagreen"] = "2e8b57";
-		d["seashell"] = "fff5ee";
-		d["sienna"] = "a0522d";
-		d["silver"] = "c0c0c0";
-		d["skyblue"] = "87ceeb";
-		d["slateblue"] = "6a5acd";
-		d["slategray"] = "708090";
-		d["slategrey"] = "708090";
-		d["snow"] = "fffafa";
-		d["springgreen"] = "00ff7f";
-		d["steelblue"] = "4682b4";
-		d["tan"] = "d2b48c";
-		d["teal"] = "008080";
-		d["thistle"] = "d8bfd8";
-		d["tomato"] = "ff6347";
-		d["turquoise"] = "40e0d0";
-		d["violet"] = "ee82ee";
-		d["wheat"] = "f5deb3";
-		d["white"] = "fff";
-		d["whitesmoke"] = "f5f5f5";
-		d["yellow"] = "ff0";
-		d["yellowgreen"] = "9acd32";
-		return d;
+		const o = new OBJ();
+		o["aliceblue"] = "f0f8ff";
+		o["antiquewhite"] = "faebd7";
+		o["aqua"] = "0ff";
+		o["aquamarine"] = "7fffd4";
+		o["azure"] = "f0ffff";
+		o["beige"] = "f5f5dc";
+		o["bisque"] = "ffe4c4";
+		o["black"] = "000";
+		o["blanchedalmond"] = "ffebcd";
+		o["blue"] = "00f";
+		o["blueviolet"] = "8a2be2";
+		o["brown"] = "a52a2a";
+		o["burlywood"] = "deb887";
+		o["burntsienna"] = "ea7e5d";
+		o["cadetblue"] = "5f9ea0";
+		o["chartreuse"] = "7fff00";
+		o["chocolate"] = "d2691e";
+		o["coral"] = "ff7f50";
+		o["cornflowerblue"] = "6495ed";
+		o["cornsilk"] = "fff8dc";
+		o["crimson"] = "dc143c";
+		o["cyan"] = "0ff";
+		o["darkblue"] = "00008b";
+		o["darkcyan"] = "008b8b";
+		o["darkgoldenrod"] = "b8860b";
+		o["darkgray"] = "a9a9a9";
+		o["darkgreen"] = "006400";
+		o["darkgrey"] = "a9a9a9";
+		o["darkkhaki"] = "bdb76b";
+		o["darkmagenta"] = "8b008b";
+		o["darkolivegreen"] = "556b2f";
+		o["darkorange"] = "ff8c00";
+		o["darkorchid"] = "9932cc";
+		o["darkred"] = "8b0000";
+		o["darksalmon"] = "e9967a";
+		o["darkseagreen"] = "8fbc8f";
+		o["darkslateblue"] = "483d8b";
+		o["darkslategray"] = "2f4f4f";
+		o["darkslategrey"] = "2f4f4f";
+		o["darkturquoise"] = "00ced1";
+		o["darkviolet"] = "9400d3";
+		o["deeppink"] = "ff1493";
+		o["deepskyblue"] = "00bfff";
+		o["dimgray"] = "696969";
+		o["dimgrey"] = "696969";
+		o["dodgerblue"] = "1e90ff";
+		o["firebrick"] = "b22222";
+		o["floralwhite"] = "fffaf0";
+		o["forestgreen"] = "228b22";
+		o["fuchsia"] = "f0f";
+		o["gainsboro"] = "dcdcdc";
+		o["ghostwhite"] = "f8f8ff";
+		o["gold"] = "ffd700";
+		o["goldenrod"] = "daa520";
+		o["gray"] = "808080";
+		o["green"] = "008000";
+		o["greenyellow"] = "adff2f";
+		o["grey"] = "808080";
+		o["honeydew"] = "f0fff0";
+		o["hotpink"] = "ff69b4";
+		o["indianred"] = "cd5c5c";
+		o["indigo"] = "4b0082";
+		o["ivory"] = "fffff0";
+		o["khaki"] = "f0e68c";
+		o["lavender"] = "e6e6fa";
+		o["lavenderblush"] = "fff0f5";
+		o["lawngreen"] = "7cfc00";
+		o["lemonchiffon"] = "fffacd";
+		o["lightblue"] = "add8e6";
+		o["lightcoral"] = "f08080";
+		o["lightcyan"] = "e0ffff";
+		o["lightgoldenrodyellow"] = "fafad2";
+		o["lightgray"] = "d3d3d3";
+		o["lightgreen"] = "90ee90";
+		o["lightgrey"] = "d3d3d3";
+		o["lightpink"] = "ffb6c1";
+		o["lightsalmon"] = "ffa07a";
+		o["lightseagreen"] = "20b2aa";
+		o["lightskyblue"] = "87cefa";
+		o["lightslategray"] = "789";
+		o["lightslategrey"] = "789";
+		o["lightsteelblue"] = "b0c4de";
+		o["lightyellow"] = "ffffe0";
+		o["lime"] = "0f0";
+		o["limegreen"] = "32cd32";
+		o["linen"] = "faf0e6";
+		o["magenta"] = "f0f";
+		o["maroon"] = "800000";
+		o["mediumaquamarine"] = "66cdaa";
+		o["mediumblue"] = "0000cd";
+		o["mediumorchid"] = "ba55d3";
+		o["mediumpurple"] = "9370db";
+		o["mediumseagreen"] = "3cb371";
+		o["mediumslateblue"] = "7b68ee";
+		o["mediumspringgreen"] = "00fa9a";
+		o["mediumturquoise"] = "48d1cc";
+		o["mediumvioletred"] = "c71585";
+		o["midnightblue"] = "191970";
+		o["mintcream"] = "f5fffa";
+		o["mistyrose"] = "ffe4e1";
+		o["moccasin"] = "ffe4b5";
+		o["navajowhite"] = "ffdead";
+		o["navy"] = "000080";
+		o["oldlace"] = "fdf5e6";
+		o["olive"] = "808000";
+		o["olivedrab"] = "6b8e23";
+		o["orange"] = "ffa500";
+		o["orangered"] = "ff4500";
+		o["orchid"] = "da70d6";
+		o["palegoldenrod"] = "eee8aa";
+		o["palegreen"] = "98fb98";
+		o["paleturquoise"] = "afeeee";
+		o["palevioletred"] = "db7093";
+		o["papayawhip"] = "ffefd5";
+		o["peachpuff"] = "ffdab9";
+		o["peru"] = "cd853f";
+		o["pink"] = "ffc0cb";
+		o["plum"] = "dda0dd";
+		o["powderblue"] = "b0e0e6";
+		o["purple"] = "800080";
+		o["red"] = "f00";
+		o["rosybrown"] = "bc8f8f";
+		o["royalblue"] = "4169e1";
+		o["saddlebrown"] = "8b4513";
+		o["salmon"] = "fa8072";
+		o["sandybrown"] = "f4a460";
+		o["seagreen"] = "2e8b57";
+		o["seashell"] = "fff5ee";
+		o["sienna"] = "a0522d";
+		o["silver"] = "c0c0c0";
+		o["skyblue"] = "87ceeb";
+		o["slateblue"] = "6a5acd";
+		o["slategray"] = "708090";
+		o["slategrey"] = "708090";
+		o["snow"] = "fffafa";
+		o["springgreen"] = "00ff7f";
+		o["steelblue"] = "4682b4";
+		o["tan"] = "d2b48c";
+		o["teal"] = "008080";
+		o["thistle"] = "d8bfd8";
+		o["tomato"] = "ff6347";
+		o["turquoise"] = "40e0d0";
+		o["violet"] = "ee82ee";
+		o["wheat"] = "f5deb3";
+		o["white"] = "fff";
+		o["whitesmoke"] = "f5f5f5";
+		o["yellow"] = "ff0";
+		o["yellowgreen"] = "9acd32";
+		return o;
 	})();
 	function $blend() {
 		return $blend.__ks_rt(this, arguments);
@@ -268,11 +268,11 @@ module.exports = function() {
 		$spaces[space].components[name] = component;
 		if(!Type.isValue($components[name])) {
 			$components[name] = (() => {
-				const d = new OBJ();
-				d.field = component.field;
-				d.spaces = new OBJ();
-				d.families = [];
-				return d;
+				const o = new OBJ();
+				o.field = component.field;
+				o.spaces = new OBJ();
+				o.families = [];
+				return o;
 			})();
 		}
 		$components[name].families.push(space);
@@ -294,9 +294,9 @@ module.exports = function() {
 	$convert.__ks_0 = function(that, space, result) {
 		if(result === void 0 || result === null) {
 			result = (() => {
-				const d = new OBJ();
-				d._alpha = 0;
-				return d;
+				const o = new OBJ();
+				o._alpha = 0;
+				return o;
 			})();
 		}
 		let s;
@@ -417,8 +417,8 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const $parsers = (() => {
-		const d = new OBJ();
-		d.srgb = Helper.function(function(that, args) {
+		const o = new OBJ();
+		o.srgb = Helper.function(function(that, args) {
 			if(args.length === 1) {
 				if(Type.isNumber(args[0])) {
 					that._space = Space.SRGB;
@@ -566,7 +566,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		d.gray = Helper.function(function(that, args) {
+		o.gray = Helper.function(function(that, args) {
 			if(args.length >= 1) {
 				if(Number.isFinite(Float.parse.__ks_0(args[0])) === true) {
 					that._space = Space.SRGB;
@@ -602,18 +602,18 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		return d;
+		return o;
 	})();
 	function $space() {
 		return $space.__ks_rt(this, arguments);
 	};
 	$space.__ks_0 = function(name) {
 		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : (() => {
-			const d = new OBJ();
-			d.alias = new OBJ();
-			d.converters = new OBJ();
-			d.components = new OBJ();
-			return d;
+			const o = new OBJ();
+			o.alias = new OBJ();
+			o.converters = new OBJ();
+			o.components = new OBJ();
+			return o;
 		})();
 	};
 	$space.__ks_rt = function(that, args) {
@@ -782,12 +782,12 @@ module.exports = function() {
 				}
 				ratio = __ks_Number.__ks_func_round_0.call(ratio, 2);
 				return (() => {
-					const d = new OBJ();
-					d.ratio = ratio;
-					d.error = 0;
-					d.min = ratio;
-					d.max = ratio;
-					return d;
+					const o = new OBJ();
+					o.ratio = ratio;
+					o.error = 0;
+					o.min = ratio;
+					o.max = ratio;
+					return o;
 				})();
 			}
 			else {
@@ -797,12 +797,12 @@ module.exports = function() {
 				const closest = Color.__ks_new_0([__ks_Number.__ks_func_limit_0.call((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._blue - (this._blue * a)) / (1 - a), 0, 255)]);
 				const min = this.__ks_func_clone_0().__ks_func_blend_0(closest, 0.5, Space.SRGB, true).__ks_func_contrast_0(color).ratio;
 				return (() => {
-					const d = new OBJ();
-					d.ratio = __ks_Number.__ks_func_round_0.call((min + max) / 2, 2);
-					d.error = __ks_Number.__ks_func_round_0.call((max - min) / 2, 2);
-					d.min = min;
-					d.max = max;
-					return d;
+					const o = new OBJ();
+					o.ratio = __ks_Number.__ks_func_round_0.call((min + max) / 2, 2);
+					o.error = __ks_Number.__ks_func_round_0.call((max - min) / 2, 2);
+					o.min = min;
+					o.max = max;
+					return o;
 				})();
 			}
 		}
@@ -1318,20 +1318,20 @@ module.exports = function() {
 			}
 			if(Type.isValue(space.formatter)) {
 				$formatters[space.name] = (() => {
-					const d = new OBJ();
-					d.space = space.name;
-					d.formatter = space.formatter;
-					return d;
+					const o = new OBJ();
+					o.space = space.name;
+					o.formatter = space.formatter;
+					return o;
 				})();
 			}
 			else if(Type.isValue(space.formatters)) {
 				for(let name in space.formatters) {
 					let formatter = space.formatters[name];
 					$formatters[name] = (() => {
-						const d = new OBJ();
-						d.space = space.name;
-						d.formatter = formatter;
-						return d;
+						const o = new OBJ();
+						o.space = space.name;
+						o.formatter = formatter;
+						return o;
 					})();
 				}
 			}
@@ -1479,9 +1479,9 @@ module.exports = function() {
 		}
 		static __ks_sttc_registerFormatter_0(format, formatter) {
 			$formatters[format] = (() => {
-				const d = new OBJ();
-				d.formatter = formatter;
-				return d;
+				const o = new OBJ();
+				o.formatter = formatter;
+				return o;
 			})();
 		}
 		static registerFormatter() {
@@ -1511,12 +1511,12 @@ module.exports = function() {
 	Space.SRGB = Space("srgb");
 	Space.RGB = Space("rgb");
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d["name"] = "srgb";
-		d["alias"] = ["rgb"];
-		d["formatters"] = (() => {
-			const d = new OBJ();
-			d.hex = Helper.function(function(that) {
+		const o = new OBJ();
+		o["name"] = "srgb";
+		o["alias"] = ["rgb"];
+		o["formatters"] = (() => {
+			const o = new OBJ();
+			o.hex = Helper.function(function(that) {
 				return $hex.__ks_0(that);
 			}, (fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
@@ -1527,7 +1527,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			d.srgb = Helper.function(function(that) {
+			o.srgb = Helper.function(function(that) {
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
 				}
@@ -1543,28 +1543,28 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			return d;
+			return o;
 		})();
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["red"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["red"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["green"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["green"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			d["blue"] = (() => {
-				const d = new OBJ();
-				d["max"] = 255;
-				return d;
+			o["blue"] = (() => {
+				const o = new OBJ();
+				o["max"] = 255;
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.__ks_func_getField_0("red");
@@ -1637,11 +1637,11 @@ module.exports = function() {
 		return this.__ks_func_blue_rt.call(null, this, this, arguments);
 	};
 	const $static = (() => {
-		const d = new OBJ();
-		d.black = Color.__ks_sttc_from_0(["#000"]);
-		d.gray = Color.__ks_sttc_from_0(["#808080"]);
-		d.white = Color.__ks_sttc_from_0(["#fff"]);
-		return d;
+		const o = new OBJ();
+		o.black = Color.__ks_sttc_from_0(["#000"]);
+		o.gray = Color.__ks_sttc_from_0(["#808080"]);
+		o.white = Color.__ks_sttc_from_0(["#fff"]);
+		return o;
 	})();
 	return {
 		Color,

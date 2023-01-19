@@ -62,32 +62,32 @@ module.exports = function() {
 	Space.HSB = Space("hsb");
 	Space.HSL = Space("hsl");
 	Color.__ks_sttc_addSpace_0((() => {
-		const d = new OBJ();
-		d.name = Space.HSL;
-		d["components"] = (() => {
-			const d = new OBJ();
-			d["hue"] = (() => {
-				const d = new OBJ();
-				d.family = Space.HSB;
-				d["field"] = "_hue";
-				return d;
+		const o = new OBJ();
+		o.name = Space.HSL;
+		o["components"] = (() => {
+			const o = new OBJ();
+			o["hue"] = (() => {
+				const o = new OBJ();
+				o.family = Space.HSB;
+				o["field"] = "_hue";
+				return o;
 			})();
-			d["saturation"] = (() => {
-				const d = new OBJ();
-				d.family = Space.HSB;
-				d["field"] = "_saturation";
-				return d;
+			o["saturation"] = (() => {
+				const o = new OBJ();
+				o.family = Space.HSB;
+				o["field"] = "_saturation";
+				return o;
 			})();
-			d["lightness"] = (() => {
-				const d = new OBJ();
-				d["max"] = 100;
-				d["round"] = 1;
-				d["field"] = "_lightness";
-				return d;
+			o["lightness"] = (() => {
+				const o = new OBJ();
+				o["max"] = 100;
+				o["round"] = 1;
+				o["field"] = "_lightness";
+				return o;
 			})();
-			return d;
+			return o;
 		})();
-		return d;
+		return o;
 	})());
 	Color.prototype.__ks_func_hue_0 = function() {
 		return this.__ks_func_getField_0("hue");

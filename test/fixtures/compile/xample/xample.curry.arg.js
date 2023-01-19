@@ -1,9 +1,9 @@
 const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let o = (() => {
-		const d = new OBJ();
-		d.name = "White";
-		return d;
+		const o = new OBJ();
+		o.name = "White";
+		return o;
 	})();
 	function fff() {
 		return fff.__ks_rt(this, arguments);

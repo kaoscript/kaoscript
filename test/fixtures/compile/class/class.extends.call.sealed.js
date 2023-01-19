@@ -51,10 +51,10 @@ module.exports = function() {
 		}
 		__ks_cons_0(options = null) {
 			Foobar.prototype.__ks_cons_0.call(this, __ks_Object.__ks_sttc_merge_0([(() => {
-				const d = new OBJ();
-				d.x = 0;
-				d.y = 0;
-				return d;
+				const o = new OBJ();
+				o.x = 0;
+				o.y = 0;
+				return o;
 			})(), options]));
 		}
 		__ks_cons_rt(that, args) {

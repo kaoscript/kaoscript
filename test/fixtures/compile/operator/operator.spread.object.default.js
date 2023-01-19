@@ -1,10 +1,15 @@
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	const original = (() => {
-		const d = new OBJ();
-		d.a = 1;
-		d.b = 2;
-		return d;
+		const o = new OBJ();
+		o.a = 1;
+		o.b = 2;
+		return o;
 	})();
-	const copy = Helper.newObject(-1, original, 1, "c", 3);
+	const copy = (() => {
+		const o = new OBJ();
+		Helper.concatObject(o, original);
+		o.c = 3;
+		return o;
+	})();
 };

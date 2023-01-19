@@ -30,9 +30,9 @@ module.exports = function() {
 		}
 		__ks_init() {
 			this._options = (() => {
-				const d = new OBJ();
-				d.class = Foobar;
-				return d;
+				const o = new OBJ();
+				o.class = Foobar;
+				return o;
 			})();
 		}
 		__ks_cons_rt(that, args) {

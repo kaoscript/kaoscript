@@ -30,9 +30,9 @@ module.exports = function() {
 		}
 		__ks_func_export_0() {
 			return (() => {
-				const d = new OBJ();
-				x: this._x;
-				return d;
+				const o = new OBJ();
+				o.x = this._x;
+				return o;
 			})();
 		}
 		__ks_func_export_rt(that, proto, args) {
