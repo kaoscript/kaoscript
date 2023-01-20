@@ -1,12 +1,12 @@
 var $function = {
-	surround(node) { # {{{
+	surround(data, node) { # {{{
 		var mut parent = node._parent
 		while ?parent && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
 		}
 
 		if parent?._instance {
-			if $function.useThisVariable(node._data.body, node) {
+			if $function.useThisVariable(data, node) {
 				if node._options.format.functions == 'es5' {
 					return {
 						arrow: false

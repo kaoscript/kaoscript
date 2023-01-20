@@ -84,7 +84,7 @@ class ArrayComprehensionForFrom extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(this)
+		var surround = $function.surround(@data.body, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -112,6 +112,8 @@ class ArrayComprehensionForFrom extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
+			var surround = $function.surround(@data.loop.when, this)
+
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
@@ -292,7 +294,7 @@ class ArrayComprehensionForIn extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(this)
+		var surround = $function.surround(@data.body, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
@@ -314,6 +316,8 @@ class ArrayComprehensionForIn extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
+			var surround = $function.surround(@data.loop.when, this)
+
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
@@ -485,7 +489,7 @@ class ArrayComprehensionForOf extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(this)
+		var surround = $function.surround(@data.body, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapObject(')
@@ -507,6 +511,8 @@ class ArrayComprehensionForOf extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
+			var surround = $function.surround(@data.loop.when, this)
+
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
@@ -606,7 +612,7 @@ class ArrayComprehensionForRange extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(this)
+		var surround = $function.surround(@data.body, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -633,6 +639,8 @@ class ArrayComprehensionForRange extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
+			var surround = $function.surround(@data.loop.when, this)
+
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
@@ -688,7 +696,7 @@ class ArrayComprehensionRepeat extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(this)
+		var surround = $function.surround(@data.body, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(0, ')
