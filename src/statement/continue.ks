@@ -1,5 +1,10 @@
 class ContinueStatement extends Statement {
+	private {
+		@name: String?	= null
+	}
 	analyse() { # {{{
+		@name = @data.label?.name
+
 		var mut parent = @parent
 
 		unless parent.isJumpable() {
@@ -17,6 +22,11 @@ class ContinueStatement extends Statement {
 	override prepare(target, targetMode)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
-		fragments.line('continue', this._data)
+		if ?@name {
+			fragments.line(`continue \(@name)`)
+		}
+		else {
+			fragments.line('continue', this._data)
+		}
 	} # }}}
 }

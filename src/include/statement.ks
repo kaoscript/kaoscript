@@ -104,6 +104,7 @@ abstract class Statement extends AbstractNode {
 }
 
 include {
+	'../statement/block'
 	'../statement/break'
 	'../statement/class/index'
 	'../statement/continue'

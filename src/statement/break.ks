@@ -1,5 +1,10 @@
 class BreakStatement extends Statement {
+	private {
+		@name: String?	= null
+	}
 	analyse() { # {{{
+		@name = @data.label?.name
+
 		var mut parent = @parent
 
 		unless parent.isJumpable() {
@@ -17,6 +22,11 @@ class BreakStatement extends Statement {
 	override prepare(target, targetMode)
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
-		fragments.line('break', this._data)
+		if ?@name {
+			fragments.line(`break \(@name)`)
+		}
+		else {
+			fragments.line('break', this._data)
+		}
 	} # }}}
 }

@@ -95,6 +95,7 @@ var $expressions = {
 
 var $statements = {
 	`\(NodeKind::BitmaskDeclaration)`			: BitmaskDeclaration
+	`\(NodeKind::BlockStatement)`				: BlockStatement
 	`\(NodeKind::BreakStatement)`				: BreakStatement
 	`\(NodeKind::CallExpression)`	 			: $callStatement
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
