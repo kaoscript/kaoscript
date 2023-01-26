@@ -1,9 +1,15 @@
+enum JunctionKind {
+	And
+	Or
+	Xor
+}
+
 class ComparisonExpression extends Expression {
 	private {
 		@await: Boolean				= false
 		@composite: Boolean			= false
 		@computed: Boolean			= true
-		@junction: String			= ' && '
+		@junction: JunctionKind		= JunctionKind::And
 		@junctive: Boolean			= false
 		@operands					= []
 		@operators					= []
@@ -26,13 +32,13 @@ class ComparisonExpression extends Expression {
 				}
 
 				if value.operator.kind == BinaryOperatorKind::And {
-					@junction = ' && '
+					pass
 				}
 				else if value.operator.kind == BinaryOperatorKind::Or {
-					@junction = ' || '
+					@junction = JunctionKind::Or
 				}
 				else {
-					@junction = 'xor'
+					@junction = JunctionKind::Xor
 				}
 			}
 			else {
@@ -157,7 +163,7 @@ class ComparisonExpression extends Expression {
 					if var { type } ?= newInfers[name] {
 						share.types.push(type)
 					}
-					else {
+					else if @junction == JunctionKind::And {
 						delete shares[name]
 					}
 				}
@@ -196,7 +202,7 @@ class ComparisonExpression extends Expression {
 					if var { type } ?= newInfers[name] {
 						share.types.push(type)
 					}
-					else {
+					else if @junction == JunctionKind::And {
 						delete shares[name]
 					}
 				}
@@ -274,7 +280,7 @@ class ComparisonExpression extends Expression {
 		}
 
 		if @junctive {
-			if @junction == 'xor' {
+			if @junction == JunctionKind::Xor {
 				fragments.code($runtime.operator(this), '.xor(')
 
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
@@ -288,10 +294,12 @@ class ComparisonExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
+				var junction = @junction == JunctionKind::And ? ' && ' : ' || '
+
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
 				for var operator in @operators from 1 {
-					fragments.code(@junction)
+					fragments.code(junction)
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, false, false)
 				}
@@ -302,12 +310,12 @@ class ComparisonExpression extends Expression {
 
 			if @operators.length > 1 {
 				for var operator in @operators from 1 to~ -1 {
-					fragments.code(@junction)
+					fragments.code(' && ')
 
 					operator.toOperatorFragments(fragments, @reuseName, true, false, true, true)
 				}
 
-				fragments.code(@junction)
+				fragments.code(' && ')
 
 				@operators[@operators.length - 1].toOperatorFragments(fragments, @reuseName, true, false, false, false)
 			}
