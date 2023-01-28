@@ -31,7 +31,7 @@ class AwaitExpression extends Expression {
 		@operation.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@operation.prepare(target)
+		@operation.prepare(target, targetMode)
 
 		@reuseName = @scope.acquireTempName(false)
 	} # }}}

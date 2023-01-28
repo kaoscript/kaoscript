@@ -71,6 +71,92 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	type() => @type
 }
 
+class UnaryOperatorImplicit extends Expression {
+	private late {
+		@property: String
+		@type: Type
+	}
+	override analyse() {
+		@property = @data.argument.name
+	}
+	override prepare(target, targetMode) { # {{{
+		var late type: Type
+
+		match @parent {
+			is CallExpression | CreateExpression {
+				var index = @parent.arguments().indexOf(this)
+				var types = []
+
+				for var function of @parent.assessment().functions {
+					if function.min() == function.max() > index {
+						types.push(function.parameter(index).getVariableType())
+					}
+					else {
+						throw new NotSupportedException()
+					}
+				}
+
+				type = Type.union(@scope, ...types)
+			}
+			is ClassVariableDeclaration {
+				type = @parent.type().type()
+			}
+			is ComparisonExpression {
+				var operands = @parent.operands()
+				var index = operands.indexOf(this)
+				var operand = operands[index - 1]
+
+				type = operand.type()
+			}
+			is MatchConditionValue {
+				type = @parent.parent().getValueType()
+			}
+			is NamedArgument {
+				var name = @parent.name()
+				var types = []
+
+				for var function of @parent.parent().assessment().functions {
+					for var parameter in function.parameters() {
+						if parameter.getExternalName() == name {
+							types.push(parameter.getVariableType())
+						}
+					}
+				}
+
+				type = Type.union(@scope, ...types)
+			}
+			is AssignmentOperatorEquals | StructFunction | TupleFunction | VariableDeclaration {
+				type = target
+			}
+			else {
+				throw new NotImplementedException()
+			}
+		}
+
+		if type.isAny() || type.isUnion() {
+			ReferenceException.throwNotDefinedProperty(@property, this)
+		}
+		else if type.isEnum() {
+			if !type.discard().hasVariable(@property) {
+				ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
+			}
+
+			@type = type
+		}
+		else if var property ?= type.getProperty(@property) {
+			@type = property.discardVariable()
+		}
+		else {
+			ReferenceException.throwNotDefinedProperty(@property, this)
+		}
+	} # }}}
+	override translate()
+	toFragments(fragments, mode) { # {{{
+		fragments.compile(@type).code($dot).compile(@property)
+	} # }}}
+	type() => @type
+}
+
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	private late {
 		@native: Boolean		= false

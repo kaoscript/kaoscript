@@ -11,7 +11,7 @@ class ComparisonExpression extends Expression {
 		@computed: Boolean			= true
 		@junction: JunctionKind		= JunctionKind::And
 		@junctive: Boolean			= false
-		@operands					= []
+		@operands: Expression[]		= []
 		@operators					= []
 		@reuseName: String?			= null
 		@tested: Boolean			= false
@@ -260,6 +260,7 @@ class ComparisonExpression extends Expression {
 
 		return array
 	} # }}}
+	operands() => @operands
 	releaseReusable() { # {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)

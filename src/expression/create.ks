@@ -32,10 +32,6 @@ class CreateExpression extends Expression {
 	override prepare(target, targetMode) { # {{{
 		@factory.prepare(@scope.reference('Class'))
 
-		for var argument in @arguments {
-			argument.prepare(AnyType.NullableUnexplicit)
-		}
-
 		if type !?= @factory.type() {
 			ReferenceException.throwNotDefined(@factory.toQuote(), this)
 		}
@@ -58,6 +54,10 @@ class CreateExpression extends Expression {
 
 			@assessment = class.getConstructorAssessment(type.name(), this)
 
+			for var argument in @arguments {
+				argument.prepare(AnyType.NullableUnexplicit)
+			}
+
 			if var result ?= Router.matchArguments(@assessment, @arguments, this) {
 				@result = result
 			}
@@ -71,6 +71,11 @@ class CreateExpression extends Expression {
 		}
 		else if !(type.isAny() || type.isClass()) || type.isVirtual() {
 			TypeException.throwNotClass(type.toQuote(), this)
+		}
+		else {
+			for var argument in @arguments {
+				argument.prepare(AnyType.NullableUnexplicit)
+			}
 		}
 
 		if @flatten {
@@ -110,6 +115,8 @@ class CreateExpression extends Expression {
 			argument.translate()
 		}
 	} # }}}
+	arguments() => @arguments
+	assessment() => @assessment
 	isComputed() => @computed
 	isUsingVariable(name) { # {{{
 		if @factory.isUsingVariable(name) {

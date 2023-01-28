@@ -59,9 +59,6 @@ class MatchStatement extends Statement {
 				if ccData.kind == NodeKind::MatchConditionArray {
 					condition = new MatchConditionArray(ccData, this, clause.scope)
 				}
-				else if ccData.kind == NodeKind::MatchConditionEnum {
-					throw new NotImplementedException(this)
-				}
 				else if ccData.kind == NodeKind::MatchConditionObject {
 					throw new NotImplementedException(this)
 				}
@@ -92,9 +89,6 @@ class MatchStatement extends Statement {
 				}
 				else if bbData.kind == NodeKind::ObjectBinding {
 					throw new NotImplementedException(this)
-				}
-				else if bbData.kind == NodeKind::MatchTypeCasting {
-					binding = new MatchBindingType(bbData, this, clause.scope)
 				}
 				else {
 					binding = new MatchBindingValue(bbData, this, clause.scope)
@@ -351,6 +345,7 @@ class MatchStatement extends Statement {
 
 		return this
 	} # }}}
+	getValueType() => @valueType
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		var {name, type} = variable
 
@@ -655,25 +650,32 @@ class MatchBindingArray extends AbstractNode {
 	} # }}}
 }
 
-class MatchBindingType extends AbstractNode {
-	analyse() { # {{{
-		@scope.define(@data.name.name, false, Type.fromAST(@data.type, this), true, this)
-	} # }}}
-	override prepare(target, targetMode)
-	translate()
-	toFragments(fragments) { # {{{
-		fragments.line($runtime.scope(this), @data.name.name, ' = ', @parent._name)
-	} # }}}
-}
-
 class MatchBindingValue extends AbstractNode {
+	private late {
+		@name: String
+	}
 	analyse() { # {{{
-		@scope.define(@data.name, false, this)
+		var mut immutable = true
+		var mut type = null
+
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Mutable {
+				immutable = false
+			}
+		}
+		
+		@name = @data.name.name
+
+		if ?@data.type {
+			type = Type.fromAST(@data.type, this)
+		}
+
+		@scope.define(@name, immutable, type, true, this)
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
 	toFragments(fragments) { # {{{
-		fragments.line($runtime.scope(this), @data.name, ' = ', @parent._name)
+		fragments.line($runtime.scope(this), @name, ' = ', @parent._name)
 	} # }}}
 }
 
@@ -860,32 +862,67 @@ class MatchConditionType extends AbstractNode {
 class MatchConditionValue extends AbstractNode {
 	private late {
 		@castingEnum: Boolean	= false
-		@value
+		@values: Expression[]	= []
 		@type: Type
 	}
 	analyse() { # {{{
-		@value = $compile.expression(@data, this)
-		@value.analyse()
+		if @data.kind == NodeKind::JunctionExpression {
+			for var operand in @data.operands {
+				var value = $compile.expression(operand, this)
+				value.analyse()
+
+				@values.push(value)
+			}
+		}
+		else {
+			var value = $compile.expression(@data, this)
+			value.analyse()
+
+			@values.push(value)
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@value.prepare(target)
+		if @values.length == 1 {
+			var value = @values[0]
 
-		@type = @value.type()
+			value.prepare(target)
+
+			@type = value.type()
+		}
+		else {
+			var types = []
+
+			for var value in @values {
+				value.prepare(target)
+
+				types.push(value.type())
+			}
+
+			@type = Type.union(@scope, ...types)
+		}
 	} # }}}
 	translate() { # {{{
-		@value.translate()
+		for var value in @values {
+			value.translate()
+		}
 	} # }}}
 	isEnum() => @type.isEnum()
 	setCastingEnum(@castingEnum)
 	toConditionFragments(fragments, name) { # {{{
-		fragments.code(name, ' === ').compile(@value)
-
-		if @castingEnum {
-			if @type.isEnum() {
-				fragments.code('.value')
+		for var value, index in @values {
+			if index > 0 {
+				fragments.code(' || ')
 			}
-			else if @type.isAny() {
-				fragments.code('.valueOf()')
+
+			fragments.code(name, ' === ').compile(value)
+
+			if @castingEnum {
+				if @type.isEnum() {
+					fragments.code('.value')
+				}
+				else if @type.isAny() {
+					fragments.code('.valueOf()')
+				}
 			}
 		}
 	} # }}}

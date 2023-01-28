@@ -10,7 +10,17 @@ class CodeFragment extends Fragment {
 		end		= null
 		start	= null
 	}
+	// TODO
+	// constructor(code: String | Number) { # {{{
+	// 	super(code)
+	// } # }}}
+	// constructor(code: String | Number, @start, @end) { # {{{
+	// 	super(code)
+	// } # }}}
 	constructor(@code) { # {{{
+		super(code)
+	} # }}}
+	constructor(code: Boolean | Number) { # {{{
 		super(code)
 	} # }}}
 	constructor(@code, @start, @end) { # {{{

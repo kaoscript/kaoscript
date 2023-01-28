@@ -162,6 +162,7 @@ var $polyadicOperators = {
 var $unaryOperators = {
 	`\(UnaryOperatorKind::Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperatorKind::ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
+	`\(UnaryOperatorKind::Implicit)`			: UnaryOperatorImplicit
 	`\(UnaryOperatorKind::Negation)`			: UnaryOperatorNegation
 	`\(UnaryOperatorKind::Negative)`			: UnaryOperatorNegative
 	`\(UnaryOperatorKind::NonEmpty)`			: UnaryOperatorNonEmpty

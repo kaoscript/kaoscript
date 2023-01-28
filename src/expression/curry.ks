@@ -1,18 +1,6 @@
 class CurryExpression extends CallExpression {
 	override prepare(target, targetMode) { # {{{
-		for var argument in @arguments {
-			argument.prepare(AnyType.NullableUnexplicit)
-
-			if argument.type().isInoperative() {
-				TypeException.throwUnexpectedInoperative(argument, this)
-			}
-		}
-
-		for var argument in @arguments until @flatten {
-			if argument is UnaryOperatorSpread && !argument.argument().type().isArray() {
-				@flatten = true
-			}
-		}
+		@prepareArguments()
 
 		if ?@object {
 			@property = @data.callee.property.name

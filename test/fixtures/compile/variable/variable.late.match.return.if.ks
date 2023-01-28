@@ -2,7 +2,7 @@ func foobar(x) {
 	var late value
 
 	match x {
-		1, 2, 3 {
+		1 | 2 | 3 {
 			return 0
 		}
 		4 {

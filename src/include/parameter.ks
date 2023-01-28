@@ -751,7 +751,7 @@ class Parameter extends AbstractNode {
 		@internal.translate()
 
 		if @hasDefaultValue {
-			@defaultValue.prepare()
+			@defaultValue.prepare(@type.getVariableType(), TargetMode::Permissive)
 
 			if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind::Equals {
 				@headedDefaultValue = @nullable || @internal.isBinding()
