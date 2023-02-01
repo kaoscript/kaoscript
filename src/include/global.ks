@@ -92,6 +92,36 @@ var $ast = {
 			modifiers: []
 		}
 	} # }}}
+	path(data): String? { # {{{
+		match data.kind {
+			NodeKind::Identifier {
+				return data.name
+			}
+			NodeKind::MemberExpression {
+				if data.property.kind == NodeKind::Identifier {
+					if var object ?= $ast.path(data.object) {
+						return `\(object).\(data.property.name)`
+					}
+				}
+			}
+		}
+
+		return null
+	} # }}}
+	pick(data) { # {{{
+		return {
+			kind: NodeKind::PickStatement
+			value: data
+			start: data.start
+		}
+	} # }}}
+	return(data? = null) { # {{{
+		return {
+			kind: NodeKind::ReturnStatement
+			value: data
+			start: data.start if ?data
+		}
+	} # }}}
 	some(data, filter): Boolean { # {{{
 		match data.kind {
 			NodeKind::BinaryExpression {

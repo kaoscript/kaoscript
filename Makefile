@@ -46,6 +46,13 @@ old:
 std:
 	gsed -i -E 's/compiler(.new|.old).js/compiler.js/' lib/bin.js
 
+patche:
+	node ./scripts/patch-error.js
+patchm:
+	node ./scripts/patch-metadata.js
+patchs:
+	node ./scripts/patch-source.js
+
 save:
 	cp lib/compiler.js lib/compiler.old.js
 

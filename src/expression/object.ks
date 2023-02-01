@@ -17,18 +17,6 @@ class ObjectExpression extends Expression {
 			var late property
 
 			match data.kind {
-				NodeKind::IfExpression {
-					property = new ObjectIfMember(data, this)
-					property.analyse()
-
-					if var reference ?= property.reference() {
-						if names[reference] {
-							SyntaxException.throwDuplicateKey(property)
-						}
-
-						names[reference] = true
-					}
-				}
 				NodeKind::ObjectMember {
 					match data.name.kind {
 						NodeKind::Identifier, NodeKind::Literal {
@@ -55,6 +43,18 @@ class ObjectExpression extends Expression {
 							property = new ObjectComputedMember(data, this)
 							property.analyse()
 						}
+					}
+				}
+				NodeKind::RestrictiveExpression {
+					property = new ObjectRestrictiveMember(data, this)
+					property.analyse()
+
+					if var reference ?= property.reference() {
+						if names[reference] {
+							SyntaxException.throwDuplicateKey(property)
+						}
+
+						names[reference] = true
 					}
 				}
 				NodeKind::ShorthandProperty {
@@ -87,18 +87,6 @@ class ObjectExpression extends Expression {
 				NodeKind::UnaryExpression {
 					property = new ObjectSpreadMember(data, this)
 					property.analyse()
-				}
-				NodeKind::UnlessExpression {
-					property = new ObjectUnlessMember(data, this)
-					property.analyse()
-
-					if var reference ?= property.reference() {
-						if names[reference] {
-							SyntaxException.throwDuplicateKey(property)
-						}
-
-						names[reference] = true
-					}
 				}
 				else {
 					NotSupportedException.throw(this)
@@ -373,87 +361,6 @@ class ObjectComputedMember extends Expression {
 	value() => @value
 }
 
-class ObjectIfMember extends Expression {
-	private late {
-		@condition
-		@property
-	}
-	analyse() { # {{{
-		@condition = $compile.expression(@data.condition, this)
-		@condition.analyse()
-
-		match @data.whenTrue.kind {
-			NodeKind::ObjectMember {
-				match @data.whenTrue.name.kind {
-					NodeKind::Identifier, NodeKind::Literal {
-						@property = new ObjectLiteralMember(@data.whenTrue, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					NodeKind::ThisExpression {
-						@property = new ObjectThisMember(@data.whenTrue, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					else {
-						@property = new ObjectComputedMember(@data.whenTrue, this)
-						@property.analyse()
-					}
-				}
-			}
-			NodeKind::ShorthandProperty {
-				match @data.whenTrue.name.kind {
-					NodeKind::Identifier {
-						@property = new ObjectLiteralMember(@data.whenTrue, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					NodeKind::ThisExpression {
-						@property = new ObjectThisMember(@data.whenTrue, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					else {
-						NotSupportedException.throw(this)
-					}
-				}
-			}
-			NodeKind::UnaryExpression {
-				@property = new ObjectSpreadMember(@data.whenTrue, this)
-				@property.analyse()
-			}
-			else {
-				NotSupportedException.throw(this)
-			}
-		}
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
-
-		@property.prepare(target, targetMode)
-	} # }}}
-	translate() { # {{{
-		@condition.translate()
-		@property.translate()
-	} # }}}
-	name() => @property.name()
-	toFragments(fragments, mode) { # {{{
-		var ctrl = fragments.newControl()
-
-		ctrl.code('if(')
-
-		ctrl.compileCondition(@condition)
-
-		ctrl.code(')').step().compile(@property).done()
-	} # }}}
-	value() => @property.value()
-	varname() => @parent.varname()
-}
-
 class ObjectLiteralMember extends Expression {
 	private late {
 		@computed: Boolean		= true
@@ -541,6 +448,94 @@ class ObjectLiteralMember extends Expression {
 	value() => @value
 }
 
+class ObjectRestrictiveMember extends Expression {
+	private late {
+		@condition
+		@property
+	}
+	analyse() { # {{{
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+
+		match @data.expression.kind {
+			NodeKind::ObjectMember {
+				match @data.expression.name.kind {
+					NodeKind::Identifier, NodeKind::Literal {
+						@property = new ObjectLiteralMember(@data.expression, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.expression, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						@property = new ObjectComputedMember(@data.expression, this)
+						@property.analyse()
+					}
+				}
+			}
+			NodeKind::ShorthandProperty {
+				match @data.expression.name.kind {
+					NodeKind::Identifier {
+						@property = new ObjectLiteralMember(@data.expression, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					NodeKind::ThisExpression {
+						@property = new ObjectThisMember(@data.expression, this)
+						@property.analyse()
+
+						this.reference(@property.reference())
+					}
+					else {
+						NotSupportedException.throw(this)
+					}
+				}
+			}
+			NodeKind::UnaryExpression {
+				@property = new ObjectSpreadMember(@data.expression, this)
+				@property.analyse()
+			}
+			else {
+				NotSupportedException.throw(this)
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+
+		@property.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@condition.translate()
+		@property.translate()
+	} # }}}
+	name() => @property.name()
+	toFragments(fragments, mode) { # {{{
+		var ctrl = fragments.newControl()
+
+		if @data.operator.kind == RestrictiveOperatorKind::If {
+			ctrl.code('if(')
+
+			ctrl.compileCondition(@condition)
+		}
+		else {
+			ctrl.code('if(!')
+
+			ctrl.wrapCondition(@condition)
+		}
+
+		ctrl.code(')').step().compile(@property).done()
+	} # }}}
+	value() => @property.value()
+	varname() => @parent.varname()
+}
+
 class ObjectSpreadMember extends Expression {
 	private {
 		@type: Type		= AnyType.NullableUnexplicit
@@ -623,85 +618,4 @@ class ObjectThisMember extends Expression {
 			.done()
 	} # }}}
 	value() => @value
-}
-
-class ObjectUnlessMember extends Expression {
-	private late {
-		@condition
-		@property
-	}
-	analyse() { # {{{
-		@condition = $compile.expression(@data.condition, this)
-		@condition.analyse()
-
-		match @data.whenFalse.kind {
-			NodeKind::ObjectMember {
-				match @data.whenFalse.name.kind {
-					NodeKind::Identifier, NodeKind::Literal {
-						@property = new ObjectLiteralMember(@data.whenFalse, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					NodeKind::ThisExpression {
-						@property = new ObjectThisMember(@data.whenFalse, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					else {
-						@property = new ObjectComputedMember(@data.whenFalse, this)
-						@property.analyse()
-					}
-				}
-			}
-			NodeKind::ShorthandProperty {
-				match @data.whenFalse.name.kind {
-					NodeKind::Identifier {
-						@property = new ObjectLiteralMember(@data.whenFalse, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					NodeKind::ThisExpression {
-						@property = new ObjectThisMember(@data.whenFalse, this)
-						@property.analyse()
-
-						this.reference(@property.reference())
-					}
-					else {
-						NotSupportedException.throw(this)
-					}
-				}
-			}
-			NodeKind::UnaryExpression {
-				@property = new ObjectSpreadMember(@data.whenFalse, this)
-				@property.analyse()
-			}
-			else {
-				NotSupportedException.throw(this)
-			}
-		}
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
-
-		@property.prepare(target, targetMode)
-	} # }}}
-	translate() { # {{{
-		@condition.translate()
-		@property.translate()
-	} # }}}
-	name() => @property.name()
-	toFragments(fragments, mode) { # {{{
-		var ctrl = fragments.newControl()
-
-		ctrl.code('if(!')
-
-		ctrl.wrapCondition(@condition)
-
-		ctrl.code(')').step().compile(@property).done()
-	} # }}}
-	value() => @property.value()
-	varname() => @parent.varname()
 }

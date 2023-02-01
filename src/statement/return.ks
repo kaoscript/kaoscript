@@ -224,8 +224,8 @@ class ReturnStatement extends Statement {
 
 				line.done()
 
-				for afterward in @afterwards {
-					afterward.toAfterwardFragments(fragments)
+				for var afterward in @afterwards {
+					afterward.toAfterwardFragments(fragments, mode)
 				}
 
 				if @async {

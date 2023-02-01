@@ -105,6 +105,7 @@ class VariableStatement extends Statement {
 
 		return false
 	} # }}}
+	length()
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		for var declaration in @declarations {
 			declaration.listNonLocalVariables(scope, variables)
@@ -121,16 +122,24 @@ class VariableStatement extends Statement {
 	} # }}}
 	override toFragments(fragments, mode) { # {{{
 		var variables = @assignments()
-		if variables.length != 0 {
+		if #variables {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 
-		if @declarations.length == 1 {
-			return @declarations[0].toFragments(fragments, mode)
+		if #@beforehands {
+			for var beforehand in @beforehands {
+				beforehand.toBeforehandFragments(fragments, mode)
+			}
 		}
 
 		for var declaration in @declarations {
-			fragments.compile(declaration)
+			if var item ?= declaration.toFragments(fragments, mode) {
+				return item
+			}
+		}
+
+		for var afterward in @afterwards {
+			afterward.toAfterwardFragments(fragments, mode)
 		}
 	} # }}}
 	try(): @try
@@ -247,7 +256,7 @@ class VariableDeclaration extends AbstractNode {
 				TypeException.throwUnexpectedInoperative(@value, this)
 			}
 
-			if @parent is IfStatement {
+			if @parent is IfStatement | IfExpression {
 				@type = @type.setNullable(false)
 			}
 
@@ -294,6 +303,7 @@ class VariableDeclaration extends AbstractNode {
 		}
 	} # }}}
 	declarator() => @declarators[0]
+	declarators() => @declarators
 	defineVariables(declarator) { # {{{
 		var assignments = []
 
@@ -404,6 +414,11 @@ class VariableDeclaration extends AbstractNode {
 		if @hasValue {
 			if @value.isAwaiting() {
 				return this.toAwaitStatementFragments^@(fragments)
+			}
+			else if @value.isInSituStatement() {
+				var declarator = @declarators[0]
+
+				fragments.newLine().code('let ').compile(declarator).done()
 			}
 			else {
 				var declarator = @declarators[0]

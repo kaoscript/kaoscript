@@ -1,1 +1,1 @@
-func foobar(): Number => r if (r <- 42) == 0 else 0
+func foobar(): Number => (r <- 42) == 0 ? r : 0

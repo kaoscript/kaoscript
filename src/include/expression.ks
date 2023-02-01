@@ -50,6 +50,8 @@ abstract class Expression extends AbstractNode {
 	isInitializingInstanceVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
 	isInferable() => false
+	//if the expression is an inline statement which use directly the defined variable
+	isInSituStatement() => false
 	// if the expression is a lateinit field
 	isLateInit() => false
 	// if the expression can be freely assigned
@@ -152,19 +154,20 @@ include {
 	'../expression/conditional'
 	'../expression/create'
 	'../expression/curry'
+	'../expression/disruptive'
 	'../expression/enum'
 	'../expression/function'
 	'../expression/if'
-	'../expression/if-variable'
+	'../expression/match'
 	'../expression/member'
 	'../expression/object'
 	'../expression/omitted'
 	'../expression/regex'
+	'../expression/restrictive'
 	'../expression/sequence'
 	'../expression/template'
 	'../expression/this'
 	'../expression/try'
-	'../expression/unless'
 
 	'../expression/misc'
 }

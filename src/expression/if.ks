@@ -1,93 +1,331 @@
 class IfExpression extends Expression {
-	private {
+	private late {
+		@bindingScope: Scope
+		@bindingVariable: Expression?
 		@condition
-		@type
-		@whenFalse
-		@whenTrue
+		@declaration: VariableDeclaration
+		@declarator
+		@existential: Boolean					= false
+		@hasBinding: Boolean					= false
+		@hasCondition: Boolean					= true
+		@hasDeclaration: Boolean				= false
+		@inline: Boolean
+		@insitu: Boolean						= false
+		@type: Type
+		@valueName: String?						= null
+		@whenFalseExpression
+		@whenFalseScope: Scope
+		@whenTrueExpression
+		@whenTrueScope: Scope
 	}
-	analyse() { # {{{
-		@condition = $compile.expression(@data.condition, this)
-		@condition.analyse()
+	initiate() { # {{{
+		if ?@data.declaration {
+			@hasDeclaration = true
+			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
 
-		@whenTrue = $compile.expression(@data.whenTrue, this)
-		@whenTrue.analyse()
+			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind::Identifier
 
-		if ?@data.whenFalse {
-			@whenFalse = $compile.expression(@data.whenFalse, this)
-			@whenFalse.analyse()
+			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind::Existential
+
+			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @hasBinding)
+			@declaration.initiate()
 		}
 	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+	override analyse() { # {{{
+		@initiate()
 
-		for var data, name of @condition.inferTypes({}) {
-			@scope.updateInferable(name, data, this)
-		}
+		@inline = @data.whenTrue.statements.length == @data.whenFalse.statements.length == 1
 
-		@whenTrue.prepare(target, targetMode)
+		if !@inline {
+			var mut statement = @parent
+			var mut declaration = null
 
-		if ?@whenFalse {
-			@whenFalse.prepare(target, targetMode)
+			while statement is not Statement {
+				if statement is VariableDeclaration {
+					declaration = statement
+				}
 
-			var t = @whenTrue.type()
-			var f = @whenFalse.type()
-
-			if t.equals(f) {
-				@type = t
+				statement = statement.parent()
 			}
-			else if f.isNull() {
-				@type = t.setNullable(true)
+
+			if ?declaration {
+				var declarators = declaration.declarators()
+				var declarator = declarators[0]
+
+				// TODO!
+				// if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
+				if declarators.length == 1 {
+					if declarator is VariableIdentifierDeclarator {
+						@declarator = declarator
+						@insitu = true
+					}
+				}
 			}
-			else if t.isNull() {
-				@type = f.setNullable(true)
+
+			if @insitu {
+				statement.addAfterward(this)
 			}
 			else {
-				@type = Type.union(@scope, t, f)
+				statement.addBeforehand(this)
+			}
+		}
+
+		if @hasDeclaration {
+			@declaration.analyse()
+
+			if @hasBinding {
+				@bindingVariable = @declaration.value()
+			}
+			else if @inline {
+				@statement().addBeforehand(this)
+			}
+
+			if ?@data.condition {
+				@condition = $compile.expression(@data.condition, this, @bindingScope)
+				@condition.analyse()
+			}
+			else {
+				@hasCondition = false
 			}
 		}
 		else {
-			@type = @whenTrue.type()
+			@bindingScope = @newScope(@scope!?, @inline ? ScopeType::Hollow : ScopeType::Bleeding)
+
+			@condition = $compile.expression(@data.condition, this, @bindingScope)
+			@condition.analyse()
+		}
+
+		@scope.line(@data.whenTrue.start.line)
+		@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
+		@whenTrueExpression.analyse()
+
+		@scope.line(@data.whenFalse.start.line)
+		@whenFalseScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		if @data.whenFalse.kind == NodeKind::IfExpression {
+			@whenFalseExpression = $compile.expression(@data.whenFalse, this, @whenFalseScope)
+			@whenFalseExpression.setCascade(true)
+			@whenFalseExpression.initiate()
+			@whenFalseExpression.analyse()
+		}
+		else {
+			@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
+			@whenFalseExpression.analyse()
 		}
 	} # }}}
-	translate() { # {{{
-		@condition.translate()
-		@whenTrue.translate()
-		@whenFalse.translate() if ?@whenFalse
+	override prepare(target, targetMode) { # {{{
+		if !@inline {
+			if @insitu {
+				@valueName = @declarator.variable().getSecureName()
+			}
+			else {
+				var statement = @statement()
+
+				@valueName = statement.scope().acquireTempName()
+
+				statement.assignTempVariables(statement.scope())
+			}
+		}
+
+		if @hasDeclaration {
+			@declaration.prepare(AnyType.NullableUnexplicit)
+
+			if @hasBinding {
+				@bindingVariable.acquireReusable(true)
+				@bindingVariable.releaseReusable()
+			}
+
+			if var variable ?= @declaration.getIdentifierVariable() {
+				variable.setRealType(variable.getRealType().setNullable(false))
+			}
+		}
+
+		if @hasCondition {
+			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+
+			for var data, name of @condition.inferTypes({}) {
+				@scope.updateInferable(name, data, this)
+			}
+
+			@condition.acquireReusable(false)
+			@condition.releaseReusable()
+		}
+
+		@statement().assignTempVariables(@bindingScope)
+
+		@scope.line(@data.whenTrue.start.line)
+		@whenTrueExpression.prepare(target, targetMode)
+
+		unless @whenTrueExpression.isExit() {
+			SyntaxException.throwDoNoExit(@whenTrueExpression)
+		}
+
+		@scope.line(@data.whenFalse.start.line)
+		@whenFalseExpression.prepare(target, targetMode)
+
+		unless @whenFalseExpression.isExit() {
+			SyntaxException.throwDoNoExit(@whenFalseExpression)
+		}
+
+		var t = @whenTrueExpression.type()
+		var f = @whenFalseExpression.type()
+
+		if t.equals(f) {
+			@type = t
+		}
+		else if f.isNull() {
+			@type = t.setNullable(true)
+		}
+		else if t.isNull() {
+			@type = f.setNullable(true)
+		}
+		else {
+			@type = Type.union(@scope, t, f)
+		}
 	} # }}}
+	override translate() { # {{{
+		if @hasDeclaration {
+			@declaration.translate()
+		}
+		if @hasCondition {
+			@condition.translate()
+		}
+
+		@whenTrueExpression.translate()
+		@whenFalseExpression.translate()
+	} # }}}
+	assignTempVariables(scope: Scope) => @statement().assignTempVariables(scope)
+	getValueName() => @valueName
 	isComputed() => true
-	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse?.isUsingVariable(name)
+	isInline() => @inline
+	isInSituStatement() => @insitu
+	isUsingVariable(name) => @condition?.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
-		@condition.listNonLocalVariables(scope, variables)
-		@whenTrue.listNonLocalVariables(scope, variables)
-		@whenFalse?.listNonLocalVariables(scope, variables)
+		@condition?.listNonLocalVariables(scope, variables)
+		@whenTrueExpression.listNonLocalVariables(scope, variables)
+		@whenFalseExpression.listNonLocalVariables(scope, variables)
 
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if ?@whenFalse {
+		if @inline {
+			if @hasDeclaration {
+				var mut first = true
+
+				@declaration.walkVariable((name, _) => {
+					if first {
+						first = false
+					}
+					else {
+						fragments.code(' && ')
+					}
+
+					fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+				})
+
+				if @hasCondition {
+					fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+				}
+			}
+			else {
+				fragments
+					.wrapCondition(@condition)
+			}
+
 			fragments
-				.wrapCondition(@condition)
 				.code(' ? ')
-				.compile(@whenTrue)
+				.compile(@whenTrueExpression)
 				.code(' : ')
-				.compile(@whenFalse)
+				.compile(@whenFalseExpression)
 		}
 		else {
-			fragments
-				.wrapCondition(@condition)
-				.code(' ? ')
-				.compile(@whenTrue)
-				.code(' : ', @whenTrue.getDefaultValue())
+			fragments.code(@valueName)
 		}
 	} # }}}
+	toAfterwardFragments(fragments, mode) { # {{{
+		@toStatementFragments(fragments, mode)
+	} # }}}
+	toBeforehandFragments(fragments, mode) { # {{{
+		@toStatementFragments(fragments, mode)
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		var ctrl = fragments.newControl()
+		if @inline {
+			if @hasDeclaration && !@hasBinding {
+				fragments.compile(@declaration)
+			}
+		}
+		else {
+			if @hasDeclaration && !@hasBinding {
+				fragments.compile(@declaration)
 
-		ctrl.code('if(')
+				var ctrl = fragments.newControl()
 
-		ctrl.compileCondition(@condition)
+				@toIfFragments(ctrl, mode)
 
-		ctrl.code(')').step().line(@whenTrue).done()
+				ctrl.done()
+			}
+			else {
+				var ctrl = fragments.newControl()
+
+				@toIfFragments(ctrl, mode)
+
+				ctrl.done()
+			}
+		}
+	} # }}}
+	toIfFragments(fragments, mode) { # {{{
+		fragments.code('if(')
+
+		if @hasDeclaration {
+			if @hasBinding {
+				fragments
+					.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
+					.compileReusable(@bindingVariable)
+					.code(')')
+
+				fragments.code(' ? (')
+
+				@declaration.declarator().toAssignmentFragments(fragments, @bindingVariable)
+
+				fragments.code(', true) : false')
+			}
+			else {
+				var mut first = true
+
+				@declaration.walkVariable((name, _) => {
+					if first {
+						first = false
+					}
+					else {
+						fragments.code(' && ')
+					}
+
+					fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+				})
+			}
+
+			if @hasCondition {
+				fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+			}
+		}
+		else {
+			fragments.compileCondition(@condition)
+		}
+
+		fragments.code(')').step()
+
+		fragments.compile(@whenTrueExpression, mode)
+
+		if @whenFalseExpression is IfStatement {
+			fragments.step().code('else ')
+
+			@whenFalseExpression.toIfFragments(fragments, mode)
+		}
+		else {
+			fragments.step().code('else').step()
+
+			fragments.compile(@whenFalseExpression, mode)
+		}
 	} # }}}
 	type() => @type
 }

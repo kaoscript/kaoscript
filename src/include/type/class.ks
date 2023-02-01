@@ -1749,7 +1749,7 @@ class ClassType extends Type {
 	} # }}}
 	// TODO
 	// listInstantiableMethods(name: String, methods: ClassMethodType[], keys: Number{}): Void {
-	listInstantiableMethods(name: String, methods: ClassMethodType[], keys): Void {
+	listInstantiableMethods(name: String, methods: ClassMethodType[], keys): Void { # {{{
 		if var functions ?= @instanceMethods[name] {
 			for var method in functions {
 				if !?keys[method.index()] {
@@ -1775,7 +1775,7 @@ class ClassType extends Type {
 		if @extending {
 			@extends.type().listInstantiableMethods(name, methods, keys)
 		}
-	}
+	} # }}}
 	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		var result = []
 

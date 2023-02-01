@@ -294,7 +294,7 @@ class LineBuilder extends ExpressionBuilder {
 		}
 	} # }}}
 	newControl(indent = @indent, initiator = true, terminator = true) { # {{{
-		return @writer.newControl(indent, initiator, terminator)
+		return @writer.newControl(indent, initiator, null, terminator)
 	} # }}}
 	newLine() => this
 	whenDone(@whenDone)

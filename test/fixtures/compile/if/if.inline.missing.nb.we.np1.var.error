@@ -1,0 +1,1 @@
+SyntaxException: The block doesn't return a value for every case (fixtures/compile/if/if.inline.missing.nb.we.np1.var.ks:3)

@@ -455,6 +455,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
+	isFinite() => true
 	isFlags() => @kind == EnumTypeKind::Bit
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()

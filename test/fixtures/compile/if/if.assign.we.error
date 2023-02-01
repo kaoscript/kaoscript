@@ -1,0 +1,1 @@
+SyntaxError: Expecting "NewLine" or "EOF" but got "i" (fixtures/compile/if/if.assign.we.ks:3:7)

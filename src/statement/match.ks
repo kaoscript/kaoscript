@@ -663,7 +663,7 @@ class MatchBindingValue extends AbstractNode {
 				immutable = false
 			}
 		}
-		
+
 		@name = @data.name.name
 
 		if ?@data.type {
@@ -928,6 +928,7 @@ class MatchConditionValue extends AbstractNode {
 	} # }}}
 	toStatementFragments(fragments) { # {{{
 	} # }}}
+	values() => @values
 }
 
 class MatchFilter extends AbstractNode {

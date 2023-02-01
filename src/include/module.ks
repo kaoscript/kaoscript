@@ -738,6 +738,7 @@ class ModuleBlock extends AbstractNode {
 		@module.exportMacro(name, macro.toMetadata())
 	} # }}}
 	file() => @module.file()
+	override getASTReference(name) => null
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if variable.static {

@@ -1,0 +1,1 @@
+SyntaxException: The 'match' doesn't match the following values: "default" (fixtures/compile/match/match.inline.arrow.missing.ks:14)

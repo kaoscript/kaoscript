@@ -68,7 +68,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo4MSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjQ0fSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NDZ9fQ=="
+                  "defaultValue": "eyJraW5kIjo4MiwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjQ0fSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NDZ9fQ=="
                 }
               ],
               "returns": "Boolean",

@@ -31,6 +31,7 @@ abstract class AbstractNode {
 	directory() => @parent.directory()
 	enhance()
 	file() => @parent.file()
+	getASTReference(name: String) => @parent?.getASTReference(name)
 	getFunctionNode() => @parent?.getFunctionNode()
 	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)

@@ -35,20 +35,5 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-		quxbaz() {
-			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
-		}
-		__ks_func_quxbaz_0(x, y) {
-			return (Operator.add(x, y) === 0) ? 42 : 24;
-		}
-		__ks_func_quxbaz_rt(that, proto, args) {
-			const t0 = Type.isValue;
-			if(args.length === 2) {
-				if(t0(args[0]) && t0(args[1])) {
-					return proto.__ks_func_quxbaz_0.call(that, args[0], args[1]);
-				}
-			}
-			throw Helper.badArgs();
-		}
 	}
 };

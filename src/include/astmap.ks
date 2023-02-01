@@ -72,12 +72,14 @@ var $expressions = {
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression
 	`\(NodeKind::CurryExpression)`				: CurryExpression
+	`\(NodeKind::DisruptiveExpression)`			: DisruptiveExpression
 	`\(NodeKind::EnumExpression)`				: EnumExpression
 	`\(NodeKind::FunctionExpression)`			: AnonymousFunctionExpression
 	`\(NodeKind::Identifier)`					: IdentifierLiteral
 	`\(NodeKind::IfExpression)`					: IfExpression
 	`\(NodeKind::LambdaExpression)`				: ArrowFunctionExpression
 	`\(NodeKind::Literal)`						: StringLiteral
+	`\(NodeKind::MatchExpression)`				: MatchExpression
 	`\(NodeKind::MemberExpression)`				: MemberExpression
 	`\(NodeKind::NamedArgument)`				: NamedArgument
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
@@ -85,12 +87,19 @@ var $expressions = {
 	`\(NodeKind::ObjectExpression)`				: ObjectExpression
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::PositionalArgument)`			: PositionalArgument
+	`\(NodeKind::Reference)`					: func(data, parent, scope) {
+		if var newData ?= parent.getASTReference(data.name) {
+			return $compile.expression(newData, parent, scope)
+		}
+
+		throw new NotSupportedException(`Unexpected reference \(data.name)`, parent)
+	}
 	`\(NodeKind::RegularExpression)`			: RegularExpression
+	`\(NodeKind::RestrictiveExpression)`		: RestrictiveExpression
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression
 	`\(NodeKind::TemplateExpression)`			: TemplateExpression
 	`\(NodeKind::ThisExpression)`				: ThisExpression
 	`\(NodeKind::TryExpression)`				: TryExpression
-	`\(NodeKind::UnlessExpression)`				: UnlessExpression
 }
 
 var $statements = {
@@ -121,15 +130,16 @@ var $statements = {
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(NodeKind::IncludeAgainDeclaration)`		: IncludeAgainDeclaration
 	`\(NodeKind::MacroDeclaration)`				: MacroDeclaration
+	`\(NodeKind::MatchStatement)`				: MatchStatement
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::PassStatement)`				: PassStatement
+	`\(NodeKind::PickStatement)`				: PickStatement
 	`\(NodeKind::RepeatStatement)`				: RepeatStatement
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration
 	`\(NodeKind::ReturnStatement)`				: ReturnStatement
 	`\(NodeKind::StructDeclaration)`			: StructDeclaration
-	`\(NodeKind::MatchStatement)`				: MatchStatement
 	`\(NodeKind::ThrowStatement)`				: ThrowStatement
 	`\(NodeKind::TryStatement)`					: TryStatement
 	`\(NodeKind::TupleDeclaration)`				: TupleDeclaration

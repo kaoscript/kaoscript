@@ -1,11 +1,3 @@
-func $return(data? = null) { # {{{
-	return {
-		kind: NodeKind::ReturnStatement
-		value: data
-		start: data.start
-	}
-} # }}}
-
 class ArrayComprehensionForFrom extends Expression {
 	private {
 		@bindingScope
@@ -37,12 +29,12 @@ class ArrayComprehensionForFrom extends Expression {
 			@step.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
 		if ?@data.loop.when {
-			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -206,12 +198,12 @@ class ArrayComprehensionForIn extends Expression {
 			@index.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
 		if ?@data.loop.when {
-			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -408,12 +400,12 @@ class ArrayComprehensionForOf extends Expression {
 			}
 		}
 
-		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
 		if ?@data.loop.when {
-			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -565,12 +557,12 @@ class ArrayComprehensionForRange extends Expression {
 			@body.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
 		if ?@data.loop.when {
-			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -671,7 +663,7 @@ class ArrayComprehensionRepeat extends Expression {
 		@to = $compile.expression(@data.loop.expression, this, @scope)
 		@to.analyse()
 
-		@body = $compile.block($return(@data.body), this, @bodyScope)
+		@body = $compile.block($ast.return(@data.body), this, @bodyScope)
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{

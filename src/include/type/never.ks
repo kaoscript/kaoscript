@@ -6,6 +6,7 @@ class NeverType extends Type {
 		throw new NotSupportedException()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Never'
+	hashCode() => `Never`
 	isComplete() => true
 	isNever() => true
 	toFragments(fragments, node) { # {{{

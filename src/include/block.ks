@@ -190,6 +190,7 @@ class Block extends AbstractNode {
 
 		return false
 	} # }}}
+	length() => @length
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		for var statement in @statements {
 			statement.listNonLocalVariables(scope, variables)

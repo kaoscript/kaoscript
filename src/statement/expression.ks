@@ -123,8 +123,14 @@ class ExpressionStatement extends Statement {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else if @expression.isDeclarable() {
-			if @assignments.length != 0 {
+			if #@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
+			}
+
+			if #@beforehands {
+				for var beforehand in @beforehands {
+					beforehand.toBeforehandFragments(fragments, mode)
+				}
 			}
 
 			var mut line = fragments.newLine()
@@ -143,8 +149,14 @@ class ExpressionStatement extends Statement {
 			line.done()
 		}
 		else {
-			if @assignments.length != 0 {
+			if #@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
+			}
+
+			if #@beforehands {
+				for var beforehand in @beforehands {
+					beforehand.toBeforehandFragments(fragments, mode)
+				}
 			}
 
 			if ?@expression.toStatementFragments {
@@ -158,8 +170,8 @@ class ExpressionStatement extends Statement {
 			}
 		}
 
-		for afterward in @afterwards {
-			afterward.toAfterwardFragments(fragments)
+		for var afterward in @afterwards {
+			afterward.toAfterwardFragments(fragments, mode)
 		}
 	} # }}}
 	walkNode(fn) => fn(this) && @expression.walkNode(fn)

@@ -371,6 +371,9 @@ export class SyntaxException extends Exception {
 		throwDeadCodeParameter(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The default value of parameter "\(name)" must be "null" when its type is "required" and "nullable"`, node)
 		} # }}}
+		throwDoNoExit(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The block doesn't return a value for every case`, node)
+		} # }}}
 		throwDuplicateConstructor(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The constructor is matching an existing constructor`, node)
 		} # }}}
@@ -565,6 +568,9 @@ export class SyntaxException extends Exception {
 		throwMissingAssignmentTryClause(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized by the clause at`, node)
 		} # }}}
+		throwMissingElseClause(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The 'match' is missing the "else" clause`, node)
+		} # }}}
 		throwMissingRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)
 		} # }}}
@@ -646,6 +652,12 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwNotInitializedVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't initialized`, node)
+		} # }}}
+		throwNotMatchedPossibilities(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The 'match' doesn't match all possible values of the tested value`, node)
+		} # }}}
+		throwNotMatchedPossibilities(values, node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The 'match' doesn't match the following values: \($joinQuote(values))`, node)
 		} # }}}
 		throwNotNamedParameter(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`Parameter must be named`, node)

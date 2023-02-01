@@ -3,6 +3,7 @@ abstract class Statement extends AbstractNode {
 		@afterwards: Array		= []
 		@assignments: Array		= []
 		@attributeDatas			= {}
+		@beforehands: Array		= []
 		@line: Number
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
@@ -17,13 +18,16 @@ abstract class Statement extends AbstractNode {
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, super.file())
 		@line = data.start.line
 	} # }}}
+	addAfterward(node) { # {{{
+		@afterwards.push(node)
+	} # }}}
+	addBeforehand(node) { # {{{
+		@beforehands.push(node)
+	} # }}}
 	addAssignments(variables) { # {{{
 		@assignments.pushUniq(...variables)
 	} # }}}
 	addInitializableVariable(variable, node) => @parent.addInitializableVariable(variable, this)
-	afterward(node) { # {{{
-		@afterwards.push(node)
-	} # }}}
 	assignTempVariables(scope: Scope) { # {{{
 		scope.commitTempVariables(@assignments)
 	} # }}}
@@ -86,18 +90,24 @@ abstract class Statement extends AbstractNode {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		var variables = @assignments()
-		if variables.length != 0 {
+		if #variables {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 
-		if r ?= this.toStatementFragments(fragments, mode) {
-			r.afterwards = @afterwards
+		if #@beforehands {
+			for var beforehand in @beforehands {
+				beforehand.toBeforehandFragments(fragments, mode)
+			}
+		}
 
-			return r
+		if var result ?= this.toStatementFragments(fragments, mode) {
+			result.afterwards = @afterwards
+
+			return result
 		}
 		else {
-			for afterward in @afterwards {
-				afterward.toAfterwardFragments(fragments)
+			for var afterward in @afterwards {
+				afterward.toAfterwardFragments(fragments, mode)
 			}
 		}
 	} # }}}
@@ -130,6 +140,7 @@ include {
 	'../statement/match'
 	'../statement/namespace'
 	'../statement/pass'
+	'../statement/pick'
 	'../statement/repeat'
 	'../statement/return'
 	'../statement/throw'

@@ -151,6 +151,7 @@ class UnaryOperatorImplicit extends Expression {
 		}
 	} # }}}
 	override translate()
+	property() => @property
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@type).code($dot).compile(@property)
 	} # }}}

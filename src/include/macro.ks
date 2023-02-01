@@ -577,62 +577,46 @@ class MacroArgument extends Type {
 }
 
 func $callExpression(data, parent, scope) { # {{{
-	var late name: String
+	if var path ?= $ast.path(data.callee) {
+		if var macros ?= scope.getMacro(path) {
+			var arguments = MacroArgument.build(data.arguments)
 
-	if data.callee.kind == NodeKind::Identifier {
-		name = data.callee.name
-	}
-	else {
-		name = Generator.generate(data.callee)
-	}
+			for var macro in macros {
+				if macro.matchArguments(arguments) {
+					var result = macro.execute(data.arguments, parent)
 
-	if var macros ?= scope.getMacro(name) {
-		var arguments = MacroArgument.build(data.arguments)
-
-		for var macro in macros {
-			if macro.matchArguments(arguments) {
-				var result = macro.execute(data.arguments, parent)
-
-				if result.body.length == 1 {
-					return $compile.expression(result.body[0], parent)
-				}
-				else {
-					throw new NotImplementedException(parent)
+					if result.body.length == 1 {
+						return $compile.expression(result.body[0], parent)
+					}
+					else {
+						throw new NotImplementedException(parent)
+					}
 				}
 			}
-		}
 
-		ReferenceException.throwNoMatchingMacro(name, arguments, parent)
+			ReferenceException.throwNoMatchingMacro(path, arguments, parent)
+		}
 	}
-	else {
-		return new CallExpression(data, parent, scope)
-	}
+
+	return new CallExpression(data, parent, scope)
 } # }}}
 
 func $callStatement(data, parent, scope) { # {{{
-	var late name: String
+	if var path ?= $ast.path(data.callee) {
+		if var macros ?= scope.getMacro(path) {
+			var arguments = MacroArgument.build(data.arguments)
 
-	if data.callee.kind == NodeKind::Identifier {
-		name = data.callee.name
-	}
-	else {
-		name = Generator.generate(data.callee)
-	}
-
-	if var macros ?= scope.getMacro(name) {
-		var arguments = MacroArgument.build(data.arguments)
-
-		for var macro in macros {
-			if macro.matchArguments(arguments) {
-				return new CallMacroStatement(data, parent, scope, macro)
+			for var macro in macros {
+				if macro.matchArguments(arguments) {
+					return new CallMacroStatement(data, parent, scope, macro)
+				}
 			}
-		}
 
-		ReferenceException.throwNoMatchingMacro(name, arguments, parent)
+			ReferenceException.throwNoMatchingMacro(path, arguments, parent)
+		}
 	}
-	else {
-		return new ExpressionStatement(data, parent, scope)
-	}
+
+	return new ExpressionStatement(data, parent, scope)
 } # }}}
 
 class CallMacroStatement extends Statement {

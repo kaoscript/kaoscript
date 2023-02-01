@@ -372,7 +372,7 @@ abstract class Type {
 							return type
 						}
 						else {
-							ReferenceException.throwNotDefinedType(Type.getPathFromAST(data.typeName), node)
+							ReferenceException.throwNotDefinedType($ast.path(data.typeName), node)
 						}
 					}
 				}
@@ -386,19 +386,6 @@ abstract class Type {
 
 			console.info(data)
 			throw new NotImplementedException(node)
-		} # }}}
-		getPathFromAST(data): String { # {{{
-			match data.kind {
-				NodeKind::Identifier {
-					return data.name
-				}
-				NodeKind::MemberExpression {
-					return `\(Type.getPathFromAST(data.object)).\(data.property.name)`
-				}
-			}
-
-			console.info(data)
-			throw new NotImplementedException()
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
@@ -730,6 +717,7 @@ abstract class Type {
 	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
 	isExported() => @exported
 	isExtendable() => false
+	isFinite() => false
 	isFlexible() => false
 	isFunction() => false
 	isFusion() => false
