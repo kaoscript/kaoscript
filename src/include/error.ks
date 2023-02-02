@@ -285,6 +285,9 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
+		throwNotAType(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`"\(name)" is not a type`, node)
+		} # }}}
 		throwNotDefined(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} # }}}

@@ -256,7 +256,7 @@ abstract class Type {
 					return new NamedType(data.name.name, type.flagComplete())
 				}
 				NodeKind::ExclusionType {
-					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
+					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration {
 					if ?data.parameters {
@@ -266,11 +266,11 @@ abstract class Type {
 						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
-				NodeKind::FunctionExpression, NodeKind::MethodDeclaration {
+				NodeKind::FunctionExpression {
 					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
 				NodeKind::FusionType {
-					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
+					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind::Identifier {
 					if var variable ?= scope.getVariable(data.name) {
@@ -340,6 +340,14 @@ abstract class Type {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
 						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
+							if var variable ?= scope.getVariable(name, -1) {
+								var type = variable.getDeclaredType()
+
+								if type.isReference() || type.isAny() {
+									ReferenceException.throwNotAType(name, node)
+								}
+							}
+
 							if ?data.typeParameters {
 								var type = new ReferenceType(scope, name, nullable)
 
@@ -377,7 +385,7 @@ abstract class Type {
 					}
 				}
 				NodeKind::UnionType {
-					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
+					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind::VariableDeclarator, NodeKind::FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, node)
@@ -690,7 +698,7 @@ abstract class Type {
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
 	isComplete() => @complete
 	isContainedIn(types) { # {{{
-		for type in types {
+		for var type in types {
 			if @equals(type) {
 				return true
 			}

@@ -10,7 +10,7 @@ class CodeFragment extends Fragment {
 		end		= null
 		start	= null
 	}
-	// TODO
+	// TODO!
 	// constructor(code: String | Number) { # {{{
 	// 	super(code)
 	// } # }}}

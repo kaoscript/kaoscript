@@ -289,24 +289,6 @@ class ClassDeclaration extends Statement {
 			@class.addStaticVariable(name, variable.type())
 		}
 
-		for var methods, name of @staticMethods {
-			var async = @extendsType?.type().isAsyncStaticMethod(name) ?? methods[0].type().isAsync()
-
-			for method in methods {
-				method.prepare()
-
-				if async != method.type().isAsync() {
-					SyntaxException.throwInvalidSyncMethods(@name, name, this)
-				}
-
-				if @class.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
-					SyntaxException.throwIdenticalMethod(name, method)
-				}
-
-				@class.addStaticMethod(name, method.type())
-			}
-		}
-
 		for var variable, name of @instanceVariables {
 			variable.prepare()
 
@@ -346,6 +328,24 @@ class ClassDeclaration extends Statement {
 				}
 
 				@class.addAbstractMethod(name, method.type())
+			}
+		}
+
+		for var methods, name of @staticMethods {
+			var async = @extendsType?.type().isAsyncStaticMethod(name) ?? methods[0].type().isAsync()
+
+			for method in methods {
+				method.prepare()
+
+				if async != method.type().isAsync() {
+					SyntaxException.throwInvalidSyncMethods(@name, name, this)
+				}
+
+				if @class.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
+					SyntaxException.throwIdenticalMethod(name, method)
+				}
+
+				@class.addStaticMethod(name, method.type())
 			}
 		}
 

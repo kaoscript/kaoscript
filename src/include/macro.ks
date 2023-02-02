@@ -660,7 +660,7 @@ class CallMacroStatement extends Statement {
 	analyse() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.analyse()
@@ -671,7 +671,7 @@ class CallMacroStatement extends Statement {
 	enhance() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.enhance()
