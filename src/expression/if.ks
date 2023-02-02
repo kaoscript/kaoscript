@@ -52,13 +52,9 @@ class IfExpression extends Expression {
 				var declarators = declaration.declarators()
 				var declarator = declarators[0]
 
-				// TODO!
-				// if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
-				if declarators.length == 1 {
-					if declarator is VariableIdentifierDeclarator {
-						@declarator = declarator
-						@insitu = true
-					}
+				if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
+					@declarator = declarator
+					@insitu = true
 				}
 			}
 

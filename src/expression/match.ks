@@ -116,13 +116,9 @@ class MatchExpression extends Expression {
 			var declarators = declaration.declarators()
 			var declarator = declarators[0]
 
-			// TODO!
-			// if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
-			if declarators.length == 1 {
-				if declarator is VariableIdentifierDeclarator {
-					@declarator = declarator
-					@insitu = true
-				}
+			if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
+				@declarator = declarator
+				@insitu = true
 			}
 		}
 
@@ -462,8 +458,7 @@ abstract class PossibilityTracker {
 	}
 	abstract {
 		isFullyMatched(): Boolean
-		// TODO!
-		// listUnmatched(): String[]
+		listUnmatched(): String[]
 	}
 	exclude(condition) { # {{{
 		throw new NotSupportedException()
@@ -473,7 +468,7 @@ abstract class PossibilityTracker {
 class DummyPossibilityTracker extends PossibilityTracker {
 	override exclude(_)
 	override isFullyMatched() => true
-	listUnmatched() => []
+	override listUnmatched() => []
 }
 
 class EnumPossibilityTracker extends PossibilityTracker {
@@ -499,5 +494,5 @@ class EnumPossibilityTracker extends PossibilityTracker {
 		}
 	} # }}}
 	override isFullyMatched() => !#@possibilities
-	listUnmatched() => @possibilities
+	override listUnmatched() => @possibilities
 }

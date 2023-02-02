@@ -143,7 +143,14 @@ class CallSuperConstructorSubstitude extends Substitude {
 	isNullable() => false
 	isSkippable() => @skippable
 	toFragments(fragments, mode) { # {{{
-		if !?@result || @result is LenientCallMatchResult {
+		if @result is PreciseCallMatchResult && @result.matches.length == 1 {
+			var { function, positions } = @result.matches[0]
+
+			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
+
+			Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
+		}
+		else {
 			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_rt.call(null, this, [`)
 
 			for argument, index in @arguments {
@@ -155,18 +162,6 @@ class CallSuperConstructorSubstitude extends Substitude {
 			}
 
 			fragments.code(']')
-		}
-		else {
-			if @result.matches.length == 1 {
-				var { function, positions } = @result.matches[0]
-
-				fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
-
-				Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
-			}
-			else {
-				throw new NotImplementedException()
-			}
 		}
 	} # }}}
 	type() => Type.Void

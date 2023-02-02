@@ -255,6 +255,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
+	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
 			return true

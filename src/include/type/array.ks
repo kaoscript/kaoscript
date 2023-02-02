@@ -217,6 +217,7 @@ class ArrayType extends Type {
 	} # }}}
 	isComplete() => true
 	isExportable() => true
+	isInstanceOf(value: AnyType) => false
 	isIterable() => true
 	isMorePreciseThan(value) => true
 	isNullable() => @nullable

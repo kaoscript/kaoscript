@@ -1541,6 +1541,7 @@ class ClassType extends Type {
 	isHybrid() => @hybrid
 	isInitializing() => @sequences.initializations != -1
 	// TODO rename to `isSubclassOf`
+	isInstanceOf(value: AnyType) => false
 	isInstanceOf(value: ClassType) { # {{{
 		if this == value {
 			return true
