@@ -80,6 +80,15 @@ class FusionType extends Type {
 		console.log(this)
 		throw new NotImplementedException()
 	} # }}}
+	hasMutableAccess() { # {{{
+		for var type in @types {
+			if type.hasMutableAccess() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isArray() { # {{{
 		for var type in @types {
 			if type.isArray() {

@@ -1,0 +1,1 @@
+SyntaxException: A file can't include itself (fixtures/compile/include/include.self.ks:1)

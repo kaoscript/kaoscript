@@ -447,7 +447,7 @@ namespace Router {
 			}
 		}
 		// TODO!
-		// echo(functions)
+		// echo('hello')
 
 		var functionList = [assessment.functions[index] for var index in functions]
 

@@ -9,6 +9,7 @@ abstract class Expression extends AbstractNode {
 			ReferenceException.throwInvalidAssignment(this)
 		}
 	} # }}}
+	flagMutating()
 	getDeclaredType() => @type()
 	getDefaultValue(): String => 'null'
 	getUnpreparedType() => AnyType.NullableUnexplicit

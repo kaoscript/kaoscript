@@ -428,6 +428,9 @@ export class SyntaxException extends Exception {
 		throwIdenticalMacro(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`A macro, named "\(name)", already exists`, node)
 		} # }}}
+		throwIncludeSelf(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`A file can't include itself`, node)
+		} # }}}
 		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node): Never ~ SyntaxException { # {{{
 			var last = functions.length - 1
 			var mut fragments = ''

@@ -576,6 +576,7 @@ class NamedType extends Type {
 	} # }}}
 
 	proxy @type {
+		hasMutableAccess
 		isComplete
 	}
 }

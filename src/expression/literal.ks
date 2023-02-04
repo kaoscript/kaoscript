@@ -113,6 +113,11 @@ class IdentifierLiteral extends Literal {
 	flagAssignable() { # {{{
 		@assignable = true
 	} # }}}
+	flagMutating() { # {{{
+		if @isVariable {
+			@variable().flagMutating()
+		}
+	} # }}}
 	getVariableDeclaration(class) { # {{{
 		return class.getInstanceVariable(@value)
 	} # }}}

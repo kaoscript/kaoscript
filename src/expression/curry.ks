@@ -21,6 +21,7 @@ class CurryExpression extends CallExpression {
 			@addCallee(new DefaultCallee(@data, null, null, this))
 		}
 	} # }}}
+	override isExit() => false
 	toCallFragments(fragments, mode) { # {{{
 		if @callees.length == 1 {
 			@callees[0].toCurryFragments(fragments, mode, this)

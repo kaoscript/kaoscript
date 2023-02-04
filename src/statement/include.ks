@@ -15,6 +15,10 @@ class IncludeDeclaration extends Statement {
 				x = fs.resolve(directory, file)
 
 				if fs.isFile(x) || fs.isFile((x += $extensions.source, x)) {
+					if x == @file() {
+						SyntaxException.throwIncludeSelf(this)
+					}
+
 					if @canLoadLocalFile(x) {
 						@loadLocalFile(data, x)
 					}

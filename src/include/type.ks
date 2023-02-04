@@ -663,6 +663,7 @@ abstract class Type {
 	// TODO merge
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
+	hasMutableAccess() => false
 	hasProperty(name: String): Boolean => false
 	isAlias() => false
 	isAlien() => @alien

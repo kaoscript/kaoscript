@@ -182,6 +182,7 @@ class ArrayType extends Type {
 
 		return str
 	} # }}}
+	hasMutableAccess() => true
 	hasProperties() => @length > 0
 	hasRest() => @rest
 	isArray() => true

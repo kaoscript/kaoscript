@@ -4,6 +4,7 @@ class Block extends AbstractNode {
 		@empty: Boolean		= false
 		@exit: Boolean		= false
 		@length: Number		= 0
+		@offset: Number		= 0
 		@statements: Array	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
@@ -17,6 +18,7 @@ class Block extends AbstractNode {
 
 		@length = @data.statements.length
 		@empty = @length == 0
+		@offset = @scope.getLineOffset()
 	} # }}}
 	analyse() { # {{{
 		for var data in @data.statements {
@@ -29,6 +31,8 @@ class Block extends AbstractNode {
 			@statements.push(statement)
 		}
 
+		@scope.setLineOffset(@offset)
+
 		for var statement in @statements {
 			@scope.line(statement.line())
 
@@ -39,6 +43,8 @@ class Block extends AbstractNode {
 			}
 		}
 
+		@scope.setLineOffset(@offset)
+
 		for var statement in @statements {
 			@scope.line(statement.line())
 
@@ -46,36 +52,25 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if !target.isVoid() && !target.isAny() {
-			for var statement, index in @statements {
-				@scope.line(statement.line())
+		@scope.setLineOffset(@offset)
 
-				if @exit {
-					SyntaxException.throwDeadCode(statement)
-				}
+		for var statement, index in @statements {
+			@scope.line(statement.line())
 
-				statement.prepare(target, index, @length)
-
-				@exit = statement.isExit()
+			if @exit {
+				SyntaxException.throwDeadCode(statement)
 			}
-		}
-		else {
-			for var statement, index in @statements {
-				@scope.line(statement.line())
 
-				if @exit {
-					SyntaxException.throwDeadCode(statement)
-				}
+			statement.prepare(target, index, @length)
 
-				statement.prepare(target, index, @length)
-
-				@exit = statement.isExit()
-			}
+			@exit = statement.isExit()
 		}
 
 		@checkExit(target)
 	} # }}}
 	translate() { # {{{
+		@scope.setLineOffset(@offset)
+
 		for statement in @statements {
 			@scope.line(statement.line())
 
@@ -91,6 +86,8 @@ class Block extends AbstractNode {
 		@data.statements.push(statement)
 	} # }}}
 	analyse(from: Number, to: Number = @data.statements.length:Number + 1) { # {{{
+		@scope.setLineOffset(@offset)
+		
 		for var data in @data.statements from from to to {
 			@scope.line(data.start.line)
 
@@ -107,7 +104,11 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	analyse(statements: Array<AbstractNode>) { # {{{
+		@scope.setLineOffset(@offset)
+		
 		for statement in statements {
+			@scope.line(statement.line())
+
 			@statements.push(statement)
 
 			statement.analyse()

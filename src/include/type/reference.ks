@@ -539,6 +539,7 @@ class ReferenceType extends Type {
 
 		return hash
 	} # }}}
+	hasMutableAccess() => @name == 'Array' | 'Object' || @type().hasMutableAccess()
 	hasParameters() => @parameters.length > 0
 	isAlias() => @type().isAlias()
 	isAlien() => @type().isAlien()
@@ -667,7 +668,7 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || @type().isBoolean()
 	isClass() => @name == 'Class'
-	isClassInstance() => @type().isClass()
+	isClassInstance() => @name != 'Object' && @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
 	override isComplete() => @type().isComplete()
 	isEnum() => @name == 'Enum' || @type().isEnum()

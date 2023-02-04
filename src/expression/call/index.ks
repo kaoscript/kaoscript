@@ -101,6 +101,8 @@ class CallExpression extends Expression {
 		if @object != null {
 			@object.prepare(AnyType.NullableUnexplicit)
 
+			@object.flagMutating()
+
 			@property = @data.callee.property.name
 
 			@makeMemberCallee(@object.type())
@@ -1021,6 +1023,8 @@ class CallExpression extends Expression {
 			if argument.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(argument, this)
 			}
+
+			argument.flagMutating()
 		}
 
 		if @options.format.spreads == 'es5' {

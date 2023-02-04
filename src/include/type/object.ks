@@ -223,6 +223,7 @@ class ObjectType extends Type {
 
 		return str
 	} # }}}
+	hasMutableAccess() => true
 	hasProperty(name: String) => ?@properties[name]
 	hasProperties() => @length > 0
 	hasRest() => @rest

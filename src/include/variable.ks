@@ -103,6 +103,11 @@ class Variable {
 
 		return this
 	} # }}}
+	flagMutating() { # {{{
+		if @declaredType.hasMutableAccess() {
+			@realType = @declaredType
+		}
+	} # }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName

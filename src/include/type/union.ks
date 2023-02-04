@@ -257,6 +257,15 @@ class UnionType extends Type {
 
 		return elements.join('|')
 	} # }}}
+	hasMutableAccess() { # {{{
+		for var type in @types {
+			if type.hasMutableAccess() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isArray() { # {{{
 		for var type in @types {
 			if !type.isArray() {
