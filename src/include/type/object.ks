@@ -223,6 +223,7 @@ class ObjectType extends Type {
 
 		return str
 	} # }}}
+	hasProperty(name: String) => ?@properties[name]
 	hasProperties() => @length > 0
 	hasRest() => @rest
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
@@ -256,18 +257,24 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isInstanceOf(value: AnyType) => false
-	isMorePreciseThan(value: Type) { # {{{
-		if value.isAny() {
-			return true
+	isMorePreciseThan(value: AnyType) => true
+	isMorePreciseThan(value: ObjectType) { # {{{
+		return @restType.isMorePreciseThan(value.getRestType())
+	} # }}}
+	isMorePreciseThan(value: ReferenceType) { # {{{
+		return false unless value.isObject()
+
+		if value.isAlias() {
+			var alias = value.discard()
+
+			return alias.hasRest()
 		}
+		else {
+			return true unless value.hasParameters()
+			return false unless @rest
 
-		var type = value.discard()
-
-		if type.isObject() {
-			return true if type.hasRest()
+			return @restType.isMorePreciseThan(value.parameter())
 		}
-
-		return false
 	} # }}}
 	isNullable() => @nullable
 	isObject() => true
@@ -326,10 +333,6 @@ class ObjectType extends Type {
 				}
 			}
 			else {
-				if type && value.hasRest() {
-					return false unless value.getRestType().isNullable()
-				}
-
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
 						return false unless prop.isSubsetOf(type, mode)
@@ -337,6 +340,17 @@ class ObjectType extends Type {
 					else {
 						return false unless type.isNullable()
 					}
+				}
+
+				if value.hasRest() {
+					var rest = value.getRestType()
+
+					for var prop, name of @properties when !value.hasProperty(name) {
+						return false unless prop.isSubsetOf(rest, mode)
+					}
+				}
+				else if mode ~~ MatchingMode::Exact {
+					return false unless value.length() == @length
 				}
 			}
 		}
@@ -548,6 +562,16 @@ class ObjectType extends Type {
 
 		if @rest {
 			@restType.toVariations(variations)
+		}
+	} # }}}
+	override unspecify() { # {{{
+		var type = @scope.reference('Object')
+
+		if @nullable {
+			return type.setNullable(true)
+		}
+		else {
+			return type
 		}
 	} # }}}
 	walk(fn) { # {{{

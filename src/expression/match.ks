@@ -151,12 +151,7 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.dummy()
 		}
 		else {
-			if @valueType.isFinite() {
-				tracker = PossibilityTracker.create(@valueType.discard())
-			}
-			else {
-				SyntaxException.throwMissingElseClause(this)
-			}
+			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
 		if @reusableValue {
@@ -195,7 +190,7 @@ class MatchExpression extends Expression {
 		}
 
 		unless tracker.isFullyMatched() {
-			if @valueType.isFinite() {
+			if tracker.isFinite() {
 				SyntaxException.throwNotMatchedPossibilities(tracker.listUnmatched(), this)
 			}
 			else {
@@ -450,13 +445,14 @@ abstract class PossibilityTracker {
 				return new EnumPossibilityTracker(type)
 			}
 
-			throw new NotImplementedException()
+			return new DefaultPossibilityTracker()
 		} # }}}
 		dummy(): PossibilityTracker { # {{{
 			return new DummyPossibilityTracker()
 		} # }}}
 	}
 	abstract {
+		isFinite(): Boolean
 		isFullyMatched(): Boolean
 		listUnmatched(): String[]
 	}
@@ -465,8 +461,16 @@ abstract class PossibilityTracker {
 	} # }}}
 }
 
+class DefaultPossibilityTracker extends PossibilityTracker {
+	override exclude(_)
+	override isFinite() => false
+	override isFullyMatched() => false
+	override listUnmatched() => []
+}
+
 class DummyPossibilityTracker extends PossibilityTracker {
 	override exclude(_)
+	override isFinite() => false
 	override isFullyMatched() => true
 	override listUnmatched() => []
 }
@@ -493,6 +497,7 @@ class EnumPossibilityTracker extends PossibilityTracker {
 			}
 		}
 	} # }}}
+	override isFinite() => true
 	override isFullyMatched() => !#@possibilities
 	override listUnmatched() => @possibilities
 }

@@ -22,26 +22,38 @@ class ArrayExpression extends Expression {
 	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
-		var mut type = null
+		var mut spread = false
 
-		for var value, index in @values {
+		for var value in @values {
 			value.prepare(subtarget)
 
-			if index == 0 {
-				type = value.type().discardSpread()
-			}
-			else if type != null {
-				if !type.equals(value.type().discardSpread()) {
-					type = null
-				}
-			}
+			spread ||= value.type().isSpread()
 		}
 
-		if type == null {
-			@type = @scope.reference('Array')
+		if spread {
+			var mut type = @values[0].type().discardSpread()
+
+			for var value in @values from 1 {
+				if !type.equals(value.type().discardSpread()) {
+					type = null
+
+					break
+				}
+			}
+
+			if ?type {
+				@type = Type.arrayOf(type, @scope)
+			}
+			else {
+				@type = @scope.reference('Array')
+			}
 		}
 		else {
-			@type = Type.arrayOf(type, @scope)
+			@type = new ArrayType(@scope)
+
+			for var value in @values {
+				@type.addProperty(value.type())
+			}
 		}
 	} # }}}
 	translate() { # {{{

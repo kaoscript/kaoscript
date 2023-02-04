@@ -446,6 +446,8 @@ namespace Router {
 				SyntaxException.throwNamedOnlyParameters([label], node)
 			}
 		}
+		// TODO!
+		// echo(functions)
 
 		var functionList = [assessment.functions[index] for var index in functions]
 

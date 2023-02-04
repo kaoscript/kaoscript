@@ -234,7 +234,6 @@ class NamespaceType extends Type {
 		return false
 	} # }}}
 	hasProperty(name: String): Boolean => @properties[name] is Type
-	isContainer() => true
 	isExhaustive() { # {{{
 		if @exhaustive {
 			return true

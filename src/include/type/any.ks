@@ -124,7 +124,7 @@ class AnyType extends Type {
 	isNullable() => @nullable
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode::Anycast && !@explicit {
-			return !@nullable || value.isNullable()
+			return !@nullable || value.isNullable() || mode ~~ MatchingMode::NonNullToNull
 		}
 		else if mode ~~ MatchingMode::Exact {
 			return false unless value.isAny()

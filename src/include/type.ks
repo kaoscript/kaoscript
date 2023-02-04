@@ -546,7 +546,7 @@ abstract class Type {
 		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
 
-			if type.isContainer() {
+			if type is NamespaceType {
 				return new NamedContainerType(name, type)
 			}
 			else {
@@ -556,7 +556,7 @@ abstract class Type {
 		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { # {{{
 			return type unless type.shallBeNamed()
 
-			var namedType = type.isContainer() ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
+			var namedType = type is NamespaceType ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
 
 			scope.define(namedType.name(), true, namedType, node)
 
@@ -706,7 +706,6 @@ abstract class Type {
 
 		return false
 	} # }}}
-	isContainer() => false
 	isEnum() => false
 	isExclusion() => false
 	isExhaustive() { # {{{
@@ -725,7 +724,6 @@ abstract class Type {
 	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
 	isExported() => @exported
 	isExtendable() => false
-	isFinite() => false
 	isFlexible() => false
 	isFunction() => false
 	isFusion() => false
@@ -941,6 +939,7 @@ abstract class Type {
 		@required = false
 	} # }}}
 	unflagStrict(): this
+	unspecify(): this
 }
 
 include {

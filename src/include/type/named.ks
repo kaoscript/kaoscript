@@ -577,7 +577,6 @@ class NamedType extends Type {
 
 	proxy @type {
 		isComplete
-		isFinite
 	}
 }
 

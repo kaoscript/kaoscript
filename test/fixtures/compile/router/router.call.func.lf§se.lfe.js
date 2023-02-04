@@ -15,7 +15,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0([Helper.function((x) => {
+	foobar([Helper.function((x) => {
 		return "";
 	}, (fn, ...args) => {
 		const t0 = Type.isValue;

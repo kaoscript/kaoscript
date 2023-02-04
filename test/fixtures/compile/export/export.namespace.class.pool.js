@@ -1,5 +1,7 @@
+require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	var __ks_Array = require("../_/._array.ks.j5k8r9.ksb")().__ks_Array;
 	let NS = Helper.namespace(function() {
 		function foo() {
 			return foo.__ks_rt(this, arguments);

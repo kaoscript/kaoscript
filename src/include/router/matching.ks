@@ -101,6 +101,22 @@ namespace Matching {
 		} # }}}
 	}
 
+	func getSpreadParameter(type: Type): Type { # {{{
+		if type is ArrayType && type.length() > 0 {
+			var parameter = type.parameter()
+
+			if parameter.isUnion() {
+				return AnyType.NullableUnexplicit
+			}
+			else {
+				return parameter
+			}
+		}
+		else {
+			return type.parameter()
+		}
+	} # }}}
+
 	func isPreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
 		return argument.isAssignableToVariable(parameter, false, false, false)
 	} # }}}
@@ -166,7 +182,8 @@ namespace Matching {
 
 		for var type in types {
 			if type.isSpread() {
-				var parameters = splitArguments([type.parameter()])
+				// TODO split by properties if array
+				var parameters = splitArguments([getSpreadParameter(type)])
 
 				if parameters.length > 1 {
 					var oldCombinations = combinations
@@ -383,7 +400,7 @@ namespace Matching {
 
 				if node.max == 1 {
 					if cursor.spread {
-						var argument = cursor.argument.parameter()
+						var argument = getSpreadParameter(cursor.argument)
 
 						if isPreciseMatch(argument, node.type) {
 							cursor.used += 1
@@ -517,7 +534,7 @@ namespace Matching {
 
 					while i < node.min {
 						if cursor.spread {
-							if cursor.argument.parameter().isAssignableToVariable(node.type) {
+							if getSpreadParameter(cursor.argument).isAssignableToVariable(node.type) {
 								cursor.used += 1
 
 								matches.push(cursor.index)

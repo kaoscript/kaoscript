@@ -31,7 +31,7 @@ class BinaryOperatorTypeCasting extends Expression {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		if !(type is ReferenceType || type is UnionType || type.isAny()) {
+		unless type.isAny() || type is ArrayType | ObjectType | ReferenceType | UnionType {
 			TypeException.throwInvalidCasting(this)
 		}
 	} # }}}

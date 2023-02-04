@@ -3,7 +3,8 @@ extern system class Array {
 	concat(...): Array
 	indexOf(...): Number
 	push(...)
-	shift(): Any
+	pop(): Any?
+	shift(): Any?
 	splice(...): Array
 	unshift(...)
 }

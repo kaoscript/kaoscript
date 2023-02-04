@@ -643,8 +643,12 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	isSplitAssignment() => false
 	isStronglyTyped() => ?@data.type
 	name() => @name
-	setDeclaredType(type: Type) { # {{{
+	setDeclaredType(mut type: Type) { # {{{
 		if !?@type {
+			if !?@data.type {
+				type = type.unspecify()
+			}
+
 			if @nullable && !type.isNullable() {
 				@variable.setDeclaredType(type.setNullable(true))
 			}

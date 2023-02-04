@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Array) (fixtures/compile/tuple/tuple.call.te.ae.ks:6)

@@ -1,24 +1,29 @@
 require("kaoscript/register");
-const {Helper, OBJ, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/._float.ks.j5k8r9.ksb")().Float;
 	var __ks_Math = require("../_/._math.ks.j5k8r9.ksb")().__ks_Math;
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
-	const $caster = (() => {
-		const o = new OBJ();
-		o.percentage = Helper.function(function(n) {
+	let $caster = Helper.namespace(function() {
+		function percentage() {
+			return percentage.__ks_rt(this, arguments);
+		};
+		percentage.__ks_0 = function(n) {
 			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
-		}, (fn, ...args) => {
+		};
+		percentage.__ks_rt = function(that, args) {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return fn.call(null, args[0]);
+					return percentage.__ks_0.call(that, args[0]);
 				}
 			}
 			throw Helper.badArgs();
-		});
-		return o;
-	})();
+		};
+		return {
+			percentage
+		};
+	});
 	function srgb() {
 		return srgb.__ks_rt(this, arguments);
 	};

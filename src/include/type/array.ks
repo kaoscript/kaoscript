@@ -194,6 +194,9 @@ class ArrayType extends Type {
 				return true
 			}
 		}
+		else if value.isTuple() {
+			return false
+		}
 		else if value.isArray() {
 			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
@@ -203,7 +206,13 @@ class ArrayType extends Type {
 				return true
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			var mut matchingMode = MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast
+
+			if anycast {
+				matchingMode += MatchingMode::Anycast + MatchingMode::AnycastParameter
+			}
+
+			return this.isSubsetOf(value, matchingMode)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -219,15 +228,33 @@ class ArrayType extends Type {
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false
 	isIterable() => true
-	isMorePreciseThan(value) => true
+	isMorePreciseThan(value: AnyType) => true
+	isMorePreciseThan(value: ArrayType) { # {{{
+		return @restType.isMorePreciseThan(value.getRestType())
+	} # }}}
+	isMorePreciseThan(value: ReferenceType) { # {{{
+		return false unless value.isArray()
+
+		if value.isAlias() {
+			var alias = value.discard()
+
+			return alias.hasRest()
+		}
+		else {
+			return true unless value.hasParameters()
+			return false unless @rest
+
+			return @restType.isMorePreciseThan(value.parameter())
+		}
+	} # }}}
 	isNullable() => @nullable
 	isSealable() => true
 	isSpread() => @spread
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		return true if this == value
-		return false unless @rest == value.hasRest()
 
 		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false unless @rest == value.hasRest()
 			return false unless @length == value.length()
 
 			for var type, index in value.properties() {
@@ -253,17 +280,28 @@ class ArrayType extends Type {
 				}
 			}
 			else {
-				if value.hasRest() {
-					return false unless value.getRestType().isNullable()
-				}
+				var mut lastIndex = -1
 
 				for var type, index in value.properties() {
 					if var prop ?= @properties[index] {
+						lastIndex = index
+
 						return false unless prop.isSubsetOf(type, mode)
 					}
 					else {
 						return false unless type.isNullable()
 					}
+				}
+
+				if value.hasRest() {
+					var rest = value.getRestType()
+
+					for var prop in @properties from lastIndex + 1 {
+						return false unless prop.isSubsetOf(rest, mode)
+					}
+				}
+				else if mode ~~ MatchingMode::Exact {
+					return false unless lastIndex + 1 == @length
 				}
 			}
 		}
@@ -301,8 +339,13 @@ class ArrayType extends Type {
 	} # }}}
 	length() => @length
 	parameter(index: Number = -1) { # {{{
-		if @length > 0 || !@rest {
-			return AnyType.NullableUnexplicit
+		if @length > 0 {
+			if @rest {
+				return Type.union(@scope, ...@properties, @restType)
+			}
+			else {
+				return Type.union(@scope, ...@properties)
+			}
 		}
 		else {
 			return @restType
@@ -433,6 +476,16 @@ class ArrayType extends Type {
 
 		if @rest {
 			@restType.toVariations(variations)
+		}
+	} # }}}
+	override unspecify() { # {{{
+		var type = @scope.reference('Array')
+
+		if @nullable {
+			return type.setNullable(true)
+		}
+		else {
+			return type
 		}
 	} # }}}
 	walk(fn)

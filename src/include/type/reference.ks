@@ -679,7 +679,6 @@ class ReferenceType extends Type {
 	isExported() => @type().isExported()
 	isExportingFragment() => !@isVirtual()
 	isExtendable() => @name == 'Function'
-	isFinite() => @type().isFinite()
 	isFunction() => @name == 'Function' || @type().isFunction()
 	isFusion() => @type().isFusion()
 	isHybrid() => @type().isHybrid()

@@ -106,6 +106,18 @@
               "inits": []
             }
           ],
+          "pop": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any!?",
+              "errors": [],
+              "inits": []
+            }
+          ],
           "shift": [
             {
               "index": 0,
@@ -113,7 +125,7 @@
               "sealed": false,
               "async": false,
               "parameters": [],
-              "returns": "Any!",
+              "returns": "Any!?",
               "errors": [],
               "inits": []
             }

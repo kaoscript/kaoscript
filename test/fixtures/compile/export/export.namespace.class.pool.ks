@@ -1,3 +1,5 @@
+import '../_/_array'
+
 export namespace NS {
 	export func foo() {
 	}
