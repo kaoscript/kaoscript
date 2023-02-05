@@ -152,6 +152,7 @@ include {
 	'../expression/await'
 	'../expression/binding'
 	'../expression/call/index'
+	'../expression/cascade'
 	'../expression/conditional'
 	'../expression/create'
 	'../expression/curry'

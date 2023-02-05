@@ -68,6 +68,7 @@ var $expressions = {
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::AwaitExpression)`				: AwaitExpression
 	`\(NodeKind::CallExpression)`				: $callExpression
+	`\(NodeKind::CascadeExpression)`			: CascadeExpression
 	`\(NodeKind::ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression

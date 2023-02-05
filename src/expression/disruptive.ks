@@ -40,7 +40,7 @@ class DisruptiveExpression extends Expression {
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 
-		@scope.line(@data.mainExpression.start.line)
+		// @scope.line(@data.mainExpression.start.line)
 		@mainExpression = $compile.expression(@data.mainExpression, this)
 		@mainExpression.analyse()
 	} # }}}
@@ -50,7 +50,7 @@ class DisruptiveExpression extends Expression {
 		@condition.acquireReusable(false)
 		@condition.releaseReusable()
 
-		@scope.line(@data.mainExpression.start.line)
+		// @scope.line(@data.mainExpression.start.line)
 		@mainExpression.prepare(AnyType.NullableUnexplicit)
 
 		var mType = @mainExpression.type()
@@ -70,7 +70,7 @@ class DisruptiveExpression extends Expression {
 			scope.define(@valueName, false, mType, this)
 		}
 
-		@scope.line(@data.disruptedExpression.start.line)
+		// @scope.line(@data.disruptedExpression.start.line)
 		@disruptedExpression = $compile.expression(@data.disruptedExpression, this)
 		@disruptedExpression.analyse()
 		@disruptedExpression.prepare(target, targetMode)
