@@ -5,6 +5,7 @@ class ReturnStatement extends Statement {
 		@enumCasting: Boolean	= false
 		@exceptions: Boolean	= false
 		@function				= null
+		@inline: Boolean		= false
 		@value					= null
 		@temp: String?			= null
 		@type: Type				= Type.Void
@@ -15,6 +16,10 @@ class ReturnStatement extends Statement {
 		var mut ancestor = parent
 
 		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+			if ancestor is IfExpression | MatchExpression {
+				@inline = true
+			}
+
 			ancestor = ancestor.parent()
 		}
 
@@ -35,7 +40,11 @@ class ReturnStatement extends Statement {
 			@exceptions = @value.hasExceptions()
 		}
 	} # }}}
-	override prepare(target, targetMode) { # {{{
+	override prepare(mut target, targetMode) { # {{{
+		if @inline && ?@function {
+			target = @function.type().getReturnType()
+		}
+
 		if target.isNever() {
 			TypeException.throwUnexpectedReturnedValue(this)
 		}
@@ -237,6 +246,6 @@ class ReturnStatement extends Statement {
 			}
 		}
 	} # }}}
-	type() => @type
+	type() => @inline ? Type.Never : @type
 	value() => @value
 }

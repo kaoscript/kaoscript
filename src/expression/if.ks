@@ -34,7 +34,9 @@ class IfExpression extends Expression {
 	override analyse() { # {{{
 		@initiate()
 
-		@inline = @data.whenTrue.statements.length == @data.whenFalse.statements.length == 1
+		if @data.whenTrue.statements.length == @data.whenFalse.statements.length == 1 {
+			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind::PickStatement
+		}
 
 		if !@inline {
 			var mut statement = @parent
@@ -163,21 +165,10 @@ class IfExpression extends Expression {
 			SyntaxException.throwDoNoExit(@whenFalseExpression)
 		}
 
-		var t = @whenTrueExpression.type()
-		var f = @whenFalseExpression.type()
+		var trueType = @whenTrueExpression.type()
+		var falseType = @whenFalseExpression.type()
 
-		if t.equals(f) {
-			@type = t
-		}
-		else if f.isNull() {
-			@type = t.setNullable(true)
-		}
-		else if t.isNull() {
-			@type = f.setNullable(true)
-		}
-		else {
-			@type = Type.union(@scope, t, f)
-		}
+		@type = Type.union(@scope, trueType, falseType)
 	} # }}}
 	override translate() { # {{{
 		if @hasDeclaration {
@@ -244,31 +235,6 @@ class IfExpression extends Expression {
 	toBeforehandFragments(fragments, mode) { # {{{
 		@toStatementFragments(fragments, mode)
 	} # }}}
-	toStatementFragments(fragments, mode) { # {{{
-		if @inline {
-			if @hasDeclaration && !@hasBinding {
-				fragments.compile(@declaration)
-			}
-		}
-		else {
-			if @hasDeclaration && !@hasBinding {
-				fragments.compile(@declaration)
-
-				var ctrl = fragments.newControl()
-
-				@toIfFragments(ctrl, mode)
-
-				ctrl.done()
-			}
-			else {
-				var ctrl = fragments.newControl()
-
-				@toIfFragments(ctrl, mode)
-
-				ctrl.done()
-			}
-		}
-	} # }}}
 	toIfFragments(fragments, mode) { # {{{
 		fragments.code('if(')
 
@@ -321,6 +287,32 @@ class IfExpression extends Expression {
 			fragments.step().code('else').step()
 
 			fragments.compile(@whenFalseExpression, mode)
+		}
+	} # }}}
+	toQuote() => `if \(@hasDeclaration ? @declaration.toQuote() : @condition.toQuote()) { ... }`
+	toStatementFragments(fragments, mode) { # {{{
+		if @inline {
+			if @hasDeclaration && !@hasBinding {
+				fragments.compile(@declaration)
+			}
+		}
+		else {
+			if @hasDeclaration && !@hasBinding {
+				fragments.compile(@declaration)
+
+				var ctrl = fragments.newControl()
+
+				@toIfFragments(ctrl, mode)
+
+				ctrl.done()
+			}
+			else {
+				var ctrl = fragments.newControl()
+
+				@toIfFragments(ctrl, mode)
+
+				ctrl.done()
+			}
 		}
 	} # }}}
 	type() => @type

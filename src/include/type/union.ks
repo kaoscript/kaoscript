@@ -3,8 +3,10 @@ class UnionType extends Type {
 		@any: Boolean				= false
 		@explicit: Boolean
 		@explicitNullity: Boolean	= false
+		@never: Boolean				= false
 		@nullable: Boolean			= false
 		@types: Array<Type>			= []
+		@void: Boolean				= true
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
@@ -32,6 +34,25 @@ class UnionType extends Type {
 		}
 	} # }}}
 	addType(mut type: Type) { # {{{
+		if @void {
+			@void = false
+
+			if type.isNever() {
+				@never = true
+
+				return this
+			}
+		}
+
+		if @never {
+			if type.isNever() {
+				return this
+			}
+			else {
+				@never = false
+			}
+		}
+
 		if @any {
 			if !@nullable && type.isNullable() {
 				@nullable = true
@@ -62,6 +83,9 @@ class UnionType extends Type {
 			for var type in type.discard().types() {
 				@addType(type)
 			}
+		}
+		else if type.isNever() {
+			pass
 		}
 		else if type.isNullable() {
 			type = type.setNullable(false)
@@ -618,6 +642,12 @@ class UnionType extends Type {
 		}
 	} # }}}
 	type() { # {{{
+		if @void {
+			return Type.Void
+		}
+		if @never {
+			return Type.Never
+		}
 		if @types.length == 1 {
 			return @types[0]
 		}

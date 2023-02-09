@@ -301,7 +301,7 @@ class MacroDeclaration extends AbstractNode {
 
 		var mut source = ''
 
-		for fragment in builder.toArray() {
+		for var fragment in builder.toArray() {
 			source += fragment.code
 		}
 

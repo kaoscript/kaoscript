@@ -1,0 +1,1 @@
+TypeException: The operand "if test() { ... }" can't be of type "Never" (fixtures/compile/if/if.inline.throw.tt.ft.ks:4)

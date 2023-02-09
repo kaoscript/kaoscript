@@ -71,4 +71,5 @@ class ThrowStatement extends Statement {
 				.done()
 		}
 	} # }}}
+	type() => Type.Never
 }

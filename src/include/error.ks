@@ -761,6 +761,9 @@ export class TypeException extends Exception {
 		throwExpectedThrownError(node): Never ~ TypeException { # {{{
 			throw new TypeException(`An error is expected to be thrown`, node)
 		} # }}}
+		throwExpectedType(expression, type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The expression "\(expression)" is expected to be of type "\(type)"`, node)
+		} # }}}
 		throwInvalidInstantiation(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Class "\(name)" can't be instantiated`, node)
 		} # }}}

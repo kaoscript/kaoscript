@@ -579,6 +579,7 @@ abstract class Type {
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
 	abstract toVariations(variations: Array<String>): Void
 	asReference(): this
+	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
 	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()

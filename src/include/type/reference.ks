@@ -75,12 +75,13 @@ class ReferenceType extends Type {
 		@name = $types[name] ?? name
 		@nullable = @explicitlyNull
 	} # }}}
+	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
 	canBeFunction(any = true) => @isUnion() ? @type.canBeFunction(any) : super(any)
 	canBeNumber(any = true) => @isUnion() ? @type.canBeNumber(any) : super(any)
 	canBeObject(any = true) { # {{{
 		if @isUnion() {
-			return @type.canBeNumber(any)
+			return @type.canBeObject(any)
 		}
 		else if any && @isAny() {
 			return true

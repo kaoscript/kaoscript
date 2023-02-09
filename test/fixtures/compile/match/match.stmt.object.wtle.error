@@ -1,0 +1,1 @@
+TypeException: The expression "value" is expected to be of type "Object" (fixtures/compile/match/match.stmt.object.wtle.ks:2)

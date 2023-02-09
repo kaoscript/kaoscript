@@ -1,8 +1,11 @@
 class MatchExpression extends Expression {
 	private late {
+		@bindingScope: Scope
 		@castingEnum: Boolean				= false
 		@clauses							= []
+		@declaration: VariableDeclaration?
 		@declarator
+		@hasDeclaration: Boolean			= false
 		@hasDefaultClause: Boolean			= false
 		@hasLateInitVariables: Boolean		= false
 		@initializedVariables: Object		= {}
@@ -11,17 +14,44 @@ class MatchExpression extends Expression {
 		@name: String?						= null
 		@nextClauseIndex: Number
 		@reusableValue: Boolean				= false
+		@testArray: String?
+		@testData							= {
+			array: 0
+			number: 0
+			object: 0
+		}
+		@testNumber: String?
+		@testObject: String?
 		@usingFallthrough: Boolean			= false
 		@value								= null
-		@valueName: String?						= null
+		@valueName: String?					= null
 		@valueType: Type
 	}
-	override analyse() { # {{{
-		@value = $compile.expression(@data.expression, this)
-		@value.analyse()
+	override initiate() { # {{{
+		if ?@data.declaration {
+			@hasDeclaration = true
 
-		@reusableValue = @value is not IdentifierLiteral
-		@hasDefaultClause = false
+			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+
+			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, false)
+			@declaration.initiate()
+		}
+		else {
+			@bindingScope = @scope!?
+		}
+	} # }}}
+	override analyse() { # {{{
+		@initiate()
+
+		if @hasDeclaration {
+			@declaration.analyse()
+		}
+		else {
+			@value = $compile.expression(@data.expression, this)
+			@value.analyse()
+
+			@reusableValue = @value is not IdentifierLiteral
+		}
 
 		var dyn condition, binding
 		for var data, index in @data.clauses {
@@ -29,59 +59,34 @@ class MatchExpression extends Expression {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: @newScope(@scope!?, ScopeType::InlineBlock)
+				scope: @newScope(@bindingScope, ScopeType::InlineBlock)
 			}
 
 			@clauses.push(clause)
 
 			clause.scope.index = index
 
-			for var ccData in data.conditions {
-				if ccData.kind == NodeKind::MatchConditionArray {
-					condition = new MatchConditionArray(ccData, this, clause.scope)
-				}
-				else if ccData.kind == NodeKind::MatchConditionObject {
-					throw new NotImplementedException(this)
-				}
-				else if ccData.kind == NodeKind::MatchConditionRange {
-					condition = new MatchConditionRange(ccData, this, clause.scope)
-				}
-				else if ccData.kind == NodeKind::MatchConditionType {
-					condition = new MatchConditionType(ccData, this, clause.scope)
-				}
-				else {
-					condition = new MatchConditionValue(ccData, this, clause.scope)
-				}
+			var filter = new MatchFilter(data, this, clause.scope)
 
-				condition.analyse()
+			filter.analyse()
 
-				clause.conditions.push(condition)
+			if filter.hasTest() {
+				clause.hasTest = true
+
+				var data = filter.getTestData()
+
+				@testData.array += data.array
+				@testData.number += data.number
+				@testData.object += data.object
 			}
-
-			if clause.conditions.length == 0 {
+			else if @hasDefaultClause {
+				throw new NotSupportedException(this)
+			}
+			else {
 				@hasDefaultClause = true
 			}
 
-			for var bbData in data.bindings {
-				if bbData.kind == NodeKind::ArrayBinding {
-					binding = new MatchBindingArray(bbData, this, clause.scope)
-
-					clause.hasTest = true
-				}
-				else if bbData.kind == NodeKind::ObjectBinding {
-					throw new NotImplementedException(this)
-				}
-				else {
-					binding = new MatchBindingValue(bbData, this, clause.scope)
-				}
-
-				binding.analyse()
-
-				clause.bindings.push(binding)
-			}
-
-			clause.filter = new MatchFilter(data, this, clause.scope)
-			clause.filter.analyse()
+			clause.filter = filter
 
 			if data.body.kind == NodeKind::Block {
 				clause.body = $compile.block(data.body, this, clause.scope)
@@ -141,9 +146,31 @@ class MatchExpression extends Expression {
 			statement.assignTempVariables(statement.scope())
 		}
 
-		@value.prepare(AnyType.NullableUnexplicit)
+		if @hasDeclaration {
+			@declaration.prepare(AnyType.NullableUnexplicit)
 
-		@valueType = @value.type()
+			if var variable ?= @declaration.getIdentifierVariable() {
+				@name = variable.getSecureName()
+				@valueType = variable.getRealType().setNullable(false)
+
+				variable.setRealType(@valueType)
+			}
+			else {
+				throw new NotSupportedException()
+			}
+		}
+		else {
+			@value.prepare(AnyType.NullableUnexplicit)
+
+			@valueType = @value.type()
+
+			if @reusableValue {
+				@name = @scope.acquireTempName(false)
+			}
+			else {
+				@name = @scope.getVariable(@data.expression.name).getSecureName()
+			}
+		}
 
 		var late tracker: PossibilityTracker
 
@@ -154,8 +181,38 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
-		if @reusableValue {
-			@name = @scope.acquireTempName(false)
+		if @testData.array > 1 {
+			if @valueType.isArray() {
+				pass
+			}
+			else if @valueType.canBeNumber() {
+				@testArray = @scope.acquireTempName(false)
+			}
+			else {
+				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Array', this)
+			}
+		}
+		if @testData.number > 1 {
+			if @valueType.isNumber() {
+				pass
+			}
+			else if @valueType.canBeNumber() {
+				@testNumber = @scope.acquireTempName(false)
+			}
+			else {
+				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Number', this)
+			}
+		}
+		if @testData.object > 1 {
+			if @valueType.isObject() {
+				pass
+			}
+			else if @valueType.canBeObject() {
+				@testObject = @scope.acquireTempName(false)
+			}
+			else {
+				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Object', this)
+			}
 		}
 
 		var enumValue = @valueType.isEnum()
@@ -164,23 +221,14 @@ class MatchExpression extends Expression {
 		var mut maxConditions = 0
 
 		for var clause, index in @clauses {
-			for var condition in clause.conditions {
-				condition.prepare(@valueType)
+			clause.filter.prepare(@scope.reference('Boolean'))
 
-				if condition.isEnum() {
-					enumConditions += 1
-				}
+			enumConditions += clause.filter:MatchFilter.getEnumConditions()
+			maxConditions += clause.filter:MatchFilter.getMaxConditions()
 
-				maxConditions += 1
-
+			for var condition in clause.filter.conditions() {
 				tracker.exclude(condition)
 			}
-
-			for var binding in clause.bindings {
-				binding.prepare()
-			}
-
-			clause.filter.prepare(@scope.reference('Boolean'))
 
 			clause.body.prepare(target)
 
@@ -204,9 +252,7 @@ class MatchExpression extends Expression {
 			}
 			else {
 				for var clause in @clauses {
-					for var condition in clause.conditions {
-						condition.setCastingEnum(true)
-					}
+					clause.filter.setCastingEnum(true)
 				}
 
 				if enumValue || @valueType.isAny() {
@@ -268,21 +314,45 @@ class MatchExpression extends Expression {
 		}
 	} # }}}
 	override translate() { # {{{
-		@value.translate()
+		if @hasDeclaration {
+			@declaration.translate()
+		}
+		else {
+			@value.translate()
+		}
 
-		for clause in @clauses {
-			for condition in clause.conditions {
-				condition.translate()
-			}
-
-			for binding in clause.bindings {
-				binding.translate()
-			}
-
+		for var clause in @clauses {
 			clause.filter.translate()
 
 			clause.body.translate()
 		}
+	} # }}}
+	getTypeTester(fragments, type) { # {{{
+		match type {
+			'array' {
+				if ?@testArray {
+					return () => {
+						fragments.code(@testArray)
+					}
+				}
+			}
+			'number' {
+				if ?@testNumber {
+					return () => {
+						fragments.code(@testNumber)
+					}
+				}
+			}
+			'object' {
+				if ?@testObject {
+					return () => {
+						fragments.code(@testObject)
+					}
+				}
+			}
+		}
+
+		return null
 	} # }}}
 	getValueName() => @valueName
 	getValueType() => @valueType
@@ -298,7 +368,10 @@ class MatchExpression extends Expression {
 		@toStatementFragments(fragments, mode)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		if @reusableValue {
+		if @hasDeclaration {
+			fragments.compile(@declaration)
+		}
+		else if @reusableValue {
 			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
 
 			if @castingEnum {
@@ -325,12 +398,27 @@ class MatchExpression extends Expression {
 			line.done()
 		}
 
-		for var clause, clauseIdx in @clauses {
-			for var condition in clause.conditions {
-				condition.toStatementFragments(fragments)
-			}
+		if ?@testArray {
+			fragments
+				.newLine()
+				.code($runtime.scope(this), @testArray, ' = ', $runtime.typeof('Array', this), `(\(@name))`)
+				.done()
+		}
+		if ?@testNumber {
+			fragments
+				.newLine()
+				.code($runtime.scope(this), @testNumber, ' = ', $runtime.typeof('Number', this), `(\(@name))`)
+				.done()
+		}
+		if ?@testObject {
+			fragments
+				.newLine()
+				.code($runtime.scope(this), @testObject, ' = ', $runtime.typeof('Object', this), `(\(@name))`)
+				.done()
+		}
 
-			clause.filter.toStatementFragments(fragments)
+		for var clause, clauseIdx in @clauses {
+			clause.filter.toBeforehandFragments(fragments, @name)
 
 			if @usingFallthrough {
 				var line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
@@ -338,9 +426,7 @@ class MatchExpression extends Expression {
 
 				@nextClauseIndex = clauseIdx + 1
 
-				for binding in clause.bindings {
-					binding.toFragments(block)
-				}
+				clause.filter.toBindingFragments(block, @name)
 
 				clause.body.toFragments(block, mode)
 
@@ -353,11 +439,7 @@ class MatchExpression extends Expression {
 		var mut we = false
 
 		for var clause, clauseIdx in @clauses {
-			if clause.conditions.length != 0 {
-				if we {
-					SyntaxException.throwAfterDefaultClause(this)
-				}
-
+			if clause.hasTest {
 				if clauseIdx != 0 {
 					ctrl.step().code('else if(')
 				}
@@ -365,13 +447,7 @@ class MatchExpression extends Expression {
 					ctrl.code('if(')
 				}
 
-				for var condition, i in clause.conditions {
-					ctrl.code(' || ') if i != 0
-
-					condition.toConditionFragments(ctrl, @name)
-				}
-
-				clause.filter.toConditionFragments(ctrl, true)
+				clause.filter.toConditionFragments(ctrl, @name)
 
 				ctrl.code(')').step()
 
@@ -379,32 +455,7 @@ class MatchExpression extends Expression {
 					ctrl.line(`\(clause.name)()`)
 				}
 				else {
-					for var binding in clause.bindings {
-						binding.toFragments(ctrl)
-					}
-
-					clause.body.toFragments(ctrl, mode)
-				}
-			}
-			else if clause.hasTest {
-				if clauseIdx != 0 {
-					ctrl.step().code('else if(')
-				}
-				else {
-					ctrl.code('if(')
-				}
-
-				clause.filter.toConditionFragments(ctrl, false)
-
-				ctrl.code(')').step()
-
-				if @usingFallthrough {
-					ctrl.line(`\(clause.name)()`)
-				}
-				else {
-					for var binding in clause.bindings {
-						binding.toFragments(ctrl)
-					}
+					clause.filter.toBindingFragments(ctrl, @name)
 
 					clause.body.toFragments(ctrl, mode)
 				}
@@ -425,9 +476,7 @@ class MatchExpression extends Expression {
 					ctrl.line(`\(clause.name)()`)
 				}
 				else {
-					for var binding in clause.bindings {
-						binding.toFragments(ctrl)
-					}
+					clause.filter.toBindingFragments(ctrl, @name)
 
 					clause.body.toFragments(ctrl, mode)
 				}

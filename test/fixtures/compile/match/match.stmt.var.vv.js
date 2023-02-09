@@ -1,10 +1,15 @@
-const {Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(x) {
-		if(x === 0 && Operator.gt(x, 0) || Operator.lt(x, 0)) {
+	foobar.__ks_0 = function(value) {
+		let x = value();
+		if(x === 1) {
+			console.log(x);
+		}
+		else {
+			console.log("bye!");
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
