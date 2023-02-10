@@ -8,7 +8,7 @@ class TryExpression extends Expression {
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Disabled {
+			if modifier.kind == ModifierKind.Disabled {
 				@unwrap = true
 			}
 		}

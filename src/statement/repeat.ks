@@ -8,7 +8,7 @@ class RepeatStatement extends Statement {
 		@toName: String
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		if ?@data.expression {
 			@to = $compile.expression(@data.expression, this, @scope)

@@ -277,7 +277,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 			@type = Type.union(@scope, ...types)
 		}
 	} # }}}
-	operator() => Operator::EmptyCoalescing
+	operator() => Operator.EmptyCoalescing
 	symbol() => '##'
 	toFragments(fragments, mode) { # {{{
 		for var operand in @operands to~ -1 {

@@ -9,6 +9,6 @@ enum CardSuit<string> {
 	Spades
 }
 
-var dyn card = CardSuit::Clubs
+var dyn card = CardSuit.Clubs
 
 console.log(card)

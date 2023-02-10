@@ -44,7 +44,7 @@ class CreateExpression extends Expression {
 			if class.isAbstract() {
 				TypeException.throwAbstractInstantiation(type.name(), this)
 			}
-			if class.features() !~ ClassFeature::Constructor {
+			if class.features() !~ ClassFeature.Constructor {
 				TypeException.throwInvalidInstantiation(type.name(), this)
 			}
 

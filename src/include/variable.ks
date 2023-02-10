@@ -35,7 +35,7 @@ class Variable {
 		} # }}}
 		fromAST(data, scope) { # {{{
 			match data.kind {
-				NodeKind::Identifier {
+				NodeKind.Identifier {
 					return scope.getVariable(data.name)
 				}
 				else {

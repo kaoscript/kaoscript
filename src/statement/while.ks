@@ -9,11 +9,11 @@ class WhileStatement extends Statement {
 		@declaration: VariableDeclaration
 	}
 	initiate() { # {{{
-		if @data.condition.kind == NodeKind::VariableDeclaration {
+		if @data.condition.kind == NodeKind.VariableDeclaration {
 			@declared = true
-			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
+			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind.Identifier
 
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, true)
 			@declaration.initiate()
@@ -27,11 +27,11 @@ class WhileStatement extends Statement {
 				@condition = @declaration.value()
 			}
 
-			@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+			@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 		}
 		else {
-			@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
-			@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
+			@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
@@ -56,7 +56,7 @@ class WhileStatement extends Statement {
 			}
 		}
 		else {
-			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+			@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 			unless @condition.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@condition, this)

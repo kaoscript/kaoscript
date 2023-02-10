@@ -77,33 +77,33 @@ describe('color.space', func() {
 		it('get', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 
 		it('set :rgb', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			c.space('rgb')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 
 		it('set :green', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			c.space('green')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 
 		it('set :hsb', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			var dyn error
 			try {
@@ -120,11 +120,11 @@ describe('color.space', func() {
 		it('like :rgb', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
-			expect(c.like('rgb').space()).to.equal(Space::SRGB)
+			expect(c.like('rgb').space()).to.equal(Space.SRGB)
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 	})
 
@@ -132,11 +132,11 @@ describe('color.space', func() {
 		it('set :rvb', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			c.space('rvb')
 
-			expect(c.space()).to.equal(Space::RVB)
+			expect(c.space()).to.equal(Space.RVB)
 
 			expect(c.rouge()).to.equal(255)
 			expect(c.vert()).to.equal(255)
@@ -146,27 +146,27 @@ describe('color.space', func() {
 		it('set :rouge', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			c.space('rouge')
 
-			expect(c.space()).to.equal(Space::RVB)
+			expect(c.space()).to.equal(Space.RVB)
 		}) # }}}
 
 		it('like :rvb', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			expect(c.like('rvb')).to.eql({
 				_alpha: 0,
 				_blue: 0,
 				_rouge: 255,
-				_space: Space::RVB,
+				_space: Space.RVB,
 				_vert: 255
 			})
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 	})
 
@@ -174,11 +174,11 @@ describe('color.space', func() {
 		it('set :blue', func() { # {{{
 			var c = new Color('#ff0')
 
-			expect(c.space()).to.equal(Space::SRGB)
+			expect(c.space()).to.equal(Space.SRGB)
 
 			c.space('cmy')
 
-			expect(c.space()).to.equal(Space::CMY)
+			expect(c.space()).to.equal(Space.CMY)
 
 			var dyn error
 			try {

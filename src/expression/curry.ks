@@ -7,14 +7,14 @@ class CurryExpression extends CallExpression {
 
 			@object.prepare(AnyType.NullableUnexplicit)
 
-			if @object.type().isClassInstance() && @data.scope.kind != ScopeKind::This {
+			if @object.type().isClassInstance() && @data.scope.kind != ScopeKind.This {
 				SyntaxException.throwOnlyThisScope(this)
 			}
 
 			@addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 		else {
-			if @data.callee.kind == NodeKind::ThisExpression && @data.scope.kind != ScopeKind::This {
+			if @data.callee.kind == NodeKind.ThisExpression && @data.scope.kind != ScopeKind.This {
 				SyntaxException.throwOnlyThisScope(this)
 			}
 

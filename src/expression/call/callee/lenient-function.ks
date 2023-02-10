@@ -63,13 +63,13 @@ class LenientFunctionCallee extends Callee {
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			if @scope == ScopeKind::Argument {
+			if @scope == ScopeKind.Argument {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(')
 					.compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(null')
@@ -85,17 +85,17 @@ class LenientFunctionCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments.wrap(@expression, mode).code('.call(null')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.wrap(@expression, mode).code('(')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, false, fragments, mode)

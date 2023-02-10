@@ -39,7 +39,7 @@ class TryStatement extends Statement {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
-				scope = @newScope(@scope!?, ScopeType::InlineBlock)
+				scope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 				if ?clause.binding {
 					scope.define(clause.binding.name, false, Type.Any, this)
@@ -59,7 +59,7 @@ class TryStatement extends Statement {
 		}
 
 		if @hasDefaultClause {
-			var scope = @newScope(@scope!?, ScopeType::InlineBlock)
+			var scope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			if ?@data.catchClause.binding {
 				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
@@ -69,7 +69,7 @@ class TryStatement extends Statement {
 			@defaultClause.analyse()
 		}
 
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		@body = $compile.block($ast.body(@data), this, @bodyScope)
 		@body.analyse()
@@ -77,7 +77,7 @@ class TryStatement extends Statement {
 		@await = @body.isAwait()
 
 		if @hasFinally {
-			var scope = @newScope(@scope!?, ScopeType::InlineBlock)
+			var scope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			@finally = $compile.block(@data.finalizer, this, scope)
 			@finally.analyse()
@@ -581,7 +581,7 @@ class TryStatement extends Statement {
 			var mut item = null
 
 			for statement, i in statements while index == -1 {
-				if item ?= statement.toFragments(block, Mode::None) {
+				if item ?= statement.toFragments(block, Mode.None) {
 					index = i
 				}
 			}
@@ -595,7 +595,7 @@ class TryStatement extends Statement {
 		}
 
 		if @hasFinally {
-			@state = TryState::Finally
+			@state = TryState.Finally
 
 			var line = fragments
 				.newLine()
@@ -610,7 +610,7 @@ class TryStatement extends Statement {
 		}
 
 		if @hasClauses {
-			@state = TryState::Catch
+			@state = TryState.Catch
 
 			var line = fragments
 				.newLine()
@@ -624,14 +624,14 @@ class TryStatement extends Statement {
 			line.done()
 		}
 
-		@state = TryState::Body
+		@state = TryState.Body
 
 		var ctrl = fragments
 			.newControl()
 			.code('try')
 			.step()
 
-		ctrl.compile(@body, Mode::None)
+		ctrl.compile(@body, Mode.None)
 
 		ctrl
 			.step()
@@ -666,7 +666,7 @@ class TryStatement extends Statement {
 			.code('if(__ks_e)')
 			.step()
 
-		if @state == TryState::Body {
+		if @state == TryState.Body {
 			if ?@catchVarname {
 				ctrl.line(`\(@catchVarname)(__ks_e)`)
 			}
@@ -677,7 +677,7 @@ class TryStatement extends Statement {
 				ctrl.line(`\(@continueVarname)()`)
 			}
 		}
-		else if @state == TryState::Catch {
+		else if @state == TryState.Catch {
 			if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)
 			}
@@ -685,7 +685,7 @@ class TryStatement extends Statement {
 				ctrl.line(`\(@continueVarname)()`)
 			}
 		}
-		else if @state == TryState::Finally {
+		else if @state == TryState.Finally {
 			if ?@continueVarname {
 				ctrl.line(`\(@continueVarname)()`)
 			}
@@ -698,7 +698,7 @@ class TryStatement extends Statement {
 
 		var statement = statements[statements.length - 1]
 
-		if @state == TryState::Body {
+		if @state == TryState.Body {
 			if !statement.hasExceptions() && (statements.length == 1 || (statements.length == 2 && statements[0] is VariableDeclaration && statements[0].isAwait())) {
 				if statements.length == 2 {
 					ctrl.compile(statements[0])
@@ -731,7 +731,7 @@ class TryStatement extends Statement {
 				var mut item = null
 
 				for i from 0 to~ statements.length - 1 while index == -1 {
-					if item ?= statements[i].toFragments(ctrl2, Mode::None) {
+					if item ?= statements[i].toFragments(ctrl2, Mode.None) {
 						index = i
 					}
 				}
@@ -744,7 +744,7 @@ class TryStatement extends Statement {
 						statement.toReusableFragments(ctrl2)
 					}
 					else {
-						if item ?= statement.toFragments(ctrl2, Mode::None) {
+						if item ?= statement.toFragments(ctrl2, Mode.None) {
 							item([])
 						}
 					}
@@ -781,7 +781,7 @@ class TryStatement extends Statement {
 			var mut item = null
 
 			for i from 0 to~ statements.length while index == -1 {
-				if item ?= statements[i].toFragments(ctrl, Mode::None) {
+				if item ?= statements[i].toFragments(ctrl, Mode.None) {
 					index = i
 				}
 			}
@@ -790,7 +790,7 @@ class TryStatement extends Statement {
 				item(statements.slice(index + 1))
 			}
 
-			if @state == TryState::Catch {
+			if @state == TryState.Catch {
 				if ?@finallyVarname {
 					ctrl.line(`\(@finallyVarname)()`)
 				}
@@ -798,7 +798,7 @@ class TryStatement extends Statement {
 					ctrl.line(`\(@continueVarname)()`)
 				}
 			}
-			else if @state == TryState::Finally {
+			else if @state == TryState.Finally {
 				if ?@continueVarname {
 					ctrl.line(`\(@continueVarname)()`)
 				}
@@ -892,7 +892,7 @@ class TryStatement extends Statement {
 				.code('try')
 				.step()
 
-			ctrl.compile(@body, Mode::None)
+			ctrl.compile(@body, Mode.None)
 
 			if ?@finallyVarname {
 				ctrl.line(`\(@finallyVarname)()`)

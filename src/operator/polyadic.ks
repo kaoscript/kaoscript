@@ -130,7 +130,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -204,7 +204,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		if @enum {
 			@toEnumFragments(fragments)
 		}
-		else if operator == this.operator() && type == OperandType::Number {
+		else if operator == this.operator() && type == OperandType.Number {
 			for var operand, index in @operands {
 				if index != 0 {
 					fragments.code($comma)
@@ -254,7 +254,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -335,7 +335,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 				}
 
 				if @number && notNumber != null {
-					TypeException.throwInvalidOperand(notNumber, Operator::Addition, this)
+					TypeException.throwInvalidOperand(notNumber, Operator.Addition, this)
 				}
 			}
 
@@ -353,11 +353,11 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	isComputed() => @native
-	operator() => Operator::Addition
+	operator() => Operator.Addition
 	symbol() => '+'
 	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == Operator::Addition {
-			if type == OperandType::Enum && (@enum || @number) {
+		if operator == Operator.Addition {
+			if type == OperandType.Enum && (@enum || @number) {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code(' | ')
@@ -366,7 +366,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 					fragments.wrap(operand)
 				}
 			}
-			else if ((@number && type == OperandType::Number) || (@string && type == OperandType::String)) {
+			else if ((@number && type == OperandType.Number) || (@string && type == OperandType.String)) {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code($comma)
@@ -448,31 +448,31 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorDivision extends NumericPolyadicOperatorExpression {
-	operator() => Operator::Division
+	operator() => Operator.Division
 	runtime() => 'division'
 	symbol() => '/'
 }
 
 class PolyadicOperatorLeftShift extends NumericPolyadicOperatorExpression {
-	operator() => Operator::LeftShift
+	operator() => Operator.LeftShift
 	runtime() => 'leftShift'
 	symbol() => '<<'
 }
 
 class PolyadicOperatorModulo extends NumericPolyadicOperatorExpression {
-	operator() => Operator::Modulo
+	operator() => Operator.Modulo
 	runtime() => 'modulo'
 	symbol() => '%'
 }
 
 class PolyadicOperatorMultiplication extends NumericPolyadicOperatorExpression {
-	operator() => Operator::Multiplication
+	operator() => Operator.Multiplication
 	runtime() => 'multiplication'
 	symbol() => '*'
 }
 
 class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
-	operator() => Operator::Quotient
+	operator() => Operator.Quotient
 	runtime() => 'quotient'
 	symbol() => '/.'
 	toNativeFragments(fragments) { # {{{
@@ -488,19 +488,19 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 }
 
 class PolyadicOperatorRightShift extends NumericPolyadicOperatorExpression {
-	operator() => Operator::RightShift
+	operator() => Operator.RightShift
 	runtime() => 'rightShift'
 	symbol() => '>>'
 }
 
 class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 	isAcceptingEnum() => true
-	operator() => Operator::Subtraction
+	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
 	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == Operator::Subtraction {
-			if type == OperandType::Enum {
+		if operator == Operator.Subtraction {
+			if type == OperandType.Enum {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code(' & ~')

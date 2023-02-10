@@ -506,9 +506,6 @@ export class SyntaxException extends Exception {
 		throwInvalidAwait(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} # }}}
-		throwInvalidEnumAccess(node): Never ~ SyntaxException { # {{{
-			throw new SyntaxException(`Accessing an enum can only be done with "::"`, node)
-		} # }}}
 		throwInvalidEnumValue(data, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The enum's value isn't valid`, node, data)
 		} # }}}

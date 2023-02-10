@@ -387,7 +387,7 @@ class ReferenceType extends Type {
 		}
 		else {
 			var export = {
-				kind: TypeKind::Reference
+				kind: TypeKind.Reference
 				name: @name
 			}
 
@@ -405,7 +405,7 @@ class ReferenceType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name) { # {{{
 		if @nullable || @parameters.length != 0 {
 			var export = {
-				kind: TypeKind::Reference
+				kind: TypeKind.Reference
 				name: name.reference ?? name
 			}
 
@@ -644,7 +644,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 		}
 		else if value is ObjectType {
 			return false unless @isObject()
@@ -660,7 +660,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -767,7 +767,7 @@ class ReferenceType extends Type {
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		return false unless @isArray()
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless !value.hasProperties()
 			return false unless @hasParameters() == value.hasRest()
 
@@ -794,7 +794,7 @@ class ReferenceType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @isObject()
 			return false unless !value.hasProperties()
 			return false unless @hasParameters() == value.hasRest()
@@ -818,7 +818,7 @@ class ReferenceType extends Type {
 
 		return false unless @isFunction()
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false if @name == 'Function'
 		}
 		else {
@@ -831,12 +831,12 @@ class ReferenceType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		else if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if @name != value._name || @parameters.length != value._parameters.length {
 				return false
 			}
 
-			if mode ~~ MatchingMode::NonNullToNull {
+			if mode ~~ MatchingMode.NonNullToNull {
 				if @isNullable() && !value.isNullable() {
 					return false
 				}
@@ -888,7 +888,7 @@ class ReferenceType extends Type {
 				return @type().canBeVirtual(value.name())
 			}
 
-			if mode ~~ MatchingMode::AutoCast {
+			if mode ~~ MatchingMode.AutoCast {
 				if @type().isEnum() {
 					return @type().discard().type().isSubsetOf(value, mode)
 				}
@@ -906,8 +906,8 @@ class ReferenceType extends Type {
 			return @discardAlias().isSubsetOf(value, mode)
 		}
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
-			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode::Missing {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
 			}
 			else {
@@ -946,7 +946,7 @@ class ReferenceType extends Type {
 		else if value.isAny() {
 			return true
 		}
-		else if this.isSubsetOf(value, MatchingMode::Exact) {
+		else if this.isSubsetOf(value, MatchingMode.Exact) {
 			return true
 		}
 		else if @isFunction() {
@@ -1202,7 +1202,7 @@ class ReferenceType extends Type {
 		if @predefined {
 			return @export(references, indexDelta, mode, module)
 		}
-		else if mode ~~ ExportMode::Alien {
+		else if mode ~~ ExportMode.Alien {
 			if @type.isClass() {
 				return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
 			}
@@ -1210,7 +1210,7 @@ class ReferenceType extends Type {
 				return super(references, indexDelta, mode, module)
 			}
 		}
-		else if mode ~~ ExportMode::Requirement {
+		else if mode ~~ ExportMode.Requirement {
 			if @type.isRequirement() || !@type.isNative() {
 				if @type.isClass() {
 					return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
@@ -1262,7 +1262,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	override toRouteTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if @nullable && junction == Junction::AND
+		fragments.code('(') if @nullable && junction == Junction.AND
 
 		@toTestFragments(fragments, node, junction)
 
@@ -1270,7 +1270,7 @@ class ReferenceType extends Type {
 			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(')')
 		}
 
-		fragments.code(')') if @nullable && junction == Junction::AND
+		fragments.code(')') if @nullable && junction == Junction.AND
 	} # }}}
 	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
 		@resolve()
@@ -1283,12 +1283,12 @@ class ReferenceType extends Type {
 			fragments.code('function(value) { return ')
 
 			if @nullable {
-				@toTestFragments(fragments, literal, Junction::OR)
+				@toTestFragments(fragments, literal, Junction.OR)
 
 				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
 			}
 			else {
-				@toTestFragments(fragments, literal, Junction::NONE)
+				@toTestFragments(fragments, literal, Junction.NONE)
 			}
 
 			fragments.code('; }')
@@ -1297,19 +1297,19 @@ class ReferenceType extends Type {
 			fragments.code('value => ')
 
 			if @nullable {
-				@toTestFragments(fragments, literal, Junction::OR)
+				@toTestFragments(fragments, literal, Junction.OR)
 
 				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
 			}
 			else {
-				@toTestFragments(fragments, literal, Junction::NONE)
+				@toTestFragments(fragments, literal, Junction.NONE)
 			}
 		}
 
 		fragments.code(')')
 	} # }}}
 	private toTestFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction::AND {
+		if @nullable && junction == Junction.AND {
 			fragments.code('(')
 		}
 
@@ -1350,14 +1350,14 @@ class ReferenceType extends Type {
 			if node._options.format.functions == 'es5' {
 				fragments.code('function(value) { return ')
 
-				@parameters[0].toTestFragments(fragments, literal, Junction::NONE)
+				@parameters[0].toTestFragments(fragments, literal, Junction.NONE)
 
 				fragments.code('; }')
 			}
 			else {
 				fragments.code('value => ')
 
-				@parameters[0].toTestFragments(fragments, literal, Junction::NONE)
+				@parameters[0].toTestFragments(fragments, literal, Junction.NONE)
 			}
 		}
 
@@ -1366,7 +1366,7 @@ class ReferenceType extends Type {
 		if @nullable {
 			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
 
-			if junction == Junction::AND {
+			if junction == Junction.AND {
 				fragments.code(')')
 			}
 		}
@@ -1398,10 +1398,10 @@ class ReferenceType extends Type {
 		}
 
 		var mut subjunction = null
-		if @nullable && junction == Junction::AND {
+		if @nullable && junction == Junction.AND {
 			fragments.code('(')
 
-			subjunction = Junction::OR
+			subjunction = Junction.OR
 		}
 
 		var unalias = @discardAlias()

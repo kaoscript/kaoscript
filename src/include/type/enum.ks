@@ -75,10 +75,10 @@ class EnumType extends Type {
 			return type.flagComplete()
 		} # }}}
 	}
-	constructor(@scope, @kind = EnumTypeKind::Number) { # {{{
+	constructor(@scope, @kind = EnumTypeKind.Number) { # {{{
 		super(scope)
 
-		if @kind == EnumTypeKind::String {
+		if @kind == EnumTypeKind.String {
 			@type = scope.reference('String')
 		}
 		else {
@@ -118,16 +118,16 @@ class EnumType extends Type {
 		return index
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
-		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind::FieldDeclaration {
+			NodeKind.FieldDeclaration {
 				this.addVariable(data.name.name)
 			}
-			NodeKind::MethodDeclaration {
+			NodeKind.MethodDeclaration {
 				var mut instance = true
 				for i from 0 to~ data.modifiers.length while instance {
-					instance = false if data.modifiers[i].kind == ModifierKind::Static
+					instance = false if data.modifiers[i].kind == ModifierKind.Static
 				}
 
 				var type = EnumMethodType.fromAST(data, node)
@@ -262,7 +262,7 @@ class EnumType extends Type {
 		var exhaustive = @isExhaustive()
 
 		var export = {
-			kind: TypeKind::Enum
+			kind: TypeKind.Enum
 			type: @kind
 			sequenceIndex: @index
 			exhaustive
@@ -271,7 +271,7 @@ class EnumType extends Type {
 			staticMethods: {}
 		}
 
-		if @kind == EnumTypeKind::Bit {
+		if @kind == EnumTypeKind.Bit {
 			export.length = @length
 		}
 
@@ -338,6 +338,18 @@ class EnumType extends Type {
 			return null
 		}
 	} # }}}
+	getInstanceProperty(name: String) { # {{{
+		if name == 'value' {
+			return @type
+		}
+		else if var methods #= @instanceMethods[name] {
+			if methods.length == 1 {
+				return methods[0]
+			}
+		}
+
+		return null
+	} # }}}
 	getInstantiableMethod(name: String, type: FunctionType, mode: MatchingMode) { # {{{
 		var result = []
 
@@ -371,13 +383,14 @@ class EnumType extends Type {
 			return null
 		}
 	} # }}}
-	getProperty(name: String) { # {{{
-		if name == 'value' {
-			return @type
+	getStaticMethod(name: String): Type? { # {{{
+		if var methods #= @staticMethods[name] {
+			if methods.length == 1 {
+				return methods[0]
+			}
 		}
-		else {
-			return null
-		}
+
+		return null
 	} # }}}
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
@@ -417,7 +430,6 @@ class EnumType extends Type {
 
 		return false
 	} # }}}
-	hasProperty(name: String) => name == 'value'
 	incDefaultSequence() { # {{{
 		@sequences.defaults += 1
 
@@ -455,13 +467,13 @@ class EnumType extends Type {
 		}
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
-	isFlags() => @kind == EnumTypeKind::Bit
+	isFlags() => @kind == EnumTypeKind.Bit
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
-	isSubsetOf(value: EnumType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
+	isSubsetOf(value: EnumType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Similar {
+		if mode ~~ MatchingMode.Similar {
 			return value.name() == 'Enum'
 		}
 
@@ -532,7 +544,7 @@ class EnumVariableType {
 
 class EnumMethodType extends FunctionType {
 	private {
-		@access: Accessibility					= Accessibility::Public
+		@access: Accessibility					= Accessibility.Public
 		@alteration: Boolean					= false
 		@instance: Boolean						= false
 	}

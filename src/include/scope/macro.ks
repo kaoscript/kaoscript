@@ -33,7 +33,7 @@ class MacroScope extends Scope {
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
-		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature::StaticMethod, this)
+		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
 
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)

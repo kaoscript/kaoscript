@@ -59,7 +59,7 @@ class ExpressionStatement extends Statement {
 			@declaration = true
 
 			if leftMost {
-				left.setAssignment(AssignmentType::Declaration)
+				left.setAssignment(AssignmentType.Declaration)
 			}
 			else {
 				@assignments.push(...assignments)
@@ -105,7 +105,7 @@ class ExpressionStatement extends Statement {
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 
-		var item = @expression.toFragments(line, Mode::None)
+		var item = @expression.toFragments(line, Mode.None)
 
 		statements.unshift(this)
 
@@ -143,7 +143,7 @@ class ExpressionStatement extends Statement {
 				@expression.toAssignmentFragments(line)
 			}
 			else {
-				@expression.toFragments(line, Mode::None)
+				@expression.toFragments(line, Mode.None)
 			}
 
 			line.done()
@@ -160,12 +160,12 @@ class ExpressionStatement extends Statement {
 			}
 
 			if ?@expression.toStatementFragments {
-				@expression.toStatementFragments(fragments, Mode::None)
+				@expression.toStatementFragments(fragments, Mode.None)
 			}
 			else {
 				fragments
 					.newLine()
-					.compile(@expression, Mode::None)
+					.compile(@expression, Mode.None)
 					.done()
 			}
 		}

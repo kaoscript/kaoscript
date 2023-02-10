@@ -8,4 +8,4 @@ enum Foobar {
 
 func toString(foo: Foobar) => 'xyz'
 
-console.log(toString(Foobar::X))
+console.log(toString(Foobar.X))

@@ -8,4 +8,4 @@ bitmask AnimalFlags {
 
 var mut animal: AnimalFlags
 
-animal = AnimalFlags::HasClaws || AnimalFlags::CanFly || AnimalFlags::Endangered
+animal = AnimalFlags.HasClaws || AnimalFlags.CanFly || AnimalFlags.Endangered

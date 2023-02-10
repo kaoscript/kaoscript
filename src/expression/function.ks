@@ -10,7 +10,7 @@ class AnonymousFunctionExpression extends Expression {
 		@type: FunctionType
 	}
 	constructor(data, parent, scope) { # {{{
-		super(data, parent, scope, ScopeType::Function)
+		super(data, parent, scope, ScopeType.Function)
 	} # }}}
 	analyse() { # {{{
 		@scope.define('this', true, Type.Any, this)
@@ -69,7 +69,7 @@ class AnonymousFunctionExpression extends Expression {
 			if @autoTyping {
 				var type = @block.getUnpreparedType()
 
-				unless type.isSubsetOf(@type.getReturnType(), MatchingMode::FunctionSignature) {
+				unless type.isSubsetOf(@type.getReturnType(), MatchingMode.FunctionSignature) {
 					SyntaxException.throwInvalidFunctionReturn(@type.toString(), type.toString(), this)
 				}
 
@@ -125,9 +125,9 @@ class AnonymousFunctionExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code(`\($runtime.helper(this)).function(`)
 
-		var blockFunction = Parameter.toFragments(this, fragments.code('function('), ParameterMode::Default, (fragments) => fragments.code(')').newBlock())
+		var blockFunction = Parameter.toFragments(this, fragments.code('function('), ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
 
-		blockFunction.compile(@block, Mode::None)
+		blockFunction.compile(@block, Mode.None)
 
 		if !@awaiting && !@exit && @type.isAsync() {
 			blockFunction.line('__ks_cb()')
@@ -196,7 +196,7 @@ class ArrowFunctionExpression extends Expression {
 		@variables: Array<Variable>
 	}
 	constructor(data, parent, scope) { # {{{
-		super(data, parent, scope, ScopeType::Block)
+		super(data, parent, scope, ScopeType.Block)
 	} # }}}
 	analyse() { # {{{
 		@es5 = @options.format.functions == 'es5'
@@ -252,7 +252,7 @@ class ArrowFunctionExpression extends Expression {
 			if @autoTyping {
 				var type = @block.getUnpreparedType()
 
-				unless type.isSubsetOf(@type.getReturnType(), MatchingMode::FunctionSignature) {
+				unless type.isSubsetOf(@type.getReturnType(), MatchingMode.FunctionSignature) {
 					SyntaxException.throwInvalidFunctionReturn(@type.toString(), type.toString(), this)
 				}
 
@@ -357,9 +357,9 @@ class ArrowFunctionExpression extends Expression {
 		else {
 			fragments.code(`\($runtime.helper(this)).function(`)
 
-			var blockFunction = Parameter.toFragments(this, fragments.code('('), ParameterMode::Default, (fragments) => fragments.code(') =>').newBlock())
+			var blockFunction = Parameter.toFragments(this, fragments.code('('), ParameterMode.Default, (fragments) => fragments.code(') =>').newBlock())
 
-			blockFunction.compile(@block, Mode::None)
+			blockFunction.compile(@block, Mode.None)
 
 			if !@awaiting && !@exit && @type.isAsync() {
 				blockFunction.line('__ks_cb()')
@@ -411,7 +411,7 @@ class ArrowFunctionExpression extends Expression {
 			ctrl.code(variable.getSecureName())
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(fragments) {
 			return fragments.code(')').step()
 		})
 

@@ -35,7 +35,7 @@ class Literal extends Expression {
 class IdentifierLiteral extends Literal {
 	private late {
 		@assignable: Boolean			= false
-		@assignment: AssignmentType		= AssignmentType::Neither
+		@assignment: AssignmentType		= AssignmentType.Neither
 		@declaredType: Type
 		@isMacro: Boolean				= false
 		@isVariable: Boolean			= false
@@ -46,7 +46,7 @@ class IdentifierLiteral extends Literal {
 		super(data, parent, scope, data.name)
 	} # }}}
 	analyse() { # {{{
-		if @assignment == AssignmentType::Neither {
+		if @assignment == AssignmentType.Neither {
 			if @scope.hasVariable(@value) {
 				@isVariable = true
 				@line = @scope.line()
@@ -95,7 +95,7 @@ class IdentifierLiteral extends Literal {
 				@scope.renameNext(@value, @line)
 			}
 
-			if @assignment == AssignmentType::Neither && variable.isLateInit() && !variable.isInitialized() {
+			if @assignment == AssignmentType.Neither && variable.isLateInit() && !variable.isInitialized() {
 				SyntaxException.throwNotInitializedVariable(@value, this)
 			}
 
@@ -103,7 +103,7 @@ class IdentifierLiteral extends Literal {
 			@realType = variable.getRealType()
 		}
 
-		unless targetMode == TargetMode::Permissive || target.isVoid() || !@realType.isExplicit() || !target.isExplicit() || @realType.isSubsetOf(target, MatchingMode::Signature) {
+		unless targetMode == TargetMode.Permissive || target.isVoid() || !@realType.isExplicit() || !target.isExplicit() || @realType.isSubsetOf(target, MatchingMode.Signature) {
 			TypeException.throwInvalidIdentifierType(@value, @realType, target, this)
 		}
 	} # }}}
@@ -241,7 +241,7 @@ class NumberLiteral extends Literal {
 		@type = @scope.reference('Number')
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless targetMode == TargetMode::Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode::Signature) {
+		unless targetMode == TargetMode.Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode.Signature) {
 			TypeException.throwInvalidLiteralType(`"\(@value)"`, @type, target, this)
 		}
 	} # }}}
@@ -259,7 +259,7 @@ class StringLiteral extends Literal {
 		@type = @scope.reference('String')
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless targetMode == TargetMode::Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode::Signature) {
+		unless targetMode == TargetMode.Permissive || target.isVoid() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode.Signature) {
 			TypeException.throwInvalidLiteralType(@value, @type, target, this)
 		}
 	} # }}}

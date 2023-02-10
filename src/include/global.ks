@@ -10,12 +10,12 @@ var $extensions = { # {{{
 
 var $ast = {
 	block(data) { # {{{
-		if data.kind == NodeKind::Block {
+		if data.kind == NodeKind.Block {
 			return data
 		}
 		else {
 			return {
-				kind: NodeKind::Block
+				kind: NodeKind.Block
 				statements: [
 					data
 				]
@@ -27,18 +27,18 @@ var $ast = {
 	body(data?) { # {{{
 		if !?data.body {
 			return {
-				kind: NodeKind::Block
+				kind: NodeKind.Block
 				statements: []
 				start: data.start
 				end: data.end
 			}
 		}
-		else if data.body.kind == NodeKind::Block || data.body.kind == NodeKind::ReturnStatement {
+		else if data.body.kind == NodeKind.Block || data.body.kind == NodeKind.ReturnStatement {
 			return data.body
 		}
-		else if data.body.kind == NodeKind::IfStatement || data.body.kind == NodeKind::UnlessStatement {
+		else if data.body.kind == NodeKind.IfStatement || data.body.kind == NodeKind.UnlessStatement {
 			return {
-				kind: NodeKind::Block
+				kind: NodeKind.Block
 				statements: [data.body]
 				start: data.body.start
 				end: data.body.end
@@ -46,7 +46,7 @@ var $ast = {
 		}
 		else {
 			return {
-				kind: NodeKind::ReturnStatement
+				kind: NodeKind.ReturnStatement
 				value: data.body
 				start: data.body.start
 				end: data.body.end
@@ -65,7 +65,7 @@ var $ast = {
 	identifier(name) { # {{{
 		if name is String {
 			return {
-				kind: NodeKind::Identifier
+				kind: NodeKind.Identifier
 				name: name
 			}
 		}
@@ -75,11 +75,11 @@ var $ast = {
 	} # }}}
 	isThisField(name: String, data): Boolean { # {{{
 		match data.kind {
-			NodeKind::ThisExpression {
+			NodeKind.ThisExpression {
 				return data.name.name == name
 			}
-			NodeKind::MemberExpression {
-				return data.object.kind == NodeKind::Identifier && data.object.name == 'this' && data.property.kind == NodeKind::Identifier && (data.property.name == name || data.property.name == `_\(name)`)
+			NodeKind.MemberExpression {
+				return data.object.kind == NodeKind.Identifier && data.object.name == 'this' && data.property.kind == NodeKind.Identifier && (data.property.name == name || data.property.name == `_\(name)`)
 			}
 		}
 
@@ -87,18 +87,18 @@ var $ast = {
 	} # }}}
 	parameter() { # {{{
 		return {
-			kind: NodeKind::Parameter
+			kind: NodeKind.Parameter
 			attributes: []
 			modifiers: []
 		}
 	} # }}}
 	path(data): String? { # {{{
 		match data.kind {
-			NodeKind::Identifier {
+			NodeKind.Identifier {
 				return data.name
 			}
-			NodeKind::MemberExpression {
-				if data.property.kind == NodeKind::Identifier {
+			NodeKind.MemberExpression {
+				if data.property.kind == NodeKind.Identifier {
 					if var object ?= $ast.path(data.object) {
 						return `\(object).\(data.property.name)`
 					}
@@ -110,26 +110,26 @@ var $ast = {
 	} # }}}
 	pick(data) { # {{{
 		return {
-			kind: NodeKind::PickStatement
+			kind: NodeKind.PickStatement
 			value: data
 			start: data.start
 		}
 	} # }}}
 	return(data? = null) { # {{{
 		return {
-			kind: NodeKind::ReturnStatement
+			kind: NodeKind.ReturnStatement
 			value: data
 			start: data.start if ?data
 		}
 	} # }}}
 	some(data, filter): Boolean { # {{{
 		match data.kind {
-			NodeKind::BinaryExpression {
+			NodeKind.BinaryExpression {
 				if filter(data.left) || filter(data.right) || $ast.some(data.left, filter) || $ast.some(data.right, filter) {
 					return true
 				}
 			}
-			NodeKind::CallExpression {
+			NodeKind.CallExpression {
 				for var argument in data.arguments {
 					if filter(argument) || $ast.some(argument, filter) {
 						return true
@@ -150,8 +150,8 @@ var $compile = {
 		if var clazz ?= $expressions[data.kind] {
 			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
-		else if data.kind == NodeKind::BinaryExpression {
-			if data.operator.kind == BinaryOperatorKind::Assignment {
+		else if data.kind == NodeKind.BinaryExpression {
+			if data.operator.kind == BinaryOperatorKind.Assignment {
 				if var clazz ?= $assignmentOperators[data.operator.assignment] {
 					expression = new clazz(data, parent, scope)
 				}
@@ -166,7 +166,7 @@ var $compile = {
 				throw new NotSupportedException(`Unexpected binary operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind::PolyadicExpression {
+		else if data.kind == NodeKind.PolyadicExpression {
 			if var clazz ?= $polyadicOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
@@ -174,7 +174,7 @@ var $compile = {
 				throw new NotSupportedException(`Unexpected polyadic operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind::UnaryExpression {
+		else if data.kind == NodeKind.UnaryExpression {
 			if var clazz ?= $unaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
@@ -182,7 +182,7 @@ var $compile = {
 				throw new NotSupportedException(`Unexpected unary operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind::JunctionExpression {
+		else if data.kind == NodeKind.JunctionExpression {
 			throw new NotSupportedException(`Unexpected junction expression`, parent)
 		}
 		else {

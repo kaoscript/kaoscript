@@ -28,19 +28,19 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		for var modifier in data.modifiers {
 			match modifier.kind {
-				ModifierKind::Immutable {
+				ModifierKind.Immutable {
 					@immutable = true
 				}
-				ModifierKind::LateInit {
+				ModifierKind.LateInit {
 					@lateInit = true
 				}
-				ModifierKind::Private {
+				ModifierKind.Private {
 					private = true
 				}
-				ModifierKind::Static {
+				ModifierKind.Static {
 					@instance = false
 				}
-				ModifierKind::ThisAlias {
+				ModifierKind.ThisAlias {
 					alias = true
 				}
 			}
@@ -55,7 +55,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			}
 		}
 
-		if @class.features() !~ ClassFeature::Field {
+		if @class.features() !~ ClassFeature.Field {
 			TypeException.throwImplInvalidField(@variable.name(), this)
 		}
 	} # }}}
@@ -240,7 +240,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		@topNodes: Array					= []
 	}
 	constructor(data, parent, @variable) { # {{{
-		super(data, parent, parent.scope(), ScopeType::Function)
+		super(data, parent, parent.scope(), ScopeType.Function)
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)
@@ -248,24 +248,24 @@ class ImplementClassMethodDeclaration extends Statement {
 		@name = @data.name.name
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Override {
+			if modifier.kind == ModifierKind.Override {
 				@override = true
 			}
-			else if modifier.kind == ModifierKind::Overwrite {
+			else if modifier.kind == ModifierKind.Overwrite {
 				@overwrite = true
 			}
-			else if modifier.kind == ModifierKind::Static {
+			else if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
 
 		if @instance {
-			if @class.features() !~ ClassFeature::InstanceMethod {
+			if @class.features() !~ ClassFeature.InstanceMethod {
 				TypeException.throwImplInvalidInstanceMethod(@variable.name(), this)
 			}
 		}
 		else {
-			if @class.features() !~ ClassFeature::StaticMethod {
+			if @class.features() !~ ClassFeature.StaticMethod {
 				TypeException.throwImplInvalidStaticMethod(@variable.name(), this)
 			}
 		}
@@ -347,7 +347,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					SyntaxException.throwNotSealedOverwrite(this)
 				}
 
-				var methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError)
+				var methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode.SimilarParameter + MatchingMode.ShiftableParameters + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -362,7 +362,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, true, this)
 			}
 			else {
-				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameter + MatchingMode::IgnoreName + MatchingMode::Superclass) {
+				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -379,7 +379,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					NotImplementedException.throw(this)
 				}
 
-				var methods = @class.listMatchingStaticMethods(@name, @type, MatchingMode::ShiftableParameters)
+				var methods = @class.listMatchingStaticMethods(@name, @type, MatchingMode.ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -394,7 +394,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, false, this)
 			}
 			else {
-				if @class.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @class.hasMatchingStaticMethod(@name, @type, MatchingMode.ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -433,7 +433,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			var oldType = overridden.getReturnType()
 			var newType = @type.getReturnType()
 
-			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
+			unless newType.isSubsetOf(oldType, MatchingMode.Exact + MatchingMode.Missing) || newType.isInstanceOf(oldType) {
 				if @override {
 					if @isAssertingOverride() {
 						SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
@@ -497,13 +497,13 @@ class ImplementClassMethodDeclaration extends Statement {
 	class() => @variable
 	getMatchingMode(): MatchingMode { # {{{
 		if @override {
-			return MatchingMode::ShiftableParameters
+			return MatchingMode.ShiftableParameters
 		}
 		else if @overwrite {
-			return MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters
+			return MatchingMode.SimilarParameter + MatchingMode.ShiftableParameters
 		}
 		else {
-			return MatchingMode::ExactParameter
+			return MatchingMode.ExactParameter
 		}
 	} # }}}
 	getOverridableVarname() => 'this'
@@ -678,7 +678,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			null
 			assessment
 			block
-			exhaustive ? null : Router.FooterType::NO_THROW
+			exhaustive ? null : Router.FooterType.NO_THROW
 			exhaustive ? null : (fragments, _) => {
 				if !labelable {
 					fragments
@@ -723,7 +723,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			labelable ? 'args' : 'arguments'
 			assessment
 			block
-			exhaustive ? null : Router.FooterType::NO_THROW
+			exhaustive ? null : Router.FooterType.NO_THROW
 			exhaustive ? null : (fragments, _) => {
 				if !labelable {
 					fragments
@@ -777,7 +777,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()
@@ -797,10 +797,10 @@ class ImplementClassMethodDeclaration extends Statement {
 	type() => @type
 	private {
 		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
-			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 
 			if !@override {
-				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+				mode -= MatchingMode.MissingParameterType - MatchingMode.MissingParameterArity
 			}
 
 			var methods = superclass.listInstantiableMethods(@name, @type, mode)
@@ -812,7 +812,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 			else if methods.length > 0 {
 				for var m in methods {
-					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
+					if m.isSubsetOf(@type, MatchingMode.ExactParameter) {
 						method = m
 						exact = true
 
@@ -856,7 +856,7 @@ class ImplementClassMethodDeclaration extends Statement {
 						var oldType = method.getReturnType()
 						var newType = @type.getReturnType()
 
-						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
+						if !(newType.isSubsetOf(oldType, MatchingMode.Default + MatchingMode.Missing) || newType.isInstanceOf(oldType)) {
 							if @isAssertingOverride() {
 								SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 							}
@@ -884,7 +884,7 @@ class ImplementClassMethodDeclaration extends Statement {
 						var mut matched = false
 
 						for var newType in newTypes until matched {
-							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
+							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
 						}
@@ -904,7 +904,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					}
 				}
 
-				if !@override && (exact || type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::IgnoreName)) {
+				if !@override && (exact || type.isSubsetOf(method, MatchingMode.ExactParameter + MatchingMode.IgnoreName)) {
 					type.index(method.index())
 				}
 
@@ -924,7 +924,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		listOverloadedMethods(superclass: ClassType) { # {{{
 			if var methods ?= superclass.listInstanceMethods(@name) {
 				for var method in methods {
-					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
+					if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
 						return []
 					}
 				}
@@ -933,7 +933,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			return superclass.listInstantiableMethods(
 				@name
 				@type
-				MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter
+				MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter
 			)
 		} # }}}
 	}
@@ -957,7 +957,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		@topNodes: Array				= []
 	}
 	constructor(data, parent, @variable) { # {{{
-		super(data, parent, parent.scope(), ScopeType::Function)
+		super(data, parent, parent.scope(), ScopeType.Function)
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)
@@ -965,7 +965,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		if @class.isHybrid() {
 			NotSupportedException.throw(this)
 		}
-		if @class.features() !~ ClassFeature::Constructor {
+		if @class.features() !~ ClassFeature.Constructor {
 			NotSupportedException.throw(this)
 		}
 	} # }}}
@@ -973,7 +973,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		@scope.line(@data.start.line)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Overwrite {
+			if modifier.kind == ModifierKind.Overwrite {
 				@overwrite = true
 			}
 		}
@@ -1030,7 +1030,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				SyntaxException.throwNotSealedOverwrite(this)
 			}
 
-			var methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters)
+			var methods = @class.listMatchingConstructors(@type, MatchingMode.SimilarParameter + MatchingMode.ShiftableParameters)
 			if methods.length == 0 {
 				SyntaxException.throwNoSuitableOverwrite(@classRef, 'constructor', @type, this)
 			}
@@ -1044,7 +1044,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			variable.replaceCall = (data, arguments, node) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable, this)
 		}
 		else {
-			if @class.hasMatchingConstructor(@type, MatchingMode::ExactParameter) {
+			if @class.hasMatchingConstructor(@type, MatchingMode.ExactParameter) {
 				SyntaxException.throwDuplicateConstructor(this)
 			}
 			else {
@@ -1113,14 +1113,14 @@ class ImplementClassConstructorDeclaration extends Statement {
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind::CallExpression
+					kind: NodeKind.CallExpression
 					attributes: []
 					modifiers: []
 					scope: {
-						kind: ScopeKind::This
+						kind: ScopeKind.This
 					}
 					callee: {
-						kind: NodeKind::Identifier
+						kind: NodeKind.Identifier
 						name: 'super'
 						start: @data.start
 						end: @data.start
@@ -1152,12 +1152,12 @@ class ImplementClassConstructorDeclaration extends Statement {
 	class() => @variable
 	private getConstructorIndex(body: Array) { # {{{
 		for var statement, index in body {
-			if statement.kind == NodeKind::CallExpression {
-				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
+			if statement.kind == NodeKind.CallExpression {
+				if statement.callee.kind == NodeKind.Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
 					return index
 				}
 			}
-			else if statement.kind == NodeKind::IfStatement {
+			else if statement.kind == NodeKind.IfStatement {
 				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
@@ -1168,10 +1168,10 @@ class ImplementClassConstructorDeclaration extends Statement {
 	} # }}}
 	getMatchingMode(): MatchingMode { # {{{
 		if @overwrite {
-			return MatchingMode::SimilarParameter + MatchingMode::ShiftableParameters
+			return MatchingMode.SimilarParameter + MatchingMode.ShiftableParameters
 		}
 		else {
-			return MatchingMode::ExactParameter
+			return MatchingMode.ExactParameter
 		}
 	} # }}}
 	getOverridableVarname() => 'this'
@@ -1250,7 +1250,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				'arguments'
 				assessment
 				block
-				exhaustive ? null : Router.FooterType::NO_THROW
+				exhaustive ? null : Router.FooterType.NO_THROW
 				exhaustive ? null : (fragments, _) => {
 					fragments.line(`return new \(classname)(...arguments)`)
 				}
@@ -1291,7 +1291,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()

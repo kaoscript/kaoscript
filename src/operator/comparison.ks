@@ -9,7 +9,7 @@ class ComparisonExpression extends Expression {
 		@await: Boolean				= false
 		@composite: Boolean			= false
 		@computed: Boolean			= true
-		@junction: JunctionKind		= JunctionKind::And
+		@junction: JunctionKind		= JunctionKind.And
 		@junctive: Boolean			= false
 		@operands: Expression[]		= []
 		@operators					= []
@@ -24,21 +24,21 @@ class ComparisonExpression extends Expression {
 		if @data.values.length == 3 {
 			var value = @data.values[2]
 
-			if value.kind == NodeKind::JunctionExpression {
+			if value.kind == NodeKind.JunctionExpression {
 				@junctive = true
 
 				for var operand in value.operands {
 					@addOperator(@data.values[1], operand1, @addOperand(operand))
 				}
 
-				if value.operator.kind == BinaryOperatorKind::And {
+				if value.operator.kind == BinaryOperatorKind.And {
 					pass
 				}
-				else if value.operator.kind == BinaryOperatorKind::Or {
-					@junction = JunctionKind::Or
+				else if value.operator.kind == BinaryOperatorKind.Or {
+					@junction = JunctionKind.Or
 				}
 				else {
-					@junction = JunctionKind::Xor
+					@junction = JunctionKind.Xor
 				}
 			}
 			else {
@@ -125,12 +125,12 @@ class ComparisonExpression extends Expression {
 	} # }}}
 	private getOperator(data, operand1, operand2) { # {{{
 		match data.kind {
-			BinaryOperatorKind::Equality => return new EqualityOperator(this, operand1, operand2)
-			BinaryOperatorKind::GreaterThan => return new GreaterThanOperator(this, operand1, operand2)
-			BinaryOperatorKind::GreaterThanOrEqual => return new GreaterThanOrEqualOperator(this, operand1, operand2)
-			BinaryOperatorKind::Inequality => return new InequalityOperator(this, operand1, operand2)
-			BinaryOperatorKind::LessThan => return new LessThanOperator(this, operand1, operand2)
-			BinaryOperatorKind::LessThanOrEqual => return new LessThanOrEqualOperator(this, operand1, operand2)
+			BinaryOperatorKind.Equality => return new EqualityOperator(this, operand1, operand2)
+			BinaryOperatorKind.GreaterThan => return new GreaterThanOperator(this, operand1, operand2)
+			BinaryOperatorKind.GreaterThanOrEqual => return new GreaterThanOrEqualOperator(this, operand1, operand2)
+			BinaryOperatorKind.Inequality => return new InequalityOperator(this, operand1, operand2)
+			BinaryOperatorKind.LessThan => return new LessThanOperator(this, operand1, operand2)
+			BinaryOperatorKind.LessThanOrEqual => return new LessThanOrEqualOperator(this, operand1, operand2)
 		}
 	} # }}}
 	hasExceptions() => false
@@ -163,7 +163,7 @@ class ComparisonExpression extends Expression {
 					if var { type } ?= newInfers[name] {
 						share.types.push(type)
 					}
-					else if @junction == JunctionKind::And {
+					else if @junction == JunctionKind.And {
 						delete shares[name]
 					}
 				}
@@ -202,7 +202,7 @@ class ComparisonExpression extends Expression {
 					if var { type } ?= newInfers[name] {
 						share.types.push(type)
 					}
-					else if @junction == JunctionKind::And {
+					else if @junction == JunctionKind.And {
 						delete shares[name]
 					}
 				}
@@ -281,7 +281,7 @@ class ComparisonExpression extends Expression {
 		}
 
 		if @junctive {
-			if @junction == JunctionKind::Xor {
+			if @junction == JunctionKind.Xor {
 				fragments.code($runtime.operator(this), '.xor(')
 
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
@@ -295,7 +295,7 @@ class ComparisonExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				var junction = @junction == JunctionKind::And ? ' && ' : ' || '
+				var junction = @junction == JunctionKind.And ? ' && ' : ' || '
 
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
@@ -777,25 +777,25 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 }
 
 class GreaterThanOperator extends NumericComparisonOperator {
-	operator() => Operator::GreaterThan
+	operator() => Operator.GreaterThan
 	runtime() => 'gt'
 	symbol() => '>'
 }
 
 class GreaterThanOrEqualOperator extends NumericComparisonOperator {
-	operator() => Operator::GreaterThanOrEqual
+	operator() => Operator.GreaterThanOrEqual
 	runtime() => 'gte'
 	symbol() => '>='
 }
 
 class LessThanOperator extends NumericComparisonOperator {
-	operator() => Operator::LessThan
+	operator() => Operator.LessThan
 	runtime() => 'lt'
 	symbol() => '<'
 }
 
 class LessThanOrEqualOperator extends NumericComparisonOperator {
-	operator() => Operator::LessThanOrEqual
+	operator() => Operator.LessThanOrEqual
 	runtime() => 'lte'
 	symbol() => '<='
 }

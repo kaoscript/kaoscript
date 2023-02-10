@@ -11,8 +11,8 @@ namespace Build {
 			var mut maxRest = 0
 			var mut rest = false
 
-			var mmmin = MinMax::POSITIONAL + MinMax::ASYNC + MinMax::REST
-			var mmmax = MinMax::POSITIONAL + MinMax::ASYNC
+			var mmmin = MinMax.POSITIONAL + MinMax.ASYNC + MinMax.REST
+			var mmmax = MinMax.POSITIONAL + MinMax.ASYNC
 
 			for var function in functions {
 				if var parameter ?= function.getRestParameter() {
@@ -352,8 +352,8 @@ namespace Build {
 	namespace Legion {
 		export func expandGroup(group: Group, name: String, ignoreIndistinguishable: Boolean, excludes: String[], node: AbstractNode): Void { # {{{
 			for var function in group.functions {
-				var min = function.min(MinMax::POSITIONAL + MinMax::ASYNC + MinMax::REST, excludes)
-				var minAfter = function.min(MinMax::AFTER_REST + MinMax::ASYNC, excludes)
+				var min = function.min(MinMax.POSITIONAL + MinMax.ASYNC + MinMax.REST, excludes)
+				var minAfter = function.min(MinMax.AFTER_REST + MinMax.ASYNC, excludes)
 				var mut parameters = function.parameters(excludes)
 
 				if function.isAsync() {
@@ -524,8 +524,8 @@ namespace Build {
 		} # }}}
 
 		func getMaxRestExpand(restIndex: Number, parameters: ParameterType[], remaining: Number, function: FunctionType): Number { # {{{
-			var min = function.min(MinMax::AFTER_REST + MinMax::ASYNC)
-			var max = function.max(MinMax::AFTER_REST + MinMax::ASYNC)
+			var min = function.min(MinMax.AFTER_REST + MinMax.ASYNC)
+			var max = function.max(MinMax.AFTER_REST + MinMax.ASYNC)
 
 			return remaining if min == max
 

@@ -61,10 +61,10 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind::FieldDeclaration {
+					NodeKind.FieldDeclaration {
 						property = new ImplementClassFieldDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration {
+					NodeKind.MethodDeclaration {
 						if type.isConstructor(data.name.name) {
 							property = new ImplementClassConstructorDeclaration(data, this, @type)
 						}
@@ -90,10 +90,10 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind::FieldDeclaration {
+					NodeKind.FieldDeclaration {
 						property = new ImplementEnumFieldDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration {
+					NodeKind.MethodDeclaration {
 						property = new ImplementEnumMethodDeclaration(data, this, @type)
 					}
 					else {
@@ -111,10 +111,10 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind::FieldDeclaration {
+					NodeKind.FieldDeclaration {
 						property = new ImplementNamespaceVariableDeclaration(data, this, @type)
 					}
-					NodeKind::MethodDeclaration {
+					NodeKind.MethodDeclaration {
 						property = new ImplementNamespaceFunctionDeclaration(data, this, @type)
 					}
 					else {
@@ -219,7 +219,7 @@ class ImplementDeclaration extends Statement {
 		}
 
 		for property in @properties {
-			property.toFragments(fragments, Mode::None)
+			property.toFragments(fragments, Mode.None)
 		}
 
 		for var properties of @sharingProperties {

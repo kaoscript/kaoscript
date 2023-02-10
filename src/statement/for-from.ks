@@ -26,8 +26,8 @@ class ForFromStatement extends Statement {
 		@fromBallpark: Boolean
 		@fromName: String
 		@immutable: Boolean					= false
-		@loopKind: LoopKind					= LoopKind::Unknown
-		@order: OrderKind					= OrderKind::None
+		@loopKind: LoopKind					= LoopKind.Unknown
+		@order: OrderKind					= OrderKind.None
 		@outerScope
 		@step
 		@stepAssert: Boolean				= false
@@ -48,17 +48,17 @@ class ForFromStatement extends Statement {
 		var variable = @scope.getVariable(@data.variable.name)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Ascending {
-				@order = OrderKind::Ascending
+			if modifier.kind == ModifierKind.Ascending {
+				@order = OrderKind.Ascending
 			}
-			else if modifier.kind == ModifierKind::Declarative {
+			else if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Descending {
-				@order = OrderKind::Descending
+			else if modifier.kind == ModifierKind.Descending {
+				@order = OrderKind.Descending
 				@ascending = false
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
 		}
@@ -66,18 +66,18 @@ class ForFromStatement extends Statement {
 		@declared = @declaration || variable == null
 
 		if @declared {
-			@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		}
 		else {
 			@bindingScope = @scope
 		}
 
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		@from = $compile.expression(@data.from, this, @scope)
 		@from.analyse()
 
-		@fromBallpark = $ast.hasModifier(@data.from, ModifierKind::Ballpark)
+		@fromBallpark = $ast.hasModifier(@data.from, ModifierKind.Ballpark)
 
 		if @from.isUsingVariable(@data.variable.name) {
 			if @declared {
@@ -91,7 +91,7 @@ class ForFromStatement extends Statement {
 		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
-		@toBallpark = $ast.hasModifier(@data.to, ModifierKind::Ballpark)
+		@toBallpark = $ast.hasModifier(@data.to, ModifierKind.Ballpark)
 
 		if @to.isUsingVariable(@data.variable.name) {
 			if @declared {
@@ -148,7 +148,7 @@ class ForFromStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()
@@ -161,9 +161,9 @@ class ForFromStatement extends Statement {
 
 		@variable.prepare()
 
-		@from.prepare(@scope.reference('Number'), TargetMode::Permissive)
-		@to.prepare(@scope.reference('Number'), TargetMode::Permissive)
-		@step?.prepare(@scope.reference('Number'), TargetMode::Permissive)
+		@from.prepare(@scope.reference('Number'), TargetMode.Permissive)
+		@to.prepare(@scope.reference('Number'), TargetMode.Permissive)
+		@step?.prepare(@scope.reference('Number'), TargetMode.Permissive)
 
 		if @from is NumberLiteral && @to is NumberLiteral {
 			if ?@else {
@@ -171,9 +171,9 @@ class ForFromStatement extends Statement {
 			}
 
 			if !?@step || @step is NumberLiteral {
-				@loopKind = LoopKind::Static
+				@loopKind = LoopKind.Static
 
-				if @order == OrderKind::None {
+				if @order == OrderKind.None {
 					if ?@step {
 						if @step.value() == 0 {
 							SyntaxException.throwForBadStep('for/from', this)
@@ -202,7 +202,7 @@ class ForFromStatement extends Statement {
 						SyntaxException.throwForBadStep('for/from', this)
 					}
 
-					if @order == OrderKind::Ascending {
+					if @order == OrderKind.Ascending {
 						unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
 							SyntaxException.throwForNoMatch('for/from', this)
 						}
@@ -217,7 +217,7 @@ class ForFromStatement extends Statement {
 				}
 			}
 			else {
-				@loopKind = LoopKind::Ordered
+				@loopKind = LoopKind.Ordered
 
 				if @from.value() > @to.value() {
 					@ascending = false
@@ -231,8 +231,8 @@ class ForFromStatement extends Statement {
 			}
 		}
 		else {
-			if @order != OrderKind::None {
-				@loopKind = LoopKind::Ordered
+			if @order != OrderKind.None {
+				@loopKind = LoopKind.Ordered
 			}
 
 			if ?@step {
@@ -241,9 +241,9 @@ class ForFromStatement extends Statement {
 				}
 
 				if @step is NumberLiteral {
-					@loopKind = LoopKind::Ordered
+					@loopKind = LoopKind.Ordered
 
-					if @order == OrderKind::None {
+					if @order == OrderKind.None {
 						if @step.value() == 0 {
 							throw new NotImplementedException()
 						}
@@ -258,7 +258,7 @@ class ForFromStatement extends Statement {
 					}
 				}
 				else {
-					if @loopKind == LoopKind::Unknown || @step.isComposite() {
+					if @loopKind == LoopKind.Unknown || @step.isComposite() {
 						@stepName = @scope.acquireTempName()
 					}
 
@@ -274,7 +274,7 @@ class ForFromStatement extends Statement {
 				@fromAssert = true
 			}
 
-			if @loopKind == LoopKind::Unknown || (@fromAssert && @from.isLooseComposite()) {
+			if @loopKind == LoopKind.Unknown || (@fromAssert && @from.isLooseComposite()) {
 				@fromName = @scope.acquireTempName()
 			}
 
@@ -286,14 +286,14 @@ class ForFromStatement extends Statement {
 				@toAssert = true
 			}
 
-			if @loopKind == LoopKind::Unknown || (@toAssert && @to.isLooseComposite()) {
+			if @loopKind == LoopKind.Unknown || (@toAssert && @to.isLooseComposite()) {
 				@toName = @scope.acquireTempName()
 			}
 			else if @to.isLooseComposite() {
 				@toName = @bindingScope.acquireTempName()
 			}
 
-			if @loopKind == LoopKind::Unknown {
+			if @loopKind == LoopKind.Unknown {
 				@stepName ??= @scope.acquireTempName()
 				@unknownTranslator = @scope.acquireTempName()
 				@unknownIndex = @bindingScope.acquireTempName(false)
@@ -343,7 +343,7 @@ class ForFromStatement extends Statement {
 		@scope.releaseTempName(@unknownTranslator) if ?@unknownTranslator
 
 		if ?@toName {
-			if @loopKind == LoopKind::Unknown || @toAssert {
+			if @loopKind == LoopKind.Unknown || @toAssert {
 				@scope.releaseTempName(@toName)
 			}
 			else {
@@ -448,7 +448,7 @@ class ForFromStatement extends Statement {
 					.newLine()
 					.code(`\($runtime.helper(this)).assertNumber(\(@step.toQuote(true)), `)
 					.compile(@stepName ?? @step)
-					.code(`, \(@order != OrderKind::None || @ascending ? 2 : 1))`)
+					.code(`, \(@order != OrderKind.None || @ascending ? 2 : 1))`)
 					.done()
 			}
 			else {
@@ -584,20 +584,20 @@ class ForFromStatement extends Statement {
 			ctrl.code(' && !(').compileCondition(@until).code(')')
 		}
 		else if ?@while {
-			ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
+			ctrl.code(' && ').wrapCondition(@while, Mode.None, Junction.AND)
 		}
 
 		ctrl.code('; ')
 
 		if ?@step {
-			if @data.step.kind == NodeKind::NumericExpression && @data.step.value == 1 {
-				ctrl.code(@order == OrderKind::None || @ascending ? '++' : '--').compile(@variable)
+			if @data.step.kind == NodeKind.NumericExpression && @data.step.value == 1 {
+				ctrl.code(@order == OrderKind.None || @ascending ? '++' : '--').compile(@variable)
 			}
-			else if @data.step.kind == NodeKind::NumericExpression && @data.step.value == -1 {
+			else if @data.step.kind == NodeKind.NumericExpression && @data.step.value == -1 {
 				ctrl.code('--').compile(@variable)
 			}
 			else {
-				ctrl.compile(@variable).code(@order == OrderKind::None || @ascending ? ' += ' : ' -= ').compile(@stepName ?? @step)
+				ctrl.compile(@variable).code(@order == OrderKind.None || @ascending ? ' += ' : ' -= ').compile(@stepName ?? @step)
 			}
 		}
 		else {
@@ -620,10 +620,10 @@ class ForFromStatement extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		if @loopKind == LoopKind::Unknown {
+		if @loopKind == LoopKind.Unknown {
 			@toUnknownFragments(fragments, mode)
 		}
-		else if @loopKind == LoopKind::Static {
+		else if @loopKind == LoopKind.Static {
 			@toStaticFragments(fragments, mode)
 		}
 		else {
@@ -669,7 +669,7 @@ class ForFromStatement extends Statement {
 			ctrl.code(' && !(').compileCondition(@until).code(')')
 		}
 		else if ?@while {
-			ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
+			ctrl.code(' && ').wrapCondition(@while, Mode.None, Junction.AND)
 		}
 
 		ctrl.code('; ')

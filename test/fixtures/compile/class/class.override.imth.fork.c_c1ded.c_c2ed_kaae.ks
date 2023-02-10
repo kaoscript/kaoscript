@@ -10,12 +10,12 @@ enum EnumA {
 }
 
 class MainA {
-	prepare(value: ValueA = ValueA.Foobar, mode: EnumA = EnumA::Foobar) {
+	prepare(value: ValueA = ValueA.Foobar, mode: EnumA = EnumA.Foobar) {
 	}
 }
 
 class MainB extends MainA {
-	prepare(value: ValueB, mode: EnumA = EnumA::Foobar) {
+	prepare(value: ValueB, mode: EnumA = EnumA.Foobar) {
 	}
 	override prepare(value, mode) {
 	}

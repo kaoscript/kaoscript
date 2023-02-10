@@ -271,7 +271,7 @@ class NamedType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		else if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false
 		}
 		else {
@@ -293,7 +293,7 @@ class NamedType extends Type {
 						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
 					}
 					else {
-						return @type.isSubsetOf(value.type(), mode + MatchingMode::Subclass)
+						return @type.isSubsetOf(value.type(), mode + MatchingMode.Subclass)
 					}
 				}
 				else if value.type() is EnumType {

@@ -1,6 +1,6 @@
 class ClassConstructorType extends FunctionType {
 	private late {
-		@access: Accessibility					= Accessibility::Public
+		@access: Accessibility					= Accessibility.Public
 		@class: ClassType
 		@dependent: Boolean						= false
 		@initVariables: Object<Boolean>			= {}
@@ -110,14 +110,14 @@ class ClassConstructorType extends FunctionType {
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
+			if modifier.kind == ModifierKind.Async {
 				throw new NotImplementedException()
 			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
+			else if modifier.kind == ModifierKind.Private {
+				@access = Accessibility.Private
 			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
+			else if modifier.kind == ModifierKind.Protected {
+				@access = Accessibility.Protected
 			}
 		}
 	} # }}}

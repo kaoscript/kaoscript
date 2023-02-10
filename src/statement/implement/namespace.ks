@@ -75,7 +75,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@topNodes: Array						= []
 	}
 	constructor(data, parent, @variable) { # {{{
-		super(data, parent, parent.scope(), ScopeType::Block)
+		super(data, parent, parent.scope(), ScopeType.Block)
 
 		@namespace = @variable.type()
 		@namespaceRef = @scope.reference(@variable)
@@ -106,11 +106,11 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		@type = property.type()
 
-		@returnNull = ?@data.body && (@data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement)
+		@returnNull = ?@data.body && (@data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement)
 
 		@main = !@namespace.hasProperty(@name)
 
-		if @namespace.hasMatchingFunction(@name, @type, MatchingMode::ExactParameter) {
+		if @namespace.hasMatchingFunction(@name, @type, MatchingMode.ExactParameter) {
 			SyntaxException.throwDuplicateFunction(@name, this)
 		}
 		else {
@@ -149,7 +149,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@topNodes.push(node)
 	} # }}}
 	authority() => this
-	getMatchingMode(): MatchingMode => MatchingMode::ExactParameter
+	getMatchingMode(): MatchingMode => MatchingMode.ExactParameter
 	getParameterOffset() => 0
 	getSharedName() => null
 	isAssertingParameter() => @options.rules.assertParameter
@@ -209,11 +209,11 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		line.code(`\(namespace).\(@name).\(@internalName) = function(`)
 
-		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 
-		block.compile(@block, Mode::None)
+		block.compile(@block, Mode.None)
 
 		if !@exit {
 			if !@awaiting && @type.isAsync() {

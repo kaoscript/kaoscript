@@ -4,7 +4,7 @@ class BitmaskDeclaration extends EnumDeclaration {
 	}
 	initiate() { # {{{
 		@name = @data.name.name
-		@enum = new EnumType(@scope, EnumTypeKind::Bit)
+		@enum = new EnumType(@scope, EnumTypeKind.Bit)
 		@type = new NamedType(@name, @enum)
 		@variable = @scope.define(@name, true, @type, this)
 

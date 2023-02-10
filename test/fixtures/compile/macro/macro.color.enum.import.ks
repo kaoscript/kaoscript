@@ -44,13 +44,13 @@ impl Space {
 }
 
 Color.registerSpace({
-	name: Space::HSL
+	name: Space.HSL
 	components: {
 		hue: {
-			family: Space::HSB
+			family: Space.HSB
 		}
 		saturation: {
-			family: Space::HSB
+			family: Space.HSB
 		}
 		lightness: {
 			max: 100

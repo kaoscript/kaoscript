@@ -15,7 +15,7 @@ class EnumCreateCallee extends Callee {
 		@expression.analyse()
 		@expression.prepare(AnyType.NullableUnexplicit)
 
-		@bitmask = enum.type().kind() == EnumTypeKind::Bit
+		@bitmask = enum.type().kind() == EnumTypeKind.Bit
 		@type = node.scope().reference(enum)
 
 		if !@bitmask || !argument.type().isAssignableToVariable(enum.type().type(), false, false, false) {

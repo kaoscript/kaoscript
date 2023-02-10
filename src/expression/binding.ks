@@ -1,6 +1,6 @@
 class ArrayBinding extends Expression {
 	private {
-		@assignment: AssignmentType			= AssignmentType::Neither
+		@assignment: AssignmentType			= AssignmentType.Neither
 		@elements: ArrayBindingElement[]	= []
 		@flatten: Boolean					= false
 		@immutable: Boolean					= false
@@ -18,7 +18,7 @@ class ArrayBinding extends Expression {
 
 			element.analyse()
 
-			if element.isThisAliasing() && @assignment != AssignmentType::Parameter {
+			if element.isThisAliasing() && @assignment != AssignmentType.Parameter {
 				@flatten = true
 			}
 
@@ -174,7 +174,7 @@ class ArrayBinding extends Expression {
 
 class ArrayBindingElement extends Expression {
 	private {
-		@assignment: AssignmentType		= AssignmentType::Neither
+		@assignment: AssignmentType		= AssignmentType.Neither
 		@defaultValue					= null
 		@hasDefaultValue: Boolean		= false
 		@index							= -1
@@ -199,11 +199,11 @@ class ArrayBindingElement extends Expression {
 				@defaultValue.analyse()
 			}
 
-			@thisAlias = @data.name.kind == NodeKind::ThisExpression
+			@thisAlias = @data.name.kind == NodeKind.ThisExpression
 		}
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Rest {
+			if modifier.kind == ModifierKind.Rest {
 				@rest = true
 			}
 		}
@@ -225,7 +225,7 @@ class ArrayBindingElement extends Expression {
 
 				variable.setDeclaredType(@type)
 
-				if @assignment == AssignmentType::Declaration {
+				if @assignment == AssignmentType.Declaration {
 					variable.setRealType(@type)
 				}
 				else if @hasDefaultValue {
@@ -383,7 +383,7 @@ class FlatReusableBindingElement extends Expression {
 
 class ObjectBinding extends Expression {
 	private {
-		@assignment: AssignmentType			= AssignmentType::Neither
+		@assignment: AssignmentType			= AssignmentType.Neither
 		@elements: ObjectBindingElement[]	= []
 		@flatten: Boolean					= false
 		@immutable: Boolean					= false
@@ -399,7 +399,7 @@ class ObjectBinding extends Expression {
 
 			element.analyse()
 
-			if element.hasDefaultValue() || (element.isThisAliasing() && @assignment != AssignmentType::Parameter) {
+			if element.hasDefaultValue() || (element.isThisAliasing() && @assignment != AssignmentType.Parameter) {
 				@flatten = true
 			}
 
@@ -525,7 +525,7 @@ class ObjectBinding extends Expression {
 		if @flatten {
 			@toFlatFragments(fragments, value)
 		}
-		else if @assignment == AssignmentType::Declaration {
+		else if @assignment == AssignmentType.Declaration {
 			fragments
 				.compile(this)
 				.code($equals)
@@ -584,7 +584,7 @@ class ObjectBinding extends Expression {
 class ObjectBindingElement extends Expression {
 	private {
 		@alias: Expression?				= null
-		@assignment: AssignmentType		= AssignmentType::Neither
+		@assignment: AssignmentType		= AssignmentType.Neither
 		@computed: Boolean				= false
 		@defaultValue					= null
 		@hasDefaultValue: Boolean		= false
@@ -596,7 +596,7 @@ class ObjectBindingElement extends Expression {
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Computed {
+			if modifier.kind == ModifierKind.Computed {
 				@computed = true
 
 				break
@@ -608,9 +608,9 @@ class ObjectBindingElement extends Expression {
 
 			@alias = @compileVariable(@data.alias)
 
-			@thisAlias = @data.alias.kind == NodeKind::ThisExpression
+			@thisAlias = @data.alias.kind == NodeKind.ThisExpression
 		}
-		else if @data.name.kind == NodeKind::ThisExpression {
+		else if @data.name.kind == NodeKind.ThisExpression {
 			@name = $compile.expression(@data.name.name, this)
 
 			@alias = @compileVariable(@data.name)
@@ -636,7 +636,7 @@ class ObjectBindingElement extends Expression {
 		}
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Rest {
+			if modifier.kind == ModifierKind.Rest {
 				@rest = true
 			}
 		}
@@ -657,7 +657,7 @@ class ObjectBindingElement extends Expression {
 
 			variable.setDeclaredType(@type)
 
-			if @assignment == AssignmentType::Declaration {
+			if @assignment == AssignmentType.Declaration {
 				variable.setRealType(@type)
 			}
 			else if @hasDefaultValue {

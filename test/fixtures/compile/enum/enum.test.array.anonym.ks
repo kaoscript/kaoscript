@@ -12,6 +12,6 @@ class Foobar {
 }
 
 func quxbaz(f, x) {
-	if f.color(x) == Color::Red {
+	if f.color(x) == Color.Red {
 	}
 }

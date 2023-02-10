@@ -425,7 +425,7 @@ namespace Matching {
 
 							if var value ?= getRefinableValue(cursor, context) {
 								if node.type.isUnion() {
-									var mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreRetained
+									var mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreRetained
 									var types = []
 
 									for var type in node.type.types() {
@@ -457,13 +457,13 @@ namespace Matching {
 						}
 
 						if var value ?= getRefinableValue(cursor, context) {
-							var mode = MatchingMode::FunctionSignature
-								+ MatchingMode::AnycastParameter
-								+ MatchingMode::MissingReturn
-								+ MatchingMode::IgnoreRetained
-								+ MatchingMode::ShiftableParameters
-								+ MatchingMode::RequireAllParameters
-								+ MatchingMode::IgnoreNullable
+							var mode = MatchingMode.FunctionSignature
+								+ MatchingMode.AnycastParameter
+								+ MatchingMode.MissingReturn
+								+ MatchingMode.IgnoreRetained
+								+ MatchingMode.ShiftableParameters
+								+ MatchingMode.RequireAllParameters
+								+ MatchingMode.IgnoreNullable
 
 							if node.type.isUnion() {
 								var types = []

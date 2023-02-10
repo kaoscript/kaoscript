@@ -47,8 +47,8 @@ export class Color {
 }
 
 Color.registerSpace({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space.SRGB
+	alias: [Space.RGB]
 	formatters: {
 		hex(that: Color): String { # {{{
 			return $hex(that)

@@ -30,7 +30,7 @@ class RestrictiveExpression extends Expression {
 		return variables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @data.operator.kind == RestrictiveOperatorKind::If {
+		if @data.operator.kind == RestrictiveOperatorKind.If {
 			fragments
 				.wrapCondition(@condition)
 				.code(' ? ')
@@ -45,7 +45,7 @@ class RestrictiveExpression extends Expression {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		if @data.operator.kind == RestrictiveOperatorKind::If {
+		if @data.operator.kind == RestrictiveOperatorKind.If {
 			fragments
 				.newControl()
 				.code('if(')

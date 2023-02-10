@@ -14,12 +14,12 @@ abstract class AssignmentOperatorExpression extends Expression {
 		}
 
 		if @isDeclararing() {
-			@left.setAssignment(AssignmentType::Expression)
+			@left.setAssignment(AssignmentType.Expression)
 		}
 
 		@left.analyse()
 
-		@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
+		@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
 
 		@right = $compile.expression(@data.right, this, @bindingScope)
 
@@ -110,7 +110,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		@native: Boolean			= false
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -200,7 +200,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 				.compile(@left)
 				.code($comma)
 
-			@right.toOperandFragments(fragments, this.operator(), OperandType::Number)
+			@right.toOperandFragments(fragments, this.operator(), OperandType.Number)
 
 			fragments.code(')')
 		}
@@ -223,7 +223,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		@string: Boolean			= false
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -281,12 +281,12 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 						}
 					}
 					else {
-						TypeException.throwInvalidOperand(@right, Operator::Addition, this)
+						TypeException.throwInvalidOperand(@right, Operator.Addition, this)
 					}
 				}
 			}
 			else {
-				TypeException.throwInvalidOperand(@left, Operator::Addition, this)
+				TypeException.throwInvalidOperand(@left, Operator.Addition, this)
 			}
 
 			var nullable = @left.type().isNullable() || @right.type().isNullable()
@@ -330,7 +330,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				fragments.code(' + ')
 			}
 
-			@right.toOperandFragments(fragments, Operator::Addition, OperandType::Enum)
+			@right.toOperandFragments(fragments, Operator.Addition, OperandType.Enum)
 
 			fragments.code(')')
 		}
@@ -344,22 +344,22 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 			if @number {
 				fragments.code($runtime.operator(this), '.addNum(')
 
-				type = OperandType::Number
+				type = OperandType.Number
 			}
 			else if @string {
 				fragments.code($runtime.helper(this), '.concatString(')
 
-				type = OperandType::String
+				type = OperandType.String
 			}
 			else {
 				fragments.code($runtime.operator(this), '.add(')
 
-				type = OperandType::Any
+				type = OperandType.Any
 			}
 
 			fragments.compile(@left).code($comma)
 
-			@right.toOperandFragments(fragments, Operator::Addition, type)
+			@right.toOperandFragments(fragments, Operator.Addition, type)
 
 			fragments.code(')')
 		}
@@ -369,32 +369,32 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
-	operator() => Operator::Division
+	operator() => Operator.Division
 	runtime() => 'division'
 	symbol() => '/='
 }
 
 
 class AssignmentOperatorLeftShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator::LeftShift
+	operator() => Operator.LeftShift
 	runtime() => 'leftShift'
 	symbol() => '<<='
 }
 
 class AssignmentOperatorModulo extends NumericAssignmentOperatorExpression {
-	operator() => Operator::Modulo
+	operator() => Operator.Modulo
 	runtime() => 'modulo'
 	symbol() => '%='
 }
 
 class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpression {
-	operator() => Operator::Multiplication
+	operator() => Operator.Multiplication
 	runtime() => 'multiplication'
 	symbol() => '*='
 }
 
 class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
-	operator() => Operator::Quotient
+	operator() => Operator.Quotient
 	runtime() => 'quotient'
 	symbol() => '/.='
 	toNativeFragments(fragments) { # {{{
@@ -402,20 +402,20 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	} # }}}
 }
 class AssignmentOperatorRightShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator::RightShift
+	operator() => Operator.RightShift
 	runtime() => 'rightShift'
 	symbol() => '>>='
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {
 	isAcceptingEnum() => true
-	operator() => Operator::Subtraction
+	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-='
 	toEnumFragments(fragments) { # {{{
 		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ~')
 
-		@right.toOperandFragments(fragments, Operator::Subtraction, OperandType::Enum)
+		@right.toOperandFragments(fragments, Operator.Subtraction, OperandType.Enum)
 
 		fragments.code(')')
 	} # }}}

@@ -1,21 +1,21 @@
 abstract class DependencyStatement extends Statement {
 	abstract applyFlags(type: Type)
 	define(declaration) { # {{{
-		var options = Attribute.configure(declaration, @options, AttributeTarget::Statement, @file())
+		var options = Attribute.configure(declaration, @options, AttributeTarget.Statement, @file())
 		var scope = @parent.scope()
 
 		match declaration.kind {
-			NodeKind::ClassDeclaration {
+			NodeKind.ClassDeclaration {
 				var type = @applyFlags(new ClassType(scope))
 
 				for var modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind::Abstract {
+					if modifier.kind == ModifierKind.Abstract {
 						type.flagAbstract()
 					}
-					else if modifier.kind == ModifierKind::Sealed {
+					else if modifier.kind == ModifierKind.Sealed {
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::System {
+					else if modifier.kind == ModifierKind.System {
 						type.flagSystem()
 					}
 				}
@@ -50,12 +50,12 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::EnumDeclaration {
-				var mut ekind = EnumTypeKind::Number
+			NodeKind.EnumDeclaration {
+				var mut ekind = EnumTypeKind.Number
 
 				if ?declaration.type {
 					if Type.fromAST(declaration.type, this).isString() {
-						ekind = EnumTypeKind::String
+						ekind = EnumTypeKind.String
 					}
 				}
 
@@ -79,7 +79,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::FunctionDeclaration {
+			NodeKind.FunctionDeclaration {
 				var mut type = null
 				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
@@ -105,14 +105,14 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::NamespaceDeclaration {
+			NodeKind.NamespaceDeclaration {
 				var type = @applyFlags(new NamespaceType(scope))
 
 				for var modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind::Sealed {
+					if modifier.kind == ModifierKind.Sealed {
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::System {
+					else if modifier.kind == ModifierKind.System {
 						type.flagSystem()
 					}
 				}
@@ -136,7 +136,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind::VariableDeclarator {
+			NodeKind.VariableDeclarator {
 				var mut type = Type.fromAST(declaration.type, this)
 
 				var mut instance = type is ClassType
@@ -156,14 +156,14 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				for var modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind::Sealed {
+					if modifier.kind == ModifierKind.Sealed {
 						if !type.isSealable() {
 							type = new SealableType(scope, type)
 						}
 
 						type.flagSealed()
 					}
-					else if modifier.kind == ModifierKind::System {
+					else if modifier.kind == ModifierKind.System {
 						if !type.isSealable() {
 							type = new SealableType(scope, type)
 						}
@@ -199,7 +199,7 @@ class ExternDeclaration extends DependencyStatement {
 		var dyn variable
 		for var declaration in @data.declarations {
 			if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
-				if declaration.kind == NodeKind::FunctionDeclaration {
+				if declaration.kind == NodeKind.FunctionDeclaration {
 					var late parameters
 					if declaration.parameters?.length != 0 {
 						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
@@ -276,7 +276,7 @@ class RequireDeclaration extends DependencyStatement {
 
 		for var declaration in @data.declarations {
 			if var variable ?= @scope.getVariable(declaration.name.name) {
-				if declaration.kind == NodeKind::FunctionDeclaration {
+				if declaration.kind == NodeKind.FunctionDeclaration {
 					var requirement = module.getRequirement(declaration.name.name)
 
 					var late parameters
@@ -375,7 +375,7 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 		return type
 			.flagAlien()
 			.flagRequirement()
-			.origin(TypeOrigin::ExternOrRequire)
+			.origin(TypeOrigin.ExternOrRequire)
 	} # }}}
 	toStatementFragments(fragments, mode)
 }
@@ -424,7 +424,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 		return type
 			.flagAlien()
 			.flagRequirement()
-			.origin(TypeOrigin::RequireOrExtern + TypeOrigin::Require + TypeOrigin::Extern)
+			.origin(TypeOrigin.RequireOrExtern + TypeOrigin.Require + TypeOrigin.Extern)
 	} # }}}
 	toStatementFragments(fragments, mode)
 }
@@ -493,10 +493,10 @@ class RequireOrImportDeclarator extends Importer {
 							if type.isAlien() {
 								var origin = type.origin()
 								if ?origin {
-									type.origin(origin:TypeOrigin + TypeOrigin::RequireOrExtern)
+									type.origin(origin:TypeOrigin + TypeOrigin.RequireOrExtern)
 								}
 								else {
-									type.origin(TypeOrigin::RequireOrExtern)
+									type.origin(TypeOrigin.RequireOrExtern)
 								}
 
 								requirement.flagAlternative()
@@ -524,7 +524,7 @@ class RequireOrImportDeclarator extends Importer {
 		}
 	} # }}}
 	flagForcefullyRebinded()
-	override mode() => ImportMode::RequireOrImport
+	override mode() => ImportMode.RequireOrImport
 	toStatementFragments(fragments, mode) { # {{{
 		var module = @module()
 
@@ -690,10 +690,10 @@ class ExternOrImportDeclarator extends Importer {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin::ExternOrRequire)
+					type.origin(origin:TypeOrigin + TypeOrigin.ExternOrRequire)
 				}
 				else {
-					type.origin(TypeOrigin::ExternOrRequire)
+					type.origin(TypeOrigin.ExternOrRequire)
 				}
 
 				requirement.type(type)
@@ -715,7 +715,7 @@ class ExternOrImportDeclarator extends Importer {
 		}
 	} # }}}
 	flagForcefullyRebinded()
-	override mode() => ImportMode::ExternOrImport
+	override mode() => ImportMode.ExternOrImport
 	toStatementFragments(fragments, mode) { # {{{
 		if @requirements.length == 0 {
 			@toImportFragments(fragments)

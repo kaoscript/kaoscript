@@ -73,8 +73,8 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
-		if this.isSubsetOf(value, MatchingMode::Similar) {
-			if this.isSubsetOf(value, MatchingMode::Exact) {
+		if this.isSubsetOf(value, MatchingMode.Similar) {
+			if this.isSubsetOf(value, MatchingMode.Exact) {
 				return 0
 			}
 			else {
@@ -110,7 +110,7 @@ class ObjectType extends Type {
 		}
 
 		var export = {
-			kind: TypeKind::Object
+			kind: TypeKind.Object
 		}
 
 		if @system {
@@ -245,7 +245,7 @@ class ObjectType extends Type {
 				return true
 			}
 
-			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -299,12 +299,12 @@ class ObjectType extends Type {
 	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		return true if this == value || @empty
 
-		var type = mode !~ MatchingMode::Reference
+		var type = mode !~ MatchingMode.Reference
 		if type {
 			return false unless @rest == value.hasRest()
 		}
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @length == value.length()
 
 			var properties = value.properties()
@@ -350,7 +350,7 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(rest, mode)
 					}
 				}
-				else if mode ~~ MatchingMode::Exact {
+				else if mode ~~ MatchingMode.Exact {
 					return false unless value.length() == @length
 				}
 			}
@@ -362,10 +362,10 @@ class ObjectType extends Type {
 		return false unless value.isObject()
 
 		if value.name() != 'Object' {
-			return this.isSubsetOf(value.discard(), mode + MatchingMode::Reference)
+			return this.isSubsetOf(value.discard(), mode + MatchingMode.Reference)
 		}
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @length == 0
 			return false unless @rest == value.hasParameters()
 
@@ -500,11 +500,11 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`value => `)
 
-			@toTestFunctionFragments(fragments, node, Junction::NONE)
+			@toTestFunctionFragments(fragments, node, Junction.NONE)
 		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction::AND {
+		if @nullable && junction == Junction.AND {
 			fragments.code('(')
 		}
 
@@ -547,7 +547,7 @@ class ObjectType extends Type {
 		if @nullable {
 			fragments.code(` || \($runtime.type(node)).isNull(value)`)
 
-			if junction == Junction::AND {
+			if junction == Junction.AND {
 				fragments.code(')')
 			}
 		}

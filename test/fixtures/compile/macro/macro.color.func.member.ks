@@ -59,8 +59,8 @@ var $util = {
 }
 
 Color.registerSpace({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space.SRGB
+	alias: [Space.RGB]
 	formatters: {
 		hex: $util.formatToHex
 		srgb: $util.formatToSRGB

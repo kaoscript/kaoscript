@@ -47,7 +47,7 @@ class ClassConstructorDeclaration extends Statement {
 				null
 				assessment
 				fragments.block()
-				variable.type().hasConstructors() ? Router.FooterType::MUST_THROW : Router.FooterType::NO_THROW
+				variable.type().hasConstructors() ? Router.FooterType.MUST_THROW : Router.FooterType.NO_THROW
 				(fragments, _) => {
 					var constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons_rt'
 
@@ -73,12 +73,12 @@ class ClassConstructorDeclaration extends Statement {
 		footer(fragments)
 	} # }}}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
+		super(data, parent, parent.newScope(parent._constructorScope, ScopeType.Block))
 
 		@abstract = parent.isAbstract()
 
 		for modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Override {
+			if modifier.kind == ModifierKind.Override {
 				@override = true
 			}
 		}
@@ -108,7 +108,7 @@ class ClassConstructorDeclaration extends Statement {
 						is CallExpression {
 							var data = node.data()
 
-							if data.callee.kind == NodeKind::ThisExpression {
+							if data.callee.kind == NodeKind.ThisExpression {
 								SyntaxException.throwNotYetDefined(`@\(data.callee.name.name)`, node)
 							}
 						}
@@ -213,14 +213,14 @@ class ClassConstructorDeclaration extends Statement {
 		if extendsType.matchArguments([], this) {
 			if extendsType.hasConstructors() || extendsType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind::CallExpression
+					kind: NodeKind.CallExpression
 					attributes: []
 					modifiers: []
 					scope: {
-						kind: ScopeKind::This
+						kind: ScopeKind.This
 					}
 					callee: {
-						kind: NodeKind::Identifier
+						kind: NodeKind.Identifier
 						name: 'super'
 						start: @data.start
 						end: @data.start
@@ -263,12 +263,12 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	private getConstructorIndex(body: Array) { # {{{
 		for statement, index in body {
-			if statement.kind == NodeKind::CallExpression {
-				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
+			if statement.kind == NodeKind.CallExpression {
+				if statement.callee.kind == NodeKind.Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
 					return index
 				}
 			}
-			else if statement.kind == NodeKind::IfStatement {
+			else if statement.kind == NodeKind.IfStatement {
 				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
@@ -282,12 +282,12 @@ class ClassConstructorDeclaration extends Statement {
 	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { # {{{
 		for statement, index in body {
-			if statement.kind == NodeKind::CallExpression {
-				if statement.callee.kind == NodeKind::Identifier && statement.callee.name == 'super' {
+			if statement.kind == NodeKind.CallExpression {
+				if statement.callee.kind == NodeKind.Identifier && statement.callee.name == 'super' {
 					return index
 				}
 			}
-			else if statement.kind == NodeKind::IfStatement {
+			else if statement.kind == NodeKind.IfStatement {
 				if ?statement.whenFalse && @getSuperIndex(statement.whenTrue.statements) != -1 && @getSuperIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
@@ -298,7 +298,7 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	isAbstract() { # {{{
 		for modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Abstract {
+			if modifier.kind == ModifierKind.Abstract {
 				return true
 			}
 		}
@@ -319,7 +319,7 @@ class ClassConstructorDeclaration extends Statement {
 			.newControl()
 			.code('constructor(')
 
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
 			return node.code(')').step()
 		})
 
@@ -368,7 +368,7 @@ class ClassConstructorDeclaration extends Statement {
 				.newLine()
 				.code(`const \(@internalName) = (`)
 
-			var block = Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+			var block = Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
 				return node.code(') =>').newBlock()
 			})
 
@@ -400,7 +400,7 @@ class ClassConstructorDeclaration extends Statement {
 				ctrl.code(`\(@internalName)(`)
 			}
 
-			Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+			Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
 				return node.code(')').step()
 			})
 
@@ -419,10 +419,10 @@ class ClassConstructorDeclaration extends Statement {
 	override walkNode(fn) => fn(this) && @block.walkNode(fn)
 	private {
 		getOveriddenConstructor(superclass: ClassType) { # {{{
-			var mut mode = MatchingMode::FunctionSignature
+			var mut mode = MatchingMode.FunctionSignature
 
 			if !@override {
-				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+				mode -= MatchingMode.MissingParameterType - MatchingMode.MissingParameterArity
 			}
 
 			var methods = superclass.listConstructors(@type, mode)
@@ -434,7 +434,7 @@ class ClassConstructorDeclaration extends Statement {
 			}
 			else if methods.length > 0 {
 				for var m in methods {
-					if m.isSubsetOf(@type, MatchingMode::ExactParameter) {
+					if m.isSubsetOf(@type, MatchingMode.ExactParameter) {
 						method = m
 						exact = true
 
@@ -477,7 +477,7 @@ class ClassConstructorDeclaration extends Statement {
 						var mut matched = false
 
 						for var newType in newTypes until matched {
-							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
+							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
 						}
@@ -503,13 +503,13 @@ class ClassConstructorDeclaration extends Statement {
 		listOverloadedConstructors(superclass: ClassType) { # {{{
 			if var methods ?= superclass.listConstructors() {
 				for var method in methods {
-					if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
+					if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
 						return []
 					}
 				}
 			}
 
-			return superclass.listConstructors(@type, MatchingMode::FunctionSignature + MatchingMode::SubsetParameter)
+			return superclass.listConstructors(@type, MatchingMode.FunctionSignature + MatchingMode.SubsetParameter)
 		} # }}}
 	}
 }

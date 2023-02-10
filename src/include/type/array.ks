@@ -43,8 +43,8 @@ class ArrayType extends Type {
 		return type
 	} # }}}
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
-		if this.isSubsetOf(value, MatchingMode::Similar) {
-			if this.isSubsetOf(value, MatchingMode::Exact) {
+		if this.isSubsetOf(value, MatchingMode.Similar) {
+			if this.isSubsetOf(value, MatchingMode.Exact) {
 				return 0
 			}
 			else {
@@ -100,7 +100,7 @@ class ArrayType extends Type {
 		}
 
 		var export = {
-			kind: TypeKind::Array
+			kind: TypeKind.Array
 		}
 
 		if @length > 0 {
@@ -207,10 +207,10 @@ class ArrayType extends Type {
 				return true
 			}
 
-			var mut matchingMode = MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
 			if anycast {
-				matchingMode += MatchingMode::Anycast + MatchingMode::AnycastParameter
+				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
 			}
 
 			return this.isSubsetOf(value, matchingMode)
@@ -254,7 +254,7 @@ class ArrayType extends Type {
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		return true if this == value
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @rest == value.hasRest()
 			return false unless @length == value.length()
 
@@ -301,7 +301,7 @@ class ArrayType extends Type {
 						return false unless prop.isSubsetOf(rest, mode)
 					}
 				}
-				else if mode ~~ MatchingMode::Exact {
+				else if mode ~~ MatchingMode.Exact {
 					return false unless lastIndex + 1 == @length
 				}
 			}
@@ -312,7 +312,7 @@ class ArrayType extends Type {
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isArray()
 
-		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @length == 0
 			return false unless @rest == value.hasParameters()
 
@@ -423,11 +423,11 @@ class ArrayType extends Type {
 		else {
 			fragments.code(`value => `)
 
-			@toTestFunctionFragments(fragments, node, Junction::NONE)
+			@toTestFunctionFragments(fragments, node, Junction.NONE)
 		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction::AND {
+		if @nullable && junction == Junction.AND {
 			fragments.code('(')
 		}
 
@@ -463,7 +463,7 @@ class ArrayType extends Type {
 		if @nullable {
 			fragments.code(` || \($runtime.type(node)).isNull(value)`)
 
-			if junction == Junction::AND {
+			if junction == Junction.AND {
 				fragments.code(')')
 			}
 		}

@@ -21,7 +21,7 @@ class StructDeclaration extends Statement {
 
 			var mut name = ''
 			var mut member = @data.extends
-			while member.kind == NodeKind::MemberExpression {
+			while member.kind == NodeKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
 				member = member.object
@@ -118,7 +118,7 @@ class StructDeclaration extends Statement {
 
 		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
-		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
+		Parameter.toFragments(@function, ctrl, ParameterMode.Default, func(fragments) {
 			return fragments.code(')').step()
 		})
 
@@ -246,7 +246,7 @@ class StructFieldDeclaration extends AbstractNode {
 
 			if type == null {
 				for var modifier in @data.modifiers {
-					if modifier.kind == ModifierKind::Nullable {
+					if modifier.kind == ModifierKind.Nullable {
 						type = AnyType.NullableUnexplicit
 					}
 				}
@@ -259,7 +259,7 @@ class StructFieldDeclaration extends AbstractNode {
 
 			@type = new StructFieldType(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
-			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
 			}
 		}
@@ -287,7 +287,7 @@ class StructFieldParameter extends Parameter {
 			name: @field.name()
 		}, this, @scope)
 
-		@internal.setAssignment(AssignmentType::Parameter)
+		@internal.setAssignment(AssignmentType.Parameter)
 		@internal.analyse()
 
 		for var name in @internal.listAssignments([]) {

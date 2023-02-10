@@ -360,7 +360,7 @@ namespace RegroupTree {
 
 	func listShadows(tree: Tree, data: Array, ceiling: Number): Array { # {{{
 		var newData = [...data]
-		var results = [ShadowKind::None]
+		var results = [ShadowKind.None]
 
 		for var key in tree.order {
 			listShadows(tree.columns[key], tree.max, ceiling, newData, {}, results)
@@ -386,7 +386,7 @@ namespace RegroupTree {
 			max: tree.max
 		}
 
-		var result = [ShadowKind::None, -1]
+		var result = [ShadowKind.None, -1]
 
 		if data.length != 0 {
 			var data = data.shift()
@@ -422,20 +422,20 @@ namespace RegroupTree {
 										if useNegLength0 {
 											useNegLength0 = false
 
-											setResult(result, ShadowKind::Soft, lastIndex, max, ceiling, data, parameters)
+											setResult(result, ShadowKind.Soft, lastIndex, max, ceiling, data, parameters)
 										}
 										else if useNegLengthN {
 											useNegLengthN = false
 
 											if parameter.min != maximus.max {
-												setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
+												setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 											}
 											else {
-												setResult(result, ShadowKind::Soft, lastIndex, max, ceiling, data, parameters)
+												setResult(result, ShadowKind.Soft, lastIndex, max, ceiling, data, parameters)
 											}
 										}
 										else {
-											setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
+											setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 										}
 									}
 									else if argType.isAssignableToVariable(parameter.type, false, true, false) {
@@ -446,14 +446,14 @@ namespace RegroupTree {
 											useNegLengthN = false
 
 											if parameter.min != maximus.max && parameter.min != arguments.length + 1 {
-												setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
+												setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 											}
 											else {
-												setResult(result, ShadowKind::Soft, lastIndex, max, ceiling, data, parameters)
+												setResult(result, ShadowKind.Soft, lastIndex, max, ceiling, data, parameters)
 											}
 										}
 										else {
-											setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
+											setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 										}
 									}
 								}
@@ -464,7 +464,7 @@ namespace RegroupTree {
 								if var argType ?= arguments.shift() {
 									var assignable = parameter.type.isAssignableToVariable(argType, false, false, false, true)
 									if (assignable && argType.isNullable()) || (!assignable && parameter.type.isAssignableToVariable(argType, false, true, false, true)) {
-										setResult(result, ShadowKind::Hard, lastIndex, max, ceiling, data, parameters)
+										setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 									}
 								}
 							}
@@ -518,10 +518,10 @@ namespace RegroupTree {
 		for var tree, index in group down {
 			var mut [kind, ...matches] = listShadows(tree, maxs, max)
 
-			if kind == ShadowKind::Soft {
+			if kind == ShadowKind.Soft {
 				shadows = matches
 			}
-			else if kind == ShadowKind::Hard {
+			else if kind == ShadowKind.Hard {
 				if !?lastMatches {
 					lastMatches = matches
 				}
@@ -595,23 +595,23 @@ namespace RegroupTree {
 	func setResult(result: Array, mut kind: ShadowKind, mut index: Number, max: Number, ceiling: Number, data: Object, parameters: Object): Void { # {{{
 		index = getValidNode(index, data, parameters)
 
-		if kind == ShadowKind::Soft {
+		if kind == ShadowKind.Soft {
 			if var maximus ?= data[index] {
 				if ceiling - max > maximus.max && !maximus.rest {
-					kind = ShadowKind::Hard
+					kind = ShadowKind.Hard
 				}
 			}
 		}
 
-		if kind == ShadowKind::Soft {
-			if result[0] == ShadowKind::None {
-				result[0] = ShadowKind::Soft
+		if kind == ShadowKind.Soft {
+			if result[0] == ShadowKind.None {
+				result[0] = ShadowKind.Soft
 				result[1] = index
 			}
 		}
 		else {
-			if result[0] != ShadowKind::Hard {
-				result[0] = ShadowKind::Hard
+			if result[0] != ShadowKind.Hard {
+				result[0] = ShadowKind.Hard
 				result[1] = index
 			}
 		}

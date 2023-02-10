@@ -22,14 +22,14 @@ class ForOfStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Declarative {
+			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
 		}
@@ -52,7 +52,7 @@ class ForOfStatement extends Statement {
 
 		if ?@data.value {
 			@value = $compile.expression(@data.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType::Expression)
+			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
 			for var name in @value.listAssignments([]) {
@@ -98,7 +98,7 @@ class ForOfStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()

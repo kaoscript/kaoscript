@@ -51,7 +51,7 @@ class AwaitExpression extends Expression {
 		var dyn item
 
 		for statement, i in statements while index == -1 {
-			if item ?= statement.toFragments(block, Mode::None) {
+			if item ?= statement.toFragments(block, Mode.None) {
 				index = i
 			}
 		}
@@ -66,7 +66,7 @@ class AwaitExpression extends Expression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @awaiting {
-			if var item ?= @operation.toFragments(fragments, Mode::Async) {
+			if var item ?= @operation.toFragments(fragments, Mode.Async) {
 				return item
 			}
 			else {

@@ -58,8 +58,8 @@ func formatToSRGB(that: Color): String { # {{{
 } # }}}
 
 Color.registerSpace({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space.SRGB
+	alias: [Space.RGB]
 	formatters: {
 		hex: formatToHex
 		srgb: formatToSRGB

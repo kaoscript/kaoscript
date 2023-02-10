@@ -1,7 +1,7 @@
 class ThisExpression extends Expression {
 	private late {
 		@assignable: Boolean		= false
-		@assignment: AssignmentType	= AssignmentType::Neither
+		@assignment: AssignmentType	= AssignmentType.Neither
 		@calling: Boolean			= false
 		@class: NamedType
 		@composite: Boolean			= false
@@ -83,7 +83,7 @@ class ThisExpression extends Expression {
 				else if variable ?= type.getInstanceVariable(`_\(@name)`) {
 					@variableName = `_\(@name)`
 
-					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
+					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType.Neither {
 						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
@@ -152,7 +152,7 @@ class ThisExpression extends Expression {
 				else if variable ?= type.getInstanceVariable(`_\(@name)`) {
 					@variableName = `_\(@name)`
 
-					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
+					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType.Neither {
 						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
 					}
 					else {

@@ -300,7 +300,7 @@ var $parsers = {
 	srgb(that: Color, args: array): bool { # {{{
 		if args.length == 1 {
 			if args[0] is number {
-				that._space = Space::SRGB
+				that._space = Space.SRGB
 				that._alpha = $caster.alpha(((args[0] >> 24) && 0xff) / 255)
 				that._red = (args[0] >> 16) && 0xff
 				that._green = (args[0] >> 8) && 0xff
@@ -308,7 +308,7 @@ var $parsers = {
 				return true
 			}
 			else if args[0] is array {
-				that._space = Space::SRGB
+				that._space = Space.SRGB
 
 				that._alpha = args[0].length == 4 ? $caster.alpha(args[0][3]) : 1
 				that._red = $caster.ff(args[0][0])
@@ -318,7 +318,7 @@ var $parsers = {
 			}
 			else if args[0] is object {
 				if ?args[0].r && ?args[0].g && ?args[0].b {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._alpha = $caster.alpha(args[0].a)
 					that._red = $caster.ff(args[0].r)
 					that._green = $caster.ff(args[0].g)
@@ -327,7 +327,7 @@ var $parsers = {
 				}
 
 				if ?args[0].red && ?args[0].green && ?args[0].blue {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._alpha = $caster.alpha(args[0].alpha)
 					that._red = $caster.ff(args[0].red)
 					that._green = $caster.ff(args[0].green)
@@ -346,7 +346,7 @@ var $parsers = {
 				else if 'rand' == color {
 					var c = Math.random() * 0xffffff || 0
 
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._alpha = 1
 					that._red = ((c >> 16) && 0xff)
 					that._green = ((c >> 8) && 0xff)
@@ -360,7 +360,7 @@ var $parsers = {
 
 				// #ff0000aa
 				if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
 					that._blue = Integer.parse(match[3], 16)
@@ -369,7 +369,7 @@ var $parsers = {
 				}
 				// #ff9000, #ff0000
 				else if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
 					that._blue = Integer.parse(match[3], 16)
@@ -378,7 +378,7 @@ var $parsers = {
 				}
 				// #fffa
 				else if match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
 					that._blue = Integer.parse(match[3] + match[3], 16)
@@ -387,7 +387,7 @@ var $parsers = {
 				}
 				// #f00, #fff
 				else if match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
 					that._blue = Integer.parse(match[3] + match[3], 16)
@@ -396,7 +396,7 @@ var $parsers = {
 				}
 				// rgb(1, 234, 56)
 				else if match ?= /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = $caster.ff(match[1])
 					that._green = $caster.ff(match[2])
 					that._blue = $caster.ff(match[3])
@@ -405,7 +405,7 @@ var $parsers = {
 				}
 				// rgb(66%, 55%, 44%) in [0,100]%, [0,100]%, [0,100]%
 				else if match ?= /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Math.round(2.55 * $caster.percentage(match[1]))
 					that._green = Math.round(2.55 * $caster.percentage(match[2]))
 					that._blue = Math.round(2.55 * $caster.percentage(match[3]))
@@ -414,7 +414,7 @@ var $parsers = {
 				}
 				// rgba(#ff0000, 1)
 				else if match ?= /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
 					that._blue = Integer.parse(match[3], 16)
@@ -423,7 +423,7 @@ var $parsers = {
 				}
 				// rgba(#f00, 1)
 				else if match ?= /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
 					that._blue = Integer.parse(match[3] + match[3], 16)
@@ -432,7 +432,7 @@ var $parsers = {
 				}
 				// 1, 234, 56
 				else if match ?= /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = $caster.ff(match[1])
 					that._green = $caster.ff(match[2])
 					that._blue = $caster.ff(match[3])
@@ -442,7 +442,7 @@ var $parsers = {
 			}
 		}
 		else if args.length >= 3 {
-			that._space = Space::SRGB
+			that._space = Space.SRGB
 			that._alpha = args.length >= 4 ? $caster.alpha(args[3]) : 1
 			that._red = $caster.ff(args[0])
 			that._green = $caster.ff(args[1])
@@ -455,7 +455,7 @@ var $parsers = {
 	gray(that: Color, args: array): bool { # {{{
 		if args.length >= 1 {
 			if Number.isFinite(Float.parse(args[0])) {
-				that._space = Space::SRGB
+				that._space = Space.SRGB
 				that._red = that._green = that._blue = $caster.ff(args[0])
 				that._alpha = args.length >= 2 ? $caster.alpha(args[1]) : 1
 				return true
@@ -465,14 +465,14 @@ var $parsers = {
 
 				// gray(56)
 				if match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = that._green = that._blue = $caster.ff(match[1])
 					that._alpha = $caster.alpha(match[2], ?match[3])
 					return true
 				}
 				// gray(66%)
 				else if match ?= /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
-					that._space = Space::SRGB
+					that._space = Space.SRGB
 					that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]))
 					that._alpha = $caster.alpha(match[2], ?match[3])
 					return true
@@ -498,7 +498,7 @@ export enum Space<string> {
 export class Color {
 	private {
 		_dummy: bool = false
-		_space: Space = Space::SRGB
+		_space: Space = Space.SRGB
 		_alpha: int = 0
 		_red: int = 0
 		_green: int = 0
@@ -704,7 +704,7 @@ export class Color {
 		return this
 	} # }}}
 
-	blend(mut color: Color, mut percentage: float, mut space: Space = Space::SRGB, alpha: bool = false): Color { # {{{
+	blend(mut color: Color, mut percentage: float, mut space: Space = Space.SRGB, alpha: bool = false): Color { # {{{
 		if alpha {
 			var w = (percentage * 2) - 1
 			var a = color._alpha - this._alpha
@@ -761,7 +761,7 @@ export class Color {
 
 		if a == 1 {
 			if color._alpha != 1 {
-				color = color.clone().blend(this, 0.5, Space::SRGB, true)
+				color = color.clone().blend(this, 0.5, Space.SRGB, true)
 			}
 
 			var l1 = this.luminance() + 0.05
@@ -782,8 +782,8 @@ export class Color {
 			}
 		}
 		else {
-			var black = this.clone().blend($static.black, 0.5, Space::SRGB, true).contrast(color).ratio
-			var white = this.clone().blend($static.white, 0.5, Space::SRGB, true).contrast(color).ratio
+			var black = this.clone().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio
+			var white = this.clone().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio
 
 			var max = Math.max(black, white)
 
@@ -793,7 +793,7 @@ export class Color {
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
 			)
 
-			var min: Number = this.clone().blend(closest, 0.5, Space::SRGB, true).contrast(color).ratio
+			var min: Number = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio
 
 			return {
 				ratio: ((min + max) / 2).round(2)
@@ -808,8 +808,8 @@ export class Color {
 		var s1 = this._space
 		var s2 = target._space
 
-		this.space(Space::SRGB)
-		target.space(Space::SRGB)
+		this.space(Space.SRGB)
+		target.space(Space.SRGB)
 
 		target._red = this._red
 		target._green = this._green
@@ -824,8 +824,8 @@ export class Color {
 	} # }}}
 
 	distance(mut color: Color): float { # {{{
-		var that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
-		color = color.like(Space::SRGB)
+		var that: {_red: float, _green: float, _blue: float} = this.like(Space.SRGB)
+		color = color.like(Space.SRGB)
 
 		return Math.sqrt(3 * (color._red - that._red) * (color._red - that._red) + 4 * (color._green - that._green) * (color._green - that._green) + 2 * (color._blue - that._blue) * (color._blue - that._blue))
 	} # }}}
@@ -865,8 +865,8 @@ export class Color {
 		var gradient: array<Color> = [this]
 
 		if length > 0 {
-			this.space(Space::SRGB)
-			endColor.space(Space::SRGB)
+			this.space(Space.SRGB)
+			endColor.space(Space.SRGB)
 
 			length += 1
 
@@ -891,7 +891,7 @@ export class Color {
 	} # }}}
 
 	greyscale(model: string = 'BT709'): Color { # {{{
-		this.space(Space::SRGB)
+		this.space(Space.SRGB)
 
 		if model == 'BT709' {
 			this._red = this._green = this._blue = Math.round(0.2126 * this._red + 0.7152 * this._green + 0.0722 * this._blue)
@@ -913,17 +913,17 @@ export class Color {
 	} # }}}
 
 	hex(): string { # {{{
-		return $hex(this.like(Space::SRGB))
+		return $hex(this.like(Space.SRGB))
 	} # }}}
 
 	isBlack(): bool { # {{{
-		var that = this.like(Space::SRGB)
+		var that = this.like(Space.SRGB)
 		return that._red == 0 && that._green == 0 && that._blue == 0
 	} # }}}
 
 	isTransparent(): bool { # {{{
 		if this._alpha == 0 {
-			var that = this.like(Space::SRGB)
+			var that = this.like(Space.SRGB)
 			return that._red == 0 && that._green == 0 && that._blue == 0
 		}
 		else {
@@ -932,7 +932,7 @@ export class Color {
 	} # }}}
 
 	isWhite(): bool { # {{{
-		var that = this.like(Space::SRGB)
+		var that = this.like(Space.SRGB)
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} # }}}
 
@@ -949,7 +949,7 @@ export class Color {
 	} # }}}
 
 	luminance(): Number { # {{{
-		var that = this.like(Space::SRGB)
+		var that = this.like(Space.SRGB)
 
 		var mut r: float = that._red:!float / 255
 		r = r < 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
@@ -964,7 +964,7 @@ export class Color {
 	} # }}}
 
 	negative(): Color { # {{{
-		this.space(Space::SRGB)
+		this.space(Space.SRGB)
 
 		this._red ^^= 0xff
 		this._green ^^= 0xff

@@ -7,7 +7,7 @@ enum Color {
 func foobar(color) {
 }
 
-var color = Color::Red
+var color = Color.Red
 
 foobar(color)
-foobar(Color::Red)
+foobar(Color.Red)

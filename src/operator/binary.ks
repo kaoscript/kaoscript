@@ -119,7 +119,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		symbol(): String
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -169,7 +169,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		fragments.wrap(@left).code($space).code(@symbol(), @data.operator).code($space).wrap(@right)
 	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == this.operator() && type == OperandType::Number {
+		if operator == this.operator() && type == OperandType.Number {
 			fragments.compile(@left).code($comma).compile(@right)
 		}
 		else {
@@ -209,7 +209,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if !target.isVoid() && !target.canBeEnum() {
 			@expectingEnum = false
@@ -251,12 +251,12 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 						}
 					}
 					else {
-						TypeException.throwInvalidOperand(@right, Operator::Addition, this)
+						TypeException.throwInvalidOperand(@right, Operator.Addition, this)
 					}
 				}
 			}
 			else {
-				TypeException.throwInvalidOperand(@left, Operator::Addition, this)
+				TypeException.throwInvalidOperand(@left, Operator.Addition, this)
 			}
 
 			var nullable = @left.type().isNullable() || @right.type().isNullable()
@@ -282,11 +282,11 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	isComputed() => @native || (@enum && !@expectingEnum)
 	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): this
 	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == Operator::Addition {
-			if type == OperandType::Enum && (@enum || @number) {
+		if operator == Operator.Addition {
+			if type == OperandType.Enum && (@enum || @number) {
 				fragments.wrap(@left).code(' | ').wrap(@right)
 			}
-			else if ((@number && type == OperandType::Number) || (@string && type == OperandType::String)) {
+			else if ((@number && type == OperandType.Number) || (@string && type == OperandType.String)) {
 				fragments.compile(@left).code($comma).compile(@right)
 			}
 			else {
@@ -345,13 +345,13 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
-	operator() => Operator::Division
+	operator() => Operator.Division
 	runtime() => 'division'
 	symbol() => '/'
 }
 
 class BinaryOperatorLeftShift extends NumericBinaryOperatorExpression {
-	operator() => Operator::LeftShift
+	operator() => Operator.LeftShift
 	runtime() => 'leftShift'
 	symbol() => '<<'
 }
@@ -372,17 +372,17 @@ class BinaryOperatorMatch extends Expression {
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 
-		if @data.right.kind == NodeKind::JunctionExpression {
+		if @data.right.kind == NodeKind.JunctionExpression {
 			@junctive = true
 
 			for var operand in @data.right.operands {
 				@addOperand(operand)
 			}
 
-			if @data.right.operator.kind == BinaryOperatorKind::And {
+			if @data.right.operator.kind == BinaryOperatorKind.And {
 				@junction = ' && '
 			}
-			else if @data.right.operator.kind == BinaryOperatorKind::Or {
+			else if @data.right.operator.kind == BinaryOperatorKind.Or {
 				@junction = ' || '
 			}
 		}
@@ -398,7 +398,7 @@ class BinaryOperatorMatch extends Expression {
 		}
 
 		unless @subject.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@subject, Operator::Match, this)
+			TypeException.throwInvalidOperand(@subject, Operator.Match, this)
 		}
 
 		if !@subject.type().isNumber() || @subject.type().isNullable() {
@@ -413,7 +413,7 @@ class BinaryOperatorMatch extends Expression {
 			}
 
 			unless operand.type().canBeNumber() {
-				TypeException.throwInvalidOperand(operand, Operator::Match, this)
+				TypeException.throwInvalidOperand(operand, Operator.Match, this)
 			}
 		}
 	} # }}}
@@ -579,18 +579,18 @@ class BinaryOperatorMismatch extends BinaryOperatorMatch {
 }
 
 class BinaryOperatorModulo extends NumericBinaryOperatorExpression {
-	operator() => Operator::Modulo
+	operator() => Operator.Modulo
 	runtime() => 'modulo'
 	symbol() => '%'
 }
 
 class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
-	operator() => Operator::Multiplication
+	operator() => Operator.Multiplication
 	runtime() => 'multiplication'
 	symbol() => '*'
 }
 class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
-	operator() => Operator::Quotient
+	operator() => Operator.Quotient
 	runtime() => 'quotient'
 	symbol() => '/.'
 	toNativeFragments(fragments) { # {{{
@@ -599,19 +599,19 @@ class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorRightShift extends NumericBinaryOperatorExpression {
-	operator() => Operator::RightShift
+	operator() => Operator.RightShift
 	runtime() => 'rightShift'
 	symbol() => '>>'
 }
 
 class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 	isAcceptingEnum() => true
-	operator() => Operator::Subtraction
+	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
 	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == Operator::Subtraction {
-			if type == OperandType::Enum {
+		if operator == Operator.Subtraction {
+			if type == OperandType.Enum {
 				fragments.wrap(@left).code(' & ~').wrap(@right)
 			}
 			else {

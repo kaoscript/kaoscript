@@ -25,7 +25,7 @@ class ImportScope extends BlockScope {
 		@variables[name] = [@line(), variable]
 	} # }}}
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Renamed {
+		if mode ~~ MatchingMode.Renamed {
 			if var renames ?= @scopeRenames[name] {
 				for var rename in renames {
 					if rename.name == newName {

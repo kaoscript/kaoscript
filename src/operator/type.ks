@@ -12,10 +12,10 @@ class BinaryOperatorTypeCasting extends Expression {
 		@type = Type.fromAST(@data.right, this)
 
 		for var modifier in @data.operator.modifiers {
-			if modifier.kind == ModifierKind::Forced {
+			if modifier.kind == ModifierKind.Forced {
 				@forced = true
 			}
-			else if modifier.kind == ModifierKind::Nullable {
+			else if modifier.kind == ModifierKind.Nullable {
 				@nullable = true
 
 				@type = @type.setNullable(true)
@@ -73,7 +73,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	private late {
 		@computed: Boolean		= false
 		@falseType: Type
-		@junction: Junction		= Junction::NONE
+		@junction: Junction		= Junction.NONE
 		@subject
 		@trueType: Type
 	}
@@ -88,22 +88,22 @@ class BinaryOperatorTypeEquality extends Expression {
 			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind::JunctionExpression {
+		if @data.right.kind == NodeKind.JunctionExpression {
 			var late type: Type
 
-			if @data.right.operator.kind == BinaryOperatorKind::And {
+			if @data.right.operator.kind == BinaryOperatorKind.And {
 				type = new FusionType(@scope)
 
-				@junction = Junction::AND
+				@junction = Junction.AND
 			}
 			else {
 				type = new UnionType(@scope)
 
-				@junction = Junction::OR
+				@junction = Junction.OR
 			}
 
 			for var operand in @data.right.operands {
-				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
+				if operand.kind == NodeKind.TypeReference && operand.typeName?.kind == NodeKind.Identifier {
 					if var variable ?= @scope.getVariable(operand.typeName.name) {
 						type.addType(@validateType(variable))
 					}
@@ -123,7 +123,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			@subject.releaseReusable()
 		}
 		else {
-			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+			if @data.right.kind == NodeKind.TypeReference && @data.right.typeName?.kind == NodeKind.Identifier {
 				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
 					@trueType = @validateType(variable)
 				}
@@ -207,7 +207,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	private late {
 		@computed: Boolean		= false
 		@falseType: Type
-		@junction: Junction		= Junction::NONE
+		@junction: Junction		= Junction.NONE
 		@subject
 		@trueType: Type
 	}
@@ -223,22 +223,22 @@ class BinaryOperatorTypeInequality extends Expression {
 			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind::JunctionExpression {
+		if @data.right.kind == NodeKind.JunctionExpression {
 			var late type: Type
 
-			if @data.right.operator.kind == BinaryOperatorKind::And {
+			if @data.right.operator.kind == BinaryOperatorKind.And {
 				type = new FusionType(@scope)
 
-				@junction = Junction::AND
+				@junction = Junction.AND
 			}
 			else {
 				type = new UnionType(@scope)
 
-				@junction = Junction::OR
+				@junction = Junction.OR
 			}
 
 			for var operand in @data.right.operands {
-				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
+				if operand.kind == NodeKind.TypeReference && operand.typeName?.kind == NodeKind.Identifier {
 					if var variable ?= @scope.getVariable(operand.typeName.name) {
 						type.addType(@validateType(variable))
 					}
@@ -255,7 +255,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			@computed = true
 		}
 		else {
-			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+			if @data.right.kind == NodeKind.TypeReference && @data.right.typeName?.kind == NodeKind.Identifier {
 				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
 					@falseType = @validateType(variable)
 				}

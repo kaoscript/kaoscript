@@ -50,7 +50,7 @@ class ReturnStatement extends Statement {
 		}
 
 		if ?@value {
-			@value.prepare(target, TargetMode::Permissive)
+			@value.prepare(target, TargetMode.Permissive)
 
 			@value.acquireReusable(false)
 			@value.releaseReusable()
@@ -72,10 +72,10 @@ class ReturnStatement extends Statement {
 			else if !@type.isExplicit() && @type.isAny() {
 				pass
 			}
-			else if @type.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+			else if @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				pass
 			}
-			else if @type.isEnum() && @type.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast) {
+			else if @type.isEnum() && @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				@type = target!?
 				@enumCasting = true
 			}
@@ -83,10 +83,10 @@ class ReturnStatement extends Statement {
 				var mut cast = false
 
 				for var tt in @type.types() {
-					if tt.isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+					if tt.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 						pass
 					}
-					else if tt.isEnum() && tt.discard().type().isSubsetOf(target, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+					else if tt.isEnum() && tt.discard().type().isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 						cast = true
 					}
 					else if tt.isAssignableToVariable(target, true, false, false) {
@@ -168,7 +168,7 @@ class ReturnStatement extends Statement {
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 
-		var item = @value.toFragments(line, Mode::None)
+		var item = @value.toFragments(line, Mode.None)
 
 		item([this])
 

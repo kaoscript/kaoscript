@@ -6,8 +6,8 @@ class UntilStatement extends Statement {
 		@condition
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @bindingScope)
 		@condition.analyse()
@@ -17,7 +17,7 @@ class UntilStatement extends Statement {
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)

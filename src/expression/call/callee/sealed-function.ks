@@ -21,26 +21,26 @@ class SealedFunctionCallee extends Callee {
 	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
 			match node._data.scope.kind {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					throw new NotImplementedException(node)
 				}
 			}
 		}
 		else {
 			match node._data.scope.kind {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
 
 					for var argument, index in node.arguments() {

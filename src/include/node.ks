@@ -24,7 +24,7 @@ abstract class AbstractNode {
 	} # }}}
 	abstract analyse()
 	// TODO remove default value
-	abstract prepare(target: Type = Type.Void, targetMode: TargetMode = TargetMode::Strict)
+	abstract prepare(target: Type = Type.Void, targetMode: TargetMode = TargetMode.Strict)
 	abstract translate()
 	authority() => @parent.authority()
 	data() => @data
@@ -39,19 +39,19 @@ abstract class AbstractNode {
 	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { # {{{
 		match type {
-			ScopeType::Bleeding {
+			ScopeType.Bleeding {
 				return new BleedingScope(scope)
 			}
-			ScopeType::Block {
+			ScopeType.Block {
 				return new BlockScope(scope)
 			}
-			ScopeType::Function {
+			ScopeType.Function {
 				return new FunctionScope(scope)
 			}
-			ScopeType::Hollow {
+			ScopeType.Hollow {
 				return new HollowScope(scope)
 			}
-			ScopeType::InlineBlock {
+			ScopeType.InlineBlock {
 				if @options.format.variables == 'es6' {
 					return new InlineBlockScope(scope)
 				}
@@ -59,7 +59,7 @@ abstract class AbstractNode {
 					return new LaxInlineBlockScope(scope)
 				}
 			}
-			ScopeType::Operation {
+			ScopeType.Operation {
 				return new OperationScope(scope)
 			}
 		}

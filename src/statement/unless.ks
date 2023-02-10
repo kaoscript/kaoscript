@@ -5,7 +5,7 @@ class UnlessStatement extends Statement {
 		@condition
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
@@ -14,7 +14,7 @@ class UnlessStatement extends Statement {
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)

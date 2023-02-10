@@ -9,13 +9,13 @@ class InvertedPreciseMethodCallee extends MethodCallee {
 	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		match @scope {
-			ScopeKind::Argument {
+			ScopeKind.Argument {
 				throw new NotImplementedException(node)
 			}
-			ScopeKind::Null {
+			ScopeKind.Null {
 				throw new NotImplementedException(node)
 			}
-			ScopeKind::This {
+			ScopeKind.This {
 				fragments.code(`\(@name.name())`)
 
 				if @function.isInstance() {

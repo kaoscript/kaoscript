@@ -1,9 +1,10 @@
 class MemberExpression extends Expression {
 	private late {
 		@assignable: Boolean			= false
-		@assignment: AssignmentType		= AssignmentType::Neither
+		@assignment: AssignmentType		= AssignmentType.Neither
 		@callee
 		@computed: Boolean				= false
+		@enumCasting: Boolean			= false
 		@inferable: Boolean				= false
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
@@ -29,10 +30,10 @@ class MemberExpression extends Expression {
 	} # }}}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Computed {
+			if modifier.kind == ModifierKind.Computed {
 				@computed = true
 			}
-			else if modifier.kind == ModifierKind::Nullable {
+			else if modifier.kind == ModifierKind.Nullable {
 				@nullable = true
 			}
 		}
@@ -43,7 +44,6 @@ class MemberExpression extends Expression {
 
 			if @computed {
 				@property = $compile.expression(@data.property, this)
-
 				@property.analyse()
 			}
 		}
@@ -65,63 +65,7 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property.prepare(AnyType.NullableUnexplicit)
 
-				var mut nf = true
-
-				if type.isTuple() {
-					if @property is NumberLiteral | StringLiteral {
-						if var property ?= type.getProperty(@property.value()) {
-							@type = property.type()
-
-							nf = false
-						}
-						else if type.isExhaustive(this) {
-							if @assignable {
-								ReferenceException.throwInvalidAssignment(this)
-							}
-							else {
-								ReferenceException.throwNotDefinedProperty(@property.value(), this)
-							}
-						}
-					}
-				}
-
-				if nf && type.isArray() {
-					if @property is NumberLiteral {
-						if var property ?= type.getProperty(@property.value()) {
-							@type = property
-
-							nf = false
-						}
-						else if type.isExhaustive(this) {
-							if @assignable {
-								ReferenceException.throwInvalidAssignment(this)
-							}
-							else {
-								ReferenceException.throwNotDefinedProperty(@property.value(), this)
-							}
-						}
-					}
-				}
-
-				if nf && type.isObject() {
-					if @property is NumberLiteral | StringLiteral {
-						if var property ?= type.getProperty(@property.value()) {
-							@type = property
-
-							nf = false
-						}
-						else if type.isExhaustive(this) {
-							if @assignable {
-								ReferenceException.throwInvalidAssignment(this)
-							}
-							else {
-								ReferenceException.throwNotDefinedProperty(@property.value(), this)
-							}
-						}
-					}
-				}
-
-				if nf {
+				unless @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) {
 					@type = type.parameter()
 				}
 
@@ -143,92 +87,16 @@ class MemberExpression extends Expression {
 				}
 			}
 			else {
-				var isTuple = type.isTuple()
-
 				@property = @data.property.name
 
-				if !isTuple {
+				unless type.isTuple() {
 					if 48 <= @property.charCodeAt(0) <= 57 {
 						SyntaxException.throwInvalidIdentifier(@property, this)
 					}
 				}
 
-				if type.isObject() {
-					@type = type.parameter()
-				}
-
-				if isTuple {
-					@computed = true
-					@stringProperty = true
-
-					if var property ?= type.getProperty(@property) {
-						@property = `\(property.index())`
-						@type = property.type()
-					}
-					else if type.isExhaustive(this) {
-						if @assignable {
-							ReferenceException.throwInvalidAssignment(this)
-						}
-						else {
-							ReferenceException.throwNotDefinedProperty(@property, this)
-						}
-					}
-
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path())[\(@property)]`
-					}
-				}
-				else if type.isStruct() {
-					if var property ?= type.getProperty(@property) {
-						@type = property.type()
-					}
-					else if type.isExhaustive(this) {
-						if @assignable {
-							ReferenceException.throwInvalidAssignment(this)
-						}
-						else {
-							ReferenceException.throwNotDefinedProperty(@property, this)
-						}
-					}
-
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path()).\(@property)`
-					}
-				}
-				else {
-					if var property ?= type.getProperty(@property) {
-						var type = type.discardReference()
-						if type.isClass() && property is ClassVariableType && property.isSealed() {
-							@sealed = true
-							@usingGetter = property.hasDefaultValue()
-							@usingSetter = property.hasDefaultValue()
-						}
-
-						@type = property.discardVariable()
-					}
-					else if type.isEnum() {
-						SyntaxException.throwInvalidEnumAccess(this)
-					}
-					else if @assignable && type.isLiberal() {
-						@liberal = true
-						@objectType = type
-					}
-					else if type.isExhaustive(this) {
-						if @assignable {
-							ReferenceException.throwInvalidAssignment(this)
-						}
-						else {
-							ReferenceException.throwNotDefinedProperty(@property, this)
-						}
-					}
-
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path()).\(@property)`
-					}
-				}
+				// TODO void
+				var ignore = @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type)
 
 				if @assignable {
 					if var variable ?= this.declaration() {
@@ -374,6 +242,244 @@ class MemberExpression extends Expression {
 		return variables
 	} # }}}
 	path() => @path
+	prepareArray(type: Type): Boolean { # {{{
+		return false unless type.isArray()
+
+		if @computed {
+			if @property is NumberLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			return @prepareObject(type)
+		}
+	} # }}}
+	prepareEnum(type: Type): Boolean { # {{{
+		return false unless type.isEnum()
+
+		if @computed {
+			if @property is NumberLiteral | StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property.type()
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			if type is NamedType {
+				if type.type().hasVariable(@property) {
+					@type = type.reference(@scope)
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+				else if var property ?= type.type().getStaticMethod(@property) {
+					@type = property
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
+				}
+			}
+			else if type is ReferenceType {
+				if var property ?= type.discard().getInstanceProperty(@property) {
+					@type = property.discardVariable()
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+			}
+
+			return false
+		}
+	} # }}}
+	prepareObject(mut type): Boolean { # {{{
+		if @computed {
+			return false unless type.isObject()
+
+			if @property is NumberLiteral | StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			if type.isObject() {
+				@type = type.parameter()
+			}
+
+			if var property ?= type.getProperty(@property) {
+				var type = type.discardReference()
+				if type.isClass() && property is ClassVariableType && property.isSealed() {
+					@sealed = true
+					@usingGetter = property.hasDefaultValue()
+					@usingSetter = property.hasDefaultValue()
+				}
+
+				@type = property.discardVariable()
+			}
+			else if @assignable && type.isLiberal() {
+				@liberal = true
+				@objectType = type
+			}
+			else if type.isExhaustive(this) {
+				if @assignable {
+					ReferenceException.throwInvalidAssignment(this)
+				}
+				else {
+					ReferenceException.throwNotDefinedProperty(@property, this)
+				}
+			}
+
+			if @object.isInferable() {
+				@inferable = true
+				@path = `\(@object.path()).\(@property)`
+			}
+
+			return true
+		}
+	} # }}}
+	prepareStruct(type: Type): Boolean { # {{{
+		return false unless type.isStruct()
+
+		if @computed {
+			if @property is NumberLiteral | StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property.type()
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			if var property ?= type.getProperty(@property) {
+				@type = property.type()
+			}
+			else if type.isExhaustive(this) {
+				if @assignable {
+					ReferenceException.throwInvalidAssignment(this)
+				}
+				else {
+					ReferenceException.throwNotDefinedProperty(@property, this)
+				}
+			}
+
+			if @object.isInferable() {
+				@inferable = true
+				@path = `\(@object.path()).\(@property)`
+			}
+
+			return true
+		}
+	} # }}}
+	prepareTuple(type: Type): Boolean { # {{{
+		return false unless type.isTuple()
+
+		if @computed {
+			if @property is NumberLiteral | StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property.type()
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			@computed = true
+			@stringProperty = true
+
+			if var property ?= type.getProperty(@property) {
+				@property = `\(property.index())`
+				@type = property.type()
+			}
+			else if type.isExhaustive(this) {
+				if @assignable {
+					ReferenceException.throwInvalidAssignment(this)
+				}
+				else {
+					ReferenceException.throwNotDefinedProperty(@property, this)
+				}
+			}
+
+			if @object.isInferable() {
+				@inferable = true
+				@path = `\(@object.path())[\(@property)]`
+			}
+
+			return true
+		}
+	} # }}}
 	releaseReusable() { # {{{
 		if @object.isCallable() {
 			@object.releaseReusable()
@@ -395,6 +501,18 @@ class MemberExpression extends Expression {
 		else {
 			@objectType.addProperty(@property, type)
 		}
+	} # }}}
+	toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{
+		this.toFragments(fragments, mode)
+
+		if @type.isEnum() && !(type.isAny() || type.isEnum()) {
+			fragments.code('.value')
+		}
+	} # }}}
+	toCastingFragments(fragments, mode) { # {{{
+		this.toFragments(fragments, mode)
+
+		fragments.code('.value')
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @isNullable() && !@tested {
@@ -423,7 +541,7 @@ class MemberExpression extends Expression {
 			else if @prepareObject && @type.isMethod() && @parent is not ClassProxyDeclaration | ClassProxyGroupDeclaration {
 				fragments.code(`\($runtime.helper(this)).bindMethod(`)
 
-				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
+				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
 					fragments.compile(@object)
 				}
 				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
@@ -445,7 +563,7 @@ class MemberExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
+				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
 					fragments.code('(').compile(@object).code(')')
 				}
 				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
@@ -460,6 +578,10 @@ class MemberExpression extends Expression {
 				}
 				else {
 					fragments.code($dot).compile(@property)
+				}
+
+				if @enumCasting {
+					fragments.code('.value')
 				}
 			}
 		}
@@ -608,5 +730,12 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	type() => @type
+	validateType(type: Type) { # {{{
+		if @type.isEnum() {
+			if !type.isAny() && !type.isEnum() {
+				@enumCasting = true
+			}
+		}
+	} # }}}
 	walkNode(fn) => fn(this) && @object.walkNode(fn)
 }

@@ -17,6 +17,6 @@ func foobar(day: Weekday) {
     }
 }
 
-foobar(Weekday::WEDNESDAY)
+foobar(Weekday.WEDNESDAY)
 
 export Weekday

@@ -9,5 +9,5 @@ func foobar(): String {
 }
 
 func quxbaz(): Color {
-	return Color::Red
+	return Color.Red
 }

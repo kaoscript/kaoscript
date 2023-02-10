@@ -174,7 +174,7 @@ class VariableDeclaration extends AbstractNode {
 	} # }}}
 	override initiate() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Mutable {
+			if modifier.kind == ModifierKind.Mutable {
 				@immutable = false
 				@rebindable = true
 			}
@@ -186,13 +186,13 @@ class VariableDeclaration extends AbstractNode {
 			var late declarator
 
 			match data.name.kind {
-				NodeKind::ArrayBinding {
+				NodeKind.ArrayBinding {
 					declarator = new VariableBindingDeclarator(data, this)
 				}
-				NodeKind::Identifier {
+				NodeKind.Identifier {
 					declarator = new VariableIdentifierDeclarator(data, this)
 				}
-				NodeKind::ObjectBinding {
+				NodeKind.ObjectBinding {
 					declarator = new VariableBindingDeclarator(data, this)
 				}
 				else {
@@ -211,7 +211,7 @@ class VariableDeclaration extends AbstractNode {
 				@rebindable = ?@valueScope
 			}
 
-			@valueScope ??= @newScope(@scope!?, ScopeType::Hollow)
+			@valueScope ??= @newScope(@scope!?, ScopeType.Hollow)
 
 			var line = @valueScope.getRawLine()
 
@@ -386,23 +386,23 @@ class VariableDeclaration extends AbstractNode {
 		return variables
 	} # }}}
 	setModifier(modifier: ModifierKind) { # {{{
-		if modifier == ModifierKind::Dynamic {
+		if modifier == ModifierKind.Dynamic {
 			@autotype = false
 			@immutable = false
 			@rebindable = true
 		}
-		else if modifier == ModifierKind::Mutable {
+		else if modifier == ModifierKind.Mutable {
 			@immutable = false
 			@rebindable = true
 		}
-		else if modifier == ModifierKind::LateInit {
+		else if modifier == ModifierKind.LateInit {
 			@lateInit = true
 		}
 	} # }}}
 	toAwaitStatementFragments(fragments, statements) { # {{{
 		var line = fragments.newLine()
 
-		var item = @value.toFragments(line, Mode::None)
+		var item = @value.toFragments(line, Mode.None)
 
 		statements.unshift(this)
 
@@ -479,7 +479,7 @@ class VariableBindingDeclarator extends AbstractNode {
 	analyse() { # {{{
 		@binding = $compile.expression(@data.name, this)
 
-		@binding.setAssignment(AssignmentType::Declaration)
+		@binding.setAssignment(AssignmentType.Declaration)
 
 		if @parent.isImmutable() {
 			@binding.flagImmutable()
@@ -573,7 +573,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@redeclared = @scope.hasDeclaredVariable(@name)
 
 		@identifier = new IdentifierLiteral(@data.name, this, @scope)
-		@identifier.setAssignment(AssignmentType::Declaration)
+		@identifier.setAssignment(AssignmentType.Declaration)
 		@identifier.analyse()
 
 		@parent.defineVariables(@identifier)
@@ -586,7 +586,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Nullable {
+			if modifier.kind == ModifierKind.Nullable {
 				@nullable = true
 			}
 		}

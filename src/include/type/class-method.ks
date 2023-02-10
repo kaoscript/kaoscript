@@ -1,7 +1,7 @@
 class ClassMethodType extends FunctionType {
 	private {
 		@abstract: Boolean						= false
-		@access: Accessibility					= Accessibility::Public
+		@access: Accessibility					= Accessibility.Public
 		@forked: Boolean						= false
 		@forkedIndex: Number?					= null
 		@initVariables: Object<Boolean>			= {}
@@ -134,14 +134,14 @@ class ClassMethodType extends FunctionType {
 			return false
 		}
 
-		return @access != Accessibility::Internal
+		return @access != Accessibility.Internal
 	} # }}}
 	isForked() => @forked
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isInstance() => @instance
 	isMethod() => true
 	isOverflowing(methods: Array<ClassMethodType>) { # {{{
-		var mode = MatchingMode::SimilarParameter + MatchingMode::MissingParameter + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
+		var mode = MatchingMode.SimilarParameter + MatchingMode.MissingParameter + MatchingMode.ShiftableParameters + MatchingMode.RequireAllParameters
 
 		for var method in methods {
 			if this.isSubsetOf(method, mode) {
@@ -178,22 +178,22 @@ class ClassMethodType extends FunctionType {
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Abstract {
+			if modifier.kind == ModifierKind.Abstract {
 				@abstract = true
 			}
-			else if modifier.kind == ModifierKind::Async {
+			else if modifier.kind == ModifierKind.Async {
 				@async()
 			}
-			else if modifier.kind == ModifierKind::Internal {
-				@access = Accessibility::Internal
+			else if modifier.kind == ModifierKind.Internal {
+				@access = Accessibility.Internal
 			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
+			else if modifier.kind == ModifierKind.Private {
+				@access = Accessibility.Private
 			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
+			else if modifier.kind == ModifierKind.Protected {
+				@access = Accessibility.Protected
 			}
-			else if modifier.kind == ModifierKind::Sealed {
+			else if modifier.kind == ModifierKind.Sealed {
 				@sealed = true
 			}
 		}
@@ -211,7 +211,7 @@ class ClassMethodType extends FunctionType {
 			return
 		}
 
-		if data.kind == NodeKind::TypeReference && data.typeName.kind == NodeKind::Identifier {
+		if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
 			if data.typeName.name == 'this' {
 				@dynamicReturn = true
 				@unknownReturnType = true
@@ -220,7 +220,7 @@ class ClassMethodType extends FunctionType {
 				return
 			}
 		}
-		else if data.kind == NodeKind::ThisExpression {
+		else if data.kind == NodeKind.ThisExpression {
 			@dynamicReturn = true
 			@unknownReturnType = true
 			@returnData = data

@@ -41,13 +41,13 @@ class LenientThisCallee extends Callee {
 
 		if @flatten {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.code(`\(name).\(@property).apply(\(name)`)
 				}
 			}
@@ -56,13 +56,13 @@ class LenientThisCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.code(`\(name).\(@property)(`)
 
 					for var argument, index in node.arguments() {

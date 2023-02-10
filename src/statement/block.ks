@@ -7,7 +7,7 @@ class BlockStatement extends Statement {
 	analyse() { # {{{
 		@label = @data.label.name
 
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		@scope.line(@data.body.start.line)
 

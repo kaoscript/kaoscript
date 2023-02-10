@@ -31,7 +31,7 @@ class AliasType extends Type {
 	discardReference() => @type.discardAlias()
 	override export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
-			kind: TypeKind::Alias
+			kind: TypeKind.Alias
 			of: @type.export(references, indexDelta, mode, module)
 		}
 	} # }}}

@@ -6,7 +6,7 @@ class Scanner {
 	match(...tokens: Array<Token>) {
 		var c = this.skip(tokens.length)
 
-		return Token::INVALID
+		return Token.INVALID
 	}
 	private skip(index) {
 	}

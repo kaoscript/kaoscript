@@ -16,7 +16,7 @@ class ConditionalExpression extends Expression {
 		@whenFalse.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 		for var data, name of @condition.inferTypes({}) {
 			@scope.updateInferable(name, data, this)

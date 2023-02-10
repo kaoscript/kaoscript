@@ -33,7 +33,7 @@ class Attribute {
 		conditional(data, node) { # {{{
 			if data.attributes?.length > 0 {
 				for var attr in data.attributes {
-					if var attribute ?= Attribute.get(attr.declaration, AttributeTarget::Conditional) {
+					if var attribute ?= Attribute.get(attr.declaration, AttributeTarget.Conditional) {
 						return attribute.evaluate(node)
 					}
 				}
@@ -42,7 +42,7 @@ class Attribute {
 			return true
 		} # }}}
 		configure(data, mut options?, mode, fileName, force = false) { # {{{
-			var clone = !force && options != null && AttributeTarget::Global !~ mode
+			var clone = !force && options != null && AttributeTarget.Global !~ mode
 
 			if options == null {
 				options = {
@@ -82,10 +82,10 @@ class Attribute {
 		get(data, targets) { # {{{
 			var dyn name = null
 
-			if data.kind == NodeKind::AttributeExpression {
+			if data.kind == NodeKind.AttributeExpression {
 				name = data.name.name
 			}
-			else if data.kind == NodeKind::Identifier {
+			else if data.kind == NodeKind.Identifier {
 				name = data.name
 			}
 
@@ -110,12 +110,12 @@ class Attribute {
 
 class ElseAttribute extends Attribute {
 	static {
-		target() => AttributeTarget::Conditional
+		target() => AttributeTarget.Conditional
 	}
 	constructor(data)
 	clone(options, cloned) => options
 	evaluate(node) { # {{{
-		if var flag ?= node.getAttributeData(AttributeData::Conditional) {
+		if var flag ?= node.getAttributeData(AttributeData.Conditional) {
 			return !flag
 		}
 		else {
@@ -129,7 +129,7 @@ class ErrorAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Property + AttributeTarget.Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -144,7 +144,7 @@ class ErrorAttribute extends Attribute {
 	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
 			match arg.kind {
-				NodeKind::AttributeExpression {
+				NodeKind.AttributeExpression {
 					if arg.name.name == 'ignore' {
 						for a in arg.arguments {
 							options.error.ignore.push(a.name)
@@ -156,7 +156,7 @@ class ErrorAttribute extends Attribute {
 						}
 					}
 				}
-				NodeKind::Identifier {
+				NodeKind.Identifier {
 					match arg.name {
 						'off' => options.error.level = 'off'
 					}
@@ -173,7 +173,7 @@ class FormatAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -187,7 +187,7 @@ class FormatAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
-			if arg.kind == NodeKind::AttributeOperation {
+			if arg.kind == NodeKind.AttributeOperation {
 				options.format[arg.name.name] = arg.value.value
 			}
 		}
@@ -201,7 +201,7 @@ class IfAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Conditional
+		target() => AttributeTarget.Conditional
 	}
 	constructor(@data)
 	clone(options, cloned) => options
@@ -240,12 +240,12 @@ class IfAttribute extends Attribute {
 
 		var flag = @evaluate(@data.arguments[0], node.target())
 
-		node.setAttributeData(AttributeData::Conditional, flag)
+		node.setAttributeData(AttributeData.Conditional, flag)
 
 		return flag
 	} # }}}
 	evaluate(data, target) { # {{{
-		if data.kind == NodeKind::AttributeExpression {
+		if data.kind == NodeKind.AttributeExpression {
 			match data.name.name {
 				'all' {
 					for arg in data.arguments when !@evaluate(arg, target) {
@@ -337,7 +337,7 @@ class IfAttribute extends Attribute {
 				}
 			}
 		}
-		else if data.kind == NodeKind::Identifier {
+		else if data.kind == NodeKind.Identifier {
 			if match ?= $semverRegex.exec(data.name) {
 				if ?match[2] {
 					return target.name == match[1] && target.version == match[2]
@@ -358,7 +358,7 @@ class ParseAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -372,7 +372,7 @@ class ParseAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for arg in @data.arguments {
-			if arg.kind == NodeKind::AttributeOperation {
+			if arg.kind == NodeKind.AttributeOperation {
 				options.parse[arg.name.name] = arg.value.value
 			}
 		}
@@ -386,7 +386,7 @@ class RetainAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Parameter
+		target() => AttributeTarget.Parameter
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -407,7 +407,7 @@ class RetainAttribute extends Attribute {
 
 class RetainParametersAttribute extends RetainAttribute {
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Statement
 	}
 }
 
@@ -416,7 +416,7 @@ class RulesAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Property + AttributeTarget.Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -430,7 +430,7 @@ class RulesAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for var argument in @data.arguments {
-			if argument.kind == NodeKind::Identifier {
+			if argument.kind == NodeKind.Identifier {
 				var name = argument.name.toLowerCase()
 
 				if var data ?= $rules[name] {
@@ -451,12 +451,12 @@ class RuntimeAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global
+		target() => AttributeTarget.Global
 	}
 	constructor(@data)
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			if arg.kind == NodeKind::AttributeOperation {
+			if arg.kind == NodeKind.AttributeOperation {
 				if arg.name.name == 'package' {
 					options.runtime.helper.package = options.runtime.type.package = arg.value.value
 				}
@@ -468,10 +468,10 @@ class RuntimeAttribute extends Attribute {
 					options.runtime.type.alias = prefix + options.runtime.type.alias
 				}
 			}
-			else if arg.kind == NodeKind::AttributeExpression {
+			else if arg.kind == NodeKind.AttributeExpression {
 				if arg.name.name == 'helper' {
 					for var arg in arg.arguments {
-						if arg.kind == NodeKind::AttributeOperation {
+						if arg.kind == NodeKind.AttributeOperation {
 							match arg.name.name {
 								'alias' => options.runtime.helper.alias = arg.value.value
 								'member' => options.runtime.helper.member = arg.value.value
@@ -482,7 +482,7 @@ class RuntimeAttribute extends Attribute {
 				}
 				else if arg.name.name == 'operator' {
 					for var arg in arg.arguments {
-						if arg.kind == NodeKind::AttributeOperation {
+						if arg.kind == NodeKind.AttributeOperation {
 							match arg.name.name {
 								'alias' => options.runtime.operator.alias = arg.value.value
 								'member' => options.runtime.operator.member = arg.value.value
@@ -493,7 +493,7 @@ class RuntimeAttribute extends Attribute {
 				}
 				else if arg.name.name == 'type' {
 					for var arg in arg.arguments {
-						if arg.kind == NodeKind::AttributeOperation {
+						if arg.kind == NodeKind.AttributeOperation {
 							match arg.name.name {
 								'alias' => options.runtime.type.alias = arg.value.value
 								'member' => options.runtime.type.member = arg.value.value
@@ -514,7 +514,7 @@ class TargetAttribute extends Attribute {
 		@data
 	}
 	static {
-		target() => AttributeTarget::Global + AttributeTarget::Statement
+		target() => AttributeTarget.Global + AttributeTarget.Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { # {{{
@@ -538,7 +538,7 @@ class TargetAttribute extends Attribute {
 	} # }}}
 	configure(mut options, fileName, lineNumber) { # {{{
 		for argument in @data.arguments {
-			if argument.kind == NodeKind::Identifier {
+			if argument.kind == NodeKind.Identifier {
 				if match !?= $targetRegex.exec(argument.name) {
 					throw new Error(`Invalid target syntax: \(argument.name)`)
 				}

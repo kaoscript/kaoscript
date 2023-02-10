@@ -14,7 +14,7 @@ class ClassProxyDeclaration extends Statement {
 		@name = data.internal.name
 
 		for modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Static {
+			if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
@@ -63,7 +63,7 @@ class ClassProxyDeclaration extends Statement {
 					var type = function.clone()
 					type.setProxy(@externalPath, @externalName)
 
-					if var method ?= class.getMatchingInstanceMethod(@name, type, MatchingMode::ExactParameter + MatchingMode::Superclass) {
+					if var method ?= class.getMatchingInstanceMethod(@name, type, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 						@overridenMethods.push({
 							index: method.index()
 							type
@@ -153,7 +153,7 @@ class ClassProxyGroupDeclaration extends Statement {
 		super(data, parent, parent.newInstanceMethodScope())
 
 		for modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Static {
+			if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
@@ -213,7 +213,7 @@ class ClassProxyGroupDeclaration extends Statement {
 
 						if type is ClassMethodGroupType {
 							for var function in type.functions() {
-								if var method ?= class.getMatchingInstanceMethod(internal, function, MatchingMode::ExactParameter + MatchingMode::Superclass) {
+								if var method ?= class.getMatchingInstanceMethod(internal, function, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 									overloads.push({
 										internal: method.index()
 										external: function.index()
@@ -224,7 +224,7 @@ class ClassProxyGroupDeclaration extends Statement {
 							}
 						}
 						else {
-							if var method ?= class.getMatchingInstanceMethod(internal, type, MatchingMode::ExactParameter + MatchingMode::Superclass) {
+							if var method ?= class.getMatchingInstanceMethod(internal, type, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 								overloads.push({
 									internal: method.index()
 									external: type.index()

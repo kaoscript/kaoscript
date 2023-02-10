@@ -22,11 +22,11 @@ class IfStatement extends Statement {
 	override initiate() { # {{{
 		if ?@data.declaration {
 			@hasDeclaration = true
-			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind::Identifier
+			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind.Identifier
 
-			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind::Existential
+			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
 
 			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @cascade || @hasBinding)
 			@declaration.initiate()
@@ -42,7 +42,7 @@ class IfStatement extends Statement {
 				@bindingVariable = @declaration.value()
 			}
 
-			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+			@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 			if ?@data.condition {
 				@condition = $compile.expression(@data.condition, this, @bindingScope)
@@ -53,8 +53,8 @@ class IfStatement extends Statement {
 			}
 		}
 		else {
-			@bindingScope = @newScope(@scope!?, ScopeType::Hollow)
-			@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+			@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
+			@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
@@ -66,11 +66,11 @@ class IfStatement extends Statement {
 		@whenTrueExpression.analyse()
 
 		if @hasWhenFalse {
-			@whenFalseScope = @newScope(@scope!?, ScopeType::InlineBlock)
+			@whenFalseScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			@scope.line(@data.whenFalse.start.line)
 
-			if @data.whenFalse.kind == NodeKind::IfStatement {
+			if @data.whenFalse.kind == NodeKind.IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.setCascade(true)
 				@whenFalseExpression.initiate()
@@ -97,7 +97,7 @@ class IfStatement extends Statement {
 		}
 
 		if @hasCondition {
-			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+			@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 			unless @condition.type().canBeBoolean() {
 				TypeException.throwInvalidCondition(@condition, this)
@@ -574,7 +574,7 @@ class IfStatement extends Statement {
 			}
 
 			if @hasCondition {
-				fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+				fragments.code(' && ').compileCondition(@condition, mode, Junction.AND)
 			}
 		}
 		else {

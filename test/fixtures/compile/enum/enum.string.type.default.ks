@@ -10,7 +10,7 @@ enum CardSuit<string> {
 func foobar(x: String) {
 }
 
-foobar(CardSuit::Hearts)
+foobar(CardSuit.Hearts)
 
 func quxbaz(x: CardSuit, y: CardSuit): String {
 	return x + y

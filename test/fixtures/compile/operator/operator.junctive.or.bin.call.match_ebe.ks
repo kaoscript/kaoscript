@@ -6,7 +6,7 @@ bitmask AnimalFlags {
 	Endangered
 }
 
-func abilities(): AnimalFlags => AnimalFlags::None
+func abilities(): AnimalFlags => AnimalFlags.None
 
-if abilities() ~~ AnimalFlags::CanFly | AnimalFlags::EatsFish {
+if abilities() ~~ AnimalFlags.CanFly | AnimalFlags.EatsFish {
 }

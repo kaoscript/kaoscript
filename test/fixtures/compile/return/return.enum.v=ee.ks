@@ -5,5 +5,5 @@ enum Color<String> {
 }
 
 func foobar(): String {
-	return Color::Red
+	return Color.Red
 }

@@ -10,7 +10,7 @@ class Block extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, @file())
+		@options = Attribute.configure(data, parent._options, AttributeTarget.Statement, @file())
 
 		if !?@data.statements {
 			@data.statements = []
@@ -206,7 +206,7 @@ class Block extends AbstractNode {
 			var dyn item
 
 			for statement, i in @statements while index == -1 {
-				if item ?= statement.toFragments(fragments, Mode::None) {
+				if item ?= statement.toFragments(fragments, Mode.None) {
 					index = i
 				}
 			}
@@ -223,7 +223,7 @@ class Block extends AbstractNode {
 	} # }}}
 	toRangeFragments(fragments, from: Number, to: Number = @statements.length + 1) { # {{{
 		for statement in @statements from from to to {
-			statement.toFragments(fragments, Mode::None)
+			statement.toFragments(fragments, Mode.None)
 		}
 	} # }}}
 	type() { # {{{

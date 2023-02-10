@@ -57,7 +57,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 	}
 	else {
 		match reification {
-			ReificationKind::Argument {
+			ReificationKind.Argument {
 				if data is Array {
 					return data.join(', ')
 				}
@@ -65,7 +65,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Expression {
+			ReificationKind.Expression {
 				var context = {
 					data: ''
 				}
@@ -74,7 +74,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 
 				return context.data
 			}
-			ReificationKind::Join {
+			ReificationKind.Join {
 				if data is Array {
 					return data.join(separator)
 				}
@@ -82,7 +82,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Statement {
+			ReificationKind.Statement {
 				if data is Array {
 					return data.join('\n') + '\n'
 				}
@@ -90,7 +90,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 					return data
 				}
 			}
-			ReificationKind::Write {
+			ReificationKind.Write {
 				return data
 			}
 		}
@@ -149,27 +149,27 @@ func $serialize(macro, data, context) { # {{{
 			if value is MacroMarker {
 				if ?computed {
 					name = `\(Generator.generate(macro.getMark(computed[1]), {
-						mode: Generator.KSWriterMode::Property
+						mode: Generator.KSWriterMode.Property
 					}))`
 				}
 				else {
 					name = key
 				}
 
-				if macro.getMark(value.index + 1) == NodeKind::ObjectMember {
+				if macro.getMark(value.index + 1) == NodeKind.ObjectMember {
 					context.data += `\(name): \(Generator.generate(macro.getMark(value.index), {
-						mode: Generator.KSWriterMode::Property
+						mode: Generator.KSWriterMode.Property
 					}))`
 				}
 				else {
 					context.data += `\(name)\(Generator.generate(macro.getMark(value.index), {
-						mode: Generator.KSWriterMode::Property
+						mode: Generator.KSWriterMode.Property
 					}))`
 				}
 			}
 			else if ?computed {
 				context.data += `\(Generator.generate(macro.getMark(computed[1]), {
-					mode: Generator.KSWriterMode::Property
+					mode: Generator.KSWriterMode.Property
 				})): `
 
 				$serialize(macro, value, context)
@@ -189,27 +189,26 @@ func $serialize(macro, data, context) { # {{{
 
 func $transformExpression(macro, node, data, writer) { # {{{
 	match data.kind {
-		NodeKind::EnumExpression {
+		NodeKind.FunctionExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::FunctionExpression {
+		NodeKind.LambdaExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::LambdaExpression {
+		NodeKind.MemberExpression {
 			return macro.addMark(data)
 		}
-		NodeKind::ObjectMember {
-			var name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
-			var value = 	data.value.kind == NodeKind::EnumExpression ||
-							(data.value.kind == NodeKind::Identifier && !node.scope().isPredefinedVariable(data.value.name)) ||
-							data.value.kind == NodeKind::LambdaExpression ||
-							data.value.kind == NodeKind::MemberExpression
+		NodeKind.ObjectMember {
+			var name = data.name.kind == NodeKind.ComputedPropertyName || data.name.kind == NodeKind.TemplateExpression
+			var value = 	(data.value.kind == NodeKind.Identifier && !node.scope().isPredefinedVariable(data.value.name)) ||
+							data.value.kind == NodeKind.LambdaExpression ||
+							data.value.kind == NodeKind.MemberExpression
 
 			if name || value {
 				return {
-					kind: NodeKind::ObjectMember
+					kind: NodeKind.ObjectMember
 					name: name ? macro.addPropertyNameMark(data.name) : data.name
-					value: value ? macro.addMark(data.value, NodeKind::ObjectMember) : data.value
+					value: value ? macro.addMark(data.value, NodeKind.ObjectMember) : data.value
 					start: data.start
 					end: data.end
 				}
@@ -263,16 +262,16 @@ class MacroDeclaration extends AbstractNode {
 
 			for var modifier in data.modifiers until auto {
 				match modifier.kind {
-					ModifierKind::AutoEvaluate {
+					ModifierKind.AutoEvaluate {
 						auto = true
 					}
-					ModifierKind::Rest {
+					ModifierKind.Rest {
 						rest = true
 					}
 				}
 			}
 
-			@parameters[data.internal.name] = auto ? MacroVariableKind::AutoEvaluated : MacroVariableKind::AST
+			@parameters[data.internal.name] = auto ? MacroVariableKind.AutoEvaluated : MacroVariableKind.AST
 
 			line.code(`,\(auto ? ' mut' : '')\(rest ? ' ...' : '') \(data.internal.name)`)
 
@@ -284,7 +283,7 @@ class MacroDeclaration extends AbstractNode {
 		var block = line.code(')').newBlock()
 
 		for var kind, name of @parameters {
-			if kind == MacroVariableKind::AutoEvaluated {
+			if kind == MacroVariableKind.AutoEvaluated {
 				block.line(`\(name) = __ks_auto(\(name))`)
 			}
 		}
@@ -316,14 +315,14 @@ class MacroDeclaration extends AbstractNode {
 		@marks.push(data, kind)
 
 		return {
-			kind: NodeKind::CreateExpression
+			kind: NodeKind.CreateExpression
 			class: {
-				kind: NodeKind::Identifier
+				kind: NodeKind.Identifier
 				name: '__ks_marker'
 			}
 			arguments: [
 				{
-					kind: NodeKind::NumericExpression
+					kind: NodeKind.NumericExpression
 					value: index
 				}
 			]
@@ -335,7 +334,7 @@ class MacroDeclaration extends AbstractNode {
 		@marks.push(data, kind)
 
 		return {
-			kind: NodeKind::Identifier
+			kind: NodeKind.Identifier
 			name: `_ks_property_name_mark_\(index)`
 		}
 	} # }}}
@@ -352,10 +351,9 @@ class MacroDeclaration extends AbstractNode {
 
 		// console.log(args)
 		var mut data = @fn(...args)
-		// console.log('execute =>', data)
 
 		try {
-			data = Parser.parseStatements(data + '\n', Parser.FunctionMode::Method)
+			data = Parser.parseStatements(data + '\n', Parser.FunctionMode.Method)
 		}
 		catch error {
 			error.fileName = `\(@parent.file())$\(@name)$\(@executeCount)`
@@ -370,7 +368,7 @@ class MacroDeclaration extends AbstractNode {
 		recipient.exportMacro(name, this)
 	} # }}}
 	private filter(statement, data, mut fragments) { # {{{
-		if data.kind == NodeKind::MacroExpression {
+		if data.kind == NodeKind.MacroExpression {
 			if statement {
 				fragments = fragments.newLine().code('__ks_src += ')
 			}
@@ -381,8 +379,8 @@ class MacroDeclaration extends AbstractNode {
 				}
 
 				match element.kind {
-					MacroElementKind::Expression {
-						if element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST {
+					MacroElementKind.Expression {
+						if element.expression.kind == NodeKind.Identifier && @parameters[element.expression.name] == MacroVariableKind.AST {
 							unless !?element.reification {
 								SyntaxException.throwInvalidASTReification(this)
 							}
@@ -390,16 +388,16 @@ class MacroDeclaration extends AbstractNode {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
 						}
 						else if !?element.reification {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(ReificationKind::Expression))`)
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(ReificationKind.Expression))`)
 						}
-						else if element.reification.kind == ReificationKind::Join {
+						else if element.reification.kind == ReificationKind.Join {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
 						}
 						else {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
 						}
 					}
-					MacroElementKind::Literal {
+					MacroElementKind.Literal {
 						if element.value[0] == '\\' {
 							fragments.code($quote(element.value.substr(1).replace(/\\/g, '\\\\')))
 						}
@@ -407,7 +405,7 @@ class MacroDeclaration extends AbstractNode {
 							fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
 						}
 					}
-					MacroElementKind::NewLine {
+					MacroElementKind.NewLine {
 						fragments.code('"\\n"')
 					}
 				}
@@ -510,7 +508,7 @@ class MacroArgument extends Type {
 	toFragments(fragments, node) { # {{{
 		throw new NotSupportedException()
 	} # }}}
-	toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE) { # {{{
+	toPositiveTestFragments(fragments, node, junction: Junction = Junction.NONE) { # {{{
 		throw new NotSupportedException()
 	} # }}}
 	toVariations(variations: Array<String>) { # {{{
@@ -529,25 +527,25 @@ class MacroArgument extends Type {
 
 		match value.name() {
 			'Array' {
-				return @data.kind == NodeKind::ArrayExpression
+				return @data.kind == NodeKind.ArrayExpression
 			}
 			'Expression' {
-				return	@data.kind == NodeKind::UnaryExpression ||
-						@data.kind == NodeKind::BinaryExpression ||
-						@data.kind == NodeKind::PolyadicExpression ||
+				return	@data.kind == NodeKind.UnaryExpression ||
+						@data.kind == NodeKind.BinaryExpression ||
+						@data.kind == NodeKind.PolyadicExpression ||
 						?$expressions[@data.kind]
 			}
 			'Identifier' {
-				return @data.kind == NodeKind::Identifier
+				return @data.kind == NodeKind.Identifier
 			}
 			'Number' {
-				return @data.kind == NodeKind::NumericExpression
+				return @data.kind == NodeKind.NumericExpression
 			}
 			'Object' {
-				return @data.kind == NodeKind::ObjectExpression
+				return @data.kind == NodeKind.ObjectExpression
 			}
 			'String' {
-				return @data.kind == NodeKind::Literal
+				return @data.kind == NodeKind.Literal
 			}
 		}
 
@@ -566,11 +564,11 @@ class MacroArgument extends Type {
 	isUnion() => false
 	toQuote() { # {{{
 		match @data.kind {
-			NodeKind::ArrayExpression => return 'Array'
-			NodeKind::Identifier => return 'Identifier'
-			NodeKind::NumericExpression => return 'Number'
-			NodeKind::ObjectExpression => return 'Object'
-			NodeKind::Literal => return 'String'
+			NodeKind.ArrayExpression => return 'Array'
+			NodeKind.Identifier => return 'Identifier'
+			NodeKind.NumericExpression => return 'Number'
+			NodeKind.ObjectExpression => return 'Object'
+			NodeKind.Literal => return 'String'
 			else => return 'Expression'
 		}
 	} # }}}
@@ -640,7 +638,7 @@ class CallMacroStatement extends Statement {
 
 		var file = `\(@file())!#\(@macro.name())`
 
-		@options = Attribute.configure(data, @options, AttributeTarget::Global, file)
+		@options = Attribute.configure(data, @options, AttributeTarget.Global, file)
 
 		for var data in data.body {
 			@scope.line(data.start.line)

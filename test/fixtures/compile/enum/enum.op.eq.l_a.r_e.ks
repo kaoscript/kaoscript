@@ -5,7 +5,7 @@ enum Color {
 }
 
 func foobar(color) {
-	if color == Color::Red {
+	if color == Color.Red {
 
 	}
 }

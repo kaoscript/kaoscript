@@ -5,13 +5,13 @@ class PreciseFunctionCallee extends PreciseCallee {
 	override buildHashCode() => `function:\(@index):\(@positions.join(','))`
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			if @scope == ScopeKind::Argument {
+			if @scope == ScopeKind.Argument {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(')
 					.compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(null')
@@ -27,17 +27,17 @@ class PreciseFunctionCallee extends PreciseCallee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments.wrap(@expression, mode).code(`.__ks_\(@index)`).code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments.wrap(@expression, mode).code(`.__ks_\(@index)`).code('.call(null')
 
 					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.wrap(@expression, mode).code(`.__ks_\(@index)`).code('(')
 
 					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
@@ -48,7 +48,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 	toCurryFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments
 						.code($runtime.helper(node), '.curry(')
 						.compile(@expression)
@@ -56,14 +56,14 @@ class PreciseFunctionCallee extends PreciseCallee {
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments
 						.code($runtime.helper(node), '.curry(')
 						.compile(@expression)
 						.code(`.__ks_\(@index)`)
 						.code(', null')
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments
 						.code($runtime.helper(node), '.curry(')
 						.compile(@expression)
@@ -77,7 +77,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
@@ -85,14 +85,14 @@ class PreciseFunctionCallee extends PreciseCallee {
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(`.__ks_\(@index)`)
 						.code(', null')
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)

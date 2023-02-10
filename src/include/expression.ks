@@ -100,10 +100,10 @@ abstract class Expression extends AbstractNode {
 
 		return @statement
 	} # }}}
-	toArgumentFragments(fragments, mode = Mode::None) { # {{{
+	toArgumentFragments(fragments, mode = Mode.None) { # {{{
 		this.toFragments(fragments, mode)
 	} # }}}
-	toArgumentFragments(fragments, type: Type, mode = Mode::None) { # {{{
+	toArgumentFragments(fragments, type: Type, mode = Mode.None) { # {{{
 		@toArgumentFragments(fragments, mode)
 	} # }}}
 	toCastingFragments(fragments, mode) { # {{{
@@ -113,22 +113,22 @@ abstract class Expression extends AbstractNode {
 
 		fragments.code(')')
 	} # }}}
-	toConditionFragments(fragments, mode = Mode::None, junction = Junction::NONE) { # {{{
+	toConditionFragments(fragments, mode = Mode.None, junction = Junction.NONE) { # {{{
 		this.toFragments(fragments, mode)
 
 		if !@type().isBoolean() || @type().isNullable() {
 			fragments.code(' === true')
 		}
 	} # }}}
-	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
-	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode::None)
+	toNullableFragments(fragments) => this.toFragments(fragments, Mode.None)
+	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode.None)
 	toQuote(): String { # {{{
 		throw new NotSupportedException()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
 		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
 	} # }}}
-	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toReusableFragments(fragments) => this.toFragments(fragments, Mode.None)
 	toStringFragments(fragments) { # {{{
 		var type = @type()
 		if type.isReference() && type.type().isEnum() {
@@ -157,7 +157,6 @@ include {
 	'../expression/create'
 	'../expression/curry'
 	'../expression/disruptive'
-	'../expression/enum'
 	'../expression/function'
 	'../expression/if'
 	'../expression/match'

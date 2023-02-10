@@ -25,20 +25,20 @@ class ImplementEnumFieldDeclaration extends Statement {
 		var value = @data.value
 
 		match @enum.kind() {
-			EnumTypeKind::Bit {
+			EnumTypeKind.Bit {
 				if ?value {
-					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
+					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
 						@composite = true
 
 						@operands = [value.left, value.right]
 					}
-					else if value.kind == NodeKind::PolyadicExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
+					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
 						@composite = true
 
 						@operands = value.operands
 					}
 					else {
-						if value.kind == NodeKind::NumericExpression {
+						if value.kind == NodeKind.NumericExpression {
 							if value.value > 53 {
 								SyntaxException.throwEnumOverflow(@enumName.name(), this)
 							}
@@ -60,9 +60,9 @@ class ImplementEnumFieldDeclaration extends Statement {
 					@value = `\(@enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1))`
 				}
 			}
-			EnumTypeKind::String {
+			EnumTypeKind.String {
 				if ?value {
-					if value.kind == NodeKind::Literal {
+					if value.kind == NodeKind.Literal {
 						@value = $quote(value.value)
 					}
 					else {
@@ -73,9 +73,9 @@ class ImplementEnumFieldDeclaration extends Statement {
 					@value = $quote(@name.toLowerCase())
 				}
 			}
-			EnumTypeKind::Number {
+			EnumTypeKind.Number {
 				if ?value {
-					if value.kind == NodeKind::NumericExpression {
+					if value.kind == NodeKind.NumericExpression {
 						@value = `\(@enum.index(value.value))`
 					}
 					else {
@@ -134,7 +134,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@topNodes: Array					= []
 	}
 	constructor(data, parent, @enumName) { # {{{
-		super(data, parent, parent.scope(), ScopeType::Function)
+		super(data, parent, parent.scope(), ScopeType.Function)
 
 		@enum = @enumName.type()
 		@enumRef = @scope.reference(@enumName)
@@ -145,13 +145,13 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@name = @data.name.name
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Override {
+			if modifier.kind == ModifierKind.Override {
 				@override = true
 			}
-			else if modifier.kind == ModifierKind::Overwrite {
+			else if modifier.kind == ModifierKind.Overwrite {
 				NotSupportedException.throw(this)
 			}
-			else if modifier.kind == ModifierKind::Static {
+			else if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
@@ -190,7 +190,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@type.flagAlteration()
 
 		if @instance {
-			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 
 			if @override {
 				if var method ?= @enum.getInstantiableMethod(@name, @type, mode) {
@@ -211,9 +211,9 @@ class ImplementEnumMethodDeclaration extends Statement {
 				}
 			}
 			else {
-				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+				mode -= MatchingMode.MissingParameterType - MatchingMode.MissingParameterArity
 
-				if @enum.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @enum.hasMatchingInstanceMethod(@name, @type, MatchingMode.ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -226,7 +226,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 				NotSupportedException.throw(this)
 			}
 			else {
-				if @enum.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @enum.hasMatchingStaticMethod(@name, @type, MatchingMode.ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -281,10 +281,10 @@ class ImplementEnumMethodDeclaration extends Statement {
 	authority() => this
 	getMatchingMode(): MatchingMode { # {{{
 		if @override {
-			return MatchingMode::ShiftableParameters
+			return MatchingMode.ShiftableParameters
 		}
 		else {
-			return MatchingMode::ExactParameter
+			return MatchingMode.ExactParameter
 		}
 	} # }}}
 	getOverridableVarname() => @enumName.name()
@@ -372,7 +372,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.code(`\(@enumName.name()).__ks_sttc_\(@name)_\(@type.index()) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
 			fragments.code(')')
 
 			return fragments.newBlock()

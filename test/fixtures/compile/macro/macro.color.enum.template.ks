@@ -43,11 +43,11 @@ class Color {
 }
 
 Color.registerSpace({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space.SRGB
+	alias: [Space.RGB]
 	parsers: {
 		from: {
-			`\(Space::YUV)`() {
+			`\(Space.YUV)`() {
 				return 'RGB -> UYV'
 			}
 		}

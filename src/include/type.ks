@@ -222,11 +222,11 @@ abstract class Type {
 			data = data as Any
 
 			match data.kind {
-				NodeKind::ArrayType {
+				NodeKind.ArrayType {
 					var mut type = new ArrayType(scope)
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind::Nullable {
+						if modifier.kind == ModifierKind.Nullable {
 							type = type.setNullable(true)
 						}
 					}
@@ -241,24 +241,24 @@ abstract class Type {
 
 					return type
 				}
-				NodeKind::ClassDeclaration {
+				NodeKind.ClassDeclaration {
 					var type = new ClassType(scope)
 
 					for modifier in data.modifiers {
-						if modifier.kind == ModifierKind::Abstract {
+						if modifier.kind == ModifierKind.Abstract {
 							type._abstract = data.abstract
 						}
-						else if modifier.kind == ModifierKind::Sealed {
+						else if modifier.kind == ModifierKind.Sealed {
 							type.flagSealed()
 						}
 					}
 
 					return new NamedType(data.name.name, type.flagComplete())
 				}
-				NodeKind::ExclusionType {
+				NodeKind.ExclusionType {
 					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
-				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration {
+				NodeKind.FunctionDeclaration, NodeKind.MethodDeclaration {
 					if ?data.parameters {
 						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
 					}
@@ -266,13 +266,13 @@ abstract class Type {
 						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
-				NodeKind::FunctionExpression {
+				NodeKind.FunctionExpression {
 					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
-				NodeKind::FusionType {
+				NodeKind.FusionType {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
-				NodeKind::Identifier {
+				NodeKind.Identifier {
 					if var variable ?= scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
@@ -283,7 +283,7 @@ abstract class Type {
 						ReferenceException.throwNotDefinedType(data.name, node)
 					}
 				}
-				NodeKind::MemberExpression {
+				NodeKind.MemberExpression {
 					var object = Type.fromAST(data.object, scope, defined, node)
 
 					if object.isAny() {
@@ -293,14 +293,14 @@ abstract class Type {
 						return object.getProperty(data.property.name)
 					}
 				}
-				NodeKind::NumericExpression {
+				NodeKind.NumericExpression {
 					return scope.reference('Number')
 				}
-				NodeKind::ObjectType {
+				NodeKind.ObjectType {
 					var mut type = new ObjectType(scope)
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind::Nullable {
+						if modifier.kind == ModifierKind.Nullable {
 							type = type.setNullable(true)
 						}
 					}
@@ -315,7 +315,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind::TypeList {
+				NodeKind.TypeList {
 					var mut type = new NamespaceType(scope)
 
 					for var property in data.types {
@@ -324,16 +324,16 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind::TypeReference {
+				NodeKind.TypeReference {
 					var mut nullable = false
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind::Nullable {
+						if modifier.kind == ModifierKind.Nullable {
 							nullable = true
 						}
 					}
 
-					if data.typeName.kind == NodeKind::Identifier {
+					if data.typeName.kind == NodeKind.Identifier {
 						var name = Type.renameNative(data.typeName.name)
 
 						if name == 'Any' {
@@ -365,7 +365,7 @@ abstract class Type {
 							ReferenceException.throwNotDefinedType(data.typeName.name, node)
 						}
 					}
-					else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
+					else if data.typeName.kind == NodeKind.MemberExpression && !data.typeName.computed {
 						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
 						if !defined || namespace.scope().hasVariable(data.typeName.property.name, -1) {
@@ -384,10 +384,10 @@ abstract class Type {
 						}
 					}
 				}
-				NodeKind::UnionType {
+				NodeKind.UnionType {
 					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
-				NodeKind::VariableDeclarator, NodeKind::FieldDeclaration {
+				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, node)
 				}
 			}
@@ -474,43 +474,43 @@ abstract class Type {
 			}
 			else if ?data.kind {
 				match data.kind {
-					TypeKind::Alias {
+					TypeKind.Alias {
 						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Array {
+					TypeKind.Array {
 						return ArrayType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Class {
+					TypeKind.Class {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Enum {
+					TypeKind.Enum {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Function {
+					TypeKind.Function {
 						return FunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Fusion {
+					TypeKind.Fusion {
 						return FusionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Namespace {
+					TypeKind.Namespace {
 						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Object {
+					TypeKind.Object {
 						return ObjectType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::OverloadedFunction {
+					TypeKind.OverloadedFunction {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Reference {
+					TypeKind.Reference {
 						return ReferenceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Struct {
+					TypeKind.Struct {
 						return StructType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Tuple {
+					TypeKind.Tuple {
 						return TupleType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
-					TypeKind::Union {
+					TypeKind.Union {
 						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 				}
@@ -522,9 +522,9 @@ abstract class Type {
 				var first = references[data.originals[0]]
 				var second = references[data.originals[1]]
 
-				var requirement = first.origin() ~~ TypeOrigin::Require
+				var requirement = first.origin() ~~ TypeOrigin.Require
 				var [major, minor] = requirement ? [first, second] : [second, first]
-				var origin = requirement ? TypeOrigin::RequireOrExtern : TypeOrigin::ExternOrRequire
+				var origin = requirement ? TypeOrigin.RequireOrExtern : TypeOrigin.ExternOrRequire
 
 				var type = new ClassType(scope)
 
@@ -576,7 +576,7 @@ abstract class Type {
 	abstract clone(): Type
 	abstract export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	abstract toFragments(fragments, node)
-	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
+	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction.NONE)
 	abstract toVariations(variations: Array<String>): Void
 	asReference(): this
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
@@ -615,7 +615,7 @@ abstract class Type {
 	discardSpread(): Type => this
 	discardVariable(): Type => this
 	// TODO to remove
-	equals(value?): Boolean => ?value && this.isSubsetOf(value, MatchingMode::Exact)
+	equals(value?): Boolean => ?value && this.isSubsetOf(value, MatchingMode.Exact)
 	flagAlien() { # {{{
 		@alien = true
 
@@ -722,7 +722,7 @@ abstract class Type {
 	isExplicit() => true
 	isExplicitlyExported() => @exported
 	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1
-	isExportable(mode: ExportMode) => mode ~~ ExportMode::Requirement || @isExportable()
+	isExportable(mode: ExportMode) => mode ~~ ExportMode.Requirement || @isExportable()
 	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
 	isExported() => @exported
 	isExtendable() => false
@@ -880,7 +880,7 @@ abstract class Type {
 
 		return @referenceIndex
 	} # }}}
-	toNegativeTestFragments(fragments, node, junction: Junction = Junction::NONE) => @toPositiveTestFragments(fragments.code('!'), node, junction)
+	toNegativeTestFragments(fragments, node, junction: Junction = Junction.NONE) => @toPositiveTestFragments(fragments.code('!'), node, junction)
 	toQuote(): String { # {{{
 		throw new NotSupportedException()
 	} # }}}
@@ -922,7 +922,7 @@ abstract class Type {
 			fragments.code('value => ')
 		}
 
-		@toTestFunctionFragments(fragments, node, Junction::NONE)
+		@toTestFunctionFragments(fragments, node, Junction.NONE)
 
 		if node._options.format.functions == 'es5' {
 			fragments.code('; }')

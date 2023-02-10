@@ -20,13 +20,13 @@ class PreciseThisCallee extends MethodCallee {
 
 			if @flatten {
 				match node._data.scope.kind {
-					ScopeKind::Argument {
+					ScopeKind.Argument {
 						throw new NotImplementedException(node)
 					}
-					ScopeKind::Null {
+					ScopeKind.Null {
 						throw new NotImplementedException(node)
 					}
-					ScopeKind::This {
+					ScopeKind.This {
 						if @function.isInstance() {
 							fragments.code(`\(name).__ks_func_\(@property)_\(@function.index()).call(this`)
 						}
@@ -40,13 +40,13 @@ class PreciseThisCallee extends MethodCallee {
 			}
 			else {
 				match @scope {
-					ScopeKind::Argument {
+					ScopeKind.Argument {
 						throw new NotImplementedException(node)
 					}
-					ScopeKind::Null {
+					ScopeKind.Null {
 						throw new NotImplementedException(node)
 					}
-					ScopeKind::This {
+					ScopeKind.This {
 						if @alien {
 							throw new NotImplementedException(node)
 						}
@@ -66,13 +66,13 @@ class PreciseThisCallee extends MethodCallee {
 			var name = @node.scope().getVariable('this').getSecureName()
 
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					if @alien {
 						fragments.code(`\(name).\(@property)(`)
 					}

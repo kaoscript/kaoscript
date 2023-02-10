@@ -18,13 +18,13 @@ class PreciseMethodCallee extends MethodCallee {
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.compileReusable(@object)
 
 					if @alien {
@@ -45,13 +45,13 @@ class PreciseMethodCallee extends MethodCallee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.wrap(@object)
 
 					if @alien {
@@ -92,13 +92,13 @@ class PreciseMethodCallee extends MethodCallee {
 			}
 
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments.compile(node.getCallScope())
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments.code('null')
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.compile(@object.caller())
 				}
 			}

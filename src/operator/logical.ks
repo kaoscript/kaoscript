@@ -2,7 +2,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	private late {
 		@expectingEnum: Boolean		= true
 		@native: Boolean		= false
-		@operand: OperandType	= OperandType::Any
+		@operand: OperandType	= OperandType.Any
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -16,7 +16,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 
 		for var operand in @operands {
-			operand.prepare(target, TargetMode::Permissive)
+			operand.prepare(target, TargetMode.Permissive)
 
 			var type = operand.type()
 
@@ -81,18 +81,18 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			}
 			else {
 				@type = @scope.reference('Boolean')
-				@operand = OperandType::Boolean
+				@operand = OperandType.Boolean
 				@native = true
 			}
 		}
 		else if number {
 			if target.isEnum() {
 				@type = target
-				@operand = OperandType::Enum
+				@operand = OperandType.Enum
 			}
 			else {
 				@type = @scope.reference('Number')
-				@operand = OperandType::Number
+				@operand = OperandType.Number
 				@expectingEnum = false
 			}
 
@@ -104,7 +104,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	inferTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType::Boolean
+		return inferables unless @operand == OperandType.Boolean
 
 		var scope = @statement().scope()
 
@@ -151,7 +151,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	} # }}}
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	inferWhenTrueTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType::Boolean
+		return inferables unless @operand == OperandType.Boolean
 
 		for var operand in @operands {
 			for var data, name of operand.inferWhenTrueTypes({}) {
@@ -161,12 +161,12 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
-	isBooleanComputed(junction: Junction) => junction != Junction::AND
-	operator() => Operator::And
+	isBooleanComputed(junction: Junction) => junction != Junction.AND
+	operator() => Operator.And
 	symbol() => '&&'
 	toFragments(fragments, mode) { # {{{
 		if @native {
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				for var operand, index in @operands {
 					if index > 0 {
 						fragments
@@ -175,7 +175,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 							.code($space)
 					}
 
-					fragments.wrapCondition(operand, Mode::None, Junction::AND)
+					fragments.wrapCondition(operand, Mode.None, Junction.AND)
 				}
 			}
 			else {
@@ -202,7 +202,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		else {
 			fragments.code(`\($runtime.operator(this))`)
 
-			if @operand == OperandType::Number {
+			if @operand == OperandType.Number {
 				fragments.code('.andNum(')
 			}
 			else {
@@ -240,7 +240,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	private late {
 		@expectingEnum: Boolean		= true
 		@native: Boolean			= false
-		@operand: OperandType		= OperandType::Any
+		@operand: OperandType		= OperandType.Any
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -328,7 +328,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 			else {
 				@type = @scope.reference('Boolean')
-				@operand = OperandType::Boolean
+				@operand = OperandType.Boolean
 				@native = true
 			}
 
@@ -339,11 +339,11 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		else if number {
 			if target.isEnum() {
 				@type = target
-				@operand = OperandType::Enum
+				@operand = OperandType.Enum
 			}
 			else {
 				@type = @scope.reference('Number')
-				@operand = OperandType::Number
+				@operand = OperandType.Number
 				@expectingEnum = false
 			}
 
@@ -355,7 +355,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	inferTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType::Boolean
+		return inferables unless @operand == OperandType.Boolean
 
 		var scope = @statement().scope()
 
@@ -401,7 +401,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenFalseTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType::Boolean
+		return inferables unless @operand == OperandType.Boolean
 
 		var scope = @statement().scope()
 
@@ -447,7 +447,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType::Boolean
+		return inferables unless @operand == OperandType.Boolean
 
 		var scope = @statement().scope()
 
@@ -512,12 +512,12 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		return inferables
 	} # }}}
-	isBooleanComputed(junction: Junction) => junction != Junction::OR
-	operator() => Operator::Or
+	isBooleanComputed(junction: Junction) => junction != Junction.OR
+	operator() => Operator.Or
 	symbol() => '||'
 	toFragments(fragments, mode) { # {{{
 		if @native {
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				for var operand, index in @operands {
 					if index > 0 {
 						fragments
@@ -526,7 +526,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 							.code($space)
 					}
 
-					fragments.wrapCondition(operand, Mode::None, Junction::OR)
+					fragments.wrapCondition(operand, Mode.None, Junction.OR)
 				}
 			}
 			else {
@@ -553,10 +553,10 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		else {
 			fragments.code(`\($runtime.operator(this))`)
 
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				fragments.code('.orBool(')
 			}
-			else if @operand == OperandType::Number {
+			else if @operand == OperandType.Number {
 				fragments.code('.orNum(')
 			}
 			else {
@@ -591,7 +591,7 @@ class BinaryOperatorOr extends PolyadicOperatorOr {
 }
 
 class PolyadicOperatorImply extends PolyadicOperatorOr {
-	operator() => Operator::Imply
+	operator() => Operator.Imply
 	symbol() => '->'
 	toFragments(fragments, mode) { # {{{
 		var l = @operands.length - 2
@@ -619,11 +619,11 @@ class BinaryOperatorImply extends BinaryOperatorOr {
 
 class PolyadicOperatorXor extends PolyadicOperatorAnd {
 	inferWhenFalseTypes(inferables) => @inferWhenTrueTypes(inferables)
-	operator() => Operator::Xor
+	operator() => Operator.Xor
 	symbol() => '^^'
 	toFragments(fragments, mode) { # {{{
 		if @native {
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				var l = @operands.length - 2
 
 				if l > 0 {
@@ -662,7 +662,7 @@ class PolyadicOperatorXor extends PolyadicOperatorAnd {
 		else {
 			fragments.code(`\($runtime.operator(this))`)
 
-			if @operand == OperandType::Number {
+			if @operand == OperandType.Number {
 				fragments.code('.xorNum(')
 			}
 			else {
@@ -695,7 +695,7 @@ class BinaryOperatorXor extends PolyadicOperatorXor {
 abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExpression {
 	private late {
 		@native: Boolean		= false
-		@operand: OperandType	= OperandType::Any
+		@operand: OperandType	= OperandType.Any
 	}
 	abstract {
 		native(): String
@@ -705,7 +705,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		toBooleanFragments(fragments): Boolean
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		var mut nullable = false
 		var mut boolean = true
@@ -762,13 +762,13 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 			else {
 				@type = @scope.reference('Boolean')
-				@operand = OperandType::Boolean
+				@operand = OperandType.Boolean
 				@native = native
 			}
 		}
 		else if number {
 			@type = @scope.reference('Number')
-			@operand = OperandType::Number
+			@operand = OperandType.Number
 			@native = native
 
 			if nullable {
@@ -776,7 +776,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 		}
 
-		if @operand == OperandType::Boolean || !@native {
+		if @operand == OperandType.Boolean || !@native {
 			@left.acquireReusable(true)
 			@left.releaseReusable()
 		}
@@ -784,7 +784,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 	toFragments(fragments, mode) { # {{{
 		var mut next = true
 
-		if @operand == OperandType::Boolean {
+		if @operand == OperandType.Boolean {
 			next = @toBooleanFragments(fragments)
 		}
 
@@ -794,10 +794,10 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 
 		if next {
 			var late operator
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				operator = `\(@runtime())Bool`
 			}
-			else if @operand == OperandType::Number {
+			else if @operand == OperandType.Number {
 				operator = `\(@runtime())Num`
 			}
 			else {
@@ -823,8 +823,8 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 
 class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 	isAcceptingEnum() => true
-	native() => @operand == OperandType::Boolean ? '&&' : '&='
-	operator() => Operator::And
+	native() => @operand == OperandType.Boolean ? '&&' : '&='
+	operator() => Operator.And
 	runtime() => 'and'
 	symbol() => '&&='
 	toBooleanFragments(fragments) { # {{{
@@ -851,8 +851,8 @@ class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 }
 
 class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
-	native() => @operand == OperandType::Boolean ? '||' : '|='
-	operator() => Operator::Or
+	native() => @operand == OperandType.Boolean ? '||' : '|='
+	operator() => Operator.Or
 	runtime() => 'or'
 	symbol() => '||='
 	toBooleanFragments(fragments) { # {{{
@@ -880,12 +880,12 @@ class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
 
 class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
 	native() => '^='
-	operator() => Operator::Xor
+	operator() => Operator.Xor
 	runtime() => 'xor'
 	symbol() => '^^='
 	toBooleanFragments(fragments) => true
 	toNativeFragments(fragments) { # {{{
-		if @operand == OperandType::Boolean {
+		if @operand == OperandType.Boolean {
 			fragments.compileReusable(@left).code(' = ').compileReusable(@left).code(` !== `).compile(@right)
 		}
 		else {

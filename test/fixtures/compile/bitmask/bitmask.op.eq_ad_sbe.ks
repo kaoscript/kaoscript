@@ -7,5 +7,5 @@ bitmask AnimalFlags {
 }
 
 func foobar(mut animal: AnimalFlags) {
-	animal = animal + AnimalFlags::HasClaws - AnimalFlags::CanFly
+	animal = animal + AnimalFlags.HasClaws - AnimalFlags.CanFly
 }

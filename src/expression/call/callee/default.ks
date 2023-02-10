@@ -99,7 +99,7 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(acquire || @nullable || (@flatten && @scope == ScopeKind::This))
+		@expression.acquireReusable(acquire || @nullable || (@flatten && @scope == ScopeKind.This))
 	} # }}}
 	override hashCode() => `default`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
@@ -113,13 +113,13 @@ class DefaultCallee extends Callee {
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			if @scope == ScopeKind::Argument {
+			if @scope == ScopeKind.Argument {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(')
 					.compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
 				fragments
 					.compileReusable(@expression)
 					.code('.apply(null')
@@ -135,7 +135,7 @@ class DefaultCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
 					for var argument in node.arguments() {
@@ -144,7 +144,7 @@ class DefaultCallee extends Callee {
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments.wrap(@expression, mode).code('.call(null')
 
 					for var argument in node.arguments() {
@@ -153,7 +153,7 @@ class DefaultCallee extends Callee {
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.wrap(@expression, mode).code('(')
 
 					for var argument, index in node.arguments() {
@@ -170,20 +170,20 @@ class DefaultCallee extends Callee {
 
 		if @flatten {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(', null')
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
@@ -200,20 +200,20 @@ class DefaultCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code($comma)
 						.compile(node.getCallScope())
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(', null')
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)

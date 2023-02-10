@@ -97,7 +97,7 @@ class NamespaceType extends Type {
 	addPropertyFromAST(data, node) { # {{{
 		var mut type = Type.fromAST(data, node)
 
-		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		if options.rules.nonExhaustive {
 			type.setExhaustive(false)
@@ -172,7 +172,7 @@ class NamespaceType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if ?@majorOriginal {
 			var export = {
-				kind: TypeKind::Namespace
+				kind: TypeKind.Namespace
 				original: @majorOriginal.referenceIndex()
 				exhaustive: @isExhaustive()
 				properties: {}
@@ -188,7 +188,7 @@ class NamespaceType extends Type {
 		}
 		else {
 			var export = {
-				kind: TypeKind::Namespace
+				kind: TypeKind.Namespace
 				sealed: @sealed
 				system: @system
 				exhaustive: @isExhaustive()
@@ -349,8 +349,8 @@ class NamespacePropertyType extends Type {
 	} # }}}
 	isSealed() => @type.isSealed()
 	isSubsetOf(value: NamespacePropertyType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
-			return @type.isSubsetOf(value.type(), MatchingMode::Exact)
+		if mode ~~ MatchingMode.Exact {
+			return @type.isSubsetOf(value.type(), MatchingMode.Exact)
 		}
 		else {
 			return true

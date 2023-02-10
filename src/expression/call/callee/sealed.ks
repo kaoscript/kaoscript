@@ -16,7 +16,7 @@ class SealedCallee extends Callee {
 		@object = node._object
 		@property = node._property
 		@flatten = node._flatten
-		@nullableProperty = data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Nullable)
+		@nullableProperty = data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable)
 		@scope = data.scope.kind
 
 		var union = new UnionType(node.scope())
@@ -45,13 +45,13 @@ class SealedCallee extends Callee {
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			match node._data.scope.kind {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					if @instance {
 						fragments.code(`\(@variable.getSealedPath())._im_\(@property).apply(null, `)
 
@@ -67,13 +67,13 @@ class SealedCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					if @instance {
 						fragments
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)

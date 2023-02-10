@@ -9,16 +9,16 @@ class ExportDeclaration extends Statement {
 				var late statement
 
 				match declaration.kind {
-					NodeKind::DeclarationSpecifier {
+					NodeKind.DeclarationSpecifier {
 						statement = $compile.statement(declaration.declaration, this)
 					}
-					NodeKind::GroupSpecifier {
+					NodeKind.GroupSpecifier {
 						statement = new ExportGroupSpecifier(declaration, this)
 					}
-					NodeKind::NamedSpecifier {
+					NodeKind.NamedSpecifier {
 						statement = new ExportNamedSpecifier(declaration, this)
 					}
-					NodeKind::PropertiesSpecifier {
+					NodeKind.PropertiesSpecifier {
 						statement = new ExportPropertiesSpecifier(declaration, this)
 					}
 					else {
@@ -34,7 +34,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 		else {
-			for var declaration in @data.declarations when declaration.kind == NodeKind::DeclarationSpecifier {
+			for var declaration in @data.declarations when declaration.kind == NodeKind.DeclarationSpecifier {
 				var statement = $compile.statement(declaration.declaration, this)
 
 				statement.initiate()
@@ -84,7 +84,7 @@ class ExportDeclaration extends Statement {
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		for statement in @statements {
-			statement.toFragments(fragments, Mode::None)
+			statement.toFragments(fragments, Mode.None)
 		}
 	} # }}}
 	override walkVariable(fn) { # {{{
@@ -102,10 +102,10 @@ class ExportGroupSpecifier extends AbstractNode {
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Exclusion {
+			if modifier.kind == ModifierKind.Exclusion {
 				@exclusion = true
 			}
-			else if modifier.kind == ModifierKind::Wildcard {
+			else if modifier.kind == ModifierKind.Wildcard {
 				@wildcard = true
 			}
 		}
@@ -144,7 +144,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	}
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Wildcard {
+			if modifier.kind == ModifierKind.Wildcard {
 				@wildcard = true
 			}
 		}

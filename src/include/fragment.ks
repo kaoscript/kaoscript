@@ -69,7 +69,7 @@ class FragmentBuilder extends Writer {
 }
 
 class BlockBuilder extends BlockWriter {
-	compile(node, mode = Mode::None) { # {{{
+	compile(node, mode = Mode.None) { # {{{
 		if node is not Primitive {
 			node.toFragments(this, mode)
 		}
@@ -104,12 +104,12 @@ class ControlBuilder extends ControlWriter {
 			return null
 		}
 	} # }}}
-	compile(node, mode = Mode::None) { # {{{
+	compile(node, mode = Mode.None) { # {{{
 		@step.compile(node, mode)
 
 		return this
 	} # }}}
-	compileCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	compileCondition(node, mode = Mode.None, junction = Junction.NONE) { # {{{
 		@step.compileCondition(node, mode, junction)
 
 		return this
@@ -134,7 +134,7 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
-	wrapCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	wrapCondition(node, mode = Mode.None, junction = Junction.NONE) { # {{{
 		@step.wrapCondition(node, mode, junction)
 
 		return this
@@ -176,7 +176,7 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	compile(node, mode = Mode::None) { # {{{
+	compile(node, mode = Mode.None) { # {{{
 		if node is not Primitive {
 			node.toFragments(this, mode)
 		}
@@ -186,7 +186,7 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	compileCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	compileCondition(node, mode = Mode.None, junction = Junction.NONE) { # {{{
 		if node is not Primitive {
 			node.toConditionFragments(this, mode, junction)
 		}
@@ -216,7 +216,7 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	wrap(node, mode = Mode::None) { # {{{
+	wrap(node, mode = Mode.None) { # {{{
 		if node.isComputed() {
 			@code('(')
 
@@ -230,11 +230,11 @@ class ExpressionBuilder extends ExpressionWriter {
 
 		return this
 	} # }}}
-	wrapCondition(node, mode = Mode::None, junction = Junction::NONE) { # {{{
+	wrapCondition(node, mode = Mode.None, junction = Junction.NONE) { # {{{
 		if node.isBooleanComputed(junction) {
 			@code('(')
 
-			node.toConditionFragments(this, mode, Junction::NONE)
+			node.toConditionFragments(this, mode, Junction.NONE)
 
 			@code(')')
 		}

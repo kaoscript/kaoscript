@@ -6,7 +6,7 @@ enum Color {
 	Blue
 }
 
-console.log(Color::Red)
+console.log(Color.Red)
 
 impl Color {
 	DarkRed = 3
@@ -14,6 +14,6 @@ impl Color {
 	DarkBlue
 }
 
-console.log(Color::DarkGreen)
+console.log(Color.DarkGreen)
 
 export Color

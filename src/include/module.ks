@@ -31,10 +31,10 @@ export class Module {
 		@data = @parse(data, file)
 
 		@directory = path.dirname(file)
-		@options = Attribute.configure(@data, @compiler._options, AttributeTarget::Global, file, true)
+		@options = Attribute.configure(@data, @compiler._options, AttributeTarget.Global, file, true)
 
 		for attr in @data.attributes {
-			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {
+			if attr.declaration.kind == NodeKind.Identifier &&	attr.declaration.name == 'bin' {
 				@binary = true
 			}
 		}
@@ -322,9 +322,9 @@ export class Module {
 					}
 				}
 				else if var { name, type } ?= arguments[index] {
-					if type.isSubsetOf(requirement.type(), MatchingMode::Signature) {
-						if !requirement.type().isSubsetOf(type, MatchingMode::Signature) {
-							var index = type.toMetadata(metadata, 0, ExportMode::Requirement, this)
+					if type.isSubsetOf(requirement.type(), MatchingMode.Signature) {
+						if !requirement.type().isSubsetOf(type, MatchingMode.Signature) {
+							var index = type.toMetadata(metadata, 0, ExportMode.Requirement, this)
 							var newType = Type.toNamedType(requirement.name(), references[index] ?? Type.import(index, metadata, references, alterations, queue, scope, @body))
 
 							references[index] = newType
@@ -538,7 +538,7 @@ export class Module {
 					type = variable.type()
 				}
 
-				@metaExports.exports.push(type.toMetadata(@metaExports.references, delta, ExportMode::Export, this), name)
+				@metaExports.exports.push(type.toMetadata(@metaExports.references, delta, ExportMode.Export, this), name)
 			}
 
 			for var datas, name of @exportedMacros {
@@ -557,7 +557,7 @@ export class Module {
 			}
 			for var type, name of @aliens {
 				@metaRequirements.aliens.push(
-					type.toMetadata(@metaRequirements.references, 0, ExportMode::Alien, this)
+					type.toMetadata(@metaRequirements.references, 0, ExportMode.Alien, this)
 					name,
 					null
 				)
@@ -565,7 +565,7 @@ export class Module {
 
 			for var requirement in @requirements {
 				@metaRequirements.requirements.push(
-					requirement.type().toMetadata(@metaRequirements.references, 0, ExportMode::Requirement, this)
+					requirement.type().toMetadata(@metaRequirements.references, 0, ExportMode.Requirement, this)
 					requirement.name()
 					requirement.toRequiredMetadata()
 				)
@@ -625,7 +625,7 @@ class ModuleBlock extends AbstractNode {
 
 		var mut start = 0
 
-		if @data.body[0].kind == NodeKind::ShebangDeclaration {
+		if @data.body[0].kind == NodeKind.ShebangDeclaration {
 			@module.flagBinary()
 
 			start = 1
@@ -633,9 +633,9 @@ class ModuleBlock extends AbstractNode {
 
 		if !@module.isStandardLibrary() {
 			var std = $compile.statement({
-				kind: NodeKind::ImportDeclaration
+				kind: NodeKind.ImportDeclaration
 				declarations: [{
-					kind: NodeKind::ImportDeclarator
+					kind: NodeKind.ImportDeclarator
 					source: {
 						value: fs.resolve($standardLibraryDirectory, 'index.ks')
 					}
@@ -783,7 +783,7 @@ class ModuleBlock extends AbstractNode {
 		var mut item = null
 
 		for statement, i in @statements while index == -1 {
-			if item ?= statement.toFragments(fragments, Mode::None) {
+			if item ?= statement.toFragments(fragments, Mode.None) {
 				index = i
 			}
 		}

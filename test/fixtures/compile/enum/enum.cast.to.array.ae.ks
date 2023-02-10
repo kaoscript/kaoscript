@@ -4,9 +4,9 @@ enum Color<String> {
 	Blue
 }
 
-var aliases: Array = [Color::Red]
+var aliases: Array = [Color.Red]
 
 func foobar() {
-	if aliases[0] == Color::Red {
+	if aliases[0] == Color.Red {
 	}
 }

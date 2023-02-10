@@ -37,7 +37,7 @@ class FusionType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
-			kind: TypeKind::Fusion
+			kind: TypeKind.Fusion
 			types: [type.toExportOrReference(references, indexDelta, mode, module) for type in @types]
 		}
 	} # }}}
@@ -112,7 +112,7 @@ class FusionType extends Type {
 			return false
 		}
 
-		return @isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
+		return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 	} # }}}
 	isComplete() => true
 	isExportable() => true
@@ -164,42 +164,42 @@ class FusionType extends Type {
 		throw new NotImplementedException(node)
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		for type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
 
-			type.toNegativeTestFragments(fragments, node, Junction::AND)
+			type.toNegativeTestFragments(fragments, node, Junction.AND)
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		for type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
 
-			type.toPositiveTestFragments(fragments, node, Junction::AND)
+			type.toPositiveTestFragments(fragments, node, Junction.AND)
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	toQuote() => @hashCode()
 	toTestFunctionFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		for var type, index in @types {
 			fragments.code(' && ') if index != 0
 
-			type.toTestFunctionFragments(fragments, node, Junction::AND)
+			type.toTestFunctionFragments(fragments, node, Junction.AND)
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('fusion', @nullable)

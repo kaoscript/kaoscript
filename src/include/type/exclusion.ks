@@ -32,7 +32,7 @@ class ExclusionType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
-			kind: TypeKind::Exclusion
+			kind: TypeKind.Exclusion
 			types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 		}
 	} # }}}
@@ -87,52 +87,52 @@ class ExclusionType extends Type {
 	toQuote() => [type.toQuote() for var type in @types].join('^')
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		if @types[0].isAny() {
-			@types[1].toNegativeTestFragments(fragments, node, Junction::AND)
+			@types[1].toNegativeTestFragments(fragments, node, Junction.AND)
 
 			for var type in @types from 2 {
 				fragments.code(' && ')
 
-				type.toNegativeTestFragments(fragments, node, Junction::AND)
+				type.toNegativeTestFragments(fragments, node, Junction.AND)
 			}
 		}
 		else {
-			@types[0].toPositiveTestFragments(fragments, node, Junction::AND)
+			@types[0].toPositiveTestFragments(fragments, node, Junction.AND)
 
 			for var type in @types from 1 {
 				fragments.code(' && ')
 
-				type.toNegativeTestFragments(fragments, node, Junction::AND)
+				type.toNegativeTestFragments(fragments, node, Junction.AND)
 			}
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	toTestFunctionFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		if @types[0].isAny() {
-			@types[1].toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+			@types[1].toTestFunctionFragments(fragments.code('!'), node, Junction.AND)
 
 			for var type in @types from 2 {
 				fragments.code(' && ')
 
-				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+				type.toTestFunctionFragments(fragments.code('!'), node, Junction.AND)
 			}
 		}
 		else {
-			@types[0].toTestFunctionFragments(fragments, node, Junction::AND)
+			@types[0].toTestFunctionFragments(fragments, node, Junction.AND)
 
 			for var type in @types from 1 {
 				fragments.code(' && ')
 
-				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+				type.toTestFunctionFragments(fragments.code('!'), node, Junction.AND)
 			}
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('exclusion')

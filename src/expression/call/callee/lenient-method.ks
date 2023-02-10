@@ -32,10 +32,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		if @flatten {
 			fragments.compileReusable(@object).code(`.\(@property)`)
 
-			if @scope == ScopeKind::Argument {
+			if @scope == ScopeKind.Argument {
 				fragments.code('.apply(').compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
 				fragments.code('.apply(null')
 			}
 			else {
@@ -58,17 +58,17 @@ class LenientMethodCallee extends LenientFunctionCallee {
 			}
 
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					fragments.code('.call(').compile(node.getCallScope(), mode)
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					fragments.code('.call(null')
 
 					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.code('(')
 
 					if @sealed && @instance {

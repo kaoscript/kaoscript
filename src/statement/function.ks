@@ -44,26 +44,26 @@ var $function = {
 	} # }}}
 	useThisVariable(data, node) { # {{{
 		match data.kind {
-			NodeKind::ArrayExpression {
+			NodeKind.ArrayExpression {
 				for value in data.values {
 					if $function.useThisVariable(value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::BinaryExpression {
+			NodeKind.BinaryExpression {
 				if $function.useThisVariable(data.left, node) || $function.useThisVariable(data.right, node) {
 					return true
 				}
 			}
-			NodeKind::Block {
+			NodeKind.Block {
 				for statement in data.statements {
 					if $function.useThisVariable(statement, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::CallExpression {
+			NodeKind.CallExpression {
 				if $function.useThisVariable(data.callee, node) {
 					return true
 				}
@@ -74,14 +74,14 @@ var $function = {
 					}
 				}
 			}
-			NodeKind::ComparisonExpression {
+			NodeKind.ComparisonExpression {
 				for var operand in data.values step 2 {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::CreateExpression {
+			NodeKind.CreateExpression {
 				if $function.useThisVariable(data.class, node) {
 					return true
 				}
@@ -92,9 +92,8 @@ var $function = {
 					}
 				}
 			}
-			NodeKind::EnumExpression => return false
-			NodeKind::Identifier => return data.name == 'this'
-			NodeKind::IfStatement {
+			NodeKind.Identifier => return data.name == 'this'
+			NodeKind.IfStatement {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
 					return true
 				}
@@ -103,35 +102,35 @@ var $function = {
 					return true
 				}
 			}
-			NodeKind::Literal => return false
-			NodeKind::MemberExpression => return $function.useThisVariable(data.object, node)
-			NodeKind::NumericExpression => return false
-			NodeKind::ObjectExpression {
+			NodeKind.Literal => return false
+			NodeKind.MemberExpression => return $function.useThisVariable(data.object, node)
+			NodeKind.NumericExpression => return false
+			NodeKind.ObjectExpression {
 				for property in data.properties {
 					if $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::PolyadicExpression {
+			NodeKind.PolyadicExpression {
 				for operand in data.operands {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::ReturnStatement => return $function.useThisVariable(data.value, node)
-			NodeKind::TemplateExpression {
+			NodeKind.ReturnStatement => return $function.useThisVariable(data.value, node)
+			NodeKind.TemplateExpression {
 				for element in data.elements {
 					if $function.useThisVariable(element, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::ThisExpression => return true
-			NodeKind::ThrowStatement => return $function.useThisVariable(data.value, node)
-			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
-			NodeKind::VariableDeclaration {
+			NodeKind.ThisExpression => return true
+			NodeKind.ThrowStatement => return $function.useThisVariable(data.value, node)
+			NodeKind.UnaryExpression => return $function.useThisVariable(data.argument, node)
+			NodeKind.VariableDeclaration {
 				return ?data.init && $function.useThisVariable(data.init, node)
 			}
 			else {
@@ -394,7 +393,7 @@ class FunctionDeclarator extends AbstractNode {
 		@type: FunctionType
 	}
 	constructor(@variable, @data, @parent) { # {{{
-		super(data, parent, parent.scope(), ScopeType::Function)
+		super(data, parent, parent.scope(), ScopeType.Function)
 
 		variable.addDeclarator(this)
 	} # }}}
@@ -422,7 +421,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, @index, this)
 
-		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
+		@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
@@ -507,7 +506,7 @@ class FunctionDeclarator extends AbstractNode {
 		var mut item = null
 
 		for var statement, i in statements while index == -1 {
-			if item ?= statement.toFragments(ctrl, Mode::None) {
+			if item ?= statement.toFragments(ctrl, Mode.None) {
 				index = i
 			}
 		}
@@ -525,11 +524,11 @@ class FunctionDeclarator extends AbstractNode {
 	toStatementFragments(fragments) { # {{{
 		var line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
 
-		var block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 
-		block.compile(@block, Mode::None)
+		block.compile(@block, Mode.None)
 
 		if !@exit {
 			if !@awaiting && @type.isAsync() {

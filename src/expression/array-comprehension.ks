@@ -10,8 +10,8 @@ class ArrayComprehensionForFrom extends Expression {
 		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), true, this)
 
@@ -91,7 +91,7 @@ class ArrayComprehensionForFrom extends Expression {
 			fragments.code(', 1')
 		}
 
-		fragments.code($comma, !$ast.hasModifier(@data.loop.from, ModifierKind::Ballpark), $comma, !$ast.hasModifier(@data.loop.to, ModifierKind::Ballpark), $comma)
+		fragments.code($comma, !$ast.hasModifier(@data.loop.from, ModifierKind.Ballpark), $comma, !$ast.hasModifier(@data.loop.to, ModifierKind.Ballpark), $comma)
 
 		fragments
 			.code(surround.beforeParameters)
@@ -142,17 +142,17 @@ class ArrayComprehensionForIn extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
-			if modifier.kind == ModifierKind::Declarative {
+			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
-			else if modifier.kind == ModifierKind::Descending {
+			else if modifier.kind == ModifierKind.Descending {
 				@descending = true
 			}
 		}
@@ -162,7 +162,7 @@ class ArrayComprehensionForIn extends Expression {
 
 		if ?@data.loop.value {
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType::Expression)
+			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
 			for var name in @value.listAssignments([]) {
@@ -347,14 +347,14 @@ class ArrayComprehensionForOf extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.loop.modifiers {
-			if modifier.kind == ModifierKind::Declarative {
+			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
 		}
@@ -383,7 +383,7 @@ class ArrayComprehensionForOf extends Expression {
 
 		if ?@data.loop.value {
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType::Expression)
+			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
 			for var name in @value.listAssignments([]) {
@@ -538,8 +538,8 @@ class ArrayComprehensionForRange extends Expression {
 		@when			= null
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), true, this)
 
@@ -658,7 +658,7 @@ class ArrayComprehensionRepeat extends Expression {
 		@toName: String
 	}
 	analyse() { # {{{
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		@to = $compile.expression(@data.loop.expression, this, @scope)
 		@to.analyse()

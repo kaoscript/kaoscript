@@ -52,7 +52,7 @@ class StructType extends Type {
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
-			kind: TypeKind::Struct
+			kind: TypeKind.Struct
 			fields: {}
 		}
 
@@ -116,7 +116,7 @@ class StructType extends Type {
 	} # }}}
 	isExtending() => @extending
 	override isStruct() => true
-	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
+	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Struct' {
 			return true

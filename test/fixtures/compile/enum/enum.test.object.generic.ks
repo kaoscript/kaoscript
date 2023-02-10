@@ -8,5 +8,5 @@ class Foobar {
 	private {
 		_colors: Object<Color>	= {}
 	}
-	isRed(name) => @colors[name] == Color::Red
+	isRed(name) => @colors[name] == Color.Red
 }

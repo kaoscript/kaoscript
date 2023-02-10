@@ -8,6 +8,6 @@ enum Color {
 	Blue
 }
 
-var dyn color = Color::Red
+var dyn color = Color.Red
 
 console.log(color)

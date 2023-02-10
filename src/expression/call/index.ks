@@ -92,7 +92,7 @@ class CallExpression extends Expression {
 			@arguments.push(argument)
 		}
 
-		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Computed) {
+		if @data.callee.kind == NodeKind.MemberExpression && !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Computed) {
 			@object = $compile.expression(@data.callee.object, this)
 			@object.analyse()
 		}
@@ -108,7 +108,7 @@ class CallExpression extends Expression {
 			@makeMemberCallee(@object.type())
 		}
 		else {
-			if @data.callee.kind == NodeKind::Identifier {
+			if @data.callee.kind == NodeKind.Identifier {
 				if var variable ?= @scope.getVariable(@data.callee.name) {
 					var type = variable.getRealType()
 
@@ -150,10 +150,10 @@ class CallExpression extends Expression {
 					ReferenceException.throwUndefinedFunction(@data.callee.name, this)
 				}
 			}
-			else if @data.callee.kind == NodeKind::FunctionExpression {
+			else if @data.callee.kind == NodeKind.FunctionExpression {
 				throw new NotImplementedException(this)
 			}
-			else if @data.callee.kind == NodeKind::LambdaExpression {
+			else if @data.callee.kind == NodeKind.LambdaExpression {
 				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
 				expression.prepare(AnyType.NullableUnexplicit)
@@ -178,7 +178,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNoMatchingFunction('', @arguments, this)
 				}
 			}
-			else if @data.callee.kind == NodeKind::ThisExpression {
+			else if @data.callee.kind == NodeKind.ThisExpression {
 				@prepareArguments()
 
 				var expression = $compile.expression(@data.callee, this)
@@ -286,7 +286,7 @@ class CallExpression extends Expression {
 			callee.translate()
 		}
 
-		if @data.scope.kind == ScopeKind::Argument {
+		if @data.scope.kind == ScopeKind.Argument {
 			@callScope = $compile.expression(@data.scope.value, this)
 			@callScope.analyse()
 			@callScope.prepare(AnyType.NullableUnexplicit)
@@ -376,7 +376,7 @@ class CallExpression extends Expression {
 				return true
 			}
 		}
-		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
+		else if @data.callee.kind == NodeKind.Identifier && @data.callee.name == name {
 			return true
 		}
 
@@ -392,7 +392,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			return true if @object.isUsingNonLocalVariables(scope)
 		}
-		else if @data.callee.kind == NodeKind::Identifier {
+		else if @data.callee.kind == NodeKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if !scope.hasDeclaredVariable(variable.name()) {
@@ -427,7 +427,7 @@ class CallExpression extends Expression {
 				return true
 			}
 		}
-		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
+		else if @data.callee.kind == NodeKind.Identifier && @data.callee.name == name {
 			return true
 		}
 
@@ -443,7 +443,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			@object.listLocalVariables(scope, variables)
 		}
-		else if @data.callee.kind == NodeKind::Identifier {
+		else if @data.callee.kind == NodeKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if scope.hasDeclaredVariable(variable.name()) {
@@ -461,7 +461,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			@object.listNonLocalVariables(scope, variables)
 		}
-		else if @data.callee.kind == NodeKind::Identifier {
+		else if @data.callee.kind == NodeKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if !variable.isModule() && !scope.hasDeclaredVariable(variable.name()) {
@@ -789,7 +789,7 @@ class CallExpression extends Expression {
 			}
 			is ReferenceType {
 				if value.isNullable() && !@options.rules.ignoreMisfit {
-					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind::Nullable) {
+					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
 						TypeException.throwNullableCaller(@property, this)
 					}
 				}
@@ -863,7 +863,7 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					if	@data.callee.object.kind == NodeKind::Identifier &&
+					if	@data.callee.object.kind == NodeKind.Identifier &&
 							(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 							(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 					{
@@ -1054,7 +1054,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if mode == Mode::Async {
+		if mode == Mode.Async {
 			for var argument in @arguments {
 				if argument.isAwaiting() {
 					return argument.toFragments(fragments, mode)
@@ -1113,7 +1113,7 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
-		if mode == Mode::Async {
+		if mode == Mode.Async {
 			@toCallFragments(fragments, mode)
 
 			fragments.code(', ') if @arguments.length != 0
@@ -1156,10 +1156,10 @@ class CallExpression extends Expression {
 		if @object != null {
 			fragments += `\(@object.toQuote()).\(@property)`
 		}
-		else if @data.callee.kind == NodeKind::Identifier {
+		else if @data.callee.kind == NodeKind.Identifier {
 			fragments += @data.callee.name
 		}
-		else if @data.callee.kind == NodeKind::ThisExpression {
+		else if @data.callee.kind == NodeKind.ThisExpression {
 			fragments += `@\(@data.callee.name.name)`
 		}
 		else {
@@ -1277,7 +1277,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 		@expression
 	}
 	constructor(@expression, match) {
-		super(expression.data(), expression.parent(), expression.scope(), ScopeType::Block)
+		super(expression.data(), expression.parent(), expression.scope(), ScopeType.Block)
 	}
 	analyse() { # {{{
 	} # }}}
@@ -1289,7 +1289,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code('((')
 
-		var block = Parameter.toFragments(@expression, fragments, ParameterMode::Default, func(fragments) {
+		var block = Parameter.toFragments(@expression, fragments, ParameterMode.Default, func(fragments) {
 			return fragments.code(') =>').newBlock()
 		})
 

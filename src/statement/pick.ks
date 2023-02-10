@@ -19,7 +19,7 @@ class PickStatement extends Statement {
 		@value.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@value.prepare(target, TargetMode::Permissive)
+		@value.prepare(target, TargetMode.Permissive)
 
 		@value.acquireReusable(false)
 		@value.releaseReusable()

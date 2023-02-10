@@ -32,10 +32,10 @@ class Parameter extends AbstractNode {
 	static {
 		compileExpression(data, node) { # {{{
 			match data.kind {
-				NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
-				NodeKind::Identifier => return new IdentifierParameter(data, node)
-				NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
-				NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
+				NodeKind.ArrayBinding => return new ArrayBindingParameter(data, node)
+				NodeKind.Identifier => return new IdentifierParameter(data, node)
+				NodeKind.ObjectBinding => return new ObjectBindingParameter(data, node)
+				NodeKind.ThisExpression => return new ThisExpressionParameter(data, node)
 			}
 		} # }}}
 		getUntilDifferentTypeIndex(parameters, index) { # {{{
@@ -67,7 +67,7 @@ class Parameter extends AbstractNode {
 			var parameters = node.parameters()
 			var signature = node.type()
 
-			var name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
+			var name = (mode == ParameterMode.Default | ParameterMode.OverloadedFunction | ParameterMode.HelperConstructor) ? 'arguments' : '__ks_arguments'
 
 			// TODO move to `var mut`
 			var dyn restIndex = -1
@@ -122,15 +122,15 @@ class Parameter extends AbstractNode {
 			var mut asyncHeaderParameter = false
 
 			if signature.max() > 0 {
-				if mode == ParameterMode::ArrowFunction {
+				if mode == ParameterMode.ArrowFunction {
 					fragments.code(`...\(name)`)
 				}
-				else if mode == ParameterMode::HybridConstructor {
+				else if mode == ParameterMode.HybridConstructor {
 					fragments.code(name)
 				}
 			}
 
-			if mode == ParameterMode::Default | ParameterMode::HelperConstructor {
+			if mode == ParameterMode.Default | ParameterMode.HelperConstructor {
 				var offset = node.getParameterOffset()
 
 				for var parameter, i in parameters {
@@ -150,7 +150,7 @@ class Parameter extends AbstractNode {
 
 			fragments = fn(fragments)
 
-			if mode != ParameterMode::HelperConstructor {
+			if mode != ParameterMode.HelperConstructor {
 				for var parameter in parameters to~ lastHeaderParameterIndex {
 					parameter.toValidationFragments(fragments)
 				}
@@ -464,14 +464,14 @@ class Parameter extends AbstractNode {
 
 					ctrl2.code(`else if(arguments[__ks_i] === null || `)
 
-					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::OR)
+					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.OR)
 
 					ctrl2.code(')').step()
 				}
 				else {
 					ctrl2.code('if(')
 
-					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::NONE)
+					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.NONE)
 
 					ctrl2.code(')').step()
 				}
@@ -560,14 +560,14 @@ class Parameter extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Parameter, super.file())
+		@options = Attribute.configure(data, parent._options, AttributeTarget.Parameter, super.file())
 		@retained = @options.parameters.retain
 	} # }}}
 	analyse() { # {{{
 		var mut immutable = true
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Mutable {
+			if modifier.kind == ModifierKind.Mutable {
 				immutable = false
 
 				break
@@ -576,7 +576,7 @@ class Parameter extends AbstractNode {
 
 		if ?@data.internal {
 			@internal = Parameter.compileExpression(@data.internal, this)
-			@internal.setAssignment(AssignmentType::Parameter)
+			@internal.setAssignment(AssignmentType.Parameter)
 
 			if ?@data.operator {
 				@internal.operator(@data.operator.assignment)
@@ -606,16 +606,16 @@ class Parameter extends AbstractNode {
 
 		for var modifier in @data.modifiers {
 			match modifier.kind {
-				ModifierKind::NameOnly {
-					passing = PassingMode::LABELED
+				ModifierKind.NameOnly {
+					passing = PassingMode.LABELED
 				}
-				ModifierKind::Nullable {
+				ModifierKind.Nullable {
 					nullable = true
 				}
-				ModifierKind::PositionOnly {
-					passing = PassingMode::POSITIONAL
+				ModifierKind.PositionOnly {
+					passing = PassingMode.POSITIONAL
 				}
-				ModifierKind::Rest {
+				ModifierKind.Rest {
 					@rest = true
 
 					if ?modifier.arity {
@@ -629,7 +629,7 @@ class Parameter extends AbstractNode {
 						max = Infinity
 					}
 				}
-				ModifierKind::Required {
+				ModifierKind.Required {
 					@explicitlyRequired = true
 				}
 			}
@@ -674,7 +674,7 @@ class Parameter extends AbstractNode {
 
 		if ?@data.defaultValue {
 			if @explicitlyRequired && type.isNullable() {
-				if @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 					pass
 				}
 				else if @internal is IdentifierLiteral {
@@ -713,7 +713,7 @@ class Parameter extends AbstractNode {
 
 			@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
 
-			unless @type.isSubsetOf(target, MatchingMode::Signature) {
+			unless @type.isSubsetOf(target, MatchingMode.Signature) {
 				TypeException.throwInvalidParameterType(@type, target, this)
 			}
 		}
@@ -751,9 +751,9 @@ class Parameter extends AbstractNode {
 		@internal.translate()
 
 		if @hasDefaultValue {
-			@defaultValue.prepare(@type.getVariableType(), TargetMode::Permissive)
+			@defaultValue.prepare(@type.getVariableType(), TargetMode.Permissive)
 
-			if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind::Equals {
+			if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind.Equals {
 				@headedDefaultValue = @nullable || @internal.isBinding()
 			}
 			else {
@@ -880,7 +880,7 @@ class Parameter extends AbstractNode {
 class AliasStatement extends Statement {
 	private {
 		@expression: ThisExpressionParameter
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@parameter: Parameter
 	}
 	constructor(@expression, @parameter) { # {{{
@@ -912,7 +912,7 @@ class AliasStatement extends Statement {
 
 class IdentifierParameter extends IdentifierLiteral {
 	private {
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 	}
 	static {
 		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { # {{{
@@ -975,12 +975,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::NONE)
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.NONE)
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
 					}
 
 					ctrl2
@@ -988,7 +988,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						.step()
 
 					if index + 1 == context.length {
-						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+						wrongdoer(ctrl2, ParameterWrongDoing.BadType, {
 							async: context.async
 							name: that.name()
 							type: type
@@ -1008,7 +1008,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							.code('else')
 							.step()
 
-						wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+						wrongdoer(ctrl3, ParameterWrongDoing.BadType, {
 							async: context.async
 							name: that.name()
 							type: type
@@ -1082,12 +1082,12 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
 
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
 
 							line.code(')')
 						}
 						else {
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction::AND)
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction.AND)
 						}
 
 						line
@@ -1199,12 +1199,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::NONE)
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.NONE)
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
 					}
 
 					ctrl2
@@ -1212,7 +1212,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						.step()
 
 					if index + 1 == context.length {
-						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+						wrongdoer(ctrl2, ParameterWrongDoing.BadType, {
 							async: context.async
 							name: that.name()
 							type: type
@@ -1232,7 +1232,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							.code('else')
 							.step()
 
-						wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+						wrongdoer(ctrl3, ParameterWrongDoing.BadType, {
 							async: context.async
 							name: that.name()
 							type: type
@@ -1324,10 +1324,10 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							ctrl2.compile(that).code(' !== null && ')
 
-							declaredType.toNegativeTestFragments(ctrl2, that, Junction::AND)
+							declaredType.toNegativeTestFragments(ctrl2, that, Junction.AND)
 						}
 						else {
-							declaredType.toNegativeTestFragments(ctrl2, that, Junction::NONE)
+							declaredType.toNegativeTestFragments(ctrl2, that, Junction.NONE)
 						}
 
 						ctrl2
@@ -1335,7 +1335,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 
 						if fixed || index + 1 == context.length {
-							wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+							wrongdoer(ctrl2, ParameterWrongDoing.BadType, {
 								async: context.async
 								name: that.name()
 								type: declaredType
@@ -1370,7 +1370,7 @@ class IdentifierParameter extends IdentifierLiteral {
 								.code('else')
 								.step()
 
-							wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+							wrongdoer(ctrl3, ParameterWrongDoing.BadType, {
 								async: context.async
 								name: that.name()
 								type: declaredType
@@ -1418,13 +1418,13 @@ class IdentifierParameter extends IdentifierLiteral {
 						.newControl()
 						.code('if(').compile(that).code(' === void 0')
 
-					if !declaredType.isNullable() || that.operator() != AssignmentOperatorKind::Equals {
+					if !declaredType.isNullable() || that.operator() != AssignmentOperatorKind.Equals {
 						ctrl.code(' || ').compile(that).code(' === null')
 					}
 
 					ctrl.code(')').step()
 
-					if that.operator() == AssignmentOperatorKind::EmptyCoalescing {
+					if that.operator() == AssignmentOperatorKind.EmptyCoalescing {
 						if value.isComposite() {
 							ctrl
 								.newLine()
@@ -1480,7 +1480,7 @@ class IdentifierParameter extends IdentifierLiteral {
 		@declaredType = @realType = type
 	} # }}}
 	setDefaultValue(value) { # {{{
-		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+		if @operator == AssignmentOperatorKind.EmptyCoalescing && value.isComposite() {
 			value.acquireReusable(true)
 			value.releaseReusable()
 		}
@@ -1501,7 +1501,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 class ArrayBindingParameter extends ArrayBinding {
 	private late {
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@tempName: Literal
 	}
 	analyse() { # {{{
@@ -1540,7 +1540,7 @@ class ArrayBindingParameter extends ArrayBinding {
 		}
 	} # }}}
 	setDefaultValue(value) { # {{{
-		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+		if @operator == AssignmentOperatorKind.EmptyCoalescing && value.isComposite() {
 			value.acquireReusable(true)
 			value.releaseReusable()
 		}
@@ -1561,7 +1561,7 @@ class ArrayBindingParameter extends ArrayBinding {
 				.step()
 
 			if value != null {
-				if @operator == AssignmentOperatorKind::EmptyCoalescing {
+				if @operator == AssignmentOperatorKind.EmptyCoalescing {
 					if value.isComposite() {
 						ctrl
 							.newLine()
@@ -1617,7 +1617,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 
 class ObjectBindingParameter extends ObjectBinding {
 	private late {
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@tempName: Literal
 	}
 	analyse() { # {{{
@@ -1656,7 +1656,7 @@ class ObjectBindingParameter extends ObjectBinding {
 		}
 	} # }}}
 	setDefaultValue(value) { # {{{
-		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+		if @operator == AssignmentOperatorKind.EmptyCoalescing && value.isComposite() {
 			value.acquireReusable(true)
 			value.releaseReusable()
 		}
@@ -1677,7 +1677,7 @@ class ObjectBindingParameter extends ObjectBinding {
 				.step()
 
 			if value != null {
-				if @operator == AssignmentOperatorKind::EmptyCoalescing {
+				if @operator == AssignmentOperatorKind.EmptyCoalescing {
 					if value.isComposite() {
 						ctrl
 							.newLine()
@@ -1734,7 +1734,7 @@ class ObjectBindingParameterElement extends ObjectBindingElement {
 class AnonymousParameter extends AbstractNode {
 	private late {
 		@name: String
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@type: Type
 	}
 	analyse()
@@ -1781,7 +1781,7 @@ class AnonymousParameter extends AbstractNode {
 
 class ThisExpressionParameter extends ThisExpression {
 	private {
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind::Equals
+		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 	}
 	override prepare(target, targetMode) { # {{{
 		super(target)
@@ -1839,7 +1839,7 @@ class ThisExpressionParameter extends ThisExpression {
 		variable.setDeclaredType(type).setDefinitive(definitive)
 	} # }}}
 	setDefaultValue(value) { # {{{
-		if @operator == AssignmentOperatorKind::EmptyCoalescing && value.isComposite() {
+		if @operator == AssignmentOperatorKind.EmptyCoalescing && value.isComposite() {
 			value.acquireReusable(true)
 			value.releaseReusable()
 		}

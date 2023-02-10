@@ -57,7 +57,7 @@ class BlockScope extends Scope {
 			var mut notAdded = true
 
 			for var m, index in @macros[name] while notAdded {
-				if m.type().isSubsetOf(type, MatchingMode::Signature) {
+				if m.type().isSubsetOf(type, MatchingMode.Signature) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false

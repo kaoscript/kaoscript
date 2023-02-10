@@ -21,11 +21,11 @@ class IfExpression extends Expression {
 	initiate() { # {{{
 		if ?@data.declaration {
 			@hasDeclaration = true
-			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind::Identifier
+			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind.Identifier
 
-			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind::Existential
+			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
 
 			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @hasBinding)
 			@declaration.initiate()
@@ -35,7 +35,7 @@ class IfExpression extends Expression {
 		@initiate()
 
 		if @data.whenTrue.statements.length == @data.whenFalse.statements.length == 1 {
-			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind::PickStatement
+			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.PickStatement
 		}
 
 		if !@inline {
@@ -87,20 +87,20 @@ class IfExpression extends Expression {
 			}
 		}
 		else {
-			@bindingScope = @newScope(@scope!?, @inline ? ScopeType::Hollow : ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, @inline ? ScopeType.Hollow : ScopeType.Bleeding)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
 		}
 
 		@scope.line(@data.whenTrue.start.line)
-		@whenTrueScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
 		@whenTrueExpression.analyse()
 
 		@scope.line(@data.whenFalse.start.line)
-		@whenFalseScope = @newScope(@bindingScope, ScopeType::InlineBlock)
-		if @data.whenFalse.kind == NodeKind::IfExpression {
+		@whenFalseScope = @newScope(@bindingScope, ScopeType.InlineBlock)
+		if @data.whenFalse.kind == NodeKind.IfExpression {
 			@whenFalseExpression = $compile.expression(@data.whenFalse, this, @whenFalseScope)
 			@whenFalseExpression.setCascade(true)
 			@whenFalseExpression.initiate()
@@ -139,7 +139,7 @@ class IfExpression extends Expression {
 		}
 
 		if @hasCondition {
-			@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+			@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 			for var data, name of @condition.inferTypes({}) {
 				@scope.updateInferable(name, data, this)
@@ -211,7 +211,7 @@ class IfExpression extends Expression {
 				})
 
 				if @hasCondition {
-					fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+					fragments.code(' && ').compileCondition(@condition, mode, Junction.AND)
 				}
 			}
 			else {
@@ -267,7 +267,7 @@ class IfExpression extends Expression {
 			}
 
 			if @hasCondition {
-				fragments.code(' && ').compileCondition(@condition, mode, Junction::AND)
+				fragments.code(' && ').compileCondition(@condition, mode, Junction.AND)
 			}
 		}
 		else {

@@ -1,6 +1,6 @@
 class ClassDestructorType extends FunctionType {
 	private {
-		@access: Accessibility	= Accessibility::Public
+		@access: Accessibility	= Accessibility.Public
 	}
 	constructor(data, node) { # {{{
 		super([], data, node)
@@ -12,14 +12,14 @@ class ClassDestructorType extends FunctionType {
 	} # }}}
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
+			if modifier.kind == ModifierKind.Async {
 				throw new NotImplementedException()
 			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
+			else if modifier.kind == ModifierKind.Private {
+				@access = Accessibility.Private
 			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
+			else if modifier.kind == ModifierKind.Protected {
+				@access = Accessibility.Protected
 			}
 		}
 	} # }}}

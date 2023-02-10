@@ -123,20 +123,20 @@ class AnyType extends Type {
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Anycast && !@explicit {
-			return !@nullable || value.isNullable() || mode ~~ MatchingMode::NonNullToNull
+		if mode ~~ MatchingMode.Anycast && !@explicit {
+			return !@nullable || value.isNullable() || mode ~~ MatchingMode.NonNullToNull
 		}
-		else if mode ~~ MatchingMode::Exact {
+		else if mode ~~ MatchingMode.Exact {
 			return false unless value.isAny()
 
-			if mode ~~ MatchingMode::NullToNonNull {
+			if mode ~~ MatchingMode.NullToNonNull {
 				return !@nullable || value.isNullable()
 			}
 			else {
 				return @nullable == value.isNullable()
 			}
 		}
-		else if mode ~~ MatchingMode::Missing && !@explicit {
+		else if mode ~~ MatchingMode.Missing && !@explicit {
 			return !@nullable || value.isNullable()
 		}
 		else {

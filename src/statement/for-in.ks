@@ -22,9 +22,9 @@ class ForInStatement extends Statement {
 		@immutable: Boolean					= false
 		@index								= null
 		@indexName: String
-		@loopKind: LoopKind					= LoopKind::Unknown
+		@loopKind: LoopKind					= LoopKind.Unknown
 		@loopTempVariables: Array			= []
-		@order: OrderKind					= OrderKind::None
+		@order: OrderKind					= OrderKind.None
 		@split
 		@splitAssert: Boolean				= false
 		@splitName: String
@@ -44,21 +44,21 @@ class ForInStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Ascending {
-				@order = OrderKind::Ascending
+			if modifier.kind == ModifierKind.Ascending {
+				@order = OrderKind.Ascending
 			}
-			else if modifier.kind == ModifierKind::Declarative {
+			else if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Descending {
-				@order = OrderKind::Descending
+			else if modifier.kind == ModifierKind.Descending {
+				@order = OrderKind.Descending
 				@ascending = false
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
 		}
@@ -81,7 +81,7 @@ class ForInStatement extends Statement {
 
 		if ?@data.value {
 			@value = $compile.expression(@data.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType::Expression)
+			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
 			for var name in @value.listAssignments([]) {
@@ -111,7 +111,7 @@ class ForInStatement extends Statement {
 
 			@checkForRenamedVariables(@from, variables)
 
-			@fromBallpark = $ast.hasModifier(@data.from, ModifierKind::Ballpark)
+			@fromBallpark = $ast.hasModifier(@data.from, ModifierKind.Ballpark)
 		}
 
 		if ?@data.to {
@@ -120,7 +120,7 @@ class ForInStatement extends Statement {
 
 			@checkForRenamedVariables(@to, variables)
 
-			@toBallpark = $ast.hasModifier(@data.to, ModifierKind::Ballpark)
+			@toBallpark = $ast.hasModifier(@data.to, ModifierKind.Ballpark)
 		}
 
 		if ?@data.step {
@@ -163,7 +163,7 @@ class ForInStatement extends Statement {
 		@body.analyse()
 
 		if ?@data.else {
-			@elseScope = @newScope(@scope!?, ScopeType::InlineBlock)
+			@elseScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 			@else = $compile.block(@data.else, this, @elseScope)
 			@else.analyse()
@@ -244,9 +244,9 @@ class ForInStatement extends Statement {
 			var validate = @from is NumberLiteral && @to is NumberLiteral
 
 			if !?@step || @step is NumberLiteral {
-				@loopKind = LoopKind::Static
+				@loopKind = LoopKind.Static
 
-				if @order == OrderKind::None {
+				if @order == OrderKind.None {
 					if ?@step {
 						if @step.value() == 0 {
 							SyntaxException.throwForBadStep('for/in', this)
@@ -293,9 +293,9 @@ class ForInStatement extends Statement {
 					}
 
 					if !validate {
-						@ascending = @order == OrderKind::Ascending
+						@ascending = @order == OrderKind.Ascending
 					}
-					else if @order == OrderKind::Ascending {
+					else if @order == OrderKind.Ascending {
 						unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
 							SyntaxException.throwForNoMatch('for/in', this)
 						}
@@ -310,8 +310,8 @@ class ForInStatement extends Statement {
 				}
 			}
 			else {
-				if @order != OrderKind::None {
-					@loopKind = LoopKind::Ordered
+				if @order != OrderKind.None {
+					@loopKind = LoopKind.Ordered
 				}
 
 				if !validate {
@@ -331,7 +331,7 @@ class ForInStatement extends Statement {
 				@stepAssert = true
 			}
 
-			if @loopKind != LoopKind::Unknown {
+			if @loopKind != LoopKind.Unknown {
 				if !?@to {
 					@toName = @bindingScope.acquireTempName(false)
 					@toBallpark = @ascending
@@ -346,8 +346,8 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if @order != OrderKind::None {
-				@loopKind = LoopKind::Ordered
+			if @order != OrderKind.None {
+				@loopKind = LoopKind.Ordered
 			}
 
 			if ?@step {
@@ -356,9 +356,9 @@ class ForInStatement extends Statement {
 				}
 
 				if @step is NumberLiteral {
-					@loopKind = LoopKind::Ordered
+					@loopKind = LoopKind.Ordered
 
-					if @order == OrderKind::None {
+					if @order == OrderKind.None {
 						if @step.value() == 0 {
 							throw new NotImplementedException()
 						}
@@ -373,7 +373,7 @@ class ForInStatement extends Statement {
 					}
 				}
 				else {
-					if @loopKind == LoopKind::Unknown || @step.isComposite() {
+					if @loopKind == LoopKind.Unknown || @step.isComposite() {
 						@stepName = @scope.acquireTempName()
 					}
 
@@ -383,7 +383,7 @@ class ForInStatement extends Statement {
 			else {
 				if !?@to {
 					if !?@from {
-						@loopKind = LoopKind::Static
+						@loopKind = LoopKind.Static
 					}
 
 					@toBallpark = true
@@ -391,7 +391,7 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		if @loopKind == LoopKind::Unknown {
+		if @loopKind == LoopKind.Unknown {
 			if @expression.isLooseComposite() {
 				@expressionName = @scope.acquireTempName()
 			}
@@ -478,7 +478,7 @@ class ForInStatement extends Statement {
 		@else?.prepare(target)
 
 		if ?@expressionName {
-			if @loopKind == LoopKind::Unknown {
+			if @loopKind == LoopKind.Unknown {
 				@scope.releaseTempName(@expressionName)
 			}
 			else {
@@ -494,7 +494,7 @@ class ForInStatement extends Statement {
 		@scope.releaseTempName(@unknownTranslator) if ?@unknownTranslator
 
 		if ?@toName {
-			if @loopKind == LoopKind::Unknown || @toAssert {
+			if @loopKind == LoopKind.Unknown || @toAssert {
 				@scope.releaseTempName(@toName)
 			}
 			else {
@@ -764,7 +764,7 @@ class ForInStatement extends Statement {
 					.newLine()
 					.code(`\($runtime.helper(this)).assertNumber(\(@step.toQuote(true)), `)
 					.compile(@stepName ?? @step)
-					.code(`, \(@order != OrderKind::None || @ascending ? 2 : 1))`)
+					.code(`, \(@order != OrderKind.None || @ascending ? 2 : 1))`)
 					.done()
 			}
 			else {
@@ -869,7 +869,7 @@ class ForInStatement extends Statement {
 				ctrl.code(' && !(').compileCondition(@until).code(')')
 			}
 			else if ?@while {
-				ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
+				ctrl.code(' && ').wrapCondition(@while, Mode.None, Junction.AND)
 			}
 		}
 
@@ -893,10 +893,10 @@ class ForInStatement extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		if @loopKind == LoopKind::Unknown {
+		if @loopKind == LoopKind.Unknown {
 			@toUnknownFragments(fragments, mode)
 		}
-		else if @loopKind == LoopKind::Static {
+		else if @loopKind == LoopKind.Static {
 			@toStaticFragments(fragments, mode)
 		}
 		else {
@@ -1003,7 +1003,7 @@ class ForInStatement extends Statement {
 				ctrl.code(' && !(').compileCondition(@until).code(')')
 			}
 			else if ?@while {
-				ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
+				ctrl.code(' && ').wrapCondition(@while, Mode.None, Junction.AND)
 			}
 		}
 

@@ -30,7 +30,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		if @isAcceptingEnum() && @argument.type().isEnum() {
 			@isEnum = true
@@ -161,11 +161,11 @@ class UnaryOperatorImplicit extends Expression {
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	private late {
 		@native: Boolean		= false
-		@operand: OperandType	= OperandType::Any
+		@operand: OperandType	= OperandType.Any
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		var mut boolean = true
 		var mut number = true
@@ -196,7 +196,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			native = false
 		}
 		else {
-			TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
+			TypeException.throwInvalidOperand(@argument, Operator.Negation, this)
 		}
 
 		if !boolean && !number {
@@ -204,7 +204,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 				TypeException.throwUnexpectedExpression(this, target, this)
 			}
 			else {
-				TypeException.throwInvalidOperation(this, Operator::Negation, this)
+				TypeException.throwInvalidOperation(this, Operator.Negation, this)
 			}
 		}
 
@@ -218,13 +218,13 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			}
 			else {
 				@type = @scope.reference('Boolean')
-				@operand = OperandType::Boolean
+				@operand = OperandType.Boolean
 				@native = true
 			}
 		}
 		else if number {
 			@type = @scope.reference('Number')
-			@operand = OperandType::Number
+			@operand = OperandType.Number
 			@native = native
 
 			if type.isNullable() {
@@ -236,7 +236,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 	inferWhenTrueTypes(inferables) => @argument.inferWhenFalseTypes(inferables)
 	toFragments(fragments, mode) { # {{{
 		if @native {
-			if @operand == OperandType::Boolean {
+			if @operand == OperandType.Boolean {
 				fragments.code('!', @data.operator).wrapCondition(@argument)
 			}
 			else {
@@ -246,7 +246,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 		else {
 			fragments.code(`\($runtime.operator(this))`)
 
-			if @operand == OperandType::Number {
+			if @operand == OperandType.Number {
 				fragments.code('.negationNum(')
 			}
 			else {
@@ -260,7 +260,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
-	operator() => Operator::Negative
+	operator() => Operator.Negative
 	runtime() => 'negative'
 	symbol() => '-'
 }

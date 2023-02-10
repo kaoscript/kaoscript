@@ -328,7 +328,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode::Permissive)
+		super(target, TargetMode.Permissive)
 
 		@left.acquireReusable(true)
 		@left.releaseReusable()
@@ -385,7 +385,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		var last = @operands.length - 1
 
 		for var operand, index in @operands {
-			operand.prepare(target, TargetMode::Permissive)
+			operand.prepare(target, TargetMode.Permissive)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -428,7 +428,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			@type = Type.union(@scope, ...types)
 		}
 	} # }}}
-	operator() => Operator::NullCoalescing
+	operator() => Operator.NullCoalescing
 	symbol() => '??'
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Type')

@@ -43,7 +43,7 @@ class ModuleScope extends Scope {
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
-		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature::StaticMethod, this)
+		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {
@@ -79,7 +79,7 @@ class ModuleScope extends Scope {
 			var mut notAdded = true
 
 			for var m, index in @macros[name] while notAdded {
-				if type.isSubsetOf(m.type(), MatchingMode::Signature) {
+				if type.isSubsetOf(m.type(), MatchingMode.Signature) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false

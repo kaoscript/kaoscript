@@ -50,7 +50,7 @@ class MatchStatement extends Statement {
 		if ?@data.declaration {
 			@hasDeclaration = true
 
-			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
 			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, false)
 			@declaration.initiate()
@@ -76,7 +76,7 @@ class MatchStatement extends Statement {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: @newScope(@bindingScope, ScopeType::InlineBlock)
+				scope: @newScope(@bindingScope, ScopeType.InlineBlock)
 			}
 
 			@clauses.push(clause)
@@ -675,7 +675,7 @@ class MatchBindingArray extends AbstractNode {
 	}
 	analyse() { # {{{
 		@array = $compile.expression(@data, this)
-		@array.setAssignment(AssignmentType::Expression)
+		@array.setAssignment(AssignmentType.Expression)
 		@array.analyse()
 
 		@parent.defineVariables(@array, @scope)
@@ -702,7 +702,7 @@ class MatchBindingArray extends AbstractNode {
 	toConditionFragments(fragments, name, junction, precondition) { # {{{
 		var check = precondition?(junction, 'array')
 
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		if ?check {
 			check()
@@ -724,7 +724,7 @@ class MatchBindingArray extends AbstractNode {
 			}
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 }
 
@@ -736,14 +736,14 @@ class MatchBindingObject extends AbstractNode {
 	}
 	analyse() { # {{{
 		@binding = $compile.expression(@data, this)
-		@binding.setAssignment(AssignmentType::Declaration)
+		@binding.setAssignment(AssignmentType.Declaration)
 		@binding.analyse()
 
 		@parent.defineVariables(@binding, @scope)
 
 		for var data in @data.elements {
 			match data.kind {
-				NodeKind::BindingElement {
+				NodeKind.BindingElement {
 					@properties.push({
 						name: data.name.name
 					})
@@ -833,7 +833,7 @@ class MatchBindingValue extends AbstractNode {
 		var mut type = null
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Mutable {
+			if modifier.kind == ModifierKind.Mutable {
 				immutable = false
 			}
 		}
@@ -865,8 +865,8 @@ class MatchConditionArray extends AbstractNode {
 		@flatten = @options.format.destructuring == 'es5'
 
 		for var mut value in @data.values {
-			if value.kind != NodeKind::OmittedExpression {
-				if value.kind == NodeKind::MatchConditionRange {
+			if value.kind != NodeKind.OmittedExpression {
+				if value.kind == NodeKind.MatchConditionRange {
 					value = new MatchConditionRange(value, this)
 				}
 				else {
@@ -915,7 +915,7 @@ class MatchConditionArray extends AbstractNode {
 						line.code(', ')
 					}
 
-					if value.kind == NodeKind::OmittedExpression {
+					if value.kind == NodeKind.OmittedExpression {
 						if value.spread {
 							line.code('...')
 						}
@@ -929,12 +929,12 @@ class MatchConditionArray extends AbstractNode {
 
 				var mut index = 0
 				for var value, i in @data.values {
-					if value.kind != NodeKind::OmittedExpression {
+					if value.kind != NodeKind.OmittedExpression {
 						if index != 0 {
 							line.code(' && ')
 						}
 
-						@values[index].toConditionFragments(line, `__ks_\(i)`, Junction::AND, null)
+						@values[index].toConditionFragments(line, `__ks_\(i)`, Junction.AND, null)
 
 						index += 1
 					}
@@ -947,7 +947,7 @@ class MatchConditionArray extends AbstractNode {
 	toConditionFragments(fragments, name, junction, precondition) { # {{{
 		var check = precondition?(junction, 'array')
 
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		if ?check {
 			check()
@@ -981,7 +981,7 @@ class MatchConditionArray extends AbstractNode {
 			fragments.code(@name, '(', name, ')')
 		}
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 }
 
@@ -993,7 +993,7 @@ class MatchConditionObject extends AbstractNode {
 	analyse() { # {{{
 		for var data in @data.properties {
 			match data.kind {
-				NodeKind::ObjectMember {
+				NodeKind.ObjectMember {
 					var property = {
 						name: data.name.name
 					}
@@ -1045,7 +1045,7 @@ class MatchConditionObject extends AbstractNode {
 				}
 
 				if ?value {
-					value.toConditionFragments(line, name, Junction::AND, null)
+					value.toConditionFragments(line, name, Junction.AND, null)
 				}
 				else {
 					line.code(`!\($runtime.type(this)).isNull(\(name))`)
@@ -1058,13 +1058,13 @@ class MatchConditionObject extends AbstractNode {
 	toConditionFragments(fragments, name, junction, precondition?) { # {{{
 		if ?@name {
 			if var check ?= precondition?(junction, 'object') {
-				fragments.code('(') if junction == Junction::OR
+				fragments.code('(') if junction == Junction.OR
 
 				check()
 
 				fragments.code(` && \(@name)(\(name))`)
 
-				fragments.code(')') if junction == Junction::OR
+				fragments.code(')') if junction == Junction.OR
 			}
 			else {
 				fragments.code(`\(@name)(\(name))`)
@@ -1113,7 +1113,7 @@ class MatchConditionRange extends AbstractNode {
 	toConditionFragments(fragments, name, junction, precondition?) { # {{{
 		var check = precondition?(junction, 'number')
 
-		fragments.code('(') if junction == Junction::OR
+		fragments.code('(') if junction == Junction.OR
 
 		if ?check {
 			check()
@@ -1128,7 +1128,7 @@ class MatchConditionRange extends AbstractNode {
 			.code(name, @to ? ' <= ' : '<')
 			.compile(@right)
 
-		fragments.code(')') if junction == Junction::OR
+		fragments.code(')') if junction == Junction.OR
 	} # }}}
 }
 
@@ -1157,7 +1157,7 @@ class MatchConditionValue extends AbstractNode {
 		@type: Type
 	}
 	analyse() { # {{{
-		if @data.kind == NodeKind::JunctionExpression {
+		if @data.kind == NodeKind.JunctionExpression {
 			for var operand in @data.operands {
 				var value = $compile.expression(operand, this)
 				value.analyse()
@@ -1218,7 +1218,7 @@ class MatchConditionValue extends AbstractNode {
 			}
 		}
 		else if @values.length > 1 {
-			fragments.code('(') if junction == Junction::AND
+			fragments.code('(') if junction == Junction.AND
 
 			for var value, index in @values {
 				if index > 0 {
@@ -1237,7 +1237,7 @@ class MatchConditionValue extends AbstractNode {
 				}
 			}
 
-			fragments.code(')') if junction == Junction::AND
+			fragments.code(')') if junction == Junction.AND
 		}
 	} # }}}
 	values() => @values
@@ -1267,7 +1267,7 @@ class MatchFilter extends AbstractNode {
 			var late binding
 
 			match data.kind {
-				NodeKind::ArrayBinding {
+				NodeKind.ArrayBinding {
 					if @isObject {
 						throw new NotSupportedException(this)
 					}
@@ -1279,7 +1279,7 @@ class MatchFilter extends AbstractNode {
 					@testData.array += 1
 					@inlineFilter = false
 				}
-				NodeKind::ObjectBinding {
+				NodeKind.ObjectBinding {
 					if @isArray {
 						throw new NotSupportedException(this)
 					}
@@ -1308,7 +1308,7 @@ class MatchFilter extends AbstractNode {
 				var late condition
 
 				match data.kind {
-					NodeKind::MatchConditionArray {
+					NodeKind.MatchConditionArray {
 						if @isObject {
 							throw new NotSupportedException(this)
 						}
@@ -1317,7 +1317,7 @@ class MatchFilter extends AbstractNode {
 
 						@testData.array += 1
 					}
-					NodeKind::MatchConditionObject {
+					NodeKind.MatchConditionObject {
 						if @isArray {
 							throw new NotSupportedException(this)
 						}
@@ -1326,7 +1326,7 @@ class MatchFilter extends AbstractNode {
 
 						@testData.object += 1
 					}
-					NodeKind::MatchConditionRange {
+					NodeKind.MatchConditionRange {
 						if @isArray || @isObject {
 							throw new NotSupportedException(this)
 						}
@@ -1335,7 +1335,7 @@ class MatchFilter extends AbstractNode {
 
 						@testData.number += 1
 					}
-					NodeKind::MatchConditionType {
+					NodeKind.MatchConditionType {
 						condition = new MatchConditionType(data, @parent, scope)
 					}
 					else {
@@ -1427,7 +1427,7 @@ class MatchFilter extends AbstractNode {
 		}
 	} # }}}
 	toConditionFragments(fragments, name) { # {{{
-		var mut junction = Junction::NONE
+		var mut junction = Junction.NONE
 
 		var precondition = (jun: Junction, type: String) => {
 			match jun {
@@ -1456,10 +1456,10 @@ class MatchFilter extends AbstractNode {
 
 				fragments.code('(') if wrap
 
-				@conditions[0].toConditionFragments(fragments, name, Junction::NONE, precondition)
+				@conditions[0].toConditionFragments(fragments, name, Junction.NONE, precondition)
 
 				for var condition in @conditions from 1 {
-					condition.toConditionFragments(fragments, name, Junction::OR, precondition)
+					condition.toConditionFragments(fragments, name, Junction.OR, precondition)
 				}
 
 				fragments.code(')') if wrap

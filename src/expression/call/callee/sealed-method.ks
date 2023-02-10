@@ -9,7 +9,7 @@ class SealedMethodCallee extends Callee {
 	constructor(@data, @object, @objectType, @property, @instance, @node) { # {{{
 		super(data)
 
-		@nullableProperty = data.callee.modifiers?.some(modifier => modifier.kind == ModifierKind::Nullable)
+		@nullableProperty = data.callee.modifiers?.some(modifier => modifier.kind == ModifierKind.Nullable)
 	} # }}}
 	translate() { # {{{
 		@object.translate()
@@ -60,13 +60,13 @@ class SealedMethodCallee extends Callee {
 	toFragments(fragments, mode, node) { # {{{
 		if node._flatten {
 			match node._data.scope.kind {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					if @instance {
 						fragments.code(`\(@objectType.getSealedPath())._im_\(@property).apply(null, `)
 
@@ -82,13 +82,13 @@ class SealedMethodCallee extends Callee {
 		}
 		else {
 			match node._data.scope.kind {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					if @instance {
 						fragments
 							.code(`\(@objectType.getSealedPath())._im_\(@property)(`)

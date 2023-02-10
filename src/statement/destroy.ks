@@ -5,7 +5,7 @@ class DestroyStatement extends Statement {
 		@type: Type
 	}
 	initiate() { # {{{
-		if @data.variable.kind == NodeKind::Identifier {
+		if @data.variable.kind == NodeKind.Identifier {
 			if !@scope.hasVariable(@data.variable.name) {
 				ReferenceException.throwNotDefined(@data.variable.name, this)
 			}

@@ -30,7 +30,7 @@ class ClassDestructorDeclaration extends Statement {
 		ctrl.done() unless node._es5
 	} # }}}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newScope(parent._destructorScope, ScopeType::Block))
+		super(data, parent, parent.newScope(parent._destructorScope, ScopeType.Block))
 
 		@internalName = `__ks_destroy_0`
 
@@ -38,7 +38,7 @@ class ClassDestructorDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		var parameter = new Parameter({
-			kind: NodeKind::Parameter
+			kind: NodeKind.Parameter
 			modifiers: []
 			internal: $ast.identifier('that')
 		}, this)
@@ -62,7 +62,7 @@ class ClassDestructorDeclaration extends Statement {
 	getParameterOffset() => 0
 	isAbstract() { # {{{
 		for modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Abstract {
+			if modifier.kind == ModifierKind.Abstract {
 				return true
 			}
 		}
@@ -85,7 +85,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.code(`static \(@internalName)(`)
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
 			return node.code(')').step()
 		})
 

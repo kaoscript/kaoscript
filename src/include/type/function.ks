@@ -206,7 +206,7 @@ class FunctionType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var result = {
-			kind: TypeKind::Function
+			kind: TypeKind.Function
 		}
 
 		if !@isAlien() && @index != -1 {
@@ -215,7 +215,7 @@ class FunctionType extends Type {
 
 		result.async = @async
 
-		if mode !~ ExportMode::OverloadedFunction {
+		if mode !~ ExportMode.OverloadedFunction {
 			result.exhaustive = @isExhaustive()
 		}
 
@@ -291,10 +291,10 @@ class FunctionType extends Type {
 	index(@index): this
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is FunctionType {
-			var mut mode = MatchingMode::FunctionSignature
+			var mut mode = MatchingMode.FunctionSignature
 
 			if anycast {
-				mode += MatchingMode::AnycastParameter + MatchingMode::MissingReturn
+				mode += MatchingMode.AnycastParameter + MatchingMode.MissingReturn
 			}
 
 			return value.isSubsetOf(this, mode)
@@ -372,7 +372,7 @@ class FunctionType extends Type {
 		// console.log(pIndex, pStep, @parameters[pIndex]?.toQuote(), aIndex, aStep, arguments[aIndex]?.toQuote())
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
-				if mode !~ MatchingMode::RequireAllParameters {
+				if mode !~ MatchingMode.RequireAllParameters {
 					return FunctionType.isOptional(arguments, aIndex, aStep)
 				}
 				else {
@@ -458,7 +458,7 @@ class FunctionType extends Type {
 	} # }}}
 	isProxy() => false
 	isSubsetOf(value: AnyType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Missing {
+		if mode ~~ MatchingMode.Missing {
 			return true
 		}
 
@@ -476,44 +476,44 @@ class FunctionType extends Type {
 			return false
 		}
 
-		if mode ~~ MatchingMode::Exact {
-			mode += MatchingMode::ExactParameter + MatchingMode::ExactReturn
+		if mode ~~ MatchingMode.Exact {
+			mode += MatchingMode.ExactParameter + MatchingMode.ExactReturn
 		}
-		else if mode ~~ MatchingMode::Similar {
-			mode += MatchingMode::SimilarParameter + MatchingMode::SimilarReturn
+		else if mode ~~ MatchingMode.Similar {
+			mode += MatchingMode.SimilarParameter + MatchingMode.SimilarReturn
 		}
 
-		if mode ~~ MatchingMode::MissingParameter && @missingParameters {
+		if mode ~~ MatchingMode.MissingParameter && @missingParameters {
 			pass
 		}
-		else if mode ~~ MatchingMode::ShiftableParameters {
-			var mut paramMode = MatchingMode::Default
+		else if mode ~~ MatchingMode.ShiftableParameters {
+			var mut paramMode = MatchingMode.Default
 
-			paramMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactParameter
-			paramMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarParameter
-			paramMode += MatchingMode::MissingType if mode ~~ MatchingMode::MissingParameterType
-			paramMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassParameter
-			paramMode += MatchingMode::Subset if mode ~~ MatchingMode::SubsetParameter
-			paramMode += MatchingMode::NonNullToNull if mode ~~ MatchingMode::NonNullToNullParameter
-			paramMode += MatchingMode::NullToNonNull if mode ~~ MatchingMode::NullToNonNullParameter
-			paramMode += MatchingMode::MissingDefault if mode ~~ MatchingMode::MissingParameterDefault
-			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
-			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
-			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
-			paramMode += MatchingMode::IgnoreRetained if mode ~~ MatchingMode::IgnoreRetained
-			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
-			paramMode += MatchingMode::IgnoreAnonymous if mode ~~ MatchingMode::IgnoreAnonymous
-			paramMode += MatchingMode::IgnoreNullable if mode ~~ MatchingMode::IgnoreNullable
-			paramMode += MatchingMode::RequireAllParameters if mode ~~ MatchingMode::RequireAllParameters
+			paramMode += MatchingMode.Exact if mode ~~ MatchingMode.ExactParameter
+			paramMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarParameter
+			paramMode += MatchingMode.MissingType if mode ~~ MatchingMode.MissingParameterType
+			paramMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassParameter
+			paramMode += MatchingMode.Subset if mode ~~ MatchingMode.SubsetParameter
+			paramMode += MatchingMode.NonNullToNull if mode ~~ MatchingMode.NonNullToNullParameter
+			paramMode += MatchingMode.NullToNonNull if mode ~~ MatchingMode.NullToNonNullParameter
+			paramMode += MatchingMode.MissingDefault if mode ~~ MatchingMode.MissingParameterDefault
+			paramMode += MatchingMode.MissingArity if mode ~~ MatchingMode.MissingParameterArity
+			paramMode += MatchingMode.Renamed if mode ~~ MatchingMode.Renamed
+			paramMode += MatchingMode.IgnoreName if mode ~~ MatchingMode.IgnoreName
+			paramMode += MatchingMode.IgnoreRetained if mode ~~ MatchingMode.IgnoreRetained
+			paramMode += MatchingMode.Anycast if mode ~~ MatchingMode.AnycastParameter
+			paramMode += MatchingMode.IgnoreAnonymous if mode ~~ MatchingMode.IgnoreAnonymous
+			paramMode += MatchingMode.IgnoreNullable if mode ~~ MatchingMode.IgnoreNullable
+			paramMode += MatchingMode.RequireAllParameters if mode ~~ MatchingMode.RequireAllParameters
 
 			if !value.isParametersMatching(@parameters, paramMode) {
 				return false
 			}
 		}
 		else {
-			if mode ~~ MatchingMode::AdditionalParameter {
+			if mode ~~ MatchingMode.AdditionalParameter {
 				if @parameters.length < value._parameters.length {
-					if mode !~ MatchingMode::MissingParameterDefault && @min() < value.min() {
+					if mode !~ MatchingMode.MissingParameterDefault && @min() < value.min() {
 						return false
 					}
 
@@ -524,12 +524,12 @@ class FunctionType extends Type {
 					}
 				}
 				else {
-					if mode !~ MatchingMode::MissingParameterArity {
+					if mode !~ MatchingMode.MissingParameterArity {
 						if @max() < value.max() {
 							return false
 						}
 
-						if mode !~ MatchingMode::MissingParameterDefault && @min() < value.min() {
+						if mode !~ MatchingMode.MissingParameterDefault && @min() < value.min() {
 							return false
 						}
 					}
@@ -541,7 +541,7 @@ class FunctionType extends Type {
 					}
 				}
 			}
-			else if mode ~~ MatchingMode::MissingParameter {
+			else if mode ~~ MatchingMode.MissingParameter {
 				if @parameters.length > value._parameters.length {
 					return false
 				}
@@ -550,11 +550,11 @@ class FunctionType extends Type {
 					return false unless parameter.min() == 0
 				}
 
-				if mode !~ MatchingMode::MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
+				if mode !~ MatchingMode.MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
 					return false
 				}
 
-				if mode !~ MatchingMode::MissingParameterDefault && @min() != value.min() {
+				if mode !~ MatchingMode.MissingParameterDefault && @min() != value.min() {
 					return false
 				}
 			}
@@ -563,31 +563,31 @@ class FunctionType extends Type {
 					return false
 				}
 
-				if mode !~ MatchingMode::MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
+				if mode !~ MatchingMode.MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
 					return false
 				}
 
-				if mode !~ MatchingMode::MissingParameterDefault && (@min() != value.min() || @max() != value.max()) {
+				if mode !~ MatchingMode.MissingParameterDefault && (@min() != value.min() || @max() != value.max()) {
 					return false
 				}
 			}
 
-			var mut paramMode = MatchingMode::Default
+			var mut paramMode = MatchingMode.Default
 
-			paramMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactParameter
-			paramMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarParameter
-			paramMode += MatchingMode::MissingType if mode ~~ MatchingMode::MissingParameterType
-			paramMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassParameter
-			paramMode += MatchingMode::Subset if mode ~~ MatchingMode::SubsetParameter
-			paramMode += MatchingMode::NonNullToNull if mode ~~ MatchingMode::NonNullToNullParameter
-			paramMode += MatchingMode::NullToNonNull if mode ~~ MatchingMode::NullToNonNullParameter
-			paramMode += MatchingMode::MissingDefault if mode ~~ MatchingMode::MissingParameterDefault
-			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
-			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
-			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
-			paramMode += MatchingMode::IgnoreRetained if mode ~~ MatchingMode::IgnoreRetained
-			paramMode += MatchingMode::Anycast if mode ~~ MatchingMode::AnycastParameter
-			paramMode += MatchingMode::IgnoreAnonymous if mode ~~ MatchingMode::IgnoreAnonymous
+			paramMode += MatchingMode.Exact if mode ~~ MatchingMode.ExactParameter
+			paramMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarParameter
+			paramMode += MatchingMode.MissingType if mode ~~ MatchingMode.MissingParameterType
+			paramMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassParameter
+			paramMode += MatchingMode.Subset if mode ~~ MatchingMode.SubsetParameter
+			paramMode += MatchingMode.NonNullToNull if mode ~~ MatchingMode.NonNullToNullParameter
+			paramMode += MatchingMode.NullToNonNull if mode ~~ MatchingMode.NullToNonNullParameter
+			paramMode += MatchingMode.MissingDefault if mode ~~ MatchingMode.MissingParameterDefault
+			paramMode += MatchingMode.MissingArity if mode ~~ MatchingMode.MissingParameterArity
+			paramMode += MatchingMode.Renamed if mode ~~ MatchingMode.Renamed
+			paramMode += MatchingMode.IgnoreName if mode ~~ MatchingMode.IgnoreName
+			paramMode += MatchingMode.IgnoreRetained if mode ~~ MatchingMode.IgnoreRetained
+			paramMode += MatchingMode.Anycast if mode ~~ MatchingMode.AnycastParameter
+			paramMode += MatchingMode.IgnoreAnonymous if mode ~~ MatchingMode.IgnoreAnonymous
 
 			if paramMode != 0 {
 				var valLabels = {}
@@ -603,7 +603,7 @@ class FunctionType extends Type {
 				}
 
 				var mut index = 0
-				var testLabel = mode !~ MatchingMode::IgnoreName
+				var testLabel = mode !~ MatchingMode.IgnoreName
 
 				for var parameter in @parameters {
 					if testLabel && parameter.isLabeled() {
@@ -627,18 +627,18 @@ class FunctionType extends Type {
 			}
 		}
 
-		if mode ~~ MatchingMode::IgnoreReturn {
+		if mode ~~ MatchingMode.IgnoreReturn {
 			pass
 		}
 		else if !?@returnType {
 			return false unless value.isMissingReturn()
 		}
-		else if !(mode ~~ MatchingMode::MissingReturn && value.isMissingReturn()) {
-			var mut returnMode = MatchingMode::Default
+		else if !(mode ~~ MatchingMode.MissingReturn && value.isMissingReturn()) {
+			var mut returnMode = MatchingMode.Default
 
-			returnMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactReturn
-			returnMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarReturn
-			returnMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassReturn
+			returnMode += MatchingMode.Exact if mode ~~ MatchingMode.ExactReturn
+			returnMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarReturn
+			returnMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassReturn
 
 			if returnMode != 0 {
 				var newType = value.getReturnType()
@@ -647,18 +647,18 @@ class FunctionType extends Type {
 			}
 		}
 
-		if mode ~~ MatchingMode::IgnoreError {
+		if mode ~~ MatchingMode.IgnoreError {
 			pass
 		}
 		else if @errors.length == 0 {
 			return false unless value.isMissingError()
 		}
-		else if !(mode ~~ MatchingMode::MissingError && value.isMissingError()) {
-			var mut errorMode = MatchingMode::Default
+		else if !(mode ~~ MatchingMode.MissingError && value.isMissingError()) {
+			var mut errorMode = MatchingMode.Default
 
-			errorMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactError
-			errorMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarErrors
-			errorMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassError
+			errorMode += MatchingMode.Exact if mode ~~ MatchingMode.ExactError
+			errorMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarErrors
+			errorMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassError
 
 			if errorMode != 0 {
 				var newTypes = value.listErrors()
@@ -702,7 +702,7 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	max(mode: MinMax = MinMax::DEFAULT, mut excludes: String[]? = null) { # {{{
+	max(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
 		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
 		if var max ?= @maxs[key] {
@@ -713,25 +713,25 @@ class FunctionType extends Type {
 
 		var mut max = 0
 
-		if mode ~~ MinMax::AFTER_REST {
+		if mode ~~ MinMax.AFTER_REST {
 			if @hasRest {
 				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					max += parameter.max()
 				}
 			}
 		}
-		else if mode ~~ MinMax::DEFAULT {
+		else if mode ~~ MinMax.DEFAULT {
 			for var parameter in @parameters when !excludes.contains(parameter.getExternalName()) {
 				max += parameter.max()
 			}
 		}
-		else if mode ~~ MinMax::LABELED_ONLY {
+		else if mode ~~ MinMax.LABELED_ONLY {
 			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.getExternalName()) {
 				max += parameter.max()
 			}
 		}
-		else if mode ~~ MinMax::POSITIONAL {
-			if @hasRest && mode ~~ MinMax::REST {
+		else if mode ~~ MinMax.POSITIONAL {
+			if @hasRest && mode ~~ MinMax.REST {
 				max = Infinity
 			}
 			else {
@@ -741,7 +741,7 @@ class FunctionType extends Type {
 			}
 		}
 
-		if @async && mode ~~ MinMax::ASYNC {
+		if @async && mode ~~ MinMax.ASYNC {
 			max += 1
 		}
 
@@ -749,7 +749,7 @@ class FunctionType extends Type {
 
 		return max
 	} # }}}
-	min(mode: MinMax = MinMax::DEFAULT, mut excludes: String[]? = null) { # {{{
+	min(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
 		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
 		if var min ?= @mins[key] {
@@ -760,25 +760,25 @@ class FunctionType extends Type {
 
 		var mut min = 0
 
-		if mode ~~ MinMax::AFTER_REST {
+		if mode ~~ MinMax.AFTER_REST {
 			if @hasRest {
 				for var parameter in @parameters from @restIndex + 1 when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					min += parameter.min()
 				}
 			}
 		}
-		else if mode ~~ MinMax::DEFAULT {
+		else if mode ~~ MinMax.DEFAULT {
 			for var parameter in @parameters when !excludes.contains(parameter.getExternalName()) {
 				min += parameter.min()
 			}
 		}
-		else if mode ~~ MinMax::LABELED_ONLY {
+		else if mode ~~ MinMax.LABELED_ONLY {
 			for var parameter in @parameters when parameter.isOnlyLabeled() && !excludes.contains(parameter.getExternalName()) {
 				min += parameter.min()
 			}
 		}
-		else if mode ~~ MinMax::POSITIONAL {
-			if mode ~~ MinMax::REST {
+		else if mode ~~ MinMax.POSITIONAL {
+			if mode ~~ MinMax.REST {
 				for var parameter in @parameters when parameter.isPositional() && !excludes.contains(parameter.getExternalName()) {
 					min += parameter.min()
 				}
@@ -790,7 +790,7 @@ class FunctionType extends Type {
 			}
 		}
 
-		if @async && mode ~~ MinMax::ASYNC {
+		if @async && mode ~~ MinMax.ASYNC {
 			min += 1
 		}
 
@@ -810,14 +810,14 @@ class FunctionType extends Type {
 	} # }}}
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
+			if modifier.kind == ModifierKind.Async {
 				@async = true
 			}
 		}
 	} # }}}
 	pushTo(methods) { # {{{
 		for var method in methods {
-			if this.isSubsetOf(method, MatchingMode::SimilarParameter) {
+			if this.isSubsetOf(method, MatchingMode.SimilarParameter) {
 				return
 			}
 		}
@@ -831,7 +831,7 @@ class FunctionType extends Type {
 			return
 		}
 
-		if data.kind == NodeKind::TypeReference && data.typeName.kind == NodeKind::Identifier {
+		if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
 			match data.typeName.name {
 				'auto' {
 					@dynamicReturn = true
@@ -862,7 +862,7 @@ class FunctionType extends Type {
 				}
 			}
 		}
-		else if data.kind == NodeKind::NumericExpression {
+		else if data.kind == NodeKind.NumericExpression {
 			@dynamicReturn = true
 			@returnType = node.scope().reference('Number')
 			@returnData = data
@@ -1010,7 +1010,7 @@ class OverloadedFunctionType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var functions = []
 
-		var overloadedMode = mode + ExportMode::OverloadedFunction
+		var overloadedMode = mode + ExportMode.OverloadedFunction
 
 		for var reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
@@ -1024,7 +1024,7 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return {
-			kind: TypeKind::OverloadedFunction
+			kind: TypeKind.OverloadedFunction
 			exhaustive: @isExhaustive()
 			functions
 		}
@@ -1088,14 +1088,14 @@ class OverloadedFunctionType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
 		return value.isFunction()
 	} # }}}
 	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
@@ -1108,7 +1108,7 @@ class OverloadedFunctionType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: OverloadedFunctionType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
@@ -1129,7 +1129,7 @@ class OverloadedFunctionType extends Type {
 		return true
 	} # }}}
 	isSubsetOf(value: NamedType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 

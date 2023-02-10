@@ -58,7 +58,7 @@ namespace Unbounded {
 	} # }}}
 
 	func getMinAfter(function: FunctionType): Number { # {{{
-		return function.min(MinMax::AFTER_REST + MinMax::ASYNC)
+		return function.min(MinMax.AFTER_REST + MinMax.ASYNC)
 	} # }}}
 
 	func getRowType(row: Row, tree: TreeBranch | TreeLeaf): RowType? { # {{{

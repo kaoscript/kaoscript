@@ -17,7 +17,7 @@ class TupleDeclaration extends Statement {
 
 		for var modifier in @data.modifiers {
 			match modifier.kind {
-				ModifierKind::Named {
+				ModifierKind.Named {
 					named = true
 				}
 			}
@@ -35,7 +35,7 @@ class TupleDeclaration extends Statement {
 
 			var mut name = ''
 			var mut member = @data.extends
-			while member.kind == NodeKind::MemberExpression {
+			while member.kind == NodeKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
 				member = member.object
@@ -129,7 +129,7 @@ class TupleDeclaration extends Statement {
 
 		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
-		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
+		Parameter.toFragments(@function, ctrl, ParameterMode.Default, func(fragments) {
 			return fragments.code(')').step()
 		})
 
@@ -265,7 +265,7 @@ class TupleFieldDeclaration extends AbstractNode {
 
 			if type == null {
 				for var modifier in @data.modifiers {
-					if modifier.kind == ModifierKind::Nullable {
+					if modifier.kind == ModifierKind.Nullable {
 						type = AnyType.NullableUnexplicit
 					}
 				}
@@ -278,7 +278,7 @@ class TupleFieldDeclaration extends AbstractNode {
 
 			@type = new TupleFieldType(@scope, @data.name?.name, @index, type, @parameter.isRequired())
 
-			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
 			}
 		}
@@ -310,7 +310,7 @@ class TupleFieldParameter extends Parameter {
 			@internal = new IdentifierParameter({name: `__ks_\(@field.index())`}, this, @scope)
 		}
 
-		@internal.setAssignment(AssignmentType::Parameter)
+		@internal.setAssignment(AssignmentType.Parameter)
 		@internal.analyse()
 
 		for var name in @internal.listAssignments([]) {

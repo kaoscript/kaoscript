@@ -22,14 +22,14 @@ class SealableType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @system {
 			return {
-				kind: TypeKind::Sealable
+				kind: TypeKind.Sealable
 				system: true
 				type: @type.toReference(references, indexDelta, mode, module)
 			}
 		}
 		else {
 			return {
-				kind: TypeKind::Sealable
+				kind: TypeKind.Sealable
 				sealed: @isSealed()
 				type: @type.toReference(references, indexDelta, mode, module)
 			}
@@ -50,7 +50,7 @@ class SealableType extends Type {
 	isSealed() => @sealed || @type.isSealed()
 	isSubsetOf(value: SealableType, mode: MatchingMode) => @type.isSubsetOf(value.type(), mode)
 	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Similar {
+		if mode ~~ MatchingMode.Similar {
 			return @type.isSubsetOf(value, mode)
 		}
 		else {

@@ -1,1 +1,0 @@
-var x = Type::foo

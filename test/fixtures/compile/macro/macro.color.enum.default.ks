@@ -42,8 +42,8 @@ class Color {
 }
 
 Color.registerSpace({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space.SRGB
+	alias: [Space.RGB]
 	components: {
 		red: {
 			max: 255

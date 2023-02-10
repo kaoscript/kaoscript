@@ -44,7 +44,7 @@ class ClassMethodDeclaration extends Statement {
 				labelable ? 'args' : `arguments`
 				assessment
 				fragments.block()
-				extends.type().hasStaticMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
+				extends.type().hasStaticMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
 				(fragments, _) => {
 					if extends.type().hasStaticMethod(name) {
 						if labelable {
@@ -129,7 +129,7 @@ class ClassMethodDeclaration extends Statement {
 				null
 				assessment
 				fragments.block()
-				extends.type().hasInstanceMethod(name) ? Router.FooterType::NO_THROW : Router.FooterType::MIGHT_THROW
+				extends.type().hasInstanceMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
 				(fragments, _) => {
 					if extends.type().hasInstanceMethod(name) {
 						if extends.type().isSealedInstanceMethod(name) {
@@ -185,13 +185,13 @@ class ClassMethodDeclaration extends Statement {
 		@name = data.name.name
 
 		for modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Abstract {
+			if modifier.kind == ModifierKind.Abstract {
 				@abstract = true
 			}
-			else if modifier.kind == ModifierKind::Override {
+			else if modifier.kind == ModifierKind.Override {
 				@override = true
 			}
-			else if modifier.kind == ModifierKind::Static {
+			else if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
@@ -245,7 +245,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		if ?@data.body {
-			@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
+			@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 		}
 
 		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
@@ -305,20 +305,20 @@ class ClassMethodDeclaration extends Statement {
 			for var method in overloaded {
 				var mut hidden = null
 
-				if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode::Default) {
+				if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode.Default) {
 					SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
 				}
-				else if @type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::AdditionalParameter + MatchingMode::IgnoreAnonymous + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+				else if @type.isSubsetOf(method, MatchingMode.ExactParameter + MatchingMode.AdditionalParameter + MatchingMode.IgnoreAnonymous + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
 					hidden = true
 
 					overload.push(method.index())
 				}
-				else if method.isSubsetOf(@type, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+				else if method.isSubsetOf(@type, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
 					hidden = true
 
 					overload.push(method.index())
 				}
-				else if @type.isSubsetOf(method, MatchingMode::AdditionalParameter + MatchingMode::MissingParameterArity + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+				else if @type.isSubsetOf(method, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
 					hidden = false
 
 					overload.push(method.index())
@@ -343,7 +343,7 @@ class ClassMethodDeclaration extends Statement {
 			@hiddenOverride = !overridden.isAbstract()
 		}
 		else {
-			var mode = MatchingMode::ExactParameter + MatchingMode::IgnoreName + MatchingMode::Superclass
+			var mode = MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass
 
 			if @instance {
 				if @parent.class().hasMatchingInstanceMethod(@name, @type, mode) {
@@ -386,7 +386,7 @@ class ClassMethodDeclaration extends Statement {
 			var oldType = overridden.getReturnType()
 			var newType = @type.getReturnType()
 
-			unless newType.isSubsetOf(oldType, MatchingMode::Exact + MatchingMode::Missing) || newType.isInstanceOf(oldType) {
+			unless newType.isSubsetOf(oldType, MatchingMode.Exact + MatchingMode.Missing) || newType.isInstanceOf(oldType) {
 				if @override {
 					if @isAssertingOverride() {
 						SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
@@ -418,10 +418,10 @@ class ClassMethodDeclaration extends Statement {
 
 				for var overload in overloaded when !overload.isMissingReturn() {
 					if ?type {
-						if type.isSubsetOf(overload.getReturnType(), MatchingMode::Default) {
+						if type.isSubsetOf(overload.getReturnType(), MatchingMode.Default) {
 							pass
 						}
-						else if overload.getReturnType().isSubsetOf(type, MatchingMode::Default) {
+						else if overload.getReturnType().isSubsetOf(type, MatchingMode.Default) {
 							type = overload.getReturnType()
 						}
 						else {
@@ -558,7 +558,7 @@ class ClassMethodDeclaration extends Statement {
 
 				var literal = new Literal(false, this, @scope(), parameter.getExternalName())
 
-				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::AND)
+				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
 
 				index += 1
 			}
@@ -597,7 +597,7 @@ class ClassMethodDeclaration extends Statement {
 			ctrl.code(`\(@internalName)(`)
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
 			return node.code(')').step()
 		})
 
@@ -637,13 +637,13 @@ class ClassMethodDeclaration extends Statement {
 	} # }}}
 	private {
 		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
-			var mut mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+			var mut mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 
 			if @override {
-				mode += MatchingMode::NullToNonNullParameter
+				mode += MatchingMode.NullToNonNullParameter
 			}
 			else {
-				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+				mode -= MatchingMode.MissingParameterType - MatchingMode.MissingParameterArity
 			}
 
 			var mut method = null
@@ -651,7 +651,7 @@ class ClassMethodDeclaration extends Statement {
 
 			var list = @instance ? superclass.listInstantiableMethods : superclass.listStaticMethods
 
-			if var methods #= list(@name, @type, MatchingMode::ExactParameter) {
+			if var methods #= list(@name, @type, MatchingMode.ExactParameter) {
 				if methods.length == 1 {
 					method = methods[0]
 					exact = true
@@ -700,7 +700,7 @@ class ClassMethodDeclaration extends Statement {
 						var oldType = method.getReturnType()
 						var newType = @type.getReturnType()
 
-						if !(newType.isSubsetOf(oldType, MatchingMode::Default + MatchingMode::Missing) || newType.isInstanceOf(oldType)) {
+						if !(newType.isSubsetOf(oldType, MatchingMode.Default + MatchingMode.Missing) || newType.isInstanceOf(oldType)) {
 							if @isAssertingOverride() {
 								SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 							}
@@ -731,7 +731,7 @@ class ClassMethodDeclaration extends Statement {
 						var mut matched = false
 
 						for var newType in newTypes until matched {
-							if newType.isSubsetOf(oldType, MatchingMode::Default) || newType.isInstanceOf(oldType) {
+							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType) {
 								matched = true
 							}
 						}
@@ -756,7 +756,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 
 				if !@override {
-					if exact || type.isSubsetOf(method, MatchingMode::ExactParameter + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn) {
+					if exact || type.isSubsetOf(method, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.IgnoreReturn) {
 						type.index(method.index())
 
 						return { method, type, exact: true }
@@ -784,7 +784,7 @@ class ClassMethodDeclaration extends Statement {
 			if @instance {
 				if var methods ?= superclass.listInstanceMethods(@name) {
 					for var method in methods {
-						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
+						if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
 							return []
 						}
 					}
@@ -793,13 +793,13 @@ class ClassMethodDeclaration extends Statement {
 				return superclass.listInstantiableMethods(
 					@name
 					@type
-					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+					MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 				)
 			}
 			else {
 				if var methods ?= superclass.listStaticMethods(@name) {
 					for var method in methods {
-						if method.isSubsetOf(@type, MatchingMode::ExactParameter) {
+						if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
 							return []
 						}
 					}
@@ -808,7 +808,7 @@ class ClassMethodDeclaration extends Statement {
 				return superclass.listStaticMethods(
 					@name
 					@type
-					MatchingMode::FunctionSignature + MatchingMode::SubsetParameter + MatchingMode::MissingParameter - MatchingMode::AdditionalParameter + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+					MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 				)
 			}
 		} # }}}

@@ -136,7 +136,7 @@ class NamedTupleType extends TupleType {
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
-			kind: TypeKind::Tuple
+			kind: TypeKind.Tuple
 			named: true
 			fields: {}
 		}
@@ -177,7 +177,7 @@ class NamedTupleType extends TupleType {
 			return null
 		}
 	} # }}}
-	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
+	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Tuple' {
 			return true
@@ -444,7 +444,7 @@ class UnnamedTupleType extends TupleType {
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
-			kind: TypeKind::Tuple
+			kind: TypeKind.Tuple
 			named: false
 			fields: []
 		}
@@ -460,7 +460,7 @@ class UnnamedTupleType extends TupleType {
 		return export
 	} # }}}
 	override isArray() => true
-	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
+	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Tuple' {
 			return true

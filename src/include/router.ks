@@ -466,12 +466,12 @@ namespace Router {
 		args!: String = 'args'
 		assessment: Assessment
 		fragments: BlockBuilder
-		footerType: FooterType = FooterType::MUST_THROW
+		footerType: FooterType = FooterType.MUST_THROW
 		footer: Function = Fragment.toDefaultFooter
 		node: AbstractNode
 	): Void { # {{{
 		if !#assessment.mainRoutes {
-			if footerType == FooterType::NO_THROW {
+			if footerType == FooterType.NO_THROW {
 				footer(fragments, node)
 			}
 			else {
@@ -490,7 +490,7 @@ namespace Router {
 
 		var mark = fragments.mark()
 		var helper = Fragment.buildHelper(mark, args, node)
-		var fallback = footerType != FooterType::MUST_THROW
+		var fallback = footerType != FooterType.MUST_THROW
 		var mut continuous = true
 		var mut useAllArgs = false
 
@@ -538,7 +538,7 @@ namespace Router {
 
 		if continuous {
 			if !useAllArgs {
-				if footerType == FooterType::MUST_THROW {
+				if footerType == FooterType.MUST_THROW {
 					Fragment.toDefaultFooter(fragments, node)
 				}
 				else {
@@ -547,7 +547,7 @@ namespace Router {
 			}
 		}
 		else if !assessment.emptiable || !assessment.rest || !useAllArgs {
-			if footerType == FooterType::MUST_THROW {
+			if footerType == FooterType.MUST_THROW {
 				Fragment.toDefaultFooter(fragments, node)
 			}
 			else {

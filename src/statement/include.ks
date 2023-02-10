@@ -212,7 +212,7 @@ class IncludeDeclarator extends Statement {
 	constructor(declaration, @data, @file, moduleName: String? = null, @parent) { # {{{
 		super(data, parent)
 
-		@options = Attribute.configure(declaration, @options, AttributeTarget::Global, super.file(), true)
+		@options = Attribute.configure(declaration, @options, AttributeTarget.Global, super.file(), true)
 
 		@directory = path.dirname(file)
 
@@ -227,7 +227,7 @@ class IncludeDeclarator extends Statement {
 		}
 	} # }}}
 	initiate() { # {{{
-		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, @file())
+		Attribute.configure(@data, @parent.parent()._options, AttributeTarget.Global, @file())
 
 		var offset = @scope.getLineOffset()
 

@@ -4,7 +4,7 @@ extern console: {
 
 import '../export/export.enum.color.ks'
 
-var dyn color = Color::Red
+var dyn color = Color.Red
 
 console.log(color)
 
@@ -14,7 +14,7 @@ impl Color {
 	DarkBlue
 }
 
-color = Color::DarkGreen
+color = Color.DarkGreen
 
 console.log(color)
 

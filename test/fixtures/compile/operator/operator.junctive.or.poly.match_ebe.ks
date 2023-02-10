@@ -7,6 +7,6 @@ bitmask AnimalFlags {
 }
 
 func foobar(abilities: AnimalFlags) {
-	if abilities ~~ AnimalFlags::CanFly | AnimalFlags::EatsFish | AnimalFlags::HasClaws {
+	if abilities ~~ AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.HasClaws {
 	}
 }

@@ -8,7 +8,7 @@ enum Quxbaz {
 	baz
 }
 
-var x = Foobar::foo
+var x = Foobar.foo
 
 if x is Quxbaz {
 

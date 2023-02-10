@@ -62,25 +62,25 @@ class ClassDeclaration extends Statement {
 		}
 		else {
 			match data.kind {
-				NodeKind::BinaryExpression {
-					if data.operator.kind == BinaryOperatorKind::Assignment && data.operator.assignment == AssignmentOperatorKind::Equals {
+				NodeKind.BinaryExpression {
+					if data.operator.kind == BinaryOperatorKind.Assignment && data.operator.assignment == AssignmentOperatorKind.Equals {
 						if $ast.isThisField(name, data.left) {
 							return !$ast.some(data.right, $ast.isThisField^^(name))
 						}
 					}
 				}
-				NodeKind::CallExpression {
-					if constructor && data.callee.kind == NodeKind::Identifier {
+				NodeKind.CallExpression {
+					if constructor && data.callee.kind == NodeKind.Identifier {
 						if data.callee.name == 'this' || (extending && data.callee.name == 'super') {
 							for arg in data.arguments {
-								if arg.kind == NodeKind::Identifier && arg.name == name {
+								if arg.kind == NodeKind.Identifier && arg.name == name {
 									return true
 								}
 							}
 						}
 					}
 				}
-				NodeKind::ReturnStatement {
+				NodeKind.ReturnStatement {
 					return ClassDeclaration.isAssigningAlias(data.value, name, constructor, extending)
 				}
 			}
@@ -134,9 +134,9 @@ class ClassDeclaration extends Statement {
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope)
 
-		@constructorScope = @newScope(@scope!?, ScopeType::Function)
-		@destructorScope = @newScope(@scope!?, ScopeType::Function)
-		@instanceVariableScope = @newScope(@scope!?, ScopeType::Function)
+		@constructorScope = @newScope(@scope!?, ScopeType.Function)
+		@destructorScope = @newScope(@scope!?, ScopeType.Function)
+		@instanceVariableScope = @newScope(@scope!?, ScopeType.Function)
 		@es5 = @options.format.classes == 'es5'
 	} # }}}
 	initiate() { # {{{
@@ -146,7 +146,7 @@ class ClassDeclaration extends Statement {
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		for var data in @data.members when data.kind == NodeKind::MacroDeclaration {
+		for var data in @data.members when data.kind == NodeKind.MacroDeclaration {
 			var name = data.name.name
 			var declaration = new MacroDeclaration(data, this, null)
 
@@ -175,7 +175,7 @@ class ClassDeclaration extends Statement {
 
 			var mut name = ''
 			var mut member = @data.extends
-			while member.kind == NodeKind::MemberExpression {
+			while member.kind == NodeKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
 				member = member.object
@@ -189,12 +189,12 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Abstract {
+			if modifier.kind == ModifierKind.Abstract {
 				@abstract = true
 
 				@class.flagAbstract()
 			}
-			else if modifier.kind == ModifierKind::Sealed {
+			else if modifier.kind == ModifierKind.Sealed {
 				@sealed = true
 
 				@class.flagSealed()
@@ -203,11 +203,11 @@ class ClassDeclaration extends Statement {
 
 		for var data in @data.members {
 			match data.kind {
-				NodeKind::CommentBlock {
+				NodeKind.CommentBlock {
 				}
-				NodeKind::CommentLine {
+				NodeKind.CommentLine {
 				}
-				NodeKind::FieldDeclaration {
+				NodeKind.FieldDeclaration {
 					var declaration = new ClassVariableDeclaration(data, this)
 
 					declaration.analyse()
@@ -216,9 +216,9 @@ class ClassDeclaration extends Statement {
 						@inits = true
 					}
 				}
-				NodeKind::MacroDeclaration {
+				NodeKind.MacroDeclaration {
 				}
-				NodeKind::MethodDeclaration {
+				NodeKind.MethodDeclaration {
 					var late declaration
 
 					if @class.isConstructor(data.name.name) {
@@ -233,12 +233,12 @@ class ClassDeclaration extends Statement {
 
 					declaration.analyse()
 				}
-				NodeKind::ProxyDeclaration {
+				NodeKind.ProxyDeclaration {
 					var declaration = new ClassProxyDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind::ProxyGroupDeclaration {
+				NodeKind.ProxyGroupDeclaration {
 					var declaration = new ClassProxyGroupDeclaration(data, this)
 
 					declaration.analyse()
@@ -305,7 +305,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -323,7 +323,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -341,7 +341,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingStaticMethod(name, method.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -364,7 +364,7 @@ class ClassDeclaration extends Statement {
 			for var constructor in @constructors {
 				constructor.prepare()
 
-				if @class.hasMatchingConstructor(constructor.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingConstructor(constructor.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalConstructor(constructor)
 				}
 
@@ -434,7 +434,7 @@ class ClassDeclaration extends Statement {
 							for var fork in forks {
 								if method.isSubsetOf(
 										fork
-										MatchingMode::FunctionSignature + MatchingMode::MissingParameter
+										MatchingMode.FunctionSignature + MatchingMode.MissingParameter
 									)
 								{
 									hidden = true
@@ -468,10 +468,10 @@ class ClassDeclaration extends Statement {
 
 				for var method in methods {
 					for var m in all when m.index() != method.type().index() && m.index() != method.type().getForkedIndex() {
-						if method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !method.type().isSubsetOf(m.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+						if method.type().isSubsetOf(m.type(), MatchingMode.FunctionSignature + MatchingMode.IgnoreName + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) && !method.type().isSubsetOf(m.type(), MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
 							SyntaxException.throwHiddenMethod(name, @type, m.type(), @type, method.type(), method)
 						}
-						if m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreName + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) && !m.type().isSubsetOf(method.type(), MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::IgnoreError) {
+						if m.type().isSubsetOf(method.type(), MatchingMode.FunctionSignature + MatchingMode.IgnoreName + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) && !m.type().isSubsetOf(method.type(), MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
 							SyntaxException.throwHiddenMethod(name, @type, method.type(), @type, m.type(), method)
 						}
 					}
@@ -651,7 +651,7 @@ class ClassDeclaration extends Statement {
 	level() => @class.level()
 	name() => @name
 	newInstanceMethodScope() { # {{{
-		var scope = @newScope(@scope!?, ScopeType::Function)
+		var scope = @newScope(@scope!?, ScopeType.Function)
 
 		scope.define('this', true, @scope.reference(@name), true, this)
 
@@ -742,7 +742,7 @@ class ClassDeclaration extends Statement {
 		var m = []
 
 		for method in @constructors {
-			method.toFragments(clazz, Mode::None)
+			method.toFragments(clazz, Mode.None)
 
 			m.push(method.type())
 		}
@@ -758,7 +758,7 @@ class ClassDeclaration extends Statement {
 		)
 
 		if ?@destructor {
-			@destructor.toFragments(clazz, Mode::None)
+			@destructor.toFragments(clazz, Mode.None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
@@ -783,7 +783,7 @@ class ClassDeclaration extends Statement {
 					method.toForkFragments(clazz)
 				}
 
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				if method.isRoutable() {
 					if method.isHiddenOverride() {
@@ -824,7 +824,7 @@ class ClassDeclaration extends Statement {
 			var m = []
 
 			for method in methods {
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
 			}
@@ -851,7 +851,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var proxy in @proxies {
-			proxy.toFragments(clazz, Mode::None)
+			proxy.toFragments(clazz, Mode.None)
 		}
 
 		clazz.done()
@@ -891,7 +891,7 @@ class ClassDeclaration extends Statement {
 				.step()
 
 			for method in @constructors {
-				method.toFragments(ctrl, Mode::None)
+				method.toFragments(ctrl, Mode.None)
 
 				m.push(method.type())
 			}
@@ -910,7 +910,7 @@ class ClassDeclaration extends Statement {
 				null
 				assessment
 				block
-				Router.FooterType::MUST_THROW
+				Router.FooterType.MUST_THROW
 				this
 			)
 
@@ -965,7 +965,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if ?@destructor {
-			@destructor.toFragments(clazz, Mode::None)
+			@destructor.toFragments(clazz, Mode.None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
@@ -994,7 +994,7 @@ class ClassDeclaration extends Statement {
 			ClassMethodDeclaration.toInstanceHeadFragments(name, @class, clazz)
 
 			for var method in methods {
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
 			}
@@ -1023,7 +1023,7 @@ class ClassDeclaration extends Statement {
 			m.clear()
 
 			for method in methods {
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
 			}
@@ -1136,7 +1136,7 @@ class ClassDeclaration extends Statement {
 		var m = []
 
 		for method in @constructors {
-			method.toFragments(clazz, Mode::None)
+			method.toFragments(clazz, Mode.None)
 
 			m.push(method.type())
 		}
@@ -1152,7 +1152,7 @@ class ClassDeclaration extends Statement {
 		)
 
 		if ?@destructor {
-			@destructor.toFragments(clazz, Mode::None)
+			@destructor.toFragments(clazz, Mode.None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
@@ -1167,7 +1167,7 @@ class ClassDeclaration extends Statement {
 			m.clear()
 
 			for method in methods {
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
 			}
@@ -1209,7 +1209,7 @@ class ClassDeclaration extends Statement {
 			m.clear()
 
 			for method in methods {
-				method.toFragments(clazz, Mode::None)
+				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
 			}

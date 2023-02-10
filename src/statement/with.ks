@@ -13,13 +13,13 @@ class WithStatement extends Statement {
 		@variables				= []
 	}
 	constructor(@data, @parent, scope: Scope = parent.scope()!?) { # {{{
-		super(data, parent, scope, ScopeType::Bleeding)
+		super(data, parent, scope, ScopeType.Bleeding)
 	} # }}}
 	override initiate() { # {{{
 		@hasFinally = ?@data.finalizer
 
 		for var data in @data.variables {
-			if data.kind == NodeKind::VariableDeclaration {
+			if data.kind == NodeKind.VariableDeclaration {
 				var declaration = new VariableDeclaration(data, this, @scope, @scope, false)
 
 				declaration.initiate()
@@ -47,7 +47,7 @@ class WithStatement extends Statement {
 			})
 		}
 
-		@bodyScope = @newScope(@scope!?, ScopeType::InlineBlock)
+		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()

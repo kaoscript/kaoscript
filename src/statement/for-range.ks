@@ -17,14 +17,14 @@ class ForRangeStatement extends Statement {
 		@while
 	}
 	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType::InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType::InlineBlock)
+		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Declarative {
+			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
-			else if modifier.kind == ModifierKind::Immutable {
+			else if modifier.kind == ModifierKind.Immutable {
 				@immutable = true
 			}
 		}
@@ -173,13 +173,13 @@ class ForRangeStatement extends Statement {
 			ctrl.code(' && !(').compileCondition(@until).code(')')
 		}
 		else if ?@while {
-			ctrl.code(' && ').wrapCondition(@while, Mode::None, Junction::AND)
+			ctrl.code(' && ').wrapCondition(@while, Mode.None, Junction.AND)
 		}
 
 		ctrl.code('; ')
 
 		if ?@data.step {
-			if @data.step.kind == NodeKind::NumericExpression {
+			if @data.step.kind == NodeKind.NumericExpression {
 				if @data.step.value == 1 {
 					ctrl.code('++').compile(@value)
 				}

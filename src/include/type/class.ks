@@ -38,7 +38,7 @@ class ClassType extends Type {
 		@explicitlyExported: Boolean		= false
 		@extending: Boolean					= false
 		@extends: NamedType<ClassType>?		= null
-		@features: ClassFeature				= ClassFeature::All
+		@features: ClassFeature				= ClassFeature.All
 		@fullyImplementedMethods: Boolean{}	= {}
 		@hybrid: Boolean					= false
 		@init: Number						= 0
@@ -168,7 +168,7 @@ class ClassType extends Type {
 					var first = references[data.originals[0]].discardName()
 					var second = references[data.originals[1]].discardName()
 
-					var [major, minor] = first.origin() ~~ TypeOrigin::Require ? [first, second] : [second, first]
+					var [major, minor] = first.origin() ~~ TypeOrigin.Require ? [first, second] : [second, first]
 					var isArgument = alterations[major == first ? data.originals[0] : data.originals[1]]
 
 					ClassType.importFromOriginal(data, type, major, isArgument, metadata, references, alterations, queue, scope, node)
@@ -397,13 +397,13 @@ class ClassType extends Type {
 		@alterations.instanceVariables[name] = true
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
-		var options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
+		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind::FieldDeclaration {
+			NodeKind.FieldDeclaration {
 				var mut instance = true
 				for i from 0 to~ data.modifiers.length while instance {
-					instance = false if data.modifiers[i].kind == ModifierKind::Static
+					instance = false if data.modifiers[i].kind == ModifierKind.Static
 				}
 
 				var type = ClassVariableType.fromAST(data, node)
@@ -415,7 +415,7 @@ class ClassType extends Type {
 					@addStaticVariable(data.name.name, type)
 				}
 			}
-			NodeKind::MethodDeclaration {
+			NodeKind.MethodDeclaration {
 				if @isConstructor(data.name.name) {
 					var type = ClassConstructorType.fromAST(data, node)
 
@@ -431,7 +431,7 @@ class ClassType extends Type {
 				else {
 					var mut instance = true
 					for i from 0 to~ data.modifiers.length while instance {
-						instance = false if data.modifiers[i].kind == ModifierKind::Static
+						instance = false if data.modifiers[i].kind == ModifierKind.Static
 					}
 
 					var type = ClassMethodType.fromAST(data, node)
@@ -642,10 +642,10 @@ class ClassType extends Type {
 
 		var mut exportSuper = false
 		if ?@majorOriginal {
-			if mode ~~ ExportMode::Export {
+			if mode ~~ ExportMode.Export {
 				exportSuper = @hasExportableOriginals()
 			}
-			else if mode ~~ ExportMode::Requirement {
+			else if mode ~~ ExportMode.Requirement {
 				var mut original? = @majorOriginal
 
 				while ?original {
@@ -662,20 +662,20 @@ class ClassType extends Type {
 
 		if exportSuper {
 			export = {
-				kind: TypeKind::Class
+				kind: TypeKind.Class
 			}
 
-			if mode ~~ ExportMode::Export {
+			if mode ~~ ExportMode.Export {
 				var origin = @origin()
 				var extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
 				var require = ClassType.getRequireReference(@majorOriginal)
 
 				if ?extern {
 					if ?require {
-						if origin ~~ TypeOrigin::ExternOrRequire {
+						if origin ~~ TypeOrigin.ExternOrRequire {
 							export.originals = [extern, require]
 						}
-						else if origin ~~ TypeOrigin::RequireOrExtern {
+						else if origin ~~ TypeOrigin.RequireOrExtern {
 							export.originals = [require, extern]
 						}
 						else {
@@ -759,7 +759,7 @@ class ClassType extends Type {
 		}
 		else {
 			export = {
-				kind: TypeKind::Class
+				kind: TypeKind.Class
 				abstract: @abstract
 				alien: @alien
 				hybrid: @hybrid
@@ -813,13 +813,13 @@ class ClassType extends Type {
 				export.extends = @extends.metaReference(references, indexDelta, mode, module)
 			}
 
-			if @features != ClassFeature::All {
+			if @features != ClassFeature.All {
 				export.features = @features
 			}
 		}
 
-		if mode !~ ExportMode::Export && ?@origin && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
-			var origin = @origin - TypeOrigin::Extern - TypeOrigin::Require
+		if mode !~ ExportMode.Export && ?@origin && @origin ~~ TypeOrigin.Extern && @origin !~ TypeOrigin.Import {
+			var origin = @origin - TypeOrigin.Extern - TypeOrigin.Require
 
 			if origin != 0 {
 				export.origin = origin
@@ -988,7 +988,7 @@ class ClassType extends Type {
 
 		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for var method, index in methods down {
-				if method.isSubsetOf(@instanceMethods[name], MatchingMode::FunctionSignature) {
+				if method.isSubsetOf(@instanceMethods[name], MatchingMode.FunctionSignature) {
 					methods.splice(index, 1)
 				}
 			}
@@ -1019,7 +1019,7 @@ class ClassType extends Type {
 	getAbstractMethod(name: String, type: Type) { # {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
-				if type.isMatching(method, MatchingMode::FunctionSignature) {
+				if type.isMatching(method, MatchingMode.FunctionSignature) {
 					return method
 				}
 			}
@@ -1203,7 +1203,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @extending && mode ~~ MatchingMode::Superclass {
+		if @extending && mode ~~ MatchingMode.Superclass {
 			return @extends.type().getMatchingInstanceMethod(name, type, mode)
 		}
 
@@ -1347,7 +1347,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @extending && mode ~~ MatchingMode::Superclass {
+		if @extending && mode ~~ MatchingMode.Superclass {
 			return @extends.type().hasMatchingInstanceMethod(name, type, mode)
 		}
 
@@ -1362,7 +1362,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @extending && mode ~~ MatchingMode::Superclass {
+		if @extending && mode ~~ MatchingMode.Superclass {
 			return @extends.type().hasMatchingStaticMethod(name, type, mode)
 		}
 
@@ -1530,10 +1530,10 @@ class ClassType extends Type {
 
 		@fullyImplementedMethods[name] = false
 
-		var mode = MatchingMode::Signature - MatchingMode::MissingParameterType
+		var mode = MatchingMode.Signature - MatchingMode.MissingParameterType
 
-		for var method in @listAbstractMethods(name, MatchingScope::Global) {
-			return false unless method.isSubsetOf(@listInstanceMethods(name, MatchingScope::Global), mode)
+		for var method in @listAbstractMethods(name, MatchingScope.Global) {
+			return false unless method.isSubsetOf(@listInstanceMethods(name, MatchingScope.Global), mode)
 		}
 
 		return @fullyImplementedMethods[name] <- true
@@ -1565,15 +1565,15 @@ class ClassType extends Type {
 			return true
 		}
 
-		if mode ~~ MatchingMode::Subclass && @extending && @extends.type().isInstanceOf(value) {
+		if mode ~~ MatchingMode.Subclass && @extending && @extends.type().isInstanceOf(value) {
 			return true
 		}
 
-		if mode ~~ MatchingMode::Exact {
+		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
-		if mode ~~ MatchingMode::Similar {
+		if mode ~~ MatchingMode.Similar {
 			for var variable, name of value._instanceVariables {
 				if !@instanceVariables[name]?.isSubsetOf(variable, mode) {
 					return false
@@ -1586,8 +1586,8 @@ class ClassType extends Type {
 				}
 			}
 
-			var mut functionMode = MatchingMode::FunctionSignature + MatchingMode::Similar
-			functionMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
+			var mut functionMode = MatchingMode.FunctionSignature + MatchingMode.Similar
+			functionMode += MatchingMode.Renamed if mode ~~ MatchingMode.Renamed
 
 			for var methods, name of value._instanceMethods {
 				if @instanceMethods[name] is not Array {
@@ -1637,7 +1637,7 @@ class ClassType extends Type {
 	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
 	listAbstractMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
-		if scope == MatchingScope::Element {
+		if scope == MatchingScope.Element {
 			return @abstractMethods[name] ?? []
 		}
 
@@ -1690,7 +1690,7 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	listInstanceMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
-		if scope == MatchingScope::Element {
+		if scope == MatchingScope.Element {
 			return @instanceMethods[name] ?? []
 		}
 
@@ -1853,7 +1853,7 @@ class ClassType extends Type {
 
 		@extends.type().filterAbstractMethods(abstractMethods)
 
-		var mode = MatchingMode::Signature - MatchingMode::MissingParameterType
+		var mode = MatchingMode.Signature - MatchingMode.MissingParameterType
 
 		var matchables = []
 
@@ -1921,13 +1921,13 @@ class ClassType extends Type {
 	} # }}}
 	matchInstanceWith(object: ObjectType, matchables) { # {{{
 		for var property, name of object._properties {
-			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode::Signature) {
+			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode.Signature) {
 			}
 			else if @instanceMethods[name] is Array {
 				var mut nf = true
 
 				for method in @instanceMethods[name] while nf {
-					if method.isSubsetOf(property, MatchingMode::FunctionSignature) {
+					if method.isSubsetOf(property, MatchingMode.FunctionSignature) {
 						nf = false
 					}
 				}
@@ -2063,8 +2063,8 @@ class ClassType extends Type {
 		throw new NotImplementedException(node)
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if mode ~~ ExportMode::Export {
-			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin::ExternOrRequire | TypeOrigin::RequireOrExtern {
+		if mode ~~ ExportMode.Export {
+			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin.ExternOrRequire | TypeOrigin.RequireOrExtern {
 				var require = ClassType.getRequireReference(this)
 				var extern = ClassType.getExternReference(this)
 
@@ -2072,7 +2072,7 @@ class ClassType extends Type {
 					var referenceIndex = references.length + indexDelta
 
 					references.push({
-						originals: @origin ~~ TypeOrigin::ExternOrRequire ? [extern, require] : [require, extern]
+						originals: @origin ~~ TypeOrigin.ExternOrRequire ? [extern, require] : [require, extern]
 					})
 
 					@referenceIndex = referenceIndex
@@ -2092,7 +2092,7 @@ class ClassType extends Type {
 		return super(references, indexDelta, mode, module)
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if mode ~~ ExportMode::Alien {
+		if mode ~~ ExportMode.Alien {
 			if ?@minorOriginal {
 				return @minorOriginal.toReference(references, indexDelta, mode, module)
 			}
@@ -2100,7 +2100,7 @@ class ClassType extends Type {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
 		}
-		else if mode ~~ ExportMode::Requirement {
+		else if mode ~~ ExportMode.Requirement {
 			if ?@majorOriginal && !@isRequirement() {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}

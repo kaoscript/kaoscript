@@ -1,6 +1,6 @@
 class ClassVariableType extends Type {
 	private {
-		@access: Accessibility	= Accessibility::Public
+		@access: Accessibility	= Accessibility.Public
 		@default: Boolean		= false
 		@immutable: Boolean		= false
 		@lateInit: Boolean		= false
@@ -22,20 +22,20 @@ class ClassVariableType extends Type {
 			if ?data.modifiers {
 				for var modifier in data.modifiers {
 					match modifier.kind {
-						ModifierKind::Immutable {
+						ModifierKind.Immutable {
 							type._immutable = true
 						}
-						ModifierKind::Internal {
-							type.access(Accessibility::Internal)
+						ModifierKind.Internal {
+							type.access(Accessibility.Internal)
 						}
-						ModifierKind::LateInit {
+						ModifierKind.LateInit {
 							type._lateInit = true
 						}
-						ModifierKind::Private {
-							type.access(Accessibility::Private)
+						ModifierKind.Private {
+							type.access(Accessibility.Private)
 						}
-						ModifierKind::Protected {
-							type.access(Accessibility::Protected)
+						ModifierKind.Protected {
+							type.access(Accessibility.Protected)
 						}
 					}
 				}
@@ -88,8 +88,8 @@ class ClassVariableType extends Type {
 	isLateInit() => @lateInit
 	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
 	isSubsetOf(value: ClassVariableType, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode::Exact {
-			return @type.isSubsetOf(value.type(), MatchingMode::Exact)
+		if mode ~~ MatchingMode.Exact {
+			return @type.isSubsetOf(value.type(), MatchingMode.Exact)
 		}
 		else {
 			return true

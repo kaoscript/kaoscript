@@ -4,5 +4,5 @@ extern console: {
 
 import './import.enum.ks'
 
-console.log(Colour::Red)
-console.log(Colour::DarkGreen)
+console.log(Colour.Red)
+console.log(Colour.DarkGreen)

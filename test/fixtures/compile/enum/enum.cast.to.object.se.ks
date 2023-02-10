@@ -5,10 +5,10 @@ enum Color<String> {
 }
 
 var aliases: Object<String> = {
-	r: Color::Red
+	r: Color.Red
 }
 
 func foobar(x: String) {
-	if aliases[x] == Color::Red {
+	if aliases[x] == Color.Red {
 	}
 }

@@ -6,7 +6,7 @@ abstract class Callee {
 	}
 	constructor(@data) { # {{{
 		for var modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Nullable {
+			if modifier.kind == ModifierKind.Nullable {
 				@nullable = true
 			}
 		}

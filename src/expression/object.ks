@@ -8,7 +8,7 @@ class ObjectExpression extends Expression {
 		@varname: String			= 'o'
 	}
 	constructor(@data, @parent, @scope) { # {{{
-		super(data, parent, scope, ScopeType::Hollow)
+		super(data, parent, scope, ScopeType.Hollow)
 	} # }}}
 	analyse() { # {{{
 		var names = {}
@@ -17,9 +17,9 @@ class ObjectExpression extends Expression {
 			var late property
 
 			match data.kind {
-				NodeKind::ObjectMember {
+				NodeKind.ObjectMember {
 					match data.name.kind {
-						NodeKind::Identifier, NodeKind::Literal {
+						NodeKind.Identifier, NodeKind.Literal {
 							property = new ObjectLiteralMember(data, this)
 							property.analyse()
 
@@ -29,7 +29,7 @@ class ObjectExpression extends Expression {
 
 							names[property.reference()] = true
 						}
-						NodeKind::ThisExpression {
+						NodeKind.ThisExpression {
 							property = new ObjectThisMember(data, this)
 							property.analyse()
 
@@ -45,7 +45,7 @@ class ObjectExpression extends Expression {
 						}
 					}
 				}
-				NodeKind::RestrictiveExpression {
+				NodeKind.RestrictiveExpression {
 					property = new ObjectRestrictiveMember(data, this)
 					property.analyse()
 
@@ -57,9 +57,9 @@ class ObjectExpression extends Expression {
 						names[reference] = true
 					}
 				}
-				NodeKind::ShorthandProperty {
+				NodeKind.ShorthandProperty {
 					match data.name.kind {
-						NodeKind::Identifier {
+						NodeKind.Identifier {
 							property = new ObjectLiteralMember(data, this)
 							property.analyse()
 
@@ -69,7 +69,7 @@ class ObjectExpression extends Expression {
 
 							names[property.reference()] = true
 						}
-						NodeKind::ThisExpression {
+						NodeKind.ThisExpression {
 							property = new ObjectThisMember(data, this)
 							property.analyse()
 
@@ -84,7 +84,7 @@ class ObjectExpression extends Expression {
 						}
 					}
 				}
-				NodeKind::UnaryExpression {
+				NodeKind.UnaryExpression {
 					property = new ObjectSpreadMember(data, this)
 					property.analyse()
 				}
@@ -300,9 +300,9 @@ class ObjectComputedMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
+		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
-		if @data.name.kind == NodeKind::ComputedPropertyName {
+		if @data.name.kind == NodeKind.ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
 		}
 		else {
@@ -372,9 +372,9 @@ class ObjectLiteralMember extends Expression {
 		@type: Type
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
+		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
-		if @data.name.kind == NodeKind::Identifier	{
+		if @data.name.kind == NodeKind.Identifier	{
 			@name = new Literal(@data.name, this, @scope:Scope, @data.name.name)
 
 			this.reference('.' + @data.name.name)
@@ -387,14 +387,14 @@ class ObjectLiteralMember extends Expression {
 			this.reference('[' + $quote(@data.name.value) + ']')
 		}
 
-		if @data.kind == NodeKind::ObjectMember {
+		if @data.kind == NodeKind.ObjectMember {
 			@value = $compile.expression(@data.value, this)
 
-			@function = @data.value.kind == NodeKind::FunctionExpression
+			@function = @data.value.kind == NodeKind.FunctionExpression
 
 			@shorthand =
-				@data.name.kind == NodeKind::Identifier &&
-				@data.value.kind == NodeKind::Identifier &&
+				@data.name.kind == NodeKind.Identifier &&
+				@data.value.kind == NodeKind.Identifier &&
 				@data.name.name == @data.value.name
 		}
 		else {
@@ -458,15 +458,15 @@ class ObjectRestrictiveMember extends Expression {
 		@condition.analyse()
 
 		match @data.expression.kind {
-			NodeKind::ObjectMember {
+			NodeKind.ObjectMember {
 				match @data.expression.name.kind {
-					NodeKind::Identifier, NodeKind::Literal {
+					NodeKind.Identifier, NodeKind.Literal {
 						@property = new ObjectLiteralMember(@data.expression, this)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
-					NodeKind::ThisExpression {
+					NodeKind.ThisExpression {
 						@property = new ObjectThisMember(@data.expression, this)
 						@property.analyse()
 
@@ -478,15 +478,15 @@ class ObjectRestrictiveMember extends Expression {
 					}
 				}
 			}
-			NodeKind::ShorthandProperty {
+			NodeKind.ShorthandProperty {
 				match @data.expression.name.kind {
-					NodeKind::Identifier {
+					NodeKind.Identifier {
 						@property = new ObjectLiteralMember(@data.expression, this)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
-					NodeKind::ThisExpression {
+					NodeKind.ThisExpression {
 						@property = new ObjectThisMember(@data.expression, this)
 						@property.analyse()
 
@@ -497,7 +497,7 @@ class ObjectRestrictiveMember extends Expression {
 					}
 				}
 			}
-			NodeKind::UnaryExpression {
+			NodeKind.UnaryExpression {
 				@property = new ObjectSpreadMember(@data.expression, this)
 				@property.analyse()
 			}
@@ -507,7 +507,7 @@ class ObjectRestrictiveMember extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode::Permissive)
+		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
 		@property.prepare(target, targetMode)
 	} # }}}
@@ -519,7 +519,7 @@ class ObjectRestrictiveMember extends Expression {
 	toFragments(fragments, mode) { # {{{
 		var ctrl = fragments.newControl()
 
-		if @data.operator.kind == RestrictiveOperatorKind::If {
+		if @data.operator.kind == RestrictiveOperatorKind.If {
 			ctrl.code('if(')
 
 			ctrl.compileCondition(@condition)
@@ -542,7 +542,7 @@ class ObjectSpreadMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property, @file())
+		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()

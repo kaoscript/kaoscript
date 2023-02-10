@@ -14,78 +14,78 @@ bitmask AnimalFlags<u8> {
 func foobar(x: Number) {
 }
 
-foobar(AnimalFlags::Predator)
+foobar(AnimalFlags.Predator)
 
 func printAnimalAbilities(abilities: AnimalFlags) {
-	if abilities ~~ AnimalFlags::HasClaws {
+	if abilities ~~ AnimalFlags.HasClaws {
 		console.log('animal has claws')
 	}
 
-	if abilities ~~ AnimalFlags::CanFly {
+	if abilities ~~ AnimalFlags.CanFly {
 		console.log('animal can fly')
 	}
 
-	if abilities == AnimalFlags::None {
+	if abilities == AnimalFlags.None {
 		console.log('nothing')
 	}
 }
 
-var mut abilities = AnimalFlags::None
+var mut abilities = AnimalFlags.None
 
 printAnimalAbilities(abilities)
 
-abilities += AnimalFlags::HasClaws
+abilities += AnimalFlags.HasClaws
 
 printAnimalAbilities(abilities)
 
-abilities -= AnimalFlags::HasClaws
+abilities -= AnimalFlags.HasClaws
 printAnimalAbilities(abilities)
 
-abilities += AnimalFlags::HasClaws + AnimalFlags::CanFly
+abilities += AnimalFlags.HasClaws + AnimalFlags.CanFly
 printAnimalAbilities(abilities)
 
-abilities += AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+abilities += AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered
 printAnimalAbilities(abilities)
 
-abilities -= AnimalFlags::HasClaws - AnimalFlags::CanFly
+abilities -= AnimalFlags.HasClaws - AnimalFlags.CanFly
 printAnimalAbilities(abilities)
 
-abilities -= AnimalFlags::HasClaws - AnimalFlags::CanFly - AnimalFlags::Endangered
+abilities -= AnimalFlags.HasClaws - AnimalFlags.CanFly - AnimalFlags.Endangered
 printAnimalAbilities(abilities)
 
-printAnimalAbilities(AnimalFlags::HasClaws + AnimalFlags::CanFly)
+printAnimalAbilities(AnimalFlags.HasClaws + AnimalFlags.CanFly)
 
-printAnimalAbilities(AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered)
+printAnimalAbilities(AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered)
 
-printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags::HasClaws)
+printAnimalAbilities(AnimalFlags.EndangeredFlyingClawedFishEating - AnimalFlags.HasClaws)
 
-printAnimalAbilities(AnimalFlags::EndangeredFlyingClawedFishEating - AnimalFlags::HasClaws - AnimalFlags::CanFly)
+printAnimalAbilities(AnimalFlags.EndangeredFlyingClawedFishEating - AnimalFlags.HasClaws - AnimalFlags.CanFly)
 
 func quxbaz(x) {
 	var late abex
 	if x {
-		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+		abex = AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered
 	}
 	else {
-		abex = AnimalFlags::HasClaws + AnimalFlags::CanFly
+		abex = AnimalFlags.HasClaws + AnimalFlags.CanFly
 	}
 
 	var late abey: AnimalFlags
 	if x {
-		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+		abey = AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered
 	}
 	else {
-		abey = AnimalFlags::HasClaws + AnimalFlags::CanFly
+		abey = AnimalFlags.HasClaws + AnimalFlags.CanFly
 	}
 
 	var late abez: Number
 	if x {
-		abez = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+		abez = AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered
 	}
 	else {
-		abez = AnimalFlags::HasClaws + AnimalFlags::CanFly
+		abez = AnimalFlags.HasClaws + AnimalFlags.CanFly
 	}
 }
 
-var abyx = AnimalFlags::HasClaws + AnimalFlags::CanFly
-var abyy = AnimalFlags::HasClaws + AnimalFlags::CanFly + AnimalFlags::Endangered
+var abyx = AnimalFlags.HasClaws + AnimalFlags.CanFly
+var abyy = AnimalFlags.HasClaws + AnimalFlags.CanFly + AnimalFlags.Endangered

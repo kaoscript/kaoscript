@@ -184,7 +184,7 @@ namespace Fragment {
 				var column = tree.columns[tree.order[0]]
 
 				if isNeedingTestings(column) {
-					useAllArgs = toTreeFragments(buildPath, args, tree, column, false, helper, fragments, 0, 1, Junction::NONE, continuous, -1, tree.min, node)
+					useAllArgs = toTreeFragments(buildPath, args, tree, column, false, helper, fragments, 0, 1, Junction.NONE, continuous, -1, tree.min, node)
 				}
 				else {
 					toCallFragments(buildPath, args, tree, column, fragments, node)
@@ -198,7 +198,7 @@ namespace Fragment {
 				for var key, index in tree.order {
 					var column = tree.columns[key]
 
-					useAllArgs = toTreeFragments(buildPath, args, tree, column, anyTested, helper, fragments, index, tree.order.length, Junction::NONE, hasAlternative(tree, index), -1, tree.min, node)
+					useAllArgs = toTreeFragments(buildPath, args, tree, column, anyTested, helper, fragments, index, tree.order.length, Junction.NONE, hasAlternative(tree, index), -1, tree.min, node)
 
 					if !anyTested && column.type.isAny() {
 						anyTested = true
@@ -490,12 +490,12 @@ namespace Fragment {
 				useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, builder, 0, branch.order.length, junction, true, startIndex, min - branch.min, node)
 			}
 			else {
-				if junction == Junction::AND {
+				if junction == Junction.AND {
 					builder.code(')').step()
 				}
 
 				for var key, index in branch.order {
-					useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], false, helper, builder, index, branch.order.length, Junction::NONE, true, startIndex, min - branch.min, node)
+					useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], false, helper, builder, index, branch.order.length, Junction.NONE, true, startIndex, min - branch.min, node)
 				}
 			}
 		}
@@ -503,7 +503,7 @@ namespace Fragment {
 			var late fragments: BlockBuilder | ControlBuilder
 			var mut shouldClose = false
 
-			if junction == Junction::AND {
+			if junction == Junction.AND {
 				fragments = builder
 				fragments.code(' && ')
 			}
@@ -582,7 +582,7 @@ namespace Fragment {
 
 			if isUsingTestings(branch, startIndex) {
 				if nIndex + 1 == nLength && branch.order.length == 1 {
-					toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction::AND, alternative, startIndex, min - branch.min, node)
+					toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction.AND, alternative, startIndex, min - branch.min, node)
 				}
 				else {
 					fragments.code(')').step()
@@ -591,7 +591,7 @@ namespace Fragment {
 					var mut nullTested = false
 
 					for var key, index in branch.order {
-						useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], nullTested, helper, fragments, index, branch.order.length, Junction::NONE, alternative || hasAlternative(branch, index), startIndex, min - branch.min, node)
+						useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[key], nullTested, helper, fragments, index, branch.order.length, Junction.NONE, alternative || hasAlternative(branch, index), startIndex, min - branch.min, node)
 
 						if !nullTested && branch.columns[key].type.isNull() {
 							nullTested = true
@@ -606,7 +606,7 @@ namespace Fragment {
 			else {
 				fragments.code(')').step()
 
-				var useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction::NONE, alternative || hasAlternative(branch, 0), startIndex, min - branch.min, node)
+				var useAllArgs = toTreeFragments(buildPath, args, tree, branch.columns[branch.order[0]], false, helper, fragments, 0, 1, Junction.NONE, alternative || hasAlternative(branch, 0), startIndex, min - branch.min, node)
 
 				if !alternative && !useAllArgs {
 					fragments.line(`throw \($runtime.helper(node)).badArgs()`)
@@ -645,7 +645,7 @@ namespace Fragment {
 			var late fragments: BlockBuilder | ControlBuilder
 			var mut shouldClose = false
 
-			if junction == Junction::AND {
+			if junction == Junction.AND {
 				fragments = builder
 				fragments.code(' && ')
 			}

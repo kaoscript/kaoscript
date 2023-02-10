@@ -31,7 +31,7 @@ class MatchExpression extends Expression {
 		if ?@data.declaration {
 			@hasDeclaration = true
 
-			@bindingScope = @newScope(@scope!?, ScopeType::Bleeding)
+			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
 			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, false)
 			@declaration.initiate()
@@ -59,7 +59,7 @@ class MatchExpression extends Expression {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: @newScope(@bindingScope, ScopeType::InlineBlock)
+				scope: @newScope(@bindingScope, ScopeType.InlineBlock)
 			}
 
 			@clauses.push(clause)
@@ -88,7 +88,7 @@ class MatchExpression extends Expression {
 
 			clause.filter = filter
 
-			if data.body.kind == NodeKind::Block {
+			if data.body.kind == NodeKind.Block {
 				clause.body = $compile.block(data.body, this, clause.scope)
 			}
 			else {

@@ -35,7 +35,7 @@ class EnumMethodCallee extends Callee {
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
+		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind.This))
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
@@ -61,13 +61,13 @@ class EnumMethodCallee extends Callee {
 		}
 		else {
 			match @scope {
-				ScopeKind::Argument {
+				ScopeKind.Argument {
 					NotImplementedException.throw(node)
 				}
-				ScopeKind::Null {
+				ScopeKind.Null {
 					NotImplementedException.throw(node)
 				}
-				ScopeKind::This {
+				ScopeKind.This {
 					fragments.code(`\(@enum.name()).\(@methodName)(`)
 
 					fragments.wrap(@expression._object, mode)

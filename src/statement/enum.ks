@@ -14,7 +14,7 @@ class EnumDeclaration extends Statement {
 		var type = Type.fromAST(@data.type, this)
 
 		if type.isString() {
-			@enum = new EnumType(@scope, EnumTypeKind::String)
+			@enum = new EnumType(@scope, EnumTypeKind.String)
 		}
 		else {
 			@enum = new EnumType(@scope)
@@ -27,18 +27,18 @@ class EnumDeclaration extends Statement {
 	analyse() { # {{{
 		for var data in @data.members {
 			match data.kind {
-				NodeKind::CommentBlock {
+				NodeKind.CommentBlock {
 					pass
 				}
-				NodeKind::CommentLine {
+				NodeKind.CommentLine {
 					pass
 				}
-				NodeKind::FieldDeclaration {
+				NodeKind.FieldDeclaration {
 					var declaration = new EnumVariableDeclaration(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind::MethodDeclaration {
+				NodeKind.MethodDeclaration {
 					var declaration = new EnumMethodDeclaration(data, this)
 
 					declaration.analyse()
@@ -72,7 +72,7 @@ class EnumDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @enum.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @enum.hasMatchingInstanceMethod(name, method.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -93,7 +93,7 @@ class EnumDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @enum.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @enum.hasMatchingStaticMethod(name, method.type(), MatchingMode.ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -157,7 +157,7 @@ class EnumDeclaration extends Statement {
 			var types = []
 
 			for var method in methods {
-				method.toFragments(fragments, Mode::None)
+				method.toFragments(fragments, Mode.None)
 
 				types.push(method.type())
 			}
@@ -189,7 +189,7 @@ class EnumDeclaration extends Statement {
 			var types = []
 
 			for var method in methods {
-				method.toFragments(fragments, Mode::None)
+				method.toFragments(fragments, Mode.None)
 
 				types.push(method.type())
 			}
@@ -242,22 +242,22 @@ class EnumVariableDeclaration extends AbstractNode {
 		var value = @data.value
 
 		match enum.kind() {
-			EnumTypeKind::Bit {
+			EnumTypeKind.Bit {
 				var length = enum.length()
 
 				if ?value {
-					if value.kind == NodeKind::BinaryExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
+					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
 						@composite = true
 
 						@operands = [value.left, value.right]
 					}
-					else if value.kind == NodeKind::PolyadicExpression && value.operator.kind == BinaryOperatorKind::Or | BinaryOperatorKind::Addition {
+					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
 						@composite = true
 
 						@operands = value.operands
 					}
 					else {
-						if value.kind == NodeKind::NumericExpression {
+						if value.kind == NodeKind.NumericExpression {
 							if value.value > length {
 								SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
 							}
@@ -281,9 +281,9 @@ class EnumVariableDeclaration extends AbstractNode {
 
 				@type = @scope.reference('Number')
 			}
-			EnumTypeKind::String {
+			EnumTypeKind.String {
 				if ?value {
-					if value.kind == NodeKind::Literal {
+					if value.kind == NodeKind.Literal {
 						@value = $quote(value.value)
 					}
 					else {
@@ -296,9 +296,9 @@ class EnumVariableDeclaration extends AbstractNode {
 
 				@type = @scope.reference('String')
 			}
-			EnumTypeKind::Number {
+			EnumTypeKind.Number {
 				if ?value {
-					if value.kind == NodeKind::NumericExpression {
+					if value.kind == NodeKind.NumericExpression {
 						@value = `\(enum.index(value.value))`
 					}
 					else {
@@ -354,12 +354,12 @@ class EnumMethodDeclaration extends Statement {
 		@topNodes: Array				= []
 	}
 	constructor(data, parent) { # {{{
-		super(data, parent, @newScope(parent.scope(), ScopeType::Function))
+		super(data, parent, @newScope(parent.scope(), ScopeType.Function))
 
 		@name = data.name.name
 
 		for var modifier in data.modifiers {
-			if modifier.kind == ModifierKind::Static {
+			if modifier.kind == ModifierKind.Static {
 				@instance = false
 			}
 		}
@@ -499,7 +499,7 @@ class EnumMethodDeclaration extends Statement {
 			ctrl.code('that')
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, node => node.code(')').step())
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, node => node.code(')').step())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(ctrl)

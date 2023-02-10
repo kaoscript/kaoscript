@@ -189,7 +189,7 @@ abstract class Importer extends Statement {
 					}
 
 					var type = @worker.getType(name)
-					if ?def.type && !type.isSubsetOf(def.type, MatchingMode::Signature) {
+					if ?def.type && !type.isSubsetOf(def.type, MatchingMode.Signature) {
 						TypeException.throwNotCompatibleDefinition(def.internal, name, @data.source.value, this)
 					}
 
@@ -199,7 +199,7 @@ abstract class Importer extends Statement {
 					else if !variable.isPredefined() && @arguments.fromLocal[def.internal] is not Number {
 						ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
 					}
-					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode::Signature + MatchingMode::Renamed) {
+					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode.Signature + MatchingMode.Renamed) {
 						var alien = variable.getDeclaredType().isAlien()
 
 						variable.setDeclaredType(type ?? def.type)
@@ -292,7 +292,7 @@ abstract class Importer extends Statement {
 		}
 
 		for var modifer in data.modifiers {
-			if modifer.kind == ModifierKind::Required {
+			if modifer.kind == ModifierKind.Required {
 				argument.required = true
 
 				break
@@ -313,7 +313,7 @@ abstract class Importer extends Statement {
 			arguments.fromLocal[data.value.name] = arguments.values.length
 			arguments.toImport[argument.name] = arguments.values.length
 		}
-		else if data.value.kind == NodeKind::Identifier {
+		else if data.value.kind == NodeKind.Identifier {
 
 			argument.isNamed = true
 			argument.name = data.name?.name ?? data.value.name
@@ -408,7 +408,7 @@ abstract class Importer extends Statement {
 							@addArgument({
 								modifiers: []
 								value: {
-									kind: NodeKind::Identifier
+									kind: NodeKind.Identifier
 									name: name
 								}
 							}, true, arguments)
@@ -428,7 +428,7 @@ abstract class Importer extends Statement {
 					@addArgument({
 						modifiers: []
 						value: {
-							kind: NodeKind::Identifier
+							kind: NodeKind.Identifier
 							name: name
 						}
 					}, true, arguments)
@@ -519,7 +519,7 @@ abstract class Importer extends Statement {
 		for var argument, index in [...arguments.values] when !argument.required {
 			var variable = @scope.getVariable(argument.identifier)
 
-			if variable.getRealType().isSubsetOf(argument.type, MatchingMode::Signature) {
+			if variable.getRealType().isSubsetOf(argument.type, MatchingMode.Signature) {
 				argument.type = variable.getRealType()
 			}
 			else if argument.isAutofill {
@@ -615,7 +615,7 @@ abstract class Importer extends Statement {
 		@moduleName = moduleName
 
 		for var modifer in @data.modifiers until @autofill {
-			if modifer.kind == ModifierKind::Autofill {
+			if modifer.kind == ModifierKind.Autofill {
 				@autofill = true
 			}
 		}
@@ -647,15 +647,15 @@ abstract class Importer extends Statement {
 		else {
 			for var data in @data.specifiers {
 				match data.kind {
-					NodeKind::GroupSpecifier {
+					NodeKind.GroupSpecifier {
 						var mut alias = false
 						var mut exclusion = false
 
 						for var modifier in data.modifiers {
-							if modifier.kind == ModifierKind::Alias {
+							if modifier.kind == ModifierKind.Alias {
 								alias = true
 							}
-							else if modifier.kind == ModifierKind::Exclusion {
+							else if modifier.kind == ModifierKind.Exclusion {
 								exclusion = true
 							}
 						}
@@ -663,16 +663,16 @@ abstract class Importer extends Statement {
 						if alias {
 							for var data in data.elements {
 								match data.kind {
-									NodeKind::NamedSpecifier {
+									NodeKind.NamedSpecifier {
 										match data.internal.kind {
-											NodeKind::Identifier {
+											NodeKind.Identifier {
 												if ?@alias {
 													throw new NotSupportedException(this)
 												}
 
 												@alias = data.internal.name
 											}
-											NodeKind::ObjectBinding {
+											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
 													var internal = data.name.name
 
@@ -711,7 +711,7 @@ abstract class Importer extends Statement {
 						else {
 							for var data in data.elements {
 								match data.kind {
-									NodeKind::NamedSpecifier {
+									NodeKind.NamedSpecifier {
 										var internal = data.internal.name
 										var external = ?data.external ? data.external.name : internal
 
@@ -724,8 +724,8 @@ abstract class Importer extends Statement {
 											@addImport(external, internal, false)
 										}
 									}
-									NodeKind::TypedSpecifier {
-										if data.type.kind == NodeKind::TypeAliasDeclaration {
+									NodeKind.TypedSpecifier {
+										if data.type.kind == NodeKind.TypeAliasDeclaration {
 											var name = data.type.name.name
 											var type = Type.fromAST(data.type.type, this)
 
@@ -739,7 +739,7 @@ abstract class Importer extends Statement {
 							}
 						}
 					}
-					NodeKind::NamedSpecifier {
+					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = ?data.external ? data.external.name : internal
 
@@ -909,14 +909,14 @@ abstract class Importer extends Statement {
 		else {
 			for var data in @data.specifiers {
 				match data.kind {
-					NodeKind::GroupSpecifier {
+					NodeKind.GroupSpecifier {
 						var mut alias = false
 
 						for var modifier in data.modifiers {
-							if modifier.kind == ModifierKind::Alias {
+							if modifier.kind == ModifierKind.Alias {
 								alias = true
 							}
-							else if modifier.kind == ModifierKind::Exclusion {
+							else if modifier.kind == ModifierKind.Exclusion {
 								NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
 							}
 						}
@@ -924,9 +924,9 @@ abstract class Importer extends Statement {
 						if #data.elements {
 							for var data in data.elements {
 								match data.kind {
-									NodeKind::NamedSpecifier {
+									NodeKind.NamedSpecifier {
 										match data.internal.kind {
-											NodeKind::Identifier {
+											NodeKind.Identifier {
 												var internal = data.internal.name
 												var external = ?data.external ? data.external.name : internal
 
@@ -939,7 +939,7 @@ abstract class Importer extends Statement {
 													@addVariable(external, internal, true, null)
 												}
 											}
-											NodeKind::ObjectBinding {
+											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
 													var internal = data.name.name
 
@@ -966,7 +966,7 @@ abstract class Importer extends Statement {
 							throw new NotImplementedException()
 						}
 					}
-					NodeKind::NamedSpecifier {
+					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = ?data.external ? data.external.name : internal
 
@@ -1346,7 +1346,7 @@ abstract class Importer extends Statement {
 		if required {
 			SyntaxException.throwMissingRequirement(name, this)
 		}
-		else if @mode() == ImportMode::Import && required is Number {
+		else if @mode() == ImportMode.Import && required is Number {
 			for var i from 0 to~ metadata.aliens.length step 3 {
 				if metadata.aliens[i] == required {
 					metadata.aliens[i + 2] = true
@@ -1393,7 +1393,7 @@ class ImportDeclaration extends Statement {
 
 class ImportDeclarator extends Importer {
 	flagForcefullyRebinded()
-	override mode() => ImportMode::Import
+	override mode() => ImportMode.Import
 	toStatementFragments(fragments, mode) { # {{{
 		@toImportFragments(fragments)
 	} # }}}
@@ -1434,10 +1434,10 @@ class ImportWorker {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin::Extern + TypeOrigin::Import)
+					type.origin(origin:TypeOrigin + TypeOrigin.Extern + TypeOrigin.Import)
 				}
 				else {
-					type.origin(TypeOrigin::Extern + TypeOrigin::Import)
+					type.origin(TypeOrigin.Extern + TypeOrigin.Import)
 				}
 			}
 			else {
@@ -1470,7 +1470,7 @@ class ImportWorker {
 			var newType = oldAliens[index + 1]
 			var oldType = oldAliens[index + 1]
 
-			if !oldType.isSubsetOf(newType, MatchingMode::Signature) {
+			if !oldType.isSubsetOf(newType, MatchingMode.Signature) {
 				TypeException.throwNotCompatibleAlien(name, @node.data().source.value, @node)
 			}
 		}
@@ -1497,7 +1497,7 @@ class ImportWorker {
 				if var index ?= arguments.toImport[name] {
 					var argument = arguments.values[index]
 
-					if !argument.required && !type.isAny() && !argument.type.isSubsetOf(type, MatchingMode::Signature) {
+					if !argument.required && !type.isAny() && !argument.type.isSubsetOf(type, MatchingMode.Signature) {
 						if argument.isAutofill {
 							argument.isApproved = false
 						}
@@ -1521,7 +1521,7 @@ class ImportWorker {
 						}
 
 						if var type ?= references[reqIndex] {
-							if !argument.type.isSubsetOf(type, MatchingMode::Signature) {
+							if !argument.type.isSubsetOf(type, MatchingMode.Signature) {
 								TypeException.throwNotCompatibleAlien(name, @node.data().source.value, @node)
 							}
 						}
@@ -1547,17 +1547,17 @@ class ImportWorker {
 			if !?references[index] {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
 
-				type.origin(TypeOrigin::Require)
+				type.origin(TypeOrigin.Require)
 			}
 			else {
 				type = references[index]
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin::Require)
+					type.origin(origin:TypeOrigin + TypeOrigin.Require)
 				}
 				else {
-					type.origin(TypeOrigin::Require + TypeOrigin::Import)
+					type.origin(TypeOrigin.Require + TypeOrigin.Import)
 				}
 			}
 

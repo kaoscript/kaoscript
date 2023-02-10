@@ -18,7 +18,7 @@ describe('color.operation', func() {
 	}) # }}}
 
 	it('blend(#ff0, blue, 0.5, rgb)', func() { # {{{
-		var c = new Color('#ff0').blend(Color.from('blue')!!, 0.5, Space::RGB)
+		var c = new Color('#ff0').blend(Color.from('blue')!!, 0.5, Space.RGB)
 
 		expect(c.hex()).to.equal('#808080')
 	}) # }}}

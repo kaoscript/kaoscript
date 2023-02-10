@@ -56,6 +56,6 @@ func contains(e1: Foobar, e2: Foobar) {
 	return e1 ~~ e2
 }
 
-expect(contains(Foobar::e42 + Foobar::e08, Foobar::e42)).to.equal(true)
-expect(contains(Foobar::e42 + Foobar::e08, Foobar::e08)).to.equal(true)
-expect(contains(Foobar::e42 + Foobar::e08, Foobar::e10)).to.equal(false)
+expect(contains(Foobar.e42 + Foobar.e08, Foobar.e42)).to.equal(true)
+expect(contains(Foobar.e42 + Foobar.e08, Foobar.e08)).to.equal(true)
+expect(contains(Foobar.e42 + Foobar.e08, Foobar.e10)).to.equal(false)
