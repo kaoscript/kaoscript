@@ -21,6 +21,8 @@ class Block extends AbstractNode {
 		@offset = @scope.getLineOffset()
 	} # }}}
 	analyse() { # {{{
+		@scope.setLineOffset(@offset)
+
 		for var data in @data.statements {
 			@scope.line(data.start.line)
 
