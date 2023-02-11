@@ -8,14 +8,14 @@ enum MacroVariableKind {
 var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
 func $autoEvaluate(macro, node, data) { # {{{
-	return $evaluate(Generator.generate(data, {
+	return $evaluate($compileMacro(Generator.generate(data, {
 		transformers: {
 			expression: $transformExpression^^(macro, node)
 		}
-	}))
+	})))
 } # }}}
 
-func $evaluate(source: String, standardLibrary: Boolean = false): Function { # {{{
+func $compileMacro(source: String, standardLibrary: Boolean = false): String { # {{{
 	// console.log('--> ', source)
 
 	var compiler = new Compiler('__ks__', {
@@ -30,7 +30,11 @@ func $evaluate(source: String, standardLibrary: Boolean = false): Function { # {
 	compiler.compile('extern console, JSON\nrequire __ks_marker\nreturn ' + source)
 	// console.log('=- ', compiler.toSource())
 
-	return eval(compiler.toSource())(MacroMarker)
+	return compiler.toSource()
+} # }}}
+
+func $evaluate(source: String): Function { # {{{
+	return eval(source)(MacroMarker)
 } # }}}
 
 func $generate(macro, node, data) { # {{{
@@ -228,6 +232,7 @@ class MacroDeclaration extends AbstractNode {
 		@name: String
 		@parameters: Object						= {}
 		@referenceIndex: Number					= -1
+		@source: String?
 		@standardLibrary: Boolean
 		@type: MacroType
 	}
@@ -247,64 +252,71 @@ class MacroDeclaration extends AbstractNode {
 	} # }}}
 	analyse()
 	private buildFunction() { # {{{
-		var builder = new Generator.KSWriter({
-			filters: {
-				expression: this.filter^@(false)
-				statement: this.filter^@(true)
-			}
-		})
+		if ?@data.source {
+			@source = @data.source
+		}
+		else {
+			var builder = new Generator.KSWriter({
+				filters: {
+					expression: this.filter^@(false)
+					statement: this.filter^@(true)
+				}
+			})
 
-		var line = builder.newLine().code('func(__ks_auto, __ks_reificate')
+			var line = builder.newLine().code('func(__ks_auto, __ks_reificate')
 
-		for var data in @data.parameters {
-			var mut auto = false
-			var mut rest = false
+			for var data in @data.parameters {
+				var mut auto = false
+				var mut rest = false
 
-			for var modifier in data.modifiers until auto {
-				match modifier.kind {
-					ModifierKind.AutoEvaluate {
-						auto = true
+				for var modifier in data.modifiers until auto {
+					match modifier.kind {
+						ModifierKind.AutoEvaluate {
+							auto = true
+						}
+						ModifierKind.Rest {
+							rest = true
+						}
 					}
-					ModifierKind.Rest {
-						rest = true
-					}
+				}
+
+				@parameters[data.internal.name] = auto ? MacroVariableKind.AutoEvaluated : MacroVariableKind.AST
+
+				line.code(`,\(auto ? ' mut' : '')\(rest ? ' ...' : '') \(data.internal.name)`)
+
+				if ?data.defaultValue {
+					line.code(' = ').expression(data.defaultValue)
 				}
 			}
 
-			@parameters[data.internal.name] = auto ? MacroVariableKind.AutoEvaluated : MacroVariableKind.AST
+			var block = line.code(')').newBlock()
 
-			line.code(`,\(auto ? ' mut' : '')\(rest ? ' ...' : '') \(data.internal.name)`)
-
-			if ?data.defaultValue {
-				line.code(' = ').expression(data.defaultValue)
+			for var kind, name of @parameters {
+				if kind == MacroVariableKind.AutoEvaluated {
+					block.line(`\(name) = __ks_auto(\(name))`)
+				}
 			}
-		}
 
-		var block = line.code(')').newBlock()
+			block.line('var mut __ks_src = ""')
 
-		for var kind, name of @parameters {
-			if kind == MacroVariableKind.AutoEvaluated {
-				block.line(`\(name) = __ks_auto(\(name))`)
+			for var statement in $ast.block(@data.body).statements {
+				block.statement(statement)
 			}
+
+			block.line('return __ks_src').done()
+
+			line.done()
+
+			var mut source = ''
+
+			for var fragment in builder.toArray() {
+				source += fragment.code
+			}
+
+			@source = $compileMacro(source, @standardLibrary)
 		}
 
-		block.line('var mut __ks_src = ""')
-
-		for var statement in $ast.block(@data.body).statements {
-			block.statement(statement)
-		}
-
-		block.line('return __ks_src').done()
-
-		line.done()
-
-		var mut source = ''
-
-		for var fragment in builder.toArray() {
-			source += fragment.code
-		}
-
-		@fn = $evaluate(source, @standardLibrary)
+		@fn = $evaluate(@source)
 	} # }}}
 	override prepare(target, targetMode)
 	prepare(target: Type, index: Number, length: Number)
@@ -431,10 +443,16 @@ class MacroDeclaration extends AbstractNode {
 	name() => @name
 	statement() => this
 	toFragments(fragments, mode)
-	toMetadata() => Buffer.from(JSON.stringify({
-		parameters: @data.parameters
-		body: @data.body
-	})).toString('base64')
+	toMetadata() { # {{{
+		if !?@source {
+			@buildFunction()
+		}
+
+		return Buffer.from(JSON.stringify({
+			parameters: @data.parameters
+			@source
+		})).toString('base64')
+	} # }}}
 	type() => @type
 }
 

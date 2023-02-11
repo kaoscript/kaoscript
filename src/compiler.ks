@@ -32,6 +32,8 @@ include {
 	'./include/global'
 	'./include/node'
 	'./include/astmap'
+
+	'./std/index'
 }
 
 export class Compiler {
