@@ -10,13 +10,11 @@ class ClassVariableType extends Type {
 		fromAST(data, node: AbstractNode): ClassVariableType { # {{{
 			var scope = node.scope()
 
-			var mut type: ClassVariableType
-
-			if ?data.type {
-				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
+			var type = if ?data.type {
+				pick new ClassVariableType(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				type = new ClassVariableType(scope, AnyType.NullableUnexplicit)
+				pick new ClassVariableType(scope, AnyType.NullableUnexplicit)
 			}
 
 			if ?data.modifiers {

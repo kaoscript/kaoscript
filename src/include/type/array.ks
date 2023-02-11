@@ -226,6 +226,7 @@ class ArrayType extends Type {
 		return false
 	} # }}}
 	isComplete() => true
+	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Array').isExhaustive()
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false
 	isIterable() => true

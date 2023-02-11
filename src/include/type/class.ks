@@ -1051,7 +1051,7 @@ class ClassType extends Type {
 
 		for method in @constructors {
 			if method.isSubsetOf(type, mode) {
-				return method
+				result.push(method)
 			}
 		}
 

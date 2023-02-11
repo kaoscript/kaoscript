@@ -252,7 +252,7 @@ class MemberExpression extends Expression {
 
 					return true
 				}
-				else if type.isExhaustive(this) {
+				else {
 					if @assignable {
 						ReferenceException.throwInvalidAssignment(this)
 					}
@@ -443,7 +443,7 @@ class MemberExpression extends Expression {
 
 					return true
 				}
-				else if type.isExhaustive(this) {
+				else if @property is NumberLiteral || type.isExhaustive(this) {
 					if @assignable {
 						ReferenceException.throwInvalidAssignment(this)
 					}

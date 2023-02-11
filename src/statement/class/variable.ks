@@ -112,10 +112,10 @@ class ClassVariableDeclaration extends AbstractNode {
 					@type.type(AnyType.NullableUnexplicit)
 				}
 				else if @nullable && !type.isNullable() {
-					@type.type(type.setNullable(true))
+					@type.type(type.setNullable(true).unspecify())
 				}
 				else {
-					@type.type(type)
+					@type.type(type.unspecify())
 				}
 			}
 

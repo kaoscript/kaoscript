@@ -137,10 +137,13 @@ class IdentifierLiteral extends Literal {
 			if variable.isLateInit() {
 				node.initializeVariable(VariableBrief(
 					name: @value
-					type
+					type: type.unspecify()
 					immutable: true
 					lateInit: true
 				))
+			}
+			else {
+				variable.flagMutating()
 			}
 		}
 	} # }}}

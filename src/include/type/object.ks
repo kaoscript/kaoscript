@@ -257,6 +257,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
+	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
