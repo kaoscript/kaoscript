@@ -1084,7 +1084,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	reset(): this { # {{{
-		delete @type
+		drop @type
 		@nullable = @explicitlyNull
 		@predefined = false
 	} # }}}

@@ -2,6 +2,6 @@ extern console
 
 var dyn foo = 'bar'
 
-delete foo
+drop foo
 
 console.log(foo)

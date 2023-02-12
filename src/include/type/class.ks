@@ -994,7 +994,7 @@ class ClassType extends Type {
 			}
 
 			if methods.length == 0 {
-				delete abstractMethods[name]
+				drop abstractMethods[name]
 			}
 		}
 	} # }}}
@@ -1865,7 +1865,7 @@ class ClassType extends Type {
 			}
 
 			if methods.length == 0 {
-				delete abstractMethods[name]
+				drop abstractMethods[name]
 			}
 		}
 

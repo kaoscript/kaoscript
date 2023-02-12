@@ -370,7 +370,7 @@ namespace Router {
 					namedCount += 1
 
 					if ?shorthands[name] {
-						delete shorthands[name]
+						drop shorthands[name]
 
 						shortCount -= 1
 					}
@@ -395,7 +395,7 @@ namespace Router {
 								strict: false
 							))
 
-							delete shorthands[name]
+							drop shorthands[name]
 
 							shortCount -= 1
 						}

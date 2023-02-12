@@ -1,4 +1,4 @@
-class DestroyStatement extends Statement {
+class DropStatement extends Statement {
 	private late {
 		@expression
 		@identifier: Boolean		= false

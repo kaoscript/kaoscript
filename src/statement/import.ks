@@ -525,8 +525,8 @@ abstract class Importer extends Statement {
 			else if argument.isAutofill {
 				arguments.values.splice(index, 1)
 
-				delete arguments.fromLocal[argument.identifier]
-				delete arguments.toImport[argument.name]
+				drop arguments.fromLocal[argument.identifier]
+				drop arguments.toImport[argument.name]
 			}
 			else {
 				TypeException.throwNotCompatibleArgument(argument.identifier, argument.name, @data.source.value, this)

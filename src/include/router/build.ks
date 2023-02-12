@@ -1082,7 +1082,7 @@ namespace Build {
 
 						branch.order.remove(key)
 
-						delete branch.columns[key]
+						drop branch.columns[key]
 					}
 
 					main.type = Type.union(scope, ...types).sort()
@@ -1182,7 +1182,7 @@ namespace Build {
 
 						applyMin2(branch, mins, type)
 
-						delete branch.columns[type]
+						drop branch.columns[type]
 
 						branch.order.remove(type)
 					}
@@ -1194,7 +1194,7 @@ namespace Build {
 							column2.min = Math.max(0, column2.min - column.min)
 							column2.variadic = true
 
-							delete branch.columns[type]
+							drop branch.columns[type]
 
 							branch.order.remove(type)
 						}
@@ -1213,7 +1213,7 @@ namespace Build {
 						for var col, type of column.columns {
 							col.max = branch.columns[type].max
 
-							delete branch.columns[type]
+							drop branch.columns[type]
 
 							branch.order.remove(type)
 						}
@@ -1250,7 +1250,7 @@ namespace Build {
 					return
 				}
 
-				delete branch.columns[type]
+				drop branch.columns[type]
 
 				branch.rest = node.rest
 				branch.variadic = node.variadic
@@ -1282,7 +1282,7 @@ namespace Build {
 						if ?groups[index + 1] {
 							groups[index] = groups[index + 1]
 
-							delete groups[index + 1]
+							drop groups[index + 1]
 
 							groups[index].unshift(type)
 						}
@@ -1301,7 +1301,7 @@ namespace Build {
 						var type = Type.union(scope, ...[branch.columns[key].type for var key in group]).sort()
 
 						for var key in group {
-							delete branch.columns[key]
+							drop branch.columns[key]
 						}
 
 						column.type = type
@@ -1430,7 +1430,7 @@ namespace Build {
 						parameter.min = Math.min(parameter.min, param.min)
 						parameter.max = Math.max(parameter.max, param.max)
 
-						delete params[key]
+						drop params[key]
 					}
 					else {
 						parameter.min = 0

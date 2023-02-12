@@ -4,7 +4,7 @@ var foo = 'bar'
 
 console.log(`\(foo)`)
 
-delete foo
+drop foo
 
 var foo = 42
 

@@ -1,3 +1,3 @@
 var dyn foo = 'bar'
 
-delete foo
+drop foo

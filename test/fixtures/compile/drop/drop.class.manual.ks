@@ -5,4 +5,4 @@ class Foo {
 
 var mut foo: Foo = new Foo()
 
-delete foo
+drop foo

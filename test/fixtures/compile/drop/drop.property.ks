@@ -2,4 +2,4 @@ var dyn foo = {
 	bar: 'qux'
 }
 
-delete foo.bar
+drop foo.bar

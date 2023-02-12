@@ -3,6 +3,6 @@ class ClassA {
 		_x
 	}
 	foo() {
-		delete @x
+		drop @x
 	}
 }

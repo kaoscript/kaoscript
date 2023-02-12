@@ -164,7 +164,7 @@ class ComparisonExpression extends Expression {
 						share.types.push(type)
 					}
 					else if @junction == JunctionKind.And {
-						delete shares[name]
+						drop shares[name]
 					}
 				}
 
@@ -203,7 +203,7 @@ class ComparisonExpression extends Expression {
 						share.types.push(type)
 					}
 					else if @junction == JunctionKind.And {
-						delete shares[name]
+						drop shares[name]
 					}
 				}
 

@@ -366,7 +366,7 @@ class BlockScope extends Scope {
 	processStash(name) { # {{{
 		var stash = @stashes[name]
 		if ?stash {
-			delete @stashes[name]
+			drop @stashes[name]
 
 			var mut variable = @getVariable(name)
 			for var mut fn in stash {

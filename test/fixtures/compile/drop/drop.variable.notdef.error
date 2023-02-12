@@ -1,0 +1,1 @@
+ReferenceException: "foo" is not defined (fixtures/compile/drop/drop.variable.notdef.ks:7)
