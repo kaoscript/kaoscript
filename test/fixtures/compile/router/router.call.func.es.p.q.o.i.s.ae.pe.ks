@@ -20,6 +20,6 @@ func foobar(x: Number) => 'number'
 func foobar(x: String) => 'string'
 func foobar(x) => 'any'
 
-var value = Pair('', 0)
+var value = new Pair('', 0)
 
 foobar(value)

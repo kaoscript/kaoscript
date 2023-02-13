@@ -3,4 +3,4 @@ tuple Point {
     y: Number
 }
 
-var point = Point(0, 0)
+var point = new Point(0, 0)

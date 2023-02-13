@@ -272,7 +272,7 @@ class ThisExpression extends Expression {
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
 		if @variableName != null {
-			node.initializeVariable(VariableBrief(
+			node.initializeVariable(new VariableBrief(
 				name: @variableName
 				type
 				instance: @instance

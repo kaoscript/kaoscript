@@ -135,7 +135,7 @@ class IdentifierLiteral extends Literal {
 			var variable = @scope.getVariable(@value, @line)
 
 			if variable.isLateInit() {
-				node.initializeVariable(VariableBrief(
+				node.initializeVariable(new VariableBrief(
 					name: @value
 					type: type.unspecify()
 					immutable: true

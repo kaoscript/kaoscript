@@ -5,7 +5,7 @@ tuple Pair(String, Number)
 expect(Pair is Tuple).to.equal(true)
 expect(Type.typeOf(Pair)).to.equal('tuple')
 
-var pair = Pair('x', 0.1)
+var pair = new Pair('x', 0.1)
 
 expect(pair is Pair).to.equal(true)
 expect(Type.typeOf(pair)).to.equal('tuple-instance')

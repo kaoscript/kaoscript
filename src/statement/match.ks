@@ -283,7 +283,7 @@ class MatchStatement extends Statement {
 
 			var type = Type.union(@scope, ...types)
 
-			@parent.initializeVariable(VariableBrief(name, type), this, this)
+			@parent.initializeVariable(new VariableBrief(name, type), this, this)
 		}
 
 		for var inferable, name of inferables {

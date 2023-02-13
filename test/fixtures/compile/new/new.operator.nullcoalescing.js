@@ -29,7 +29,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(name) {
 		const clazz = Type.isValue($map[name]) ? $map[name] : $map.default;
-		return new clazz();
+		return Helper.create(clazz, []);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

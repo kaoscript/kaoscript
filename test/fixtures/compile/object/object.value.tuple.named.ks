@@ -9,7 +9,7 @@ class Foobar {
 		@y: Number	= 0
 	}
 	position() => ({
-		start: Position(
+		start: new Position(
 			y: @y
 			x: @x
 		)
@@ -18,7 +18,7 @@ class Foobar {
 		x: @x
 		y: @y
 	})
-	position_tuple() => Position(
+	position_tuple() => new Position(
 		y: @y
 		x: @x
 	)

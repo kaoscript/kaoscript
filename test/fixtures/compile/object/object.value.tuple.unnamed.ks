@@ -6,11 +6,11 @@ class Foobar {
 		@y: Number	= 0
 	}
 	position() => ({
-		start: Position(@x, @y)
+		start: new Position(@x, @y)
 	})
 	position_dict() => ({
 		x: @x
 		y: @y
 	})
-	position_tuple() => Position(@x, @y)
+	position_tuple() => new Position(@x, @y)
 }

@@ -1,11 +1,18 @@
+enum ContainerKind {
+	Class
+	Struct
+	Tuple
+	Unknown
+}
+
 class CreateExpression extends Expression {
 	private late {
 		@alien: Boolean					= false
 		@arguments: Array				= []
 		@assessment: Router.Assessment?
+		@container: ContainerKind		= .Unknown
 		@computed: Boolean				= true
 		@factory: Expression
-		@flatten: Boolean				= false
 		@hybrid: Boolean				= false
 		@result: CallMatchResult?
 		@sealed: Boolean				= false
@@ -15,73 +22,106 @@ class CreateExpression extends Expression {
 		@factory = $compile.expression(@data.class, this)
 		@factory.analyse()
 
-		var es5 = @options.format.spreads == 'es5'
-
 		for var data in @data.arguments {
 			var argument = $compile.expression(data, this)
 
 			argument.analyse()
 
 			@arguments.push(argument)
-
-			if es5 && argument is UnaryOperatorSpread {
-				@flatten = true
-			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@factory.prepare(@scope.reference('Class'))
+		@factory.prepare(AnyType.Unexplicit)
 
-		if type !?= @factory.type() {
+		var type = @factory.type()
+
+		unless ?type {
 			ReferenceException.throwNotDefined(@factory.toQuote(), this)
 		}
-		else if type.isNamed() && type.type() is ClassType {
-			var class = type.type()
-
-			if type.isVirtual() {
-				TypeException.throwNotClass(type.name(), this)
-			}
-			if class.isAbstract() {
-				TypeException.throwAbstractInstantiation(type.name(), this)
-			}
-			if class.features() !~ ClassFeature.Constructor {
-				TypeException.throwInvalidInstantiation(type.name(), this)
-			}
-
-			if class.hasSealedConstructors() {
-				@sealed = true
-			}
-
-			@assessment = class.getConstructorAssessment(type.name(), this)
-
-			for var argument in @arguments {
-				argument.prepare(AnyType.NullableUnexplicit)
-			}
-
-			if var result ?= Router.matchArguments(@assessment, @arguments, this) {
-				@result = result
-			}
-			else if class.isExhaustiveConstructor(this) {
-				ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
-			}
-
-			@alien = class.isAlien()
-			@hybrid = class.isHybrid()
-			@type = @scope.reference(type).flagStrict()
+		if !(type.isAny() || type.isContainer()) || type.isVirtual() {
+			TypeException.throwNotCreatable(type.toQuote(), this)
 		}
-		else if !(type.isAny() || type.isClass()) || type.isVirtual() {
-			TypeException.throwNotClass(type.toQuote(), this)
+
+		if type.isNamed() {
+			match type.type() {
+				is ClassType {
+					var class = type.type()
+
+					if type.isVirtual() {
+						TypeException.throwNotClass(type.name(), this)
+					}
+					if class.isAbstract() {
+						TypeException.throwAbstractInstantiation(type.name(), this)
+					}
+					if class.features() !~ ClassFeature.Constructor {
+						TypeException.throwInvalidInstantiation(type.name(), this)
+					}
+
+					if class.hasSealedConstructors() {
+						@sealed = true
+					}
+
+					@assessment = class.getConstructorAssessment(type.name(), this)
+
+					@prepareArguments()
+
+					if var result ?= Router.matchArguments(@assessment, @arguments, this) {
+						@result = result
+					}
+					else if class.isExhaustiveConstructor(this) {
+						ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
+					}
+
+					@container = .Class
+					@alien = class.isAlien()
+					@hybrid = class.isHybrid()
+					@type = @scope.reference(type).flagStrict()
+				}
+				is StructType {
+					var struct = type.discardName()
+
+					@assessment = struct.assessment(type.reference(@scope), this)
+
+					@prepareArguments()
+
+					if var result ?= Router.matchArguments(@assessment, @arguments, this) {
+						@result = result
+					}
+					else if struct.isExhaustive(this) {
+						ReferenceException.throwNoMatchingStruct(type.name(), @arguments, this)
+					}
+
+					@container = .Struct
+					@type = @scope.reference(type).flagStrict()
+				}
+				is TupleType {
+					var tuple = type.discardName()
+
+					@assessment = tuple.assessment(type.reference(@scope), this)
+
+					@prepareArguments()
+
+
+					if var result ?= Router.matchArguments(@assessment, @arguments, this) {
+						@result = result
+					}
+					else if tuple.isExhaustive(this) {
+						ReferenceException.throwNoMatchingTuple(type.name(), @arguments, this)
+					}
+
+					@container = .Tuple
+					@type = @scope.reference(type).flagStrict()
+				}
+				else {
+					@prepareArguments()
+				}
+			}
 		}
 		else {
-			for var argument in @arguments {
-				argument.prepare(AnyType.NullableUnexplicit)
-			}
+			@prepareArguments()
 		}
 
-		if @flatten {
-			@computed = false
-		}
-		else if !?@result || @result is LenientCallMatchResult {
+		if !?@result || @result is LenientCallMatchResult {
 			if @sealed {
 				@computed = false
 			}
@@ -111,7 +151,7 @@ class CreateExpression extends Expression {
 	translate() { # {{{
 		@factory.translate()
 
-		for argument in @arguments {
+		for var argument in @arguments {
 			argument.translate()
 		}
 	} # }}}
@@ -140,27 +180,28 @@ class CreateExpression extends Expression {
 
 		return variables
 	} # }}}
-	toFragments(fragments, mode) { # {{{
-		if @flatten {
-			if @sealed {
-				fragments.code(`\(@type.type().getSealedName()).new.apply(null`)
+	prepareArguments() { # {{{
+		for var argument in @arguments {
+			argument.prepare(AnyType.NullableUnexplicit)
 
-				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
-
-				fragments.code(')')
+			if argument.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(argument, this)
 			}
-			else {
-				@module().flag('Helper')
 
-				fragments.code(`\($runtime.helper(this)).create(`).compile(@factory)
-
-				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
-
-				fragments.code(')')
-			}
+			argument.flagMutating()
 		}
-		else {
-			if !?@result || @result is LenientCallMatchResult {
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		match @container {
+			.Class => @toClassFragments(fragments, mode)
+			.Struct => @toStructFragments(fragments, mode)
+			.Tuple => @toTupleFragments(fragments, mode)
+			else => @toUnknownFragments(fragments, mode)
+		}
+	} # }}}
+	toClassFragments(fragments, mode) { # {{{
+		match @result {
+			is LenientCallMatchResult {
 				if @sealed {
 					fragments.code(`\(@type.type().getSealedName()).new(`)
 				}
@@ -168,22 +209,27 @@ class CreateExpression extends Expression {
 					fragments.code('new ').compile(@factory).code('(')
 				}
 
-				for var argument, i in @arguments {
-					fragments.code($comma) if i != 0
-
-					fragments.compile(argument)
+				if #@result.possibilities {
+					Router.Argument.toFragments(@result.positions, null, @arguments, @result.possibilities[0], @assessment.labelable, false, fragments, mode)
 				}
-
-				fragments.code(')')
-			}
-			else {
-				if @hybrid {
-					fragments.code('new ').compile(@factory).code('(')
-
+				else {
 					for var argument, i in @arguments {
 						fragments.code($comma) if i != 0
 
 						fragments.compile(argument)
+					}
+				}
+
+				fragments.code(')')
+			}
+			is PreciseCallMatchResult {
+				if @hybrid {
+					fragments.code('new ').compile(@factory).code('(')
+
+					if #@arguments {
+						var { function, positions } = @result.matches[0]
+
+						Router.Argument.toFragments(positions, null, @arguments, function, @assessment.labelable, false, fragments, mode)
 					}
 
 					fragments.code(')')
@@ -219,8 +265,117 @@ class CreateExpression extends Expression {
 					throw new NotImplementedException()
 				}
 			}
+			else {
+				if @sealed {
+					fragments.code(`\(@type.type().getSealedName()).new(`)
+				}
+				else {
+					fragments.code('new ').compile(@factory).code('(')
+				}
+
+				for var argument, i in @arguments {
+					fragments.code($comma) if i != 0
+
+					fragments.compile(argument)
+				}
+
+				fragments.code(')')
+			}
 		}
 	} # }}}
 	toQuote() => `new \(@factory.toQuote())()`
+	toStructFragments(fragments, mode) { # {{{
+		fragments.wrap(@factory, mode)
+
+		match @result {
+			is LenientCallMatchResult {
+				fragments.code('(')
+
+				Router.Argument.toFragments(@result.positions, null, @arguments, @result.possibilities[0], false, false, fragments, mode)
+
+				fragments.code(')')
+			}
+			is PreciseCallMatchResult {
+				match @result.matches.length {
+					0 {
+						fragments.code(`.__ks_new()`)
+					}
+					1 {
+						fragments.code(`.__ks_new(`)
+
+						var { function, positions } = @result.matches[0]
+
+						Router.Argument.toFragments(positions, null, @arguments, function, false, false, fragments, mode)
+
+						fragments.code(')')
+					}
+					else {
+						throw new NotImplementedException()
+					}
+				}
+			}
+			else {
+				fragments.code('(')
+
+				for var argument, i in @arguments {
+					fragments.code($comma) if i != 0
+
+					fragments.compile(argument)
+				}
+
+				fragments.code(')')
+			}
+		}
+	} # }}}
+	toTupleFragments(fragments, mode) { # {{{
+		fragments.wrap(@factory, mode)
+
+		match @result {
+			is LenientCallMatchResult {
+				fragments.code('(')
+
+				Router.Argument.toFragments(@result.positions, null, @arguments, @result.possibilities[0], false, false, fragments, mode)
+
+				fragments.code(')')
+			}
+			is PreciseCallMatchResult {
+				match @result.matches.length {
+					0 {
+						fragments.code(`.__ks_new()`)
+					}
+					1 {
+						fragments.code(`.__ks_new(`)
+
+						var { function, positions } = @result.matches[0]
+
+						Router.Argument.toFragments(positions, null, @arguments, function, false, false, fragments, mode)
+
+						fragments.code(')')
+					}
+					else {
+						throw new NotImplementedException()
+					}
+				}
+			}
+			else {
+				fragments.code('(')
+
+				for var argument, i in @arguments {
+					fragments.code($comma) if i != 0
+
+					fragments.compile(argument)
+				}
+
+				fragments.code(')')
+			}
+		}
+	} # }}}
+	toUnknownFragments(fragments, mode) { # {{{
+		fragments.code($runtime.helper(this), '.create(').compile(@factory, mode).code($comma)
+
+		CallExpression.toFlattenArgumentsFragments(fragments, @arguments)
+
+		fragments.code(')')
+	} # }}}
 	type() => @type
 }

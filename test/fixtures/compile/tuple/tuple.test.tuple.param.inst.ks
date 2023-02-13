@@ -3,4 +3,4 @@ tuple Pair(String, Number)
 func foobar(tuple: Tuple) {
 }
 
-foobar(Pair('', 0))
+foobar(new Pair('', 0))

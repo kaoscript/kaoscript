@@ -21,7 +21,10 @@ class CallExpression extends Expression {
 	}
 	static {
 		toFlattenArgumentsFragments(fragments, arguments, prefill? = null) { # {{{
-			if arguments.length == 1 && prefill == null && arguments[0].argument().type().isArray() {
+			if arguments.length == 0 {
+				fragments.code('[]')
+			}
+			else if arguments.length == 1 && !?prefill && arguments[0] is UnaryOperatorSpread && arguments[0].argument().type().isArray() {
 				arguments[0].argument().toArgumentFragments(fragments)
 			}
 			else {
@@ -535,52 +538,10 @@ class CallExpression extends Expression {
 			@addCallee(new EnumCreateCallee(@data, type, argument, this))
 		}
 		else if type.isStruct() {
-			var struct = type.discardName()
-
-			@assessment = struct.assessment(type.reference(@scope), this)
-
-			@prepareArguments()
-
-			if var result ?= Router.matchArguments(@assessment, @arguments, type.isExhaustive(this), this) {
-				if result is LenientCallMatchResult {
-					@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
-				}
-				else {
-					@addCallee(new StructCreateCallee(@data, @assessment, result.matches[0], this))
-				}
-			}
-			else {
-				if type.isExhaustive(this) {
-					ReferenceException.throwNoMatchingStruct(name, @arguments, this)
-				}
-				else {
-					@addCallee(new DefaultCallee(@data, @object, null, type, this))
-				}
-			}
+			TypeException.throwConstructorWithoutNew(name, this)
 		}
 		else if type.isTuple() {
-			var tuple = type.discardName()
-
-			@assessment = tuple.assessment(type.reference(@scope), this)
-
-			@prepareArguments()
-
-			if var result ?= Router.matchArguments(@assessment, @arguments, this) {
-				if result is LenientCallMatchResult {
-					@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
-				}
-				else {
-					@addCallee(new TupleCreateCallee(@data, @assessment, result.matches[0], this))
-				}
-			}
-			else {
-				if type.isExhaustive(this) {
-					ReferenceException.throwNoMatchingTuple(name, @arguments, this)
-				}
-				else {
-					@addCallee(new DefaultCallee(@data, @object, null, type, this))
-				}
-			}
+			TypeException.throwConstructorWithoutNew(name, this)
 		}
 		else if type.isClass() {
 			TypeException.throwConstructorWithoutNew(name, this)
@@ -1321,7 +1282,5 @@ include {
 	'./callee/sealed-function'
 	'./callee/sealed-method'
 	'./callee/sealed-precise-method'
-	'./callee/struct-create'
 	'./callee/substitute'
-	'./callee/tuple-create'
 }

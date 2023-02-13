@@ -2,7 +2,7 @@ extern console
 
 import './tuple.export.default'
 
-var pair = Pair('x', 0.1)
+var pair = new Pair('x', 0.1)
 
 console.log(`\(pair.0)`, pair.1 + 1)
 

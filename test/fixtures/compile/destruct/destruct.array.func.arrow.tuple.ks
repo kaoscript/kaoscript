@@ -3,4 +3,4 @@ tuple Foobar {
 	y: Number
 }
 
-[Foobar(0, 0)].map(([ x ], _, _) => x)
+[new Foobar(0, 0)].map(([ x ], _, _) => x)

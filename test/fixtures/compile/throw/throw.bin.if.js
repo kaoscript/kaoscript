@@ -1,3 +1,4 @@
+const {Helper} = require("@kaoscript/runtime");
 if(true) {
-	throw new Error();
+	throw Helper.create(Error, []);
 }

@@ -177,7 +177,7 @@ namespace Router {
 
 	func assess(functions: FunctionType[], name: String, node: AbstractNode): Assessment { # {{{
 		if !#functions {
-			return Assessment(
+			return new Assessment(
 				name
 				async: false
 				emptiable: true
@@ -224,7 +224,7 @@ namespace Router {
 						}
 					}
 					else {
-						var data = Label(
+						var data = new Label(
 							all: [function.index()]
 							mandatories: []
 						)
@@ -305,7 +305,7 @@ namespace Router {
 			mainRoutes.push(key)
 		}
 
-		return Assessment(
+		return new Assessment(
 			name
 			async
 			emptiable
@@ -324,10 +324,10 @@ namespace Router {
 	func matchArguments(assessment: Assessment, arguments: Expression[], exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { # {{{
 		if assessment.length == 0 {
 			if !#arguments {
-				return PreciseCallMatchResult([])
+				return new PreciseCallMatchResult([])
 			}
 			else {
-				return LenientCallMatchResult([])
+				return new LenientCallMatchResult([])
 			}
 		}
 
@@ -342,7 +342,7 @@ namespace Router {
 
 		if assessment.macro {
 			for var argument, index in arguments {
-				indexeds.push(NamingArgument(
+				indexeds.push(new NamingArgument(
 					index
 					type: argument
 					strict: false
@@ -360,7 +360,7 @@ namespace Router {
 						throw new NotSupportedException()
 					}
 
-					nameds[name] = NamingArgument(
+					nameds[name] = new NamingArgument(
 						index
 						name
 						type: argument.type()
@@ -379,7 +379,7 @@ namespace Router {
 					var name = argument.name()
 
 					if argument.variable().isPredefined() {
-						indexeds.push(NamingArgument(
+						indexeds.push(new NamingArgument(
 							index
 							type: argument.type()
 							strict: false
@@ -389,7 +389,7 @@ namespace Router {
 						if ?shorthands[name] {
 							invalids[name] = true
 
-							indexeds.push(shorthands[name], NamingArgument(
+							indexeds.push(shorthands[name], new NamingArgument(
 								index
 								type: argument.type()
 								strict: false
@@ -402,7 +402,7 @@ namespace Router {
 						else {
 							shortCount += 1
 
-							shorthands[name] = NamingArgument(
+							shorthands[name] = new NamingArgument(
 								index
 								name
 								type: argument.type()
@@ -411,7 +411,7 @@ namespace Router {
 						}
 					}
 					else {
-						indexeds.push(NamingArgument(
+						indexeds.push(new NamingArgument(
 							index
 							type: argument.type()
 							strict: false
@@ -419,7 +419,7 @@ namespace Router {
 					}
 				}
 				else {
-					indexeds.push(NamingArgument(
+					indexeds.push(new NamingArgument(
 						index
 						type: argument.type()
 						strict: false

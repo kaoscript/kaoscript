@@ -6,7 +6,7 @@ struct Point {
 }
 
 func foobar(x, y) {
-	var point = Point(y: y, x: x)
+	var point = new Point(y: y, x: x)
 
 	console.log(point.x + 1, point.x + point.y)
 }

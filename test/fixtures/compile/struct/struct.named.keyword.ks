@@ -2,4 +2,4 @@ struct Foobar {
 	function: Number
 }
 
-var s = Foobar(function: 42)
+var s = new Foobar(function: 42)

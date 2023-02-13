@@ -18,13 +18,13 @@ namespace Matching {
 			var combinations = splitArguments(arguments)
 
 			if combinations.length == 1 {
-				var context = MatchContext(combinations[0], excludes, async: assessment.async, indexeds, node)
+				var context = new MatchContext(combinations[0], excludes, async: assessment.async, indexeds, node)
 
 				for var tree in route.trees {
 					WithIndex.match(tree, context)
 
 					if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
-						return PreciseCallMatchResult(context.matches)
+						return new PreciseCallMatchResult(context.matches)
 					}
 				}
 
@@ -33,14 +33,14 @@ namespace Matching {
 						context.possibilities.pushUniq(function)
 					}
 
-					return LenientCallMatchResult(context.possibilities)
+					return new LenientCallMatchResult(context.possibilities)
 				}
 			}
 			else {
 				var results = []
 
 				for var combination in combinations {
-					var context = MatchContext(combination, excludes, async: assessment.async, indexeds, node)
+					var context = new MatchContext(combination, excludes, async: assessment.async, indexeds, node)
 
 					var mut nf = true
 
@@ -48,7 +48,7 @@ namespace Matching {
 						WithIndex.match(tree, context)
 
 						if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
-							results.push(PreciseCallMatchResult(context.matches))
+							results.push(new PreciseCallMatchResult(context.matches))
 
 							nf = false
 						}
@@ -60,7 +60,7 @@ namespace Matching {
 								context.possibilities.pushUniq(function)
 							}
 
-							results.push(LenientCallMatchResult(context.possibilities))
+							results.push(new LenientCallMatchResult(context.possibilities))
 						}
 					}
 					else {
@@ -157,7 +157,7 @@ namespace Matching {
 			}
 
 			if precise {
-				return PreciseCallMatchResult([match for var match of perFunctions])
+				return new PreciseCallMatchResult([match for var match of perFunctions])
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace Matching {
 			}
 		}
 
-		return LenientCallMatchResult(possibilities)
+		return new LenientCallMatchResult(possibilities)
 	} # }}}
 
 	func splitArguments(types: Type[]): Type[][] { # {{{
@@ -287,7 +287,7 @@ namespace Matching {
 							}
 						}
 
-						context.matches.push(CallMatch(
+						context.matches.push(new CallMatch(
 							function
 							positions
 						))
@@ -311,7 +311,7 @@ namespace Matching {
 								}
 							}
 
-							context.matches.push(CallMatch(
+							context.matches.push(new CallMatch(
 								function
 								positions
 							))
@@ -331,7 +331,7 @@ namespace Matching {
 								}
 							}
 
-							context.matches.push(CallMatch(
+							context.matches.push(new CallMatch(
 								function
 								positions
 							))
@@ -348,7 +348,7 @@ namespace Matching {
 							var mut nf = true
 
 							for var key in tree.order while nf {
-								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), Matches(), newContext) {
+								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), new Matches(), newContext) {
 									nf = false
 								}
 							}
@@ -372,7 +372,7 @@ namespace Matching {
 					}
 					else {
 						for var key in tree.order {
-							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches(), context) {
+							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), new Matches(), context) {
 								return
 							}
 						}
@@ -610,7 +610,7 @@ namespace Matching {
 		}
 
 		func duplicateContext(context: MatchContext): MatchContext { # {{{
-			return MatchContext(
+			return new MatchContext(
 				async: context.async
 				found: false
 				arguments: context.arguments
@@ -623,7 +623,7 @@ namespace Matching {
 		} # }}}
 
 		func duplicateCursor(cursor: Cursor, type: Type = cursor.argument): Cursor { # {{{
-			return Cursor(
+			return new Cursor(
 				argument: type
 				index: cursor.index
 				length: cursor.length
@@ -634,7 +634,7 @@ namespace Matching {
 
 		func getCursor(index: Number, arguments: Type[]): Cursor { # {{{
 			if index >= arguments.length {
-				return Cursor(
+				return new Cursor(
 					argument: Type.Any
 					index
 					length: 0
@@ -647,7 +647,7 @@ namespace Matching {
 			var spread = argument.isSpread()
 
 			if spread {
-				return Cursor(
+				return new Cursor(
 					argument
 					index
 					length: Infinity
@@ -656,7 +656,7 @@ namespace Matching {
 				)
 			}
 			else {
-				return Cursor(
+				return new Cursor(
 					argument
 					index
 					length: 1
@@ -708,7 +708,7 @@ namespace Matching {
 			return false if !?cursor
 
 			for var key in branch.order {
-				if matchTreeNode(tree, branch.columns[key], cursor, Matches(
+				if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
 					precise: argMatches.precise
 					arguments: [...argMatches.arguments]
 				), context) {
@@ -795,7 +795,7 @@ namespace Matching {
 				return false
 			}
 			else {
-				context.matches.push(CallMatch(
+				context.matches.push(new CallMatch(
 					function: leaf.function
 					positions: match
 				))
@@ -1145,12 +1145,12 @@ namespace Matching {
 						}
 					}
 
-					var match = CallMatch(
+					var match = new CallMatch(
 						function
 						positions
 					)
 
-					return PreciseCallMatchResult(matches: [match])
+					return new PreciseCallMatchResult(matches: [match])
 				}
 				else {
 					var possibilities = []
@@ -1207,7 +1207,7 @@ namespace Matching {
 						possibilities.push(function)
 					}
 
-					return LenientCallMatchResult(possibilities, positions, labels)
+					return new LenientCallMatchResult(possibilities, positions, labels)
 				}
 			}
 			else {
@@ -1281,7 +1281,7 @@ namespace Matching {
 							else {
 								var possibilities = [result.matches[0].function]
 
-								return LenientCallMatchResult(possibilities)
+								return new LenientCallMatchResult(possibilities)
 							}
 						}
 						else if result.possibilities.length == 1 {

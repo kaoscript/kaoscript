@@ -708,6 +708,7 @@ abstract class Type {
 
 		return false
 	} # }}}
+	isContainer() => @isClass() || @isStruct() || @isTuple()
 	isEnum() => false
 	isExclusion() => false
 	isExhaustive() { # {{{

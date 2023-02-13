@@ -2,6 +2,6 @@ struct Foobar {
 	values: String{}
 }
 
-var foo = Foobar(
+var foo = new Foobar(
 	values: {}
 )

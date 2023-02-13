@@ -44,7 +44,7 @@ module.exports = function() {
 			return this.__ks_func_new_rt.call(null, this, this, arguments);
 		}
 		__ks_func_new_0() {
-			const foo = new this._options.class();
+			const foo = Helper.create(this._options.class, []);
 		}
 		__ks_func_new_rt(that, proto, args) {
 			if(args.length === 0) {

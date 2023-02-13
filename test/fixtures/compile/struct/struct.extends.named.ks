@@ -9,7 +9,7 @@ struct Point3D extends Point {
 	z: Number
 }
 
-var dyn point = Point3D(
+var dyn point = new Point3D(
 	x: 0.3
 	y: 0.4
 	z: 0.5

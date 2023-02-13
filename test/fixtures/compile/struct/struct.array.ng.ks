@@ -2,6 +2,6 @@ struct Event {
 	names: Array
 }
 
-var e = Event(
+var e = new Event(
 	names: []
 )

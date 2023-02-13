@@ -102,7 +102,7 @@ module.exports = function(expect) {
 	expect(test(id.__ks_0(TupleA.__ks_new()))).to.equal("any", "id(tuple-instance)");
 	expect(test(JS.object)).to.equal("object", "js(object)");
 	expect(test(JS.ClassA)).to.equal("any", "js(class)");
-	expect(test(new JS.ClassA())).to.equal("object", "class-instance(js)");
-	expect(test(id.__ks_0(new JS.ClassA()))).to.equal("object", "id(class-instance(js))");
+	expect(test(Helper.create(JS.ClassA, []))).to.equal("object", "class-instance(js)");
+	expect(test(id.__ks_0(Helper.create(JS.ClassA, [])))).to.equal("object", "id(class-instance(js))");
 	expect(test(JS.instanceA)).to.equal("object", "js(class-instance)");
 };

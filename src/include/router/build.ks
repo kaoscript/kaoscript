@@ -42,7 +42,7 @@ namespace Build {
 			}
 
 			for var n from min to max {
-				groups[n] = Group(n)
+				groups[n] = new Group(n)
 			}
 
 			for var function in functions {
@@ -89,7 +89,7 @@ namespace Build {
 				functionMap[function.index()] = function
 			}
 
-			return Route(
+			return new Route(
 				functions: functionMap
 				trees
 			)
@@ -146,7 +146,7 @@ namespace Build {
 				}
 			}
 
-			return Tree(
+			return new Tree(
 				min: 0
 				function: master
 			)
@@ -239,7 +239,7 @@ namespace Build {
 		): Void { # {{{
 			if type.isSplittable() {
 				var types = type.split([])
-				var union = UnionMatch(
+				var union = new UnionMatch(
 					function
 					length: types.length
 					matches: []
@@ -330,12 +330,12 @@ namespace Build {
 						}
 					}
 
-					group.rows[key] = Row(
+					group.rows[key] = new Row(
 						key
 						function
 						union
 						types: [
-							RowType(
+							new RowType(
 								index: argIndex
 								type
 								rest
@@ -387,7 +387,7 @@ namespace Build {
 			if types.length == target {
 				if var match ?= group.rows[key] {
 					if function == match.function {
-						group.rows[key] = Row(
+						group.rows[key] = new Row(
 							key
 							function
 							types
@@ -398,7 +398,7 @@ namespace Build {
 						SyntaxException.throwIndistinguishableFunctions(name, match.types.map(({ type }, _, _) => type), [function, match.function], node) unless ignoreIndistinguishable
 					}
 					else if function.max() < match.function.max() {
-						group.rows[key] = Row(
+						group.rows[key] = new Row(
 							key
 							function
 							types
@@ -407,7 +407,7 @@ namespace Build {
 					}
 				}
 				else {
-					group.rows[key] = Row(
+					group.rows[key] = new Row(
 						key
 						function
 						types
@@ -498,7 +498,7 @@ namespace Build {
 
 				var types = [
 					...types
-					RowType(
+					new RowType(
 						index: argIndex
 						type
 						rest
@@ -674,7 +674,7 @@ namespace Build {
 				}
 			}
 
-			var row = Row(
+			var row = new Row(
 				function
 				key: ''
 				types: []
@@ -689,7 +689,7 @@ namespace Build {
 				var rest = parameter.max() == Infinity
 
 				row.key += key
-				row.types.push(RowType(
+				row.types.push(new RowType(
 					index: (afterRest ? argIndex - argCount : argIndex) as Number
 					type: type as Type
 					rest
@@ -705,7 +705,7 @@ namespace Build {
 				}
 			}
 
-			var tree = Tree(n)
+			var tree = new Tree(n)
 			var dyn column = tree
 			var mut variadic = false
 
@@ -722,7 +722,7 @@ namespace Build {
 				}
 
 				if index == lastIndex {
-					column.columns[hash] = TreeLeaf(
+					column.columns[hash] = new TreeLeaf(
 						index: (afterRest ? argIndex - argCount : argIndex) as Number
 						type: type as Type
 						min: min as Number
@@ -731,7 +731,7 @@ namespace Build {
 						rest
 						isNode: false
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function
 								parameter: index as Number
@@ -745,7 +745,7 @@ namespace Build {
 					)
 				}
 				else {
-					column.columns[hash] = TreeBranch(
+					column.columns[hash] = new TreeBranch(
 						index: (afterRest ? argIndex - argCount : argIndex) as Number
 						type: type as Type
 						min: min as Number
@@ -753,7 +753,7 @@ namespace Build {
 						variadic
 						rest
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function
 								parameter: index as Number
@@ -840,14 +840,14 @@ namespace Build {
 
 					var key = `:\(row.function.index()):\(parameter)`
 
-					branch.columns[hash] = TreeLeaf(
+					branch.columns[hash] = new TreeLeaf(
 						index
 						type
 						rest
 						variadic: rest
 						isNode: false
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -868,13 +868,13 @@ namespace Build {
 					var key = `:\(row.function.index()):\(parameter)`
 
 					if !?branch.columns[hash] {
-						branch.columns[hash] = TreeBranch(
+						branch.columns[hash] = new TreeBranch(
 							index
 							type
 							rest
 							variadic: rest
 							parameters: {
-								[key]: TreeParameter(
+								[key]: new TreeParameter(
 									key
 									function: row.function
 									parameter
@@ -892,7 +892,7 @@ namespace Build {
 						branch.rows.push(row)
 
 						if !?branch.parameters[key] {
-							branch.parameters[key] = TreeParameter(
+							branch.parameters[key] = new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -932,7 +932,7 @@ namespace Build {
 		} # }}}
 
 		export func createTree(rows: Row{}, min: Number): Tree { # {{{
-			var tree = Tree(min)
+			var tree = new Tree(min)
 
 			var usages: Object<Number> = {}
 			for var _, key of rows {
@@ -952,14 +952,14 @@ namespace Build {
 
 					var key = `:\(row.function.index()):\(parameter)`
 
-					tree.columns[hash] = TreeLeaf(
+					tree.columns[hash] = new TreeLeaf(
 						index
 						type
 						rest
 						variadic: rest
 						isNode: false
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -980,13 +980,13 @@ namespace Build {
 					var key = `:\(row.function.index()):\(parameter)`
 
 					if !?tree.columns[hash] {
-						tree.columns[hash] = TreeBranch(
+						tree.columns[hash] = new TreeBranch(
 							index
 							type
 							rest
 							variadic: rest
 							parameters: {
-								[key]: TreeParameter(
+								[key]: new TreeParameter(
 									key
 									function: row.function
 									parameter
@@ -1014,7 +1014,7 @@ namespace Build {
 						branch.rows.push(row)
 
 						if !?branch.parameters[key] {
-							branch.parameters[key] = TreeParameter(
+							branch.parameters[key] = new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -1462,7 +1462,7 @@ namespace Build {
 				var hash = type.hashCode()
 				var key = `:\(row.function.index()):\(parameter)`
 
-				row.types.push(RowType(
+				row.types.push(new RowType(
 					index
 					type
 					rest
@@ -1470,7 +1470,7 @@ namespace Build {
 				))
 
 				if i == lastParameter {
-					var leaf = TreeLeaf(
+					var leaf = new TreeLeaf(
 						index
 						type
 						min
@@ -1479,7 +1479,7 @@ namespace Build {
 						variadic: rest || min != max
 						isNode: false
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -1502,7 +1502,7 @@ namespace Build {
 					}
 				}
 				else if i == 0 {
-					branch = TreeBranch(
+					branch = new TreeBranch(
 						index
 						type
 						min
@@ -1510,7 +1510,7 @@ namespace Build {
 						rest
 						variadic: true
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function: row.function
 								parameter
@@ -1527,7 +1527,7 @@ namespace Build {
 					result = branch
 				}
 				else {
-					branch.columns[hash] = TreeBranch(
+					branch.columns[hash] = new TreeBranch(
 						index
 						type
 						min
@@ -1535,7 +1535,7 @@ namespace Build {
 						rest
 						variadic: rest || min != max
 						parameters: {
-							[key]: TreeParameter(
+							[key]: new TreeParameter(
 								key
 								function: row.function
 								parameter

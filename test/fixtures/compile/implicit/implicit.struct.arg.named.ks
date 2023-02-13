@@ -7,4 +7,4 @@ struct Style {
 	fontWeight: FontWeight
 }
 
-var bold = Style(fontWeight: .Bold)
+var bold = new Style(fontWeight: .Bold)

@@ -7,7 +7,7 @@ struct StructA {
 	y: Number
 }
 
-expect(foo(StructA(0, 0))).to.eql([0])
+expect(foo(new StructA(0, 0))).to.eql([0])
 
 expect(foo({x: 0, y: 0})).to.eql([0])
 

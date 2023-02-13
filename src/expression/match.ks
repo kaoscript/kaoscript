@@ -303,7 +303,7 @@ class MatchExpression extends Expression {
 
 			var type = Type.union(@scope, ...types)
 
-			@parent.initializeVariable(VariableBrief(name, type), this, this)
+			@parent.initializeVariable(new VariableBrief(name, type), this, this)
 		}
 
 		if @reusableValue {

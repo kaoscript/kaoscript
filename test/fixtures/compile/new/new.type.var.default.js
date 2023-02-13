@@ -19,5 +19,5 @@ module.exports = function() {
 		}
 	}
 	let __ks_class_1 = Foobar;
-	const value = new __ks_class_1();
+	const value = Helper.create(__ks_class_1, []);
 };

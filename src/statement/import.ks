@@ -99,7 +99,7 @@ enum ImportMode {
 abstract class Importer extends Statement {
 	private late {
 		@alias: String?								= null
-		@arguments: Arguments						= Arguments()
+		@arguments: Arguments						= new Arguments()
 		@autofill: Boolean							= false
 		@count: Number								= 0
 		@extAddendum: String						= ''
@@ -220,7 +220,7 @@ abstract class Importer extends Statement {
 					}
 
 					if !type.isAlias() {
-						var var = ImportedVariable(
+						var var = new ImportedVariable(
 							name: def.internal
 							sealed: type.isSealed() && !type.isSystem()
 							system: type.isSystem()
@@ -387,11 +387,11 @@ abstract class Importer extends Statement {
 		@module().import(internal)
 
 		if isVariable && type is not AliasType {
-			@variables[external] = ImportedVariable(internal)
+			@variables[external] = new ImportedVariable(internal)
 			@count += 1
 		}
 	} # }}}
-	buildArguments(metadata, arguments: Arguments = Arguments()): Arguments { # {{{
+	buildArguments(metadata, arguments: Arguments = new Arguments()): Arguments { # {{{
 		@scope.line(@line() - 1)
 
 		if @data.arguments?.length != 0 {

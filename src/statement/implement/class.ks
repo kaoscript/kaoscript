@@ -1080,7 +1080,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 			if var variable ?= @class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
-					@block.initializeVariable(VariableBrief(
+					@block.initializeVariable(new VariableBrief(
 						name
 						type: statement.type()
 						instance: true

@@ -20,6 +20,6 @@ func foobar(x: Number) => 'number'
 func foobar(x: String) => 'string'
 func foobar(x) => 'any'
 
-var value = Point(0, 0)
+var value = new Point(0, 0)
 
 foobar(value)
