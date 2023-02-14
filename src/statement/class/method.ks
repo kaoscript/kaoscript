@@ -597,9 +597,7 @@ class ClassMethodDeclaration extends Statement {
 			ctrl.code(`\(@internalName)(`)
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
-			return node.code(')').step()
-		})
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, (node) => node.code(')').step())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(ctrl)

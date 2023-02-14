@@ -85,9 +85,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.code(`static \(@internalName)(`)
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
-			return node.code(')').step()
-		})
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, (node) => node.code(')').step())
 
 		ctrl.compile(@block)
 

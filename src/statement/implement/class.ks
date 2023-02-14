@@ -777,11 +777,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
-			fragments.code(')')
-
-			return fragments.newBlock()
-		})
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)
@@ -1291,11 +1287,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
-			fragments.code(')')
-
-			return fragments.newBlock()
-		})
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

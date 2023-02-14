@@ -372,11 +372,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.code(`\(@enumName.name()).__ks_sttc_\(@name)_\(@type.index()) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
-			fragments.code(')')
-
-			return fragments.newBlock()
-		})
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

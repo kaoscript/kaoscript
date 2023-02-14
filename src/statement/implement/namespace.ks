@@ -209,9 +209,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		line.code(`\(namespace).\(@name).\(@internalName) = function(`)
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, func(fragments) {
-			return fragments.code(')').newBlock()
-		})
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
 
 		block.compile(@block, Mode.None)
 

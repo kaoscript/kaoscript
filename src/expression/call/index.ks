@@ -1250,9 +1250,7 @@ class SimplifiedArrowFunctionExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code('((')
 
-		var block = Parameter.toFragments(@expression, fragments, ParameterMode.Default, func(fragments) {
-			return fragments.code(') =>').newBlock()
-		})
+		var block = Parameter.toFragments(@expression, fragments, ParameterMode.Default, (fragments) => fragments.code(') =>').newBlock())
 
 		block.compile(@expression._block)
 

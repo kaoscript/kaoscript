@@ -319,9 +319,7 @@ class ClassConstructorDeclaration extends Statement {
 			.newControl()
 			.code('constructor(')
 
-		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
-			return node.code(')').step()
-		})
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, (node) => node.code(')').step())
 
 		if @parent._extendsType.isSealedAlien() {
 			var index = @getSuperIndex(@block.getDataStatements())
@@ -368,9 +366,7 @@ class ClassConstructorDeclaration extends Statement {
 				.newLine()
 				.code(`const \(@internalName) = (`)
 
-			var block = Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
-				return node.code(') =>').newBlock()
-			})
+			var block = Parameter.toFragments(this, ctrl, ParameterMode.Default, (node) => node.code(') =>').newBlock())
 
 			var index = @getSuperIndex(@block.getDataStatements())
 
@@ -400,9 +396,7 @@ class ClassConstructorDeclaration extends Statement {
 				ctrl.code(`\(@internalName)(`)
 			}
 
-			Parameter.toFragments(this, ctrl, ParameterMode.Default, func(node) {
-				return node.code(')').step()
-			})
+			Parameter.toFragments(this, ctrl, ParameterMode.Default, (node) => node.code(')').step())
 
 			for var node in @topNodes {
 				node.toAuthorityFragments(ctrl)

@@ -118,9 +118,7 @@ class StructDeclaration extends Statement {
 
 		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
-		Parameter.toFragments(@function, ctrl, ParameterMode.Default, func(fragments) {
-			return fragments.code(')').step()
-		})
+		Parameter.toFragments(@function, ctrl, ParameterMode.Default, (fragments) => fragments.code(')').step())
 
 		@toObjectFragments(ctrl, mode)
 

@@ -411,9 +411,7 @@ class ArrowFunctionExpression extends Expression {
 			ctrl.code(variable.getSecureName())
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode.Default, func(fragments) {
-			return fragments.code(')').step()
-		})
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, (fragments) => fragments.code(')').step())
 
 		ctrl.compile(@block)
 
