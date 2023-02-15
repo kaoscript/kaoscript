@@ -142,7 +142,7 @@ module.exports = function(expect) {
 		else {
 			results.push(null);
 		}
-		let __ks_0 = z.valueOf();
+		let __ks_0 = Helper.valueOf(z);
 		if(__ks_0 === CardSuit.Clubs.value) {
 			results.push("c");
 		}

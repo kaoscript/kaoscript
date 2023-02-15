@@ -142,6 +142,15 @@ class UnionType extends Type {
 
 		return false
 	} # }}}
+	canBeEnum(any = true) { # {{{
+		for var type in @types {
+			if type.canBeEnum(any) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	canBeFunction(any = true) { # {{{
 		for var type in @types {
 			if type.canBeFunction(any) {

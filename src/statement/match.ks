@@ -179,8 +179,6 @@ class MatchStatement extends Statement {
 			}
 		}
 
-		var enumValue = @valueType.isEnum()
-
 		var inferables = {}
 		var mut enumConditions = 0
 		var mut maxConditions = 0
@@ -226,8 +224,8 @@ class MatchStatement extends Statement {
 			}
 		}
 
-		if enumConditions != 0 || enumValue {
-			if enumValue && enumConditions == maxConditions {
+		if enumConditions != 0 {
+			if @valueType.canBeEnum(false) {
 				pass
 			}
 			else {
@@ -235,7 +233,7 @@ class MatchStatement extends Statement {
 					clause.filter.setCastingEnum(true)
 				}
 
-				if enumValue || @valueType.isAny() {
+				if @valueType.isAny() || @valueType.canBeEnum() {
 					@castingEnum = true
 
 					if !@reusableValue {
@@ -557,27 +555,36 @@ class MatchStatement extends Statement {
 			fragments.compile(@declaration)
 		}
 		else if @reusableValue {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
+			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
 
 			if @castingEnum {
 				if @valueType.isEnum() {
-					line.code('.value')
+					line.compile(@value).code('.value')
 				}
 				else if @valueType.isAny() {
-					line.code('.valueOf()')
+					line.code($runtime.helper(this), '.valueOf(').compile(@value).code(')')
 				}
+				else {
+					line.compile(@value)
+				}
+			}
+			else {
+				line.compile(@value)
 			}
 
 			line.done()
 		}
 		else if @castingEnum {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
+			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
 
 			if @valueType.isEnum() {
-				line.code('.value')
+				line.code(@data.expression.name, '.value')
 			}
 			else if @valueType.isAny() {
-				line.code('.valueOf()')
+				line.code($runtime.helper(this), '.valueOf(', @data.expression.name, ')')
+			}
+			else {
+				line.code(@data.expression.name)
 			}
 
 			line.done()
@@ -894,6 +901,7 @@ class MatchConditionArray extends AbstractNode {
 		}
 	} # }}}
 	isEnum() => false
+	setCastingEnum(_)
 	toBeforehandFragments(fragments) { # {{{
 		if @values.length > 0 {
 			var mut line = fragments.newLine()
@@ -1023,6 +1031,7 @@ class MatchConditionObject extends AbstractNode {
 		}
 	} # }}}
 	isEnum() => false
+	setCastingEnum(_)
 	toBeforehandFragments(fragments) { # {{{
 		if #@properties {
 			var line = fragments.newLine()
@@ -1109,6 +1118,7 @@ class MatchConditionRange extends AbstractNode {
 		@right.translate()
 	} # }}}
 	isEnum() => false
+	setCastingEnum(_)
 	toBeforehandFragments(fragments)
 	toConditionFragments(fragments, name, junction, precondition?) { # {{{
 		var check = precondition?(junction, 'number')
@@ -1142,6 +1152,7 @@ class MatchConditionType extends AbstractNode {
 	} # }}}
 	translate()
 	isEnum() => false
+	setCastingEnum(_)
 	toBeforehandFragments(fragments)
 	toConditionFragments(fragments, name, junction, precondition?) { # {{{
 		precondition?(junction, 'any')
@@ -1206,25 +1217,10 @@ class MatchConditionValue extends AbstractNode {
 		if @values.length == 1 {
 			var value = @values[0]
 
-			fragments.code(name, ' === ').compile(value)
-
-			if @castingEnum {
-				if @type.isEnum() {
-					fragments.code('.value')
-				}
-				else if @type.isAny() {
-					fragments.code('.valueOf()')
-				}
+			if @type.isContainer() {
+				@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 			}
-		}
-		else if @values.length > 1 {
-			fragments.code('(') if junction == Junction.AND
-
-			for var value, index in @values {
-				if index > 0 {
-					fragments.code(' || ')
-				}
-
+			else {
 				fragments.code(name, ' === ').compile(value)
 
 				if @castingEnum {
@@ -1233,6 +1229,35 @@ class MatchConditionValue extends AbstractNode {
 					}
 					else if @type.isAny() {
 						fragments.code('.valueOf()')
+					}
+				}
+			}
+		}
+		else if @values.length > 1 {
+			fragments.code('(') if junction == Junction.AND
+
+			var mut literal = null
+
+			for var value, index in @values {
+				if index > 0 {
+					fragments.code(' || ')
+				}
+
+				if value.type().isContainer() {
+					literal ??= new Literal(false, this, @scope:Scope, name)
+
+					value.type().toPositiveTestFragments(fragments, literal)
+				}
+				else {
+					fragments.code(name, ' === ').compile(value)
+
+					if @castingEnum {
+						if @type.isEnum() {
+							fragments.code('.value')
+						}
+						else if @type.isAny() {
+							fragments.code('.valueOf()')
+						}
 					}
 				}
 			}

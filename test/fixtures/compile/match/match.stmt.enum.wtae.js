@@ -10,7 +10,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(card) {
-		let __ks_0 = card.valueOf();
+		let __ks_0 = Helper.valueOf(card);
 		if(__ks_0 === CardSuit.Clubs.value) {
 			console.log("clubs");
 		}
