@@ -1,0 +1,79 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "isCat",
+      1,
+      "Pet",
+      2,
+      "PetKind"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "this": {
+          "reference": 1
+        },
+        "parameters": [],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "system": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {
+          "kind": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      },
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": 1,
+        "exhaustive": true,
+        "variables": [
+          "Cat",
+          "Dog"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

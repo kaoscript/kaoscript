@@ -540,7 +540,7 @@ class EnumPossibilityTracker extends PossibilityTracker {
 					@possibilities.remove(value.property())
 				}
 				else {
-					console.log(value)
+					echo(value)
 					throw new NotImplementedException()
 				}
 			}

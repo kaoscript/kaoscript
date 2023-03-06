@@ -1,0 +1,1 @@
+ReferenceException: The function "isCat" is missing the "this" context (fixtures/compile/this/this.func.curry.nb.ks:2)

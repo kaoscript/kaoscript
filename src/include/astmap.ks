@@ -86,6 +86,7 @@ var $expressions = {
 	`\(NodeKind.ObjectBinding)`					: ObjectBinding
 	`\(NodeKind.ObjectExpression)`				: ObjectExpression
 	`\(NodeKind.OmittedExpression)`				: OmittedExpression
+	`\(NodeKind.PlaceholderArgument)`			: PlaceholderArgument
 	`\(NodeKind.PositionalArgument)`			: PositionalArgument
 	`\(NodeKind.Reference)`						: func(data, parent, scope) {
 		if var newData ?= parent.getASTReference(data.name) {

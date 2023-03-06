@@ -182,12 +182,12 @@ module.exports = function() {
 		return $binder.__ks_rt(this, arguments);
 	};
 	$binder.__ks_0 = function(last, components, first, firstArgs) {
-		const that = first.call(null, ...firstArgs);
+		const that = first(...firstArgs);
 		const lastArgs = Helper.mapObject(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
-		return last.call(null, ...lastArgs);
+		return last(...lastArgs);
 	};
 	$binder.__ks_rt = function(that, args) {
 		const t0 = Type.isFunction;
@@ -332,7 +332,7 @@ module.exports = function() {
 	$find.__ks_0 = function(from, to) {
 		for(const name in $spaces[from].converters) {
 			if(Type.isValue($spaces[name].converters[to])) {
-				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
+				$spaces[from].converters[to] = (__ks_0) => $binder($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name], ...__ks_0);
 				return;
 			}
 		}

@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_func_append_0 = function(args) {
 		for(let i = 0; i < args.length; ++i) {
-			this.push(...args[i]);
+			this.push.apply(this, [].concat(args[i]));
 		}
 		return this;
 	};

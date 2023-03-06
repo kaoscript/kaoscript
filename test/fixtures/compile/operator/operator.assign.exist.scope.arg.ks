@@ -1,6 +1,6 @@
 extern console, context
 
-func foo() {
+func foo(this) {
 	return this.message
 }
 

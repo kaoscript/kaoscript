@@ -1,0 +1,72 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "addOne"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "parameters": [
+              {
+                "external": "y",
+                "internal": "y",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "external": "z",
+                "internal": "z",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          },
+          {
+            "kind": "function",
+            "index": 1,
+            "async": false,
+            "parameters": [
+              {
+                "external": "y",
+                "internal": "y",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "external": "z",
+                "internal": "z",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

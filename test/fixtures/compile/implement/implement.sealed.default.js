@@ -32,7 +32,7 @@ module.exports = function() {
 		__ks_func_draw_1(shape) {
 			return Helper.concatString("I'm drawing a ", this._color, " ", shape, ".");
 		}
-		draw() {
+		draw(...args) {
 			const t0 = Type.isValue;
 			if(args.length === 0) {
 				return this.__ks_func_draw_0();

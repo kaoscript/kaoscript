@@ -127,6 +127,10 @@ class ClassConstructorDeclaration extends Statement {
 
 		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
 
+		@type.unflagAssignableThis()
+
+		@type.setThisType(@parent.type().reference())
+
 		var dyn overridden
 
 		if @parent.isExtending() {

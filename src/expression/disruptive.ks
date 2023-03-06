@@ -26,7 +26,6 @@ class DisruptiveExpression extends Expression {
 
 			if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
 				@declarator = declarator
-				// @insitu = true
 			}
 		}
 

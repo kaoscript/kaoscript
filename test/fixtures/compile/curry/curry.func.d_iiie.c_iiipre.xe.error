@@ -1,0 +1,1 @@
+ReferenceException: The function "add" can't be matched to given arguments (Number, Number, Number, ...) (fixtures/compile/curry/curry.func.d_iiie.c_iiipre.xe.ks:3)

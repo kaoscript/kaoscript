@@ -4,6 +4,49 @@ abstract class Callee {
 		@nullable: Boolean			= false
 		@nullableProperty: Boolean	= false
 	}
+	static {
+		buildPositionHash(positions: CallMatchPosition[]) { # {{{
+			var mut hash = ''
+
+			for var position, index in positions {
+				hash += ',' if index != 0
+
+				if position is Array {
+					for var { index, element, from }, i in position {
+						hash += '|' if i != 0
+
+						if !?index {
+							pass
+						}
+						else if ?element {
+							hash += `\(index)[\(element)]`
+						}
+						else if ?from {
+							hash += `\(index)/\(from)`
+						}
+						else {
+							hash += `\(index)`
+						}
+					}
+				}
+				else {
+					var { index, element, from } = position
+
+					if !?index {
+						pass
+					}
+					else if ?element {
+						hash += `\(index)[\(element)]`
+					}
+					else {
+						hash += `\(index)`
+					}
+				}
+			}
+
+			return hash
+		}
+	} # }}}
 	constructor(@data) { # {{{
 		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Nullable {
@@ -40,7 +83,7 @@ abstract class PreciseCallee extends Callee {
 		@hash: String?
 		@index: Number
 		@node: CallExpression
-		@positions: CallMatchArgument[]
+		@positions: CallMatchPosition[]
 		@scope: ScopeKind
 		@type: Type
 	}

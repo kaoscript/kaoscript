@@ -70,6 +70,10 @@ class IdentifierLiteral extends Literal {
 			}
 		}
 		else {
+			if @value == 'this' {
+				SyntaxException.throwReservedThisVariable(this)
+			}
+
 			@isVariable = true
 			@line = @scope.line()
 		}
@@ -107,6 +111,7 @@ class IdentifierLiteral extends Literal {
 			TypeException.throwInvalidIdentifierType(@value, @realType, target, this)
 		}
 	} # }}}
+	caller() => 'null'
 	export(recipient) { # {{{
 		recipient.export(@value, this)
 	} # }}}

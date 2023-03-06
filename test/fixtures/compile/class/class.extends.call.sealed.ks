@@ -1,6 +1,6 @@
 impl Object {
 	static {
-		merge(...args): Object => {}
+		merge(...args?): Object => {}
 	}
 }
 

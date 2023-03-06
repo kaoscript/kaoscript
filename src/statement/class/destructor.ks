@@ -51,6 +51,10 @@ class ClassDestructorDeclaration extends Statement {
 		@parameters[0].prepare()
 
 		@type = new ClassDestructorType(@data, this)
+
+		@type.unflagAssignableThis()
+
+		@type.setThisType(@parent.type().reference())
 	} # }}}
 	translate() { # {{{
 		@block = $compile.function($ast.body(@data), this)

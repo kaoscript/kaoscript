@@ -13,7 +13,7 @@ class PreciseThisCallee extends MethodCallee {
 		@instance = match.function.isInstance()
 		@sealed = match.function.isSealed()
 	} # }}}
-	override buildHashCode() => `this:\(@property):\(@index):\(@alien):\(@instance):\(@positions.join(','))`
+	override buildHashCode() => `this:\(@property):\(@index):\(@alien):\(@instance):\(Callee.buildPositionHash(@positions))`
 	toFragments(fragments, mode, node) { # {{{
 		if @sealed {
 			var name = @objectType.getSealedPath()
@@ -21,9 +21,6 @@ class PreciseThisCallee extends MethodCallee {
 			if @flatten {
 				match node._data.scope.kind {
 					ScopeKind.Argument {
-						throw new NotImplementedException(node)
-					}
-					ScopeKind.Null {
 						throw new NotImplementedException(node)
 					}
 					ScopeKind.This {
@@ -34,16 +31,13 @@ class PreciseThisCallee extends MethodCallee {
 							fragments.code(`\(name).__ks_sttc_\(@property)_\(@function.index()).apply(this`)
 						}
 
-						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, null, fragments, mode)
 					}
 				}
 			}
 			else {
 				match @scope {
 					ScopeKind.Argument {
-						throw new NotImplementedException(node)
-					}
-					ScopeKind.Null {
 						throw new NotImplementedException(node)
 					}
 					ScopeKind.This {
@@ -57,7 +51,7 @@ class PreciseThisCallee extends MethodCallee {
 							fragments.code(`\(name).__ks_sttc_\(@property)_\(@function.index())(this`)
 						}
 
-						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, true, fragments, mode)
 					}
 				}
 			}
@@ -67,9 +61,6 @@ class PreciseThisCallee extends MethodCallee {
 
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind.This {
@@ -83,7 +74,7 @@ class PreciseThisCallee extends MethodCallee {
 						fragments.code(`\(name).__ks_sttc_\(@property)_\(@index)(`)
 					}
 
-					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
+					Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, true, fragments, mode)
 				}
 			}
 		}

@@ -218,6 +218,12 @@ export class ReferenceException extends Exception {
 		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
 		} # }}}
+		throwMissingThisContext(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The function "\(name)" is missing the "this" context`, node)
+		} # }}}
+		throwNoAssignableThisInMethod(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The method "\(name)" can't be rebinded to a new "this" context`, node)
+		} # }}}
 		throwNoMatchingConstructor(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to no arguments`, node)
@@ -265,6 +271,9 @@ export class ReferenceException extends Exception {
 			else {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
+		} # }}}
+		throwNoMatchingThis(name, node): Never ~ ReferenceException { # {{{
+			throw new ReferenceException(`The "this" context of function "\(name)" can't be matched`, node)
 		} # }}}
 		throwUnrecognizedNamedArgument(name, node): Never ~ ReferenceException { # {{{
 			throw new ReferenceException(`The argument "\(name)" isn't recognized`, node)
@@ -691,6 +700,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwReservedStaticVariable(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The class variable "\(name)" is reserved`, node)
+		} # }}}
+		throwReservedThisVariable(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`The variable "this" is reserved`, node)
 		} # }}}
 		throwShadowFunction(name, function, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The function "\(name)\(function.toQuote())" is been concealed by others functions`, node)

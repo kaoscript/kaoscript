@@ -1,0 +1,1 @@
+ReferenceException: "this" is not defined (fixtures/compile/keyword/keyword.this.function.default.ks:2)

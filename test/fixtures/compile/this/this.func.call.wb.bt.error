@@ -1,0 +1,1 @@
+ReferenceException: The "this" context of function "isCat" can't be matched (fixtures/compile/this/this.func.call.wb.bt.ks:2)

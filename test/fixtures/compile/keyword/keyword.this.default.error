@@ -1,0 +1,1 @@
+SyntaxException: The variable "this" is reserved (fixtures/compile/keyword/keyword.this.default.ks:1)

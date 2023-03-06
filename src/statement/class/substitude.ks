@@ -16,11 +16,13 @@ class CallThisConstructorSubstitude extends Substitude {
 
 		var assessment = class.type().getConstructorAssessment(class.name(), node)
 
-		if var result ?= Router.matchArguments(assessment, @arguments, node) {
-			@result = result
-		}
-		else {
-			ReferenceException.throwNoMatchingConstructor(class.name(), @arguments, node)
+		match Router.matchArguments(assessment, null, @arguments, node) {
+			is LenientCallMatchResult | PreciseCallMatchResult with result {
+				@result = result
+			}
+			else {
+				ReferenceException.throwNoMatchingConstructor(class.name(), @arguments, node)
+			}
 		}
 	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
@@ -56,7 +58,7 @@ class CallThisConstructorSubstitude extends Substitude {
 
 				fragments.code(`\(@class.path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
-				Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
+				Router.Argument.toFragments(positions, null, @arguments, function, false, true, true, fragments, mode)
 			}
 			else {
 				throw new NotImplementedException()
@@ -85,7 +87,7 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 
 				fragments.code(`__ks_cons_\(function.index())`).code('(')
 
-				Router.Argument.toFragments(positions, null, @arguments, function, false, false, fragments, mode)
+				Router.Argument.toFragments(positions, null, @arguments, function, false, false, true, fragments, mode)
 			}
 			else {
 				throw new NotImplementedException()
@@ -108,12 +110,16 @@ class CallSuperConstructorSubstitude extends Substitude {
 		var extends = @class.type().extends()
 		var assessment = extends.type().getConstructorAssessment(extends.name(), node)
 
-		if var result ?= Router.matchArguments(assessment, @arguments, node) {
-			@result = result
-			@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
-		}
-		else if extends.type().isExhaustiveConstructor(node) {
-			ReferenceException.throwNoMatchingConstructor(extends.name(), @arguments, node)
+		match Router.matchArguments(assessment, null, @arguments, node) {
+			is LenientCallMatchResult | PreciseCallMatchResult with result {
+				@result = result
+				@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
+			}
+			else {
+				if extends.type().isExhaustiveConstructor(node) {
+					ReferenceException.throwNoMatchingConstructor(extends.name(), @arguments, node)
+				}
+			}
 		}
 	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
@@ -148,7 +154,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 
 			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_\(function.index())`).code('.call(this')
 
-			Router.Argument.toFragments(positions, null, @arguments, function, false, true, fragments, mode)
+			Router.Argument.toFragments(positions, null, @arguments, function, false, true, true, fragments, mode)
 		}
 		else {
 			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_rt.call(null, this, [`)
@@ -199,21 +205,21 @@ class CallSuperMethodES6Substitude extends Substitude {
 
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		var result = Router.matchArguments(assessment, @arguments, @method)
+		match Router.matchArguments(assessment, null, @arguments, @method) {
+			is LenientCallMatchResult | PreciseCallMatchResult with result {
+				@result = result
 
-		if ?result {
-			@result = result
-
-			if result is PreciseCallMatchResult && result.matches.length == 1 {
-				@name = `__ks_func_\(@method.name())_\(result.matches[0].function.index())`
-				@precise = true
+				if result is PreciseCallMatchResult && result.matches.length == 1 {
+					@name = `__ks_func_\(@method.name())_\(result.matches[0].function.index())`
+					@precise = true
+				}
+				else {
+					@name = `__ks_func_\(@method.name())_rt`
+				}
 			}
 			else {
-				@name = `__ks_func_\(@method.name())_rt`
+				ReferenceException.throwNoMatchingStaticMethod(@method.name(), @class.name(), [argument.type() for var argument in @arguments], @method)
 			}
-		}
-		else {
-			ReferenceException.throwNoMatchingStaticMethod(@method.name(), @class.name(), [argument.type() for var argument in @arguments], @method)
 		}
 
 		@extendsName = @class.type().extends().name()
@@ -259,7 +265,9 @@ class CallSuperMethodES6Substitude extends Substitude {
 }
 
 class CallSealedSuperMethodSubstitude extends Substitude {
-	private {
+	// TODO!
+	// private {
+	private late {
 		@arguments
 		@class: NamedType<ClassType>
 		@data
@@ -273,22 +281,22 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		var result = Router.matchArguments(assessment, @arguments, @method)
+		match Router.matchArguments(assessment, null, @arguments, @method) {
+			is LenientCallMatchResult | PreciseCallMatchResult with result {
+				@result = result
 
-		if ?result {
-			@result = result
-
-			if result is PreciseCallMatchResult && result.matches.length == 1 {
-				@name = `__ks_func_\(@method.name())_\(result.matches[0].function.index())`
-				@sealed = result.matches[0].function.isSealed()
+				if result is PreciseCallMatchResult && result.matches.length == 1 {
+					@name = `__ks_func_\(@method.name())_\(result.matches[0].function.index())`
+					@sealed = result.matches[0].function.isSealed()
+				}
+				else {
+					@name = `_im_\(@method.name())`
+					@sealed = true
+				}
 			}
 			else {
-				@name = `_im_\(@method.name())`
-				@sealed = true
+				throw new NotImplementedException(@method)
 			}
-		}
-		else {
-			throw new NotImplementedException(@method)
 		}
 	} # }}}
 	isNullable() => false

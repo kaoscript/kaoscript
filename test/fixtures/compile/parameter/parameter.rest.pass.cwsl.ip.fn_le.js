@@ -41,7 +41,7 @@ module.exports = function(expect) {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		__ks_ClassA.__ks_func_foobar_0.call(a, values);
+		__ks_ClassA._im_foobar(a, ...values);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isArray;

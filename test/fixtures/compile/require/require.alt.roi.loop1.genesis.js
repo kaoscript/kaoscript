@@ -40,10 +40,10 @@ module.exports = function(__ks_Array, __ks_Object) {
 		return clone.__ks_rt(this, arguments);
 	};
 	clone.__ks_0 = function(value) {
-		return this;
+		return __ks_Array.__ks_sttc_clone_0(value);
 	};
 	clone.__ks_1 = function(value) {
-		return this;
+		return __ks_Object.__ks_sttc_clone_0(value);
 	};
 	clone.__ks_2 = function(value) {
 		if(value === void 0) {

@@ -1,21 +1,30 @@
 class LenientFunctionCallee extends Callee {
 	private {
+		@curry
 		@expression
 		@flatten: Boolean
 		@function: FunctionType
 		@functions: FunctionType[]
 		@hash: String
 		@labelable: Boolean
-		@labels: Number{}?
 		@node: CallExpression
-		@positions: Number[]
+		@result: LenientCallMatchResult?
 		@scope: ScopeKind
 		@type: Type
 	}
-	constructor(@data, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
-		this(data, assessment, result.possibilities, result.positions, result.labels, node)
+	// TODO!
+	// constructor(@data, assessment: Router.Assessment, @result!, @node) { # {{{
+	constructor(@data, assessment: Router.Assessment, @result, @node) { # {{{
+		this(data, assessment, result.possibilities, node)
+
+		if ?@result.positions {
+			@hash += `:\(Callee.buildPositionHash(@result.positions))`
+		}
+		if ?@result.labels {
+			@hash += `:\(Object.map(@result.labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
+		}
 	} # }}}
-	constructor(@data, assessment: Router.Assessment, @functions, @positions = [], @labels = null, @node) { # {{{
+	constructor(@data, assessment: Router.Assessment, @functions, @node) { # {{{
 		super(data)
 
 		{ @labelable } = assessment
@@ -41,12 +50,6 @@ class LenientFunctionCallee extends Callee {
 
 		@hash = 'lenient'
 		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`
-		if ?@positions {
-			@hash += `:\(@positions.join(','))`
-		}
-		if ?@labels {
-			@hash += `:\(Object.map(@labels, ([label, index], ...) => `\(label)=\(index)`).join(','))`
-		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(@flatten)
@@ -69,11 +72,6 @@ class LenientFunctionCallee extends Callee {
 					.code('.apply(')
 					.compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
-				fragments
-					.compileReusable(@expression)
-					.code('.apply(null')
-			}
 			else {
 				fragments
 					.compileReusable(@expression)
@@ -81,27 +79,78 @@ class LenientFunctionCallee extends Callee {
 					.compile(@expression.caller(), mode)
 			}
 
-			Router.Argument.toFlatFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
+			Router.Argument.toFlatFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, null, fragments, mode)
 		}
 		else {
 			match @scope {
 				ScopeKind.Argument {
 					fragments.wrap(@expression, mode).code('.call(').compile(node.getCallScope(), mode)
 
-					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
-				}
-				ScopeKind.Null {
-					fragments.wrap(@expression, mode).code('.call(null')
-
-					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
+					Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, false, fragments, mode)
 				}
 				ScopeKind.This {
 					fragments.wrap(@expression, mode).code('(')
-
-					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, false, fragments, mode)
+					
+					Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, false, false, fragments, mode)
 				}
 			}
 		}
+	} # }}}
+	toCurryFragments(fragments, mode, node) { # {{{
+		var [type, map] = @curry
+
+		match @scope {
+			ScopeKind.Argument {
+				throw new NotImplementedException()
+			}
+			ScopeKind.This {
+				fragments.code('(')
+
+				for var _, index in type.parameters() {
+					fragments.code($comma) if index != 0
+
+					fragments.code(`__ks_\(index)`)
+				}
+
+				fragments.code(') => ').compile(@expression).code('(')
+
+				var arguments = @node.arguments()
+
+				CurryExpression.toArgumentFragments(map, arguments, false, fragments, mode)
+			}
+		}
+	} # }}}
+	toCurryType() { # {{{
+		if !?@result {
+			throw new NotImplementedException()
+		}
+
+		if ?@result.matches {
+			if @result.matches.length > 1 {
+				var overloaded = new OverloadedFunctionType(@node.scope())
+
+				for var { function, positions }, index in @result.matches {
+					@curry = CurryExpression.toCurryType(function, positions, false, @node)
+
+					overloaded.addFunction(@curry[0])
+				}
+
+				return overloaded
+			}
+			else {
+				@curry = CurryExpression.toCurryType(@result.matches[0].function, @result.matches[0].positions, false, @node)
+
+				return @curry[0]
+			}
+		}
+
+		if ?@result.positions && @result.possibilities.length == 1 {
+			@curry = CurryExpression.toCurryType(@result.possibilities[0], @result.positions, false, @node)
+
+			return @curry[0]
+		}
+
+		throw new NotImplementedException()
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
 		if @nullable {

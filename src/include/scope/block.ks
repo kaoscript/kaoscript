@@ -410,7 +410,7 @@ class BlockScope extends Scope {
 		return if @renamedVariables[name] is String
 
 		var index = @getRenamedIndex(name) + 1
-		var newName = '__ks_' + name + '_' + index
+		var newName = `__ks_\(name)_\(index)`
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName

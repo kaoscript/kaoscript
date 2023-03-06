@@ -9,15 +9,20 @@ class ClassProxyDeclaration extends Statement {
 		@type: Type
 	}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newInstanceMethodScope())
-
-		@name = data.internal.name
+		var mut instance = true
 
 		for modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Static {
-				@instance = false
+				instance = false
+
+				break
 			}
 		}
+
+		super(data, parent, parent.newMethodScope(instance))
+
+		@name = data.internal.name
+		@instance = instance
 
 		parent._proxies.push(this)
 	} # }}}
@@ -150,13 +155,19 @@ class ClassProxyGroupDeclaration extends Statement {
 		@recipientPath: String
 	}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newInstanceMethodScope())
+		var mut instance = true
 
 		for modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Static {
-				@instance = false
+				instance = false
+
+				break
 			}
 		}
+
+		super(data, parent, parent.newMethodScope(instance))
+
+		@instance = instance
 
 		parent._proxies.push(this)
 	} # }}}

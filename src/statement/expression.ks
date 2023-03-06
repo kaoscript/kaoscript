@@ -120,7 +120,7 @@ class ExpressionStatement extends Statement {
 			pass
 		}
 		else if @expression.isAwaiting() {
-			return this.toAwaitStatementFragments^@(fragments)
+			return this.toAwaitStatementFragments^^(fragments, ^)
 		}
 		else if @expression.isDeclarable() {
 			if #@assignments {

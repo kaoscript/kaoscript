@@ -390,6 +390,7 @@ class FunctionDeclarator extends AbstractNode {
 		@returnNull: Boolean			= false
 		@variable: FunctionVariable
 		@topNodes: Array				= []
+		@thisVariable: Variable?
 		@type: FunctionType
 	}
 	constructor(@variable, @data, @parent) { # {{{
@@ -400,20 +401,40 @@ class FunctionDeclarator extends AbstractNode {
 	analyse() { # {{{
 		@offset = @scope.module().getLineOffset()
 
-		@scope.define('this', true, Type.Any, this)
+		if #@data.parameters {
+			var mut firstParameter = 0
+			var parameter = @data.parameters[0]
 
-		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			if parameter.external?.name == 'this' || parameter.internal?.name == 'this' {
+				if parameter.external?.name == parameter.internal?.name == 'this' {
+					firstParameter = 1
 
-			parameter.analyse()
+					@thisVariable = @scope.define('this', true, Type.Any, this)
+				}
+				else {
+					throw new NotImplementedException()
+				}
+			}
 
-			@parameters.push(parameter)
+			for var data in @data.parameters from firstParameter {
+				var parameter = new Parameter(data, this)
+
+				parameter.analyse()
+
+				@parameters.push(parameter)
+			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@scope.module().setLineOffset(@offset)
 
 		@scope.line(@data.start.line)
+
+		if ?@thisVariable && ?@data.parameters[0].type {
+			var type = Type.fromAST(@data.parameters[0].type, this)
+
+			@thisVariable.setDeclaredType(type)
+		}
 
 		for var parameter in @parameters {
 			parameter.prepare()
@@ -430,6 +451,10 @@ class FunctionDeclarator extends AbstractNode {
 
 		if @autoTyping {
 			@type.setReturnType(@block.getUnpreparedType())
+		}
+
+		if ?@thisVariable {
+			@type.setThisType(@thisVariable.getDeclaredType())
 		}
 
 		@type.flagComplete()

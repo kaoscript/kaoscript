@@ -63,9 +63,6 @@ class SealedMethodCallee extends Callee {
 				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind.Null {
-					throw new NotImplementedException(node)
-				}
 				ScopeKind.This {
 					if @instance {
 						fragments.code(`\(@objectType.getSealedPath())._im_\(@property).apply(null, `)
@@ -83,9 +80,6 @@ class SealedMethodCallee extends Callee {
 		else {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind.This {

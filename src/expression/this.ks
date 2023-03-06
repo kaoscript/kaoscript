@@ -110,31 +110,35 @@ class ThisExpression extends Expression {
 					if type.hasInstantiableMethod(@name) {
 						var assessment = type.getInstantiableAssessment(@name, this)
 
-						if var result ?= Router.matchArguments(assessment, @parent.arguments(), this) {
-							var late functions: FunctionType[]
+						match Router.matchArguments(assessment, null, @parent.arguments(), this) {
+							is LenientCallMatchResult | PreciseCallMatchResult with result {
+								var late functions: FunctionType[]
 
-							if result is PreciseCallMatchResult {
-								functions = [match.function for var match in result.matches]
+								if result is PreciseCallMatchResult {
+									functions = [match.function for var match in result.matches]
+								}
+								else {
+									functions = result.possibilities
+								}
+
+								@type = Type.union(@scope, ...functions)
+
+								if functions.some((fn, ...) => fn.isSealed()) {
+									@sealed = true
+								}
+								else {
+									@fragment = `\(name).\(@name)`
+								}
 							}
 							else {
-								functions = result.possibilities
+								if type.isExhaustive(this) && @parent is not CurryExpression {
+									ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
+								}
+								else {
+									@fragment = `\(name).\(@name)`
+									@type = @scope.getChunkType(@fragment) ?? Type.union(@scope, ...type.listInstantiableMethods(@name))
+								}
 							}
-
-							@type = Type.union(@scope, ...functions)
-
-							if functions.some((fn, ...) => fn.isSealed()) {
-								@sealed = true
-							}
-							else {
-								@fragment = `\(name).\(@name)`
-							}
-						}
-						else if type.isExhaustive(this) && @parent is not CurryExpression {
-							ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
-						}
-						else {
-							@fragment = `\(name).\(@name)`
-							@type = @scope.getChunkType(@fragment) ?? Type.union(@scope, ...type.listInstantiableMethods(@name))
 						}
 					}
 					else {

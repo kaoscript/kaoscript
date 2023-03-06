@@ -38,7 +38,7 @@ namespace Fragment {
 
 					return `pts`
 				}
-				tester: getTester^$(context, fragments, node)
+				tester: getTester^$(context, fragments, node, ^)
 			}
 		} # }}}
 
@@ -218,7 +218,7 @@ namespace Fragment {
 		} # }}}
 	}
 
-	func getTester(fragments: MarkWriter, node: AbstractNode, type: Type): String { # {{{
+	func getTester(this, fragments: MarkWriter, node: AbstractNode, type: Type): String { # {{{
 		var hash = type.hashCode(true)
 
 		if var name ?= this.testers[hash] {

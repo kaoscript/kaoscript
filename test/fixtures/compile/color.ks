@@ -176,13 +176,13 @@ func $blend(x: float, y: float, percentage: float): float { # {{{
 } # }}}
 
 func $binder(last: func, components, first: func, ...firstArgs): func { # {{{
-	var that = first**(...firstArgs)
+	var that = first(...firstArgs)
 
 	var lastArgs = [that[component.field] for component, name of components]
 
 	lastArgs.push(that)
 
-	return last**(...lastArgs)
+	return last(...lastArgs)
 } # }}}
 
 namespace $caster {
@@ -238,7 +238,7 @@ func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}):
 func $find(from: string, to: string): void { # {{{
 	for var _, name of $spaces[from].converters {
 		if ?$spaces[name].converters[to] {
-			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
+			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name], ...)
 
 			return
 		}

@@ -18,6 +18,6 @@ var dyn user = 'john'
 
 var dyn info = [directory, ' ', user, ': ']
 
-var dyn logHello = log^^(machine, ':', ...info)
+var dyn logHello = log^^(machine, ':', ...info, ...)
 
 logHello('foo')

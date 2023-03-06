@@ -413,7 +413,7 @@ class VariableDeclaration extends AbstractNode {
 	toFragments(fragments, mode) { # {{{
 		if @hasValue {
 			if @value.isAwaiting() {
-				return this.toAwaitStatementFragments^@(fragments)
+				return this.toAwaitStatementFragments^^(fragments, ...)
 			}
 			else if @value.isInSituStatement() {
 				var declarator = @declarators[0]

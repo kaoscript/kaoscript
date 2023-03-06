@@ -65,7 +65,7 @@ class ClassDeclaration extends Statement {
 				NodeKind.BinaryExpression {
 					if data.operator.kind == BinaryOperatorKind.Assignment && data.operator.assignment == AssignmentOperatorKind.Equals {
 						if $ast.isThisField(name, data.left) {
-							return !$ast.some(data.right, $ast.isThisField^^(name))
+							return !$ast.some(data.right, $ast.isThisField^^(name, ^))
 						}
 					}
 				}
@@ -650,15 +650,17 @@ class ClassDeclaration extends Statement {
 	isHybrid() => @hybrid
 	level() => @class.level()
 	name() => @name
-	newInstanceMethodScope() { # {{{
+	newMethodScope(instance: Boolean) { # {{{
 		var scope = @newScope(@scope!?, ScopeType.Function)
 
-		scope.define('this', true, @scope.reference(@name), true, this)
+		if instance {
+			scope.define('this', true, @scope.reference(@name), true, this)
 
-		if @extending {
-			scope.flagExtending()
+			if @extending {
+				scope.flagExtending()
 
-			scope.define('super', true, @scope.reference(@extendsName), true, this)
+				scope.define('super', true, @scope.reference(@extendsName), true, this)
+			}
 		}
 
 		return scope
@@ -1198,7 +1200,7 @@ class ClassDeclaration extends Statement {
 						fragments.code(`\(name)(kws, ...args)`).step()
 					}
 					else {
-						fragments.code(`\(name)()`).step()
+						fragments.code(`\(name)(...args)`).step()
 					}
 				}
 				(fragments) => fragments.done()
@@ -1332,19 +1334,18 @@ class ClassDeclaration extends Statement {
 		}
 	} # }}}
 	updateMethodScope(method) { # {{{
-		if @extending {
-			var variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
+		if method.isInstance() {
+			if @extending {
+				var variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
-			if @extendsType.isSealed() {
-				variable.replaceCall = (data, arguments, node) => new CallSealedSuperMethodSubstitude(data, arguments, method, @type)
-				variable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
-				variable.replaceContext = () => (fragments) => fragments.code('this')
-			}
-			else if @es5 {
-				throw new NotSupportedException()
-			}
-			else {
-				variable.replaceCall = (data, arguments, node) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
+				if @extendsType.isSealed() {
+					variable.replaceCall = (data, arguments, node) => new CallSealedSuperMethodSubstitude(data, arguments, method, @type)
+					variable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
+					variable.replaceContext = () => (fragments) => fragments.code('this')
+				}
+				else {
+					variable.replaceCall = (data, arguments, node) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
+				}
 			}
 		}
 	} # }}}

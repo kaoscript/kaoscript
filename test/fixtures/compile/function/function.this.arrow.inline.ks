@@ -1,3 +1,0 @@
-func foobar() {
-	return () => this
-}

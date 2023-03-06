@@ -5,16 +5,7 @@ module.exports = function() {
 		return new OBJ();
 	};
 	__ks_Object._sm_merge = function() {
-		const t0 = Type.isValue;
-		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
-		let pts;
-		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
-			return __ks_Object.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
-		}
-		if(Object.merge) {
-			return Object.merge(...arguments);
-		}
-		throw Helper.badArgs();
+		return __ks_Object.__ks_sttc_merge_0(Array.from(arguments));
 	};
 	class Foobar {
 		static __ks_new_0(...args) {

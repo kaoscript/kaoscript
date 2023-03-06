@@ -24,6 +24,6 @@ module.exports = function() {
 	let info = (() => {
 		return [machine, ":", directory, " "];
 	})();
-	let logHello = Helper.vcurry(log, null, ...info, user, ": ");
+	let logHello = (__ks_0) => log(...info, user, ": ", ...__ks_0);
 	logHello("foo");
 };

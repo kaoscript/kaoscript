@@ -884,7 +884,7 @@ class TryStatement extends Statement {
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if @await {
-			return this.toAwaitStatementFragments^@(fragments)
+			return this.toAwaitStatementFragments^^(fragments, ^)
 		}
 		else {
 			var ctrl = fragments

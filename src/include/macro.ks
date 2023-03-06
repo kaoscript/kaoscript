@@ -10,13 +10,13 @@ var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 
 func $autoEvaluate(macro, node, data) { # {{{
 	return $evaluate($compileMacro(Generator.generate(data, {
 		transformers: {
-			expression: $transformExpression^^(macro, node)
+			expression: $transformExpression^^(macro, node, ^, ^)
 		}
 	})))
 } # }}}
 
 func $compileMacro(source: String, standardLibrary: Boolean = false): String { # {{{
-	// console.log('--> ', source)
+	// echo('--> ', source)
 
 	var compiler = new Compiler('__ks__', {
 		register: false
@@ -28,7 +28,7 @@ func $compileMacro(source: String, standardLibrary: Boolean = false): String { #
 	}
 
 	compiler.compile('extern console, JSON\nrequire __ks_marker\nreturn ' + source)
-	// console.log('=- ', compiler.toSource())
+	// echo('=- ', compiler.toSource())
 
 	return compiler.toSource()
 } # }}}
@@ -258,8 +258,8 @@ class MacroDeclaration extends AbstractNode {
 		else {
 			var builder = new Generator.KSWriter({
 				filters: {
-					expression: this.filter^@(false)
-					statement: this.filter^@(true)
+					expression: this.filter^^(false, ^, ^)
+					statement: this.filter^^(true, ^, ^)
 				}
 			})
 
@@ -355,13 +355,13 @@ class MacroDeclaration extends AbstractNode {
 			@buildFunction()
 		}
 
-		// console.log(@fn.toString())
+		// echo(@fn.toString())
 		var module = @module()
 		@executeCount += 1
 
-		var args = [$autoEvaluate^^(this, parent), $reificate^^(this, parent)].concat(arguments)
+		var args = [$autoEvaluate^^(this, parent, ^), $reificate^^(this, parent, ...)].concat(arguments)
 
-		// console.log(args)
+		// echo(args)
 		var mut data = @fn(...args)
 
 		try {

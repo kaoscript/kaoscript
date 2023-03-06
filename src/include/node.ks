@@ -66,7 +66,7 @@ abstract class AbstractNode {
 	} # }}}
 	parent() => @parent
 	printDebug() { # {{{
-		console.log(`\(@file()):\(@data.start.line)`)
+		echo(`\(@file()):\(@data.start.line)`)
 	} # }}}
 	reference() { # {{{
 		if ?@parent?.reference() {

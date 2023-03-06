@@ -44,9 +44,6 @@ class LenientThisCallee extends Callee {
 				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind.Null {
-					throw new NotImplementedException(node)
-				}
 				ScopeKind.This {
 					fragments.code(`\(name).\(@property).apply(\(name)`)
 				}
@@ -57,9 +54,6 @@ class LenientThisCallee extends Callee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind.This {

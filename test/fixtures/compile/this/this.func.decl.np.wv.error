@@ -1,0 +1,1 @@
+SyntaxException: The variable "this" is reserved (fixtures/compile/this/this.func.decl.np.wv.ks:2)

@@ -119,11 +119,6 @@ class DefaultCallee extends Callee {
 					.code('.apply(')
 					.compile(node.getCallScope(), mode)
 			}
-			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
-				fragments
-					.compileReusable(@expression)
-					.code('.apply(null')
-			}
 			else {
 				fragments
 					.compileReusable(@expression)
@@ -144,15 +139,6 @@ class DefaultCallee extends Callee {
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
-				ScopeKind.Null {
-					fragments.wrap(@expression, mode).code('.call(null')
-
-					for var argument in node.arguments() {
-						fragments.code($comma)
-
-						DefaultCallee.toArgumentFragments(argument, fragments, mode)
-					}
-				}
 				ScopeKind.This {
 					fragments.wrap(@expression, mode).code('(')
 
@@ -166,67 +152,51 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	toCurryFragments(fragments, mode, node) { # {{{
-		node.module().flag('Helper')
-
-		if @flatten {
-			match @scope {
-				ScopeKind.Argument {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code($comma)
-						.compile(node.getCallScope())
-				}
-				ScopeKind.Null {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code(', null')
-				}
-				ScopeKind.This {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code($comma)
-						.compile(@expression.caller())
-				}
+		match @scope {
+			ScopeKind.Argument {
+				throw new NotImplementedException()
 			}
+			ScopeKind.This {
+				var arguments = @node.arguments()
+				var parameters = []
 
-			for argument in node.arguments() {
-				fragments.code($comma)
+				fragments.code('(')
 
-				DefaultCallee.toArgumentFragments(argument, fragments, mode)
+				for var argument in arguments {
+					if argument is PlaceholderArgument {
+						fragments.code($comma) if #parameters
+
+						var name = `__ks_\(parameters.length)`
+
+						fragments.code(name)
+						parameters.push(name)
+					}
+				}
+
+				fragments.code(') => ').compile(@expression).code('(')
+
+				for var argument, index in arguments {
+					fragments.code($comma) if index != 0
+
+					if argument is PlaceholderArgument {
+						fragments.code(parameters.shift())
+					}
+					else {
+						argument.toArgumentFragments(fragments, mode)
+					}
+				}
 			}
 		}
+	} # }}}
+	toCurryType() { # {{{
+		if @type is FunctionType {
+			throw new NotImplementedException()
+		}
 		else {
-			match @scope {
-				ScopeKind.Argument {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code($comma)
-						.compile(node.getCallScope())
-				}
-				ScopeKind.Null {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code(', null')
-				}
-				ScopeKind.This {
-					fragments
-						.code($runtime.helper(node), '.vcurry(')
-						.compile(@expression)
-						.code(', ')
-						.compile(@expression.caller())
-				}
-			}
+			var type = new FunctionType(@node.scope())
+			type.addParameter(AnyType.NullableExplicit, null, 0, Infinity)
 
-			for argument in node.arguments() {
-				fragments.code($comma)
-
-				DefaultCallee.toArgumentFragments(argument, fragments, mode)
-			}
+			return type
 		}
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{

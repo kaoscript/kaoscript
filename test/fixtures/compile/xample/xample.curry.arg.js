@@ -20,6 +20,14 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let f = Helper.vcurry(fff, o);
-	let s = f("Hello ");
+	let f = Helper.curry((fn, ...args) => {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return fn[0](args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	}, (__ks_0) => fff.__ks_0.call(o, __ks_0));
+	let s = f.__ks_0("Hello ");
 };

@@ -24,9 +24,6 @@ class SealedFunctionCallee extends Callee {
 				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind.Null {
-					throw new NotImplementedException(node)
-				}
 				ScopeKind.This {
 					throw new NotImplementedException(node)
 				}
@@ -35,9 +32,6 @@ class SealedFunctionCallee extends Callee {
 		else {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind.This {

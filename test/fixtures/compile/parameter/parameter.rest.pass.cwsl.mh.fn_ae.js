@@ -21,7 +21,7 @@ module.exports = function(expect) {
 			expect(args).to.eql(["abc", "def", "ghi", "jkl"]);
 			items.push(...args);
 		}
-		foobar() {
+		foobar(...args) {
 			const t0 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
@@ -38,7 +38,7 @@ module.exports = function(expect) {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		a.__ks_func_foobar_0(values);
+		a.foobar(...values);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isArray;

@@ -12,9 +12,6 @@ class InvertedPreciseMethodCallee extends MethodCallee {
 			ScopeKind.Argument {
 				throw new NotImplementedException(node)
 			}
-			ScopeKind.Null {
-				throw new NotImplementedException(node)
-			}
 			ScopeKind.This {
 				fragments.code(`\(@name.name())`)
 
@@ -27,7 +24,7 @@ class InvertedPreciseMethodCallee extends MethodCallee {
 
 				fragments.wrap(@expression._object, mode)
 
-				Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+				Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, true, fragments, mode)
 			}
 		}
 	} # }}}

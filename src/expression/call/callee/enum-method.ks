@@ -64,9 +64,6 @@ class EnumMethodCallee extends Callee {
 				ScopeKind.Argument {
 					NotImplementedException.throw(node)
 				}
-				ScopeKind.Null {
-					NotImplementedException.throw(node)
-				}
 				ScopeKind.This {
 					fragments.code(`\(@enum.name()).\(@methodName)(`)
 

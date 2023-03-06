@@ -1,8 +1,20 @@
-type CallMatchArgument = Number | Array<Number> | Null
+// TODO!
+// type CallMatchArgument = Number | ArrayElementMatch | Array<Number | ArrayElementMatch | ArraySliceMatch> | Null
+
+struct CallMatchArgument {
+	index: Number?		= null
+	element: Number?	= null
+	from: Number?		= null
+	to: Number?			= null
+}
+
+// TODO!
+// type CallMatchPosition = CallMatchArgument | CallMatchArgument[]
+type CallMatchPosition = CallMatchArgument | Array<CallMatchArgument>
 
 struct CallMatch {
 	function: FunctionType
-	positions: CallMatchArgument[]
+	positions: CallMatchPosition[]
 }
 
 struct PreciseCallMatchResult {
@@ -13,9 +25,20 @@ struct LenientCallMatchResult {
 	possibilities: FunctionType[]
 	positions: Number[]				= []
 	labels: Number{}				= {}
+	matches: CallMatch[]?			= null
 }
 
-type CallMatchResult = PreciseCallMatchResult | LenientCallMatchResult
+enum NoMatchResult {
+	NoArgumentMatch
+	NoThisMatch
+}
+
+enum ArgumentMatchMode {
+	AllMatches
+	BestMatch
+}
+
+type CallMatchResult = PreciseCallMatchResult | LenientCallMatchResult | NoMatchResult
 
 namespace Router {
 	struct Assessment {
@@ -156,6 +179,7 @@ namespace Router {
 		matches: Array<CallMatch>			= []
 		possibilities: Array<FunctionType>	= []
 		indexeds: NamingArgument[]
+		mode: ArgumentMatchMode
 		node: AbstractNode
 	}
 
@@ -321,7 +345,9 @@ namespace Router {
 		)
 	} # }}}
 
-	func matchArguments(assessment: Assessment, arguments: Expression[], exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { # {{{
+	// TODO!
+	// func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
+	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = ArgumentMatchMode.BestMatch, node: AbstractNode): CallMatchResult { # {{{
 		if assessment.length == 0 {
 			if !#arguments {
 				return new PreciseCallMatchResult([])
@@ -353,61 +379,70 @@ namespace Router {
 		}
 		else {
 			for var argument, index in arguments {
-				if argument is NamedArgument {
-					var name = argument.name()
+				match argument {
+					is NamedArgument {
+						var name = argument.name()
 
-					if ?nameds[name] {
-						throw new NotSupportedException()
-					}
+						if ?nameds[name] {
+							throw new NotSupportedException()
+						}
 
-					nameds[name] = new NamingArgument(
-						index
-						name
-						type: argument.type()
-						strict: true
-					)
-
-					namedCount += 1
-
-					if ?shorthands[name] {
-						drop shorthands[name]
-
-						shortCount -= 1
-					}
-				}
-				else if argument is IdentifierLiteral {
-					var name = argument.name()
-
-					if argument.variable().isPredefined() {
-						indexeds.push(new NamingArgument(
+						nameds[name] = new NamingArgument(
 							index
+							name
 							type: argument.type()
-							strict: false
-						))
-					}
-					else if !?nameds[name] && !?invalids[name] {
+							strict: true
+						)
+
+						namedCount += 1
+
 						if ?shorthands[name] {
-							invalids[name] = true
-
-							indexeds.push(shorthands[name], new NamingArgument(
-								index
-								type: argument.type()
-								strict: false
-							))
-
 							drop shorthands[name]
 
 							shortCount -= 1
 						}
-						else {
-							shortCount += 1
+					}
+					is IdentifierLiteral {
+						var name = argument.name()
 
-							shorthands[name] = new NamingArgument(
+						if argument.variable().isPredefined() {
+							indexeds.push(new NamingArgument(
 								index
-								name
 								type: argument.type()
 								strict: false
-							)
+							))
+						}
+						else if !?nameds[name] && !?invalids[name] {
+							if ?shorthands[name] {
+								invalids[name] = true
+
+								indexeds.push(shorthands[name], new NamingArgument(
+									index
+									type: argument.type()
+									strict: false
+								))
+
+								drop shorthands[name]
+
+								shortCount -= 1
+							}
+							else {
+								shortCount += 1
+
+								shorthands[name] = new NamingArgument(
+									index
+									name
+									type: argument.type()
+									strict: false
+								)
+							}
+						}
+						else {
+							indexeds.push(new NamingArgument(
+								index
+								type: argument.type()
+								strict: false
+							))
 						}
 					}
 					else {
@@ -415,23 +450,36 @@ namespace Router {
 							index
 							type: argument.type()
 							strict: false
+							value: argument
 						))
 					}
-				}
-				else {
-					indexeds.push(new NamingArgument(
-						index
-						type: argument.type()
-						strict: false
-						value: argument
-					))
 				}
 
 				types.push(argument.type())
 			}
 		}
 
-		var mut functions: Array = Object.keys(assessment.functions).map((i, ...) => parseInt(i))
+		var mut functions: Number[] = []
+
+		if ?thisType {
+			for var function of assessment.functions {
+				if function.hasAssignableThis() && thisType.isAssignableToVariable(function.getThisType(), true, false, false) {
+					functions.push(function.index())
+				}
+			}
+		}
+		else {
+			for var function of assessment.functions {
+				if function.isMissingThis() || !function.hasAssignableThis() || function.getThisType().isAny() {
+					functions.push(function.index())
+				}
+			}
+		}
+
+		unless #functions {
+			return NoMatchResult.NoThisMatch
+		}
+
 		var labels = []
 
 		for var data, label of assessment.labels {
@@ -446,18 +494,20 @@ namespace Router {
 				SyntaxException.throwNamedOnlyParameters([label], node)
 			}
 		}
-		// TODO!
-		// echo('hello')
+
+		unless #functions {
+			return NoMatchResult.NoArgumentMatch
+		}
 
 		var functionList = [assessment.functions[index] for var index in functions]
 
 		var route = Build.getRoute(assessment, labels, functionList, node)
 
 		if namedCount > 0 || shortCount > 0 {
-			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, exhaustive, node)
+			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, mode, node)
 		}
 		else {
-			return Matching.matchArguments(assessment, route, types, [], indexeds, node)
+			return Matching.matchArguments(assessment, route, types, [], indexeds, mode, node)
 		}
 	} # }}}
 
@@ -558,24 +608,37 @@ namespace Router {
 
 	namespace Argument {
 		export func toFragments(
-			positions: CallMatchArgument[]
+			positions!: CallMatchPosition[] = []
 			labels: Number{}?
 			expressions: Expression[]
 			function: FunctionType
 			labelable: Boolean
-			isUsingScope: Boolean
+			needSeparator: Boolean
+			precise: Boolean
 			fragments
 			mode
 		): Void { # {{{
 			var arguments = [...positions]
-			for var argument in arguments down while !?argument {
-				arguments.pop()
+			for var argument in arguments down {
+				if argument is Array {
+					break
+				}
+				else if !?argument.index {
+					arguments.pop()
+				}
+				else {
+					break
+				}
 			}
 
 			if !#arguments && !#labels {
 				if #expressions {
-					if isUsingScope {
+					if needSeparator {
 						fragments.code($comma)
+					}
+
+					if labelable {
+						fragments.code('{}', $comma)
 					}
 
 					for var expression, i in expressions {
@@ -584,11 +647,18 @@ namespace Router {
 						expression.toArgumentFragments(fragments, mode)
 					}
 				}
+				else if labelable {
+					if needSeparator {
+						fragments.code($comma)
+					}
+
+					fragments.code('{}')
+				}
 
 				return
 			}
 
-			if isUsingScope {
+			if needSeparator {
 				fragments.code($comma)
 			}
 
@@ -626,63 +696,140 @@ namespace Router {
 
 			var parameters = function.parameters()
 
-			for var argument, index in arguments {
+			for var position, index in arguments {
 				fragments.code($comma) if index != 0
 
 				var parameter = parameters[index].type()
 
-				if !?argument {
-					fragments.code('void 0')
-				}
-				else if argument is Number {
-					expressions[argument].toArgumentFragments(fragments, parameter, mode)
-				}
-				else if function.isAlien() {
-					for var arg, i in argument {
-						fragments.code($comma) if i != 0
+				// TODO!
+				// match argument {
+				// 	Null {
+				// 	}
+				// 	Number {
+				// 	}
+				// 	Array with [argument: Number] when expressions[argument] is UnaryOperatorSpread && expressions[argument].type().isArray() {
+				// 	}
+				// 	Array with [{ argument, from }: ArraySliceMatch] {
+				// 	}
+				// 	Array {
+				// 	}
+				// 	ArrayElementMatch with { argument, index } {
+				// 	}
+				// }
 
-						expressions[arg].toArgumentFragments(fragments, mode)
-					}
-				}
-				else {
-					if argument.length == 1 && expressions[argument[0]] is UnaryOperatorSpread && expressions[argument[0]].type().isArray() {
-						expressions[argument[0]].argument().toArgumentFragments(fragments, mode)
-					}
-					else {
-						fragments.code('[')
-
-						for var arg, i in argument {
+				if position is Array {
+					if function.isAlien() {
+						for var { index }, i in position {
 							fragments.code($comma) if i != 0
 
-							expressions[arg].toArgumentFragments(fragments, mode)
+							expressions[index].toArgumentFragments(fragments, mode)
 						}
 
-						fragments.code(']')
+						continue
+					}
+
+					if position.length == 1 {
+						if ?position[0].from {
+							expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
+
+							fragments.code(`.slice(\(position[0].from)`)
+
+							if ?position[0].to {
+								fragments.code(`, \(position[0].to + 1)`)
+							}
+
+							fragments.code(')')
+
+							continue
+						}
+						else if expressions[position[0].index] is UnaryOperatorSpread && expressions[position[0].index].type().isArray() {
+							if precise {
+								expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
+							}
+							else {
+								expressions[position[0].index].toArgumentFragments(fragments, mode)
+							}
+
+							continue
+						}
+					}
+
+					fragments.code('[') if precise
+
+					for var { index, element, from }, i in position {
+						fragments.code($comma) if i != 0
+
+						if ?element {
+							expressions[index].argument().toArgumentFragments(fragments, mode)
+
+							fragments.code(`[\(element)]`)
+						}
+						else if ?from {
+							fragments.code('...')
+
+							expressions[index].argument().toArgumentFragments(fragments, mode)
+
+							fragments.code(`.slice(\(from))`)
+						}
+						else {
+							expressions[index].toArgumentFragments(fragments, parameter, mode)
+						}
+					}
+
+					fragments.code(']') if precise
+				}
+				else {
+					var { index, element } = position
+
+					if !?index {
+						fragments.code('void 0')
+					}
+					else if ?element {
+						expressions[index].argument().toArgumentFragments(fragments, mode)
+
+						fragments.code(`[\(element)]`)
+					}
+					else {
+						expressions[index].toArgumentFragments(fragments, parameter, mode)
 					}
 				}
 			}
 		} # }}}
 
 		export func toFlatFragments(
-			positions: CallMatchArgument[]
+			positions!: CallMatchPosition[] = []
 			labels: Number{}?
 			expressions: Expression[]
 			function: FunctionType
 			labelable: Boolean
-			isUsingScope: Boolean
+			needSeparator: Boolean
+			prefill?
 			fragments
 			mode
 		): Void { # {{{
 			var arguments = [...positions]
-			for var argument in arguments down while !?argument {
-				arguments.pop()
+			for var argument in arguments down {
+				if argument is Array {
+					break
+				}
+				else if !?argument.index {
+					arguments.pop()
+				}
+				else {
+					break
+				}
 			}
 
-			if isUsingScope {
+			if needSeparator {
 				fragments.code($comma)
 			}
 
-			fragments.code(`[].concat(`)
+			if ?prefill {
+				fragments.code('[').compile(prefill).code('].concat(')
+			}
+			else {
+				fragments.code(`[].concat(`)
+			}
 
 			if !#arguments && !#labels {
 				for var expression, i in expressions {
@@ -736,19 +883,35 @@ namespace Router {
 			var parameters = function.parameters()
 			var mut opened = false
 
-			for var argIndex, index in arguments {
-				var parameter = parameters[argIndex].type()
+			for var position, index in arguments {
+				if position is Array {
+					if position.length == 1 && expressions[position[0].index] is UnaryOperatorSpread && expressions[position[0].index].type().isArray() {
+						if opened {
+							fragments.code('], ')
 
-				if !?argIndex {
-					if index == 0 {
-						fragments.code('void 0')
+							opened = false
+						}
+
+						expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
 					}
 					else {
-						fragments.code(', void 0')
+						if !opened {
+							fragments.code('[')
+						}
+
+						for var { index }, i in position {
+							fragments.code($comma) if i != 0
+
+							expressions[index].toArgumentFragments(fragments, mode)
+						}
+
+						if !opened {
+							fragments.code(']')
+						}
 					}
 				}
-				else if argIndex is Number {
-					var argument = expressions[argIndex]
+				else if ?position.index {
+					var argument = expressions[position.index]
 
 					if argument is UnaryOperatorSpread {
 						if opened {
@@ -776,27 +939,12 @@ namespace Router {
 						argument.toArgumentFragments(fragments)
 					}
 				}
-				else if function.isAlien() {
-					for var arg, i in argIndex {
-						fragments.code($comma) if i != 0
-
-						expressions[arg].toArgumentFragments(fragments, mode)
-					}
-				}
 				else {
-					if argIndex.length == 1 && expressions[argIndex[0]] is UnaryOperatorSpread && expressions[argIndex[0]].type().isArray() {
-						expressions[argIndex[0]].argument().toArgumentFragments(fragments, mode)
+					if index == 0 {
+						fragments.code('void 0')
 					}
 					else {
-						fragments.code('[')
-
-						for var arg, i in argIndex {
-							fragments.code($comma) if i != 0
-
-							expressions[arg].toArgumentFragments(fragments, mode)
-						}
-
-						fragments.code(']')
+						fragments.code(', void 0')
 					}
 				}
 			}

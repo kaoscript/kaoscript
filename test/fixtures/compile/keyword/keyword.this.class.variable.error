@@ -1,1 +1,1 @@
-SyntaxException: Identifier "this" has already been declared (fixtures/compile/keyword/keyword.this.class.variable.ks:3)
+SyntaxException: The variable "this" is reserved (fixtures/compile/keyword/keyword.this.class.variable.ks:3)

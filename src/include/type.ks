@@ -398,8 +398,8 @@ abstract class Type {
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
 
-			// console.log('-- import --')
-			// console.log(JSON.stringify(data, null, 2))
+			// echo('-- import --')
+			// echo(JSON.stringify(data, null, 2))
 
 			if !?data {
 				return Type.Any
@@ -747,6 +747,7 @@ abstract class Type {
 	isNull() => false
 	isNullable() => false
 	isObject() => false
+	isPlaceholder() => false
 	isPredefined() => false
 	isPrimitive() => false
 	isReducible() => false

@@ -22,7 +22,12 @@ module.exports = function(expect) {
 		__ks_case_1 = cases[__ks_1];
 		for(let __ks_3 = [1992, 2000], i = 0, __ks_2 = __ks_3.length, year; i < __ks_2; ++i) {
 			year = __ks_3[i];
-			functions.push(Helper.vcurry(test, null, __ks_case_1, year, i));
+			functions.push(Helper.curry((fn, ...args) => {
+				if(args.length === 0) {
+					return fn[0]();
+				}
+				throw Helper.badArgs();
+			}, () => test.__ks_0(__ks_case_1, year, i)));
 		}
 	}
 	for(let __ks_1 = 0, __ks_0 = functions.length, fn; __ks_1 < __ks_0; ++__ks_1) {

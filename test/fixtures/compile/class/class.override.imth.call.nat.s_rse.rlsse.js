@@ -36,8 +36,10 @@ module.exports = function() {
 			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_quxbaz_0(values) {
+			return 0;
 		}
 		__ks_func_quxbaz_1(values) {
+			return 1;
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {
 			const t0 = Type.isString;

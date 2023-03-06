@@ -10,6 +10,7 @@ bitmask MinMax {
 class FunctionType extends Type {
 	private late {
 		@assessment							= null
+		@assignableThis: Boolean			= true
 		@async: Boolean						= false
 		@autoTyping: Boolean				= false
 		@dynamicReturn: Boolean				= false
@@ -20,10 +21,12 @@ class FunctionType extends Type {
 		@mins: Number{}						= {}
 		@missingParameters: Boolean			= false
 		@missingReturn: Boolean				= true
+		@missingThis: Boolean				= true
 		@parameters: Array<ParameterType>	= []
 		@restIndex: Number					= -1
 		@returnData							= null
 		@returnType: Type					= AnyType.NullableUnexplicit
+		@thisType: Type						= AnyType.Unexplicit
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
@@ -64,6 +67,11 @@ class FunctionType extends Type {
 			}
 
 			queue.push(() => {
+				if ?data.this {
+					type._thisType = Type.import(data.this, metadata, references, alterations, queue, scope, node)
+					type._missingThis = false
+				}
+
 				type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for var throw in data.errors]
 
 				if ?data.returns {
@@ -219,6 +227,10 @@ class FunctionType extends Type {
 			result.exhaustive = @isExhaustive()
 		}
 
+		if @assignableThis && @thisType != AnyType.Unexplicit {
+			result.this = @thisType.toReference(references, indexDelta, mode, module)
+		}
+
 		result.parameters = [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
 		result.returns = @returnType.toReference(references, indexDelta, mode, module)
 		result.errors = [throw.toReference(references, indexDelta, mode, module) for var throw in @errors]
@@ -247,6 +259,7 @@ class FunctionType extends Type {
 	getRestParameter() => @parameters[@restIndex]
 	getReturnData(): @returnData
 	getReturnType(): @returnType
+	getThisType(): @thisType
 	hashCode() { # {{{
 		var mut fragments = ''
 
@@ -272,6 +285,7 @@ class FunctionType extends Type {
 
 		return fragments
 	} # }}}
+	hasAssignableThis() => @assignableThis
 	hasRestParameter(): @hasRest
 	hasVarargsParameter() { # {{{
 		for var parameter in @parameters {
@@ -352,6 +366,7 @@ class FunctionType extends Type {
 	isFunction() => true
 	isMissingError() => @errors.length == 0
 	isMissingReturn() => @missingReturn
+	isMissingThis() => @missingThis
 	isMorePreciseThan(value: FunctionType) { # {{{
 		if @parameters.length != value._parameters.length {
 			return false
@@ -369,7 +384,7 @@ class FunctionType extends Type {
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => @isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { # {{{
-		// console.log(pIndex, pStep, @parameters[pIndex]?.toQuote(), aIndex, aStep, arguments[aIndex]?.toQuote())
+		// echo(pIndex, pStep, @parameters[pIndex]?.toQuote(), aIndex, aStep, arguments[aIndex]?.toQuote())
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
 				if mode !~ MatchingMode.RequireAllParameters {
@@ -685,7 +700,7 @@ class FunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 
-		return ?Router.matchArguments(assessment, arguments, node)
+		return Router.matchArguments(assessment, null, arguments, node) is not NoMatchResult
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isFunction() {
@@ -873,6 +888,9 @@ class FunctionType extends Type {
 		@returnType = Type.fromAST(data, node)
 	} # }}}
 	setReturnType(@returnType): this
+	setThisType(@thisType): this { # {{{
+		@missingThis = false
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code('Function')
 	} # }}}
@@ -880,6 +898,19 @@ class FunctionType extends Type {
 		var mut fragments = ''
 
 		fragments += '('
+
+		if !@missingThis && @assignableThis {
+			if @thisType.isAny() {
+				fragments += 'this'
+			}
+			else {
+				fragments += `this: \(@thisType.toQuote())`
+			}
+
+			if #@parameters {
+				fragments += ', '
+			}
+		}
 
 		for var parameter, index in @parameters {
 			if index != 0 {
@@ -908,6 +939,10 @@ class FunctionType extends Type {
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('func', 1)
+	} # }}}
+	unflagAssignableThis(): this { # {{{
+		@assignableThis = false
+		@missingThis = false
 	} # }}}
 }
 
@@ -1139,7 +1174,7 @@ class OverloadedFunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 
-		return ?Router.matchArguments(assessment, arguments, node)
+		return Router.matchArguments(assessment, null, arguments, node) is not NoMatchResult
 	} # }}}
 	originals(@majorOriginal): this { # {{{
 		@altering = true

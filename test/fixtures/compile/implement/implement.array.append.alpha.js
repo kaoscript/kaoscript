@@ -3,14 +3,14 @@ module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_func_appendUniq_0 = function(args) {
 		if(args.length === 1) {
-			__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[0]));
+			__ks_Array._im_pushUniq.apply(null, [this].concat(args[0]));
 		}
 		else {
 			let __ks_0, __ks_1, __ks_2, __ks_3;
 			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, Infinity, "", 1);
 			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 				i = __ks_3(__ks_4);
-				__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[i]));
+				__ks_Array._im_pushUniq.apply(null, [this].concat(args[i]));
 			}
 		}
 		return this;

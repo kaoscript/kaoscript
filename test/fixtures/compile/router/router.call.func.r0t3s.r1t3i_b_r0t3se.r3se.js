@@ -45,7 +45,7 @@ module.exports = function() {
 	};
 	f.__ks_0 = function() {
 		const args = ["x", "y", "z"];
-		return foobar(...args);
+		return foobar.__ks_0(args);
 	};
 	f.__ks_rt = function(that, args) {
 		if(args.length === 0) {

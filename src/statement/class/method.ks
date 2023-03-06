@@ -180,19 +180,27 @@ class ClassMethodDeclaration extends Statement {
 		footer(fragments)
 	} # }}}
 	constructor(data, parent) { # {{{
-		super(data, parent, parent.newInstanceMethodScope())
+		var mut instance = true
+
+		for var modifier in data.modifiers {
+			if modifier.kind == ModifierKind.Static {
+				instance = false
+
+				break
+			}
+		}
+
+		super(data, parent, parent.newMethodScope(instance))
 
 		@name = data.name.name
+		@instance = instance
 
-		for modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Abstract {
 				@abstract = true
 			}
 			else if modifier.kind == ModifierKind.Override {
 				@override = true
-			}
-			else if modifier.kind == ModifierKind.Static {
-				@instance = false
 			}
 		}
 
@@ -260,6 +268,12 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
+
+		@type.unflagAssignableThis()
+
+		if @instance {
+			@type.setThisType(@parent.type().reference())
+		}
 
 		@autoTyping = @type.isAutoTyping()
 		var dynamicReturn = @type.isDynamicReturn()
@@ -370,7 +384,7 @@ class ClassMethodDeclaration extends Statement {
 				@type.setReturnType(@block.getUnpreparedType())
 			}
 			else {
-				var return = $compile.expression(returnData, this)
+				var return = $compile.expression(returnData, this, @scope)
 
 				return.analyse()
 

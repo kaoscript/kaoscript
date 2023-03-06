@@ -421,6 +421,26 @@ class ArrowFunctionExpression extends Expression {
 
 		ctrl.done()
 	} # }}}
+	toBlockFragments(fragments) { # {{{
+		fragments.compile(@block)
+
+		if !@awaiting && !@exit && @type.isAsync() {
+			fragments.line('__ks_cb()')
+		}
+	} # }}}
+	toQuote() { # {{{
+		var mut fragments = '('
+
+		for var parameter, index in @parameters {
+			fragments += ', ' if index > 0
+
+			fragments += parameter.toQuote()
+		}
+
+		fragments += ') => ...'
+
+		return fragments
+	} # }}}
 	type() => @type
 	type(@type) { # {{{
 		for var parameter, index in @type.parameters() {

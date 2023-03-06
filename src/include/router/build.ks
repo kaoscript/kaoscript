@@ -1874,29 +1874,29 @@ namespace Build {
 
 		var equivalences = []
 
-		// console.log([item.key for var item in items])
+		// echo([item.key for var item in items])
 		items.sort((a, b) => {
 			if a.children:Array.contains(b) {
-				// console.log(a.key, b.key, 1, 'b⊂a')
+				// echo(a.key, b.key, 1, 'b⊂a')
 				return 1
 			}
 			if b.children:Array.contains(a) {
-				// console.log(a.key, b.key, -1, 'a⊂b')
+				// echo(a.key, b.key, -1, 'a⊂b')
 				return -1
 			}
 
 			var d = b.usage - a.usage
 
 			if d == 0 {
-				// console.log(a.key, b.key, a.type.compareToRef(b.type))
+				// echo(a.key, b.key, a.type.compareToRef(b.type))
 				return a.type.compareToRef(b.type)
 			}
 			else {
-				// console.log(a.key, b.key, d)
+				// echo(a.key, b.key, d)
 				return d
 			}
 		})
-		// console.log([item.key for var item in items])
+		// echo([item.key for var item in items])
 
 		tree.order = [item.key for var item in items]
 

@@ -1,0 +1,1 @@
+ReferenceException: The method "kind" can't be rebinded to a new "this" context (fixtures/compile/this/this.imth.curry.wb.bt.ks:2)

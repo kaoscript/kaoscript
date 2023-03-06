@@ -35,7 +35,7 @@ module.exports = function() {
 		__ks_func_draw_0() {
 			throw new Error("Not Implemented");
 		}
-		draw() {
+		draw(...args) {
 			if(args.length === 0) {
 				return this.__ks_func_draw_0();
 			}

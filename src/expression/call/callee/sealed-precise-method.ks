@@ -14,9 +14,6 @@ class SealedPreciseMethodCallee extends MethodCallee {
 				ScopeKind.Argument {
 					throw new NotImplementedException(node)
 				}
-				ScopeKind.Null {
-					throw new NotImplementedException(node)
-				}
 				ScopeKind.This {
 					if @function.isInstance() {
 						fragments.code(`\(@objectType.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)
@@ -28,12 +25,12 @@ class SealedPreciseMethodCallee extends MethodCallee {
 							fragments.compile(@object)
 						}
 
-						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, null, fragments, mode)
 					}
 					else {
 						fragments.code(`\(@objectType.getSealedPath()).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
 
-						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, null, fragments, mode)
 					}
 				}
 			}
@@ -41,9 +38,6 @@ class SealedPreciseMethodCallee extends MethodCallee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind.Null {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind.This {
@@ -60,12 +54,12 @@ class SealedPreciseMethodCallee extends MethodCallee {
 							fragments.compile(@object)
 						}
 
-						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, fragments, mode)
+						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, true, fragments, mode)
 					}
 					else {
 						fragments.code(`\(@objectType.getSealedPath()).__ks_sttc_\(@property)_\(@function.index())(`)
 
-						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, fragments, mode)
+						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, true, fragments, mode)
 					}
 				}
 			}

@@ -197,7 +197,7 @@ class ReturnStatement extends Statement {
 			}
 
 			if @value.isAwaiting() {
-				return this.toAwaitStatementFragments^@(fragments)
+				return this.toAwaitStatementFragments^^(fragments, ^)
 			}
 			else {
 				var line = fragments.newLine().code('return ')

@@ -1,7 +1,7 @@
 namespace Matching {
 	struct Matches {
 		precise: Boolean					= true
-		arguments: Array<CallMatchArgument>	= []
+		arguments: CallMatchPosition[]		= []
 	}
 
 	export {
@@ -13,41 +13,55 @@ namespace Matching {
 			arguments: Array
 			excludes: String[]
 			indexeds: NamingArgument[]
+			mode: ArgumentMatchMode
 			node: AbstractNode
-		): CallMatchResult? { # {{{
+		): CallMatchResult { # {{{
 			var combinations = splitArguments(arguments)
+			// TODO!
+			// echo(combinations)
 
 			if combinations.length == 1 {
-				var context = new MatchContext(combinations[0], excludes, async: assessment.async, indexeds, node)
+				var context = new MatchContext(combinations[0], excludes, async: assessment.async, indexeds, mode, node)
 
 				for var tree in route.trees {
 					WithIndex.match(tree, context)
 
-					if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
+					if mode == .BestMatch && context.found && #context.matches && !#context.possibilities {
 						return new PreciseCallMatchResult(context.matches)
 					}
 				}
 
 				if context.found {
-					for var { function } in context.matches {
-						context.possibilities.pushUniq(function)
-					}
+					if #context.matches {
+						if !#context.possibilities {
+							return new PreciseCallMatchResult(context.matches)
+						}
 
-					return new LenientCallMatchResult(context.possibilities)
+						if mode == .BestMatch {
+							for var { function } in context.matches {
+								context.possibilities.pushUniq(function)
+							}
+						}
+
+						return new LenientCallMatchResult(context.possibilities, matches: context.matches)
+					}
+					else {
+						return new LenientCallMatchResult(context.possibilities)
+					}
 				}
 			}
 			else {
 				var results = []
 
 				for var combination in combinations {
-					var context = new MatchContext(combination, excludes, async: assessment.async, indexeds, node)
+					var context = new MatchContext(combination, excludes, async: assessment.async, indexeds, mode, node)
 
 					var mut nf = true
 
 					for var tree in route.trees while nf {
 						WithIndex.match(tree, context)
 
-						if context.found && context.matches.length > 0 && context.possibilities.length == 0 {
+						if context.found && #context.matches && !#context.possibilities {
 							results.push(new PreciseCallMatchResult(context.matches))
 
 							nf = false
@@ -60,18 +74,18 @@ namespace Matching {
 								context.possibilities.pushUniq(function)
 							}
 
-							results.push(new LenientCallMatchResult(context.possibilities))
+							results.push(new LenientCallMatchResult(context.possibilities, matches: context.matches))
 						}
 					}
 					else {
-						return null
+						return NoMatchResult.NoArgumentMatch
 					}
 				}
 
 				return mergeResults(results)
 			}
 
-			return null
+			return NoMatchResult.NoArgumentMatch
 		} # }}}
 
 		func matchArguments(
@@ -81,19 +95,21 @@ namespace Matching {
 			nameds: NamingArgument{}
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
-			exhaustive: Boolean
+			mode: ArgumentMatchMode
 			node: AbstractNode
-		): CallMatchResult? { # {{{
+		): CallMatchResult { # {{{
 			var combinations = splitArguments(arguments)
 
 			var results = []
 
 			for var combination in combinations {
-				if var result ?= WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], exhaustive, node) {
-					results.push(result)
-				}
-				else {
-					return null
+				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], mode, node) {
+					is LenientCallMatchResult | PreciseCallMatchResult {
+						results.push(result)
+					}
+					else {
+						return NoMatchResult.NoArgumentMatch
+					}
 				}
 			}
 
@@ -121,6 +137,57 @@ namespace Matching {
 		return argument.isAssignableToVariable(parameter, false, false, false)
 	} # }}}
 
+	func isSameArgument(a: CallMatchArgument, b: CallMatchArgument): Boolean { # {{{
+		if ?a.index {
+			return false unless ?b.index
+			return false unless a.index == b.index
+
+			if ?a.element {
+				return false unless ?b.element
+				return false unless a.element == b.element
+			}
+			else {
+				return false unless !?b.element
+			}
+
+			if ?a.from {
+				return false unless ?b.from
+				return false unless a.from == b.from
+			}
+			else {
+				return false unless !?b.from
+			}
+		}
+		else {
+			return false unless !?b.index
+		}
+
+		return true
+	} # }}}
+
+	func isSamePositions(aPositions: CallMatchPosition[], bPositions: CallMatchPosition[]): Boolean { # {{{
+		return false unless aPositions.length == bPositions.length
+
+		for var a, index in aPositions {
+			var b = bPositions[index]
+
+			if a is Array {
+				return false unless b is Array
+				return false unless a.length == b.length
+
+				for var k, index in a {
+					return false unless isSameArgument(k, b[index])
+				}
+			}
+			else {
+				return false unless b is CallMatchArgument
+				return false unless isSameArgument(a, b)
+			}
+		}
+
+		return true
+	} # }}}
+
 	func isUnpreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
 		if argument.isStrict() {
 			return argument.isAssignableToVariable(parameter, true, false, false)
@@ -130,9 +197,9 @@ namespace Matching {
 		}
 	} # }}}
 
-	func mergeResults(results: CallMatchResult[]): CallMatchResult? { # {{{
+	func mergeResults(results: CallMatchResult[]): CallMatchResult { # {{{
 		if results.length == 0 {
-			return null
+			return NoMatchResult.NoArgumentMatch
 		}
 		else if results.length == 1 {
 			return results[0]
@@ -146,7 +213,7 @@ namespace Matching {
 			for var { matches } in results while precise {
 				for var match in matches while precise {
 					if var result ?= perFunctions[match.function.index()] {
-						if !Array.same(result.positions, match.positions) {
+						if !isSamePositions(result.positions, match.positions) {
 							precise = false
 						}
 					}
@@ -283,7 +350,7 @@ namespace Matching {
 								positions[type.parameter] = []
 							}
 							else {
-								positions[type.parameter] = null
+								positions[type.parameter] = new CallMatchArgument()
 							}
 						}
 
@@ -307,7 +374,7 @@ namespace Matching {
 									positions.push([])
 								}
 								else {
-									positions.push(null)
+									positions.push(new CallMatchArgument())
 								}
 							}
 
@@ -327,7 +394,7 @@ namespace Matching {
 									positions[type.parameter] = []
 								}
 								else {
-									positions[type.parameter] = null
+									positions[type.parameter] = new CallMatchArgument()
 								}
 							}
 
@@ -372,6 +439,7 @@ namespace Matching {
 					}
 					else {
 						for var key in tree.order {
+							// echo('---', key)
 							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), new Matches(), context) {
 								return
 							}
@@ -388,6 +456,7 @@ namespace Matching {
 				context: MatchContext
 			): { cursor: Cursor?, argMatches: Matches? } { # {{{
 				var last = arguments.length - 1
+				// echo(node.type.hashCode(), node.min, node.max, cursor.index, cursor.spread, cursor.used, cursor.length, last)
 
 				if node.min == 0 && cursor.index > last {
 					argMatches.arguments.push([])
@@ -400,12 +469,26 @@ namespace Matching {
 
 				if node.max == 1 {
 					if cursor.spread {
+						if cursor.argument.isPlaceholder() {
+							cursor.used += 1
+
+							argMatches.arguments.push([new CallMatchArgument(index: cursor.index)])
+
+							cursor = getNextCursor(cursor, arguments)
+
+							return { cursor, argMatches }
+						}
+
 						var argument = getSpreadParameter(cursor.argument)
 
 						if isPreciseMatch(argument, node.type) {
+							argMatches.precise = cursor.length != Infinity
+
+							argMatches.arguments.push([new CallMatchArgument(index: cursor.index, element: cursor.used)])
+
 							cursor.used += 1
 
-							argMatches.arguments.push([cursor.index])
+							cursor = getNextCursor(cursor, arguments)
 
 							return { cursor, argMatches }
 						}
@@ -414,7 +497,9 @@ namespace Matching {
 
 							cursor.used += 1
 
-							argMatches.arguments.push([cursor.index])
+							argMatches.arguments.push([new CallMatchArgument(index: cursor.index, element: cursor.used)])
+
+							cursor = getNextCursor(cursor, arguments)
 
 							return { cursor, argMatches }
 						}
@@ -448,7 +533,7 @@ namespace Matching {
 							if matched {
 								cursor.used += 1
 
-								argMatches.arguments.push([cursor.index])
+								argMatches.arguments.push([new CallMatchArgument(index: cursor.index)])
 
 								cursor = getNextCursor(cursor, arguments)
 
@@ -479,7 +564,7 @@ namespace Matching {
 
 									cursor.used += 1
 
-									argMatches.arguments.push([cursor.index])
+									argMatches.arguments.push([new CallMatchArgument(index: cursor.index)])
 
 									cursor = getNextCursor(cursor, arguments)
 
@@ -491,7 +576,7 @@ namespace Matching {
 
 								cursor.used += 1
 
-								argMatches.arguments.push([cursor.index])
+								argMatches.arguments.push([new CallMatchArgument(index: cursor.index)])
 
 								cursor = getNextCursor(cursor, arguments)
 
@@ -504,7 +589,7 @@ namespace Matching {
 
 							cursor.used += 1
 
-							argMatches.arguments.push([cursor.index])
+							argMatches.arguments.push([new CallMatchArgument(index: cursor.index)])
 
 							cursor = getNextCursor(cursor, arguments)
 
@@ -528,79 +613,151 @@ namespace Matching {
 					}
 				}
 				else {
+					var initialIndex = cursor.index
 					var mut i = 0
 
 					var matches = []
 
 					while i < node.min {
-						if cursor.spread {
-							if getSpreadParameter(cursor.argument).isAssignableToVariable(node.type) {
-								cursor.used += 1
+						var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
-								matches.push(cursor.index)
-
-								argMatches.arguments.push(matches)
-
-								return { cursor, argMatches }
-							}
-							else {
-								return {}
+						if isPreciseMatch(argument, node.type) {
+							if cursor.used + 1 > getMinParameter(cursor.argument) {
+								argMatches.precise = false
 							}
 						}
+						else if isUnpreciseMatch(argument, node.type) {
+							argMatches.precise = false
+						}
 						else {
-							if !cursor.argument.isAssignableToVariable(node.type, true, false, false) {
-								return {}
-							}
+							return {}
 						}
 
 						i += 1
-						cursor.used += 1
 
-						matches.push(cursor.index)
-
-						cursor = getNextCursor(cursor, arguments)
+						cursor = pushCursor(cursor, arguments, matches)
 					}
 
 					if node.max <= 0 {
 						var last = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
 
-						while cursor.index <= last {
-							if cursor.argument.isSpread() {
-								if !cursor.argument.parameter(0).isAssignableToVariable(node.type, true, false, false) {
-									break
+						if cursor.index <= last {
+							while cursor.index <= last {
+								if cursor.argument is not PlaceholderType {
+									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+
+									if isPreciseMatch(argument, node.type) {
+										pass
+									}
+									else if isUnpreciseMatch(argument, node.type) {
+										argMatches.precise = false
+									}
+									else {
+										break
+									}
 								}
-							}
-							else if !cursor.argument.isAssignableToVariable(node.type, true, false, false) {
-								break
-							}
 
-							i += 1
-							cursor.used += 1
+								i += 1
 
-							matches.push(cursor.index)
-
-							if cursor.argument.isSpread() {
-								cursor = getNextCursor(cursor, arguments, true)
+								cursor = pushCursor(cursor, arguments, matches, cursor.index == last || cursor.spread && cursor.length == Infinity)
 							}
-							else {
-								cursor = getNextCursor(cursor, arguments)
+						}
+						else {
+							if 0 < cursor.used <= cursor.length {
+								var mut match = true
+
+								if cursor.argument is not PlaceholderType {
+									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+
+									if isPreciseMatch(argument, node.type) {
+										pass
+									}
+									else if isUnpreciseMatch(argument, node.type) {
+										argMatches.precise = false
+									}
+									else {
+										match = false
+									}
+								}
+
+								if match {
+									if node.max == Infinity {
+										matches.push(new CallMatchArgument(index: cursor.index, from: cursor.used))
+
+										cursor = getNextCursor(cursor, arguments, true)
+									}
+									else {
+										var to = cursor.length + node.max + cursor.used - 1
+
+										// TODO!
+										// matches.push(new CallMatchArgument(
+										// 	index: cursor.index
+										// 	from: cursor.used
+										// 	// TODO!
+										// 	// to unless to == cursor.length
+										// 	// to if to != cursor.length
+										// 	to: to if to + 1 < cursor.length
+										// ))
+										var match = new CallMatchArgument(
+											index: cursor.index
+											from: cursor.used
+										)
+										if to + 1 < cursor.length {
+											match.to = to
+										}
+										matches.push(match)
+
+										cursor.used += 1 - node.max
+
+										cursor = getNextCursor(cursor, arguments)
+									}
+
+									if cursor.spread && cursor.argument is PlaceholderType {
+										matches.push(new CallMatchArgument(index: cursor.index))
+
+										cursor = getNextCursor(cursor, arguments, true)
+									}
+								}
 							}
 						}
 					}
 					else {
 						while i < node.max && cursor?.index <= last {
-							if !cursor.argument.isAssignableToVariable(node.type, true, false, false) {
+							var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+
+							if isPreciseMatch(argument, node.type) {
+								pass
+							}
+							else if isUnpreciseMatch(argument, node.type) {
+								argMatches.precise = false
+							}
+							else {
 								break
 							}
 
 							i += 1
-							cursor.used += 1
 
-							matches.push(cursor.index)
-
-							cursor = getNextCursor(cursor, arguments)
+							cursor = pushCursor(cursor, arguments, matches)
 						}
 					}
+
+					if cursor.spread && cursor.index == initialIndex {
+						if var next ?= arguments[cursor.index + 1]; next.isSpread() {
+							if node.max != Infinity {
+								argMatches.precise = false
+							}
+
+							cursor = getNextCursor(cursor, arguments, true)
+						}
+					}
+
+
+					// TODO!
+					// block addArgument {
+					// 		if matches.every((i, ...) => i == matches[0]) {
+					// 			break addArgument
+					// 		}
+					// }
 
 					argMatches.arguments.push(matches)
 
@@ -650,7 +807,7 @@ namespace Matching {
 				return new Cursor(
 					argument
 					index
-					length: Infinity
+					length: getLength(argument)
 					spread
 					used: 0
 				)
@@ -663,6 +820,30 @@ namespace Matching {
 					spread
 					used: 0
 				)
+			}
+		} # }}}
+
+		func getLength(type: Type): Number { # {{{
+			if !type.isSpread() {
+				return 1
+			}
+			else if type is ArrayType && !type.hasRest() {
+				return type.length()
+			}
+			else {
+				return Infinity
+			}
+		} # }}}
+
+		func getMinParameter(type: Type): Number { # {{{
+			if type is ArrayType {
+				return type.length()
+			}
+			else if type.isSpread() {
+				return 0
+			}
+			else {
+				return 1
 			}
 		} # }}}
 
@@ -702,17 +883,105 @@ namespace Matching {
 		} # }}}
 
 		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
-			// console.log('branch', toString(cursor))
-			{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
-			// console.log(toString(cursor), argMatches)
-			return false if !?cursor
-
-			for var key in branch.order {
-				if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
+			// echo('branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise)
+			if cursor.spread && context.mode == .AllMatches  {
+				var result = matchArguments(branch, context.arguments, cursor, new Matches(
 					precise: argMatches.precise
 					arguments: [...argMatches.arguments]
-				), context) {
-					return true
+				), context)
+				// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
+
+				if ?result.cursor {
+					for var key in branch.order {
+						if matchTreeNode(tree, branch.columns[key], result.cursor, new Matches(
+							precise: result.argMatches.precise
+							arguments: [...result.argMatches.arguments]
+						), context) {
+							if context.mode == .BestMatch {
+								return true
+							}
+						}
+					}
+
+					if !context.found && cursor.argument is PlaceholderType {
+						cursor = getNextCursor(cursor, context.arguments, true)
+						// echo('branch', toString(cursor))
+
+						{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+						// echo(toString(cursor), argMatches, context.arguments.length)
+						return false if !?cursor
+
+						for var key in branch.order {
+							if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
+								precise: argMatches.precise
+								arguments: [...argMatches.arguments]
+							), context) {
+								if context.mode == .BestMatch {
+									return true
+								}
+							}
+						}
+					}
+				}
+				else if cursor.argument is PlaceholderType {
+					cursor = getNextCursor(cursor, context.arguments, true)
+					// echo('branch', toString(cursor))
+
+					{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+					// echo(toString(cursor), argMatches, context.arguments.length)
+					return false if !?cursor
+
+					for var key in branch.order {
+						if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
+							precise: argMatches.precise
+							arguments: [...argMatches.arguments]
+						), context) {
+							if context.mode == .BestMatch {
+								return true
+							}
+						}
+					}
+				}
+			}
+			else {
+				var outOfBound = cursor.index >= context.arguments.length
+
+				{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
+
+				return false if !?cursor
+
+				if !outOfBound && branch.min == 0 && cursor.index >= context.arguments.length {
+					var argument = context.arguments.last()
+
+					for var key in branch.order {
+						var node = branch.columns[key]
+
+						if node.min != 0 {
+							continue
+						}
+
+						if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
+							precise: argMatches.precise
+							arguments: [...argMatches.arguments]
+						), context) {
+							if context.mode == .BestMatch {
+								return true
+							}
+						}
+					}
+				}
+				else {
+					for var key in branch.order {
+						if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
+							precise: argMatches.precise
+							arguments: [...argMatches.arguments]
+						), context) {
+							if context.mode == .BestMatch {
+								return true
+							}
+						}
+					}
 				}
 			}
 
@@ -721,10 +990,31 @@ namespace Matching {
 
 		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
 			if !leaf.function.isAsync() {
-				// console.log('leaf', toString(cursor), leaf.function.hashCode())
-				{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
-				// console.log(toString(cursor), argMatches, context.arguments.length)
-				return false if !?cursor || (cursor.index + 1 <= context.arguments.length && cursor.used == 0)
+				// echo('leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches)
+				if cursor.spread && context.mode == .AllMatches  {
+					var result = matchArguments(leaf, context.arguments, cursor, new Matches(
+						precise: argMatches.precise
+						arguments: [...argMatches.arguments]
+					), context)
+					// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
+
+					if !?result.cursor || result.cursor.index + 1 < context.arguments.length || result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0 {
+						cursor = getNextCursor(cursor, context.arguments, true)
+						// echo('leaf', toString(cursor), leaf.function.hashCode())
+
+						{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
+						// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
+					}
+					else {
+						{ cursor, argMatches } = result
+					}
+				}
+				else {
+					{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
+				}
+				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
+
+				return false if !?cursor || cursor.index + 1 < context.arguments.length || (cursor.index + 1 == context.arguments.length && cursor.used == 0)
 			}
 
 			if leaf.byNames.length > 0 {
@@ -732,7 +1022,7 @@ namespace Matching {
 			}
 
 			var parameters = leaf.function.parameters(context.excludes)
-			var match = []
+			var positions = []
 
 			var dyn length = 0
 
@@ -773,11 +1063,17 @@ namespace Matching {
 					}
 				}
 
-				if !?pMatch && parameter.isVarargs() {
-					pMatch = []
+				if !?pMatch {
+					if parameter.isVarargs() {
+						positions.push([])
+					}
+					else if argMatches.precise {
+						positions.push(new CallMatchArgument())
+					}
 				}
-
-				match.push(pMatch)
+				else {
+					positions.push(pMatch)
+				}
 			}
 
 			if leaf.function.isAsync() {
@@ -789,18 +1085,64 @@ namespace Matching {
 
 			context.found = true
 
-			if !argMatches.precise || cursor.index < context.arguments.length {
+			if !argMatches.precise {
 				context.possibilities.pushUniq(leaf.function)
+
+				context.matches.push(new CallMatch(
+					function: leaf.function
+					positions
+				))
 
 				return false
 			}
 			else {
 				context.matches.push(new CallMatch(
 					function: leaf.function
-					positions: match
+					positions
 				))
 
 				return true
+			}
+		} # }}}
+
+		func pushCursor(cursor: Cursor, arguments: Type[], matches: CallMatchArgument[], force: Boolean = false): Cursor { # {{{
+			// echo(cursor.spread, cursor.index, matches.last()?.index, force)
+			if cursor.spread {
+				if var last ?= matches.last(); last.index == cursor.index {
+					if ?last.to {
+						last.to = cursor.used + 1
+					}
+					else if ?last.element {
+						last.from = last.element
+						last.to = cursor.used + 1
+
+						drop last.element
+					}
+
+					if last.from == 0 && last.to == cursor.length {
+						drop last.from
+						drop last.to
+					}
+				}
+				else {
+					matches.push(new CallMatchArgument(
+						index: cursor.index
+						element: cursor.used if cursor.length != Infinity
+					))
+				}
+
+				cursor.used += 1
+
+				return getNextCursor(cursor, arguments, force)
+			}
+			else {
+				matches.push(new CallMatchArgument(
+					index: cursor.index
+				))
+
+				cursor.used += 1
+
+				return getNextCursor(cursor, arguments, force)
 			}
 		} # }}}
 
@@ -826,7 +1168,8 @@ namespace Matching {
 			nameds: NamingArgument{}
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
-			exhaustive: Boolean, node: AbstractNode
+			mode: ArgumentMatchMode
+			node: AbstractNode
 		): CallMatchResult? { # {{{
 			var perNames = {}
 
@@ -887,18 +1230,8 @@ namespace Matching {
 
 					var functions = possibleFunctions.intersection(matchedFunctions)
 
-					if exhaustive {
-						if functions.length == 0 {
-							return null
-						}
-						else {
-							possibleFunctions = functions
-						}
-					}
-					else {
-						if functions.length != 0 {
-							possibleFunctions = functions
-						}
+					if functions.length != 0 {
+						possibleFunctions = functions
 					}
 				}
 				else {
@@ -906,21 +1239,7 @@ namespace Matching {
 				}
 			}
 
-			if Object.isEmpty(shorthands) {
-				return matchIndex(
-					assessment
-					route
-					argumentTypes
-					nameds
-					shorthands
-					indexeds
-					possibleFunctions
-					preciseness
-					excludes
-					node
-				)
-			}
-			else {
+			if #shorthands {
 				var perFunctions = {}
 
 				for var function in possibleFunctions {
@@ -990,21 +1309,7 @@ namespace Matching {
 					}
 				}
 
-				if Object.isEmpty(perArguments) {
-					return matchIndex(
-						assessment
-						route
-						argumentTypes
-						nameds
-						{}
-						indexeds
-						possibleFunctions
-						preciseness
-						excludes
-						node
-					)
-				}
-				else {
+				if #perArguments {
 					for var perArgument of perArguments {
 						var newIndexeds = [...indexeds]
 						for var argument in perArgument.indexeds {
@@ -1021,6 +1326,7 @@ namespace Matching {
 							perArgument.functions
 							perArgument.preciseness
 							[...excludes, ...Object.keys(perArgument.shorthands)]
+							mode
 							node
 						) {
 							return result
@@ -1042,9 +1348,40 @@ namespace Matching {
 						possibleFunctions
 						preciseness
 						excludes
+						mode
 						node
 					)
 				}
+				else {
+					return matchIndex(
+						assessment
+						route
+						argumentTypes
+						nameds
+						{}
+						indexeds
+						possibleFunctions
+						preciseness
+						excludes
+						mode
+						node
+					)
+				}
+			}
+			else {
+				return matchIndex(
+					assessment
+					route
+					argumentTypes
+					nameds
+					shorthands
+					indexeds
+					possibleFunctions
+					preciseness
+					excludes
+					mode
+					node
+				)
 			}
 		} # }}}
 
@@ -1098,6 +1435,7 @@ namespace Matching {
 			mut possibleFunctions: []
 			preciseness: {}
 			excludes: String[]
+			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
 			if indexeds.length == 0 {
@@ -1131,16 +1469,16 @@ namespace Matching {
 						var name = parameter.getExternalName()
 
 						if var argument ?= nameds[name] {
-							positions.push(argument.index)
+							positions.push(new CallMatchArgument(argument.index))
 							namedLefts -= 1
 						}
 						else if var argument ?= shorthands[name] {
-							positions.push(argument.index)
+							positions.push(new CallMatchArgument(argument.index))
 							namedLefts -= 1
 						}
 						else {
 							if namedLefts > 0 {
-								positions.push(null)
+								positions.push(new CallMatchArgument())
 							}
 						}
 					}
@@ -1165,7 +1503,7 @@ namespace Matching {
 
 						var mut namedLefts = Object.length(nameds) + Object.length(shorthands)
 
-						for var parameter in function.parameters() {
+						for var parameter, index in function.parameters() {
 							var name = parameter.getExternalName()
 
 							if parameter.isOnlyLabeled() {
@@ -1180,16 +1518,16 @@ namespace Matching {
 							}
 							else {
 								if var argument ?= nameds[name] {
-									newPositions.push(argument.index)
+									newPositions.push(new CallMatchArgument(argument.index))
 									namedLefts -= 1
 								}
 								else if var argument ?= shorthands[name] {
-									newPositions.push(argument.index)
+									newPositions.push(new CallMatchArgument(argument.index))
 									namedLefts -= 1
 								}
 								else {
 									if namedLefts > 0 {
-										newPositions.push(null)
+										newPositions.push(new CallMatchArgument())
 									}
 								}
 							}
@@ -1200,7 +1538,7 @@ namespace Matching {
 							positions = newPositions
 							labels = newLabels
 						}
-						else if !Array.same(positions, newPositions) {
+						else if !isSamePositions(positions, newPositions) {
 							throw new NotSupportedException()
 						}
 
@@ -1219,61 +1557,30 @@ namespace Matching {
 				var route = Build.getRoute(assessment, excludes, functions, node)
 
 				if indexeds.length == argumentTypes.length {
-					return matchArguments(assessment, route, arguments, excludes, indexeds, node)
+					return matchArguments(assessment, route, arguments, excludes, indexeds, mode, node)
 				}
 				else {
-					if var result ?= matchArguments(assessment, route, arguments, excludes, indexeds, node) {
-						if result is PreciseCallMatchResult {
-							if possibleFunctions.every((key, _, _) => preciseness[key]) {
+					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, mode, node) {
+						is PreciseCallMatchResult {
+							var precise = possibleFunctions.every((key, _, _) => preciseness[key])
+
+							if mode == .AllMatches {
 								for var match in result.matches {
-									var indexes = {}
-									var positions = []
+									resolveCurryMatch(match, nameds, shorthands)
+								}
 
-									for var parameter in match.function.parameters() {
-										var name = parameter.getExternalName()
+								if precise {
+									return result
+								}
+								else {
+									var possibilities = [result.matches[0].function]
 
-										if var argument ?= nameds[name] {
-											positions.push(argument.index)
-
-											indexes[argument.index] = true
-										}
-										else if var argument ?= shorthands[name] {
-											positions.push(argument.index)
-
-											indexes[argument.index] = true
-										}
-										else if var mut index ?= match.positions.shift() {
-											if index is Array {
-												var args = []
-
-												for var mut i in index {
-													while indexes[i] {
-														i += 1
-													}
-
-													args.push(i)
-
-													indexes[i] = true
-												}
-
-												positions.push(args)
-											}
-											else {
-												while indexes[index] {
-													index += 1
-												}
-
-												positions.push(index)
-
-												indexes[index] = true
-											}
-										}
-										else {
-											positions.push(null)
-										}
-									}
-
-									match.positions = positions
+									return new LenientCallMatchResult(possibilities, matches: result.matches)
+								}
+							}
+							else if precise {
+								for var match in result.matches {
+									resolveCallMatch(match, nameds, shorthands, arguments, true)
 								}
 
 								return result
@@ -1284,98 +1591,297 @@ namespace Matching {
 								return new LenientCallMatchResult(possibilities)
 							}
 						}
-						else if result.possibilities.length == 1 {
-							if #result.positions || #result.labels {
-								throw new NotImplementedException()
-							}
-							else {
-								var function = result.possibilities[0]
-								result.positions = []
-								result.labels = {}
+						is LenientCallMatchResult {
+							if result.possibilities.length == 1 {
+								if result.matches.length == 1 {
+									var match = result.matches[0]
 
-								var mut namedLefts = excludes.length
-								var mut requiredLefts = 0
-
-								for var parameter in function.parameters(excludes) {
-									if parameter.min() > 0 {
-										requiredLefts += 1
+									if !resolveCallMatch(match, nameds, shorthands, arguments, false) {
+										return null
 									}
+
+									var possibilities = [match.function]
+
+									return new LenientCallMatchResult(possibilities, match.positions)
 								}
+								else if #result.positions || #result.labels {
+									throw new NotImplementedException()
+								}
+								else {
+									var function = result.possibilities[0]
+									result.positions = []
+									result.labels = {}
 
-								var mut lastIndexed = null
+									var mut namedLefts = excludes.length
+									var mut requiredLefts = 0
 
-								for var parameter, index in function.parameters() {
-									var name = parameter.getExternalName()
-
-									if parameter.isOnlyLabeled() {
-										if var argument ?= nameds[name] {
-											result.labels[name] = argument.index
-											namedLefts -= 1
-											lastIndexed = null
-										}
-										else if var argument ?= shorthands[name] {
-											result.labels[name] = argument.index
-											namedLefts -= 1
-											lastIndexed = null
+									for var parameter in function.parameters(excludes) {
+										if parameter.min() > 0 {
+											requiredLefts += 1
 										}
 									}
-									else {
-										if var argument ?= nameds[name] {
-											result.positions.push(argument.index)
-											namedLefts -= 1
-											lastIndexed = null
-										}
-										else if var argument ?= shorthands[name] {
-											result.positions.push(argument.index)
-											namedLefts -= 1
-											lastIndexed = null
-										}
-										else if parameter.min() >= 1 {
-											var argument = indexeds.shift()
 
-											result.positions.push(argument.index)
+									var mut lastIndexed = null
 
-											requiredLefts -= 1
+									for var parameter, index in function.parameters() {
+										var name = parameter.getExternalName()
 
-											lastIndexed = null
-											arguments.shift()
-										}
-										else if arguments.length > requiredLefts {
-											var argument = indexeds.shift()
-
-											result.positions.push(argument.index)
-
-											lastIndexed = arguments.shift()
+										if parameter.isOnlyLabeled() {
+											if var argument ?= nameds[name] {
+												result.labels[name] = argument.index
+												namedLefts -= 1
+												lastIndexed = null
+											}
+											else if var argument ?= shorthands[name] {
+												result.labels[name] = argument.index
+												namedLefts -= 1
+												lastIndexed = null
+											}
 										}
 										else {
-											if namedLefts > 0 {
-												if ?lastIndexed && lastIndexed.isAssignableToVariable(parameter.type(), true, true, false, true) {
-													ReferenceException.throwConfusingArguments(assessment.name, node)
+											if var argument ?= nameds[name] {
+												result.positions.push(new CallMatchArgument(argument.index))
+												namedLefts -= 1
+												lastIndexed = null
+											}
+											else if var argument ?= shorthands[name] {
+												result.positions.push(new CallMatchArgument(argument.index))
+												namedLefts -= 1
+												lastIndexed = null
+											}
+											else if parameter.min() >= 1 {
+												var argument = indexeds.shift()
+
+												if argument.type.isSpread() {
+													indexeds.unshift(argument)
 												}
-												else {
-													result.positions.push(null)
+
+												result.positions.push(new CallMatchArgument(argument.index))
+
+												requiredLefts -= 1
+
+												lastIndexed = null
+												arguments.shift()
+											}
+											else if arguments.length > requiredLefts {
+												var argument = indexeds.shift()
+
+												result.positions.push(new CallMatchArgument(argument.index))
+
+												lastIndexed = arguments.shift()
+											}
+											else {
+												if namedLefts > 0 {
+													if ?lastIndexed && lastIndexed.isAssignableToVariable(parameter.type(), true, true, false, true) {
+														ReferenceException.throwConfusingArguments(assessment.name, node)
+													}
+													else {
+														result.positions.push(new CallMatchArgument())
+													}
 												}
 											}
 										}
 									}
+
+									if indexeds.length > 0 {
+										if indexeds.length == 1 && indexeds[0].type.isSpread() {
+											pass
+										}
+										else {
+											throw new NotSupportedException()
+										}
+									}
+									if arguments.length > 0 {
+										throw new NotSupportedException()
+									}
 								}
 
-								if arguments.length > 0 {
-									throw new NotSupportedException()
-								}
+								return result
 							}
-
-							return result
+							else {
+								return result
+							}
 						}
 						else {
-							return result
+							return null
 						}
-					}
-					else {
-						return null
 					}
 				}
 			}
+		} # }}}
+
+		func resolveCallMatch(match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}, arguments: Type[], precise: Boolean): Boolean { # {{{
+			var indexes = {}
+			var positions = []
+			var lefts = []
+			var mut latest: Type? = null
+
+			for var parameter, index in match.function.parameters() {
+				var name = parameter.getExternalName()
+
+				if var argument ?= nameds[name] {
+					var mut fill = true
+
+					if !precise && ?latest {
+
+						for var left, index in lefts while fill {
+							if isUnpreciseMatch(latest, left.type()) {
+								fill = false
+							}
+
+							if isUnpreciseMatch(argument.type, left.type()) {
+								return false
+							}
+						}
+					}
+
+					if fill {
+						while positions.length + 1 <= index {
+							positions.push(new CallMatchArgument())
+						}
+					}
+
+					positions.push(new CallMatchArgument(argument.index))
+
+					indexes[argument.index] = true
+					latest = null
+				}
+				else if var argument ?= shorthands[name] {
+					var mut fill = true
+
+					if !precise && ?latest {
+						for var left, index in lefts while fill {
+							if isUnpreciseMatch(latest, left.type()) {
+								fill = false
+							}
+
+							if isUnpreciseMatch(argument.type, left.type()) {
+								return false
+							}
+						}
+					}
+
+					if fill {
+						while positions.length + 1 <= index {
+							positions.push(new CallMatchArgument())
+						}
+					}
+
+					positions.push(new CallMatchArgument(argument.index))
+
+					indexes[argument.index] = true
+					latest = null
+				}
+				else if var mut position ?= match.positions.shift() {
+					latest = null
+
+					if position is Array {
+						var args = []
+						var currents = {}
+
+						for var argument in position {
+							var mut current = argument.index
+
+							if current !?= currents[argument.index] {
+								while indexes[current] {
+									current += 1
+								}
+
+								currents[argument.index] = current
+								indexes[current] = true
+							}
+
+							argument.index = current
+
+							args.push(argument)
+						}
+
+						positions.push(args)
+					}
+					else if ?position.index {
+						if parameter.min() == 0 {
+							latest = arguments[position.index]
+						}
+
+						while indexes[position.index] {
+							position.index += 1
+						}
+
+						positions.push(position)
+
+						indexes[position.index] = true
+					}
+					else {
+						positions.push(position)
+					}
+				}
+				else {
+					lefts.push(parameter)
+				}
+			}
+
+			match.positions = positions
+
+			return true
+		} # }}}
+
+		func resolveCurryMatch(match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}): Void { # {{{
+			var indexes = {}
+			var positions = []
+
+			for var parameter in match.function.parameters() {
+				var name = parameter.getExternalName()
+
+				if var argument ?= nameds[name] {
+					positions.push(new CallMatchArgument(argument.index))
+
+					indexes[argument.index] = 'n'
+				}
+				else if var argument ?= shorthands[name] {
+					positions.push(new CallMatchArgument(argument.index))
+
+					indexes[argument.index] = 's'
+				}
+				else if var position ?= match.positions.shift() {
+					if position is Array {
+						var args = []
+						var currents = {}
+
+						for var pos, j in position {
+							var mut { index } = pos
+
+							if index !?= currents[index] {
+								while indexes[index] == 'n' | 's' {
+									index += 1
+								}
+
+								currents[pos.index] = index
+								indexes[index] = 'i'
+							}
+
+							pos.index = index
+
+							args.push(pos)
+						}
+
+						positions.push(args)
+					}
+					else {
+						while indexes[position.index] == 'n' | 's' {
+							position.index += 1
+						}
+
+						positions.push(position)
+
+						indexes[position.index] = 'i'
+					}
+				}
+				else {
+					positions.push(new CallMatchArgument())
+				}
+			}
+
+			match.positions = positions
 		} # }}}
 
 		func sortNodes(types: Type[]): String[] { # {{{

@@ -1,0 +1,1 @@
+SyntaxException: The variable "this" is reserved (fixtures/compile/this/this.smth.decl.wsp.wc.ks:2)

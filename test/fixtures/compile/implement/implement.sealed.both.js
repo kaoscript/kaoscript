@@ -29,7 +29,7 @@ module.exports = function() {
 		__ks_func_draw_0() {
 			return "I'm drawing a " + this._color + " rectangle.";
 		}
-		draw() {
+		draw(...args) {
 			if(args.length === 0) {
 				return this.__ks_func_draw_0();
 			}

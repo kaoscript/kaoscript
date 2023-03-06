@@ -6,11 +6,11 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		@property: String
 		@sealed: Boolean					= false
 	}
-	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, result: LenientCallMatchResult, @node) { # {{{
-		this(data, object, objectType, property, assessment, result.possibilities, result.positions, result.labels, node)
+	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @result, @node) { # {{{
+		this(data, object, objectType, property, assessment, result.possibilities, node)
 	} # }}}
-	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @functions, @positions = [], @labels = null, @node) { # {{{
-		super(data, assessment, functions, positions, labels, node)
+	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @functions, @node) { # {{{
+		super(data, assessment, functions, node)
 
 		@instance = @function.isInstance()
 
@@ -30,19 +30,30 @@ class LenientMethodCallee extends LenientFunctionCallee {
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
-			fragments.compileReusable(@object).code(`.\(@property)`)
-
-			if @scope == ScopeKind.Argument {
-				fragments.code('.apply(').compile(node.getCallScope(), mode)
-			}
-			else if @scope == ScopeKind.Null || @expression is not MemberExpression {
+			if @sealed {
+				if @instance {
+					fragments.code(`\(@objectType.getSealedPath())._im_\(@property)`)
+				}
+				else {
+					fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)`)
+				}
+				
 				fragments.code('.apply(null')
+				
+				Router.Argument.toFlatFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, @object, fragments, mode)
 			}
 			else {
-				fragments.code('.apply(').compile(@object, mode)
+				fragments.compileReusable(@object).code(`.\(@property)`)
+				
+				if @scope == ScopeKind.Argument {
+					fragments.code('.apply(').compile(node.getCallScope(), mode)
+				}
+				else {
+					fragments.code('.apply(').compile(@object, mode)
+				}
+				
+				Router.Argument.toFlatFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, null, fragments, mode)
 			}
-
-			Router.Argument.toFlatFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
 		}
 		else {
 			if @sealed {
@@ -61,12 +72,7 @@ class LenientMethodCallee extends LenientFunctionCallee {
 				ScopeKind.Argument {
 					fragments.code('.call(').compile(node.getCallScope(), mode)
 
-					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
-				}
-				ScopeKind.Null {
-					fragments.code('.call(null')
-
-					Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
+					Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, false, fragments, mode)
 				}
 				ScopeKind.This {
 					fragments.code('(')
@@ -79,10 +85,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 							fragments.compile(@object)
 						}
 
-						Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, true, fragments, mode)
+						Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, false, fragments, mode)
 					}
 					else {
-						Router.Argument.toFragments(@positions, @labels, node.arguments(), @function, @labelable, false, fragments, mode)
+						Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, false, false, fragments, mode)
 					}
 				}
 			}

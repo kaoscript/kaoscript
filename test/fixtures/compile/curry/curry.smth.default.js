@@ -31,12 +31,20 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const hello = Helper.vcurry(Message.build, null, "Hello!");
+	const hello = Helper.curry((fn, ...args) => {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+			return fn[0](Helper.getVarargs(args, 0, pts[1]));
+		}
+		throw Helper.badArgs();
+	}, (__ks_0) => Message.__ks_sttc_build_0(["Hello!", ...__ks_0]));
 	function print() {
 		return print.__ks_rt(this, arguments);
 	};
 	print.__ks_0 = function(name, printer) {
-		return printer("It's nice to meet you, ", name, ".");
+		return printer("It's nice to meet you, " + name + ".");
 	};
 	print.__ks_rt = function(that, args) {
 		const t0 = Type.isString;
