@@ -1,0 +1,1 @@
+TypeException: The identifier "values" of type "{x: String, y: String}" is expected to be of type "String{}" (fixtures/compile/destruct/destruct.object.decl.vv.§.§.#oss.%o<s_s>e.ks:4)

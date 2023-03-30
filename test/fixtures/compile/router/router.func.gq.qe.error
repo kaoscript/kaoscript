@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("Foobar"), the function "foobar" can be matched with "foobar(x: Foobar)" or "foobar(: Foobar)" (fixtures/compile/router/router.func.gq.qe.ks:6)

@@ -383,7 +383,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var methods, name of @forkedMethods {
-			for var mut { original, forks, hidden } of methods {
+			for var mut { original, forks, hidden? } of methods {
 				var index = original.index()
 				var instance = original.isInstance()
 				var mut found = false

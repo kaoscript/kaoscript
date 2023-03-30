@@ -693,7 +693,10 @@ abstract class Type {
 			return false
 		}
 	} # }}}
+	isBinding() => false
 	isBoolean() => false
+	isBroadArray() => @isArray()
+	isBroadObject() => @isObject()
 	isCloned() => false
 	isClass() => false
 	isClassInstance() => false
@@ -772,6 +775,9 @@ abstract class Type {
 	isVoid() => false
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
+	merge(value: Type, node): Type { # {{{
+		return @isMorePreciseThan(value) ? this : value
+	} # }}}
 	minorOriginal() => null
 	origin(): @origin
 	origin(@origin): this
@@ -959,7 +965,6 @@ include {
 	'./type/class-destructor'
 	'./type/class-method'
 	'./type/class-variable'
-	'./type/destructurable-object'
 	'./type/enum'
 	'./type/namespace'
 	'./type/never'

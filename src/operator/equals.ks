@@ -41,7 +41,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		if @condition {
 			var names = []
 
-			for var name in left.listAssignments([]) {
+			for var { name } in left.listAssignments([]) {
 				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
 						throw new NotImplementedException(this)

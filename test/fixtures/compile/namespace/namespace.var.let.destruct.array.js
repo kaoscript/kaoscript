@@ -1,4 +1,4 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function min() {
 		return min.__ks_rt(this, arguments);
@@ -13,7 +13,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let foo = Helper.namespace(function() {
-		let [gender, age] = min.__ks_0();
+		let  __ks_0 = min.__ks_0();
+		Helper.assertDexArray(__ks_0, 1, 2, 0, Type.isValue);
+		let [gender, age] = __ks_0;
 		return {
 			gender,
 			age

@@ -121,7 +121,10 @@ class WhileStatement extends Statement {
 
 				ctrl.code(' ? (')
 
-				@declaration.declarator().toAssignmentFragments(ctrl, @condition)
+				var declarator = @declaration.declarator()
+
+				declarator.toAssertFragments(ctrl, @condition)
+				declarator.toAssignmentFragments(ctrl, @condition)
 
 				ctrl.code(', true) : false')
 			}

@@ -458,7 +458,7 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	isCascade() => @cascade
-	isExit() => ?@whenFalseExpression && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	isExit() => @hasWhenFalse && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInitializingInstanceVariable(name) { # {{{
 		if @condition.isInitializingInstanceVariable(name) {
 			return true
@@ -534,7 +534,10 @@ class IfStatement extends Statement {
 
 				fragments.code(' ? (')
 
-				@declaration.declarator().toAssignmentFragments(fragments, @bindingVariable)
+				var declarator = @declaration.declarator()
+
+				declarator.toAssertFragments(fragments, @bindingVariable)
+				declarator.toAssignmentFragments(fragments, @bindingVariable)
 
 				fragments.code(', true) : false')
 			}
@@ -598,4 +601,15 @@ class IfStatement extends Statement {
 			}
 		}
 	} # }}}
+	type() {
+		if @hasWhenFalse {
+			var trueType = @whenTrueExpression.type()
+			var falseType = @whenFalseExpression.type()
+
+			return Type.union(@scope, trueType, falseType)
+		}
+		else {
+			return Type.Void
+		}
+	}
 }

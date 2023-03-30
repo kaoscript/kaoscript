@@ -84,7 +84,7 @@ class ForInStatement extends Statement {
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
-			for var name in @value.listAssignments([]) {
+			for var { name } in @value.listAssignments([]) {
 				var variable = @scope.getVariable(name)
 
 				if @declaration || !?variable {
@@ -185,7 +185,7 @@ class ForInStatement extends Statement {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = valueType.merge(parameterType, this)
 
 			if @value is IdentifierLiteral {
 				if @declareValue {
@@ -200,11 +200,16 @@ class ForInStatement extends Statement {
 					element.type(realType.getProperty(index))
 				}
 			}
+			else if @value is ArrayBinding | ObjectBinding {
+				@value.type(realType)
+			}
 			else {
-				for var name in @value.listAssignments([]) {
+				for var { name } in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
+
+			@value.prepare()
 		}
 
 		if ?@from {
@@ -543,8 +548,8 @@ class ForInStatement extends Statement {
 	} # }}}
 	checkForBreak(expression) { # {{{
 		if !@useBreak && @value != null {
-			for var variable in @value.listAssignments([]) until @useBreak {
-				if expression.isUsingVariable(variable) {
+			for var { name } in @value.listAssignments([]) until @useBreak {
+				if expression.isUsingVariable(name) {
 					@useBreak = true
 				}
 			}
@@ -561,13 +566,13 @@ class ForInStatement extends Statement {
 		}
 
 		if @value != null {
-			for var variable in @value.listAssignments([]) {
-				if expression.isUsingVariable(variable) {
+			for var { name } in @value.listAssignments([]) {
+				if expression.isUsingVariable(name) {
 					if @declareValue {
-						variables.pushUniq(variable)
+						variables.pushUniq(name)
 					}
 					else {
-						SyntaxException.throwAlreadyDeclared(variable, this)
+						SyntaxException.throwAlreadyDeclared(name, this)
 					}
 				}
 			}
@@ -590,6 +595,10 @@ class ForInStatement extends Statement {
 	toBodyFragments(fragments) { # {{{
 		if ?@value {
 			if !?@split {
+				if @value is ArrayBinding | ObjectBinding {
+					@value.toAssertFragments(fragments, @bindingValue, false)
+				}
+
 				var line = fragments.newLine()
 
 				@value.toAssignmentFragments(line, @bindingValue)

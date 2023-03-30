@@ -125,9 +125,6 @@ class NamedType extends Type {
 			else if @type.isTuple() && value.isTuple() {
 				return @name == 'Tuple' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
-			else {
-				return false
-			}
 		}
 		else if value is ReferenceType {
 			if value.name() == 'Class' {
@@ -170,8 +167,6 @@ class NamedType extends Type {
 					return true
 				}
 			}
-
-			return false
 		}
 		else if value is ExclusionType {
 			var types = value.types()
@@ -188,9 +183,13 @@ class NamedType extends Type {
 
 			return true
 		}
-		else {
-			return false
+		else if value is ArrayType {
+			if @name == 'Array' {
+				return true
+			}
 		}
+
+		return false
 	} # }}}
 	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
@@ -553,7 +552,7 @@ class NamedType extends Type {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
-			@type.toPositiveTestFragments(fragments, node, junction)
+			@reference().toPositiveTestFragments(fragments, node, junction)
 		}
 	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)

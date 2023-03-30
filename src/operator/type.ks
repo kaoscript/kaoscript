@@ -44,7 +44,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isNullable() => @left.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
-	listAssignments(array: Array<String>) => @left.listAssignments(array)
+	listAssignments(array: Array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { # {{{
 		if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
@@ -170,7 +170,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
-	listAssignments(array: Array<String>) => @subject.listAssignments(array)
+	listAssignments(array: Array) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { # {{{
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
@@ -303,7 +303,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return inferables
 	} # }}}
-	listAssignments(array: Array<String>) => @subject.listAssignments(array)
+	listAssignments(array: Array) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { # {{{
 		@falseType.toNegativeTestFragments(fragments, @subject)
 	} # }}}

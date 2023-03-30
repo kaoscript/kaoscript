@@ -39,11 +39,15 @@ class ModuleScope extends Scope {
 		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
 		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
 		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
+		@predefined.__Any = new Variable('Any', true, true, AnyType.Explicit)
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
+		@predefined.__Never = new Variable('Null', true, true, Type.Never)
+		@predefined.__Null = new Variable('Null', true, true, NullType.Explicit)
 		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
+		@predefined.__Void = new Variable('Void', true, true, Type.Void)
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {

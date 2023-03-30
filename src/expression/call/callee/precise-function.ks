@@ -112,7 +112,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 					var parameters = @function.parameters()
 					var arguments = @node.arguments()
 
-					for var { parameter, value: { passthru } }, index in map when ?passthru {
+					for var { parameter, value % { passthru? } }, index in map when ?passthru {
 						block
 							.newLine()
 							.code($runtime.scope(@node))

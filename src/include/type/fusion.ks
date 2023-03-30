@@ -77,7 +77,6 @@ class FusionType extends Type {
 			return types[0].hashCode(fattenNull)
 		}
 
-		echo(this)
 		throw new NotImplementedException()
 	} # }}}
 	hasMutableAccess() { # {{{

@@ -36,7 +36,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		if @condition {
 			var names = []
 
-			for var name in left.listAssignments([]) {
+			for var { name } in left.listAssignments([]) {
 				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
 						@statement.addInitializableVariable(variable, true, this)
@@ -117,6 +117,10 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		fragments.code(' ? (')
 
 		if ?@left.toAssignmentFragments {
+			if @left is ArrayBinding | ObjectBinding {
+				@left.toAssertFragments(fragments, @right, true)
+			}
+
 			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
@@ -171,7 +175,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			var scope = @statement.scope()
 			var names = []
 
-			for var name in left.listAssignments([]) {
+			for var { name } in left.listAssignments([]) {
 				if var variable ?= scope.getVariable(name) {
 					if variable.isLateInit() {
 						if @parent == @statement {

@@ -20,7 +20,7 @@ class UnaryOperatorExpression extends Expression {
 	hasExceptions() => false
 	inferTypes(inferables) => @argument.inferTypes(inferables)
 	isUsingVariable(name) => @argument.isUsingVariable(name)
-	listAssignments(array: Array<String>) => @argument.listAssignments(array)
+	listAssignments(array: Array) => @argument.listAssignments(array)
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
@@ -76,13 +76,16 @@ class UnaryOperatorImplicit extends Expression {
 		@property: String
 		@type: Type
 	}
-	override analyse() {
+	override analyse() { # {{{
 		@property = @data.argument.name
-	}
+	} # }}}
 	override prepare(target, targetMode) { # {{{
 		var late type: Type
 
 		match @parent {
+			is BinaryOperatorMatch {
+				type = @parent.subject().type()
+			}
 			is CallExpression | CreateExpression {
 				var index = @parent.arguments().indexOf(this)
 				var types = []
@@ -125,7 +128,7 @@ class UnaryOperatorImplicit extends Expression {
 
 				type = Type.union(@scope, ...types)
 			}
-			is AssignmentOperatorEquals | StructFunction | TupleFunction | VariableDeclaration {
+			is AssignmentOperatorEquals | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
 				type = target
 			}
 			else {

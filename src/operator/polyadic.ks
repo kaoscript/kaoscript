@@ -62,7 +62,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 	left(left): this { # {{{
 		@operands[0] = left
 	} # }}}
-	listAssignments(array: Array<String>) { # {{{
+	listAssignments(array: Array) { # {{{
 		for var operand in @operands {
 			operand.listAssignments(array)
 		}

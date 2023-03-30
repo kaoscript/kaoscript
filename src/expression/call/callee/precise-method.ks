@@ -129,7 +129,7 @@ class PreciseMethodCallee extends MethodCallee {
 
 					var arguments = @node.arguments()
 
-					for var { parameter, value, values }, index in map {
+					for var { parameter, value?, values? }, index in map {
 							fragments.code($comma) if index != 0
 
 							if ?value {
@@ -143,7 +143,7 @@ class PreciseMethodCallee extends MethodCallee {
 							else if ?values {
 								fragments.code('[')
 
-								for var { placeholder, passthru }, index in values {
+								for var { placeholder?, passthru? }, index in values {
 									fragments.code($comma) if index != 0
 
 									if ?passthru {
@@ -193,7 +193,7 @@ class PreciseMethodCallee extends MethodCallee {
 
 						var arguments = @node.arguments()
 
-						for var { parameter, value, values }, index in map {
+						for var { parameter, value?, values? }, index in map {
 							fragments.code($comma) if index != 0
 
 							if ?value {
@@ -207,7 +207,7 @@ class PreciseMethodCallee extends MethodCallee {
 							else if ?values {
 								fragments.code('[')
 
-								for var { placeholder, passthru }, index in values {
+								for var { placeholder?, passthru? }, index in values {
 									fragments.code($comma) if index != 0
 
 									if ?passthru {

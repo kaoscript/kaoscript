@@ -320,7 +320,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		if @instance {
 			if @override {
 				if var data ?= @getOveriddenMethod(@class, unknownReturnType) {
-					{ method: overridden, type: @type } = data
+					{ method % overridden, type % @type } = data
 
 					unless @class.isAbstract() {
 						@hiddenOverride = true

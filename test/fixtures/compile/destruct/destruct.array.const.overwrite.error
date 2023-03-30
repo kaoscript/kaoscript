@@ -1,1 +1,0 @@
-ReferenceException: The identifier "a" is immutable (fixtures/compile/destruct/destruct.array.const.overwrite.ks:7)

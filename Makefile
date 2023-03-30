@@ -46,6 +46,16 @@ old:
 std:
 	gsed -i -E 's/compiler(.new|.old).js/compiler.js/' lib/bin.js
 
+selfnew:
+	if [ ! -f "lib/compiler.old9.js" ]; then cp lib/compiler.old.js lib/compiler.old9.js; fi;
+	mv lib/compiler.old.js lib/compiler.old2.js
+	mv lib/compiler.js lib/compiler.old.js
+
+selfold:
+	rm lib/compiler.js
+	mv lib/compiler.old.js lib/compiler.js
+	mv lib/compiler.old2.js lib/compiler.old.js
+
 patche:
 	node ./scripts/patch-error.js
 patchm:

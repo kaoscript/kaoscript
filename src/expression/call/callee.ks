@@ -12,7 +12,7 @@ abstract class Callee {
 				hash += ',' if index != 0
 
 				if position is Array {
-					for var { index, element, from }, i in position {
+					for var { index?, element?, from? }, i in position {
 						hash += '|' if i != 0
 
 						if !?index {
@@ -30,7 +30,7 @@ abstract class Callee {
 					}
 				}
 				else {
-					var { index, element, from } = position
+					var { index?, element?, from? } = position
 
 					if !?index {
 						pass

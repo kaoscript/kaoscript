@@ -1,13 +1,17 @@
 class ObjectType extends Type {
 	private {
+		@computed: Boolean{}			 = {}
+		@destructuring: Boolean			= false
 		@empty: Boolean					= false
 		@length: Number					= 0
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
-		@properties: Object<Type>		= {}
+		@properties: Type{}				= {}
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		@testProperties: Boolean		= false
+		@testRest: Boolean				= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ObjectType { # {{{
@@ -18,6 +22,10 @@ class ObjectType extends Type {
 			}
 			else if data.sealed {
 				type.flagSealed()
+			}
+
+			if data.destructuring {
+				type.flagDestructuring()
 			}
 
 			queue.push(() => {
@@ -35,20 +43,26 @@ class ObjectType extends Type {
 			return type.flagComplete()
 		} # }}}
 	}
-	addProperty(name: String, type: Type) { # {{{
+	addProperty(name: String, computed: Boolean = false, type: Type) { # {{{
 		@properties[name] = type
+		@computed[name] = computed
 		@length += 1
+		@testProperties ||= !type.isAny() || !type.isNullable()
 	} # }}}
 	clone() { # {{{
 		var type = new ObjectType(@scope)
 
 		type._complete = @complete
+		type._destructuring = @destructuring
 		type._nullable = @nullable
 		type._length = @length
 		type._properties = {...@properties}
+		type._computed = {...@computed}
 		type._rest = @rest
 		type._restType = @restType
 		type._spread = @spread
+		type._testProperties = @testProperties
+		type._testRest = @testRest
 
 		return type
 	} # }}}
@@ -131,6 +145,9 @@ class ObjectType extends Type {
 		if @rest {
 			export.rest = @restType.export(references, indexDelta, mode, module)
 		}
+		if @destructuring {
+			export.destructuring = true
+		}
 
 		return export
 	} # }}}
@@ -142,6 +159,9 @@ class ObjectType extends Type {
 		}
 
 		return this
+	} # }}}
+	flagDestructuring() { # {{{
+		@destructuring = true
 	} # }}}
 	flagEmpty(): this { # {{{
 		@empty = true
@@ -245,7 +265,13 @@ class ObjectType extends Type {
 				return true
 			}
 
-			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+
+			if anycast {
+				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
+			}
+
+			return this.isSubsetOf(value, matchingMode)
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -257,11 +283,34 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
+	isBinding() => true
+	isDestructuring() => @destructuring
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
-		return @restType.isMorePreciseThan(value.getRestType())
+		if value.hasProperties() {
+			if @hasProperties() {
+				for var type, name of @properties {
+					if !value.hasProperty(name) {
+						return false
+					}
+				}
+
+				if @length > value.length() {
+					return false
+				}
+			}
+			else {
+				return false
+			}
+		}
+
+		if @rest && value.hasRest() {
+			return @restType.isMorePreciseThan(value.getRestType())
+		}
+
+		return true
 	} # }}}
 	isMorePreciseThan(value: ReferenceType) { # {{{
 		return false unless value.isObject()
@@ -282,21 +331,8 @@ class ObjectType extends Type {
 	isObject() => true
 	isExportable() => true
 	isLiberal() => @liberal
+	isMatching(value: Type, mode: MatchingMode) => false
 	isSealable() => true
-	isSubsetOf(value: DestructurableObjectType, mode: MatchingMode) { # {{{
-		for var type, name of value.properties() {
-			if var prop ?= @properties[name] {
-				if !prop.isSubsetOf(type, mode) {
-					return false
-				}
-			}
-			else if !type.isNullable() {
-				return false
-			}
-		}
-
-		return true
-	} # }}}
 	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		return true if this == value || @empty
 
@@ -351,9 +387,10 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(rest, mode)
 					}
 				}
-				else if mode ~~ MatchingMode.Exact {
-					return false unless value.length() == @length
-				}
+				// for exact match
+				// else if mode ~~ MatchingMode.Exact {
+				// 	return false unless value.length() == @length
+				// }
 			}
 		}
 
@@ -390,7 +427,7 @@ class ObjectType extends Type {
 
 		return true
 	} # }}}
-	isMatching(value: Type, mode: MatchingMode) => false
+	isTestingProperties() => @testProperties
 	length(): @length
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isObject() {
@@ -406,6 +443,91 @@ class ObjectType extends Type {
 		}
 
 		return false
+	} # }}}
+	merge(value: ObjectType, node): Type { # {{{
+		var result = new ObjectType(@scope)
+
+		result.flagDestructuring() if @destructuring
+		result.flagSpread() if @spread
+
+		if @hasProperties() {
+			if value.hasProperties() {
+				for var type, name of @properties {
+					result.addProperty(name, @computed[name], type.merge(value.getProperty(name), node))
+				}
+
+				if @rest {
+					if value.hasRest() {
+						result.setRestType(@restType.merge(value.getRestType(), node))
+					}
+					else {
+						result.setRestType(@restType)
+					}
+				}
+			}
+			else if value.hasRest() {
+				var restType = value.getRestType()
+
+				for var type, name of @properties {
+					result.addProperty(name, @computed[name], type.merge(restType, node))
+				}
+
+				if @rest {
+					result.setRestType(@restType.merge(restType, node))
+				}
+			}
+			else {
+				return this
+			}
+		}
+		else {
+			throw new NotImplementedException()
+		}
+
+		return result
+	} # }}}
+	merge(value: ReferenceType, node): Type { # {{{
+		unless value.isBroadObject() {
+			TypeException.throwIncompatible(value, this, node)
+		}
+
+		if !value.isObject() {
+			unless value.isAssignableToVariable(this, true, false, false) {
+				TypeException.throwIncompatible(value, this, node)
+			}
+
+			return value
+		}
+
+		if value.hasParameters() {
+			var result = new ObjectType(@scope)
+
+			result.flagDestructuring() if @destructuring
+			result.flagSpread() if @spread
+
+			if @hasProperties() {
+				var restType = value.parameter()
+
+				for var type, name of @properties {
+					result.addProperty(name, @computed[name], restType.merge(type, node))
+				}
+
+				if @rest {
+					result.setRestType(@restType.merge(restType, node))
+				}
+			}
+			else {
+				throw new NotImplementedException()
+			}
+
+			return result
+		}
+		else if value.isAlias() {
+			return @merge(value.discard(), node)
+		}
+		else {
+			return this
+		}
 	} # }}}
 	parameter(index: Number = -1) { # {{{
 		if @length > 0 || !@rest {
@@ -437,6 +559,7 @@ class ObjectType extends Type {
 	} # }}}
 	setRestType(@restType): this { # {{{
 		@rest = true
+		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
@@ -465,7 +588,12 @@ class ObjectType extends Type {
 					nc = true
 				}
 
-				str += `\(name): \(property.toQuote())`
+				if @computed[name] {
+					str += `[\(name)]: \(property.toQuote())`
+				}
+				else {
+					str += `\(name): \(property.toQuote())`
+				}
 			}
 
 			if @rest {
@@ -488,69 +616,120 @@ class ObjectType extends Type {
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return @export(references, indexDelta, mode, module)
 	} # }}}
+	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).assertDexObject(`).compile(value)
+
+		if @testRest || @testProperties {
+			@toSubtestFragments(testingType, fragments, node)
+		}
+
+		fragments.code(')')
+	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
 	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if @length == 0 && !@rest && !@nullable {
-			fragments.code($runtime.type(node), '.isObject')
+	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
+		if testingType {
+			if @destructuring {
+				fragments.code(', 1')
+			}
+			else {
+				fragments.code(', 2')
+			}
 		}
 		else {
+			fragments.code(', 0')
+		}
+
+		if @testRest || @testProperties {
+			fragments.code($comma)
+
+			var literal = new Literal(false, node, node.scope(), 'value')
+
+			if @testProperties {
+				if @testRest {
+					@restType.toTestFunctionFragments(fragments, literal)
+				}
+				else {
+					fragments.code('0')
+				}
+
+				fragments.code(', {')
+
+				var mut comma = false
+
+				for var type, name of @properties {
+					if comma {
+						fragments.code($comma)
+					}
+					else {
+						comma = true
+					}
+
+					if @computed[name] {
+						fragments.code(`[\(name)]: `)
+					}
+					else {
+						fragments.code(`\(name): `)
+					}
+
+					type.toTestFunctionFragments(fragments, literal)
+				}
+
+				fragments.code('}')
+			}
+			else {
+				@restType.toTestFunctionFragments(fragments, literal)
+			}
+		}
+	} # }}}
+	toTestFragments(name: String, testingType: Boolean, fragments, node) { # {{{
+		if testingType && !@destructuring && !@testRest && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isObject(\(name))`)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexObject(\(name)`)
+
+			@toSubtestFragments(testingType, fragments, node)
+
+			fragments.code(')')
+		}
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
+		if @length == 0 && !@rest && !@nullable {
+			if !@destructuring {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+		else if @testRest || @testProperties || @nullable {
 			fragments.code(`value => `)
 
 			@toTestFunctionFragments(fragments, node, Junction.NONE)
 		}
+		else {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction.AND {
-			fragments.code('(')
-		}
-
-		fragments.code($runtime.type(node), '.isObject(value')
-
-		var literal = new Literal(false, node, node.scope(), 'value')
-
-		if @rest {
-			fragments.code($comma)
-
-			@restType.toTestFunctionFragments(fragments, literal)
-		}
-		else if @length > 0 {
-			fragments.code(', void 0')
-		}
-
-		if @length > 0 {
-			fragments.code(', {')
-
-			var mut nc = false
-
-			for var type, name of @properties {
-				if nc {
-					fragments.code($comma)
-				}
-				else {
-					nc = true
-				}
-
-				fragments.code(`\(name): `)
-
-				type.toTestFunctionFragments(fragments, literal)
-			}
-
-			fragments.code('}')
-		}
-
-		fragments.code(')')
-
 		if @nullable {
+			fragments.code('(') if junction == Junction.AND
+
+			@toTestFragments('value', true, fragments, node)
+
 			fragments.code(` || \($runtime.type(node)).isNull(value)`)
 
-			if junction == Junction.AND {
-				fragments.code(')')
-			}
+			fragments.code(')') if junction == Junction.AND
+		}
+		else {
+			@toTestFragments('value', true, fragments, node)
 		}
 	} # }}}
 	override toVariations(variations) { # {{{

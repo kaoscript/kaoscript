@@ -11,11 +11,22 @@ class BreakStatement extends Statement {
 			SyntaxException.throwIllegalStatement('break', this)
 		}
 
-		while !parent.isLoop() {
-			parent = parent.parent()
+		if ?@name {
+			while parent is not BlockStatement || parent.name() != @name {
+				parent = parent.parent()
 
-			unless parent?.isJumpable() {
-				SyntaxException.throwIllegalStatement('break', this)
+				unless parent?.isJumpable() {
+					SyntaxException.throwIllegalStatement('break', this)
+				}
+			}
+		}
+		else {
+			while !parent.isLoop() {
+				parent = parent.parent()
+
+				unless parent?.isJumpable() {
+					SyntaxException.throwIllegalStatement('break', this)
+				}
 			}
 		}
 	} # }}}

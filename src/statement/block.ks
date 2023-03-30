@@ -1,11 +1,12 @@
 class BlockStatement extends Statement {
 	private late {
-		@body				= null
+		@body					= null
 		@bodyScope: Scope
-		@label: String
+		@continuous: Boolean	= false
+		@name: String
 	}
 	analyse() { # {{{
-		@label = @data.label.name
+		@name = @data.label.name
 
 		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
 
@@ -22,11 +23,38 @@ class BlockStatement extends Statement {
 	translate() { # {{{
 		@body.translate()
 	} # }}}
+	flagContinuous() { # {{{
+		@continuous = true
+	} # }}}
 	isJumpable() => true
 	isUsingVariable(name) { # {{{
 		return @body.isUsingVariable(name)
 	} # }}}
+	name() => @name
 	toFragments(fragments, mode) { # {{{
-		var ctrl = fragments.newControl().code(`\(@label):`).step().compile(@body).done()
+		if @continuous {
+			var loop = fragments
+				.newControl()
+				.code('while(true)')
+				.step()
+
+			loop
+				.newControl()
+				.code(`\(@name):`)
+				.step()
+				.compile(@body)
+				.line('break')
+				.done()
+
+			loop.done()
+		}
+		else {
+			fragments
+				.newControl()
+				.code(`\(@name):`)
+				.step()
+				.compile(@body)
+				.done()
+		}
 	} # }}}
 }

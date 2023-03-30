@@ -1,0 +1,1 @@
+ReferenceException: The constructor of class "Foobar" can't be matched to given arguments (Null) (fixtures/compile/class/class.ctor.attr.req.call.ne.ks:8)

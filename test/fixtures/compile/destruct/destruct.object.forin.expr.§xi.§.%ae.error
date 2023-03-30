@@ -1,0 +1,1 @@
+ReferenceException: The identifier "line" is immutable (fixtures/compile/destruct/destruct.object.forin.expr.§xi.§.%ae.ks:4)

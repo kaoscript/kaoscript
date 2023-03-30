@@ -25,7 +25,7 @@ class StructType extends Type {
 		@count: Number							= 0
 		@extending: Boolean						= false
 		@extends: NamedType<StructType>?		= null
-		@fields: Object<StructFieldType>		= {}
+		@fields: StructFieldType{}				= {}
 		@function: FunctionType?				= null
 	}
 	addField(field: StructFieldType) { # {{{
@@ -114,9 +114,20 @@ class StructType extends Type {
 			return null
 		}
 	} # }}}
+	hasProperty(name: String) { # {{{
+		if ?@fields[name] {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasProperty(name)
+		}
+		else {
+			return false
+		}
+	} # }}}
 	isExtending() => @extending
 	override isStruct() => true
-	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Struct' {
 			return true
@@ -125,6 +136,33 @@ class StructType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
+	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
+		for var type, name of value.properties() {
+			if var prop ?= @getProperty(name) {
+				return false unless prop.type().isSubsetOf(type, mode)
+			}
+			else {
+				return false unless type.isNullable()
+			}
+		}
+
+		if value.hasRest() {
+			var rest = value.getRestType()
+
+			for var prop, name of @getAllFieldsMap() when !value.hasProperty(name) {
+				return false unless prop.type().isSubsetOf(rest, mode)
+			}
+		}
+		// for exact match
+		// else {
+		// 	for var prop, name of @getAllFieldsMap() when !value.hasProperty(name) {
+		// 		return false
+		// 	}
+		// }
+
+		return true
+	} # }}}
+	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {

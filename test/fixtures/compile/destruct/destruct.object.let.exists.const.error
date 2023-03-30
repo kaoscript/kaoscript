@@ -1,1 +1,0 @@
-SyntaxException: Identifier "bar" has already been declared (fixtures/compile/destruct/destruct.object.let.exists.const.ks:6)

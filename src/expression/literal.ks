@@ -13,7 +13,7 @@ class Literal extends Expression {
 	translate()
 	hasExceptions() => false
 	isComposite() => false
-	listAssignments(array: Array<String>) => array
+	listAssignments(array: Array) => array
 	override listNonLocalVariables(scope, variables) => variables
 	toFragments(fragments, mode) { # {{{
 		if @data {
@@ -181,8 +181,8 @@ class IdentifierLiteral extends Literal {
 		return false
 	} # }}}
 	isUsingVariable(name) => @value == name
-	listAssignments(array: Array<String>) { # {{{
-		array.push(@value)
+	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
+		array.push({ name: @value, immutable })
 
 		return array
 	} # }}}

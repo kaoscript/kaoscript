@@ -79,8 +79,76 @@ abstract class TupleType extends Type {
 			return null
 		}
 	} # }}}
+	hasProperty(index: Number) { # {{{
+		if ?@fieldsByIndex[index] {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasProperty(index)
+		}
+		else {
+			return false
+		}
+	} # }}}
+	hasProperty(name: String) { # {{{
+		if ?@fieldsByIndex[name] {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasProperty(name)
+		}
+		else {
+			return false
+		}
+	} # }}}
 	isExtending() => @extending
+	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
+		if value.name() == 'Tuple' {
+			return true
+		}
+
+		return false
+	} # }}}
 	override isTuple() => true
+	isSubsetOf(value: NullType, mode: MatchingMode) => false
+	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
+		for var type, index in value.properties() {
+			if var prop ?= @getProperty(index) {
+				return false unless prop.type().isSubsetOf(type, mode)
+			}
+			else {
+				return false unless type.isNullable()
+			}
+		}
+
+		if value.hasRest() {
+			var rest = value.getRestType()
+
+			for var prop, index in @listAllFields() from value.length() {
+				return false unless prop.type().isSubsetOf(rest, mode)
+			}
+		}
+		// for exact match
+		// else {
+		// 	for var prop, index in @listAllFields() from value.length() {
+		// 		return false
+		// 	}
+		// }
+
+		return true
+	} # }}}
+	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
+	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
+		for var type in value.types() {
+			if this.isSubsetOf(type) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	length(): Number => @extendedLength + @length
 	listAllFields(list = []) { # {{{
 		if @extending {

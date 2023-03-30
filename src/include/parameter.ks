@@ -564,17 +564,17 @@ class Parameter extends AbstractNode {
 		@retained = @options.parameters.retain
 	} # }}}
 	analyse() { # {{{
-		var mut immutable = true
-
-		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Mutable {
-				immutable = false
-
-				break
-			}
-		}
-
 		if ?@data.internal {
+			var mut immutable = true
+
+			for var modifier in @data.modifiers {
+				if modifier.kind == ModifierKind.Mutable {
+					immutable = false
+
+					break
+				}
+			}
+
 			@internal = Parameter.compileExpression(@data.internal, this)
 			@internal.setAssignment(AssignmentType.Parameter)
 
@@ -584,12 +584,14 @@ class Parameter extends AbstractNode {
 
 			@internal.analyse()
 
-			for var name in @internal.listAssignments([]) {
+			for var assignment in @internal.listAssignments([]) {
+				var { name } = assignment
+
 				if @scope.hasDefinedVariable(name) {
 					SyntaxException.throwAlreadyDeclared(name, this)
 				}
 
-				@scope.define(name, immutable, null, this)
+				@scope.define(name, assignment.immutable ?? immutable, null, this)
 			}
 		}
 		else {
@@ -597,7 +599,9 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@internal.prepare()
+		var declaredType = Type.fromAST(@data.type, this)
+
+		@internal.prepare(declaredType)
 
 		var mut min: Number = 1
 		var mut max: Number = 1
@@ -608,6 +612,11 @@ class Parameter extends AbstractNode {
 			match modifier.kind {
 				ModifierKind.NameOnly {
 					passing = PassingMode.LABELED
+				}
+				ModifierKind.NonNullable {
+					if @internal is ThisExpressionParameter {
+						@internal.flagNonNullable()
+					}
 				}
 				ModifierKind.Nullable {
 					nullable = true
@@ -654,11 +663,8 @@ class Parameter extends AbstractNode {
 		}
 
 		if ?@data.type {
-			var declaredType = Type.fromAST(@data.type, this)
 
-			if !?type || (type.isObject() && declaredType.isObject()) || declaredType.isMorePreciseThan(type) {
-				type = declaredType
-			}
+			type = type?.merge(declaredType, this) ?? declaredType
 		}
 
 		if nullable {
@@ -779,7 +785,7 @@ class Parameter extends AbstractNode {
 	isAssertingParameter() => @parent.isAssertingParameter()
 	isAssertingParameterType() => @parent.isAssertingParameterType()
 	isComprehensive() => @comprehensive
-	isRequired() => @defaultValue == null || @explicitlyRequired
+	isRequired() => @explicitlyRequired || !?@defaultValue
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
 	max() => @arity?.max ?? 1
@@ -1515,18 +1521,30 @@ class ArrayBindingParameter extends ArrayBinding {
 	isBinding() => true
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
 	operator(@operator): this
-	setDeclaredType(type, definitive: Boolean = false) { # {{{
+	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
 				element.setDeclaredType(type, definitive)
 			}
 		}
-		else if type.isArray() {
+		else if type.isBroadArray() {
+			type = type.discard()
+
 			if type.isReference() {
 				var elementType = type.parameter()
 
 				for var element in @elements {
 					element.setDeclaredType(elementType, definitive)
+				}
+			}
+			else if type.isTuple() {
+				for var element in @elements {
+					if element.isRest() {
+						throw new NotImplementedException()
+					}
+					else {
+						element.setDeclaredType(type.getProperty(element.index()).type(), definitive)
+					}
 				}
 			}
 			else {
@@ -1611,7 +1629,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
 	setDeclaredType(type, definitive) { # {{{
-		@name.setDeclaredType(type, definitive)
+		@name?.setDeclaredType(type, definitive)
 	} # }}}
 }
 
@@ -1631,13 +1649,15 @@ class ObjectBindingParameter extends ObjectBinding {
 	isBinding() => true
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
 	operator(@operator): this
-	setDeclaredType(type, definitive: Boolean = false) { # {{{
+	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
 				element.setDeclaredType(type, definitive)
 			}
 		}
-		else if type.isObject() {
+		else if type.isBroadObject() {
+			type = type.discard()
+
 			if type.isReference() {
 				var elementType = type.parameter()
 
@@ -1645,9 +1665,24 @@ class ObjectBindingParameter extends ObjectBinding {
 					element.setDeclaredType(elementType, definitive)
 				}
 			}
+			else if type.isStruct() {
+				for var element in @elements {
+					if element.isRest() {
+						throw new NotImplementedException()
+					}
+					else {
+						element.setDeclaredType(type.getProperty(element.name()).type(), definitive)
+					}
+				}
+			}
 			else {
 				for var element in @elements {
-					element.setDeclaredType(type.getProperty(element.name()), definitive)
+					if element.isRest() {
+						element.setDeclaredType(type.getRestType(), definitive)
+					}
+					else {
+						element.setDeclaredType(type.getProperty(element.name()), definitive)
+					}
 				}
 			}
 		}
@@ -1671,12 +1706,12 @@ class ObjectBindingParameter extends ObjectBinding {
 	} # }}}
 	toValidationFragments(fragments, rest, value?, header, async) { # {{{
 		if @flatten {
-			var ctrl = fragments
-				.newControl()
-				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
-				.step()
+			if ?value {
+				var ctrl = fragments
+					.newControl()
+					.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
+					.step()
 
-			if value != null {
 				if @operator == AssignmentOperatorKind.EmptyCoalescing {
 					if value.isComposite() {
 						ctrl
@@ -1704,9 +1739,9 @@ class ObjectBindingParameter extends ObjectBinding {
 				else {
 					ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
 				}
-			}
 
-			ctrl.done()
+				ctrl.done()
+			}
 
 			var line = fragments.newLine().code($runtime.scope(this))
 
@@ -1727,7 +1762,7 @@ class ObjectBindingParameterElement extends ObjectBindingElement {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
 	setDeclaredType(type, definitive) { # {{{
-		@alias.setDeclaredType(type, definitive)
+		@internal?.setDeclaredType(type, definitive)
 	} # }}}
 }
 
@@ -1822,8 +1857,8 @@ class ThisExpressionParameter extends ThisExpression {
 	} # }}}
 	getDeclaredType() => @type
 	isBinding() => false
-	listAssignments(array: Array<String>) { # {{{
-		array.push(@name)
+	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
+		array.push({ @name })
 
 		return array
 	} # }}}

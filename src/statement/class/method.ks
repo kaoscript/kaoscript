@@ -288,7 +288,7 @@ class ClassMethodDeclaration extends Statement {
 
 			if var data ?= @getOveriddenMethod(superclass, unknownReturnType) {
 				@overriding = true
-				{ method: overridden, type: @type, exact: @exact } = data
+				{ method % overridden, type % @type, exact % @exact } = data
 			}
 
 			overloaded = @listOverloadedMethods(superclass)

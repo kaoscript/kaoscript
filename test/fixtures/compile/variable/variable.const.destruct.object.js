@@ -1,4 +1,4 @@
-const {Helper, OBJ} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo() {
 		return foo.__ks_rt(this, arguments);
@@ -17,6 +17,8 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const {x, y} = foo.__ks_0();
+	let  __ks_0 = foo.__ks_0();
+	Helper.assertDexObject(__ks_0, 1, 0, {x: Type.isValue, y: Type.isValue});
+	const {x, y} = __ks_0;
 	console.log(x, y);
 };

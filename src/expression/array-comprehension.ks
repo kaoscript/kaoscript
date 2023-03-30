@@ -165,7 +165,7 @@ class ArrayComprehensionForIn extends Expression {
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
-			for var name in @value.listAssignments([]) {
+			for var { name } in @value.listAssignments([]) {
 				var variable = @scope.getVariable(name)
 
 				if @declaration || variable == null {
@@ -241,7 +241,7 @@ class ArrayComprehensionForIn extends Expression {
 				}
 			}
 			else {
-				for var name in @value.listAssignments([]) {
+				for var { name } in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
@@ -386,7 +386,7 @@ class ArrayComprehensionForOf extends Expression {
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
-			for var name in @value.listAssignments([]) {
+			for var { name } in @value.listAssignments([]) {
 				var variable = @bindingScope.getVariable(name)
 
 				if @declaration || variable == null {
@@ -443,7 +443,7 @@ class ArrayComprehensionForOf extends Expression {
 				}
 			}
 			else {
-				for var name in @value.listAssignments([]) {
+				for var { name } in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}

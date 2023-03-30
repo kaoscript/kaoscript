@@ -11,11 +11,24 @@ class ContinueStatement extends Statement {
 			SyntaxException.throwIllegalStatement('continue', this)
 		}
 
-		while !parent.isLoop() {
-			parent = parent.parent()
+		if ?@name {
+			while parent is not BlockStatement || parent.name() != @name {
+				parent = parent.parent()
 
-			unless parent?.isJumpable() {
-				SyntaxException.throwIllegalStatement('continue', this)
+				unless parent?.isJumpable() {
+					SyntaxException.throwIllegalStatement('continue', this)
+				}
+			}
+
+			parent.flagContinuous()
+		}
+		else {
+			while !parent.isLoop() {
+				parent = parent.parent()
+
+				unless parent?.isJumpable() {
+					SyntaxException.throwIllegalStatement('continue', this)
+				}
 			}
 		}
 	} # }}}
@@ -23,7 +36,7 @@ class ContinueStatement extends Statement {
 	translate()
 	toStatementFragments(fragments, mode) { # {{{
 		if ?@name {
-			fragments.line(`continue \(@name)`)
+			fragments.line(`break \(@name)`)
 		}
 		else {
 			fragments.line('continue', this._data)

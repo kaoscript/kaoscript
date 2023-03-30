@@ -247,7 +247,10 @@ class IfExpression extends Expression {
 
 				fragments.code(' ? (')
 
-				@declaration.declarator().toAssignmentFragments(fragments, @bindingVariable)
+				var declarator = @declaration.declarator()
+
+				declarator.toAssertFragments(fragments, @bindingVariable)
+				declarator.toAssignmentFragments(fragments, @bindingVariable)
 
 				fragments.code(', true) : false')
 			}

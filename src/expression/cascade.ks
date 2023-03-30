@@ -2,6 +2,7 @@ enum CascadeMode {
 	Default
 	Cascade
 	Inline
+	Statement
 }
 
 class CascadeExpression extends Expression {
@@ -18,34 +19,39 @@ class CascadeExpression extends Expression {
 	override analyse() { # {{{
 		var mut statement = @parent
 
-		while statement is not Statement {
-			if @mode == .Default {
-				if statement is CascadeExpression {
-					@cascade = statement
-					@mode = .Cascade
-				}
-				else if statement is VariableDeclaration {
-					var declarators = statement.declarators()
-					var declarator = declarators[0]
+		if @parent is ExpressionStatement {
+			statement.addBeforehand(this)
+		}
+		else {
+			while statement is not Statement {
+				if @mode == .Default {
+					if statement is CascadeExpression {
+						@cascade = statement
+						@mode = .Cascade
+					}
+					else if statement is VariableDeclaration {
+						var declarators = statement.declarators()
+						var declarator = declarators[0]
 
-					if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
-						@declarator = declarator
-						@mode = .Inline
+						if declarators.length == 1 && declarator is VariableIdentifierDeclarator {
+							@declarator = declarator
+							@mode = .Inline
+						}
 					}
 				}
+
+				statement = statement.parent()
 			}
 
-			statement = statement.parent()
-		}
-
-		if @mode == .Inline {
-			statement.addAfterward(this)
-		}
-		else if @mode == .Cascade {
-			@cascade.addBeforehand(this)
-		}
-		else if @parent is not Statement {
-			statement.addBeforehand(this)
+			if @mode == .Inline {
+				statement.addAfterward(this)
+			}
+			else if @mode == .Cascade {
+				@cascade.addBeforehand(this)
+			}
+			else if @parent is not Statement {
+				statement.addBeforehand(this)
+			}
 		}
 
 		@object = $compile.expression(@data.object, this)
@@ -62,6 +68,9 @@ class CascadeExpression extends Expression {
 			@valueName = variable.getSecureName()
 
 			variable.setRealType(@type)
+		}
+		else if @object is IdentifierLiteral {
+			@valueName = @object.name()
 		}
 		else {
 			var scope = @statement().scope()
@@ -117,13 +126,17 @@ class CascadeExpression extends Expression {
 		}
 
 		if @mode != .Inline {
-			fragments
-				.newLine()
-				.code(`\(@valueName) = `)
-				.compile(@object)
-				.done()
+			if @object is not IdentifierLiteral {
+				fragments
+					.newLine()
+					.code(`\(@valueName) = `)
+					.compile(@object)
+					.done()
+			}
 
-			@toStatementFragments(fragments, mode)
+			if @parent is not ExpressionStatement {
+				@toStatementFragments(fragments, mode)
+			}
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{

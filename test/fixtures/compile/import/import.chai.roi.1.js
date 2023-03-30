@@ -66,9 +66,10 @@ module.exports = function(assert, Assertion, config, expect, should, Should, use
 		Assertion.addMethod("eql", assertEql);
 		Assertion.addMethod("eqls", assertEql);
 	}, (fn, ...args) => {
-		const t0 = Type.isDestructurableObject;
+		const t0 = value => Type.isDexObject(value, 1, 0, {Assertion: Type.isValue});
+		const t1 = value => Type.isDexObject(value, 1, 0, {flag: Type.isValue});
 		if(args.length === 2) {
-			if(t0(args[0]) && t0(args[1])) {
+			if(t0(args[0]) && t1(args[1])) {
 				return fn.call(null, args[0], args[1]);
 			}
 		}

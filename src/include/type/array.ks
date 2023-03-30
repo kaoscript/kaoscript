@@ -1,15 +1,22 @@
 class ArrayType extends Type {
 	private {
+		@destructuring: Boolean			= false
 		@length: Number					= 0
 		@nullable: Boolean				= false
-		@properties: Array<Type>		= []
+		@properties: Type[]				= []
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		@testProperties: Boolean		= false
+		@testRest: Boolean				= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ArrayType { # {{{
 			var type = new ArrayType(scope)
+
+			if data.destructuring {
+				type.flagDestructuring()
+			}
 
 			queue.push(() => {
 				if ?data.properties {
@@ -29,16 +36,20 @@ class ArrayType extends Type {
 	addProperty(type: Type) { # {{{
 		@properties.push(type)
 		@length += 1
+		@testProperties ||= !type.isAny() || !type.isNullable()
 	} # }}}
 	clone() { # {{{
 		var type = new ArrayType(@scope)
 
+		type._destructuring = @destructuring
 		type._length = @length
 		type._nullable = @nullable
 		type._properties = [...@properties]
 		type._rest = @rest
 		type._restType = @restType
 		type._spread = @spread
+		type._testProperties = @testProperties
+		type._testRest = @testRest
 
 		return type
 	} # }}}
@@ -110,8 +121,14 @@ class ArrayType extends Type {
 		if @rest {
 			export.rest = @restType.export(references, indexDelta, mode, module)
 		}
+		if @destructuring {
+			export.destructuring = true
+		}
 
 		return export
+	} # }}}
+	flagDestructuring() { # {{{
+		@destructuring = true
 	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
@@ -225,6 +242,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
+	isBinding() => true
 	isComplete() => true
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Array').isExhaustive()
 	isExportable() => true
@@ -302,9 +320,10 @@ class ArrayType extends Type {
 						return false unless prop.isSubsetOf(rest, mode)
 					}
 				}
-				else if mode ~~ MatchingMode.Exact {
-					return false unless lastIndex + 1 == @length
-				}
+				// for exact match
+				// else if mode ~~ MatchingMode.Exact {
+				// 	return false unless lastIndex + 1 == @length
+				// }
 			}
 		}
 
@@ -339,7 +358,93 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
+	isTestingProperties() => @testProperties
 	length() => @length
+	merge(value: ArrayType, node): Type { # {{{
+		var result = new ArrayType(@scope)
+
+		result.flagDestructuring() if @destructuring
+		result.flagSpread() if @spread
+
+		if @hasProperties() {
+			if value.hasProperties() {
+				for var type, index in @properties {
+					result.addProperty(type.merge(value.getProperty(index), node))
+				}
+
+				if @rest {
+					if value.hasRest() {
+						result.setRestType(@restType.merge(value.getRestType(), node))
+					}
+					else {
+						result.setRestType(@restType)
+					}
+				}
+			}
+			else if value.hasRest() {
+				var restType = value.getRestType()
+
+				for var type in @properties {
+					result.addProperty(type.merge(restType, node))
+				}
+
+				if @rest {
+					result.setRestType(@restType.merge(restType, node))
+				}
+			}
+			else {
+				return this
+			}
+		}
+		else {
+			throw new NotImplementedException()
+		}
+
+		return result
+	} # }}}
+	merge(value: ReferenceType, node): Type { # {{{
+		unless value.isBroadArray() {
+			TypeException.throwIncompatible(this, value, node)
+		}
+
+		if !value.isArray() {
+			unless value.isAssignableToVariable(this, true, false, false) {
+				TypeException.throwIncompatible(value, this, node)
+			}
+
+			return value
+		}
+
+		if value.hasParameters() {
+			var result = new ArrayType(@scope)
+
+			result.flagDestructuring() if @destructuring
+			result.flagSpread() if @spread
+
+			if @hasProperties() {
+				var restType = value.parameter()
+
+				for var type in @properties {
+					result.addProperty(restType.merge(type, node))
+				}
+
+				if @rest {
+					result.setRestType(@restType.merge(restType, node))
+				}
+			}
+			else {
+				throw new NotImplementedException()
+			}
+
+			return result
+		}
+		else if value.isAlias() {
+			return @merge(value.discard(), node)
+		}
+		else {
+			return this
+		}
+	} # }}}
 	parameter(index: Number = -1) { # {{{
 		if @length > 0 {
 			if @rest {
@@ -368,6 +473,7 @@ class ArrayType extends Type {
 	} # }}}
 	setRestType(@restType): this { # {{{
 		@rest = true
+		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw new NotImplementedException()
@@ -414,59 +520,173 @@ class ArrayType extends Type {
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return @export(references, indexDelta, mode, module)
 	} # }}}
+	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
+
+		if @testRest || @testProperties {
+			@toSubtestFragments(testingType, false, fragments, node)
+		}
+
+		fragments.code(')')
+	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw new NotImplementedException()
 	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if @length == 0 && !@rest && !@nullable {
-			fragments.code($runtime.type(node), '.isArray')
+	toSubtestFragments(testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
+		if testingType {
+			if @destructuring {
+				fragments.code(', 1')
+			}
+			else {
+				fragments.code(', 2')
+			}
 		}
 		else {
+			fragments.code(', 0')
+		}
+
+		if testingLength {
+			fragments.code(`, \(@length), \(@length)`)
+		}
+
+		if @testRest || @testProperties {
+			fragments.code($comma)
+
+			var literal = new Literal(false, node, node.scope(), 'value')
+
+			if @testProperties {
+				if !testingLength {
+					fragments.code(`\(@length), 0, `)
+				}
+
+				if @testRest {
+					var mut onlyRest = true
+
+					for var type in @properties {
+						if type != @restType {
+							onlyRest = false
+							break
+						}
+					}
+
+					@restType.toTestFunctionFragments(fragments, literal)
+
+					if !onlyRest {
+						fragments.code(', [')
+
+						var mut comma = false
+
+						for var type in @properties {
+							if comma {
+								fragments.code($comma)
+							}
+							else {
+								comma = true
+							}
+
+							type.toTestFunctionFragments(fragments, literal)
+						}
+
+						fragments.code(']')
+					}
+				}
+				else {
+					var mut onlyRest = true
+					var baseType = @properties[0]
+
+					for var type in @properties from 1 {
+						if type != baseType {
+							onlyRest = false
+							break
+						}
+					}
+
+					if onlyRest {
+						baseType.toTestFunctionFragments(fragments, literal)
+					}
+					else {
+						fragments.code('0, [')
+
+						var mut comma = false
+
+						for var type in @properties {
+							if comma {
+								fragments.code($comma)
+							}
+							else {
+								comma = true
+							}
+
+							type.toTestFunctionFragments(fragments, literal)
+						}
+
+						fragments.code(']')
+					}
+				}
+			}
+			else {
+				if !testingLength {
+					fragments.code(`0, 0, `)
+				}
+
+				@restType.toTestFunctionFragments(fragments, literal)
+			}
+		}
+	} # }}}
+	toTestFragments(name: String, testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
+		if testingType && @length == 0 && !@destructuring && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isArray(\(name)`)
+
+			if @testRest {
+				fragments.code($comma)
+
+				var literal = new Literal(false, node, node.scope(), 'value')
+
+				@restType.toTestFunctionFragments(fragments, literal)
+			}
+
+			fragments.code(')')
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexArray(\(name)`)
+
+			@toSubtestFragments(testingType, testingLength, fragments, node)
+
+			fragments.code(')')
+		}
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
+		if @length == 0 && !@rest && !@nullable {
+			if !@destructuring {
+				fragments.code($runtime.type(node), '.isArray')
+			}
+		}
+		else if @rest || @testProperties || @nullable {
 			fragments.code(`value => `)
 
 			@toTestFunctionFragments(fragments, node, Junction.NONE)
 		}
+		else {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexArray')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isArray')
+			}
+		}
 	} # }}}
 	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction.AND {
-			fragments.code('(')
-		}
-
-		fragments.code($runtime.type(node), '.isArray(value')
-
-		var literal = new Literal(false, node, node.scope(), 'value')
-
-		if @rest {
-			fragments.code($comma)
-
-			@restType.toTestFunctionFragments(fragments, literal)
-		}
-		else if @length > 0 {
-			fragments.code(', void 0')
-		}
-
-		if @length > 0 {
-			fragments.code(', [')
-
-			for var type, index in @properties {
-				if index > 0 {
-					fragments.code($comma)
-				}
-
-				type.toTestFunctionFragments(fragments, literal)
-			}
-
-			fragments.code(']')
-		}
-
-		fragments.code(')')
-
 		if @nullable {
+			fragments.code('(') if junction == Junction.AND
+
+			@toTestFragments('value', true, false, fragments, node)
+
 			fragments.code(` || \($runtime.type(node)).isNull(value)`)
 
-			if junction == Junction.AND {
-				fragments.code(')')
-			}
+			fragments.code(')') if junction == Junction.AND
+		}
+		else {
+			@toTestFragments('value', true, false, fragments, node)
 		}
 	} # }}}
 	override toVariations(variations) { # {{{

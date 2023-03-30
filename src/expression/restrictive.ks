@@ -21,6 +21,7 @@ class RestrictiveExpression extends Expression {
 		@condition.translate()
 		@expression.translate()
 	} # }}}
+	expression() => @expression
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @expression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{

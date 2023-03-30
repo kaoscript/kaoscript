@@ -52,7 +52,9 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	defineVariables(left: AbstractNode, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
-		@defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
+		var assignments = left.listAssignments([]).map(({ name }, ...) => name)
+
+		@defineVariables(left, assignments, scope, expression, leftMost)
 	} # }}}
 	export(recipient)
 	export(recipient, enhancement: Boolean) { # {{{

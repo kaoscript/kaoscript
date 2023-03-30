@@ -791,6 +791,9 @@ export class TypeException extends Exception {
 		throwImplInvalidType(node): Never ~ TypeException { # {{{
 			throw new TypeException(`impl has an invalid type`, node)
 		} # }}}
+		throwIncompatible(type1: Type, type2: Type, node): Never ~ TypeException { # {{{
+			throw new TypeException(`The types \(type1.toQuote(true)) and \(type2.toQuote(true)) aren't compatible`, node)
+		} # }}}
 		throwInvalid(name, node): Never ~ TypeException { # {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} # }}}

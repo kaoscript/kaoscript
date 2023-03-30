@@ -1,11 +1,11 @@
 class CurryExpression extends CallExpression {
 	static {
 		toArgumentFragments(map, arguments, precise: Boolean, fragments, mode) { # {{{
-			for var { parameter, value, values }, index in map {
+			for var { parameter, value?, values? }, index in map {
 				fragments.code($comma) if index != 0
 
 				if ?value {
-					var { placeholder, passthru, element, from, to } = value
+					var { placeholder?, passthru?, element?, from?, to? } = value
 
 					if ?passthru {
 						if ?element {
@@ -34,7 +34,7 @@ class CurryExpression extends CallExpression {
 				}
 				else if ?values {
 					if precise && values.length == 1 {
-						var { placeholder, passthru, element, from, to } = values[0]
+						var { placeholder?, passthru?, element?, from?, to? } = values[0]
 
 						if ?passthru {
 							if ?element {
@@ -72,7 +72,7 @@ class CurryExpression extends CallExpression {
 					var first = concat ? 1 : 0
 
 					if concat {
-						var { passthru, from, to } = values[0]
+						var { passthru, from, to? } = values[0]
 
 						arguments[passthru].argument().toArgumentFragments(fragments, mode)
 
@@ -88,9 +88,7 @@ class CurryExpression extends CallExpression {
 						fragments.code('[')
 					}
 
-					// TODO!
-					// for var { placeholder, passthru, element, from, to }, index in values from concat ? 1 : 0 {
-					for var { placeholder, passthru, element, from, to }, index in values from first {
+					for var { placeholder?, passthru?, element?, from?, to? }, index in values from first {
 						fragments.code($comma) if index != first
 
 						if ?passthru {
@@ -160,7 +158,7 @@ class CurryExpression extends CallExpression {
 				else if position is Array {
 					var values = []
 
-					for var { index, element, from, to } in position {
+					for var { index, element?, from?, to? } in position {
 						var argument = arguments[index]
 
 						if argument is PlaceholderArgument {
@@ -198,8 +196,8 @@ class CurryExpression extends CallExpression {
 						placeholder += 1
 					}
 					else {
-						var { index, element, from, to } = position
-						
+						var { index, element?, from?, to? } = position
+
 						map.push({ parameter: index, value: {
 							passthru: index
 							element if ?element
@@ -220,7 +218,7 @@ class CurryExpression extends CallExpression {
 		@matchingMode = .AllMatches
 
 		super(target, targetMode)
-		
+
 		match @callees.length {
 			1 {
 				@type = @callees[0].toCurryType()

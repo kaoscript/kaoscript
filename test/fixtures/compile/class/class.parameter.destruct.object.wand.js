@@ -28,7 +28,7 @@ module.exports = function() {
 			console.log(this._x + "." + this._y);
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = Type.isDestructurableObject;
+			const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isString, y: Type.isString});
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_0.call(that, args[0]);

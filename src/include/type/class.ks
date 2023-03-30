@@ -1619,16 +1619,27 @@ class ClassType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
-		if value.hasRest() {
-			return false unless value.getRestType().isNullable()
-		}
-
 		for var type, name of value.properties() {
 			if var prop ?= @getInstanceProperty(name) {
-				return false unless prop.isSubsetOf(type, mode)
+				return false unless prop.type().isSubsetOf(type, mode)
 			}
 			else {
 				return false unless type.isNullable()
+			}
+		}
+
+		var variables = @listInstanceVariables((...) => true)
+
+		if value.hasRest() {
+			var rest = value.getRestType()
+
+			for var name in variables when !value.hasProperty(name) {
+				return false unless @getInstanceProperty(name).type().isSubsetOf(rest, mode)
+			}
+		}
+		else {
+			for var name in variables when !value.hasProperty(name) {
+				return false
 			}
 		}
 

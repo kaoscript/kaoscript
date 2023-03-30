@@ -7,7 +7,7 @@ module.exports = function() {
 		props[key] = Operator.xorBool(props[key], value);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isObject(value, value => Type.isBoolean(value) || Type.isString(value));
+		const t0 = value => Type.isDexObject(value, 2, value => Type.isBoolean(value) || Type.isString(value));
 		const t1 = Type.isString;
 		const t2 = value => Type.isBoolean(value) || Type.isString(value);
 		if(args.length === 3) {

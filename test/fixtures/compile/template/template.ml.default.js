@@ -7,7 +7,7 @@ module.exports = function() {
 		return Helper.concatString("<book id=\"bk", id, "\">\n	<author>", author, "</author>\n	<title>", title, "</title>\n	<genre>", genre, "</genre>\n	<price>", price, "</price>\n</book>");
 	};
 	book2xml.__ks_rt = function(that, args) {
-		const t0 = Type.isDestructurableObject;
+		const t0 = value => Type.isDexObject(value, 1, 0, {id: Type.isValue, author: Type.isValue, title: Type.isValue, genre: Type.isValue, price: Type.isValue});
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return book2xml.__ks_0.call(that, args[0]);

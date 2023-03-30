@@ -253,7 +253,7 @@ class ComparisonExpression extends Expression {
 
 		return false
 	} # }}}
-	listAssignments(array: Array<String>) { # {{{
+	listAssignments(array: Array) { # {{{
 		for var operand in @operands {
 			operand.listAssignments(array)
 		}

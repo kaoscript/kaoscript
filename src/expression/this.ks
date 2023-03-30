@@ -12,6 +12,7 @@ class ThisExpression extends Expression {
 		@lateInit: Boolean			= false
 		@name: String
 		@namesake: Boolean			= false
+		@nonNullable: Boolean		= false
 		@sealed: Boolean			= false
 		@type: Type?				= null
 		@variableName: String?		= null
@@ -250,18 +251,22 @@ class ThisExpression extends Expression {
 	flagAssignable() { # {{{
 		@assignable = true
 	} # }}}
+	flagNonNullable() { # {{{
+		@nonNullable = true
+		@type = @type.setNullable(false)
+	} # }}}
 	fragment() => @fragment
 	getClass() => @class
 	getDeclaredType() { # {{{
 		if ?@variableName {
 			if @instance {
 				if var variable ?= @class.type().getInstanceVariable(@variableName) {
-					return variable.type()
+					return @nonNullable ? variable.type().setNullable(false) : variable.type()
 				}
 			}
 			else {
 				if var variable ?= @class.type().getStaticVariable(@variableName) {
-					return variable.type()
+					return @nonNullable ? variable.type().setNullable(false) : variable.type()
 				}
 			}
 		}
@@ -293,9 +298,9 @@ class ThisExpression extends Expression {
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name
-	listAssignments(array: Array<String>) { # {{{
+	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
 		if @variableName != null {
-			array.push(@variableName)
+			array.push({ name: @variableName })
 		}
 
 		return array

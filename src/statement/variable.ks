@@ -159,6 +159,7 @@ class VariableDeclaration extends AbstractNode {
 		@hasValue: Boolean			= false
 		@immutable: Boolean			= true
 		@lateInit: Boolean			= false
+		@mixedMutability: Boolean	= false
 		@rebindable: Boolean		= false
 		@redeclared: Boolean		= false
 		@toDeclareAll: Boolean		= true
@@ -255,6 +256,7 @@ class VariableDeclaration extends AbstractNode {
 			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@value, this)
 			}
+			// echo('VariableDeclaration.type', @type.hashCode())
 
 			if @parent is IfStatement | IfExpression {
 				@type = @type.setNullable(false)
@@ -307,7 +309,14 @@ class VariableDeclaration extends AbstractNode {
 	defineVariables(declarator) { # {{{
 		var assignments = []
 
-		for var name in declarator.listAssignments([]) {
+		// TODO!
+		// for var { name, immutable = @immutable } in declarator.listAssignments([]) {
+		for var assignment in declarator.listAssignments([]) {
+			var name = assignment.name
+			var immutable = assignment.immutable ?? @immutable
+
+			@mixedMutability ||= immutable != @immutable
+
 			if @scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
@@ -317,7 +326,7 @@ class VariableDeclaration extends AbstractNode {
 
 			var mut alreadyDeclared = @scope.hasDeclaredVariable(name)
 
-			var variable = @scope.define(name, @isImmutable(), null, this)
+			var variable = @scope.define(name, immutable, null, this)
 
 			if alreadyDeclared {
 				alreadyDeclared = !variable.isRenamed()
@@ -429,7 +438,7 @@ class VariableDeclaration extends AbstractNode {
 					if @options.format.variables == 'es5' {
 						line.code('var ')
 					}
-					else if @rebindable || @redeclared {
+					else if @rebindable || @redeclared || @mixedMutability {
 						line.code('let ')
 					}
 					else {
@@ -437,7 +446,7 @@ class VariableDeclaration extends AbstractNode {
 					}
 				}
 
-				declarator.toAssignmentFragments(line, @value)
+				declarator.toAssignmentFragments(line)
 
 				line.done()
 			}
@@ -459,7 +468,7 @@ class VariableDeclaration extends AbstractNode {
 			NotImplementedException.throw(this)
 		}
 		else {
-			@declarators[0].toAssignmentFragments(fragments, @value)
+			@declarators[0].toAssignmentFragments(fragments)
 		}
 	} # }}}
 	type() => @type
@@ -518,39 +527,48 @@ class VariableBindingDeclarator extends AbstractNode {
 		if !?@type {
 			if !type.isAny() {
 				if @binding is ArrayBinding {
-					unless type.isArray() || type.isTuple() {
+					unless type.isBroadArray() {
 						TypeException.throwInvalidBinding('Array', this)
 					}
 				}
 				else {
-					unless type.isObject() || type.isStruct() {
+					unless type.isBroadObject() {
 						TypeException.throwInvalidBinding('Object', this)
 					}
 				}
 			}
 
 			@type = type
-			@binding.type(type).prepare()
 		}
 	} # }}}
 	setRealType(type: Type) { # {{{
 		if !type.isAny() {
 			if @binding is ArrayBinding {
-				unless type.isArray() || type.isTuple() {
+				unless type.isBroadArray() {
 					TypeException.throwInvalidBinding('Array', this)
 				}
 			}
 			else {
-				unless type.isObject() || type.isStruct() {
+				unless type.isBroadObject() {
 					TypeException.throwInvalidBinding('Object', this)
 				}
 			}
 		}
+
+		// TODO!
+		// @binding
+		// 	..type(type)
+		// 	..value(@parent.value())
+		// 	..prepare()
+		@binding.type(@type)
+		@binding.value(@parent.value())
+		@binding.prepare()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@binding)
 	} # }}}
-	toAssignmentFragments(fragments, value) => @binding.toAssignmentFragments(fragments, value)
+	toAssertFragments(fragments, value) => @binding.toAssertFragments(fragments, value, true)
+	toAssignmentFragments(fragments, value? = null) => @binding.toAssignmentFragments(fragments, value ?? @parent.value())
 	type() => @type
 	override walkVariable(fn) { # {{{
 		@binding.walkVariable(fn)
@@ -678,11 +696,12 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@identifier)
 	} # }}}
-	toAssignmentFragments(fragments, value) { # {{{
+	toAssertFragments(fragments, value)
+	toAssignmentFragments(fragments, value? = null) { # {{{
 		fragments
 			.compile(@identifier)
 			.code($equals)
-			.compile(value)
+			.compile(value ?? @parent.value())
 	} # }}}
 	type() => @type
 	variable() => @variable

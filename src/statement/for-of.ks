@@ -55,7 +55,7 @@ class ForOfStatement extends Statement {
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
-			for var name in @value.listAssignments([]) {
+			for var { name } in @value.listAssignments([]) {
 				var variable = @bindingScope.getVariable(name)
 
 				if @declaration || variable == null {
@@ -116,7 +116,7 @@ class ForOfStatement extends Statement {
 			@expressionName = @bindingScope.acquireTempName(false)
 		}
 
-		if @value != null {
+		if ?@value {
 			var parameterType = type.parameter()
 			var valueType = Type.fromAST(@data.type, this)
 
@@ -124,7 +124,7 @@ class ForOfStatement extends Statement {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+			var realType = valueType.merge(parameterType, this)
 
 			if @value is IdentifierLiteral {
 				if @defineValue {
@@ -134,14 +134,20 @@ class ForOfStatement extends Statement {
 					@bindingScope.replaceVariable(@value.name(), realType, this)
 				}
 			}
+			else if @value is ArrayBinding | ObjectBinding {
+				@value.setAssignment(.Declaration)
+				@value.type(realType)
+			}
 			else {
-				for var name in @value.listAssignments([]) {
+				for var { name } in @value.listAssignments([]) {
 					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
+
+			@value.prepare()
 		}
 
-		if @key != null {
+		if ?@key {
 			unless @defineKey {
 				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
 			}
@@ -152,11 +158,7 @@ class ForOfStatement extends Statement {
 			@keyName = @bindingScope.acquireTempName(false)
 		}
 
-		if @options.format.destructuring == 'es5' && @value is not IdentifierLiteral {
-			@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
-
-			@bindingValue.acquireReusable(true)
-		}
+		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
 
 		@assignTempVariables(@bindingScope)
 
@@ -235,13 +237,13 @@ class ForOfStatement extends Statement {
 		}
 
 		if @value != null {
-			for var variable in @value.listAssignments([]) {
-				if expression.isUsingVariable(variable) {
+			for var { name } in @value.listAssignments([]) {
+				if expression.isUsingVariable(name) {
 					if @defineValue {
-						variables.pushUniq(variable)
+						variables.pushUniq(name)
 					}
 					else {
-						SyntaxException.throwAlreadyDeclared(variable, this)
+						SyntaxException.throwAlreadyDeclared(name, this)
 					}
 				}
 			}
@@ -305,7 +307,11 @@ class ForOfStatement extends Statement {
 
 		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
 
-		if @value != null {
+		if ?@value {
+			if @value is ArrayBinding | ObjectBinding {
+				@value.toAssertFragments(ctrl, @bindingValue, false)
+			}
+
 			var mut line = ctrl.newLine()
 
 			if @declaration || @defineValue {
@@ -320,18 +326,7 @@ class ForOfStatement extends Statement {
 				}
 			}
 
-			if @bindingValue == null {
-				line
-					.compile(@value)
-					.code($equals)
-					.compile(@expressionName ?? @expression)
-					.code('[')
-					.compile(@key ?? @keyName)
-					.code(']')
-			}
-			else {
-				@value.toAssignmentFragments(line, @bindingValue)
-			}
+			@value.toAssignmentFragments(line, @bindingValue)
 
 			line.done()
 		}

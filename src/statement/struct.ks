@@ -288,7 +288,7 @@ class StructFieldParameter extends Parameter {
 		@internal.setAssignment(AssignmentType.Parameter)
 		@internal.analyse()
 
-		for var name in @internal.listAssignments([]) {
+		for var { name } in @internal.listAssignments([]) {
 			@scope.define(name, false, null, this)
 		}
 	} # }}}

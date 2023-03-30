@@ -105,7 +105,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 		if @condition {
 			var names = []
 
-			for var name in left.listAssignments([]) {
+			for var { name } in left.listAssignments([]) {
 				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
 						@statement.addInitializableVariable(variable, true, this)

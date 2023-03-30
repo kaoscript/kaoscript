@@ -7,7 +7,7 @@ module.exports = function() {
 		return 0;
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = Type.isDestructurableObject;
+		const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isValue, y: Type.isValue});
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

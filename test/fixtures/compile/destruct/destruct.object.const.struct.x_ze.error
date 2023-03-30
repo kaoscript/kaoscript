@@ -1,1 +1,0 @@
-ReferenceException: The destructuring variable "z" can't be matched (fixtures/compile/destruct/destruct.object.const.struct.x_ze.ks:6)

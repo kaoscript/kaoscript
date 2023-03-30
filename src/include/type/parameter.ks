@@ -195,6 +195,7 @@ class ParameterType extends Type {
 	getInternalName() => @internalName
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
+	hashCode() => @toQuote()
 	index(): @index
 	index(@index): this
 	isAnonymous(): @anonymous

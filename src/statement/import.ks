@@ -674,9 +674,10 @@ abstract class Importer extends Statement {
 											}
 											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
-													var internal = data.name.name
+													var external = data.external.name
+													var internal = data.internal?.name ?? external
 
-													@addImport(internal, internal, false, null)
+													@addImport(external, internal, false, null)
 												}
 											}
 											else {
@@ -928,7 +929,7 @@ abstract class Importer extends Statement {
 										match data.internal.kind {
 											NodeKind.Identifier {
 												var internal = data.internal.name
-												var external = ?data.external ? data.external.name : internal
+												var external = data.external?.name ?? internal
 
 												if alias {
 													@addVariable(external, internal, false, type)
@@ -941,9 +942,10 @@ abstract class Importer extends Statement {
 											}
 											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
-													var internal = data.name.name
+													var external = data.external.name
+													var internal = data.internal?.name ?? external
 
-													@addVariable(internal, internal, true, null)
+													@addVariable(external, internal, true, null)
 												}
 											}
 											else {

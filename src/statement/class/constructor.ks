@@ -137,7 +137,7 @@ class ClassConstructorDeclaration extends Statement {
 			var superclass = @parent.extends().type()
 
 			if var data ?= @getOveriddenConstructor(superclass) {
-				{ method: overridden, type: @type } = data
+				{ method % overridden, type % @type } = data
 
 				@overriding = true
 

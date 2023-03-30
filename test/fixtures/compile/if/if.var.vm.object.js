@@ -18,7 +18,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let x, y, __ks_0;
-	if(Type.isValue(__ks_0 = foobar.__ks_0()) ? ({x, y} = __ks_0, true) : false) {
+	if(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexObject(__ks_0, 1, 0, {x: Type.isValue, y: Type.isValue}), {x, y} = __ks_0, true) : false) {
 		console.log(Helper.toString(x));
 	}
 };

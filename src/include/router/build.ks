@@ -683,7 +683,7 @@ namespace Build {
 			var mut afterRest = false
 			var byNames = []
 
-			for var { parameter, index, argIndex, argType: type } of parameters {
+			for var { parameter, index, argIndex, argType % type } of parameters {
 				var hash = type.hashCode()
 				var key = `;\(afterRest ? argIndex - argCount : argIndex);\(hash)`
 				var rest = parameter.max() == Infinity
@@ -711,7 +711,7 @@ namespace Build {
 
 			afterRest = false
 
-			for var { parameter, index, argIndex, argType: type } of parameters {
+			for var { parameter, index, argIndex, argType % type } of parameters {
 				var hash = type.hashCode()
 				var key = `:\(function.index()):\(index)`
 				var rest = parameter.max() == Infinity

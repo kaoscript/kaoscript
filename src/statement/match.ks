@@ -1,5 +1,32 @@
-var $match = {
-	length(elements) { # {{{
+enum MatchClauseKind {
+	DEFAULT
+	ARRAY
+	NUMBER
+	OBJECT
+}
+
+enum TestKind {
+	ARRAY
+	OBJECT
+}
+
+namespace $match {
+	func length(binding: ArrayBinding) { # {{{
+		var mut min = 0
+		var mut max = 0
+
+		for var element in binding.elements() {
+			min += element.min()
+			max += element.max()
+		}
+
+		return {
+			min: min
+			max: max
+		}
+	} # }}}
+
+	func length(elements: []) { # {{{
 		var mut min = 0
 		var mut max = 0
 
@@ -18,6 +45,8 @@ var $match = {
 			max: max
 		}
 	} # }}}
+
+	export length
 }
 
 class MatchStatement extends Statement {
@@ -34,14 +63,7 @@ class MatchStatement extends Statement {
 		@name: String?						= null
 		@nextClauseIndex: Number
 		@reusableValue: Boolean				= false
-		@testArray: String?
-		@testData							= {
-			array: 0
-			number: 0
-			object: 0
-		}
-		@testNumber: String?
-		@testObject: String?
+		@tests								= {}
 		@usingFallthrough: Boolean			= false
 		@value								= null
 		@valueType: Type
@@ -89,12 +111,6 @@ class MatchStatement extends Statement {
 
 			if filter.hasTest() {
 				clause.hasTest = true
-
-				var data = filter.getTestData()
-
-				@testData.array += data.array
-				@testData.number += data.number
-				@testData.object += data.object
 			}
 			else if @hasDefaultClause {
 				throw new NotSupportedException(this)
@@ -145,40 +161,6 @@ class MatchStatement extends Statement {
 			}
 		}
 
-		if @testData.array > 1 {
-			if @valueType.isArray() {
-				pass
-			}
-			else if @valueType.canBeNumber() {
-				@testArray = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Array', this)
-			}
-		}
-		if @testData.number > 1 {
-			if @valueType.isNumber() {
-				pass
-			}
-			else if @valueType.canBeNumber() {
-				@testNumber = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Number', this)
-			}
-		}
-		if @testData.object > 1 {
-			if @valueType.isObject() {
-				pass
-			}
-			else if @valueType.canBeObject() {
-				@testObject = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Object', this)
-			}
-		}
-
 		var inferables = {}
 		var mut enumConditions = 0
 		var mut maxConditions = 0
@@ -219,6 +201,44 @@ class MatchStatement extends Statement {
 							union: false
 							data
 						}
+					}
+				}
+			}
+		}
+
+		for var test of @tests when test.count > 1 {
+			test.name = @scope.acquireTempName(false)
+
+			test.tests = [test.name]
+		}
+
+		for var test of @tests when test.count == 1 {
+			if test.kind == TestKind.ARRAY {
+				var { testingType, minmax?, type? } = test
+
+				if testingType && ?minmax && ?type {
+					var conditionHash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),`
+					var bindingHash = `$Array,false,"",\(type?.hashCode() ?? '')`
+
+					// TODO
+					// if {
+					// 	var condition ?= @tests[conditionHash]
+					// 	var binding ?= @tests[bindingHash]
+					// }
+					// then {
+					// }
+					if ?@tests[conditionHash] && ?@tests[bindingHash] {
+						@tests[conditionHash].count += 1
+						@tests[bindingHash].count += 1
+
+						if !?@tests[conditionHash].name {
+							@tests[conditionHash].name = @scope.acquireTempName(false)
+						}
+						if !?@tests[bindingHash].name {
+							@tests[bindingHash].name = @scope.acquireTempName(false)
+						}
+
+						test.tests = [@tests[conditionHash].name, @tests[bindingHash].name]
 					}
 				}
 			}
@@ -362,8 +382,39 @@ class MatchStatement extends Statement {
 
 		@parent.addInitializableVariable(variable, node)
 	} # }}}
+	addArrayTest(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
+		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash] {
+			data.count += 1
+		}
+		else {
+			@tests[hash] = {
+				kind: TestKind.ARRAY
+				count: 1
+				testingType
+				minmax
+				type
+			}
+		}
+	} # }}}
+	addObjectTest(testingType: Boolean, type: Type?) { # {{{
+		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash] {
+			data.count += 1
+		}
+		else {
+			@tests[hash] = {
+				kind: TestKind.OBJECT
+				count: 1
+				testingType
+				type
+			}
+		}
+	} # }}}
 	defineVariables(left, scope) { # {{{
-		for var name in left.listAssignments([]) {
+		for var { name } in left.listAssignments([]) {
 			if scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
@@ -380,32 +431,25 @@ class MatchStatement extends Statement {
 
 		return this
 	} # }}}
-	getTypeTester(fragments, type) { # {{{
-		match type {
-			'array' {
-				if ?@testArray {
-					return () => {
-						fragments.code(@testArray)
-					}
-				}
-			}
-			'number' {
-				if ?@testNumber {
-					return () => {
-						fragments.code(@testNumber)
-					}
-				}
-			}
-			'object' {
-				if ?@testObject {
-					return () => {
-						fragments.code(@testObject)
-					}
-				}
-			}
-		}
+	getArrayTests(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
+		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
 
-		return null
+		if var data ?= @tests[hash]; ?data.tests {
+			return data.tests
+		}
+		else {
+			return null
+		}
+	} # }}}
+	getObjectTests(testingType: Boolean, type: Type?) { # {{{
+		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash]; ?data.tests {
+			return data.tests
+		}
+		else {
+			return null
+		}
 	} # }}}
 	getValueType() => @valueType
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
@@ -541,6 +585,9 @@ class MatchStatement extends Statement {
 
 		return false
 	} # }}}
+	throwExpectedType(type: String): Never ~ TypeException { # {{{
+		TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), type, this)
+	} # }}}
 	toFallthroughFragments(fragments) { # {{{
 		if @nextClauseIndex < @clauses.length {
 			fragments.line(`\(@clauses[@nextClauseIndex].name)()`)
@@ -590,29 +637,42 @@ class MatchStatement extends Statement {
 			line.done()
 		}
 
-		if ?@testArray {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testArray, ' = ', $runtime.typeof('Array', this), `(\(@name))`)
-				.done()
-		}
-		if ?@testNumber {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testNumber, ' = ', $runtime.typeof('Number', this), `(\(@name))`)
-				.done()
-		}
-		if ?@testObject {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testObject, ' = ', $runtime.typeof('Object', this), `(\(@name))`)
-				.done()
+		for var test of @tests when test.count > 1 {
+			var line = fragments.newLine()
+
+			line.code(`\($runtime.scope(this))\(test.name) = \($runtime.helper(this)).memo(`)
+
+			if test.kind == TestKind.ARRAY {
+				var { testingType, minmax?, type? } = test
+
+				if ?type {
+					type.toTestFragments(@name, testingType, ?minmax, line, this)
+				}
+				else if ?minmax {
+					var { min, max } = minmax
+
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0), \(min), \(max == Infinity ? 0 : max))`)
+				}
+				else {
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0))`)
+				}
+			}
+			else {
+				var { testingType, type? } = test
+
+				if ?type {
+					type.toTestFragments(@name, testingType, line, this)
+				}
+				else {
+					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
+				}
+			}
+
+			line.code(')').done()
 		}
 
-		for var clause, clauseIdx in @clauses {
-			clause.filter.toBeforehandFragments(fragments, @name)
-
-			if @usingFallthrough {
+		if @usingFallthrough {
+			for var clause, clauseIdx in @clauses {
 				var line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
 				var block = line.newBlock()
 
@@ -674,72 +734,97 @@ class MatchStatement extends Statement {
 
 		ctrl.done()
 	} # }}}
+	value() => @value
 }
 
 class MatchBindingArray extends AbstractNode {
-	private {
-		@array
+	private late {
+		@binding
+		@minmax
+		@testingLength: Boolean			= true
+		@testingProperties: Boolean		= true
+		@testingType: Boolean			= true
 	}
 	analyse() { # {{{
-		@array = $compile.expression(@data, this)
-		@array.setAssignment(AssignmentType.Expression)
-		@array.analyse()
+		@binding = $compile.expression(@data, this)
+		@binding.setAssignment(AssignmentType.Declaration)
+		@binding.analyse()
 
-		@parent.defineVariables(@array, @scope)
+		@minmax = $match.length(@binding)
+
+		if @minmax.max == Infinity {
+			@testingLength = false
+		}
+
+		@parent.defineVariables(@binding, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@array.prepare()
+		@binding.prepare()
+
+		@testingType &&= !@parent.getValueType().isArray()
+		@testingProperties = @binding.type().isTestingProperties()
+
+		if @testingType || @testingLength || @testingProperties {
+			@parent.addArrayTest(@testingType, @testingLength ? @minmax : null, @testingProperties ? @binding.type() : null)
+		}
 	} # }}}
 	translate() { # {{{
-		@array.translate()
+		@binding.translate()
 	} # }}}
+	getMinMax() => @minmax
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@array)
+		fragments.compile(@binding)
 	} # }}}
-	toBeforehandFragments(fragments)
 	toBindingFragments(fragments, name) { # {{{
+		var value = new Literal(name, this)
+
 		var mut line = fragments.newLine()
 
 		line.code($runtime.scope(this))
 
-		@array.toAssignmentFragments(line, new Literal(name, this))
+		@binding.toAssignmentFragments(line, value)
 
 		line.done()
 	} # }}}
-	toConditionFragments(fragments, name, junction, precondition) { # {{{
-		var check = precondition?(junction, 'array')
+	toConditionFragments(fragments, name, junction) { # {{{
+		return unless @testingLength || @testingType || @testingProperties
 
-		fragments.code('(') if junction == Junction.OR
+		var { min, max } = @minmax
+		var type = @binding.type()
 
-		if ?check {
-			check()
-
-			fragments.code(' && ')
-		}
-
-		var mm = $match.length(@data.elements)
-		if mm.min == mm.max {
-			if mm.min != Infinity {
-				fragments.code(name, '.length === ', mm.min)
+		if var tests ?= @parent.getArrayTests(@testingType, @testingLength ? @minmax : null, @testingProperties ? @binding.type() : null) {
+			if junction == Junction.AND {
+				for var test in tests {
+					fragments.code(` && \(test)()`)
+				}
+			}
+			else {
+				for var test, index in tests {
+					fragments
+						.code(` && `) if index > 0
+						.code(`\(test)()`)
+				}
 			}
 		}
-		else {
-			fragments.code(name, '.length >= ', mm.min)
+		else if @testingLength || @testingType || @testingProperties {
+			fragments.code(' && ') if junction == Junction.AND
 
-			if mm.max != Infinity {
-				fragments.code(' && ', name, '.length <= ', mm.max)
-			}
+			type.toTestFragments(name, @testingType, @testingLength, fragments, this)
 		}
-
-		fragments.code(')') if junction == Junction.OR
+	} # }}}
+	unflagLengthTesting() { # {{{
+		@testingLength = false
+	} # }}}
+	unflagTypeTesting() { # {{{
+		@testingType = false
 	} # }}}
 }
 
 class MatchBindingObject extends AbstractNode {
 	private {
 		@binding
-		@name: String?		= null
-		@properties			= []
+		@testingProperties: Boolean		= false
+		@testingType: Boolean			= true
 	}
 	analyse() { # {{{
 		@binding = $compile.expression(@data, this)
@@ -747,87 +832,86 @@ class MatchBindingObject extends AbstractNode {
 		@binding.analyse()
 
 		@parent.defineVariables(@binding, @scope)
-
-		for var data in @data.elements {
-			match data.kind {
-				NodeKind.BindingElement {
-					@properties.push({
-						name: data.name.name
-					})
-				}
-			}
-		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@binding.prepare()
 
-		if #@properties {
-			@name = @scope.parent().acquireTempName(false)
+		var bindingType = @binding.type()
+		var valueType = @parent.getValueType()
+
+		@testingType &&= !(bindingType.isBroadObject() || target.isBroadObject() || valueType.isBroadObject())
+		if bindingType.isBinding() && bindingType.isTestingProperties() {
+			if target.isBroadObject() && valueType.isBroadObject() {
+				for var _, name of bindingType.properties() {
+					unless target.hasProperty(name) || valueType.hasProperty(name) {
+						@testingProperties = true
+
+						break
+					}
+				}
+			}
+			else if target.isBroadObject() {
+				for var _, name of bindingType.properties() {
+					unless target.hasProperty(name) {
+						@testingProperties = true
+
+						break
+					}
+				}
+			}
+			else {
+				@testingProperties = true
+			}
+		}
+
+		if @testingType || @testingProperties {
+			@parent.addObjectTest(@testingType, @testingProperties ? @binding.type() : null)
 		}
 	} # }}}
 	translate() { # {{{
 		@binding.translate()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		fragments.code('{')
-
-		for var { name }, i in @properties {
-			if i != 0 {
-				fragments.code(', ')
-			}
-
-			fragments.code(name)
-		}
-
-		fragments.code('}')
-	} # }}}
-	toBeforehandFragments(fragments) { # {{{
-		if #@properties {
-			var line = fragments.newLine()
-
-			line.code($runtime.scope(this), @name, ' = ({')
-
-			for var { name }, i in @properties {
-				if i != 0 {
-					line.code(', ')
-				}
-
-				line.code(name)
-			}
-
-			line.code('}) => ')
-
-			for var { name, value }, i in @properties {
-				if i != 0 {
-					line.code(' && ')
-				}
-
-				line.code(`!\($runtime.type(this)).isNull(\(name))`)
-			}
-
-			line.done()
-		}
+		fragments.compile(@binding)
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
+		var value = new Literal(name, this)
+
 		var line = fragments.newLine()
 
 		line.code($runtime.scope(this))
 
-		@binding.toAssignmentFragments(line, new Literal(name, this))
+		@binding.toAssignmentFragments(line, value)
 
 		line.done()
 	} # }}}
-	toConditionFragments(fragments, name, junction, precondition) { # {{{
-		if ?@name {
-			if var check ?= precondition?(junction, 'object') {
-				check()
+	toConditionFragments(fragments, name, junction) { # {{{
+		return unless @testingType || @testingProperties
 
-				fragments.code(` && \(@name)(\(name))`)
+		var type = @binding.type()
+
+		if var tests ?= @parent.getObjectTests(@testingType, @testingProperties ? @binding.type() : null) {
+			if junction == Junction.AND {
+				for var test in tests {
+					fragments.code(` && \(test)()`)
+				}
 			}
 			else {
-				fragments.code(`\(@name)(\(name))`)
+				for var test, index in tests {
+					fragments
+						.code(` && `) if index > 0
+						.code(`\(test)()`)
+				}
 			}
 		}
+		else if @testingType || @testingProperties {
+			fragments.code(' && ') if junction == Junction.AND
+
+			type.toTestFragments(name, @testingType, fragments, this)
+		}
+	} # }}}
+	unflagTypeTesting() { # {{{
+		@testingType = false
 	} # }}}
 }
 
@@ -855,22 +939,21 @@ class MatchBindingValue extends AbstractNode {
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
-	toBeforehandFragments(fragments)
 	toBindingFragments(fragments, name) { # {{{
 		fragments.line($runtime.scope(this), @name, ' = ', name)
 	} # }}}
-	toConditionFragments(fragments, name, junction, precondition)
+	toConditionFragments(fragments, name, junction)
+	unflagLengthTesting()
+	unflagTypeTesting()
 }
 
 class MatchConditionArray extends AbstractNode {
-	private {
-		@flatten: Boolean	= false
-		@name: String?		= null
+	private late {
+		@minmax
 		@values				= []
+		@type: Type
 	}
 	analyse() { # {{{
-		@flatten = @options.format.destructuring == 'es5'
-
 		for var mut value in @data.values {
 			if value.kind != NodeKind.OmittedExpression {
 				if value.kind == NodeKind.MatchConditionRange {
@@ -885,15 +968,19 @@ class MatchConditionArray extends AbstractNode {
 				@values.push(value)
 			}
 		}
+
+		@minmax = $match.length(@data.values)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if @values.length > 0 {
-			@name = @scope.parent().acquireTempName(false)
-		}
+		@type = new ArrayType(@scope)
 
 		for var value in @values {
 			value.prepare()
+
+			@type.addProperty(value.type())
 		}
+
+		@parent.addArrayTest(true, @minmax, null)
 	} # }}}
 	translate() { # {{{
 		for value in @values {
@@ -902,101 +989,50 @@ class MatchConditionArray extends AbstractNode {
 	} # }}}
 	isEnum() => false
 	setCastingEnum(_)
-	toBeforehandFragments(fragments) { # {{{
-		if @values.length > 0 {
-			var mut line = fragments.newLine()
+	toConditionFragments(fragments, name, junction) { # {{{
+		var { min, max } = @minmax
 
-			if @flatten {
-				var name = new Literal('__ks__', this)
-
-				line.code($runtime.scope(this), @name, ' = function(__ks__)')
-
-				var block = line.newBlock()
-
-				block.done()
+		match junction {
+			Junction.AND {
+				fragments.code(' && ')
 			}
-			else {
-				line.code($runtime.scope(this), @name, ' = ([')
-
-				for var value, i in @data.values {
-					if i != 0 {
-						line.code(', ')
-					}
-
-					if value.kind == NodeKind.OmittedExpression {
-						if value.spread {
-							line.code('...')
-						}
-					}
-					else {
-						line.code('__ks_', i)
-					}
-				}
-
-				line.code(']) => ')
-
-				var mut index = 0
-				for var value, i in @data.values {
-					if value.kind != NodeKind.OmittedExpression {
-						if index != 0 {
-							line.code(' && ')
-						}
-
-						@values[index].toConditionFragments(line, `__ks_\(i)`, Junction.AND, null)
-
-						index += 1
-					}
-				}
+			Junction.OR {
+				fragments.code('(')
 			}
-
-			line.done()
-		}
-	} # }}}
-	toConditionFragments(fragments, name, junction, precondition) { # {{{
-		var check = precondition?(junction, 'array')
-
-		fragments.code('(') if junction == Junction.OR
-
-		if ?check {
-			check()
-
-			fragments.code(' && ')
 		}
 
-		var mut and = false
-
-		var mm = $match.length(@data.values)
-		if mm.min == mm.max {
-			if mm.min != Infinity {
-				fragments.code(name, '.length === ', mm.min)
-
-				and = true
+		// }
+		if var tests ?= @parent.getArrayTests(true, @minmax, null) {
+			for var test, index in tests {
+				fragments
+					.code(` && `) if index > 0
+					.code(`\(test)()`)
 			}
 		}
 		else {
-			fragments.code(name, '.length >= ', mm.min)
-
-			if mm.max != Infinity {
-				fragments.code(' && ', name, '.length <= ', mm.max)
-			}
-
-			and = true
+			fragments.code(`\($runtime.type(this)).isDexArray(\(name), 1, \(min), \(max == Infinity ? 0 : max))`)
 		}
 
-		if ?@name {
-			fragments.code(' && ') if and
+		var mut index = 0
 
-			fragments.code(@name, '(', name, ')')
+		for var value, i in @data.values when value.kind != NodeKind.OmittedExpression {
+			fragments.code(' && ')
+
+			@values[index].toConditionFragments(fragments, `\(name)[\(i)]`, Junction.AND)
+
+			index += 1
 		}
 
 		fragments.code(')') if junction == Junction.OR
 	} # }}}
+	type() => @type
 }
 
 class MatchConditionObject extends AbstractNode {
-	private {
-		@name: String?		= null
+	private late {
+		@isObject: Boolean	= false
 		@properties			= []
+		@type: Type
 	}
 	analyse() { # {{{
 		for var data in @data.properties {
@@ -1017,12 +1053,25 @@ class MatchConditionObject extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if #@properties {
-			@name = @scope.parent().acquireTempName(false)
+		@type = new ObjectType(@scope)
 
-			for var property in @properties when ?property.value {
-				property.value.prepare()
+		if #@properties {
+			for var { name, value? } in @properties {
+				if ?value {
+					value.prepare()
+
+					@type.addProperty(name, false, value.type())
+				}
+				else {
+					@type.addProperty(name, false, AnyType.Unexplicit)
+				}
 			}
+		}
+
+		@isObject = @parent.getValueType().isBroadObject()
+
+		if !@isObject {
+			@parent.addObjectTest(true, null)
 		}
 	} # }}}
 	translate() { # {{{
@@ -1032,54 +1081,45 @@ class MatchConditionObject extends AbstractNode {
 	} # }}}
 	isEnum() => false
 	setCastingEnum(_)
-	toBeforehandFragments(fragments) { # {{{
-		if #@properties {
-			var line = fragments.newLine()
-
-			line.code($runtime.scope(this), @name, ' = ({')
-
-			for var { name }, i in @properties {
-				if i != 0 {
-					line.code(', ')
-				}
-
-				line.code(name)
+	toConditionFragments(fragments, name, junction?) { # {{{
+		match junction {
+			Junction.AND {
+				fragments.code(' && ')
 			}
-
-			line.code('}) => ')
-
-			for var { name, value }, i in @properties {
-				if i != 0 {
-					line.code(' && ')
-				}
-
-				if ?value {
-					value.toConditionFragments(line, name, Junction.AND, null)
-				}
-				else {
-					line.code(`!\($runtime.type(this)).isNull(\(name))`)
-				}
+			Junction.OR {
+				fragments.code('(')
 			}
-
-			line.done()
 		}
-	} # }}}
-	toConditionFragments(fragments, name, junction, precondition?) { # {{{
-		if ?@name {
-			if var check ?= precondition?(junction, 'object') {
-				fragments.code('(') if junction == Junction.OR
 
-				check()
-
-				fragments.code(` && \(@name)(\(name))`)
-
-				fragments.code(')') if junction == Junction.OR
+		if !@isObject {
+			if var tests ?= @parent.getObjectTests(true, null) {
+				for var test, index in tests {
+					fragments
+						.code(` && `) if index > 0
+						.code(`\(test)()`)
+				}
 			}
 			else {
-				fragments.code(`\(@name)(\(name))`)
+				fragments.code(`\($runtime.type(this)).isDexObject(\(name), 1)`)
 			}
 		}
+
+		var mut index = 0
+
+		for var property, i in @properties {
+			fragments.code(' && ') if i > 0 || !@isObject
+
+			if ?property.value {
+				property.value.toConditionFragments(fragments, `\(name).\(property.name)`, Junction.AND)
+			}
+			else {
+				fragments.code(`!\($runtime.type(this)).isNull(\(name).\(property.name))`)
+			}
+		}
+
+		fragments.code(')') if !@isObject && junction == Junction.OR
 	} # }}}
+	type() => @type
 }
 
 class MatchConditionRange extends AbstractNode {
@@ -1119,17 +1159,8 @@ class MatchConditionRange extends AbstractNode {
 	} # }}}
 	isEnum() => false
 	setCastingEnum(_)
-	toBeforehandFragments(fragments)
-	toConditionFragments(fragments, name, junction, precondition?) { # {{{
-		var check = precondition?(junction, 'number')
-
+	toConditionFragments(fragments, name, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
-
-		if ?check {
-			check()
-
-			fragments.code(' && ')
-		}
 
 		fragments
 			.code(name, @from ? ' >= ' : '>')
@@ -1140,6 +1171,7 @@ class MatchConditionRange extends AbstractNode {
 
 		fragments.code(')') if junction == Junction.OR
 	} # }}}
+	type() => @scope.reference('Number')
 }
 
 class MatchConditionType extends AbstractNode {
@@ -1153,12 +1185,10 @@ class MatchConditionType extends AbstractNode {
 	translate()
 	isEnum() => false
 	setCastingEnum(_)
-	toBeforehandFragments(fragments)
-	toConditionFragments(fragments, name, junction, precondition?) { # {{{
-		precondition?(junction, 'any')
-
+	toConditionFragments(fragments, name, junction) { # {{{
 		@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 	} # }}}
+	type() => @type
 }
 
 class MatchConditionValue extends AbstractNode {
@@ -1208,12 +1238,21 @@ class MatchConditionValue extends AbstractNode {
 			value.translate()
 		}
 	} # }}}
+	isContainer() { # {{{
+		if @values.length == 1 {
+			return @type.isContainer()
+		}
+		else {
+			for var value in @values {
+				return false unless value.type().isContainer()
+			}
+
+			return true
+		}
+	} # }}}
 	isEnum() => @type.isEnum()
 	setCastingEnum(@castingEnum)
-	toBeforehandFragments(fragments)
-	toConditionFragments(fragments, name, junction, precondition?) { # {{{
-		precondition?(junction, 'any')
-
+	toConditionFragments(fragments, name, junction) { # {{{
 		if @values.length == 1 {
 			var value = @values[0]
 
@@ -1265,6 +1304,7 @@ class MatchConditionValue extends AbstractNode {
 			fragments.code(')') if junction == Junction.AND
 		}
 	} # }}}
+	type() => @type
 	values() => @values
 }
 
@@ -1275,15 +1315,7 @@ class MatchFilter extends AbstractNode {
 		@enumConditions: Number	= 0
 		@filter					= null
 		@hasTest: Boolean		= false
-		@inlineFilter: Boolean	= true
-		@isArray: Boolean		= false
-		@isObject: Boolean		= false
-		@name: String?
-		@testData				= {
-			array: 0
-			number: 0
-			object: 0
-		}
+		@kind: MatchClauseKind	= .DEFAULT
 	}
 	override analyse() { # {{{
 		var scope = @scope()
@@ -1293,28 +1325,28 @@ class MatchFilter extends AbstractNode {
 
 			match data.kind {
 				NodeKind.ArrayBinding {
-					if @isObject {
+					if @kind == .DEFAULT {
+						@kind = .ARRAY
+					}
+					else {
 						throw new NotSupportedException(this)
 					}
 
 					binding = new MatchBindingArray(data, @parent, scope)
 
 					@hasTest = true
-					@isArray = true
-					@testData.array += 1
-					@inlineFilter = false
 				}
 				NodeKind.ObjectBinding {
-					if @isArray {
+					if @kind == .DEFAULT {
+						@kind = .OBJECT
+					}
+					else {
 						throw new NotSupportedException(this)
 					}
 
 					binding = new MatchBindingObject(data, @parent, scope)
 
 					@hasTest = true
-					@isObject = true
-					@testData.object += 1
-					@inlineFilter = false
 				}
 				else {
 					binding = new MatchBindingValue(data, @parent, scope)
@@ -1334,34 +1366,63 @@ class MatchFilter extends AbstractNode {
 
 				match data.kind {
 					NodeKind.MatchConditionArray {
-						if @isObject {
+						if @kind == .ARRAY {
+							pass
+						}
+						else if @kind == .DEFAULT {
+							@kind = .ARRAY
+						}
+						else {
 							throw new NotSupportedException(this)
 						}
 
 						condition = new MatchConditionArray(data, @parent, scope)
 
-						@testData.array += 1
+						for var binding in @bindings {
+							// TODO!
+							// binding
+							// 	..unflagLengthTesting()
+							// 	..unflagTypeTesting()
+							binding.unflagLengthTesting()
+							binding.unflagTypeTesting()
+						}
 					}
 					NodeKind.MatchConditionObject {
-						if @isArray {
+						if @kind == .OBJECT {
+							pass
+						}
+						else if @kind == .DEFAULT {
+							@kind = .OBJECT
+						}
+						else {
 							throw new NotSupportedException(this)
 						}
 
 						condition = new MatchConditionObject(data, @parent, scope)
 
-						@testData.object += 1
+						for var binding in @bindings {
+							binding.unflagTypeTesting()
+						}
 					}
 					NodeKind.MatchConditionRange {
-						if @isArray || @isObject {
+						if @kind == .NUMBER {
+							pass
+						}
+						else if @kind == .DEFAULT {
+							@kind = .NUMBER
+						}
+						else {
 							throw new NotSupportedException(this)
 						}
 
 						condition = new MatchConditionRange(data, @parent, scope)
-
-						@testData.number += 1
 					}
 					NodeKind.MatchConditionType {
 						condition = new MatchConditionType(data, @parent, scope)
+
+						for var binding in @bindings {
+							binding.unflagTypeTesting()
+						}
 					}
 					else {
 						condition = new MatchConditionValue(data, @parent, scope)
@@ -1382,25 +1443,66 @@ class MatchFilter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		var valueType = @parent().getValueType()
+
+		match @kind {
+			.ARRAY {
+				if valueType.isArray() || valueType.canBeArray() {
+					pass
+				}
+				else {
+					@parent.throwExpectedType('Array')
+				}
+			}
+			.NUMBER {
+				if valueType.isNumber() || valueType.canBeNumber() {
+					pass
+				}
+				else {
+					@parent.throwExpectedType('Number')
+				}
+			}
+			.OBJECT {
+				if valueType.isObject() || valueType.canBeObject() {
+					pass
+				}
+				else {
+					@parent.throwExpectedType('Object')
+				}
+			}
+		}
+
+		var types = []
+
 		for var condition in @conditions {
 			condition.prepare()
 
-			if condition.isEnum() {
-				@enumConditions += 1
+			if condition is MatchConditionValue {
+				if condition.isEnum() {
+					@enumConditions += 1
+
+					types.push(condition.type().reference(@scope))
+				}
+				else if condition.isContainer() {
+					for var binding in @bindings {
+						binding.unflagTypeTesting()
+					}
+
+					types.push(condition.type().reference(@scope))
+				}
+			}
+			else {
+				types.push(condition.type())
 			}
 		}
+
+		var conditionType = Type.union(@scope, ...types)
 
 		for var binding in @bindings {
-			binding.prepare()
+			binding.prepare(conditionType)
 		}
 
-		if ?@filter {
-			@filter.prepare(target)
-
-			if !@inlineFilter {
-				@name = @scope.parent().acquireTempName(false)
-			}
-		}
+		@filter?.prepare(target)
 	} # }}}
 	override translate() { # {{{
 		for var condition in @conditions {
@@ -1416,34 +1518,10 @@ class MatchFilter extends AbstractNode {
 	conditions() => @conditions
 	getEnumConditions(): Number => @enumConditions
 	getMaxConditions(): Number => @conditions.length
-	getTestData() => @testData
 	hasTest() => @hasTest
 	setCastingEnum(castingEnum: Boolean) { # {{{
 		for var condition in @conditions {
 			condition.setCastingEnum(castingEnum)
-		}
-	} # }}}
-	toBeforehandFragments(fragments, name) { # {{{
-		for var condition in @conditions {
-			condition.toBeforehandFragments(fragments)
-		}
-
-		for var binding in @bindings {
-			binding.toBeforehandFragments(fragments)
-		}
-
-		if ?@name {
-			var line = fragments.newLine()
-
-			line.code($runtime.scope(this), @name, ' = (')
-
-			for var binding, i in @bindings {
-				line.code(', ') if i != 0
-
-				line.compile(binding)
-			}
-
-			line.code(') => ').compile(@filter).done()
 		}
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
@@ -1454,57 +1532,53 @@ class MatchFilter extends AbstractNode {
 	toConditionFragments(fragments, name) { # {{{
 		var mut junction = Junction.NONE
 
-		var precondition = (jun: Junction, type: String) => {
-			match jun {
-				.AND {
-					if junction == .AND {
-						fragments.code(' && ')
-					}
-				}
-				.NONE {
-					junction = .AND
-				}
-				.OR {
-					fragments.code(' || ')
-				}
-			}
-
-			return @parent.getTypeTester(fragments, type)
-		}
-
 		if #@conditions {
 			if @conditions.length == 1 {
-				@conditions[0].toConditionFragments(fragments, name, junction, precondition)
+				@conditions[0].toConditionFragments(fragments, name, junction)
 			}
-			else if @conditions.length > 1 {
+			else {
 				var wrap = #@bindings || ?@filter
 
 				fragments.code('(') if wrap
 
-				@conditions[0].toConditionFragments(fragments, name, Junction.NONE, precondition)
+				@conditions[0].toConditionFragments(fragments, name, Junction.NONE)
 
 				for var condition in @conditions from 1 {
-					condition.toConditionFragments(fragments, name, Junction.OR, precondition)
+					fragments.code(' || ')
+
+					condition.toConditionFragments(fragments, name, Junction.OR)
 				}
 
 				fragments.code(')') if wrap
 			}
+
+			junction = .AND
 		}
 
 		if #@bindings {
 			for var binding in @bindings {
-				binding.toConditionFragments(fragments, name, junction, precondition)
+				binding.toConditionFragments(fragments, name, junction)
 			}
+
+			junction = .AND
 		}
 
 		if ?@filter {
 			fragments.code(' && ') if junction == .AND
 
-			if @inlineFilter {
-				fragments.compile(@filter)
+			if #@bindings {
+				fragments.code('((')
+
+				for var binding, i in @bindings {
+					fragments.code(', ') if i != 0
+
+					fragments.compile(binding)
+				}
+
+				fragments.code(') => ').compile(@filter).code(`)(\(name))`)
 			}
 			else {
-				fragments.code(`\(@name)(\(name))`)
+				fragments.compile(@filter)
 			}
 		}
 	} # }}}

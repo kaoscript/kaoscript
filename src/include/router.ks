@@ -1,6 +1,3 @@
-// TODO!
-// type CallMatchArgument = Number | ArrayElementMatch | Array<Number | ArrayElementMatch | ArraySliceMatch> | Null
-
 struct CallMatchArgument {
 	index: Number?		= null
 	element: Number?	= null
@@ -379,80 +376,11 @@ namespace Router {
 		}
 		else {
 			for var argument, index in arguments {
-				match argument {
-					is NamedArgument {
-						var name = argument.name()
-
-						if ?nameds[name] {
-							throw new NotSupportedException()
-						}
-
-						nameds[name] = new NamingArgument(
-							index
-							name
-							type: argument.type()
-							strict: true
-						)
-
-						namedCount += 1
-
-						if ?shorthands[name] {
-							drop shorthands[name]
-
-							shortCount -= 1
-						}
-					}
-					is IdentifierLiteral {
-						var name = argument.name()
-
-						if argument.variable().isPredefined() {
-							indexeds.push(new NamingArgument(
-								index
-								type: argument.type()
-								strict: false
-							))
-						}
-						else if !?nameds[name] && !?invalids[name] {
-							if ?shorthands[name] {
-								invalids[name] = true
-
-								indexeds.push(shorthands[name], new NamingArgument(
-									index
-									type: argument.type()
-									strict: false
-								))
-
-								drop shorthands[name]
-
-								shortCount -= 1
-							}
-							else {
-								shortCount += 1
-
-								shorthands[name] = new NamingArgument(
-									index
-									name
-									type: argument.type()
-									strict: false
-								)
-							}
-						}
-						else {
-							indexeds.push(new NamingArgument(
-								index
-								type: argument.type()
-								strict: false
-							))
-						}
-					}
-					else {
-						indexeds.push(new NamingArgument(
-							index
-							type: argument.type()
-							strict: false
-							value: argument
-						))
-					}
+				if argument is RestrictiveExpression {
+					[namedCount, shortCount] = Matching.prepare(argument.expression(), index, nameds, shorthands, indexeds, invalids, namedCount, shortCount)
+				}
+				else {
+					[namedCount, shortCount] = Matching.prepare(argument, index, nameds, shorthands, indexeds, invalids, namedCount, shortCount)
 				}
 
 				types.push(argument.type())
@@ -701,22 +629,6 @@ namespace Router {
 
 				var parameter = parameters[index].type()
 
-				// TODO!
-				// match argument {
-				// 	Null {
-				// 	}
-				// 	Number {
-				// 	}
-				// 	Array with [argument: Number] when expressions[argument] is UnaryOperatorSpread && expressions[argument].type().isArray() {
-				// 	}
-				// 	Array with [{ argument, from }: ArraySliceMatch] {
-				// 	}
-				// 	Array {
-				// 	}
-				// 	ArrayElementMatch with { argument, index } {
-				// 	}
-				// }
-
 				if position is Array {
 					if function.isAlien() {
 						for var { index }, i in position {
@@ -756,7 +668,7 @@ namespace Router {
 
 					fragments.code('[') if precise
 
-					for var { index, element, from }, i in position {
+					for var { index?, element?, from? }, i in position {
 						fragments.code($comma) if i != 0
 
 						if ?element {
@@ -779,7 +691,7 @@ namespace Router {
 					fragments.code(']') if precise
 				}
 				else {
-					var { index, element } = position
+					var { index?, element? } = position
 
 					if !?index {
 						fragments.code('void 0')

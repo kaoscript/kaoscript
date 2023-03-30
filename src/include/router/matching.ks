@@ -115,6 +115,86 @@ namespace Matching {
 
 			return mergeResults(results)
 		} # }}}
+
+		func prepare(argument, index, nameds, shorthands, indexeds, invalids, mut namedCount, mut shortCount) { # {{{
+			match argument {
+				is NamedArgument {
+					var name = argument.name()
+
+					if ?nameds[name] {
+						throw new NotSupportedException()
+					}
+
+					nameds[name] = new NamingArgument(
+						index
+						name
+						type: argument.type()
+						strict: true
+					)
+
+					namedCount += 1
+
+					if ?shorthands[name] {
+						drop shorthands[name]
+
+						shortCount -= 1
+					}
+				}
+				is IdentifierLiteral {
+					var name = argument.name()
+
+					if argument.variable().isPredefined() {
+						indexeds.push(new NamingArgument(
+							index
+							type: argument.type()
+							strict: false
+						))
+					}
+					else if !?nameds[name] && !?invalids[name] {
+						if ?shorthands[name] {
+							invalids[name] = true
+
+							indexeds.push(shorthands[name], new NamingArgument(
+								index
+								type: argument.type()
+								strict: false
+							))
+
+							drop shorthands[name]
+
+							shortCount -= 1
+						}
+						else {
+							shortCount += 1
+
+							shorthands[name] = new NamingArgument(
+								index
+								name
+								type: argument.type()
+								strict: false
+							)
+						}
+					}
+					else {
+						indexeds.push(new NamingArgument(
+							index
+							type: argument.type()
+							strict: false
+						))
+					}
+				}
+				else {
+					indexeds.push(new NamingArgument(
+						index
+						type: argument.type()
+						strict: false
+						value: argument
+					))
+				}
+			}
+
+			return [namedCount, shortCount]
+		} # }}}
 	}
 
 	func getSpreadParameter(type: Type): Type { # {{{
@@ -454,7 +534,7 @@ namespace Matching {
 				mut cursor: Cursor
 				argMatches: Matches
 				context: MatchContext
-			): { cursor: Cursor?, argMatches: Matches? } { # {{{
+			): { cursor: Cursor, argMatches: Matches }? { # {{{
 				var last = arguments.length - 1
 				// echo(node.type.hashCode(), node.min, node.max, cursor.index, cursor.spread, cursor.used, cursor.length, last)
 
@@ -464,7 +544,7 @@ namespace Matching {
 					return { cursor, argMatches }
 				}
 				if node.min != 0 && cursor.index + node.min - 1 > last {
-					return {}
+					return null
 				}
 
 				if node.max == 1 {
@@ -609,7 +689,7 @@ namespace Matching {
 						return { cursor, argMatches }
 					}
 					else {
-						return {}
+						return null
 					}
 				}
 				else {
@@ -630,7 +710,7 @@ namespace Matching {
 							argMatches.precise = false
 						}
 						else {
-							return {}
+							return null
 						}
 
 						i += 1
@@ -693,10 +773,7 @@ namespace Matching {
 										// matches.push(new CallMatchArgument(
 										// 	index: cursor.index
 										// 	from: cursor.used
-										// 	// TODO!
-										// 	// to unless to == cursor.length
-										// 	// to if to != cursor.length
-										// 	to: to if to + 1 < cursor.length
+										// 	to if to + 1 < cursor.length
 										// ))
 										var match = new CallMatchArgument(
 											index: cursor.index
@@ -750,14 +827,6 @@ namespace Matching {
 							cursor = getNextCursor(cursor, arguments, true)
 						}
 					}
-
-
-					// TODO!
-					// block addArgument {
-					// 		if matches.every((i, ...) => i == matches[0]) {
-					// 			break addArgument
-					// 		}
-					// }
 
 					argMatches.arguments.push(matches)
 
@@ -885,13 +954,11 @@ namespace Matching {
 		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
 			// echo('branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise)
 			if cursor.spread && context.mode == .AllMatches  {
-				var result = matchArguments(branch, context.arguments, cursor, new Matches(
-					precise: argMatches.precise
-					arguments: [...argMatches.arguments]
-				), context)
-				// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
-
-				if ?result.cursor {
+				if var result ?= matchArguments(branch, context.arguments, cursor, new Matches(
+						precise: argMatches.precise
+						arguments: [...argMatches.arguments]
+					), context)
+				{
 					for var key in branch.order {
 						if matchTreeNode(tree, branch.columns[key], result.cursor, new Matches(
 							precise: result.argMatches.precise
@@ -907,9 +974,10 @@ namespace Matching {
 						cursor = getNextCursor(cursor, context.arguments, true)
 						// echo('branch', toString(cursor))
 
-						{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+						if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+							return false
+						}
 						// echo(toString(cursor), argMatches, context.arguments.length)
-						return false if !?cursor
 
 						for var key in branch.order {
 							if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
@@ -927,9 +995,10 @@ namespace Matching {
 					cursor = getNextCursor(cursor, context.arguments, true)
 					// echo('branch', toString(cursor))
 
-					{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+					if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+						return false
+					}
 					// echo(toString(cursor), argMatches, context.arguments.length)
-					return false if !?cursor
 
 					for var key in branch.order {
 						if matchTreeNode(tree, branch.columns[key], cursor, new Matches(
@@ -946,10 +1015,10 @@ namespace Matching {
 			else {
 				var outOfBound = cursor.index >= context.arguments.length
 
-				{ cursor, argMatches } = matchArguments(branch, context.arguments, cursor, argMatches, context)
+				if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+					return false
+				}
 				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
-
-				return false if !?cursor
 
 				if !outOfBound && branch.min == 0 && cursor.index >= context.arguments.length {
 					var argument = context.arguments.last()
@@ -998,23 +1067,28 @@ namespace Matching {
 					), context)
 					// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 
-					if !?result.cursor || result.cursor.index + 1 < context.arguments.length || result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0 {
+					if !?result || result.cursor.index + 1 < context.arguments.length || result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0 {
 						cursor = getNextCursor(cursor, context.arguments, true)
 						// echo('leaf', toString(cursor), leaf.function.hashCode())
 
-						{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
+						if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context) {
+							return false
+						}
 						// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 					}
 					else {
-						{ cursor, argMatches } = result
+						// TODO!
+						{ cursor, argMatches } = result!?
 					}
 				}
 				else {
-					{ cursor, argMatches } = matchArguments(leaf, context.arguments, cursor, argMatches, context)
+					if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context) {
+						return false
+					}
 				}
 				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
 
-				return false if !?cursor || cursor.index + 1 < context.arguments.length || (cursor.index + 1 == context.arguments.length && cursor.used == 0)
+				return false if cursor.index + 1 < context.arguments.length || (cursor.index + 1 == context.arguments.length && cursor.used == 0)
 			}
 
 			if leaf.byNames.length > 0 {
@@ -1039,7 +1113,8 @@ namespace Matching {
 						var arg = argMatches.arguments[index]
 
 						if ?pMatch && pMatch is Array {
-							pMatch.push(...arg)
+							// TODO!
+							pMatch.push(...arg:Array)
 
 							length += arg.length
 						}

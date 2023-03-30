@@ -28,7 +28,7 @@ module.exports = function() {
 			console.log(this._x + "." + this._y);
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = Type.isArray;
+			const t0 = value => Type.isDexArray(value, 1, 2, 0, Type.isString);
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_0.call(that, args[0]);

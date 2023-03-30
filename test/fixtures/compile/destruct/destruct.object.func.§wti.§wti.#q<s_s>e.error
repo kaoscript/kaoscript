@@ -1,0 +1,1 @@
+TypeException: The types "Foobar" and "{x: Number, y: Number}" aren't compatible (fixtures/compile/destruct/destruct.object.func.§wti.§wti.#q<s_s>e.ks:8)

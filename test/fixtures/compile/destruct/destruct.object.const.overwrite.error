@@ -1,1 +1,0 @@
-ReferenceException: The identifier "bar" is immutable (fixtures/compile/destruct/destruct.object.const.overwrite.ks:7)

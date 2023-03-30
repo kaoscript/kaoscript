@@ -7,7 +7,7 @@ module.exports = function() {
 		console.log(Helper.toString(o.name));
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isObject(value, () => true, {color: Type.isString});
+		const t0 = value => Type.isDexObject(value, 2, 0, {color: Type.isString});
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

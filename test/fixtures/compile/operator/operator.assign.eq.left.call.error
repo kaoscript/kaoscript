@@ -1,0 +1,1 @@
+SyntaxError: The left-hand side of an assignment expression must be a variable, a property access or a binding (fixtures/compile/operator/operator.assign.eq.left.call.ks:2:2)

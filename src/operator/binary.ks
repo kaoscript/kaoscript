@@ -47,7 +47,7 @@ class BinaryOperatorExpression extends Expression {
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
 	left(): @left
 	left(@left): this
-	listAssignments(array: Array<String>) { # {{{
+	listAssignments(array: Array) { # {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
 
@@ -462,6 +462,7 @@ class BinaryOperatorMatch extends Expression {
 			operand.releaseReusable()
 		}
 	} # }}}
+	subject() => @subject
 	toFragments(fragments, mode) { # {{{
 		if @await {
 			NotSupportedException.throw(this)

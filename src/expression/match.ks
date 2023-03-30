@@ -14,14 +14,7 @@ class MatchExpression extends Expression {
 		@name: String?						= null
 		@nextClauseIndex: Number
 		@reusableValue: Boolean				= false
-		@testArray: String?
-		@testData							= {
-			array: 0
-			number: 0
-			object: 0
-		}
-		@testNumber: String?
-		@testObject: String?
+		@tests								= {}
 		@usingFallthrough: Boolean			= false
 		@value								= null
 		@valueName: String?					= null
@@ -72,12 +65,6 @@ class MatchExpression extends Expression {
 
 			if filter.hasTest() {
 				clause.hasTest = true
-
-				var data = filter.getTestData()
-
-				@testData.array += data.array
-				@testData.number += data.number
-				@testData.object += data.object
 			}
 			else if @hasDefaultClause {
 				throw new NotSupportedException(this)
@@ -181,40 +168,6 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
-		if @testData.array > 1 {
-			if @valueType.isArray() {
-				pass
-			}
-			else if @valueType.canBeNumber() {
-				@testArray = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Array', this)
-			}
-		}
-		if @testData.number > 1 {
-			if @valueType.isNumber() {
-				pass
-			}
-			else if @valueType.canBeNumber() {
-				@testNumber = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Number', this)
-			}
-		}
-		if @testData.object > 1 {
-			if @valueType.isObject() {
-				pass
-			}
-			else if @valueType.canBeObject() {
-				@testObject = @scope.acquireTempName(false)
-			}
-			else {
-				TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), 'Object', this)
-			}
-		}
-
 		var enumValue = @valueType.isEnum()
 
 		var mut enumConditions = 0
@@ -235,6 +188,12 @@ class MatchExpression extends Expression {
 			if @usingFallthrough {
 				clause.name = @scope.acquireTempName(false)
 			}
+		}
+
+		for var test of @tests when test.count > 1 {
+			test.name = @scope.acquireTempName(false)
+
+			test.tests = [test.name]
 		}
 
 		unless tracker.isFullyMatched() {
@@ -327,32 +286,68 @@ class MatchExpression extends Expression {
 			clause.body.translate()
 		}
 	} # }}}
-	getTypeTester(fragments, type) { # {{{
-		match type {
-			'array' {
-				if ?@testArray {
-					return () => {
-						fragments.code(@testArray)
-					}
-				}
-			}
-			'number' {
-				if ?@testNumber {
-					return () => {
-						fragments.code(@testNumber)
-					}
-				}
-			}
-			'object' {
-				if ?@testObject {
-					return () => {
-						fragments.code(@testObject)
-					}
-				}
+	addArrayTest(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
+		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash] {
+			data.count += 1
+		}
+		else {
+			@tests[hash] = {
+				kind: TestKind.ARRAY
+				count: 1
+				testingType
+				minmax
+				type
 			}
 		}
+	} # }}}
+	addObjectTest(testingType: Boolean, type: Type?) { # {{{
+		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
 
-		return null
+		if var data ?= @tests[hash] {
+			data.count += 1
+		}
+		else {
+			@tests[hash] = {
+				kind: TestKind.OBJECT
+				count: 1
+				testingType
+				type
+			}
+		}
+	} # }}}
+	flagImplementedTest(type, details? = null) { # {{{
+		if var data ?= @tests[type] {
+			if ?details || ?data.details {
+				if data.details == details {
+					data.implemented = true
+				}
+			}
+			else {
+				data.implemented = true
+			}
+		}
+	} # }}}
+	getArrayTests(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
+		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash]; ?data.tests {
+			return data.tests
+		}
+		else {
+			return null
+		}
+	} # }}}
+	getObjectTests(testingType: Boolean, type: Type?) { # {{{
+		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
+
+		if var data ?= @tests[hash]; ?data.tests {
+			return data.tests
+		}
+		else {
+			return null
+		}
 	} # }}}
 	getValueName() => @valueName
 	getValueType() => @valueType
@@ -398,29 +393,42 @@ class MatchExpression extends Expression {
 			line.done()
 		}
 
-		if ?@testArray {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testArray, ' = ', $runtime.typeof('Array', this), `(\(@name))`)
-				.done()
-		}
-		if ?@testNumber {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testNumber, ' = ', $runtime.typeof('Number', this), `(\(@name))`)
-				.done()
-		}
-		if ?@testObject {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @testObject, ' = ', $runtime.typeof('Object', this), `(\(@name))`)
-				.done()
+		for var test of @tests when test.count > 1 {
+			var line = fragments.newLine()
+
+			line.code(`\($runtime.scope(this))\(test.name) = \($runtime.helper(this)).memo(`)
+
+			if test.kind == TestKind.ARRAY {
+				var { testingType, minmax, type } = test
+
+				if ?type {
+					type.toTestFragments(@name, testingType, ?minmax, line, this)
+				}
+				else if ?minmax {
+					var { min, max } = minmax
+
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0), \(min), \(max == Infinity ? 0 : max))`)
+				}
+				else {
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0))`)
+				}
+			}
+			else {
+				var { testingType, type } = test
+
+				if ?type {
+					type.toTestFragments(@name, testingType, line, this)
+				}
+				else {
+					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
+				}
+			}
+
+			line.code(')').done()
 		}
 
-		for var clause, clauseIdx in @clauses {
-			clause.filter.toBeforehandFragments(fragments, @name)
-
-			if @usingFallthrough {
+		if @usingFallthrough {
+			for var clause, clauseIdx in @clauses {
 				var line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
 				var block = line.newBlock()
 
@@ -540,7 +548,6 @@ class EnumPossibilityTracker extends PossibilityTracker {
 					@possibilities.remove(value.property())
 				}
 				else {
-					echo(value)
 					throw new NotImplementedException()
 				}
 			}
