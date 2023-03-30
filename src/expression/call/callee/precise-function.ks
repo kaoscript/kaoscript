@@ -130,12 +130,9 @@ class PreciseFunctionCallee extends PreciseCallee {
 					fragments.code('(')
 
 					for var _, index in type.parameters() {
-						// TODO!
-						// fragments
-						// 	..code($comma) if index != 0
-						// 	..code(`__ks_\(index)`)
-						fragments.code($comma) if index != 0
-						fragments.code(`__ks_\(index)`)
+						fragments
+							..code($comma) if index != 0
+							..code(`__ks_\(index)`)
 					}
 
 					fragments.code(') => ')
@@ -148,12 +145,10 @@ class PreciseFunctionCallee extends PreciseCallee {
 								.compile(@expression)
 								.code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(`)
 								.compile(@node.getCallScope())
-							// TODO!
-							// .code($comma) if #arguments
+								// TODO!
+								// .code($comma) if #arguments
 
-							// TODO!
-							// if #arguments {
-							if arguments.length > 0 {
+							if #arguments {
 								fragments.code($comma)
 							}
 						}

@@ -12,9 +12,7 @@ class LenientFunctionCallee extends Callee {
 		@scope: ScopeKind
 		@type: Type
 	}
-	// TODO!
-	// constructor(@data, assessment: Router.Assessment, @result!, @node) { # {{{
-	constructor(@data, assessment: Router.Assessment, @result, @node) { # {{{
+	constructor(@data, assessment: Router.Assessment, @result!?, @node) { # {{{
 		this(data, assessment, result.possibilities, node)
 
 		if ?@result.positions {
@@ -90,7 +88,7 @@ class LenientFunctionCallee extends Callee {
 				}
 				ScopeKind.This {
 					fragments.wrap(@expression, mode).code('(')
-					
+
 					Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, false, false, fragments, mode)
 				}
 			}

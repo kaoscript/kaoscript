@@ -1379,12 +1379,9 @@ class MatchFilter extends AbstractNode {
 						condition = new MatchConditionArray(data, @parent, scope)
 
 						for var binding in @bindings {
-							// TODO!
-							// binding
-							// 	..unflagLengthTesting()
-							// 	..unflagTypeTesting()
-							binding.unflagLengthTesting()
-							binding.unflagTypeTesting()
+							binding
+								..unflagLengthTesting()
+								..unflagTypeTesting()
 						}
 					}
 					NodeKind.MatchConditionObject {

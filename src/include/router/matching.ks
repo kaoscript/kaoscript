@@ -8,9 +8,7 @@ namespace Matching {
 		func matchArguments(
 			assessment: Assessment
 			route: Route
-			// TODO active element testing
-			// arguments: Type[]
-			arguments: Array
+			arguments: Type[]
 			excludes: String[]
 			indexeds: NamingArgument[]
 			mode: ArgumentMatchMode

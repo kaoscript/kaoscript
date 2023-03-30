@@ -342,9 +342,7 @@ namespace Router {
 		)
 	} # }}}
 
-	// TODO!
-	// func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
-	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = ArgumentMatchMode.BestMatch, node: AbstractNode): CallMatchResult { # {{{
+	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
 		if assessment.length == 0 {
 			if !#arguments {
 				return new PreciseCallMatchResult([])
