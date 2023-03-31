@@ -306,7 +306,12 @@ abstract class Type {
 					}
 
 					for var property in data.properties {
-						type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+						if ?property.type {
+							type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+						}
+						else {
+							type.addProperty(property.name.name, AnyType.Unexplicit)
+						}
 					}
 
 					if ?data.rest {
@@ -615,7 +620,7 @@ abstract class Type {
 	discardSpread(): Type => this
 	discardVariable(): Type => this
 	// TODO to remove
-	equals(value?): Boolean => ?value && this.isSubsetOf(value, MatchingMode.Exact)
+	equals(value?): Boolean => ?value && @isSubsetOf(value, MatchingMode.Exact)
 	flagAlien() { # {{{
 		@alien = true
 

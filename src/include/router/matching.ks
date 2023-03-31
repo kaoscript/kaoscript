@@ -767,20 +767,11 @@ namespace Matching {
 									else {
 										var to = cursor.length + node.max + cursor.used - 1
 
-										// TODO!
-										// matches.push(new CallMatchArgument(
-										// 	index: cursor.index
-										// 	from: cursor.used
-										// 	to if to + 1 < cursor.length
-										// ))
-										var match = new CallMatchArgument(
+										matches.push(new CallMatchArgument(
 											index: cursor.index
 											from: cursor.used
-										)
-										if to + 1 < cursor.length {
-											match.to = to
-										}
-										matches.push(match)
+											:to if to + 1 < cursor.length
+										))
 
 										cursor.used += 1 - node.max
 
@@ -1065,7 +1056,7 @@ namespace Matching {
 					), context)
 					// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 
-					if !?result || result.cursor.index + 1 < context.arguments.length || result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0 {
+					if !?result || result.cursor.index + 1 < context.arguments.length || (result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0) {
 						cursor = getNextCursor(cursor, context.arguments, true)
 						// echo('leaf', toString(cursor), leaf.function.hashCode())
 

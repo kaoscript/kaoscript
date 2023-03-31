@@ -273,7 +273,7 @@ class MatchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !!@clauses[index].body.isExit() {
+				else if !@clauses[index].body.isExit() {
 					initializable = false
 
 					break
@@ -326,7 +326,7 @@ class MatchStatement extends Statement {
 			@value.translate()
 		}
 
-		for clause in @clauses {
+		for var clause in @clauses {
 			clause.filter.translate()
 
 			clause.body.translate()
@@ -564,6 +564,24 @@ class MatchStatement extends Statement {
 		return true
 	} # }}}
 	isJumpable() => true
+	isInitializingInstanceVariable(name) { # {{{
+		return false unless @hasDefaultClause
+
+		for var clause in @clauses {
+			return false unless clause.filter.isInitializingInstanceVariable(name) || clause.body.isInitializingInstanceVariable(name)
+		}
+
+		return true
+	} # }}}
+	isInitializingStaticVariable(name) { # {{{
+		return false unless @hasDefaultClause
+
+		for var clause in @clauses {
+			return false unless clause.filter.isInitializingStaticVariable(name) || clause.body.isInitializingStaticVariable(name)
+		}
+
+		return true
+	} # }}}
 	isLateInitializable() => true
 	isUsingVariable(name) { # {{{
 		if @hasDeclaration {
@@ -1516,6 +1534,12 @@ class MatchFilter extends AbstractNode {
 	getEnumConditions(): Number => @enumConditions
 	getMaxConditions(): Number => @conditions.length
 	hasTest() => @hasTest
+	isInitializingInstanceVariable(name) { # {{{
+		return @filter?.isInitializingInstanceVariable(name)
+	} # }}}
+	isInitializingStaticVariable(name) { # {{{
+		return @filter?.isInitializingStaticVariable(name)
+	} # }}}
 	setCastingEnum(castingEnum: Boolean) { # {{{
 		for var condition in @conditions {
 			condition.setCastingEnum(castingEnum)

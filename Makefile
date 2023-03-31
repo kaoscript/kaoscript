@@ -56,6 +56,9 @@ selfold:
 	mv lib/compiler.old.js lib/compiler.js
 	mv lib/compiler.old2.js lib/compiler.old.js
 
+ntest:
+	find test -name "*.no"
+
 patche:
 	node ./scripts/patch-error.js
 patchm:

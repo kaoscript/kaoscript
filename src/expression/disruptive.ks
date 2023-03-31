@@ -32,7 +32,7 @@ class DisruptiveExpression extends Expression {
 		if @insitu {
 			statement.addAfterward(this)
 		}
-		else {
+		else if @parent != statement {
 			statement.addBeforehand(this)
 		}
 

@@ -429,6 +429,10 @@ class ForInStatement extends Statement {
 
 		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
 
+		if ?@value {
+			@bindingValue.acquireReusable(@value.isSplitAssignment())
+		}
+
 		@assignTempVariables(@scope!?)
 		@assignTempVariables(@bindingScope)
 
@@ -506,6 +510,8 @@ class ForInStatement extends Statement {
 				@bindingScope.releaseTempName(@toName)
 			}
 		}
+
+		@bindingValue.releaseReusable()
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {

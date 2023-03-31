@@ -1,7 +1,7 @@
 class InlineBlockScope extends BlockScope {
 	private {
 		@tempParentNames	= {}
-		@upatedInferables	= {}
+		@updatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		if var name ?= @acquireUnusedTempName() {
@@ -93,7 +93,7 @@ class InlineBlockScope extends BlockScope {
 		return parent.hasDeclaredVariable(name)
 	} # }}}
 	isInline() => true
-	listUpdatedInferables() => @upatedInferables
+	listUpdatedInferables() => @updatedInferables
 	releaseTempName(name) { # {{{
 		if @tempParentNames[name] == true {
 			@parent().releaseTempName(name)
@@ -156,7 +156,7 @@ class InlineBlockScope extends BlockScope {
 		variable = super.replaceVariable(name, variable)
 
 		if !@declarations[newName] {
-			@upatedInferables[name] = {
+			@updatedInferables[name] = {
 				isVariable: true
 				type: variable.getRealType()
 			}
@@ -169,7 +169,7 @@ class InlineBlockScope extends BlockScope {
 		var variable = super.replaceVariable(name, type, downcast, absolute, node)
 
 		if !@declarations[newName] {
-			@upatedInferables[name] = {
+			@updatedInferables[name] = {
 				isVariable: true
 				type: variable.getRealType()
 			}

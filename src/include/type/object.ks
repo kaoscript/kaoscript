@@ -344,6 +344,15 @@ class ObjectType extends Type {
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @length == value.length()
 
+			if mode ~~ MatchingMode.NonNullToNull {
+				if @isNullable() && !value.isNullable() {
+					return false
+				}
+			}
+			else if @isNullable() != value.isNullable() {
+				return false
+			}
+
 			var properties = value.properties()
 
 			return false unless Array.same(Object.keys(@properties), Object.keys(properties))
@@ -357,6 +366,10 @@ class ObjectType extends Type {
 			}
 		}
 		else {
+			if @isNullable() && !value.isNullable() {
+				return false
+			}
+
 			if type && @rest {
 				return false unless value.hasRest()
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)

@@ -256,7 +256,6 @@ class VariableDeclaration extends AbstractNode {
 			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@value, this)
 			}
-			// echo('VariableDeclaration.type', @type.hashCode())
 
 			if @parent is IfStatement | IfExpression {
 				@type = @type.setNullable(false)
@@ -555,14 +554,10 @@ class VariableBindingDeclarator extends AbstractNode {
 			}
 		}
 
-		// TODO!
-		// @binding
-		// 	..type(type)
-		// 	..value(@parent.value())
-		// 	..prepare()
-		@binding.type(@type)
-		@binding.value(@parent.value())
-		@binding.prepare()
+		@binding
+			..type(@type)
+			..value(@parent.value())
+			..prepare()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@binding)

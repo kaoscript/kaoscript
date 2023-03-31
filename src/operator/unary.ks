@@ -83,6 +83,9 @@ class UnaryOperatorImplicit extends Expression {
 		var late type: Type
 
 		match @parent {
+			is BinaryOperatorAddition, BinaryOperatorSubtraction, PolyadicOperatorAddition, PolyadicOperatorSubtraction {
+				type = target
+			}
 			is BinaryOperatorMatch {
 				type = @parent.subject().type()
 			}

@@ -160,6 +160,10 @@ class ForOfStatement extends Statement {
 
 		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
 
+		if ?@value {
+			@bindingValue.acquireReusable(@value.isSplitAssignment())
+		}
+
 		@assignTempVariables(@bindingScope)
 
 		if ?@until {
@@ -201,6 +205,8 @@ class ForOfStatement extends Statement {
 
 		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
 		@bindingScope.releaseTempName(@keyName) if ?@keyName
+
+		@bindingValue.releaseReusable()
 
 		for var inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {

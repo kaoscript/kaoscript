@@ -277,6 +277,15 @@ class ArrayType extends Type {
 			return false unless @rest == value.hasRest()
 			return false unless @length == value.length()
 
+			if mode ~~ MatchingMode.NonNullToNull {
+				if @isNullable() && !value.isNullable() {
+					return false
+				}
+			}
+			else if @isNullable() != value.isNullable() {
+				return false
+			}
+
 			for var type, index in value.properties() {
 				return false unless @properties[index].isSubsetOf(type, mode)
 			}
@@ -286,6 +295,10 @@ class ArrayType extends Type {
 			}
 		}
 		else {
+			if @isNullable() && !value.isNullable() {
+				return false
+			}
+
 			if @rest {
 				return false unless value.hasRest()
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)

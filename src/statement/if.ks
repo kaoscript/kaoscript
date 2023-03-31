@@ -107,7 +107,7 @@ class IfStatement extends Statement {
 				@whenTrueScope.updateInferable(name, data, this)
 			}
 
-			if @whenFalseExpression != null {
+			if ?@whenFalseExpression {
 				for var data, name of @condition.inferWhenFalseTypes({}) {
 					@whenFalseScope.updateInferable(name, data, this)
 				}
@@ -601,7 +601,7 @@ class IfStatement extends Statement {
 			}
 		}
 	} # }}}
-	type() {
+	type() { # {{{
 		if @hasWhenFalse {
 			var trueType = @whenTrueExpression.type()
 			var falseType = @whenFalseExpression.type()
@@ -611,5 +611,5 @@ class IfStatement extends Statement {
 		else {
 			return Type.Void
 		}
-	}
+	} # }}}
 }
