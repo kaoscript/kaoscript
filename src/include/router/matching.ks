@@ -1066,8 +1066,7 @@ namespace Matching {
 						// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 					}
 					else {
-						// TODO!
-						{ cursor, argMatches } = result!?
+						{ cursor, argMatches } = result
 					}
 				}
 				else {

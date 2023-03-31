@@ -265,9 +265,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 }
 
 class CallSealedSuperMethodSubstitude extends Substitude {
-	// TODO!
-	// private {
-	private late {
+	private {
 		@arguments
 		@class: NamedType<ClassType>
 		@data

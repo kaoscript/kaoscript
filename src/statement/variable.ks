@@ -308,12 +308,7 @@ class VariableDeclaration extends AbstractNode {
 	defineVariables(declarator) { # {{{
 		var assignments = []
 
-		// TODO!
-		// for var { name, immutable = @immutable } in declarator.listAssignments([]) {
-		for var assignment in declarator.listAssignments([]) {
-			var name = assignment.name
-			var immutable = assignment.immutable ?? @immutable
-
+		for var { name, immutable = @immutable } in declarator.listAssignments([]) {
 			@mixedMutability ||= immutable != @immutable
 
 			if @scope.hasDefinedVariable(name) {
