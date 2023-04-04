@@ -52,7 +52,7 @@ selfnew:
 	mv lib/compiler.js lib/compiler.old.js
 
 selfold:
-	rm lib/compiler.js
+	rm lib/compiler.js || true
 	mv lib/compiler.old.js lib/compiler.js
 	mv lib/compiler.old2.js lib/compiler.old.js
 
@@ -103,6 +103,8 @@ dev:
 	@# tests
 	@# node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
+	@# node test/compile.dev.js "compile struct.create.obj.ret.wvar"
+	@# node test/compile.dev.js "compile router.call.func.o§f#be.o§f%be"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

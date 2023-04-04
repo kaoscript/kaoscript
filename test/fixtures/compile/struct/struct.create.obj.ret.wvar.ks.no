@@ -1,0 +1,13 @@
+struct Point {
+    x: Number
+    y: Number
+}
+
+func createPoint(): Point {
+	var point = {
+		x: 0.3
+		y: 0.4
+	}
+
+	return point
+}

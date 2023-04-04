@@ -87,6 +87,9 @@ abstract class Expression extends AbstractNode {
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
+	setAttributes(data) { # {{{
+		@options = Attribute.configure({ attributes: data }, @parent._options, AttributeTarget.Statement, this.file())
+	} # }}}
 	statement() { # {{{
 		if !?@statement {
 			@leftMost = this

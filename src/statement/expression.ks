@@ -6,7 +6,7 @@ class ExpressionStatement extends Statement {
 		@variable				= null
 	}
 	analyse() { # {{{
-		@expression = $compile.expression(@data, this)
+		@expression = $compile.expression(@data.expression, this)
 		@expression.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{

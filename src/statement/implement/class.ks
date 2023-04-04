@@ -1109,19 +1109,26 @@ class ImplementClassConstructorDeclaration extends Statement {
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind.CallExpression
+					kind: NodeKind.ExpressionStatement
 					attributes: []
 					modifiers: []
-					scope: {
-						kind: ScopeKind.This
-					}
-					callee: {
-						kind: NodeKind.Identifier
-						name: 'super'
+					expression: {
+						kind: NodeKind.CallExpression
+						attributes: []
+						modifiers: []
+						scope: {
+							kind: ScopeKind.This
+						}
+						callee: {
+							kind: NodeKind.Identifier
+							name: 'super'
+							start: @data.start
+							end: @data.start
+						}
+						arguments: []
 						start: @data.start
 						end: @data.start
 					}
-					arguments: []
 					start: @data.start
 					end: @data.start
 				})
@@ -1148,9 +1155,13 @@ class ImplementClassConstructorDeclaration extends Statement {
 	class() => @variable
 	private getConstructorIndex(body: Array) { # {{{
 		for var statement, index in body {
-			if statement.kind == NodeKind.CallExpression {
-				if statement.callee.kind == NodeKind.Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
-					return index
+			if statement.kind == NodeKind.ExpressionStatement {
+				var expression = statement.expression
+
+				if expression.kind == NodeKind.CallExpression {
+					if expression.callee.kind == NodeKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super' || (@overwrite && expression.callee.name == 'precursor')) {
+						return index
+					}
 				}
 			}
 			else if statement.kind == NodeKind.IfStatement {

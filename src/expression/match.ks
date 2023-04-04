@@ -75,12 +75,7 @@ class MatchExpression extends Expression {
 
 			clause.filter = filter
 
-			if data.body.kind == NodeKind.Block {
-				clause.body = $compile.block(data.body, this, clause.scope)
-			}
-			else {
-				clause.body = $compile.block($ast.pick(data.body), this, clause.scope)
-			}
+			clause.body = $compile.block(data.body, this, clause.scope)
 		}
 
 		for var clause in @clauses {

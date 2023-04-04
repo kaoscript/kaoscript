@@ -282,7 +282,7 @@ class MacroDeclaration extends AbstractNode {
 
 				@parameters[data.internal.name] = auto ? MacroVariableKind.AutoEvaluated : MacroVariableKind.AST
 
-				line.code(`,\(auto ? ' mut' : '')\(rest ? ' ...' : '') \(data.internal.name)`)
+				line.code(`,\(auto ? ' mut' : '') \(rest ? '...' : '')\(data.internal.name)`)
 
 				if ?data.defaultValue {
 					line.code(' = ').expression(data.defaultValue)
@@ -355,7 +355,6 @@ class MacroDeclaration extends AbstractNode {
 			@buildFunction()
 		}
 
-		// echo(@fn.toString())
 		var module = @module()
 		@executeCount += 1
 
@@ -363,6 +362,7 @@ class MacroDeclaration extends AbstractNode {
 
 		// echo(args)
 		var mut data = @fn(...args)
+		// echo(data)
 
 		try {
 			data = Parser.parseStatements(data + '\n', Parser.FunctionMode.Method)
@@ -380,58 +380,68 @@ class MacroDeclaration extends AbstractNode {
 		recipient.exportMacro(name, this)
 	} # }}}
 	private filter(statement, data, mut fragments) { # {{{
-		if data.kind == NodeKind.MacroExpression {
-			if statement {
-				fragments = fragments.newLine().code('__ks_src += ')
+		var elements = if statement {
+			unless data.kind == NodeKind.ExpressionStatement && data.expression.kind == NodeKind.MacroExpression {
+				return false
 			}
 
-			for element, index in data.elements {
-				if index != 0 {
-					fragments.code(' + ')
-				}
-
-				match element.kind {
-					MacroElementKind.Expression {
-						if element.expression.kind == NodeKind.Identifier && @parameters[element.expression.name] == MacroVariableKind.AST {
-							unless !?element.reification {
-								SyntaxException.throwInvalidASTReification(this)
-							}
-
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
-						}
-						else if !?element.reification {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(ReificationKind.Expression))`)
-						}
-						else if element.reification.kind == ReificationKind.Join {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
-						}
-						else {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
-						}
-					}
-					MacroElementKind.Literal {
-						if element.value[0] == '\\' {
-							fragments.code($quote(element.value.substr(1).replace(/\\/g, '\\\\')))
-						}
-						else {
-							fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
-						}
-					}
-					MacroElementKind.NewLine {
-						fragments.code('"\\n"')
-					}
-				}
-			}
-
-			if statement {
-				fragments.done()
-			}
-
-			return true
+			pick data.expression.elements
 		}
 		else {
-			return false
+			unless data.kind == NodeKind.MacroExpression {
+				return false
+			}
+
+			pick data.elements
 		}
+
+		if statement {
+			fragments = fragments.newLine().code('__ks_src += ')
+		}
+
+		for var element, index in elements {
+			if index != 0 {
+				fragments.code(' + ')
+			}
+
+			match element.kind {
+				MacroElementKind.Expression {
+					if element.expression.kind == NodeKind.Identifier && @parameters[element.expression.name] == MacroVariableKind.AST {
+						unless !?element.reification {
+							SyntaxException.throwInvalidASTReification(this)
+						}
+
+						fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
+					}
+					else if !?element.reification {
+						fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(ReificationKind.Expression))`)
+					}
+					else if element.reification.kind == ReificationKind.Join {
+						fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
+					}
+					else {
+						fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
+					}
+				}
+				MacroElementKind.Literal {
+					if element.value[0] == '\\' {
+						fragments.code($quote(element.value.substr(1).replace(/\\/g, '\\\\')))
+					}
+					else {
+						fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
+					}
+				}
+				MacroElementKind.NewLine {
+					fragments.code('"\\n"')
+				}
+			}
+		}
+
+		if statement {
+			fragments.done()
+		}
+
+		return true
 	} # }}}
 	getMark(index) => @marks[index]
 	isEnhancementExport() => false
@@ -601,9 +611,16 @@ func $callExpression(data, parent, scope) { # {{{
 				if macro.matchArguments(arguments) {
 					var result = macro.execute(data.arguments, parent)
 
-					if result.body.length == 1 {
-						return $compile.expression(result.body[0], parent)
+					if result.body.length == 1 && result.body[0].kind == NodeKind.ExpressionStatement {
+						var expression = $compile.expression(result.body[0].expression, parent)
+
+						expression.setAttributes(result.body[0].attributes)
+
+						return expression
 					}
+					// if result.body.length == 1 {
+					// 	return $compile.expression(result.body[0], parent)
+					// }
 					else {
 						throw new NotImplementedException(parent)
 					}
@@ -618,9 +635,9 @@ func $callExpression(data, parent, scope) { # {{{
 } # }}}
 
 func $callStatement(data, parent, scope) { # {{{
-	if var path ?= $ast.path(data.callee) {
+	if var path ?= $ast.path(data.expression.callee) {
 		if var macros ?= scope.getMacro(path) {
-			var arguments = MacroArgument.build(data.arguments)
+			var arguments = MacroArgument.build(data.expression.arguments)
 
 			for var macro in macros {
 				if macro.matchArguments(arguments) {
@@ -646,7 +663,7 @@ class CallMacroStatement extends Statement {
 		super(data, parent, scope)
 	} # }}}
 	initiate() { # {{{
-		var data = @macro.execute(@data.arguments, this)
+		var data = @macro.execute(@data.expression.arguments, this)
 
 		var offset = @scope.getLineOffset()
 

@@ -311,13 +311,13 @@ class ArrayBindingElement extends Expression {
 			}
 		}
 
-		if ?@data.name {
-			@name = @compileVariable(@data.name)
+		if ?@data.internal {
+			@name = @compileVariable(@data.internal)
 			@name.setAssignment(@assignment)
 			@name.analyse()
 
 			@named = true
-			@thisAlias = @data.name.kind == NodeKind.ThisExpression
+			@thisAlias = @data.internal.kind == NodeKind.ThisExpression
 		}
 
 		if ?@data.defaultValue {

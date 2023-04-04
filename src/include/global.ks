@@ -16,9 +16,7 @@ var $ast = {
 		else {
 			return {
 				kind: NodeKind.Block
-				statements: [
-					data
-				]
+				statements: [data]
 				start: data.start
 				end: data.end
 			}

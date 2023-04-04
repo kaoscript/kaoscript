@@ -674,8 +674,8 @@ abstract class Importer extends Statement {
 											}
 											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
-													var external = data.external.name
-													var internal = data.internal?.name ?? external
+													var internal = data.internal.name
+													var external = data.external?.name ?? internal
 
 													@addImport(external, internal, false, null)
 												}
@@ -714,7 +714,7 @@ abstract class Importer extends Statement {
 								match data.kind {
 									NodeKind.NamedSpecifier {
 										var internal = data.internal.name
-										var external = ?data.external ? data.external.name : internal
+										var external = data.external?.name ?? internal
 
 										if ?macros[external] {
 											for var data in macros[external] {
@@ -942,8 +942,8 @@ abstract class Importer extends Statement {
 											}
 											NodeKind.ObjectBinding {
 												for var data in data.internal.elements {
-													var external = data.external.name
-													var internal = data.internal?.name ?? external
+													var internal = data.internal.name
+													var external = data.external?.name ?? internal
 
 													@addVariable(external, internal, true, null)
 												}
@@ -970,7 +970,7 @@ abstract class Importer extends Statement {
 					}
 					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
-						var external = ?data.external ? data.external.name : internal
+						var external = data.external?.name ?? internal
 
 						@addVariable(external, internal, true, type.getProperty(external))
 					}

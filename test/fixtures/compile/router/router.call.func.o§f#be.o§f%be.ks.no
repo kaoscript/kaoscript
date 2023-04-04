@@ -1,0 +1,6 @@
+func foobar(filters: Object<(): Boolean>) {
+}
+
+foobar({
+	x() => true
+})

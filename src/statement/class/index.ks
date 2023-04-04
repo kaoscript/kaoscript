@@ -62,19 +62,25 @@ class ClassDeclaration extends Statement {
 		}
 		else {
 			match data.kind {
-				NodeKind.BinaryExpression {
-					if data.operator.kind == BinaryOperatorKind.Assignment && data.operator.assignment == AssignmentOperatorKind.Equals {
-						if $ast.isThisField(name, data.left) {
-							return !$ast.some(data.right, $ast.isThisField^^(name, ^))
+				NodeKind.ExpressionStatement {
+					var expression = data.expression
+
+					match expression.kind {
+						NodeKind.BinaryExpression {
+							if expression.operator.kind == BinaryOperatorKind.Assignment && expression.operator.assignment == AssignmentOperatorKind.Equals {
+								if $ast.isThisField(name, expression.left) {
+									return !$ast.some(expression.right, $ast.isThisField^^(name, ^))
+								}
+							}
 						}
-					}
-				}
-				NodeKind.CallExpression {
-					if constructor && data.callee.kind == NodeKind.Identifier {
-						if data.callee.name == 'this' || (extending && data.callee.name == 'super') {
-							for arg in data.arguments {
-								if arg.kind == NodeKind.Identifier && arg.name == name {
-									return true
+						NodeKind.CallExpression {
+							if constructor && expression.callee.kind == NodeKind.Identifier {
+								if expression.callee.name == 'this' || (extending && expression.callee.name == 'super') {
+									for arg in expression.arguments {
+										if arg.kind == NodeKind.Identifier && arg.name == name {
+											return true
+										}
+									}
 								}
 							}
 						}

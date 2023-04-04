@@ -107,7 +107,6 @@ var $statements = {
 	`\(NodeKind.BitmaskDeclaration)`			: BitmaskDeclaration
 	`\(NodeKind.BlockStatement)`				: BlockStatement
 	`\(NodeKind.BreakStatement)`				: BreakStatement
-	`\(NodeKind.CallExpression)`	 			: $callStatement
 	`\(NodeKind.ClassDeclaration)`				: ClassDeclaration
 	`\(NodeKind.ContinueStatement)`				: ContinueStatement
 	`\(NodeKind.DiscloseDeclaration)`			: DiscloseDeclaration
@@ -116,6 +115,14 @@ var $statements = {
 	`\(NodeKind.DropStatement)`					: DropStatement
 	`\(NodeKind.EnumDeclaration)`				: EnumDeclaration
 	`\(NodeKind.ExportDeclaration)`				: ExportDeclaration
+	`\(NodeKind.ExpressionStatement)`			: func(data, parent, scope) {
+		if data.expression.kind == NodeKind.CallExpression {
+			return $callStatement(data, parent, scope)
+		}
+		else {
+			return new ExpressionStatement(data, parent, scope)
+		}
+	}
 	`\(NodeKind.ExternDeclaration)`				: ExternDeclaration
 	`\(NodeKind.ExternOrImportDeclaration)`		: ExternOrImportDeclaration
 	`\(NodeKind.ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
@@ -150,7 +157,6 @@ var $statements = {
 	`\(NodeKind.VariableStatement)`				: VariableStatement
 	`\(NodeKind.WhileStatement)`				: WhileStatement
 	`\(NodeKind.WithStatement)`					: WithStatement
-	`default`									: ExpressionStatement
 }
 
 var $polyadicOperators = {

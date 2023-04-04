@@ -217,19 +217,26 @@ class ClassConstructorDeclaration extends Statement {
 		if extendsType.matchArguments([], this) {
 			if extendsType.hasConstructors() || extendsType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind.CallExpression
+					kind: NodeKind.ExpressionStatement
 					attributes: []
 					modifiers: []
-					scope: {
-						kind: ScopeKind.This
-					}
-					callee: {
-						kind: NodeKind.Identifier
-						name: 'super'
+					expression: {
+						kind: NodeKind.CallExpression
+						attributes: []
+						modifiers: []
+						scope: {
+							kind: ScopeKind.This
+						}
+						callee: {
+							kind: NodeKind.Identifier
+							name: 'super'
+							start: @data.start
+							end: @data.start
+						}
+						arguments: []
 						start: @data.start
 						end: @data.start
 					}
-					arguments: []
 					start: @data.start
 					end: @data.start
 				})
@@ -267,9 +274,13 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	private getConstructorIndex(body: Array) { # {{{
 		for statement, index in body {
-			if statement.kind == NodeKind.CallExpression {
-				if statement.callee.kind == NodeKind.Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
-					return index
+			if statement.kind == NodeKind.ExpressionStatement {
+				var expression = statement.expression
+
+				if expression.kind == NodeKind.CallExpression {
+					if expression.callee.kind == NodeKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super') {
+						return index
+					}
 				}
 			}
 			else if statement.kind == NodeKind.IfStatement {
@@ -286,9 +297,13 @@ class ClassConstructorDeclaration extends Statement {
 	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { # {{{
 		for statement, index in body {
-			if statement.kind == NodeKind.CallExpression {
-				if statement.callee.kind == NodeKind.Identifier && statement.callee.name == 'super' {
-					return index
+			if statement.kind == NodeKind.ExpressionStatement {
+				var expression = statement.expression
+
+				if expression.kind == NodeKind.CallExpression {
+					if expression.callee.kind == NodeKind.Identifier && expression.callee.name == 'super' {
+						return index
+					}
 				}
 			}
 			else if statement.kind == NodeKind.IfStatement {
