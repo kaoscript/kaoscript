@@ -4,6 +4,7 @@ class ObjectBinding extends Expression {
 		@elements: ObjectBindingElement[]	= []
 		@flatten: Boolean					= false
 		@immutable: Boolean					= false
+		@rest: Boolean						= false
 		@reuseName: String?
 		@tested: Boolean					= false
 		@testType: Type
@@ -23,6 +24,8 @@ class ObjectBinding extends Expression {
 			}
 
 			@elements.push(element)
+
+			@rest ||= element.isRest()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -112,7 +115,7 @@ class ObjectBinding extends Expression {
 				if element.isRest() {
 					@testType.setRestType(type)
 				}
-				else if element.isRequired() && !(type.isAny() && type.isNullable()) {
+				else if @rest || (element.isRequired() && !(type.isAny() && type.isNullable())) {
 					@testType.addProperty(element.name(), element.hasComputedKey(), type)
 				}
 			}

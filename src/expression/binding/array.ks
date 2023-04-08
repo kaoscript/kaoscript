@@ -5,6 +5,7 @@ class ArrayBinding extends Expression {
 		@firstAnonymous: Number?			= null
 		@flatten: Boolean					= false
 		@immutable: Boolean					= false
+		@rest: Boolean						= false
 		@reuseName: String?
 		@tested: Boolean					= false
 		@testType: Type
@@ -26,6 +27,8 @@ class ArrayBinding extends Expression {
 			}
 
 			@elements.push(element)
+
+			@rest ||= element.isRest()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -97,6 +100,7 @@ class ArrayBinding extends Expression {
 		}
 
 		var mut untested = false
+		var mut min = 0
 
 		if @assignment == .Parameter {
 			for var element in @elements {
@@ -105,10 +109,13 @@ class ArrayBinding extends Expression {
 				}
 				else {
 					@testType.addProperty(element.getExternalType())
-				}
 
-				if element.hasDefaultValue() && !element.isRequired() {
-					untested = true
+					if element.hasDefaultValue() && !element.isRequired() {
+						untested = true
+					}
+					else {
+						min += 1
+					}
 				}
 			}
 		}
@@ -122,6 +129,10 @@ class ArrayBinding extends Expression {
 					if !type.isAny() || !type.isNullable() {
 						@flatten = true
 					}
+
+					if @rest {
+						@testType.addProperty(type)
+					}
 				}
 				else if element.isRest() {
 					@testType.setRestType(type)
@@ -134,12 +145,14 @@ class ArrayBinding extends Expression {
 					}
 
 					@testType.addProperty(type)
+
+					min += 1
 				}
 			}
 		}
 
 		if untested {
-			@testType.unflagFullTest()
+			@testType.unflagFullTest(min)
 		}
 
 		if @statement() is ExpressionStatement | VariableStatement {
@@ -505,6 +518,13 @@ class ArrayBindingElement extends Expression {
 
 		if @name is ArrayBinding {
 			@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
+		}
+		else if @rest {
+			fragments
+				.compile(@name)
+				.code($equals)
+				.wrap(value)
+				.code(`.slice(\(@index))`)
 		}
 		else if @hasDefaultValue {
 			fragments

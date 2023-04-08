@@ -4,6 +4,7 @@ class ArrayType extends Type {
 		@fullTest: Boolean				= true
 		@length: Number					= 0
 		@nullable: Boolean				= false
+		@min: Number?					= null
 		@properties: Type[]				= []
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
@@ -561,7 +562,7 @@ class ArrayType extends Type {
 		}
 
 		if testingLength {
-			fragments.code(`, \(@length), 0`)
+			fragments.code(`, \(@min ?? @length), 0`)
 		}
 		else {
 			fragments.code(`, 0, 0`)
@@ -717,9 +718,9 @@ class ArrayType extends Type {
 			@restType.toVariations(variations)
 		}
 	} # }}}
-	unflagFullTest() { # {{{
+	unflagFullTest(@min) { # {{{
 		@fullTest = false
-		@testLength = false
+		@testLength = @min > 0
 	} # }}}
 	override unspecify() { # {{{
 		var type = @scope.reference('Array')
