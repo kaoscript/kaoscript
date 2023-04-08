@@ -941,7 +941,7 @@ namespace Matching {
 		} # }}}
 
 		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
-			// echo('branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise)
+			// echo('-- branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise)
 			if cursor.spread && context.mode == .AllMatches  {
 				if var result ?= matchArguments(branch, context.arguments, cursor, new Matches(
 						precise: argMatches.precise
@@ -1048,7 +1048,7 @@ namespace Matching {
 
 		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
 			if !leaf.function.isAsync() {
-				// echo('leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches)
+				// echo('-- leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches)
 				if cursor.spread && context.mode == .AllMatches  {
 					var result = matchArguments(leaf, context.arguments, cursor, new Matches(
 						precise: argMatches.precise
@@ -1071,6 +1071,7 @@ namespace Matching {
 				}
 				else {
 					if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context) {
+						// echo(null)
 						return false
 					}
 				}

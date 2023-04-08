@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(pair) {
-		if(Type.isDexArray(pair, 1, 2, 2, Type.isValue) && (([x, y]) => x === y)(pair)) {
+		if(Type.isDexArray(pair, 1, 2, 0, Type.isValue) && (([x, y]) => x === y)(pair)) {
 			let [x, y] = pair;
 			console.log("These are twins");
 		}

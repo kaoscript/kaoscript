@@ -7,6 +7,7 @@ class ArrayType extends Type {
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		@testLength: Boolean			= false
 		@testProperties: Boolean		= false
 		@testRest: Boolean				= false
 	}
@@ -138,6 +139,9 @@ class ArrayType extends Type {
 		type._spread = true
 
 		return type
+	} # }}}
+	flagTestLength() { # {{{
+		@testLength = true
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
 		if index >= @length {
@@ -536,8 +540,8 @@ class ArrayType extends Type {
 	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
 
-		if @testRest || @testProperties {
-			@toSubtestFragments(testingType, false, fragments, node)
+		if @testRest || @testProperties || @testLength {
+			@toSubtestFragments(testingType, @testLength, fragments, node)
 		}
 
 		fragments.code(')')
@@ -559,7 +563,7 @@ class ArrayType extends Type {
 		}
 
 		if testingLength {
-			fragments.code(`, \(@length), \(@length)`)
+			fragments.code(`, \(@length), 0`)
 		}
 
 		if @testRest || @testProperties {

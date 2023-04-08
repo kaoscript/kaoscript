@@ -9,9 +9,12 @@ class TempReusableExpression extends Expression {
 	analyse()
 	override prepare(target, targetMode)
 	translate()
-	isComputed() => @count == 0 && @value.isComposite()
+	isComputed() => @count == 0 && @value is not String && @value.isComposite()
 	toFragments(fragments, mode) { # {{{
-		if @count == 0 && @value.isComposite() {
+		if @value is String {
+			fragments.code(@value)
+		}
+		else if @count == 0 && @value.isComposite() {
 			fragments.compileReusable(@value)
 		}
 		else {

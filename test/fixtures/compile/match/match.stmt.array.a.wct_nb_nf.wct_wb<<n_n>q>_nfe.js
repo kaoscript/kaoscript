@@ -23,7 +23,7 @@ module.exports = function() {
 		}
 		if(Type.isNumber(value)) {
 		}
-		else if(Type.isArray(value) && Type.isDexArray(value, 0, 1, 1, value => Type.isStructInstance(value, Foobar))) {
+		else if(Type.isArray(value) && Type.isDexArray(value, 0, 1, 0, value => Type.isStructInstance(value, Foobar))) {
 			let [{argument, from}] = value;
 		}
 	};

@@ -11,8 +11,6 @@ class ObjectBinding extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@flatten = @options.format.destructuring == 'es5'
-
 		for var data in @data.elements {
 			var element = @newElement(data)
 
@@ -214,7 +212,7 @@ class ObjectBinding extends Expression {
 	} # }}}
 	toAssignmentFragments(fragments, mut value? = null) { # {{{
 		if @flatten {
-			@toFlatFragments(fragments, @value ?? value)
+			@toFlatFragments(fragments, @reuseName ?? @value ?? value)
 		}
 		else {
 			fragments.code('(') unless @assignment == .Declaration

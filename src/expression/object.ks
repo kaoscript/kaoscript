@@ -142,6 +142,7 @@ class ObjectExpression extends Expression {
 			}
 			else {
 				var type = target.isReference() ? target.parameter() : AnyType.NullableUnexplicit
+				var rest: Type[] = []
 
 				for var property in @properties {
 					property.prepare(type)
@@ -149,6 +150,16 @@ class ObjectExpression extends Expression {
 					if property is ObjectLiteralMember {
 						@type.addProperty(property.name(), property.type())
 					}
+					else if property is ObjectSpreadMember {
+						rest.push(property.type())
+					}
+					else if property is ObjectThisMember {
+						@type.addProperty(property.name(), property.type())
+					}
+				}
+
+				if #rest {
+					@type.setRestType(Type.union(@scope, ...rest))
 				}
 			}
 		}

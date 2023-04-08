@@ -9,6 +9,7 @@ build:
 	cp lib/compiler.js ../compiler-bin-js-es6
 	cp lib/compiler.js ../../ZokugunKS/lang/node_modules/kaoscript/lib/compiler.js
 	cp lib/compiler.js ../highlight-tmlanguage/node_modules/kaoscript/lib/compiler.js
+	cp lib/compiler.js ../kaoscript-new/lib/compiler.old.js
 
 cls:
 	printf '\033[2J\033[3J\033[1;1H'
@@ -103,8 +104,7 @@ dev:
 	@# tests
 	@# node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
-	@# node test/compile.dev.js "compile struct.create.obj.ret.wvar"
-	@# node test/compile.dev.js "compile router.call.func.o§f#be.o§f%be"
+	@# node test/compile.dev.js "compile template.ml.newline"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

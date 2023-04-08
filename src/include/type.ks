@@ -315,7 +315,15 @@ abstract class Type {
 					}
 
 					if ?data.rest {
-						type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
+						if ?data.rest.type {
+							type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
+						}
+						else if data.modifiers.some(({ kind }) => kind == ModifierKind.Nullable) {
+							type.setRestType(AnyType.NullableUnexplicit)
+						}
+						else {
+							type.setRestType(AnyType.Unexplicit)
+						}
 					}
 
 					return type.flagComplete()

@@ -1,0 +1,1 @@
+SyntaxException: A parameter's default value must be "null" when its type is "required" and "nullable" (fixtures/compile/destruct/destruct.object.decl.vv.§v_wtn_wdi.%fe.ks:3)

@@ -665,13 +665,13 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 		}
 		else if value is ObjectType {
 			return false unless @isBroadObject()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			return this.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -852,7 +852,7 @@ class ReferenceType extends Type {
 		if @isAlias() {
 			var unalias = @discardAlias()
 
-			return unalias.isSubsetOf(value, mode)
+			return unalias.isSubsetOf(value, mode + MatchingMode.Reference)
 		}
 
 		return true

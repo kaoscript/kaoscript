@@ -12,8 +12,6 @@ class ArrayBinding extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@flatten = @options.format.destructuring == 'es5'
-
 		for var data, index in @data.elements {
 			var element = @newElement(data)
 
@@ -23,7 +21,7 @@ class ArrayBinding extends Expression {
 
 			element.analyse()
 
-			if element.isThisAliasing() && @assignment != AssignmentType.Parameter {
+			if element.hasDefaultValue() || (element.isThisAliasing() && @assignment != AssignmentType.Parameter) {
 				@flatten = true
 			}
 
@@ -104,6 +102,10 @@ class ArrayBinding extends Expression {
 			}
 			else {
 				@testType.addProperty(element.getExternalType())
+
+				if element.isRequired() {
+					@testType.flagTestLength()
+				}
 			}
 		}
 
@@ -220,7 +222,7 @@ class ArrayBinding extends Expression {
 	} # }}}
 	toAssignmentFragments(fragments, mut value? = null) { # {{{
 		if @flatten {
-			@toFlatFragments(fragments, @value ?? value)
+			@toFlatFragments(fragments, @reuseName ?? @value ?? value)
 		}
 		else {
 			fragments.code('(') unless @assignment == .Declaration
@@ -304,6 +306,9 @@ class ArrayBindingElement extends Expression {
 				ModifierKind.Nullable {
 					@nullable = true
 					@type = AnyType.NullableUnexplicit
+				}
+				ModifierKind.Required {
+					@explicitlyRequired = true
 				}
 				ModifierKind.Rest {
 					@rest = true
@@ -411,6 +416,7 @@ class ArrayBindingElement extends Expression {
 			return @type
 		}
 	} # }}}
+	hasDefaultValue() => @hasDefaultValue
 	index() => @index
 	index(@index) => this
 	initializeVariables(type: Type, node: Expression) { # {{{
@@ -422,6 +428,7 @@ class ArrayBindingElement extends Expression {
 	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
 	isAnonymous() => !@named
 	isRedeclared() => @named ? @name.isRedeclared() : false
+	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue || @nullable)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
 	listAssignments(array: Array, immutable: Boolean? = null) => @named ? @name.listAssignments(array, @immutable) : array

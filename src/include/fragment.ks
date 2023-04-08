@@ -217,7 +217,10 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} # }}}
 	wrap(node, mode = Mode.None) { # {{{
-		if node.isComputed() {
+		if node is Primitive {
+			@writer.push(@writer.newFragment(node))
+		}
+		else if node.isComputed() {
 			@code('(')
 
 			node.toFragments(this, mode)
@@ -231,7 +234,10 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} # }}}
 	wrapCondition(node, mode = Mode.None, junction = Junction.NONE) { # {{{
-		if node.isBooleanComputed(junction) {
+		if node is Primitive {
+			@writer.push(@writer.newFragment(node))
+		}
+		else if node.isBooleanComputed(junction) {
 			@code('(')
 
 			node.toConditionFragments(this, mode, Junction.NONE)
@@ -245,7 +251,10 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} # }}}
 	wrapNullable(node) { # {{{
-		if node.isNullableComputed() {
+		if node is Primitive {
+			@writer.push(@writer.newFragment(node))
+		}
+		else if node.isNullableComputed() {
 			@code('(')
 
 			node.toNullableFragments(this)
