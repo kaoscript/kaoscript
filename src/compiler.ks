@@ -33,7 +33,7 @@ include {
 	'./include/node'
 	'./include/astmap'
 
-	'./std/index'
+	'../registry/std/index'
 }
 
 export class Compiler {
