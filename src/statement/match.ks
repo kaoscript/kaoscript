@@ -437,9 +437,34 @@ class MatchStatement extends Statement {
 		if var data ?= @tests[hash]; ?data.tests {
 			return data.tests
 		}
-		else {
-			return null
+
+		if testingType {
+			var hash1 = `$Array,true,\(JSON.stringify(minmax ?? '')),`
+			var hash2 = `$Array,false,\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
+
+			if ?@tests[hash1]?.tests && ?@tests[hash2]?.tests {
+				var tests = [...@tests[hash1].tests, ...@tests[hash2].tests]
+
+				@tests[hash] ??= {}
+				@tests[hash].tests = tests
+
+				return tests
+			}
 		}
+		else {
+			var hash1 = `$Array,true,\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
+
+			if var data ?= @tests[hash1]; ?data.tests {
+				var tests = data.tests
+
+				@tests[hash] ??= {}
+				@tests[hash].tests = tests
+
+				return tests
+			}
+		}
+
+		return null
 	} # }}}
 	getObjectTests(testingType: Boolean, type: Type?) { # {{{
 		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
@@ -783,7 +808,7 @@ class MatchBindingArray extends AbstractNode {
 		@testingProperties = @binding.type().isTestingProperties()
 
 		if @testingType || @testingLength || @testingProperties {
-			@parent.addArrayTest(@testingType, @testingLength ? @minmax : null, @testingProperties ? @binding.type() : null)
+			@parent.addArrayTest(@testingType, @minmax, @testingProperties ? @binding.type() : null)
 		}
 	} # }}}
 	translate() { # {{{
@@ -810,7 +835,7 @@ class MatchBindingArray extends AbstractNode {
 		var { min, max } = @minmax
 		var type = @binding.type()
 
-		if var tests ?= @parent.getArrayTests(@testingType, @testingLength ? @minmax : null, @testingProperties ? @binding.type() : null) {
+		if var tests ?= @parent.getArrayTests(@testingType, @minmax, @testingProperties ? @binding.type() : null) {
 			if junction == Junction.AND {
 				for var test in tests {
 					fragments.code(` && \(test)()`)
@@ -827,7 +852,7 @@ class MatchBindingArray extends AbstractNode {
 		else if @testingLength || @testingType || @testingProperties {
 			fragments.code(' && ') if junction == Junction.AND
 
-			type.toTestFragments(name, @testingType, @testingLength, fragments, this)
+			type.toTestFragments(name, @testingType, true, fragments, this)
 		}
 	} # }}}
 	unflagLengthTesting() { # {{{

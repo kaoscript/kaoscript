@@ -713,7 +713,10 @@ class ObjectType extends Type {
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
-			if !@destructuring {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
 				fragments.code($runtime.type(node), '.isObject')
 			}
 		}

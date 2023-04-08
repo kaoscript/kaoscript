@@ -1,6 +1,6 @@
 class ArrayBinding extends Expression {
 	private late {
-		@assignment: AssignmentType			= AssignmentType.Neither
+		@assignment: AssignmentType			= .Neither
 		@elements: ArrayBindingElement[]	= []
 		@firstAnonymous: Number?			= null
 		@flatten: Boolean					= false
@@ -96,17 +96,50 @@ class ArrayBinding extends Expression {
 			}
 		}
 
-		for var element in @elements {
-			if element.isRest() {
-				@testType.setRestType(element.getExternalType())
-			}
-			else {
-				@testType.addProperty(element.getExternalType())
+		var mut untested = false
 
-				if element.isRequired() {
-					@testType.flagTestLength()
+		if @assignment == .Parameter {
+			for var element in @elements {
+				if element.isRest() {
+					@testType.setRestType(element.getExternalType())
+				}
+				else {
+					@testType.addProperty(element.getExternalType())
+				}
+
+				if element.hasDefaultValue() && !element.isRequired() {
+					untested = true
 				}
 			}
+		}
+		else {
+			for var element in @elements {
+				var type = element.getExternalType()
+
+				if element.hasDefaultValue() && !element.isRequired() {
+					untested = true
+
+					if !type.isAny() || !type.isNullable() {
+						@flatten = true
+					}
+				}
+				else if element.isRest() {
+					@testType.setRestType(type)
+
+					untested = true
+				}
+				else {
+					if untested {
+						SyntaxException.throwUnsupportedDestructuringArray(this)
+					}
+
+					@testType.addProperty(type)
+				}
+			}
+		}
+
+		if untested {
+			@testType.unflagFullTest()
 		}
 
 		if @statement() is ExpressionStatement | VariableStatement {
@@ -236,7 +269,7 @@ class ArrayBinding extends Expression {
 		}
 	} # }}}
 	toBeforehandFragments(fragments, mode) { # {{{
-		if @value.isComposite() {
+		if ?@reuseName {
 			fragments.newLine().code(`\($runtime.scope(this)) \(@reuseName) = `).compile(@value).done()
 		}
 
@@ -428,7 +461,7 @@ class ArrayBindingElement extends Expression {
 	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
 	isAnonymous() => !@named
 	isRedeclared() => @named ? @name.isRedeclared() : false
-	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue || @nullable)
+	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
 	listAssignments(array: Array, immutable: Boolean? = null) => @named ? @name.listAssignments(array, @immutable) : array
@@ -494,6 +527,12 @@ class ArrayBindingElement extends Expression {
 				.code($comma)
 				.code('() => ')
 				.compile(@defaultValue)
+
+			if @assignment != .Parameter && !@isRequired() && !(@type.isAny() && @type.isNullable()) {
+				fragments.code($comma)
+
+				@type.setNullable(false).toTestFunctionFragments(fragments, this)
+			}
 
 			fragments.code(')')
 		}

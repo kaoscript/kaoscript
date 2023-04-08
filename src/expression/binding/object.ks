@@ -1,6 +1,6 @@
 class ObjectBinding extends Expression {
 	private late {
-		@assignment: AssignmentType			= AssignmentType.Neither
+		@assignment: AssignmentType			= .Neither
 		@elements: ObjectBindingElement[]	= []
 		@flatten: Boolean					= false
 		@immutable: Boolean					= false
@@ -95,12 +95,26 @@ class ObjectBinding extends Expression {
 			}
 		}
 
-		for var element in @elements {
-			if element.isRest() {
-				@testType.setRestType(element.getExternalType())
+		if @assignment == .Parameter {
+			for var element in @elements {
+				if element.isRest() {
+					@testType.setRestType(element.getExternalType())
+				}
+				else {
+					@testType.addProperty(element.name(), element.hasComputedKey(), element.getExternalType())
+				}
 			}
-			else {
-				@testType.addProperty(element.name(), element.hasComputedKey(), element.getExternalType())
+		}
+		else {
+			for var element in @elements {
+				var type = element.getExternalType()
+
+				if element.isRest() {
+					@testType.setRestType(type)
+				}
+				else if element.isRequired() && !(type.isAny() && type.isNullable()) {
+					@testType.addProperty(element.name(), element.hasComputedKey(), type)
+				}
 			}
 		}
 
@@ -280,7 +294,7 @@ class ObjectBinding extends Expression {
 
 class ObjectBindingElement extends Expression {
 	private late {
-		@assignment: AssignmentType			= AssignmentType.Neither
+		@assignment: AssignmentType			= .Neither
 		@computed: Boolean					= false
 		@defaultValue						= null
 		@explicitlyNonNullable: Boolean		= false
@@ -291,7 +305,7 @@ class ObjectBindingElement extends Expression {
 		@internal: Expression
 		@named: Boolean						= true
 		@nullable: Boolean					= false
-		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
+		@operator: AssignmentOperatorKind	= .Equals
 		@rest: Boolean						= false
 		@sameName: Boolean					= false
 		@thisAlias: Boolean					= false
@@ -453,7 +467,7 @@ class ObjectBindingElement extends Expression {
 	isAnonymous() => !@named
 	isDeclararingVariable(name: String) => @internal?.isDeclararingVariable(name)
 	isRedeclared() => @internal?.isRedeclared()
-	isRequired() => @explicitlyRequired || !(@computed || @rest || @hasDefaultValue || @nullable)
+	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
 	listAssignments(array: Array, immutable: Boolean? = null) => @internal?.listAssignments(array, @immutable) ?? array
@@ -543,6 +557,12 @@ class ObjectBindingElement extends Expression {
 				.code($comma)
 				.code('() => ')
 				.compile(@defaultValue)
+
+			if @assignment != .Parameter && !@isRequired() && !@type.isAny() {
+				fragments.code($comma)
+
+				@type.setNullable(false).toTestFunctionFragments(fragments, this)
+			}
 
 			fragments.code(')')
 		}

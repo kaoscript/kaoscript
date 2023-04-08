@@ -618,9 +618,6 @@ func $callExpression(data, parent, scope) { # {{{
 
 						return expression
 					}
-					// if result.body.length == 1 {
-					// 	return $compile.expression(result.body[0], parent)
-					// }
 					else {
 						throw new NotImplementedException(parent)
 					}

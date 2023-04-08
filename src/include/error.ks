@@ -742,6 +742,9 @@ export class SyntaxException extends Exception {
 		throwUnreportedError(name, node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`An error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
 		} # }}}
+		throwUnsupportedDestructuringArray(node): Never ~ SyntaxException { # {{{
+			throw new SyntaxException(`An optional element must be last in a destructuring array.`, node)
+		} # }}}
 		throwUnsupportedDestructuringAssignment(node): Never ~ SyntaxException { # {{{
 			throw new SyntaxException(`The current destructuring assignment is unsupported`, node)
 		} # }}}

@@ -24,7 +24,7 @@ module.exports = function() {
 		__ks_func_foobar_0() {
 			let __ks_3;
 			for(let __ks_2 = quxbaz.__ks_0(), __ks_1 = 0, __ks_0 = __ks_2.length, name, flag; __ks_1 < __ks_0; ++__ks_1) {
-				Helper.assertDexObject(__ks_2[__ks_1], 1, 0, {name: Type.isValue, flag: () => true});
+				Helper.assertDexObject(__ks_2[__ks_1], 1, 0, {name: Type.isValue});
 				name = (__ks_3 = __ks_2[__ks_1]).name, flag = Helper.default(__ks_3.flag, 1, () => this._flag);
 			}
 		}

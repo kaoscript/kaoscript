@@ -1573,12 +1573,12 @@ class ArrayBindingParameter extends ArrayBinding {
 	} # }}}
 	toValidationFragments(fragments, rest, value?, header, async) { # {{{
 		if @flatten {
-			var ctrl = fragments
-				.newControl()
-				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
-				.step()
+			if ?value {
+				var ctrl = fragments
+					.newControl()
+					.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
+					.step()
 
-			if value != null {
 				if @operator == AssignmentOperatorKind.EmptyCoalescing {
 					if value.isComposite() {
 						ctrl
@@ -1606,9 +1606,9 @@ class ArrayBindingParameter extends ArrayBinding {
 				else {
 					ctrl.newLine().compile(@tempName).code($equals).compile(value).done()
 				}
-			}
 
-			ctrl.done()
+				ctrl.done()
+			}
 
 			var line = fragments.newLine().code($runtime.scope(this))
 

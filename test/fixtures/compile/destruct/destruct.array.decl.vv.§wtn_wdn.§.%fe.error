@@ -1,0 +1,1 @@
+SyntaxException: An optional element must be last in a destructuring array. (fixtures/compile/destruct/destruct.array.decl.vv.§wtn_wdn.§.%fe.ks:3)

@@ -1,13 +1,14 @@
 class ArrayType extends Type {
 	private {
 		@destructuring: Boolean			= false
+		@fullTest: Boolean				= true
 		@length: Number					= 0
 		@nullable: Boolean				= false
 		@properties: Type[]				= []
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
-		@testLength: Boolean			= false
+		@testLength: Boolean			= true
 		@testProperties: Boolean		= false
 		@testRest: Boolean				= false
 	}
@@ -139,9 +140,6 @@ class ArrayType extends Type {
 		type._spread = true
 
 		return type
-	} # }}}
-	flagTestLength() { # {{{
-		@testLength = true
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
 		if index >= @length {
@@ -565,6 +563,9 @@ class ArrayType extends Type {
 		if testingLength {
 			fragments.code(`, \(@length), 0`)
 		}
+		else {
+			fragments.code(`, 0, 0`)
+		}
 
 		if @testRest || @testProperties {
 			fragments.code($comma)
@@ -572,17 +573,15 @@ class ArrayType extends Type {
 			var literal = new Literal(false, node, node.scope(), 'value')
 
 			if @testProperties {
-				if !testingLength {
-					fragments.code(`\(@length), 0, `)
-				}
-
 				if @testRest {
-					var mut onlyRest = true
+					var mut onlyRest = @fullTest
 
-					for var type in @properties {
-						if type != @restType {
-							onlyRest = false
-							break
+					if onlyRest {
+						for var type in @properties {
+							if type != @restType {
+								onlyRest = false
+								break
+							}
 						}
 					}
 
@@ -608,13 +607,15 @@ class ArrayType extends Type {
 					}
 				}
 				else {
-					var mut onlyRest = true
+					var mut onlyRest = @fullTest
 					var baseType = @properties[0]
 
-					for var type in @properties from 1 {
-						if type != baseType {
-							onlyRest = false
-							break
+					if onlyRest {
+						for var type in @properties from 1 {
+							if type != baseType {
+								onlyRest = false
+								break
+							}
 						}
 					}
 
@@ -642,10 +643,6 @@ class ArrayType extends Type {
 				}
 			}
 			else {
-				if !testingLength {
-					fragments.code(`0, 0, `)
-				}
-
 				@restType.toTestFunctionFragments(fragments, literal)
 			}
 		}
@@ -674,7 +671,10 @@ class ArrayType extends Type {
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
-			if !@destructuring {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexArray')
+			}
+			else {
 				fragments.code($runtime.type(node), '.isArray')
 			}
 		}
@@ -696,14 +696,14 @@ class ArrayType extends Type {
 		if @nullable {
 			fragments.code('(') if junction == Junction.AND
 
-			@toTestFragments('value', true, false, fragments, node)
+			@toTestFragments('value', true, @testLength, fragments, node)
 
 			fragments.code(` || \($runtime.type(node)).isNull(value)`)
 
 			fragments.code(')') if junction == Junction.AND
 		}
 		else {
-			@toTestFragments('value', true, false, fragments, node)
+			@toTestFragments('value', true, @testLength, fragments, node)
 		}
 	} # }}}
 	override toVariations(variations) { # {{{
@@ -716,6 +716,10 @@ class ArrayType extends Type {
 		if @rest {
 			@restType.toVariations(variations)
 		}
+	} # }}}
+	unflagFullTest() { # {{{
+		@fullTest = false
+		@testLength = false
 	} # }}}
 	override unspecify() { # {{{
 		var type = @scope.reference('Array')
