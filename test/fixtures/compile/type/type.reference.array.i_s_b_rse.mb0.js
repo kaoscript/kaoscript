@@ -7,7 +7,7 @@ module.exports = function() {
 		const x = values[0];
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexArray(value, 2, 3, 0, Type.isString, [Type.isNumber, Type.isString, Type.isBoolean]);
+		const t0 = value => Type.isDexArray(value, 1, 3, 0, Type.isString, [Type.isNumber, Type.isString, Type.isBoolean]);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

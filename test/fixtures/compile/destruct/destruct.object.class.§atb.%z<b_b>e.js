@@ -17,7 +17,7 @@ module.exports = function() {
 			this._x = data.x;
 		}
 		__ks_cons_rt(that, args) {
-			const t0 = value => Type.isDexObject(value, 2, 0, {x: Type.isBoolean, y: Type.isBoolean});
+			const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isBoolean, y: Type.isBoolean});
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return Foobar.prototype.__ks_cons_0.call(that, args[0]);

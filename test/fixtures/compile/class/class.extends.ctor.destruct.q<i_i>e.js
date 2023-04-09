@@ -59,7 +59,7 @@ module.exports = function() {
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = value => Type.isString(value) || Type.isNull(value);
-			const t1 = value => Type.isDexObject(value, 2, 0, {line: Type.isNumber, column: Type.isNumber});
+			const t1 = value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber});
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length >= 1 && args.length <= 2) {

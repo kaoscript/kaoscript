@@ -126,6 +126,19 @@ class StructType extends Type {
 			return false
 		}
 	} # }}}
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+		if value is ObjectType {
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+
+			if anycast {
+				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
+			}
+
+			return @isSubsetOf(value, matchingMode)
+		}
+
+		return false
+	} # }}}
 	isExtending() => @extending
 	override isStruct() => true
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{

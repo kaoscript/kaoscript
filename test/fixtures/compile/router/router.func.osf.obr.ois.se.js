@@ -17,8 +17,8 @@ module.exports = function() {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isString;
-		const t1 = value => Type.isDexObject(value, 2, Type.isBoolean);
-		const t2 = value => Type.isDexObject(value, 2, Type.isNumber);
+		const t1 = value => Type.isDexObject(value, 1, Type.isBoolean);
+		const t2 = value => Type.isDexObject(value, 1, Type.isNumber);
 		const t3 = value => Type.isObject(value, Type.isString);
 		if(args.length === 1) {
 			if(t0(args[0])) {

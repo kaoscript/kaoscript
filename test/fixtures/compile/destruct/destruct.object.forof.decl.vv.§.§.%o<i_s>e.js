@@ -10,7 +10,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 2, value => Type.isDexObject(value, 2, 0, {line: Type.isNumber, element: Type.isString}));
+		const t0 = value => Type.isDexObject(value, 1, value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, element: Type.isString}));
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

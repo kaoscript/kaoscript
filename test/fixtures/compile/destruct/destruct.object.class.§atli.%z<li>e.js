@@ -25,7 +25,7 @@ module.exports = function() {
 			this._positions = data.positions;
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = value => Type.isDexObject(value, 2, 0, {positions: value => Type.isArray(value, Type.isNumber)});
+			const t0 = value => Type.isDexObject(value, 1, 0, {positions: value => Type.isArray(value, Type.isNumber)});
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_0.call(that, args[0]);

@@ -8,7 +8,7 @@ module.exports = function() {
 		return _;
 	}, function(__ks_new, args) {
 		const t0 = Type.isNumber;
-		const t1 = value => Type.isDexObject(value, 2, 0, {unit: Type.isString, value: Type.isNumber});
+		const t1 = value => Type.isDexObject(value, 1, 0, {unit: Type.isString, value: Type.isNumber});
 		if(args.length === 3) {
 			if(t0(args[0]) && t0(args[1]) && t1(args[2])) {
 				return __ks_new(args[0], args[1], args[2]);

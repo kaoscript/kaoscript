@@ -187,6 +187,14 @@ class NamedType extends Type {
 			if @name == 'Array' {
 				return true
 			}
+			else if @type.isTuple() {
+				return @type.isAssignableToVariable(value, anycast, nullcast, downcast)
+			}
+		}
+		else if value is ObjectType {
+			if @type.isClass() || @type.isStruct() {
+				return @type.isAssignableToVariable(value, anycast, nullcast, downcast)
+			}
 		}
 
 		return false

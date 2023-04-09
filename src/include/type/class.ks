@@ -1432,6 +1432,19 @@ class ClassType extends Type {
 	} # }}}
 	isAbstract() => @abstract
 	isAltering() => @altering
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+		if value is ObjectType {
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+
+			if anycast {
+				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
+			}
+
+			return @isSubsetOf(value, matchingMode)
+		}
+
+		return false
+	} # }}}
 	isAsyncInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name][0].isAsync()

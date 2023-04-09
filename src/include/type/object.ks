@@ -646,12 +646,7 @@ class ObjectType extends Type {
 	} # }}}
 	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
 		if testingType {
-			if @destructuring {
-				fragments.code(', 1')
-			}
-			else {
-				fragments.code(', 2')
-			}
+			fragments.code(', 1')
 		}
 		else {
 			fragments.code(', 0')

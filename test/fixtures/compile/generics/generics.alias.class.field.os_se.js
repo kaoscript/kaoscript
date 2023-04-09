@@ -17,7 +17,7 @@ module.exports = function() {
 			this._values = values;
 		}
 		__ks_cons_rt(that, args) {
-			const t0 = value => Type.isDexObject(value, 2, Type.isString);
+			const t0 = value => Type.isDexObject(value, 1, Type.isString);
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return Foobar.prototype.__ks_cons_0.call(that, args[0]);

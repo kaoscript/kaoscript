@@ -7,7 +7,7 @@ module.exports = function() {
 		(props[key] !== true) && (props[key] = value === true);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 2, value => Type.isBoolean(value) || Type.isString(value));
+		const t0 = value => Type.isDexObject(value, 1, value => Type.isBoolean(value) || Type.isString(value));
 		const t1 = Type.isString;
 		const t2 = value => Type.isBoolean(value) || Type.isString(value);
 		if(args.length === 3) {
