@@ -152,28 +152,41 @@ class DefaultCallee extends Callee {
 		}
 	} # }}}
 	toCurryFragments(fragments, mode, node) { # {{{
+		var arguments = @node.arguments()
+		var parameters = []
+
+		fragments.code('(')
+
+		for var argument in arguments {
+			if argument is PlaceholderArgument {
+				fragments.code($comma) if #parameters
+
+				var name = `__ks_\(parameters.length)`
+
+				fragments.code(name)
+				parameters.push(name)
+			}
+		}
+
+		fragments.code(') => ').compile(@expression)
+
 		match @scope {
 			ScopeKind.Argument {
-				throw new NotImplementedException()
-			}
-			ScopeKind.This {
-				var arguments = @node.arguments()
-				var parameters = []
+				fragments.code('.call(').compile(@node.getCallScope())
 
-				fragments.code('(')
+				for var argument, index in arguments {
+					fragments.code($comma)
 
-				for var argument in arguments {
 					if argument is PlaceholderArgument {
-						fragments.code($comma) if #parameters
-
-						var name = `__ks_\(parameters.length)`
-
-						fragments.code(name)
-						parameters.push(name)
+						fragments.code(parameters.shift())
+					}
+					else {
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
-
-				fragments.code(') => ').compile(@expression).code('(')
+			}
+			ScopeKind.This {
+				fragments.code('(')
 
 				for var argument, index in arguments {
 					fragments.code($comma) if index != 0
