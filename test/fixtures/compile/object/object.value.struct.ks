@@ -9,7 +9,7 @@ class Foobar {
 		@y: Number	= 0
 	}
 	position() => ({
-		start: new Position(
+		start: Position.new(
 			x: @x
 			y: @y
 		)
@@ -18,7 +18,7 @@ class Foobar {
 		x: @x
 		y: @y
 	})
-	position_struct() => new Position(
+	position_struct() => Position.new(
 		x: @x
 		y: @y
 	)

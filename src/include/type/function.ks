@@ -50,14 +50,14 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
 			if ?data.parameters {
-				return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
+				return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 			}
 			else {
-				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
+				return FunctionType.new([ParameterType.new(scope, Type.Any, 0, Infinity)], data, node)
 			}
 		} # }}}
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
-			var type = new FunctionType(scope)
+			var type = FunctionType.new(scope)
 
 			type._index = data.index ?? -1
 			type._async = data.async
@@ -165,7 +165,7 @@ class FunctionType extends Type {
 		@errors.pushUniq(...types)
 	} # }}}
 	addParameter(type: Type, name: String?, min, max) { # {{{
-		var parameter = new ParameterType(@scope, name, name, type, min, max)
+		var parameter = ParameterType.new(@scope, name, name, type, min, max)
 
 		parameter.index(@parameters.length)
 
@@ -201,7 +201,7 @@ class FunctionType extends Type {
 		@async = true
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
 		return -1
@@ -957,7 +957,7 @@ class OverloadedFunctionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { # {{{
-			var type = new OverloadedFunctionType(scope)
+			var type = OverloadedFunctionType.new(scope)
 
 			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
@@ -1023,7 +1023,7 @@ class OverloadedFunctionType extends Type {
 			@async = type.isAsync()
 		}
 
-		var fn = new FunctionType(@scope, 0)
+		var fn = FunctionType.new(@scope, 0)
 		fn.addParameter(AnyType.NullableExplicit, null, 0, Infinity)
 
 		fn._missingParameters = true
@@ -1040,7 +1040,7 @@ class OverloadedFunctionType extends Type {
 		return @assessment
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var functions = []
@@ -1180,10 +1180,10 @@ class OverloadedFunctionType extends Type {
 		@altering = true
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toQuote() { # {{{
 		return [function.toQuote() for var function in @functions].join('|')

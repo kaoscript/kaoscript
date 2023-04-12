@@ -5,4 +5,4 @@ class Foobar {
 	constructor(@values)
 }
 
-var foo = new Foobar([])
+var foo = Foobar.new([])

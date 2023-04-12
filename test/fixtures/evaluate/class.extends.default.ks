@@ -14,6 +14,6 @@ class Rectangle extends Shape {
 	draw(prefix: String): String => `\(prefix) I'm drawing a \(@color) rectangle.`
 }
 
-var dyn r = new Rectangle('black')
+var dyn r = Rectangle.new('black')
 
 expect(r.draw('Hello!')).to.equal(`Hello! I'm drawing a black rectangle.`)

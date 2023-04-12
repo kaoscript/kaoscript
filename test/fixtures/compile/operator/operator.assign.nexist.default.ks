@@ -8,7 +8,7 @@ func qux() ~ Error {
 	var dyn foo = () => 'otto'
 
 	if bar !?= foo() {
-		throw new Error()
+		throw Error.new()
 	}
 
 	console.log(foo, bar)

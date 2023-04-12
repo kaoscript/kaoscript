@@ -42,7 +42,7 @@ class LenientThisCallee extends Callee {
 		if @flatten {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					fragments.code(`\(name).\(@property).apply(\(name)`)
@@ -54,7 +54,7 @@ class LenientThisCallee extends Callee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					fragments.code(`\(name).\(@property)(`)
@@ -69,7 +69,7 @@ class LenientThisCallee extends Callee {
 		}
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

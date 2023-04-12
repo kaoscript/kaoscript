@@ -5,7 +5,7 @@ class Foobar {
 }
 
 func foobar(x, y) {
-	var f = new Foobar()
+	var f = Foobar.new()
 
 	f.foobar(x, y, options: {})
 }

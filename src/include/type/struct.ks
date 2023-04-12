@@ -1,7 +1,7 @@
 class StructType extends Type {
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): StructType { # {{{
-			var value = new StructType(scope)
+			var value = StructType.new(scope)
 
 			queue.push(() => {
 				var mut index = 0
@@ -75,7 +75,7 @@ class StructType extends Type {
 		if @function == null {
 			var scope = node.scope()
 
-			@function = new FunctionType(scope)
+			@function = FunctionType.new(scope)
 
 			for var field, index in @listAllFields([]) {
 				if field.isRequired() {
@@ -363,7 +363,7 @@ class StructType extends Type {
 						SyntaxException.throwMissingStructField(name, node)
 					}
 					else {
-						order.push(new Literal('null', node))
+						order.push(Literal.new('null', node))
 					}
 				}
 			}
@@ -418,7 +418,7 @@ class StructType extends Type {
 					countdown -= 1
 				}
 				else {
-					order[index] = new Literal('null', node)
+					order[index] = Literal.new('null', node)
 				}
 			}
 		}
@@ -446,7 +446,7 @@ class StructFieldType extends Type {
 		import(index: Number, name: String?, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
-			return new StructFieldType(scope, name, index, fieldType, data.required)
+			return StructFieldType.new(scope, name, index, fieldType, data.required)
 		} # }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { # {{{

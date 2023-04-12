@@ -17,7 +17,7 @@ class AnonymousFunctionExpression extends Expression {
 
 		@parameters = []
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
@@ -36,7 +36,7 @@ class AnonymousFunctionExpression extends Expression {
 				parameter.prepare()
 			}
 
-			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 
 			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
@@ -58,7 +58,7 @@ class AnonymousFunctionExpression extends Expression {
 				parameter.prepare(targetParameters[index])
 			}
 
-			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 			@type.setReturnType(target.getReturnType())
 
 			@block = $compile.function($ast.body(@data), this)
@@ -204,7 +204,7 @@ class ArrowFunctionExpression extends Expression {
 
 		@parameters = []
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
@@ -221,7 +221,7 @@ class ArrowFunctionExpression extends Expression {
 				parameter.prepare()
 			}
 
-			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 
 			@block.analyse()
 
@@ -242,7 +242,7 @@ class ArrowFunctionExpression extends Expression {
 				parameter.prepare(targetParameters[index].type())
 			}
 
-			@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 			@type.setReturnType(target.getReturnType())
 
 			@block.analyse()

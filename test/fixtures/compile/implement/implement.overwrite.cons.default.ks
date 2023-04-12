@@ -20,8 +20,8 @@ impl Date {
 	}
 }
 
-var d1 = new Date()
-var d2 = new Date(d1)
-var d3 = new Date(2000, 1, 1)
+var d1 = Date.new()
+var d2 = Date.new(d1)
+var d3 = Date.new(2000, 1, 1)
 
 export Date

@@ -245,7 +245,7 @@ class ForFromStatement extends Statement {
 
 					if @order == OrderKind.None {
 						if @step.value() == 0 {
-							throw new NotImplementedException()
+							throw NotImplementedException.new()
 						}
 						else if @step.value() < 0 {
 							@ascending = false
@@ -253,7 +253,7 @@ class ForFromStatement extends Statement {
 					}
 					else {
 						if @step.value() <= 0 {
-							throw new NotImplementedException()
+							throw NotImplementedException.new()
 						}
 					}
 				}
@@ -528,7 +528,7 @@ class ForFromStatement extends Statement {
 					}
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 
@@ -564,7 +564,7 @@ class ForFromStatement extends Statement {
 				}
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 

@@ -5,9 +5,9 @@ class Shape {
 	}
 
 	static {
-		makeCircle(color: string): Shape => new Shape('circle', color)
+		makeCircle(color: string): Shape => Shape.new('circle', color)
 
-		makeRectangle(color: string): Shape => new Shape('rectangle', color)
+		makeRectangle(color: string): Shape => Shape.new('rectangle', color)
 	}
 
 	constructor(@type, @color)

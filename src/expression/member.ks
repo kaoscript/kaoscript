@@ -199,7 +199,7 @@ class MemberExpression extends Expression {
 		if @object is IdentifierLiteral {
 			if var property ?= @object.type().getProperty(@property) {
 				if @object.type().isClass() && !@object.type().isReference() {
-					node.initializeVariable(new VariableBrief(
+					node.initializeVariable(VariableBrief.new(
 						name: @property
 						type
 						static: true
@@ -208,7 +208,7 @@ class MemberExpression extends Expression {
 					))
 				}
 				else if @object.name() == 'this' {
-					node.initializeVariable(new VariableBrief(
+					node.initializeVariable(VariableBrief.new(
 						name: @path.substring(5)
 						type
 						instance: true

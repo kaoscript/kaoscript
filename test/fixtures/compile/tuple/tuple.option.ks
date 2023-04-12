@@ -3,12 +3,12 @@ tuple Pair(
 	Number	= 0
 )
 
-var pair = new Pair()
+var pair = Pair.new()
 
-var pair2 = new Pair(null, 3.14)
+var pair2 = Pair.new(null, 3.14)
 
-var pair3 = new Pair('foobar')
+var pair3 = Pair.new('foobar')
 
-var pair4 = new Pair('foobar', null)
+var pair4 = Pair.new('foobar', null)
 
-var pair5 = new Pair(null, null)
+var pair5 = Pair.new(null, null)

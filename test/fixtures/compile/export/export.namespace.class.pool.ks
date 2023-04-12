@@ -21,7 +21,7 @@ var $available = []
 
 export func acquire(): NS.Foobar {
 	if $available.length == 0 {
-		return new NS.Foobar()
+		return NS.Foobar.new()
 	}
 	else {
 		return $available.pop()!!

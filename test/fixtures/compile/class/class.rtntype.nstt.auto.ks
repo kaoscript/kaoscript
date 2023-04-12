@@ -8,7 +8,7 @@ class Foobar {
 	value(@value): auto => this
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 console.log(`\(f.value('foobar').value())`)
 

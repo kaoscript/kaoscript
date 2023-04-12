@@ -1,7 +1,7 @@
 class Foobar {
 }
 
-var x = new Foobar()
+var x = Foobar.new()
 
 if x is Class {
 }

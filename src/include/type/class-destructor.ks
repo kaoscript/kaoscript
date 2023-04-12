@@ -13,7 +13,7 @@ class ClassDestructorType extends FunctionType {
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind.Async {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			else if modifier.kind == ModifierKind.Private {
 				@access = Accessibility.Private

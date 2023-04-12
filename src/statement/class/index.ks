@@ -97,14 +97,14 @@ class ClassDeclaration extends Statement {
 	static toWrongDoingFragments(block, ctrl?, argName, async, returns) { # {{{
 		if ctrl == null {
 			if async {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			else {
 				block
 					.newControl()
 					.code(`if(\(argName).length !== 0)`)
 					.step()
-					.line('throw new SyntaxError("Wrong number of arguments")')
+					.line('throw SyntaxError.new("Wrong number of arguments")')
 					.done()
 			}
 		}
@@ -112,7 +112,7 @@ class ClassDeclaration extends Statement {
 			if async {
 				ctrl.step().code('else').step()
 
-				ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("Wrong number of arguments")`)
+				ctrl.line(`let __ks_cb, __ks_error = SyntaxError.new("Wrong number of arguments")`)
 
 				ctrl
 					.newControl()
@@ -130,10 +130,10 @@ class ClassDeclaration extends Statement {
 			else if returns {
 				ctrl.done()
 
-				block.line('throw new SyntaxError("Wrong number of arguments")')
+				block.line('throw SyntaxError.new("Wrong number of arguments")')
 			}
 			else {
-				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
+				ctrl.step().code('else').step().line('throw SyntaxError.new("Wrong number of arguments")').done()
 			}
 		}
 	} # }}}
@@ -147,14 +147,14 @@ class ClassDeclaration extends Statement {
 	} # }}}
 	initiate() { # {{{
 		@name = @data.name.name
-		@class = new ClassType(@scope)
-		@type = new NamedType(@name, @class)
+		@class = ClassType.new(@scope)
+		@type = NamedType.new(@name, @class)
 
 		@variable = @scope.define(@name, true, @type, this)
 
 		for var data in @data.members when data.kind == NodeKind.MacroDeclaration {
 			var name = data.name.name
-			var declaration = new MacroDeclaration(data, this, null)
+			var declaration = MacroDeclaration.new(data, this, null)
 
 			if @macros[name] is Array {
 				@macros[name].push(declaration)
@@ -169,7 +169,7 @@ class ClassDeclaration extends Statement {
 	analyse() { # {{{
 		var mut thisVariable = @constructorScope.define('this', true, @scope.reference(@name), true, this)
 
-		thisVariable.replaceCall = (data, arguments, node) => new CallThisConstructorSubstitude(data, arguments, @type, this)
+		thisVariable.replaceCall = (data, arguments, node) => CallThisConstructorSubstitude.new(data, arguments, @type, this)
 
 		@destructorScope.define('this', true, @scope.reference(@name), true, this)
 		@destructorScope.rename('this', 'that')
@@ -214,7 +214,7 @@ class ClassDeclaration extends Statement {
 				NodeKind.CommentLine {
 				}
 				NodeKind.FieldDeclaration {
-					var declaration = new ClassVariableDeclaration(data, this)
+					var declaration = ClassVariableDeclaration.new(data, this)
 
 					declaration.analyse()
 
@@ -228,29 +228,29 @@ class ClassDeclaration extends Statement {
 					var late declaration
 
 					if @class.isConstructor(data.name.name) {
-						declaration = new ClassConstructorDeclaration(data, this)
+						declaration = ClassConstructorDeclaration.new(data, this)
 					}
 					else if @class.isDestructor(data.name.name) {
-						declaration = new ClassDestructorDeclaration(data, this)
+						declaration = ClassDestructorDeclaration.new(data, this)
 					}
 					else {
-						declaration = new ClassMethodDeclaration(data, this)
+						declaration = ClassMethodDeclaration.new(data, this)
 					}
 
 					declaration.analyse()
 				}
 				NodeKind.ProxyDeclaration {
-					var declaration = new ClassProxyDeclaration(data, this)
+					var declaration = ClassProxyDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
 				NodeKind.ProxyGroupDeclaration {
-					var declaration = new ClassProxyGroupDeclaration(data, this)
+					var declaration = ClassProxyGroupDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
 				else {
-					throw new NotSupportedException(`Unknow kind \(data.kind)`, this)
+					throw NotSupportedException.new(`Unknow kind \(data.kind)`, this)
 				}
 			}
 		}
@@ -462,7 +462,7 @@ class ClassDeclaration extends Statement {
 						}
 					}
 
-					new ClassForkedMethodDeclaration(name, method, forks, hidden, this)
+					ClassForkedMethodDeclaration.new(name, method, forks, hidden, this)
 				}
 			}
 		}
@@ -1322,21 +1322,21 @@ class ClassDeclaration extends Statement {
 		if @hybrid && !@es5 {
 			var thisVariable = @constructorScope.getVariable('this')
 
-			thisVariable.replaceCall = (data, arguments, node) => new CallHybridThisConstructorES6Substitude(data, arguments, @type, node)
+			thisVariable.replaceCall = (data, arguments, node) => CallHybridThisConstructorES6Substitude.new(data, arguments, @type, node)
 
-			superVariable.replaceCall = (data, arguments, node) => new CallHybridSuperConstructorES6Substitude(data, arguments, @type, node)
+			superVariable.replaceCall = (data, arguments, node) => CallHybridSuperConstructorES6Substitude.new(data, arguments, @type, node)
 		}
 		else {
 			if @es5 {
-				throw new NotSupportedException()
+				throw NotSupportedException.new()
 			}
 			else {
-				superVariable.replaceCall = (data, arguments, node) => new CallSuperConstructorSubstitude(data, arguments, @type, node)
+				superVariable.replaceCall = (data, arguments, node) => CallSuperConstructorSubstitude.new(data, arguments, @type, node)
 			}
 		}
 
 		if @extendsType.isSealed() {
-			superVariable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
+			superVariable.replaceMemberCall = (property, arguments, node) => MemberSealedSuperMethodSubstitude.new(property, arguments, @type, node)
 		}
 	} # }}}
 	updateMethodScope(method) { # {{{
@@ -1345,12 +1345,12 @@ class ClassDeclaration extends Statement {
 				var variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
 				if @extendsType.isSealed() {
-					variable.replaceCall = (data, arguments, node) => new CallSealedSuperMethodSubstitude(data, arguments, method, @type)
-					variable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
+					variable.replaceCall = (data, arguments, node) => CallSealedSuperMethodSubstitude.new(data, arguments, method, @type)
+					variable.replaceMemberCall = (property, arguments, node) => MemberSealedSuperMethodSubstitude.new(property, arguments, @type, node)
 					variable.replaceContext = () => (fragments) => fragments.code('this')
 				}
 				else {
-					variable.replaceCall = (data, arguments, node) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
+					variable.replaceCall = (data, arguments, node) => CallSuperMethodES6Substitude.new(data, arguments, method, @type)
 				}
 			}
 		}

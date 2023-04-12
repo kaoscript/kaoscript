@@ -35,11 +35,11 @@ export class Color {
 	static addSpace(data)
 
 	getField(name) ~ Error {
-		throw new Error('Not Implemented')
+		throw Error.new('Not Implemented')
 	}
 
 	setField(name, value) ~ Error {
-		throw new Error('Not Implemented')
+		throw Error.new('Not Implemented')
 	}
 }
 

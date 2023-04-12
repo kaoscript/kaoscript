@@ -271,7 +271,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				@type = @scope.reference('String')
 			}
 			else {
-				@type = new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
+				@type = UnionType.new(@scope, [@scope.reference('Number'), @scope.reference('String')])
 
 				if nullable {
 					@type = @type.setNullable(true)

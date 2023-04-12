@@ -4,7 +4,7 @@ class SealableType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
-			var type = new SealableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
+			var type = SealableType.new(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			if data.sealed {
 				type.flagSealed()
@@ -17,7 +17,7 @@ class SealableType extends Type {
 		super(scope)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @system {

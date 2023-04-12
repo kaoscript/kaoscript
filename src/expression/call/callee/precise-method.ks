@@ -10,7 +10,7 @@ class PreciseMethodCallee extends MethodCallee {
 		@proxy: Boolean
 	}
 	constructor(@data, @object, @objectType, @property, assessment, @matches, @node) { # {{{
-		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, matches[0], node)
+		super(data, MemberExpression.new(data.callee, node, node.scope(), object), false, assessment, matches[0], node)
 
 		@alien = matches[0].function.isAlien()
 		@instance = matches[0].function.isInstance()
@@ -21,7 +21,7 @@ class PreciseMethodCallee extends MethodCallee {
 		if @flatten {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					fragments.compileReusable(@object)
@@ -45,7 +45,7 @@ class PreciseMethodCallee extends MethodCallee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					fragments.wrap(@object)
@@ -73,7 +73,7 @@ class PreciseMethodCallee extends MethodCallee {
 	toCurryFragments(fragments, mode, node) { # {{{
 		match @scope {
 			ScopeKind.Argument {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			ScopeKind.This {
 				if @curries.length == 1 {
@@ -234,7 +234,7 @@ class PreciseMethodCallee extends MethodCallee {
 		@curries = []
 
 		if @matches.length > 1 {
-			var overloaded = new OverloadedFunctionType(@node.scope())
+			var overloaded = OverloadedFunctionType.new(@node.scope())
 
 			for var { function, positions }, index in @matches {
 				var curry = CurryExpression.toCurryType(function, positions, true, @node)

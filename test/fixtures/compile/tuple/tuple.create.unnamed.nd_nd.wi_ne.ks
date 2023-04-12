@@ -1,3 +1,3 @@
 tuple Pair(Number, Number)
 
-var pair = new Pair(0)
+var pair = Pair.new(0)

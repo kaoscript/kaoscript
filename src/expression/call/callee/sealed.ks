@@ -19,7 +19,7 @@ class SealedCallee extends Callee {
 		@nullableProperty = data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable)
 		@scope = data.scope.kind
 
-		var union = new UnionType(node.scope())
+		var union = UnionType.new(node.scope())
 
 		for var method in methods {
 			@validate(method, node)
@@ -46,7 +46,7 @@ class SealedCallee extends Callee {
 		if @flatten {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @instance {
@@ -65,7 +65,7 @@ class SealedCallee extends Callee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @instance {

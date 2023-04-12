@@ -7,7 +7,7 @@ class Foobar {
 			@x = 42
 		}
 		else {
-			throw new Error('failed')
+			throw Error.new('failed')
 		}
 	}
 }

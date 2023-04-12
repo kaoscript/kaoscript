@@ -44,7 +44,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 			for var { name } in left.listAssignments([]) {
 				if var variable ?= @scope.getVariable(name) {
 					if variable.isLateInit() {
-						throw new NotImplementedException(this)
+						throw NotImplementedException.new(this)
 					}
 					else if variable.isImmutable() {
 						ReferenceException.throwImmutable(name, this)

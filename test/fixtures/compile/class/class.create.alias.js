@@ -29,7 +29,7 @@ module.exports = function() {
 			return this.__ks_func_newLine_rt.call(null, this, this, arguments);
 		}
 		__ks_func_newLine_0(args) {
-			return Helper.create(this._line, args);
+			return new this._line(...args);
 		}
 		__ks_func_newLine_rt(that, proto, args) {
 			const t0 = Type.isValue;

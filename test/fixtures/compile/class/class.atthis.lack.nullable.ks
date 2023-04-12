@@ -14,6 +14,6 @@ class Greetings {
 	}
 }
 
-var dyn hello = new Greetings('Hello world!')
+var dyn hello = Greetings.new('Hello world!')
 
 console.log(hello.greet('miss White'))

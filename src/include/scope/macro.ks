@@ -26,25 +26,25 @@ class MacroScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
-		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
-		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
-		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
-		@predefined.__Any = new Variable('Any', true, true, AnyType.Explicit)
-		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
-		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
-		@predefined.__Never = new Variable('Null', true, true, Type.Never)
-		@predefined.__Null = new Variable('Null', true, true, NullType.Explicit)
-		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
+		@predefined.__false = Variable.new('false', true, true, this.reference('Boolean'))
+		@predefined.__null = Variable.new('null', true, true, NullType.Explicit)
+		@predefined.__true = Variable.new('true', true, true, this.reference('Boolean'))
+		@predefined.__Any = Variable.new('Any', true, true, AnyType.Explicit)
+		@predefined.__Infinity = Variable.new('Infinity', true, true, this.reference('Number'))
+		@predefined.__Math = Variable.new('Math', true, true, this.reference('Object'))
+		@predefined.__NaN = Variable.new('NaN', true, true, this.reference('Number'))
+		@predefined.__Never = Variable.new('Null', true, true, Type.Never)
+		@predefined.__Null = Variable.new('Null', true, true, NullType.Explicit)
+		@predefined.__Primitive = Variable.new('Primitive', true, true, AliasType.new(this, UnionType.new(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
-		@predefined.__Void = new Variable('Void', true, true, Type.Void)
+		@predefined.__Void = Variable.new('Void', true, true, Type.Void)
 
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
 		@predefined.__Identifier = Variable.createPredefinedClass('Identifier', this)
 	} # }}}
 	acquireTempName(declare: Boolean = true) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	authority() => this
 	block() => this
@@ -81,7 +81,7 @@ class MacroScope extends Scope {
 			}
 		}
 
-		var variable = new Variable(name, immutable, false, type, initialized)
+		var variable = Variable.new(name, immutable, false, type, initialized)
 
 		@defineVariable(variable, node)
 
@@ -165,13 +165,13 @@ class MacroScope extends Scope {
 		return match
 	} # }}}
 	releaseTempName(name) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
+			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

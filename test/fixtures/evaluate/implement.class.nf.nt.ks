@@ -6,7 +6,7 @@ class Shape {
 	}
 
 	static makeBlue(): Shape {
-		return new Shape('blue')
+		return Shape.new('blue')
 	}
 
 	constructor(@color)
@@ -18,7 +18,7 @@ class Shape {
 
 impl Shape {
 	static makeRed(): Shape {
-		return new Shape('red')
+		return Shape.new('red')
 	}
 }
 

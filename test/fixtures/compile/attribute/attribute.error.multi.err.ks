@@ -8,4 +8,4 @@ class NotImplementedError extends Error {
 class NotSupportedError extends Error {
 }
 
-throw new Error()
+throw Error.new()

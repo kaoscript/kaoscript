@@ -4,7 +4,7 @@ class ClassA {
 
 class ClassX extends ClassA {
 	private {
-		@foobar: ClassA	= new ClassA()
+		@foobar: ClassA	= ClassA.new()
 	}
 	foobar() => @foobar
 	foobar(@foobar) => this
@@ -12,7 +12,7 @@ class ClassX extends ClassA {
 
 class ClassY extends ClassA {
 	private {
-		@foobar: ClassA	= new ClassA()
+		@foobar: ClassA	= ClassA.new()
 	}
 	quxbaz() {
 		if @foobar is ClassX {

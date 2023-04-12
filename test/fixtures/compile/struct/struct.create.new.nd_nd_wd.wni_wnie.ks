@@ -4,4 +4,4 @@ struct Point {
 	z: Number	= 0
 }
 
-var point = new Point(x: 42, y: 1)
+var point = Point.new(x: 42, y: 1)

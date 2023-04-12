@@ -3,7 +3,7 @@ class Foobar {
 }
 
 func set(name: String, value: String): Foobar {
-	var clone = new Foobar()
+	var clone = Foobar.new()
 
 	clone.values = {
 		[name]: value

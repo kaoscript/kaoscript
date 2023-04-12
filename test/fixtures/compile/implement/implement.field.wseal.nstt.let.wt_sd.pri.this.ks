@@ -14,7 +14,7 @@ impl Date {
 	}
 }
 
-var d = new Date()
+var d = Date.new()
 
 expect(d.culture()).to.equal('und')
 

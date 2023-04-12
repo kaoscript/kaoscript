@@ -10,4 +10,4 @@ class Style {
 	constructor(@fontWeight)
 }
 
-var bold = new Style(fontWeight: .Bold)
+var bold = Style.new(fontWeight: .Bold)

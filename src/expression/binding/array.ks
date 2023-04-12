@@ -34,7 +34,7 @@ class ArrayBinding extends Expression {
 	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
 
-		@testType = new ArrayType(@scope)
+		@testType = ArrayType.new(@scope)
 		@testType.flagDestructuring()
 
 		if !?@type {
@@ -223,7 +223,7 @@ class ArrayBinding extends Expression {
 		return array
 	} # }}}
 	name() => null
-	newElement(data) => new ArrayBindingElement(data, this, @scope)
+	newElement(data) => ArrayBindingElement.new(data, this, @scope)
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
@@ -297,7 +297,7 @@ class ArrayBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			var reusableValue = new TempReusableExpression(value, this)
+			var reusableValue = TempReusableExpression.new(value, this)
 
 			var mut comma = false
 			for var element in @elements when !element.isAnonymous() {
@@ -517,7 +517,7 @@ class ArrayBindingElement extends Expression {
 		return unless @named
 
 		if @name is ArrayBinding {
-			@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
+			@name.toFlatFragments(fragments, FlatArrayBindingElement.new(value, @index, this))
 		}
 		else if @rest {
 			fragments

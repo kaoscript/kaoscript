@@ -5,4 +5,4 @@ extern sealed class Error
 class Exception extends Error {
 }
 
-throw new Exception()
+throw Exception.new()

@@ -8,4 +8,4 @@ export class Template {
 	}
 }
 
-export var template = new Template()
+export var template = Template.new()

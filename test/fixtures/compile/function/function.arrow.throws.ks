@@ -1,5 +1,5 @@
 var foobar = (x) ~ Error => {
-	throw new Error()
+	throw Error.new()
 }
 
 export foobar

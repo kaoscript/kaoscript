@@ -207,7 +207,7 @@ namespace Unbounded {
 					to = { variadic: false, index: from.index + argument.steps }
 				}
 
-				last = new TreeArgument(
+				last = TreeArgument.new(
 					parameter: parameter.parameter
 					from
 					to

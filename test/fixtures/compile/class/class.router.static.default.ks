@@ -19,7 +19,7 @@ abstract class Type {
 			return Type.import(name, data, references, node.scope().domain(), node)
 		} # }}}
 		import(name: String?, data, references, domain: Domain, node: AbstractNode): Type { # {{{
-			return new FoobarType()
+			return FoobarType.new()
 		} # }}}
 	}
 }

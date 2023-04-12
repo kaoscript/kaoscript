@@ -5,4 +5,4 @@ disclose Date {
 	constructor(Date: date)
 }
 
-var d = new Date(2000, 1, 1)
+var d = Date.new(2000, 1, 1)

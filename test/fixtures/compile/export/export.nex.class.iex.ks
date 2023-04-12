@@ -4,6 +4,6 @@ extern class Foobar {
 	foobar()
 }
 
-console.log(new Foobar().foobar())
+console.log(Foobar.new().foobar())
 
 export Foobar

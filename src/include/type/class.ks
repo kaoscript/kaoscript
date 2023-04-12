@@ -123,7 +123,7 @@ class ClassType extends Type {
 			}
 		} # }}}
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassType { # {{{
-			var type = new ClassType(scope)
+			var type = ClassType.new(scope)
 
 			type._sequences.initializations = data.sequences[0]
 			type._sequences.defaults = data.sequences[1]
@@ -426,7 +426,7 @@ class ClassType extends Type {
 					@addConstructor(type)
 				}
 				else if @isDestructor(data.name.name) {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				else {
 					var mut instance = true
@@ -458,7 +458,7 @@ class ClassType extends Type {
 				}
 			}
 			else {
-				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
+				throw NotSupportedException.new(`Unexpected kind \(data.kind)`, node)
 			}
 		}
 	} # }}}
@@ -518,7 +518,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	clone() { # {{{
-		var that = new ClassType(@scope)
+		var that = ClassType.new(@scope)
 
 		that.copyFrom(this)
 
@@ -994,7 +994,7 @@ class ClassType extends Type {
 			}
 
 			if methods.length == 0 {
-				drop abstractMethods[name]
+				Object.delete(abstractMethods, name)
 			}
 		}
 	} # }}}
@@ -1119,7 +1119,7 @@ class ClassType extends Type {
 				return @instanceMethods[name][0]
 			}
 			else {
-				return new ClassMethodGroupType(@scope, @instanceMethods[name])
+				return ClassMethodGroupType.new(@scope, @instanceMethods[name])
 			}
 		}
 		else if @instanceVariables[name] is ClassVariableType {
@@ -1160,7 +1160,7 @@ class ClassType extends Type {
 				return @instanceMethods[name][0]
 			}
 			else {
-				return new ClassMethodGroupType(@scope, @instanceMethods[name])
+				return ClassMethodGroupType.new(@scope, @instanceMethods[name])
 			}
 		}
 
@@ -1170,7 +1170,7 @@ class ClassType extends Type {
 					return functions[0]
 				}
 				else {
-					return new ClassMethodGroupType(@scope, functions)
+					return ClassMethodGroupType.new(@scope, functions)
 				}
 			}
 		}
@@ -1889,7 +1889,7 @@ class ClassType extends Type {
 			}
 
 			if methods.length == 0 {
-				drop abstractMethods[name]
+				Object.delete(abstractMethods, name)
 			}
 		}
 
@@ -2084,7 +2084,7 @@ class ClassType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode.Export {
@@ -2133,7 +2133,7 @@ class ClassType extends Type {
 		return super(references, indexDelta, mode, module)
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)
@@ -2197,7 +2197,7 @@ class ClassMethodGroupType extends OverloadedFunctionType {
 		}
 	} # }}}
 	clone() { # {{{
-		var that = new ClassMethodGroupType(@scope, [function.clone() for var function in @functions])
+		var that = ClassMethodGroupType.new(@scope, [function.clone() for var function in @functions])
 
 		return that
 	} # }}}

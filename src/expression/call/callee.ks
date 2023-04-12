@@ -60,11 +60,12 @@ abstract class Callee {
 	abstract translate()
 	abstract type(): Type
 	acquireReusable(acquire)
+	isComputed() => false
 	isNullable() => @nullable || @nullableProperty
 	isNullableComputed() => @nullable && @nullableProperty
 	isSkippable() => false
 	mergeWith(that: Callee) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	releaseReusable()
 	validate(type: FunctionType, node) { # {{{

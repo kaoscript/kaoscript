@@ -8,7 +8,7 @@ class Pet {
 }
 
 
-var cat = new Pet()
+var cat = Pet.new()
 var nya = {}
 
 echo(cat.kind^$(nya)())

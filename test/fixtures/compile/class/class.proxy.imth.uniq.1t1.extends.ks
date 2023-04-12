@@ -4,15 +4,15 @@ class ClassA {
 
 class ClassB extends ClassA {
 	private {
-		@element: ClassA = new ClassA()
+		@element: ClassA = ClassA.new()
 	}
 	proxy {
 		foobar = @element.foobar
 	}
 }
 
-var a = new ClassA()
-var b = new ClassB()
+var a = ClassA.new()
+var b = ClassB.new()
 
 a.foobar()
 b.foobar()

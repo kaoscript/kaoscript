@@ -2,6 +2,6 @@ struct Foobar {
 	x
 }
 
-var f = new Foobar('')
+var f = Foobar.new('')
 
 f.x = null

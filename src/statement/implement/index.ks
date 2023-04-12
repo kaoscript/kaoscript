@@ -62,21 +62,21 @@ class ImplementDeclaration extends Statement {
 
 				match data.kind {
 					NodeKind.FieldDeclaration {
-						property = new ImplementClassFieldDeclaration(data, this, @type)
+						property = ImplementClassFieldDeclaration.new(data, this, @type)
 					}
 					NodeKind.MethodDeclaration {
 						if type.isConstructor(data.name.name) {
-							property = new ImplementClassConstructorDeclaration(data, this, @type)
+							property = ImplementClassConstructorDeclaration.new(data, this, @type)
 						}
 						else if type.isDestructor(data.name.name) {
 							NotImplementedException.throw(this)
 						}
 						else {
-							property = new ImplementClassMethodDeclaration(data, this, @type)
+							property = ImplementClassMethodDeclaration.new(data, this, @type)
 						}
 					}
 					else {
-						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
+						throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
 					}
 				}
 
@@ -91,13 +91,13 @@ class ImplementDeclaration extends Statement {
 
 				match data.kind {
 					NodeKind.FieldDeclaration {
-						property = new ImplementEnumFieldDeclaration(data, this, @type)
+						property = ImplementEnumFieldDeclaration.new(data, this, @type)
 					}
 					NodeKind.MethodDeclaration {
-						property = new ImplementEnumMethodDeclaration(data, this, @type)
+						property = ImplementEnumMethodDeclaration.new(data, this, @type)
 					}
 					else {
-						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
+						throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
 					}
 				}
 
@@ -112,13 +112,13 @@ class ImplementDeclaration extends Statement {
 
 				match data.kind {
 					NodeKind.FieldDeclaration {
-						property = new ImplementNamespaceVariableDeclaration(data, this, @type)
+						property = ImplementNamespaceVariableDeclaration.new(data, this, @type)
 					}
 					NodeKind.MethodDeclaration {
-						property = new ImplementNamespaceFunctionDeclaration(data, this, @type)
+						property = ImplementNamespaceFunctionDeclaration.new(data, this, @type)
 					}
 					else {
-						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
+						throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
 					}
 				}
 
@@ -188,7 +188,7 @@ class ImplementDeclaration extends Statement {
 				}
 
 				if !found {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 		}

@@ -15,7 +15,7 @@ class ArrayType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ArrayType { # {{{
-			var type = new ArrayType(scope)
+			var type = ArrayType.new(scope)
 
 			if data.destructuring {
 				type.flagDestructuring()
@@ -42,7 +42,7 @@ class ArrayType extends Type {
 		@testProperties ||= !type.isAny() || !type.isNullable()
 	} # }}}
 	clone() { # {{{
-		var type = new ArrayType(@scope)
+		var type = ArrayType.new(@scope)
 
 		type._destructuring = @destructuring
 		type._length = @length
@@ -377,7 +377,7 @@ class ArrayType extends Type {
 	isTestingProperties() => @testProperties
 	length() => @length
 	merge(value: ArrayType, node): Type { # {{{
-		var result = new ArrayType(@scope)
+		var result = ArrayType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
 		result.flagSpread() if @spread
@@ -413,7 +413,7 @@ class ArrayType extends Type {
 			}
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 
 		return result
@@ -432,7 +432,7 @@ class ArrayType extends Type {
 		}
 
 		if value.hasParameters() {
-			var result = new ArrayType(@scope)
+			var result = ArrayType.new(@scope)
 
 			result.flagDestructuring() if @destructuring
 			result.flagSpread() if @spread
@@ -449,7 +449,7 @@ class ArrayType extends Type {
 				}
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 
 			return result
@@ -492,7 +492,7 @@ class ArrayType extends Type {
 		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toQuote() { # {{{
 		var mut str = ''
@@ -546,7 +546,7 @@ class ArrayType extends Type {
 		fragments.code(')')
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toSubtestFragments(testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
 		if testingType {
@@ -566,7 +566,7 @@ class ArrayType extends Type {
 		if @testRest || @testProperties {
 			fragments.code($comma)
 
-			var literal = new Literal(false, node, node.scope(), 'value')
+			var literal = Literal.new(false, node, node.scope(), 'value')
 
 			if @testProperties {
 				if @testRest {
@@ -650,7 +650,7 @@ class ArrayType extends Type {
 			if @testRest {
 				fragments.code($comma)
 
-				var literal = new Literal(false, node, node.scope(), 'value')
+				var literal = Literal.new(false, node, node.scope(), 'value')
 
 				@restType.toTestFunctionFragments(fragments, literal)
 			}

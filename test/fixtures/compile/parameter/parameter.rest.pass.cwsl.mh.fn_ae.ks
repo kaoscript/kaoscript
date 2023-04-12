@@ -7,7 +7,7 @@ sealed class ClassA {
 	}
 }
 
-var a = new ClassA()
+var a = ClassA.new()
 
 var items = []
 

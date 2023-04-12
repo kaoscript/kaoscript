@@ -18,7 +18,7 @@ impl Date {
 	}
 }
 
-var d = new Date()
+var d = Date.new()
 
 expect(d.setHours(12)).to.equal(d)
 expect(d.getHours()).to.equal(12)

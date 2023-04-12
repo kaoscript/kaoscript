@@ -13,7 +13,7 @@ class Waldo extends Quxbaz {
 
 func foobar(f: Foobar) => f.foobar(42)
 
-var w = new Waldo()
+var w = Waldo.new()
 
 w.foobar(42)
 

@@ -92,12 +92,12 @@ class BinaryOperatorTypeEquality extends Expression {
 			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind.And {
-				type = new FusionType(@scope)
+				type = FusionType.new(@scope)
 
 				@junction = Junction.AND
 			}
 			else {
-				type = new UnionType(@scope)
+				type = UnionType.new(@scope)
 
 				@junction = Junction.OR
 			}
@@ -112,7 +112,7 @@ class BinaryOperatorTypeEquality extends Expression {
 					}
 				}
 				else {
-					throw new NotImplementedException(this)
+					throw NotImplementedException.new(this)
 				}
 			}
 
@@ -132,7 +132,7 @@ class BinaryOperatorTypeEquality extends Expression {
 				}
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 
@@ -227,12 +227,12 @@ class BinaryOperatorTypeInequality extends Expression {
 			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind.And {
-				type = new FusionType(@scope)
+				type = FusionType.new(@scope)
 
 				@junction = Junction.AND
 			}
 			else {
-				type = new UnionType(@scope)
+				type = UnionType.new(@scope)
 
 				@junction = Junction.OR
 			}
@@ -247,7 +247,7 @@ class BinaryOperatorTypeInequality extends Expression {
 					}
 				}
 				else {
-					throw new NotImplementedException(this)
+					throw NotImplementedException.new(this)
 				}
 			}
 
@@ -264,7 +264,7 @@ class BinaryOperatorTypeInequality extends Expression {
 				}
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 

@@ -9,7 +9,7 @@ func foobar(x) ~ Error {
 			value = 1
 		}
 		else {
-			throw new Error()
+			throw Error.new()
 		}
 	}
 

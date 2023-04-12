@@ -12,4 +12,4 @@ func getLine(position: IPosition) {
 	return position.line
 }
 
-getLine(new Position(1, 1))
+getLine(Position.new(1, 1))

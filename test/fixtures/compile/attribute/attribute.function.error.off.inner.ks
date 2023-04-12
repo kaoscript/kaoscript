@@ -1,5 +1,5 @@
 func error() ~ Error {
-	throw new Error()
+	throw Error.new()
 }
 
 

@@ -89,7 +89,7 @@ class UnaryOperatorImplicit extends Expression {
 			is BinaryOperatorMatch {
 				type = @parent.subject().type()
 			}
-			is CallExpression | CreateExpression {
+			is CallExpression {
 				var index = @parent.arguments().indexOf(this)
 				var types = []
 
@@ -98,7 +98,7 @@ class UnaryOperatorImplicit extends Expression {
 						types.push(function.parameter(index).getVariableType())
 					}
 					else {
-						throw new NotSupportedException()
+						throw NotSupportedException.new()
 					}
 				}
 
@@ -135,7 +135,7 @@ class UnaryOperatorImplicit extends Expression {
 				type = target
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 
@@ -216,7 +216,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 
 		if boolean {
 			if number {
-				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
 
 				if type.isNullable() {
 					@type = @type.setNullable(true)
@@ -309,7 +309,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 	isExpectingType() => true
 	toFragments(fragments, mode) { # {{{
 		if @options.format.spreads == 'es5' {
-			throw new NotSupportedException(this)
+			throw NotSupportedException.new(this)
 		}
 
 		fragments

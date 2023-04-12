@@ -8,11 +8,11 @@ class NamespaceDeclaration extends Statement {
 		@variable: Variable
 	}
 	constructor(data, parent, scope) { # {{{
-		super(data, parent, new NamespaceScope(scope))
+		super(data, parent, NamespaceScope.new(scope))
 	} # }}}
 	initiate() { # {{{
 		@name = @data.name.name
-		@type = new NamedContainerType(@name, new NamespaceType(@scope!?))
+		@type = NamedContainerType.new(@name, NamespaceType.new(@scope!?))
 
 		@variable = @scope.parent().define(@name, true, @type, this)
 

@@ -5,7 +5,7 @@ struct Foobar {
 	y: String
 }
 
-foo = new Foobar('x', 'y')
+foo = Foobar.new('x', 'y')
 
 {x, y} = foo
 

@@ -86,7 +86,7 @@ if ?program.target {
 if program.compile {
 	options.output = path.join(process.cwd(), program.output ?? '')
 
-	var compiler = new Compiler(file, options)
+	var compiler = Compiler.new(file, options)
 
 	compiler.compile()
 
@@ -97,14 +97,14 @@ if program.compile {
 	compiler.writeOutput()
 }
 else if program.print {
-	var compiler = new Compiler(file, options)
+	var compiler = Compiler.new(file, options)
 
 	compiler.compile()
 
 	echo(compiler.toSource())
 }
 else {
-	var compiler = new Compiler(file, options)
+	var compiler = Compiler.new(file, options)
 
 	compiler.compile()
 
@@ -117,7 +117,7 @@ else {
 	sandbox.__dirname = path.dirname(file)
 	sandbox.__filename = file
 
-	var _module = sandbox.module <- new Module('eval')
+	var _module = sandbox.module <- Module.new('eval')
 	var _require = sandbox.require <- (path) => Module._load(path, _module, true)
 
 	_module.filename = file

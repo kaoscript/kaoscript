@@ -1,6 +1,6 @@
 class Foobar {
 	static get(x: String): Foobar {
-		return new Foobar()
+		return Foobar.new()
 	}
 }
 

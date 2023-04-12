@@ -6,5 +6,5 @@ class Quxbaz extends Foobar {
 	foobar(x: Number): Number => 2
 }
 
-var q = new Quxbaz()
+var q = Quxbaz.new()
 var f = q.foobar(42)

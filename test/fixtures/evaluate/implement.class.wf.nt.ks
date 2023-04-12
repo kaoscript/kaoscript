@@ -4,13 +4,13 @@ sealed class Shape {
 	private {
 		_color: string = ''
 	}
-	
+
 	static makeBlue(): Shape {
-		return new Shape('blue')
+		return Shape.new('blue')
 	}
-	
+
 	constructor(@color)
-	
+
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
@@ -18,7 +18,7 @@ sealed class Shape {
 
 impl Shape {
 	static makeRed(): Shape {
-		return new Shape('red')
+		return Shape.new('red')
 	}
 }
 

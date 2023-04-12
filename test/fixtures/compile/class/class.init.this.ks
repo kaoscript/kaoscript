@@ -5,6 +5,6 @@ class Foo {
 
 class Bar {
 	private {
-		_foo: Foo = new Foo(this)
+		_foo: Foo = Foo.new(this)
 	}
 }

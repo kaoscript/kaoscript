@@ -8,7 +8,7 @@ enum Weekday {
     SUNDAY
 
     isWeekend(): Boolean {
-		throw new Error()
+		throw Error.new()
 	}
 }
 

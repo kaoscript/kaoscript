@@ -5,7 +5,7 @@ func foobar(x, y): Number ~ Error {
 		z = 1
 	}
 	else if y == 0 {
-		throw new Error()
+		throw Error.new()
 	}
 	else if x == 1 && y == 1 {
 		z = 2

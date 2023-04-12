@@ -32,10 +32,10 @@ class Parameter extends AbstractNode {
 	static {
 		compileExpression(data, node) { # {{{
 			match data.kind {
-				NodeKind.ArrayBinding => return new ArrayBindingParameter(data, node)
-				NodeKind.Identifier => return new IdentifierParameter(data, node)
-				NodeKind.ObjectBinding => return new ObjectBindingParameter(data, node)
-				NodeKind.ThisExpression => return new ThisExpressionParameter(data, node)
+				NodeKind.ArrayBinding => return ArrayBindingParameter.new(data, node)
+				NodeKind.Identifier => return IdentifierParameter.new(data, node)
+				NodeKind.ObjectBinding => return ObjectBindingParameter.new(data, node)
+				NodeKind.ThisExpression => return ThisExpressionParameter.new(data, node)
 			}
 		} # }}}
 		getUntilDifferentTypeIndex(parameters, index) { # {{{
@@ -219,11 +219,11 @@ class Parameter extends AbstractNode {
 									.newControl()
 									.code(`if(arguments.length < 1)`)
 									.step()
-									.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
+									.line(`throw SyntaxError.new("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
 									.step()
 									.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 									.step()
-									.line(`throw new TypeError("'callback' must be a function")`)
+									.line(`throw TypeError.new("'callback' must be a function")`)
 									.done()
 							}
 							else {
@@ -231,7 +231,7 @@ class Parameter extends AbstractNode {
 									.newControl()
 									.code(`if(arguments.length < \(signature.min() + 1))`)
 									.step()
-									.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+									.line(`\($runtime.scope(node))__ks_error = SyntaxError.new("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
 
 								ctrl
 									.newControl()
@@ -248,7 +248,7 @@ class Parameter extends AbstractNode {
 									.step()
 									.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 									.step()
-									.line(`throw new TypeError("'callback' must be a function")`)
+									.line(`throw TypeError.new("'callback' must be a function")`)
 									.done()
 							}
 						}
@@ -261,7 +261,7 @@ class Parameter extends AbstractNode {
 								.newControl()
 								.code(`if(arguments.length < \(signature.min() + 1))`)
 								.step()
-								.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+								.line(`\($runtime.scope(node))__ks_error = SyntaxError.new("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
 
 							ctrl
 								.newControl()
@@ -278,7 +278,7 @@ class Parameter extends AbstractNode {
 								.step()
 								.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 								.step()
-								.line(`throw new TypeError("'callback' must be a function")`)
+								.line(`throw TypeError.new("'callback' must be a function")`)
 
 							ctrl.done()
 						}
@@ -289,7 +289,7 @@ class Parameter extends AbstractNode {
 						.newControl()
 						.code(`if(\(name).length < \(signature.min() + node.getParameterOffset()))`)
 						.step()
-						.line(`throw new SyntaxError("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
+						.line(`throw SyntaxError.new("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
 						.done()
 				}
 			}
@@ -453,7 +453,7 @@ class Parameter extends AbstractNode {
 
 				var ctrl2 = ctrl.newControl()
 
-				var literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
+				var literal = Literal.new(false, node, node.scope(), 'arguments[__ks_i]')
 
 				if parameter.type().isNullable() {
 					ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
@@ -526,7 +526,7 @@ class Parameter extends AbstractNode {
 					if context.async {
 						ctrl
 							.newLine()
-							.code(`return __ks_cb(new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.code(`return __ks_cb(SyntaxError.new("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
 							.compile(parameter)
 							.code(`.length + ")"))`)
 							.done()
@@ -534,7 +534,7 @@ class Parameter extends AbstractNode {
 					else {
 						ctrl
 							.newLine()
-							.code(`throw new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.code(`throw SyntaxError.new("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
 							.compile(parameter)
 							.code(`.length + ")")`)
 							.done()
@@ -595,7 +595,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 		else {
-			@internal = new AnonymousParameter(@data, this)
+			@internal = AnonymousParameter.new(@data, this)
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -710,14 +710,14 @@ class Parameter extends AbstractNode {
 		var external: String? = @data.external?.name ?? internal
 
 		if target.isVoid() {
-			@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
+			@type = ParameterType.new(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
 		}
 		else {
 			if !type.isExplicit() {
 				type = target.type()
 			}
 
-			@type = new ParameterType(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
+			@type = ParameterType.new(@scope, external, internal, passing, type!?, min, max, @hasDefaultValue)
 
 			unless @type.isSubsetOf(target, MatchingMode.Signature) {
 				TypeException.throwInvalidParameterType(@type, target, this)
@@ -741,7 +741,7 @@ class Parameter extends AbstractNode {
 
 				@type.setDefaultValue(call, false)
 
-				@defaultValue = new Literal(`\(@parent.getOverridableVarname()).\(call)`, @parent)
+				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(call)`, @parent)
 			}
 		}
 
@@ -774,7 +774,7 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	addAliasParameter(expression: ThisExpressionParameter) { # {{{
-		var alias = new AliasStatement(expression, this)
+		var alias = AliasStatement.new(expression, this)
 
 		return @scope.reference(alias.type())
 	} # }}}
@@ -860,7 +860,7 @@ class Parameter extends AbstractNode {
 				@defaultValue.prepare()
 			}
 			else {
-				@defaultValue = new Literal(`\(@parent.getOverridableVarname()).\(@type.getDefaultValue())`, @parent)
+				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(@type.getDefaultValue())`, @parent)
 			}
 
 			@hasDefaultValue = true
@@ -981,12 +981,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.NONE)
+						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.NONE)
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
+						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
 					}
 
 					ctrl2
@@ -1088,12 +1088,12 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
 
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
+							declaredType.toPositiveTestFragments(line, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
 
 							line.code(')')
 						}
 						else {
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction.AND)
+							declaredType.toPositiveTestFragments(line, Literal.new(false, that, that.scope(), '__ks__'), Junction.AND)
 						}
 
 						line
@@ -1205,12 +1205,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.NONE)
+						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.NONE)
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction.OR)
+						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
 					}
 
 					ctrl2
@@ -1514,12 +1514,12 @@ class ArrayBindingParameter extends ArrayBinding {
 		super()
 
 		if @flatten {
-			@tempName = new Literal(@scope.acquireTempName(false), this)
+			@tempName = Literal.new(@scope.acquireTempName(false), this)
 		}
 	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
-	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
+	newElement(data) => ArrayBindingParameterElement.new(data, this, @scope)
 	operator(@operator): this
 	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
@@ -1540,7 +1540,7 @@ class ArrayBindingParameter extends ArrayBinding {
 			else if type.isTuple() {
 				for var element in @elements {
 					if element.isRest() {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 					else {
 						element.setDeclaredType(type.getProperty(element.index()).type(), definitive)
@@ -1642,12 +1642,12 @@ class ObjectBindingParameter extends ObjectBinding {
 		super()
 
 		if @flatten {
-			@tempName = new Literal(@scope.acquireTempName(false), this)
+			@tempName = Literal.new(@scope.acquireTempName(false), this)
 		}
 	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
-	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
+	newElement(data) => ObjectBindingParameterElement.new(data, this, @scope)
 	operator(@operator): this
 	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
@@ -1668,7 +1668,7 @@ class ObjectBindingParameter extends ObjectBinding {
 			else if type.isStruct() {
 				for var element in @elements {
 					if element.isRest() {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 					else {
 						element.setDeclaredType(type.getProperty(element.name()).type(), definitive)
@@ -1786,7 +1786,7 @@ class AnonymousParameter extends AbstractNode {
 	} # }}}
 	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { # {{{
 		if arity != null {
-			throw new NotImplementedException(this)
+			throw NotImplementedException.new(this)
 		}
 		else {
 			if @type.isAny() {
@@ -1822,7 +1822,7 @@ class ThisExpressionParameter extends ThisExpression {
 		super(target)
 
 		unless ?@variableName {
-			throw new NotSupportedException(this)
+			throw NotSupportedException.new(this)
 		}
 
 		var method = @statement()

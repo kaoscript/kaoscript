@@ -3,5 +3,5 @@ class Writer {
 		Line: class
 	}
 	constructor(@Line)
-	newLine(...args) => new this.Line(...args)
+	newLine(...args) => this.Line.new(...args)
 }

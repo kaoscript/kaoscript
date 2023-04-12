@@ -58,7 +58,7 @@ class ImportScope extends BlockScope {
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
+			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

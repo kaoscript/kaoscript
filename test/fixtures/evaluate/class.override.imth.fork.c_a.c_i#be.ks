@@ -12,4 +12,4 @@ func foobar(f: Foobar) {
 	expect(f.foobar(0)).to.equals(true)
 }
 
-foobar(new Quxbaz())
+foobar(Quxbaz.new())

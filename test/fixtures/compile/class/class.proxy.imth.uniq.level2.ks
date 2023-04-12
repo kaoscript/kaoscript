@@ -20,9 +20,9 @@ class Node extends AbstractNode {
 
 func foobar() => 42
 
-var root = new Root()
-var level1 = new Node(root)
-var level2 = new Node(level1)
+var root = Root.new()
+var level1 = Node.new(root)
+var level2 = Node.new(level1)
 var value = foobar()
 
 console.log(`\(level2.foobar(value))`)

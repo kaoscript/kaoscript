@@ -13,6 +13,6 @@ class Foobar extends Master {
 	}
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 f.foobar('', '')

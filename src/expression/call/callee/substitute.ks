@@ -21,7 +21,7 @@ class SubstituteCallee extends Callee {
 		@substitute.toFragments(fragments, mode)
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	translate()
 	type() => @type

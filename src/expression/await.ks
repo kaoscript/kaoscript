@@ -73,10 +73,10 @@ class AwaitExpression extends Expression {
 				@awaiting = false
 
 				if ?@try {
-					return @try.toAwaitExpressionFragments^^(fragments, [new Literal(@reuseName!?, this)], ^)
+					return @try.toAwaitExpressionFragments^^(fragments, [Literal.new(@reuseName!?, this)], ^)
 				}
 				else if @function?.type().isAsync() {
-					return @function.toAwaitExpressionFragments^^(fragments, [new Literal(@reuseName!?, this)], ^)
+					return @function.toAwaitExpressionFragments^^(fragments, [Literal.new(@reuseName!?, this)], ^)
 				}
 				else {
 					return this.toAwaitExpressionFragments^^(fragments, ^)

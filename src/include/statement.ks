@@ -123,7 +123,6 @@ include {
 	'../statement/disclose'
 	'../statement/do-until'
 	'../statement/do-while'
-	'../statement/drop'
 	'../statement/enum'
 	'../statement/bitmask'
 	'../statement/export'

@@ -4,4 +4,4 @@ class Foobar {
 
 }
 
-func foobar() => Foobar.new()
+func foobar() => Foobar.foobar()

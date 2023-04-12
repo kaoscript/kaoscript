@@ -1,5 +1,5 @@
 import '../class/class.ctor.rest'
 
-var m0 = new Message()
-var m1 = new Message('foo')
-var m2 = new Message('foo', 'bar')
+var m0 = Message.new()
+var m1 = Message.new('foo')
+var m2 = Message.new('foo', 'bar')

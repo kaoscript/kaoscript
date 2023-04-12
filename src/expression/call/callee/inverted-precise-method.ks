@@ -4,13 +4,13 @@ class InvertedPreciseMethodCallee extends MethodCallee {
 		@property: String
 	}
 	constructor(@data, @name, @property, assessment, match: CallMatch, node) { # {{{
-		super(data, new MemberExpression(data.callee, node, node.scope(), node._object), false, assessment, match, node)
+		super(data, MemberExpression.new(data.callee, node, node.scope(), node._object), false, assessment, match, node)
 	} # }}}
 	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		match @scope {
 			ScopeKind.Argument {
-				throw new NotImplementedException(node)
+				throw NotImplementedException.new(node)
 			}
 			ScopeKind.This {
 				fragments.code(`\(@name.name())`)

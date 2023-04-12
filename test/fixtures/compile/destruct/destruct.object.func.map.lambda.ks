@@ -3,4 +3,4 @@ struct Foobar {
 	y: Number
 }
 
-[new Foobar(0, 0)].map(({ x }, _, _) => x)
+[Foobar.new(0, 0)].map(({ x }, _, _) => x)

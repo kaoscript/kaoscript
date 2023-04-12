@@ -9,6 +9,6 @@ class Quxbaz {
 		}
 	}
 	new() {
-		var foo = new @options.class()
+		var foo = @options.class.new()
 	}
 }

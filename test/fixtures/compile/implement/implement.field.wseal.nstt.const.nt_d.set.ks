@@ -10,7 +10,7 @@ impl Date {
 	culture(@culture) => this
 }
 
-var d = new Date()
+var d = Date.new()
 
 expect(d.culture()).to.equal('und')
 

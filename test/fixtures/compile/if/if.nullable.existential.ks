@@ -1,6 +1,6 @@
 class Foobar {
 	static create(): Foobar {
-		return new Foobar()
+		return Foobar.new()
 	}
 	foobar(): Foobar? => this
 	quxbaz(): Boolean => true

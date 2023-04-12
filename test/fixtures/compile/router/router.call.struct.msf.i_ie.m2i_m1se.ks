@@ -6,5 +6,5 @@ struct StructA {
 }
 
 func foobar(a: String, b: Number) {
-	return new StructA(y: b, x: a)
+	return StructA.new(y: b, x: a)
 }

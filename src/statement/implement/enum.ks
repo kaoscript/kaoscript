@@ -66,7 +66,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 						@value = $quote(value.value)
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 				}
 				else {
@@ -79,7 +79,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 						@value = `\(@enum.index(value.value))`
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 				}
 				else {
@@ -158,7 +158,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@parameters = []
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
@@ -185,7 +185,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new EnumMethodType([parameter.type() for var parameter in @parameters], @data, this)
+		@type = EnumMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAlteration()
 

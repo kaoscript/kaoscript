@@ -25,7 +25,7 @@ class DefaultCallee extends Callee {
 			@expression = $compile.expression(data.callee, node)
 		}
 		else {
-			@expression = new MemberExpression(data.callee, node, node.scope(), object)
+			@expression = MemberExpression.new(data.callee, node, node.scope(), object)
 		}
 
 		@expression.analyse()
@@ -203,10 +203,10 @@ class DefaultCallee extends Callee {
 	} # }}}
 	toCurryType() { # {{{
 		if @type is FunctionType {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 		else {
-			var type = new FunctionType(@node.scope())
+			var type = FunctionType.new(@node.scope())
 			type.addParameter(AnyType.NullableExplicit, null, 0, Infinity)
 
 			return type

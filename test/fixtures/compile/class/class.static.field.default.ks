@@ -18,7 +18,7 @@ class Foo {
 
 console.log(Foo.bar)
 
-var dyn foo = new Foo('xyz')
+var dyn foo = Foo.new('xyz')
 console.log(foo.name)
 
 export Foo

@@ -4,7 +4,7 @@ class Foobar {
 	foo(x, ...items, y = 42): String => `[\(x), \(items), \(y)]`
 }
 
-var x = new Foobar()
+var x = Foobar.new()
 
 console.log(`\(x.foo(1))`)
 

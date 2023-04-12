@@ -8,7 +8,7 @@ class Quxbaz extends Foobar {
 
 }
 
-var x = new Quxbaz()
+var x = Quxbaz.new()
 
 if x is Quxbaz {
 

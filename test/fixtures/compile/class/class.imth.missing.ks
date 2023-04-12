@@ -3,6 +3,6 @@ extern console
 class Foobar {
 }
 
-var x = new Foobar()
+var x = Foobar.new()
 
 console.log(`\(x.foo())`)

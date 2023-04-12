@@ -5,7 +5,7 @@ class FusionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
-			var fusion = new FusionType(scope)
+			var fusion = FusionType.new(scope)
 
 			queue.push(() => {
 				for var type in data.types {
@@ -33,7 +33,7 @@ class FusionType extends Type {
 		}
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
@@ -77,7 +77,7 @@ class FusionType extends Type {
 			return types[0].hashCode(fattenNull)
 		}
 
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	hasMutableAccess() { # {{{
 		for var type in @types {
@@ -160,7 +160,7 @@ class FusionType extends Type {
 		return AnyType.NullableUnexplicit
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR

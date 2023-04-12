@@ -17,11 +17,11 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
 			var scope = node.scope()
 
-			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
 			var data = index
-			var type = new ClassMethodType(scope)
+			var type = ClassMethodType.new(scope)
 
 			type._index = data.index
 			type._access = data.access
@@ -60,7 +60,7 @@ class ClassMethodType extends FunctionType {
 	}
 	access(@access) => this
 	clone() { # {{{
-		var clone = new ClassMethodType(@scope)
+		var clone = ClassMethodType.new(@scope)
 
 		FunctionType.clone(this, clone)
 

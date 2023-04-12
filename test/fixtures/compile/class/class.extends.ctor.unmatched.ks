@@ -12,5 +12,5 @@ class Rectangle extends Shape {
 	}
 }
 
-var s = new Shape('red')
-var r = new Rectangle('red')
+var s = Shape.new('red')
+var r = Rectangle.new('red')

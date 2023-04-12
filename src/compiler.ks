@@ -54,7 +54,7 @@ export class Compiler {
 		} # }}}
 		registerTarget(mut target: String, options: Object) { # {{{
 			if target !?= $targetRegex.exec(target) {
-				throw new Error(`Invalid target syntax: \(target)`)
+				throw Error.new(`Invalid target syntax: \(target)`)
 			}
 
 			$targets[target[1]] ??= {}
@@ -73,21 +73,21 @@ export class Compiler {
 		registerTargetAlias(mut target: String, mut alias: String) { # {{{
 			if alias !?= $targetRegex.exec(alias) {
 				if !?$targets[alias] || $targets[alias] is not Function {
-					throw new Error(`Invalid target syntax: \(alias)`)
+					throw Error.new(`Invalid target syntax: \(alias)`)
 				}
 
 				$targets[target] = $targets[alias]
 			}
 			else {
 				if target !?= $targetRegex.exec(target) {
-					throw new Error(`Invalid target syntax: \(target)`)
+					throw Error.new(`Invalid target syntax: \(target)`)
 				}
 
 				if !?$targets[alias[1]] {
-					throw new Error(`Undefined target '\(alias[1])'`)
+					throw Error.new(`Undefined target '\(alias[1])'`)
 				}
 				else if !?$targets[alias[1]][alias[2]] {
-					throw new Error(`Undefined target's version '\(alias[2])'`)
+					throw Error.new(`Undefined target's version '\(alias[2])'`)
 				}
 
 				$targets[target[1]] ??= {}
@@ -153,7 +153,7 @@ export class Compiler {
 
 		if @options.target is String {
 			if target !?= $targetRegex.exec(@options.target) {
-				throw new Error(`Invalid target syntax: \(@options.target)`)
+				throw Error.new(`Invalid target syntax: \(@options.target)`)
 			}
 
 			@options.target = {
@@ -162,13 +162,13 @@ export class Compiler {
 			}
 		}
 		else if @options.target is not Object || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
-			throw new Error(`Undefined target`)
+			throw Error.new(`Undefined target`)
 		}
 
 		@options = $expandOptions(@options)
 	} # }}}
 	initiate(data: String? = null) { # {{{
-		@module = new Module(data ?? fs.readFile(@file), this, @file)
+		@module = Module.new(data ?? fs.readFile(@file), this, @file)
 
 		if @standardLibrary {
 			@module.flagStandardLibrary()
@@ -182,7 +182,7 @@ export class Compiler {
 		return @initiate(data).finish()
 	} # }}}
 	createServant(file) { # {{{
-		return new Compiler(file, Object.defaults(@options, {
+		return Compiler.new(file, Object.defaults(@options, {
 			register: false
 		}), @hashes, [...@hierarchy, file])
 	} # }}}
@@ -278,7 +278,7 @@ export class Compiler {
 	} # }}}
 	writeOutput() { # {{{
 		if @options.output is not String {
-			throw new Error('Undefined option: output')
+			throw Error.new('Undefined option: output')
 		}
 
 		fs.mkdir(@options.output)
@@ -292,7 +292,7 @@ export class Compiler {
 }
 
 export func compileFile(file, options? = null) { # {{{
-	var compiler = new Compiler(file, options)
+	var compiler = Compiler.new(file, options)
 
 	return compiler.compile().toSource()
 } # }}}

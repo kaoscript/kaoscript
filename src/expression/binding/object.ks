@@ -31,7 +31,7 @@ class ObjectBinding extends Expression {
 	override prepare(target, targetMode) { # {{{
 		var subtarget = target.isObject() ? target.parameter() : AnyType.NullableUnexplicit
 
-		@testType = new ObjectType(@scope)
+		@testType = ObjectType.new(@scope)
 		@testType.flagDestructuring()
 
 		if !?@type {
@@ -184,7 +184,7 @@ class ObjectBinding extends Expression {
 		return array
 	} # }}}
 	name() => null
-	newElement(data) => new ObjectBindingElement(data, this, @scope)
+	newElement(data) => ObjectBindingElement.new(data, this, @scope)
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
@@ -258,7 +258,7 @@ class ObjectBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			var reusableValue = new TempReusableExpression(value, this)
+			var reusableValue = TempReusableExpression.new(value, this)
 
 			@elements[0].toFlatFragments(fragments, reusableValue)
 

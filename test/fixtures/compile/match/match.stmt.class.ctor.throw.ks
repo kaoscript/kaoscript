@@ -8,7 +8,7 @@ class Foobar {
 				@x = 0
 			}
 			else {
-				throw new Error('foobar')
+				throw Error.new('foobar')
 			}
 		}
 	}

@@ -17,4 +17,4 @@ class Rectangle extends Shape {
 	}
 }
 
-var r = new Rectangle('black')
+var r = Rectangle.new('black')

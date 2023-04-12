@@ -6,4 +6,4 @@ class ClassB extends ClassA {
 func foobar(x: ClassB? = null, y: ClassA) {
 }
 
-foobar(new ClassB())
+foobar(ClassB.new())

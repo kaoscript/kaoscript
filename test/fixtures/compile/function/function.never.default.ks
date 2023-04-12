@@ -1,5 +1,5 @@
 func foobar(): never {
-	throw new Error()
+	throw Error.new()
 }
 
 export foobar

@@ -6,7 +6,7 @@ impl ClassA {
 	}
 }
 
-var a = new ClassA()
+var a = ClassA.new()
 
 func foobar(values) {
 	a.foobar(...values)

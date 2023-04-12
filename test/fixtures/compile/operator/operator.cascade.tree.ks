@@ -1,11 +1,11 @@
 require class Node
 
-var right = new Node('e')
-var root = new Node('root')
-	..left = (new Node('a')
-		..left = (new Node('b')
-			..left = new Node('c')
+var right = Node.new('e')
+var root = Node.new('root')
+	..left = (Node.new('a')
+		..left = (Node.new('b')
+			..left = Node.new('c')
 		)
-		..right = new Node('d')
+		..right = Node.new('d')
 	)
 	..right = right

@@ -7,7 +7,7 @@ class Pet {
 	kind() => PetKind.Cat
 }
 
-var cat = new Pet()
-var nya = new Pet()
+var cat = Pet.new()
+var nya = Pet.new()
 
 echo(cat.kind*$(nya))

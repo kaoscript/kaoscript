@@ -90,7 +90,7 @@ class Attribute {
 			}
 
 			if ?name && (clazz ?= $attributes[name]) && clazz.target() ~~ targets {
-				return new clazz(data)
+				return clazz.new(data)
 			}
 			else {
 				return null
@@ -333,7 +333,7 @@ class IfAttribute extends Attribute {
 				}
 				else {
 					console.info(data)
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 		}
@@ -540,7 +540,7 @@ class TargetAttribute extends Attribute {
 		for argument in @data.arguments {
 			if argument.kind == NodeKind.Identifier {
 				if match !?= $targetRegex.exec(argument.name) {
-					throw new Error(`Invalid target syntax: \(argument.name)`)
+					throw Error.new(`Invalid target syntax: \(argument.name)`)
 				}
 
 				options.target = {

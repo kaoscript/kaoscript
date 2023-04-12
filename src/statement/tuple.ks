@@ -24,10 +24,10 @@ class TupleDeclaration extends Statement {
 		}
 
 		if named {
-			@tuple = new NamedTupleType(@scope)
+			@tuple = NamedTupleType.new(@scope)
 		}
 		else {
-			@tuple = new UnnamedTupleType(@scope)
+			@tuple = UnnamedTupleType.new(@scope)
 		}
 
 		if ?@data.extends {
@@ -44,15 +44,15 @@ class TupleDeclaration extends Statement {
 			@extendsName = `\(member.name)\(name)`
 		}
 
-		@type = new NamedType(@name, @tuple)
+		@type = NamedType.new(@name, @tuple)
 
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	override analyse() { # {{{
-		@function = new TupleFunction(@data, this, new BlockScope(@scope!?))
+		@function = TupleFunction.new(@data, this, BlockScope.new(@scope!?))
 
 		for var data in @data.fields {
-			var field = new TupleFieldDeclaration(data, this)
+			var field = TupleFieldDeclaration.new(data, this)
 
 			field.analyse()
 
@@ -169,7 +169,7 @@ class TupleFunction extends AbstractNode {
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
-		@type = new FunctionType(@scope)
+		@type = FunctionType.new(@scope)
 	} # }}}
 	analyse()
 	override prepare(target, targetMode) { # {{{
@@ -180,7 +180,7 @@ class TupleFunction extends AbstractNode {
 			var parent = @parent._extendsType.type()
 
 			for var type in parent.listAllFields() {
-				var field = new TupleFieldDeclaration(type, @parent!?)
+				var field = TupleFieldDeclaration.new(type, @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -235,7 +235,7 @@ class TupleFieldDeclaration extends AbstractNode {
 			@hasName = true
 		}
 
-		@parameter = new TupleFieldParameter(this, parent._function)
+		@parameter = TupleFieldParameter.new(this, parent._function)
 	} # }}}
 	constructor(@type, parent) { # {{{
 		super($ast.parameter(), parent)
@@ -246,7 +246,7 @@ class TupleFieldDeclaration extends AbstractNode {
 
 		@index = @type.index()
 
-		@parameter = new TupleFieldParameter(this, parent._function)
+		@parameter = TupleFieldParameter.new(this, parent._function)
 		@parameter.unflagValidation()
 	} # }}}
 	analyse()
@@ -274,7 +274,7 @@ class TupleFieldDeclaration extends AbstractNode {
 				type = NullType.Explicit
 			}
 
-			@type = new TupleFieldType(@scope, @data.name?.name, @index, type, @parameter.isRequired())
+			@type = TupleFieldType.new(@scope, @data.name?.name, @index, type, @parameter.isRequired())
 
 			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
@@ -302,10 +302,10 @@ class TupleFieldParameter extends Parameter {
 	} # }}}
 	analyse() { # {{{
 		if @field.hasName() {
-			@internal = new IdentifierParameter({name: @field.name()}, this, @scope)
+			@internal = IdentifierParameter.new({name: @field.name()}, this, @scope)
 		}
 		else {
-			@internal = new IdentifierParameter({name: `__ks_\(@field.index())`}, this, @scope)
+			@internal = IdentifierParameter.new({name: `__ks_\(@field.index())`}, this, @scope)
 		}
 
 		@internal.setAssignment(AssignmentType.Parameter)

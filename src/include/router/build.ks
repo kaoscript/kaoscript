@@ -42,7 +42,7 @@ namespace Build {
 			}
 
 			for var n from min to max {
-				groups[n] = new Group(n)
+				groups[n] = Group.new(n)
 			}
 
 			for var function in functions {
@@ -89,7 +89,7 @@ namespace Build {
 				functionMap[function.index()] = function
 			}
 
-			return new Route(
+			return Route.new(
 				functions: functionMap
 				trees
 			)
@@ -146,7 +146,7 @@ namespace Build {
 				}
 			}
 
-			return new Tree(
+			return Tree.new(
 				min: 0
 				function: master
 			)
@@ -163,7 +163,7 @@ namespace Build {
 				if function.isAsync() {
 					var scope = node.scope()
 
-					var parameter = new ParameterType(scope, scope.reference('Function')).index(parameters.length)
+					var parameter = ParameterType.new(scope, scope.reference('Function')).index(parameters.length)
 
 					parameters = [...parameters, parameter]
 
@@ -239,7 +239,7 @@ namespace Build {
 		): Void { # {{{
 			if type.isSplittable() {
 				var types = type.split([])
-				var union = new UnionMatch(
+				var union = UnionMatch.new(
 					function
 					length: types.length
 					matches: []
@@ -330,12 +330,12 @@ namespace Build {
 						}
 					}
 
-					group.rows[key] = new Row(
+					group.rows[key] = Row.new(
 						key
 						function
 						union
 						types: [
-							new RowType(
+							RowType.new(
 								index: argIndex
 								type
 								rest
@@ -359,7 +359,7 @@ namespace Build {
 				if function.isAsync() {
 					var scope = node.scope()
 
-					parameters = [...parameters, new ParameterType(scope, scope.reference('Function')).index(parameters.length)]
+					parameters = [...parameters, ParameterType.new(scope, scope.reference('Function')).index(parameters.length)]
 				}
 
 				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, group.n, group.n - min, 0, 0, 0, -1, '', [], {})
@@ -387,7 +387,7 @@ namespace Build {
 			if types.length == target {
 				if var match ?= group.rows[key] {
 					if function == match.function {
-						group.rows[key] = new Row(
+						group.rows[key] = Row.new(
 							key
 							function
 							types
@@ -398,7 +398,7 @@ namespace Build {
 						SyntaxException.throwIndistinguishableFunctions(name, match.types.map(({ type }, _, _) => type), [function, match.function], node) unless ignoreIndistinguishable
 					}
 					else if function.max() < match.function.max() {
-						group.rows[key] = new Row(
+						group.rows[key] = Row.new(
 							key
 							function
 							types
@@ -407,7 +407,7 @@ namespace Build {
 					}
 				}
 				else {
-					group.rows[key] = new Row(
+					group.rows[key] = Row.new(
 						key
 						function
 						types
@@ -498,7 +498,7 @@ namespace Build {
 
 				var types = [
 					...types
-					new RowType(
+					RowType.new(
 						index: argIndex
 						type
 						rest
@@ -595,7 +595,7 @@ namespace Build {
 			if function.isAsync() {
 				var scope = node.scope()
 
-				fnParameters = [...fnParameters, new ParameterType(scope, scope.reference('Function'))]
+				fnParameters = [...fnParameters, ParameterType.new(scope, scope.reference('Function'))]
 			}
 
 			for var row of rows {
@@ -674,7 +674,7 @@ namespace Build {
 				}
 			}
 
-			var row = new Row(
+			var row = Row.new(
 				function
 				key: ''
 				types: []
@@ -689,7 +689,7 @@ namespace Build {
 				var rest = parameter.max() == Infinity
 
 				row.key += key
-				row.types.push(new RowType(
+				row.types.push(RowType.new(
 					index: (afterRest ? argIndex - argCount : argIndex) as Number
 					type: type as Type
 					rest
@@ -705,7 +705,7 @@ namespace Build {
 				}
 			}
 
-			var tree = new Tree(n)
+			var tree = Tree.new(n)
 			var dyn column = tree
 			var mut variadic = false
 
@@ -722,7 +722,7 @@ namespace Build {
 				}
 
 				if index == lastIndex {
-					column.columns[hash] = new TreeLeaf(
+					column.columns[hash] = TreeLeaf.new(
 						index: (afterRest ? argIndex - argCount : argIndex) as Number
 						type: type as Type
 						min: min as Number
@@ -731,7 +731,7 @@ namespace Build {
 						rest
 						isNode: false
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function
 								parameter: index as Number
@@ -745,7 +745,7 @@ namespace Build {
 					)
 				}
 				else {
-					column.columns[hash] = new TreeBranch(
+					column.columns[hash] = TreeBranch.new(
 						index: (afterRest ? argIndex - argCount : argIndex) as Number
 						type: type as Type
 						min: min as Number
@@ -753,7 +753,7 @@ namespace Build {
 						variadic
 						rest
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function
 								parameter: index as Number
@@ -789,7 +789,7 @@ namespace Build {
 			if function.isAsync() {
 				var scope = node.scope()
 
-				parameters = [...parameters, new ParameterType(scope, scope.reference('Function'))]
+				parameters = [...parameters, ParameterType.new(scope, scope.reference('Function'))]
 			}
 
 			var mut count = 0
@@ -840,14 +840,14 @@ namespace Build {
 
 					var key = `:\(row.function.index()):\(parameter)`
 
-					branch.columns[hash] = new TreeLeaf(
+					branch.columns[hash] = TreeLeaf.new(
 						index
 						type
 						rest
 						variadic: rest
 						isNode: false
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -868,13 +868,13 @@ namespace Build {
 					var key = `:\(row.function.index()):\(parameter)`
 
 					if !?branch.columns[hash] {
-						branch.columns[hash] = new TreeBranch(
+						branch.columns[hash] = TreeBranch.new(
 							index
 							type
 							rest
 							variadic: rest
 							parameters: {
-								[key]: new TreeParameter(
+								[key]: TreeParameter.new(
 									key
 									function: row.function
 									parameter
@@ -892,7 +892,7 @@ namespace Build {
 						branch.rows.push(row)
 
 						if !?branch.parameters[key] {
-							branch.parameters[key] = new TreeParameter(
+							branch.parameters[key] = TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -932,7 +932,7 @@ namespace Build {
 		} # }}}
 
 		export func createTree(rows: Row{}, min: Number): Tree { # {{{
-			var tree = new Tree(min)
+			var tree = Tree.new(min)
 
 			var usages: Object<Number> = {}
 			for var _, key of rows {
@@ -952,14 +952,14 @@ namespace Build {
 
 					var key = `:\(row.function.index()):\(parameter)`
 
-					tree.columns[hash] = new TreeLeaf(
+					tree.columns[hash] = TreeLeaf.new(
 						index
 						type
 						rest
 						variadic: rest
 						isNode: false
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -980,13 +980,13 @@ namespace Build {
 					var key = `:\(row.function.index()):\(parameter)`
 
 					if !?tree.columns[hash] {
-						tree.columns[hash] = new TreeBranch(
+						tree.columns[hash] = TreeBranch.new(
 							index
 							type
 							rest
 							variadic: rest
 							parameters: {
-								[key]: new TreeParameter(
+								[key]: TreeParameter.new(
 									key
 									function: row.function
 									parameter
@@ -1014,7 +1014,7 @@ namespace Build {
 						branch.rows.push(row)
 
 						if !?branch.parameters[key] {
-							branch.parameters[key] = new TreeParameter(
+							branch.parameters[key] = TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -1082,7 +1082,7 @@ namespace Build {
 
 						branch.order.remove(key)
 
-						drop branch.columns[key]
+						Object.delete(branch.columns, key)
 					}
 
 					main.type = Type.union(scope, ...types).sort()
@@ -1182,7 +1182,7 @@ namespace Build {
 
 						applyMin2(branch, mins, type)
 
-						drop branch.columns[type]
+						Object.delete(branch.columns, type)
 
 						branch.order.remove(type)
 					}
@@ -1194,7 +1194,7 @@ namespace Build {
 							column2.min = Math.max(0, column2.min - column.min)
 							column2.variadic = true
 
-							drop branch.columns[type]
+							Object.delete(branch.columns, type)
 
 							branch.order.remove(type)
 						}
@@ -1213,7 +1213,7 @@ namespace Build {
 						for var col, type of column.columns {
 							col.max = branch.columns[type].max
 
-							drop branch.columns[type]
+							Object.delete(branch.columns, type)
 
 							branch.order.remove(type)
 						}
@@ -1250,7 +1250,7 @@ namespace Build {
 					return
 				}
 
-				drop branch.columns[type]
+				Object.delete(branch.columns, type)
 
 				branch.rest = node.rest
 				branch.variadic = node.variadic
@@ -1282,7 +1282,7 @@ namespace Build {
 						if ?groups[index + 1] {
 							groups[index] = groups[index + 1]
 
-							drop groups[index + 1]
+							Object.delete(groups, index + 1)
 
 							groups[index].unshift(type)
 						}
@@ -1301,7 +1301,7 @@ namespace Build {
 						var type = Type.union(scope, ...[branch.columns[key].type for var key in group]).sort()
 
 						for var key in group {
-							drop branch.columns[key]
+							Object.delete(branch.columns, key)
 						}
 
 						column.type = type
@@ -1430,7 +1430,7 @@ namespace Build {
 						parameter.min = Math.min(parameter.min, param.min)
 						parameter.max = Math.max(parameter.max, param.max)
 
-						drop params[key]
+						Object.delete(params, key)
 					}
 					else {
 						parameter.min = 0
@@ -1462,7 +1462,7 @@ namespace Build {
 				var hash = type.hashCode()
 				var key = `:\(row.function.index()):\(parameter)`
 
-				row.types.push(new RowType(
+				row.types.push(RowType.new(
 					index
 					type
 					rest
@@ -1470,7 +1470,7 @@ namespace Build {
 				))
 
 				if i == lastParameter {
-					var leaf = new TreeLeaf(
+					var leaf = TreeLeaf.new(
 						index
 						type
 						min
@@ -1479,7 +1479,7 @@ namespace Build {
 						variadic: rest || min != max
 						isNode: false
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -1502,7 +1502,7 @@ namespace Build {
 					}
 				}
 				else if i == 0 {
-					branch = new TreeBranch(
+					branch = TreeBranch.new(
 						index
 						type
 						min
@@ -1510,7 +1510,7 @@ namespace Build {
 						rest
 						variadic: true
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -1527,7 +1527,7 @@ namespace Build {
 					result = branch
 				}
 				else {
-					branch.columns[hash] = new TreeBranch(
+					branch.columns[hash] = TreeBranch.new(
 						index
 						type
 						min
@@ -1535,7 +1535,7 @@ namespace Build {
 						rest
 						variadic: rest || min != max
 						parameters: {
-							[key]: new TreeParameter(
+							[key]: TreeParameter.new(
 								key
 								function: row.function
 								parameter

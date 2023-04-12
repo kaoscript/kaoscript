@@ -15,6 +15,6 @@ class Greetings {
 	greet(name): String ~ SyntaxError => `\(@message)\nIt's nice to meet you, \(name).`
 }
 
-var hello = new Greetings('Hello world!')
+var hello = Greetings.new('Hello world!')
 
 console.log(hello.greet('miss White'))

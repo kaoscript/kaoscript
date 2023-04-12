@@ -218,7 +218,7 @@ class ReturnStatement extends Statement {
 		}
 		else {
 			if @value.isAwaiting() {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 			else {
 				@assignments.remove(@temp)

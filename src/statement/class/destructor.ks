@@ -37,7 +37,7 @@ class ClassDestructorDeclaration extends Statement {
 		parent._destructor = this
 	} # }}}
 	analyse() { # {{{
-		var parameter = new Parameter({
+		var parameter = Parameter.new({
 			kind: NodeKind.Parameter
 			modifiers: []
 			internal: $ast.identifier('that')
@@ -50,7 +50,7 @@ class ClassDestructorDeclaration extends Statement {
 	override prepare(target, targetMode) { # {{{
 		@parameters[0].prepare()
 
-		@type = new ClassDestructorType(@data, this)
+		@type = ClassDestructorType.new(@data, this)
 
 		@type.unflagAssignableThis()
 

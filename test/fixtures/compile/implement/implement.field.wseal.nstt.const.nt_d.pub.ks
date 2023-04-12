@@ -6,7 +6,7 @@ impl Date {
 	final @culture	= 'und'
 }
 
-var d = new Date()
+var d = Date.new()
 
 expect(d.culture).to.not.exist
 

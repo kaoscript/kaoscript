@@ -12,8 +12,8 @@ class Proxy {
 	proxy hello = @component.hello
 }
 
-var p1 = new Proxy(new Hello())
-var p2 = new Proxy(null)
+var p1 = Proxy.new(Hello.new())
+var p2 = Proxy.new(null)
 
 console.log(`\(p1.hello('Joe'))`)
 console.log(`\(p2.hello('Joe'))`)

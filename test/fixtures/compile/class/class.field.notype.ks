@@ -6,20 +6,20 @@ class Greetings {
 	private {
 		_message = ''
 	}
-	
+
 	constructor() {
 		this('Hello!')
 	}
-	
+
 	constructor(message) {
 		this._message = message
 	}
-	
+
 	greet(name) {
 		return this._message + '\nIt\'s nice to meet you, ' + name + '.'
 	}
 }
 
-var dyn hello = new Greetings('Hello world!')
+var dyn hello = Greetings.new('Hello world!')
 
 console.log(hello.greet('miss White'))

@@ -10,7 +10,7 @@ func foobar(x, y) ~ Error {
 		}
     }
     else {
-        throw new Error('foobar')
+        throw Error.new('foobar')
     }
 }
 

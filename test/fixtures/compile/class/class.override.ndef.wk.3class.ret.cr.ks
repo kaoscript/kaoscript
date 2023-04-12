@@ -8,9 +8,9 @@ class ClassC extends ClassB {
 }
 
 class Foobar {
-	foobar(): ClassB => new ClassB()
+	foobar(): ClassB => ClassB.new()
 }
 
 class Quxbaz extends Foobar {
-	override foobar(): ClassA => new ClassA()
+	override foobar(): ClassA => ClassA.new()
 }

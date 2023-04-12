@@ -18,7 +18,7 @@ func getLine(position: IPosition) {
 }
 
 func newPosition() {
-	return new Position(1, 1)
+	return Position.new(1, 1)
 }
 
 expect(getLine(newPosition())).to.eql(1)

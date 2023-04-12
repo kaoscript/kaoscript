@@ -3,7 +3,7 @@ func test(x): Boolean ~ Error {
         return true
     }
     else {
-        throw new Error('foobar')
+        throw Error.new('foobar')
     }
 }
 

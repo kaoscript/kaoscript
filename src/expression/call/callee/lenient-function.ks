@@ -99,7 +99,7 @@ class LenientFunctionCallee extends Callee {
 
 		match @scope {
 			ScopeKind.Argument {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			ScopeKind.This {
 				fragments.code('(')
@@ -120,12 +120,12 @@ class LenientFunctionCallee extends Callee {
 	} # }}}
 	toCurryType() { # {{{
 		if !?@result {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 
 		if ?@result.matches {
 			if @result.matches.length > 1 {
-				var overloaded = new OverloadedFunctionType(@node.scope())
+				var overloaded = OverloadedFunctionType.new(@node.scope())
 
 				for var { function, positions }, index in @result.matches {
 					@curry = CurryExpression.toCurryType(function, positions, false, @node)
@@ -148,7 +148,7 @@ class LenientFunctionCallee extends Callee {
 			return @curry[0]
 		}
 
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
 		if @nullable {

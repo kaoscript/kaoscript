@@ -11,10 +11,10 @@ class ClassVariableType extends Type {
 			var scope = node.scope()
 
 			var type = if ?data.type {
-				pick new ClassVariableType(scope, Type.fromAST(data.type, node))
+				pick ClassVariableType.new(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				pick new ClassVariableType(scope, AnyType.NullableUnexplicit)
+				pick ClassVariableType.new(scope, AnyType.NullableUnexplicit)
 			}
 
 			if ?data.modifiers {
@@ -48,7 +48,7 @@ class ClassVariableType extends Type {
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
 			var data = index
-			var type = new ClassVariableType(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
+			var type = ClassVariableType.new(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
 			type._default = data.default
@@ -62,7 +62,7 @@ class ClassVariableType extends Type {
 		super(scope)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	discardVariable() => @type
 	access(@access) => this

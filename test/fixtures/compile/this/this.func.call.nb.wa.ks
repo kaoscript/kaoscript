@@ -11,6 +11,6 @@ func isCat(this: Pet) {
     return this.kind() == PetKind.Cat
 }
 
-var nya = new Pet()
+var nya = Pet.new()
 
 echo(isCat(nya))

@@ -1,14 +1,14 @@
 extern console
 
 class CarFactory {
-	makeCar(): Car => new Car()
+	makeCar(): Car => Car.new()
 }
 
 class Car {
 	getType(): String => 'sport'
 }
 
-var factory = new CarFactory()
+var factory = CarFactory.new()
 
 console.log(`\(factory.makeCar().getType())`)
 

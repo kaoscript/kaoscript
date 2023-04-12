@@ -5,4 +5,4 @@ class Foobar {
 	constructor(@x!?)
 }
 
-var f = new Foobar(null)
+var f = Foobar.new(null)

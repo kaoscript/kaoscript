@@ -9,7 +9,7 @@ class Quxbaz extends Foobar {
 	foobar(value: String) => 2
 }
 
-func getFoobar(): Foobar => new Quxbaz()
+func getFoobar(): Foobar => Quxbaz.new()
 
 var f = getFoobar()
 

@@ -6,7 +6,7 @@ struct Foobar {
 }
 
 func foobar(values, test) {
-	values.push(new Foobar(
+	values.push(Foobar.new(
 		a: 1
 		c: 3
 		d: 4 if test()

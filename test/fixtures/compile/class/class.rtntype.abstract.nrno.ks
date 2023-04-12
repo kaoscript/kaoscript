@@ -13,7 +13,7 @@ class Foobar extends Master {
 	value(@value) => this
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 console.log(`\(f.value('foobar').value())`)
 

@@ -158,7 +158,7 @@ class ForOfStatement extends Statement {
 			@keyName = @bindingScope.acquireTempName(false)
 		}
 
-		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
+		@bindingValue = TempMemberExpression.new(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
 
 		if ?@value {
 			@bindingValue.acquireReusable(@value.isSplitAssignment())

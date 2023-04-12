@@ -1,3 +1,3 @@
 extern console
 
-console.log(new Date(2013, 2, 1))
+console.log(Date.new(2013, 2, 1))

@@ -3,4 +3,4 @@ struct Foobar {
 	z
 }
 
-var a = new Foobar(x: 1, y: 1, z: 1)
+var a = Foobar.new(x: 1, y: 1, z: 1)

@@ -21,7 +21,7 @@ class HollowScope extends Scope {
 			}
 		}
 
-		var variable = new Variable(name, immutable, false, type, initialized)
+		var variable = Variable.new(name, immutable, false, type, initialized)
 
 		@defineVariable(variable, node)
 

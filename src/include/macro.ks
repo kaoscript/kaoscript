@@ -18,7 +18,7 @@ func $autoEvaluate(macro, node, data) { # {{{
 func $compileMacro(source: String, standardLibrary: Boolean = false): String { # {{{
 	// echo('--> ', source)
 
-	var compiler = new Compiler('__ks__', {
+	var compiler = Compiler.new('__ks__', {
 		register: false
 		target: $target
 	})
@@ -27,7 +27,7 @@ func $compileMacro(source: String, standardLibrary: Boolean = false): String { #
 		compiler.flagStandardLibrary()
 	}
 
-	compiler.compile('extern console, JSON\nrequire __ks_marker\nreturn ' + source)
+	compiler.compile('extern console, JSON\nrequire class __ks_marker\nreturn ' + source)
 	// echo('=- ', compiler.toSource())
 
 	return compiler.toSource()
@@ -199,7 +199,9 @@ func $transformExpression(macro, node, data, writer) { # {{{
 		NodeKind.LambdaExpression {
 			return macro.addMark(data)
 		}
-		NodeKind.MemberExpression {
+		// TODO!
+		// NodeKind.MemberExpression when data.object.kind != NodeKind.Identifier || data.object.name != '__ks_marker' {
+		NodeKind.MemberExpression when $marker(data) {
 			return macro.addMark(data)
 		}
 		NodeKind.ObjectMember {
@@ -222,6 +224,7 @@ func $transformExpression(macro, node, data, writer) { # {{{
 
 	return data
 } # }}}
+func $marker(data) => data.object.kind != NodeKind.Identifier || data.object.name != '__ks_marker'
 
 class MacroDeclaration extends AbstractNode {
 	private {
@@ -237,7 +240,7 @@ class MacroDeclaration extends AbstractNode {
 		@type: MacroType
 	}
 	constructor(@data, @parent, _: Scope?, @name = data.name.name, @standardLibrary = false) { # {{{
-		super(data, parent, new MacroScope())
+		super(data, parent, MacroScope.new())
 
 		@standardLibrary ||= @parent.module().isStandardLibrary()
 
@@ -256,7 +259,7 @@ class MacroDeclaration extends AbstractNode {
 			@source = @data.source
 		}
 		else {
-			var builder = new Generator.KSWriter({
+			var builder = Generator.KSWriter.new({
 				filters: {
 					expression: this.filter^^(false, ^, ^)
 					statement: this.filter^^(true, ^, ^)
@@ -327,10 +330,22 @@ class MacroDeclaration extends AbstractNode {
 		@marks.push(data, kind)
 
 		return {
-			kind: NodeKind.CreateExpression
-			class: {
-				kind: NodeKind.Identifier
-				name: '__ks_marker'
+			kind: NodeKind.CallExpression
+			modifiers: []
+			scope: {
+				kind: ScopeKind.This
+			}
+			callee: {
+				kind: NodeKind.MemberExpression
+				modifiers: []
+				object: {
+					kind: NodeKind.Identifier
+					name: '__ks_marker'
+				}
+				property: {
+					kind: NodeKind.Identifier
+					name: 'new'
+				}
 			}
 			arguments: [
 				{
@@ -470,10 +485,10 @@ class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode): MacroType { # {{{
 		var scope = node.scope()
 
-		return new MacroType([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
+		return MacroType.new([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
 	} # }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
-		var type = new MacroType(scope)
+		var type = MacroType.new(scope)
 
 		for var parameter in data.parameters {
 			type.addParameter(ParameterType.import(parameter, false, references, scope, node), node)
@@ -508,10 +523,10 @@ class MacroType extends FunctionType {
 			}
 		}
 		else if @hasRest {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 
 		return true
@@ -523,24 +538,24 @@ class MacroArgument extends Type {
 	private {
 		@data
 	}
-	static build(arguments: Array) => [new MacroArgument(argument) for var argument in arguments]
+	static build(arguments: Array) => [MacroArgument.new(argument) for var argument in arguments]
 	constructor(@data) { # {{{
 		super(null)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	toPositiveTestFragments(fragments, node, junction: Junction = Junction.NONE) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	toVariations(variations: Array<String>) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	isAssignableToVariable(value: AnyType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		return true
@@ -619,7 +634,7 @@ func $callExpression(data, parent, scope) { # {{{
 						return expression
 					}
 					else {
-						throw new NotImplementedException(parent)
+						throw NotImplementedException.new(parent)
 					}
 				}
 			}
@@ -628,7 +643,7 @@ func $callExpression(data, parent, scope) { # {{{
 		}
 	}
 
-	return new CallExpression(data, parent, scope)
+	return CallExpression.new(data, parent, scope)
 } # }}}
 
 func $callStatement(data, parent, scope) { # {{{
@@ -638,7 +653,7 @@ func $callStatement(data, parent, scope) { # {{{
 
 			for var macro in macros {
 				if macro.matchArguments(arguments) {
-					return new CallMacroStatement(data, parent, scope, macro)
+					return CallMacroStatement.new(data, parent, scope, macro)
 				}
 			}
 
@@ -646,7 +661,7 @@ func $callStatement(data, parent, scope) { # {{{
 		}
 	}
 
-	return new ExpressionStatement(data, parent, scope)
+	return ExpressionStatement.new(data, parent, scope)
 } # }}}
 
 class CallMacroStatement extends Statement {

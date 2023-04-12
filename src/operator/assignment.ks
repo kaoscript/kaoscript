@@ -138,7 +138,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 					leftMost = leftMost.left()
 				}
 
-				var newLeft = new BinaryOperatorSubtraction(@data, leftMost, @scope)
+				var newLeft = BinaryOperatorSubtraction.new(@data, leftMost, @scope)
 
 				newLeft.setOperands(@left, leftMost.left(), enum: true, expectingEnum: false)
 
@@ -250,7 +250,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 					leftMost = leftMost.left()
 				}
 
-				var newLeft = new BinaryOperatorAddition(@data, leftMost, @scope)
+				var newLeft = BinaryOperatorAddition.new(@data, leftMost, @scope)
 
 				newLeft.setOperands(@left, leftMost.left(), enum: true, number: @number, expectingEnum: false)
 
@@ -303,7 +303,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 			else {
 				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
-				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+				@type = UnionType.new(@scope, [numberType, @scope.reference('String')], false)
 			}
 		}
 

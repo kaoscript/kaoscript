@@ -3,7 +3,7 @@ func foobar() {
 
 func quxbaz() ~ Error {
 	if x !?= foobar() {
-		throw new Error()
+		throw Error.new()
 	}
 
 	return x.y

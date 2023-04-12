@@ -6,7 +6,7 @@ class TypeAliasDeclaration extends Statement {
 	override initiate() { # {{{
 		@name = @data.name.name
 
-		@variable = @scope.define(@name, true, new AliasType(@scope, Type.fromAST(@data.type, this)), this)
+		@variable = @scope.define(@name, true, AliasType.new(@scope, Type.fromAST(@data.type, this)), this)
 	} # }}}
 	analyse()
 	override prepare(target, targetMode)

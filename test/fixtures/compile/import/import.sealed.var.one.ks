@@ -4,5 +4,5 @@ extern console: {
 	log(...args)
 }
 
-var shape: Shape = new Shape('yellow')
+var shape: Shape = Shape.new('yellow')
 console.log(shape.draw('rectangle'))

@@ -14,7 +14,7 @@ func foobar(d: Date) {
 
 }
 
-var d = new Date()
+var d = Date.new()
 
 foobar(d.setDate(1))
 

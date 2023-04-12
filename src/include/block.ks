@@ -269,7 +269,7 @@ class FunctionBlock extends Block {
 			}
 
 			if toAdd {
-				var statement = new ReturnStatement(@return, this)
+				var statement = ReturnStatement.new(@return, this)
 
 				statement.analyse()
 				statement.prepare(target)

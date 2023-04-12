@@ -1,5 +1,5 @@
 class Foobar {
 }
 
-if (x = new Foobar()) == 0 {
+if (x = Foobar.new()) == 0 {
 }

@@ -81,17 +81,17 @@ var $function = {
 					}
 				}
 			}
-			NodeKind.CreateExpression {
-				if $function.useThisVariable(data.class, node) {
-					return true
-				}
+			// NodeKind.CreateExpression {
+			// 	if $function.useThisVariable(data.class, node) {
+			// 		return true
+			// 	}
 
-				for arg in data.arguments {
-					if $function.useThisVariable(arg, node) {
-						return true
-					}
-				}
-			}
+			// 	for arg in data.arguments {
+			// 		if $function.useThisVariable(arg, node) {
+			// 			return true
+			// 		}
+			// 	}
+			// }
 			NodeKind.Identifier => return data.name == 'this'
 			NodeKind.IfStatement {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
@@ -134,7 +134,7 @@ var $function = {
 				return ?data.init && $function.useThisVariable(data.init, node)
 			}
 			else {
-				throw new NotImplementedException(`Unknow kind \(data.kind)`, node)
+				throw NotImplementedException.new(`Unknow kind \(data.kind)`, node)
 			}
 		}
 
@@ -154,28 +154,28 @@ class FunctionDeclaration extends Statement {
 	static toFlatWrongDoingFragments(block, ctrl?, argName, async, returns) { # {{{
 		if ctrl == null {
 			if async {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			else {
 				block
 					.newControl()
 					.code(`if(\(argName).length !== 0)`)
 					.step()
-					.line('throw new SyntaxError("Wrong number of arguments")')
+					.line('throw SyntaxError.new("Wrong number of arguments")')
 					.done()
 			}
 		}
 		else {
 			if async {
-				ctrl.step().code('else').step().line(`return __ks_cb(new SyntaxError("Wrong number of arguments"))`).done()
+				ctrl.step().code('else').step().line(`return __ks_cb(SyntaxError.new("Wrong number of arguments"))`).done()
 			}
 			else if returns {
 				ctrl.done()
 
-				block.line('throw new SyntaxError("Wrong number of arguments")')
+				block.line('throw SyntaxError.new("Wrong number of arguments")')
 			}
 			else {
-				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
+				ctrl.step().code('else').step().line('throw SyntaxError.new("Wrong number of arguments")').done()
 			}
 		}
 	} # }}}
@@ -201,7 +201,7 @@ class FunctionDeclaration extends Statement {
 						@main = true
 						@extended = true
 
-						@variable = new FunctionVariable(@scope!?, @name, true, type.length?() ?? 1)
+						@variable = FunctionVariable.new(@scope!?, @name, true, type.length?() ?? 1)
 
 						@variable.getRealType().addFunction(type)
 
@@ -217,7 +217,7 @@ class FunctionDeclaration extends Statement {
 				}, variable => {
 					@variable = variable
 
-					var declarator = new FunctionDeclarator(@variable, @data, this)
+					var declarator = FunctionDeclarator.new(@variable, @data, this)
 
 					declarator.analyse()
 				})
@@ -226,7 +226,7 @@ class FunctionDeclaration extends Statement {
 		else {
 			@main = true
 
-			@variable = new FunctionVariable(@scope!?, @name, false)
+			@variable = FunctionVariable.new(@scope!?, @name, false)
 
 			@scope.defineVariable(@variable, this)
 		}
@@ -243,7 +243,7 @@ class FunctionDeclaration extends Statement {
 				else {
 					var type = @variable.getDeclaredType()
 
-					@variable = new FunctionVariable(@scope!?, @name, true, type.length?() ?? 1)
+					@variable = FunctionVariable.new(@scope!?, @name, true, type.length?() ?? 1)
 
 					@variable.getRealType().addFunction(type)
 
@@ -251,12 +251,12 @@ class FunctionDeclaration extends Statement {
 				}
 			}
 
-			var declarator = new FunctionDeclarator(@variable, @data, this)
+			var declarator = FunctionDeclarator.new(@variable, @data, this)
 
 			declarator.analyse()
 		}
 		else if @continued {
-			var declarator = new FunctionDeclarator(@variable, @data, this)
+			var declarator = FunctionDeclarator.new(@variable, @data, this)
 
 			declarator.analyse()
 		}
@@ -412,12 +412,12 @@ class FunctionDeclarator extends AbstractNode {
 					@thisVariable = @scope.define('this', true, Type.Any, this)
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 
 			for var data in @data.parameters from firstParameter {
-				var parameter = new Parameter(data, this)
+				var parameter = Parameter.new(data, this)
 
 				parameter.analyse()
 
@@ -440,7 +440,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, @index, this)
+		@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, @index, this)
 
 		@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 
@@ -576,7 +576,7 @@ class FunctionVariable extends Variable {
 		@indexDelta: Number							 = 0
 	}
 	constructor(scope: Scope, @name, @extended, @indexDelta = 0) { # {{{
-		super(name, true, false, new OverloadedFunctionType(scope))
+		super(name, true, false, OverloadedFunctionType.new(scope))
 
 		@initialized = true
 	} # }}}

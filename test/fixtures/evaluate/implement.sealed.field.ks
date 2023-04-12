@@ -11,9 +11,9 @@ impl Date {
 	culture(@culture) => this
 }
 
-expect(new Date().culture()).to.equal('und')
+expect(Date.new().culture()).to.equal('und')
 
-var d = new Date()
+var d = Date.new()
 
 expect(d.culture('en')).to.equal(d)
 

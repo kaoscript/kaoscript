@@ -19,7 +19,7 @@ class CodeFragment extends Fragment {
 }
 
 func $code(code) { # {{{
-	return new CodeFragment(code)
+	return CodeFragment.new(code)
 } # }}}
 
 func $const(node) { # {{{

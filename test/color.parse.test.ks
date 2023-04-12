@@ -13,7 +13,7 @@ import {
 describe('color.parse', func() {
 	describe('hex', func() {
 		it('#ddd', func() { # {{{
-			var c = new Color('#ddd')
+			var c = Color.new('#ddd')
 
 			expect(c.red()).equal(221)
 			expect(c.green()).equal(221)
@@ -22,7 +22,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('#808080', func() { # {{{
-			var c = new Color('#808080')
+			var c = Color.new('#808080')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -31,7 +31,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('#ddda', func() { # {{{
-			var c = new Color('#ddda')
+			var c = Color.new('#ddda')
 
 			expect(c.red()).equal(221)
 			expect(c.green()).equal(221)
@@ -40,7 +40,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('#808080A0', func() { # {{{
-			var c = new Color('#808080A0')
+			var c = Color.new('#808080A0')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -51,7 +51,7 @@ describe('color.parse', func() {
 
 	describe('rgb', func() {
 		it('rgb(128, 128, 128)', func() { # {{{
-			var c = new Color('rgb(128, 128, 128)')
+			var c = Color.new('rgb(128, 128, 128)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -60,7 +60,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgb(50%, 50%, 50%)', func() { # {{{
-			var c = new Color('rgb(50%, 50%, 50%)')
+			var c = Color.new('rgb(50%, 50%, 50%)')
 
 			expect(c.red()).equal(127)
 			expect(c.green()).equal(127)
@@ -69,7 +69,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(128, 128, 128, 0.7)', func() { # {{{
-			var c = new Color('rgba(128, 128, 128, 0.7)')
+			var c = Color.new('rgba(128, 128, 128, 0.7)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -78,7 +78,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(50%, 50%, 50%, 70%)', func() { # {{{
-			var c = new Color('rgba(50%, 50%, 50%, 70%)')
+			var c = Color.new('rgba(50%, 50%, 50%, 70%)')
 
 			expect(c.red()).equal(127)
 			expect(c.green()).equal(127)
@@ -87,7 +87,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(#808080, 0.7)', func() { # {{{
-			var c = new Color('rgba(#808080, 0.7)')
+			var c = Color.new('rgba(#808080, 0.7)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -96,7 +96,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(#808080, 70%)', func() { # {{{
-			var c = new Color('rgba(#808080, 70%)')
+			var c = Color.new('rgba(#808080, 70%)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -105,7 +105,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(#ddd, 0.7)', func() { # {{{
-			var c = new Color('rgba(#ddd, 0.7)')
+			var c = Color.new('rgba(#ddd, 0.7)')
 
 			expect(c.red()).equal(221)
 			expect(c.green()).equal(221)
@@ -114,7 +114,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('rgba(#ddd, 70%)', func() { # {{{
-			var c = new Color('rgba(#ddd, 70%)')
+			var c = Color.new('rgba(#ddd, 70%)')
 
 			expect(c.red()).equal(221)
 			expect(c.green()).equal(221)
@@ -125,7 +125,7 @@ describe('color.parse', func() {
 
 	describe('gray', func() {
 		it('gray(128)', func() { # {{{
-			var c = new Color('gray(128)')
+			var c = Color.new('gray(128)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -134,7 +134,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('gray(50%)', func() { # {{{
-			var c = new Color('gray(50%)')
+			var c = Color.new('gray(50%)')
 
 			expect(c.red()).equal(127)
 			expect(c.green()).equal(127)
@@ -143,7 +143,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('gray(128, 0.7)', func() { # {{{
-			var c = new Color('gray(128, 0.7)')
+			var c = Color.new('gray(128, 0.7)')
 
 			expect(c.red()).equal(128)
 			expect(c.green()).equal(128)
@@ -152,7 +152,7 @@ describe('color.parse', func() {
 		}) # }}}
 
 		it('gray(50%, 70%)', func() { # {{{
-			var c = new Color('gray(50%, 70%)')
+			var c = Color.new('gray(50%, 70%)')
 
 			expect(c.red()).equal(127)
 			expect(c.green()).equal(127)

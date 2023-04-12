@@ -10,11 +10,11 @@ class ClassConstructorType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{
 			var scope = node.scope()
 
-			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return ClassConstructorType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
 			var data = index
-			var type = new ClassConstructorType(scope)
+			var type = ClassConstructorType.new(scope)
 
 			type._index = data.index
 			type._access = data.access
@@ -48,7 +48,7 @@ class ClassConstructorType extends FunctionType {
 		}
 	} # }}}
 	clone() { # {{{
-		var clone = new ClassConstructorType(@scope)
+		var clone = ClassConstructorType.new(@scope)
 
 		FunctionType.clone(this, clone)
 
@@ -111,7 +111,7 @@ class ClassConstructorType extends FunctionType {
 	private processModifiers(modifiers) { # {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind.Async {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			else if modifier.kind == ModifierKind.Private {
 				@access = Accessibility.Private

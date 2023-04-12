@@ -8,6 +8,6 @@ class Pet {
 }
 
 
-var cat = new Pet()
+var cat = Pet.new()
 
 echo(cat.kind^^()())

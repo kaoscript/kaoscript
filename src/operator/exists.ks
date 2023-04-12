@@ -182,7 +182,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 							@statement.addInitializableVariable(variable, false, this)
 						}
 						else {
-							throw new NotImplementedException(this)
+							throw NotImplementedException.new(this)
 						}
 
 						@lateinit = true

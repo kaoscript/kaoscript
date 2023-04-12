@@ -28,6 +28,6 @@ class Rectangle extends Shape {
 	}
 }
 
-var dyn r = new Rectangle('black', 'white')
+var dyn r = Rectangle.new('black', 'white')
 
 console.log(r.draw())

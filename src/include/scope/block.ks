@@ -118,7 +118,7 @@ class BlockScope extends Scope {
 			}
 		}
 
-		var variable = new Variable(name, immutable, false, type, initialized)
+		var variable = Variable.new(name, immutable, false, type, initialized)
 
 		@defineVariable(variable, node)
 
@@ -335,7 +335,7 @@ class BlockScope extends Scope {
 	line() => @module.line()
 	line(line: Number) => @module.line(line)
 	listCompositeMacros(name) { # {{{
-		var regex = new RegExp(`^\(name)\.`)
+		var regex = RegExp.new(`^\(name)\.`)
 		var list = []
 
 		for m, n of @macros when regex.test(n) {
@@ -366,7 +366,7 @@ class BlockScope extends Scope {
 	processStash(name) { # {{{
 		var stash = @stashes[name]
 		if ?stash {
-			drop @stashes[name]
+			Object.delete(@stashes, name)
 
 			var mut variable = @getVariable(name)
 			for var mut fn in stash {
@@ -498,7 +498,7 @@ class BlockScope extends Scope {
 			var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 			if @references[hash] is not ReferenceType {
-				@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
+				@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
 			}
 
 			return @references[hash]

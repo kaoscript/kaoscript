@@ -12,85 +12,85 @@ import {
 
 describe('color.operation', func() {
 	it('blend(#ff0, blue, 0.5)', func() { # {{{
-		var c = new Color('#ff0').blend(Color.from('blue')!!, 0.5)
+		var c = Color.new('#ff0').blend(Color.from('blue')!!, 0.5)
 
 		expect(c.hex()).to.equal('#808080')
 	}) # }}}
 
 	it('blend(#ff0, blue, 0.5, rgb)', func() { # {{{
-		var c = new Color('#ff0').blend(Color.from('blue')!!, 0.5, Space.RGB)
+		var c = Color.new('#ff0').blend(Color.from('blue')!!, 0.5, Space.RGB)
 
 		expect(c.hex()).to.equal('#808080')
 	}) # }}}
 
 	it('clearer(#ff08, 0.5)', func() { # {{{
-		var c = new Color('#ff08').clearer(0.5)
+		var c = Color.new('#ff08').clearer(0.5)
 
 		expect(c.hex()).to.equal('#ffff0008')
 	}) # }}}
 
 	it('clearer(#ff08, 50%)', func() { # {{{
-		var c = new Color('#ff08').clearer('50%')
+		var c = Color.new('#ff08').clearer('50%')
 
 		expect(c.hex()).to.equal('#ff04')
 	}) # }}}
 
 	it('opaquer(#ff08, 0.5)', func() { # {{{
-		var c = new Color('#ff08').opaquer(0.5)
+		var c = Color.new('#ff08').opaquer(0.5)
 
 		expect(c.hex()).to.equal('#ff0')
 	}) # }}}
 
 	it('opaquer(#ff08, 50%)', func() { # {{{
-		var c = new Color('#ff08').opaquer('50%')
+		var c = Color.new('#ff08').opaquer('50%')
 
 		expect(c.hex()).to.equal('#ff0c')
 	}) # }}}
 
 	it('greyscale(#abc)', func() { # {{{
-		var c = new Color('#abc').greyscale()
+		var c = Color.new('#abc').greyscale()
 
 		expect(c.hex()).to.equal('#b9b9b9')
 	}) # }}}
 
 	it('greyscale(#abc, BT709)', func() { # {{{
-		var c = new Color('#abc').greyscale('BT709')
+		var c = Color.new('#abc').greyscale('BT709')
 
 		expect(c.hex()).to.equal('#b9b9b9')
 	}) # }}}
 
 	it('greyscale(#abc, average)', func() { # {{{
-		var c = new Color('#abc').greyscale('average')
+		var c = Color.new('#abc').greyscale('average')
 
 		expect(c.hex()).to.equal('#bbb')
 	}) # }}}
 
 	it('greyscale(#abc, lightness)', func() { # {{{
-		var c = new Color('#abc').greyscale('lightness')
+		var c = Color.new('#abc').greyscale('lightness')
 
 		expect(c.hex()).to.equal('#7d7d7d')
 	}) # }}}
 
 	it('greyscale(#abc, Y)', func() { # {{{
-		var c = new Color('#abc').greyscale('Y')
+		var c = Color.new('#abc').greyscale('Y')
 
 		expect(c.hex()).to.equal('#b8b8b8')
 	}) # }}}
 
 	it('greyscale(#abc, RMY)', func() { # {{{
-		var c = new Color('#abc').greyscale('RMY')
+		var c = Color.new('#abc').greyscale('RMY')
 
 		expect(c.hex()).to.equal('#b4b4b4')
 	}) # }}}
 
 	it('negative(#abc)', func() { # {{{
-		var c = new Color('#abc').negative()
+		var c = Color.new('#abc').negative()
 
 		expect(c.hex()).to.equal('#543')
 	}) # }}}
 
 	it('scheme(#abc)', func() { # {{{
-		var colors = new Color('#abc').scheme([
+		var colors = Color.new('#abc').scheme([
 			func(color) {
 				return color.shade(0.3).hex()
 			},
@@ -105,25 +105,25 @@ describe('color.operation', func() {
 	}) # }}}
 
 	it('shade(#abc, 0.5)', func() { # {{{
-		var c = new Color('#abc').shade(0.5)
+		var c = Color.new('#abc').shade(0.5)
 
 		expect(c.hex()).to.equal('#555e66')
 	}) # }}}
 
 	it('tint(#abc, 0.5)', func() { # {{{
-		var c = new Color('#abc').tint(0.5)
+		var c = Color.new('#abc').tint(0.5)
 
 		expect(c.hex()).to.equal('#d5dde6')
 	}) # }}}
 
 	it('tone(#abc, 0.5)', func() { # {{{
-		var c = new Color('#abc').tone(0.5)
+		var c = Color.new('#abc').tone(0.5)
 
 		expect(c.hex()).to.equal('#959ea6')
 	}) # }}}
 
 	it('gradient(#abc, #963, 4)', func() { # {{{
-		var colors = new Color('#abc').gradient(Color.from('#963')!!, 4)
+		var colors = Color.new('#abc').gradient(Color.from('#963')!!, 4)
 
 		expect(colors.length).to.equal(6)
 		expect(colors[0].hex()).to.equal('#abc')

@@ -42,5 +42,5 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let __ks_class_1 = foobar.__ks_0();
-	const value = Helper.create(__ks_class_1, []);
+	const value = new __ks_class_1();
 };

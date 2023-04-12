@@ -1,7 +1,7 @@
 require expect: func
 
 func test(case, year, index) {
-	var d = new Date(year, case[0], case[1])
+	var d = Date.new(year, case[0], case[1])
 
 	expect(d.getDay()).to.equal(case[index + 2])
 }

@@ -5,6 +5,6 @@ struct Point {
     y: Number
 }
 
-var point = new Point(x: 0.3, y: 0.4)
+var point = Point.new(x: 0.3, y: 0.4)
 
 console.log(point.x + 1, point.x + point.y)

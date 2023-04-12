@@ -67,7 +67,7 @@ class ParameterType extends Type {
 				type = type.setNullable(true)
 			}
 
-			var parameter = new ParameterType(scope, externalName, internalName, type, min, max, default)
+			var parameter = ParameterType.new(scope, externalName, internalName, type, min, max, default)
 
 			if default {
 				parameter.setDefaultValue(data.defaultValue, true)
@@ -85,7 +85,7 @@ class ParameterType extends Type {
 			var data = index
 			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 			var passing = ?data.passing ? PassingMode(data.passing) : PassingMode.BOTH
-			var type = new ParameterType(scope, data.external, data.internal, passing, subtype, data.min, data.max, data.default)
+			var type = ParameterType.new(scope, data.external, data.internal, passing, subtype, data.min, data.max, data.default)
 
 			if data.default {
 				if data.comprehensive {
@@ -132,7 +132,7 @@ class ParameterType extends Type {
 		}
 	} # }}}
 	clone(): ParameterType { # {{{
-		var that = new ParameterType(@scope, @externalName, @internalName, @passing, @type, @min, @max, @default)
+		var that = ParameterType.new(@scope, @externalName, @internalName, @passing, @type, @min, @max, @default)
 
 		if @retained {
 			that.flagRetained()
@@ -294,7 +294,7 @@ class ParameterType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	toQuote() { # {{{
 		var mut fragments = ''

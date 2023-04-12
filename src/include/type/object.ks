@@ -15,7 +15,7 @@ class ObjectType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ObjectType { # {{{
-			var type = new ObjectType(scope)
+			var type = ObjectType.new(scope)
 
 			if data.system {
 				type.flagSystem()
@@ -50,7 +50,7 @@ class ObjectType extends Type {
 		@testProperties ||= !type.isAny() || !type.isNullable()
 	} # }}}
 	clone() { # {{{
-		var type = new ObjectType(@scope)
+		var type = ObjectType.new(@scope)
 
 		type._complete = @complete
 		type._destructuring = @destructuring
@@ -458,7 +458,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	merge(value: ObjectType, node): Type { # {{{
-		var result = new ObjectType(@scope)
+		var result = ObjectType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
 		result.flagSpread() if @spread
@@ -494,7 +494,7 @@ class ObjectType extends Type {
 			}
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 
 		return result
@@ -513,7 +513,7 @@ class ObjectType extends Type {
 		}
 
 		if value.hasParameters() {
-			var result = new ObjectType(@scope)
+			var result = ObjectType.new(@scope)
 
 			result.flagDestructuring() if @destructuring
 			result.flagSpread() if @spread
@@ -530,7 +530,7 @@ class ObjectType extends Type {
 				}
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 
 			return result
@@ -575,7 +575,7 @@ class ObjectType extends Type {
 		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toQuote() { # {{{
 		var mut str = ''
@@ -639,10 +639,10 @@ class ObjectType extends Type {
 		fragments.code(')')
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
 		if testingType {
@@ -655,7 +655,7 @@ class ObjectType extends Type {
 		if @testRest || @testProperties {
 			fragments.code($comma)
 
-			var literal = new Literal(false, node, node.scope(), 'value')
+			var literal = Literal.new(false, node, node.scope(), 'value')
 
 			if @testProperties {
 				if @testRest {

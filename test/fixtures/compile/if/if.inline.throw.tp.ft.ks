@@ -6,7 +6,7 @@ func foobar(test, resolve: (): String) ~ Error {
 		pick resolve()
 	}
 	else {
-		throw new Error()
+		throw Error.new()
 	}
 
 	console.log(`\(value)`)

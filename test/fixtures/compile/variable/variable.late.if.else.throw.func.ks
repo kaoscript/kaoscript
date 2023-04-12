@@ -13,5 +13,5 @@ func quxbaz(): String? {
 }
 
 func error(): Never ~ Error {
-	throw new Error()
+	throw Error.new()
 }

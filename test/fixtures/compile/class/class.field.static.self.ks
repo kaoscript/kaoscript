@@ -1,6 +1,6 @@
 class Foobar {
 	static {
-		ABC = new Foobar(1, 3)
+		ABC = Foobar.new(1, 3)
 	}
 	private {
 		_x: Number

@@ -9,9 +9,9 @@ class FDate extends Date {
 	}
 }
 
-var d = new Date()
-var f = new FDate()
-var x: Date = (() => new FDate())()
+var d = Date.new()
+var f = FDate.new()
+var x: Date = (() => FDate.new())()
 
 d.foobar()
 f.foobar()

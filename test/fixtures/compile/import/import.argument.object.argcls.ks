@@ -6,7 +6,7 @@ func grault(n: Number): Number => n + 42
 
 func garply(s: NewString): NewString => s.toLowerCase()
 
-func waldo(): NewString => new NewString('miss White')
+func waldo(): NewString => NewString.new('miss White')
 
 export var foobar: {
 	func corge(): Number

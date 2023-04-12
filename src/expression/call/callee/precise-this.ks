@@ -21,7 +21,7 @@ class PreciseThisCallee extends MethodCallee {
 			if @flatten {
 				match node._data.scope.kind {
 					ScopeKind.Argument {
-						throw new NotImplementedException(node)
+						throw NotImplementedException.new(node)
 					}
 					ScopeKind.This {
 						if @function.isInstance() {
@@ -38,11 +38,11 @@ class PreciseThisCallee extends MethodCallee {
 			else {
 				match @scope {
 					ScopeKind.Argument {
-						throw new NotImplementedException(node)
+						throw NotImplementedException.new(node)
 					}
 					ScopeKind.This {
 						if @alien {
-							throw new NotImplementedException(node)
+							throw NotImplementedException.new(node)
 						}
 						else if @instance {
 							fragments.code(`\(name).__ks_func_\(@property)_\(@function.index()).call(this`)
@@ -61,7 +61,7 @@ class PreciseThisCallee extends MethodCallee {
 
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @alien {

@@ -2,7 +2,7 @@ extern console
 
 import '../export/export.namespace.class.loop.ks'
 
-var foo = new NS.Foobar()
+var foo = NS.Foobar.new()
 
 foo.name('miss White')
 

@@ -1,9 +1,9 @@
 class AnyType extends Type {
 	static {
-		Explicit = new AnyType(true, false)
-		NullableExplicit = new AnyType(true, true)
-		Unexplicit = new AnyType(false, false)
-		NullableUnexplicit = new AnyType(false, true)
+		Explicit = AnyType.new(true, false)
+		NullableExplicit = AnyType.new(true, true)
+		Unexplicit = AnyType.new(false, false)
+		NullableUnexplicit = AnyType.new(false, true)
 	}
 	private {
 		@explicit: Boolean	= true
@@ -16,7 +16,7 @@ class AnyType extends Type {
 		this()
 	} # }}}
 	clone() { # {{{
-		var that = new AnyType(@explicit, @nullable)
+		var that = AnyType.new(@explicit, @nullable)
 
 		return that.copyFrom(this)
 	} # }}}
@@ -208,7 +208,7 @@ class AnyType extends Type {
 	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
-		var literal = new Literal(false, node, node.scope(), 'value')
+		var literal = Literal.new(false, node, node.scope(), 'value')
 
 		if @nullable {
 			if node._options.format.functions == 'es5' {

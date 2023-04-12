@@ -3,5 +3,5 @@ func foobar(x, y) {
 }
 
 func quxbaz(): never {
-	throw new Error()
+	throw Error.new()
 }

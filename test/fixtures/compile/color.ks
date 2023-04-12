@@ -231,7 +231,7 @@ func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}):
 		return result
 	}
 	else {
-		throw new Error(`It can't convert a color from '\(that._space)' to '\(space)' spaces.`)
+		throw Error.new(`It can't convert a color from '\(that._space)' to '\(space)' spaces.`)
 	}
 } # }}}
 
@@ -650,7 +650,7 @@ export class Color {
 		} # }}}
 
 		from(...args): Color | bool { # {{{
-			var color = $from(new Color(), args)
+			var color = $from(Color.new(), args)
 
 			return color._dummy ? false : color
 		} # }}}
@@ -664,19 +664,19 @@ export class Color {
 				model = null
 			}
 
-			var color = $from(new Color(), args)
+			var color = $from(Color.new(), args)
 
 			return color._dummy ? false : color.greyscale(model)
 		} # }}}
 
 		hex(...args): String | bool { # {{{
-			var color = $from(new Color(), args)
+			var color = $from(Color.new(), args)
 
 			return color._dummy ? false : color.hex()
 		} # }}}
 
 		negative(...args): Color | bool { # {{{
-			var color = $from(new Color(), args)
+			var color = $from(Color.new(), args)
 
 			return color._dummy ? false : color.negative()
 		} # }}}
@@ -753,7 +753,7 @@ export class Color {
 	} # }}}
 
 	clone(): Color { # {{{
-		return this.copy(new Color())
+		return this.copy(Color.new())
 	} # }}}
 
 	contrast(mut color: Color) { # {{{
@@ -787,7 +787,7 @@ export class Color {
 
 			var max = Math.max(black, white)
 
-			var closest = new Color(
+			var closest = Color.new(
 				((color._red - (this._red * a)) / (1 - a)).limit(0, 255),
 				((color._green - (this._green * a)) / (1 - a)).limit(0, 255),
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
@@ -854,7 +854,7 @@ export class Color {
 			return this[component.field]
 		}
 		else if component.families.length > 1 {
-			throw new Error(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
+			throw Error.new(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
 		}
 		else {
 			return this.like(component.families[0])[component.field]
@@ -1002,7 +1002,7 @@ export class Color {
 			component = $spaces[this._space].components[name]
 		}
 		else if component.families.length > 1 {
-			throw new Error(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
+			throw Error.new(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
 		}
 		else {
 			this.space(component.families[0])
@@ -1040,7 +1040,7 @@ export class Color {
 				space = $components[space].families[0]
 			}
 			else {
-				throw new Error(`The component '\(space)' has a conflict between the spaces '\($components[space].families.join('\', \''))'`)
+				throw Error.new(`The component '\(space)' has a conflict between the spaces '\($components[space].families.join('\', \''))'`)
 			}
 		}
 

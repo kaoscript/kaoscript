@@ -8,7 +8,7 @@ class Shape {
 	}
 
 	static makeBlue(): Shape {
-		return new Shape('blue')
+		return Shape.new('blue')
 	}
 
 	constructor(@color)

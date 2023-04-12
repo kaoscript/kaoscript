@@ -21,7 +21,7 @@ class Variable {
 	}
 	static {
 		createPredefinedClass(name: String, features: ClassFeature? = null, scope: Scope): Variable { # {{{
-			type = new ClassType(scope)
+			type = ClassType.new(scope)
 			type.flagAlien()
 			type.flagComplete()
 			type.flagPredefined()
@@ -31,7 +31,7 @@ class Variable {
 				type.features(features)
 			}
 
-			return new Variable(name, true, true, type)
+			return Variable.new(name, true, true, type)
 		} # }}}
 		fromAST(data, scope) { # {{{
 			match data.kind {
@@ -40,7 +40,7 @@ class Variable {
 				}
 				else {
 					console.error(data)
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 		} # }}}
@@ -65,7 +65,7 @@ class Variable {
 		@module = @predefined
 	} # }}}
 	clone() { # {{{
-		var clone = new Variable()
+		var clone = Variable.new()
 
 		clone._name = @name
 		clone._secureName = @secureName

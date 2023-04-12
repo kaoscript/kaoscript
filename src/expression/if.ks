@@ -27,7 +27,7 @@ class IfExpression extends Expression {
 
 			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
 
-			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @hasBinding)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, @hasBinding)
 			@declaration.initiate()
 		}
 	} # }}}

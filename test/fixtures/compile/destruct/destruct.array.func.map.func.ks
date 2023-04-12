@@ -5,4 +5,4 @@ tuple Foobar {
 
 func quxbaz([ x ], _, _) => x
 
-[new Foobar(0, 0)].map(quxbaz)
+[Foobar.new(0, 0)].map(quxbaz)

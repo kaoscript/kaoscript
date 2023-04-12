@@ -1,9 +1,9 @@
 class Quxbaz {
-	static get(): Quxbaz => new Quxbaz()
+	static get(): Quxbaz => Quxbaz.new()
 }
 
 class Foobar extends Quxbaz {
-	static get(): Foobar => new Foobar()
+	static get(): Foobar => Foobar.new()
 }
 
 func foobar(x: Foobar) {

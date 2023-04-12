@@ -26,7 +26,7 @@ class MatchExpression extends Expression {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, false)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, false)
 			@declaration.initiate()
 		}
 		else {
@@ -59,7 +59,7 @@ class MatchExpression extends Expression {
 
 			clause.scope.index = index
 
-			var filter = new MatchFilter(data, this, clause.scope)
+			var filter = MatchFilter.new(data, this, clause.scope)
 
 			filter.analyse()
 
@@ -67,7 +67,7 @@ class MatchExpression extends Expression {
 				clause.hasTest = true
 			}
 			else if @hasDefaultClause {
-				throw new NotSupportedException(this)
+				throw NotSupportedException.new(this)
 			}
 			else {
 				@hasDefaultClause = true
@@ -138,7 +138,7 @@ class MatchExpression extends Expression {
 				variable.setRealType(@valueType)
 			}
 			else {
-				throw new NotSupportedException()
+				throw NotSupportedException.new()
 			}
 		}
 		else {
@@ -257,7 +257,7 @@ class MatchExpression extends Expression {
 
 			var type = Type.union(@scope, ...types)
 
-			@parent.initializeVariable(new VariableBrief(name, type), this, this)
+			@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 		}
 
 		if @reusableValue {
@@ -494,13 +494,13 @@ abstract class PossibilityTracker {
 	static {
 		create(type: Type): PossibilityTracker { # {{{
 			if type is EnumType {
-				return new EnumPossibilityTracker(type)
+				return EnumPossibilityTracker.new(type)
 			}
 
-			return new DefaultPossibilityTracker()
+			return DefaultPossibilityTracker.new()
 		} # }}}
 		dummy(): PossibilityTracker { # {{{
-			return new DummyPossibilityTracker()
+			return DummyPossibilityTracker.new()
 		} # }}}
 	}
 	abstract {
@@ -509,7 +509,7 @@ abstract class PossibilityTracker {
 		listUnmatched(): String[]
 	}
 	exclude(condition) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 }
 
@@ -543,7 +543,7 @@ class EnumPossibilityTracker extends PossibilityTracker {
 					@possibilities.remove(value.property())
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 		}

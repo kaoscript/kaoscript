@@ -11,7 +11,7 @@ func close(id: Number) {
 
 func foobar() ~ Error {
 	with var file = open() {
-		throw new Error()
+		throw Error.new()
 	}
 	finally {
 		close(file)

@@ -10,7 +10,7 @@ class UnionType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): UnionType { # {{{
-			var type = new UnionType(scope)
+			var type = UnionType.new(scope)
 
 			if ?data.nullable {
 				type._nullable = data.nullable
@@ -188,7 +188,7 @@ class UnionType extends Type {
 		return false
 	} # }}}
 	clone() { # {{{
-		var that = new UnionType(@scope)
+		var that = UnionType.new(@scope)
 
 		that._any = @any
 		that._explicit = @explicit
@@ -519,7 +519,7 @@ class UnionType extends Type {
 		return types
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	toQuote() { # {{{
 		if @nullable && @types.length == 2 {

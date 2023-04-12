@@ -15,6 +15,6 @@ impl Shape {
 	}
 }
 
-var s = new Shape('x', 'y')
+var s = Shape.new('x', 'y')
 
 export Shape

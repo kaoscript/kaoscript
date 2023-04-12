@@ -7,7 +7,7 @@ class Hello {
 }
 
 class Proxy {
-	private @component: Hello = new Hello()
+	private @component: Hello = Hello.new()
 
 	proxy @component {
 		goodbye
@@ -16,7 +16,7 @@ class Proxy {
 	}
 }
 
-var proxy = new Proxy()
+var proxy = Proxy.new()
 
 console.log(`\(proxy.hello('Joe'))`)
 

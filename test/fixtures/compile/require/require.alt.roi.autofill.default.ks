@@ -2,4 +2,4 @@ import '../import/import.immu.import.cc.ks'
 
 require|import './require.default.ks'(...)
 
-var c = new Color()
+var c = Color.new()

@@ -2,7 +2,7 @@ class Foobar {
 	toString(): String => 'foobar'
 }
 
-func foobar(): Foobar => new Foobar()
+func foobar(): Foobar => Foobar.new()
 
 func qux(x: String): String => x
 

@@ -539,11 +539,11 @@ namespace Fragment {
 						}
 					}
 					else {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 			else {

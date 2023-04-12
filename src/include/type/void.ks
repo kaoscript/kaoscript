@@ -3,7 +3,7 @@ class VoidType extends Type {
 		super(null)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Void'
 	hashCode() => `Void`
@@ -16,7 +16,7 @@ class VoidType extends Type {
 	} # }}}
 	toQuote(): String => `Void`
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotSupportedException(node)
+		throw NotSupportedException.new(node)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('void')

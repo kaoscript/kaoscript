@@ -5,14 +5,14 @@ class SealedPreciseMethodCallee extends MethodCallee {
 		@property: String
 	}
 	constructor(@data, @object, @objectType, @property, assessment, match: CallMatch, @node) { # {{{
-		super(data, new MemberExpression(data.callee, node, node.scope(), object), false, assessment, match, node)
+		super(data, MemberExpression.new(data.callee, node, node.scope(), object), false, assessment, match, node)
 	} # }}}
 	override buildHashCode() => null
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @function.isInstance() {
@@ -38,11 +38,11 @@ class SealedPreciseMethodCallee extends MethodCallee {
 		else {
 			match @scope {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @function.isAlien() {
-						throw new NotImplementedException(node)
+						throw NotImplementedException.new(node)
 					}
 					else if @function.isInstance() {
 						fragments.code(`\(@objectType.getSealedPath()).__ks_func_\(@property)_\(@function.index()).call(`)

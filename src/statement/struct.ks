@@ -14,7 +14,7 @@ class StructDeclaration extends Statement {
 	override initiate() { # {{{
 		@name = @data.name.name
 
-		@struct = new StructType(@scope)
+		@struct = StructType.new(@scope)
 
 		if ?@data.extends {
 			@extending = true
@@ -30,15 +30,15 @@ class StructDeclaration extends Statement {
 			@extendsName = `\(member.name)\(name)`
 		}
 
-		@type = new NamedType(@name, @struct)
+		@type = NamedType.new(@name, @struct)
 
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	override analyse() { # {{{
-		@function = new StructFunction(@data, this, new BlockScope(@scope!?))
+		@function = StructFunction.new(@data, this, BlockScope.new(@scope!?))
 
 		for var data in @data.fields {
-			var field = new StructFieldDeclaration(data, this)
+			var field = StructFieldDeclaration.new(data, this)
 
 			field.analyse()
 
@@ -158,7 +158,7 @@ class StructFunction extends AbstractNode {
 	constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
 
-		@type = new FunctionType(@scope)
+		@type = FunctionType.new(@scope)
 	} # }}}
 	analyse()
 	override prepare(target, targetMode) { # {{{
@@ -166,7 +166,7 @@ class StructFunction extends AbstractNode {
 
 		if @parent.isExtending() {
 			for var type in @parent._extendsType.type().listAllFields() {
-				var field = new StructFieldDeclaration(type as StructFieldType, @parent!?)
+				var field = StructFieldDeclaration.new(type as StructFieldType, @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -219,7 +219,7 @@ class StructFieldDeclaration extends AbstractNode {
 
 		@name = data.name.name
 
-		@parameter = new StructFieldParameter(this, parent._function)
+		@parameter = StructFieldParameter.new(this, parent._function)
 	} # }}}
 	constructor(@type, parent) { # {{{
 		super($ast.parameter(), parent)
@@ -227,7 +227,7 @@ class StructFieldDeclaration extends AbstractNode {
 		@name = @type.name()
 		@index = @type.index()
 
-		@parameter = new StructFieldParameter(this, parent._function)
+		@parameter = StructFieldParameter.new(this, parent._function)
 		@parameter.unflagValidation()
 	} # }}}
 	analyse()
@@ -255,7 +255,7 @@ class StructFieldDeclaration extends AbstractNode {
 				type = NullType.Explicit
 			}
 
-			@type = new StructFieldType(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
+			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
 			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
@@ -281,7 +281,7 @@ class StructFieldParameter extends Parameter {
 		super(field._data, parent)
 	} # }}}
 	analyse() { # {{{
-		@internal = new IdentifierParameter({
+		@internal = IdentifierParameter.new({
 			name: @field.name()
 		}, this, @scope)
 

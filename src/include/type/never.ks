@@ -3,7 +3,7 @@ class NeverType extends Type {
 		super(null)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Never'
 	hashCode() => `Never`
@@ -14,7 +14,7 @@ class NeverType extends Type {
 	} # }}}
 	toQuote(): String => `Never`
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotSupportedException(node)
+		throw NotSupportedException.new(node)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('never')

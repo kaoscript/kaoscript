@@ -125,12 +125,12 @@ class ComparisonExpression extends Expression {
 	} # }}}
 	private getOperator(data, operand1, operand2) { # {{{
 		match data.kind {
-			BinaryOperatorKind.Equality => return new EqualityOperator(this, operand1, operand2)
-			BinaryOperatorKind.GreaterThan => return new GreaterThanOperator(this, operand1, operand2)
-			BinaryOperatorKind.GreaterThanOrEqual => return new GreaterThanOrEqualOperator(this, operand1, operand2)
-			BinaryOperatorKind.Inequality => return new InequalityOperator(this, operand1, operand2)
-			BinaryOperatorKind.LessThan => return new LessThanOperator(this, operand1, operand2)
-			BinaryOperatorKind.LessThanOrEqual => return new LessThanOrEqualOperator(this, operand1, operand2)
+			BinaryOperatorKind.Equality => return EqualityOperator.new(this, operand1, operand2)
+			BinaryOperatorKind.GreaterThan => return GreaterThanOperator.new(this, operand1, operand2)
+			BinaryOperatorKind.GreaterThanOrEqual => return GreaterThanOrEqualOperator.new(this, operand1, operand2)
+			BinaryOperatorKind.Inequality => return InequalityOperator.new(this, operand1, operand2)
+			BinaryOperatorKind.LessThan => return LessThanOperator.new(this, operand1, operand2)
+			BinaryOperatorKind.LessThanOrEqual => return LessThanOrEqualOperator.new(this, operand1, operand2)
 		}
 	} # }}}
 	hasExceptions() => false
@@ -164,7 +164,7 @@ class ComparisonExpression extends Expression {
 						share.types.push(type)
 					}
 					else if @junction == JunctionKind.And {
-						drop shares[name]
+						Object.delete(shares, name)
 					}
 				}
 
@@ -203,7 +203,7 @@ class ComparisonExpression extends Expression {
 						share.types.push(type)
 					}
 					else if @junction == JunctionKind.And {
-						drop shares[name]
+						Object.delete(shares, name)
 					}
 				}
 

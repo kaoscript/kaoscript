@@ -2,6 +2,6 @@ class Foobar {
 	public x?	= null
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 f.x = null

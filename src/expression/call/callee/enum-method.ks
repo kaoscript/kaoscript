@@ -11,7 +11,7 @@ class EnumMethodCallee extends Callee {
 	constructor(@data, @enum, @methodName, @methods, node) { # {{{
 		super(data)
 
-		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
+		@expression = MemberExpression.new(data.callee, node, node.scope(), node._object)
 		@expression.analyse()
 		@expression.prepare(AnyType.NullableUnexplicit)
 
@@ -20,7 +20,7 @@ class EnumMethodCallee extends Callee {
 		@scope = data.scope.kind
 
 		if #methods {
-			var union = new UnionType(node.scope())
+			var union = UnionType.new(node.scope())
 
 			for var method in methods {
 				@validate(method, node)

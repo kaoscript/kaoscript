@@ -61,7 +61,7 @@ class CallThisConstructorSubstitude extends Substitude {
 				Router.Argument.toFragments(positions, null, @arguments, function, false, true, true, fragments, mode)
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 	} # }}}
@@ -90,7 +90,7 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 				Router.Argument.toFragments(positions, null, @arguments, function, false, false, true, fragments, mode)
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 	} # }}}
@@ -293,7 +293,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 				}
 			}
 			else {
-				throw new NotImplementedException(@method)
+				throw NotImplementedException.new(@method)
 			}
 		}
 	} # }}}
@@ -380,13 +380,13 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 	} # }}}
 	type() { # {{{
 		if @result is LenientCallMatchResult {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 		else if @result.matches.length == 1 {
 			return @result.matches[0].function.getReturnType()
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 	} # }}}
 }

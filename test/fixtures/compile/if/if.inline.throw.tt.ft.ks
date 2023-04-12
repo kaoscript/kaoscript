@@ -2,9 +2,9 @@ extern class Error
 
 func foobar(test, resolve) ~ Error {
 	var value = if test() {
-		throw new Error()
+		throw Error.new()
 	}
 	else {
-		throw new Error()
+		throw Error.new()
 	}
 }

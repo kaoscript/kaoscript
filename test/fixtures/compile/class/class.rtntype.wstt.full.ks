@@ -2,7 +2,7 @@ extern console
 
 class Foobar {
 	private static {
-		@instance: Foobar = new Foobar()
+		@instance: Foobar = Foobar.new()
 	}
 	static {
 		instance(): @instance

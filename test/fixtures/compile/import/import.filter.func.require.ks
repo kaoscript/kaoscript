@@ -6,7 +6,7 @@ import '../export/export.filter.func.require.ks'(Foobar)
 
 console.log(`\(foobar('foobar'))`)
 
-var x = new Foobar()
+var x = Foobar.new()
 
 console.log(`\(foobar(x).toString())`)
 

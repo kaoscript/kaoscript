@@ -46,22 +46,22 @@ var $expressions = {
 	`\(NodeKind.ArrayBinding)`					: ArrayBinding
 	`\(NodeKind.ArrayComprehension)`			: func(data, parent, scope) {
 		if data.loop.kind == NodeKind.ForFromStatement {
-			return new ArrayComprehensionForFrom(data, parent, scope)
+			return ArrayComprehensionForFrom.new(data, parent, scope)
 		}
 		else if data.loop.kind == NodeKind.ForInStatement {
-			return new ArrayComprehensionForIn(data, parent, scope)
+			return ArrayComprehensionForIn.new(data, parent, scope)
 		}
 		else if data.loop.kind == NodeKind.ForOfStatement {
-			return new ArrayComprehensionForOf(data, parent, scope)
+			return ArrayComprehensionForOf.new(data, parent, scope)
 		}
 		else if data.loop.kind == NodeKind.ForRangeStatement {
-			return new ArrayComprehensionForRange(data, parent, scope)
+			return ArrayComprehensionForRange.new(data, parent, scope)
 		}
 		else if data.loop.kind == NodeKind.RepeatStatement {
-			return new ArrayComprehensionRepeat(data, parent, scope)
+			return ArrayComprehensionRepeat.new(data, parent, scope)
 		}
 		else {
-			throw new NotSupportedException(`Unexpected kind \(data.loop.kind)`, parent)
+			throw NotSupportedException.new(`Unexpected kind \(data.loop.kind)`, parent)
 		}
 	}
 	`\(NodeKind.ArrayExpression)`				: ArrayExpression
@@ -71,7 +71,6 @@ var $expressions = {
 	`\(NodeKind.CascadeExpression)`				: CascadeExpression
 	`\(NodeKind.ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind.ConditionalExpression)`			: ConditionalExpression
-	`\(NodeKind.CreateExpression)`				: CreateExpression
 	`\(NodeKind.CurryExpression)`				: CurryExpression
 	`\(NodeKind.DisruptiveExpression)`			: DisruptiveExpression
 	`\(NodeKind.FunctionExpression)`			: AnonymousFunctionExpression
@@ -93,7 +92,7 @@ var $expressions = {
 			return $compile.expression(newData, parent, scope)
 		}
 
-		throw new NotSupportedException(`Unexpected reference \(data.name)`, parent)
+		throw NotSupportedException.new(`Unexpected reference \(data.name)`, parent)
 	}
 	`\(NodeKind.RegularExpression)`				: RegularExpression
 	`\(NodeKind.RestrictiveExpression)`			: RestrictiveExpression
@@ -112,7 +111,6 @@ var $statements = {
 	`\(NodeKind.DiscloseDeclaration)`			: DiscloseDeclaration
 	`\(NodeKind.DoUntilStatement)`				: DoUntilStatement
 	`\(NodeKind.DoWhileStatement)`				: DoWhileStatement
-	`\(NodeKind.DropStatement)`					: DropStatement
 	`\(NodeKind.EnumDeclaration)`				: EnumDeclaration
 	`\(NodeKind.ExportDeclaration)`				: ExportDeclaration
 	`\(NodeKind.ExpressionStatement)`			: func(data, parent, scope) {
@@ -120,7 +118,7 @@ var $statements = {
 			return $callStatement(data, parent, scope)
 		}
 		else {
-			return new ExpressionStatement(data, parent, scope)
+			return ExpressionStatement.new(data, parent, scope)
 		}
 	}
 	`\(NodeKind.ExternDeclaration)`				: ExternDeclaration

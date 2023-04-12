@@ -7,4 +7,4 @@ func foo() => 42
 
 console.log(foo.toSource())
 console.log(template.compile().toSource())
-console.log(new Template().compile().toSource())
+console.log(Template.new().compile().toSource())

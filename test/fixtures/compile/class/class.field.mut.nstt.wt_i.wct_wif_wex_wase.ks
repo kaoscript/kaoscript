@@ -4,7 +4,7 @@ class Foobar {
 	}
 	constructor(test) ~ Error {
 		if test {
-			throw new Error('failed')
+			throw Error.new('failed')
 		}
 		else {
 			@x = 24

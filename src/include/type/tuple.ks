@@ -39,7 +39,7 @@ abstract class TupleType extends Type {
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()
-			@function = new FunctionType(scope)
+			@function = FunctionType.new(scope)
 
 			for var field in @listAllFields([]) {
 				if field.isRequired() {
@@ -178,7 +178,7 @@ class NamedTupleType extends TupleType {
 	static {
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): NamedTupleType { # {{{
 			var data = index
-			var value = new NamedTupleType(scope)
+			var value = NamedTupleType.new(scope)
 
 			queue.push(() => {
 				if ?data.extends {
@@ -417,7 +417,7 @@ class NamedTupleType extends TupleType {
 						SyntaxException.throwMissingTupleField(name, node)
 					}
 					else {
-						order.push(new Literal('null', node))
+						order.push(Literal.new('null', node))
 					}
 				}
 			}
@@ -472,7 +472,7 @@ class NamedTupleType extends TupleType {
 					countdown -= 1
 				}
 				else {
-					order[index] = new Literal('null', node)
+					order[index] = Literal.new('null', node)
 				}
 			}
 		}
@@ -485,7 +485,7 @@ class UnnamedTupleType extends TupleType {
 	static {
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): UnnamedTupleType { # {{{
 			var data = index
-			var value = new UnnamedTupleType(scope)
+			var value = UnnamedTupleType.new(scope)
 
 			queue.push(() => {
 				if ?data.extends {
@@ -600,7 +600,7 @@ class TupleFieldType extends Type {
 		import(name?, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
-			return new TupleFieldType(scope, name, data.index, fieldType, data.required)
+			return TupleFieldType.new(scope, name, data.index, fieldType, data.required)
 		} # }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { # {{{

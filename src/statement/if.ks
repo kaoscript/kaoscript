@@ -28,7 +28,7 @@ class IfStatement extends Statement {
 
 			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
 
-			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, @cascade || @hasBinding)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, @cascade || @hasBinding)
 			@declaration.initiate()
 		}
 	} # }}}
@@ -130,7 +130,7 @@ class IfStatement extends Statement {
 				if @whenTrueExpression.isExit() {
 					for var map, name of @lateInitVariables {
 						if map.false.initializable {
-							@parent.initializeVariable(new VariableBrief(name, type: map.false.type), this, this)
+							@parent.initializeVariable(VariableBrief.new(name, type: map.false.type), this, this)
 						}
 						else {
 							SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
@@ -157,7 +157,7 @@ class IfStatement extends Statement {
 							SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
 						}
 
-						@parent.initializeVariable(new VariableBrief(name, type), this, this)
+						@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 					}
 
 					var conditionInferables = @condition.inferWhenFalseTypes({})
@@ -202,7 +202,7 @@ class IfStatement extends Statement {
 
 				for var map, name of @lateInitVariables {
 					if map.false.initializable {
-						@parent.initializeVariable(new VariableBrief(name, type: map.false.type), this, this)
+						@parent.initializeVariable(VariableBrief.new(name, type: map.false.type), this, this)
 					}
 					else {
 						SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
@@ -222,7 +222,7 @@ class IfStatement extends Statement {
 
 				for var map, name of @lateInitVariables {
 					if map.true.initializable {
-						@parent.initializeVariable(new VariableBrief(name, type: map.true.type), this, this)
+						@parent.initializeVariable(VariableBrief.new(name, type: map.true.type), this, this)
 					}
 					else {
 						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
@@ -257,7 +257,7 @@ class IfStatement extends Statement {
 						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
 					}
 
-					@parent.initializeVariable(new VariableBrief(name, type), this, this)
+					@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 				}
 
 				var trueInferables = @whenTrueScope.listUpdatedInferables()
@@ -394,7 +394,7 @@ class IfStatement extends Statement {
 			map[whenTrue].type = type
 		}
 		else {
-			throw new NotSupportedException(this)
+			throw NotSupportedException.new(this)
 
 		}
 	} # }}}

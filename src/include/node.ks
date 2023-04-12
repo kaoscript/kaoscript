@@ -40,27 +40,27 @@ abstract class AbstractNode {
 	newScope(scope: Scope, type: ScopeType) { # {{{
 		match type {
 			ScopeType.Bleeding {
-				return new BleedingScope(scope)
+				return BleedingScope.new(scope)
 			}
 			ScopeType.Block {
-				return new BlockScope(scope)
+				return BlockScope.new(scope)
 			}
 			ScopeType.Function {
-				return new FunctionScope(scope)
+				return FunctionScope.new(scope)
 			}
 			ScopeType.Hollow {
-				return new HollowScope(scope)
+				return HollowScope.new(scope)
 			}
 			ScopeType.InlineBlock {
 				if @options.format.variables == 'es6' {
-					return new InlineBlockScope(scope)
+					return InlineBlockScope.new(scope)
 				}
 				else {
-					return new LaxInlineBlockScope(scope)
+					return LaxInlineBlockScope.new(scope)
 				}
 			}
 			ScopeType.Operation {
-				return new OperationScope(scope)
+				return OperationScope.new(scope)
 			}
 		}
 	} # }}}

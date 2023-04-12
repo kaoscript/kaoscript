@@ -1,3 +1,3 @@
 struct Unit
 
-var unit = new Unit()
+var unit = Unit.new()

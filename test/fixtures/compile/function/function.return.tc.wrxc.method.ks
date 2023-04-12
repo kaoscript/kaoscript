@@ -1,10 +1,10 @@
 class Foobar {
 	foobar(test: Boolean): Foobar {
 		if test {
-			return new Quxbaz()
+			return Quxbaz.new()
 		}
 		else {
-			return new Foobar()
+			return Foobar.new()
 		}
 	}
 }

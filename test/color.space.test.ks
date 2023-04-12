@@ -75,13 +75,13 @@ Color.registerSpace({ # {{{ cmy
 describe('color.space', func() {
 	describe('space', func() {
 		it('get', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 		}) # }}}
 
 		it('set :rgb', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -91,7 +91,7 @@ describe('color.space', func() {
 		}) # }}}
 
 		it('set :green', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -101,7 +101,7 @@ describe('color.space', func() {
 		}) # }}}
 
 		it('set :hsb', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -118,7 +118,7 @@ describe('color.space', func() {
 		}) # }}}
 
 		it('like :rgb', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -130,7 +130,7 @@ describe('color.space', func() {
 
 	describe('rvb', func() {
 		it('set :rvb', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -144,7 +144,7 @@ describe('color.space', func() {
 		}) # }}}
 
 		it('set :rouge', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -154,7 +154,7 @@ describe('color.space', func() {
 		}) # }}}
 
 		it('like :rvb', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 
@@ -172,7 +172,7 @@ describe('color.space', func() {
 
 	describe('cmy', func() {
 		it('set :blue', func() { # {{{
-			var c = new Color('#ff0')
+			var c = Color.new('#ff0')
 
 			expect(c.space()).to.equal(Space.SRGB)
 

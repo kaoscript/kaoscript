@@ -9,8 +9,8 @@ struct Point3D extends Point {
 	z: Number
 }
 
-var p2 = new Point(1, 2)
-var p3 = new Point3D(1, 2, 3)
+var p2 = Point.new(1, 2)
+var p3 = Point3D.new(1, 2, 3)
 
 func default(p: Point): Number {
 	var d3 = p as Point3D

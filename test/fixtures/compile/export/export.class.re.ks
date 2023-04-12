@@ -6,6 +6,6 @@ class ReShape extends Shape {
 	}
 }
 
-var r = new ReShape('red')
+var r = ReShape.new('red')
 
 export ReShape

@@ -4,6 +4,6 @@ abstract class Foobar {
 
 class Quxbaz extends Foobar {
 	override foobar(x) ~ Error {
-		throw new Error()
+		throw Error.new()
 	}
 }

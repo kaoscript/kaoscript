@@ -12,7 +12,7 @@ struct Point3D extends Point {
 expect(Point3D is Struct).to.equal(true)
 expect(Type.typeOf(Point3D)).to.equal('struct')
 
-var point = new Point3D(0.3, 0.4, 0.5)
+var point = Point3D.new(0.3, 0.4, 0.5)
 
 expect(point is Point).to.equal(true)
 expect(point is Point3D).to.equal(true)

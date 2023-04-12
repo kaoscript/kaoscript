@@ -1,5 +1,5 @@
 extern class Error
 
 try {
-	throw new Error()
+	throw Error.new()
 }

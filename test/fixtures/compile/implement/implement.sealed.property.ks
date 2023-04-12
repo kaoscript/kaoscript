@@ -8,6 +8,6 @@ class Foobar {
 	values: Array	= []
 }
 
-var foobar = new Foobar()
+var foobar = Foobar.new()
 
 foobar.values.pushUniq(42)

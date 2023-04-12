@@ -43,7 +43,7 @@ class ReferenceType extends Type {
 
 			var parameters = ?data.parameters ? [Type.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
 
-			return new ReferenceType(scope, name as String, data.nullable!?, parameters)
+			return ReferenceType.new(scope, name as String, data.nullable!?, parameters)
 		} # }}}
 		toQuote(name, nullable, parameters) { # {{{
 			var fragments = [name]
@@ -92,7 +92,7 @@ class ReferenceType extends Type {
 	} # }}}
 	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
 	clone(): ReferenceType { # {{{
-		var type = new ReferenceType(@scope, @name, @nullable, @parameters)
+		var type = ReferenceType.new(@scope, @name, @nullable, @parameters)
 
 		type._sealed = @sealed
 		type._spread = @spread
@@ -692,7 +692,8 @@ class ReferenceType extends Type {
 	isExplicitlyNull() => @explicitlyNull
 	isExportable() => @type().isExportable()
 	isExported() => @type().isExported()
-	isExportingFragment() => !@isVirtual()
+	// isExportingFragment() => !@isVirtual()
+	isExportingFragment() => true
 	isExtendable() => @name == 'Function'
 	isFunction() => @name == 'Function' || @type().isFunction()
 	isFusion() => @type().isFusion()
@@ -981,6 +982,7 @@ class ReferenceType extends Type {
 	isTuple() => @name == 'Tuple' || @type().isTuple()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => @type().isUnion()
+	isVirtual() => @type().isVirtual()
 	isVoid() => @name == 'Void' || @type().isVoid()
 	matchContentOf(value: Type) { # {{{
 		if this == value {
@@ -1130,7 +1132,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	reset(): this { # {{{
-		drop @type
+		Object.delete(this, '_type')
 		@nullable = @explicitlyNull
 		@predefined = false
 	} # }}}
@@ -1199,7 +1201,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
-		if !@isVirtual() {
+		// if !@isVirtual() {
 			var varname = variable.name?()
 
 			if name == varname {
@@ -1208,7 +1210,7 @@ class ReferenceType extends Type {
 			else {
 				fragments.newLine().code(`\(name): `).compile(variable).done()
 			}
-		}
+		// }
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code(@name)
@@ -1323,7 +1325,7 @@ class ReferenceType extends Type {
 
 		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
 
-		var literal = new Literal(false, node, node.scope(), 'value')
+		var literal = Literal.new(false, node, node.scope(), 'value')
 
 		if node._options.format.functions == 'es5' {
 			fragments.code('function(value) { return ')
@@ -1391,7 +1393,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			var literal = new Literal(false, node, node.scope(), 'value')
+			var literal = Literal.new(false, node, node.scope(), 'value')
 
 			if node._options.format.functions == 'es5' {
 				fragments.code('function(value) { return ')
@@ -1477,7 +1479,7 @@ class ReferenceType extends Type {
 					fragments.code(`isTupleInstance`)
 				}
 				else {
-					throw new NotSupportedException()
+					throw NotSupportedException.new()
 				}
 
 				fragments.code(`(value, `)
@@ -1494,7 +1496,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			var literal = new Literal(false, node, node.scope(), 'value')
+			var literal = Literal.new(false, node, node.scope(), 'value')
 
 			@parameters[0].toTestFunctionFragments(fragments, literal)
 		}

@@ -99,7 +99,7 @@ enum ImportMode {
 abstract class Importer extends Statement {
 	private late {
 		@alias: String?								= null
-		@arguments: Arguments						= new Arguments()
+		@arguments: Arguments						= Arguments.new()
 		@autofill: Boolean							= false
 		@count: Number								= 0
 		@extAddendum: String						= ''
@@ -152,7 +152,7 @@ abstract class Importer extends Statement {
 			@scope.line(@line())
 
 			for var argument in @arguments.values when argument.required {
-				module.addRequirement(new ImportingRequirement(argument.name, argument.type, this))
+				module.addRequirement(ImportingRequirement.new(argument.name, argument.type, this))
 
 				if var variable ?= @scope.getVariable(argument.name) {
 					variable.setDeclaredType(argument.type)
@@ -173,7 +173,7 @@ abstract class Importer extends Statement {
 				var variable = @scope.getVariable(def.internal)
 
 				if def.isAlias {
-					var type = new NamedContainerType(def.internal, new NamespaceType(@scope:Scope))
+					var type = NamedContainerType.new(def.internal, NamespaceType.new(@scope:Scope))
 
 					for i from 1 to~ @metaExports.exports.length step 2 {
 						var name = @metaExports.exports[i]
@@ -220,7 +220,7 @@ abstract class Importer extends Statement {
 					}
 
 					if !type.isAlias() {
-						var var = new ImportedVariable(
+						var var = ImportedVariable.new(
 							name: def.internal
 							sealed: type.isSealed() && !type.isSystem()
 							system: type.isSystem()
@@ -387,11 +387,11 @@ abstract class Importer extends Statement {
 		@module().import(internal)
 
 		if isVariable && type is not AliasType {
-			@variables[external] = new ImportedVariable(internal)
+			@variables[external] = ImportedVariable.new(internal)
 			@count += 1
 		}
 	} # }}}
-	buildArguments(metadata, arguments: Arguments = new Arguments()): Arguments { # {{{
+	buildArguments(metadata, arguments: Arguments = Arguments.new()): Arguments { # {{{
 		@scope.line(@line() - 1)
 
 		if @data.arguments?.length != 0 {
@@ -525,8 +525,8 @@ abstract class Importer extends Statement {
 			else if argument.isAutofill {
 				arguments.values.splice(index, 1)
 
-				drop arguments.fromLocal[argument.identifier]
-				drop arguments.toImport[argument.name]
+				Object.delete(arguments.fromLocal, argument.identifier)
+				Object.delete(arguments.toImport, argument.name)
 			}
 			else {
 				TypeException.throwNotCompatibleArgument(argument.identifier, argument.name, @data.source.value, this)
@@ -622,7 +622,7 @@ abstract class Importer extends Statement {
 
 		@loadMetadata()
 
-		@worker = new ImportWorker(@metaRequirements, @metaExports, this)
+		@worker = ImportWorker.new(@metaRequirements, @metaExports, this)
 
 		var macros = {}
 		for var i from 0 to~ @metaExports.macros.length step 2 {
@@ -640,7 +640,7 @@ abstract class Importer extends Statement {
 
 			for var datas, name of macros {
 				for data in datas {
-					new MacroDeclaration(data, this, null, name, @standardLibrary)
+					MacroDeclaration.new(data, this, null, name, @standardLibrary)
 				}
 			}
 		}
@@ -667,7 +667,7 @@ abstract class Importer extends Statement {
 										match data.internal.kind {
 											NodeKind.Identifier {
 												if ?@alias {
-													throw new NotSupportedException(this)
+													throw NotSupportedException.new(this)
 												}
 
 												@alias = data.internal.name
@@ -681,12 +681,12 @@ abstract class Importer extends Statement {
 												}
 											}
 											else {
-												throw new NotImplementedException()
+												throw NotImplementedException.new()
 											}
 										}
 									}
 									else {
-										throw new NotImplementedException()
+										throw NotImplementedException.new()
 									}
 								}
 							}
@@ -705,7 +705,7 @@ abstract class Importer extends Statement {
 
 							for var datas, name of macros when exclusions.indexOf(name) == -1 {
 								for var data in datas {
-									new MacroDeclaration(data, this, null, name, @standardLibrary)
+									MacroDeclaration.new(data, this, null, name, @standardLibrary)
 								}
 							}
 						}
@@ -718,7 +718,7 @@ abstract class Importer extends Statement {
 
 										if ?macros[external] {
 											for var data in macros[external] {
-												new MacroDeclaration(data, this, null, internal, @standardLibrary)
+												MacroDeclaration.new(data, this, null, internal, @standardLibrary)
 											}
 										}
 										else {
@@ -734,7 +734,7 @@ abstract class Importer extends Statement {
 										}
 									}
 									else {
-										throw new NotImplementedException()
+										throw NotImplementedException.new()
 									}
 								}
 							}
@@ -747,7 +747,7 @@ abstract class Importer extends Statement {
 						@addImport(external, internal, true, null)
 					}
 					else {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 				}
 			}
@@ -949,12 +949,12 @@ abstract class Importer extends Statement {
 												}
 											}
 											else {
-												throw new NotImplementedException()
+												throw NotImplementedException.new()
 											}
 										}
 									}
 									else {
-										throw new NotImplementedException()
+										throw NotImplementedException.new()
 									}
 								}
 							}
@@ -965,7 +965,7 @@ abstract class Importer extends Statement {
 							}
 						}
 						else {
-							throw new NotImplementedException()
+							throw NotImplementedException.new()
 						}
 					}
 					NodeKind.NamedSpecifier {
@@ -975,7 +975,7 @@ abstract class Importer extends Statement {
 						@addVariable(external, internal, true, type.getProperty(external))
 					}
 					else {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 				}
 			}
@@ -1365,7 +1365,7 @@ class ImportDeclaration extends Statement {
 	}
 	initiate() { # {{{
 		for var data in @data.declarations {
-			var declarator = new ImportDeclarator(data, this)
+			var declarator = ImportDeclarator.new(data, this)
 
 			declarator.initiate()
 
@@ -1409,7 +1409,7 @@ class ImportWorker {
 		@scope: Scope
 	}
 	constructor(@metaRequirements, @metaExports, @node) { # {{{
-		@scope = new ImportScope(node.scope())
+		@scope = ImportScope.new(node.scope())
 	} # }}}
 	hasType(name: String) => @scope.hasDefinedVariable(name)
 	getType(name: String) => @scope.getDefinedVariable(name).getDeclaredType()
@@ -1584,7 +1584,7 @@ class ImportWorker {
 				variable.setDeclaredType(type)
 			}
 			else {
-				@scope.addVariable(name, new Variable(name, false, false, type), @node)
+				@scope.addVariable(name, Variable.new(name, false, false, type), @node)
 
 				variables[index] = true
 			}
@@ -1597,7 +1597,7 @@ class ImportWorker {
 			var name = @metaRequirements.aliens[i + 1]
 
 			if !@scope.hasVariable(name) {
-				@scope.addVariable(name, new Variable(name, false, false, references[index]), @node)
+				@scope.addVariable(name, Variable.new(name, false, false, references[index]), @node)
 
 				variables[index] = true
 			}

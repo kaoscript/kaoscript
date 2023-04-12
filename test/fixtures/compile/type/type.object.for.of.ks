@@ -2,7 +2,7 @@ class Foobar {
 
 }
 
-var x = new Foobar()
+var x = Foobar.new()
 
 for var property of x {
 

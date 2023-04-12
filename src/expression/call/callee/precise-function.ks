@@ -189,7 +189,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 		@curries = []
 
 		if @matches.length > 1 {
-			var overloaded = new OverloadedFunctionType(@node.scope())
+			var overloaded = OverloadedFunctionType.new(@node.scope())
 
 			for var { function, positions }, index in @matches {
 				var curry = CurryExpression.toCurryType(function, positions, true, @node)

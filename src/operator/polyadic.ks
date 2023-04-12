@@ -348,7 +348,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			else {
 				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
-				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+				@type = UnionType.new(@scope, [numberType, @scope.reference('String')], false)
 			}
 		}
 	} # }}}

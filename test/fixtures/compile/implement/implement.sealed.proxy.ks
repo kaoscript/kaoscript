@@ -31,7 +31,7 @@ class Proxy {
 	}
 
 	constructor(color) {
-		this._shape = new Shape(color)
+		this._shape = Shape.new(color)
 	}
 
 	draw(): string => this._shape.draw()
@@ -41,6 +41,6 @@ class Proxy {
 	draw(color, shape): string => this._shape.draw(color, shape)
 }
 
-var dyn shape = new Proxy('yellow')
+var dyn shape = Proxy.new('yellow')
 console.log(shape.draw('rectangle'))
 console.log(shape.draw('red', 'rectangle'))

@@ -128,12 +128,12 @@ class CurryExpression extends CallExpression {
 					}
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 		} # }}}
 		toCurryType(function: FunctionType, positions: CallMatchPosition[], precise: Boolean, node: AbstractNode): [FunctionType, Array] { # {{{
-			var type = new FunctionType(node.scope())
+			var type = FunctionType.new(node.scope())
 				..setThisType(function.getThisType())
 				..setReturnType(function.getReturnType())
 				..addError(...function.listErrors())
@@ -166,7 +166,7 @@ class CurryExpression extends CallExpression {
 								type.addParameter(parameter.clone(), node)
 							}
 							else {
-								throw new NotImplementedException()
+								throw NotImplementedException.new()
 							}
 
 							values.push({ placeholder })
@@ -224,7 +224,7 @@ class CurryExpression extends CallExpression {
 				@type = @callees[0].toCurryType()
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 	} # }}}
@@ -235,7 +235,7 @@ class CurryExpression extends CallExpression {
 				@callees[0].toCurryFragments(fragments, mode, this)
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 	} # }}}

@@ -7,6 +7,6 @@ class Foobar {
 func foobar(x: Instance) {
 }
 
-foobar(new Foobar())
+foobar(Foobar.new())
 
 export Instance

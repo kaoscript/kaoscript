@@ -7,6 +7,6 @@ tuple TupleA {
 	y: Number
 }
 
-expect(foo(new TupleA(0, 0))).to.eql([0])
+expect(foo(TupleA.new(0, 0))).to.eql([0])
 
 expect(foo([0, 0])).to.eql([0])

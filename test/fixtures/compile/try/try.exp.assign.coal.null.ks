@@ -3,7 +3,7 @@ func foobar(x) ~ Error {
         return 42
     }
     else {
-        throw new Error('foobar')
+        throw Error.new('foobar')
     }
 }
 

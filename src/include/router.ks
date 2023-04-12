@@ -198,7 +198,7 @@ namespace Router {
 
 	func assess(functions: FunctionType[], name: String, node: AbstractNode): Assessment { # {{{
 		if !#functions {
-			return new Assessment(
+			return Assessment.new(
 				name
 				async: false
 				emptiable: true
@@ -245,7 +245,7 @@ namespace Router {
 						}
 					}
 					else {
-						var data = new Label(
+						var data = Label.new(
 							all: [function.index()]
 							mandatories: []
 						)
@@ -326,7 +326,7 @@ namespace Router {
 			mainRoutes.push(key)
 		}
 
-		return new Assessment(
+		return Assessment.new(
 			name
 			async
 			emptiable
@@ -345,10 +345,10 @@ namespace Router {
 	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
 		if assessment.length == 0 {
 			if !#arguments {
-				return new PreciseCallMatchResult([])
+				return PreciseCallMatchResult.new([])
 			}
 			else {
-				return new LenientCallMatchResult([])
+				return LenientCallMatchResult.new([])
 			}
 		}
 
@@ -363,7 +363,7 @@ namespace Router {
 
 		if assessment.macro {
 			for var argument, index in arguments {
-				indexeds.push(new NamingArgument(
+				indexeds.push(NamingArgument.new(
 					index
 					type: argument
 					strict: false

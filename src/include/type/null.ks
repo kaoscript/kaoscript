@@ -1,7 +1,7 @@
 class NullType extends Type {
 	static {
-		Explicit = new NullType(true)
-		Unexplicit = new NullType(false)
+		Explicit = NullType.new(true)
+		Unexplicit = NullType.new(false)
 	}
 	private {
 		@explicit: Boolean	= false
@@ -13,7 +13,7 @@ class NullType extends Type {
 		super(null)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	compareToRef(value: AnyType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) => 1

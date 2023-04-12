@@ -6,7 +6,7 @@ struct Foobar {
 
 var y = -1
 
-var a = new Foobar(
+var a = Foobar.new(
 	x: 1
 	y
 )

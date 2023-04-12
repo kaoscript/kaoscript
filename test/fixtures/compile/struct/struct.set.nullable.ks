@@ -7,6 +7,6 @@ struct Quxbaz {
 	y
 }
 
-var point = new Foobar()
+var point = Foobar.new()
 
-point.qux = new Quxbaz(1, 1)
+point.qux = Quxbaz.new(1, 1)

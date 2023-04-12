@@ -2,4 +2,4 @@
 
 extern class Error
 
-throw new Error()
+throw Error.new()

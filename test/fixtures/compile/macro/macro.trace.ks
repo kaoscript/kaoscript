@@ -1,7 +1,7 @@
 extern console
 
 macro trace_build_age_with_reification() {
-	var dyn d = new Date(2013, 2, 15)
+	var dyn d = Date.new(2013, 2, 15)
 
 	d.setUTCDate(1)
 	d.setUTCHours(0, 0, 0)

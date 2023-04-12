@@ -2,4 +2,4 @@
 
 extern sealed class Error
 
-throw new Error()
+throw Error.new()

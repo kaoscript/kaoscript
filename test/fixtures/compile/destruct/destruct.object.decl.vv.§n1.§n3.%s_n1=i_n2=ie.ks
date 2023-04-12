@@ -3,4 +3,4 @@ struct Point {
 	y: Number
 }
 
-var {x, z} = new Point(0, 0)
+var {x, z} = Point.new(0, 0)

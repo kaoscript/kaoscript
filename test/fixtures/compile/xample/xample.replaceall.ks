@@ -21,7 +21,7 @@ impl String {
 			return this.split(find).join(replacement)
 		}
 		else {
-			return this.replace(new RegExp(find.escapeRegex(), 'g'), replacement)
+			return this.replace(RegExp.new(find.escapeRegex(), 'g'), replacement)
 		}
 	}
 }

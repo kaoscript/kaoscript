@@ -365,7 +365,7 @@ class ForInStatement extends Statement {
 
 					if @order == OrderKind.None {
 						if @step.value() == 0 {
-							throw new NotImplementedException()
+							throw NotImplementedException.new()
 						}
 						else if @step.value() < 0 {
 							@ascending = false
@@ -373,7 +373,7 @@ class ForInStatement extends Statement {
 					}
 					else {
 						if @step.value() <= 0 {
-							throw new NotImplementedException()
+							throw NotImplementedException.new()
 						}
 					}
 				}
@@ -427,7 +427,7 @@ class ForInStatement extends Statement {
 			@splitName = @bindingScope.acquireTempName(false)
 		}
 
-		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
+		@bindingValue = TempMemberExpression.new(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
 
 		if ?@value {
 			@bindingValue.acquireReusable(@value.isSplitAssignment())

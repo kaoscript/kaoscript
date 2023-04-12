@@ -22,6 +22,6 @@ class Point3D extends Point2D {
 
 func x(point: Point2D) => point.x()
 
-var p = new Point3D(1, 2, 3)
+var p = Point3D.new(1, 2, 3)
 
 console.log(x(p))

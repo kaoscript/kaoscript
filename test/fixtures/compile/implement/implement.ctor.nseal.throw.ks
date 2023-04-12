@@ -10,7 +10,7 @@ class Shape {
 }
 
 func error(message) ~ Error {
-	throw new Error(message)
+	throw Error.new(message)
 }
 
 impl Shape {
@@ -19,6 +19,6 @@ impl Shape {
 	}
 }
 
-var s = new Shape('x', 'y')
+var s = Shape.new('x', 'y')
 
 export Shape

@@ -210,7 +210,7 @@ abstract class Type {
 		@system: Boolean				= false
 	}
 	static {
-		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
+		arrayOf(parameter: Type, scope: Scope) => ReferenceType.new(scope, 'Array', false, [parameter])
 		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
@@ -223,7 +223,7 @@ abstract class Type {
 
 			match data.kind {
 				NodeKind.ArrayType {
-					var mut type = new ArrayType(scope)
+					var mut type = ArrayType.new(scope)
 
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Nullable {
@@ -242,7 +242,7 @@ abstract class Type {
 					return type
 				}
 				NodeKind.ClassDeclaration {
-					var type = new ClassType(scope)
+					var type = ClassType.new(scope)
 
 					for modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Abstract {
@@ -253,24 +253,24 @@ abstract class Type {
 						}
 					}
 
-					return new NamedType(data.name.name, type.flagComplete())
+					return NamedType.new(data.name.name, type.flagComplete())
 				}
 				NodeKind.ExclusionType {
-					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return ExclusionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind.FunctionDeclaration, NodeKind.MethodDeclaration {
 					if ?data.parameters {
-						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
+						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
-						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
+						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
 				NodeKind.FunctionExpression {
-					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
+					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
 				NodeKind.FusionType {
-					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return FusionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind.Identifier {
 					if var variable ?= scope.getVariable(data.name) {
@@ -297,7 +297,7 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind.ObjectType {
-					var mut type = new ObjectType(scope)
+					var mut type = ObjectType.new(scope)
 
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Nullable {
@@ -329,7 +329,7 @@ abstract class Type {
 					return type.flagComplete()
 				}
 				NodeKind.TypeList {
-					var mut type = new NamespaceType(scope)
+					var mut type = NamespaceType.new(scope)
 
 					for var property in data.types {
 						type.addProperty(property.name.name, Type.fromAST(property, scope, defined, node))
@@ -362,7 +362,7 @@ abstract class Type {
 							}
 
 							if ?data.typeParameters {
-								var type = new ReferenceType(scope, name, nullable)
+								var type = ReferenceType.new(scope, name, nullable)
 
 								for parameter in data.typeParameters {
 									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
@@ -382,7 +382,7 @@ abstract class Type {
 						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
 						if !defined || namespace.scope().hasVariable(data.typeName.property.name, -1) {
-							var type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
+							var type = ReferenceType.new(namespace.scope(), data.typeName.property.name, nullable)
 
 							if ?data.typeParameters {
 								for parameter in data.typeParameters {
@@ -398,7 +398,7 @@ abstract class Type {
 					}
 				}
 				NodeKind.UnionType {
-					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return UnionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
 				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, node)
@@ -406,7 +406,7 @@ abstract class Type {
 			}
 
 			console.info(data)
-			throw new NotImplementedException(node)
+			throw NotImplementedException.new(node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
@@ -444,7 +444,7 @@ abstract class Type {
 			else if data is Array {
 				if data[0] is Number {
 					if data[0] == -1 {
-						throw new NotImplementedException(node)
+						throw NotImplementedException.new(node)
 					}
 					else if var type ?= references[data[0]] {
 						return references[data[0]].name(data[1])
@@ -539,7 +539,7 @@ abstract class Type {
 				var [major, minor] = requirement ? [first, second] : [second, first]
 				var origin = requirement ? TypeOrigin.RequireOrExtern : TypeOrigin.ExternOrRequire
 
-				var type = new ClassType(scope)
+				var type = ClassType.new(scope)
 
 				type.origin(origin).originals(major.type(), minor.type())
 
@@ -551,25 +551,25 @@ abstract class Type {
 			}
 
 			console.info(data)
-			throw new NotImplementedException(node)
+			throw NotImplementedException.new(node)
 		} # }}}
 		isNative(name: String) => $natives[name] == true
-		objectOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Object', false, [parameter])
+		objectOf(parameter: Type, scope: Scope) => ReferenceType.new(scope, 'Object', false, [parameter])
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
 
 			if type is NamespaceType {
-				return new NamedContainerType(name, type)
+				return NamedContainerType.new(name, type)
 			}
 			else {
-				return new NamedType(name, type)
+				return NamedType.new(name, type)
 			}
 		} # }}}
 		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { # {{{
 			return type unless type.shallBeNamed()
 
-			var namedType = type is NamespaceType ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
+			var namedType = type is NamespaceType ? NamedContainerType.new(scope.acquireTempName(declare), type) : NamedType.new(scope.acquireTempName(declare), type)
 
 			scope.define(namedType.name(), true, namedType, node)
 
@@ -580,7 +580,7 @@ abstract class Type {
 				return types[0]
 			}
 
-			var union = new UnionType(scope, types)
+			var union = UnionType.new(scope, types)
 
 			return union.type()
 		} # }}}
@@ -903,7 +903,7 @@ abstract class Type {
 	} # }}}
 	toNegativeTestFragments(fragments, node, junction: Junction = Junction.NONE) => @toPositiveTestFragments(fragments.code('!'), node, junction)
 	toQuote(): String { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
 		if double {
@@ -993,7 +993,7 @@ include {
 }
 
 Type.Any = AnyType.Unexplicit
-Type.Never = new NeverType()
+Type.Never = NeverType.new()
 Type.Null = NullType.Unexplicit
-Type.Undecided = new AnyType(false, true)
-Type.Void = new VoidType()
+Type.Undecided = AnyType.new(false, true)
+Type.Void = VoidType.new()

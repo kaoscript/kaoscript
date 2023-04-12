@@ -6,7 +6,7 @@ abstract class DependencyStatement extends Statement {
 
 		match declaration.kind {
 			NodeKind.ClassDeclaration {
-				var type = @applyFlags(new ClassType(scope))
+				var type = @applyFlags(ClassType.new(scope))
 
 				for var modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind.Abstract {
@@ -59,7 +59,7 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				var type = @applyFlags(new EnumType(scope, ekind))
+				var type = @applyFlags(EnumType.new(scope, ekind))
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if options.rules.nonExhaustive || declaration.members.length == 0 {
@@ -84,7 +84,7 @@ abstract class DependencyStatement extends Statement {
 				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
 
-					type = new FunctionType(parameters, declaration, this)
+					type = FunctionType.new(parameters, declaration, this)
 				}
 				else {
 					type = @scope().reference('Function')
@@ -106,7 +106,7 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind.NamespaceDeclaration {
-				var type = @applyFlags(new NamespaceType(scope))
+				var type = @applyFlags(NamespaceType.new(scope))
 
 				for var modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind.Sealed {
@@ -142,7 +142,7 @@ abstract class DependencyStatement extends Statement {
 				var mut instance = type is ClassType
 
 				if type is ReferenceType && type.isClass() {
-					type = new ClassType(scope)
+					type = ClassType.new(scope)
 
 					type.setExhaustive(false)
 				}
@@ -158,14 +158,14 @@ abstract class DependencyStatement extends Statement {
 				for var modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind.Sealed {
 						if !type.isSealable() {
-							type = new SealableType(scope, type)
+							type = SealableType.new(scope, type)
 						}
 
 						type.flagSealed()
 					}
 					else if modifier.kind == ModifierKind.System {
 						if !type.isSealable() {
-							type = new SealableType(scope, type)
+							type = SealableType.new(scope, type)
 						}
 
 						type.flagSystem()
@@ -183,7 +183,7 @@ abstract class DependencyStatement extends Statement {
 				return scope.define(declaration.name.name, true, type, true, this)
 			}
 			else {
-				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, this)
+				throw NotSupportedException.new(`Unexpected kind \(declaration.kind)`, this)
 			}
 		}
 	} # }}}
@@ -205,13 +205,13 @@ class ExternDeclaration extends DependencyStatement {
 						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
-						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
+						parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
 					}
 
-					var type = new FunctionType(parameters, declaration, this).flagAlien()
+					var type = FunctionType.new(parameters, declaration, this).flagAlien()
 
 					if variable.getDeclaredType() is FunctionType {
-						var newType = new OverloadedFunctionType(@scope)
+						var newType = OverloadedFunctionType.new(@scope)
 
 						newType.addFunction(variable.getDeclaredType())
 						newType.addFunction(type)
@@ -284,13 +284,13 @@ class RequireDeclaration extends DependencyStatement {
 						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
-						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
+						parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
 					}
 
-					var type = new FunctionType(parameters, declaration, this)
+					var type = FunctionType.new(parameters, declaration, this)
 
 					if variable.getDeclaredType() is FunctionType {
-						var newType = new OverloadedFunctionType(@scope)
+						var newType = OverloadedFunctionType.new(@scope)
 
 						newType.addFunction(variable.getDeclaredType())
 						newType.addFunction(type)
@@ -322,7 +322,7 @@ class RequireDeclaration extends DependencyStatement {
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = @define(declaration)
-		var requirement = new StaticRequirement(variable, this)
+		var requirement = StaticRequirement.new(variable, this)
 
 		@module().addRequirement(requirement)
 	} # }}}
@@ -365,7 +365,7 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = @define(declaration)
-		var requirement = new EORDynamicRequirement(variable, this)
+		var requirement = EORDynamicRequirement.new(variable, this)
 
 		@module()
 			.addAlien(requirement.name(), requirement.type())
@@ -414,7 +414,7 @@ class RequireOrExternDeclaration extends DependencyStatement {
 	translate()
 	addRequirement(declaration) { # {{{
 		var variable = @define(declaration)
-		var requirement = new ROEDynamicRequirement(variable, this)
+		var requirement = ROEDynamicRequirement.new(variable, this)
 
 		@module()
 			.addRequirement(requirement)
@@ -439,7 +439,7 @@ class RequireOrImportDeclaration extends Statement {
 		}
 
 		for var data in @data.declarations {
-			var declarator = new RequireOrImportDeclarator(data, this)
+			var declarator = RequireOrImportDeclarator.new(data, this)
 
 			declarator.initiate()
 
@@ -487,7 +487,7 @@ class RequireOrImportDeclarator extends Importer {
 							variable.declaration().flagForcefullyRebinded()
 						}
 						else {
-							var requirement = new ROIDynamicRequirement(variable, this)
+							var requirement = ROIDynamicRequirement.new(variable, this)
 							var type = requirement.type()
 
 							if type.isAlien() {
@@ -509,7 +509,7 @@ class RequireOrImportDeclarator extends Importer {
 				}
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 
@@ -520,7 +520,7 @@ class RequireOrImportDeclarator extends Importer {
 		}
 
 		if @alias != null {
-			throw new NotImplementedException(this)
+			throw NotImplementedException.new(this)
 		}
 	} # }}}
 	flagForcefullyRebinded()
@@ -645,7 +645,7 @@ class ExternOrImportDeclaration extends Statement {
 		}
 
 		for var data in @data.declarations {
-			var declarator = new ExternOrImportDeclarator(data, this)
+			var declarator = ExternOrImportDeclarator.new(data, this)
 
 			declarator.initiate()
 
@@ -685,7 +685,7 @@ class ExternOrImportDeclarator extends Importer {
 
 		for var var of @variables {
 			if var variable ?= @scope.getVariable(var.name) {
-				var requirement = new ROIDynamicRequirement(variable, this)
+				var requirement = ROIDynamicRequirement.new(variable, this)
 				var type = requirement.type().flagAlien()
 
 				var origin = type.origin()
@@ -711,7 +711,7 @@ class ExternOrImportDeclarator extends Importer {
 		}
 
 		if @alias != null {
-			throw new NotImplementedException(this)
+			throw NotImplementedException.new(this)
 		}
 	} # }}}
 	flagForcefullyRebinded()

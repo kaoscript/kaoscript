@@ -100,6 +100,8 @@ class CallExpression extends Expression {
 		if @data.callee.kind == NodeKind.MemberExpression && !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Computed) {
 			@object = $compile.expression(@data.callee.object, this)
 			@object.analyse()
+
+			@property = @data.callee.property.name
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -107,8 +109,6 @@ class CallExpression extends Expression {
 
 		if ?@object {
 			@object.prepare(AnyType.NullableUnexplicit)
-
-			@property = @data.callee.property.name
 
 			@makeMemberCallee(@object.type())
 
@@ -149,7 +149,7 @@ class CallExpression extends Expression {
 
 						var substitute = variable.replaceCall(@data, @arguments, this)
 
-						@addCallee(new SubstituteCallee(@data, substitute, this))
+						@addCallee(SubstituteCallee.new(@data, substitute, this))
 					}
 					else {
 						@makeCallee(type, variable.name())
@@ -160,7 +160,7 @@ class CallExpression extends Expression {
 				}
 			}
 			else if @data.callee.kind == NodeKind.FunctionExpression {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 			else if @data.callee.kind == NodeKind.LambdaExpression {
 				var expression = $compile.expression(@data.callee, this)
@@ -175,10 +175,10 @@ class CallExpression extends Expression {
 
 				match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
 					is LenientCallMatchResult with result {
-						@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
+						@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 					}
 					is PreciseCallMatchResult with { matches } {
-						var callee = new PreciseFunctionCallee(@data, expression, @assessment, matches, this)
+						var callee = PreciseFunctionCallee.new(@data, expression, @assessment, matches, this)
 
 						callee.flagDirect()
 
@@ -204,7 +204,7 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
 						is LenientCallMatchResult with { possibilities } {
-							@addCallee(new LenientThisCallee(@data, expression, @property, possibilities, this))
+							@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							if matches.length == 1 {
@@ -212,10 +212,10 @@ class CallExpression extends Expression {
 								var class = expression.getClass()
 								var reference = @scope.reference(class)
 
-								@addCallee(new PreciseThisCallee(@data, expression, reference, @property, @assessment, match, this))
+								@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
 							}
 							else {
-								throw new NotImplementedException(this)
+								throw NotImplementedException.new(this)
 							}
 						}
 						else {
@@ -227,15 +227,15 @@ class CallExpression extends Expression {
 					@prepareArguments()
 
 					if expression.isSealed() {
-						var object = new IdentifierLiteral($ast.identifier('this'), this, @scope)
+						var object = IdentifierLiteral.new($ast.identifier('this'), this, @scope)
 						var class = expression.getClass()
 						var reference = @scope.reference(class)
 
-						@addCallee(new SealedMethodCallee(@data, object, reference, @property, true, this))
+						@addCallee(SealedMethodCallee.new(@data, object, reference, @property, true, this))
 
 					}
 					else {
-						@addCallee(new DefaultCallee(@data, null, null, this))
+						@addCallee(DefaultCallee.new(@data, null, null, this))
 					}
 				}
 				else {
@@ -249,7 +249,7 @@ class CallExpression extends Expression {
 
 				@prepareArguments()
 
-				@addCallee(new DefaultCallee(@data, null, null, this))
+				@addCallee(DefaultCallee.new(@data, null, null, this))
 			}
 		}
 
@@ -355,7 +355,7 @@ class CallExpression extends Expression {
 	} # }}}
 	isCallable() => !@reusable
 	isComposite() => !@reusable
-	isComputed() => (@nullable || @callees.length > 1) && !@tested
+	isComputed() => ((@nullable || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
 	isExit() => @type.isNever()
 	isExpectingType() => true
 	override isInitializingInstanceVariable(name) { # {{{
@@ -493,26 +493,26 @@ class CallExpression extends Expression {
 
 			match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
 				is LenientCallMatchResult with result {
-					@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
+					@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 				}
 				is PreciseCallMatchResult with { matches } {
 					if matches.length == 1 {
 						var match = matches[0]
 
 						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
-							@addCallee(new LenientFunctionCallee(@data, @assessment, [match.function], this))
+							@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
 						}
 						else {
-							@addCallee(new PreciseFunctionCallee(@data, @assessment, matches, this))
+							@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
 						}
 					}
 					else if @matchingMode == .AllMatches {
-						@addCallee(new PreciseFunctionCallee(@data, @assessment, matches, this))
+						@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
 					}
 					else {
 						var functions = [match.function for var match in matches]
 
-						@addCallee(new LenientFunctionCallee(@data, @assessment, functions, this))
+						@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
 					}
 				}
 				NoMatchResult.NoArgumentMatch {
@@ -520,7 +520,7 @@ class CallExpression extends Expression {
 						ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 					}
 					else {
-						@addCallee(new DefaultCallee(@data, @object, null, this))
+						@addCallee(DefaultCallee.new(@data, @object, null, this))
 					}
 				}
 				NoMatchResult.NoThisMatch {
@@ -548,7 +548,7 @@ class CallExpression extends Expression {
 				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
 			}
 
-			@addCallee(new EnumCreateCallee(@data, type, argument, this))
+			@addCallee(EnumCreateCallee.new(@data, type, argument, this))
 		}
 		else if type.isStruct() {
 			TypeException.throwConstructorWithoutNew(name, this)
@@ -562,7 +562,7 @@ class CallExpression extends Expression {
 		else if type.canBeFunction() {
 			@prepareArguments()
 
-			@addCallee(new DefaultCallee(@data, @object, null, this))
+			@addCallee(DefaultCallee.new(@data, @object, null, this))
 		}
 		else {
 			@prepareArguments()
@@ -571,7 +571,7 @@ class CallExpression extends Expression {
 				TypeException.throwNotFunction(name, this)
 			}
 			else {
-				@addCallee(new DefaultCallee(@data, @object, null, this))
+				@addCallee(DefaultCallee.new(@data, @object, null, this))
 			}
 		}
 	} # }}}
@@ -595,37 +595,60 @@ class CallExpression extends Expression {
 
 				var reference = @scope().reference(name)
 
-				if value.hasStaticMethod(@property) {
+				if reference.isVirtual() {
+					TypeException.throwNotCreatable(reference.toQuote(), this)
+				}
+
+				if @property == 'new' {
+					@assessment = value.getConstructorAssessment(name.name(), this)
+
+					@prepareArguments()
+
+					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
+						is LenientCallMatchResult, PreciseCallMatchResult {
+							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
+						}
+						else {
+							if value.isExhaustiveConstructor(this) {
+								ReferenceException.throwNoMatchingConstructor(name.name(), [argument.type() for var argument in @arguments], this)
+							}
+							else {
+								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
+							}
+						}
+					}
+				}
+				else if value.hasStaticMethod(@property) {
 					@assessment = value.getStaticAssessment(@property, this)
 
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with result {
-							@addCallee(new LenientMethodCallee(@data, @object, reference, @property, @assessment, result, this))
+							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 
 								if match.function.isSealed() {
-									@addCallee(new SealedPreciseMethodCallee(@data, @object, reference, @property, @assessment, match, this))
+									@addCallee(SealedPreciseMethodCallee.new(@data, @object, reference, @property, @assessment, match, this))
 								}
 								else {
-									@addCallee(new PreciseMethodCallee(@data, @object, reference, @property, @assessment, matches, this))
+									@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 								}
 							}
 							else if @matchingMode == .AllMatches {
-								@addCallee(new PreciseMethodCallee(@data, @object, reference, @property, @assessment, matches, this))
+								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 							}
 							else {
 								var functions = [match.function for var match in matches]
 
 								if functions.some((function, _, _) => function.isSealed()) {
-									@addCallee(new SealedCallee(@data, name, false, functions, this))
+									@addCallee(SealedCallee.new(@data, name, false, functions, this))
 								}
 								else {
-									@addCallee(new LenientFunctionCallee(@data, @assessment, functions, this))
+									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
 								}
 							}
 						}
@@ -634,10 +657,10 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingStaticMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
 							}
 							else if @assessment.sealed {
-								@addCallee(new SealedMethodCallee(@data, @object, reference, @property, false, this))
+								@addCallee(SealedMethodCallee.new(@data, @object, reference, @property, false, this))
 							}
 							else {
-								@addCallee(new DefaultCallee(@data, @object, reference, this))
+								@addCallee(DefaultCallee.new(@data, @object, reference, this))
 							}
 						}
 					}
@@ -648,7 +671,7 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(new DefaultCallee(@data, @object, reference, this))
+					@addCallee(DefaultCallee.new(@data, @object, reference, this))
 				}
 			}
 			is EnumType {
@@ -663,14 +686,14 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with result {
-							@addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
+							@addCallee(EnumMethodCallee.new(@data, @object, @property, result.possibilities, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							if matches.length == 1 {
-								@addCallee(new PreciseMethodCallee(@data, @object, reference, @property, @assessment, matches, this))
+								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 							}
 							else {
-								throw new NotImplementedException(this)
+								throw NotImplementedException.new(this)
 							}
 						}
 						else {
@@ -678,7 +701,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), @arguments, this)
 							}
 							else {
-								@addCallee(new EnumMethodCallee(@data, @object, @property, null, this))
+								@addCallee(EnumMethodCallee.new(@data, @object, @property, null, this))
 							}
 						}
 					}
@@ -689,7 +712,7 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(new DefaultCallee(@data, @object, reference, this))
+					@addCallee(DefaultCallee.new(@data, @object, reference, this))
 				}
 			}
 			is ExclusionType {
@@ -710,23 +733,23 @@ class CallExpression extends Expression {
 
 						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 							is LenientCallMatchResult with result {
-								@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
+								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 							}
 							is PreciseCallMatchResult with { matches } {
 								if matches.length == 1 {
 									var match = matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										@addCallee(new LenientFunctionCallee(@data, @assessment, [match.function], this))
+										@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
 									}
 									else {
-										@addCallee(new PreciseFunctionCallee(@data, @assessment, matches, this))
+										@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
 									}
 								}
 								else {
 									var functions = [match.function for var match in matches]
 
-									@addCallee(new LenientFunctionCallee(@data, @assessment, functions, this))
+									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
 								}
 							}
 							else {
@@ -734,7 +757,7 @@ class CallExpression extends Expression {
 									ReferenceException.throwNoMatchingFunctionInNamespace(@property, name, @arguments, this)
 								}
 								else {
-									@addCallee(new DefaultCallee(@data, @object, null, this))
+									@addCallee(DefaultCallee.new(@data, @object, null, this))
 								}
 							}
 						}
@@ -752,7 +775,7 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(new DefaultCallee(@data, @object, null, this))
+					@addCallee(DefaultCallee.new(@data, @object, null, this))
 				}
 			}
 			is ObjectType {
@@ -773,20 +796,88 @@ class CallExpression extends Expression {
 					}
 				}
 
-				@makeMemberCalleeFromReference(value)
+				if @property == 'new' && value.isClass() {
+					@prepareArguments()
+
+					@addCallee(ConstructorCallee.new(@data, @object, value, null, null, this))
+				}
+				else {
+					@makeMemberCalleeFromReference(value)
+				}
 			}
 			is SealableType {
 				@makeMemberCallee(value.type(), name)
+			}
+			is StructType {
+				name = name as NamedType
+
+				var reference = @scope().reference(name)
+
+				if @property == 'new' {
+					@assessment = value.assessment(reference, this)
+
+					@prepareArguments()
+
+					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
+						is LenientCallMatchResult, PreciseCallMatchResult {
+							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
+						}
+						else {
+							if value.isExhaustive(this) {
+								ReferenceException.throwNoMatchingStruct(name.name(), [argument.type() for var argument in @arguments], this)
+							}
+							else {
+								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
+							}
+						}
+					}
+				}
+				else {
+					throw NotSupportedException.new(this)
+				}
 			}
 			is UnionType {
 				for var type in value.types() {
 					@makeMemberCallee(type)
 				}
 			}
+			is TupleType {
+				name = name as NamedType
+
+				var reference = @scope().reference(name)
+
+				if @property == 'new' {
+					@assessment = value.assessment(reference, this)
+
+					@prepareArguments()
+
+					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
+						is LenientCallMatchResult, PreciseCallMatchResult {
+							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
+						}
+						else {
+							if value.isExhaustive(this) {
+								ReferenceException.throwNoMatchingTuple(name.name(), [argument.type() for var argument in @arguments], this)
+							}
+							else {
+								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
+							}
+						}
+					}
+				}
+				else {
+					throw NotSupportedException.new(this)
+				}
+			}
 			else {
 				@prepareArguments()
 
-				@addCallee(new DefaultCallee(@data, @object, null, this))
+				if @property == 'new' {
+					@addCallee(ConstructorCallee.new(@data, @object, AnyType.NullableUnexplicit, null, null, this))
+				}
+				else {
+					@addCallee(DefaultCallee.new(@data, @object, null, this))
+				}
 			}
 		}
 	} # }}}
@@ -810,7 +901,7 @@ class CallExpression extends Expression {
 							var class = value.getClassWithInstantiableMethod(@property, reference.type())
 							var reference = @scope.reference(class)
 
-							@addCallee(new LenientMethodCallee(@data, @object, reference, @property, @assessment, result, this))
+							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							var class = value.getClassWithInstantiableMethod(@property, reference.type())
@@ -820,19 +911,19 @@ class CallExpression extends Expression {
 								var match = matches[0]
 
 								if match.function.isSealed() {
-									@addCallee(new SealedPreciseMethodCallee(@data, @object, reference, @property, @assessment, match, this))
+									@addCallee(SealedPreciseMethodCallee.new(@data, @object, reference, @property, @assessment, match, this))
 								}
 								else {
-									@addCallee(new PreciseMethodCallee(@data, @object, reference, @property, @assessment, matches, this))
+									@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 								}
 							}
 							else if @matchingMode == .AllMatches {
-								@addCallee(new PreciseMethodCallee(@data, @object, reference, @property, @assessment, matches, this))
+								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 							}
 							else {
 								var functions = [match.function for var match in matches]
 
-								@addCallee(new LenientMethodCallee(@data, @object, reference, @property, @assessment, functions, this))
+								@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, functions, this))
 							}
 						}
 						NoMatchResult.NoArgumentMatch {
@@ -840,7 +931,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingStaticMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
 							}
 							else {
-								@addCallee(new DefaultCallee(@data, @object, reference, this))
+								@addCallee(DefaultCallee.new(@data, @object, reference, this))
 							}
 						}
 						NoMatchResult.NoThisMatch {
@@ -855,16 +946,16 @@ class CallExpression extends Expression {
 							(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 							(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 					{
-						@addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
+						@addCallee(SubstituteCallee.new(@data, substitute, Type.Any, this))
 					}
 					else if value.hasInstanceVariable(@property) {
-						@addCallee(new DefaultCallee(@data, @object, reference, this))
+						@addCallee(DefaultCallee.new(@data, @object, reference, this))
 					}
 					else if value.isExhaustive(this) {
 						ReferenceException.throwNotFoundStaticMethod(@property, reference.name(), this)
 					}
 					else {
-						@addCallee(new DefaultCallee(@data, @object, reference, this))
+						@addCallee(DefaultCallee.new(@data, @object, reference, this))
 					}
 				}
 			}
@@ -876,18 +967,18 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with result {
-							@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
+							@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 
-								@addCallee(new InvertedPreciseMethodCallee(@data, reference.discardReference() as NamedType, @property, @assessment, match, this))
+								@addCallee(InvertedPreciseMethodCallee.new(@data, reference.discardReference() as NamedType, @property, @assessment, match, this))
 							}
 							else {
 								var functions = [match.function for var match in matches]
 
-								@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, functions, this))
+								@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, functions, this))
 							}
 						}
 						else {
@@ -895,7 +986,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
 							}
 							else {
-								@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+								@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
 							}
 						}
 					}
@@ -906,11 +997,11 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+					@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
 				}
 			}
 			is FunctionType {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 			is NamedType {
 				@makeMemberCalleeFromReference(value.type(), reference)
@@ -924,23 +1015,23 @@ class CallExpression extends Expression {
 
 						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 							is LenientCallMatchResult with result {
-								@addCallee(new LenientFunctionCallee(@data, @assessment, result, this))
+								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 							}
 							is PreciseCallMatchResult with { matches } {
 								if matches.length == 1 {
 									var match = matches[0]
 
 									if match.function.isAlien() || match.function.index() == -1 {
-										@addCallee(new LenientFunctionCallee(@data, @assessment, [match.function], this))
+										@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
 									}
 									else {
-										@addCallee(new PreciseFunctionCallee(@data, @assessment, matches, this))
+										@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
 									}
 								}
 								else {
 									var functions = [match.function for var match in matches]
 
-									@addCallee(new LenientFunctionCallee(@data, @assessment, functions, this))
+									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
 								}
 							}
 							else {
@@ -948,13 +1039,13 @@ class CallExpression extends Expression {
 									ReferenceException.throwNoMatchingFunction(@property, reference.name(), @arguments, this)
 								}
 								else {
-									@addCallee(new DefaultCallee(@data, @object, reference, this))
+									@addCallee(DefaultCallee.new(@data, @object, reference, this))
 								}
 							}
 						}
 					}
 					else {
-						throw new NotImplementedException(this)
+						throw NotImplementedException.new(this)
 					}
 				}
 				else if value.isExhaustive(this) {
@@ -963,11 +1054,11 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(new DefaultCallee(@data, @object, reference, this))
+					@addCallee(DefaultCallee.new(@data, @object, reference, this))
 				}
 			}
 			is ParameterType {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 			is ReferenceType {
 				@makeMemberCalleeFromReference(value.type(), value)
@@ -980,7 +1071,7 @@ class CallExpression extends Expression {
 			else {
 				@prepareArguments()
 
-				@addCallee(new DefaultCallee(@data, @object, reference, this))
+				@addCallee(DefaultCallee.new(@data, @object, reference, this))
 			}
 		}
 	} # }}}
@@ -989,7 +1080,7 @@ class CallExpression extends Expression {
 			if sealed {
 				@prepareArguments()
 
-				@addCallee(new SealedFunctionCallee(@data, name, property, property.getReturnType(), this))
+				@addCallee(SealedFunctionCallee.new(@data, name, property, property.getReturnType(), this))
 			}
 			else {
 				@makeCallee(property, @property)
@@ -1001,7 +1092,7 @@ class CallExpression extends Expression {
 		else {
 			@prepareArguments()
 
-			@addCallee(new DefaultCallee(@data, @object, null, property, this))
+			@addCallee(DefaultCallee.new(@data, @object, null, property, this))
 		}
 	} # }}}
 	prepareArguments() { # {{{
@@ -1152,7 +1243,7 @@ class CallExpression extends Expression {
 	toQuote() { # {{{
 		var mut fragments = ''
 
-		if @object != null {
+		if ?@object {
 			fragments += `\(@object.toQuote()).\(@property)`
 		}
 		else if @data.callee.kind == NodeKind.Identifier {
@@ -1177,7 +1268,7 @@ class CallExpression extends Expression {
 				@callees[0].toNullableFragments(fragments, this)
 			}
 			else {
-				throw new NotImplementedException(this)
+				throw NotImplementedException.new(this)
 			}
 		}
 	} # }}}
@@ -1257,7 +1348,7 @@ class PlaceholderArgument extends Expression {
 	analyse() { # {{{
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@type = new PlaceholderType(@scope)
+		@type = PlaceholderType.new(@scope)
 
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind.Rest {
@@ -1284,10 +1375,10 @@ class PlaceholderType extends Type {
 		@rest: Boolean		= false
 	}
 	override clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	flagRest(): Void { # {{{
 		@rest = true
@@ -1300,10 +1391,10 @@ class PlaceholderType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => true
 	parameter(index) => AnyType.NullableUnexplicit
 	override toFragments(fragments, node) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	override toQuote() { # {{{
 		if @rest {
@@ -1317,7 +1408,7 @@ class PlaceholderType extends Type {
 		}
 	} # }}}
 	override toVariations(variations) { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 }
 
@@ -1344,6 +1435,7 @@ class PositionalArgument extends Expression {
 
 include {
 	'./callee'
+	'./callee/constructor'
 	'./callee/default'
 	'./callee/enum-create'
 	'./callee/enum-method'

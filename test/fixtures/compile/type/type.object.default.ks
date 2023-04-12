@@ -1,11 +1,11 @@
 var mut x: Object
 
-x = new Date()
+x = Date.new()
 
 class Foobar {
 
 }
 
-x = new Foobar()
+x = Foobar.new()
 
 export x

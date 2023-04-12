@@ -31,7 +31,7 @@ class EnumType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumType { # {{{
-			var type = new EnumType(scope, EnumTypeKind(data.type))
+			var type = EnumType.new(scope, EnumTypeKind(data.type))
 
 			type._exhaustive = data.exhaustive
 			type._index = data.sequenceIndex
@@ -149,7 +149,7 @@ class EnumType extends Type {
 				}
 			}
 			else {
-				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
+				throw NotSupportedException.new(`Unexpected kind \(data.kind)`, node)
 			}
 		}
 	} # }}}
@@ -182,7 +182,7 @@ class EnumType extends Type {
 		return index
 	} # }}}
 	addVariable(name: String) { # {{{
-		var variable = new EnumVariableType()
+		var variable = EnumVariableType.new()
 
 		@variables[name] = variable
 
@@ -200,7 +200,7 @@ class EnumType extends Type {
 		return @assessment
 	} # }}}
 	clone() { # {{{
-		var that = new EnumType(@scope)
+		var that = EnumType.new(@scope)
 
 		return that.copyFrom(this)
 	} # }}}
@@ -313,7 +313,7 @@ class EnumType extends Type {
 		if @function == null {
 			var scope = node.scope()
 
-			@function = new FunctionType(scope)
+			@function = FunctionType.new(scope)
 
 			@function.addParameter(@type, 'value', 1, 1)
 
@@ -506,10 +506,10 @@ class EnumType extends Type {
 		return @index
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('enum', @sequences.defaults)
@@ -552,11 +552,11 @@ class EnumMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
 			var scope = node.scope()
 
-			return new EnumMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
 			var data = index
-			var type = new EnumMethodType(scope)
+			var type = EnumMethodType.new(scope)
 
 			type._identifier = data.id
 			type._access = data.access
@@ -576,7 +576,7 @@ class EnumMethodType extends FunctionType {
 		} # }}}
 	}
 	clone() { # {{{
-		var clone = new EnumMethodType(@scope)
+		var clone = EnumMethodType.new(@scope)
 
 		FunctionType.clone(this, clone)
 

@@ -34,7 +34,7 @@ class VariableStatement extends Statement {
 		var modifier = modifing ? @data.modifiers[0].kind : null
 
 		for var data in @data.declarations {
-			var declaration = new VariableDeclaration(data, this, @scope)
+			var declaration = VariableDeclaration.new(data, this, @scope)
 
 			if modifing {
 				declaration.setModifier(modifier)
@@ -188,16 +188,16 @@ class VariableDeclaration extends AbstractNode {
 
 			match data.name.kind {
 				NodeKind.ArrayBinding {
-					declarator = new VariableBindingDeclarator(data, this)
+					declarator = VariableBindingDeclarator.new(data, this)
 				}
 				NodeKind.Identifier {
-					declarator = new VariableIdentifierDeclarator(data, this)
+					declarator = VariableIdentifierDeclarator.new(data, this)
 				}
 				NodeKind.ObjectBinding {
-					declarator = new VariableBindingDeclarator(data, this)
+					declarator = VariableBindingDeclarator.new(data, this)
 				}
 				else {
-					throw new NotImplementedException(this)
+					throw NotImplementedException.new(this)
 				}
 			}
 
@@ -580,7 +580,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 		@redeclared = @scope.hasDeclaredVariable(@name)
 
-		@identifier = new IdentifierLiteral(@data.name, this, @scope)
+		@identifier = IdentifierLiteral.new(@data.name, this, @scope)
 		@identifier.setAssignment(AssignmentType.Declaration)
 		@identifier.analyse()
 

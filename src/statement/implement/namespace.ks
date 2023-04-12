@@ -84,7 +84,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@name = @data.name.name
 
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 

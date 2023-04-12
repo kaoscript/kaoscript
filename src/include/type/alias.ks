@@ -4,7 +4,7 @@ class AliasType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
-			var type = new AliasType(scope)
+			var type = AliasType.new(scope)
 
 			queue.push(() => {
 				type.type(Type.import(data.of, metadata, references, alterations, queue, scope, node))
@@ -24,7 +24,7 @@ class AliasType extends Type {
 	canBeNumber(any = true) => @type.canBeNumber(any)
 	canBeString(any = true) => @type.canBeString(any)
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	discard() => @type.discard()
 	discardAlias() => @type.discardAlias()
@@ -60,7 +60,7 @@ class AliasType extends Type {
 	parameter() => @type.parameter()
 	reduce(type: Type) => @type.reduce(type)
 	setNullable(nullable: Boolean) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	shallBeNamed() => true
 	override split(types) => @type.split(types)
@@ -68,7 +68,7 @@ class AliasType extends Type {
 	type(@type) => this
 	toExportFragment(fragments, name, variable)
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) => @type.toNegativeTestFragments(fragments, node, junction)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)

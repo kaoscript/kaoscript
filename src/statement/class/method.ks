@@ -245,7 +245,7 @@ class ClassMethodDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
@@ -256,7 +256,7 @@ class ClassMethodDeclaration extends Statement {
 			@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 		}
 
-		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
+		@block = MethodBlock.new($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		return if @analysed
@@ -267,7 +267,7 @@ class ClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.unflagAssignableThis()
 
@@ -570,7 +570,7 @@ class ClassMethodDeclaration extends Statement {
 			for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 				ctrl2.code(' && ') unless index == 0
 
-				var literal = new Literal(false, this, @scope(), parameter.getExternalName())
+				var literal = Literal.new(false, this, @scope(), parameter.getExternalName())
 
 				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
 
@@ -618,7 +618,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		if @awaiting {
-			throw new NotImplementedException(this)
+			throw NotImplementedException.new(this)
 		}
 		else {
 			ctrl.compile(@block)

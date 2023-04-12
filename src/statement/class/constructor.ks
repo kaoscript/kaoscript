@@ -89,14 +89,14 @@ class ClassConstructorDeclaration extends Statement {
 		@parameters = []
 
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
 			@parameters.push(parameter)
 		}
 
-		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
+		@block = ConstructorBlock.new($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		for var parameter in @parameters {
@@ -125,7 +125,7 @@ class ClassConstructorDeclaration extends Statement {
 			}
 		}
 
-		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassConstructorType.new([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.unflagAssignableThis()
 
@@ -180,7 +180,7 @@ class ClassConstructorDeclaration extends Statement {
 
 			if var variable ?= class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
-					@block.initializeVariable(new VariableBrief(
+					@block.initializeVariable(VariableBrief.new(
 						name
 						type: statement.type()
 						instance: true

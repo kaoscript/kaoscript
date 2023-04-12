@@ -15,7 +15,7 @@ class WhileStatement extends Statement {
 
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind.Identifier
 
-			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, true)
+			@declaration = VariableDeclaration.new(@data.condition, this, @bindingScope, @scope:Scope, true)
 			@declaration.initiate()
 		}
 	} # }}}

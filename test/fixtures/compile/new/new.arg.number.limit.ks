@@ -7,6 +7,6 @@ class Foobar {
 	constructor(@value) {
 	}
 	foobar() {
-		var x = new Foobar(@value.limit(0, 255))
+		var x = Foobar.new(@value.limit(0, 255))
 	}
 }

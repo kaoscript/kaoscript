@@ -79,14 +79,14 @@ class ClassProxyDeclaration extends Statement {
 				}
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 		else if @type.isAny() {
 			ReferenceException.throwNoTypeProxy(@external.toQuote(), this)
 		}
 		else {
-			class.addInstanceVariable(@name, new ClassVariableType(@scope(), @type))
+			class.addInstanceVariable(@name, ClassVariableType.new(@scope(), @type))
 		}
 	} # }}}
 	translate() { # {{{
@@ -124,7 +124,7 @@ class ClassProxyDeclaration extends Statement {
 				ctrl.done()
 			}
 			else {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 		}
 		else {
@@ -212,7 +212,7 @@ class ClassProxyGroupDeclaration extends Statement {
 				var external = data.external.name
 
 				if ?@elements[internal] {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 				else if var property ?= type.getProperty(external) {
 					var type = property.clone()
@@ -255,7 +255,7 @@ class ClassProxyGroupDeclaration extends Statement {
 						ReferenceException.throwNoTypeProxy(@recipient.toQuote(), external, this)
 					}
 					else {
-						class.addInstanceVariable(internal, new ClassVariableType(@scope(), type))
+						class.addInstanceVariable(internal, ClassVariableType.new(@scope(), type))
 
 						@elements[internal] = {
 							external
@@ -269,7 +269,7 @@ class ClassProxyGroupDeclaration extends Statement {
 			}
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 	} # }}}
 	translate()
@@ -326,7 +326,7 @@ class ClassProxyGroupDeclaration extends Statement {
 			}
 		}
 		else {
-			throw new NotImplementedException()
+			throw NotImplementedException.new()
 		}
 	} # }}}
 }

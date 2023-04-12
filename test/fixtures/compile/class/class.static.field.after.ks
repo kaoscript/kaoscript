@@ -1,6 +1,6 @@
 class ClassA {
 	static {
-		x = new ClassB()
+		x = ClassB.new()
 	}
 }
 

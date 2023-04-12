@@ -74,7 +74,7 @@ class MatchStatement extends Statement {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = new VariableDeclaration(@data.declaration, this, @bindingScope, @scope:Scope, false)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, false)
 			@declaration.initiate()
 		}
 		else {
@@ -105,7 +105,7 @@ class MatchStatement extends Statement {
 
 			clause.scope.index = index
 
-			var filter = new MatchFilter(data, this, clause.scope)
+			var filter = MatchFilter.new(data, this, clause.scope)
 
 			filter.analyse()
 
@@ -113,7 +113,7 @@ class MatchStatement extends Statement {
 				clause.hasTest = true
 			}
 			else if @hasDefaultClause {
-				throw new NotSupportedException(this)
+				throw NotSupportedException.new(this)
 			}
 			else {
 				@hasDefaultClause = true
@@ -145,7 +145,7 @@ class MatchStatement extends Statement {
 				variable.setRealType(@valueType)
 			}
 			else {
-				throw new NotSupportedException()
+				throw NotSupportedException.new()
 			}
 		}
 		else {
@@ -301,7 +301,7 @@ class MatchStatement extends Statement {
 
 			var type = Type.union(@scope, ...types)
 
-			@parent.initializeVariable(new VariableBrief(name, type), this, this)
+			@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 		}
 
 		for var inferable, name of inferables {
@@ -819,7 +819,7 @@ class MatchBindingArray extends AbstractNode {
 		fragments.compile(@binding)
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		var value = new Literal(name, this)
+		var value = Literal.new(name, this)
 
 		var mut line = fragments.newLine()
 
@@ -918,7 +918,7 @@ class MatchBindingObject extends AbstractNode {
 		fragments.compile(@binding)
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		var value = new Literal(name, this)
+		var value = Literal.new(name, this)
 
 		var line = fragments.newLine()
 
@@ -1000,10 +1000,10 @@ class MatchConditionArray extends AbstractNode {
 		for var mut value in @data.values {
 			if value.kind != NodeKind.OmittedExpression {
 				if value.kind == NodeKind.MatchConditionRange {
-					value = new MatchConditionRange(value, this)
+					value = MatchConditionRange.new(value, this)
 				}
 				else {
-					value = new MatchConditionValue(value, this)
+					value = MatchConditionValue.new(value, this)
 				}
 
 				value.analyse()
@@ -1015,7 +1015,7 @@ class MatchConditionArray extends AbstractNode {
 		@minmax = $match.length(@data.values)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@type = new ArrayType(@scope)
+		@type = ArrayType.new(@scope)
 
 		for var value in @values {
 			value.prepare()
@@ -1086,7 +1086,7 @@ class MatchConditionObject extends AbstractNode {
 					}
 
 					if ?data.value {
-						property.value = value = new MatchConditionValue(data.value, this)
+						property.value = value = MatchConditionValue.new(data.value, this)
 						property.value.analyse()
 					}
 
@@ -1096,7 +1096,7 @@ class MatchConditionObject extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@type = new ObjectType(@scope)
+		@type = ObjectType.new(@scope)
 
 		if #@properties {
 			for var { name, value? } in @properties {
@@ -1229,7 +1229,7 @@ class MatchConditionType extends AbstractNode {
 	isEnum() => false
 	setCastingEnum(_)
 	toConditionFragments(fragments, name, junction) { # {{{
-		@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
+		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name))
 	} # }}}
 	type() => @type
 }
@@ -1300,7 +1300,7 @@ class MatchConditionValue extends AbstractNode {
 			var value = @values[0]
 
 			if @type.isContainer() {
-				@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
+				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name))
 			}
 			else {
 				fragments.code(name, ' === ').compile(value)
@@ -1326,7 +1326,7 @@ class MatchConditionValue extends AbstractNode {
 				}
 
 				if value.type().isContainer() {
-					literal ??= new Literal(false, this, @scope:Scope, name)
+					literal ??= Literal.new(false, this, @scope:Scope, name)
 
 					value.type().toPositiveTestFragments(fragments, literal)
 				}
@@ -1372,10 +1372,10 @@ class MatchFilter extends AbstractNode {
 						@kind = .ARRAY
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 
-					binding = new MatchBindingArray(data, @parent, scope)
+					binding = MatchBindingArray.new(data, @parent, scope)
 
 					@hasTest = true
 				}
@@ -1384,15 +1384,15 @@ class MatchFilter extends AbstractNode {
 						@kind = .OBJECT
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 
-					binding = new MatchBindingObject(data, @parent, scope)
+					binding = MatchBindingObject.new(data, @parent, scope)
 
 					@hasTest = true
 				}
 				else {
-					binding = new MatchBindingValue(data, @parent, scope)
+					binding = MatchBindingValue.new(data, @parent, scope)
 				}
 			}
 
@@ -1416,10 +1416,10 @@ class MatchFilter extends AbstractNode {
 							@kind = .ARRAY
 						}
 						else {
-							throw new NotSupportedException(this)
+							throw NotSupportedException.new(this)
 						}
 
-						condition = new MatchConditionArray(data, @parent, scope)
+						condition = MatchConditionArray.new(data, @parent, scope)
 
 						for var binding in @bindings {
 							binding
@@ -1435,10 +1435,10 @@ class MatchFilter extends AbstractNode {
 							@kind = .OBJECT
 						}
 						else {
-							throw new NotSupportedException(this)
+							throw NotSupportedException.new(this)
 						}
 
-						condition = new MatchConditionObject(data, @parent, scope)
+						condition = MatchConditionObject.new(data, @parent, scope)
 
 						for var binding in @bindings {
 							binding.unflagTypeTesting()
@@ -1452,20 +1452,20 @@ class MatchFilter extends AbstractNode {
 							@kind = .NUMBER
 						}
 						else {
-							throw new NotSupportedException(this)
+							throw NotSupportedException.new(this)
 						}
 
-						condition = new MatchConditionRange(data, @parent, scope)
+						condition = MatchConditionRange.new(data, @parent, scope)
 					}
 					NodeKind.MatchConditionType {
-						condition = new MatchConditionType(data, @parent, scope)
+						condition = MatchConditionType.new(data, @parent, scope)
 
 						for var binding in @bindings {
 							binding.unflagTypeTesting()
 						}
 					}
 					else {
-						condition = new MatchConditionValue(data, @parent, scope)
+						condition = MatchConditionValue.new(data, @parent, scope)
 					}
 				}
 

@@ -277,7 +277,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@parameters = []
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
@@ -302,7 +302,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		@type = new ClassMethodType([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAltering()
 
@@ -359,7 +359,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				var type = Type.union(@scope, ...methods)
 				var variable = @scope.define('precursor', true, type, this)
 
-				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, true, this)
+				variable.replaceCall = (data, arguments, node) => CallOverwrittenMethodSubstitude.new(data, arguments, @variable, @name, methods, true, this)
 			}
 			else {
 				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
@@ -391,7 +391,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				var type = Type.union(@scope, ...methods)
 				var variable = @scope.define('precursor', true, type, this)
 
-				variable.replaceCall = (data, arguments, node) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, false, this)
+				variable.replaceCall = (data, arguments, node) => CallOverwrittenMethodSubstitude.new(data, arguments, @variable, @name, methods, false, this)
 			}
 			else {
 				if @class.hasMatchingStaticMethod(@name, @type, MatchingMode.ExactParameter) {
@@ -817,7 +817,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 
 				if !?method {
-					throw new NotSupportedException(this)
+					throw NotSupportedException.new(this)
 				}
 			}
 
@@ -982,25 +982,25 @@ class ImplementClassConstructorDeclaration extends Statement {
 			if @getConstructorIndex($ast.block(body).statements) != -1 {
 				@scope.rename('this', 'that')
 
-				@this.replaceCall = (data, arguments, node) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
+				@this.replaceCall = (data, arguments, node) => CallSealedConstructorSubstitude.new(data, arguments, @variable, this)
 
 				@dependent = true
 			}
 		}
 		else {
-			@this.replaceCall = (data, arguments, node) => new CallThisConstructorSubstitude(data, arguments, @variable, this)
+			@this.replaceCall = (data, arguments, node) => CallThisConstructorSubstitude.new(data, arguments, @variable, this)
 		}
 
 		@parameters = []
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
 			@parameters.push(parameter)
 		}
 
-		@block = new ConstructorBlock($ast.block(body), this, @scope)
+		@block = ConstructorBlock.new($ast.block(body), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@scope.line(@data.start.line)
@@ -1009,7 +1009,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassConstructorType.new([parameter.type() for var parameter in @parameters], @data, this)
 
 		@type.flagAltering()
 
@@ -1037,7 +1037,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 			var variable = @scope.define('precursor', true, @classRef, this)
 
-			variable.replaceCall = (data, arguments, node) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable, this)
+			variable.replaceCall = (data, arguments, node) => CallOverwrittenConstructorSubstitude.new(data, arguments, @variable, this)
 		}
 		else {
 			if @class.hasMatchingConstructor(@type, MatchingMode.ExactParameter) {
@@ -1076,7 +1076,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 			if var variable ?= @class.getInstanceVariable(name) {
 				if variable.isRequiringInitialization() {
-					@block.initializeVariable(new VariableBrief(
+					@block.initializeVariable(VariableBrief.new(
 						name
 						type: statement.type()
 						instance: true

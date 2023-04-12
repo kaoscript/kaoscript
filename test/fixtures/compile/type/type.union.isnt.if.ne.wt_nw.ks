@@ -3,7 +3,7 @@ class Foobar {
 
 func foobar(mut x: Foobar | String | Number, y) {
 	if x is not String {
-		x = new Foobar()
+		x = Foobar.new()
 	}
 
 	quxbaz(x)

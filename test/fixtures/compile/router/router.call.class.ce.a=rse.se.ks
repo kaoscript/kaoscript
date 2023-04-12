@@ -6,4 +6,4 @@ class Foobar {
 	}
 }
 
-var f = new Foobar('a')
+var f = Foobar.new('a')

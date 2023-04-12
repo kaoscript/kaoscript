@@ -8,6 +8,6 @@ class ClassB extends ClassA {
 	foobar(x = 0) => super(x)
 }
 
-var b = new ClassB()
+var b = ClassB.new()
 
 expect(b.foobar()).to.equals(0)

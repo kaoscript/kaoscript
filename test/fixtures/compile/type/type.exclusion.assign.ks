@@ -5,5 +5,5 @@ class Foobar {
 
 var mut x: Instance
 
-x = new Foobar()
-x = new Date()
+x = Foobar.new()
+x = Date.new()

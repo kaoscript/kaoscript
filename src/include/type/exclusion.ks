@@ -4,12 +4,12 @@ class ExclusionType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
-			var type = new ExclusionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for var item in data.types])
+			var type = ExclusionType.new(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for var item in data.types])
 
 			return type
 		} # }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { # {{{
-			var type = new ExclusionType(scope)
+			var type = ExclusionType.new(scope)
 
 			queue.push(() => {
 				for var item in data.types {
@@ -24,7 +24,7 @@ class ExclusionType extends Type {
 		super(scope)
 	} # }}}
 	clone() { # {{{
-		var that = new ExclusionType(@scope)
+		var that = ExclusionType.new(@scope)
 
 		that._types = [...@types]
 
@@ -82,7 +82,7 @@ class ExclusionType extends Type {
 		return true
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	toQuote() => [type.toQuote() for var type in @types].join('^')
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)

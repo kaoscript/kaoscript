@@ -10,9 +10,9 @@ class ClassX {
 }
 
 func foobar(a: ClassA) {
-	var c = new ClassX()
+	var c = ClassX.new()
 
 	c.foobar(a)
 }
 
-foobar(new ClassB())
+foobar(ClassB.new())

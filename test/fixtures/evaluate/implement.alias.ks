@@ -22,7 +22,7 @@ impl Shape {
 	drawing() => this.draw(form)
 }
 
-var shape: Shape = new Shape('yellow')
+var shape: Shape = Shape.new('yellow')
 
 expect(shape.draw()).to.equals(`I'm drawing with a yellow pencil.`)
 expect(shape.draw('rectangle')).to.equals(`I'm drawing a yellow rectangle.`)

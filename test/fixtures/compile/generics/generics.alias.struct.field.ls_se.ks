@@ -2,6 +2,6 @@ struct Foobar {
 	values: String[]
 }
 
-var foo = new Foobar(
+var foo = Foobar.new(
 	values: []
 )

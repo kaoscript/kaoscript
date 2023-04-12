@@ -23,14 +23,14 @@ class NamedType extends Type {
 	clone() { # {{{
 		@cloned = true
 
-		return new NamedType(@name, @type.clone())
+		return NamedType.new(@name, @type.clone())
 	} # }}}
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
 	discardAlias() => @isAlias() ? @type.discardAlias() : this
 	discardName() => @type
-	duplicate() => new NamedType(@name, @type)
+	duplicate() => NamedType.new(@name, @type)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
@@ -478,7 +478,7 @@ class NamedType extends Type {
 			return @type.metaReference(references, indexDelta, mode, module, @name)
 		}
 		else {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 	} # }}}
 	minorOriginal() => @type.minorOriginal()
@@ -527,7 +527,7 @@ class NamedType extends Type {
 			return @type.toAlterationReference(references, indexDelta, mode, module)
 		}
 		else {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
@@ -578,7 +578,7 @@ class NamedType extends Type {
 			@type.walk(fn)
 		}
 		else {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 	} # }}}
 

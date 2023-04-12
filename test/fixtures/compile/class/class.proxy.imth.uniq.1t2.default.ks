@@ -15,7 +15,7 @@ class Proxy {
 	}
 }
 
-var p = new Proxy(new Hello())
+var p = Proxy.new(Hello.new())
 
 p.hello('')
 p.hello(42)

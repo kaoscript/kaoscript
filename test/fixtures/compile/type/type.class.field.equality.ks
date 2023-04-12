@@ -8,7 +8,7 @@ class Quxbaz extends Foobar {
 
 class Corge {
 	private {
-		@foo: Foobar	= new Foobar()
+		@foo: Foobar	= Foobar.new()
 	}
 	qux() {
 		if @foo is Quxbaz {

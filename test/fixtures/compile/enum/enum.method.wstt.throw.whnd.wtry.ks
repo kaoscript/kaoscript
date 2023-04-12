@@ -12,7 +12,7 @@
             'monday' => return MONDAY
         }
 
-        throw new Error()
+        throw Error.new()
     }
 }
 

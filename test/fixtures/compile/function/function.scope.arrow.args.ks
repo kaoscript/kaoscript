@@ -11,7 +11,7 @@ var cases = [
 for var case in cases {
 	for var year, i in [1992, 2000] {
 		functions.push((x, y) => {
-			var d = new Date(year, case[0], case[1])
+			var d = Date.new(year, case[0], case[1])
 
 			expect(d.getDay()).to.equal(case[i + 2] + x)
 		})

@@ -1,5 +1,5 @@
 import './this.func.export.default.ks'
 
-var nya = new Pet()
+var nya = Pet.new()
 
 echo(isCat*$(nya))

@@ -10,8 +10,8 @@ func foo() ~ Error {
 	}
 	catch {
 		console.log('catch')
-		
-		throw new Error()
+
+		throw Error.new()
 	}
 	finally {
 		console.log('finally')
@@ -19,5 +19,5 @@ func foo() ~ Error {
 }
 
 func bar() ~ Error {
-	throw new Error()
+	throw Error.new()
 }

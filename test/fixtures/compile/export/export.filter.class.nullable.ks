@@ -12,7 +12,7 @@ class Bar {
 
 class Qux extends Bar {
 	constructor() {
-		super(new Foo())
+		super(Foo.new())
 	}
 }
 

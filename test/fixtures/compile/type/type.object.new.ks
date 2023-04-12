@@ -1,1 +1,1 @@
-var x = new Object()
+var x = Object.new()

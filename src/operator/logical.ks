@@ -73,7 +73,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		if boolean {
 			if number {
-				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
 
 				if nullable {
 					@type = @type.setNullable(true)
@@ -320,7 +320,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		if boolean {
 			if number {
-				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
 
 				if nullable {
 					@type = @type.setNullable(true)
@@ -754,7 +754,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 
 		if boolean {
 			if number {
-				@type = new UnionType(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
 
 				if nullable {
 					@type = @type.setNullable(true)

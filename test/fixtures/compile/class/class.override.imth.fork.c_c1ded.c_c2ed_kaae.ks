@@ -3,7 +3,7 @@ class ValueA {
 class ValueB extends ValueA {
 }
 
-ValueA.Foobar = new ValueA()
+ValueA.Foobar = ValueA.new()
 
 enum EnumA {
 	Foobar

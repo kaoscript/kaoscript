@@ -7,7 +7,7 @@ class Foobar {
 	x() => @x
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 var dyn x = f.x
 

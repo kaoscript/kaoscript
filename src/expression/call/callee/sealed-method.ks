@@ -61,7 +61,7 @@ class SealedMethodCallee extends Callee {
 		if node._flatten {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @instance {
@@ -80,7 +80,7 @@ class SealedMethodCallee extends Callee {
 		else {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					if @instance {

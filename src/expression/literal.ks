@@ -140,7 +140,7 @@ class IdentifierLiteral extends Literal {
 			var variable = @scope.getVariable(@value, @line)
 
 			if variable.isLateInit() {
-				node.initializeVariable(new VariableBrief(
+				node.initializeVariable(VariableBrief.new(
 					name: @value
 					type: type.unspecify()
 					immutable: true
@@ -234,7 +234,7 @@ class IdentifierLiteral extends Literal {
 			fn(@value, @realType)
 		}
 		else {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 	} # }}}
 }

@@ -12,10 +12,10 @@ class Proxy {
 	}
 }
 
-var p1 = new Proxy()
-var p2 = new Proxy()
+var p1 = Proxy.new()
+var p2 = Proxy.new()
 
-p1.component = new Hello()
+p1.component = Hello.new()
 
 console.log(`\(p1.hello('Joe'))`)
 console.log(`\(p2.hello('Joe'))`)

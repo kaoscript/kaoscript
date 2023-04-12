@@ -22,17 +22,17 @@ class SealedFunctionCallee extends Callee {
 		if node._flatten {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 			}
 		}
 		else {
 			match node._data.scope.kind {
 				ScopeKind.Argument {
-					throw new NotImplementedException(node)
+					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
 					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
@@ -49,7 +49,7 @@ class SealedFunctionCallee extends Callee {
 		}
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
-		throw new NotImplementedException(node)
+		throw NotImplementedException.new(node)
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{
 		@type.toPositiveTestFragments(fragments, @object)

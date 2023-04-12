@@ -158,7 +158,7 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		var declarator = new IncludeDeclarator(declaration, data, path, this)
+		var declarator = IncludeDeclarator.new(declaration, data, path, this)
 
 		declarator.initiate()
 
@@ -181,7 +181,7 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		var declarator = new IncludeDeclarator(declaration, data, path, moduleName, this)
+		var declarator = IncludeDeclarator.new(declaration, data, path, moduleName, this)
 
 		declarator.initiate()
 

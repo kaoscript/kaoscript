@@ -20,7 +20,7 @@ class WithStatement extends Statement {
 
 		for var data in @data.variables {
 			if data.kind == NodeKind.VariableDeclaration {
-				var declaration = new VariableDeclaration(data, this, @scope, @scope, false)
+				var declaration = VariableDeclaration.new(data, this, @scope, @scope, false)
 
 				declaration.initiate()
 

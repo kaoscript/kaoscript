@@ -9,7 +9,7 @@ class Foobar {
 	type(): @type
 }
 
-func foobar(...args?) => new Foobar(...args!!)
+func foobar(...args?) => Foobar.new(...args!!)
 
 var r = foobar(null, 'foobar')
 

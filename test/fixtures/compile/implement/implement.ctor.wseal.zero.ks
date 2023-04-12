@@ -6,6 +6,6 @@ impl Date {
 	}
 }
 
-var d = new Date()
+var d = Date.new()
 
 export Date

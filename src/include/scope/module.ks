@@ -36,18 +36,18 @@ class ModuleScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
-		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
-		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
-		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
-		@predefined.__Any = new Variable('Any', true, true, AnyType.Explicit)
-		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
-		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
-		@predefined.__Never = new Variable('Null', true, true, Type.Never)
-		@predefined.__Null = new Variable('Null', true, true, NullType.Explicit)
-		@predefined.__Primitive = new Variable('Primitive', true, true, new AliasType(this, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
+		@predefined.__false = Variable.new('false', true, true, this.reference('Boolean'))
+		@predefined.__null = Variable.new('null', true, true, NullType.Explicit)
+		@predefined.__true = Variable.new('true', true, true, this.reference('Boolean'))
+		@predefined.__Any = Variable.new('Any', true, true, AnyType.Explicit)
+		@predefined.__Infinity = Variable.new('Infinity', true, true, this.reference('Number'))
+		@predefined.__Math = Variable.new('Math', true, true, this.reference('Object'))
+		@predefined.__NaN = Variable.new('NaN', true, true, this.reference('Number'))
+		@predefined.__Never = Variable.new('Null', true, true, Type.Never)
+		@predefined.__Null = Variable.new('Null', true, true, NullType.Explicit)
+		@predefined.__Primitive = Variable.new('Primitive', true, true, AliasType.new(this, UnionType.new(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
-		@predefined.__Void = new Variable('Void', true, true, Type.Void)
+		@predefined.__Void = Variable.new('Void', true, true, Type.Void)
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {
@@ -144,7 +144,7 @@ class ModuleScope extends Scope {
 			}
 		}
 
-		var variable = new Variable(name, immutable, false, type, initialized)
+		var variable = Variable.new(name, immutable, false, type, initialized)
 
 		variable.flagModule()
 
@@ -399,7 +399,7 @@ class ModuleScope extends Scope {
 		@line = line + @lineOffset
 	} # }}}
 	listCompositeMacros(name) { # {{{
-		var regex = new RegExp(`^\(name)\.`)
+		var regex = RegExp.new(`^\(name)\.`)
 		var list = []
 
 		for m, n of @macros when regex.test(n) {
@@ -429,7 +429,7 @@ class ModuleScope extends Scope {
 	processStash(name) { # {{{
 		var stash = @stashes[name]
 		if ?stash {
-			drop @stashes[name]
+			Object.delete(@stashes, name)
 
 			var mut variable = @getVariable(name)
 			for var mut fn in stash {
@@ -520,7 +520,7 @@ class ModuleScope extends Scope {
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
+			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

@@ -13,17 +13,17 @@ class ExportDeclaration extends Statement {
 						statement = $compile.statement(declaration.declaration, this)
 					}
 					NodeKind.GroupSpecifier {
-						statement = new ExportGroupSpecifier(declaration, this)
+						statement = ExportGroupSpecifier.new(declaration, this)
 					}
 					NodeKind.NamedSpecifier {
-						statement = new ExportNamedSpecifier(declaration, this)
+						statement = ExportNamedSpecifier.new(declaration, this)
 					}
 					NodeKind.PropertiesSpecifier {
-						statement = new ExportPropertiesSpecifier(declaration, this)
+						statement = ExportPropertiesSpecifier.new(declaration, this)
 					}
 					else {
 						console.info(declaration)
-						throw new NotImplementedException(this)
+						throw NotImplementedException.new(this)
 					}
 				}
 
@@ -168,7 +168,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		}
 		else if @wildcard {
 			@expression.type().walk((name, _) => {
-				recipient.export(name, new ExportProperty(@expression, name))
+				recipient.export(name, ExportProperty.new(@expression, name))
 			})
 		}
 		else {
@@ -177,7 +177,7 @@ class ExportNamedSpecifier extends AbstractNode {
 			var type = @expression.type()
 
 			if type.isClass() || type.isNamespace() {
-				var regex = new RegExp(`^\(@expression.name())`)
+				var regex = RegExp.new(`^\(@expression.name())`)
 
 				for var macro in @scope.listCompositeMacros(@expression.name()) {
 					macro.export(recipient, macro.name().replace(regex, @externalName))
@@ -209,10 +209,10 @@ class ExportPropertiesSpecifier extends AbstractNode {
 
 		for var property in @data.properties {
 			if ?property.external {
-				recipient.export(property.external.name, new ExportProperty(@object, property.internal.name))
+				recipient.export(property.external.name, ExportProperty.new(@object, property.internal.name))
 			}
 			else {
-				recipient.export(property.internal.name, new ExportProperty(@object, property.internal.name))
+				recipient.export(property.internal.name, ExportProperty.new(@object, property.internal.name))
 			}
 		}
 	} # }}}

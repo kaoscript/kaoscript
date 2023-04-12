@@ -121,7 +121,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 					for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 						ctrl2.code(' && ') unless index == 0
 
-						var literal = new Literal(false, this, @scope(), `\(parameter.getExternalName())[0]`)
+						var literal = Literal.new(false, this, @scope(), `\(parameter.getExternalName())[0]`)
 
 						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
 
@@ -140,7 +140,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 				ctrl.line(`return super.__ks_func_\(@name)_\(@type.index())(\(parameters))`)
 			}
 			else {
-				throw new NotSupportedException()
+				throw NotSupportedException.new()
 			}
 		}
 		else {
@@ -154,7 +154,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 				for var parameter in fork.parameters() when parameter.min() > 0 || names[parameter.getExternalName()] {
 					ctrl2.code(' && ') unless index == 0
 
-					var literal = new Literal(false, this, @scope(), parameter.getExternalName())
+					var literal = Literal.new(false, this, @scope(), parameter.getExternalName())
 
 					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
 

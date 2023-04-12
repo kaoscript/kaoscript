@@ -103,7 +103,7 @@ abstract class Scope {
 	reference(value: AnyType): ReferenceType => @resolveReference('Any')
 	reference(value: ArrayType): ReferenceType { # {{{
 		if value.hasProperties() {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 
 		if value.hasRest() {
@@ -123,7 +123,7 @@ abstract class Scope {
 	} # }}}
 	reference(value: ObjectType): ReferenceType { # {{{
 		if value.hasProperties() {
-			throw new NotSupportedException()
+			throw NotSupportedException.new()
 		}
 
 		if value.hasRest() {
@@ -135,7 +135,7 @@ abstract class Scope {
 	reference(value: ReferenceType): ReferenceType => @resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
 	reference(value: Variable): ReferenceType => @resolveReference(value.name())
 	reference(value: Type): ReferenceType { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	reference(value: String, nullable: Boolean = false, parameters: Array = []): ReferenceType { # {{{
 		return @resolveReference(value, nullable, parameters)

@@ -9,5 +9,5 @@ var $map = {
 func foobar(name) {
 	var clazz = $map[name] ?? $map.default
 
-	return new clazz()
+	return clazz.new()
 }

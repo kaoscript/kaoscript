@@ -8,7 +8,7 @@ class NamespaceType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): NamespaceType { # {{{
-			var type = new NamespaceType(scope)
+			var type = NamespaceType.new(scope)
 
 			if ?data.exhaustive {
 				type._exhaustive = data.exhaustive
@@ -45,7 +45,7 @@ class NamespaceType extends Type {
 		} # }}}
 	}
 	constructor(scope: Scope) { # {{{
-		super(new NamespaceTypeScope(scope))
+		super(NamespaceTypeScope.new(scope))
 	} # }}}
 	addFunction(name: String, type: FunctionType) { # {{{
 		if var property ?= @properties[name] {
@@ -55,10 +55,10 @@ class NamespaceType extends Type {
 				propertyType.addFunction(type)
 			}
 			else if propertyType is FunctionType {
-				throw new NotImplementedException()
+				throw NotImplementedException.new()
 			}
 			else {
-				throw new NotSupportedException()
+				throw NotSupportedException.new()
 			}
 
 			if type.isSealed() {
@@ -77,10 +77,10 @@ class NamespaceType extends Type {
 	} # }}}
 	addProperty(name: String, mut property: Type) { # {{{
 		if property is not NamespacePropertyType {
-			property = new NamespacePropertyType(property.scope(), property)
+			property = NamespacePropertyType.new(property.scope(), property)
 		}
 
-		var variable = new Variable(name, false, false, property.type())
+		var variable = Variable.new(name, false, false, property.type())
 
 		@scope.addVariable(name, variable)
 
@@ -123,11 +123,11 @@ class NamespaceType extends Type {
 			type._scope = @scope
 		}
 
-		var variable = new Variable(name, false, false, type)
+		var variable = Variable.new(name, false, false, type)
 
 		@scope.addVariable(name, variable)
 
-		var property = new NamespacePropertyType(@scope, variable.getDeclaredType())
+		var property = NamespacePropertyType.new(@scope, variable.getDeclaredType())
 
 		@properties[name] = property
 
@@ -142,7 +142,7 @@ class NamespaceType extends Type {
 		return variable.getDeclaredType()
 	} # }}}
 	clone() { # {{{
-		var that = new NamespaceType(@scope:Scope)
+		var that = NamespaceType.new(@scope:Scope)
 
 		that.copyFrom(this)
 
@@ -273,10 +273,10 @@ class NamespaceType extends Type {
 	} # }}}
 	shallBeNamed() => true
 	toFragments(fragments, node) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw new NotImplementedException()
+		throw NotImplementedException.new()
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('namespace')
@@ -299,13 +299,13 @@ class NamespacePropertyType extends Type {
 		@type: Type
 	}
 	static {
-		fromAST(data, node) => new NamespacePropertyType(node.scope(), Type.fromAST(data, node))
+		fromAST(data, node) => NamespacePropertyType.new(node.scope(), Type.fromAST(data, node))
 	}
 	constructor(@scope, @type) { # {{{
 		super(scope)
 	} # }}}
 	clone() { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var dyn export

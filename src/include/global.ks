@@ -141,60 +141,60 @@ var $ast = {
 }
 
 var $compile = {
-	block(data, parent, scope = parent.scope()) => new Block($ast.block(data), parent, scope)
+	block(data, parent, scope = parent.scope()) => Block.new($ast.block(data), parent, scope)
 	expression(data, parent, scope = parent.scope()) { # {{{
 		var dyn expression
 
 		if var clazz ?= $expressions[data.kind] {
-			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+			expression = clazz is Class ? clazz.new(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind.BinaryExpression {
 			if data.operator.kind == BinaryOperatorKind.Assignment {
 				if var clazz ?= $assignmentOperators[data.operator.assignment] {
-					expression = new clazz(data, parent, scope)
+					expression = clazz.new(data, parent, scope)
 				}
 				else {
-					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
+					throw NotSupportedException.new(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
 			else if var clazz ?= $binaryOperators[data.operator.kind] {
-				expression = new clazz(data, parent, scope)
+				expression = clazz.new(data, parent, scope)
 			}
 			else {
-				throw new NotSupportedException(`Unexpected binary operator \(data.operator.kind)`, parent)
+				throw NotSupportedException.new(`Unexpected binary operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind.PolyadicExpression {
 			if var clazz ?= $polyadicOperators[data.operator.kind] {
-				expression = new clazz(data, parent, scope)
+				expression = clazz.new(data, parent, scope)
 			}
 			else {
-				throw new NotSupportedException(`Unexpected polyadic operator \(data.operator.kind)`, parent)
+				throw NotSupportedException.new(`Unexpected polyadic operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind.UnaryExpression {
 			if var clazz ?= $unaryOperators[data.operator.kind] {
-				expression = new clazz(data, parent, scope)
+				expression = clazz.new(data, parent, scope)
 			}
 			else {
-				throw new NotSupportedException(`Unexpected unary operator \(data.operator.kind)`, parent)
+				throw NotSupportedException.new(`Unexpected unary operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind.JunctionExpression {
-			throw new NotSupportedException(`Unexpected junction expression`, parent)
+			throw NotSupportedException.new(`Unexpected junction expression`, parent)
 		}
 		else {
-			throw new NotSupportedException(`Unexpected expression/statement \(data.kind)`, parent)
+			throw NotSupportedException.new(`Unexpected expression/statement \(data.kind)`, parent)
 		}
 
 		return expression
 	} # }}}
-	function(data, parent, scope = parent.scope()) => new FunctionBlock($ast.block(data), parent, scope)
+	function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
 	statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
 			var clazz = $statements[data.kind] ?? $statements.default
 
-			return new clazz(data, parent, scope)
+			return clazz.new(data, parent, scope)
 		}
 		else {
 			return null
@@ -325,7 +325,7 @@ var $typeofs = { # {{{
 func $expandOptions(options) { # {{{
 	var engine = $targets[options.target.name]
 	if !?engine {
-		throw new Error(`Undefined target '\(options.target.name)'`)
+		throw Error.new(`Undefined target '\(options.target.name)'`)
 	}
 
 	if engine is Function {
@@ -333,12 +333,12 @@ func $expandOptions(options) { # {{{
 			return Object.defaults(options, opts)
 		}
 		else {
-			throw new Error(`Undefined target's version '\(options.target.version)'`)
+			throw Error.new(`Undefined target's version '\(options.target.version)'`)
 		}
 	}
 	else {
 		if !?engine[options.target.version] {
-			throw new Error(`Undefined target's version '\(options.target.version)'`)
+			throw Error.new(`Undefined target's version '\(options.target.version)'`)
 		}
 
 		return Object.defaults(options, engine[options.target.version])

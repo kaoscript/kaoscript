@@ -274,7 +274,7 @@ class CreateExpression extends Expression {
 					fragments.code(')')
 				}
 				else {
-					throw new NotImplementedException()
+					throw NotImplementedException.new()
 				}
 			}
 			else {
@@ -322,7 +322,7 @@ class CreateExpression extends Expression {
 						fragments.code(')')
 					}
 					else {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 				}
 			}
@@ -365,7 +365,7 @@ class CreateExpression extends Expression {
 						fragments.code(')')
 					}
 					else {
-						throw new NotImplementedException()
+						throw NotImplementedException.new()
 					}
 				}
 			}

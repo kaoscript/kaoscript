@@ -126,7 +126,7 @@ abstract class Expression extends AbstractNode {
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode.None)
 	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode.None)
 	toQuote(): String { # {{{
-		throw new NotSupportedException()
+		throw NotSupportedException.new()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
 		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
@@ -157,7 +157,6 @@ include {
 	'../expression/call/index.ks'
 	'../expression/cascade'
 	'../expression/conditional'
-	'../expression/create'
 	'../expression/curry'
 	'../expression/disruptive'
 	'../expression/function'

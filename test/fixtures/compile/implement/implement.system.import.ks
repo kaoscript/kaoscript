@@ -4,7 +4,7 @@ require|import '../_/_date.ks'
 
 impl Date {
 	static {
-		today(): Date => new Date().midnight()
+		today(): Date => Date.new().midnight()
 	}
 	midnight(): Date {
 		this.setHours(0)
@@ -16,6 +16,6 @@ impl Date {
 }
 
 console.log(Date.today())
-console.log(new Date().midnight())
+console.log(Date.new().midnight())
 
 export Date

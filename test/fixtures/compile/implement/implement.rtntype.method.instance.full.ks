@@ -11,7 +11,7 @@ impl Foobar {
 	value(@value): this
 }
 
-var f = new Foobar()
+var f = Foobar.new()
 
 console.log(`\(f.value('foobar').value())`)
 

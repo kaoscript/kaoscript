@@ -28,6 +28,6 @@ class ProxyGreetings extends AbstractGreetings {
 	}
 }
 
-var greetings = new ProxyGreetings(new Greetings())
+var greetings = ProxyGreetings.new(Greetings.new())
 
 console.log(`\(greetings.greet('John'))`)

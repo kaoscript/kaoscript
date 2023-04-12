@@ -14,13 +14,13 @@ class EnumDeclaration extends Statement {
 		var type = Type.fromAST(@data.type, this)
 
 		if type.isString() {
-			@enum = new EnumType(@scope, EnumTypeKind.String)
+			@enum = EnumType.new(@scope, EnumTypeKind.String)
 		}
 		else {
-			@enum = new EnumType(@scope)
+			@enum = EnumType.new(@scope)
 		}
 
-		@type = new NamedType(@name, @enum)
+		@type = NamedType.new(@name, @enum)
 
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
@@ -34,17 +34,17 @@ class EnumDeclaration extends Statement {
 					pass
 				}
 				NodeKind.FieldDeclaration {
-					var declaration = new EnumVariableDeclaration(data, this)
+					var declaration = EnumVariableDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
 				NodeKind.MethodDeclaration {
-					var declaration = new EnumMethodDeclaration(data, this)
+					var declaration = EnumMethodDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
 				else {
-					throw new NotSupportedException(`Unknow kind \(data.kind)`, this)
+					throw NotSupportedException.new(`Unknow kind \(data.kind)`, this)
 				}
 			}
 		}
@@ -287,7 +287,7 @@ class EnumVariableDeclaration extends AbstractNode {
 						@value = $quote(value.value)
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 				}
 				else {
@@ -302,7 +302,7 @@ class EnumVariableDeclaration extends AbstractNode {
 						@value = `\(enum.index(value.value))`
 					}
 					else {
-						throw new NotSupportedException(this)
+						throw NotSupportedException.new(this)
 					}
 				}
 				else {
@@ -383,14 +383,14 @@ class EnumMethodDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		for var data in @data.parameters {
-			var parameter = new Parameter(data, this)
+			var parameter = Parameter.new(data, this)
 
 			parameter.analyse()
 
 			@parameters.push(parameter)
 		}
 
-		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
+		@block = MethodBlock.new($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		var enumName = @parent.name()
@@ -413,7 +413,7 @@ class EnumMethodDeclaration extends Statement {
 
 		var arguments = [parameter.type() for var parameter in @parameters]
 
-		@type = new EnumMethodType(arguments, @data, this)
+		@type = EnumMethodType.new(arguments, @data, this)
 
 		@block.analyse()
 
@@ -506,7 +506,7 @@ class EnumMethodDeclaration extends Statement {
 		}
 
 		if @awaiting {
-			throw new NotImplementedException(this)
+			throw NotImplementedException.new(this)
 		}
 		else {
 			ctrl.compile(@block)

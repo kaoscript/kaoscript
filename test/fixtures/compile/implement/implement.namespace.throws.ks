@@ -2,7 +2,7 @@ extern namespace NS
 
 impl NS {
 	foobar() ~ Error {
-		throw new Error()
+		throw Error.new()
 	}
 }
 

@@ -1,1 +1,1 @@
-var x = new Namespace()
+var x = Namespace.new()
