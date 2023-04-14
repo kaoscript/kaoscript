@@ -692,7 +692,6 @@ class ReferenceType extends Type {
 	isExplicitlyNull() => @explicitlyNull
 	isExportable() => @type().isExportable()
 	isExported() => @type().isExported()
-	// isExportingFragment() => !@isVirtual()
 	isExportingFragment() => true
 	isExtendable() => @name == 'Function'
 	isFunction() => @name == 'Function' || @type().isFunction()
@@ -1201,16 +1200,14 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
-		// if !@isVirtual() {
-			var varname = variable.name?()
+		var varname = variable.name?()
 
-			if name == varname {
-				fragments.line(name)
-			}
-			else {
-				fragments.newLine().code(`\(name): `).compile(variable).done()
-			}
-		// }
+		if name == varname {
+			fragments.line(name)
+		}
+		else {
+			fragments.newLine().code(`\(name): `).compile(variable).done()
+		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code(@name)

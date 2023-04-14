@@ -8,8 +8,8 @@ class ClassA {
 struct StructA {
 }
 
-tuple TupleA {
-}
+tuple TupleA [
+]
 
 func id(x?) => x
 

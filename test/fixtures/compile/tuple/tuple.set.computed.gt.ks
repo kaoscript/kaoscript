@@ -1,6 +1,6 @@
 extern console
 
-tuple Pair(String, Number)
+tuple Pair [ :String, :Number ]
 
 var pair = Pair.new('x', 0.1)
 

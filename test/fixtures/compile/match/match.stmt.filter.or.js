@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		if(x === 0 && Operator.gt(x, 0) || Operator.lt(x, 0)) {
+		if(x === 0 && (Operator.gt(x, 0) || Operator.lt(x, 0))) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

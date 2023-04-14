@@ -1624,7 +1624,7 @@ class MatchFilter extends AbstractNode {
 				fragments.code(') => ').compile(@filter).code(`)(\(name))`)
 			}
 			else {
-				fragments.compile(@filter)
+				fragments.compileCondition(@filter, null, junction)
 			}
 		}
 	} # }}}

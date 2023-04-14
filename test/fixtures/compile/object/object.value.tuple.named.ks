@@ -1,7 +1,7 @@
-tuple Position {
+tuple Position [
 	x: Number
 	y: Number
-}
+]
 
 class Foobar {
 	private {

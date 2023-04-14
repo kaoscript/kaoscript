@@ -81,17 +81,6 @@ var $function = {
 					}
 				}
 			}
-			// NodeKind.CreateExpression {
-			// 	if $function.useThisVariable(data.class, node) {
-			// 		return true
-			// 	}
-
-			// 	for arg in data.arguments {
-			// 		if $function.useThisVariable(arg, node) {
-			// 			return true
-			// 		}
-			// 	}
-			// }
 			NodeKind.Identifier => return data.name == 'this'
 			NodeKind.IfStatement {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {

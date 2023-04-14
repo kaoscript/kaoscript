@@ -1,7 +1,7 @@
-tuple Foobar {
+tuple Foobar [
 	x: Number
 	y: Number
-}
+]
 
 func quxbaz([ x ], _, _) => x
 

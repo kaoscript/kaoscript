@@ -5,7 +5,7 @@ enum CardSuit<String> {
 	Spades
 }
 
-tuple Pair(String, Number)
+tuple Pair [ :String, :Number ]
 
 struct Point {
     x: Number

@@ -1,6 +1,6 @@
 require expect: func
 
-tuple Pair(String, Number)
+tuple Pair [ :String, :Number ]
 
 expect(Pair is Tuple).to.equal(true)
 expect(Type.typeOf(Pair)).to.equal('tuple')

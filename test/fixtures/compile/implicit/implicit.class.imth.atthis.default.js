@@ -1,0 +1,46 @@
+const {Helper, Type} = require("@kaoscript/runtime");
+module.exports = function() {
+	const FontWeight = Helper.enum(Number, {
+		Bold: 0,
+		Normal: 1
+	});
+	class Style {
+		static __ks_new_0() {
+			const o = Object.create(Style.prototype);
+			o.__ks_init();
+			return o;
+		}
+		constructor() {
+			this.__ks_init();
+			this.__ks_cons_rt.call(null, this, arguments);
+		}
+		__ks_init() {
+			this._weight = FontWeight.Normal;
+		}
+		__ks_cons_rt(that, args) {
+			if(args.length !== 0) {
+				throw Helper.badArgs();
+			}
+		}
+		foobar() {
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foobar_0(weight) {
+			if(weight === void 0 || weight === null) {
+				weight = FontWeight.Normal;
+			}
+			this._weight = weight;
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = value => Type.isEnumInstance(value, FontWeight) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length <= 1) {
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+					return proto.__ks_func_foobar_0.call(that, Helper.getVararg(args, 0, pts[1]));
+				}
+			}
+			throw Helper.badArgs();
+		}
+	}
+};

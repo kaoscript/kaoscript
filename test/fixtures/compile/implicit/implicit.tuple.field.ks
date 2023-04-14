@@ -3,6 +3,6 @@ enum FontWeight {
 	Normal
 }
 
-tuple Style {
+tuple Style [
 	fontWeight: FontWeight	= .Normal
-}
+]

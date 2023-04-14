@@ -1,3 +1,3 @@
-tuple Pair(Number = 0, Number = 0)
+tuple Pair [ :Number = 0, :Number = 0 ]
 
 var pair = Pair.new()

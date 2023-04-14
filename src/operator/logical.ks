@@ -221,6 +221,18 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	toBooleanFragments(fragments, mode, junction) { # {{{
 		this.toFragments(fragments, mode)
 	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if junction == Junction.OR {
+			fragments.code('(')
+
+			this.toFragments(fragments, mode)
+
+			fragments.code(')')
+		}
+		else {
+			this.toFragments(fragments, mode)
+		}
+	} # }}}
 	type(): @type
 }
 
@@ -574,6 +586,18 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
 		this.toFragments(fragments, mode)
+	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if junction == Junction.AND {
+			fragments.code('(')
+
+			this.toFragments(fragments, mode)
+
+			fragments.code(')')
+		}
+		else {
+			this.toFragments(fragments, mode)
+		}
 	} # }}}
 	type(): @type
 }

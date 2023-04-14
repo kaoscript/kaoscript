@@ -1,7 +1,7 @@
-tuple Pair(
-	String	= ''
-	Number	= 0
-)
+tuple Pair [
+	:String	= ''
+	:Number	= 0
+]
 
 var pair = Pair.new()
 

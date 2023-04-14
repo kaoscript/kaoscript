@@ -131,7 +131,7 @@ class UnaryOperatorImplicit extends Expression {
 
 				type = Type.union(@scope, ...types)
 			}
-			is AssignmentOperatorEquals | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
+			is AssignmentOperatorEquals | ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
 				type = target
 			}
 			else {

@@ -12,23 +12,7 @@ class TupleDeclaration extends Statement {
 	}
 	override initiate() { # {{{
 		@name = @data.name.name
-
-		var mut named = false
-
-		for var modifier in @data.modifiers {
-			match modifier.kind {
-				ModifierKind.Named {
-					named = true
-				}
-			}
-		}
-
-		if named {
-			@tuple = NamedTupleType.new(@scope)
-		}
-		else {
-			@tuple = UnnamedTupleType.new(@scope)
-		}
+		@tuple = TupleType.new(@scope)
 
 		if ?@data.extends {
 			@extending = true

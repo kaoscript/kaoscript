@@ -12,7 +12,6 @@
     "references": [
       {
         "kind": "tuple",
-        "named": false,
         "fields": [
           {
             "index": 0,

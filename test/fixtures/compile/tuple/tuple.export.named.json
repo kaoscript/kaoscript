@@ -12,19 +12,20 @@
     "references": [
       {
         "kind": "tuple",
-        "named": true,
-        "fields": {
-          "x": {
+        "fields": [
+          {
             "index": 0,
+            "name": "x",
             "required": false,
             "type": "String"
           },
-          "y": {
+          {
             "index": 1,
+            "name": "y",
             "required": false,
             "type": "Number"
           }
-        }
+        ]
       }
     ],
     "macros": []

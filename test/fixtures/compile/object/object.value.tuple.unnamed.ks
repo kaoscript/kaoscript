@@ -1,4 +1,4 @@
-tuple Position(Number, Number)
+tuple Position [ :Number, :Number ]
 
 class Foobar {
 	private {

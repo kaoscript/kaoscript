@@ -1,8 +1,8 @@
 extern console
 
-tuple Pair(String, Number)
+tuple Pair [ :String, :Number ]
 
-tuple Triple(Boolean) extends Pair
+tuple Triple extends Pair [ :Boolean ]
 
 var triple = Triple.new('x', 0.1, true)
 

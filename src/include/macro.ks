@@ -199,9 +199,7 @@ func $transformExpression(macro, node, data, writer) { # {{{
 		NodeKind.LambdaExpression {
 			return macro.addMark(data)
 		}
-		// TODO!
-		// NodeKind.MemberExpression when data.object.kind != NodeKind.Identifier || data.object.name != '__ks_marker' {
-		NodeKind.MemberExpression when $marker(data) {
+		NodeKind.MemberExpression when data.object.kind != NodeKind.Identifier || data.object.name != '__ks_marker' {
 			return macro.addMark(data)
 		}
 		NodeKind.ObjectMember {
@@ -224,7 +222,6 @@ func $transformExpression(macro, node, data, writer) { # {{{
 
 	return data
 } # }}}
-func $marker(data) => data.object.kind != NodeKind.Identifier || data.object.name != '__ks_marker'
 
 class MacroDeclaration extends AbstractNode {
 	private {
