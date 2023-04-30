@@ -79,6 +79,7 @@ class AliasType extends Type {
 	} # }}}
 
 	proxy @type {
+		hasRest
 		isComplete
 	}
 }

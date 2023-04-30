@@ -29,7 +29,7 @@ module.exports = function() {
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;
 			const t1 = Type.isNumber;
-			const t2 = value => Type.isDexObject(value, 1, 0, {line: Type.isNumber});
+			const t2 = value => Type.isDexObject(value, 1, Type.isValue, {line: Type.isNumber, column: Type.isNumber});
 			if(args.length === 2) {
 				if(t0(args[0])) {
 					if(t1(args[1])) {

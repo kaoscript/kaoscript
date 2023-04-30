@@ -21,7 +21,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(items) {
-			this.quxbaz(...Helper.cast(items, "Array<String>", false, value => Type.isArray(value, Type.isString)));
+			this.quxbaz(...Helper.cast(items, "String[]", false, value => Type.isArray(value, Type.isString)));
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = Type.isValue;

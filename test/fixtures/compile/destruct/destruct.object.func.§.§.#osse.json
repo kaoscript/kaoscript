@@ -23,11 +23,7 @@
           {
             "type": {
               "kind": "object",
-              "properties": {
-                "x": "String",
-                "y": "String"
-              },
-              "destructuring": true
+              "rest": "String"
             },
             "min": 1,
             "max": 1,

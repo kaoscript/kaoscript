@@ -1,1 +1,1 @@
-TypeException: The identifier "xy" of type "Point" is expected to be of type "Array<Point>" (fixtures/compile/return/return.object.#olqe.oqe.ks:8)
+TypeException: The identifier "xy" of type "Point" is expected to be of type "Point[]" (fixtures/compile/return/return.object.#olqe.oqe.ks:8)

@@ -12,7 +12,7 @@ module.exports = function() {
 		console.log(x + "." + y);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isString, y: Type.isString}) || Type.isNull(value);
+		const t0 = value => Type.isDexObject(value, 1, Type.isString) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 1) {

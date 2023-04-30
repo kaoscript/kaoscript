@@ -568,13 +568,8 @@
                   "external": "strings",
                   "internal": "strings",
                   "type": {
-                    "kind": "reference",
-                    "name": 3,
-                    "parameters": [
-                      {
-                        "reference": 4
-                      }
-                    ]
+                    "kind": "array",
+                    "rest": "String"
                   },
                   "min": 0,
                   "max": "Infinity",
@@ -599,11 +594,8 @@
                   "external": "numbers",
                   "internal": "numbers",
                   "type": {
-                    "kind": "reference",
-                    "name": 3,
-                    "parameters": [
-                      "Number"
-                    ]
+                    "kind": "array",
+                    "rest": "Number"
                   },
                   "min": 0,
                   "max": "Infinity",
@@ -700,14 +692,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 3,
-                "nullable": true,
-                "parameters": [
-                  {
-                    "reference": 4
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []
@@ -853,13 +839,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 3,
-                "parameters": [
-                  {
-                    "reference": 4
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []
@@ -1020,13 +1001,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 3,
-                "parameters": [
-                  {
-                    "reference": 4
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []

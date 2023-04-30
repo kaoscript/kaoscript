@@ -23,11 +23,8 @@
           "kind": "fusion",
           "types": [
             {
-              "kind": "reference",
-              "name": "Array",
-              "parameters": [
-                "String?"
-              ]
+              "kind": "array",
+              "rest": "String?"
             },
             {
               "kind": "object",

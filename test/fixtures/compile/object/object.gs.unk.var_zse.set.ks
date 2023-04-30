@@ -10,4 +10,4 @@ var o: Color = {
 
 o.name = 'White'
 
-console.log(`\(o.name)`)
+// console.log(`\(o.name)`)

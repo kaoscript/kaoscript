@@ -23,11 +23,8 @@
           "values": {
             "access": 4,
             "type": {
-              "kind": "reference",
-              "name": "Object",
-              "parameters": [
-                "Number"
-              ]
+              "kind": "object",
+              "rest": "Number"
             },
             "default": true,
             "immutable": false,

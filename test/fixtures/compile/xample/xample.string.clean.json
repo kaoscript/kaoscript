@@ -38,13 +38,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": "Array",
-                "parameters": [
-                  {
-                    "reference": 0
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []

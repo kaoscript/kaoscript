@@ -222,4 +222,5 @@ class FusionType extends Type {
 			return this
 		}
 	} # }}}
+	types() => @types
 }

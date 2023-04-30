@@ -331,15 +331,28 @@ namespace Matching {
 				var parameters = splitArguments([getSpreadParameter(type)])
 
 				if parameters.length > 1 {
+					var scope = type.scope()
+					var nullable = type.isNullable()
 					var oldCombinations = combinations
 
 					combinations = []
 
-					for var oldCombination in oldCombinations {
-						for var parameter in parameters {
-							var ref = ReferenceType.new(type.scope(), type.name(), type.isNullable(), parameter).flagSpread()
+					if type.isArray() {
+						for var oldCombination in oldCombinations {
+							for var parameter in parameters {
+								var ref = Type.arrayOf(parameter[0], scope).setNullable(nullable).flagSpread()
 
-							combinations.push([...oldCombination, ref])
+								combinations.push([...oldCombination, ref])
+							}
+						}
+					}
+					else {
+						for var oldCombination in oldCombinations {
+							for var parameter in parameters {
+								var ref = Type.objectOf(parameter[0], scope).setNullable(nullable).flagSpread()
+
+								combinations.push([...oldCombination, ref])
+							}
 						}
 					}
 				}
@@ -1322,6 +1335,10 @@ namespace Matching {
 
 						for var function in possibleFunctions {
 							if var { type } ?= parameters.find((data, _, _) => data.function == function) {
+								// echo(argumentType)
+								// echo(type)
+								// echo(argumentType.hashCode(), type.hashCode())
+								// echo(isUnpreciseMatch(argumentType, type))
 								if isPreciseMatch(argumentType, type) {
 									matched = true
 

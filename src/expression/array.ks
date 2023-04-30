@@ -125,6 +125,13 @@ class ArrayExpression extends Expression {
 		return fragments
 	} # }}}
 	type() => @type
+	validateType(type: ArrayType) { # {{{
+		for var value, index in @values {
+			if var propertyType ?= type.getProperty(index) {
+				value.validateType(propertyType)
+			}
+		}
+	} # }}}
 	validateType(type: ReferenceType) { # {{{
 		if type.hasParameters() {
 			var parameter = type.parameter(0)

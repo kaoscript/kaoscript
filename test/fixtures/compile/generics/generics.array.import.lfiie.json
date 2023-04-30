@@ -20,27 +20,24 @@
             "external": "functions",
             "internal": "functions",
             "type": {
-              "kind": "reference",
-              "name": "Array",
-              "parameters": [
-                {
-                  "kind": "function",
-                  "async": false,
-                  "exhaustive": true,
-                  "parameters": [
-                    {
-                      "external": "x",
-                      "internal": "x",
-                      "type": "Number",
-                      "min": 1,
-                      "max": 1,
-                      "default": false
-                    }
-                  ],
-                  "returns": "Number",
-                  "errors": []
-                }
-              ]
+              "kind": "array",
+              "rest": {
+                "kind": "function",
+                "async": false,
+                "exhaustive": true,
+                "parameters": [
+                  {
+                    "external": "x",
+                    "internal": "x",
+                    "type": "Number",
+                    "min": 1,
+                    "max": 1,
+                    "default": false
+                  }
+                ],
+                "returns": "Number",
+                "errors": []
+              }
             },
             "min": 1,
             "max": 1,

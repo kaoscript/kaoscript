@@ -89,13 +89,8 @@
                   "external": "quote",
                   "internal": "quote",
                   "type": {
-                    "kind": "reference",
-                    "name": "Array",
-                    "parameters": [
-                      {
-                        "reference": 1
-                      }
-                    ]
+                    "kind": "array",
+                    "rest": "String"
                   },
                   "min": 0,
                   "max": 1,

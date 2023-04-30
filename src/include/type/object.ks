@@ -87,16 +87,29 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
-		if this.isSubsetOf(value, MatchingMode.Similar) {
-			if this.isSubsetOf(value, MatchingMode.Exact) {
-				return 0
+		if @rest {
+			if !value.hasRest() {
+				return 1
 			}
-			else {
-				return -1
+
+			var rest = @restType.compareToRef(value.getRestType())
+
+			if rest != 0 {
+				return rest
 			}
 		}
+		else if value.hasRest() {
+			return -1
+		}
 
-		return 1
+		if @length < value.length() {
+			return -1
+		}
+		else if @length > value.length() {
+			return 1
+		}
+
+		return 0
 	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
@@ -256,7 +269,12 @@ class ObjectType extends Type {
 				return true
 			}
 		}
-		else if value.isObject() {
+
+		if value.isAlias() {
+			return @isAssignableToVariable(value.discard(), anycast, nullcast, downcast, limited)
+		}
+
+		if value.isObject() {
 			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
 			}
@@ -273,9 +291,10 @@ class ObjectType extends Type {
 
 			return this.isSubsetOf(value, matchingMode)
 		}
-		else if value is UnionType {
+
+		if value is UnionType {
 			for var type in value.types() {
-				if @isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
 					return true
 				}
 			}
@@ -289,6 +308,8 @@ class ObjectType extends Type {
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
+		return true if this == value
+
 		if value.hasProperties() {
 			if @hasProperties() {
 				for var type, name of @properties {
@@ -313,19 +334,25 @@ class ObjectType extends Type {
 		return true
 	} # }}}
 	isMorePreciseThan(value: ReferenceType) { # {{{
+		if value.isAlias() {
+			return @isMorePreciseThan(value.discardAlias())
+		}
+
 		return false unless value.isObject()
 
-		if value.isAlias() {
-			var alias = value.discard()
+		return true unless value.hasParameters()
+		return false unless @rest
 
-			return alias.hasRest()
+		return @restType.isMorePreciseThan(value.parameter())
+	} # }}}
+	isMorePreciseThan(value: UnionType) { # {{{
+		for var type in value.types() {
+			if @isMorePreciseThan(type) {
+				return true
+			}
 		}
-		else {
-			return true unless value.hasParameters()
-			return false unless @rest
 
-			return @restType.isMorePreciseThan(value.parameter())
-		}
+		return false
 	} # }}}
 	isNullable() => @nullable
 	isObject() => true
@@ -336,12 +363,13 @@ class ObjectType extends Type {
 	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
 		return true if this == value || @empty
 
-		var type = mode !~ MatchingMode.Reference
-		if type {
-			return false unless @rest == value.hasRest()
-		}
+		var reference = mode !~ MatchingMode.Reference
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if reference {
+				return false unless @rest == value.hasRest()
+			}
+
 			return false unless @length == value.length()
 
 			if mode ~~ MatchingMode.NonNullToNull {
@@ -370,7 +398,7 @@ class ObjectType extends Type {
 				return false
 			}
 
-			if type && @rest {
+			if @rest {
 				return false unless value.hasRest()
 				return false unless @restType.isSubsetOf(value.getRestType(), mode)
 
@@ -390,16 +418,10 @@ class ObjectType extends Type {
 					}
 					else {
 						return false unless type.isNullable()
+						// return false
 					}
 				}
 
-				if value.hasRest() {
-					var rest = value.getRestType()
-
-					for var prop, name of @properties when !value.hasProperty(name) {
-						return false unless prop.isSubsetOf(rest, mode)
-					}
-				}
 				// for exact match
 				// else if mode ~~ MatchingMode.Exact {
 				// 	return false unless value.length() == @length
@@ -439,6 +461,30 @@ class ObjectType extends Type {
 		}
 
 		return true
+	} # }}}
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			if value is UnionType {
+				for var type in value.types() {
+					if this.isSubsetOf(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else {
+				return value.isAny()
+			}
+		}
 	} # }}}
 	isTestingProperties() => @testProperties
 	length(): @length
@@ -755,6 +801,9 @@ class ObjectType extends Type {
 		if @rest {
 			@restType.toVariations(variations)
 		}
+	} # }}}
+	unflagLiberal() { # {{{
+		@liberal = false
 	} # }}}
 	override unspecify() { # {{{
 		var type = @scope.reference('Object')

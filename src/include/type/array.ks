@@ -57,16 +57,29 @@ class ArrayType extends Type {
 		return type
 	} # }}}
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
-		if this.isSubsetOf(value, MatchingMode.Similar) {
-			if this.isSubsetOf(value, MatchingMode.Exact) {
-				return 0
+		if @rest {
+			if !value.hasRest() {
+				return 1
 			}
-			else {
-				return -1
+
+			var rest = @restType.compareToRef(value.getRestType())
+
+			if rest != 0 {
+				return rest
 			}
 		}
+		else if value.hasRest() {
+			return -1
+		}
 
-		return 1
+		if @length < value.length() {
+			return -1
+		}
+		else if @length > value.length() {
+			return 1
+		}
+
+		return 0
 	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
@@ -215,15 +228,17 @@ class ArrayType extends Type {
 				return true
 			}
 		}
-		else if value.isTuple() {
-			return false
+
+		if value.isAlias() {
+			return @isAssignableToVariable(value.discard(), anycast, nullcast, downcast, limited)
 		}
-		else if value.isArray() {
+
+		if value.isArray() {
 			if @isNullable() && !nullcast && !value.isNullable() {
 				return false
 			}
 
-			if anycast && @length == 0 && !@rest {
+			if @length == 0 && !@rest {
 				return true
 			}
 
@@ -235,9 +250,10 @@ class ArrayType extends Type {
 
 			return this.isSubsetOf(value, matchingMode)
 		}
-		else if value is UnionType {
+
+		if value is UnionType {
 			for var type in value.types() {
-				if @isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
 					return true
 				}
 			}
@@ -253,22 +269,30 @@ class ArrayType extends Type {
 	isIterable() => true
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ArrayType) { # {{{
+		return true if this == value
+
 		return @restType.isMorePreciseThan(value.getRestType())
 	} # }}}
 	isMorePreciseThan(value: ReferenceType) { # {{{
+		if value.isAlias() {
+			return @isMorePreciseThan(value.discardAlias())
+		}
+
 		return false unless value.isArray()
 
-		if value.isAlias() {
-			var alias = value.discard()
+		return true unless value.hasParameters()
+		return false unless @rest
 
-			return alias.hasRest()
+		return @restType.isMorePreciseThan(value.parameter())
+	} # }}}
+	isMorePreciseThan(value: UnionType) { # {{{
+		for var type in value.types() {
+			if @isMorePreciseThan(type) {
+				return true
+			}
 		}
-		else {
-			return true unless value.hasParameters()
-			return false unless @rest
 
-			return @restType.isMorePreciseThan(value.parameter())
-		}
+		return false
 	} # }}}
 	isNullable() => @nullable
 	isSealable() => true
@@ -348,6 +372,10 @@ class ArrayType extends Type {
 	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
 		return false unless value.isArray()
 
+		if value.name() != 'Array' {
+			return this.isSubsetOf(value.discard(), mode + MatchingMode.Reference)
+		}
+
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless @length == 0
 			return false unless @rest == value.hasParameters()
@@ -374,8 +402,47 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
+	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			if value is UnionType {
+				for var type in value.types() {
+					if this.isSubsetOf(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else {
+				return value.isAny()
+			}
+		}
+	} # }}}
 	isTestingProperties() => @testProperties
 	length() => @length
+	matchContentOf(value: Type) { # {{{
+		if value.isAny() || value.isArray() {
+			return true
+		}
+
+		if value is UnionType {
+			for var type in value.types() {
+				if @matchContentOf(type) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} # }}}
 	merge(value: ArrayType, node): Type { # {{{
 		var result = ArrayType.new(@scope)
 

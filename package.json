@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.10.0",
+	"version": "0.11.0",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -28,7 +28,7 @@
 		"bin/kaoscript",
 		"lib/bin.js",
 		"lib/compiler.json",
-		"registry",
+		"registry/**/*.ks",
 		"scripts/install.js",
 		"src/fs.js",
 		"src/register.js"

@@ -210,7 +210,13 @@ abstract class Type {
 		@system: Boolean				= false
 	}
 	static {
-		arrayOf(parameter: Type, scope: Scope) => ReferenceType.new(scope, 'Array', false, [parameter])
+		arrayOf(parameter: Type, scope: Scope) { # {{{
+			var type = ArrayType.new(scope)
+
+			type.setRestType(parameter)
+
+			return type
+		} # }}}
 		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
@@ -352,6 +358,21 @@ abstract class Type {
 						if name == 'Any' {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
+						else if #data.typeParameters {
+							var type = match name {
+								'Array'		=> ArrayType.new(scope).setNullable(nullable)
+								'Object'	=> ObjectType.new(scope).setNullable(nullable)
+								else {
+									return scope.reference(name, nullable)
+								}
+							}
+
+							var parameter = data.typeParameters[0]
+
+							type.setRestType(Type.fromAST(parameter, scope, defined, node))
+
+							return type.flagComplete()
+						}
 						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 							if var variable ?= scope.getVariable(name, -1) {
 								var type = variable.getDeclaredType()
@@ -361,18 +382,7 @@ abstract class Type {
 								}
 							}
 
-							if ?data.typeParameters {
-								var type = ReferenceType.new(scope, name, nullable)
-
-								for parameter in data.typeParameters {
-									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
-								}
-
-								return type
-							}
-							else {
-								return scope.reference(name, nullable)
-							}
+							return scope.reference(name, nullable)
 						}
 						else {
 							ReferenceException.throwNotDefinedType(data.typeName.name, node)
@@ -382,15 +392,7 @@ abstract class Type {
 						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
 						if !defined || namespace.scope().hasVariable(data.typeName.property.name, -1) {
-							var type = ReferenceType.new(namespace.scope(), data.typeName.property.name, nullable)
-
-							if ?data.typeParameters {
-								for parameter in data.typeParameters {
-									type._parameters.push(Type.fromAST(parameter, scope, defined, node))
-								}
-							}
-
-							return type
+							return ReferenceType.new(namespace.scope(), data.typeName.property.name, nullable)
 						}
 						else {
 							ReferenceException.throwNotDefinedType($ast.path(data.typeName), node)
@@ -554,7 +556,13 @@ abstract class Type {
 			throw NotImplementedException.new(node)
 		} # }}}
 		isNative(name: String) => $natives[name] == true
-		objectOf(parameter: Type, scope: Scope) => ReferenceType.new(scope, 'Object', false, [parameter])
+		objectOf(parameter: Type, scope: Scope) { # {{{
+			var type = ObjectType.new(scope)
+
+			type.setRestType(parameter)
+
+			return type
+		} # }}}
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
@@ -679,6 +687,7 @@ abstract class Type {
 	hashCode(fattenNull: Boolean) => @hashCode()
 	hasMutableAccess() => false
 	hasProperty(name: String): Boolean => false
+	hasRest() => false
 	isAlias() => false
 	isAlien() => @alien
 	isAltering() => false

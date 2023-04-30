@@ -584,6 +584,7 @@ class NamedType extends Type {
 
 	proxy @type {
 		hasMutableAccess
+		hasRest
 		isComplete
 	}
 }

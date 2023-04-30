@@ -534,13 +534,8 @@
                   "external": "strings",
                   "internal": "strings",
                   "type": {
-                    "kind": "reference",
-                    "name": 2,
-                    "parameters": [
-                      {
-                        "reference": 3
-                      }
-                    ]
+                    "kind": "array",
+                    "rest": "String"
                   },
                   "min": 0,
                   "max": "Infinity",
@@ -565,11 +560,8 @@
                   "external": "numbers",
                   "internal": "numbers",
                   "type": {
-                    "kind": "reference",
-                    "name": 2,
-                    "parameters": [
-                      "Number"
-                    ]
+                    "kind": "array",
+                    "rest": "Number"
                   },
                   "min": 0,
                   "max": "Infinity",
@@ -666,14 +658,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 2,
-                "nullable": true,
-                "parameters": [
-                  {
-                    "reference": 3
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []
@@ -818,13 +804,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 2,
-                "parameters": [
-                  {
-                    "reference": 3
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []
@@ -985,13 +966,8 @@
                 }
               ],
               "returns": {
-                "kind": "reference",
-                "name": 2,
-                "parameters": [
-                  {
-                    "reference": 3
-                  }
-                ]
+                "kind": "array",
+                "rest": "String"
               },
               "errors": [],
               "inits": []

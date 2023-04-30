@@ -12,7 +12,7 @@ module.exports = function() {
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isObject(value, value => Type.isArray(value, Type.isString));
+		const t0 = value => Type.isDexObject(value, 1, value => Type.isArray(value, Type.isString));
 		const t1 = Type.isString;
 		if(args.length === 3) {
 			if(t0(args[0]) && t1(args[1]) && t1(args[2])) {

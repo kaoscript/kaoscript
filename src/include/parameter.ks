@@ -663,8 +663,8 @@ class Parameter extends AbstractNode {
 		}
 
 		if ?@data.type {
-
 			type = type?.merge(declaredType, this) ?? declaredType
+			type = declaredType
 		}
 
 		if nullable {
@@ -1865,7 +1865,7 @@ class ThisExpressionParameter extends ThisExpression {
 	operator(): @operator
 	operator(@operator): this
 	setDeclaredType(type, definitive) { # {{{
-		if !type.matchContentOf(@type) {
+		unless type.isSubsetOf(@type, MatchingMode.Signature) {
 			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
 		}
 

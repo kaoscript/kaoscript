@@ -19,12 +19,8 @@
               "kind": "object",
               "properties": {
                 "values": {
-                  "kind": "reference",
-                  "name": "Array",
-                  "nullable": true,
-                  "parameters": [
-                    "String"
-                  ]
+                  "kind": "array",
+                  "rest": "String"
                 }
               }
             }

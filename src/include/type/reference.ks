@@ -41,9 +41,7 @@ class ReferenceType extends Type {
 				name = data.name
 			}
 
-			var parameters = ?data.parameters ? [Type.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
-
-			return ReferenceType.new(scope, name as String, data.nullable!?, parameters)
+			return ReferenceType.new(scope, name as String, data.nullable!?, null)
 		} # }}}
 		toQuote(name, nullable, parameters) { # {{{
 			var fragments = [name]
@@ -577,6 +575,7 @@ class ReferenceType extends Type {
 			return type.hasProperty(name)
 		}
 	} # }}}
+	hasRest() => @name == 'Object' || @type().hasRest()
 	isAlias() => @type().isAlias()
 	isAlien() => @type().isAlien()
 	isAny() => @name == 'Any'
@@ -629,6 +628,16 @@ class ReferenceType extends Type {
 
 				return true
 			}
+			else if value.name() == 'Array' && @canBeArray() {
+				if @nullable && !nullcast && !value.isNullable() {
+					return false
+				}
+
+				return true
+			}
+			else if value.isAlias() {
+				return @isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
+			}
 			else {
 				return @type().isAssignableToVariable(value.type(), anycast, nullcast, downcast)
 			}
@@ -650,6 +659,15 @@ class ReferenceType extends Type {
 
 				return false
 			}
+		}
+		else if value is FusionType {
+			for var type in value.types() {
+				if !@isAssignableToVariable(type, anycast, nullcast, downcast) {
+					return false
+				}
+			}
+
+			return true
 		}
 		else if value is ArrayType {
 			return false unless @isBroadArray()
@@ -751,6 +769,21 @@ class ReferenceType extends Type {
 			else {
 				return false
 			}
+		}
+		else if value.isUnion() {
+			for var type in value.discard().types() {
+				if @matchContentOf(type) || @isMorePreciseThan(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if @name == 'Array' && value.isBroadArray() {
+			return true
+		}
+		else if @name == 'Object' && value.isBroadObject() {
+			return true
 		}
 		else {
 			var a: Type = @discardReference()!?
@@ -1030,8 +1063,16 @@ class ReferenceType extends Type {
 	} # }}}
 	name(): String => @name
 	parameter(index: Number = 0) { # {{{
-		if @parameters.length == 0 && @isArray() {
-			return @type().parameter()
+		if @parameters.length == 0 {
+			if @isAlias() {
+				return @discardAlias().parameter()
+			}
+			else if @isArray() {
+				return @type().parameter()
+			}
+			else {
+				return AnyType.NullableUnexplicit
+			}
 		}
 		else if index >= @parameters.length {
 			return AnyType.NullableUnexplicit
@@ -1417,18 +1458,23 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toTestFunctionFragments(fragments, node) { # {{{
-		var unalias = @discardAlias()
-		var name = unalias.name?() ?? @name
-		var tof = $runtime.typeof(name, node)
-
-		if !#@parameters && ?tof && !@nullable {
-			fragments.code(`\(tof)`)
-		}
-		else if unalias.isExclusion() || unalias.isFunction() || unalias.isObject() || unalias.isUnion() {
-			unalias.toTestFunctionFragments(fragments, node)
+		if @nullable {
+			super.toTestFunctionFragments(fragments, node)
 		}
 		else {
-			super.toTestFunctionFragments(fragments, node)
+			var unalias = @discardAlias()
+			var name = unalias.name?() ?? @name
+			var tof = $runtime.typeof(name, node)
+
+			if !#@parameters && ?tof {
+				fragments.code(`\(tof)`)
+			}
+			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+				unalias.toTestFunctionFragments(fragments, node)
+			}
+			else {
+				super.toTestFunctionFragments(fragments, node)
+			}
 		}
 	} # }}}
 	toTestFunctionFragments(fragments, node, junction) { # {{{
@@ -1451,7 +1497,7 @@ class ReferenceType extends Type {
 
 		var unalias = @discardAlias()
 
-		if unalias.isObject() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+		if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
 			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
 		}
 		else {

@@ -62,7 +62,7 @@ class ArrayBinding extends Expression {
 			var type = @type.discard()
 
 			if type.isTuple() {
-				if type.length() < @elements.length {
+				unless type.length() >= @elements.length {
 					ReferenceException.throwBindingExceedArray(@elements.length, type.length(), this)
 				}
 
@@ -73,7 +73,7 @@ class ArrayBinding extends Expression {
 				}
 			}
 			else if type.isArray() {
-				if type.length() < @elements.length {
+				unless type.hasRest() || type.length() >= @elements.length {
 					ReferenceException.throwBindingExceedArray(@elements.length, type.length(), this)
 				}
 

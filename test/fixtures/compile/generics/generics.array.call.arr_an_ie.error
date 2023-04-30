@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (Array<String?>?) (fixtures/compile/generics/generics.array.call.arr_an_ie.ks:14)
+ReferenceException: The function "foobar" can't be matched to given arguments (String?[]?) (fixtures/compile/generics/generics.array.call.arr_an_ie.ks:14)

@@ -19,7 +19,7 @@ module.exports = function() {
 		const t0 = Type.isString;
 		const t1 = value => Type.isDexObject(value, 1, Type.isBoolean);
 		const t2 = value => Type.isDexObject(value, 1, Type.isNumber);
-		const t3 = value => Type.isObject(value, Type.isString);
+		const t3 = value => Type.isDexObject(value, 1, Type.isString);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_3.call(that, args[0]);
