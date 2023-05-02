@@ -92,13 +92,20 @@ class UnionType extends Type {
 
 			var mut notMatched = true
 
-			for var t, i in @types while notMatched {
-				if type.isAssignableToVariable(t, false, false, false) {
-					notMatched = false
+			if type.isComplete() {
+				for var t, i in @types while notMatched {
+					if type.isAssignableToVariable(t, false, false, false) {
+						notMatched = false
 
-					if t.isStrict() != type.isStrict() {
-						@types[i] = t.unflagStrict()
+						if t.isStrict() != type.isStrict() {
+							@types[i] = t.unflagStrict()
+						}
 					}
+				}
+			}
+			else {
+				for var t in @types while notMatched {
+					notMatched = t != type
 				}
 			}
 
@@ -116,13 +123,20 @@ class UnionType extends Type {
 		else {
 			var mut notMatched = true
 
-			for var t, i in @types while notMatched {
-				if type.isAssignableToVariable(t, false, false, false) {
-					notMatched = false
+			if type.isComplete() {
+				for var t, i in @types while notMatched {
+					if type.isAssignableToVariable(t, false, false, false) {
+						notMatched = false
 
-					if t.isStrict() != type.isStrict() {
-						@types[i] = t.unflagStrict()
+						if t.isStrict() != type.isStrict() {
+							@types[i] = t.unflagStrict()
+						}
 					}
+				}
+			}
+			else {
+				for var t in @types while notMatched {
+					notMatched = t != type
 				}
 			}
 

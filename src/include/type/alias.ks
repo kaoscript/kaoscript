@@ -7,7 +7,9 @@ class AliasType extends Type {
 			var type = AliasType.new(scope)
 
 			queue.push(() => {
-				type.type(Type.import(data.of, metadata, references, alterations, queue, scope, node))
+				type
+					..type(Type.import(data.of, metadata, references, alterations, queue, scope, node))
+					..flagComplete()
 			})
 
 			return type
@@ -80,6 +82,5 @@ class AliasType extends Type {
 
 	proxy @type {
 		hasRest
-		isComplete
 	}
 }

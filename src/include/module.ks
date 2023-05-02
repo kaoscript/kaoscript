@@ -665,6 +665,10 @@ class ModuleBlock extends AbstractNode {
 			}
 		}
 
+		for var statement in @statements {
+			statement.postInitiate()
+		}
+
 		@length = @data.body.length
 	} # }}}
 	analyse() { # {{{

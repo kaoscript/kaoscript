@@ -43,6 +43,11 @@ class ExportDeclaration extends Statement {
 			}
 		}
 	} # }}}
+	postInitiate() { # {{{
+		for var statement in @statements {
+			statement.postInitiate()
+		}
+	} # }}}
 	analyse() { # {{{
 		for var statement in @statements {
 			statement.analyse()
@@ -100,6 +105,7 @@ class ExportGroupSpecifier extends AbstractNode {
 		@exclusion: Boolean		= false
 		@wildcard: Boolean		= false
 	}
+	postInitiate()
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind.Exclusion {
@@ -142,6 +148,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		@externalName: String?
 		@wildcard: Boolean		= false
 	}
+	postInitiate()
 	analyse() { # {{{
 		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind.Wildcard {
@@ -198,6 +205,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 	private {
 		@object
 	}
+	postInitiate()
 	analyse()
 	override prepare(target, targetMode) { # {{{
 		@object = $compile.expression(@data.object, @parent)

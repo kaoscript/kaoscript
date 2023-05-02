@@ -250,6 +250,7 @@ class MacroDeclaration extends AbstractNode {
 
 		@parent.registerMacro(@name, this)
 	} # }}}
+	postInitiate()
 	analyse()
 	private buildFunction() { # {{{
 		if ?@data.source {

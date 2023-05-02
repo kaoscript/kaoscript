@@ -26,6 +26,10 @@ class NamespaceDeclaration extends Statement {
 
 			@statements.push(statement)
 		}
+
+		for var statement in @statements {
+			statement.postInitiate()
+		}
 	} # }}}
 	analyse() { # {{{
 		for statement in @statements {

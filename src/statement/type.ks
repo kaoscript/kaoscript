@@ -2,11 +2,18 @@ class TypeAliasDeclaration extends Statement {
 	private late {
 		@name: String
 		@variable: Variable
+		@type: AliasType
 	}
 	override initiate() { # {{{
 		@name = @data.name.name
 
-		@variable = @scope.define(@name, true, AliasType.new(@scope, Type.fromAST(@data.type, this)), this)
+		@type = AliasType.new(@scope)
+		@variable = @scope.define(@name, true, @type, this)
+	} # }}}
+	postInitiate() { # {{{
+		@type
+			..type(Type.fromAST(@data.type, this))
+			..flagComplete()
 	} # }}}
 	analyse()
 	override prepare(target, targetMode)

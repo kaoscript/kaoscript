@@ -245,6 +245,10 @@ class IncludeDeclarator extends Statement {
 			}
 		}
 
+		for var statement in @statements {
+			statement.postInitiate()
+		}
+
 		@scope.line(@data.end.line)
 
 		@offsetEnd = offset + @scope.line() - @offsetStart
