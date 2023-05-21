@@ -1,0 +1,15 @@
+extern {
+	namespace fs {
+		async func readFile(file: String): String
+	}
+
+	system class String {
+		split(separator: RegExp): String[]
+	}
+
+	func parseInt(value: String): Number
+}
+
+func read(filename: String): Number {
+	return parseInt((await fs.readFile(filename)).split(/\r?\n/g)[0])
+}

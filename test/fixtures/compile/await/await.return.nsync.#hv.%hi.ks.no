@@ -1,0 +1,7 @@
+import 'fs'
+
+func read(): String {
+	var data = await fs.readFile('data.json')
+
+	return data
+}

@@ -53,6 +53,7 @@ abstract class Expression extends AbstractNode {
 	isInferable() => false
 	//if the expression is an inline statement which use directly the defined variable
 	isInSituStatement() => false
+	isInverted() => false
 	// if the expression is a lateinit field
 	isLateInit() => false
 	// if the expression can be freely assigned

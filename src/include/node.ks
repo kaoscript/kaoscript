@@ -33,6 +33,7 @@ abstract class AbstractNode {
 	file() => @parent.file()
 	getASTReference(name: String) => @parent?.getASTReference(name)
 	getFunctionNode() => @parent?.getFunctionNode()
+	getTopicReference(data) => @parent?.getTopicReference(data)
 	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => @file() != @module().file()

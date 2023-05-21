@@ -842,38 +842,30 @@ class FunctionType extends Type {
 	setReturnType(data?, node) { # {{{
 		if !?data {
 			@returnType = AnyType.NullableUnexplicit
-
-			return
 		}
-
-		if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
+		else if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
 			match data.typeName.name {
 				'auto' {
 					@dynamicReturn = true
 					@autoTyping = true
-
-					return
 				}
 				'false', 'true' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Boolean')
 					@returnData = data.typeName
-
-					return
 				}
 				'Infinity', 'NaN' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Number')
 					@returnData = data.typeName
-
-					return
 				}
 				'null' {
 					@dynamicReturn = true
 					@returnType = node.scope().reference('Null')
 					@returnData = data.typeName
-
-					return
+				}
+				else {
+					@returnType = Type.fromAST(data, node)
 				}
 			}
 		}
@@ -881,11 +873,10 @@ class FunctionType extends Type {
 			@dynamicReturn = true
 			@returnType = node.scope().reference('Number')
 			@returnData = data
-
-			return
 		}
-
-		@returnType = Type.fromAST(data, node)
+		else {
+			@returnType = Type.fromAST(data, node)
+		}
 	} # }}}
 	setReturnType(@returnType): this
 	setThisType(@thisType): this { # {{{

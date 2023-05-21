@@ -9,7 +9,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 	}
 	analyse() { # {{{
 		for var data in @data.operands {
-			operand = $compile.expression(data, this)
+			var operand = $compile.expression(data, this)
 
 			operand.analyse()
 

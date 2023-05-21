@@ -241,7 +241,7 @@ class Block extends AbstractNode {
 			return Type.union(@scope, ...types)
 		}
 		else {
-			return Type.Never
+			return Type.Void
 		}
 	} # }}}
 	walkNode(fn) { # {{{

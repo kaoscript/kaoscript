@@ -1,0 +1,5 @@
+import 'fs'
+
+func read(): auto {
+	var data = await fs.readFile('data.json')
+}

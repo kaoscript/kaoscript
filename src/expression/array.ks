@@ -61,6 +61,15 @@ class ArrayExpression extends Expression {
 			value.translate()
 		}
 	} # }}}
+	isInverted() { # {{{
+		for var value in @values {
+			if value.isInverted() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isMatchingType(type: Type) { # {{{
 		if @values.length == 0 {
 			return type.isAny() || type.isArray()
@@ -107,6 +116,13 @@ class ArrayExpression extends Expression {
 			}
 
 			fragments.code(']')
+		}
+	} # }}}
+	toInvertedFragments(fragments, callback) { # {{{
+		for var value in @values {
+			if value.isInverted() {
+				return value.toInvertedFragments(fragments, callback)
+			}
 		}
 	} # }}}
 	toQuote() { # {{{

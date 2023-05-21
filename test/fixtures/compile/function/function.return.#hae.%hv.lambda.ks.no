@@ -1,0 +1,6 @@
+var foobar = (): auto => {
+}
+
+foobar()
+
+export foobar

@@ -1,0 +1,6 @@
+var foobar = func(): auto {
+}
+
+foobar()
+
+export foobar

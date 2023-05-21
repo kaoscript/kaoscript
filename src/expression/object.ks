@@ -185,6 +185,15 @@ class ObjectExpression extends Expression {
 		}
 	} # }}}
 	isComputed() => true
+	isInverted() { # {{{
+		for var property in @properties {
+			if property.isInverted() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isMatchingType(type: Type) { # {{{
 		if @properties.length == 0 {
 			return type.isAny() || type.isObject()
@@ -274,6 +283,13 @@ class ObjectExpression extends Expression {
 			}
 		}
 	} # }}}
+	toInvertedFragments(fragments, callback) { # {{{
+		for var property in @properties {
+			if property.isInverted() {
+				return property.toInvertedFragments(fragments, callback)
+			}
+		}
+	} # }}}
 	toReusableFragments(fragments) { # {{{
 		fragments
 			.code(@reuseName, $equals)
@@ -338,6 +354,7 @@ class ObjectComputedMember extends Expression {
 		@name.acquireReusable(acquire)
 		@value.acquireReusable(acquire)
 	} # }}}
+	isInverted() => @name.isInverted() || @value.isInverted()
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@name.listNonLocalVariables(scope, variables)
@@ -369,6 +386,14 @@ class ObjectComputedMember extends Expression {
 			.compile(@value)
 			.done()
 	} # }}}
+	toInvertedFragments(fragments, callback) {
+		if @name.isInverted() {
+			@name.toInvertedFragments(fragments, callback)
+		}
+		else {
+			@value.toInvertedFragments(fragments, callback)
+		}
+	}
 	value() => @value
 }
 
@@ -427,6 +452,7 @@ class ObjectLiteralMember extends Expression {
 		@value.translate()
 	} # }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
+	isInverted() => @value.isInverted()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	name() => @name.value()
@@ -450,6 +476,7 @@ class ObjectLiteralMember extends Expression {
 
 		line.done()
 	} # }}}
+	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
 	type() => @type
 	validateType(type: Type) { # {{{
 		if @type.isEnum() && !type.isEnum() {
@@ -576,6 +603,7 @@ class ObjectSpreadMember extends Expression {
 		@value.translate()
 	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
+	isInverted() => @value.isInverted()
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	toFragments(fragments, mode) { # {{{
 		fragments
@@ -585,6 +613,7 @@ class ObjectSpreadMember extends Expression {
 			.code(')')
 			.done()
 	} # }}}
+	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
 	type(): @type
 	value() => @value
 }

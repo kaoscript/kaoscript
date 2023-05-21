@@ -163,6 +163,10 @@ class MemberExpression extends Expression {
 		if @computed && !@stringProperty && @property.isCallable() {
 			@property.acquireReusable(@nullable || acquire)
 		}
+
+		if @object.isComposite() {
+			@object.acquireReusable(false)
+		}
 	} # }}}
 	caller() => @object
 	declaration() { # {{{
@@ -222,6 +226,7 @@ class MemberExpression extends Expression {
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
 	isInferable() => @inferable
+	isInverted() => @object.isInverted() || (@computed && @property.isInverted())
 	isLiberal() => @liberal
 	isLooseComposite() => @isCallable() || @isNullable()
 	isMacro() => false
@@ -630,6 +635,14 @@ class MemberExpression extends Expression {
 			if !@type.isBoolean() || @type.isNullable() {
 				fragments.code(' === true')
 			}
+		}
+	} # }}}
+	toInvertedFragments(fragments, callback) { # {{{
+		if @computed && @property.isInverted() {
+			@property.toInvertedFragments(fragments, callback)
+		}
+		else {
+			@object.toInvertedFragments(fragments, callback)
 		}
 	} # }}}
 	toNullableFragments(fragments) { # {{{

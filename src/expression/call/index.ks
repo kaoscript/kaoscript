@@ -305,19 +305,19 @@ class CallExpression extends Expression {
 		}
 
 		if @callees.length > 1 {
-			for callee in @callees to~ -1 {
+			for var callee in @callees to~ -1 {
 				callee.acquireReusable(true)
 			}
 
 			@callees.last().acquireReusable(acquire)
 		}
 		else {
-			for callee in @callees {
+			for var callee in @callees {
 				callee.acquireReusable(acquire)
 			}
 		}
 
-		for argument in @arguments {
+		for var argument in @arguments {
 			argument.acquireReusable(acquire)
 		}
 	} # }}}
@@ -372,6 +372,19 @@ class CallExpression extends Expression {
 		}
 
 		return true
+	} # }}}
+	isInverted() { # {{{
+		for var argument in @arguments {
+			if argument.isInverted() {
+				return true
+			}
+		}
+
+		if ?@object {
+			return @object.isInverted()
+		}
+
+		return false
 	} # }}}
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
@@ -1239,6 +1252,24 @@ class CallExpression extends Expression {
 				}
 			}
 		}
+	} # }}}
+	toInvertedFragments(fragments, callback) { # {{{
+		// echo(`CallExpression.toInvertedFragments#\(@data.start.line)-\(@data.end.line)`)
+		for var argument in @arguments {
+			if argument.isInverted() {
+				// return argument.toInvertedFragments(fragments, (fragments) => {
+				// 	// echo(`CallExpression.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`)
+				// 	callback(fragments)
+				// })
+				return argument.toInvertedFragments(fragments, callback)
+			}
+		}
+
+		// @object.toInvertedFragments(fragments, (fragments) => {
+		// 	// echo(`CallExpression.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`)
+		// 	callback(fragments)
+		// })
+		@object.toInvertedFragments(fragments, callback)
 	} # }}}
 	toQuote() { # {{{
 		var mut fragments = ''

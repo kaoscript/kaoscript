@@ -42,6 +42,15 @@ class TemplateExpression extends Expression {
 		return false
 	} # }}}
 	isComputed() => @elements.length > 1 || !@isString
+	isInverted() { # {{{
+		for var element in @elements {
+			if element.isInverted() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
 		for var element in @elements {
 			element.listNonLocalVariables(scope, variables)
@@ -79,6 +88,13 @@ class TemplateExpression extends Expression {
 			}
 
 			fragments.code(')')
+		}
+	} # }}}
+	toInvertedFragments(fragments, callback) { # {{{
+		for var element in @elements {
+			if element.isInverted() {
+				return element.toInvertedFragments(fragments, callback)
+			}
 		}
 	} # }}}
 	type() => @scope.reference('String')

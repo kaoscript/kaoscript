@@ -23,8 +23,10 @@ var $assignmentOperators = {
 var $binaryOperators = {
 	`\(BinaryOperatorKind.Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperatorKind.And)`					: BinaryOperatorAnd
+	`\(BinaryOperatorKind.BackwardPipeline)`	: BinaryOperatorBackwardPipeline
 	`\(BinaryOperatorKind.Division)`			: BinaryOperatorDivision
 	`\(BinaryOperatorKind.EmptyCoalescing)`		: BinaryOperatorEmptyCoalescing
+	`\(BinaryOperatorKind.ForwardPipeline)`		: BinaryOperatorForwardPipeline
 	`\(BinaryOperatorKind.Imply)`				: BinaryOperatorImply
 	`\(BinaryOperatorKind.LeftShift)`			: BinaryOperatorLeftShift
 	`\(BinaryOperatorKind.Match)`				: BinaryOperatorMatch
@@ -98,6 +100,9 @@ var $expressions = {
 	`\(NodeKind.RestrictiveExpression)`			: RestrictiveExpression
 	`\(NodeKind.SequenceExpression)`			: SequenceExpression
 	`\(NodeKind.TemplateExpression)`			: TemplateExpression
+	`\(NodeKind.TopicReference)`				: func(data, parent, scope) {
+		return parent.getTopicReference(data)
+	}
 	`\(NodeKind.ThisExpression)`				: ThisExpression
 	`\(NodeKind.TryExpression)`					: TryExpression
 }

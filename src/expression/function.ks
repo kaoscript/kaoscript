@@ -13,6 +13,8 @@ class AnonymousFunctionExpression extends Expression {
 		super(data, parent, scope, ScopeType.Function)
 	} # }}}
 	analyse() { # {{{
+		@scope.line(@data.start.line)
+
 		@scope.define('this', true, Type.Any, this)
 
 		@parameters = []
@@ -30,6 +32,8 @@ class AnonymousFunctionExpression extends Expression {
 		unless target.isAny() || target.isFunction() {
 			TypeException.throwInvalidFunctionType(target, this)
 		}
+
+		@scope.line(@data.start.line)
 
 		if target.isAny() || target.isReference() {
 			for var parameter in @parameters {
@@ -202,6 +206,8 @@ class ArrowFunctionExpression extends Expression {
 		@es5 = @options.format.functions == 'es5'
 		@block = $compile.function($ast.body(@data), this)
 
+		@scope.line(@data.start.line)
+
 		@parameters = []
 		for var data in @data.parameters {
 			var parameter = Parameter.new(data, this)
@@ -215,6 +221,8 @@ class ArrowFunctionExpression extends Expression {
 		unless target.isAny() || target.isFunction() {
 			TypeException.throwInvalidFunctionType(target, this)
 		}
+
+		@scope.line(@data.start.line)
 
 		if target.isAny() || target.isReference() {
 			for var parameter in @parameters {

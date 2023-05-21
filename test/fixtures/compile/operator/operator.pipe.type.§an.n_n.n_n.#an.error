@@ -1,0 +1,1 @@
+TypeException: The existential test of "value |>? quxbaz()" is always positive (fixtures/compile/operator/operator.pipe.type.§an.n_n.n_n.#an.ks:2)

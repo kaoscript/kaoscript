@@ -347,10 +347,10 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@left.acquireReusable(true)
+		// @left.acquireReusable(true)
 	} # }}}
 	releaseReusable() { # {{{
-		@left.releaseReusable()
+		// @left.releaseReusable()
 	} # }}}
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	toFragments(fragments, mode) { # {{{

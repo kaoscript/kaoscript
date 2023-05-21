@@ -1,0 +1,1 @@
+SyntaxException: No return is supported in this function (fixtures/compile/await/await.return.nsync.#ha.%hx.ks:3)

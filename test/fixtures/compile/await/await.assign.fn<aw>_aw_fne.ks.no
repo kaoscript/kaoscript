@@ -1,0 +1,13 @@
+import 'fs'
+
+async func read() {
+	var mut data = null
+
+	data = (await fs.readFile(await filename())).trim()
+
+	return data
+}
+
+async func filename() {
+	return 'data.json'
+}

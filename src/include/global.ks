@@ -51,6 +51,17 @@ var $ast = {
 			}
 		}
 	} # }}}
+	call(callee, arguments = []) { # {{{
+		return {
+			kind: NodeKind.CallExpression
+			modifiers: []
+			scope: { kind: ScopeKind.This }
+			callee
+			arguments
+			start: callee.start
+			end: callee.end
+		}
+	} # }}}
 	hasModifier(data, target: ModifierKind): Boolean { # {{{
 		for var modifier in data.modifiers {
 			if modifier.kind == target {
@@ -137,6 +148,12 @@ var $ast = {
 		}
 
 		return false
+	} # }}}
+	topicReference() { # {{{
+		return {
+			kind: NodeKind.TopicReference
+			modifiers: []
+		}
 	} # }}}
 }
 

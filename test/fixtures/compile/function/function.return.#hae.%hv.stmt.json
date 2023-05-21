@@ -1,0 +1,25 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "parameters": [],
+        "returns": "Void",
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

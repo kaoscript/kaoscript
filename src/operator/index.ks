@@ -16,15 +16,11 @@ enum OperandType {
 enum Operator<String> {
 	Addition			= 'additive'
 	And					= 'and'
-	DecrementPostfix	= 'postfix-decrement'
-	DecrementPrefix		= 'prefix-decrement'
 	Division			= 'divisive'
 	EmptyCoalescing		= 'empty-coalescing'
 	GreaterThan			= 'greater-than'
 	GreaterThanOrEqual	= 'greater-than-or-equal'
 	Imply				= 'imply'
-	IncrementPostfix	= 'postfix-increment'
-	IncrementPrefix		= 'prefix-increment'
 	LeftShift			= 'left-shift'
 	LessThan			= 'less-than'
 	LessThanOrEqual		= 'less-than-or-equal'
@@ -36,6 +32,7 @@ enum Operator<String> {
 	Negative			= 'negative'
 	NullCoalescing		= 'null-coalescing'
 	Or					= 'or'
+	Pipeline			= 'pipeline'
 	Quotient			= 'quotient'
 	RightShift			= 'right-shift'
 	Subtraction			= 'subtractive'
@@ -45,14 +42,10 @@ enum Operator<String> {
 var $operatorTypes = {
 	[Operator.Addition]: ['Number']
 	[Operator.And]: ['Boolean', 'Number']
-	[Operator.DecrementPostfix]: ['Number']
-	[Operator.DecrementPrefix]: ['Number']
 	[Operator.Division]: ['Number']
 	[Operator.GreaterThan]: ['Number']
 	[Operator.GreaterThanOrEqual]: ['Number']
 	[Operator.Imply]: ['Boolean']
-	[Operator.IncrementPostfix]: ['Number']
-	[Operator.IncrementPrefix]: ['Number']
 	[Operator.LeftShift]: ['Number']
 	[Operator.LessThan]: ['Number']
 	[Operator.LessThanOrEqual]: ['Number']
@@ -77,5 +70,6 @@ include {
 	'./equals'
 	'./exists'
 	'./logical'
+	'./pipeline'
 	'./type'
 }
