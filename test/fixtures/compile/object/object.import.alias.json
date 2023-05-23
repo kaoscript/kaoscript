@@ -18,7 +18,8 @@
             "x": "Number",
             "y": "Number"
           }
-        }
+        },
+        "testIndex": 0
       }
     ],
     "macros": []

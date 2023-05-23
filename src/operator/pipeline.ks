@@ -51,8 +51,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 		if @existential {
 			var expression = @topic.expression()
 
-			// echo(expression.type().hashCode())
-			// echo(expression.type().isNullable() , expression.isLateInit() , @options.rules.ignoreMisfit , expression is MemberExpression)
 			unless expression.type().isNullable() || expression.isLateInit() || @options.rules.ignoreMisfit || expression is MemberExpression {
 				TypeException.throwNotNullableExistential(expression, this)
 			}
@@ -73,7 +71,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 		@expression.translate()
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		// echo(`BinaryOperatorPipeline.acquireReusable#\(@data.start.line)-\(@data.end.line)`, @isTested(), @topic.isComposite())
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
@@ -107,7 +104,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 		return @topic
 	} # }}}
 	isComposite() => @existential || @nonEmpty || @expression.isComposite()
-	// isComputed() => @existential || @nonEmpty || @expression.isComputed()
 	isInverted() => true
 	isTested() => @existential || @nonEmpty || (@topic.expression() is BinaryOperatorPipeline && @topic.expression().isTested())
 	releaseReusable() { # {{{
@@ -119,8 +115,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 		@topic.releaseReusable()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		// echo(`BinaryOperatorPipeline.toFragments#\(@data.start.line)-\(@data.end.line)`, @reusable, @inverted, @expression.isInverted(), @topic.isReusable(), @expression.isComputed())
-
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -128,9 +122,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 			@inverted = true
 
 			@expression.toInvertedFragments(fragments, (fragments) => {
-				// echo(`BinaryOperatorPipeline.toFragments.callback#\(@data.start.line)-\(@data.end.line)`, @topic.isComposite())
 				@toInvertedFragments(fragments, (fragments) => {
-					// echo(`BinaryOperatorPipeline.toFragments.callback2#\(@data.start.line)-\(@data.end.line)`)
 					@expression.toFragments(fragments, mode)
 				})
 			})
@@ -145,17 +137,10 @@ abstract class BinaryOperatorPipeline extends Expression {
 		}
 	} # }}}
 	toInvertedFragments(fragments, callback) { # {{{
-		// echo(`BinaryOperatorPipeline.toInvertedFragments#\(@data.start.line)-\(@data.end.line)`, @inverted, @expression.isInverted(), @existential || @nonEmpty, @topic.isComposite(), @topic.isReusable(), @expression.isComputed())
-
 		if !@inverted && @expression.isInverted() {
 			@inverted = true
 
 			@expression.toInvertedFragments(fragments, (fragments) => {
-				// echo(`BinaryOperatorPipeline.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`, @topic.isComposite())
-				// @toInvertedFragments(fragments, (fragments) => {
-				// 	echo(`BinaryOperatorPipeline.toInvertedFragments.callback2#\(@data.start.line)-\(@data.end.line)`)
-				// 	callback(fragments)
-				// })
 				@toInvertedFragments(fragments, callback)
 			})
 		}
@@ -163,7 +148,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 			@inverted = true
 
 			var composite = @topic.isComposite()
-			// var composite = @data.end.line != 9
 
 			if composite {
 				fragments.code('(').compileReusable(@topic).code($comma)
@@ -203,7 +187,6 @@ abstract class BinaryOperatorPipeline extends Expression {
 		}
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		// echo(`BinaryOperatorPipeline.toReusableFragments#\(@data.start.line)-\(@data.end.line)`, @reusable, @reuseName, @inverted, @expression.isInverted())
 		if !@reusable && ?@reuseName {
 			fragments.code(@reuseName, $equals).compile(this)
 
@@ -220,37 +203,8 @@ abstract class BinaryOperatorPipeline extends Expression {
 }
 
 class BinaryOperatorBackwardPipeline extends BinaryOperatorPipeline {
-	// acquireReusable(acquire) { # {{{
-	// 	// echo(`BinaryOperatorPipeline.acquireReusable#\(@data.start.line)-\(@data.end.line)`, @isTested(), @topic.isComposite())
-	// 	if acquire {
-	// 		@reuseName = @scope.acquireTempName()
-	// 	}
-
-	// 	@expression.acquireReusable(false)
-	// } # }}}
 	override getExpressionData() => @data.left
 	override getValueData() => @data.right
-	// releaseReusable() { # {{{
-	// 	if ?@reuseName {
-	// 		@scope.releaseTempName(@reuseName)
-	// 	}
-
-	// 	@expression.releaseReusable()
-	// } # }}}
-	// toFragments(fragments, mode) { # {{{
-	// 	// echo(`BinaryOperatorPipeline.toFragments#\(@data.start.line)-\(@data.end.line)`, @expression.isInverted(), @inverted, @isTested())
-	// 	if @reusable {
-	// 		fragments.code(@reuseName)
-	// 	}
-	// 	else {
-	// 		if @topic?.isReusable() {
-	// 			fragments.code('(').compileReusable(@topic).code($comma).compileReusable(@expression).code(')')
-	// 		}
-	// 		else {
-	// 			@expression.toFragments(fragments, mode)
-	// 		}
-	// 	}
-	// } # }}}
 	toQuote() { # {{{
 		var mut fragments = `\(@topic.toQuote()) `
 
@@ -274,106 +228,8 @@ class BinaryOperatorBackwardPipeline extends BinaryOperatorPipeline {
 }
 
 class BinaryOperatorForwardPipeline extends BinaryOperatorPipeline {
-	// private {
-	// 	@inverted: Boolean				= false
-	// }
-	// acquireReusable(acquire) { # {{{
-	// 	// echo(`BinaryOperatorPipeline.acquireReusable#\(@data.start.line)-\(@data.end.line)`, @isTested(), @topic.isComposite())
-	// 	if acquire {
-	// 		@reuseName = @scope.acquireTempName()
-	// 	}
-
-	// 	@topic.acquireReusable((@existential || @nonEmpty) && @topic.isComposite())
-
-	// 	@expression.acquireReusable(false)
-	// } # }}}
-	// isInverted() => true
-	// isTested() => @existential || @nonEmpty || (@topic.expression() is BinaryOperatorForwardPipeline && @topic.expression().isTested())
 	override getExpressionData() => @data.right
 	override getValueData() => @data.left
-	// releaseReusable() { # {{{
-	// 	if ?@reuseName {
-	// 		@scope.releaseTempName(@reuseName)
-	// 	}
-
-	// 	@expression.releaseReusable()
-	// 	@topic.releaseReusable()
-	// } # }}}
-	// toFragments(fragments, mode) { # {{{
-	// 	// echo(`BinaryOperatorPipeline.toFragments#\(@data.start.line)-\(@data.end.line)`, @expression.isInverted(), @inverted, @isTested())
-	// 	if @reusable {
-	// 		fragments.code(@reuseName)
-	// 	}
-	// 	else if !@inverted && @expression.isInverted() {
-	// 		@inverted = true
-
-	// 		@expression.toInvertedFragments(fragments, (fragments) => {
-	// 			// echo(`BinaryOperatorPipeline.toFragments.callback#\(@data.start.line)-\(@data.end.line)`, @topic.isComposite())
-	// 			@toInvertedFragments(fragments, (fragments) => {
-	// 				// echo(`BinaryOperatorPipeline.toFragments.callback2#\(@data.start.line)-\(@data.end.line)`)
-	// 				@expression.toFragments(fragments, mode)
-	// 			})
-	// 		})
-	// 	}
-	// 	else {
-	// 		if @topic.isReusable() {
-	// 			fragments.code('(').compileReusable(@topic).code($comma).compileReusable(@expression).code(')')
-	// 		}
-	// 		else {
-	// 			@expression.toFragments(fragments, mode)
-	// 		}
-	// 	}
-	// } # }}}
-	// toInvertedFragments(fragments, callback) { # {{{
-	// 	// echo(`BinaryOperatorPipeline.toInvertedFragments#\(@data.start.line)-\(@data.end.line)`, @topic.isComposite(), @topic._reuseName, @existential, @nonEmpty)
-
-	// 	if !@inverted && @expression.isInverted() {
-	// 		@inverted = true
-
-	// 		@expression.toInvertedFragments(fragments, (fragments) => {
-	// 			// echo(`BinaryOperatorPipeline.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`, @topic.isComposite())
-	// 			// @toInvertedFragments(fragments, (fragments) => {
-	// 			// 	echo(`BinaryOperatorPipeline.toInvertedFragments.callback2#\(@data.start.line)-\(@data.end.line)`)
-	// 			// 	callback(fragments)
-	// 			// })
-	// 			@toInvertedFragments(fragments, callback)
-	// 		})
-	// 	}
-	// 	else if @existential || @nonEmpty {
-	// 		@inverted = true
-
-	// 		var composite = @topic.isComposite()
-	// 		// var composite = @data.end.line != 9
-
-	// 		if composite {
-	// 			fragments.code('(').compileReusable(@topic).code($comma)
-	// 		}
-
-	// 		if @existential {
-	// 			fragments.code($runtime.type(this) + '.isValue(').compile(@topic).code(') ? ')
-
-	// 			callback(fragments)
-
-	// 			fragments.code(' : null')
-	// 		}
-	// 		else {
-	// 			fragments.code($runtime.type(this) + '.isNotEmpty(').compile(@topic).code(') ? ')
-
-	// 			callback(fragments)
-
-	// 			fragments.code(' : null')
-	// 		}
-
-	// 		if composite {
-	// 			fragments.code(')')
-	// 		}
-	// 	}
-	// 	else {
-	// 		@inverted = true
-
-	// 		callback(fragments)
-	// 	}
-	// } # }}}
 	toQuote() { # {{{
 		var mut fragments = `\(@topic.toQuote()) `
 
@@ -547,8 +403,6 @@ class TopicReference extends Expression {
 		@tested = true
 	} # }}}
 	isComposite() => @isReusable() || @expression.isComposite()
-	// isComputed() => @isComposite() || @expression.isComputed()
-	// isInverted() => @expression is BinaryOperatorPipeline
 	isInverted() => true
 	isReusable() => @destructuring || @usage > 1
 	releaseReusable() { # {{{
@@ -559,7 +413,6 @@ class TopicReference extends Expression {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		// echo(`TopicReference.toFragments#\(@data.start.line)-\(@data.end.line)`, @expression.isInverted())
 		if @reusable {
 			if @spread {
 				fragments.code('...')
@@ -572,14 +425,8 @@ class TopicReference extends Expression {
 		}
 	} # }}}
 	toInvertedFragments(fragments, callback) { # {{{
-		// echo(`TopicReference.toInvertedFragments#\(@data.start.line)-\(@data.end.line)`, @expression is BinaryOperatorPipeline, @expression.isTested?(), @destructuring, @reuseName)
-
 		if @expression is BinaryOperatorPipeline {
 			if @expression.isTested() {
-				// @expression.toInvertedFragments(fragments, (fragments) => {
-				// 	echo(`TopicReference.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`, @reuseName)
-				// 	callback(fragments)
-				// })
 				@expression.toInvertedFragments(fragments, callback)
 			}
 			else {

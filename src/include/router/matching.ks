@@ -1335,10 +1335,6 @@ namespace Matching {
 
 						for var function in possibleFunctions {
 							if var { type } ?= parameters.find((data, _, _) => data.function == function) {
-								// echo(argumentType)
-								// echo(type)
-								// echo(argumentType.hashCode(), type.hashCode())
-								// echo(isUnpreciseMatch(argumentType, type))
 								if isPreciseMatch(argumentType, type) {
 									matched = true
 

@@ -732,6 +732,20 @@ class ArrayType extends Type {
 			fragments.code(')')
 		}
 	} # }}}
+	override toTestFragments(fragments, node, junction) { # {{{
+		if @nullable {
+			fragments.code('(') if junction == Junction.AND
+
+			@toTestFragments('value', true, @testLength, fragments, node)
+
+			fragments.code(` || \($runtime.type(node)).isNull(value)`)
+
+			fragments.code(')') if junction == Junction.AND
+		}
+		else {
+			@toTestFragments('value', true, @testLength, fragments, node)
+		}
+	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
@@ -744,7 +758,7 @@ class ArrayType extends Type {
 		else if @rest || @testProperties || @nullable {
 			fragments.code(`value => `)
 
-			@toTestFunctionFragments(fragments, node, Junction.NONE)
+			@toTestFragments(fragments, node, Junction.NONE)
 		}
 		else {
 			if @destructuring {
@@ -753,20 +767,6 @@ class ArrayType extends Type {
 			else {
 				fragments.code($runtime.type(node), '.isArray')
 			}
-		}
-	} # }}}
-	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		if @nullable {
-			fragments.code('(') if junction == Junction.AND
-
-			@toTestFragments('value', true, @testLength, fragments, node)
-
-			fragments.code(` || \($runtime.type(node)).isNull(value)`)
-
-			fragments.code(')') if junction == Junction.AND
-		}
-		else {
-			@toTestFragments('value', true, @testLength, fragments, node)
 		}
 	} # }}}
 	override toVariations(variations) { # {{{

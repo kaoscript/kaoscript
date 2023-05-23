@@ -189,13 +189,13 @@ class FusionType extends Type {
 		fragments.code(')') if junction == Junction.OR
 	} # }}}
 	toQuote() => @hashCode()
-	toTestFunctionFragments(fragments, node, junction) { # {{{
+	toTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
 		for var type, index in @types {
 			fragments.code(' && ') if index != 0
 
-			type.toTestFunctionFragments(fragments, node, Junction.AND)
+			type.toTestFragments(fragments, node, Junction.AND)
 		}
 
 		fragments.code(')') if junction == Junction.OR

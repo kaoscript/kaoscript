@@ -10,6 +10,7 @@ class ObjectType extends Type {
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		@testName: String?
 		@testProperties: Boolean		= false
 		@testRest: Boolean				= false
 	}
@@ -61,6 +62,7 @@ class ObjectType extends Type {
 		type._rest = @rest
 		type._restType = @restType
 		type._spread = @spread
+		type._testName = @testName
 		type._testProperties = @testProperties
 		type._testRest = @testRest
 
@@ -207,6 +209,7 @@ class ObjectType extends Type {
 		return null
 	} # }}}
 	getRestType(): @restType
+	getTestName(): @testName
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''
 
@@ -303,6 +306,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isBinding() => true
+	isComplex() => @destructuring || @testRest || @testProperties
 	isDestructuring() => @destructuring
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
@@ -418,7 +422,6 @@ class ObjectType extends Type {
 					}
 					else {
 						return false unless type.isNullable()
-						// return false
 					}
 				}
 
@@ -620,6 +623,7 @@ class ObjectType extends Type {
 		@rest = true
 		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
+	setTestName(@testName)
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
@@ -705,7 +709,7 @@ class ObjectType extends Type {
 
 			if @testProperties {
 				if @testRest {
-					@restType.toTestFunctionFragments(fragments, literal)
+					@restType.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
 				}
 				else {
 					fragments.code('0')
@@ -730,18 +734,21 @@ class ObjectType extends Type {
 						fragments.code(`\(name): `)
 					}
 
-					type.toTestFunctionFragments(fragments, literal)
+					type.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
 				}
 
 				fragments.code('}')
 			}
 			else {
-				@restType.toTestFunctionFragments(fragments, literal)
+				@restType.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
 			}
 		}
 	} # }}}
 	toTestFragments(name: String, testingType: Boolean, fragments, node) { # {{{
-		if testingType && !@destructuring && !@testRest && !@testProperties {
+		if ?@testName {
+			fragments.code(`\(@testName)(\(name))`)
+		}
+		else if testingType && !@destructuring && !@testRest && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isObject(\(name))`)
 		}
 		else {
@@ -752,30 +759,7 @@ class ObjectType extends Type {
 			fragments.code(')')
 		}
 	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if @length == 0 && !@rest && !@nullable {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
-		}
-		else if @testRest || @testProperties || @nullable {
-			fragments.code(`value => `)
-
-			@toTestFunctionFragments(fragments, node, Junction.NONE)
-		}
-		else {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
-		}
-	} # }}}
-	override toTestFunctionFragments(fragments, node, junction) { # {{{
+	override toTestFragments(fragments, node, junction) { # {{{
 		if @nullable {
 			fragments.code('(') if junction == Junction.AND
 
@@ -787,6 +771,76 @@ class ObjectType extends Type {
 		}
 		else {
 			@toTestFragments('value', true, fragments, node)
+		}
+	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
+		if ?@testName {
+			if @nullable {
+				fragments.code(`value => \(@testName)(value) || \($runtime.type(node)).isNull(value)`)
+			}
+			else {
+				fragments.code(`\(@testName)`)
+			}
+		}
+		else if @length == 0 && !@rest && !@nullable {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+		else if @testRest || @testProperties || @nullable {
+			fragments.code(`value => `)
+
+			@toTestFragments(fragments, node, Junction.NONE)
+		}
+		else {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+	} # }}}
+	override toTestFunctionFragments(fragments, node, mode) { # {{{
+		if mode == .USE && ?@testName {
+			if @nullable {
+				fragments.code(`value => \(@testName)(value) || \($runtime.type(node)).isNull(value)`)
+			}
+			else {
+				fragments.code(`\(@testName)`)
+			}
+		}
+		if @length == 0 && !@rest && !@nullable {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+		else if @testRest || @testProperties || @nullable {
+			fragments.code(`value => `)
+
+			fragments.code(`\($runtime.type(node)).isDexObject(value`)
+
+			@toSubtestFragments(true, fragments, node)
+
+			fragments.code(')')
+
+			if @nullable {
+				fragments.code(` || \($runtime.type(node)).isNull(value)`)
+			}
+		}
+		else {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
 		}
 	} # }}}
 	override toVariations(variations) { # {{{

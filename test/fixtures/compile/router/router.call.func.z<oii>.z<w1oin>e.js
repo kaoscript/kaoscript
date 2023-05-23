@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isFoobar: value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber})
+	};
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -7,7 +10,7 @@ module.exports = function() {
 		quxbaz.__ks_0(value);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber});
+		const t0 = __ksType.isFoobar;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
@@ -21,7 +24,7 @@ module.exports = function() {
 	quxbaz.__ks_0 = function(value) {
 	};
 	quxbaz.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}) && Type.isDexObject(value, 1, 0, {z: value => Type.isNumber(value) || Type.isNull(value)});
+		const t0 = value => __ksType.isFoobar(value) && Type.isDexObject(value, 1, 0, {z: value => Type.isNumber(value) || Type.isNull(value)});
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return quxbaz.__ks_0.call(that, args[0]);

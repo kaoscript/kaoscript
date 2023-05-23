@@ -20,7 +20,8 @@
               "rest": "String"
             }
           }
-        }
+        },
+        "testIndex": 0
       }
     ],
     "macros": []

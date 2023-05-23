@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isData: value => Type.isDexObject(value, 1, 0, {test: Type.isFunction, text: Type.isFunction})
+	};
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

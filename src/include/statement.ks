@@ -81,6 +81,7 @@ abstract class Statement extends AbstractNode {
 	listNonLocalVariables(scope: Scope, variables: Array) => variables
 	postInitiate()
 	prepare(target: Type, index: Number, length: Number) => @prepare(target)
+	recipient() => @parent.recipient()
 	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
 	} # }}}

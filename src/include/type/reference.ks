@@ -1334,7 +1334,7 @@ class ReferenceType extends Type {
 			@type.toNegativeTestFragments(fragments, node, junction)
 		}
 		else {
-			@toTestFragments(fragments.code('!'), node, junction)
+			@toReferenceTestFragments(fragments.code('!'), node, junction)
 		}
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
@@ -1344,13 +1344,13 @@ class ReferenceType extends Type {
 			@type.toPositiveTestFragments(fragments, node, junction)
 		}
 		else {
-			@toTestFragments(fragments, node, junction)
+			@toReferenceTestFragments(fragments, node, junction)
 		}
 	} # }}}
 	override toRouteTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if @nullable && junction == Junction.AND
 
-		@toTestFragments(fragments, node, junction)
+		@toReferenceTestFragments(fragments, node, junction)
 
 		if @nullable {
 			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(')')
@@ -1369,12 +1369,12 @@ class ReferenceType extends Type {
 			fragments.code('function(value) { return ')
 
 			if @nullable {
-				@toTestFragments(fragments, literal, Junction.OR)
+				@toReferenceTestFragments(fragments, literal, Junction.OR)
 
 				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
 			}
 			else {
-				@toTestFragments(fragments, literal, Junction.NONE)
+				@toReferenceTestFragments(fragments, literal, Junction.NONE)
 			}
 
 			fragments.code('; }')
@@ -1383,101 +1383,18 @@ class ReferenceType extends Type {
 			fragments.code('value => ')
 
 			if @nullable {
-				@toTestFragments(fragments, literal, Junction.OR)
+				@toReferenceTestFragments(fragments, literal, Junction.OR)
 
 				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
 			}
 			else {
-				@toTestFragments(fragments, literal, Junction.NONE)
+				@toReferenceTestFragments(fragments, literal, Junction.NONE)
 			}
 		}
 
 		fragments.code(')')
 	} # }}}
-	private toTestFragments(fragments, node, junction) { # {{{
-		if @nullable && junction == Junction.AND {
-			fragments.code('(')
-		}
-
-		if var tof ?= $runtime.typeof(@name, node) {
-			fragments.code(`\(tof)(`).compileReusable(node)
-		}
-		else {
-			fragments.code(`\($runtime.type(node)).`)
-
-			if @type.isClass() {
-				fragments.code(`isClassInstance`)
-			}
-			else if @type.isEnum() {
-				fragments.code(`isEnumInstance`)
-			}
-			else if @type.isStruct() {
-				fragments.code(`isStructInstance`)
-			}
-			else if @type.isTuple() {
-				fragments.code(`isTupleInstance`)
-			}
-
-			fragments.code(`(`).compileReusable(node).code(`, `)
-
-			if @type is NamedType {
-				fragments.code(@type.path())
-			}
-			else {
-				fragments.code(@name)
-			}
-		}
-
-		if @parameters.length != 0 {
-			fragments.code(', ')
-
-			var literal = Literal.new(false, node, node.scope(), 'value')
-
-			if node._options.format.functions == 'es5' {
-				fragments.code('function(value) { return ')
-
-				@parameters[0].toTestFragments(fragments, literal, Junction.NONE)
-
-				fragments.code('; }')
-			}
-			else {
-				fragments.code('value => ')
-
-				@parameters[0].toTestFragments(fragments, literal, Junction.NONE)
-			}
-		}
-
-		fragments.code(')')
-
-		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
-
-			if junction == Junction.AND {
-				fragments.code(')')
-			}
-		}
-	} # }}}
-	toTestFunctionFragments(fragments, node) { # {{{
-		if @nullable {
-			super.toTestFunctionFragments(fragments, node)
-		}
-		else {
-			var unalias = @discardAlias()
-			var name = unalias.name?() ?? @name
-			var tof = $runtime.typeof(name, node)
-
-			if !#@parameters && ?tof {
-				fragments.code(`\(tof)`)
-			}
-			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-				unalias.toTestFunctionFragments(fragments, node)
-			}
-			else {
-				super.toTestFunctionFragments(fragments, node)
-			}
-		}
-	} # }}}
-	toTestFunctionFragments(fragments, node, junction) { # {{{
+	override toTestFragments(fragments, node, junction) { # {{{
 		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
@@ -1498,7 +1415,7 @@ class ReferenceType extends Type {
 		var unalias = @discardAlias()
 
 		if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
+			unalias.toTestFragments(fragments, node, subjunction ?? junction)
 		}
 		else {
 			var name = unalias.name?() ?? @name
@@ -1556,6 +1473,26 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
+	override toTestFunctionFragments(fragments, node) { # {{{
+		if @nullable {
+			super.toTestFunctionFragments(fragments, node)
+		}
+		else {
+			var unalias = @discardAlias()
+			var name = unalias.name?() ?? @name
+			var tof = $runtime.typeof(name, node)
+
+			if !#@parameters && ?tof {
+				fragments.code(`\(tof)`)
+			}
+			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+				unalias.toTestFunctionFragments(fragments, node)
+			}
+			else {
+				super.toTestFunctionFragments(fragments, node)
+			}
+		}
+	} # }}}
 	override toVariations(variations) { # {{{
 		@resolve()
 
@@ -1581,5 +1518,69 @@ class ReferenceType extends Type {
 		type._strict = false
 
 		return type
+	} # }}}
+
+	private toReferenceTestFragments(fragments, node, junction) { # {{{
+		if @nullable && junction == Junction.AND {
+			fragments.code('(')
+		}
+
+		if var tof ?= $runtime.typeof(@name, node) {
+			fragments.code(`\(tof)(`).compileReusable(node)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).`)
+
+			if @type.isClass() {
+				fragments.code(`isClassInstance`)
+			}
+			else if @type.isEnum() {
+				fragments.code(`isEnumInstance`)
+			}
+			else if @type.isStruct() {
+				fragments.code(`isStructInstance`)
+			}
+			else if @type.isTuple() {
+				fragments.code(`isTupleInstance`)
+			}
+
+			fragments.code(`(`).compileReusable(node).code(`, `)
+
+			if @type is NamedType {
+				fragments.code(@type.path())
+			}
+			else {
+				fragments.code(@name)
+			}
+		}
+
+		if @parameters.length != 0 {
+			fragments.code(', ')
+
+			var literal = Literal.new(false, node, node.scope(), 'value')
+
+			if node._options.format.functions == 'es5' {
+				fragments.code('function(value) { return ')
+
+				@parameters[0].toReferenceTestFragments(fragments, literal, Junction.NONE)
+
+				fragments.code('; }')
+			}
+			else {
+				fragments.code('value => ')
+
+				@parameters[0].toReferenceTestFragments(fragments, literal, Junction.NONE)
+			}
+		}
+
+		fragments.code(')')
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+
+			if junction == Junction.AND {
+				fragments.code(')')
+			}
+		}
 	} # }}}
 }

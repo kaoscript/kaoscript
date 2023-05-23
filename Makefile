@@ -99,7 +99,7 @@ dev:
 	@# @make clean
 
 	@# compile compiler
-	@make comp
+	@# @make comp
 
 	@# tests
 	@# node test/compile.dev.js "compile "

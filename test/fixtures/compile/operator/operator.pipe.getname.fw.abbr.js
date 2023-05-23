@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isUser: value => Type.isDexObject(value, 1, 0, {name: Type.isString, supervisorId: value => Type.isNumber(value) || Type.isNull(value)})
+	};
 	function getSupervisorName() {
 		return getSupervisorName.__ks_rt(this, arguments);
 	};

@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isData: value => Type.isDexObject(value, 1, 0, {positions: value => Type.isArray(value, Type.isNumber)})
+	};
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);
@@ -25,7 +28,7 @@ module.exports = function() {
 			this._positions = data.positions;
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = value => Type.isDexObject(value, 1, 0, {positions: value => Type.isArray(value, Type.isNumber)});
+			const t0 = __ksType.isData;
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_0.call(that, args[0]);

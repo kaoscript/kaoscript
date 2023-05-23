@@ -346,12 +346,6 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			@type = Type.union(@scope, leftType, @right.type())
 		}
 	} # }}}
-	acquireReusable(acquire) { # {{{
-		// @left.acquireReusable(true)
-	} # }}}
-	releaseReusable() { # {{{
-		// @left.releaseReusable()
-	} # }}}
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	toFragments(fragments, mode) { # {{{
 		if @left.isNullable() {

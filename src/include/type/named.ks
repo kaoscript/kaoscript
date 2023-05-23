@@ -93,6 +93,8 @@ class NamedType extends Type {
 			return this.getSealedName()
 		}
 	} # }}}
+	getTestIndex() => @type.getTestIndex()
+	getTestName() => @type.getTestName()
 	hasContainer() => ?@container
 	hashCode() => `&\(@name)`
 	hasProperty(name: String) => @type.hasProperty(name)
@@ -509,6 +511,8 @@ class NamedType extends Type {
 	referenceIndex() => @type.referenceIndex()
 	resetReferences() => @type.resetReferences()
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
+	setTestIndex(index) => @type.setTestIndex(index)
+	setTestName(name) => @type.setTestName(name)
 	split(types: Array) { # {{{
 		if @type.isAlias() || @type.isUnion() {
 			@type.split(types)
@@ -586,6 +590,8 @@ class NamedType extends Type {
 		hasMutableAccess
 		hasRest
 		isComplete
+		isExportingType
+		// toExportTypeFragment
 	}
 }
 

@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber})
+	};
 	class Foobar {
 		static __ks_new_0(...args) {
 			const o = Object.create(Foobar.prototype);
@@ -29,7 +32,7 @@ module.exports = function() {
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;
 			const t1 = Type.isNumber;
-			const t2 = value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber});
+			const t2 = __ksType.isPosition;
 			if(args.length === 2) {
 				if(t0(args[0])) {
 					if(t1(args[1])) {
@@ -59,7 +62,7 @@ module.exports = function() {
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = value => Type.isString(value) || Type.isNull(value);
-			const t1 = value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber});
+			const t1 = __ksType.isPosition;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length >= 1 && args.length <= 2) {

@@ -114,7 +114,9 @@ abstract class Importer extends Statement {
 		@reusable: Boolean							= false
 		@reuseName: String
 		@standardLibrary: Boolean					= false
-		@variables: Object<ImportedVariable>	= {}
+		@typeTested: Boolean						= false
+		@typeTestName: String
+		@variables: Object<ImportedVariable>		= {}
 		@variationId: String
 		@worker: ImportWorker
 	}
@@ -163,6 +165,7 @@ abstract class Importer extends Statement {
 			}
 
 			var matchables = []
+			var types = []
 			var workerScope = @worker.scope()
 
 			for var def, name of @imports {
@@ -219,7 +222,14 @@ abstract class Importer extends Statement {
 
 					}
 
-					if !type.isAlias() {
+					if type.isAlias() {
+						if type.isExportingType() {
+							@typeTested = true
+
+							types.push({ def, type })
+						}
+					}
+					else {
 						var var = ImportedVariable.new(
 							name: def.internal
 							sealed: type.isSealed() && !type.isSystem()
@@ -247,7 +257,17 @@ abstract class Importer extends Statement {
 				variable.setComplete(true)
 			}
 
-			if @count != 0 || @alias != null {
+			if @typeTested {
+				@typeTestName = @recipient().authority().getTypeTestVariable()
+
+				for var { def, type } in types {
+					type.setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
+				}
+
+				@count += 1
+			}
+
+			if @count != 0 || ?@alias {
 				module.flagRegister()
 			}
 		}
@@ -353,6 +373,7 @@ abstract class Importer extends Statement {
 		}
 
 		@imports[external] = {
+			external
 			internal
 			isAlias
 			newVariable
@@ -1017,7 +1038,7 @@ abstract class Importer extends Statement {
 	} # }}}
 	toKSFileFragments(fragments, destructuring) { # {{{
 		if @count == 0 {
-			if @alias != null {
+			if ?@alias {
 				var line = fragments
 					.newLine()
 					.code('var ', @alias, ' = ')
@@ -1035,7 +1056,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else {
-			if @alias != null {
+			if ?@alias {
 				var line = fragments
 					.newLine()
 					.code('var ', @reuseName, ' = ')
@@ -1046,28 +1067,39 @@ abstract class Importer extends Statement {
 			}
 
 			if @count == 1 {
-				var dyn variable, name
-
-				for variable, name of @variables {
-				}
-
-				if variable.system {
+				if @typeTested {
 					var line = fragments
 						.newLine()
-						.code(`var __ks_\(variable.name) = `)
+						.code(`var \(@typeTestName) = `)
 
 					@toRequireFragments(line)
 
-					line.code(`.__ks_\(name)`).done()
+					line.code(`.__ksType`).done()
 				}
 				else {
-					var line = fragments
-						.newLine()
-						.code(`var \(variable.name) = `)
+					var dyn variable, name
 
-					@toRequireFragments(line)
+					for variable, name of @variables {
+					}
 
-					line.code(`.\(name)`).done()
+					if variable.system {
+						var line = fragments
+							.newLine()
+							.code(`var __ks_\(variable.name) = `)
+
+						@toRequireFragments(line)
+
+						line.code(`.__ks_\(name)`).done()
+					}
+					else {
+						var line = fragments
+							.newLine()
+							.code(`var \(variable.name) = `)
+
+						@toRequireFragments(line)
+
+						line.code(`.\(name)`).done()
+					}
 				}
 			}
 			else {
@@ -1118,6 +1150,14 @@ abstract class Importer extends Statement {
 							}
 						}
 
+						if @typeTested {
+							if nf {
+								line.code(', ')
+							}
+
+							line.code(`\(@typeTestName) = \(varname).__ksType`)
+						}
+
 						line.done()
 					}
 				}
@@ -1162,6 +1202,14 @@ abstract class Importer extends Statement {
 								}
 							}
 						}
+					}
+
+					if @typeTested {
+						if nf {
+							line.code(', ')
+						}
+
+						line.code(`__ksType: \(@typeTestName)`)
 					}
 
 					line.code('} = ')

@@ -1254,21 +1254,12 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	toInvertedFragments(fragments, callback) { # {{{
-		// echo(`CallExpression.toInvertedFragments#\(@data.start.line)-\(@data.end.line)`)
 		for var argument in @arguments {
 			if argument.isInverted() {
-				// return argument.toInvertedFragments(fragments, (fragments) => {
-				// 	// echo(`CallExpression.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`)
-				// 	callback(fragments)
-				// })
 				return argument.toInvertedFragments(fragments, callback)
 			}
 		}
 
-		// @object.toInvertedFragments(fragments, (fragments) => {
-		// 	// echo(`CallExpression.toInvertedFragments.callback#\(@data.start.line)-\(@data.end.line)`)
-		// 	callback(fragments)
-		// })
 		@object.toInvertedFragments(fragments, callback)
 	} # }}}
 	toQuote() { # {{{

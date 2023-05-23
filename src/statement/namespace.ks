@@ -6,6 +6,8 @@ class NamespaceDeclaration extends Statement {
 		@topNodes: Array							= []
 		@type: NamedContainerType<NamespaceType>
 		@variable: Variable
+		@typeTests									= []
+		@typeTestVariable: String
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, NamespaceScope.new(scope))
@@ -77,6 +79,13 @@ class NamespaceDeclaration extends Statement {
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
 	} # }}}
+	addTypeTest(name: String, type: Type): String { # {{{
+		@typeTestVariable ??= @getTypeTestVariable()
+
+		@typeTests.push({ name, type })
+
+		return `\(@typeTestVariable).is\(name)`
+	} # }}}
 	authority() => this
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
@@ -90,6 +99,7 @@ class NamespaceDeclaration extends Statement {
 		@parent.registerMacro(`\(@name).\(name)`, macro)
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} # }}}
+	getTypeTestVariable() => @parent.recipient().authority().getTypeTestVariable()
 	includePath() => null
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if var var ?= @scope.getDefinedVariable(variable.name) {
@@ -115,6 +125,22 @@ class NamespaceDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { # {{{
 		var line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		var block = line.newBlock()
+
+		if #@typeTests {
+			var line = block.newLine().code(`\($runtime.immutableScope(this))\(@typeTestVariable) = `)
+			var object = line.newObject()
+
+			for var { type, name } in @typeTests {
+				var line = object.newLine().code(`is\(name): `)
+
+				type.toTestFunctionFragments(line, this, TestFunctionMode.DEFINE)
+
+				line.done()
+			}
+
+			object.done()
+			line.done()
+		}
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

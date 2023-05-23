@@ -386,14 +386,14 @@ class ObjectComputedMember extends Expression {
 			.compile(@value)
 			.done()
 	} # }}}
-	toInvertedFragments(fragments, callback) {
+	toInvertedFragments(fragments, callback) { # {{{
 		if @name.isInverted() {
 			@name.toInvertedFragments(fragments, callback)
 		}
 		else {
 			@value.toInvertedFragments(fragments, callback)
 		}
-	}
+	} # }}}
 	value() => @value
 }
 

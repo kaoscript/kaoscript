@@ -16,7 +16,14 @@ class TypeAliasDeclaration extends Statement {
 			..flagComplete()
 	} # }}}
 	analyse()
-	override prepare(target, targetMode)
+	override prepare(target, targetMode) { # {{{
+		if @type.isComplex() {
+			var authority = @recipient().authority()
+			var name = authority.addTypeTest(@name, @type)
+
+			@type.setTestName(name)
+		}
+	} # }}}
 	translate()
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)

@@ -1,10 +1,15 @@
 class AliasType extends Type {
 	private late {
+		@testIndex: Number?
 		@type: Type
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
 			var type = AliasType.new(scope)
+
+			if ?data.testIndex {
+				type.setTestIndex(data.testIndex)
+			}
 
 			queue.push(() => {
 				type
@@ -35,15 +40,19 @@ class AliasType extends Type {
 		return {
 			kind: TypeKind.Alias
 			of: @type.export(references, indexDelta, mode, module)
+			@testIndex if ?@testIndex
 		}
 	} # }}}
 	getProperty(name: String): Type => @type.getProperty(name)
+	getTestIndex() => @testIndex
+	getTestName() => @type.getTestName()
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
 	isExclusion() => @type.isExclusion()
 	isExportable() => @type.isExportable()
 	isExportingFragment() => false
+	isExportingType() => @type.isComplex()
 	isFunction() => @type.isFunction()
 	isFusion() => @type.isFusion()
 	isNamespace() => @type.isNamespace()
@@ -64,11 +73,13 @@ class AliasType extends Type {
 	setNullable(nullable: Boolean) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
+	setTestIndex(@testIndex)
+	setTestName(name) => @type.setTestName(name)
 	shallBeNamed() => true
 	override split(types) => @type.split(types)
 	type() => @type
 	type(@type) => this
-	toExportFragment(fragments, name, variable)
+	override toExportFragment(fragments, name, variable)
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
@@ -82,5 +93,7 @@ class AliasType extends Type {
 
 	proxy @type {
 		hasRest
+		isComplex
+		toTestFunctionFragments
 	}
 }

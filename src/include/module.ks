@@ -8,6 +8,7 @@ export class Module {
 		@data
 		@directory
 		@exports						= {}
+		@exported: Boolean				= false
 		@exportedMacros					= {}
 		@file
 		@flags							= {}
@@ -15,7 +16,11 @@ export class Module {
 		@imports						= {}
 		@includeModules					= {}
 		@includePaths					= {}
-		@metaExports?					= null
+		@metaExports					= {
+			exports: []
+			references: []
+			macros: []
+		}
 		@metaRequirements?				= null
 		@options
 		@output
@@ -110,6 +115,7 @@ export class Module {
 
 		return this
 	} # }}}
+	authority() => @body
 	compile() { # {{{
 		@initiate()
 
@@ -403,21 +409,38 @@ export class Module {
 
 			@body.toFragments(block)
 
-			var mut exportable = false
-			for var export of @exports {
-				if export.type.isExportingFragment() {
-					exportable = true
+			var mut exportingFragments = {}
+			var mut exportingTypes = []
 
-					break
+			for var export, name of @exports {
+				if export.type.isExportingFragment() {
+					exportingFragments[name] = export
+				}
+				else if export.type.isExportingType() {
+					exportingTypes.push(export)
 				}
 			}
 
-			if exportable {
+			if #exportingFragments || #exportingTypes {
 				var line = block.newLine().code('return ')
 				var object = line.newObject()
 
-				for var export, name of @exports {
+				for var export, name of exportingFragments {
 					export.type.toExportFragment(object, name, export.variable)
+				}
+
+				if #exportingTypes {
+					var line = object.newLine().code('__ksType: [')
+
+					for var { type }, index in exportingTypes {
+						line.code($comma) if index > 0
+
+						line.code(type.getTestName())
+
+						type.setTestIndex(index)
+					}
+
+					line.code(']').done()
 				}
 
 				object.done()
@@ -515,27 +538,17 @@ export class Module {
 		return fragments.toArray()
 	} # }}}
 	toExports() { # {{{
-		if @metaRequirements == null {
-			@toRequirements()
-		}
+		@metaRequirements ??= @toRequirements()
 
-		if @metaExports == null {
-			@metaExports = {
-				exports: []
-				references: []
-				macros: []
-			}
-
+		if !@exported {
 			var delta = @metaRequirements.references.length
 
 			for var { variable }, name of @exports {
-				var late type
-
-				if variable is IdentifierLiteral | Variable {
-					type = variable.getDeclaredType()
+				var type = if variable is IdentifierLiteral | Variable {
+					pick variable.getDeclaredType()
 				}
 				else {
-					type = variable.type()
+					pick variable.type()
 				}
 
 				@metaExports.exports.push(type.toMetadata(@metaExports.references, delta, ExportMode.Export, this), name)
@@ -544,6 +557,8 @@ export class Module {
 			for var datas, name of @exportedMacros {
 				@metaExports.macros.push(name, datas)
 			}
+
+			@exported = true
 		}
 
 		return @metaExports
@@ -608,11 +623,13 @@ export class Module {
 
 class ModuleBlock extends AbstractNode {
 	private {
-		@attributeDatas				= {}
-		@length: Number				= 0
+		@attributeDatas					= {}
+		@length: Number					= 0
 		@module: Module
-		@statements: Array			= []
-		@topNodes: Array			= []
+		@statements: Array				= []
+		@topNodes: Array				= []
+		@typeTests						= []
+		@typeTestVarCount: Number		= -1
 	}
 	constructor(@data, @module) { # {{{
 		super()
@@ -736,6 +753,11 @@ class ModuleBlock extends AbstractNode {
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
 	} # }}}
+	addTypeTest(name: String, type: Type): String { # {{{
+		@typeTests.push({ name, type })
+
+		return `__ksType.is\(name)`
+	} # }}}
 	authority() => this
 	directory() => @module.directory()
 	exportMacro(name, macro) { # {{{
@@ -744,6 +766,11 @@ class ModuleBlock extends AbstractNode {
 	file() => @module.file()
 	override getASTReference(name) => null
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	getTypeTestVariable(): String { # {{{
+		@typeTestVarCount += 1
+
+		return `__ksType\(@typeTestVarCount)`
+	} # }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if variable.static {
 			var class = @scope.getVariable(variable.class).declaration()
@@ -779,6 +806,22 @@ class ModuleBlock extends AbstractNode {
 	} # }}}
 	target() => @options.target
 	toFragments(fragments) { # {{{
+		if #@typeTests {
+			var line = fragments.newLine().code(`\($runtime.immutableScope(this))__ksType = `)
+			var object = line.newObject()
+
+			for var { type, name } in @typeTests {
+				var line = object.newLine().code(`is\(name): `)
+
+				type.toTestFunctionFragments(line, this, TestFunctionMode.DEFINE)
+
+				line.done()
+			}
+
+			object.done()
+			line.done()
+		}
+
 		for var node in @topNodes {
 			node.toAuthorityFragments(fragments)
 		}

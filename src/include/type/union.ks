@@ -565,6 +565,17 @@ class UnionType extends Type {
 		return `\(quote)\(elements.join(`\(quote), \(quote)`))\(quote) or \(quote)\(last)\(quote)`
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
+	override toTestFragments(fragments, node, junction) { # {{{
+		fragments.code('(') if junction == Junction.AND
+
+		for var type, index in @types {
+			fragments.code(' || ') if index != 0
+
+			type.toTestFragments(fragments, node, Junction.OR)
+		}
+
+		fragments.code(')') if junction == Junction.AND
+	} # }}}
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
@@ -600,17 +611,6 @@ class UnionType extends Type {
 			}
 
 			type.toRouteTestFragments(fragments, node, Junction.OR)
-		}
-
-		fragments.code(')') if junction == Junction.AND
-	} # }}}
-	toTestFunctionFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.AND
-
-		for var type, index in @types {
-			fragments.code(' || ') if index != 0
-
-			type.toTestFunctionFragments(fragments, node, Junction.OR)
 		}
 
 		fragments.code(')') if junction == Junction.AND

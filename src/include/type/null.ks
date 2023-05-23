@@ -51,12 +51,12 @@ class NullType extends Type {
 	toFragments(fragments, node)
 	toQuote() => 'Null'
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Null'
+	override toTestFragments(fragments, node, junction) { # {{{
+		fragments.code(`\($runtime.type(node)).isNull(value)`)
+	} # }}}
 	override toPositiveTestFragments(fragments, node, junction)
 	override toTestFunctionFragments(fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
-	} # }}}
-	override toTestFunctionFragments(fragments, node, junction) { # {{{
-		fragments.code(`\($runtime.type(node)).isNull(value)`)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('null')

@@ -184,6 +184,11 @@ enum Junction {
 	OR
 }
 
+enum TestFunctionMode {
+	DEFINE
+	USE
+}
+
 bitmask TypeOrigin {
 	None
 
@@ -724,6 +729,7 @@ abstract class Type {
 	isClassInstance() => false
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
 	isComplete() => @complete
+	isComplex() => false
 	isContainedIn(types) { # {{{
 		for var type in types {
 			if @equals(type) {
@@ -750,6 +756,7 @@ abstract class Type {
 	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1
 	isExportable(mode: ExportMode) => mode ~~ ExportMode.Requirement || @isExportable()
 	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
+	isExportingType() => false
 	isExported() => @exported
 	isExtendable() => false
 	isFlexible() => false
@@ -944,6 +951,9 @@ abstract class Type {
 	toRouteTestFragments(fragments, node, argName: String, from: Number, to: Number, default: Boolean, junction: Junction) { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	toTestFragments(fragments, node, junction: Junction) { # {{{
+		NotImplementedException.throw()
+	} # }}}
 	toTestFunctionFragments(fragments, node) { # {{{
 		if node._options.format.functions == 'es5' {
 			fragments.code('function(value) { return ')
@@ -952,14 +962,19 @@ abstract class Type {
 			fragments.code('value => ')
 		}
 
-		@toTestFunctionFragments(fragments, node, Junction.NONE)
+		@toTestFragments(fragments, node, Junction.NONE)
 
 		if node._options.format.functions == 'es5' {
 			fragments.code('; }')
 		}
 	} # }}}
-	toTestFunctionFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw()
+	toTestFunctionFragments(fragments, node, mode: TestFunctionMode) { # {{{
+		if mode == .USE {
+			@toTestFunctionFragments(fragments, node)
+		}
+		else {
+			NotImplementedException.throw()
+		}
 	} # }}}
 	toTestType() => this
 	toTypeQuote() => @toQuote()
