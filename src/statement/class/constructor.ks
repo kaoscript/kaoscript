@@ -12,6 +12,7 @@ class ClassConstructorDeclaration extends Statement {
 		@forks: Array<ClassConstructorType>?	= null
 		@hiddenOverride: Boolean				= false
 		@indigentValues: Array					= []
+		@offset: Number							= 0
 		@override: Boolean						= false
 		@overriding: Boolean					= false
 		@topNodes: Array						= []
@@ -86,6 +87,10 @@ class ClassConstructorDeclaration extends Statement {
 		parent._constructors.push(this)
 	} # }}}
 	analyse() { # {{{
+		@offset = @scope.module().getLineOffset()
+
+		@scope.line(@line())
+
 		@parameters = []
 
 		for var data in @data.parameters {
@@ -99,6 +104,10 @@ class ClassConstructorDeclaration extends Statement {
 		@block = ConstructorBlock.new($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		@scope.module().setLineOffset(@offset)
+
+		@scope.line(@line())
+
 		for var parameter in @parameters {
 			parameter.prepare()
 

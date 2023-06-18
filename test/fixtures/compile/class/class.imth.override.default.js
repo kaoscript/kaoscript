@@ -20,20 +20,17 @@ module.exports = function() {
 		format() {
 			return this.__ks_func_format_rt.call(null, this, this, arguments);
 		}
-		__ks_func_format_0(message) {
-			return message.toUpperCase();
+		__ks_func_format_1(message) {
+			return message.toLowerCase();
 		}
 		__ks_func_format_rt(that, proto, args) {
 			const t0 = Type.isString;
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return proto.__ks_func_format_0.call(that, args[0]);
+					return proto.__ks_func_format_1.call(that, args[0]);
 				}
 			}
 			throw Helper.badArgs();
 		}
 	}
-	LetterBox.prototype.__ks_func_format_0 = function(message) {
-		return message.toLowerCase();
-	};
 };

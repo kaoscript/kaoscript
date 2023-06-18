@@ -7,6 +7,12 @@ module.exports = function(expect) {
 			o.__ks_cons_0(...args);
 			return o;
 		}
+		static __ks_new_1() {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_1();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
 			this.__ks_cons_rt.call(null, this, arguments);
@@ -17,8 +23,14 @@ module.exports = function(expect) {
 		__ks_cons_0(color) {
 			this._color = color;
 		}
+		__ks_cons_1() {
+			this._color = "red";
+		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;
+			if(args.length === 0) {
+				return Shape.prototype.__ks_cons_1.call(that);
+			}
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return Shape.prototype.__ks_cons_0.call(that, args[0]);
@@ -51,27 +63,6 @@ module.exports = function(expect) {
 			throw Helper.badArgs();
 		}
 	}
-	Shape.__ks_new_1 = function() {
-		const o = Object.create(Shape.prototype);
-		o.__ks_init();
-		o.__ks_cons_1();
-		return o;
-	};
-	Shape.prototype.__ks_cons_1 = function() {
-		this._color = "red";
-	};
-	Shape.prototype.__ks_cons_rt = function(that, args) {
-		const t0 = Type.isString;
-		if(args.length === 0) {
-			return Shape.prototype.__ks_cons_1.call(that);
-		}
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return Shape.prototype.__ks_cons_0.call(that, args[0]);
-			}
-		}
-		throw Helper.badArgs();
-	};
 	let shape = Shape.__ks_new_1();
 	expect(shape.__ks_func_draw_0()).to.equals("I'm drawing a red rectangle.");
 };

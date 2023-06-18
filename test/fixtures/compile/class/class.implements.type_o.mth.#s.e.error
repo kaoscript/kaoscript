@@ -1,0 +1,1 @@
+SyntaxException: Class "ClassA" doesn't implement the following method: "foobar(): String" of the type TypeA (fixtures/compile/class/class.implements.type_o.mth.#s.e.ks:5)

@@ -152,6 +152,37 @@ class FusionType extends Type {
 
 		return false
 	} # }}}
+	listFunctions(name: String): Array { # {{{
+		var result = []
+
+		for var type in @types {
+			result.push(...type.listFunctions(name))
+		}
+
+		return result
+	} # }}}
+	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
+		var result = []
+
+		for var subtype in @types {
+			result.push(...subtype.listFunctions(name, type, mode))
+		}
+
+		return result
+	} # }}}
+	listMissingProperties(class: ClassType) { # {{{
+		var mut fields = {}
+		var mut functions = {}
+
+		for var subtype in @types {
+			var missing = subtype.listMissingProperties(class)
+
+			fields = { ...missing.fields, ...fields }
+			functions = { ...missing.functions, ...functions }
+		}
+
+		return { fields, functions }
+	} # }}}
 	parameter() { # {{{
 		for var type in @types when type.isArray() {
 			return type.parameter()

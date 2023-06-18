@@ -1,1 +1,1 @@
-SyntaxException: The constructor is matching an existing constructor (fixtures/compile/implement/implement.ctor.nseal.duplicate.ks:7)
+SyntaxException: The constructor is identical with another constructor (fixtures/compile/implement/implement.ctor.nseal.duplicate.ks:7)

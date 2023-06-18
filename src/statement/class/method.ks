@@ -1,3 +1,126 @@
+namespace Method {
+	type Matcher = {
+		match(name: String): Array
+		matchAll(name: String, type: FunctionType, mode: MatchingMode): Array
+	}
+
+	func noopList(name: String): Array => []
+	func noopMatch(name: String, type: FunctionType, mode: MatchingMode): Array => []
+
+	func instance(class: ClassDeclaration): Matcher { # {{{
+		if class.isExtending() {
+			if class.isImplementing() {
+				return {
+					match(name: String): Array {
+						var result = class.extends().type().listInstanceMethods(name)
+
+						for var interface in class.listInterfaces() {
+							result.push(...interface.listFunctions(name))
+						}
+
+						return result
+					}
+					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+						var result = class.extends().type().listInstantiableMethods(name, type, mode)
+
+						for var interface in class.listInterfaces() {
+							result.push(...interface.listFunctions(name, type, mode))
+						}
+
+						return result
+					}
+				}
+			}
+			else {
+				return {
+					// TODO!
+					// match: class.extends().type().listInstanceMethods
+					match(name: String): Array {
+						return class.extends().type().listInstanceMethods(name)
+					}
+					// TODO!
+					// matchAll: class.extends().type().listInstantiableMethods
+					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+						return class.extends().type().listInstantiableMethods(name, type, mode)
+					}
+				}
+			}
+		}
+		else if class.isImplementing() {
+			return {
+				match(name: String): Array {
+					var result = []
+
+					for var interface in class.listInterfaces() {
+						result.push(...interface.listFunctions(name))
+					}
+
+					return result
+				}
+				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+					var result = []
+
+					for var interface in class.listInterfaces() {
+						result.push(...interface.listFunctions(name, type, mode))
+					}
+
+					return result
+				}
+			}
+		}
+		else {
+			return {
+				match: noopList
+				matchAll: noopMatch
+			}
+		}
+	} # }}}
+
+	func instance(class: ClassType): Matcher { # {{{
+		return {
+			match(name: String): Array {
+				return class.listInstantiableMethods(name)
+			}
+			matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+				return class.listInstantiableMethods(name, type, mode)
+			}
+		}
+	} # }}}
+
+	// TODO!
+	// func static(class: ClassDeclaration): Matcher { # {{{
+	func statik(class: ClassDeclaration): Matcher { # {{{
+		if class.isExtending() {
+			var superClass = class.extends().type()
+
+			return {
+				// TODO!
+				// match: class.extends().type().listStaticMethods
+				// TODO!
+				// match(name: String): Array => superClass.listStaticMethods(name)
+				match(name: String): Array {
+					return class.extends().type().listStaticMethods(name)
+				}
+				// TODO!
+				// matchAll: class.extends().type().listStaticMethods
+				// TODO!
+				// matchAll(name: String, type: FunctionType, mode: MatchingMode): Array => superClass.listStaticMethods(name, type, mode)
+				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+					return class.extends().type().listStaticMethods(name, type, mode)
+				}
+			}
+		}
+		else {
+			return {
+				match: noopList
+				matchAll: noopMatch
+			}
+		}
+	} # }}}
+
+	export instance, statik, Matcher
+}
+
 class ClassMethodDeclaration extends Statement {
 	private late {
 		@block: FunctionBlock
@@ -18,6 +141,7 @@ class ClassMethodDeclaration extends Statement {
 		@indigentValues: Array				= []
 		@instance: Boolean					= true
 		@name: String
+		@offset: Number						= 0
 		@override: Boolean					= false
 		@overriding: Boolean				= false
 		@parameters: Array<Parameter>		= []
@@ -244,6 +368,10 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
+		@offset = @scope.module().getLineOffset()
+
+		@scope.line(@line())
+
 		for var data in @data.parameters {
 			var parameter = Parameter.new(data, this)
 
@@ -260,6 +388,10 @@ class ClassMethodDeclaration extends Statement {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		return if @analysed
+
+		@scope.module().setLineOffset(@offset)
+
+		@scope.line(@line())
 
 		@parent.updateMethodScope(this)
 
@@ -278,98 +410,7 @@ class ClassMethodDeclaration extends Statement {
 		@autoTyping = @type.isAutoTyping()
 		var dynamicReturn = @type.isDynamicReturn()
 		var returnData = @type.getReturnData()
-		var unknownReturnType = @type.isUnknownReturnType()
-
-		var mut overridden = null
-		var mut overloaded = []
-
-		if @parent.isExtending() {
-			var superclass = @parent.extends().type()
-
-			if var data ?= @getOveriddenMethod(superclass, unknownReturnType) {
-				@overriding = true
-				{ method % overridden, type % @type, exact % @exact } = data
-			}
-
-			overloaded = @listOverloadedMethods(superclass)
-
-			var overload = []
-
-			if @overriding {
-				if @exact {
-					overloaded:Array.remove(overridden)
-
-					overload.push(overridden.index())
-				}
-				else if overloaded:Array.contains(overridden) {
-					@parent.addForkedMethod(@name, overridden, @type, true)
-
-					overloaded:Array.remove(overridden)
-
-					overload.push(overridden.index())
-				}
-				else {
-					@parent.addForkedMethod(@name, overridden, @type, true)
-				}
-			}
-			else if @override {
-				SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
-			}
-
-			for var method in overloaded {
-				var mut hidden = null
-
-				if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode.Default) {
-					SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
-				}
-				else if @type.isSubsetOf(method, MatchingMode.ExactParameter + MatchingMode.AdditionalParameter + MatchingMode.IgnoreAnonymous + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
-					hidden = true
-
-					overload.push(method.index())
-				}
-				else if method.isSubsetOf(@type, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
-					hidden = true
-
-					overload.push(method.index())
-				}
-				else if @type.isSubsetOf(method, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
-					hidden = false
-
-					overload.push(method.index())
-				}
-
-				@parent.addForkedMethod(@name, method, @type, hidden)
-			}
-
-			if #overload {
-				@type.overload(overload)
-			}
-
-			if var sealedclass ?= superclass.getHybridMethod(@name, @parent.extends()) {
-				@parent.addSharedMethod(@name, sealedclass)
-			}
-		}
-		else if @override {
-			SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
-		}
-
-		if @exact {
-			@hiddenOverride = !overridden.isAbstract()
-		}
-		else {
-			var mode = MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass
-
-			if @instance {
-				if @parent.class().hasMatchingInstanceMethod(@name, @type, mode) {
-					SyntaxException.throwIdenticalMethod(@name, this)
-				}
-			}
-			else {
-				if @parent.class().hasMatchingStaticMethod(@name, @type, mode) {
-					SyntaxException.throwIdenticalMethod(@name, this)
-				}
-			}
-		}
+		var { overridden, overloaded } = @resolveOver()
 
 		for var alias in @aliases {
 			@type.flagInitializingInstanceVariable(alias.getVariableName())
@@ -388,7 +429,7 @@ class ClassMethodDeclaration extends Statement {
 
 				return.analyse()
 
-				if unknownReturnType {
+				if @type.isUnknownReturnType() {
 					@type.setReturnType(return.getUnpreparedType())
 				}
 
@@ -456,6 +497,8 @@ class ClassMethodDeclaration extends Statement {
 		@analysed = true
 	} # }}}
 	translate() { # {{{
+		@scope.line(@line())
+
 		var index = @forked || (@overriding && @type.isForked()) ? @type.getForkedIndex() : @type.index()
 
 		if @instance {
@@ -647,8 +690,10 @@ class ClassMethodDeclaration extends Statement {
 			return @type
 		}
 	} # }}}
-	private {
-		getOveriddenMethod(superclass: ClassType, returnReference: Boolean) { # {{{
+	protected {
+		// TODO!
+		// getOveriddenMethod({ matchAll }: Method.Matcher, returnReference: Boolean) { # {{{
+		getOveriddenMethod({ matchAll }, returnReference: Boolean) { # {{{
 			var mut mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 
 			if @override {
@@ -661,9 +706,7 @@ class ClassMethodDeclaration extends Statement {
 			var mut method = null
 			var mut exact = false
 
-			var list = @instance ? superclass.listInstantiableMethods : superclass.listStaticMethods
-
-			if var methods #= list(@name, @type, MatchingMode.ExactParameter) {
+			if var methods #= matchAll(@name, @type, MatchingMode.ExactParameter) {
 				if methods.length == 1 {
 					method = methods[0]
 					exact = true
@@ -672,7 +715,7 @@ class ClassMethodDeclaration extends Statement {
 					return null
 				}
 			}
-			else if var methods #= list(@name, @type, mode) {
+			else if var methods #= matchAll(@name, @type, mode) {
 				if methods.length == 1 {
 					method = methods[0]
 				}
@@ -682,7 +725,21 @@ class ClassMethodDeclaration extends Statement {
 			}
 
 			if ?method {
-				var type = @override ? method.clone() : @type
+				var type = if @override {
+					if method is ClassMethodType {
+						pick method.clone()
+					}
+					else {
+						pick ClassMethodType.fromFunction(method)
+					}
+				}
+				else {
+					pick @type
+				}
+
+				if @type.isLessAccessibleThan(method) {
+					SyntaxException.throwLessAccessibleMethod(@parent.type(), @name, @parameters, this)
+				}
 
 				if @override {
 					var parameters = type.parameters()
@@ -763,7 +820,7 @@ class ClassMethodDeclaration extends Statement {
 					}
 				}
 
-				if exact && method.isForked() {
+				if exact && method.isMethod() && method.isForked() {
 					type.setForkedIndex(method.getForkedIndex())
 				}
 
@@ -792,37 +849,120 @@ class ClassMethodDeclaration extends Statement {
 
 			return null
 		} # }}}
-		listOverloadedMethods(superclass: ClassType) { # {{{
-			if @instance {
-				if var methods ?= superclass.listInstanceMethods(@name) {
-					for var method in methods {
-						if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
-							return []
-						}
+		// TODO!
+		// listOverloadedMethods({ match, matchAll }: Method.Matcher) { # {{{
+		listOverloadedMethods({ match, matchAll }) { # {{{
+			if var methods ?= match(@name) {
+				for var method in methods {
+					if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
+						return []
 					}
 				}
+			}
 
-				return superclass.listInstantiableMethods(
-					@name
-					@type
-					MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter + MatchingMode.IgnoreReturn + MatchingMode.MissingError
-				)
+			return matchAll(
+				@name
+				@type
+				MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter + MatchingMode.IgnoreReturn + MatchingMode.MissingError
+			)
+		} # }}}
+		resolveOver(): { overridden: FunctionType?, overloaded: FunctionType[] } { # {{{
+			var mut overridden = null
+			var mut overloaded = []
+
+			if @parent.isExtending() || @parent.isImplementing() {
+				var matcher = @instance ? Method.instance(@parent) : Method.statik(@parent)
+
+				if var data ?= @getOveriddenMethod(matcher, @type.isUnknownReturnType()) {
+					@overriding = true
+					{ method % overridden, type % @type, exact % @exact } = data
+				}
+
+				overloaded = @listOverloadedMethods(matcher)
+
+				var overload = []
+
+				if @overriding {
+					if @exact {
+						overloaded:Array.remove(overridden)
+
+						overload.push(overridden.index())
+					}
+					else if overloaded:Array.contains(overridden) {
+						@parent.addForkedMethod(@name, overridden, @type, true)
+
+						overloaded:Array.remove(overridden)
+
+						overload.push(overridden.index())
+					}
+					else {
+						@parent.addForkedMethod(@name, overridden, @type, true)
+					}
+				}
+				else if @override {
+					SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
+				}
+
+				for var method in overloaded {
+					var mut hidden = null
+
+					if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode.Default) {
+						SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
+					}
+					else if @type.isSubsetOf(method, MatchingMode.ExactParameter + MatchingMode.AdditionalParameter + MatchingMode.IgnoreAnonymous + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
+						hidden = true
+
+						overload.push(method.index())
+					}
+					else if method.isSubsetOf(@type, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
+						hidden = true
+
+						overload.push(method.index())
+					}
+					else if @type.isSubsetOf(method, MatchingMode.AdditionalParameter + MatchingMode.MissingParameterArity + MatchingMode.IgnoreReturn + MatchingMode.IgnoreError) {
+						hidden = false
+
+						overload.push(method.index())
+					}
+
+					@parent.addForkedMethod(@name, method, @type, hidden)
+				}
+
+				if #overload {
+					@type.overload(overload)
+				}
+
+				if @parent.isExtending() {
+					var superclass = @parent.extends().type()
+
+					if var sealedclass ?= superclass.getHybridMethod(@name, @parent.extends()) {
+						@parent.addSharedMethod(@name, sealedclass)
+					}
+				}
+			}
+			else if @override {
+				SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
+			}
+
+			if @exact {
+				@hiddenOverride = !(overridden is not ClassMethodType || overridden.isAbstract())
 			}
 			else {
-				if var methods ?= superclass.listStaticMethods(@name) {
-					for var method in methods {
-						if method.isSubsetOf(@type, MatchingMode.ExactParameter) {
-							return []
-						}
+				var mode = MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass
+
+				if @instance {
+					if @parent.class().hasMatchingInstanceMethod(@name, @type, mode) {
+						SyntaxException.throwIdenticalMethod(@name, this)
 					}
 				}
-
-				return superclass.listStaticMethods(
-					@name
-					@type
-					MatchingMode.FunctionSignature + MatchingMode.SubsetParameter + MatchingMode.MissingParameter - MatchingMode.AdditionalParameter + MatchingMode.IgnoreReturn + MatchingMode.MissingError
-				)
+				else {
+					if @parent.class().hasMatchingStaticMethod(@name, @type, mode) {
+						SyntaxException.throwIdenticalMethod(@name, this)
+					}
+				}
 			}
+
+			return { overridden, overloaded }
 		} # }}}
 	}
 }

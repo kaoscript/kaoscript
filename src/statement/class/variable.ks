@@ -65,25 +65,48 @@ class ClassVariableDeclaration extends AbstractNode {
 		if ?@data.value {
 			@defaultValue = true
 			@lateInit = false
+
+			if @instance {
+				@parent._inits = true
+			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if @parent.isExtending() {
-			var type = @parent._extendsType.type()
+		@type = ClassVariableType.fromAST(@data!?, this)
 
-			if @instance {
-				if type.hasInstanceVariable(@name) {
+		if @instance {
+			if @parent.isExtending() {
+				if @parent.extends().type().hasInstanceVariable(@name) {
 					ReferenceException.throwAlreadyDefinedField(@name, this)
 				}
 			}
-			else {
-				if type.hasStaticVariable(@name) {
+
+			if @parent.isImplementing() {
+				for var interface in @parent.listInterfaces() {
+					if var property ?= interface.getProperty(@data.name.name) {
+						if $accessibility.isLessAccessibleThan(@type.access(), Accessibility.Public) {
+							SyntaxException.throwLessAccessibleVariable(@parent.type(), @name, this)
+						}
+
+						if @type.type().isExplicit() {
+							unless @type.isSubsetOf(property, MatchingMode.Default) {
+								SyntaxException.throwUnmatchVariable(@parent.type(), interface, @name, this)
+							}
+						}
+						else {
+							@type.type(property)
+						}
+					}
+				}
+			}
+		}
+		else {
+			if @parent.isExtending() {
+				if @parent.extends().type().hasStaticVariable(@name) {
 					ReferenceException.throwAlreadyDefinedField(@name, this)
 				}
 			}
 		}
-
-		@type = ClassVariableType.fromAST(@data!?, this)
 
 		if @type.isRequiringInitialization() {
 			@initialized = false

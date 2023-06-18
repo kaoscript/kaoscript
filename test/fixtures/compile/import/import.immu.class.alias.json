@@ -130,7 +130,9 @@
               ],
               "returns": "Any?",
               "errors": [],
-              "inits": []
+              "inits": [
+                "_luma"
+              ]
             }
           ]
         },

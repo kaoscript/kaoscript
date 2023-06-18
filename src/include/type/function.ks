@@ -201,7 +201,11 @@ class FunctionType extends Type {
 		@async = true
 	} # }}}
 	clone() { # {{{
-		throw NotSupportedException.new()
+		var clone = FunctionType.new(@scope)
+
+		FunctionType.clone(this, clone)
+
+		return clone
 	} # }}}
 	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
 		return -1
@@ -963,6 +967,19 @@ class OverloadedFunctionType extends Type {
 			return type
 		} # }}}
 	}
+	constructor(@scope) { # {{{
+		super(@scope)
+	} # }}}
+	constructor(@scope, @functions) { # {{{
+		super(scope)
+
+		for var function in functions {
+			if function.isAsync() {
+				@async = true
+				break
+			}
+		}
+	} # }}}
 	addFunction(type: FunctionType) { # {{{
 		if @functions.length == 0 {
 			@async = type.isAsync()
@@ -1031,7 +1048,9 @@ class OverloadedFunctionType extends Type {
 		return @assessment
 	} # }}}
 	clone() { # {{{
-		throw NotSupportedException.new()
+		var that = OverloadedFunctionType.new(@scope, [function.clone() for var function in @functions])
+
+		return that
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var functions = []

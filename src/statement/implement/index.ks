@@ -1,10 +1,11 @@
 class ImplementDeclaration extends Statement {
 	private late {
-		@forkedMethods			= {}
-		@newSealedClass			= false
-		@properties				= []
-		@sharingProperties		= {}
+		@forkedMethods				= {}
+		@newSealedClass				= false
+		@properties					= []
+		@sharingProperties			= {}
 		@type: NamedType
+		@useDeclaration: Boolean	= false
 		@variable: Variable
 	}
 	analyse() { # {{{
@@ -12,9 +13,67 @@ class ImplementDeclaration extends Statement {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 
-		@variable.setComplete(false)
+		match var declaration = @variable.declaration() {
+			is ClassDeclaration {
+				if declaration.type().isSealed() {
+					@variable.setComplete(false)
+				}
+				else {
+					@useDeclaration = true
+
+					var class = declaration.type().type()
+
+					for var data in @data.properties {
+						match data.kind {
+							NodeKind.FieldDeclaration {
+								var property = ImplementUnifiedClassFieldDeclaration.new(data, declaration, this)
+
+								property.analyse()
+
+								@properties.push(property)
+							}
+							NodeKind.MethodDeclaration {
+								// TODO!
+								// var property = if type.isConstructor(data.name.name) {
+								// 	pick ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
+								// }
+								// else if type.isDestructor(data.name.name) {
+								// 	pick ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
+								// }
+								// else {
+								// 	pick ImplementUnifiedClassMethodDeclaration.new(data, declaration, this)
+								// }
+								var late property
+
+								if class.isConstructor(data.name.name) {
+									property = ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
+								}
+								else if class.isDestructor(data.name.name) {
+									property = ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
+								}
+								else {
+									property = ImplementUnifiedClassMethodDeclaration.new(data, declaration, this)
+								}
+
+								property.analyse()
+
+								@properties.push(property)
+							}
+							else {
+								throw NotImplementedException.new(this)
+							}
+						}
+					}
+				}
+			}
+			else {
+				@variable.setComplete(false)
+			}
+		}
 	} # }}}
 	enhance() { # {{{
+		return if @useDeclaration
+
 		if !@variable.isClassStatement() {
 			@resolveType(false)
 		}
@@ -50,6 +109,8 @@ class ImplementDeclaration extends Statement {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		return if @useDeclaration
+
 		if @variable.isClassStatement() {
 			@resolveType(true)
 		}
@@ -62,17 +123,17 @@ class ImplementDeclaration extends Statement {
 
 				match data.kind {
 					NodeKind.FieldDeclaration {
-						property = ImplementClassFieldDeclaration.new(data, this, @type)
+						property = ImplementDividedClassFieldDeclaration.new(data, this, @type)
 					}
 					NodeKind.MethodDeclaration {
 						if type.isConstructor(data.name.name) {
-							property = ImplementClassConstructorDeclaration.new(data, this, @type)
+							property = ImplementDividedClassConstructorDeclaration.new(data, this, @type)
 						}
 						else if type.isDestructor(data.name.name) {
 							NotImplementedException.throw(this)
 						}
 						else {
-							property = ImplementClassMethodDeclaration.new(data, this, @type)
+							property = ImplementDividedClassMethodDeclaration.new(data, this, @type)
 						}
 					}
 					else {
@@ -194,6 +255,8 @@ class ImplementDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
+		return if @useDeclaration
+
 		for var property in @properties {
 			property.translate()
 		}
@@ -214,6 +277,8 @@ class ImplementDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
+		return if @useDeclaration
+
 		if @newSealedClass {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
@@ -230,7 +295,8 @@ class ImplementDeclaration extends Statement {
 }
 
 include {
-	'./class.ks'
+	'./divided-class.ks'
+	'./unified-class.ks'
 	'./enum.ks'
 	'./namespace.ks'
 }

@@ -149,6 +149,18 @@ var $ast = {
 
 		return false
 	} # }}}
+	toIMString(data) { # {{{
+		var mut object = data
+		var mut property = ''
+
+		while object.kind == NodeKind.MemberExpression {
+			property = `.\(object.property.name)\(property)`
+
+			object = object.object
+		}
+
+		return `\(object.name)\(property)`
+	} # }}}
 	topicReference() { # {{{
 		return {
 			kind: NodeKind.TopicReference

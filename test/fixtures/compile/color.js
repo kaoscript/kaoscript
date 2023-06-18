@@ -1310,6 +1310,69 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
+		red() {
+			return this.__ks_func_red_rt.call(null, this, this, arguments);
+		}
+		__ks_func_red_0() {
+			return this.__ks_func_getField_0("red");
+		}
+		__ks_func_red_1(value) {
+			return this.setField("red", value);
+		}
+		__ks_func_red_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 0) {
+				return proto.__ks_func_red_0.call(that);
+			}
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_red_1.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		green() {
+			return this.__ks_func_green_rt.call(null, this, this, arguments);
+		}
+		__ks_func_green_0() {
+			return this.__ks_func_getField_0("green");
+		}
+		__ks_func_green_1(value) {
+			return this.setField("green", value);
+		}
+		__ks_func_green_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 0) {
+				return proto.__ks_func_green_0.call(that);
+			}
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_green_1.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		blue() {
+			return this.__ks_func_blue_rt.call(null, this, this, arguments);
+		}
+		__ks_func_blue_0() {
+			return this.__ks_func_getField_0("blue");
+		}
+		__ks_func_blue_1(value) {
+			return this.setField("blue", value);
+		}
+		__ks_func_blue_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 0) {
+				return proto.__ks_func_blue_0.call(that);
+			}
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_blue_1.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
 		static __ks_sttc_addSpace_0(space) {
 			const spaces = Object.keys($spaces);
 			$space(space.name);
@@ -1566,76 +1629,6 @@ module.exports = function() {
 		})();
 		return o;
 	})());
-	Color.prototype.__ks_func_red_0 = function() {
-		return this.__ks_func_getField_0("red");
-	};
-	Color.prototype.__ks_func_red_1 = function(value) {
-		return this.setField("red", value);
-	};
-	Color.prototype.__ks_func_green_0 = function() {
-		return this.__ks_func_getField_0("green");
-	};
-	Color.prototype.__ks_func_green_1 = function(value) {
-		return this.setField("green", value);
-	};
-	Color.prototype.__ks_func_blue_0 = function() {
-		return this.__ks_func_getField_0("blue");
-	};
-	Color.prototype.__ks_func_blue_1 = function(value) {
-		return this.setField("blue", value);
-	};
-	Color.prototype.__ks_init_1 = Color.prototype.__ks_init;
-	Color.prototype.__ks_init = function() {
-		this.__ks_init_1();
-		this._red = 0;
-		this._green = 0;
-		this._blue = 0;
-	};
-	Color.prototype.__ks_func_red_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		if(args.length === 0) {
-			return proto.__ks_func_red_0.call(that);
-		}
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return proto.__ks_func_red_1.call(that, args[0]);
-			}
-		}
-		throw Helper.badArgs();
-	};
-	Color.prototype.red = function() {
-		return this.__ks_func_red_rt.call(null, this, this, arguments);
-	};
-	Color.prototype.__ks_func_green_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		if(args.length === 0) {
-			return proto.__ks_func_green_0.call(that);
-		}
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return proto.__ks_func_green_1.call(that, args[0]);
-			}
-		}
-		throw Helper.badArgs();
-	};
-	Color.prototype.green = function() {
-		return this.__ks_func_green_rt.call(null, this, this, arguments);
-	};
-	Color.prototype.__ks_func_blue_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		if(args.length === 0) {
-			return proto.__ks_func_blue_0.call(that);
-		}
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return proto.__ks_func_blue_1.call(that, args[0]);
-			}
-		}
-		throw Helper.badArgs();
-	};
-	Color.prototype.blue = function() {
-		return this.__ks_func_blue_rt.call(null, this, this, arguments);
-	};
 	const $static = (() => {
 		const o = new OBJ();
 		o.black = Color.__ks_sttc_from_0(["#000"]);

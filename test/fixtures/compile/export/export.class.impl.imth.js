@@ -26,19 +26,19 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-	}
-	Shape.prototype.__ks_func_draw_0 = function() {
-		return this._color;
-	};
-	Shape.prototype.__ks_func_draw_rt = function(that, proto, args) {
-		if(args.length === 0) {
-			return proto.__ks_func_draw_0.call(that);
+		draw() {
+			return this.__ks_func_draw_rt.call(null, this, this, arguments);
 		}
-		throw Helper.badArgs();
-	};
-	Shape.prototype.draw = function() {
-		return this.__ks_func_draw_rt.call(null, this, this, arguments);
-	};
+		__ks_func_draw_0() {
+			return this._color;
+		}
+		__ks_func_draw_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_draw_0.call(that);
+			}
+			throw Helper.badArgs();
+		}
+	}
 	return {
 		Shape
 	};

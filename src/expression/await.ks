@@ -11,7 +11,7 @@ class AwaitExpression extends Expression {
 
 		var mut ancestor = parent
 
-		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementDividedClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			if ancestor is TryStatement {
 				@try = ancestor
 			}

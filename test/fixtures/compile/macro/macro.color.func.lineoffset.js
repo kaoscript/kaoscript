@@ -45,9 +45,9 @@ module.exports = function() {
 	Color.prototype.__ks_func_blue_1 = function(value) {
 		return this.setField("blue", value);
 	};
-	Color.prototype.__ks_init_4 = Color.prototype.__ks_init;
+	Color.prototype.__ks_init_1 = Color.prototype.__ks_init;
 	Color.prototype.__ks_init = function() {
-		this.__ks_init_4();
+		this.__ks_init_1();
 		this._rouge = 0;
 		this._vert = 0;
 		this._blue = 0;
@@ -163,9 +163,9 @@ module.exports = function() {
 	Color.prototype.__ks_func_yellow_1 = function(value) {
 		return this.setField("yellow", value);
 	};
-	Color.prototype.__ks_init_7 = Color.prototype.__ks_init;
+	Color.prototype.__ks_init_4 = Color.prototype.__ks_init;
 	Color.prototype.__ks_init = function() {
-		this.__ks_init_7();
+		this.__ks_init_4();
 		this._cyan = 0;
 		this._magenta = 0;
 		this._yellow = 0;

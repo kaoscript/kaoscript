@@ -83,9 +83,9 @@ module.exports = function() {
 	Color.prototype.__ks_func_blue_1 = function(value) {
 		return this.setField("blue", value);
 	};
-	Color.prototype.__ks_init_4 = Color.prototype.__ks_init;
+	Color.prototype.__ks_init_1 = Color.prototype.__ks_init;
 	Color.prototype.__ks_init = function() {
-		this.__ks_init_4();
+		this.__ks_init_1();
 		this._rouge = 0;
 		this._vert = 0;
 		this._blue = 0;

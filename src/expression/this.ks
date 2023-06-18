@@ -45,7 +45,7 @@ class ThisExpression extends Expression {
 				@declaration = parent.parent()
 				break
 			}
-			else if parent is ImplementClassMethodDeclaration {
+			else if parent is ImplementDividedClassMethodDeclaration {
 				if !parent.isInstance() {
 					SyntaxException.throwUnexpectedAlias(@name, this)
 				}
@@ -54,7 +54,7 @@ class ThisExpression extends Expression {
 				@declaration = parent.parent()
 				break
 			}
-			else if parent is ImplementClassConstructorDeclaration {
+			else if parent is ImplementDividedClassConstructorDeclaration {
 				@class = parent.class()
 				@declaration = parent.parent()
 				break

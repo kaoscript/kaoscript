@@ -1,0 +1,59 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Shape"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "system": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {
+          "draw": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "text",
+                  "internal": "text",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo2MywibW9kaWZpZXJzIjpbXSwidmFsdWUiOiJIZWxsbyEiLCJzdGFydCI6eyJsaW5lIjoyLCJjb2x1bW4iOjIyfSwiZW5kIjp7ImxpbmUiOjIsImNvbHVtbiI6MzB9fQ=="
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

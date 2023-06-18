@@ -491,6 +491,56 @@ class ObjectType extends Type {
 	} # }}}
 	isTestingProperties() => @testProperties
 	length(): @length
+	listFunctions(name: String): Array { # {{{
+		var result = []
+
+		if var property ?= @properties[name] {
+			if property is FunctionType {
+				result.push(property)
+			}
+		}
+
+		return result
+	} # }}}
+	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
+		var result = []
+
+		if var property ?= @properties[name] {
+			if property is FunctionType {
+				if property.isSubsetOf(type, mode) {
+					result.push(property)
+				}
+			}
+		}
+
+		return result
+	} # }}}
+	listMissingProperties(class: ClassType) { # {{{
+		var fields = {}
+		var functions = {}
+
+		for var type, name of @properties {
+			match type {
+				is FunctionType {
+					unless class.hasMatchingInstanceMethod(name, type, MatchingMode.FunctionSignature) {
+						functions[name] = type
+					}
+				}
+				else {
+					if var variable ?= class.getInstanceVariable(name) {
+						unless variable.isSubsetOf(type, MatchingMode.Default) {
+							fields[name] = type
+						}
+					}
+					else {
+						fields[name] = type
+					}
+				}
+			}
+		}
+
+		return { fields, functions }
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isObject() {
 			return true

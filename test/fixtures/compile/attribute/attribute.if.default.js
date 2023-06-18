@@ -26,20 +26,20 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-	}
-	Shape.prototype.__ks_func_draw_es6_0 = function(canvas) {
-		return "I'm drawing a " + this._color + " rectangle.";
-	};
-	Shape.prototype.__ks_func_draw_es6_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return proto.__ks_func_draw_es6_0.call(that, args[0]);
-			}
+		draw_es6() {
+			return this.__ks_func_draw_es6_rt.call(null, this, this, arguments);
 		}
-		throw Helper.badArgs();
-	};
-	Shape.prototype.draw_es6 = function() {
-		return this.__ks_func_draw_es6_rt.call(null, this, this, arguments);
-	};
+		__ks_func_draw_es6_0(canvas) {
+			return "I'm drawing a " + this._color + " rectangle.";
+		}
+		__ks_func_draw_es6_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_draw_es6_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+	}
 };

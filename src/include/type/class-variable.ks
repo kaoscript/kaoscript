@@ -50,7 +50,8 @@ class ClassVariableType extends Type {
 			var data = index
 			var type = ClassVariableType.new(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 
-			type._access = data.access
+			// TODO!
+			type._access = Accessibility.__ks_from(data.access)
 			type._default = data.default
 			type._immutable = data.immutable
 			type._lateInit = data.lateInit
@@ -65,6 +66,7 @@ class ClassVariableType extends Type {
 		throw NotSupportedException.new()
 	} # }}}
 	discardVariable() => @type
+	access() => @access
 	access(@access) => this
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var data = {
@@ -93,6 +95,7 @@ class ClassVariableType extends Type {
 			return true
 		}
 	} # }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) => @type.isSubsetOf(value, mode)
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
 	override toVariations(variations)

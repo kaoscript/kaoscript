@@ -17,23 +17,23 @@ module.exports = function(expect) {
 				throw Helper.badArgs();
 			}
 		}
-	}
-	ClassA.prototype.__ks_func_foobar_0 = function(args) {
-		expect(args).to.eql(["abc", "def", "ghi", "jkl"]);
-		items.push(...args);
-	};
-	ClassA.prototype.__ks_func_foobar_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
-		let pts;
-		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
-			return proto.__ks_func_foobar_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+		foobar() {
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
-		throw Helper.badArgs();
-	};
-	ClassA.prototype.foobar = function() {
-		return this.__ks_func_foobar_rt.call(null, this, this, arguments);
-	};
+		__ks_func_foobar_0(args) {
+			expect(args).to.eql(["abc", "def", "ghi", "jkl"]);
+			items.push(...args);
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return proto.__ks_func_foobar_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+	}
 	const a = ClassA.__ks_new_0();
 	const items = [];
 	function foobar() {

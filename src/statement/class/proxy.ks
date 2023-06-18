@@ -5,6 +5,7 @@ class ClassProxyDeclaration extends Statement {
 		@externalPath: String
 		@instance: Boolean				= true
 		@name: String
+		@offset: Number					= 0
 		@overridenMethods: Array		= []
 		@type: Type
 	}
@@ -26,8 +27,14 @@ class ClassProxyDeclaration extends Statement {
 
 		parent._proxies.push(this)
 	} # }}}
-	analyse()
+	analyse() { # {{{
+		@offset = @scope.module().getLineOffset()
+	} # }}}
 	override prepare(target, targetMode) { # {{{
+		@scope.module().setLineOffset(@offset)
+
+		@scope.line(@line())
+
 		var class = @parent.type().type()
 
 		@external = $compile.expression(@data.external, this)
@@ -151,6 +158,7 @@ class ClassProxyGroupDeclaration extends Statement {
 	private late {
 		@instance: Boolean					= true
 		@elements: Object<Object>			= {}
+		@offset: Number						= 0
 		@recipient: Expression
 		@recipientPath: String
 	}
@@ -171,8 +179,14 @@ class ClassProxyGroupDeclaration extends Statement {
 
 		parent._proxies.push(this)
 	} # }}}
-	analyse()
+	analyse() { # {{{
+		@offset = @scope.module().getLineOffset()
+	} # }}}
 	override prepare(target, targetMode) { # {{{
+		@scope.module().setLineOffset(@offset)
+
+		@scope.line(@line())
+
 		var class = @parent.type().type()
 
 		@recipient = $compile.expression(@data.recipient, this)

@@ -1,0 +1,1 @@
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/class/class.implements.type_o.mth.#s.or=%ie.ks:7)

@@ -3,6 +3,40 @@ enum Accessibility {
 	Private
 	Protected
 	Public
+
+	// TODO!
+	// static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
+	// } # }}}
+}
+
+var $accessibility = {
+	isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
+		// TODO!
+		// return match source {
+		// 	.Public => false
+		// 	.Protected => target == .Public
+		// 	.Private => target == .Protected | .Public
+		// 	.Internal => target == .Private | .Protected | .Public
+		// }
+		match source {
+			// TODO!
+			// .Public {
+			// 	return false
+			// }
+			.Protected {
+				return target == .Public
+			}
+			.Private {
+				return target == .Protected | .Public
+			}
+			.Internal {
+				return target == .Private | .Protected | .Public
+			}
+			else {
+				return false
+			}
+		}
+	} # }}}
 }
 
 bitmask ClassFeature {
@@ -41,10 +75,12 @@ class ClassType extends Type {
 		@features: ClassFeature				= ClassFeature.All
 		@fullyImplementedMethods: Boolean{}	= {}
 		@hybrid: Boolean					= false
+		@implementing: Boolean				= false
 		@init: Number						= 0
 		@instanceAssessments: Object		= {}
 		@instanceMethods: Object			= {}
 		@instanceVariables: Object			= {}
+		@interfaces	: NamedType[]			= []
 		@level: Number						= 0
 		@majorOriginal: ClassType?
 		@minorOriginal: ClassType?
@@ -198,6 +234,12 @@ class ClassType extends Type {
 				queue.push(() => {
 					if ?data.extends {
 						type.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+					}
+
+					if ?data.implements {
+						for var interface in data.implements {
+							type.addInterface(Type.import(interface, metadata, references, alterations, queue, scope, node).discardReference())
+						}
 					}
 
 					if data.abstract {
@@ -395,6 +437,11 @@ class ClassType extends Type {
 		}
 
 		@alterations.instanceVariables[name] = true
+	} # }}}
+	addInterface(type: NamedType) { # {{{
+		@implementing = true
+
+		@interfaces.push(type)
 	} # }}}
 	addPropertyFromAST(data, node) { # {{{
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
@@ -811,6 +858,10 @@ class ClassType extends Type {
 
 			if @extending {
 				export.extends = @extends.metaReference(references, indexDelta, mode, module)
+			}
+
+			if @implementing {
+				export.implements = [interface.metaReference(references, indexDelta, mode, module) for var interface in @interfaces]
 			}
 
 			if @features != ClassFeature.All {
@@ -1552,6 +1603,7 @@ class ClassType extends Type {
 		return @fullyImplementedMethods[name] <- true
 	} # }}}
 	isHybrid() => @hybrid
+	isImplementing() => @implementing
 	isInitializing() => @sequences.initializations != -1
 	// TODO rename to `isSubclassOf`
 	isInstanceOf(value: AnyType) => false
@@ -1836,6 +1888,7 @@ class ClassType extends Type {
 
 		return result
 	} # }}}
+	listInterfaces() => @interfaces
 	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { # {{{
 		var results: Array = []
 
@@ -2186,16 +2239,6 @@ class ClassType extends Type {
 }
 
 class ClassMethodGroupType extends OverloadedFunctionType {
-	constructor(@scope, @functions) { # {{{
-		super(scope)
-
-		for function in functions {
-			if function.isAsync() {
-				@async = true
-				break
-			}
-		}
-	} # }}}
 	clone() { # {{{
 		var that = ClassMethodGroupType.new(@scope, [function.clone() for var function in @functions])
 

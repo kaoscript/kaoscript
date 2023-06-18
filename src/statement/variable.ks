@@ -15,7 +15,7 @@ class VariableStatement extends Statement {
 			ancestor is ArrowFunctionExpression ||
 			ancestor is FunctionDeclarator ||
 			ancestor is ClassMethodDeclaration ||
-			ancestor is ImplementClassMethodDeclaration ||
+			ancestor is ImplementDividedClassMethodDeclaration ||
 			ancestor is ImplementNamespaceFunctionDeclaration
 		) {
 			if ancestor is TryStatement {

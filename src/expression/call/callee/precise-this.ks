@@ -5,6 +5,7 @@ class PreciseThisCallee extends MethodCallee {
 		@objectType: ReferenceType
 		@property: String
 		@sealed: Boolean					= false
+		@variable
 	}
 	constructor(@data, @expression, @objectType, @property, assessment, match: CallMatch, @node) { # {{{
 		super(data, expression, true, assessment, match, node)
@@ -12,6 +13,8 @@ class PreciseThisCallee extends MethodCallee {
 		@alien = match.function.isAlien()
 		@instance = match.function.isInstance()
 		@sealed = match.function.isSealed()
+
+		@variable = @node.scope().getVariable('this')
 	} # }}}
 	override buildHashCode() => `this:\(@property):\(@index):\(@alien):\(@instance):\(Callee.buildPositionHash(@positions))`
 	toFragments(fragments, mode, node) { # {{{
@@ -57,7 +60,7 @@ class PreciseThisCallee extends MethodCallee {
 			}
 		}
 		else {
-			var name = @node.scope().getVariable('this').getSecureName()
+			var name = @variable.getSecureName()
 
 			match @scope {
 				ScopeKind.Argument {

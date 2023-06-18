@@ -7,6 +7,12 @@ module.exports = function() {
 			o.__ks_cons_0(...args);
 			return o;
 		}
+		static __ks_new_1(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
 			this.__ks_cons_rt.call(null, this, arguments);
@@ -17,11 +23,21 @@ module.exports = function() {
 		__ks_cons_0(color) {
 			this._color = color;
 		}
+		__ks_cons_1(x, y) {
+			error.__ks_0("not supported");
+		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;
+			const t1 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return Shape.prototype.__ks_cons_0.call(that, args[0]);
+				}
+				throw Helper.badArgs();
+			}
+			if(args.length === 2) {
+				if(t1(args[0]) && t1(args[1])) {
+					return Shape.prototype.__ks_cons_1.call(that, args[0], args[1]);
 				}
 			}
 			throw Helper.badArgs();
@@ -60,31 +76,6 @@ module.exports = function() {
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return error.__ks_0.call(that, args[0]);
-			}
-		}
-		throw Helper.badArgs();
-	};
-	Shape.__ks_new_1 = function(...args) {
-		const o = Object.create(Shape.prototype);
-		o.__ks_init();
-		o.__ks_cons_1(...args);
-		return o;
-	};
-	Shape.prototype.__ks_cons_1 = function(x, y) {
-		error.__ks_0("not supported");
-	};
-	Shape.prototype.__ks_cons_rt = function(that, args) {
-		const t0 = Type.isString;
-		const t1 = Type.isValue;
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return Shape.prototype.__ks_cons_0.call(that, args[0]);
-			}
-			throw Helper.badArgs();
-		}
-		if(args.length === 2) {
-			if(t1(args[0]) && t1(args[1])) {
-				return Shape.prototype.__ks_cons_1.call(that, args[0], args[1]);
 			}
 		}
 		throw Helper.badArgs();

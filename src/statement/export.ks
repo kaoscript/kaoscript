@@ -116,13 +116,13 @@ class ExportGroupSpecifier extends AbstractNode {
 			}
 		}
 	} # }}}
-	override prepare(target, targetMode) {
+	override prepare(target, targetMode) { # {{{
 		if @exclusion {
 			for var element in @data.elements {
 				@elements.push(element.internal.name)
 			}
 		}
-	}
+	} # }}}
 	translate()
 	export(recipient) { # {{{
 		if @exclusion {

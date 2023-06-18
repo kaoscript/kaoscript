@@ -357,6 +357,9 @@ class NamedType extends Type {
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => $virtuals[@name] ?? false
+	listFunctions(name: String): Array => @type.listFunctions(name)
+	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
+	listMissingProperties(class: ClassType) => @type.listMissingProperties(class)
 	majorOriginal() => @type.majorOriginal()
 	matchClassName(that: Type?) { # {{{
 		if that == null {
@@ -476,7 +479,7 @@ class NamedType extends Type {
 		return false
 	} # }}}
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @type is ClassType || @type is StructType || @type is TupleType {
+		if @type is AliasType | ClassType | StructType | TupleType {
 			return @type.metaReference(references, indexDelta, mode, module, @name)
 		}
 		else {
@@ -591,7 +594,6 @@ class NamedType extends Type {
 		hasRest
 		isComplete
 		isExportingType
-		// toExportTypeFragment
 	}
 }
 

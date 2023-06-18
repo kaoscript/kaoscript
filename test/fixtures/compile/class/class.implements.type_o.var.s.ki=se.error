@@ -1,0 +1,1 @@
+SyntaxException: The variable "ClassA._name" is less accessible than the overriden variable (fixtures/compile/class/class.implements.type_o.var.s.ki=se.ks:7)

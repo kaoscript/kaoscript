@@ -118,7 +118,7 @@
                 }
               ],
               "returns": {
-                "reference": 1
+                "reference": 0
               },
               "errors": [],
               "inits": [

@@ -1,0 +1,1 @@
+SyntaxException: Class "ClassA" doesn't implement the following field: "name: String" of the type TypeA (fixtures/compile/class/class.implements.type_o.var.s.e.ks:5)

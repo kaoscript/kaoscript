@@ -111,6 +111,7 @@ class Variable {
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
+	hasDeclaration() => ?@declaration
 	isAltereable() => @altereable
 	isClassStatement() => @class
 	isComplete() => @complete

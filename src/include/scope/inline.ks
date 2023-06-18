@@ -40,7 +40,7 @@ class InlineBlockScope extends BlockScope {
 
 		return null
 	} # }}}
-	private declareVariable(name: String, scope: Scope) { # {{{
+	protected declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @hasBleedingVariable(name)) {
 			var newName = @getNewName(name)
 
@@ -180,7 +180,7 @@ class InlineBlockScope extends BlockScope {
 }
 
 class LaxInlineBlockScope extends InlineBlockScope {
-	private declareVariable(name: String, scope: Scope) { # {{{
+	protected declareVariable(name: String, scope: Scope) { # {{{
 		if $keywords[name] == true || @hasRenamedVariable(name) {
 			var newName = @getNewName(name)
 

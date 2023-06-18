@@ -34,10 +34,12 @@ class ClassDeclaration extends Statement {
 		@forcefullyRebinded: Boolean		= false
 		@forkedMethods						= {}
 		@hybrid: Boolean					= false
+		@implementing: Boolean				= false
 		@inits: Boolean						= false
 		@instanceMethods					= {}
 		@instanceVariables					= {}
 		@instanceVariableScope
+		@interfaces							= []
 		@macros								= {}
 		@proxies							= []
 		@references							= {}
@@ -179,15 +181,7 @@ class ClassDeclaration extends Statement {
 		if ?@data.extends {
 			@extending = true
 
-			var mut name = ''
-			var mut member = @data.extends
-			while member.kind == NodeKind.MemberExpression {
-				name = `.\(member.property.name)\(name)`
-
-				member = member.object
-			}
-
-			@extendsName = `\(member.name)\(name)`
+			@extendsName = $ast.toIMString(@data.extends)
 
 			if @extendsName == @name {
 				SyntaxException.throwInheritanceLoop(@name, this)
@@ -217,14 +211,20 @@ class ClassDeclaration extends Statement {
 					var declaration = ClassVariableDeclaration.new(data, this)
 
 					declaration.analyse()
-
-					if declaration.isInstance() && declaration.hasDefaultValue() {
-						@inits = true
-					}
 				}
 				NodeKind.MacroDeclaration {
 				}
 				NodeKind.MethodDeclaration {
+					// TODO!
+					// var declaration = if @class.isConstructor(data.name.name) {
+					// 	pick ClassConstructorDeclaration.new(data, this)
+					// }
+					// else if @class.isDestructor(data.name.name) {
+					// 	pick ClassDestructorDeclaration.new(data, this)
+					// }
+					// else {
+					// 	pick ClassMethodDeclaration.new(data, this)
+					// }
 					var late declaration
 
 					if @class.isConstructor(data.name.name) {
@@ -270,6 +270,34 @@ class ClassDeclaration extends Statement {
 
 			@class.extends(@extendsType)
 		}
+
+		if ?@data.implements {
+			@implementing = true
+
+			for var implement in @data.implements {
+				var name = $ast.toIMString(implement)
+
+				if name == @name {
+					SyntaxException.throwInheritanceLoop(@name, this)
+				}
+
+				if var type ?= Type.fromAST(implement, this) {
+					if type.isAlias() {
+						unless type.isObject() {
+							SyntaxException.throwNotObjectInterface(name, this)
+						}
+					}
+					else {
+						throw NotImplementedException.new(this)
+					}
+
+					@interfaces.push(type)
+				}
+				else {
+					ReferenceException.throwNotDefined(name, this)
+				}
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @extending {
@@ -287,6 +315,12 @@ class ClassDeclaration extends Statement {
 			@instanceVariableScope.define('super', true, superType, true, this)
 
 			@updateConstructorScope()
+		}
+
+		if @implementing {
+			for var interface in @interfaces {
+				@class.addInterface(interface)
+			}
 		}
 
 		for var variable, name of @staticVariables {
@@ -384,8 +418,24 @@ class ClassDeclaration extends Statement {
 			@class.incDestructorSequence()
 		}
 
-		if @extending && !@abstract && !Object.isEmpty(notImplemented <- @class.listMissingAbstractMethods()) {
-			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
+		if !@abstract {
+			if @extending {
+				var notImplemented = @class.listMissingAbstractMethods()
+
+				if #notImplemented {
+					SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
+				}
+			}
+
+			if @implementing {
+				for var interface in @interfaces {
+					var notImplemented = interface.listMissingProperties(@class)
+
+					if #notImplemented.fields || #notImplemented.functions {
+						SyntaxException.throwMissingProperties(@name, interface, notImplemented, this)
+					}
+				}
+			}
 		}
 
 		for var methods, name of @forkedMethods {
@@ -482,6 +532,11 @@ class ClassDeclaration extends Statement {
 						}
 					}
 				}
+			}
+		}
+
+		if @implementing {
+			for var interface in @interfaces {
 			}
 		}
 
@@ -653,8 +708,10 @@ class ClassDeclaration extends Statement {
 	isAbstract() => @abstract
 	isEnhancementExport() => true
 	isExtending() => @extending
+	isImplementing() => @implementing
 	isHybrid() => @hybrid
 	level() => @class.level()
+	listInterfaces() => @interfaces
 	name() => @name
 	newMethodScope(instance: Boolean) { # {{{
 		var scope = @newScope(@scope!?, ScopeType.Function)

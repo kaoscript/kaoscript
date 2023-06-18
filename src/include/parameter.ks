@@ -884,10 +884,11 @@ class Parameter extends AbstractNode {
 }
 
 class AliasStatement extends Statement {
-	private {
+	private late {
 		@expression: ThisExpressionParameter
 		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@parameter: Parameter
+		@variable
 	}
 	constructor(@expression, @parameter) { # {{{
 		var parent = parameter.parent()
@@ -897,20 +898,20 @@ class AliasStatement extends Statement {
 		parent.addAtThisParameter(this)
 	} # }}}
 	analyse()
-	override prepare(target, targetMode)
+	override prepare(target, targetMode) { # {{{
+		@variable = @scope.getVariable(@expression.name())
+	} # }}}
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
 	operator(@operator): this
 	path() => @expression.path()
 	toStatementFragments(fragments, mode) { # {{{
-		var variable = @scope.getVariable(@expression.name())
-
 		if @expression.isSealed() && !@parameter.parent().isConstructor() {
-			fragments.newLine().code(`\(@expression.getClass().getSealedName()).__ks_set_\(@expression.name())(this, `).compile(variable).code(')').done()
+			fragments.newLine().code(`\(@expression.getClass().getSealedName()).__ks_set_\(@expression.name())(this, `).compile(@variable).code(')').done()
 		}
 		else {
-			fragments.newLine().code(@expression.fragment(), $equals).compile(variable).done()
+			fragments.newLine().code(@expression.fragment(), $equals).compile(@variable).done()
 		}
 	} # }}}
 	type() => @expression.type()
@@ -1815,8 +1816,9 @@ class AnonymousParameter extends AbstractNode {
 }
 
 class ThisExpressionParameter extends ThisExpression {
-	private {
+	private late {
 		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
+		@variable
 	}
 	override prepare(target, targetMode) { # {{{
 		super(target)
@@ -1827,7 +1829,7 @@ class ThisExpressionParameter extends ThisExpression {
 
 		var method = @statement()
 
-		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
+		if method is ClassMethodDeclaration || method is ImplementDividedClassMethodDeclaration {
 			var class = method.parent()
 
 			var late variable
@@ -1843,7 +1845,7 @@ class ThisExpressionParameter extends ThisExpression {
 				ReferenceException.throwImmutable(this)
 			}
 		}
-		else if method is ClassConstructorDeclaration || method is ImplementClassConstructorDeclaration {
+		else if method is ClassConstructorDeclaration || method is ImplementDividedClassConstructorDeclaration {
 			var class = method.parent()
 
 			var variable = class.type().type().getInstanceVariable(@variableName)
@@ -1852,6 +1854,8 @@ class ThisExpressionParameter extends ThisExpression {
 				ReferenceException.throwImmutable(this)
 			}
 		}
+
+		@variable = @scope.getVariable(@name)
 
 		@parent.addAliasParameter(this)
 	} # }}}
@@ -1886,10 +1890,10 @@ class ThisExpressionParameter extends ThisExpression {
 		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@scope.getVariable(@name))
+		fragments.compile(@variable)
 	} # }}}
 	toParameterFragments(fragments) { # {{{
-		fragments.compile(@scope.getVariable(@name))
+		fragments.compile(@variable)
 	} # }}}
 	toValidationFragments(fragments, rest, defaultValue?, header, async) { # {{{
 		IdentifierParameter.toValidationFragments(fragments, rest, defaultValue, header, async, this)

@@ -26,16 +26,16 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-	}
-	Shape.__ks_sttc_draw_0 = function() {
-		return "red";
-	};
-	Shape.draw = function() {
-		if(arguments.length === 0) {
-			return Shape.__ks_func_draw_0();
+		static __ks_sttc_draw_0() {
+			return "red";
 		}
-		throw Helper.badArgs();
-	};
+		static draw() {
+			if(arguments.length === 0) {
+				return Shape.__ks_sttc_draw_0();
+			}
+			throw Helper.badArgs();
+		}
+	}
 	return {
 		Shape
 	};

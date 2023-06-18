@@ -127,6 +127,7 @@ class IdentifierLiteral extends Literal {
 		return class.getInstanceVariable(@value)
 	} # }}}
 	getDeclaredType() => @declaredType
+	getSecureName() => @isVariable ? @variable().getSecureName() : @value
 	getUnpreparedType() { # {{{
 		if @isVariable {
 			return @scope.getVariable(@value, @line).getRealType()

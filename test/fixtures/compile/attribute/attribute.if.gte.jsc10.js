@@ -26,20 +26,20 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		}
-	}
-	Shape.prototype.__ks_func_draw_trident_0 = function(canvas) {
-		return "I'm drawing a " + this._color + " rectangle.";
-	};
-	Shape.prototype.__ks_func_draw_trident_rt = function(that, proto, args) {
-		const t0 = Type.isValue;
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return proto.__ks_func_draw_trident_0.call(that, args[0]);
-			}
+		draw_trident() {
+			return this.__ks_func_draw_trident_rt.call(null, this, this, arguments);
 		}
-		throw Helper.badArgs();
-	};
-	Shape.prototype.draw_trident = function() {
-		return this.__ks_func_draw_trident_rt.call(null, this, this, arguments);
-	};
+		__ks_func_draw_trident_0(canvas) {
+			return "I'm drawing a " + this._color + " rectangle.";
+		}
+		__ks_func_draw_trident_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_draw_trident_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+	}
 };

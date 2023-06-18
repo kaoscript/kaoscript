@@ -842,7 +842,7 @@ abstract class Type {
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() && !@isSystem() {
-			var varname = variable.name?()
+			var varname = variable.getSecureName?()
 
 			if name == varname {
 				fragments.line(name)

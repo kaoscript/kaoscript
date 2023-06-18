@@ -48,6 +48,69 @@
         "instanceVariables": {},
         "staticVariables": {},
         "instanceMethods": {
+          "getUTCHours": [
+            {
+              "index": 0,
+              "access": 1,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "setUTCHours": [
+            {
+              "index": 0,
+              "access": 1,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "hours",
+                  "internal": "hours",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "minutes",
+                  "internal": "minutes",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo4MSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjU2fSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6NTh9fQ=="
+                },
+                {
+                  "external": "seconds",
+                  "internal": "seconds",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo4MSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjc4fSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6ODB9fQ=="
+                },
+                {
+                  "external": "ms",
+                  "internal": "ms",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo4MSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjk1fSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6OTd9fQ=="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
           "getHours": [
             {
               "index": 1,

@@ -1,0 +1,105 @@
+[
+  {
+    "aliens": [
+      0,
+      "Date",
+      true
+    ],
+    "requirements": [
+      1,
+      "expect",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      "Function"
+    ]
+  },
+  {
+    "exports": [
+      2,
+      "Date"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {
+          "_culture": {
+            "access": 2,
+            "type": "String",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": true
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "culture": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "culture",
+                  "internal": "culture",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": [
+                "_culture"
+              ]
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          0,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,7 +1,7 @@
 var $function = {
 	surround(data, node) { # {{{
 		var mut parent = node._parent
-		while ?parent && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
+		while ?parent && !(parent is ClassMethodDeclaration || parent is ImplementDividedClassMethodDeclaration) {
 			parent = parent.parent()
 		}
 

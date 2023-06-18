@@ -19,12 +19,20 @@ class ClassMethodType extends FunctionType {
 
 			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} # }}}
+		fromFunction(source: FunctionType): ClassMethodType { # {{{
+			var clone = ClassMethodType.new(source._scope)
+
+			FunctionType.clone(source, clone)
+
+			return clone
+		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { # {{{
 			var data = index
 			var type = ClassMethodType.new(scope)
 
 			type._index = data.index
-			type._access = data.access
+			// TODO!
+			type._access = Accessibility.__ks_from(data.access)
 			type._sealed = data.sealed
 			type._async = data.async
 			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
@@ -58,6 +66,7 @@ class ClassMethodType extends FunctionType {
 			return type
 		} # }}}
 	}
+	access() => @access
 	access(@access) => this
 	clone() { # {{{
 		var clone = ClassMethodType.new(@scope)
@@ -134,11 +143,13 @@ class ClassMethodType extends FunctionType {
 			return false
 		}
 
-		return @access != Accessibility.Internal
+		return true
 	} # }}}
 	isForked() => @forked
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isInstance() => @instance
+	isLessAccessibleThan(target: ClassMethodType) => $accessibility.isLessAccessibleThan(@access, target.access())
+	isLessAccessibleThan(target: FunctionType) => $accessibility.isLessAccessibleThan(@access, Accessibility.Public)
 	isMethod() => true
 	isOverflowing(methods: Array<ClassMethodType>) { # {{{
 		var mode = MatchingMode.SimilarParameter + MatchingMode.MissingParameter + MatchingMode.ShiftableParameters + MatchingMode.RequireAllParameters

@@ -1016,6 +1016,9 @@ class ReferenceType extends Type {
 	isUnion() => @type().isUnion()
 	isVirtual() => @type().isVirtual()
 	isVoid() => @name == 'Void' || @type().isVoid()
+	listFunctions(name: String): Array => @type().listFunctions(name)
+	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type().listFunctions(name, type, mode)
+	listMissingProperties(class: ClassType) => @type().listMissingProperties(class)
 	matchContentOf(value: Type) { # {{{
 		if this == value {
 			return true

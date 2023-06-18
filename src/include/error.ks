@@ -545,6 +545,12 @@ export class SyntaxException extends Exception {
 		throwInvalidRule(name, fileName, lineNumber): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The rule "\(name)" is invalid`, fileName, lineNumber)
 		} # }}}
+		throwLessAccessibleMethod(class, name, parameters, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" is less accessible than the overriden method`, node)
+		} # }}}
+		throwLessAccessibleVariable(class, name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The variable "\(class.toQuote()).\(name)" is less accessible than the overriden variable`, node)
+		} # }}}
 		throwLoopingImport(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The import "\(name)" is looping`, node)
 		} # }}}
@@ -582,6 +588,37 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwMissingElseClause(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The 'match' is missing the "else" clause`, node)
+		} # }}}
+		throwMissingProperties(name, interface, { fields, functions }, node): Never ~ SyntaxException { # {{{
+			var mut message = `Class "\(name)" doesn't implement `
+
+			if #fields {
+				var fragments = []
+
+				for var type, name of fields {
+					fragments.push(`"\(name): \(type.toQuote())"`)
+				}
+
+				message += `the following field\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
+			}
+
+			if #functions {
+				if #fields {
+					message += " and "
+				}
+
+				var fragments = []
+
+				for var type, name of functions {
+					fragments.push(`"\(name)\(type.toQuote())"`)
+				}
+
+				message += `the following method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
+			}
+
+			message += ` of the type \(interface.toQuote())`
+
+			throw SyntaxException.new(message, node)
 		} # }}}
 		throwMissingRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`import is missing the argument "\(name)"`, node)
@@ -674,6 +711,9 @@ export class SyntaxException extends Exception {
 		throwNotNamedParameter(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Parameter must be named`, node)
 		} # }}}
+		throwNotObjectInterface(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The interface "\(name)" is not an object`, node)
+		} # }}}
 		throwNotOverloadableFunction(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Variable "\(name)" is not an overloadable function`, node)
 		} # }}}
@@ -726,6 +766,9 @@ export class SyntaxException extends Exception {
 			var fragments = [`"\(name)"` for var name in names]
 
 			throw SyntaxException.new(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
+		} # }}}
+		throwUnmatchVariable(class, interface, varname, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The variable "\(varname)" doesn't match the one of \(interface.toQuote(true))`, node)
 		} # }}}
 		throwUnnamedWildcardImport(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Wilcard import can't be named`, node)

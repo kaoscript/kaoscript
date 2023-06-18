@@ -22,12 +22,12 @@ import {
 func rewire(option, defaultValue?) { # {{{
 	var files = []
 
-	for item in option.split(',') {
-		item = item.split('=')
+	for var item in option.split(',') {
+		var parts = item.split('=')
 
 		files.push({
-			input: item[0]
-			output: item[1]
+			input: parts[0]
+			output: parts[1]
 		})
 	}
 

@@ -15,7 +15,7 @@ class ReturnStatement extends Statement {
 
 		var mut ancestor = parent
 
-		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementDividedClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
 			if ancestor is IfExpression | MatchExpression {
 				@inline = true
 			}
