@@ -545,10 +545,10 @@ export class Module {
 
 			for var { variable }, name of @exports {
 				var type = if variable is IdentifierLiteral | Variable {
-					pick variable.getDeclaredType()
+					set variable.getDeclaredType()
 				}
 				else {
-					pick variable.type()
+					set variable.type()
 				}
 
 				@metaExports.exports.push(type.toMetadata(@metaExports.references, delta, ExportMode.Export, this), name)

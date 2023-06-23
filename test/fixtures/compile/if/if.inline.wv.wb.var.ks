@@ -5,8 +5,8 @@ var x = if var mut y ?= foo() {
 		y += bar(i)!?
 	}
 
-	pick y
+	set y
 }
 else {
-	pick bar()
+	set bar()
 }

@@ -1,13 +1,13 @@
 func foobar(test) {
 	var value = if test(0) {
 		if test(1) {
-			pick 42
+			set 42
 		}
 		else {
-			pick 1
+			set 1
 		}
 	}
 	else {
-		pick 0
+		set 0
 	}
 }

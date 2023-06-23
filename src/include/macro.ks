@@ -398,14 +398,14 @@ class MacroDeclaration extends AbstractNode {
 				return false
 			}
 
-			pick data.expression.elements
+			set data.expression.elements
 		}
 		else {
 			unless data.kind == NodeKind.MacroExpression {
 				return false
 			}
 
-			pick data.elements
+			set data.elements
 		}
 
 		if statement {

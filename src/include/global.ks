@@ -117,13 +117,6 @@ var $ast = {
 
 		return null
 	} # }}}
-	pick(data) { # {{{
-		return {
-			kind: NodeKind.PickStatement
-			value: data
-			start: data.start
-		}
-	} # }}}
 	return(data? = null) { # {{{
 		return {
 			kind: NodeKind.ReturnStatement

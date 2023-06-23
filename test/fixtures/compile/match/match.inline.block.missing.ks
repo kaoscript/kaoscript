@@ -13,55 +13,55 @@ enum ANSIColor {
 func color(fg: ANSIColor, bg: ANSIColor): String {
 	var fgCode = match fg {
 		.black {
-			pick 30
+			set 30
 		}
 		.red {
-			pick 31
+			set 31
 		}
 		.green {
-			pick 32
+			set 32
 		}
 		.yellow {
-			pick 33
+			set 33
 		}
 		.blue {
-			pick 34
+			set 34
 		}
 		.magenta {
-			pick 35
+			set 35
 		}
 		.cyan {
-			pick 36
+			set 36
 		}
 		.white {
-			pick 37
+			set 37
 		}
 	}
 
 	var bgCode = match bg {
 		.black {
-			pick 30
+			set 30
 		}
 		.red {
-			pick 31
+			set 31
 		}
 		.green {
-			pick 32
+			set 32
 		}
 		.yellow {
-			pick 33
+			set 33
 		}
 		.blue {
-			pick 34
+			set 34
 		}
 		.magenta {
-			pick 35
+			set 35
 		}
 		.cyan {
-			pick 36
+			set 36
 		}
 		.white {
-			pick 37
+			set 37
 		}
 	}
 

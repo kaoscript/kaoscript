@@ -5,6 +5,6 @@ func foobar(test, resolve) ~ Error {
 		throw Error.new()
 	}
 	else {
-		pick resolve()
+		set resolve()
 	}
 }

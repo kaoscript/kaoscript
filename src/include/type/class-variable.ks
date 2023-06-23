@@ -11,10 +11,10 @@ class ClassVariableType extends Type {
 			var scope = node.scope()
 
 			var type = if ?data.type {
-				pick ClassVariableType.new(scope, Type.fromAST(data.type, node))
+				set ClassVariableType.new(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				pick ClassVariableType.new(scope, AnyType.NullableUnexplicit)
+				set ClassVariableType.new(scope, AnyType.NullableUnexplicit)
 			}
 
 			if ?data.modifiers {

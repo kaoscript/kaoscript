@@ -36,7 +36,7 @@ class IfExpression extends Expression {
 		@initiate()
 
 		if !@cascade && @data.whenTrue.statements.length == @data.whenFalse.statements?.length == 1 {
-			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.PickStatement
+			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.SetStatement
 		}
 
 		if !@inline {

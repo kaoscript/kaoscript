@@ -1,8 +1,8 @@
 extern foo, bar, qux
 
 var x = if foo() {
-	pick qux()
+	set qux()
 }
 else {
-	pick bar()
+	set bar()
 }

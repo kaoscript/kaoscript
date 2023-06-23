@@ -548,13 +548,13 @@ class ObjectBindingElement extends Expression {
 				.code($comma)
 				.code(match @operator {
 					.EmptyCoalescing, .NonEmpty {
-						pick '2'
+						set '2'
 					}
 					.NullCoalescing, .Existential {
-						pick '1'
+						set '1'
 					}
 					else {
-						pick @type.isNullable() ? '0' : '1'
+						set @type.isNullable() ? '0' : '1'
 					}
 				})
 				.code($comma)

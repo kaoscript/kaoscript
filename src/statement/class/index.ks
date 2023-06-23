@@ -216,13 +216,13 @@ class ClassDeclaration extends Statement {
 				}
 				NodeKind.MethodDeclaration {
 					var declaration = if @class.isConstructor(data.name.name) {
-						pick ClassConstructorDeclaration.new(data, this)
+						set ClassConstructorDeclaration.new(data, this)
 					}
 					else if @class.isDestructor(data.name.name) {
-						pick ClassDestructorDeclaration.new(data, this)
+						set ClassDestructorDeclaration.new(data, this)
 					}
 					else {
-						pick ClassMethodDeclaration.new(data, this)
+						set ClassMethodDeclaration.new(data, this)
 					}
 
 					declaration.analyse()

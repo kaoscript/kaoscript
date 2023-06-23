@@ -144,12 +144,12 @@ var $statements = {
 	`\(NodeKind.MatchStatement)`				: MatchStatement
 	`\(NodeKind.NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind.PassStatement)`					: PassStatement
-	`\(NodeKind.PickStatement)`					: PickStatement
 	`\(NodeKind.RepeatStatement)`				: RepeatStatement
 	`\(NodeKind.RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind.RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind.RequireOrImportDeclaration)`	: RequireOrImportDeclaration
 	`\(NodeKind.ReturnStatement)`				: ReturnStatement
+	`\(NodeKind.SetStatement)`					: SetStatement
 	`\(NodeKind.StructDeclaration)`				: StructDeclaration
 	`\(NodeKind.ThrowStatement)`				: ThrowStatement
 	`\(NodeKind.TryStatement)`					: TryStatement

@@ -711,14 +711,14 @@ class ClassMethodDeclaration extends Statement {
 			if ?method {
 				var type = if @override {
 					if method is ClassMethodType {
-						pick method.clone()
+						set method.clone()
 					}
 					else {
-						pick ClassMethodType.fromFunction(method)
+						set ClassMethodType.fromFunction(method)
 					}
 				}
 				else {
-					pick @type
+					set @type
 				}
 
 				if @type.isLessAccessibleThan(method) {

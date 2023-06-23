@@ -1,11 +1,11 @@
 func foobar(test) {
 	var value = if test(0) {
-		pick 0
+		set 0
 	}
 	else if test(1) {
-		pick 1
+		set 1
 	}
 	else {
-		pick 2
+		set 2
 	}
 }

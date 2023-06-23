@@ -3,7 +3,7 @@ extern console
 
 func foobar(test, resolve: (): String) ~ Error {
 	var value = if test() {
-		pick resolve()
+		set resolve()
 	}
 	else {
 		throw Error.new()

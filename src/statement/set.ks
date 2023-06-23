@@ -1,4 +1,4 @@
-class PickStatement extends Statement {
+class SetStatement extends Statement {
 	private late {
 		@gateway
 		@inline: Boolean
