@@ -10,12 +10,12 @@ class AnonymousFunctionExpression extends Expression {
 		@type: FunctionType
 	}
 	constructor(data, parent, scope) { # {{{
-		super(data, parent, scope, ScopeType.Function)
+		super(data, parent, scope, ScopeType.InlineFunction)
 	} # }}}
 	analyse() { # {{{
 		@scope.line(@data.start.line)
 
-		@scope.define('this', true, Type.Any, this)
+		// @scope.define('this', true, Type.Any, this)
 
 		@parameters = []
 		for var data in @data.parameters {
@@ -190,7 +190,6 @@ class ArrowFunctionExpression extends Expression {
 		@autoTyping: Boolean			= false
 		@awaiting: Boolean				= false
 		@block: Block
-		@es5: Boolean					= false
 		@exit: Boolean					= false
 		@name: String
 		@parameters: Array<Parameter>
@@ -203,9 +202,6 @@ class ArrowFunctionExpression extends Expression {
 		super(data, parent, scope, ScopeType.Block)
 	} # }}}
 	analyse() { # {{{
-		@es5 = @options.format.functions == 'es5'
-		@block = $compile.function($ast.body(@data), this)
-
 		@scope.line(@data.start.line)
 
 		@parameters = []
@@ -231,6 +227,7 @@ class ArrowFunctionExpression extends Expression {
 
 			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 
+			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
 
 			@autoTyping = @type.isAutoTyping()
@@ -247,12 +244,13 @@ class ArrowFunctionExpression extends Expression {
 			}
 
 			for var parameter, index in @parameters {
-				parameter.prepare(targetParameters[index].type())
+				parameter.prepare(targetParameters[index])
 			}
 
 			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
 			@type.setReturnType(target.getReturnType())
 
+			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
 
 			@autoTyping = @type.isAutoTyping()
@@ -269,25 +267,9 @@ class ArrowFunctionExpression extends Expression {
 		}
 
 		@type.flagComplete()
-
-		@usingThis = @isUsingVariable('this')
-
-		if @es5 {
-			@variables = @block.listNonLocalVariables(@scope, [])
-
-			if @usingThis || @variables.length != 0 {
-				@shiftToAuthority = true
-
-				var authority = @authority()
-
-				@name = authority.scope().getReservedName()
-
-				authority.addTopNode(this)
-			}
-		}
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -304,6 +286,7 @@ class ArrowFunctionExpression extends Expression {
 
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
+		@usingThis = @isUsingVariable('this')
 	} # }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
@@ -331,13 +314,13 @@ class ArrowFunctionExpression extends Expression {
 	isOverridableFunction() => false
 	isRefinable() => true
 	isUsingVariable(name) { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			if parameter.isUsingVariable(name) {
 				return true
 			}
 		}
 
-		return @block.isUsingVariable(name)
+		return @block?.isUsingVariable(name)
 	} # }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
@@ -387,9 +370,11 @@ class ArrowFunctionExpression extends Expression {
 
 			var blockRouter = fragments.code(`...args) =>`).newBlock()
 
+			var bind = @usingThis ? 'this' : 'null'
+
 			Router.toFragments(
 				(function, line) => {
-					line.code(`fn.call(this`)
+					line.code(`fn.call(\(bind)`)
 
 					return true
 				}

@@ -10,7 +10,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o["from"] = (() => {
 				const o = new OBJ();
-				o.srgb = Helper.function(function(red, green, blue, that) {
+				o.srgb = Helper.function((red, green, blue, that) => {
 					that._rouge = red;
 					that._vert = green;
 					that._blue = blue;
@@ -27,7 +27,7 @@ module.exports = function() {
 			})();
 			o["to"] = (() => {
 				const o = new OBJ();
-				o.srgb = Helper.function(function(rouge, vert, blue, that) {
+				o.srgb = Helper.function((rouge, vert, blue, that) => {
 					that._red = rouge;
 					that._green = vert;
 					that._blue = blue;

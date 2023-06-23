@@ -1,4 +1,3 @@
-
 enum TargetMode {
 	Ignore
 	Permissive
@@ -40,19 +39,19 @@ abstract class AbstractNode {
 	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { # {{{
 		match type {
-			ScopeType.Bleeding {
+			.Bleeding {
 				return BleedingScope.new(scope)
 			}
-			ScopeType.Block {
+			.Block {
 				return BlockScope.new(scope)
 			}
-			ScopeType.Function {
+			.Function {
 				return FunctionScope.new(scope)
 			}
-			ScopeType.Hollow {
+			.Hollow {
 				return HollowScope.new(scope)
 			}
-			ScopeType.InlineBlock {
+			.InlineBlock {
 				if @options.format.variables == 'es6' {
 					return InlineBlockScope.new(scope)
 				}
@@ -60,7 +59,10 @@ abstract class AbstractNode {
 					return LaxInlineBlockScope.new(scope)
 				}
 			}
-			ScopeType.Operation {
+			.InlineFunction {
+				return InlineFunctionScope.new(scope)
+			}
+			.Operation {
 				return OperationScope.new(scope)
 			}
 		}

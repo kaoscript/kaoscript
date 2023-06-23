@@ -10,13 +10,7 @@ class ThrowStatement extends Statement {
 		var mut ancestor = parent
 
 		do {
-			if	ancestor is AnonymousFunctionExpression ||
-				ancestor is ArrowFunctionExpression ||
-				ancestor is FunctionDeclarator ||
-				ancestor is ClassMethodDeclaration ||
-				ancestor is ImplementDividedClassMethodDeclaration ||
-				ancestor is ImplementNamespaceFunctionDeclaration
-			{
+			if ancestor is AnonymousFunctionExpression | ArrowFunctionExpression | FunctionDeclarator | ClassMethodDeclaration | ImplementDividedClassMethodDeclaration | ImplementNamespaceFunctionDeclaration {
 				@function = ancestor
 				@inSource = false
 				break

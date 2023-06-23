@@ -199,6 +199,12 @@ bitmask TypeOrigin {
 	RequireOrExtern
 }
 
+// type TypeTest = {
+// 	holder: String
+// 	path: String
+// 	index: Number?
+// }
+
 abstract class Type {
 	private {
 		@alien: Boolean					= false
@@ -693,6 +699,7 @@ abstract class Type {
 	hasMutableAccess() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false
+	hasTest() => false
 	isAlias() => false
 	isAlien() => @alien
 	isAltering() => false

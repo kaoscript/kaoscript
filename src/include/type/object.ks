@@ -10,6 +10,7 @@ class ObjectType extends Type {
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		// TODO move to alias
 		@testName: String?
 		@testProperties: Boolean		= false
 		@testRest: Boolean				= false
@@ -263,6 +264,7 @@ class ObjectType extends Type {
 	hasProperty(name: String) => ?@properties[name]
 	hasProperties() => @length > 0
 	hasRest() => @rest
+	hasTest() => ?@testName
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
 			if @isNullable() {
@@ -863,7 +865,7 @@ class ObjectType extends Type {
 				fragments.code(`\(@testName)`)
 			}
 		}
-		if @length == 0 && !@rest && !@nullable {
+		else if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
 			}

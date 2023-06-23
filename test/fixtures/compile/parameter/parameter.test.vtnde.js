@@ -9,7 +9,7 @@ module.exports = function(expect) {
 			let pts;
 			if(args.length <= 1) {
 				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
-					return fn.call(this, Helper.getVararg(args, 0, pts[1]));
+					return fn.call(null, Helper.getVararg(args, 0, pts[1]));
 				}
 			}
 			throw Helper.badArgs();
@@ -21,7 +21,7 @@ module.exports = function(expect) {
 		return foo("foo");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -29,7 +29,7 @@ module.exports = function(expect) {
 		return foo(1, 2);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -37,7 +37,7 @@ module.exports = function(expect) {
 		return foo("foo", 1);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

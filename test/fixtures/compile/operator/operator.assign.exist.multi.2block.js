@@ -4,7 +4,7 @@ module.exports = function() {
 		return "otto";
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	});
@@ -12,7 +12,7 @@ module.exports = function() {
 		return "itti";
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	});

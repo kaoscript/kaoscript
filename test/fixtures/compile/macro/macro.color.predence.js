@@ -36,7 +36,7 @@ module.exports = function() {
 		o["name"] = "FBQ";
 		o["formatters"] = (() => {
 			const o = new OBJ();
-			o.foo = Helper.function(function(t1, t2, t3) {
+			o.foo = Helper.function((t1, t2, t3) => {
 				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 			}, (fn, ...args) => {
 				const t0 = Type.isNumber;
@@ -47,7 +47,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			o.bar = Helper.function(function(h, i) {
+			o.bar = Helper.function((h, i) => {
 				return h + ((1 / 3) * -(i - 1));
 			}, (fn, ...args) => {
 				const t0 = Type.isNumber;

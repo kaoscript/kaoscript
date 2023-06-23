@@ -34,10 +34,10 @@ class ImplementDeclaration extends Statement {
 							}
 							NodeKind.MethodDeclaration {
 								// TODO!
-								// var property = if type.isConstructor(data.name.name) {
+								// var property = if class.isConstructor(data.name.name) {
 								// 	pick ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
 								// }
-								// else if type.isDestructor(data.name.name) {
+								// else if class.isDestructor(data.name.name) {
 								// 	pick ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
 								// }
 								// else {

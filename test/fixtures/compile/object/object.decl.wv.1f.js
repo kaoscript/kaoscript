@@ -2,7 +2,7 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let foo = (() => {
 		const o = new OBJ();
-		o.bar = Helper.function(function(name = null) {
+		o.bar = Helper.function((name = null) => {
 			let n = 0;
 		}, (fn, ...args) => {
 			const t0 = value => Type.isString(value) || Type.isNull(value);

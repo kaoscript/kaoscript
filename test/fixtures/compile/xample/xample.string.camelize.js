@@ -10,7 +10,7 @@ module.exports = function(__ks_String) {
 			const t0 = Type.isValue;
 			if(args.length === 2) {
 				if(t0(args[0]) && t0(args[1])) {
-					return fn.call(this, args[0], args[1]);
+					return fn.call(null, args[0], args[1]);
 				}
 			}
 			throw Helper.badArgs();

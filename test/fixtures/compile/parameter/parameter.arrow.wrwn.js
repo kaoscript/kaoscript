@@ -9,7 +9,7 @@ module.exports = function() {
 		const t0 = Type.isValue;
 		if(args.length === 2) {
 			if(t0(args[1])) {
-				return fn.call(this, args[0], args[1]);
+				return fn.call(null, args[0], args[1]);
 			}
 		}
 		throw Helper.badArgs();

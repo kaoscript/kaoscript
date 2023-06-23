@@ -127,7 +127,18 @@ class ObjectExpression extends Expression {
 					else if property is ObjectSpreadMember {
 						property.prepare(type)
 
-						rest.push(property.type())
+						var type = property.value().type().discard()
+
+						if type.isObject() && !type.hasRest() {
+							for var property, name of type.properties() {
+								if !@type.hasProperty(name) {
+									@type.addProperty(name, property.type())
+								}
+							}
+						}
+						else {
+							rest.push(property.type())
+						}
 					}
 					else if property is ObjectThisMember {
 						property.prepare(target.getProperty(property.name()))

@@ -13,13 +13,13 @@ module.exports = function(expect) {
 			let pts;
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return fn.call(this, [], void 0, args[0]);
+					return fn.call(null, [], void 0, args[0]);
 				}
 				throw Helper.badArgs();
 			}
 			if(args.length >= 2) {
 				if(Helper.isVarargs(args, 0, args.length - 2, t0, pts = [0], 0) && Helper.isVarargs(args, 1, 1, t1, pts, 1) && Helper.isVarargs(args, 1, 1, t0, pts, 2) && te(pts, 3)) {
-					return fn.call(this, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]), Helper.getVararg(args, pts[2], pts[3]));
+					return fn.call(null, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]), Helper.getVararg(args, pts[2], pts[3]));
 				}
 			}
 			throw Helper.badArgs();
@@ -29,7 +29,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

@@ -20,7 +20,7 @@ module.exports = function() {
 		const t0 = Type.isValue;
 		if(t0(kws.x)) {
 			if(args.length === 0) {
-				return fn.call(this, kws.x);
+				return fn.call(null, kws.x);
 			}
 		}
 		throw Helper.badArgs();

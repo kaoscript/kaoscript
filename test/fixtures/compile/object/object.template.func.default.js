@@ -3,7 +3,7 @@ module.exports = function() {
 	let x = "y";
 	let foo = (() => {
 		const o = new OBJ();
-		o[x] = Helper.function(function() {
+		o[x] = Helper.function(() => {
 			return 42;
 		}, (fn, ...args) => {
 			if(args.length === 0) {

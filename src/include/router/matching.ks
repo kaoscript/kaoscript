@@ -15,7 +15,7 @@ namespace Matching {
 			node: AbstractNode
 		): CallMatchResult { # {{{
 			var combinations = splitArguments(arguments)
-			// TODO!
+			// TODO
 			// echo(combinations)
 
 			if combinations.length == 1 {
@@ -1115,7 +1115,7 @@ namespace Matching {
 						var arg = argMatches.arguments[index]
 
 						if ?pMatch && pMatch is Array {
-							// TODO!
+							// TODO
 							pMatch.push(...arg:Array)
 
 							length += arg.length

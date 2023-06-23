@@ -9,13 +9,13 @@ module.exports = function(expect) {
 			let pts;
 			if(args.length >= 2 && args.length <= 3) {
 				if(Helper.isVarargs(args, 1, args.length - 1, t0, pts = [0], 0) && Helper.isVarargs(args, 1, 1, t0, pts, 1) && te(pts, 2)) {
-					return fn.call(this, Helper.getVarargs(args, 0, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
+					return fn.call(null, Helper.getVarargs(args, 0, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
 				}
 				throw Helper.badArgs();
 			}
 			if(args.length >= 4 && args.length <= 6) {
 				if(t0(args[0]) && t0(args[1]) && t0(args[2]) && Helper.isVarargs(args, 1, 3, t0, pts = [3], 0) && te(pts, 1)) {
-					return fn.call(this, [args[0], args[1], args[2]], Helper.getVarargs(args, 3, pts[1]));
+					return fn.call(null, [args[0], args[1], args[2]], Helper.getVarargs(args, 3, pts[1]));
 				}
 			}
 			throw Helper.badArgs();
@@ -25,7 +25,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -33,7 +33,7 @@ module.exports = function(expect) {
 		return foo(1);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -46,7 +46,7 @@ module.exports = function(expect) {
 		return foo(1, 2, 3, 4, 5, 6, 7);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

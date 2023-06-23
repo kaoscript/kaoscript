@@ -25,7 +25,7 @@ module.exports = function() {
 		const t0 = Type.isValue;
 		if(args.length === 3) {
 			if(t0(args[1]) && t0(args[2])) {
-				return fn.call(this, args[0], args[1], args[2]);
+				return fn.call(null, args[0], args[1], args[2]);
 			}
 		}
 		throw Helper.badArgs();

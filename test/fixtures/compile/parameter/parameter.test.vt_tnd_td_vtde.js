@@ -16,7 +16,7 @@ module.exports = function(expect) {
 			const t3 = value => Type.isString(value) || Type.isNull(value);
 			if(args.length === 2) {
 				if(t0(args[0]) && t1(args[1])) {
-					return fn.call(this, args[0], void 0, void 0, args[1]);
+					return fn.call(null, args[0], void 0, void 0, args[1]);
 				}
 				throw Helper.badArgs();
 			}
@@ -24,12 +24,12 @@ module.exports = function(expect) {
 				if(t0(args[0])) {
 					if(t2(args[1])) {
 						if(t1(args[2])) {
-							return fn.call(this, args[0], void 0, args[1], args[2]);
+							return fn.call(null, args[0], void 0, args[1], args[2]);
 						}
 						throw Helper.badArgs();
 					}
 					if(t3(args[1]) && t1(args[2])) {
-						return fn.call(this, args[0], args[1], void 0, args[2]);
+						return fn.call(null, args[0], args[1], void 0, args[2]);
 					}
 					throw Helper.badArgs();
 				}
@@ -37,7 +37,7 @@ module.exports = function(expect) {
 			}
 			if(args.length === 4) {
 				if(t0(args[0]) && t3(args[1]) && t2(args[2]) && t1(args[3])) {
-					return fn.call(this, args[0], args[1], args[2], args[3]);
+					return fn.call(null, args[0], args[1], args[2], args[3]);
 				}
 			}
 			throw Helper.badArgs();
@@ -47,7 +47,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -55,7 +55,7 @@ module.exports = function(expect) {
 		return foo("foo");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -63,7 +63,7 @@ module.exports = function(expect) {
 		return foo(true);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -71,7 +71,7 @@ module.exports = function(expect) {
 		return foo(42);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -81,7 +81,7 @@ module.exports = function(expect) {
 		return foo("foo", "bar");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -89,7 +89,7 @@ module.exports = function(expect) {
 		return foo("foo", true);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -97,7 +97,7 @@ module.exports = function(expect) {
 		return foo("foo", []);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -110,7 +110,7 @@ module.exports = function(expect) {
 		return foo("foo", "bar", true);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -118,7 +118,7 @@ module.exports = function(expect) {
 		return foo("foo", "bar", "qux");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -126,7 +126,7 @@ module.exports = function(expect) {
 		return foo("foo", "bar", []);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -134,7 +134,7 @@ module.exports = function(expect) {
 		return foo("foo", 42, "qux");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -142,7 +142,7 @@ module.exports = function(expect) {
 		return foo("foo", true, "qux");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -153,7 +153,7 @@ module.exports = function(expect) {
 		return foo("foo", "bar", true, "qux");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

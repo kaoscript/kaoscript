@@ -435,6 +435,12 @@ export class Module {
 					for var { type }, index in exportingTypes {
 						line.code($comma) if index > 0
 
+						// var test = type.getTestType()
+
+						// line.code(`\(test.holder).\(test.path)`)
+
+						// // type.setTestIndex(index)
+						// test.index = index
 						line.code(type.getTestName())
 
 						type.setTestIndex(index)
@@ -753,10 +759,14 @@ class ModuleBlock extends AbstractNode {
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
 	} # }}}
-	addTypeTest(name: String, type: Type): String { # {{{
+	addTypeTest(name: String, type: Type): Void { # {{{
 		@typeTests.push({ name, type })
 
-		return `__ksType.is\(name)`
+		// return {
+		// 	holder: '__ksType'
+		// 	path: `.is\(name)`
+		// }
+		type.setTestName(`__ksType.is\(name)`)
 	} # }}}
 	authority() => this
 	directory() => @module.directory()

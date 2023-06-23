@@ -7,7 +7,7 @@ module.exports = function(expect) {
 			const t0 = Type.isValue;
 			if(args.length === 2) {
 				if(t0(args[0]) && t0(args[1])) {
-					return fn.call(this, args[0], args[1]);
+					return fn.call(null, args[0], args[1]);
 				}
 			}
 			throw Helper.badArgs();
@@ -17,7 +17,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -25,7 +25,7 @@ module.exports = function(expect) {
 		return foo(1);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

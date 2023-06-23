@@ -75,6 +75,7 @@ enum ScopeType {
 	Function
 	Hollow
 	InlineBlock
+	InlineFunction
 	Macro
 	Operation
 }

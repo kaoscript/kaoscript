@@ -10,14 +10,7 @@ class VariableStatement extends Statement {
 
 		var mut ancestor = parent
 
-		while ?ancestor && !(
-			ancestor is AnonymousFunctionExpression ||
-			ancestor is ArrowFunctionExpression ||
-			ancestor is FunctionDeclarator ||
-			ancestor is ClassMethodDeclaration ||
-			ancestor is ImplementDividedClassMethodDeclaration ||
-			ancestor is ImplementNamespaceFunctionDeclaration
-		) {
+		while ?ancestor && !(ancestor is AnonymousFunctionExpression | ArrowFunctionExpression | FunctionDeclarator | ClassMethodDeclaration | ImplementDividedClassMethodDeclaration | ImplementNamespaceFunctionDeclaration) {
 			if ancestor is TryStatement {
 				@try = ancestor
 			}

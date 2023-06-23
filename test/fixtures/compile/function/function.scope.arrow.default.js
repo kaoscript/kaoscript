@@ -11,7 +11,7 @@ module.exports = function(expect) {
 				expect(d.getDay()).to.equal(__ks_case_1[i + 2]);
 			}, (fn, ...args) => {
 				if(args.length === 0) {
-					return fn.call(this);
+					return fn.call(null);
 				}
 				throw Helper.badArgs();
 			}));

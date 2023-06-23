@@ -11,7 +11,7 @@ module.exports = function() {
 		let pts;
 		if(args.length <= 1) {
 			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
-				return fn.call(this, Helper.getVararg(args, 0, pts[1]));
+				return fn.call(null, Helper.getVararg(args, 0, pts[1]));
 			}
 		}
 		throw Helper.badArgs();

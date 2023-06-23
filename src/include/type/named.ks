@@ -4,6 +4,7 @@ class NamedType extends Type {
 		@container: NamedContainerType?	= null
 		@name: String
 		@type: Type
+		// @typeTest: TypeTest?			= null
 	}
 	constructor(@name, @type) { # {{{
 		super(type.scope())
@@ -516,6 +517,7 @@ class NamedType extends Type {
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
 	setTestIndex(index) => @type.setTestIndex(index)
 	setTestName(name) => @type.setTestName(name)
+	// setTypeTest(@typeTest) => this
 	split(types: Array) { # {{{
 		if @type.isAlias() || @type.isUnion() {
 			@type.split(types)
@@ -592,8 +594,11 @@ class NamedType extends Type {
 	proxy @type {
 		hasMutableAccess
 		hasRest
+		hasTest
 		isComplete
 		isExportingType
+		toTestFragments
+		toTestFunctionFragments
 	}
 }
 

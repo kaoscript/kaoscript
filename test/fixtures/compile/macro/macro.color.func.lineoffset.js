@@ -90,7 +90,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o["from"] = (() => {
 				const o = new OBJ();
-				o.srgb = Helper.function(function(red, green, blue, that) {
+				o.srgb = Helper.function((red, green, blue, that) => {
 					that._cyan = blue;
 					that._magenta = red;
 					that._yellow = green;
@@ -107,7 +107,7 @@ module.exports = function() {
 			})();
 			o["to"] = (() => {
 				const o = new OBJ();
-				o.srgb = Helper.function(function(cyan, magenta, yellow, that) {
+				o.srgb = Helper.function((cyan, magenta, yellow, that) => {
 					that._red = magenta;
 					that._green = yellow;
 					that._blue = cyan;

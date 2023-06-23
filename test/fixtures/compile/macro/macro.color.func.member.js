@@ -130,7 +130,7 @@ module.exports = function() {
 	}
 	const $util = (() => {
 		const o = new OBJ();
-		o.formatToHex = Helper.function(function(that) {
+		o.formatToHex = Helper.function((that) => {
 			return $hex(that);
 		}, (fn, ...args) => {
 			const t0 = value => Type.isClassInstance(value, Color);
@@ -141,7 +141,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		o.formatToSRGB = Helper.function(function(that) {
+		o.formatToSRGB = Helper.function((that) => {
 			if(that._alpha === 1) {
 				return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
 			}

@@ -33,12 +33,12 @@ namespace Method {
 			}
 			else {
 				return {
-					// TODO!
+					// TODO
 					// match: class.extends().type().listInstanceMethods
 					match(name: String): Array {
 						return class.extends().type().listInstanceMethods(name)
 					}
-					// TODO!
+					// TODO
 					// matchAll: class.extends().type().listInstantiableMethods
 					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
 						return class.extends().type().listInstantiableMethods(name, type, mode)
@@ -87,9 +87,7 @@ namespace Method {
 		}
 	} # }}}
 
-	// TODO!
-	// func static(class: ClassDeclaration): Matcher { # {{{
-	func statik(class: ClassDeclaration): Matcher { # {{{
+	func static(class: ClassDeclaration): Matcher { # {{{
 		if class.isExtending() {
 			var superClass = class.extends().type()
 
@@ -118,7 +116,7 @@ namespace Method {
 		}
 	} # }}}
 
-	export instance, statik, Matcher
+	export instance, static, Matcher
 }
 
 class ClassMethodDeclaration extends Statement {
@@ -871,7 +869,7 @@ class ClassMethodDeclaration extends Statement {
 			var mut overloaded = []
 
 			if @parent.isExtending() || @parent.isImplementing() {
-				var matcher = @instance ? Method.instance(@parent) : Method.statik(@parent)
+				var matcher = @instance ? Method.instance(@parent) : Method.static(@parent)
 
 				if var data ?= @getOveriddenMethod(matcher, @type.isUnknownReturnType()) {
 					@overriding = true

@@ -11,13 +11,13 @@ module.exports = function(expect) {
 			const t1 = value => Type.isString(value) || Type.isNull(value);
 			if(args.length === 2) {
 				if(t0(args[0])) {
-					return fn.call(this, args[0], void 0, args[1]);
+					return fn.call(null, args[0], void 0, args[1]);
 				}
 				throw Helper.badArgs();
 			}
 			if(args.length === 3) {
 				if(t0(args[0]) && t1(args[1])) {
-					return fn.call(this, args[0], args[1], args[2]);
+					return fn.call(null, args[0], args[1], args[2]);
 				}
 			}
 			throw Helper.badArgs();
@@ -27,7 +27,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -35,7 +35,7 @@ module.exports = function(expect) {
 		return foo("foo");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -43,7 +43,7 @@ module.exports = function(expect) {
 		return foo(true);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -51,7 +51,7 @@ module.exports = function(expect) {
 		return foo(42);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

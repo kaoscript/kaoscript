@@ -10,7 +10,7 @@ module.exports = function() {
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
-				return fn.call(this, Helper.getVarargs(args, 0, pts[1]));
+				return fn.call(null, Helper.getVarargs(args, 0, pts[1]));
 			}
 			throw Helper.badArgs();
 		});

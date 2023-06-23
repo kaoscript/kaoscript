@@ -262,6 +262,7 @@ abstract class Importer extends Statement {
 
 				for var { def, type } in types {
 					type.setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
+					// type.setTestHolder(@typeTestName)
 				}
 
 				@count += 1

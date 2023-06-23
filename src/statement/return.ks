@@ -183,7 +183,7 @@ class ReturnStatement extends Statement {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @value == null {
+		if !?@value {
 			if @async {
 				fragments.line('return __ks_cb()')
 			}
@@ -191,9 +191,15 @@ class ReturnStatement extends Statement {
 				fragments.line('return', @data)
 			}
 		}
-		else if @temp == null {
-			if @assignments.length != 0 {
+		else if !?@temp {
+			if #@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
+			}
+
+			if #@beforehands {
+				for var beforehand in @beforehands {
+					beforehand.toBeforehandFragments(fragments, mode)
+				}
 			}
 
 			if @value.isAwaiting() {
@@ -223,8 +229,14 @@ class ReturnStatement extends Statement {
 			else {
 				@assignments.remove(@temp)
 
-				if @assignments.length != 0 {
+				if #@assignments {
 					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
+				}
+
+				if #@beforehands {
+					for var beforehand in @beforehands {
+						beforehand.toBeforehandFragments(fragments, mode)
+					}
 				}
 
 				var line = fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `)

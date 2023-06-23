@@ -31,7 +31,7 @@ use(func({Assertion}, {flag}) {
 		}
 	} # }}}
 
-	func assertEql(obj, msg? = null) { # {{{
+	func assertEql(this, obj, msg? = null) { # {{{
 		if msg != null {
 			flag(this, 'message', msg)
 		}

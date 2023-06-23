@@ -10,7 +10,7 @@ module.exports = function(expect) {
 			const t0 = Type.isValue;
 			if(args.length === 2) {
 				if(t0(args[0]) && t0(args[1])) {
-					return fn.call(this, [args[0]], void 0, [args[1]]);
+					return fn.call(null, [args[0]], void 0, [args[1]]);
 				}
 				throw Helper.badArgs();
 			}
@@ -18,11 +18,11 @@ module.exports = function(expect) {
 				if(t0(args[0])) {
 					if(t0(args[1])) {
 						if(t0(args[2])) {
-							return fn.call(this, [args[0], args[1]], void 0, [args[2]]);
+							return fn.call(null, [args[0], args[1]], void 0, [args[2]]);
 						}
 					}
 					if(t0(args[2])) {
-						return fn.call(this, [args[0]], args[1], [args[2]]);
+						return fn.call(null, [args[0]], args[1], [args[2]]);
 					}
 					throw Helper.badArgs();
 				}
@@ -33,15 +33,15 @@ module.exports = function(expect) {
 					if(t0(args[1])) {
 						if(t0(args[2])) {
 							if(t0(args[3])) {
-								return fn.call(this, [args[0], args[1], args[2]], void 0, [args[3]]);
+								return fn.call(null, [args[0], args[1], args[2]], void 0, [args[3]]);
 							}
 						}
 						if(t0(args[3])) {
-							return fn.call(this, [args[0], args[1]], args[2], [args[3]]);
+							return fn.call(null, [args[0], args[1]], args[2], [args[3]]);
 						}
 					}
 					if(t0(args[2]) && t0(args[3])) {
-						return fn.call(this, [args[0]], args[1], [args[2], args[3]]);
+						return fn.call(null, [args[0]], args[1], [args[2], args[3]]);
 					}
 					throw Helper.badArgs();
 				}
@@ -52,15 +52,15 @@ module.exports = function(expect) {
 					if(t0(args[1])) {
 						if(t0(args[2])) {
 							if(t0(args[4])) {
-								return fn.call(this, [args[0], args[1], args[2]], args[3], [args[4]]);
+								return fn.call(null, [args[0], args[1], args[2]], args[3], [args[4]]);
 							}
 						}
 						if(t0(args[3]) && t0(args[4])) {
-							return fn.call(this, [args[0], args[1]], args[2], [args[3], args[4]]);
+							return fn.call(null, [args[0], args[1]], args[2], [args[3], args[4]]);
 						}
 					}
 					if(t0(args[2]) && t0(args[3]) && t0(args[4])) {
-						return fn.call(this, [args[0]], args[1], [args[2], args[3], args[4]]);
+						return fn.call(null, [args[0]], args[1], [args[2], args[3], args[4]]);
 					}
 					throw Helper.badArgs();
 				}
@@ -70,11 +70,11 @@ module.exports = function(expect) {
 				if(t0(args[0]) && t0(args[1])) {
 					if(t0(args[2])) {
 						if(t0(args[4]) && t0(args[5])) {
-							return fn.call(this, [args[0], args[1], args[2]], args[3], [args[4], args[5]]);
+							return fn.call(null, [args[0], args[1], args[2]], args[3], [args[4], args[5]]);
 						}
 					}
 					if(t0(args[3]) && t0(args[4]) && t0(args[5])) {
-						return fn.call(this, [args[0], args[1]], args[2], [args[3], args[4], args[5]]);
+						return fn.call(null, [args[0], args[1]], args[2], [args[3], args[4], args[5]]);
 					}
 					throw Helper.badArgs();
 				}
@@ -82,7 +82,7 @@ module.exports = function(expect) {
 			}
 			if(args.length === 7) {
 				if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[4]) && t0(args[5]) && t0(args[6])) {
-					return fn.call(this, [args[0], args[1], args[2]], args[3], [args[4], args[5], args[6]]);
+					return fn.call(null, [args[0], args[1], args[2]], args[3], [args[4], args[5], args[6]]);
 				}
 			}
 			throw Helper.badArgs();
@@ -92,7 +92,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -100,7 +100,7 @@ module.exports = function(expect) {
 		return foo(1);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

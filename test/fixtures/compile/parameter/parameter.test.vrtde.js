@@ -10,7 +10,7 @@ module.exports = function(expect) {
 			const t0 = value => Type.isNumber(value) || Type.isNull(value);
 			if(args.length === 1) {
 				if(t0(args[0])) {
-					return fn.call(this, args[0]);
+					return fn.call(null, args[0]);
 				}
 			}
 			throw Helper.badArgs();
@@ -20,7 +20,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -30,7 +30,7 @@ module.exports = function(expect) {
 		return foo("foobar");
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

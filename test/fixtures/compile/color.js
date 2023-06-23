@@ -418,7 +418,7 @@ module.exports = function() {
 	};
 	const $parsers = (() => {
 		const o = new OBJ();
-		o.srgb = Helper.function(function(that, args) {
+		o.srgb = Helper.function((that, args) => {
 			if(args.length === 1) {
 				if(Type.isNumber(args[0])) {
 					that._space = Space.SRGB;
@@ -566,7 +566,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		o.gray = Helper.function(function(that, args) {
+		o.gray = Helper.function((that, args) => {
 			if(args.length >= 1) {
 				if(Number.isFinite(Float.parse.__ks_0(args[0])) === true) {
 					that._space = Space.SRGB;
@@ -1579,7 +1579,7 @@ module.exports = function() {
 		o["alias"] = ["rgb"];
 		o["formatters"] = (() => {
 			const o = new OBJ();
-			o.hex = Helper.function(function(that) {
+			o.hex = Helper.function((that) => {
 				return $hex.__ks_0(that);
 			}, (fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
@@ -1590,7 +1590,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			o.srgb = Helper.function(function(that) {
+			o.srgb = Helper.function((that) => {
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
 				}

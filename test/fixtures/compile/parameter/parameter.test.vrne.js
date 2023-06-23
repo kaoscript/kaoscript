@@ -8,7 +8,7 @@ module.exports = function(expect) {
 			return [x];
 		}, (fn, ...args) => {
 			if(args.length === 1) {
-				return fn.call(this, args[0]);
+				return fn.call(null, args[0]);
 			}
 			throw Helper.badArgs();
 		});
@@ -17,7 +17,7 @@ module.exports = function(expect) {
 		return foo();
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();
@@ -27,7 +27,7 @@ module.exports = function(expect) {
 		return foo(1, 2);
 	}, (fn, ...args) => {
 		if(args.length === 0) {
-			return fn.call(this);
+			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	})).to.throw();

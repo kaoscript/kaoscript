@@ -9,7 +9,7 @@ module.exports = function() {
 	foobar.__ks_0 = function() {
 		return (() => {
 			const o = new OBJ();
-			o.foobar = Helper.function(function() {
+			o.foobar = Helper.function(() => {
 				return "";
 			}, (fn, ...args) => {
 				if(args.length === 0) {

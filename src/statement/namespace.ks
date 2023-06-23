@@ -6,8 +6,9 @@ class NamespaceDeclaration extends Statement {
 		@topNodes: Array							= []
 		@type: NamedContainerType<NamespaceType>
 		@variable: Variable
-		@typeTests									= []
-		@typeTestVariable: String
+		@tests										= []
+		@testIndex: Number							= 0
+		@testVariable: String
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, NamespaceScope.new(scope))
@@ -79,19 +80,41 @@ class NamespaceDeclaration extends Statement {
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
 	} # }}}
-	addTypeTest(name: String, type: Type): String { # {{{
-		@typeTestVariable ??= @getTypeTestVariable()
+	addTypeTest(name: String, type: Type): Void { # {{{
+		@testVariable ??= @getTypeTestVariable()
 
-		@typeTests.push({ name, type })
+		@tests.push({ name, type })
 
-		return `\(@typeTestVariable).is\(name)`
+		// return {
+		// 	holder: @testVariable
+		// 	path: `.is\(name)`
+		// }
+		type.setTestName(`\(@testVariable).is\(name)`)
 	} # }}}
 	authority() => this
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
 	} # }}}
 	export(name: String, variable) { # {{{
-		@type.addProperty(name, variable.getDeclaredType())
+		var type = variable.getDeclaredType()
+
+		if type.hasTest() {
+			var clone = type.clone()
+
+			// clone.type()._typeTest.holder = `\(@name).__ksType`
+
+			// clone.type()._typeTest.path = `[\(@testIndex)]`
+			// clone.type()._typeTest.index = @testIndex
+			clone.setTestName(`\(@name).__ksType[\(@testIndex)]`)
+			clone.setTestIndex(@testIndex)
+
+			@testIndex += 1
+
+			@type.addProperty(name, clone)
+		}
+		else {
+			@type.addProperty(name, type)
+		}
 
 		@exports[name] = variable
 	} # }}}
@@ -111,12 +134,33 @@ class NamespaceDeclaration extends Statement {
 	registerMacro(name, macro) { # {{{
 		@scope.addMacro(name, macro)
 	} # }}}
-	toExportFragements(fragments) { # {{{
+	toExportFragments(fragments) { # {{{
 		var line = fragments.newLine().code('return ')
 		var object = line.newObject()
 
 		for var variable, name of @exports {
-			variable.getDeclaredType().toExportFragment(object, name, variable)
+			var type = variable.getDeclaredType()
+
+			type.toExportFragment(object, name, variable)
+		}
+
+		if @testIndex > 0 {
+			var line = object.newLine().code(`__ksType: [`)
+			var mut index = 0
+
+			for var variable, name of @exports {
+				var type = variable.getDeclaredType()
+
+				if type.hasTest() {
+					line.code($comma) if index > 0
+
+					line.code(type.getTestName())
+
+					index += 1
+				}
+			}
+
+			line.code(']').done()
 		}
 
 		object.done()
@@ -126,11 +170,11 @@ class NamespaceDeclaration extends Statement {
 		var line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		var block = line.newBlock()
 
-		if #@typeTests {
-			var line = block.newLine().code(`\($runtime.immutableScope(this))\(@typeTestVariable) = `)
+		if #@tests {
+			var line = block.newLine().code(`\($runtime.immutableScope(this))\(@testVariable) = `)
 			var object = line.newObject()
 
-			for var { type, name } in @typeTests {
+			for var { type, name } in @tests {
 				var line = object.newLine().code(`is\(name): `)
 
 				type.toTestFunctionFragments(line, this, TestFunctionMode.DEFINE)
@@ -150,7 +194,7 @@ class NamespaceDeclaration extends Statement {
 			block.compile(statement)
 		}
 
-		@toExportFragements(block)
+		@toExportFragments(block)
 
 		block.done()
 		line.code(')').done()

@@ -2,6 +2,7 @@ class IfExpression extends Expression {
 	private late {
 		@bindingScope: Scope
 		@bindingVariable: Expression?
+		@cascade: Boolean						= false
 		@condition
 		@declaration: VariableDeclaration
 		@declarator
@@ -9,7 +10,7 @@ class IfExpression extends Expression {
 		@hasBinding: Boolean					= false
 		@hasCondition: Boolean					= true
 		@hasDeclaration: Boolean				= false
-		@inline: Boolean
+		@inline: Boolean						= false
 		@insitu: Boolean						= false
 		@type: Type
 		@valueName: String?						= null
@@ -34,7 +35,7 @@ class IfExpression extends Expression {
 	override analyse() { # {{{
 		@initiate()
 
-		if @data.whenTrue.statements.length == @data.whenFalse.statements.length == 1 {
+		if !@cascade && @data.whenTrue.statements.length == @data.whenFalse.statements?.length == 1 {
 			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.PickStatement
 		}
 
@@ -60,11 +61,13 @@ class IfExpression extends Expression {
 				}
 			}
 
-			if @insitu {
-				statement.addAfterward(this)
-			}
-			else {
-				statement.addBeforehand(this)
+			if !@cascade {
+				if @insitu {
+					statement.addAfterward(this)
+				}
+				else {
+					statement.addBeforehand(this)
+				}
 			}
 		}
 
@@ -100,10 +103,10 @@ class IfExpression extends Expression {
 
 		@scope.line(@data.whenFalse.start.line)
 		@whenFalseScope = @newScope(@bindingScope, ScopeType.InlineBlock)
+
 		if @data.whenFalse.kind == NodeKind.IfExpression {
 			@whenFalseExpression = $compile.expression(@data.whenFalse, this, @whenFalseScope)
 			@whenFalseExpression.setCascade(true)
-			@whenFalseExpression.initiate()
 			@whenFalseExpression.analyse()
 		}
 		else {
@@ -184,6 +187,7 @@ class IfExpression extends Expression {
 	assignTempVariables(scope: Scope) => @statement().assignTempVariables(scope)
 	getValueName() => @valueName
 	isComputed() => true
+	isExit() => @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInline() => @inline
 	isInSituStatement() => @insitu
 	isUsingVariable(name) => @condition?.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
@@ -194,6 +198,7 @@ class IfExpression extends Expression {
 
 		return variables
 	} # }}}
+	setCascade(@cascade)
 	toFragments(fragments, mode) { # {{{
 		if @inline {
 			if @hasDeclaration {
@@ -215,8 +220,7 @@ class IfExpression extends Expression {
 				}
 			}
 			else {
-				fragments
-					.wrapCondition(@condition)
+				fragments.wrapCondition(@condition)
 			}
 
 			fragments
@@ -281,7 +285,7 @@ class IfExpression extends Expression {
 
 		fragments.compile(@whenTrueExpression, mode)
 
-		if @whenFalseExpression is IfStatement {
+		if @whenFalseExpression is IfExpression {
 			fragments.step().code('else ')
 
 			@whenFalseExpression.toIfFragments(fragments, mode)

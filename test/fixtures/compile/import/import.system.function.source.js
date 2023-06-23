@@ -27,7 +27,7 @@ module.exports = function() {
 				return 42;
 			}, (fn, ...args) => {
 				if(args.length === 0) {
-					return fn.call(this);
+					return fn.call(null);
 				}
 				throw Helper.badArgs();
 			});

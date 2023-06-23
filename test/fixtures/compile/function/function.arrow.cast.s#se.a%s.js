@@ -20,7 +20,7 @@ module.exports = function() {
 		const t0 = Type.isString;
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return fn.call(this, args[0]);
+				return fn.call(null, args[0]);
 			}
 		}
 		throw Helper.badArgs();
