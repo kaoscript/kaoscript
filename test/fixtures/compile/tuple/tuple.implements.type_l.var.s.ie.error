@@ -1,0 +1,1 @@
+SyntaxException: The variable "0" doesn't match the one of "TypeA" (fixtures/compile/tuple/tuple.implements.type_l.var.s.ie.ks:4)

@@ -15,6 +15,12 @@ class StructType extends Type {
 				if ?data.extends {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
+
+				if ?data.implements {
+					for var interface in data.implements {
+						value.addInterface(Type.import(interface, metadata, references, alterations, queue, scope, node).discardReference())
+					}
+				}
 			})
 
 			return value.flagComplete()
@@ -27,10 +33,17 @@ class StructType extends Type {
 		@extends: NamedType<StructType>?		= null
 		@fields: StructFieldType{}				= {}
 		@function: FunctionType?				= null
+		@implementing: Boolean					= false
+		@interfaces	: NamedType[]				= []
 	}
 	addField(field: StructFieldType) { # {{{
 		@fields[field.name()] = field
 		@count += 1
+	} # }}}
+	addInterface(type: NamedType) { # {{{
+		@implementing = true
+
+		@interfaces.push(type)
 	} # }}}
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
@@ -62,6 +75,10 @@ class StructType extends Type {
 
 		if @extending {
 			export.extends = @extends.metaReference(references, indexDelta, mode, module)
+		}
+
+		if @implementing {
+			export.implements = [interface.metaReference(references, indexDelta, mode, module) for var interface in @interfaces]
 		}
 
 		return export
@@ -140,6 +157,7 @@ class StructType extends Type {
 		return false
 	} # }}}
 	isExtending() => @extending
+	isImplementing() => @implementing
 	override isStruct() => true
 	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
 		if value.name() == 'Struct' {
@@ -207,6 +225,7 @@ class StructType extends Type {
 
 		return list
 	} # }}}
+	listInterfaces() => @interfaces
 	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { # {{{
 		var fields = @getAllFieldsMap()
 		var count = @count()
@@ -474,6 +493,7 @@ class StructFieldType extends Type {
 	} # }}}
 	override toVariations(variations)
 	type() => @type
+	type(@type): this
 
 	proxy @type {
 		isSubsetOf

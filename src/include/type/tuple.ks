@@ -8,6 +8,12 @@ class TupleType extends Type {
 					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
+				if ?data.implements {
+					for var interface in data.implements {
+						value.addInterface(Type.import(interface, metadata, references, alterations, queue, scope, node).discardReference())
+					}
+				}
+
 				for var type in data.fields {
 					value.addField(TupleFieldType.import(type, metadata, references, alterations, queue, scope, node))
 				}
@@ -26,6 +32,8 @@ class TupleType extends Type {
 		@fieldsByIndex: Object<TupleFieldType>	= {}
 		@fieldsByName: Object<TupleFieldType>	= {}
 		@function: FunctionType?				= null
+		@implementing: Boolean					= false
+		@interfaces	: NamedType[]				= []
 	}
 	addField(field: TupleFieldType): Void { # {{{
 		if field.isNamed() {
@@ -37,6 +45,11 @@ class TupleType extends Type {
 		@fields.push(field)
 
 		@length += 1
+	} # }}}
+	addInterface(type: NamedType) { # {{{
+		@implementing = true
+
+		@interfaces.push(type)
 	} # }}}
 	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
 		if @assessment == null {
@@ -60,6 +73,10 @@ class TupleType extends Type {
 
 		if @extending {
 			export.extends = @extends.metaReference(references, indexDelta, mode, module)
+		}
+
+		if @implementing {
+			export.implements = [interface.metaReference(references, indexDelta, mode, module) for var interface in @interfaces]
 		}
 
 		return export
@@ -142,6 +159,7 @@ class TupleType extends Type {
 		}
 	} # }}}
 	isExtending() => @extending
+	isImplementing() => @implementing
 	override isTuple() => true
 	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
 		for var type, index in value.properties() {
@@ -199,6 +217,7 @@ class TupleType extends Type {
 
 		return list
 	} # }}}
+	listInterfaces() => @interfaces
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [@toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
 	override toFragments(fragments, node) { # {{{
@@ -260,4 +279,10 @@ class TupleFieldType extends Type {
 	} # }}}
 	override toVariations(variations)
 	type() => @type
+	type(@type): this
+
+	proxy @type {
+		isSubsetOf
+		isAssignableToVariable
+	}
 }

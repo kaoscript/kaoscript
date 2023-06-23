@@ -47,6 +47,7 @@ class AliasType extends Type {
 			@testIndex if ?@testIndex
 		}
 	} # }}}
+	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String): Type => @type.getProperty(name)
 	getTestIndex() => @testIndex
 	getTestName() => @type.getTestName()
@@ -74,12 +75,13 @@ class AliasType extends Type {
 	isUnion() => @type?.isUnion()
 	listFunctions(name: String): Array => @type.listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
-	listMissingProperties(class: ClassType) => @type.listMissingProperties(class)
+	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
 	matchContentOf(value: Type): Boolean => @type.matchContentOf(value)
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { # {{{
 		return [@toMetadata(references, indexDelta, mode, module), name]
 	} # }}}
 	parameter() => @type.parameter()
+	properties() => @type.properties()
 	reduce(type: Type) => @type.reduce(type)
 	setNullable(nullable: Boolean) { # {{{
 		throw NotImplementedException.new()

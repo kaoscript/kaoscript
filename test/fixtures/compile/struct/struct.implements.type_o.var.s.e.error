@@ -1,0 +1,1 @@
+SyntaxException: Struct "StructA" doesn't implement the following field: "name: String" of the type TypeA (fixtures/compile/struct/struct.implements.type_o.var.s.e.ks:5)

@@ -543,6 +543,23 @@ class ObjectType extends Type {
 
 		return { fields, functions }
 	} # }}}
+	listMissingProperties(struct: StructType) { # {{{
+		var fields = {}
+		var functions = {}
+
+		for var type, name of @properties {
+			if var variable ?= struct.getProperty(name) {
+				unless variable.isSubsetOf(type, MatchingMode.Default) {
+					fields[name] = type
+				}
+			}
+			else {
+				fields[name] = type
+			}
+		}
+
+		return { fields, functions }
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isObject() {
 			return true

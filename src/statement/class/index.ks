@@ -420,7 +420,7 @@ class ClassDeclaration extends Statement {
 					var notImplemented = interface.listMissingProperties(@class)
 
 					if #notImplemented.fields || #notImplemented.functions {
-						SyntaxException.throwMissingProperties(@name, interface, notImplemented, this)
+						SyntaxException.throwMissingProperties('Class', @name, interface, notImplemented, this)
 					}
 				}
 			}

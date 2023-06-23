@@ -1,0 +1,1 @@
+SyntaxException: The interface "TypeA" is not an array (fixtures/compile/tuple/tuple.implements.type_uise.ks:3)

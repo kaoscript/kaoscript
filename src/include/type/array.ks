@@ -428,6 +428,23 @@ class ArrayType extends Type {
 	} # }}}
 	isTestingProperties() => @testProperties
 	length() => @length
+	listMissingProperties(tuple: TupleType) { # {{{
+		var fields = {}
+		var functions = {}
+
+		for var type, index in @properties {
+			if var variable ?= tuple.getProperty(index) {
+				unless variable.isSubsetOf(type, MatchingMode.Default) {
+					fields[index] = type
+				}
+			}
+			else {
+				fields[index] = type
+			}
+		}
+
+		return { fields, functions }
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isArray() {
 			return true

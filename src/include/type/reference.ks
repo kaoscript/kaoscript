@@ -1018,7 +1018,7 @@ class ReferenceType extends Type {
 	isVoid() => @name == 'Void' || @type().isVoid()
 	listFunctions(name: String): Array => @type().listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type().listFunctions(name, type, mode)
-	listMissingProperties(class: ClassType) => @type().listMissingProperties(class)
+	listMissingProperties(class: ClassType | StructType | TupleType) => @type().listMissingProperties(class)
 	matchContentOf(value: Type) { # {{{
 		if this == value {
 			return true

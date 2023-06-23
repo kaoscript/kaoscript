@@ -5,6 +5,7 @@ class TupleDeclaration extends Statement {
 		@extendsType: NamedType<TupleType>
 		@fields: Array<TupleFieldDeclaration>	= []
 		@function: TupleFunction
+		@implementing: Boolean					= false
 		@name: String
 		@tuple: TupleType
 		@type: NamedType<TupleType>
@@ -57,10 +58,48 @@ class TupleDeclaration extends Statement {
 			@tuple.extends(@extendsType)
 		}
 
+		if ?@data.implements {
+			@implementing = true
+
+			for var implement in @data.implements {
+				var name = $ast.toIMString(implement)
+
+				if name == @name {
+					SyntaxException.throwInheritanceLoop(@name, this)
+				}
+
+				if var type ?= Type.fromAST(implement, this) {
+					if type.isAlias() {
+						unless type.isArray() {
+							SyntaxException.throwNotArrayInterface(name, this)
+						}
+					}
+					else {
+						throw NotImplementedException.new(this)
+					}
+
+					@tuple.addInterface(type)
+				}
+				else {
+					ReferenceException.throwNotDefined(name, this)
+				}
+			}
+		}
+
 		@function.prepare()
 
 		for var field in @fields {
 			@tuple.addField(field.type())
+		}
+
+		if @implementing {
+			for var interface in @tuple.listInterfaces() {
+				var notImplemented = interface.listMissingProperties(@tuple)
+
+				if #notImplemented.fields {
+					SyntaxException.throwMissingProperties('Tuple', @name, interface, notImplemented, this)
+				}
+			}
 		}
 
 		@tuple.flagComplete()
@@ -76,6 +115,8 @@ class TupleDeclaration extends Statement {
 	fields() => @fields
 	isEnhancementExport() => true
 	isExtending() => @extending
+	isImplementing() => @implementing
+	listInterfaces() => @tuple.listInterfaces()
 	toArrayFragments(fragments, mode) { # {{{
 		if @extending {
 			var mut varname = '_'
@@ -143,6 +184,7 @@ class TupleDeclaration extends Statement {
 
 		line.code(')').done()
 	} # }}}
+	type() => @type
 }
 
 class TupleFunction extends AbstractNode {
@@ -262,6 +304,21 @@ class TupleFieldDeclaration extends AbstractNode {
 
 			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
+			}
+		}
+
+		if @parent.isImplementing() {
+			for var interface in @parent.listInterfaces() {
+				if var property ?= interface.getProperty(@index) {
+					if @type.type().isExplicit() {
+						unless @type.isSubsetOf(property, MatchingMode.Default) {
+							SyntaxException.throwUnmatchVariable(@parent.type(), interface, @index, this)
+						}
+					}
+					else {
+						@type.type(property)
+					}
+				}
 			}
 		}
 	} # }}}

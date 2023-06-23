@@ -6,6 +6,7 @@ class StructDeclaration extends Statement {
 		@extendsType: NamedType<StructType>
 		@fields: Array<StructFieldDeclaration>	= []
 		@function: StructFunction
+		@implementing: Boolean					= false
 		@name: String
 		@struct: StructType
 		@type: NamedType<StructType>
@@ -59,10 +60,48 @@ class StructDeclaration extends Statement {
 			@struct.extends(@extendsType)
 		}
 
+		if ?@data.implements {
+			@implementing = true
+
+			for var implement in @data.implements {
+				var name = $ast.toIMString(implement)
+
+				if name == @name {
+					SyntaxException.throwInheritanceLoop(@name, this)
+				}
+
+				if var type ?= Type.fromAST(implement, this) {
+					if type.isAlias() {
+						unless type.isObject() {
+							SyntaxException.throwNotObjectInterface(name, this)
+						}
+					}
+					else {
+						throw NotImplementedException.new(this)
+					}
+
+					@struct.addInterface(type)
+				}
+				else {
+					ReferenceException.throwNotDefined(name, this)
+				}
+			}
+		}
+
 		@function.prepare()
 
 		for var field in @fields {
 			@struct.addField(field.type())
+		}
+
+		if @implementing {
+			for var interface in @struct.listInterfaces() {
+				var notImplemented = interface.listMissingProperties(@struct)
+
+				if #notImplemented.fields {
+					SyntaxException.throwMissingProperties('Struct', @name, interface, notImplemented, this)
+				}
+			}
 		}
 
 		@struct.flagComplete()
@@ -78,6 +117,8 @@ class StructDeclaration extends Statement {
 	fields() => @fields
 	isEnhancementExport() => true
 	isExtending() => @extending
+	isImplementing() => @implementing
+	listInterfaces() => @struct.listInterfaces()
 	toObjectFragments(fragments, mode) { # {{{
 		if !@extending && @fields.length == 0 {
 			fragments.line(`return new \($runtime.object(this))`)
@@ -148,6 +189,7 @@ class StructDeclaration extends Statement {
 
 		line.code(')').done()
 	} # }}}
+	type() => @type
 }
 
 class StructFunction extends AbstractNode {
@@ -259,6 +301,21 @@ class StructFieldDeclaration extends AbstractNode {
 
 			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
+			}
+		}
+
+		if @parent.isImplementing() {
+			for var interface in @parent.listInterfaces() {
+				if var property ?= interface.getProperty(@data.name.name) {
+					if @type.type().isExplicit() {
+						unless @type.isSubsetOf(property, MatchingMode.Default) {
+							SyntaxException.throwUnmatchVariable(@parent.type(), interface, @name, this)
+						}
+					}
+					else {
+						@type.type(property)
+					}
+				}
 			}
 		}
 	} # }}}

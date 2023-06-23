@@ -83,6 +83,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
+	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => `__ks_\(@name)`
 	getSealedPath() { # {{{
@@ -359,7 +360,7 @@ class NamedType extends Type {
 	isVirtual() => $virtuals[@name] ?? false
 	listFunctions(name: String): Array => @type.listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
-	listMissingProperties(class: ClassType) => @type.listMissingProperties(class)
+	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
 	majorOriginal() => @type.majorOriginal()
 	matchClassName(that: Type?) { # {{{
 		if that == null {
@@ -503,6 +504,7 @@ class NamedType extends Type {
 			return @name
 		}
 	} # }}}
+	properties() => @type.properties()
 	reduce(type: Type) { # {{{
 		if @type.isReducible() {
 			return @type.reduce(type)

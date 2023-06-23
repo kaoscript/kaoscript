@@ -171,7 +171,7 @@ export class NotSupportedException extends Exception {
 		throw(...arguments): Never ~ NotSupportedException { # {{{
 			throw NotSupportedException.new(...arguments)
 		} # }}}
-		throwBitmaskLength(name, length, node): Never ~ ReferenceException { # {{{
+		throwBitmaskLength(name, length, node): Never ~ NotSupportedException { # {{{
 			throw ReferenceException.new(`Bitmask of length \(length) aren't supported`, node)
 		} # }}}
 	}
@@ -589,8 +589,8 @@ export class SyntaxException extends Exception {
 		throwMissingElseClause(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The 'match' is missing the "else" clause`, node)
 		} # }}}
-		throwMissingProperties(name, interface, { fields, functions }, node): Never ~ SyntaxException { # {{{
-			var mut message = `Class "\(name)" doesn't implement `
+		throwMissingProperties(kind, name, interface, { fields, functions }, node): Never ~ SyntaxException { # {{{
+			var mut message = `\(kind) "\(name)" doesn't implement `
 
 			if #fields {
 				var fragments = []
@@ -672,6 +672,9 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwNotAbstractClass(className, methodName, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Method "\(methodName)" is abstract but the class "\(className)" is not`, node)
+		} # }}}
+		throwNotArrayInterface(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The interface "\(name)" is not an array`, node)
 		} # }}}
 		throwNotBinary(tag, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Binary file can't use "\(tag)" statement`, node)

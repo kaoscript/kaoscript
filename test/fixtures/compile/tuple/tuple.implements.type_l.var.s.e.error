@@ -1,0 +1,1 @@
+SyntaxException: Tuple "TupleA" doesn't implement the following field: "0: String" of the type TypeA (fixtures/compile/tuple/tuple.implements.type_l.var.s.e.ks:3)

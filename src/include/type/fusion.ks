@@ -170,7 +170,7 @@ class FusionType extends Type {
 
 		return result
 	} # }}}
-	listMissingProperties(class: ClassType) { # {{{
+	listMissingProperties(class: ClassType | StructType | TupleType) { # {{{
 		var mut fields = {}
 		var mut functions = {}
 

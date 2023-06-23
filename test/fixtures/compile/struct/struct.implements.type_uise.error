@@ -1,0 +1,1 @@
+SyntaxException: The interface "TypeA" is not an object (fixtures/compile/struct/struct.implements.type_uise.ks:3)

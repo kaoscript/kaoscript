@@ -1,0 +1,1 @@
+SyntaxException: The variable "name" doesn't match the one of "TypeA" (fixtures/compile/struct/struct.implements.type_o.var.s.ie.ks:6)
