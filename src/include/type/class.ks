@@ -4,19 +4,7 @@ enum Accessibility {
 	Protected
 	Public
 
-	// TODO!
-	// static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
-	// 	return match source {
-	// 		.Public => false
-	// 		.Protected => target == .Public
-	// 		.Private => target == .Protected | .Public
-	// 		.Internal => target == .Private | .Protected | .Public
-	// 	}
-	// } # }}}
-}
-
-var $accessibility = {
-	isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
+	static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
 		return match source {
 			.Public => false
 			.Protected => target == .Public

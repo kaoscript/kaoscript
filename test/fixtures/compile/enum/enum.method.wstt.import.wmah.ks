@@ -1,4 +1,4 @@
-import './enum.method.wstt.default.ks'
+import './enum.method.wstt.call.se.ks'
 
 var day = Weekday.fromString('monday')
 

@@ -699,7 +699,7 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with result {
-							@addCallee(EnumMethodCallee.new(@data, @object, @property, result.possibilities, this))
+							@addCallee(EnumMethodCallee.new(@data, @object.type(), @property, result.possibilities, this))
 						}
 						is PreciseCallMatchResult with { matches } {
 							if matches.length == 1 {
@@ -714,7 +714,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), @arguments, this)
 							}
 							else {
-								@addCallee(EnumMethodCallee.new(@data, @object, @property, null, this))
+								@addCallee(EnumMethodCallee.new(@data, @object.type(), @property, null, this))
 							}
 						}
 					}

@@ -31,8 +31,7 @@ class ClassMethodType extends FunctionType {
 			var type = ClassMethodType.new(scope)
 
 			type._index = data.index
-			// TODO!
-			type._access = Accessibility.__ks_from(data.access)
+			type._access = Accessibility(data.access) ?? .Public
 			type._sealed = data.sealed
 			type._async = data.async
 			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
@@ -148,8 +147,8 @@ class ClassMethodType extends FunctionType {
 	isForked() => @forked
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isInstance() => @instance
-	isLessAccessibleThan(target: ClassMethodType) => $accessibility.isLessAccessibleThan(@access, target.access())
-	isLessAccessibleThan(target: FunctionType) => $accessibility.isLessAccessibleThan(@access, Accessibility.Public)
+	isLessAccessibleThan(target: ClassMethodType) => Accessibility.isLessAccessibleThan(@access, target.access())
+	isLessAccessibleThan(target: FunctionType) => Accessibility.isLessAccessibleThan(@access, Accessibility.Public)
 	isMethod() => true
 	isOverflowing(methods: Array<ClassMethodType>) { # {{{
 		var mode = MatchingMode.SimilarParameter + MatchingMode.MissingParameter + MatchingMode.ShiftableParameters + MatchingMode.RequireAllParameters

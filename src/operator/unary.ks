@@ -83,7 +83,10 @@ class UnaryOperatorImplicit extends Expression {
 		var late type: Type
 
 		match @parent {
-			is BinaryOperatorAddition, BinaryOperatorSubtraction, PolyadicOperatorAddition, PolyadicOperatorSubtraction {
+			is AssignmentOperatorAddition | AssignmentOperatorSubtraction | BinaryOperatorAddition | BinaryOperatorSubtraction | PolyadicOperatorAddition | PolyadicOperatorSubtraction {
+				type = target
+			}
+			is AssignmentOperatorEquals | BinaryOperatorNullCoalescing {
 				type = target
 			}
 			is BinaryOperatorMatch {
@@ -131,10 +134,11 @@ class UnaryOperatorImplicit extends Expression {
 
 				type = Type.union(@scope, ...types)
 			}
-			is AssignmentOperatorExpression | ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
+			is ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
 				type = target
 			}
 			else {
+				echo(@parent)
 				throw NotImplementedException.new()
 			}
 		}

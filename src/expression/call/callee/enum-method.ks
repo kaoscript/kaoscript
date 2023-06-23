@@ -1,8 +1,9 @@
 class EnumMethodCallee extends Callee {
 	private {
 		@enum: NamedType<EnumType>
-		@expression
+		@expression?
 		@flatten: Boolean
+		@instance: Boolean
 		@methodName: String
 		@methods: Array<FunctionType>?
 		@scope: ScopeKind
@@ -11,12 +12,7 @@ class EnumMethodCallee extends Callee {
 	constructor(@data, @enum, @methodName, @methods, node) { # {{{
 		super(data)
 
-		@expression = MemberExpression.new(data.callee, node, node.scope(), node._object)
-		@expression.analyse()
-		@expression.prepare(AnyType.NullableUnexplicit)
-
 		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		if #methods {
@@ -33,9 +29,19 @@ class EnumMethodCallee extends Callee {
 		else {
 			@type = @expression.type()
 		}
+
+		@instance = @methods[0].isInstance()
+
+		if @instance {
+			@expression = MemberExpression.new(data.callee, node, node.scope(), node._object)
+			@expression.analyse()
+			@expression.prepare(AnyType.NullableUnexplicit)
+
+			@nullableProperty = @expression.isNullable()
+		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind.This))
+		@expression?.acquireReusable(@nullable || (@flatten && @scope == ScopeKind.This))
 	} # }}}
 	override hashCode() => null
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
@@ -53,7 +59,7 @@ class EnumMethodCallee extends Callee {
 		}
 	} # }}}
 	releaseReusable() { # {{{
-		@expression.releaseReusable()
+		@expression?.releaseReusable()
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
@@ -67,12 +73,21 @@ class EnumMethodCallee extends Callee {
 				ScopeKind.This {
 					fragments.code(`\(@enum.name()).\(@methodName)(`)
 
-					fragments.wrap(@expression._object, mode)
+					if @instance {
+						fragments.wrap(@expression._object, mode)
 
-					for var argument, index in node.arguments() {
-						fragments.code($comma)
+						for var argument, index in node.arguments() {
+							fragments.code($comma)
 
-						argument.toArgumentFragments(fragments, mode)
+							argument.toArgumentFragments(fragments, mode)
+						}
+					}
+					else {
+						for var argument, index in node.arguments() {
+							fragments.code($comma) if index != 0
+
+							argument.toArgumentFragments(fragments, mode)
+						}
 					}
 				}
 			}
@@ -82,7 +97,7 @@ class EnumMethodCallee extends Callee {
 		NotImplementedException.throw(node)
 	} # }}}
 	translate() { # {{{
-		@expression.translate()
+		@expression?.translate()
 	} # }}}
 	type() => @type
 }

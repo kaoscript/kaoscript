@@ -84,7 +84,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			if @parent.isImplementing() {
 				for var interface in @parent.listInterfaces() {
 					if var property ?= interface.getProperty(@data.name.name) {
-						if $accessibility.isLessAccessibleThan(@type.access(), Accessibility.Public) {
+						if Accessibility.isLessAccessibleThan(@type.access(), Accessibility.Public) {
 							SyntaxException.throwLessAccessibleVariable(@parent.type(), @name, this)
 						}
 

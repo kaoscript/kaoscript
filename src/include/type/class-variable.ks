@@ -50,8 +50,7 @@ class ClassVariableType extends Type {
 			var data = index
 			var type = ClassVariableType.new(scope, Type.import(data.type, metadata, references, alterations, queue, scope, node))
 
-			// TODO!
-			type._access = Accessibility.__ks_from(data.access)
+			type._access = Accessibility(data.access) ?? .Public
 			type._default = data.default
 			type._immutable = data.immutable
 			type._lateInit = data.lateInit
