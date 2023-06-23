@@ -199,12 +199,6 @@ bitmask TypeOrigin {
 	RequireOrExtern
 }
 
-// type TypeTest = {
-// 	holder: String
-// 	path: String
-// 	index: Number?
-// }
-
 abstract class Type {
 	private {
 		@alien: Boolean					= false

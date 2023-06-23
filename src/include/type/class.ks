@@ -6,35 +6,22 @@ enum Accessibility {
 
 	// TODO!
 	// static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
+	// 	return match source {
+	// 		.Public => false
+	// 		.Protected => target == .Public
+	// 		.Private => target == .Protected | .Public
+	// 		.Internal => target == .Private | .Protected | .Public
+	// 	}
 	// } # }}}
 }
 
 var $accessibility = {
 	isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
-		// TODO!
-		// return match source {
-		// 	.Public => false
-		// 	.Protected => target == .Public
-		// 	.Private => target == .Protected | .Public
-		// 	.Internal => target == .Private | .Protected | .Public
-		// }
-		match source {
-			// TODO!
-			// .Public {
-			// 	return false
-			// }
-			.Protected {
-				return target == .Public
-			}
-			.Private {
-				return target == .Protected | .Public
-			}
-			.Internal {
-				return target == .Private | .Protected | .Public
-			}
-			else {
-				return false
-			}
+		return match source {
+			.Public => false
+			.Protected => target == .Public
+			.Private => target == .Protected | .Public
+			.Internal => target == .Private | .Protected | .Public
 		}
 	} # }}}
 }

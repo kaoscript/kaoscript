@@ -347,9 +347,7 @@ class TopicReference extends Expression {
 			@expression = $compile.expression(@data, this)
 			@expression.analyse()
 
-			// TODO!
-			// @state += .Analyse
-			@state += NodeState.Analyse
+			@state += .Analyse
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{

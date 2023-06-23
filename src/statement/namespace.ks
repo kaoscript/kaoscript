@@ -85,10 +85,6 @@ class NamespaceDeclaration extends Statement {
 
 		@tests.push({ name, type })
 
-		// return {
-		// 	holder: @testVariable
-		// 	path: `.is\(name)`
-		// }
 		type.setTestName(`\(@testVariable).is\(name)`)
 	} # }}}
 	authority() => this

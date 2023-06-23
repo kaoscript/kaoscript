@@ -33,26 +33,14 @@ class ImplementDeclaration extends Statement {
 								@properties.push(property)
 							}
 							NodeKind.MethodDeclaration {
-								// TODO!
-								// var property = if class.isConstructor(data.name.name) {
-								// 	pick ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
-								// }
-								// else if class.isDestructor(data.name.name) {
-								// 	pick ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
-								// }
-								// else {
-								// 	pick ImplementUnifiedClassMethodDeclaration.new(data, declaration, this)
-								// }
-								var late property
-
-								if class.isConstructor(data.name.name) {
-									property = ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
+								var property = if class.isConstructor(data.name.name) {
+									pick ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
 								}
 								else if class.isDestructor(data.name.name) {
-									property = ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
+									pick ImplementUnifiedClassDestructorDeclaration.new(data, declaration)
 								}
 								else {
-									property = ImplementUnifiedClassMethodDeclaration.new(data, declaration, this)
+									pick ImplementUnifiedClassMethodDeclaration.new(data, declaration, this)
 								}
 
 								property.analyse()

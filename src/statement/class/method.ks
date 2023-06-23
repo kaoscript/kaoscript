@@ -92,20 +92,8 @@ namespace Method {
 			var superClass = class.extends().type()
 
 			return {
-				// TODO!
-				// match: class.extends().type().listStaticMethods
-				// TODO!
-				// match(name: String): Array => superClass.listStaticMethods(name)
-				match(name: String): Array {
-					return class.extends().type().listStaticMethods(name)
-				}
-				// TODO!
-				// matchAll: class.extends().type().listStaticMethods
-				// TODO!
-				// matchAll(name: String, type: FunctionType, mode: MatchingMode): Array => superClass.listStaticMethods(name, type, mode)
-				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
-					return class.extends().type().listStaticMethods(name, type, mode)
-				}
+				match(name: String): Array => superClass.listStaticMethods(name)
+				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array => superClass.listStaticMethods(name, type, mode)
 			}
 		}
 		else {
@@ -689,9 +677,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} # }}}
 	protected {
-		// TODO!
-		// getOveriddenMethod({ matchAll }: Method.Matcher, returnReference: Boolean) { # {{{
-		getOveriddenMethod({ matchAll }, returnReference: Boolean) { # {{{
+		getOveriddenMethod({ matchAll }: Method.Matcher, returnReference: Boolean) { # {{{
 			var mut mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreReturn + MatchingMode.MissingError
 
 			if @override {
@@ -847,9 +833,7 @@ class ClassMethodDeclaration extends Statement {
 
 			return null
 		} # }}}
-		// TODO!
-		// listOverloadedMethods({ match, matchAll }: Method.Matcher) { # {{{
-		listOverloadedMethods({ match, matchAll }) { # {{{
+		listOverloadedMethods({ match, matchAll }: Method.Matcher) { # {{{
 			if var methods ?= match(@name) {
 				for var method in methods {
 					if method.isSubsetOf(@type, MatchingMode.ExactParameter) {

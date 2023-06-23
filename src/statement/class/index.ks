@@ -215,26 +215,14 @@ class ClassDeclaration extends Statement {
 				NodeKind.MacroDeclaration {
 				}
 				NodeKind.MethodDeclaration {
-					// TODO!
-					// var declaration = if @class.isConstructor(data.name.name) {
-					// 	pick ClassConstructorDeclaration.new(data, this)
-					// }
-					// else if @class.isDestructor(data.name.name) {
-					// 	pick ClassDestructorDeclaration.new(data, this)
-					// }
-					// else {
-					// 	pick ClassMethodDeclaration.new(data, this)
-					// }
-					var late declaration
-
-					if @class.isConstructor(data.name.name) {
-						declaration = ClassConstructorDeclaration.new(data, this)
+					var declaration = if @class.isConstructor(data.name.name) {
+						pick ClassConstructorDeclaration.new(data, this)
 					}
 					else if @class.isDestructor(data.name.name) {
-						declaration = ClassDestructorDeclaration.new(data, this)
+						pick ClassDestructorDeclaration.new(data, this)
 					}
 					else {
-						declaration = ClassMethodDeclaration.new(data, this)
+						pick ClassMethodDeclaration.new(data, this)
 					}
 
 					declaration.analyse()
