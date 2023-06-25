@@ -1,6 +1,6 @@
 extern console
 
-import './extern.disclose.string.array.default'
+import './extern.disclose.string.array.default.ks'
 
 func foo(value: String) {
 	console.log(`\(value.trim())`)

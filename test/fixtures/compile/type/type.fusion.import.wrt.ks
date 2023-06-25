@@ -1,4 +1,4 @@
-import './type.fusion.export.wrt'
+import './type.fusion.export.wrt.ks'
 
 extern console
 

@@ -1,3 +1,3 @@
-import './import.system.function.filter.default'
+import './import.system.function.filter.default.ks'
 
 export template

@@ -1,1 +1,1 @@
-import '@kaoscript/test-import/src/namespace'
+import '@kaoscript/test-import/src/namespace.ks'

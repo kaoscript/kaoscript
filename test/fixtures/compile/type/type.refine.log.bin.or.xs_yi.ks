@@ -1,8 +1,8 @@
 extern console
 
-import '../_/_boolean'
-import '../_/_number'
-import '../_/_string'
+import '../_/_boolean.ks'
+import '../_/_number.ks'
+import '../_/_string.ks'
 
 func test(x): Boolean => true
 

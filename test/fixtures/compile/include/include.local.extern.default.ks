@@ -1,3 +1,3 @@
 extern x
 
-include '../extern/extern.default'
+include '../extern/extern.default.ks'

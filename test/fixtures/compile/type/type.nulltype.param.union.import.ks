@@ -1,4 +1,4 @@
-import './type.nulltype.param.union.default'
+import './type.nulltype.param.union.default.ks'
 
 foobar(42)
 foobar('White')

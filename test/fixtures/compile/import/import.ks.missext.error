@@ -1,0 +1,1 @@
+IOException: The module "@kaoscript/test-import/src/index" can't be found in the directory "/Users/baptiste/Development/Projects/Kaoscript/kaoscript/test/fixtures/compile/import" (fixtures/compile/import/import.ks.missext.ks:1)

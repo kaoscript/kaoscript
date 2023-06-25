@@ -15,7 +15,7 @@
 import {
 	'../package.json' => metadata
 	'./fs.js'
-	'path' {
+	'node:path' {
 		var sep: String
 		func basename(path: String): String
 		func dirname(path: String): String
@@ -28,12 +28,12 @@ include {
 	'@kaoscript/ast'
 	'@kaoscript/parser'
 	'@kaoscript/util'
-	'./include/error'
-	'./include/global'
-	'./include/node'
-	'./include/astmap'
+	'./include/error.ks'
+	'./include/global.ks'
+	'./include/node.ks'
+	'./include/astmap.ks'
 
-	'../registry/std/index'
+	'../registry/std/index.ks'
 }
 
 export class Compiler {

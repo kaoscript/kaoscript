@@ -1,5 +1,5 @@
 import '../_/_string.ks'
-import 'child_process' for exec
+import 'node:child_process' for exec
 
 var df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
 

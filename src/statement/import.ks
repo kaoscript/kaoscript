@@ -12,40 +12,7 @@ var $importExts = { # {{{
 	}
 } # }}}
 
-var $nodeModules = { # {{{
-	assert: true
-	buffer: true
-	child_process: true
-	cluster: true
-	constants: true
-	crypto: true
-	dgram: true
-	dns: true
-	domain: true
-	events: true
-	fs: true
-	http: true
-	https: true
-	module: true
-	net: true
-	os: true
-	path: true
-	punycode: true
-	querystring: true
-	readline: true
-	repl: true
-	stream: true
-	string_decoder: true
-	tls: true
-	tty: true
-	url: true
-	util: true
-	v8: true
-	vm: true
-	zlib: true
-} # }}}
-
-func $nodeModulesPaths(mut start) { # {{{
+func $listModulePaths(mut start) { # {{{
 	start = fs.resolve(start)
 
 	var mut prefix = '/'
@@ -127,7 +94,12 @@ abstract class Importer extends Statement {
 
 		@standardLibrary = @module().isStandardLibrary(x)
 
-		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
+		if x.startsWith('node:') {
+			unless @loadNodeModule(x) {
+				IOException.throwNotFoundModule(x, y, this)
+			}
+		}
+		else if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			if !@standardLibrary {
 				x = fs.resolve(y, x)
 
@@ -136,12 +108,12 @@ abstract class Importer extends Statement {
 				}
 			}
 
-			if !(@loadFile(x, '', null) || @loadDirectory(x, null)) {
+			unless @loadFile(x, '', null) || @loadDirectory(x, null) {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
 		else {
-			if !(@loadNodeModule(x, y) || @loadCoreModule(x)) {
+			unless @loadModule(x, y) {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
@@ -558,15 +530,9 @@ abstract class Importer extends Statement {
 		return arguments
 	} # }}}
 	getModuleName() => @moduleName
-	loadCoreModule(moduleName) { # {{{
-		if $nodeModules[moduleName] == true {
-			return @loadNodeFile(null, moduleName)
-		}
+	loadDirectory(dir, moduleName? = null, fromPackage: Boolean = false) { # {{{
+		var pkgfile = path.join(dir, 'package.json')
 
-		return false
-	} # }}}
-	loadDirectory(dir, moduleName? = null) { # {{{
-		var mut pkgfile = path.join(dir, 'package.json')
 		if fs.isFile(pkgfile) {
 			if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
 				if ?pkg.kaoscript {
@@ -584,15 +550,20 @@ abstract class Importer extends Statement {
 					}
 				}
 
-				if pkg.main is String && (@loadFile(path.join(dir, pkg.main), pkg.main, moduleName) || @loadDirectory(path.join(dir, pkg.main), moduleName)) {
+				if pkg.main is String && (@loadFile(path.join(dir, pkg.main), pkg.main, moduleName, true) || @loadDirectory(path.join(dir, pkg.main), moduleName, true)) {
 					return true
 				}
 			}
 		}
 
-		return @loadFile(path.join(dir, 'index'), 'index', moduleName)
+		if fromPackage {
+			return @loadFile(path.join(dir, 'index'), 'index', moduleName, true)
+		}
+		else {
+			return false
+		}
 	} # }}}
-	loadFile(filename, pathAddendum, moduleName? = null) { # {{{
+	loadFile(filename, pathAddendum, moduleName? = null, fromPackage: Boolean = false) { # {{{
 		if fs.isFile(filename) {
 			if filename.endsWith($extensions.source) {
 				return @loadKSFile(filename, pathAddendum, null, moduleName)
@@ -602,13 +573,15 @@ abstract class Importer extends Statement {
 			}
 		}
 
-		if fs.isFile(filename + $extensions.source) {
-			return @loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
-		}
-		else {
-			for var _, ext of require.extensions {
-				if fs.isFile(filename + ext) {
-					return @loadNodeFile(filename, moduleName)
+		if fromPackage {
+			if fs.isFile(filename + $extensions.source) {
+				return @loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
+			}
+			else {
+				for var _, ext of require.extensions {
+					if fs.isFile(filename + ext) {
+						return @loadNodeFile(filename, moduleName)
+					}
 				}
 			}
 		}
@@ -620,10 +593,6 @@ abstract class Importer extends Statement {
 
 		if moduleName == null {
 			moduleName = module.path(filename, @data.source.value) as String
-
-			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source && path.basename(filename) == path.basename(moduleName + $extensions.source) {
-				moduleName += $extensions.source
-			}
 		}
 
 		if module.compiler().isInHierarchy(filename) {
@@ -868,7 +837,20 @@ abstract class Importer extends Statement {
 
 		@variationId = compiler.toVariationId()
 	} # }}}
-	loadNodeFile(filename: String? = null, mut moduleName: String? = null) { # {{{
+	loadModule(moduleName, start) { # {{{
+		var mut dirs = $listModulePaths(start)
+
+		for var dir in dirs {
+			var file = path.join(dir, moduleName)
+
+			if @loadFile(file, '', moduleName) || @loadDirectory(file, moduleName) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	loadNodeFile(filename: String? = null, mut moduleName: String? = null, alias: String? = null) { # {{{
 		var module = @module()
 
 		var mut file: String? = null
@@ -903,27 +885,32 @@ abstract class Importer extends Statement {
 		}
 
 		if !#@data.specifiers {
-			var parts = @data.source.value.split('/')
+			if ?alias {
+				@alias = alias
+			}
+			else {
+				var parts = @data.source.value.split('/')
 
-			for var part in parts down while @alias == null when !/(?:^\.+$|^@)/.test(part) {
-				var dots = part.split('.')
-				var last = dots.length - 1
+				for var part in parts down while @alias == null when !/(?:^\.+$|^@)/.test(part) {
+					var dots = part.split('.')
+					var last = dots.length - 1
 
-				if last == 0 {
-					@alias = dots[0].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
-				}
-				else if $importExts.data[dots[last]] == true {
-					@alias = dots.slice(0, last).join('.').replace(/[-_.]+(.)/g, (m, l, ...) => l.toUpperCase())
-				}
-				else if $importExts.source[dots[last]] == true {
-					@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
-				}
-				else {
-					@alias = dots[last].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
+					if last == 0 {
+						@alias = dots[0].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
+					}
+					else if $importExts.data[dots[last]] {
+						@alias = dots.slice(0, last).join('.').replace(/[-_.]+(.)/g, (m, l, ...) => l.toUpperCase())
+					}
+					else if $importExts.source[dots[last]] {
+						@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
+					}
+					else {
+						@alias = dots[last].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
+					}
 				}
 			}
 
-			if @alias == null {
+			unless ?@alias {
 				SyntaxException.throwUnnamedWildcardImport(this)
 			}
 
@@ -1005,18 +992,10 @@ abstract class Importer extends Statement {
 
 		return true
 	} # }}}
-	loadNodeModule(moduleName, start) { # {{{
-		var mut dirs = $nodeModulesPaths(start)
+	loadNodeModule(moduleName) { # {{{
+		var name = moduleName.substr(5)
 
-		for var dir in dirs {
-			var file = path.join(dir, moduleName)
-
-			if @loadFile(file, '', moduleName) || @loadDirectory(file, moduleName) {
-				return true
-			}
-		}
-
-		return false
+		return @loadNodeFile(null, name, name)
 	} # }}}
 	readMetadata(file) { # {{{
 		try {

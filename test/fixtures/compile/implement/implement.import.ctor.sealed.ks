@@ -1,4 +1,4 @@
-import './implement.ctor.wseal.default'
+import './implement.ctor.wseal.default.ks'
 
 var d1 = Date.new()
 var d2 = Date.new([2000, 1, 1])

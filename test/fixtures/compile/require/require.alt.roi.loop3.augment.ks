@@ -1,4 +1,4 @@
-require|import './require.alt.roi.loop3.genesis'
+require|import './require.alt.roi.loop3.genesis.ks'
 
 type NS = Number | String
 

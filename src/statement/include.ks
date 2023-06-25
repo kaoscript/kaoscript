@@ -14,7 +14,7 @@ class IncludeDeclaration extends Statement {
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
 
-				if fs.isFile(x) || fs.isFile((x += $extensions.source, x)) {
+				if fs.isFile(x) {
 					if x == @file() {
 						SyntaxException.throwIncludeSelf(this)
 					}
@@ -32,16 +32,10 @@ class IncludeDeclaration extends Statement {
 				var mut moduleVersion = ''
 
 				var mut nf = true
-				for var dir in $nodeModulesPaths(directory) while nf {
+				for var dir in $listModulePaths(directory) while nf {
 					x = fs.resolve(dir, file)
 
 					if fs.isFile(x) {
-						nf = false
-					}
-					else if fs.isFile(x + $extensions.source) {
-						x += $extensions.source
-						modulePath += $extensions.source
-
 						nf = false
 					}
 					else {
@@ -62,31 +56,12 @@ class IncludeDeclaration extends Statement {
 
 										nf = false
 									}
-									else if fs.isFile(path.join(x, pkg.main + $extensions.source)) {
-										x = path.join(x, pkg.main + $extensions.source)
-										modulePath = path.join(modulePath, pkg.main + $extensions.source)
-
-										nf = false
-									}
-									else if fs.isFile(path.join(x, pkg.main, 'index' + $extensions.source)) {
-										x = path.join(x, pkg.main, 'index' + $extensions.source)
-										modulePath = path.join(modulePath, pkg.main, 'index' + $extensions.source)
-
-										nf = false
-									}
 								}
 
 								if !nf {
 									moduleVersion = pkg.version
 								}
 							}
-						}
-
-						if nf && fs.isFile(path.join(x, 'index' + $extensions.source)) {
-							x = path.join(x, 'index' + $extensions.source)
-							modulePath = path.join(modulePath, 'index' + $extensions.source)
-
-							nf = false
 						}
 					}
 				}

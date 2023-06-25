@@ -1,3 +1,3 @@
-import './object.alias.func'
+import './object.alias.func.ks'
 
 export Coord

@@ -1,6 +1,6 @@
 var PI = 3.14
 
-require|import '../_/_array' for Array
+require|import '../_/_array.ks' for Array
 
 impl Array {
 	contains(item, from = 0) { # {{{

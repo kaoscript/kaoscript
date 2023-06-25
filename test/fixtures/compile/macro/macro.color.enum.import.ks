@@ -1,4 +1,4 @@
-import '../export/export.enum.space'
+import '../export/export.enum.space.ks'
 
 class Color {
 	macro registerSpace(@expression: Object) {

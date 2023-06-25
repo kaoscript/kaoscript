@@ -1406,11 +1406,11 @@ class ClassDeclaration extends Statement {
 }
 
 include {
-	'./substitude'
-	'./variable'
-	'./constructor'
-	'./destructor'
-	'./method'
-	'./forked-method'
-	'./proxy'
+	'./substitude.ks'
+	'./variable.ks'
+	'./constructor.ks'
+	'./destructor.ks'
+	'./method.ks'
+	'./forked-method.ks'
+	'./proxy.ks'
 }

@@ -1,5 +1,5 @@
-require|import './require.alt.roi.loop3.genesis'
-require|import './require.alt.roi.loop3.augment'(...)
+require|import './require.alt.roi.loop3.genesis.ks'
+require|import './require.alt.roi.loop3.augment.ks'(...)
 
 impl Date {
 	fromSpecial() {

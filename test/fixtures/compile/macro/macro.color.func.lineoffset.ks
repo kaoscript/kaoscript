@@ -1,4 +1,4 @@
-import '../color'
+import '../color.ks'
 
 Color.registerSpace({
 	name: 'rvb',

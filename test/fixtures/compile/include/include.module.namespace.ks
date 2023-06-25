@@ -1,5 +1,5 @@
 extern console
 
-include '@kaoscript/test-import/src/namespace'
+include '@kaoscript/test-import/src/namespace.ks'
 
 console.log(ns.foo())

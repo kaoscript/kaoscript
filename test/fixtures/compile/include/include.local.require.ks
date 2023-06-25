@@ -1,3 +1,3 @@
 extern class Color
 
-include '../require/require.default'
+include '../require/require.default.ks'

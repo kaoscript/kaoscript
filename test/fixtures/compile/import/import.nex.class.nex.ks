@@ -1,5 +1,5 @@
 extern console
 
-import '../export/export.nex.class.nex'
+import '../export/export.nex.class.nex.ks'
 
 console.log(Foobar.new().quxbaz())

@@ -1,6 +1,6 @@
 extern console
 
-import '../_/_string'
+import '../_/_string.ks'
 
 func foo(x) {
 	if x is String && x.toInt() == 42 {

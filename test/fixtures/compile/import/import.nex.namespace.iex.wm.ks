@@ -1,5 +1,5 @@
 extern console
 
-import '../export/export.nex.namespace.iex'
+import '../export/export.nex.namespace.iex.ks'
 
 console.log(NS.foobar())

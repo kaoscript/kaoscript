@@ -1,6 +1,6 @@
 extern console
 
-import './macro.export.named.wa'
+import './macro.export.named.wa.ks'
 
 console.log(t5(42))
 

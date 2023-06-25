@@ -1,4 +1,4 @@
-import '../_/_array'
+import '../_/_array.ks'
 
 export namespace NS {
 	export func foo() {

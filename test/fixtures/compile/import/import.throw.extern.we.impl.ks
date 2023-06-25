@@ -1,6 +1,6 @@
 extern console
 
-import '../export/export.throw.extern.we.impl'
+import '../export/export.throw.extern.we.impl.ks'
 
 try {
 	foo()

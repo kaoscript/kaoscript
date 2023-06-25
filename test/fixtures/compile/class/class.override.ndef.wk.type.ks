@@ -1,6 +1,6 @@
 extern console
 
-import '../_/_string'
+import '../_/_string.ks'
 
 class Shape {
 	private {

@@ -1,6 +1,6 @@
 extern console
 
-import './tuple.extends.list'
+import './tuple.extends.list.ks'
 
 var triple = Triple.new('x', 0.1, true)
 

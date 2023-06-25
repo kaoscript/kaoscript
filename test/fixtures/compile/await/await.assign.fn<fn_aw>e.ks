@@ -1,6 +1,6 @@
 extern JSON
 
-import 'fs'
+import 'node:fs'
 
 async func read() {
 	var mut data = null

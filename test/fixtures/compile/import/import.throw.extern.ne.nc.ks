@@ -1,4 +1,4 @@
-import '../export/export.throw.extern.ne'
+import '../export/export.throw.extern.ne.ks'
 
 try {
 	foo()

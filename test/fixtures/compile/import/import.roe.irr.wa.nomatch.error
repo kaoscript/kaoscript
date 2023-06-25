@@ -1,1 +1,1 @@
-TypeException: The variable "Array" and the argument "Array" of the module "./import.roe.rr" aren't compatible (fixtures/compile/import/import.roe.irr.wa.nomatch.ks:3)
+TypeException: The variable "Array" and the argument "Array" of the module "./import.roe.rr.ks" aren't compatible (fixtures/compile/import/import.roe.irr.wa.nomatch.ks:3)

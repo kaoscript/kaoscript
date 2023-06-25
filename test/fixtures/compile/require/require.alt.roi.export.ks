@@ -1,3 +1,3 @@
-require|import '../_/_array'
+require|import '../_/_array.ks'
 
 export Array

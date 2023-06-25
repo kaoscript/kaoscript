@@ -1,3 +1,3 @@
-import './import.roe.rr'
+import './import.roe.rr.ks'
 
 export Array

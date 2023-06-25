@@ -1,4 +1,4 @@
-import '../implement/implement.overwrite.pi'
+import '../implement/implement.overwrite.pi.ks'
 
 func foobar(d: Date) {
 

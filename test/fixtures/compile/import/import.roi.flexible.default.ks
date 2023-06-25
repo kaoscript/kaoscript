@@ -1,1 +1,1 @@
-require|import './import.roi.flexible.module'
+require|import './import.roi.flexible.module.ks'

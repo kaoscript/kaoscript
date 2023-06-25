@@ -1,6 +1,6 @@
 class URI {
 	macro register(@scheme: String, @meta: String = 'hier_part [ "?" query ] [ "#" fragment ]') {
-		import '@kaoscript/test-import/src/index'
+		import '@kaoscript/test-import/src/index.ks'
 
 		var name = `\(scheme[0].toUpperCase())\(scheme.substr(1).toLowerCase())URI`
 

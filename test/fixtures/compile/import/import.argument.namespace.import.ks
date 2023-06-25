@@ -1,2 +1,2 @@
-import './import.argument.namespace.export'
-import './import.argument.namespace.require'(foobar)
+import './import.argument.namespace.export.ks'
+import './import.argument.namespace.require.ks'(foobar)

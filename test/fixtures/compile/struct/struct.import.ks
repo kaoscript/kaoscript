@@ -1,6 +1,6 @@
 extern console
 
-import './struct.export'
+import './struct.export.ks'
 
 var point = Point.new(0.3, 0.4)
 

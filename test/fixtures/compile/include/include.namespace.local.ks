@@ -1,3 +1,3 @@
 namespace NS {
-	include './include.default'
+	include './include.default.ks'
 }

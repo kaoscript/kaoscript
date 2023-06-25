@@ -1,3 +1,3 @@
 extern name
 
-include '../import/import.default'
+include '../import/import.default.ks'

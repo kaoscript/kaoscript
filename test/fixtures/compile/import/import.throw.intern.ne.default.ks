@@ -1,6 +1,6 @@
 extern console
 
-import '../export/export.throw.intern.ne.default'
+import '../export/export.throw.intern.ne.default.ks'
 
 try {
 	foo()

@@ -1,6 +1,6 @@
 extern console
 
-import './tuple.export.named'
+import './tuple.export.named.ks'
 
 var pair = Pair.new('x', 0.1)
 

@@ -1,6 +1,6 @@
 extern console
 
-import './macro.export.times' for times_five => t5
+import './macro.export.times.ks' for times_five => t5
 
 console.log(t5(42))
 

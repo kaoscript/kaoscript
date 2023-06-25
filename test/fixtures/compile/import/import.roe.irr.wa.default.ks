@@ -1,5 +1,5 @@
-import '../require/require.alt.roe.array'
+import '../require/require.alt.roe.array.ks'
 
-import './import.roe.rr'(Array)
+import './import.roe.rr.ks'(Array)
 
 export Array

@@ -1,5 +1,5 @@
 extern sealed class Array
 
-import './import.roe.rr'(Array)
+import './import.roe.rr.ks'(Array)
 
 export Array

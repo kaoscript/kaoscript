@@ -1,6 +1,6 @@
-import '../_/_array'
+import '../_/_array.ks'
 
-import './import.roi.rr'(Array)
+import './import.roi.rr.ks'(Array)
 
 var m = Array.map([1..10], (value, index) => value * index)
 

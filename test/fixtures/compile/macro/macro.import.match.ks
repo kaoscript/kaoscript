@@ -1,4 +1,4 @@
-import './macro.export.match.default'
+import './macro.export.match.default.ks'
 
 extern console
 

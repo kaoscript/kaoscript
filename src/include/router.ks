@@ -183,11 +183,11 @@ namespace Router {
 	type PathBuilder = (function: FunctionType, line: LineBuilder): Boolean
 
 	include {
-		'./router/build'
-		'./router/regroup'
-		'./router/unbounded'
-		'./router/matching'
-		'./router/fragment'
+		'./router/build.ks'
+		'./router/regroup.ks'
+		'./router/unbounded.ks'
+		'./router/matching.ks'
+		'./router/fragment.ks'
 	}
 
 	enum FooterType {

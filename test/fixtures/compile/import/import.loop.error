@@ -1,1 +1,1 @@
-SyntaxException: The import "./import.loop" is looping (fixtures/compile/import/import.loop.ks:1)
+SyntaxException: The import "./import.loop.ks" is looping (fixtures/compile/import/import.loop.ks:1)

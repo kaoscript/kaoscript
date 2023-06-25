@@ -1,1 +1,1 @@
-TypeException: The arguments of the module "../require/require.string" must have unmodified types (fixtures/compile/import/import.parameter.expression.default.ks:5)
+TypeException: The arguments of the module "../require/require.string.ks" must have unmodified types (fixtures/compile/import/import.parameter.expression.default.ks:5)

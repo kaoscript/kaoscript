@@ -1,4 +1,4 @@
-import '../implement/implement.overwrite.disclose'
+import '../implement/implement.overwrite.disclose.ks'
 
 func foobar(d: Date) {
 

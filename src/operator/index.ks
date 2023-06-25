@@ -61,15 +61,15 @@ var $operatorTypes = {
 }
 
 include {
-	'./assignment'
-	'./polyadic'
-	'./binary'
-	'./unary'
-	'./comparison'
-	'./empty'
-	'./equals'
-	'./exists'
-	'./logical'
-	'./pipeline'
-	'./type'
+	'./assignment.ks'
+	'./polyadic.ks'
+	'./binary.ks'
+	'./unary.ks'
+	'./comparison.ks'
+	'./empty.ks'
+	'./equals.ks'
+	'./exists.ks'
+	'./logical.ks'
+	'./pipeline.ks'
+	'./type.ks'
 }

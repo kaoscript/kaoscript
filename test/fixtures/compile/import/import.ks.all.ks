@@ -1,1 +1,1 @@
-import '@kaoscript/test-import/src/index'
+import '@kaoscript/test-import/src/index.ks'

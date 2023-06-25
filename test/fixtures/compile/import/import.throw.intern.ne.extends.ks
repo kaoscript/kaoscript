@@ -1,7 +1,7 @@
 extern console
 extern sealed class SyntaxError
 
-import '../export/export.throw.intern.ne.extends'
+import '../export/export.throw.intern.ne.extends.ks'
 
 try {
 	foo()

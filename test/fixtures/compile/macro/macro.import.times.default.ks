@@ -1,6 +1,6 @@
 extern console
 
-import './macro.export.times'
+import './macro.export.times.ks'
 
 console.log(times_five(42))
 

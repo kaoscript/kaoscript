@@ -1,5 +1,5 @@
 extern __dirname
 
-import 'path'
+import 'node:path'
 
-import '../require/require.string'(path.join(__dirname, 'foobar.txt'):String)
+import '../require/require.string.ks'(path.join(__dirname, 'foobar.txt'):String)

@@ -1,6 +1,6 @@
 extern console, qux
 
-import '../_/_array'
+import '../_/_array.ks'
 
 func foo(mut x) {
 	if x is Array {
