@@ -77,6 +77,7 @@ enum ScopeType {
 	InlineBlock
 	InlineFunction
 	Macro
+	Method
 	Operation
 }
 
@@ -177,14 +178,15 @@ struct VariableBrief {
 }
 
 include {
-	'./scope/bleeding'
-	'./scope/block'
-	'./scope/function'
-	'./scope/hollow'
-	'./scope/inline'
-	'./scope/import'
-	'./scope/macro'
-	'./scope/namespace'
-	'./scope/module'
-	'./scope/operation'
+	'./scope/bleeding.ks'
+	'./scope/block.ks'
+	'./scope/function.ks'
+	'./scope/hollow.ks'
+	'./scope/inline.ks'
+	'./scope/import.ks'
+	'./scope/macro.ks'
+	'./scope/namespace.ks'
+	'./scope/method.ks'
+	'./scope/module.ks'
+	'./scope/operation.ks'
 }

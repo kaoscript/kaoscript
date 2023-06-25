@@ -62,6 +62,9 @@ abstract class AbstractNode {
 			.InlineFunction {
 				return InlineFunctionScope.new(scope)
 			}
+			.Method {
+				return MethodScope.new(scope)
+			}
 			.Operation {
 				return OperationScope.new(scope)
 			}

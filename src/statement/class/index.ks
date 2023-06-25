@@ -142,9 +142,9 @@ class ClassDeclaration extends Statement {
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, scope)
 
-		@constructorScope = @newScope(@scope!?, ScopeType.Function)
-		@destructorScope = @newScope(@scope!?, ScopeType.Function)
-		@instanceVariableScope = @newScope(@scope!?, ScopeType.Function)
+		@constructorScope = @newScope(@scope!?, ScopeType.Method)
+		@destructorScope = @newScope(@scope!?, ScopeType.Method)
+		@instanceVariableScope = @newScope(@scope!?, ScopeType.Method)
 		@es5 = @options.format.classes == 'es5'
 	} # }}}
 	initiate() { # {{{
@@ -702,7 +702,7 @@ class ClassDeclaration extends Statement {
 	listInterfaces() => @interfaces
 	name() => @name
 	newMethodScope(instance: Boolean) { # {{{
-		var scope = @newScope(@scope!?, ScopeType.Function)
+		var scope = @newScope(@scope!?, ScopeType.Method)
 
 		if instance {
 			scope.define('this', true, @scope.reference(@name), true, this)

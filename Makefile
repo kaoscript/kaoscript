@@ -8,7 +8,7 @@ build:
 	time ./bin/kaoscript -c -t ecma-v6 -o lib src/compiler.ks
 	cp lib/compiler.js ../compiler-bin-js-es6
 	cp lib/compiler.js ../../ZokugunKS/lang/node_modules/kaoscript/lib/compiler.js
-	cp lib/compiler.js ../highlight-tmlanguage/node_modules/kaoscript/lib/compiler.js
+	@# cp lib/compiler.js ../highlight-tmlanguage/node_modules/kaoscript/lib/compiler.js
 	cp lib/compiler.js ../kaoscript-new/lib/compiler.old.js
 
 cls:

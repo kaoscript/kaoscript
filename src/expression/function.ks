@@ -5,25 +5,39 @@ class AnonymousFunctionExpression extends Expression {
 		@block: Block
 		@exit: Boolean					= false
 		@isObjectMember: Boolean		= false
-		@parameters: Array<Parameter>
+		@parameters: Array<Parameter>	= []
+		@thisVariable: Variable?
 		@topNodes: Array				= []
 		@type: FunctionType
 	}
 	constructor(data, parent, scope) { # {{{
-		super(data, parent, scope, ScopeType.InlineFunction)
+		super(data, parent, scope, ScopeType.Function)
 	} # }}}
 	analyse() { # {{{
 		@scope.line(@data.start.line)
 
-		// @scope.define('this', true, Type.Any, this)
+		if #@data.parameters {
+			var mut firstParameter = 0
+			var parameter = @data.parameters[0]
 
-		@parameters = []
-		for var data in @data.parameters {
-			var parameter = Parameter.new(data, this)
+			if parameter.external?.name == 'this' || parameter.internal?.name == 'this' {
+				if parameter.external?.name == parameter.internal?.name == 'this' {
+					firstParameter = 1
 
-			parameter.analyse()
+					@thisVariable = @scope.define('this', true, Type.Any, this)
+				}
+				else {
+					throw NotImplementedException.new()
+				}
+			}
 
-			@parameters.push(parameter)
+			for var data in @data.parameters from firstParameter {
+				var parameter = Parameter.new(data, this)
+
+				parameter.analyse()
+
+				@parameters.push(parameter)
+			}
 		}
 
 		@isObjectMember = @parent.parent() is ObjectExpression
@@ -34,6 +48,12 @@ class AnonymousFunctionExpression extends Expression {
 		}
 
 		@scope.line(@data.start.line)
+
+		if ?@thisVariable && ?@data.parameters[0].type {
+			var type = Type.fromAST(@data.parameters[0].type, this)
+
+			@thisVariable.setDeclaredType(type)
+		}
 
 		if target.isAny() || target.isReference() {
 			for var parameter in @parameters {
@@ -79,6 +99,10 @@ class AnonymousFunctionExpression extends Expression {
 
 				@type.setReturnType(type)
 			}
+		}
+
+		if ?@thisVariable {
+			@type.setThisType(@thisVariable.getDeclaredType())
 		}
 
 		@type.flagComplete()

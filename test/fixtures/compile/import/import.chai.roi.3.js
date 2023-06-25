@@ -45,10 +45,7 @@ module.exports = function(assert, Assertion, should, Should) {
 			}
 			throw Helper.badArgs();
 		};
-		function assertEql() {
-			return assertEql.__ks_rt(this, arguments);
-		};
-		assertEql.__ks_0 = function(obj, msg = null) {
+		const assertEql = Helper.function((obj, msg = null) => {
 			if(msg !== null) {
 				flag(this, "message", msg);
 			}
@@ -57,16 +54,15 @@ module.exports = function(assert, Assertion, should, Should) {
 				o.comparator = comparator;
 				return o;
 			})()), "expected #{this} to deeply equal #{exp}", "expected #{this} to not deeply equal #{exp}", obj, this._obj, true);
-		};
-		assertEql.__ks_rt = function(that, args) {
+		}, (fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length >= 1 && args.length <= 2) {
 				if(t0(args[0])) {
-					return assertEql.__ks_0.call(that, args[0], args[1]);
+					return fn.call(this, args[0], args[1]);
 				}
 			}
 			throw Helper.badArgs();
-		};
+		});
 		Assertion.addMethod("eql", assertEql);
 		Assertion.addMethod("eqls", assertEql);
 	}, (fn, ...args) => {
