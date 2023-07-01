@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(key, value) {
 		const result = Helper.function(() => {
 			return "";
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 0) {
 				return fn.call(null);
 			}

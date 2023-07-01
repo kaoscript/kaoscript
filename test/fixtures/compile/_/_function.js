@@ -4,7 +4,7 @@ module.exports = function() {
 	__ks_Function.__ks_sttc_vcurry_0 = function(self, bind = null, args) {
 		return Helper.function((additionals) => {
 			return self.apply(bind, args.concat(additionals));
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;

@@ -2,7 +2,7 @@ const {Helper} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = Helper.function(function(x = null) {
 		return [x];
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length <= 1) {
 			return fn.call(null, args[0]);
 		}

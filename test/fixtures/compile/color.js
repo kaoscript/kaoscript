@@ -556,7 +556,7 @@ module.exports = function() {
 				return true;
 			}
 			return false;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = value => Type.isClassInstance(value, Color);
 			const t1 = Type.isArray;
 			if(args.length === 2) {
@@ -592,7 +592,7 @@ module.exports = function() {
 				}
 			}
 			return false;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = value => Type.isClassInstance(value, Color);
 			const t1 = Type.isArray;
 			if(args.length === 2) {
@@ -1581,7 +1581,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.hex = Helper.function((that) => {
 				return $hex.__ks_0(that);
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
 				if(args.length === 1) {
 					if(t0(args[0])) {
@@ -1597,7 +1597,7 @@ module.exports = function() {
 				else {
 					return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
 				}
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
 				if(args.length === 1) {
 					if(t0(args[0])) {

@@ -20,7 +20,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		const addOne = Helper.curry((fn, ...args) => {
+		const addOne = Helper.curry((that, fn, ...args) => {
 			if(args.length === 0) {
 				return fn[0]();
 			}

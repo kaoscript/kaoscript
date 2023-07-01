@@ -2,7 +2,7 @@ const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	const foobar = Helper.function(function() {
 		return "foobar";
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

@@ -8,7 +8,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.foobar = Helper.function((x) => {
 				return x;
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isString;
 				if(args.length === 1) {
 					if(t0(args[0])) {

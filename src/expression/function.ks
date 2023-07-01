@@ -167,7 +167,7 @@ class AnonymousFunctionExpression extends Expression {
 
 		var assessment = @type.assessment('<router>', this)
 
-		fragments.code(`(fn, `)
+		fragments.code(`(that, fn, `)
 
 		if assessment.labelable {
 			fragments.code('kws, ')
@@ -177,7 +177,12 @@ class AnonymousFunctionExpression extends Expression {
 
 		Router.toFragments(
 			(function, line) => {
-				line.code(`fn.call(null`)
+				if @type.isMissingThis() {
+					line.code(`fn.call(null`)
+				}
+				else {
+					line.code(`fn.call(that`)
+				}
 
 				return true
 			}
@@ -386,7 +391,7 @@ class ArrowFunctionExpression extends Expression {
 
 			var assessment = @type.assessment(@name ?? '<router>', this)
 
-			fragments.code(`(fn, `)
+			fragments.code(`(that, fn, `)
 
 			if assessment.labelable {
 				fragments.code('kws, ')
@@ -394,7 +399,7 @@ class ArrowFunctionExpression extends Expression {
 
 			var blockRouter = fragments.code(`...args) =>`).newBlock()
 
-			var bind = @usingThis ? 'this' : 'null'
+			var bind = @usingThis ? 'that' : 'null'
 
 			Router.toFragments(
 				(function, line) => {

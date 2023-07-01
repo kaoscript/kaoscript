@@ -35,7 +35,7 @@ module.exports = function() {
 		}
 	}
 	const cat = Pet.__ks_new_0();
-	console.log(Helper.curry((fn, ...args) => {
+	console.log(Helper.curry((that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn[0]();
 		}

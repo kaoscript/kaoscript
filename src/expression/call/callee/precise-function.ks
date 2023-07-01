@@ -71,7 +71,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 			var assessment = type.assessment('<router>', node)
 
-			fragments.code(`(fn, `)
+			fragments.code(`(that, fn, `)
 
 			if assessment.labelable {
 				fragments.code('kws, ')
@@ -81,9 +81,16 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 			Router.toFragments(
 				(function, line) => {
-					line.code(`fn[0](`)
-
-					return false
+					if @expression is ArrowFunctionExpression || type.isMissingThis() || @scope == .Argument {
+						line.code(`fn[0](`)
+						
+						return false
+					}
+					else {
+						line.code(`fn[0].call(that`)
+						
+						return true
+					}
 				}
 				null
 				assessment
@@ -95,72 +102,96 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 			fragments.code($comma)
 
-			match @expression {
-				is ArrowFunctionExpression {
-					fragments.code('(')
+			if @expression is ArrowFunctionExpression {
+				fragments.code('(')
 
-					for var parameter, index in type.parameters() {
-						fragments.code($comma) if index != 0
+				for var parameter, index in type.parameters() {
+					fragments.code($comma) if index != 0
 
-						fragments.code(parameter.getExternalName())
-					}
-
-					fragments.code(') =>')
-
-					var block = fragments.newBlock()
-
-					var parameters = @function.parameters()
-					var arguments = @node.arguments()
-
-					for var { parameter, value % { passthru? } }, index in map when ?passthru {
-						block
-							.newLine()
-							.code($runtime.scope(@node))
-							.code(parameters[parameter].getInternalName())
-							.code($equals)
-							.compile(arguments[passthru])
-							.done()
-					}
-
-					@expression.toBlockFragments(block)
-
-					block.done()
+					fragments.code(parameter.getExternalName())
 				}
-				else {
-					fragments.code('(')
 
-					for var _, index in type.parameters() {
+				fragments.code(') =>')
+
+				var block = fragments.newBlock()
+
+				var parameters = @function.parameters()
+				var arguments = @node.arguments()
+
+				for var { parameter, value % { passthru? } }, index in map when ?passthru {
+					block
+						.newLine()
+						.code($runtime.scope(@node))
+						.code(parameters[parameter].getInternalName())
+						.code($equals)
+						.compile(arguments[passthru])
+						.done()
+				}
+
+				@expression.toBlockFragments(block)
+
+				block.done()
+			}
+			else if type.isMissingThis() || @scope == .Argument {
+				fragments.code('(')
+
+				for var _, index in type.parameters() {
+					fragments
+						..code($comma) if index != 0
+						..code(`__ks_\(index)`)
+				}
+
+				fragments.code(') => ')
+
+				var arguments = @node.arguments()
+
+				match @scope {
+					ScopeKind.Argument {
 						fragments
-							..code($comma) if index != 0
-							..code(`__ks_\(index)`)
+							.compile(@expression)
+							.code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(`)
+							.compile(@node.getCallScope())
+							.code($comma) if #arguments
 					}
-
-					fragments.code(') => ')
-
-					var arguments = @node.arguments()
-
-					match @scope {
-						ScopeKind.Argument {
-							fragments
-								.compile(@expression)
-								.code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(`)
-								.compile(@node.getCallScope())
-								.code($comma) if #arguments
-						}
-						ScopeKind.This {
-							fragments.compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index())(`)
-						}
+					ScopeKind.This {
+						fragments.compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index())(`)
 					}
-
-					CurryExpression.toArgumentFragments(map, arguments, true, fragments, mode)
-
-					fragments.code(')')
 				}
+
+				CurryExpression.toArgumentFragments(map, arguments, true, fragments, mode)
+
+				fragments.code(')')
+			}
+			else {
+				// TODO!
+				// var ctrl = fragments.newControl(initiator: false)
+				var ctrl = fragments.newControl(fragments._indent, false)
+
+				ctrl.code('function(')
+
+				for var _, index in type.parameters() {
+					ctrl
+						..code($comma) if index != 0
+						..code(`__ks_\(index)`)
+				}
+
+				ctrl.code(')').step()
+
+				var arguments = @node.arguments()
+				var line = ctrl.newLine()
+
+				line.code('return ').compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(this, `)
+
+				CurryExpression.toArgumentFragments(map, arguments, true, line, mode)
+
+				line.code(')').done()
+
+				ctrl.done()
 			}
 		}
 		else {
 			fragments
-				.code($runtime.helper(node), '.curry((fn, ...args) => ')
+				.code($runtime.helper(node), '.curry((that, fn, ...args) => ')
 				.compile(@expression)
 				.code('(...args)')
 

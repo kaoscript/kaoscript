@@ -5,7 +5,7 @@ module.exports = function() {
 			done = null;
 		}
 		done();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = value => Type.isFunction(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

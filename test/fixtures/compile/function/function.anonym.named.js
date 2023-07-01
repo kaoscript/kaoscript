@@ -16,7 +16,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0(Helper.function(function(x) {
 		return x;
-	}, (fn, kws, ...args) => {
+	}, (that, fn, kws, ...args) => {
 		const t0 = Type.isValue;
 		if(t0(kws.x)) {
 			if(args.length === 0) {

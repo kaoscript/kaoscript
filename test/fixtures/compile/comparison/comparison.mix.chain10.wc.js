@@ -19,70 +19,70 @@ module.exports = function() {
 	};
 	foobar.__ks_0(Helper.function(() => {
 		return 1;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 2;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 2;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 3;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 3;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 2;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 1;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 1;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 3;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
 		throw Helper.badArgs();
 	}), Helper.function(() => {
 		return 5;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

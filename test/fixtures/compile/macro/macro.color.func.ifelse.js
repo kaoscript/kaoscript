@@ -29,7 +29,7 @@ module.exports = function() {
 				else if(that._bar === true) {
 				}
 				return "";
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
 				if(args.length === 1) {
 					if(t0(args[0])) {

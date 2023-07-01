@@ -28,7 +28,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const addOne = Helper.curry((fn, ...args) => add(...args), (__ks_0, __ks_1) => add.__ks_0(1, __ks_0, __ks_1), (__ks_0, __ks_1) => add.__ks_1(1, __ks_0, __ks_1));
+	const addOne = Helper.curry((that, fn, ...args) => add(...args), (__ks_0, __ks_1) => add.__ks_0(1, __ks_0, __ks_1), (__ks_0, __ks_1) => add.__ks_1(1, __ks_0, __ks_1));
 	return {
 		addOne
 	};

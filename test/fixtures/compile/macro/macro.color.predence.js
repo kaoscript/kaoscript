@@ -38,7 +38,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.foo = Helper.function((t1, t2, t3) => {
 				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isNumber;
 				if(args.length === 3) {
 					if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
@@ -49,7 +49,7 @@ module.exports = function() {
 			});
 			o.bar = Helper.function((h, i) => {
 				return h + ((1 / 3) * -(i - 1));
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isNumber;
 				if(args.length === 2) {
 					if(t0(args[0]) && t0(args[1])) {

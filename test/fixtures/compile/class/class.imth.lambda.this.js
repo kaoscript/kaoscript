@@ -23,11 +23,11 @@ module.exports = function() {
 		__ks_func_camelize_0(value) {
 			return Operator.add(this.toLowerCase(value.charAt(0)), value.substr(1).replace(/[-_\s]+(.)/g, Helper.function((__ks_0, l) => {
 				return this.__ks_func_toUpperCase_0(l);
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isValue;
 				if(args.length === 2) {
 					if(t0(args[0]) && t0(args[1])) {
-						return fn.call(this, args[0], args[1]);
+						return fn.call(that, args[0], args[1]);
 					}
 				}
 				throw Helper.badArgs();

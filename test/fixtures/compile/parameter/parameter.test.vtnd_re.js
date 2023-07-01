@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (() => {
 		return Helper.function((x = null, items) => {
 			return [x, items];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = value => Type.isNumber(value) || Type.isNull(value);
 			const t1 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);

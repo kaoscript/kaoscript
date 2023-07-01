@@ -4,7 +4,7 @@ module.exports = function() {
 		return process.__ks_rt(this, arguments);
 	};
 	process.__ks_0 = function(elements) {
-		return filter(map(elements, Helper.curry((fn, ...args) => {
+		return filter(map(elements, Helper.curry((that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {
@@ -12,7 +12,7 @@ module.exports = function() {
 				}
 			}
 			throw Helper.badArgs();
-		}, (__ks_0) => add.__ks_0(__ks_0, 1))), Helper.curry((fn, ...args) => {
+		}, (__ks_0) => add.__ks_0(__ks_0, 1))), Helper.curry((that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {

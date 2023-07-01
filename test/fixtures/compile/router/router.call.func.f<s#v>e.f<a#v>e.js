@@ -16,7 +16,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	foobar.__ks_0(Helper.function((done) => {
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isString;
 		if(args.length === 1) {
 			if(t0(args[0])) {

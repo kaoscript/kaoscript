@@ -5,7 +5,7 @@ module.exports = function(expect) {
 			x = 42;
 		}
 		return [x, items];
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = () => true;
 		const t1 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);

@@ -6,7 +6,7 @@ module.exports = function(expect) {
 				z = false;
 			}
 			return [x, y, z, a];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isString;
 			const t1 = value => Type.isString(value) || Type.isNull(value);
 			const t2 = value => Type.isBoolean(value) || Type.isNull(value);
@@ -23,7 +23,7 @@ module.exports = function(expect) {
 	})();
 	expect(Helper.function(() => {
 		return foo();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -31,7 +31,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -39,7 +39,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(true);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -47,7 +47,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(42);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -56,7 +56,7 @@ module.exports = function(expect) {
 	expect(foo("foo", 42)).to.eql(["foo", null, false, 42]);
 	expect(Helper.function(() => {
 		return foo("foo", "bar");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -64,7 +64,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", true);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -72,7 +72,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", null);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -80,7 +80,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", []);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -89,7 +89,7 @@ module.exports = function(expect) {
 	expect(foo("foo", "bar", 42)).to.eql(["foo", "bar", false, 42]);
 	expect(Helper.function(() => {
 		return foo("foo", "bar", true);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -97,7 +97,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", "bar", "qux");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -105,7 +105,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", "bar", []);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -113,7 +113,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", 42, "qux");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -121,7 +121,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", true, "qux");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -130,7 +130,7 @@ module.exports = function(expect) {
 	expect(foo("foo", "bar", true, 42)).to.eql(["foo", "bar", true, 42]);
 	expect(Helper.function(() => {
 		return foo("foo", "bar", true, "qux");
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -138,7 +138,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("foo", "bar", true, null);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

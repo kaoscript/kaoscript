@@ -23,7 +23,7 @@ module.exports = function() {
 		__ks_func_qux_0() {
 			const test = Helper.function((x, y) => {
 				return x === y;
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isValue;
 				if(args.length === 2) {
 					if(t0(args[0]) && t0(args[1])) {

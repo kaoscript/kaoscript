@@ -4,7 +4,7 @@ module.exports = function() {
 		if(foobar === void 0 || foobar === null) {
 			foobar = Helper.function(() => {
 				return "";
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}

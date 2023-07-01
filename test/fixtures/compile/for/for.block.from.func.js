@@ -4,7 +4,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.foo = Helper.function(() => {
 			let i = 0;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 0) {
 				return fn.call(null);
 			}

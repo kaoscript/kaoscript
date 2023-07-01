@@ -6,7 +6,7 @@ module.exports = function() {
 	getNewScore.__ks_0 = function(person) {
 		const newScore = (Helper.function((score) => {
 			return boundScore(0, 100, score);
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {
@@ -16,7 +16,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}))((Helper.function((score) => {
 			return add(7, score);
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {

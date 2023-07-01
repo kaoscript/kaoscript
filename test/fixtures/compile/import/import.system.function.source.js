@@ -25,7 +25,7 @@ module.exports = function() {
 		__ks_func_compile_0() {
 			return Helper.function(() => {
 				return 42;
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}

@@ -1,7 +1,7 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	it("print", Helper.function((done) => {
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isFunction;
 		if(args.length === 1) {
 			if(t0(args[0])) {

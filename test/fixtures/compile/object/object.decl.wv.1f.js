@@ -4,7 +4,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.bar = Helper.function((name = null) => {
 			let n = 0;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = value => Type.isString(value) || Type.isNull(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;

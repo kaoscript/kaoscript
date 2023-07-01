@@ -8,9 +8,9 @@ module.exports = function() {
 		return Helper.function(() => {
 			this.arrow = true;
 			return this;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 0) {
-				return fn.call(this);
+				return fn.call(that);
 			}
 			throw Helper.badArgs();
 		});

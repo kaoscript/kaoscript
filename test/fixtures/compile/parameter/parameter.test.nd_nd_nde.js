@@ -2,7 +2,7 @@ const {Helper} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = Helper.function(function(x = null, y = null, z = null) {
 		return [x, y, z];
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = () => true;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

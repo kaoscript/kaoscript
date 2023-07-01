@@ -5,7 +5,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.corge = Helper.function(() => {
 			throw new SyntaxError();
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 0) {
 				return fn.call(null);
 			}

@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (() => {
 		return Helper.function((items) => {
 			return [items];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isString;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
@@ -16,7 +16,7 @@ module.exports = function(expect) {
 	expect(foo()).to.eql([[]]);
 	expect(Helper.function(() => {
 		return foo(1);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -24,7 +24,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(null);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -32,7 +32,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(true);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -41,7 +41,7 @@ module.exports = function(expect) {
 	expect(foo("foo")).to.eql([["foo"]]);
 	expect(Helper.function(() => {
 		return foo("true", 1);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -49,7 +49,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("true", true);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -57,7 +57,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo("true", null);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -66,7 +66,7 @@ module.exports = function(expect) {
 	expect(foo("foo", "bar", "qux")).to.eql([["foo", "bar", "qux"]]);
 	expect(Helper.function(() => {
 		return foo("foo", "bar", "qux", 4);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

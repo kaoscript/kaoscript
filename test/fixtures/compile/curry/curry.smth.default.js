@@ -31,7 +31,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const hello = Helper.curry((fn, ...args) => {
+	const hello = Helper.curry((that, fn, ...args) => {
 		const t0 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (() => {
 		return Helper.function((items, x, y, z) => {
 			return [items, x, y, z];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
@@ -17,7 +17,7 @@ module.exports = function(expect) {
 	})();
 	expect(Helper.function(() => {
 		return foo();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -25,7 +25,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(1);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -33,7 +33,7 @@ module.exports = function(expect) {
 	})).to.throw();
 	expect(Helper.function(() => {
 		return foo(1, 2);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

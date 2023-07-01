@@ -83,7 +83,7 @@ class PreciseMethodCallee extends MethodCallee {
 
 					var assessment = type.assessment('<router>', node)
 
-					fragments.code(`(fn, `)
+					fragments.code(`(that, fn, `)
 
 					if assessment.labelable {
 						fragments.code('kws, ')
@@ -164,7 +164,7 @@ class PreciseMethodCallee extends MethodCallee {
 				}
 				else {
 					fragments
-						.code($runtime.helper(node), '.curry((fn, ...args) => ')
+						.code($runtime.helper(node), '.curry((that, fn, ...args) => ')
 						.compile(@expression)
 						.code('(...args)')
 

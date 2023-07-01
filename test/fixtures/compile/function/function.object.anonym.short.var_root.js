@@ -5,7 +5,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.value = Helper.function(function(r) {
 			return Operator.multiplication(PI, r);
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {

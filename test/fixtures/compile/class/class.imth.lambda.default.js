@@ -23,7 +23,7 @@ module.exports = function() {
 		__ks_func_camelize_0(value) {
 			return Operator.add(value.charAt(0).toLowerCase(), value.substr(1).replace(/[-_\s]+(.)/g, Helper.function((__ks_0, l) => {
 				return l.toUpperCase();
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isValue;
 				if(args.length === 2) {
 					if(t0(args[0]) && t0(args[1])) {

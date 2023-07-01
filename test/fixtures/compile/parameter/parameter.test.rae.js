@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (() => {
 		return Helper.function((items) => {
 			return [items];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
@@ -21,7 +21,7 @@ module.exports = function(expect) {
 	expect(foo(1, 2, 3)).to.eql([[1, 2, 3]]);
 	expect(Helper.function(() => {
 		return foo(1, 2, 3, 4);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

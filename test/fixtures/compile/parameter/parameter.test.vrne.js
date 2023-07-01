@@ -6,7 +6,7 @@ module.exports = function(expect) {
 				x = null;
 			}
 			return [x];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 1) {
 				return fn.call(null, args[0]);
 			}
@@ -15,7 +15,7 @@ module.exports = function(expect) {
 	})();
 	expect(Helper.function(() => {
 		return foo();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}
@@ -25,7 +25,7 @@ module.exports = function(expect) {
 	expect(foo(null)).to.eql([null]);
 	expect(Helper.function(() => {
 		return foo(1, 2);
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

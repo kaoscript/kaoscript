@@ -6,7 +6,7 @@ module.exports = function() {
 		o.traverseAll = true;
 		o.filter = Helper.function(function(item) {
 			return item.path.slice(-5) === ".json";
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {

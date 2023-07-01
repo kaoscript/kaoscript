@@ -15,7 +15,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const addOne = Helper.curry((fn, ...args) => {
+	const addOne = Helper.curry((that, fn, ...args) => {
 		const t0 = Type.isNumber;
 		if(args.length === 2) {
 			if(t0(args[0]) && t0(args[1])) {
@@ -24,7 +24,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	}, (__ks_0, __ks_1) => add.__ks_0(1, __ks_0, __ks_1));
-	const addTwo = Helper.curry((fn, ...args) => {
+	const addTwo = Helper.curry((that, fn, ...args) => {
 		const t0 = Type.isNumber;
 		if(args.length === 1) {
 			if(t0(args[0])) {

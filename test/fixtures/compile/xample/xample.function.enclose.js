@@ -5,7 +5,7 @@ module.exports = function() {
 		let f = this;
 		return Helper.function((args) => {
 			return enclosure(f, ...args);
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;

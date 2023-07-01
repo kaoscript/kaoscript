@@ -17,7 +17,7 @@ module.exports = function() {
 	};
 	foobar([Helper.function((x) => {
 		return "";
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {

@@ -6,7 +6,7 @@ module.exports = function(expect) {
 				x = 42;
 			}
 			return [items, x];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			const t1 = () => true;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
@@ -21,7 +21,7 @@ module.exports = function(expect) {
 	})();
 	expect(Helper.function(() => {
 		return foo();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

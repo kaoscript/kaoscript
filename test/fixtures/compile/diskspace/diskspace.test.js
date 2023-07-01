@@ -10,7 +10,7 @@ describe("diskspace", Helper.function(function() {
 			console.log(d);
 			done();
 		});
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isFunction;
 		if(args.length === 1) {
 			if(t0(args[0])) {
@@ -19,7 +19,7 @@ describe("diskspace", Helper.function(function() {
 		}
 		throw Helper.badArgs();
 	}, true));
-}, (fn, ...args) => {
+}, (that, fn, ...args) => {
 	if(args.length === 0) {
 		return fn.call(null);
 	}

@@ -134,7 +134,7 @@ class CurryExpression extends CallExpression {
 		} # }}}
 		toCurryType(function: FunctionType, positions: CallMatchPosition[], precise: Boolean, node: AbstractNode): [FunctionType, Array] { # {{{
 			var type = FunctionType.new(node.scope())
-				..setThisType(function.getThisType())
+				..setThisType(function.getThisType()) if !function.isMissingThis()
 				..setReturnType(function.getReturnType())
 				..addError(...function.listErrors())
 

@@ -10,13 +10,13 @@
 extern console, global, process, require, Object
 
 import {
-	'../package.json'	=> metadata
-	'./compiler.ks'		for Compiler
-	'child_process'		for execSync
-	'commander'			=> program
-	'module'			=> Module
-	'path'
-	'vm'
+	'../package.json'		=> metadata
+	'./compiler.ks'			for Compiler
+	'commander'				=> program
+	'node:child_process'	for execSync
+	'node:module'			=> Module
+	'node:path'
+	'node:vm'
 }
 
 func rewire(option, defaultValue?) { # {{{

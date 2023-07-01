@@ -20,7 +20,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let f = Helper.curry((fn, ...args) => {
+	let f = Helper.curry((that, fn, ...args) => {
 		const t0 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {

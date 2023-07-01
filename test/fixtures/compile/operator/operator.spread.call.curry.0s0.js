@@ -22,7 +22,7 @@ module.exports = function() {
 	let directory = "xfer";
 	let user = "john";
 	let info = [machine, ":", directory, " ", user, ": "];
-	let logHello = Helper.curry((fn, ...args) => {
+	let logHello = Helper.curry((that, fn, ...args) => {
 		const t0 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

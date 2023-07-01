@@ -5,7 +5,7 @@ module.exports = function() {
 			x = null;
 		}
 		return [x, y];
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isValue;
 		if(args.length === 2) {
 			if(t0(args[1])) {

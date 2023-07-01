@@ -5,7 +5,7 @@ module.exports = function(expect) {
 			x = 42;
 		}
 		return [x];
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length <= 1) {
 			return fn.call(null, args[0]);
 		}

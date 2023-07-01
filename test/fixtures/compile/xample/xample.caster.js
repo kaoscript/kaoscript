@@ -6,7 +6,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.hex = Helper.function((n) => {
 			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse(n), 0, 255));
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = value => Type.isNumber(value) || Type.isString(value);
 			if(args.length === 1) {
 				if(t0(args[0])) {

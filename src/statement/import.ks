@@ -553,6 +553,8 @@ abstract class Importer extends Statement {
 				if pkg.main is String && (@loadFile(path.join(dir, pkg.main), pkg.main, moduleName, true) || @loadDirectory(path.join(dir, pkg.main), moduleName, true)) {
 					return true
 				}
+
+				return @loadFile(path.join(dir, 'index'), 'index', moduleName, true)
 			}
 		}
 

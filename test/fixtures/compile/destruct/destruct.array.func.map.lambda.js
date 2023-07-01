@@ -13,7 +13,7 @@ module.exports = function() {
 	});
 	[Foobar.__ks_new(0, 0)].map(Helper.function(([x], __ks_0, __ks_1) => {
 		return x;
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = value => Type.isDexArray(value, 1, 1, 0, Type.isValue);
 		const t1 = Type.isValue;
 		if(args.length === 3) {

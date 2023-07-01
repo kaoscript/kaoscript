@@ -23,11 +23,11 @@ module.exports = function() {
 		__ks_func_foobar_0() {
 			const fn = Helper.function((data) => {
 				return new Quxbaz(data, this._foobar);
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				const t0 = Type.isValue;
 				if(args.length === 1) {
 					if(t0(args[0])) {
-						return fn.call(this, args[0]);
+						return fn.call(that, args[0]);
 					}
 				}
 				throw Helper.badArgs();

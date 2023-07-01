@@ -6,7 +6,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.qux = Helper.function(() => {
 				let i = 1;
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}

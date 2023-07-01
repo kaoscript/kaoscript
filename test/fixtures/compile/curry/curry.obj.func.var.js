@@ -4,7 +4,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.foobar = Helper.function((name, data) => {
 			return data;
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 2) {
 				if(t0(args[0]) && t0(args[1])) {
@@ -14,7 +14,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		});
 		o.quxbaz = Helper.function((fn, data) => {
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 2) {
 				if(t0(args[0]) && t0(args[1])) {
@@ -29,7 +29,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(name, data) {
-		const f = Helper.curry((fn, ...args) => {
+		const f = Helper.curry((that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 1) {
 				if(t0(args[0])) {

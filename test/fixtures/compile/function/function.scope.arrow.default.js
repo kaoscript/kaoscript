@@ -9,7 +9,7 @@ module.exports = function(expect) {
 			functions.push(Helper.function(() => {
 				const d = new Date(year, __ks_case_1[0], __ks_case_1[1]);
 				expect(d.getDay()).to.equal(__ks_case_1[i + 2]);
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}

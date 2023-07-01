@@ -14,7 +14,7 @@ module.exports = function() {
 					that._rouge = red;
 					that._vert = green;
 					that._blue = blue;
-				}, (fn, ...args) => {
+				}, (that, fn, ...args) => {
 					const t0 = Type.isValue;
 					if(args.length === 4) {
 						if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
@@ -31,7 +31,7 @@ module.exports = function() {
 					that._red = rouge;
 					that._green = vert;
 					that._blue = blue;
-				}, (fn, ...args) => {
+				}, (that, fn, ...args) => {
 					const t0 = Type.isValue;
 					if(args.length === 4) {
 						if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {

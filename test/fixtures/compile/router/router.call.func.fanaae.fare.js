@@ -21,7 +21,7 @@ module.exports = function() {
 		}
 		if(Type.isValue(a)) {
 		}
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		const t0 = Type.isValue;
 		if(args.length === 3) {
 			if(t0(args[1]) && t0(args[2])) {

@@ -9,7 +9,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.value = Helper.function(() => {
 				return box.value();
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}

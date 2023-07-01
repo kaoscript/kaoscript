@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (() => {
 		return Helper.function((x = null) => {
 			return [x];
-		}, (fn, ...args) => {
+		}, (that, fn, ...args) => {
 			if(args.length === 1) {
 				return fn.call(null, args[0]);
 			}
@@ -12,7 +12,7 @@ module.exports = function(expect) {
 	})();
 	expect(Helper.function(() => {
 		return foo();
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

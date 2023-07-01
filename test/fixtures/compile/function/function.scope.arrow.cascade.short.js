@@ -9,15 +9,15 @@ module.exports = function() {
 			o.value = Helper.function(() => {
 				return Helper.function(() => {
 					return this.value();
-				}, (fn, ...args) => {
+				}, (that, fn, ...args) => {
 					if(args.length === 0) {
-						return fn.call(this);
+						return fn.call(that);
 					}
 					throw Helper.badArgs();
 				});
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
-					return fn.call(this);
+					return fn.call(that);
 				}
 				throw Helper.badArgs();
 			});

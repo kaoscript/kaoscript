@@ -18,7 +18,7 @@ module.exports = function() {
 	};
 	console.log(__ks_Function.__ks_func_foo_0.call(Helper.function(() => {
 		return "bar";
-	}, (fn, ...args) => {
+	}, (that, fn, ...args) => {
 		if(args.length === 0) {
 			return fn.call(null);
 		}

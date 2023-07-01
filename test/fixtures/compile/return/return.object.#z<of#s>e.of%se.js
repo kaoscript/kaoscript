@@ -11,7 +11,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o.foobar = Helper.function(() => {
 				return "";
-			}, (fn, ...args) => {
+			}, (that, fn, ...args) => {
 				if(args.length === 0) {
 					return fn.call(null);
 				}
