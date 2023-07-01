@@ -7,13 +7,15 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-extern console, global, process, require, Object
+extern console, global, process, require
 
 import {
 	'../package.json'		=> metadata
 	'./compiler.ks'			for Compiler
 	'commander'				=> program
 	'node:child_process'	for execSync
+	// TODO!
+	// 'node:module'			=> class Module
 	'node:module'			=> Module
 	'node:path'
 	'node:vm'
@@ -71,7 +73,7 @@ var options = {
 if ?program.rewire {
 	options.rewire = []
 
-	for item in program.rewire {
+	for var item in program.rewire {
 		options.rewire.push({
 			input: path.join(process.cwd(), item.input)
 			output: path.join(process.cwd(), item.output)
