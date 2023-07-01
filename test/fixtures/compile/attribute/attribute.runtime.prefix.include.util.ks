@@ -1,3 +1,3 @@
 #![runtime(prefix='KS')]
 
-include '@kaoscript/util'
+include 'npm:@kaoscript/util'

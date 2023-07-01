@@ -1,1 +1,1 @@
-include '@kaoscript/util'
+include 'npm:@kaoscript/util'

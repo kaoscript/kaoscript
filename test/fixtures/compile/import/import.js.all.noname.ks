@@ -1,1 +1,1 @@
-import '@kaoscript/runtime/src/runtime.js'
+import 'npm:@kaoscript/runtime/src/runtime.js'

@@ -1,1 +1,1 @@
-import '@kaoscript/test-import'
+import 'npm:@kaoscript/test-import'

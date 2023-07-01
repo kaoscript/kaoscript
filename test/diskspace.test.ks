@@ -7,7 +7,7 @@ extern {
 }
 
 import {
-	'chai' for expect
+	'npm:chai' for expect
 	'./fixtures/compile/diskspace/diskspace.module.ks'
 }
 

@@ -1,1 +1,1 @@
-import 'klaw-sync'
+import 'npm:klaw-sync'

@@ -1,4 +1,4 @@
-import '@kaoscript/runtime' {
+import 'npm:@kaoscript/runtime' {
 	func createToken
 	sealed class Lexer
 	sealed class Parser

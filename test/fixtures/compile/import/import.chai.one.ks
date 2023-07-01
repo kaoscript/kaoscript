@@ -1,1 +1,1 @@
-import 'chai' for expect
+import 'npm:chai' for expect

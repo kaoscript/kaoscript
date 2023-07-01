@@ -1,3 +1,3 @@
 var dyn x, y
 
-import '@kaoscript/runtime'(x, y) for Type
+import 'npm:@kaoscript/runtime'(x, y) for Type

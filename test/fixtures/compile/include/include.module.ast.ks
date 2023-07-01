@@ -1,3 +1,3 @@
-include '@kaoscript/ast'
+include 'npm:@kaoscript/ast'
 
-include '@kaoscript/test-import/src/include.ast.ks'
+include 'npm:@kaoscript/test-import/src/include.ast.ks'

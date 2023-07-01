@@ -1,1 +1,1 @@
-import '@kaoscript/test-import' but Color
+import 'npm:@kaoscript/test-import' but Color

@@ -1,1 +1,1 @@
-import '@kaoscript/runtime/src/runtime.js' for Helper => H
+import 'npm:@kaoscript/runtime/src/runtime.js' for Helper => H

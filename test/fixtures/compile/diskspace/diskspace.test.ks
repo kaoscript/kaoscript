@@ -8,7 +8,7 @@ extern {
 }
 
 import {
-	'chai' for expect
+	'npm:chai' for expect
 	'./diskspace.module.ks'
 }
 

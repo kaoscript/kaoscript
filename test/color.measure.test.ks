@@ -6,7 +6,7 @@ extern {
 }
 
 import {
-	'chai' for expect
+	'npm:chai' for expect
 	'./fixtures/compile/color.ks'
 }
 

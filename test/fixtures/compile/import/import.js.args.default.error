@@ -1,1 +1,1 @@
-TypeException: The argument "x" of the module "@kaoscript/runtime" must have an unmodified type (fixtures/compile/import/import.js.args.default.ks:3)
+TypeException: The argument "x" of the module "npm:@kaoscript/runtime" must have an unmodified type (fixtures/compile/import/import.js.args.default.ks:3)

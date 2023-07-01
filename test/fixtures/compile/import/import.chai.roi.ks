@@ -1,6 +1,6 @@
-require|import 'chai' for assert, Assertion, config, expect, should, Should, use
+require|import 'npm:chai' for assert, Assertion, config, expect, should, Should, use
 
-import 'deep-eql'
+import 'npm:deep-eql'
 
 func comparator(a?, b?) { # {{{
 	if Type.isEnumInstance(a) {

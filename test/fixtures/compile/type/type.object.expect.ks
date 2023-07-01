@@ -1,6 +1,6 @@
 require expect: func
 
-import '@kaoscript/test-import/src/external.js' => JS
+import 'npm:@kaoscript/test-import/src/external.js' => JS
 
 class ClassA {
 }

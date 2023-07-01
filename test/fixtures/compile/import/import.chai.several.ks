@@ -1,1 +1,1 @@
-import 'chai' => chai, { expect }
+import 'npm:chai' => chai, { expect }

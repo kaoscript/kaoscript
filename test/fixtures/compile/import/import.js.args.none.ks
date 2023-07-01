@@ -1,1 +1,1 @@
-import '@kaoscript/runtime'() for Type
+import 'npm:@kaoscript/runtime'() for Type

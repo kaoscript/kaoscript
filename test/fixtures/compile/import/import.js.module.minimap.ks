@@ -1,1 +1,1 @@
-import '@zokugun/istanbul.reporter.minimap'
+import 'npm:@zokugun/istanbul.reporter.minimap'

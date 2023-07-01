@@ -25,9 +25,9 @@ import {
 }
 
 include {
-	'@kaoscript/ast'
-	'@kaoscript/parser'
-	'@kaoscript/util'
+	'npm:@kaoscript/ast'
+	'npm:@kaoscript/parser'
+	'npm:@kaoscript/util'
 	'./include/error.ks'
 	'./include/global.ks'
 	'./include/node.ks'

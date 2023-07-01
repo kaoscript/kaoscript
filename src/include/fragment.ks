@@ -1,4 +1,4 @@
-include '@kaoscript/source-generator'
+include 'npm:@kaoscript/source-generator'
 
 enum Mode {
 	None

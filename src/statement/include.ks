@@ -1,5 +1,3 @@
-var $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
-
 class IncludeDeclaration extends Statement {
 	private {
 		@declarators			= []
@@ -27,13 +25,15 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundFile(file, directory, this)
 				}
 			}
-			else {
+			else if file.startsWith('npm:') {
+				var name = file.substr(4)
+				
 				var mut modulePath = file
 				var mut moduleVersion = ''
 
 				var mut nf = true
-				for var dir in $listModulePaths(directory) while nf {
-					x = fs.resolve(dir, file)
+				for var dir in $listNPMModulePaths(directory) while nf {
+					x = fs.resolve(dir, name)
 
 					if fs.isFile(x) {
 						nf = false
@@ -70,9 +70,12 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
 
-				if @canLoadModuleFile(x, file, modulePath, moduleVersion) {
-					@loadModuleFile(data, x, file, modulePath, moduleVersion)
+				if @canLoadModuleFile(x, name, modulePath, moduleVersion) {
+					@loadModuleFile(data, x, name, modulePath, moduleVersion)
 				}
+			}
+			else {
+				IOException.throwNotFoundModule(file, directory, this)
 			}
 		}
 	} # }}}

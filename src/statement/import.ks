@@ -1,5 +1,7 @@
 extern process, require
 
+var $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
+
 var $importExts = { # {{{
 	data: {
 		json: true
@@ -12,7 +14,7 @@ var $importExts = { # {{{
 	}
 } # }}}
 
-func $listModulePaths(mut start) { # {{{
+func $listNPMModulePaths(mut start) { # {{{
 	start = fs.resolve(start)
 
 	var mut prefix = '/'
@@ -99,7 +101,12 @@ abstract class Importer extends Statement {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
-		else if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
+		else if x.startsWith('npm:') {
+			unless @loadNPMModule(x, y) {
+				IOException.throwNotFoundModule(x, y, this)
+			}
+		}
+		else if $localFileRegex.test(x) {
 			if !@standardLibrary {
 				x = fs.resolve(y, x)
 
@@ -113,9 +120,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else {
-			unless @loadModule(x, y) {
-				IOException.throwNotFoundModule(x, y, this)
-			}
+			IOException.throwNotFoundModule(x, y, this)
 		}
 
 		var module = @module()
@@ -839,19 +844,6 @@ abstract class Importer extends Statement {
 
 		@variationId = compiler.toVariationId()
 	} # }}}
-	loadModule(moduleName, start) { # {{{
-		var mut dirs = $listModulePaths(start)
-
-		for var dir in dirs {
-			var file = path.join(dir, moduleName)
-
-			if @loadFile(file, '', moduleName) || @loadDirectory(file, moduleName) {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
 	loadNodeFile(filename: String? = null, mut moduleName: String? = null, alias: String? = null) { # {{{
 		var module = @module()
 
@@ -891,7 +883,14 @@ abstract class Importer extends Statement {
 				@alias = alias
 			}
 			else {
-				var parts = @data.source.value.split('/')
+				var source = if var match ?= /^[A-Za-z]+:(.*)$/.exec(@data.source.value) {
+					set match[1]
+				}
+				else {
+					set @data.source.value
+				}
+				
+				var parts = source.split('/')
 
 				for var part in parts down while @alias == null when !/(?:^\.+$|^@)/.test(part) {
 					var dots = part.split('.')
@@ -998,6 +997,20 @@ abstract class Importer extends Statement {
 		var name = moduleName.substr(5)
 
 		return @loadNodeFile(null, name, name)
+	} # }}}
+	loadNPMModule(moduleName, start) { # {{{
+		var name = moduleName.substr(4)
+		var dirs = $listNPMModulePaths(start)
+
+		for var dir in dirs {
+			var file = path.join(dir, name)
+
+			if @loadFile(file, '', name) || @loadDirectory(file, name) {
+				return true
+			}
+		}
+
+		return false
 	} # }}}
 	readMetadata(file) { # {{{
 		try {
