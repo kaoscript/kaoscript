@@ -869,7 +869,7 @@ abstract class Importer extends Statement {
 		@isKSFile = false
 		@moduleName = moduleName!?
 
-		var type = Type.fromAST(@data.type, this)
+		var type = Type.fromAST(@data.type, this).flagAlien()
 		var container = type is ObjectType | NamespaceType
 
 		if container {
@@ -981,8 +981,23 @@ abstract class Importer extends Statement {
 					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = data.external?.name ?? internal
+						
+						var mut alias = false
 
-						@addVariable(external, internal, true, type.getProperty(external))
+						for var modifier in data.modifiers {
+							if modifier.kind == ModifierKind.Alias {
+								alias = true
+							}
+						}
+
+						if alias {
+							@addVariable(external, internal, false, type)
+							
+							@alias = internal
+						}
+						else {
+							@addVariable(external, internal, true, type.getProperty(external))
+						}
 					}
 					else {
 						throw NotImplementedException.new()
