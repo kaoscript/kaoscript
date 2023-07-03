@@ -19,7 +19,8 @@ module.exports = function() {
 		let index = 1;
 		if(((index = getIndex.__ks_0()) === -1) && (extending === true)) {
 		}
-		for(let __ks_1 = 0, __ks_0 = statements.length, statement; __ks_1 < __ks_0; ++__ks_1) {
+		let statement;
+		for(let __ks_1 = 0, __ks_0 = statements.length; __ks_1 < __ks_0; ++__ks_1) {
 			statement = statements[__ks_1];
 			statement.analyse();
 		}

@@ -69,7 +69,7 @@ export class Exception extends Error {
 
 						var mut nf = true
 
-						for name in hierarchy while nf {
+						for var name in hierarchy while nf {
 							if options.ignore:Array.contains(name) {
 								nf = false
 							}
@@ -79,7 +79,7 @@ export class Exception extends Error {
 							SyntaxException.throwUnreportedError(error.name(), node)
 						}
 						else if options.raise.length != 0 {
-							for name in hierarchy {
+							for var name in hierarchy {
 								if options.raise:Array.contains(name) {
 									SyntaxException.throwUnreportedError(error.name(), node)
 								}

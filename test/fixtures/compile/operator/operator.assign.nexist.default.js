@@ -12,7 +12,8 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		let bar, __ks_0;
+		let bar;
+		let __ks_0;
 		if(Type.isValue(__ks_0 = foo.__ks_0()) ? (bar = __ks_0, false) : true) {
 			throw new Error();
 		}

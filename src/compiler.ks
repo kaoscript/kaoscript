@@ -118,7 +118,6 @@ export class Compiler {
 				assertOverride: true
 				assertParameter: true
 				assertParameterType: true
-				noUndefined: false
 				ignoreError: false
 				ignoreMisfit: false
 			}
@@ -152,7 +151,9 @@ export class Compiler {
 		}, options)
 
 		if @options.target is String {
-			if target !?= $targetRegex.exec(@options.target) {
+			var target = $targetRegex.exec(@options.target)
+
+			unless ?target  {
 				throw Error.new(`Invalid target syntax: \(@options.target)`)
 			}
 
@@ -209,7 +210,7 @@ export class Compiler {
 	toSource() { # {{{
 		var mut source = ''
 
-		for fragment in @fragments {
+		for var fragment in @fragments {
 			source += fragment.code
 		}
 

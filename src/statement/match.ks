@@ -96,7 +96,7 @@ class MatchStatement extends Statement {
 		for var data, index in @data.clauses {
 			var clause = {
 				hasTest: ?data.filter
-				bindings: []
+				binding: null
 				conditions: []
 				scope: @newScope(@bindingScope, ScopeType.InlineBlock)
 			}
@@ -410,19 +410,6 @@ class MatchStatement extends Statement {
 				count: 1
 				testingType
 				type
-			}
-		}
-	} # }}}
-	defineVariables(left, scope) { # {{{
-		for var { name } in left.listAssignments([]) {
-			if scope.hasDefinedVariable(name) {
-				SyntaxException.throwAlreadyDeclared(name, this)
-			}
-			else if @options.rules.noUndefined {
-				ReferenceException.throwNotDefined(name, this)
-			}
-			else {
-				scope.define(name, false, AnyType.NullableUnexplicit, true, this)
 			}
 		}
 	} # }}}
@@ -783,13 +770,31 @@ class MatchStatement extends Statement {
 class MatchBindingArray extends AbstractNode {
 	private late {
 		@binding
+		@declaration: Boolean			= false
 		@minmax
 		@testingLength: Boolean			= true
 		@testingProperties: Boolean		= true
 		@testingType: Boolean			= true
 	}
 	analyse() { # {{{
-		@binding = $compile.expression(@data, this)
+		var mut immutable = true
+
+		if @data.kind == NodeKind.ArrayBinding {
+			@binding = $compile.expression(@data, this)
+		}
+		else {
+			for var modifier in @data.modifiers {
+				if modifier.kind == ModifierKind.Declarative {
+					@declaration = true
+				}
+				else if modifier.kind == ModifierKind.Mutable {
+					immutable = false
+				}
+			}
+
+			@binding = $compile.expression(@data.name, this, @scope)
+		}
+
 		@binding.setAssignment(AssignmentType.Declaration)
 		@binding.analyse()
 
@@ -799,9 +804,39 @@ class MatchBindingArray extends AbstractNode {
 			@testingLength = false
 		}
 
-		@parent.defineVariables(@binding, @scope)
+		if @declaration {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.define(name, immutable, AnyType.NullableUnexplicit, true, this)
+			}
+		}
+		else {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.checkVariable(name, true, this)
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		if @declaration && ?@data.type {
+			var type = Type.fromAST(@data.type, this)
+
+			if @binding is IdentifierLiteral {
+				if @declaration {
+					@binding.type(type, @scope, this)
+				}
+				else {
+					@scope.replaceVariable(@binding.name(), type, this)
+				}
+			}
+			else if @binding is ArrayBinding {
+				@binding.type(type)
+			}
+			else {
+				for var { name } in @binding.listAssignments([]) {
+					@scope.replaceVariable(name, type.getProperty(name), this)
+				}
+			}
+		}
+
 		@binding.prepare()
 
 		@testingType &&= !@parent.getValueType().isArray()
@@ -819,15 +854,12 @@ class MatchBindingArray extends AbstractNode {
 		fragments.compile(@binding)
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		var value = Literal.new(name, this)
-
-		var mut line = fragments.newLine()
-
-		line.code($runtime.scope(this))
-
-		@binding.toAssignmentFragments(line, value)
-
-		line.done()
+		if @declaration {
+			fragments.newLine().code($runtime.scope(this)).compile(@binding).code(` = \(name)`).done()
+		}
+		else {
+			fragments.newLine().compile(@binding).code(` = \(name)`).done()
+		}
 	} # }}}
 	toConditionFragments(fragments, name, junction) { # {{{
 		return unless @testingLength || @testingType || @testingProperties
@@ -866,17 +898,65 @@ class MatchBindingArray extends AbstractNode {
 class MatchBindingObject extends AbstractNode {
 	private {
 		@binding
+		@declaration: Boolean			= false
 		@testingProperties: Boolean		= false
 		@testingType: Boolean			= true
 	}
 	analyse() { # {{{
-		@binding = $compile.expression(@data, this)
+		var mut immutable = true
+
+		if @data.kind == NodeKind.ObjectBinding {
+			@binding = $compile.expression(@data, this)
+		}
+		else {
+			for var modifier in @data.modifiers {
+				if modifier.kind == ModifierKind.Declarative {
+					@declaration = true
+				}
+				else if modifier.kind == ModifierKind.Mutable {
+					immutable = false
+				}
+			}
+
+			@binding = $compile.expression(@data.name, this, @scope)
+		}
+
 		@binding.setAssignment(AssignmentType.Declaration)
 		@binding.analyse()
 
-		@parent.defineVariables(@binding, @scope)
+		if @declaration {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.define(name, immutable, AnyType.NullableUnexplicit, true, this)
+			}
+		}
+		else {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.checkVariable(name, true, this)
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		if @declaration && ?@data.type {
+			var type = Type.fromAST(@data.type, this)
+
+			if @binding is IdentifierLiteral {
+				if @declaration {
+					@binding.type(type, @scope, this)
+				}
+				else {
+					@scope.replaceVariable(@binding.name(), type, this)
+				}
+			}
+			else if @binding is ObjectBinding {
+				@binding.type(type)
+			}
+			else {
+				for var { name } in @binding.listAssignments([]) {
+					@scope.replaceVariable(name, type.getProperty(name), this)
+				}
+			}
+		}
+
 		@binding.prepare()
 
 		var bindingType = @binding.type()
@@ -918,15 +998,12 @@ class MatchBindingObject extends AbstractNode {
 		fragments.compile(@binding)
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		var value = Literal.new(name, this)
-
-		var line = fragments.newLine()
-
-		line.code($runtime.scope(this))
-
-		@binding.toAssignmentFragments(line, value)
-
-		line.done()
+		if @declaration {
+			fragments.newLine().code($runtime.scope(this)).compile(@binding).code(` = \(name)`).done()
+		}
+		else {
+			fragments.newLine().compile(@binding).code(` = \(name)`).done()
+		}
 	} # }}}
 	toConditionFragments(fragments, name, junction) { # {{{
 		return unless @testingType || @testingProperties
@@ -960,30 +1037,70 @@ class MatchBindingObject extends AbstractNode {
 
 class MatchBindingValue extends AbstractNode {
 	private late {
-		@name: String
+		@binding
+		@declaration: Boolean			= false
 	}
 	analyse() { # {{{
 		var mut immutable = true
-		var mut type = null
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Mutable {
+			if modifier.kind == ModifierKind.Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind.Mutable {
 				immutable = false
 			}
 		}
 
-		@name = @data.name.name
+		@binding = $compile.expression(@data.name, this, @scope)
+		@binding.setAssignment(AssignmentType.Declaration)
+		@binding.analyse()
 
-		if ?@data.type {
-			type = Type.fromAST(@data.type, this)
+		if @declaration {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.define(name, immutable, AnyType.NullableUnexplicit, true, this)
+			}
+		}
+		else {
+			for var { name } in @binding.listAssignments([]) {
+				@scope.checkVariable(name, true, this)
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		if @declaration && ?@data.type {
+			var type = Type.fromAST(@data.type, this)
+
+			if @binding is IdentifierLiteral {
+				if @declaration {
+					@binding.type(type, @scope, this)
+				}
+				else {
+					@scope.replaceVariable(@binding.name(), type, this)
+				}
+			}
+			else if @binding is ArrayBinding | ObjectBinding {
+				@binding.type(type)
+			}
+			else {
+				for var { name } in @binding.listAssignments([]) {
+					@scope.replaceVariable(name, type.getProperty(name), this)
+				}
+			}
 		}
 
-		@scope.define(@name, immutable, type, true, this)
+		@binding.prepare()
 	} # }}}
-	override prepare(target, targetMode)
-	translate()
+	translate() { # {{{
+		@binding.translate()
+	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		fragments.line($runtime.scope(this), @name, ' = ', name)
+		if @declaration {
+			fragments.newLine().code($runtime.scope(this)).compile(@binding).code(` = \(name)`).done()
+		}
+		else {
+			fragments.newLine().compile(@binding).code(` = \(name)`).done()
+		}
 	} # }}}
 	toConditionFragments(fragments, name, junction)
 	unflagLengthTesting()
@@ -1026,7 +1143,7 @@ class MatchConditionArray extends AbstractNode {
 		@parent.addArrayTest(true, @minmax, null)
 	} # }}}
 	translate() { # {{{
-		for value in @values {
+		for var value in @values {
 			value.translate()
 		}
 	} # }}}
@@ -1086,7 +1203,7 @@ class MatchConditionObject extends AbstractNode {
 					}
 
 					if ?data.value {
-						property.value = value = MatchConditionValue.new(data.value, this)
+						property.value = MatchConditionValue.new(data.value, this)
 						property.value.analyse()
 					}
 
@@ -1354,7 +1471,7 @@ class MatchConditionValue extends AbstractNode {
 class MatchFilter extends AbstractNode {
 	private late {
 		@conditions				= []
-		@bindings				= []
+		@binding				= null
 		@enumConditions: Number	= 0
 		@filter					= null
 		@hasTest: Boolean		= false
@@ -1363,42 +1480,36 @@ class MatchFilter extends AbstractNode {
 	override analyse() { # {{{
 		var scope = @scope()
 
-		for var data in @data.bindings {
-			var late binding
-
-			match data.kind {
-				NodeKind.ArrayBinding {
-					if @kind == .DEFAULT {
-						@kind = .ARRAY
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-
-					binding = MatchBindingArray.new(data, @parent, scope)
-
-					@hasTest = true
-				}
-				NodeKind.ObjectBinding {
-					if @kind == .DEFAULT {
-						@kind = .OBJECT
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-
-					binding = MatchBindingObject.new(data, @parent, scope)
-
-					@hasTest = true
+		if ?@data.binding {
+			if @data.binding.kind == NodeKind.ArrayBinding || @data.binding.name?.kind == NodeKind.ArrayBinding {
+				if @kind == .DEFAULT {
+					@kind = .ARRAY
 				}
 				else {
-					binding = MatchBindingValue.new(data, @parent, scope)
+					throw NotSupportedException.new(this)
 				}
+
+				@binding = MatchBindingArray.new(@data.binding, @parent, scope)
+
+				@hasTest = true
+			}
+			else if @data.binding.kind == NodeKind.ObjectBinding || @data.binding.name?.kind == NodeKind.ObjectBinding {
+				if @kind == .DEFAULT {
+					@kind = .OBJECT
+				}
+				else {
+					throw NotSupportedException.new(this)
+				}
+
+				@binding = MatchBindingObject.new(@data.binding, @parent, scope)
+
+				@hasTest = true
+			}
+			else {
+				@binding = MatchBindingValue.new(@data.binding, @parent, scope)
 			}
 
-			binding.analyse()
-
-			@bindings.push(binding)
+			@binding.analyse()
 		}
 
 		if #@data.conditions {
@@ -1421,8 +1532,12 @@ class MatchFilter extends AbstractNode {
 
 						condition = MatchConditionArray.new(data, @parent, scope)
 
-						for var binding in @bindings {
-							binding
+						// TODO!
+						// @binding?
+						// 	..unflagLengthTesting()
+						// 	..unflagTypeTesting()
+						if ?@binding {
+							@binding
 								..unflagLengthTesting()
 								..unflagTypeTesting()
 						}
@@ -1440,9 +1555,7 @@ class MatchFilter extends AbstractNode {
 
 						condition = MatchConditionObject.new(data, @parent, scope)
 
-						for var binding in @bindings {
-							binding.unflagTypeTesting()
-						}
+						@binding?.unflagTypeTesting()
 					}
 					NodeKind.MatchConditionRange {
 						if @kind == .NUMBER {
@@ -1460,9 +1573,7 @@ class MatchFilter extends AbstractNode {
 					NodeKind.MatchConditionType {
 						condition = MatchConditionType.new(data, @parent, scope)
 
-						for var binding in @bindings {
-							binding.unflagTypeTesting()
-						}
+						@binding?.unflagTypeTesting()
 					}
 					else {
 						condition = MatchConditionValue.new(data, @parent, scope)
@@ -1524,9 +1635,7 @@ class MatchFilter extends AbstractNode {
 					types.push(condition.type().reference(@scope))
 				}
 				else if condition.isContainer() {
-					for var binding in @bindings {
-						binding.unflagTypeTesting()
-					}
+					@binding?.unflagTypeTesting()
 
 					types.push(condition.type().reference(@scope))
 				}
@@ -1538,9 +1647,7 @@ class MatchFilter extends AbstractNode {
 
 		var conditionType = Type.union(@scope, ...types)
 
-		for var binding in @bindings {
-			binding.prepare(conditionType)
-		}
+		@binding?.prepare(conditionType)
 
 		@filter?.prepare(target)
 	} # }}}
@@ -1549,10 +1656,7 @@ class MatchFilter extends AbstractNode {
 			condition.translate()
 		}
 
-		for var binding in @bindings {
-			binding.translate()
-		}
-
+		@binding?.translate()
 		@filter?.translate()
 	} # }}}
 	conditions() => @conditions
@@ -1571,9 +1675,7 @@ class MatchFilter extends AbstractNode {
 		}
 	} # }}}
 	toBindingFragments(fragments, name) { # {{{
-		for var binding in @bindings {
-			binding.toBindingFragments(fragments, name)
-		}
+		@binding?.toBindingFragments(fragments, name)
 	} # }}}
 	toConditionFragments(fragments, name) { # {{{
 		var mut junction = Junction.NONE
@@ -1583,7 +1685,7 @@ class MatchFilter extends AbstractNode {
 				@conditions[0].toConditionFragments(fragments, name, junction)
 			}
 			else {
-				var wrap = #@bindings || ?@filter
+				var wrap = ?@binding || ?@filter
 
 				fragments.code('(') if wrap
 
@@ -1601,10 +1703,8 @@ class MatchFilter extends AbstractNode {
 			junction = .AND
 		}
 
-		if #@bindings {
-			for var binding in @bindings {
-				binding.toConditionFragments(fragments, name, junction)
-			}
+		if ?@binding {
+			@binding.toConditionFragments(fragments, name, junction)
 
 			junction = .AND
 		}
@@ -1612,16 +1712,8 @@ class MatchFilter extends AbstractNode {
 		if ?@filter {
 			fragments.code(' && ') if junction == .AND
 
-			if #@bindings {
-				fragments.code('((')
-
-				for var binding, i in @bindings {
-					fragments.code(', ') if i != 0
-
-					fragments.compile(binding)
-				}
-
-				fragments.code(') => ').compile(@filter).code(`)(\(name))`)
+			if ?@binding {
+				fragments.code('((').compile(@binding).code(') => ').compile(@filter).code(`)(\(name))`)
 			}
 			else {
 				fragments.compileCondition(@filter, null, junction)

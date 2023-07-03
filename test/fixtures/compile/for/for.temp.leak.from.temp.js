@@ -4,21 +4,22 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(args) {
+		let i;
 		let __ks_0, __ks_1, __ks_2, __ks_3;
 		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, Infinity, "", 1);
-		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+		for(let __ks_4 = __ks_0; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			i = __ks_3(__ks_4);
 			console.log(args[i]);
 		}
 		let j = 42;
 		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, Infinity, "", 1);
-		for(let __ks_4 = __ks_0; __ks_4 < __ks_1; __ks_4 += __ks_2) {
-			j = __ks_3(__ks_4);
+		for(let __ks_5 = __ks_0; __ks_5 < __ks_1; __ks_5 += __ks_2) {
+			j = __ks_3(__ks_5);
 			console.log(args[j]);
 		}
 		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, Infinity, "", 1);
-		for(let __ks_5 = __ks_0; __ks_5 < __ks_1; __ks_5 += __ks_2) {
-			j = __ks_3(__ks_5);
+		for(let __ks_6 = __ks_0; __ks_6 < __ks_1; __ks_6 += __ks_2) {
+			j = __ks_3(__ks_6);
 			console.log(args[j]);
 		}
 	};

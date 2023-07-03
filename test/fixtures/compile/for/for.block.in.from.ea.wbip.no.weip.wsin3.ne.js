@@ -1,5 +1,5 @@
 module.exports = function() {
-	let heroes = ["leto", "duncan", "goku", "batman", "asterix", "naruto", "totoro"];
+	const heroes = ["leto", "duncan", "goku", "batman", "asterix", "naruto", "totoro"];
 	for(let index = Math.min(heroes.length - 1, 5), hero; index >= 2; index -= 3) {
 		hero = heroes[index];
 		console.log("The hero at index %d is %s", index, hero);

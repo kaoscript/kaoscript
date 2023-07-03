@@ -2,10 +2,10 @@ extern console: {
 	log(...args)
 }
 
-characters = {
+var characters = {
 	heroes: ['leto', 'duncan', 'goku']
 }
 
-for hero in characters.heroes {
+for var hero in characters.heroes {
 	console.log(hero)
 }

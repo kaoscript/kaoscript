@@ -23,8 +23,6 @@ var $rules = {
 	'ignore-error':					['ignoreError', true]
 	'ignore-misfit':				['ignoreMisfit', true]
 	'dont-ignore-misfit':			['ignoreMisfit', false]
-	// TODO should be by default
-	'no-undefined':					['noUndefined', true]
 	'non-exhaustive':				['nonExhaustive', true]
 }
 
@@ -89,6 +87,8 @@ class Attribute {
 				name = data.name
 			}
 
+			var dyn clazz
+
 			if ?name && (clazz ?= $attributes[name]) && clazz.target() ~~ targets {
 				return clazz.new(data)
 			}
@@ -142,16 +142,16 @@ class ErrorAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
-		for arg in @data.arguments {
+		for var arg in @data.arguments {
 			match arg.kind {
 				NodeKind.AttributeExpression {
 					if arg.name.name == 'ignore' {
-						for a in arg.arguments {
+						for var a in arg.arguments {
 							options.error.ignore.push(a.name)
 						}
 					}
 					else if arg.name.name == 'raise' {
-						for a in arg.arguments {
+						for var a in arg.arguments {
 							options.error.raise.push(a.name)
 						}
 					}
@@ -186,7 +186,7 @@ class FormatAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
-		for arg in @data.arguments {
+		for var arg in @data.arguments {
 			if arg.kind == NodeKind.AttributeOperation {
 				options.format[arg.name.name] = arg.value.value
 			}
@@ -248,14 +248,14 @@ class IfAttribute extends Attribute {
 		if data.kind == NodeKind.AttributeExpression {
 			match data.name.name {
 				'all' {
-					for arg in data.arguments when !@evaluate(arg, target) {
+					for var arg in data.arguments when !@evaluate(arg, target) {
 						return false
 					}
 
 					return true
 				}
 				'any' {
-					for arg in data.arguments when @evaluate(arg, target) {
+					for var arg in data.arguments when @evaluate(arg, target) {
 						return true
 					}
 
@@ -316,7 +316,7 @@ class IfAttribute extends Attribute {
 					}
 				}
 				'none' {
-					for arg in data.arguments when @evaluate(arg, target) {
+					for var arg in data.arguments when @evaluate(arg, target) {
 						return false
 					}
 
@@ -325,7 +325,7 @@ class IfAttribute extends Attribute {
 				'one' {
 					var mut count = 0
 
-					for arg in data.arguments when @evaluate(arg, target) {
+					for var arg in data.arguments when @evaluate(arg, target) {
 						count += 1
 					}
 
@@ -338,7 +338,7 @@ class IfAttribute extends Attribute {
 			}
 		}
 		else if data.kind == NodeKind.Identifier {
-			if match ?= $semverRegex.exec(data.name) {
+			if var match ?= $semverRegex.exec(data.name) {
 				if ?match[2] {
 					return target.name == match[1] && target.version == match[2]
 				}
@@ -371,7 +371,7 @@ class ParseAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
-		for arg in @data.arguments {
+		for var arg in @data.arguments {
 			if arg.kind == NodeKind.AttributeOperation {
 				options.parse[arg.name.name] = arg.value.value
 			}
@@ -537,9 +537,11 @@ class TargetAttribute extends Attribute {
 		return options
 	} # }}}
 	configure(mut options, fileName, lineNumber) { # {{{
-		for argument in @data.arguments {
+		for var argument in @data.arguments {
 			if argument.kind == NodeKind.Identifier {
-				if match !?= $targetRegex.exec(argument.name) {
+				var match = $targetRegex.exec(argument.name)
+
+				unless ?match {
 					throw Error.new(`Invalid target syntax: \(argument.name)`)
 				}
 

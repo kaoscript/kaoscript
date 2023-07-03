@@ -4,7 +4,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let parent, __ks_0;
+		let parent;
+		let __ks_0;
 		if(!(Type.isValue(__ks_0 = x.parent()) ? (parent = __ks_0, false) : true)) {
 		}
 	};

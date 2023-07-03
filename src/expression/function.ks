@@ -60,7 +60,7 @@ class AnonymousFunctionExpression extends Expression {
 				parameter.prepare()
 			}
 
-			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
 
 			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
@@ -82,7 +82,7 @@ class AnonymousFunctionExpression extends Expression {
 				parameter.prepare(targetParameters[index])
 			}
 
-			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
 			@type.setReturnType(target.getReturnType())
 
 			@block = $compile.function($ast.body(@data), this)
@@ -108,7 +108,7 @@ class AnonymousFunctionExpression extends Expression {
 		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -254,7 +254,7 @@ class ArrowFunctionExpression extends Expression {
 				parameter.prepare()
 			}
 
-			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
 
 			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
@@ -276,7 +276,7 @@ class ArrowFunctionExpression extends Expression {
 				parameter.prepare(targetParameters[index])
 			}
 
-			@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, 0, this)
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
 			@type.setReturnType(target.getReturnType())
 
 			@block = $compile.function($ast.body(@data), this)

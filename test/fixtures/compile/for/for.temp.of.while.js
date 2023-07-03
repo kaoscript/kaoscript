@@ -4,8 +4,9 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x) {
-		for(let key in x.foo) {
-			let value = x.foo[key];
+		let value, key;
+		for(key in x.foo) {
+			value = x.foo[key];
 			let __ks_0;
 			if(!(Type.isValue(__ks_0 = value.bar()) ? (value = __ks_0, true) : false)) {
 				break;

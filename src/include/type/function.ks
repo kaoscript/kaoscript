@@ -50,7 +50,7 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
 			if ?data.parameters {
-				return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
+				return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters], data, node)
 			}
 			else {
 				return FunctionType.new([ParameterType.new(scope, Type.Any, 0, Infinity)], data, node)
@@ -248,7 +248,7 @@ class FunctionType extends Type {
 
 		@exported = true
 
-		for error in @errors {
+		for var error in @errors {
 			error.flagExported(false)
 		}
 
@@ -340,7 +340,7 @@ class FunctionType extends Type {
 	isAutoTyping(): @autoTyping
 	isCatchingError(error): Boolean { # {{{
 		if @errors.length != 0 {
-			for type in @errors {
+			for var type in @errors {
 				if error.matchInheritanceOf(type) {
 					return true
 				}
@@ -828,7 +828,7 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	private processModifiers(modifiers) { # {{{
-		for modifier in modifiers {
+		for var modifier in modifiers {
 			if modifier.kind == ModifierKind.Async {
 				@async = true
 			}
@@ -1144,7 +1144,7 @@ class OverloadedFunctionType extends Type {
 			return false
 		}
 
-		for fn in @functions {
+		for var fn in @functions {
 			if fn.isSubsetOf(value, mode) {
 				return true
 			}

@@ -1,6 +1,8 @@
 func foobar(x) => x
 
 func quxbaz(x) {
+	var dyn y
+
 	if x {
 
 	}

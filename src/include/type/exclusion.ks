@@ -33,7 +33,7 @@ class ExclusionType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind.Exclusion
-			types: [type.toReference(references, indexDelta, mode, module) for type in @types]
+			types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
@@ -54,7 +54,7 @@ class ExclusionType extends Type {
 	isComplete() => true
 	isExclusion() => true
 	isExportable() { # {{{
-		for type in @types {
+		for var type in @types {
 			if !type.isExportable() {
 				return false
 			}

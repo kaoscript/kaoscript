@@ -123,8 +123,8 @@ class ForFromStatement extends Statement {
 				@bindingScope.rename(@data.variable.name)
 			}
 		}
-		else if variable.isImmutable() {
-			ReferenceException.throwImmutable(@data.variable.name, this)
+		else {
+			@bindingScope.checkVariable(@data.variable.name, true, this)
 		}
 
 		@variable = $compile.expression(@data.variable, this, @bindingScope)

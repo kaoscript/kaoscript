@@ -22,7 +22,7 @@ impl Shape {
 	}
 }
 
-shape = Shape.makeBlue()
+var mut shape = Shape.makeBlue()
 expect(shape.draw()).to.equals(`I'm drawing a blue rectangle.`)
 
 shape = Shape.makeRed()

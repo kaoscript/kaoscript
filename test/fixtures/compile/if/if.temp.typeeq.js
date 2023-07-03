@@ -19,7 +19,8 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(x) {
-		let y, __ks_0;
+		let y;
+		let __ks_0;
 		if(x === true) {
 		}
 		else if((Type.isValue(__ks_0 = foobar.__ks_0(x)) ? (y = __ks_0, true) : false) && !Type.isString(y)) {

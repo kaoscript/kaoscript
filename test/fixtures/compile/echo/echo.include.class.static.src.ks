@@ -5,7 +5,7 @@ class Foobar {
 		}
 	}
 	quxbaz(values) {
-		for value in values {
+		for var value in values {
 		}
 	}
 }

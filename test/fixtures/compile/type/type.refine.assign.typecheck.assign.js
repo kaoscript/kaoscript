@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let isNumber = Type.isString(x) && !Number.isNaN(x.parseInt());
+		const isNumber = Type.isString(x) && !Number.isNaN(x.parseInt());
 		if(!Type.isString(x)) {
 		}
 	};

@@ -156,7 +156,7 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 		else if type is NamespaceType {
-			for data in @data.properties {
+			for var data in @data.properties {
 				var late property
 
 				match data.kind {
@@ -271,7 +271,7 @@ class ImplementDeclaration extends Statement {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
 
-		for property in @properties {
+		for var property in @properties {
 			property.toFragments(fragments, Mode.None)
 		}
 

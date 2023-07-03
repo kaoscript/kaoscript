@@ -178,7 +178,7 @@ func $blend(x: float, y: float, percentage: float): float { # {{{
 func $binder(last: func, components, first: func, ...firstArgs): func { # {{{
 	var that = first(...firstArgs)
 
-	var lastArgs = [that[component.field] for component, name of components]
+	var lastArgs = [that[component.field] for var component, name of components]
 
 	lastArgs.push(that)
 
@@ -219,8 +219,10 @@ func $component(component, name: string, space: string): void { # {{{
 } # }}}
 
 func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}): Color | object ~ Error { # {{{
-	if ?(s = $spaces[that._space]).converters[space] {
-		var args = [that[component.field] for component, name of s.components]
+	var s = $spaces[that._space]
+
+	if ?s.converters[space] {
+		var args = [that[component.field] for var component, name of s.components]
 
 		args.push(result)
 
@@ -255,7 +257,7 @@ func $from(that: Color, args: array): Color { # {{{
 		return that if $parsers[args.shift()](that, args)
 	}
 	else {
-		for parse, name of $parsers {
+		for var parse, name of $parsers {
 			return that if parse(that, args)
 		}
 	}
@@ -359,7 +361,7 @@ var $parsers = {
 				}
 
 				// #ff0000aa
-				if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
+				if var match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
@@ -368,7 +370,7 @@ var $parsers = {
 					return true
 				}
 				// #ff9000, #ff0000
-				else if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
+				else if var match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
@@ -377,7 +379,7 @@ var $parsers = {
 					return true
 				}
 				// #fffa
-				else if match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
+				else if var match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
@@ -386,7 +388,7 @@ var $parsers = {
 					return true
 				}
 				// #f00, #fff
-				else if match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
+				else if var match ?= /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
@@ -395,7 +397,7 @@ var $parsers = {
 					return true
 				}
 				// rgb(1, 234, 56)
-				else if match ?= /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color) {
+				else if var match ?= /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = $caster.ff(match[1])
 					that._green = $caster.ff(match[2])
@@ -404,7 +406,7 @@ var $parsers = {
 					return true
 				}
 				// rgb(66%, 55%, 44%) in [0,100]%, [0,100]%, [0,100]%
-				else if match ?= /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color) {
+				else if var match ?= /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Math.round(2.55 * $caster.percentage(match[1]))
 					that._green = Math.round(2.55 * $caster.percentage(match[2]))
@@ -413,7 +415,7 @@ var $parsers = {
 					return true
 				}
 				// rgba(#ff0000, 1)
-				else if match ?= /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color) {
+				else if var match ?= /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
@@ -422,7 +424,7 @@ var $parsers = {
 					return true
 				}
 				// rgba(#f00, 1)
-				else if match ?= /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color) {
+				else if var match ?= /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
@@ -431,7 +433,7 @@ var $parsers = {
 					return true
 				}
 				// 1, 234, 56
-				else if match ?= /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color) {
+				else if var match ?= /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = $caster.ff(match[1])
 					that._green = $caster.ff(match[2])
@@ -464,14 +466,14 @@ var $parsers = {
 				var color = (args[0] as string).lower().replace(/[^a-z0-9,.()#%]/g, '')
 
 				// gray(56)
-				if match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
+				if var match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = that._green = that._blue = $caster.ff(match[1])
 					that._alpha = $caster.alpha(match[2], ?match[3])
 					return true
 				}
 				// gray(66%)
-				else if match ?= /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
+				else if var match ?= /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space.SRGB
 					that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]))
 					that._alpha = $caster.alpha(match[2], ?match[3])
@@ -568,7 +570,7 @@ export class Color {
 				}
 			}
 			else if ?space.formatters {
-				for formatter, name of space.formatters {
+				for var formatter, name of space.formatters {
 					$formatters[name] = {
 						space: space.name,
 						formatter: formatter
@@ -577,19 +579,19 @@ export class Color {
 			}
 
 			if ?space.alias {
-				for alias in space.alias {
+				for var alias in space.alias {
 					$spaces[space.name].alias[alias] = true
 					$aliases[alias] = Space(space.name)
 				}
 
 				if ?$parsers[space.name] {
-					for alias in space.alias {
+					for var alias in space.alias {
 						$parsers[alias] = $parsers[space.name]
 					}
 				}
 
 				if ?$formatters[space.name] {
-					for alias in space.alias {
+					for var alias in space.alias {
 						$formatters[alias] = $formatters[space.name]
 					}
 				}
@@ -597,20 +599,20 @@ export class Color {
 
 			if ?space.converters {
 				if ?space.converters.from {
-					for converter, name of space.converters.from {
+					for var converter, name of space.converters.from {
 						$space(name) if !?$spaces[name]
 
 						$spaces[name].converters[space.name] = converter
 					}
 				}
 				if ?space.converters.to {
-					for converter, name of space.converters.to {
+					for var converter, name of space.converters.to {
 						$spaces[space.name].converters[name] = converter
 					}
 				}
 			}
 
-			for name in spaces {
+			for var name in spaces {
 				if !?$spaces[name].converters[space.name] {
 					$find(name, space.name)
 				}
@@ -621,7 +623,7 @@ export class Color {
 			}
 
 			if ?space.components {
-				for component, name of space.components {
+				for var component, name of space.components {
 					if ?component.family {
 						$spaces[space.name].components[name] = $spaces[component.family].components[name]
 
@@ -725,7 +727,7 @@ export class Color {
 
 		var components = $spaces[space].components
 
-		for component, name of components {
+		for var component, name of components {
 			if component.loop {
 				var mut d: Number = Math.abs(this[component.field] - color[component.field])
 
@@ -992,7 +994,7 @@ export class Color {
 	} # }}}
 
 	scheme(functions: array<(color: Color)>): array { # {{{
-		return [fn(this.clone()) for fn in functions]
+		return [fn(this.clone()) for var fn in functions]
 	} # }}}
 
 	private setField(name, value: number | string): Color { # {{{

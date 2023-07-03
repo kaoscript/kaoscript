@@ -6,7 +6,8 @@ module.exports = function() {
 		return o;
 	})();
 	let bar = ["otto"];
-	let qux, __ks_0;
+	let qux;
+	let __ks_0;
 	if(Type.isValue(foo[__ks_0 = bar.join(",")]) ? (qux = foo[__ks_0], true) : false) {
 	}
 };

@@ -39,15 +39,8 @@ abstract class Statement extends AbstractNode {
 					ReferenceException.throwImmutable(name, this)
 				}
 			}
-			else if @options.rules.noUndefined {
-				ReferenceException.throwNotDefined(name, this)
-			}
 			else {
-				if !scope.hasDeclaredVariable(name) {
-					@assignments.push(name)
-				}
-
-				@scope.define(name, false, this)
+				ReferenceException.throwNotDefined(name, this)
 			}
 		}
 	} # }}}

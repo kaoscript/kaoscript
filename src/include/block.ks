@@ -73,7 +73,7 @@ class Block extends AbstractNode {
 	translate() { # {{{
 		@scope.setLineOffset(@offset)
 
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
@@ -108,7 +108,7 @@ class Block extends AbstractNode {
 	analyse(statements: Array<AbstractNode>) { # {{{
 		@scope.setLineOffset(@offset)
 
-		for statement in statements {
+		for var statement in statements {
 			@scope.line(statement.line())
 
 			@statements.push(statement)
@@ -207,7 +207,7 @@ class Block extends AbstractNode {
 			var mut index = -1
 			var dyn item
 
-			for statement, i in @statements while index == -1 {
+			for var statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(fragments, Mode.None) {
 					index = i
 				}
@@ -218,13 +218,13 @@ class Block extends AbstractNode {
 			}
 		}
 		else {
-			for statement in @statements {
+			for var statement in @statements {
 				statement.toFragments(fragments, mode)
 			}
 		}
 	} # }}}
 	toRangeFragments(fragments, from: Number, to: Number = @statements.length + 1) { # {{{
-		for statement in @statements from from to to {
+		for var statement in @statements from from to to {
 			statement.toFragments(fragments, Mode.None)
 		}
 	} # }}}

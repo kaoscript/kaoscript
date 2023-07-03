@@ -11,7 +11,7 @@ impl Object {
 
 		var dyn clone = {}
 
-		for value, key of object {
+		for var value, key of object {
 			if value is Array {
 				clone[key] = value.clone()
 			}

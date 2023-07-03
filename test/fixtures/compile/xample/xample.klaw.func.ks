@@ -1,6 +1,6 @@
 extern __dirname, klaw, path, prepare
 
-for file in klaw(path.join(__dirname, 'fixtures'), {
+for var file in klaw(path.join(__dirname, 'fixtures'), {
 	nodir: true
 	traverseAll: true
 	filter: func(item) {

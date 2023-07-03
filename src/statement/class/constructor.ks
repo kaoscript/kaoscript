@@ -78,7 +78,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		@abstract = parent.isAbstract()
 
-		for modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Override {
 				@override = true
 			}
@@ -200,7 +200,7 @@ class ClassConstructorDeclaration extends Statement {
 
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -282,7 +282,7 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} # }}}
 	private getConstructorIndex(body: Array) { # {{{
-		for statement, index in body {
+		for var statement, index in body {
 			if statement.kind == NodeKind.ExpressionStatement {
 				var expression = statement.expression
 
@@ -305,7 +305,7 @@ class ClassConstructorDeclaration extends Statement {
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { # {{{
-		for statement, index in body {
+		for var statement, index in body {
 			if statement.kind == NodeKind.ExpressionStatement {
 				var expression = statement.expression
 
@@ -325,7 +325,7 @@ class ClassConstructorDeclaration extends Statement {
 		return -1
 	} # }}}
 	isAbstract() { # {{{
-		for modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind.Abstract {
 				return true
 			}

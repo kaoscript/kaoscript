@@ -7,8 +7,8 @@ module.exports = function() {
 		o.duncan = "murbella";
 		return o;
 	})();
-	for(let key in likes) {
-		let value = likes[key];
+	for(const key in likes) {
+		const value = likes[key];
 		console.log(Helper.concatString(key, " likes ", value));
 	}
 };

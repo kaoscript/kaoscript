@@ -112,7 +112,7 @@ class ThisExpression extends Expression {
 						var assessment = type.getInstantiableAssessment(@name, this)
 
 						match Router.matchArguments(assessment, null, @parent.arguments(), this) {
-							is LenientCallMatchResult | PreciseCallMatchResult with result {
+							is LenientCallMatchResult | PreciseCallMatchResult with var result {
 								var late functions: FunctionType[]
 
 								if result is PreciseCallMatchResult {

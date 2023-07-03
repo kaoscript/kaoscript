@@ -1,7 +1,7 @@
 extern console
 
 func foobar() {
-	values = quxbaz()!!
+	var values = quxbaz()!!
 
 	for var value in values {
 		console.log(`\(value)`)

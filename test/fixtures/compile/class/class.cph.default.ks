@@ -3,5 +3,5 @@ class Foobar {
 		_name
 		_items: Array	= []
 	}
-	list(fn: func) => [fn(@name, item) for item in @items]
+	list(fn: func) => [fn(@name, item) for var item in @items]
 }

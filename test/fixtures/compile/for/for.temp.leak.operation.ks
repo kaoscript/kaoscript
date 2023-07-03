@@ -6,6 +6,8 @@ func translate(statements, extending) {
 
 	}
 
+	var dyn statement
+
 	for statement in statements {
 		statement.analyse()
 	}

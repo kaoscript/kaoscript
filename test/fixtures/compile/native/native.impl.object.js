@@ -3,8 +3,8 @@ module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_func_map_0 = function(iterator) {
 		let results = [];
-		for(let index in this) {
-			let item = this[index];
+		for(const index in this) {
+			const item = this[index];
 			results.push(iterator(item, index));
 		}
 		return results;

@@ -3,16 +3,16 @@ module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_sttc_map_0 = function(dict, iterator) {
 		let results = [];
-		for(let index in dict) {
-			let item = dict[index];
+		for(const index in dict) {
+			const item = dict[index];
 			results.push(iterator(item, index));
 		}
 		return results;
 	};
 	__ks_Object.__ks_sttc_map_1 = function(dict, iterator, condition) {
 		let results = [];
-		for(let index in dict) {
-			let item = dict[index];
+		for(const index in dict) {
+			const item = dict[index];
 			if(condition(item, index) === true) {
 				results.push(iterator(item, index));
 			}

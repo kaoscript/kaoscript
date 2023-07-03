@@ -1628,7 +1628,7 @@ namespace Matching {
 			else {
 				indexeds.sort((a, b) => a.index - b.index)
 
-				var arguments = [argumentTypes[index] for { index } in indexeds]
+				var arguments = [argumentTypes[index] for var { index } in indexeds]
 				var functions = [assessment.functions[key] for var key in possibleFunctions]
 
 				var route = Build.getRoute(assessment, excludes, functions, node)

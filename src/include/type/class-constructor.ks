@@ -10,7 +10,7 @@ class ClassConstructorType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{
 			var scope = node.scope()
 
-			return ClassConstructorType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return ClassConstructorType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
 			var data = index
@@ -71,8 +71,8 @@ class ClassConstructorType extends FunctionType {
 			sealed: @sealed
 			min: @min
 			max: @max
-			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
-			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]
+			parameters: [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
+			errors: [error.toReference(references, indexDelta, mode, module) for var error in @errors]
 		}
 
 		if @class.isAbstract() {
@@ -109,7 +109,7 @@ class ClassConstructorType extends FunctionType {
 	overwrite() => @overwrite
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
-		for modifier in modifiers {
+		for var modifier in modifiers {
 			if modifier.kind == ModifierKind.Async {
 				throw NotImplementedException.new()
 			}

@@ -5,7 +5,7 @@ extern console: {
 var dyn key = 'you'
 var dyn value = 42
 
-likes = {
+var likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'

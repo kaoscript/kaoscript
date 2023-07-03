@@ -19,8 +19,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
-		let value;
-		if((value = quxbaz.__ks_0()).ok === true) {
+		let event;
+		if((event = quxbaz.__ks_0()).ok === true) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

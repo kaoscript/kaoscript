@@ -2,6 +2,6 @@ extern console
 
 var foo = {}
 
-for value in foo {
+for var value in foo {
 	console.log(value)
 }

@@ -23,7 +23,9 @@ abstract class DependencyStatement extends Statement {
 				var variable = scope.define(declaration.name.name, true, type, this)
 
 				if ?declaration.extends {
-					if superVar !?= @scope.getVariable(declaration.extends.name) {
+					var superVar = @scope.getVariable(declaration.extends.name)
+
+					if !?superVar {
 						ReferenceException.throwNotDefined(declaration.extends.name, this)
 					}
 					else if !superVar.getDeclaredType().isClass() {
@@ -70,7 +72,7 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				if declaration.members.length != 0 {
-					for member in declaration.members {
+					for var member in declaration.members {
 						type.addPropertyFromAST(member, this)
 					}
 				}
@@ -202,7 +204,7 @@ class ExternDeclaration extends DependencyStatement {
 				if declaration.kind == NodeKind.FunctionDeclaration {
 					var late parameters
 					if declaration.parameters?.length != 0 {
-						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
+						parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
 					}
 					else {
 						parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
@@ -260,7 +262,7 @@ class ExternDeclaration extends DependencyStatement {
 			.flagRequired()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		for line in @lines {
+		for var line in @lines {
 			fragments.line(line)
 		}
 	} # }}}
@@ -281,7 +283,7 @@ class RequireDeclaration extends DependencyStatement {
 
 					var late parameters
 					if declaration.parameters?.length != 0 {
-						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
+						parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
 					}
 					else {
 						parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
@@ -355,7 +357,7 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 			}
 		}
 		else {
-			for declaration in @data.declarations {
+			for var declaration in @data.declarations {
 				@addRequirement(declaration)
 			}
 		}
@@ -447,7 +449,7 @@ class RequireOrImportDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.analyse()
 		}
 	} # }}}
@@ -653,7 +655,7 @@ class ExternOrImportDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.analyse()
 		}
 	} # }}}

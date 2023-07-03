@@ -41,7 +41,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 	hasExceptions() => false
 	isComputed() => true
 	isNullable() { # {{{
-		for operand in @operands {
+		for var operand in @operands {
 			if operand.isNullable() {
 				return true
 			}

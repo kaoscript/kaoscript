@@ -1,7 +1,7 @@
 extern console
 
 func foobar(values) {
-	for value of values {
+	for var value of values {
 		console.log(value)
 	}
 	else {

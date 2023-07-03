@@ -6,7 +6,7 @@ impl Object {
 	map(iterator: func) {
 		var dyn results = []
 
-		for item, index of this {
+		for var item, index of this {
 			results.push(iterator(item, index))
 		}
 

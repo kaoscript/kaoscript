@@ -5,7 +5,8 @@ module.exports = function() {
 	};
 	parse.__ks_0 = function(color) {
 		if(Type.isString(color)) {
-			let match, __ks_0;
+			let match;
+			let __ks_0;
 			if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
 				console.log(match);
 			}

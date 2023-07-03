@@ -1,1 +1,1 @@
-a = [i for i in 0..10]
+var a = [i for var i in 0..10]

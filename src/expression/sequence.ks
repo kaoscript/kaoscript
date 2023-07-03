@@ -25,7 +25,7 @@ class SequenceExpression extends Expression {
 		@type = @expressions[@last].type()
 	} # }}}
 	translate() { # {{{
-		for expression in @expressions {
+		for var expression in @expressions {
 			expression.translate()
 		}
 	} # }}}

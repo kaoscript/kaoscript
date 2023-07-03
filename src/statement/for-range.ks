@@ -29,14 +29,13 @@ class ForRangeStatement extends Statement {
 			}
 		}
 
-		var variable = @scope.getVariable(@data.value.name)
-		if @declaration || variable == null {
+		if @declaration {
 			@bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 			@defineVariable = true
 		}
-		else if variable.isImmutable() {
-			ReferenceException.throwImmutable(@data.value.name, this)
+		else {
+			@bindingScope.checkVariable(@data.value.name, true, this)
 		}
 
 		@value = $compile.expression(@data.value, this, @bindingScope)

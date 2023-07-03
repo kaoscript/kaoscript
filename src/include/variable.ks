@@ -21,15 +21,12 @@ class Variable {
 	}
 	static {
 		createPredefinedClass(name: String, features: ClassFeature? = null, scope: Scope): Variable { # {{{
-			type = ClassType.new(scope)
-			type.flagAlien()
-			type.flagComplete()
-			type.flagPredefined()
-			type.flagSystem()
-
-			if ?features {
-				type.features(features)
-			}
+			var type = ClassType.new(scope)
+				..flagAlien()
+				..flagComplete()
+				..flagPredefined()
+				..flagSystem()
+				..features(features) if ?features
 
 			return Variable.new(name, true, true, type)
 		} # }}}

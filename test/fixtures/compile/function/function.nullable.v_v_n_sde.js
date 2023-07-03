@@ -28,8 +28,8 @@ module.exports = function() {
 	};
 	corge.__ks_0 = function(metadatas) {
 		let name;
-		for(name in metadatas) {
-			let data = metadatas[name];
+		for(const name in metadatas) {
+			const data = metadatas[name];
 			foobar(data.x, data.y, null, name);
 		}
 	};

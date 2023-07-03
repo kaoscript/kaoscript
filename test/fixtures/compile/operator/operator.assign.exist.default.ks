@@ -3,6 +3,7 @@ extern console: {
 }
 
 var dyn foo = 'otto'
+var dyn bar
 
 bar ?= foo
 

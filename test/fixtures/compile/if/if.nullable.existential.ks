@@ -6,5 +6,7 @@ class Foobar {
 	quxbaz(): Boolean => true
 }
 
+var dyn x
+
 if (x ?= Foobar.create().foobar()) && x.quxbaz() {
 }

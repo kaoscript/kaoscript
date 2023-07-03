@@ -174,10 +174,10 @@ class CallExpression extends Expression {
 				@prepareArguments()
 
 				match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-					is LenientCallMatchResult with result {
+					is LenientCallMatchResult with var result {
 						@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 					}
-					is PreciseCallMatchResult with { matches } {
+					is PreciseCallMatchResult with var { matches } {
 						var callee = PreciseFunctionCallee.new(@data, expression, @assessment, matches, this)
 
 						callee.flagDirect()
@@ -203,10 +203,10 @@ class CallExpression extends Expression {
 					@assessment = type.assessment(@property, this)
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-						is LenientCallMatchResult with { possibilities } {
+						is LenientCallMatchResult with var { possibilities } {
 							@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
 						}
-						is PreciseCallMatchResult with { matches } {
+						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 								var class = expression.getClass()
@@ -345,7 +345,7 @@ class CallExpression extends Expression {
 	} # }}}
 	isAwait() => @await
 	isAwaiting() { # {{{
-		for argument in @arguments {
+		for var argument in @arguments {
 			if argument.isAwaiting() {
 				return true
 			}
@@ -505,10 +505,10 @@ class CallExpression extends Expression {
 			@prepareArguments()
 
 			match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-				is LenientCallMatchResult with result {
+				is LenientCallMatchResult with var result {
 					@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 				}
-				is PreciseCallMatchResult with { matches } {
+				is PreciseCallMatchResult with var { matches } {
 					if matches.length == 1 {
 						var match = matches[0]
 
@@ -637,10 +637,10 @@ class CallExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with result {
+						is LenientCallMatchResult with var result {
 							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
 						}
-						is PreciseCallMatchResult with { matches } {
+						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 
@@ -698,10 +698,10 @@ class CallExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with result {
+						is LenientCallMatchResult with var result {
 							@addCallee(EnumMethodCallee.new(@data, @object.type(), @property, result.possibilities, this))
 						}
-						is PreciseCallMatchResult with { matches } {
+						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
 								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
 							}
@@ -745,10 +745,10 @@ class CallExpression extends Expression {
 						@prepareArguments()
 
 						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-							is LenientCallMatchResult with result {
+							is LenientCallMatchResult with var result {
 								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 							}
-							is PreciseCallMatchResult with { matches } {
+							is PreciseCallMatchResult with var { matches } {
 								if matches.length == 1 {
 									var match = matches[0]
 
@@ -910,13 +910,13 @@ class CallExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with result {
+						is LenientCallMatchResult with var result {
 							var class = value.getClassWithInstantiableMethod(@property, reference.type())
 							var reference = @scope.reference(class)
 
 							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
 						}
-						is PreciseCallMatchResult with { matches } {
+						is PreciseCallMatchResult with var { matches } {
 							var class = value.getClassWithInstantiableMethod(@property, reference.type())
 							var reference = @scope.reference(class)
 
@@ -955,6 +955,8 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
+					var dyn callee, substitute
+
 					if	@data.callee.object.kind == NodeKind.Identifier &&
 							(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 							(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
@@ -979,10 +981,10 @@ class CallExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with result {
+						is LenientCallMatchResult with var result {
 							@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
-						is PreciseCallMatchResult with { matches } {
+						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 
@@ -1027,10 +1029,10 @@ class CallExpression extends Expression {
 						@prepareArguments()
 
 						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-							is LenientCallMatchResult with result {
+							is LenientCallMatchResult with var result {
 								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 							}
-							is PreciseCallMatchResult with { matches } {
+							is PreciseCallMatchResult with var { matches } {
 								if matches.length == 1 {
 									var match = matches[0]
 
@@ -1152,7 +1154,7 @@ class CallExpression extends Expression {
 			@scope.releaseTempName(@reuseName)
 		}
 
-		for callee in @callees {
+		for var callee in @callees {
 			callee.releaseReusable()
 		}
 	} # }}}

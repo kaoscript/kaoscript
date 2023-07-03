@@ -292,7 +292,7 @@ class VariableDeclaration extends AbstractNode {
 			@value.translate()
 		}
 
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.translate()
 		}
 	} # }}}
@@ -351,7 +351,7 @@ class VariableDeclaration extends AbstractNode {
 	isAutoTyping() => @autotype
 	isAwait() => @await
 	isDeclararingVariable(name: String) { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			if declarator.isDeclararingVariable(name) {
 				return true
 			}
@@ -441,7 +441,7 @@ class VariableDeclaration extends AbstractNode {
 		else if @redeclared {
 			var line = fragments.newLine()
 
-			for declarator, index in @declarators {
+			for var declarator, index in @declarators {
 				line.code($comma) if index != 0
 
 				line.compile(declarator).code(' = null')

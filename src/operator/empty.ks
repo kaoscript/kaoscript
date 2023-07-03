@@ -297,7 +297,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 class BinaryOperatorEmptyCoalescing extends PolyadicOperatorEmptyCoalescing {
 	analyse() { # {{{
 		for var data in [@data.left, @data.right] {
-			operand = $compile.expression(data, this)
+			var operand = $compile.expression(data, this)
 
 			operand.analyse()
 

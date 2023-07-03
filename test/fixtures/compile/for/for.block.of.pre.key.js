@@ -1,6 +1,6 @@
 const {OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	let likes = (() => {
+	const likes = (() => {
 		const o = new OBJ();
 		o.leto = "spice";
 		o.paul = "chani";

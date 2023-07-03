@@ -8,10 +8,10 @@ class ClassDestructorType extends FunctionType {
 	access(@access) => this
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { # {{{
 		access: @access
-		errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]
+		errors: [error.toReference(references, indexDelta, mode, module) for var error in @errors]
 	} # }}}
 	private processModifiers(modifiers) { # {{{
-		for modifier in modifiers {
+		for var modifier in modifiers {
 			if modifier.kind == ModifierKind.Async {
 				throw NotImplementedException.new()
 			}

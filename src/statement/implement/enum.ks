@@ -244,7 +244,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 

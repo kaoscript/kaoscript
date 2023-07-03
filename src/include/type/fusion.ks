@@ -38,7 +38,7 @@ class FusionType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind.Fusion
-			types: [type.toExportOrReference(references, indexDelta, mode, module) for type in @types]
+			types: [type.toExportOrReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
 	getProperty(index: Number): Type? { # {{{
@@ -196,7 +196,7 @@ class FusionType extends Type {
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
-		for type, i in @types {
+		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
@@ -209,7 +209,7 @@ class FusionType extends Type {
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
-		for type, i in @types {
+		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}

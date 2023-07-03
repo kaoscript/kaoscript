@@ -9,7 +9,7 @@ async func disks() {
 	var stdout: string, stderr = await exec('df -k')
 
 	var mut matches: Array<String>
-	for line in stdout.lines() {
+	for var line in stdout.lines() {
 		if matches ?= df_regex.exec(line) {
 			disks.push({
 				device: matches[1].trim()

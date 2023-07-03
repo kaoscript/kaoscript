@@ -2,7 +2,7 @@ extern console: {
 	log(...)
 }
 
-likes = {
+var likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'

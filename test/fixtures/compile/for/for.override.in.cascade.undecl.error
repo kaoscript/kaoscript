@@ -1,1 +1,1 @@
-SyntaxException: Identifier "value" has already been declared (fixtures/compile/for/for.override.in.cascade.undecl.ks:7)
+SyntaxException: Identifier "value" has already been declared (fixtures/compile/for/for.override.in.cascade.undecl.ks:8)

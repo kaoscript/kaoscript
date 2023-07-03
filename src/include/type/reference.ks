@@ -345,9 +345,13 @@ class ReferenceType extends Type {
 	} # }}}
 	discard() => @discardReference()?.discard()
 	discardAlias() { # {{{
+		var dyn variable
+
 		if @name == 'Any' {
 			return Type.Any
 		}
+		// TODO
+		// else if var variable ?= @scope.getVariable(@name); variable.getRealType() is not ReferenceType || variable.name() != @name || variable.scope() != @scope {
 		else if (variable ?= @scope.getVariable(@name)) && (variable.getRealType() is not ReferenceType || variable.name() != @name || variable.scope() != @scope) {
 			return variable.getRealType().discardAlias()
 		}
@@ -356,9 +360,18 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	discardReference(): Type? { # {{{
+		var dyn variable, type
+
 		if @name == 'Any' {
 			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
+		// TODO improve syntax
+		// else if {
+		// 	var variable ?= @scope.getVariable(@name, -1); variable.name() != @name
+		// 	var type ?= variable.getRealType(); type is not ReferenceType || type.scope() != @scope
+		// }
+		// then {
+		// }
 		else if (variable ?= @scope.getVariable(@name, -1)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
 			return type.discardReference()
 		}
@@ -394,7 +407,7 @@ class ReferenceType extends Type {
 			}
 
 			if @parameters.length != 0 {
-				export.parameters = [parameter.toGenericParameter(references, indexDelta, mode, module) for parameter in @parameters]
+				export.parameters = [parameter.toGenericParameter(references, indexDelta, mode, module) for var parameter in @parameters]
 			}
 
 			return export
@@ -412,7 +425,7 @@ class ReferenceType extends Type {
 			}
 
 			if @parameters.length != 0 {
-				export.parameters = [parameter.toReference(references, indexDelta, mode, module) for parameter in @parameters]
+				export.parameters = [parameter.toReference(references, indexDelta, mode, module) for var parameter in @parameters]
 			}
 
 			return export
@@ -743,7 +756,7 @@ class ReferenceType extends Type {
 		return false
 	} # }}}
 	isInstanceOf(value: UnionType) { # {{{
-		for type in value.types() {
+		for var type in value.types() {
 			if @isInstanceOf(type) {
 				return true
 			}

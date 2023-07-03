@@ -219,13 +219,13 @@ class ClassType extends Type {
 
 					if data.abstract {
 						for var methods, name of data.abstractMethods {
-							for method in methods {
+							for var method in methods {
 								type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 							}
 						}
 					}
 
-					for method in data.constructors {
+					for var method in data.constructors {
 						type.addConstructor(ClassConstructorType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 
@@ -242,13 +242,13 @@ class ClassType extends Type {
 					}
 
 					for var methods, name of data.instanceMethods {
-						for method in methods {
+						for var method in methods {
 							type.dedupInstanceMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for var methods, name of data.staticMethods {
-						for method in methods {
+						for var method in methods {
 							type.dedupStaticMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
@@ -264,7 +264,7 @@ class ClassType extends Type {
 
 			if type.isAbstract() {
 				for var methods, name of data.abstractMethods {
-					for method in methods {
+					for var method in methods {
 						type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
@@ -965,7 +965,7 @@ class ClassType extends Type {
 		@exported = true
 		@explicitlyExported = explicitly
 
-		for method in @constructors {
+		for var method in @constructors {
 			method.flagExported(false)
 		}
 
@@ -978,13 +978,13 @@ class ClassType extends Type {
 		}
 
 		for var methods of @instanceMethods when methods is Array {
-			for method in methods {
+			for var method in methods {
 				method.flagExported(false)
 			}
 		}
 
 		for var methods of @staticMethods when methods is Array {
-			for method in methods {
+			for var method in methods {
 				method.flagExported(false)
 			}
 		}
@@ -1044,7 +1044,7 @@ class ClassType extends Type {
 	} # }}}
 	getAbstractMethod(name: String, type: Type) { # {{{
 		if @abstractMethods[name] is Array {
-			for method in @abstractMethods[name] {
+			for var method in @abstractMethods[name] {
 				if type.isMatching(method, MatchingMode.FunctionSignature) {
 					return method
 				}
@@ -1075,7 +1075,7 @@ class ClassType extends Type {
 
 		var result = []
 
-		for method in @constructors {
+		for var method in @constructors {
 			if method.isSubsetOf(type, mode) {
 				result.push(method)
 			}
@@ -1934,7 +1934,7 @@ class ClassType extends Type {
 		var result = []
 
 		if var methods ?= @staticMethods[name] {
-			for method in methods {
+			for var method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
 				}
@@ -1962,7 +1962,7 @@ class ClassType extends Type {
 			}
 		}
 		else {
-			for constructor in @constructors {
+			for var constructor in @constructors {
 				if constructor.matchArguments(arguments, node) {
 					return true
 				}
@@ -1978,7 +1978,7 @@ class ClassType extends Type {
 			else if @instanceMethods[name] is Array {
 				var mut nf = true
 
-				for method in @instanceMethods[name] while nf {
+				for var method in @instanceMethods[name] while nf {
 					if method.isSubsetOf(property, MatchingMode.FunctionSignature) {
 						nf = false
 					}

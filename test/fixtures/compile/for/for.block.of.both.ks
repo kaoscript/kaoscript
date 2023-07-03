@@ -2,12 +2,12 @@ extern console: {
 	log(...args)
 }
 
-likes = {
+var likes = {
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'
 }
 
-for value, key of likes {
+for var value, key of likes {
 	console.log(`\(key) likes \(value)`)
 }

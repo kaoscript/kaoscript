@@ -295,7 +295,7 @@ class Parameter extends AbstractNode {
 			}
 		} # }}}
 		toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
-			parameter = parameters[restIndex]
+			var parameter = parameters[restIndex]
 
 			var context = {
 				name

@@ -30,7 +30,9 @@ class ThrowStatement extends Statement {
 	override prepare(target, targetMode) { # {{{
 		@value.prepare(AnyType.NullableUnexplicit)
 
-		if type !?= @value.type().discardReference() {
+		var type = @value.type().discardReference()
+
+		if !?type {
 			TypeException.throwRequireClass(this)
 		}
 		else if type.isNamed() && type.type() is ClassType {

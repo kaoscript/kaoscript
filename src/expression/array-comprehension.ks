@@ -3,17 +3,33 @@ class ArrayComprehensionForFrom extends Expression {
 		@bindingScope
 		@body
 		@bodyScope
+		@declaration: Boolean				= false
 		@from
+		@immutable: Boolean					= false
 		@to
-		@step				= null
+		@step								= null
 		@variable
-		@when			= null
+		@when								= null
 	}
 	analyse() { # {{{
+		for var modifier in @data.loop.modifiers {
+			if modifier.kind == ModifierKind.Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind.Immutable {
+				@immutable = true
+			}
+		}
+
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
-		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), true, this)
+		if @declaration {
+			@bindingScope.define(@data.loop.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
+		}
+		else {
+			@bindingScope.checkVariable(@data.loop.variable.name, true, this)
+		}
 
 		@variable = $compile.expression(@data.loop.variable, this, @bindingScope)
 		@variable.analyse()
@@ -166,15 +182,13 @@ class ArrayComprehensionForIn extends Expression {
 			@value.analyse()
 
 			for var { name } in @value.listAssignments([]) {
-				var variable = @scope.getVariable(name)
-
-				if @declaration || variable == null {
+				if @declaration {
 					@declareValue = true
 
 					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
 				}
-				else if variable.isImmutable() {
-					ReferenceException.throwImmutable(name, this)
+				else {
+					@bindingScope.checkVariable(name, true, this)
 				}
 			}
 		}
@@ -183,15 +197,13 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		if ?@data.loop.index {
-			var variable = @bindingScope.getVariable(@data.loop.index.name)
-
-			if @declaration || variable == null {
+			if @declaration {
 				@bindingScope.define(@data.loop.index.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 				@declareIndex = true
 			}
-			else if variable.isImmutable() {
-				ReferenceException.throwImmutable(@data.loop.index.name, this)
+			else {
+				@bindingScope.checkVariable(@data.loop.index.name, true, this)
 			}
 
 			@index = $compile.expression(@data.loop.index, this, @bindingScope)
@@ -363,15 +375,13 @@ class ArrayComprehensionForOf extends Expression {
 		@expression.analyse()
 
 		if ?@data.loop.key {
-			var keyVariable = @scope.getVariable(@data.loop.key.name)
-
-			if @declaration || keyVariable == null {
+			if @declaration {
 				@bindingScope.define(@data.loop.key.name, @immutable, @bindingScope.reference('String'), true, this)
 
 				@defineKey = true
 			}
-			else if keyVariable.isImmutable() {
-				ReferenceException.throwImmutable(@data.loop.key.name, this)
+			else {
+				@bindingScope.checkVariable(@data.loop.key.name, true, this)
 			}
 
 			@key = $compile.expression(@data.loop.key, this, @bindingScope)
@@ -387,15 +397,13 @@ class ArrayComprehensionForOf extends Expression {
 			@value.analyse()
 
 			for var { name } in @value.listAssignments([]) {
-				var variable = @bindingScope.getVariable(name)
-
-				if @declaration || variable == null {
+				if @declaration {
 					@defineValue = true
 
 					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
 				}
-				else if variable.isImmutable() {
-					ReferenceException.throwImmutable(name, this)
+				else {
+					@bindingScope.checkVariable(name, true, this)
 				}
 			}
 		}
@@ -531,17 +539,33 @@ class ArrayComprehensionForRange extends Expression {
 		@bindingScope
 		@body
 		@bodyScope
-		@by				= null
+		@by									= null
+		@declaration: Boolean				= false
 		@from
+		@immutable: Boolean					= false
 		@to
 		@value
-		@when			= null
+		@when								= null
 	}
 	analyse() { # {{{
+		for var modifier in @data.loop.modifiers {
+			if modifier.kind == ModifierKind.Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind.Immutable {
+				@immutable = true
+			}
+		}
+
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
-		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), true, this)
+		if @declaration {
+			@bindingScope.define(@data.loop.value.name, @immutable, @bindingScope.reference('Number'), true, this)
+		}
+		else {
+			@bindingScope.checkVariable(@data.loop.value.name, true, this)
+		}
 
 		@value = $compile.expression(@data.loop.value, this, @bindingScope)
 		@value.analyse()

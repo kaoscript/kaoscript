@@ -15,7 +15,7 @@ impl Array {
 			}
 		}
 		else {
-			for item in args {
+			for var item in args {
 				if !this.contains(item) {
 					this.push(item)
 				}

@@ -4,7 +4,7 @@ export class Color {
 		var methods: Array = []
 
 		var dyn field
-		for component, name of expression.components when !?component.family {
+		for var component, name of expression.components when !?component.family {
 			field = `_\(name)`
 
 			fields.push(macro private #w(field): Number = 0)

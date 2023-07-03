@@ -197,7 +197,7 @@ class ArrayBinding extends Expression {
 	isDeclarable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { # {{{
-		for element in @elements {
+		for var element in @elements {
 			if element.isDeclararingVariable(name) {
 				return true
 			}

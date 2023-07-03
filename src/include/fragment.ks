@@ -150,7 +150,7 @@ class ExpressionBuilder extends ExpressionWriter {
 	code(...args) { # {{{
 		var dyn data
 
-		for arg, i in args {
+		for var mut arg, i in args {
 			if arg is Array {
 				@code(...arg)
 			}

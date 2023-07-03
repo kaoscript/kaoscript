@@ -3,7 +3,7 @@ module.exports = function() {
 	let foo = (() => {
 		const o = new OBJ();
 		o.bar = Helper.function((name = null) => {
-			let n = 0;
+			const n = 0;
 		}, (that, fn, ...args) => {
 			const t0 = value => Type.isString(value) || Type.isNull(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);

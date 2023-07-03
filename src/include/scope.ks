@@ -86,6 +86,16 @@ abstract class Scope {
 		isTempName(name: String): Boolean => name.length > 5 && name.substr(0, 5) == '__ks_'
 	}
 	acquireUnusedTempName(): String? => null
+	checkVariable(name: String, rebindable: Boolean, node): Void ~ ReferenceException { # {{{
+		if var variable ?= @getVariable(name) {
+			if rebindable && variable.isImmutable() {
+				ReferenceException.throwImmutable(name, node)
+			}
+		}
+		else {
+			ReferenceException.throwNotDefined(name, node)
+		}
+	} # }}}
 	commitTempVariables(variables: Array): Void
 	getChunkType(name: String, line: Number?): Type? => null
 	getLineOffset(): Number => 0
@@ -96,7 +106,14 @@ abstract class Scope {
 	hasMacro(name: String): Boolean => false
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
-	isPredefinedVariable(name: String): Boolean => (variable ?= @getVariable(name)) && variable.isPredefined()
+	isPredefinedVariable(name: String): Boolean { # {{{
+		if var variable ?= @getVariable(name) {
+			return variable.isPredefined()
+		}
+		else {
+			return false
+		}
+	} # }}}
 	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) => name == newName
 	isRenamedVariable(name: String): Boolean => false
 	line(): Number => 0

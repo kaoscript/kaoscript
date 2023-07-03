@@ -65,7 +65,7 @@ class ClassDestructorDeclaration extends Statement {
 	getFunctionNode() => this
 	getParameterOffset() => 0
 	isAbstract() { # {{{
-		for modifier in @data.modifiers {
+		for var modifier in @data.modifiers {
 			if modifier.kind == ModifierKind.Abstract {
 				return true
 			}

@@ -1,5 +1,5 @@
 func foobar(value) {
 	match value {
-		with {qux % n} 			=> echo(`qux: \(n)`)
+		with var {qux % n} 			=> echo(`qux: \(n)`)
 	}
 }

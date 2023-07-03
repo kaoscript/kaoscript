@@ -1,6 +1,8 @@
 extern console
 
 func foo(...args) {
+	var dyn i
+
 	for i from 0 to~ args.length {
 		console.log(args[i])
 	}

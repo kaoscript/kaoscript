@@ -2,7 +2,7 @@ extern console: {
 	log(...)
 }
 
-arr = [1, '', true]
+var arr = [1, '', true]
 
 [a, b, c] = arr
 

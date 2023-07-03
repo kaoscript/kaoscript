@@ -1,6 +1,8 @@
 extern console
 
 func foo(x) {
+	var dyn value
+
 	if ?x.foo {
 		for value in x.foo {
 			console.log(value)

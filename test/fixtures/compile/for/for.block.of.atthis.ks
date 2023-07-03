@@ -11,7 +11,7 @@ class Matcher {
 		}
 	}
 	print() {
-		for value, key of @likes {
+		for var value, key of @likes {
 			console.log(`\(key) likes \(value)`)
 		}
 	}

@@ -4,6 +4,7 @@ extern console: {
 
 var dyn foo = () => 'otto'
 var dyn qux = () => 'itti'
+var dyn x
 
 if x ?= foo() {
 	console.log(x)

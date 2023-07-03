@@ -7,7 +7,7 @@ func foobar(value?) {
 	match value {
 		Number {
 		}
-		Foobar with { argument, from } {
+		Foobar with var { argument, from } {
 		}
 	}
 }

@@ -255,7 +255,7 @@ abstract class Type {
 				NodeKind.ClassDeclaration {
 					var type = ClassType.new(scope)
 
-					for modifier in data.modifiers {
+					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Abstract {
 							type._abstract = data.abstract
 						}
@@ -271,14 +271,14 @@ abstract class Type {
 				}
 				NodeKind.FunctionDeclaration, NodeKind.MethodDeclaration {
 					if ?data.parameters {
-						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node).flagComplete()
+						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
 						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
 				NodeKind.FunctionExpression {
-					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
+					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
 				NodeKind.FusionType {
 					return FusionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])

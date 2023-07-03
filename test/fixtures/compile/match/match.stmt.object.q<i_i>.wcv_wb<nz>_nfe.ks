@@ -5,6 +5,6 @@ struct Foobar {
 
 func foobar(value: Foobar) {
 	match value {
-		{foo: 1}	with {qux % n} 			=> echo(`qux: \(n)`)
+		{foo: 1}	with var {qux % n} 			=> echo(`qux: \(n)`)
 	}
 }

@@ -1,4 +1,6 @@
 func init(data, builder) {
+	var dyn statement, fragment
+
 	var block = builder.newBlock()
 
 	for statement in data.block(data.body).statements {

@@ -338,7 +338,7 @@ class BlockScope extends Scope {
 		var regex = RegExp.new(`^\(name)\.`)
 		var list = []
 
-		for m, n of @macros when regex.test(n) {
+		for var m, n of @macros when regex.test(n) {
 			list.push(...m)
 		}
 

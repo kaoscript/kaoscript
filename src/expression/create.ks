@@ -66,7 +66,7 @@ class CreateExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, null, @arguments, this) {
-						is LenientCallMatchResult | PreciseCallMatchResult with result {
+						is LenientCallMatchResult | PreciseCallMatchResult with var result {
 							@result = result
 						}
 						else {
@@ -89,7 +89,7 @@ class CreateExpression extends Expression {
 					@prepareArguments()
 
 					match Router.matchArguments(@assessment, null, @arguments, this) {
-						is LenientCallMatchResult | PreciseCallMatchResult with result {
+						is LenientCallMatchResult | PreciseCallMatchResult with var result {
 							@result = result
 						}
 						else {
@@ -111,7 +111,7 @@ class CreateExpression extends Expression {
 
 
 					match Router.matchArguments(@assessment, null, @arguments, this) {
-						is LenientCallMatchResult | PreciseCallMatchResult with result {
+						is LenientCallMatchResult | PreciseCallMatchResult with var result {
 							@result = result
 						}
 						else {

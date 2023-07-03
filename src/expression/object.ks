@@ -182,7 +182,7 @@ class ObjectExpression extends Expression {
 		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
-		for property in @properties {
+		for var property in @properties {
 			property.translate()
 		}
 	} # }}}
@@ -236,7 +236,7 @@ class ObjectExpression extends Expression {
 			@scope.releaseTempName(@reuseName)
 		}
 
-		for property in @properties {
+		for var property in @properties {
 			property.releaseReusable()
 		}
 	} # }}}

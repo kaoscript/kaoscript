@@ -38,7 +38,7 @@ export class Module {
 		@directory = path.dirname(file)
 		@options = Attribute.configure(@data, @compiler._options, AttributeTarget.Global, file, true)
 
-		for attr in @data.attributes {
+		for var attr in @data.attributes {
 			if attr.declaration.kind == NodeKind.Identifier &&	attr.declaration.name == 'bin' {
 				@binary = true
 			}
@@ -829,7 +829,7 @@ class ModuleBlock extends AbstractNode {
 		var mut index = -1
 		var mut item = null
 
-		for statement, i in @statements while index == -1 {
+		for var statement, i in @statements while index == -1 {
 			if item ?= statement.toFragments(fragments, Mode.None) {
 				index = i
 			}

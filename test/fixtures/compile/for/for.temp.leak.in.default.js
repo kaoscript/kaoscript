@@ -4,14 +4,15 @@ module.exports = function() {
 		return init.__ks_rt(this, arguments);
 	};
 	init.__ks_0 = function(data, builder) {
+		let statement, fragment;
 		const block = builder.newBlock();
-		for(let __ks_2 = data.block(data.body).statements, __ks_1 = 0, __ks_0 = __ks_2.length, statement; __ks_1 < __ks_0; ++__ks_1) {
+		for(let __ks_2 = data.block(data.body).statements, __ks_1 = 0, __ks_0 = __ks_2.length; __ks_1 < __ks_0; ++__ks_1) {
 			statement = __ks_2[__ks_1];
 			block.statement(statement);
 		}
 		block.done();
 		let source = "";
-		for(let __ks_2 = builder.toArray(), __ks_1 = 0, __ks_0 = __ks_2.length, fragment; __ks_1 < __ks_0; ++__ks_1) {
+		for(let __ks_2 = builder.toArray(), __ks_1 = 0, __ks_0 = __ks_2.length; __ks_1 < __ks_0; ++__ks_1) {
 			fragment = __ks_2[__ks_1];
 			source = Helper.concatString(source, fragment.code);
 		}

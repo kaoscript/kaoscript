@@ -142,7 +142,7 @@ class ObjectBinding extends Expression {
 		}
 	} # }}}
 	export(recipient) { # {{{
-		for element in @elements {
+		for var element in @elements {
 			element.export(recipient)
 		}
 	} # }}}
@@ -158,7 +158,7 @@ class ObjectBinding extends Expression {
 	isDeclarable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { # {{{
-		for element in @elements {
+		for var element in @elements {
 			if element.isDeclararingVariable(name) {
 				return true
 			}

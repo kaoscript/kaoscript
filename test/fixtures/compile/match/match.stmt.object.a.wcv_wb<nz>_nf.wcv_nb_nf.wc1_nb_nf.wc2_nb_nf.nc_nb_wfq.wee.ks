@@ -1,6 +1,6 @@
 func foobar(value) {
 	match value {
-		{foo: 1}	with {qux % n} 		=> echo(`qux: \(n)`)
+		{foo: 1}	with var {qux % n} 		=> echo(`qux: \(n)`)
 		{foo: 1} 							=> echo('foo: 1')
 		{foo}								=> echo('has foo')
 		{qux}								=> echo('has qux')

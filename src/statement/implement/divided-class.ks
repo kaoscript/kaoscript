@@ -106,7 +106,7 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 			var constructors = @class.listConstructors()
 			var variables = [@name]
 
-			for constructor in constructors {
+			for var constructor in constructors {
 				constructor.checkVariableInitialization(variables, this)
 			}
 		}
@@ -1098,7 +1098,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 		}
 	} # }}}
 	translate() { # {{{
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 

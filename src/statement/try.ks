@@ -313,7 +313,7 @@ class TryStatement extends Statement {
 	translate() { # {{{
 		@body.translate()
 
-		for clause in @clauses {
+		for var clause in @clauses {
 			clause.body.translate()
 			clause.type.translate()
 		}
@@ -580,7 +580,7 @@ class TryStatement extends Statement {
 			var mut index = -1
 			var mut item = null
 
-			for statement, i in statements while index == -1 {
+			for var statement, i in statements while index == -1 {
 				if item ?= statement.toFragments(block, Mode.None) {
 					index = i
 				}
@@ -653,7 +653,7 @@ class TryStatement extends Statement {
 	toAwaitExpressionFragments(fragments, parameters, statements) { # {{{
 		fragments.code('(__ks_e')
 
-		for parameter in parameters {
+		for var parameter in parameters {
 			fragments.code($comma).compile(parameter)
 		}
 
@@ -819,7 +819,7 @@ class TryStatement extends Statement {
 
 			var mut ifs = fragments.newControl()
 
-			for clause, i in @data.catchClauses {
+			for var clause, i in @data.catchClauses {
 				ifs.step().code('else ') if i != 0
 
 				ifs

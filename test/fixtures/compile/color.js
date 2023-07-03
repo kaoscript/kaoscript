@@ -299,8 +299,8 @@ module.exports = function() {
 				return o;
 			})();
 		}
-		let s;
-		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
+		const s = $spaces[that._space];
+		if(Type.isValue(s.converters[space])) {
 			const args = Helper.mapObject(s.components, function(name, component) {
 				return that[component.field];
 			});
@@ -360,8 +360,8 @@ module.exports = function() {
 			}
 		}
 		else {
-			for(let name in $parsers) {
-				let parse = $parsers[name];
+			for(const name in $parsers) {
+				const parse = $parsers[name];
 				if(parse(that, args) === true) {
 					return that;
 				}
@@ -472,8 +472,8 @@ module.exports = function() {
 					if(Type.isValue($names[color])) {
 						color = Helper.concatString("#", $names[color]);
 					}
-					let match, __ks_0;
-					if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+					let match = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color);
+					if(Type.isValue(match)) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(match[1], 16);
 						that._green = Integer.parse.__ks_0(match[2], 16);
@@ -481,7 +481,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(match[4], 16) / 255);
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(match[1], 16);
 						that._green = Integer.parse.__ks_0(match[2], 16);
@@ -489,7 +489,7 @@ module.exports = function() {
 						that._alpha = 1;
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
 						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
@@ -497,7 +497,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.add(match[4], match[4]), 16) / 255);
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
 						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
@@ -505,7 +505,7 @@ module.exports = function() {
 						that._alpha = 1;
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = $caster.ff(match[1]);
 						that._green = $caster.ff(match[2]);
@@ -513,7 +513,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Math.round(2.55 * $caster.percentage(match[1]));
 						that._green = Math.round(2.55 * $caster.percentage(match[2]));
@@ -521,7 +521,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(match[1], 16);
 						that._green = Integer.parse.__ks_0(match[2], 16);
@@ -529,7 +529,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = Integer.parse.__ks_0(Operator.add(match[1], match[1]), 16);
 						that._green = Integer.parse.__ks_0(Operator.add(match[2], match[2]), 16);
@@ -537,7 +537,7 @@ module.exports = function() {
 						that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = $caster.ff(match[1]);
 						that._green = $caster.ff(match[2]);
@@ -576,14 +576,14 @@ module.exports = function() {
 				}
 				else if(Type.isString(args[0])) {
 					const color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-					let match, __ks_0;
-					if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					let match = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color);
+					if(Type.isValue(match)) {
 						that._space = Space.SRGB;
 						that._red = that._green = that._blue = $caster.ff(match[1]);
 						that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue((match = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)))) {
 						that._space = Space.SRGB;
 						that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
 						that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
@@ -704,8 +704,8 @@ module.exports = function() {
 			this.__ks_func_space_1(space);
 			color = color.__ks_func_like_0(space);
 			const components = $spaces[space].components;
-			for(let name in components) {
-				let component = components[name];
+			for(const name in components) {
+				const component = components[name];
 				if(component.loop === true) {
 					let d = Math.abs(Operator.subtraction(this[component.field], color[component.field]));
 					if(Operator.gt(d, component.half)) {
@@ -1388,8 +1388,8 @@ module.exports = function() {
 				})();
 			}
 			else if(Type.isValue(space.formatters)) {
-				for(let name in space.formatters) {
-					let formatter = space.formatters[name];
+				for(const name in space.formatters) {
+					const formatter = space.formatters[name];
 					$formatters[name] = (() => {
 						const o = new OBJ();
 						o.space = space.name;
@@ -1419,8 +1419,8 @@ module.exports = function() {
 			}
 			if(Type.isValue(space.converters)) {
 				if(Type.isValue(space.converters.from)) {
-					for(let name in space.converters.from) {
-						let converter = space.converters.from[name];
+					for(const name in space.converters.from) {
+						const converter = space.converters.from[name];
 						if(!Type.isValue($spaces[name])) {
 							$space.__ks_0(name);
 						}
@@ -1428,8 +1428,8 @@ module.exports = function() {
 					}
 				}
 				if(Type.isValue(space.converters.to)) {
-					for(let name in space.converters.to) {
-						let converter = space.converters.to[name];
+					for(const name in space.converters.to) {
+						const converter = space.converters.to[name];
 						$spaces[space.name].converters[name] = converter;
 					}
 				}
@@ -1444,8 +1444,8 @@ module.exports = function() {
 				}
 			}
 			if(Type.isValue(space.components)) {
-				for(let name in space.components) {
-					let component = space.components[name];
+				for(const name in space.components) {
+					const component = space.components[name];
 					if(Type.isValue(component.family)) {
 						$spaces[space.name].components[name] = $spaces[component.family].components[name];
 						$components[name].spaces[space.name] = true;

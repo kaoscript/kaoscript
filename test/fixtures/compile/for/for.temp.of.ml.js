@@ -4,12 +4,13 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x) {
-		for(let key in x.foo) {
-			let value = x.foo[key];
+		let value, key;
+		for(key in x.foo) {
+			value = x.foo[key];
 			console.log(key, value);
 		}
-		for(let key in x.bar) {
-			let value = x.bar[key];
+		for(key in x.bar) {
+			value = x.bar[key];
 			console.log(key, value);
 		}
 	};

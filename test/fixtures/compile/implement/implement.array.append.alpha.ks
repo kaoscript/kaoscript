@@ -6,7 +6,7 @@ impl Array {
 			this.pushUniq(...args[0])
 		}
 		else {
-			for i from 0 to~ args.length {
+			for var i from 0 to~ args.length {
 				this.pushUniq(...args[i])
 			}
 		}
@@ -22,7 +22,7 @@ impl Array {
 			}
 		}
 		else {
-			for item in args {
+			for var item in args {
 				if !this.contains(item) {
 					this.push(item)
 				}

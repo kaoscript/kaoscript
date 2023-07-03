@@ -622,7 +622,7 @@ class NamedContainerType extends NamedType {
 		if @properties[name] is Type {
 			return @properties[name]
 		}
-		else if property ?= @type.getProperty(name) {
+		else if var mut property ?= @type.getProperty(name) {
 			if property is NamedType {
 				property = property.duplicate().container(this)
 			}

@@ -15,7 +15,7 @@ impl Array {
 
 			while i < l {
 				if args[i] is Array {
-					for value in args[i] {
+					for var value in args[i] {
 						source.pushUniq(value)
 					}
 				}

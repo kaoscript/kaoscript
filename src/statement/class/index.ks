@@ -56,7 +56,7 @@ class ClassDeclaration extends Statement {
 	} # }}}
 	static isAssigningAlias(data, name, constructor, extending) { # {{{
 		if data is Array {
-			for d in data {
+			for var d in data {
 				if ClassDeclaration.isAssigningAlias(d, name, constructor, extending) {
 					return true
 				}
@@ -78,7 +78,7 @@ class ClassDeclaration extends Statement {
 						NodeKind.CallExpression {
 							if constructor && expression.callee.kind == NodeKind.Identifier {
 								if expression.callee.name == 'this' || (extending && expression.callee.name == 'super') {
-									for arg in expression.arguments {
+									for var arg in expression.arguments {
 										if arg.kind == NodeKind.Identifier && arg.name == name {
 											return true
 										}
@@ -362,7 +362,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @staticMethods {
 			var async = @extendsType?.type().isAsyncStaticMethod(name) ?? methods[0].type().isAsync()
 
-			for method in methods {
+			for var method in methods {
 				method.prepare()
 
 				if async != method.type().isAsync() {
@@ -794,7 +794,7 @@ class ClassDeclaration extends Statement {
 
 		var m = []
 
-		for method in @constructors {
+		for var method in @constructors {
 			method.toFragments(clazz, Mode.None)
 
 			m.push(method.type())
@@ -876,7 +876,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @staticMethods {
 			var m = []
 
-			for method in methods {
+			for var method in methods {
 				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
@@ -943,7 +943,7 @@ class ClassDeclaration extends Statement {
 				.code('constructor()')
 				.step()
 
-			for method in @constructors {
+			for var method in @constructors {
 				method.toFragments(ctrl, Mode.None)
 
 				m.push(method.type())
@@ -1075,7 +1075,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @staticMethods {
 			m.clear()
 
-			for method in methods {
+			for var method in methods {
 				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
@@ -1188,7 +1188,7 @@ class ClassDeclaration extends Statement {
 
 		var m = []
 
-		for method in @constructors {
+		for var method in @constructors {
 			method.toFragments(clazz, Mode.None)
 
 			m.push(method.type())
@@ -1219,7 +1219,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @instanceMethods {
 			m.clear()
 
-			for method in methods {
+			for var method in methods {
 				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())
@@ -1261,7 +1261,7 @@ class ClassDeclaration extends Statement {
 		for var methods, name of @staticMethods {
 			m.clear()
 
-			for method in methods {
+			for var method in methods {
 				method.toFragments(clazz, Mode.None)
 
 				m.push(method.type())

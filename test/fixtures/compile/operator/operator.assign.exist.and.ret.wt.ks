@@ -1,1 +1,5 @@
-func foobar(x, y): Boolean => (value ?= x()) && value.foobar()
+func foobar(x, y): Boolean {
+	var dyn value
+
+	return (value ?= x()) && value.foobar()
+}

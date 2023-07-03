@@ -35,7 +35,7 @@ class NamespaceDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.analyse()
@@ -70,7 +70,7 @@ class NamespaceDeclaration extends Statement {
 		@type.flagComplete()
 	} # }}}
 	translate() { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
@@ -97,10 +97,6 @@ class NamespaceDeclaration extends Statement {
 		if type.hasTest() {
 			var clone = type.clone()
 
-			// clone.type()._typeTest.holder = `\(@name).__ksType`
-
-			// clone.type()._typeTest.path = `[\(@testIndex)]`
-			// clone.type()._typeTest.index = @testIndex
 			clone.setTestName(`\(@name).__ksType[\(@testIndex)]`)
 			clone.setTestIndex(@testIndex)
 
@@ -186,7 +182,7 @@ class NamespaceDeclaration extends Statement {
 			node.toAuthorityFragments(block)
 		}
 
-		for statement in @statements {
+		for var statement in @statements {
 			block.compile(statement)
 		}
 

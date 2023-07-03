@@ -1,5 +1,7 @@
 class Foobar {
 	foobar() {
+		var dyn x
+
 		if (x = @quxbaz()) == 0 {
 		}
 	}

@@ -1,7 +1,7 @@
 func rewire(option) {
 	var dyn files = []
 
-	for item in option.split(',') {
+	for var mut item in option.split(',') {
 		item = item.split('=')
 
 		files.push({

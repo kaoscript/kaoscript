@@ -17,7 +17,7 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
 			var scope = node.scope()
 
-			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		fromFunction(source: FunctionType): ClassMethodType { # {{{
 			var clone = ClassMethodType.new(source._scope)
@@ -34,7 +34,7 @@ class ClassMethodType extends FunctionType {
 			type._access = Accessibility(data.access) ?? .Public
 			type._sealed = data.sealed
 			type._async = data.async
-			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
+			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for var throw in data.errors]
 
 			type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 
@@ -94,9 +94,9 @@ class ClassMethodType extends FunctionType {
 			access: @access
 			sealed: @sealed
 			async: @async
-			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
+			parameters: [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
 			returns: @returnType.toReference(references, indexDelta, mode, module)
-			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]
+			errors: [error.toReference(references, indexDelta, mode, module) for var error in @errors]
 			inits: Object.keys(@initVariables)
 		}
 
@@ -187,7 +187,7 @@ class ClassMethodType extends FunctionType {
 	overwrite() => @overwrite
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
-		for modifier in modifiers {
+		for var modifier in modifiers {
 			if modifier.kind == ModifierKind.Abstract {
 				@abstract = true
 			}

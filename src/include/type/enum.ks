@@ -60,13 +60,13 @@ class EnumType extends Type {
 
 			queue.push(() => {
 				for var methods, name of data.instanceMethods {
-					for method in methods {
+					for var method in methods {
 						type.dedupInstanceMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
 				for var methods, name of data.staticMethods {
-					for method in methods {
+					for var method in methods {
 						type.dedupStaticMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
@@ -354,7 +354,7 @@ class EnumType extends Type {
 		var result = []
 
 		if var methods ?= @instanceMethods[name] {
-			for method in methods {
+			for var method in methods {
 				if method.isSubsetOf(type, mode) {
 					result.push(method)
 				}
@@ -552,7 +552,7 @@ class EnumMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
 			var scope = node.scope()
 
-			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
+			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
 			var data = index
@@ -563,7 +563,7 @@ class EnumMethodType extends FunctionType {
 			type._async = data.async
 
 			queue.push(() => {
-				type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for error in data.errors]
+				type._errors = [Type.import(error, metadata, references, alterations, queue, scope, node) for var error in data.errors]
 
 				type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 
@@ -591,9 +591,9 @@ class EnumMethodType extends FunctionType {
 			index: @index
 			access: @access
 			async: @async
-			parameters: [parameter.export(references, indexDelta, mode, module) for parameter in @parameters]
+			parameters: [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]
 			returns: @returnType.toReference(references, indexDelta, mode, module)
-			errors: [error.toReference(references, indexDelta, mode, module) for error in @errors]
+			errors: [error.toReference(references, indexDelta, mode, module) for var error in @errors]
 		}
 
 		return export

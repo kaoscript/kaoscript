@@ -12,7 +12,7 @@ class ClassProxyDeclaration extends Statement {
 	constructor(data, parent) { # {{{
 		var mut instance = true
 
-		for modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Static {
 				instance = false
 
@@ -165,7 +165,7 @@ class ClassProxyGroupDeclaration extends Statement {
 	constructor(data, parent) { # {{{
 		var mut instance = true
 
-		for modifier in data.modifiers {
+		for var modifier in data.modifiers {
 			if modifier.kind == ModifierKind.Static {
 				instance = false
 

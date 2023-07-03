@@ -239,7 +239,6 @@ abstract class Importer extends Statement {
 
 				for var { def, type } in types {
 					type.setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
-					// type.setTestHolder(@typeTestName)
 				}
 
 				@count += 1
@@ -298,7 +297,7 @@ abstract class Importer extends Statement {
 		}
 
 		if argument.required {
-			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined() {
+			if var variable ?= @scope.getVariable(data.value.name); !variable.getDeclaredType().isPredefined() {
 				ReferenceException.throwDefined(data.value.name, this)
 			}
 
@@ -359,7 +358,7 @@ abstract class Importer extends Statement {
 		}
 	} # }}}
 	addVariable(external: String, internal: String, isVariable: Boolean, type: Type?) { # {{{
-		if (variable ?= @scope.getVariable(internal)) && !variable.isPredefined() {
+		if var variable ?= @scope.getVariable(internal); !variable.isPredefined() {
 			if @parent.includePath() != null {
 				// TODO check & merge type
 				return
@@ -624,20 +623,20 @@ abstract class Importer extends Statement {
 
 		var macros = {}
 		for var i from 0 to~ @metaExports.macros.length step 2 {
-			macros[@metaExports.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metaExports.macros[i + 1]]
+			macros[@metaExports.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for var data in @metaExports.macros[i + 1]]
 		}
 
 		@scope.line(@line())
 
 		if !#@data.specifiers {
 			for var i from 1 to~ @metaExports.exports.length step 2 {
-				name = @metaExports.exports[i]
+				var name = @metaExports.exports[i]
 
 				@addImport(name, name, false)
 			}
 
 			for var datas, name of macros {
-				for data in datas {
+				for var data in datas {
 					MacroDeclaration.new(data, this, null, name, @standardLibrary)
 				}
 			}
@@ -889,7 +888,7 @@ abstract class Importer extends Statement {
 				else {
 					set @data.source.value
 				}
-				
+
 				var parts = source.split('/')
 
 				for var part in parts down while @alias == null when !/(?:^\.+$|^@)/.test(part) {
@@ -981,7 +980,7 @@ abstract class Importer extends Statement {
 					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = data.external?.name ?? internal
-						
+
 						var mut alias = false
 
 						for var modifier in data.modifiers {
@@ -992,7 +991,7 @@ abstract class Importer extends Statement {
 
 						if alias {
 							@addVariable(external, internal, false, type)
-							
+
 							@alias = internal
 						}
 						else {
@@ -1089,6 +1088,7 @@ abstract class Importer extends Statement {
 				else {
 					var dyn variable, name
 
+					// TODO remove loop to get first element
 					for variable, name of @variables {
 					}
 
@@ -1431,12 +1431,12 @@ class ImportDeclaration extends Statement {
 		}
 	} # }}}
 	analyse() { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.analyse()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.prepare()
 		}
 	} # }}}
@@ -1445,7 +1445,7 @@ class ImportDeclaration extends Statement {
 		@parent.registerMacro(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
 	} # }}}

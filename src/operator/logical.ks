@@ -239,7 +239,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 class BinaryOperatorAnd extends PolyadicOperatorAnd {
 	analyse() { # {{{
 		for var data in [@data.left, @data.right] {
-			operand = $compile.expression(data, this)
+			var operand = $compile.expression(data, this)
 
 			operand.analyse()
 
@@ -605,7 +605,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 class BinaryOperatorOr extends PolyadicOperatorOr {
 	analyse() { # {{{
 		for var data in [@data.left, @data.right] {
-			operand = $compile.expression(data, this)
+			var operand = $compile.expression(data, this)
 
 			operand.analyse()
 
@@ -707,7 +707,7 @@ class PolyadicOperatorXor extends PolyadicOperatorAnd {
 class BinaryOperatorXor extends PolyadicOperatorXor {
 	analyse() { # {{{
 		for var data in [@data.left, @data.right] {
-			operand = $compile.expression(data, this)
+			var operand = $compile.expression(data, this)
 
 			operand.analyse()
 

@@ -19,8 +19,8 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let __ks_0 = likes.__ks_0();
-	for(let key in __ks_0) {
-		let value = __ks_0[key];
+	for(const key in __ks_0) {
+		const value = __ks_0[key];
 		console.log(Helper.concatString(key, " likes ", value));
 	}
 };

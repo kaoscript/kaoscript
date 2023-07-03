@@ -2,8 +2,8 @@ extern console: {
 	log(...args)
 }
 
-heroes = ['leto', 'duncan', 'goku']
+var heroes = ['leto', 'duncan', 'goku']
 
-for hero in heroes {
+for var hero in heroes {
 	console.log(hero)
 }

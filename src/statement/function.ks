@@ -45,7 +45,7 @@ var $function = {
 	useThisVariable(data, node) { # {{{
 		match data.kind {
 			NodeKind.ArrayExpression {
-				for value in data.values {
+				for var value in data.values {
 					if $function.useThisVariable(value, node) {
 						return true
 					}
@@ -57,7 +57,7 @@ var $function = {
 				}
 			}
 			NodeKind.Block {
-				for statement in data.statements {
+				for var statement in data.statements {
 					if $function.useThisVariable(statement, node) {
 						return true
 					}
@@ -68,7 +68,7 @@ var $function = {
 					return true
 				}
 
-				for arg in data.arguments {
+				for var arg in data.arguments {
 					if $function.useThisVariable(arg, node) {
 						return true
 					}
@@ -95,14 +95,14 @@ var $function = {
 			NodeKind.MemberExpression => return $function.useThisVariable(data.object, node)
 			NodeKind.NumericExpression => return false
 			NodeKind.ObjectExpression {
-				for property in data.properties {
+				for var property in data.properties {
 					if $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}
 			}
 			NodeKind.PolyadicExpression {
-				for operand in data.operands {
+				for var operand in data.operands {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
@@ -110,7 +110,7 @@ var $function = {
 			}
 			NodeKind.ReturnStatement => return $function.useThisVariable(data.value, node)
 			NodeKind.TemplateExpression {
-				for element in data.elements {
+				for var element in data.elements {
 					if $function.useThisVariable(element, node) {
 						return true
 					}
@@ -429,7 +429,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = FunctionType.new([parameter.type() for parameter in @parameters], @data, @index, this)
+		@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, @index, this)
 
 		@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 
@@ -453,7 +453,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@scope.line(@data.start.line)
 
-		for parameter in @parameters {
+		for var parameter in @parameters {
 			parameter.translate()
 		}
 
@@ -499,7 +499,7 @@ class FunctionDeclarator extends AbstractNode {
 	toAwaitExpressionFragments(fragments, parameters, statements) { # {{{
 		fragments.code('(__ks_e')
 
-		for parameter in parameters {
+		for var parameter in parameters {
 			fragments.code($comma).compile(parameter)
 		}
 
@@ -570,7 +570,7 @@ class FunctionVariable extends Variable {
 		@initialized = true
 	} # }}}
 	analyse() { # {{{
-		for declarator in @declarators {
+		for var declarator in @declarators {
 			declarator.analyse()
 		}
 	} # }}}

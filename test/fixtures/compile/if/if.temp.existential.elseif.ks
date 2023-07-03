@@ -2,6 +2,8 @@ extern console
 
 func parse(color: Object | String) {
 	if color is String {
+		var dyn match
+
 		if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
 			console.log(match)
 		}

@@ -1,6 +1,6 @@
 const {OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	let characters = (() => {
+	const characters = (() => {
 		const o = new OBJ();
 		o.heroes = ["leto", "duncan", "goku"];
 		return o;

@@ -17,7 +17,7 @@ class CallThisConstructorSubstitude extends Substitude {
 		var assessment = class.type().getConstructorAssessment(class.name(), node)
 
 		match Router.matchArguments(assessment, null, @arguments, node) {
-			is LenientCallMatchResult | PreciseCallMatchResult with result {
+			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 			}
 			else {
@@ -44,7 +44,7 @@ class CallThisConstructorSubstitude extends Substitude {
 		if @result is LenientCallMatchResult {
 			fragments.code(`\(@class.path()).prototype.__ks_cons_rt.call(null, this, [`)
 
-			for argument, index in @arguments {
+			for var argument, index in @arguments {
 				fragments.code($comma) if index != 0
 
 				fragments.compile(argument)
@@ -73,7 +73,7 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 		if @result is LenientCallMatchResult {
 			fragments.code(`__ks_cons_rt([`)
 
-			for argument, index in @arguments {
+			for var argument, index in @arguments {
 				fragments.code($comma) if index > 0
 
 				fragments.compile(argument)
@@ -111,7 +111,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		var assessment = extends.type().getConstructorAssessment(extends.name(), node)
 
 		match Router.matchArguments(assessment, null, @arguments, node) {
-			is LenientCallMatchResult | PreciseCallMatchResult with result {
+			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 				@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
 			}
@@ -159,7 +159,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		else {
 			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons_rt.call(null, this, [`)
 
-			for argument, index in @arguments {
+			for var argument, index in @arguments {
 				if index != 0 {
 					fragments.code($comma)
 				}
@@ -177,7 +177,7 @@ class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubsti
 	toFragments(fragments, mode) { # {{{
 		fragments.code(`super(`)
 
-		for argument, index in @arguments {
+		for var argument, index in @arguments {
 			if index != 0 {
 				fragments.code($comma)
 			}
@@ -206,7 +206,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
 		match Router.matchArguments(assessment, null, @arguments, @method) {
-			is LenientCallMatchResult | PreciseCallMatchResult with result {
+			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 
 				if result is PreciseCallMatchResult && result.matches.length == 1 {
@@ -280,7 +280,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
 		match Router.matchArguments(assessment, null, @arguments, @method) {
-			is LenientCallMatchResult | PreciseCallMatchResult with result {
+			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 
 				if result is PreciseCallMatchResult && result.matches.length == 1 {

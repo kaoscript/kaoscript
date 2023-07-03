@@ -15,7 +15,8 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function() {
-		let x, __ks_0;
+		let x;
+		let __ks_0;
 		if(Type.isValue(__ks_0 = foobar.__ks_0()) ? (x = __ks_0, false) : true) {
 			throw new Error();
 		}

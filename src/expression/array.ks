@@ -57,7 +57,7 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	translate() { # {{{
-		for value in @values {
+		for var value in @values {
 			value.translate()
 		}
 	} # }}}

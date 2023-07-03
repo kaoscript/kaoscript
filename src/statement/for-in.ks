@@ -64,15 +64,13 @@ class ForInStatement extends Statement {
 		}
 
 		if ?@data.index {
-			var variable = @bindingScope.getVariable(@data.index.name)
-
-			if @declaration || !?variable {
+			if @declaration {
 				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 				@declareIndex = true
 			}
-			else if variable.isImmutable() {
-				ReferenceException.throwImmutable(@data.index.name, this)
+			else {
+				@bindingScope.checkVariable(@data.index.name, true, this)
 			}
 
 			@index = $compile.expression(@data.index, this, @bindingScope)
@@ -85,15 +83,13 @@ class ForInStatement extends Statement {
 			@value.analyse()
 
 			for var { name } in @value.listAssignments([]) {
-				var variable = @scope.getVariable(name)
-
-				if @declaration || !?variable {
+				if @declaration {
 					@declareValue = true
 
 					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
 				}
-				else if variable.isImmutable() {
-					ReferenceException.throwImmutable(name, this)
+				else {
+					@bindingScope.checkVariable(name, true, this)
 				}
 			}
 		}

@@ -483,7 +483,7 @@ class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode): MacroType { # {{{
 		var scope = node.scope()
 
-		return MacroType.new([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
+		return MacroType.new([ParameterType.fromAST(parameter, false, scope, false, node) for var parameter in data.parameters], data, node)
 	} # }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
 		var type = MacroType.new(scope)
@@ -504,7 +504,7 @@ class MacroType extends FunctionType {
 		return @assessment
 	} # }}}
 	export() => { # {{{
-		parameters: [parameter.export() for parameter in @parameters]
+		parameters: [parameter.export() for var parameter in @parameters]
 	} # }}}
 	matchContentOf(value: MacroType): Boolean { # {{{
 		if value.min() < @min() || value.max() > @max() {
@@ -514,7 +514,7 @@ class MacroType extends FunctionType {
 		var params = value.parameters()
 
 		if @parameters.length == params.length {
-			for parameter, i in @parameters {
+			for var parameter, i in @parameters {
 				if !params[i].matchContentOf(parameter) {
 					return false
 				}
@@ -736,7 +736,7 @@ class CallMacroStatement extends Statement {
 	translate() { # {{{
 		@scope.setLineOffset(@offsetStart)
 
-		for statement in @statements {
+		for var statement in @statements {
 			@scope.line(statement.line())
 
 			statement.translate()
@@ -745,7 +745,7 @@ class CallMacroStatement extends Statement {
 		@scope.setLineOffset(@offsetEnd)
 	} # }}}
 	isAwait() { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			if statement.isAwait() {
 				return true
 			}
@@ -754,7 +754,7 @@ class CallMacroStatement extends Statement {
 		return false
 	} # }}}
 	isExit() { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			if statement.isExit() {
 				return true
 			}
@@ -763,7 +763,7 @@ class CallMacroStatement extends Statement {
 		return false
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
 	} # }}}

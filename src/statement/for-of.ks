@@ -35,15 +35,13 @@ class ForOfStatement extends Statement {
 		}
 
 		if ?@data.key {
-			var keyVariable = @scope.getVariable(@data.key.name)
-
-			if @declaration || keyVariable == null {
+			if @declaration {
 				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), true, this)
 
 				@defineKey = true
 			}
-			else if keyVariable.isImmutable() {
-				ReferenceException.throwImmutable(@data.key.name, this)
+			else {
+				@bindingScope.checkVariable(@data.key.name, true, this)
 			}
 
 			@key = $compile.expression(@data.key, this, @bindingScope)
@@ -56,15 +54,13 @@ class ForOfStatement extends Statement {
 			@value.analyse()
 
 			for var { name } in @value.listAssignments([]) {
-				var variable = @bindingScope.getVariable(name)
-
-				if @declaration || variable == null {
+				if @declaration {
 					@defineValue = true
 
 					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
 				}
-				else if variable.isImmutable() {
-					ReferenceException.throwImmutable(name, this)
+				else {
+					@bindingScope.checkVariable(name, true, this)
 				}
 			}
 		}

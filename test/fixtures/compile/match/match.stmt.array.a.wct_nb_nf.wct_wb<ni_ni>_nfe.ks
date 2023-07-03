@@ -2,7 +2,7 @@ func foobar(value?) {
 	match value {
 		Number {
 		}
-		Array with [x: Number, y: Number] {
+		Array with var [x: Number, y: Number] {
 		}
 	}
 }

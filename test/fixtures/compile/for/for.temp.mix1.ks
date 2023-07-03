@@ -1,6 +1,8 @@
 extern console
 
 func foo(x, y, z) {
+	var dyn value, key
+
 	for value in y {
 		console.log(value)
 	}

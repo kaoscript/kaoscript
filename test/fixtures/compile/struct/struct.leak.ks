@@ -4,7 +4,9 @@ struct Event {
 }
 
 func foobar() {
-	if (value = quxbaz()).ok {
+	var dyn event
+
+	if (event = quxbaz()).ok {
 	}
 }
 

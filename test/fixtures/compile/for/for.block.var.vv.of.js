@@ -2,7 +2,7 @@ const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	let key = "you";
 	let value = 42;
-	let likes = (() => {
+	const likes = (() => {
 		const o = new OBJ();
 		o.leto = "spice";
 		o.paul = "chani";

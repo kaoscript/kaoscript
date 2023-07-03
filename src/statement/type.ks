@@ -20,8 +20,6 @@ class TypeAliasDeclaration extends Statement {
 		if @type.isComplex() {
 			var authority = @recipient().authority()
 			authority.addTypeTest(@name, @type)
-
-			// @type.setTestName(test)
 		}
 	} # }}}
 	translate()

@@ -9,8 +9,8 @@ module.exports = function() {
 			return object.clone();
 		}
 		let clone = new OBJ();
-		for(let key in object) {
-			let value = object[key];
+		for(const key in object) {
+			const value = object[key];
 			if(Type.isArray(value)) {
 				clone[key] = value.clone();
 			}

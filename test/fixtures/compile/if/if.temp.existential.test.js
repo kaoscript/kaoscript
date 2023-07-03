@@ -4,7 +4,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(scope, name) {
-		let variable, __ks_0;
+		let variable;
+		let __ks_0;
 		if((Type.isValue(__ks_0 = scope.getVariable(name)) ? (variable = __ks_0, true) : false) && ((variable.name() !== name) || (variable.scope() !== scope))) {
 			return variable.discard();
 		}

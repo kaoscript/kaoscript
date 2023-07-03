@@ -28,8 +28,8 @@ module.exports = function() {
 			return this.__ks_func_print_rt.call(null, this, this, arguments);
 		}
 		__ks_func_print_0() {
-			for(let key in this._likes) {
-				let value = this._likes[key];
+			for(const key in this._likes) {
+				const value = this._likes[key];
 				console.log(Helper.concatString(key, " likes ", value));
 			}
 		}

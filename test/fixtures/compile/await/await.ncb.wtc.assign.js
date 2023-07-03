@@ -19,6 +19,7 @@ function bar() {
 	return bar.__ks_rt(this, arguments);
 };
 bar.__ks_0 = function(__ks_cb) {
+	let d;
 	let __ks_0 = (__ks_1) => {
 		return __ks_cb(null, 0);
 	};
@@ -29,7 +30,7 @@ bar.__ks_0 = function(__ks_cb) {
 			}
 			else {
 				try {
-					let d = __ks_2;
+					d = __ks_2;
 					console.log(d);
 					return __ks_cb(null, Operator.multiplication(d, 3));
 				}

@@ -1,5 +1,5 @@
 func foobar(values) {
-	var value = [value for value in values]
+	var value = [value for var value in values]
 
 	return value
 }

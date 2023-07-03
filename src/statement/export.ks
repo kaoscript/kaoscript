@@ -88,7 +88,7 @@ class ExportDeclaration extends Statement {
 		@parent.registerMacro(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		for statement in @statements {
+		for var statement in @statements {
 			statement.toFragments(fragments, Mode.None)
 		}
 	} # }}}

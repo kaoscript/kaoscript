@@ -13,8 +13,8 @@ var mut view: UIView
 
 match view {
 	is UIImageView					=> console.log("It's an image view")
-	is UILabel		with label		=> console.log("It's a label")
-	is UITableView	with tblv		{
+	is UILabel		with var label	=> console.log("It's a label")
+	is UITableView	with var tblv	{
 		var dyn sectionCount = tblv.numberOfSections()
 		console.log(`It's a table view with \(sectionCount) sections`)
 	}

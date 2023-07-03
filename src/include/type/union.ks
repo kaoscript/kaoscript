@@ -235,13 +235,13 @@ class UnionType extends Type {
 			return {
 				kind: TypeKind.Union
 				nullable: @nullable
-				types: [type.toReference(references, indexDelta, mode, module) for type in @types]
+				types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 			}
 		}
 		else {
 			return {
 				kind: TypeKind.Union
-				types: [type.toReference(references, indexDelta, mode, module) for type in @types]
+				types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 			}
 		}
 	} # }}}
@@ -253,7 +253,7 @@ class UnionType extends Type {
 			@exported = true
 		}
 
-		for type in @types {
+		for var type in @types {
 			type.flagExported(explicitly)
 		}
 
@@ -300,7 +300,7 @@ class UnionType extends Type {
 		}
 	} # }}}
 	hashCode(): String { # {{{
-		var elements = [type.hashCode() for type in @types]
+		var elements = [type.hashCode() for var type in @types]
 
 		return elements.join('|')
 	} # }}}
@@ -368,7 +368,7 @@ class UnionType extends Type {
 	} # }}}
 	isExplicit() => @explicit
 	isExportable() { # {{{
-		for type in @types {
+		for var type in @types {
 			if !type.isExportable() {
 				return false
 			}
@@ -386,7 +386,7 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	isInstanceOf(target) { # {{{
-		for type in @types {
+		for var type in @types {
 			if type.isInstanceOf(target) {
 				return true
 			}
@@ -559,7 +559,7 @@ class UnionType extends Type {
 			}
 		}
 
-		var elements = [type.toQuote() for type in @types]
+		var elements = [type.toQuote() for var type in @types]
 		var last = elements.pop()
 
 		return `\(quote)\(elements.join(`\(quote), \(quote)`))\(quote) or \(quote)\(last)\(quote)`
@@ -579,7 +579,7 @@ class UnionType extends Type {
 	override toNegativeTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
-		for type, i in @types {
+		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
@@ -592,7 +592,7 @@ class UnionType extends Type {
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.AND
 
-		for type, i in @types {
+		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' || ')
 			}
@@ -605,7 +605,7 @@ class UnionType extends Type {
 	override toRouteTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.AND
 
-		for type, i in @types {
+		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' || ')
 			}

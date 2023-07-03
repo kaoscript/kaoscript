@@ -1,1 +1,1 @@
-SyntaxException: The expression "x = Foobar.new()" doesn't return a value. (fixtures/compile/operator/operator.assign.eq.class.create.ks:4)
+SyntaxException: The expression "x = Foobar.new()" doesn't return a value. (fixtures/compile/operator/operator.assign.eq.class.create.ks:6)

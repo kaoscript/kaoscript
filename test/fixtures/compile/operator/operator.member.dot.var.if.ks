@@ -4,6 +4,8 @@ extern console: {
 
 extern a
 
+var dyn b
+
 if ?(b = a.b).c {
 	console.log(b)
 }

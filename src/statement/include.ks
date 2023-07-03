@@ -27,7 +27,7 @@ class IncludeDeclaration extends Statement {
 			}
 			else if file.startsWith('npm:') {
 				var name = file.substr(4)
-				
+
 				var mut modulePath = file
 				var mut moduleVersion = ''
 
@@ -101,7 +101,7 @@ class IncludeDeclaration extends Statement {
 	} # }}}
 	canLoadLocalFile(file) => !@module().hasInclude(file)
 	canLoadModuleFile(file, name, path, version) { # {{{
-		if versions ?= @module().listIncludeVersions(file, path) {
+		if var versions ?= @module().listIncludeVersions(file, path) {
 			if versions.length > 1 || versions[0] == version {
 				return false
 			}

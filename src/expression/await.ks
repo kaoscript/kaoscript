@@ -50,7 +50,7 @@ class AwaitExpression extends Expression {
 		var mut index = -1
 		var dyn item
 
-		for statement, i in statements while index == -1 {
+		for var statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(block, Mode.None) {
 				index = i
 			}
