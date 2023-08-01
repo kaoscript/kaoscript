@@ -246,7 +246,26 @@ class MatchStatement extends Statement {
 
 		if enumConditions != 0 {
 			if @valueType.canBeEnum(false) {
-				pass
+				if @value is CallExpression && @value.isEnumCreate() {
+					var mut recast = true
+
+					for var clause in @clauses {
+						if !clause.filter.isEnum() {
+							recast = false
+
+							break
+						}
+					}
+
+					if recast {
+						@castingEnum = true
+						@value = @value.argument(0)
+
+						for var clause in @clauses {
+							clause.filter.setCastingEnum(true)
+						}
+					}
+				}
 			}
 			else {
 				for var clause in @clauses {
@@ -635,11 +654,11 @@ class MatchStatement extends Statement {
 			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
 
 			if @castingEnum {
-				if @valueType.isEnum() {
-					line.compile(@value).code('.value')
-				}
-				else if @valueType.isAny() {
+				if @valueType.isAny() || @valueType.isNullable() {
 					line.code($runtime.helper(this), '.valueOf(').compile(@value).code(')')
+				}
+				else if @valueType.isEnum() {
+					line.compile(@value).code('.value')
 				}
 				else {
 					line.compile(@value)
@@ -654,11 +673,11 @@ class MatchStatement extends Statement {
 		else if @castingEnum {
 			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
 
-			if @valueType.isEnum() {
-				line.code(@data.expression.name, '.value')
-			}
-			else if @valueType.isAny() {
+			if @valueType.isAny() || @valueType.isNullable() {
 				line.code($runtime.helper(this), '.valueOf(', @data.expression.name, ')')
+			}
+			else if @valueType.isEnum() {
+				line.code(@data.expression.name, '.value')
 			}
 			else {
 				line.code(@data.expression.name)
@@ -1532,15 +1551,9 @@ class MatchFilter extends AbstractNode {
 
 						condition = MatchConditionArray.new(data, @parent, scope)
 
-						// TODO!
-						// @binding?
-						// 	..unflagLengthTesting()
-						// 	..unflagTypeTesting()
-						if ?@binding {
-							@binding
-								..unflagLengthTesting()
-								..unflagTypeTesting()
-						}
+						@binding?
+							..unflagLengthTesting()
+							..unflagTypeTesting()
 					}
 					NodeKind.MatchConditionObject {
 						if @kind == .OBJECT {
@@ -1663,6 +1676,17 @@ class MatchFilter extends AbstractNode {
 	getEnumConditions(): Number => @enumConditions
 	getMaxConditions(): Number => @conditions.length
 	hasTest() => @hasTest
+	isEnum() { # {{{
+		return false unless #@conditions
+
+		for var condition in @conditions {
+			if !condition.isEnum() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
 		return @filter?.isInitializingInstanceVariable(name)
 	} # }}}

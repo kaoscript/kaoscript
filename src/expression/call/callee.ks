@@ -116,7 +116,11 @@ abstract class PreciseCallee extends Callee {
 	} # }}}
 	functions() => @functions
 	override hashCode() => @hash
+	isNullable() => @nullable || @expression.isNullable()
+	isNullableComputed() => (@nullable && @expression.isNullable()) || @expression.isNullableComputed()
 	isInitializingInstanceVariable(name: String): Boolean => false
+	isReferenced() => @expression.isReferenced()
+	isUndisruptivelyNullable() => @expression.isUndisruptivelyNullable()
 	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
 		@functions.push(...that.functions())
@@ -146,6 +150,9 @@ abstract class PreciseCallee extends Callee {
 				.compileReusable(@expression)
 				.code(')')
 		}
+	} # }}}
+	toDisruptedFragments(fragments, node) { # {{{
+		@expression.toDisruptedFragments(fragments)
 	} # }}}
 	translate() { # {{{
 		@expression.translate()

@@ -1,7 +1,9 @@
 class CallExpression extends Expression {
 	private late {
+		@acquiredReusable: Boolean				= false
+		@analysed: Boolean						= false
 		@arguments: Array						= []
-		@assessment: CallMatchResult?
+		@assessment: Router.Assessment?
 		@await: Boolean							= false
 		@callees: Callee[]						= []
 		@calleeByHash: Object<Callee>			= {}
@@ -12,13 +14,16 @@ class CallExpression extends Expression {
 		@nullable: Boolean						= false
 		@nullableComputed: Boolean				= false
 		@object									= null
+		@prepared: Boolean						= false
 		@preparedArguments: Boolean				= false
 		@property: String
+		@releasedReusable: Boolean				= false
 		@reusable: Boolean						= false
 		@reuseName: String?						= null
 		@tested: Boolean						= false
 		@thisScope
 		@thisType: Type?						= null
+		@translated: Boolean					= false
 		@type: Type
 	}
 	static {
@@ -76,17 +81,16 @@ class CallExpression extends Expression {
 		} # }}}
 	}
 	analyse() { # {{{
-		var es5 = @data.arguments.length != 1 && @options.format.spreads == 'es5'
+		return if @analysed
+
+		@analysed = true
 
 		for var data in @data.arguments {
 			var argument = $compile.expression(data, this)
 
 			argument.analyse()
 
-			if es5 && argument is UnaryOperatorSpread {
-				@flatten = true
-			}
-			else if argument.isAwait() {
+			if argument.isAwait() {
 				@await = true
 			}
 
@@ -105,6 +109,10 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		return if @prepared
+
+		@prepared = true
+
 		@prepareThisScope()
 
 		if ?@object {
@@ -190,8 +198,6 @@ class CallExpression extends Expression {
 				}
 			}
 			else if @data.callee.kind == NodeKind.ThisExpression {
-				@prepareArguments()
-
 				var expression = $compile.expression(@data.callee, this)
 				expression.analyse()
 				expression.prepare(AnyType.NullableUnexplicit)
@@ -199,8 +205,9 @@ class CallExpression extends Expression {
 				@property = @data.callee.name.name
 
 				var type = expression.type()
+
 				if type is FunctionType | OverloadedFunctionType {
-					@assessment = type.assessment(@property, this)
+					@assessment ??= type.assessment(@property, this)
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
 						is LenientCallMatchResult with var { possibilities } {
@@ -265,6 +272,7 @@ class CallExpression extends Expression {
 
 			var types = [@callees[0].type()]
 
+			// TODO!
 			for var i from 1 to~ @callees.length {
 				var type = @callees[i].type()
 
@@ -289,6 +297,10 @@ class CallExpression extends Expression {
 		// echo(@type.hashCode())
 	} # }}}
 	translate() { # {{{
+		return if @translated
+
+		@translated = true
+
 		for var argument in @arguments {
 			argument.translate()
 		}
@@ -300,31 +312,40 @@ class CallExpression extends Expression {
 		@thisScope?.translate()
 	} # }}}
 	acquireReusable(mut acquire) { # {{{
+		return if @acquiredReusable
+
+		@acquiredReusable = true
+
 		if acquire {
 			@reuseName = @scope.acquireTempName()
 		}
 
-		if @callees.length > 1 {
+		if @callees.length == 1 {
+			@callees[0].acquireReusable(acquire)
+		}
+		else if @callees.length > 1 {
 			for var callee in @callees to~ -1 {
 				callee.acquireReusable(true)
 			}
 
 			@callees.last().acquireReusable(acquire)
 		}
-		else {
-			for var callee in @callees {
-				callee.acquireReusable(acquire)
-			}
-		}
 
 		for var argument in @arguments {
 			argument.acquireReusable(acquire)
 		}
 	} # }}}
+	argument(index: Number) => @arguments[index]
 	arguments() => @arguments
+	arguments(@assessment) { # {{{
+		@prepareArguments()
+
+		return @arguments
+	} # }}}
 	assessment() => @assessment
 	callees() => @callees
 	getCallScope(): @thisScope
+	getReuseName() => @reuseName
 	inferTypes(inferables) { # {{{
 		if @object != null {
 			@object.inferTypes(inferables)
@@ -355,7 +376,9 @@ class CallExpression extends Expression {
 	} # }}}
 	isCallable() => !@reusable
 	isComposite() => !@reusable
-	isComputed() => ((@nullable || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
+	isComputed() => ((@isNullable() || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
+	isDisrupted() => @object?.isDisrupted() ?? false
+	isEnumCreate() => @callees.length == 1 && @callees[0] is EnumCreateCallee
 	isExit() => @type.isNever()
 	isExpectingType() => true
 	override isInitializingInstanceVariable(name) { # {{{
@@ -386,9 +409,49 @@ class CallExpression extends Expression {
 
 		return false
 	} # }}}
-	isNullable() => @nullable
-	isNullableComputed() => @nullableComputed
+	isNullable() { # {{{
+		return false if @tested
+
+		for var callee in @callees {
+			if callee.isNullable() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isNullableComputed() { # {{{
+		for var callee in @callees {
+			if callee.isNullableComputed() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isReferenced() { # {{{
+		for var callee in @callees {
+			if callee.isReferenced() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isReusable() => @reusable
+	isReusingName() => ?@reuseName
 	isSkippable() => @callees.length == 1 && @callees[0].isSkippable()
+	isUndisruptivelyNullable() { # {{{
+		return false if @tested
+
+		for var callee in @callees {
+			if callee.isUndisruptivelyNullable() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isUsingInstanceVariable(name) { # {{{
 		if @object != null {
 			if @object.isUsingInstanceVariable(name) {
@@ -1114,9 +1177,11 @@ class CallExpression extends Expression {
 		return if @preparedArguments
 
 		for var argument in @arguments {
-			argument.prepare(AnyType.NullableUnexplicit)
+			argument
+				..flagNewExpression()
+				..prepare(AnyType.NullableUnexplicit)
 
-			if argument.type().isInoperative() {
+			if argument.type()?.isInoperative() {
 				TypeException.throwUnexpectedInoperative(argument, this)
 			}
 
@@ -1150,6 +1215,10 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	releaseReusable() { # {{{
+		return if @releasedReusable
+
+		@releasedReusable = true
+
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
 		}
@@ -1157,6 +1226,9 @@ class CallExpression extends Expression {
 		for var callee in @callees {
 			callee.releaseReusable()
 		}
+	} # }}}
+	override setReuseName(name) { # {{{
+		@reuseName ??= name
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if mode == Mode.Async {
@@ -1174,26 +1246,78 @@ class CallExpression extends Expression {
 			if @reusable {
 				fragments.code(@reuseName)
 			}
-			else if @isNullable() && !@tested {
-				fragments.wrapNullable(this).code(' ? ')
-
-				@tested = true
-
-				this.toFragments(fragments, mode)
-
-				fragments.code(' : null')
-			}
 			else {
-				for var argument in @arguments {
-					if argument.isAwaiting() {
-						return argument.toFragments(fragments, mode)
-					}
+				// TODO!
+				// var disrupted = @object?.isDisrupted() && @object.isNullable()
+				var disrupted: Boolean = @object?.isDisrupted() && @object.isNullable()
+				var testing = @isNullable()
+
+				if disrupted {
+					@object.toDisruptedFragments(fragments)
+
+					fragments.code(testing ? ' && ' : ' ? ')
 				}
 
-				@toCallFragments(fragments, mode)
+				if testing {
+					fragments.wrapNullable(this)
 
-				fragments.code(')')
+					fragments.code(' ? ')
+
+					@tested = true
+
+					@toFragments(fragments, mode)
+				}
+				else {
+					for var argument in @arguments {
+						if argument.isAwaiting() {
+							return argument.toFragments(fragments, mode)
+						}
+					}
+
+					@toCallFragments(fragments, mode)
+
+					fragments.code(')')
+				}
+
+				if disrupted || testing {
+					fragments.code(' : null')
+				}
 			}
+		}
+	} # }}}
+	toAlternativeFragments(fragments, cb) { # {{{
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @isNullable() && !@tested {
+			fragments.wrapNullable(this).code(' ? ')
+
+			@tested = true
+
+			cb(fragments, true, (fragments) => @toFragments(fragments, Mode.None))
+
+			fragments.code(' : ')
+
+			cb(fragments, false, (fragments) => {})
+		}
+		else {
+			for var argument in @arguments {
+				if argument.isAwaiting() {
+					return argument.toFragments(fragments, Mode.None)
+				}
+			}
+
+			@toCallFragments(fragments, Mode.None)
+
+			fragments.code(')')
+		}
+	} # }}}
+	toDisruptedFragments(fragments) { # {{{
+		if @callees.length == 1 {
+			@callees[0].toDisruptedFragments(fragments, this)
+		}
+		else {
+			throw NotImplementedException.new()
 		}
 	} # }}}
 	toCallFragments(fragments, mode) { # {{{

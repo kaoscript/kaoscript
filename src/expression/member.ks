@@ -232,6 +232,8 @@ class MemberExpression extends Expression {
 	isMacro() => false
 	isNullable() => @nullable || @object.isNullable() || (@computed && !@stringProperty && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && !@stringProperty && @property.isNullable() ? 1 : 0) > 1
+	isReferenced() => @object.isReferenced()
+	isUndisruptivelyNullable() => (@nullable || super.isUndisruptivelyNullable()) && !@object.isReferenced()
 	isUsingSetter() => @usingSetter
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @property == name && @object is IdentifierLiteral && @object.name() == 'this' && @object.type().discard().hasInstanceVariable(@property)
@@ -590,6 +592,9 @@ class MemberExpression extends Expression {
 				}
 			}
 		}
+	} # }}}
+	toDisruptedFragments(fragments) { # {{{
+		@object.toDisruptedFragments(fragments)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
 		if @isNullable() && !@tested {

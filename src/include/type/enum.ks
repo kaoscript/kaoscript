@@ -322,6 +322,7 @@ class EnumType extends Type {
 
 		return @function
 	} # }}}
+	hasProperty(name: String) => ?@variables[name]
 	hasVariable(name: String) => ?@variables[name]
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
 		if var assessment ?= @instanceAssessments[name] {

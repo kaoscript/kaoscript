@@ -278,8 +278,10 @@ class VariableDeclaration extends AbstractNode {
 				}
 			}
 
-			@value.acquireReusable(declarator.isSplitAssignment())
-			@value.releaseReusable()
+			if @parent is VariableStatement {
+				@value.acquireReusable(declarator.isSplitAssignment())
+				@value.releaseReusable()
+			}
 
 			@statement().assignTempVariables(@scope)
 		}

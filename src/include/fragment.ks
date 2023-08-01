@@ -144,6 +144,11 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} # }}}
+	wrapReusable(node) { # {{{
+		@step.wrapReusable(node)
+
+		return this
+	} # }}}
 }
 
 class ExpressionBuilder extends ExpressionWriter {
@@ -263,6 +268,23 @@ class ExpressionBuilder extends ExpressionWriter {
 		}
 		else {
 			node.toNullableFragments(this)
+		}
+
+		return this
+	} # }}}
+	wrapReusable(node) { # {{{
+		if node is Primitive {
+			@writer.push(@writer.newFragment(node))
+		}
+		else if node.isComputed() {
+			@code('(')
+
+			node.toReusableFragments(this)
+
+			@code(')')
+		}
+		else {
+			node.toReusableFragments(this)
 		}
 
 		return this

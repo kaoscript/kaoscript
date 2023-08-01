@@ -436,7 +436,6 @@ class TopicReference extends Expression {
 		}
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		// echo(`TopicReference.toReusableFragments#\(@data.start.line)-\(@data.end.line)`, @reusable, @reuseName)
 		if !@reusable && ?@reuseName {
 			fragments.code(@reuseName, $equals).compile(this)
 

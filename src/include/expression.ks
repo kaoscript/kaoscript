@@ -10,8 +10,10 @@ abstract class Expression extends AbstractNode {
 		}
 	} # }}}
 	flagMutating()
+	flagNewExpression()
 	getDeclaredType() => @type()
 	getDefaultValue(): String => 'null'
+	getReuseName(): String? => null
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions() => true
@@ -39,6 +41,7 @@ abstract class Expression extends AbstractNode {
 	isComputed() => false
 	// if the expression can be an assignment and be transformed as a declaration
 	isDeclarable() => false
+	isDisrupted() => false
 	// if the expression is always exiting
 	isExit() => false
 	// if the expression can be an assignment and the variable has a defined type
@@ -51,8 +54,9 @@ abstract class Expression extends AbstractNode {
 	isInitializingInstanceVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
 	isInferable() => false
-	//if the expression is an inline statement which use directly the defined variable
+	// if the expression is an inline statement which use directly the defined variable
 	isInSituStatement() => false
+	// if the access member has been inverted with the forward pipeline
 	isInverted() => false
 	// if the expression is a lateinit field
 	isLateInit() => false
@@ -68,10 +72,14 @@ abstract class Expression extends AbstractNode {
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => @isComputed()
+	isReferenced() => false
 	// if the expression's type can refined
 	isRefinable() => false
+	isReusable() => false
+	isReusingName() => false
 	// if the expression should be skipped or not
 	isSkippable() => false
+	isUndisruptivelyNullable() => @isNullable() && !@isDisrupted()
 	// if the expression is the given instance variable
 	isUsingInstanceVariable(name) => false
 	// if the expression is using any non-local vraiables
@@ -91,6 +99,7 @@ abstract class Expression extends AbstractNode {
 	setAttributes(data) { # {{{
 		@options = Attribute.configure({ attributes: data }, @parent._options, AttributeTarget.Statement, this.file())
 	} # }}}
+	setReuseName(name: String)
 	statement() { # {{{
 		if !?@statement {
 			@leftMost = this
@@ -156,7 +165,6 @@ include {
 	'../expression/await.ks'
 	'../expression/binding/index.ks'
 	'../expression/call/index.ks'
-	'../expression/cascade.ks'
 	'../expression/conditional.ks'
 	'../expression/curry.ks'
 	'../expression/disruptive.ks'
@@ -166,8 +174,10 @@ include {
 	'../expression/member.ks'
 	'../expression/object.ks'
 	'../expression/omitted.ks'
+	'../expression/reference.ks'
 	'../expression/regex.ks'
 	'../expression/restrictive.ks'
+	'../expression/rolling.ks'
 	'../expression/sequence.ks'
 	'../expression/template.ks'
 	'../expression/this.ks'

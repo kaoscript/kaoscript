@@ -32,7 +32,7 @@
                 "max": 1,
                 "default": true,
                 "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo2MywibW9kaWZpZXJzIjpbXSwidmFsdWUiOiJibGFjayIsInN0YXJ0Ijp7ImxpbmUiOjYsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NiwiY29sdW1uIjozMH19"
+                "defaultValue": "eyJraW5kIjo2MiwibW9kaWZpZXJzIjpbXSwidmFsdWUiOiJibGFjayIsInN0YXJ0Ijp7ImxpbmUiOjYsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NiwiY29sdW1uIjozMH19"
               }
             ],
             "errors": []

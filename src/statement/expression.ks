@@ -10,6 +10,7 @@ class ExpressionStatement extends Statement {
 		@expression.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		@expression.flagNewExpression()
 		@expression.prepare(Type.Void)
 
 		for var data, name of @expression.inferTypes({}) {

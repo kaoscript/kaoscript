@@ -93,16 +93,29 @@ class UnaryOperatorImplicit extends Expression {
 				type = @parent.subject().type()
 			}
 			is CallExpression {
-				var index = @parent.arguments().indexOf(this)
+				if !?@parent.assessment() {
+					return
+				}
+
+				var arguments = @parent.arguments()
+				var length = arguments.length
+				var index = arguments.indexOf(this)
 				var types = []
 
 				for var function of @parent.assessment().functions {
-					if function.min() == function.max() > index {
-						types.push(function.parameter(index).getVariableType())
+					if function.min() <= length <= function.max() {
+						for var route of function.assessment('', this).routes {
+							for var tree of route.trees when tree.min <= length <= tree.max {
+								for var column of tree.columns {
+									findImplicitArgument(column, 0, index, @property, types)
+								}
+							}
+						}
 					}
-					else {
-						throw NotSupportedException.new()
-					}
+				}
+
+				unless #types {
+					throw NotImplementedException.new()
 				}
 
 				type = Type.union(@scope, ...types)
@@ -115,7 +128,10 @@ class UnaryOperatorImplicit extends Expression {
 				var index = operands.indexOf(this)
 				var operand = operands[index - 1]
 
-				type = operand.type()
+				type = operand.type().setNullable(false)
+			}
+			is ConditionalExpression {
+				type = target
 			}
 			is MatchConditionValue {
 				type = @parent.parent().getValueType()
@@ -167,6 +183,37 @@ class UnaryOperatorImplicit extends Expression {
 	} # }}}
 	type() => @type
 }
+
+func findImplicitArgument(tree, min: Number, index: Number, property: String, types: Type[]) { # {{{
+	if index < min + tree.min {
+		if tree.type.hasProperty(property) {
+			types.pushUniq(tree.type)
+		}
+	}
+	else if tree.rest {
+		if tree.type.hasProperty(property) {
+			types.pushUniq(tree.type)
+		}
+	}
+	else {
+		var mut addable = true
+
+		for var i from tree.min to tree.max {
+			if index < min + i {
+				if addable && tree.type.hasProperty(property) {
+					types.pushUniq(tree.type)
+
+					addable = false
+				}
+			}
+			else if ?tree.columns {
+				for var column of tree.columns {
+					findImplicitArgument(column, min + i, index, property, types)
+				}
+			}
+		}
+	}
+} # }}}
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	private late {

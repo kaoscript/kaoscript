@@ -70,7 +70,6 @@ var $expressions = {
 	`\(NodeKind.ArrayRange)`					: ArrayRange
 	`\(NodeKind.AwaitExpression)`				: AwaitExpression
 	`\(NodeKind.CallExpression)`				: $callExpression
-	`\(NodeKind.CascadeExpression)`				: CascadeExpression
 	`\(NodeKind.ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind.ConditionalExpression)`			: ConditionalExpression
 	`\(NodeKind.CurryExpression)`				: CurryExpression
@@ -90,14 +89,15 @@ var $expressions = {
 	`\(NodeKind.PlaceholderArgument)`			: PlaceholderArgument
 	`\(NodeKind.PositionalArgument)`			: PositionalArgument
 	`\(NodeKind.Reference)`						: func(data, parent, scope) {
-		if var newData ?= parent.getASTReference(data.name) {
-			return $compile.expression(newData, parent, scope)
+		if var expression ?= parent.getASTReference(data.name) {
+			return ReferenceExpression.new(expression, data, parent, scope)
 		}
 
 		throw NotSupportedException.new(`Unexpected reference \(data.name)`, parent)
 	}
 	`\(NodeKind.RegularExpression)`				: RegularExpression
 	`\(NodeKind.RestrictiveExpression)`			: RestrictiveExpression
+	`\(NodeKind.RollingExpression)`				: RollingExpression
 	`\(NodeKind.SequenceExpression)`			: SequenceExpression
 	`\(NodeKind.TemplateExpression)`			: TemplateExpression
 	`\(NodeKind.TopicReference)`				: func(data, parent, scope) {

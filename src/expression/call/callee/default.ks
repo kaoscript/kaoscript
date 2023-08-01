@@ -32,7 +32,6 @@ class DefaultCallee extends Callee {
 		@expression.prepare(AnyType.NullableUnexplicit)
 
 		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		type ??= @expression.type()
@@ -67,7 +66,6 @@ class DefaultCallee extends Callee {
 		super(data)
 
 		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		var type = @expression.type()
@@ -105,6 +103,10 @@ class DefaultCallee extends Callee {
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		return false
 	} # }}}
+	isNullable() => @nullable || @expression.isNullable()
+	isNullableComputed() => (@nullable && @expression.isNullable()) || @expression.isNullableComputed()
+	isReferenced() => @expression.isReferenced()
+	isUndisruptivelyNullable() => @expression.isUndisruptivelyNullable()
 	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
 	} # }}}
@@ -211,6 +213,9 @@ class DefaultCallee extends Callee {
 
 			return type
 		}
+	} # }}}
+	toDisruptedFragments(fragments, node) { # {{{
+		@expression.toDisruptedFragments(fragments)
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
 		if @nullable {

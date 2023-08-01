@@ -389,6 +389,8 @@ abstract class ComparisonOperator {
 class EqualityOperator extends ComparisonOperator {
 	private {
 		@enumLeft: Boolean		= false
+		@enumNullLeft: Boolean	= false
+		@enumNullRight: Boolean	= false
 		@enumRight: Boolean		= false
 		@infinity: Boolean		= false
 		@nanLeft: Boolean		= false
@@ -461,7 +463,17 @@ class EqualityOperator extends ComparisonOperator {
 		}
 
 		if @enumLeft && @enumRight {
-			@enumLeft = @enumRight = false
+			if @left is CallExpression && @left.isEnumCreate() {
+				@left = @left.argument(0)
+				@enumNullLeft = true
+			}
+			else if @right is CallExpression && @right.isEnumCreate() {
+				@right = @right.argument(0)
+				@enumNullRight = true
+			}
+			else {
+				@enumLeft = @enumRight = false
+			}
 		}
 	} # }}}
 	isComputed() => !@nanLeft && !@nanRight
@@ -551,7 +563,7 @@ class EqualityOperator extends ComparisonOperator {
 		var mut wrap = true
 
 		if @enumLeft {
-			if @left.type().isNullable() {
+			if @enumNullLeft || @left.type().isNullable() {
 				fragments.code($runtime.helper(@left), '.valueOf(')
 				wrap = false
 				suffix = ')'
@@ -623,7 +635,14 @@ class EqualityOperator extends ComparisonOperator {
 		var mut wrap = true
 
 		if @enumRight {
-			suffix = '.value'
+			if @enumNullRight || @right.type().isNullable() {
+				fragments.code($runtime.helper(@left), '.valueOf(')
+				wrap = false
+				suffix = ')'
+			}
+			else {
+				suffix = '.value'
+			}
 		}
 		else if @enumLeft && @right.type().isAny() && !@right.type().isNull() {
 			if @right.type().isNullable() {

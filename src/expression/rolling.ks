@@ -1,17 +1,18 @@
-enum CascadeMode {
+enum RollingMode {
 	Default
 	Cascade
 	Inline
 	Statement
 }
 
-class CascadeExpression extends Expression {
+class RollingExpression extends Expression {
 	private late {
 		@beforehands: Array				= []
 		@cascade
 		@declarator?
 		@expressions: Array				= []
-		@mode: CascadeMode				= .Default
+		@mode: RollingMode				= .Default
+		@nullable: Boolean				= false
 		@object
 		@type: Type
 		@valueName: String?				= null
@@ -19,13 +20,19 @@ class CascadeExpression extends Expression {
 	override analyse() { # {{{
 		var mut statement = @parent
 
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind.Nullable {
+				@nullable = true
+			}
+		}
+
 		if @parent is ExpressionStatement {
 			statement.addBeforehand(this)
 		}
 		else {
 			while statement is not Statement {
 				if @mode == .Default {
-					if statement is CascadeExpression {
+					if statement is RollingExpression {
 						@cascade = statement
 						@mode = .Cascade
 					}
@@ -104,7 +111,7 @@ class CascadeExpression extends Expression {
 	} # }}}
 	override getASTReference(name) { # {{{
 		if name == 'main' {
-			return $ast.identifier(@valueName)
+			return IdentifierLiteral.new($ast.identifier(@valueName), this, @scope)
 		}
 
 		return null
@@ -140,8 +147,22 @@ class CascadeExpression extends Expression {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		for var expression in @expressions {
-			fragments.newLine().compile(expression).done()
+		if @nullable {
+			var ctrl = fragments
+				.newControl()
+				.code(`if(\($runtime.type(this)).isValue(\(@valueName)))`)
+				.step()
+
+			for var expression in @expressions {
+				ctrl.newLine().compile(expression).done()
+			}
+
+			ctrl.done()
+		}
+		else {
+			for var expression in @expressions {
+				fragments.newLine().compile(expression).done()
+			}
 		}
 	} # }}}
 	type() => @type
