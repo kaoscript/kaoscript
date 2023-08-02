@@ -1206,7 +1206,7 @@ class ClassType extends Type {
 		}
 
 		if @extending {
-			return @extends.type().getInstanceProperty(name)
+			return @extends.type().getInstantiableProperty(name)
 		}
 
 		return null

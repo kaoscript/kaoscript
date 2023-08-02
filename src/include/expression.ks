@@ -16,7 +16,7 @@ abstract class Expression extends AbstractNode {
 	getReuseName(): String? => null
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
-	hasExceptions() => true
+	hasExceptions(): Boolean => true
 	// types after of the expression block
 	inferTypes(inferables) => inferables
 	// types if the condition is true
@@ -25,73 +25,73 @@ abstract class Expression extends AbstractNode {
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
 	// if the expression can be an assignment
-	isAssignable() => false
+	isAssignable(): Boolean => false
 	// if the expression is an `await` expression
-	isAwait() => false
+	isAwait(): Boolean => false
 	// if the expression is awaiting to be resolved
-	isAwaiting() => false
+	isAwaiting(): Boolean => false
 	// if the generated code, to cast the expression has a boolean, requires to be wrapped inside parentheses
-	isBooleanComputed() => @isComputed() || !@type().isBoolean() || @type().isNullable()
-	isBooleanComputed(junction: Junction) => @isBooleanComputed()
+	isBooleanComputed(): Boolean => @isComputed() || !@type().isBoolean() || @type().isNullable()
+	isBooleanComputed(junction: Junction): Boolean => @isBooleanComputed()
 	// if the expression contains a call
-	isCallable() => false
+	isCallable(): Boolean => false
 	// if the expression needs to be assign to a temp variable to be reused
-	isComposite() => true
+	isComposite(): Boolean => true
 	// if parentheses are required around the expression to be wrapped
-	isComputed() => false
+	isComputed(): Boolean => false
 	// if the expression can be an assignment and be transformed as a declaration
-	isDeclarable() => false
-	isDisrupted() => false
+	isDeclarable(): Boolean => false
+	isDisrupted(): Boolean => false
 	// if the expression is always exiting
-	isExit() => false
+	isExit(): Boolean => false
 	// if the expression can be an assignment and the variable has a defined type
-	isExpectingType() => false
+	isExpectingType(): Boolean => false
 	// if the expression can be ignored (like a variable casting)
-	isIgnorable() => false
+	isIgnorable(): Boolean => false
 	// if the expression is a variable and needs to be initialized
-	isInitializable() => false
+	isInitializable(): Boolean => false
 	// if the expression is initializing the given instance variable
 	isInitializingInstanceVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
-	isInferable() => false
+	isInferable(): Boolean => false
 	// if the expression is an inline statement which use directly the defined variable
-	isInSituStatement() => false
+	isInSituStatement(): Boolean => false
 	// if the access member has been inverted with the forward pipeline
-	isInverted() => false
+	isInverted(): Boolean => false
 	// if the expression is a lateinit field
-	isLateInit() => false
+	isLateInit(): Boolean => false
 	// if the expression can be freely assigned
-	isLiberal() => false
+	isLiberal(): Boolean => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
-	isLooseComposite() => @isComposite()
+	isLooseComposite(): Boolean => @isComposite()
 	// if the type is matching the given type
-	isMatchingType(type: Type) => @type().matchContentOf(type)
+	isMatchingType(type: Type): Boolean => @type().matchContentOf(type)
 	// if the expression isn't empty
-	isNotEmpty() => false
+	isNotEmpty(): Boolean => false
 	// if the expression is nullable
-	isNullable() => false
+	isNullable(): Boolean => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
-	isNullableComputed() => @isComputed()
-	isReferenced() => false
+	isNullableComputed(): Boolean => @isComputed()
+	isReferenced(): Boolean => false
 	// if the expression's type can refined
-	isRefinable() => false
-	isReusable() => false
-	isReusingName() => false
+	isRefinable(): Boolean => false
+	isReusable(): Boolean => false
+	isReusingName(): Boolean => false
 	// if the expression should be skipped or not
-	isSkippable() => false
-	isUndisruptivelyNullable() => @isNullable() && !@isDisrupted()
+	isSkippable(): Boolean => false
+	isUndisruptivelyNullable(): Boolean => @isNullable() && !@isDisrupted()
 	// if the expression is the given instance variable
-	isUsingInstanceVariable(name) => false
+	isUsingInstanceVariable(name): Boolean => false
 	// if the expression is using any non-local vraiables
 	isUsingNonLocalVariables(scope: Scope): Boolean => false
 	// if the expression needs to use a setter function to assign a value
-	isUsingSetter() => false
+	isUsingSetter(): Boolean => false
 	// if the expression is the given static variable
-	isUsingStaticVariable(class, varname) => false
+	isUsingStaticVariable(class, varname): Boolean => false
 	// if the expression is the given variable
-	isUsingVariable(name) => false
+	isUsingVariable(name): Boolean => false
 	// if the expression generates multiple assignments
-	isSplitAssignment() => false
+	isSplitAssignment(): Boolean => false
 	listLocalVariables(scope: Scope, variables: Array): Array => variables
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
@@ -133,6 +133,7 @@ abstract class Expression extends AbstractNode {
 			fragments.code(' === true')
 		}
 	} # }}}
+	toFragments(fragments, mode)
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode.None)
 	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode.None)
 	toQuote(): String { # {{{

@@ -69,6 +69,7 @@ include {
 	'./empty.ks'
 	'./equals.ks'
 	'./exists.ks'
+	'./implicit.ks'
 	'./logical.ks'
 	'./pipeline.ks'
 	'./type.ks'

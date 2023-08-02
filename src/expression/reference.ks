@@ -5,26 +5,20 @@ class ReferenceExpression extends Expression {
 	constructor(@expression, data, parent, scope) { # {{{
 		super(data, parent, scope)
 	} # }}}
-	override analyse() => @expression.analyse()
-	override prepare(target, targetMode) => @expression.prepare(target, targetMode)
-	override translate() => @expression.translate()
 	override isReferenced() => true
 	override isUndisruptivelyNullable() => false
-	toFragments(fragments, mode) => @expression.toFragments(fragments, mode)
 
 	proxy @expression {
-		// TODO!
-		// analyse
-		// prepare
-		// translate
+		analyse
+		prepare
+		translate
 		acquireReusable
 		isComputed
 		isNullable
 		isNullableComputed
 		releaseReusable
 		toConditionFragments
-		// TODO!
-		// toFragments
+		toFragments
 		toQuote
 		toReusableFragments
 		type

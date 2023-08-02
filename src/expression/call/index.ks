@@ -13,7 +13,7 @@ class CallExpression extends Expression {
 		@matchingMode: ArgumentMatchMode		= .BestMatch
 		@nullable: Boolean						= false
 		@nullableComputed: Boolean				= false
-		@object									= null
+		@object: Expression?					= null
 		@prepared: Boolean						= false
 		@preparedArguments: Boolean				= false
 		@property: String
@@ -272,18 +272,17 @@ class CallExpression extends Expression {
 
 			var types = [@callees[0].type()]
 
-			// TODO!
-			for var i from 1 to~ @callees.length {
-				var type = @callees[i].type()
+			for var callee in @callees from 1 {
+				var type = callee.type()
 
 				if !types.any((item, _, _) => type.equals(item)) {
 					types.push(type)
 				}
 
-				if @callees[i].isNullable() {
+				if callee.isNullable() {
 					@nullable = true
 				}
-				if @callees[i].isNullableComputed() {
+				if callee.isNullableComputed() {
 					@nullableComputed = true
 				}
 			}
@@ -1247,9 +1246,7 @@ class CallExpression extends Expression {
 				fragments.code(@reuseName)
 			}
 			else {
-				// TODO!
-				// var disrupted = @object?.isDisrupted() && @object.isNullable()
-				var disrupted: Boolean = @object?.isDisrupted() && @object.isNullable()
+				var disrupted = @object?.isDisrupted() && @object.isNullable()
 				var testing = @isNullable()
 
 				if disrupted {
