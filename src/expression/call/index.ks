@@ -343,7 +343,7 @@ class CallExpression extends Expression {
 	} # }}}
 	assessment() => @assessment
 	callees() => @callees
-	getCallScope(): @thisScope
+	getCallScope(): valueof @thisScope
 	getReuseName() => @reuseName
 	inferTypes(inferables) { # {{{
 		if @object != null {
@@ -1528,11 +1528,11 @@ class PlaceholderType extends Type {
 	flagRest(): Void { # {{{
 		@rest = true
 	} # }}}
-	index(): @index
+	index(): valueof @index
 	index(@index): Void
 	isPlaceholder() => true
-	isRest(): @rest
-	isSpread(): @rest
+	isRest(): valueof @rest
+	isSpread(): valueof @rest
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => true
 	parameter(index) => AnyType.NullableUnexplicit
 	override toFragments(fragments, node) { # {{{

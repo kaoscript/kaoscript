@@ -188,57 +188,36 @@ class ClassMethodType extends FunctionType {
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
 		for var modifier in modifiers {
-			if modifier.kind == ModifierKind.Abstract {
-				@abstract = true
-			}
-			else if modifier.kind == ModifierKind.Async {
-				@async()
-			}
-			else if modifier.kind == ModifierKind.Internal {
-				@access = Accessibility.Internal
-			}
-			else if modifier.kind == ModifierKind.Private {
-				@access = Accessibility.Private
-			}
-			else if modifier.kind == ModifierKind.Protected {
-				@access = Accessibility.Protected
-			}
-			else if modifier.kind == ModifierKind.Sealed {
-				@sealed = true
+			match modifier.kind {
+				ModifierKind.Abstract {
+					@abstract = true
+				}
+				ModifierKind.Async {
+					@async()
+				}
+				ModifierKind.AutoType {
+					@autoTyping = true
+				}
+				ModifierKind.Internal {
+					@access = Accessibility.Internal
+				}
+				ModifierKind.Private {
+					@access = Accessibility.Private
+				}
+				ModifierKind.Protected {
+					@access = Accessibility.Protected
+				}
+				ModifierKind.Sealed {
+					@sealed = true
+				}
 			}
 		}
 	} # }}}
 	setProxy(@proxyPath, @proxyName) { # {{{
 		@proxy = true
 	} # }}}
-	setForkedIndex(@forkedIndex): this { # {{{
+	setForkedIndex(@forkedIndex): valueof this { # {{{
 		@forked = true
 	} # }}}
-	setReturnType(data?, node) { # {{{
-		if !?data {
-			@returnType = AnyType.NullableUnexplicit
-
-			return
-		}
-
-		if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
-			if data.typeName.name == 'this' {
-				@dynamicReturn = true
-				@unknownReturnType = true
-				@returnData = data.typeName
-
-				return
-			}
-		}
-		else if data.kind == NodeKind.ThisExpression {
-			@dynamicReturn = true
-			@unknownReturnType = true
-			@returnData = data
-
-			return
-		}
-
-		super(data, node)
-	} # }}}
-	override setReturnType(@returnType): this
+	override setReturnType(@returnType): valueof this
 }

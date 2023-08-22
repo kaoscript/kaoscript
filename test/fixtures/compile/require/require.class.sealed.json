@@ -79,7 +79,8 @@
                 }
               ],
               "returns": {
-                "reference": 1
+                "kind": "valueof",
+                "name": "this"
               },
               "errors": [],
               "inits": [

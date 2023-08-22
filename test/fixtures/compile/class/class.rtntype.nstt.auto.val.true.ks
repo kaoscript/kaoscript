@@ -1,5 +1,5 @@
 class Foobar {
-	value(): NaN
+	value() :> true
 }
 
 export Foobar

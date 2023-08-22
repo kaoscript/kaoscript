@@ -1,5 +1,5 @@
 class Foobar {
-	foobar(): this {
+	foobar(): valueof this {
 		this.quxbaz()
 	}
 	quxbaz()

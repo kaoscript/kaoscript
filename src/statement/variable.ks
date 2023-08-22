@@ -60,7 +60,7 @@ class VariableStatement extends Statement {
 			declaration.export(recipient)
 		}
 	} # }}}
-	function(): @function
+	function(): valueof @function
 	isAwait() => @await
 	isDeclararingVariable(name: String) { # {{{
 		for var declaration in @declarations {
@@ -135,7 +135,7 @@ class VariableStatement extends Statement {
 			afterward.toAfterwardFragments(fragments, mode)
 		}
 	} # }}}
-	try(): @try
+	try(): valueof @try
 	override walkVariable(fn) { # {{{
 		for var declaration in @declarations {
 			declaration.walkVariable(fn)

@@ -42,7 +42,7 @@ class UnaryOperatorImplicit extends Expression {
 				}
 
 				unless #types {
-					throw NotImplementedException.new()
+					ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 				}
 
 				type = Type.union(@scope, ...types)
@@ -97,7 +97,7 @@ class UnaryOperatorImplicit extends Expression {
 		}
 
 		if type.isAny() || type.isUnion() {
-			ReferenceException.throwNotDefinedProperty(@property, this)
+			ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 		}
 		else if type.isEnum() {
 			if !type.discard().hasVariable(@property) {
@@ -110,7 +110,7 @@ class UnaryOperatorImplicit extends Expression {
 			@type = property.discardVariable()
 		}
 		else {
-			ReferenceException.throwNotDefinedProperty(@property, this)
+			ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 		}
 	} # }}}
 	override translate()

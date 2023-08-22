@@ -9,6 +9,6 @@ impl String {
 			return @substringBefore(pattern, 0, missingValue)
 		}
 	}
-	substringBefore(pattern: String, position: Number = 0, missingValue: String = ''): this
-	substringBefore(pattern: RegExp, position: Number = 0, missingValue: String = ''): this
+	substringBefore(pattern: String, position: Number = 0, missingValue: String = ''): valueof this
+	substringBefore(pattern: RegExp, position: Number = 0, missingValue: String = ''): valueof this
 }

@@ -16,7 +16,7 @@ class SubstituteCallee extends Callee {
 		@nullableProperty = substitute.isNullable()
 	} # }}}
 	override hashCode() => null
-	substitute(): @substitute
+	substitute(): valueof @substitute
 	toFragments(fragments, mode, node) { # {{{
 		@substitute.toFragments(fragments, mode)
 	} # }}}

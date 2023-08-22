@@ -15,8 +15,8 @@ impl Date {
 
 		@timezone = date.timezone()
 	}
-	timezone(): @timezone
-	timezone(@timezone): this
+	timezone(): valueof @timezone
+	timezone(@timezone): valueof this
 }
 
 export Date

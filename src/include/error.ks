@@ -354,6 +354,9 @@ export class ReferenceException extends Exception {
 		throwUndefinedStaticField(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The class field "\(name)" isn't defined`, node)
 		} # }}}
+		throwUnresolvedImplicitProperty(name, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The implicit property ".\(name)" couldn't be resolved`, node)
+		} # }}}
 	}
 }
 

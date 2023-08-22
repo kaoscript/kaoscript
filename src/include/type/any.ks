@@ -20,7 +20,7 @@ class AnyType extends Type {
 
 		return that.copyFrom(this)
 	} # }}}
-	copyFrom(src: AnyType): this { # {{{
+	copyFrom(src: AnyType): valueof this { # {{{
 		@alien = src._alien
 		@required = src._required
 	} # }}}

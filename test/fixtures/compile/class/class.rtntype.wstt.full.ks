@@ -5,14 +5,14 @@ class Foobar {
 		@instance: Foobar = Foobar.new()
 	}
 	static {
-		instance(): @instance
+		instance(): valueof @instance
 		instance(@instance)
 	}
 	private {
 		@value: String	= ''
 	}
-	value(): @value
-	value(@value): this
+	value(): valueof @value
+	value(@value): valueof this
 }
 
 console.log(`\(Foobar.instance().value())`)

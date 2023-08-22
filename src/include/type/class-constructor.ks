@@ -110,16 +110,18 @@ class ClassConstructorType extends FunctionType {
 	overwrite(@overwrite)
 	private processModifiers(modifiers) { # {{{
 		for var modifier in modifiers {
-			if modifier.kind == ModifierKind.Async {
-				throw NotImplementedException.new()
-			}
-			else if modifier.kind == ModifierKind.Private {
-				@access = Accessibility.Private
-			}
-			else if modifier.kind == ModifierKind.Protected {
-				@access = Accessibility.Protected
+			match modifier.kind {
+				ModifierKind.Async {
+					throw NotImplementedException.new()
+				}
+				ModifierKind.Private {
+					@access = Accessibility.Private
+				}
+				ModifierKind.Protected {
+					@access = Accessibility.Protected
+				}
 			}
 		}
 	} # }}}
-	setClass(@class): this
+	setClass(@class): valueof this
 }

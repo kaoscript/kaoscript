@@ -9,7 +9,7 @@ abstract class Master {
 }
 
 class Foobar extends Master {
-	value(): @value
+	value(): valueof @value
 	value(@value) => this
 }
 

@@ -4,7 +4,7 @@ class Point {
 		@y: Number
 	}
 	constructor(@x, @y)
-	x(): @x
+	x(): valueof @x
 }
 
 func foobar(points: Array<Point>) {

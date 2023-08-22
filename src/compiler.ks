@@ -198,7 +198,7 @@ export class Compiler {
 		@standardLibrary = true
 	} # }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
-	module(): @module
+	module(): valueof @module
 	readFile() => fs.readFile(@file)
 	setArguments(arguments: Array, module: String? = null, node: AbstractNode? = null) => @module.setArguments(arguments, module, node)
 	sha256(file, data? = null) { # {{{

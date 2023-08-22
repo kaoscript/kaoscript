@@ -66,7 +66,8 @@
                 }
               ],
               "returns": {
-                "reference": 0
+                "kind": "reference",
+                "name": "this"
               },
               "errors": [],
               "inits": [
@@ -120,7 +121,8 @@
                 }
               ],
               "returns": {
-                "reference": 0
+                "kind": "reference",
+                "name": "this"
               },
               "errors": [],
               "inits": [

@@ -318,9 +318,6 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			@type.flagSealed()
 		}
 
-		@autoTyping = @type.isAutoTyping()
-		var dynamicReturn = @type.isDynamicReturn()
-		var returnData = @type.getReturnData()
 		var unknownReturnType = @type.isUnknownReturnType()
 
 		var mut overridden = null
@@ -415,30 +412,19 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			@type.flagInitializingInstanceVariable(alias.getVariableName())
 		}
 
-		@block.analyse(@aliases)
+		@block
+			..analyse(@aliases)
+			..analyse()
 
-		@block.analyse()
+		var return = @type.getReturnType()
 
-		if dynamicReturn {
-			if @autoTyping {
-				if @override {
-					@autoTyping = false
-				}
-				else {
-					@type.setReturnType(@block.getUnpreparedType())
-				}
-			}
-			else {
-				var return = $compile.expression(returnData, this)
+		if return is ValueOfType {
+			@block.addReturn(return.expression())
+		}
+		else if @type.isAutoTyping() && !@override {
+			@type.setReturnType(@block.getUnpreparedType())
 
-				return.analyse()
-
-				if unknownReturnType && !@override {
-					@type.setReturnType(return.getUnpreparedType())
-				}
-
-				@block.addReturn(return)
-			}
+			@autoTyping = true
 		}
 
 		if ?overridden {

@@ -234,6 +234,7 @@ class ExportProperty {
 		@property: String
 	}
 	constructor(@object, @property)
+	getDeclaredType() => @type()
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@object).code(`.\(@property)`)
 	} # }}}

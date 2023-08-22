@@ -2,7 +2,7 @@ class Foobar {
 	private {
 		@x: Number	= 42
 	}
-	x(): @x
+	x() :> @x
 	y(): Number => @x
 }
 

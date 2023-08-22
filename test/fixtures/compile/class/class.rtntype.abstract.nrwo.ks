@@ -9,8 +9,8 @@ abstract class Master {
 }
 
 class Foobar extends Master {
-	override value(): @value
-	override value(@value): this
+	override value(): valueof @value
+	override value(@value): valueof this
 }
 
 var f = Foobar.new()

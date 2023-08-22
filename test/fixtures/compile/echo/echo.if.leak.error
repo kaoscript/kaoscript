@@ -1,0 +1,1 @@
+ReferenceException: "x" is not defined (fixtures/compile/echo/echo.if.leak.ks:5)

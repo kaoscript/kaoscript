@@ -6,7 +6,7 @@ impl Shape {
 	private {
 		final @name	= 'circle'
 	}
-	name(): @name
+	name(): valueof @name
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 

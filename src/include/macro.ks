@@ -460,7 +460,7 @@ class MacroDeclaration extends AbstractNode {
 	isEnhancementExport() => false
 	isExportable() => false
 	isInstanceMethod() => false
-	isStandardLibrary(): @standardLibrary
+	isStandardLibrary(): valueof @standardLibrary
 	line() => @line
 	matchArguments(arguments: Array) => @type.matchArguments(arguments, this)
 	name() => @name

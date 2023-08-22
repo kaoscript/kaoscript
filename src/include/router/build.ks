@@ -1824,9 +1824,7 @@ namespace Build {
 		}
 	} # }}}
 
-	// TODO A Struct can be an Object
-	// func sortNodes(tree: { columns: TreeColumn{}, equivalences: String[][]?, order: String[] }): Void { # {{{
-	func sortNodes(tree): Void { # {{{
+	func sortNodes(tree: { columns: TreeColumn{}, equivalences: String[][]?, order: String[] }): Void { # {{{
 		var items = []
 
 		for var node, key of tree.columns {

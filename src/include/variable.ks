@@ -129,8 +129,8 @@ class Variable {
 	} # }}}
 	renameAs(@secureName)
 	setComplete(@complete) => this
-	setDeclaredType(@declaredType, initialize: Boolean = true) { # {{{
-		@declaredType = Type.toNamedType(@name, declaredType)
+	setDeclaredType(type: Type, initialize: Boolean = true) { # {{{
+		@declaredType = Type.toNamedType(@name, type)
 
 		if initialize {
 			@initialized = true

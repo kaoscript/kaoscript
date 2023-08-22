@@ -260,7 +260,7 @@ class NamespaceType extends Type {
 		return true
 	} # }}}
 	matchContentOf(value: Type) => value is ReferenceType && value.isNamespace()
-	originals(@majorOriginal): this { # {{{
+	originals(@majorOriginal): valueof this { # {{{
 		@altering = true
 	} # }}}
 	properties() => @properties

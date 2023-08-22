@@ -1,5 +1,5 @@
 class Foobar {
-	value(): false
+	value() :> 0
 }
 
 export Foobar

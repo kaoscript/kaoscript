@@ -6,8 +6,8 @@ impl Shape {
 	private {
 		@name
 	}
-	name(): @name
-	name(@name): this
+	name(): valueof @name
+	name(@name): valueof this
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 

@@ -59,7 +59,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 		return false
 	} # }}}
 	left() => @operands[0]
-	left(left): this { # {{{
+	left(left): valueof this { # {{{
 		@operands[0] = left
 	} # }}}
 	listAssignments(array: Array) { # {{{

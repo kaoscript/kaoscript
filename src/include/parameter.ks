@@ -69,16 +69,17 @@ class Parameter extends AbstractNode {
 
 			var name = (mode == ParameterMode.Default | ParameterMode.OverloadedFunction | ParameterMode.HelperConstructor) ? 'arguments' : '__ks_arguments'
 
-			// TODO move to `var mut`
-			var dyn restIndex = -1
-			var dyn minBefore = 0
-			var dyn maxBefore = 0
-			var dyn minRest = 0
-			var dyn minAfter = 0
-			var dyn maxAfter = 0
+			var mut {
+				restIndex = -1
+				minBefore = 0
+				maxBefore = 0
+				minRest = 0
+				minAfter = 0
+				maxAfter = 0
+			}
 
 			for var parameter, i in parameters {
-				var type = parameter.type()
+				var type: ParameterType = parameter.type()
 
 				if restIndex != -1 {
 					minAfter += type.min()
@@ -779,7 +780,7 @@ class Parameter extends AbstractNode {
 		return @scope.reference(alias.type())
 	} # }}}
 	arity() => @arity
-	getDefaultValue(): @defaultValue
+	getDefaultValue(): valueof @defaultValue
 	getReturnType() => @type.getReturnType()
 	hasDefaultValue() => @hasDefaultValue
 	isAssertingParameter() => @parent.isAssertingParameter()
@@ -904,7 +905,7 @@ class AliasStatement extends Statement {
 	translate()
 	getVariableName() => @expression.getVariableName()
 	name() => @expression.name()
-	operator(@operator): this
+	operator(@operator): valueof this
 	path() => @expression.path()
 	toStatementFragments(fragments, mode) { # {{{
 		if @expression.isSealed() && !@parameter.parent().isConstructor() {
@@ -1477,8 +1478,8 @@ class IdentifierParameter extends IdentifierLiteral {
 		} # }}}
 	}
 	isBinding() => false
-	operator(): @operator
-	operator(@operator): this
+	operator(): valueof @operator
+	operator(@operator): valueof this
 	setDeclaredType(type, definitive) { # {{{
 		var variable = @scope.getVariable(@value)
 
@@ -1521,7 +1522,7 @@ class ArrayBindingParameter extends ArrayBinding {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => ArrayBindingParameterElement.new(data, this, @scope)
-	operator(@operator): this
+	operator(@operator): valueof this
 	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
@@ -1649,7 +1650,7 @@ class ObjectBindingParameter extends ObjectBinding {
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
 	newElement(data) => ObjectBindingParameterElement.new(data, this, @scope)
-	operator(@operator): this
+	operator(@operator): valueof this
 	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
 		if type.isAny() {
 			for var element in @elements {
@@ -1779,7 +1780,7 @@ class AnonymousParameter extends AbstractNode {
 	} # }}}
 	translate()
 	name() => null
-	operator(@operator): this
+	operator(@operator): valueof this
 	setDeclaredType(@type, definitive)
 	setDefaultValue(value)
 	toFragments(fragments, mode) { # {{{
@@ -1866,8 +1867,8 @@ class ThisExpressionParameter extends ThisExpression {
 
 		return array
 	} # }}}
-	operator(): @operator
-	operator(@operator): this
+	operator(): valueof @operator
+	operator(@operator): valueof this
 	setDeclaredType(type, definitive) { # {{{
 		unless type.isSubsetOf(@type, MatchingMode.Signature) {
 			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)

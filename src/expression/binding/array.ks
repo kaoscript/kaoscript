@@ -179,7 +179,7 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} # }}}
-	elements(): @elements
+	elements(): valueof @elements
 	export(recipient) { # {{{
 		for var element in @elements {
 			element.export(recipient)

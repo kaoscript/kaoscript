@@ -176,6 +176,7 @@ enum TypeKind<String> {
 	Struct
 	Tuple
 	Union
+	ValueOf
 }
 
 enum Junction {
@@ -404,6 +405,33 @@ abstract class Type {
 						}
 					}
 				}
+				NodeKind.UnaryTypeExpression {
+					match data.operator.kind {
+						UnaryTypeOperatorKind.TypeOf {
+							if data.argument.kind == NodeKind.Identifier && data.argument.name == 'this' {
+								return ReferenceType.new(scope, 'this')
+							}
+							else {
+								var argument = $compile.expression(data.argument, node)
+
+								argument
+									..analyse()
+									..prepare(AnyType.NullableUnexplicit)
+
+								return argument.type()
+							}
+						}
+						UnaryTypeOperatorKind.ValueOf {
+							var argument = $compile.expression(data.argument, node)
+
+							argument
+								..analyse()
+								..prepare(AnyType.NullableUnexplicit)
+
+							return ValueOfType.new(argument)
+						}
+					}
+				}
 				NodeKind.UnionType {
 					return UnionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
 				}
@@ -604,7 +632,7 @@ abstract class Type {
 	abstract toFragments(fragments, node)
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction.NONE)
 	abstract toVariations(variations: Array<String>): Void
-	asReference(): this
+	asReference(): Type => this
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
@@ -647,7 +675,7 @@ abstract class Type {
 
 		return this
 	} # }}}
-	flagAltering(): this
+	flagAltering(): valueof this
 	flagComplete() { # {{{
 		@complete = true
 
@@ -801,6 +829,7 @@ abstract class Type {
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
+	isValueOf() => false
 	isVirtual() => false
 	isVoid() => false
 	// TODO to remove
@@ -809,8 +838,8 @@ abstract class Type {
 		return @isMorePreciseThan(value) ? this : value
 	} # }}}
 	minorOriginal() => null
-	origin(): @origin
-	origin(@origin): this
+	origin(): valueof @origin
+	origin(@origin): valueof this
 	parameter() => AnyType.NullableUnexplicit
 	reduce(type: Type) => this
 	reference(scope? = @scope) => scope.reference(this)
@@ -980,14 +1009,14 @@ abstract class Type {
 	toTestType() => this
 	toTypeQuote() => @toQuote()
 	// TODO
-	// type(): this
+	// type(): valueof this
 	type() => this
-	unflagAltering(): this
-	unflagRequired(): this { # {{{
+	unflagAltering(): valueof this
+	unflagRequired(): valueof this { # {{{
 		@required = false
 	} # }}}
-	unflagStrict(): this
-	unspecify(): this
+	unflagStrict(): valueof this
+	unspecify(): Type => this
 }
 
 include {
@@ -1014,6 +1043,7 @@ include {
 	'./type/exclusion.ks'
 	'./type/fusion.ks'
 	'./type/union.ks'
+	'./type/valueof.ks'
 	'./type/void.ks'
 }
 

@@ -4,13 +4,13 @@ abstract class Master {
 	private {
 		@value: String	= ''
 	}
-	abstract value(): @value
-	abstract value(@value): this
+	abstract value(): typeof @value
+	abstract value(@value): typeof this
 }
 
 class Foobar extends Master {
-	override value(): @value
-	override value(@value): this
+	override value(): valueof @value
+	override value(@value): valueof this
 }
 
 var f = Foobar.new()

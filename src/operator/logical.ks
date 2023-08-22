@@ -233,7 +233,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			this.toFragments(fragments, mode)
 		}
 	} # }}}
-	type(): @type
+	type(): valueof @type
 }
 
 class BinaryOperatorAnd extends PolyadicOperatorAnd {
@@ -599,7 +599,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			this.toFragments(fragments, mode)
 		}
 	} # }}}
-	type(): @type
+	type(): valueof @type
 }
 
 class BinaryOperatorOr extends PolyadicOperatorOr {

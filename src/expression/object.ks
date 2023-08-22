@@ -625,7 +625,7 @@ class ObjectSpreadMember extends Expression {
 			.done()
 	} # }}}
 	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
-	type(): @type
+	type(): valueof @type
 	value() => @value
 }
 

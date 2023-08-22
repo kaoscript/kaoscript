@@ -140,7 +140,7 @@ class ParameterType extends Type {
 
 		return that
 	} # }}}
-	flagRetained(): this { # {{{
+	flagRetained(): valueof this { # {{{
 		@retained = true
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -196,9 +196,9 @@ class ParameterType extends Type {
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
 	hashCode() => @toQuote()
-	index(): @index
-	index(@index): this
-	isAnonymous(): @anonymous
+	index(): valueof @index
+	index(@index): valueof this
+	isAnonymous(): valueof @anonymous
 	isAny() => @type.isAny()
 	isComprehensive() => @comprehensive
 	isExportable() => @type.isExportable()
@@ -281,8 +281,8 @@ class ParameterType extends Type {
 	} # }}}
 	matchArgument(value: Parameter) => @matchArgument(value.type())
 	matchArgument(value: Type) => value.matchContentOf(@type)
-	max(): @max
-	min(): @min
+	max(): valueof @max
+	min(): valueof @min
 	setDefaultValue(@defaultValue, @comprehensive = true) { # {{{
 		@default = true
 

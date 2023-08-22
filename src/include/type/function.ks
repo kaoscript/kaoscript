@@ -13,7 +13,6 @@ class FunctionType extends Type {
 		@assignableThis: Boolean			= true
 		@async: Boolean						= false
 		@autoTyping: Boolean				= false
-		@dynamicReturn: Boolean				= false
 		@errors: Array<Type>				= []
 		@hasRest: Boolean					= false
 		@index: Number						= -1
@@ -24,7 +23,6 @@ class FunctionType extends Type {
 		@missingThis: Boolean				= true
 		@parameters: Array<ParameterType>	= []
 		@restIndex: Number					= -1
-		@returnData							= null
 		@returnType: Type					= AnyType.NullableUnexplicit
 		@thisType: Type						= AnyType.Unexplicit
 	}
@@ -32,7 +30,6 @@ class FunctionType extends Type {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
 			target._async = source._async
 			target._autoTyping = source._autoTyping
-			target._dynamicReturn = source._dynamicReturn
 			target._errors = [...source._errors]
 			target._hasRest = source._hasRest
 			target._index = source._index
@@ -259,11 +256,10 @@ class FunctionType extends Type {
 	functions() => [this]
 	getCallIndex() => @alien ? 0 : @index
 	getProperty(name: String) => Type.Any
-	getRestIndex(): @restIndex
+	getRestIndex(): valueof @restIndex
 	getRestParameter() => @parameters[@restIndex]
-	getReturnData(): @returnData
-	getReturnType(): @returnType
-	getThisType(): @thisType
+	getReturnType(): valueof @returnType
+	getThisType(): valueof @thisType
 	hashCode() { # {{{
 		var mut fragments = ''
 
@@ -283,14 +279,14 @@ class FunctionType extends Type {
 
 		fragments += ')'
 
-		if !@returnType.isAny() {
+		if @returnType.isExplicit() {
 			fragments += ': ' + @returnType.toQuote()
 		}
 
 		return fragments
 	} # }}}
 	hasAssignableThis() => @assignableThis
-	hasRestParameter(): @hasRest
+	hasRestParameter(): valueof @hasRest
 	hasVarargsParameter() { # {{{
 		for var parameter in @parameters {
 			return true if parameter.isVarargs()
@@ -305,8 +301,8 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	index(): @index
-	index(@index): this
+	index(): valueof @index
+	index(@index): valueof this
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is FunctionType {
 			var mut mode = MatchingMode.FunctionSignature
@@ -336,8 +332,8 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	isAsync(): @async
-	isAutoTyping(): @autoTyping
+	isAsync(): valueof @async
+	isAutoTyping(): valueof @autoTyping
 	isCatchingError(error): Boolean { # {{{
 		if @errors.length != 0 {
 			for var type in @errors {
@@ -352,7 +348,6 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	isDynamicReturn(): @dynamicReturn
 	isExportable() { # {{{
 		for var parameter in @parameters {
 			if !parameter.isExportable() {
@@ -829,8 +824,13 @@ class FunctionType extends Type {
 	} # }}}
 	private processModifiers(modifiers) { # {{{
 		for var modifier in modifiers {
-			if modifier.kind == ModifierKind.Async {
-				@async = true
+			match modifier.kind {
+				ModifierKind.Async {
+					@async = true
+				}
+				ModifierKind.AutoType {
+					@autoTyping = true
+				}
 			}
 		}
 	} # }}}
@@ -847,43 +847,15 @@ class FunctionType extends Type {
 		if !?data {
 			@returnType = AnyType.NullableUnexplicit
 		}
-		else if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier {
-			match data.typeName.name {
-				'auto' {
-					@dynamicReturn = true
-					@autoTyping = true
-				}
-				'false', 'true' {
-					@dynamicReturn = true
-					@returnType = node.scope().reference('Boolean')
-					@returnData = data.typeName
-				}
-				'Infinity', 'NaN' {
-					@dynamicReturn = true
-					@returnType = node.scope().reference('Number')
-					@returnData = data.typeName
-				}
-				'null' {
-					@dynamicReturn = true
-					@returnType = node.scope().reference('Null')
-					@returnData = data.typeName
-				}
-				else {
-					@returnType = Type.fromAST(data, node)
-				}
-			}
-		}
-		else if data.kind == NodeKind.NumericExpression {
-			@dynamicReturn = true
-			@returnType = node.scope().reference('Number')
-			@returnData = data
+		else if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier && data.typeName.name == 'auto' {
+			@autoTyping = true
 		}
 		else {
 			@returnType = Type.fromAST(data, node)
 		}
 	} # }}}
-	setReturnType(@returnType): this
-	setThisType(@thisType): this { # {{{
+	setReturnType(@returnType): valueof this
+	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
 	toFragments(fragments, node) { # {{{
@@ -935,7 +907,7 @@ class FunctionType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('func', 1)
 	} # }}}
-	unflagAssignableThis(): this { # {{{
+	unflagAssignableThis(): valueof this { # {{{
 		@assignableThis = false
 		@missingThis = false
 	} # }}}
@@ -1186,7 +1158,7 @@ class OverloadedFunctionType extends Type {
 
 		return Router.matchArguments(assessment, null, arguments, node) is not NoMatchResult
 	} # }}}
-	originals(@majorOriginal): this { # {{{
+	originals(@majorOriginal): valueof this { # {{{
 		@altering = true
 	} # }}}
 	toFragments(fragments, node) { # {{{

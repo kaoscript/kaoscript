@@ -4,8 +4,8 @@ class Foobar {
 	private {
 		@value: String	= ''
 	}
-	value(): @value
-	value(@value): Foobar => this
+	value(): valueof @value
+	value(@value): valueof this
 }
 
 var f = Foobar.new()

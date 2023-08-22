@@ -60,7 +60,7 @@ export class Module {
 
 		@hashes['.'] = @compiler.sha256(file, data)
 	} # }}}
-	addAlien(name: String, type: Type): this { # {{{
+	addAlien(name: String, type: Type): valueof this { # {{{
 		@aliens[name] = type
 
 		return this

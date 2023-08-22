@@ -220,7 +220,7 @@ class MatchStatement extends Statement {
 					var conditionHash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),`
 					var bindingHash = `$Array,false,"",\(type?.hashCode() ?? '')`
 
-					// TODO
+					// TODO!
 					// if {
 					// 	var condition ?= @tests[conditionHash]
 					// 	var binding ?= @tests[bindingHash]
@@ -1180,7 +1180,6 @@ class MatchConditionArray extends AbstractNode {
 			}
 		}
 
-		// }
 		if var tests ?= @parent.getArrayTests(true, @minmax, null) {
 			for var test, index in tests {
 				fragments

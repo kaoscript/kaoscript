@@ -308,7 +308,7 @@ class EnumType extends Type {
 
 		return export
 	} # }}}
-	function(): @function
+	function(): valueof @function
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()
@@ -481,8 +481,8 @@ class EnumType extends Type {
 		return false
 	} # }}}
 	kind() => @kind
-	length(): @length
-	length(@length): this
+	length(): valueof @length
+	length(@length): valueof this
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
 		var results: Array = []
 

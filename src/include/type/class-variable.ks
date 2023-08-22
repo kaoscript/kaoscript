@@ -79,7 +79,7 @@ class ClassVariableType extends Type {
 
 		return data
 	} # }}}
-	flagNullable(): this { # {{{
+	flagNullable(): valueof this { # {{{
 		@type = @type.setNullable(true)
 	} # }}}
 	hasDefaultValue() => @default
@@ -98,8 +98,8 @@ class ClassVariableType extends Type {
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
 	override toVariations(variations)
-	type(): @type
-	type(@type): this
+	type(): valueof @type
+	type(@type): valueof this
 
 	proxy @type {
 		hashCode

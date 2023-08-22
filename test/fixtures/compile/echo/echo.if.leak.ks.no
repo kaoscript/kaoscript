@@ -1,0 +1,9 @@
+func foobar() {
+	if var x ?= quxbaz() {
+	}
+
+	echo(x)
+}
+
+func quxbaz() {
+}

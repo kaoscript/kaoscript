@@ -5,9 +5,7 @@ struct CallMatchArgument {
 	to: Number?			= null
 }
 
-// TODO
-// type CallMatchPosition = CallMatchArgument | CallMatchArgument[]
-type CallMatchPosition = CallMatchArgument | Array<CallMatchArgument>
+type CallMatchPosition = CallMatchArgument | CallMatchArgument[]
 
 struct CallMatch {
 	function: FunctionType
@@ -876,7 +874,7 @@ namespace Router {
 		matchArguments
 		toFragments
 
-		// TODO
+		// TODO!
 		// RegroupTree for toSignature
 	}
 }

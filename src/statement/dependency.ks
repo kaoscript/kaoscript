@@ -800,8 +800,8 @@ abstract class Requirement {
 	constructor(variable: Variable, @node) { # {{{
 		this(variable.name(), variable.getDeclaredType(), node)
 	} # }}}
-	alternative(): @alternative
-	flagAlternative(): this { # {{{
+	alternative(): valueof @alternative
+	flagAlternative(): valueof this { # {{{
 		var mut type = @type
 
 		while ?type.minorOriginal() {

@@ -15,11 +15,16 @@ namespace Matching {
 			node: AbstractNode
 		): CallMatchResult { # {{{
 			var combinations = splitArguments(arguments)
-			// TODO
-			// echo(combinations)
 
 			if combinations.length == 1 {
-				var context = MatchContext.new(combinations[0], excludes, async: assessment.async, indexeds, mode, node)
+				var context = MatchContext.new(
+					arguments: combinations[0]
+					excludes
+					async: assessment.async
+					indexeds
+					mode
+					node
+				)
 
 				for var tree in route.trees {
 					WithIndex.match(tree, context)

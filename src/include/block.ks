@@ -20,7 +20,7 @@ class Block extends AbstractNode {
 		@empty = @length == 0
 		@offset = @scope.getLineOffset()
 	} # }}}
-	analyse() { # {{{
+	override analyse() { # {{{
 		@scope.setLineOffset(@offset)
 
 		for var data in @data.statements {
@@ -261,18 +261,20 @@ class FunctionBlock extends Block {
 	}
 	addReturn(@return)
 	override checkExit(target?) { # {{{
-		if @return != null {
-			var mut toAdd = true
-
-			if var statement ?= @statements.last() {
-				toAdd = !statement.isExit()
+		if ?@return {
+			var toAdd = if var statement ?= @statements.last() {
+				set !statement.isExit()
+			}
+			else {
+				set true
 			}
 
 			if toAdd {
 				var statement = ReturnStatement.new(@return, this)
 
-				statement.analyse()
-				statement.prepare(target)
+				statement
+					..analyse()
+					..prepare(target)
 
 				@statements.push(statement)
 			}
@@ -285,7 +287,7 @@ class FunctionBlock extends Block {
 			else if target.isAny() && !target.isExplicit() {
 				pass
 			}
-			else if @statements.length == 0 || !@statements.last().isExit() {
+			else if !#@statements || !@statements.last().isExit() {
 				TypeException.throwExpectedReturnedValue(target, this)
 			}
 		}

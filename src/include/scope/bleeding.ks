@@ -185,6 +185,13 @@ class BleedingScope extends Scope {
 
 		return variable
 	} # }}}
+	updateInferable(name, data, node) { # {{{
+		if data.isVariable {
+			if @hasVariable(name) {
+				@replaceVariable(name, data.type, true, true, node)
+			}
+		}
+	} # }}}
 
 	proxy @parent {
 		acquireTempName

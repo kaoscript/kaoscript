@@ -1,1 +1,1 @@
-SyntaxException: The method "setDate" is matching an existing method (fixtures/compile/implement/implement.overwrite.duplicate.ks:8)
+SyntaxException: The method "setDate" is matching an existing method (fixtures/compile/implement/implement.overwrite.duplicate.ks:7)

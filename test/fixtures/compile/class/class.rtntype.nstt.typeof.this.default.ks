@@ -5,7 +5,9 @@ class Foobar {
 		@value: String	= ''
 	}
 	value(): String => @value
-	value(@value): this
+	value(@value): typeof this {
+		return this
+	}
 }
 
 var f = Foobar.new()

@@ -2,7 +2,7 @@ class Foobar {
 	private late {
 		@x: Quxbaz
 	}
-	x(): @x
+	x(): valueof @x
 }
 
 class Quxbaz {

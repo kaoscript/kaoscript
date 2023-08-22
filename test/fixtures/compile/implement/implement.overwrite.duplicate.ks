@@ -3,8 +3,6 @@ extern sealed class Date {
 }
 
 impl Date {
-	overwrite setDate(value): this {
-	}
-	overwrite setDate(value): this {
-	}
+	overwrite setDate(value): valueof this
+	overwrite setDate(value): valueof this
 }

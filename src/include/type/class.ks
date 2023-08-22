@@ -952,8 +952,8 @@ class ClassType extends Type {
 
 		@level = type.level():Number + 1
 	} # }}}
-	features(): @features
-	features(@features): this
+	features(): valueof @features
+	features(@features): valueof this
 	flagAbstract() { # {{{
 		@abstract = true
 	} # }}}
@@ -1024,7 +1024,7 @@ class ClassType extends Type {
 			}
 		}
 	} # }}}
-	flagAltering(): this { # {{{
+	flagAltering(): valueof this { # {{{
 		if ?@majorOriginal {
 			@altering = true
 		}
@@ -1032,7 +1032,7 @@ class ClassType extends Type {
 	flagPredefined() { # {{{
 		@predefined = true
 	} # }}}
-	flagRequirement(): this { # {{{
+	flagRequirement(): valueof this { # {{{
 		super()
 
 		@majorOriginal?.unflagRequired()
@@ -1799,9 +1799,7 @@ class ClassType extends Type {
 
 		return methods
 	} # }}}
-	// TODO
-	// listInstantiableMethods(name: String, methods: ClassMethodType[], keys: Number{}): Void {
-	listInstantiableMethods(name: String, methods: ClassMethodType[], keys): Void { # {{{
+	listInstantiableMethods(name: String, methods: ClassMethodType[], keys: Boolean{}): Void { # {{{
 		if var functions ?= @instanceMethods[name] {
 			for var method in functions {
 				if !?keys[method.index()] {
@@ -2015,7 +2013,7 @@ class ClassType extends Type {
 			return null
 		}
 	} # }}}
-	originals(@majorOriginal, @minorOriginal = null): this { # {{{
+	originals(@majorOriginal, @minorOriginal = null): valueof this { # {{{
 		@altering = true
 	} # }}}
 	overwriteConstructor(type, methods) { # {{{
@@ -2174,7 +2172,7 @@ class ClassType extends Type {
 			variations.push(name, sequence)
 		}
 	} # }}}
-	unflagAltering(): this { # {{{
+	unflagAltering(): valueof this { # {{{
 		for var methods of this._abstractMethods {
 			for var method in methods {
 				method.unflagAltering()

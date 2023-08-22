@@ -46,7 +46,7 @@ class TempMemberExpression extends Expression {
 		}
 	} # }}}
 	isComposite() => true
-	offset(@offset): this
+	offset(@offset): valueof this
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)

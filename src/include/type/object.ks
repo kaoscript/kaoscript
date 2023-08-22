@@ -179,10 +179,10 @@ class ObjectType extends Type {
 	flagDestructuring() { # {{{
 		@destructuring = true
 	} # }}}
-	flagEmpty(): this { # {{{
+	flagEmpty(): valueof this { # {{{
 		@empty = true
 	} # }}}
-	flagLiberal(): this { # {{{
+	flagLiberal(): valueof this { # {{{
 		@liberal = true
 	} # }}}
 	flagSpread() { # {{{
@@ -209,8 +209,8 @@ class ObjectType extends Type {
 
 		return null
 	} # }}}
-	getRestType(): @restType
-	getTestName(): @testName
+	getRestType(): valueof @restType
+	getTestName(): valueof @testName
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''
 
@@ -492,7 +492,7 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	isTestingProperties() => @testProperties
-	length(): @length
+	length(): valueof @length
 	listFunctions(name: String): Array { # {{{
 		var result = []
 
@@ -688,7 +688,7 @@ class ObjectType extends Type {
 			return type
 		}
 	} # }}}
-	setRestType(@restType): this { # {{{
+	setRestType(@restType): valueof this { # {{{
 		@rest = true
 		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}

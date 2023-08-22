@@ -21,23 +21,11 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			return this.__ks_func_quxbaz_0();
+			return Foobar.__ks_new_0();
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			if(args.length === 0) {
 				return proto.__ks_func_foobar_0.call(that);
-			}
-			throw Helper.badArgs();
-		}
-		quxbaz() {
-			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
-		}
-		__ks_func_quxbaz_0() {
-			return this;
-		}
-		__ks_func_quxbaz_rt(that, proto, args) {
-			if(args.length === 0) {
-				return proto.__ks_func_quxbaz_0.call(that);
 			}
 			throw Helper.badArgs();
 		}

@@ -63,7 +63,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 			}
 		}
 	} # }}}
-	toCurryFragments(fragments, mode, node) { # {{{
+	toCurryFragments(fragments: LineBuilder, mode, node) { # {{{
 		if @curries.length == 1 {
 			fragments.code($runtime.helper(node), '.curry(')
 
@@ -83,12 +83,12 @@ class PreciseFunctionCallee extends PreciseCallee {
 				(function, line) => {
 					if @expression is ArrowFunctionExpression || type.isMissingThis() || @scope == .Argument {
 						line.code(`fn[0](`)
-						
+
 						return false
 					}
 					else {
 						line.code(`fn[0].call(that`)
-						
+
 						return true
 					}
 				}
@@ -163,9 +163,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 				fragments.code(')')
 			}
 			else {
-				// TODO
-				// var ctrl = fragments.newControl(initiator: false)
-				var ctrl = fragments.newControl(fragments._indent, false)
+				var ctrl = fragments.newControl(initiator: false)
 
 				ctrl.code('function(')
 

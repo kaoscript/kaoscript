@@ -1,5 +1,5 @@
 class Foobar {
-	value(): Infinity
+	value() :> false
 }
 
 export Foobar

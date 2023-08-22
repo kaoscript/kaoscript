@@ -485,7 +485,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		return false
 	} # }}}
-	index(@index): this
+	index(@index): valueof this
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

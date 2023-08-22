@@ -6,7 +6,7 @@ impl Shape {
 	private {
 		final late @name: String
 	}
-	name(): @name
+	name(): valueof @name
 	toString(): String => `I'm drawing a \(@color) \(@name).`
 }
 

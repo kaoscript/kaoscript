@@ -387,8 +387,8 @@ class IfStatement extends Statement {
 			return @assignments
 		}
 	} # }}}
-	getWhenFalseScope(): @whenFalseScope
-	getWhenTrueScope(): @whenTrueScope
+	getWhenFalseScope(): valueof @whenFalseScope
+	getWhenTrueScope(): valueof @whenTrueScope
 	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { # {{{
 		if var map ?= @lateInitVariables[name] {
 			map[whenTrue].type = type

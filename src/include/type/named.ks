@@ -44,10 +44,10 @@ class NamedType extends Type {
 
 		return this
 	} # }}}
-	flagAltering(): this { # {{{
+	flagAltering(): valueof this { # {{{
 		@type.flagAltering()
 	} # }}}
-	flagComplete(): this { # {{{
+	flagComplete(): valueof this { # {{{
 		@type.flagComplete()
 	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
@@ -65,7 +65,7 @@ class NamedType extends Type {
 
 		return this
 	} # }}}
-	flagRequirement(): this { # {{{
+	flagRequirement(): valueof this { # {{{
 		@type.flagRequirement()
 	} # }}}
 	flagSealed() { # {{{
@@ -492,7 +492,7 @@ class NamedType extends Type {
 	name(@name) => this
 	origin() => @type.origin()
 	origin(origin) => @type.origin(origin)
-	originals(...originals): this { # {{{
+	originals(...originals): valueof this { # {{{
 		@type.originals(...originals)
 	} # }}}
 	parameter() => @type.parameter()
@@ -579,7 +579,7 @@ class NamedType extends Type {
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
-	unflagAltering(): this { # {{{
+	unflagAltering(): valueof this { # {{{
 		@type.unflagAltering()
 	} # }}}
 	walk(fn) { # {{{

@@ -37,7 +37,7 @@ class BitmaskDeclaration extends EnumDeclaration {
 
 		@enum.length(@length)
 	} # }}}
-	length(): @length
+	length(): valueof @length
 	override toMainTypeFragments(fragments) { # {{{
 		if @length <= 32 {
 			fragments.code('Number')

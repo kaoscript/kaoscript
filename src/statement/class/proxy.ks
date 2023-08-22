@@ -100,7 +100,7 @@ class ClassProxyDeclaration extends Statement {
 		@external.translate()
 	} # }}}
 	isInstance() => @instance
-	name(): @name
+	name(): valueof @name
 	toStatementFragments(fragments, mode) { # {{{
 		if @type.isFunction() {
 			if @instance {

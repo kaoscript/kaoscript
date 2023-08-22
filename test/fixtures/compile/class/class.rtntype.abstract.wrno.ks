@@ -4,12 +4,12 @@ abstract class Master {
 	private {
 		@value: String	= ''
 	}
-	abstract value(): @value
-	abstract value(@value): this
+	abstract value(): typeof @value
+	abstract value(@value): typeof this
 }
 
 class Foobar extends Master {
-	value(): @value
+	value(): valueof @value
 	value(@value) => this
 }
 

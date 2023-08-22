@@ -72,6 +72,11 @@ class ReturnStatement extends Statement {
 			else if !@type.isExplicit() && @type.isAny() {
 				pass
 			}
+			else if target.isValueOf() && target.isThisReference() {
+				if @value.toQuote() != 'this' {
+					TypeException.throwUnexpectedReturnType(target, @type, this)
+				}
+			}
 			else if @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				pass
 			}

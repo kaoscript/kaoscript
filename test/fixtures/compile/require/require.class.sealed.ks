@@ -4,8 +4,8 @@ impl Color {
 	private {
 		@luma: Number	= 0
 	}
-	luma(): @luma
-	luma(@luma): this
+	luma(): valueof @luma
+	luma(@luma): valueof this
 }
 
 export Color

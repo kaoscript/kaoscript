@@ -91,7 +91,7 @@ class BlockScope extends Scope {
 		if $keywords[name] == true || @declarations[name] == true {
 			var newName = @getNewName(name)
 
-			if @variables[name] is not Array {
+			if !?@variables[name] {
 				@declarations[newName] = true
 			}
 

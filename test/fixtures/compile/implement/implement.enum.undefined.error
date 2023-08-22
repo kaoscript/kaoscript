@@ -1,0 +1,1 @@
+ReferenceException: The implicit property ".Foo" couldn't be resolved (fixtures/compile/implement/implement.enum.undefined.ks:7)

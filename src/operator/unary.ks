@@ -169,7 +169,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			fragments.compile(@argument).code(')')
 		}
 	} # }}}
-	type(): @type
+	type(): valueof @type
 }
 
 class UnaryOperatorNegative extends NumericUnaryOperatorExpression {

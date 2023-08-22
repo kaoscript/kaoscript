@@ -1,5 +1,3 @@
-extern console
-
 type Data = {
 	test(): Boolean
 	text(): String
@@ -7,6 +5,6 @@ type Data = {
 
 func foobar(resolve: (): Data?) {
 	if var value ?= resolve(); value.test() {
-		console.log(`\(value.text())`)
+		echo(`\(value.text())`)
 	}
 }

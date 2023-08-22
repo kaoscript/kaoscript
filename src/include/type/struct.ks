@@ -87,7 +87,7 @@ class StructType extends Type {
 	extends(@extends) { # {{{
 		@extending = true
 	} # }}}
-	function(): @function
+	function(): valueof @function
 	function(reference, node) { # {{{
 		if @function == null {
 			var scope = node.scope()
@@ -493,7 +493,7 @@ class StructFieldType extends Type {
 	} # }}}
 	override toVariations(variations)
 	type() => @type
-	type(@type): this
+	type(@type): valueof this
 
 	proxy @type {
 		isSubsetOf

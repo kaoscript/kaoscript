@@ -170,7 +170,7 @@ class ArrayType extends Type {
 	getProperty(name: String): Type { # {{{
 		return @scope.reference('Array').getProperty(name)
 	} # }}}
-	getRestType(): @restType
+	getRestType(): valueof @restType
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''
 
@@ -571,7 +571,7 @@ class ArrayType extends Type {
 			return type
 		}
 	} # }}}
-	setRestType(@restType): this { # {{{
+	setRestType(@restType): valueof this { # {{{
 		@rest = true
 		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}

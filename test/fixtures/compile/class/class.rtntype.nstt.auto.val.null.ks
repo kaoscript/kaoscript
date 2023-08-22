@@ -1,5 +1,5 @@
 class Foobar {
-	value(): null
+	value() :> null
 }
 
 export Foobar

@@ -5,7 +5,7 @@ class Foobar {
 	constructor(x: Number) {
 		this.x(x)
 	}
-	x(@x): this
+	x(@x) :> this
 }
 
 export Foobar

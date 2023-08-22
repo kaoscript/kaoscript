@@ -33,13 +33,9 @@ namespace Method {
 			}
 			else {
 				return {
-					// TODO
-					// match: class.extends().type().listInstanceMethods
 					match(name: String): Array {
 						return class.extends().type().listInstanceMethods(name)
 					}
-					// TODO
-					// matchAll: class.extends().type().listInstantiableMethods
 					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
 						return class.extends().type().listInstantiableMethods(name, type, mode)
 					}
@@ -375,9 +371,9 @@ class ClassMethodDeclaration extends Statement {
 	override prepare(target, targetMode) { # {{{
 		return if @analysed
 
-		@scope.module().setLineOffset(@offset)
-
-		@scope.line(@line())
+		@scope
+			..module().setLineOffset(@offset)
+			..line(@line())
 
 		@parent.updateMethodScope(this)
 
@@ -387,40 +383,29 @@ class ClassMethodDeclaration extends Statement {
 
 		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
 
-		@type.unflagAssignableThis()
+		@type
+			..unflagAssignableThis()
+			..setThisType(@parent.type().reference()) if @instance
 
-		if @instance {
-			@type.setThisType(@parent.type().reference())
-		}
-
-		@autoTyping = @type.isAutoTyping()
-		var dynamicReturn = @type.isDynamicReturn()
-		var returnData = @type.getReturnData()
 		var { overridden, overloaded } = @resolveOver()
 
 		for var alias in @aliases {
 			@type.flagInitializingInstanceVariable(alias.getVariableName())
 		}
 
-		@block.analyse(@aliases)
+		@block
+			..analyse(@aliases)
+			..analyse()
 
-		@block.analyse()
+		var return = @type.getReturnType()
 
-		if dynamicReturn {
-			if @autoTyping {
-				@type.setReturnType(@block.getUnpreparedType())
-			}
-			else {
-				var return = $compile.expression(returnData, this, @scope)
+		if return is ValueOfType {
+			@block.addReturn(return.expression())
+		}
+		else if @type.isAutoTyping() {
+			@type.setReturnType(@block.getUnpreparedType())
 
-				return.analyse()
-
-				if @type.isUnknownReturnType() {
-					@type.setReturnType(return.getUnpreparedType())
-				}
-
-				@block.addReturn(return)
-			}
+			@autoTyping = true
 		}
 
 		if @overriding {
@@ -749,7 +734,10 @@ class ClassMethodDeclaration extends Statement {
 					// don't check since the type isn't set, yet
 				}
 				else if @override {
-					if !@type.isMissingReturn() {
+					if @type.isMissingReturn() {
+						type.setReturnType(method.getReturnType())
+					}
+					else {
 						var oldType = method.getReturnType()
 						var newType = @type.getReturnType()
 
@@ -763,8 +751,11 @@ class ClassMethodDeclaration extends Statement {
 
 							return null
 						}
+						else if newType.isValueOf() {
+							type.setReturnType(newType)
+						}
 						else {
-							type.setReturnType(method.getReturnType())
+							type.setReturnType(oldType)
 						}
 					}
 				}

@@ -45,8 +45,8 @@ class BinaryOperatorExpression extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
-	left(): @left
-	left(@left): this
+	left(): valueof @left
+	left(@left): valueof this
 	listAssignments(array: Array) { # {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
@@ -163,7 +163,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	} # }}}
 	isAcceptingEnum() => false
 	isComputed() => @native || (@enum && !@expectingEnum)
-	setOperands(@left, @right, @enum = false, @expectingEnum = false): this
+	setOperands(@left, @right, @enum = false, @expectingEnum = false): valueof this
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
 		fragments.wrap(@left).code($space).code(@symbol(), @data.operator).code($space).wrap(@right)
@@ -280,7 +280,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	isComputed() => @native || (@enum && !@expectingEnum)
-	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): this
+	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): valueof this
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
 			if type == OperandType.Enum && (@enum || @number) {

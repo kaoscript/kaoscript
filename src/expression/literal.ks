@@ -254,8 +254,8 @@ class NumberLiteral extends Literal {
 			TypeException.throwInvalidLiteralType(`"\(@value)"`, @type, target, this)
 		}
 	} # }}}
-	getUnpreparedType(): @type
-	type(): @type
+	getUnpreparedType(): valueof @type
+	type(): valueof @type
 }
 
 class StringLiteral extends Literal {
@@ -272,7 +272,7 @@ class StringLiteral extends Literal {
 			TypeException.throwInvalidLiteralType(@value, @type, target, this)
 		}
 	} # }}}
-	getUnpreparedType(): @type
+	getUnpreparedType(): valueof @type
 	isNotEmpty() => @value.length > 0
-	type(): @type
+	type(): valueof @type
 }

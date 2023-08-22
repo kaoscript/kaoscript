@@ -44,6 +44,10 @@ class ReferenceType extends Type {
 			return ReferenceType.new(scope, name as String, data.nullable!?, null)
 		} # }}}
 		toQuote(name, nullable, parameters) { # {{{
+			if name == 'this' {
+				return 'typeof this'
+			}
+
 			var fragments = [name]
 
 			if parameters.length != 0 {
@@ -350,9 +354,10 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return Type.Any
 		}
-		// TODO
-		// else if var variable ?= @scope.getVariable(@name); variable.getRealType() is not ReferenceType || variable.name() != @name || variable.scope() != @scope {
-		else if (variable ?= @scope.getVariable(@name)) && (variable.getRealType() is not ReferenceType || variable.name() != @name || variable.scope() != @scope) {
+		else if @name == 'this' {
+			return @type()
+		}
+		else if var variable ?= @scope.getVariable(@name); variable.getRealType() is not ReferenceType || variable.name() != @name {
 			return variable.getRealType().discardAlias()
 		}
 		else {
@@ -365,7 +370,10 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
-		// TODO improve syntax
+		else if @name == 'this' {
+			return @type()
+		}
+		// TODO! improve syntax
 		// else if {
 		// 	var variable ?= @scope.getVariable(@name, -1); variable.name() != @name
 		// 	var type ?= variable.getRealType(); type is not ReferenceType || type.scope() != @scope
@@ -1187,7 +1195,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	reset(): this { # {{{
+	reset(): valueof this { # {{{
 		Object.delete(this, '_type')
 		@nullable = @explicitlyNull
 		@predefined = false
@@ -1303,6 +1311,12 @@ class ReferenceType extends Type {
 
 		if @predefined {
 			return @export(references, indexDelta, mode, module)
+		}
+		else if @name == 'this' {
+			return {
+				kind: TypeKind.Reference
+				@name
+			}
 		}
 		else if mode ~~ ExportMode.Alien {
 			if @type.isClass() {

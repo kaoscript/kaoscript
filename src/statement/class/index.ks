@@ -685,7 +685,7 @@ class ClassDeclaration extends Statement {
 	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} # }}}
-	extends() => @extendsType
+	extends(): valueof @extendsType
 	flagForcefullyRebinded() { # {{{
 		@forcefullyRebinded = true
 	} # }}}
