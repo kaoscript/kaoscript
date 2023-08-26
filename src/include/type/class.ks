@@ -174,7 +174,6 @@ class ClassType extends Type {
 				})
 			}
 			else if ?data.originals {
-
 				queue.push(() => {
 					var first = references[data.originals[0]].discardName()
 					var second = references[data.originals[1]].discardName()
@@ -217,6 +216,8 @@ class ClassType extends Type {
 						}
 					}
 
+					references.this = type
+
 					if data.abstract {
 						for var methods, name of data.abstractMethods {
 							for var method in methods {
@@ -252,6 +253,8 @@ class ClassType extends Type {
 							type.dedupStaticMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
+
+					Object.delete(references, 'this')
 
 					type.setExhaustive(data.exhaustive)
 				})

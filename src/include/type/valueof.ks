@@ -1,7 +1,12 @@
 class ValueOfType extends ReferenceType {
 	private {
-		@expression: Expression
+		@expression: Expression?
 		@this: Boolean				= false
+	}
+	static {
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ValueOfType { # {{{
+			return ValueOfType.new(references[data.name], scope)
+		} # }}}
 	}
 	constructor(@expression) { # {{{
 		var type = expression.type()
@@ -16,6 +21,11 @@ class ValueOfType extends ReferenceType {
 
 			@type = type
 		}
+	} # }}}
+	constructor(@type, @scope) { # {{{
+		super(scope, 'this')
+
+		@this = true
 	} # }}}
 	override discardAlias() { # {{{
 		return @type().discardAlias()

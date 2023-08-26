@@ -561,6 +561,9 @@ abstract class Type {
 					TypeKind.Union {
 						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind.ValueOf {
+						return ValueOfType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 				}
 			}
 			else if ?data.type {
