@@ -376,6 +376,11 @@ class VariableDeclaration extends AbstractNode {
 	isUsingVariable(name) => @hasValue && @value.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @hasValue && @value.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @hasValue && @value.isUsingStaticVariable(class, varname)
+	listAssignments(array: Array): valueof array { # {{{
+		for var declarator in @declarators {
+			declarator.listAssignments(array)
+		}
+	} # }}}
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		if @hasValue {
 			@value.listNonLocalVariables(scope, variables)
@@ -512,6 +517,9 @@ class VariableBindingDeclarator extends AbstractNode {
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
 	isStronglyTyped() => true
+	listAssignments(array: Array): valueof array { # {{{
+		@binding.listAssignments(array)
+	} # }}}
 	setDeclaredType(type: Type) { # {{{
 		if !?@type {
 			if !type.isAny() {
@@ -645,6 +653,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	isRedeclared() => @redeclared || @scope.isRedeclaredVariable(@name)
 	isSplitAssignment() => false
 	isStronglyTyped() => ?@data.type
+	listAssignments(array: Array): valueof array { # {{{
+		@identifier.listAssignments(array)
+	} # }}}
 	name() => @name
 	setDeclaredType(mut type: Type) { # {{{
 		if !?@type {

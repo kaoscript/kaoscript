@@ -1,5 +1,5 @@
 func foobar() {
-	if var x ?= quxbaz(); x is Number && x == 0 {
+	if var x ?= quxbaz() ;; x is Number && x == 0 {
 	}
 }
 

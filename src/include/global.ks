@@ -214,9 +214,12 @@ var $compile = {
 	function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
 	statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
-			var clazz = $statements[data.kind] ?? $statements.default
-
-			return clazz.new(data, parent, scope)
+			if var clazz ?= $statements[data.kind] {
+				return clazz.new(data, parent, scope)
+			}
+			else {
+				throw NotSupportedException.new(`Unexpected statement \(data.kind)`, parent)
+			}
 		}
 		else {
 			return null

@@ -14,7 +14,7 @@ extern {
 func getSupervisorName(enteredId: String?): String? {
 	return null unless ?enteredId
 
-	if var employee ?= repository.findById(parseInt(enteredId)); ?employee.supervisorId {
+	if var employee ?= repository.findById(parseInt(enteredId)) ;; ?employee.supervisorId {
 		if var supervisor ?= repository.findById(employee.supervisorId!?) {
 			return supervisor.name
 		}

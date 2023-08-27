@@ -1,34 +1,16 @@
-enum OrderKind {
-	Ascending
-	Descending
-	None
-}
-
-enum LoopKind {
-	Ordered
-	Static
-	Unknown
-}
-
-class ForFromStatement extends Statement {
+class FromIteration extends IterationNode {
 	private late {
 		@ascending: Boolean					= true
-		@bindingScope
-		@body
-		@bodyScope
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
 		@declared: Boolean					= false
-		@else
-		@elseScope
 		@from
 		@fromAssert: Boolean				= false
 		@fromBallpark: Boolean
 		@fromName: String
 		@immutable: Boolean					= false
-		@loopKind: LoopKind					= LoopKind.Unknown
-		@order: OrderKind					= OrderKind.None
-		@outerScope
+		@loopKind: LoopKind					= .Unknown
+		@order: OrderKind					= .None
 		@step
 		@stepAssert: Boolean				= false
 		@stepName: String
@@ -43,7 +25,7 @@ class ForFromStatement extends Statement {
 		@when
 		@while
 	}
-	analyse() { # {{{
+	override analyse() { # {{{
 		var mut rename = false
 		var variable = @scope.getVariable(@data.variable.name)
 
@@ -69,7 +51,7 @@ class ForFromStatement extends Statement {
 			@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		}
 		else {
-			@bindingScope = @scope
+			@bindingScope = @scope!?
 		}
 
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
@@ -143,16 +125,6 @@ class ForFromStatement extends Statement {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
-
-		@body = $compile.block(@data.body, this, @bodyScope)
-		@body.analyse()
-
-		if ?@data.else {
-			@elseScope = @newScope(@scope!?, ScopeType.InlineBlock)
-
-			@else = $compile.block(@data.else, this, @elseScope)
-			@else.analyse()
-		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		unless @declared {
@@ -166,7 +138,7 @@ class ForFromStatement extends Statement {
 		@step?.prepare(@scope.reference('Number'), TargetMode.Permissive)
 
 		if @from is NumberLiteral && @to is NumberLiteral {
-			if ?@else {
+			if @hasElse() {
 				SyntaxException.throwForDeadElse('for/from', this)
 			}
 
@@ -331,13 +303,17 @@ class ForFromStatement extends Statement {
 
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
-
-		@body.prepare(target)
-
-		if ?@else {
-			@else.prepare(target)
-		}
-
+	} # }}}
+	override translate() { # {{{
+		@variable.translate()
+		@from.translate()
+		@to.translate()
+		@step?.translate()
+		@until?.translate()
+		@while?.translate()
+		@when?.translate()
+	} # }}}
+	override releaseVariables() { # {{{
 		@scope.releaseTempName(@fromName) if ?@fromName
 		@scope.releaseTempName(@stepName) if ?@stepName
 		@scope.releaseTempName(@unknownTranslator) if ?@unknownTranslator
@@ -350,87 +326,42 @@ class ForFromStatement extends Statement {
 				@bindingScope.releaseTempName(@toName)
 			}
 		}
-
-		if ?@else {
-			var trueInferables = @bodyScope.listUpdatedInferables()
-			var falseInferables = @elseScope.listUpdatedInferables()
-
-			for var inferable, name of trueInferables {
-				var trueType = inferable.type
-
-				if ?falseInferables[name] {
-					var falseType = falseInferables[name].type
-
-					if trueType.equals(falseType) {
-						@scope.updateInferable(name, inferable, this)
-					}
-					else {
-						@scope.updateInferable(name, {
-							isVariable: inferable.isVariable
-							type: Type.union(@scope, trueType, falseType)
-						}, this)
-					}
-				}
-				else if inferable.isVariable && @scope.hasVariable(name) {
-					@scope.replaceVariable(name, inferable.type, true, false, this)
-				}
-			}
-
-			for var inferable, name of falseInferables when !?trueInferables[name] {
-				if inferable.isVariable && @scope.hasVariable(name) {
-					@scope.replaceVariable(name, inferable.type, true, false, this)
-				}
-			}
-		}
-		else {
-			for var inferable, name of @bodyScope.listUpdatedInferables() {
-				if inferable.isVariable && @scope.hasVariable(name) {
-					@scope.replaceVariable(name, inferable.type, true, false, this)
-				}
-			}
-		}
 	} # }}}
-	translate() { # {{{
-		@variable.translate()
-		@from.translate()
-		@to.translate()
-		@step?.translate()
-		@until?.translate()
-		@while?.translate()
-		@when?.translate()
-		@body.translate()
-		@else?.translate()
-	} # }}}
-	isJumpable() => true
-	isLoop() => true
-	isUsingVariable(name) => # {{{
-			@from.isUsingVariable(name)
-		||	@to.isUsingVariable(name)
-		||	@step?.isUsingVariable(name)
-		||	@until?.isUsingVariable(name)
-		||	@while?.isUsingVariable(name)
-		||	@when?.isUsingVariable(name)
-		||	@body.isUsingVariable(name)
-		||	@else?.isUsingVariable(name)
-	# }}}
-	toBodyFragments(fragments) { # {{{
+	toBodyFragments(fragments, elseCtrl?) { # {{{
 		if ?@data.when {
-			@toDeclarationFragments(@conditionalTempVariables, fragments)
+			@parent.toDeclarationFragments(@conditionalTempVariables, fragments)
 
-			fragments
+			var ctrl = fragments
 				.newControl()
 				.code('if(')
 				.compileCondition(@when)
 				.code(')')
 				.step()
-				.compile(@body)
-				.done()
+
+			return {
+				fragments: ctrl
+				close: () => {
+					ctrl.done()
+
+					return @close(fragments, elseCtrl)
+				}
+			}
 		}
 		else {
-			fragments.compile(@body)
+			return {
+				fragments
+				close: () => @close(fragments, elseCtrl)
+			}
 		}
 	} # }}}
-	toOrderedFragments(fragments, mode) { # {{{
+	override toIterationFragments(fragments) { # {{{
+		return match @loopKind {
+			.Ordered => @toOrderedFragments(fragments)
+			.Static => @toStaticFragments(fragments)
+			.Unknown => @toUnknownFragments(fragments)
+		}
+	} # }}}
+	toOrderedFragments(fragments) { # {{{
 		var mut toDecl = !?@toName
 		var mut stepDecl = !?@stepName
 
@@ -503,9 +434,9 @@ class ForFromStatement extends Statement {
 			comparator = @ascending ? ' <= ' : ' >= '
 		}
 
-		var mut ifCtrl = null
-		if ?@else {
-			ifCtrl = fragments
+		var mut elseCtrl = null
+		if @parent.hasElse() {
+			elseCtrl = fragments
 				.newControl()
 				.code('if(')
 				.compile(@fromName ?? @from)
@@ -514,17 +445,17 @@ class ForFromStatement extends Statement {
 				if stepDecl {
 					if @step is NumberLiteral {
 						if @step.value() > 0 {
-							ifCtrl.code(` + \(@step.value())`)
+							elseCtrl.code(` + \(@step.value())`)
 						}
 						else {
-							ifCtrl.code(` - \(-@step.value())`)
+							elseCtrl.code(` - \(-@step.value())`)
 						}
 					}
 					else if ?@step {
-						ifCtrl.code(' + ').compile(@stepName ?? @step)
+						elseCtrl.code(' + ').compile(@stepName ?? @step)
 					}
 					else {
-						ifCtrl.code(@ascending ? ' + 1' : ' - 1')
+						elseCtrl.code(@ascending ? ' + 1' : ' - 1')
 					}
 				}
 				else {
@@ -532,13 +463,17 @@ class ForFromStatement extends Statement {
 				}
 			}
 
-			ifCtrl.code(comparator)
+			elseCtrl.code(comparator)
 				.compile(@toName ?? @to)
 				.code(')')
 				.step()
+
+			if @elseTest == .Setter {
+				elseCtrl.line(`\(@parent.getElseName()) = false`)
+			}
 		}
 
-		var mut ctrl = (ifCtrl ?? fragments).newControl().code('for(')
+		var mut ctrl = (elseCtrl ?? fragments).newControl().code('for(')
 
 		if @declared {
 			ctrl.code($runtime.scope(this))
@@ -606,31 +541,9 @@ class ForFromStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		@toBodyFragments(ctrl)
-
-		ctrl.done()
-
-		if ?ifCtrl {
-			ifCtrl
-				.step()
-				.code('else')
-				.step()
-				.compile(@else)
-				.done()
-		}
+		return @toBodyFragments(ctrl, elseCtrl)
 	} # }}}
-	toStatementFragments(fragments, mode) { # {{{
-		if @loopKind == LoopKind.Unknown {
-			@toUnknownFragments(fragments, mode)
-		}
-		else if @loopKind == LoopKind.Static {
-			@toStaticFragments(fragments, mode)
-		}
-		else {
-			@toOrderedFragments(fragments, mode)
-		}
-	} # }}}
-	toStaticFragments(fragments, mode) { # {{{
+	toStaticFragments(fragments) { # {{{
 		var mut ctrl = fragments.newControl().code('for(')
 
 		if @declared {
@@ -697,11 +610,9 @@ class ForFromStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		@toBodyFragments(ctrl)
-
-		ctrl.done()
+		return @toBodyFragments(ctrl, null)
 	} # }}}
-	toUnknownFragments(fragments, mode) { # {{{
+	toUnknownFragments(fragments) { # {{{
 		var comparator = @toBallpark ? '<' : '<='
 
 		fragments
@@ -715,15 +626,19 @@ class ForFromStatement extends Statement {
 			.code(')')
 			.done()
 
-		var mut ifCtrl = null
-		if ?@else {
-			ifCtrl = fragments
+		var mut elseCtrl = null
+		if @parent.hasElse() {
+			elseCtrl = fragments
 				.newControl()
 				.code(`if(\(@fromName)\(@fromBallpark ? ` + \(@stepName)` : '') \(comparator) \(@toName))`)
 				.step()
+
+			if @elseTest == .Setter {
+				elseCtrl.line(`\(@parent.getElseName()) = false`)
+			}
 		}
 
-		var ctrl = (ifCtrl ?? fragments)
+		var ctrl = (elseCtrl ?? fragments)
 			.newControl()
 			.code('for(let ')
 			.code(`\(@unknownIndex) = \(@fromName)`)
@@ -767,17 +682,6 @@ class ForFromStatement extends Statement {
 				.done()
 		}
 
-		@toBodyFragments(ctrl)
-
-		ctrl.done()
-
-		if ?ifCtrl {
-			ifCtrl
-				.step()
-				.code('else')
-				.step()
-				.compile(@else)
-				.done()
-		}
+		return @toBodyFragments(ctrl, elseCtrl)
 	} # }}}
 }

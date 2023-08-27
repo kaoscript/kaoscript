@@ -4,7 +4,7 @@ type Data = {
 }
 
 func foobar(resolve: (): Data?) {
-	if var value ?= resolve(); value.test() {
+	if var value ?= resolve() ;; value.test() {
 		echo(`\(value.text())`)
 	}
 }

@@ -1,8 +1,5 @@
-class ForRangeStatement extends Statement {
-	private {
-		@bindingScope
-		@bodyScope
-		@body
+class RangeIteration extends IterationNode {
+	private late {
 		@boundName
 		@declaration: Boolean		= false
 		@defineVariable: Boolean	= false
@@ -16,7 +13,7 @@ class ForRangeStatement extends Statement {
 		@when
 		@while
 	}
-	analyse() { # {{{
+	override analyse() { # {{{
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
@@ -65,9 +62,6 @@ class ForRangeStatement extends Statement {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
-
-		@body = $compile.block(@data.body, this, @bodyScope)
-		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		unless @defineVariable {
@@ -108,24 +102,12 @@ class ForRangeStatement extends Statement {
 				TypeException.throwInvalidCondition(@when, this)
 			}
 		}
-
-		@body.prepare(target)
-
-		@bindingScope.releaseTempName(@boundName) if ?@boundName
-		@bindingScope.releaseTempName(@stepName) if ?@stepName
-
-		for var inferable, name of @bodyScope.listUpdatedInferables() {
-			if inferable.isVariable && @scope.hasVariable(name) {
-				@scope.replaceVariable(name, inferable.type, true, false, this)
-			}
-		}
 	} # }}}
-	translate() { # {{{
+	override translate() { # {{{
 		@value.translate()
 		@from.translate()
 		@to.translate()
-
-		@step.translate() if ?@step
+		@step?.translate()
 
 		if ?@until {
 			@until.translate()
@@ -134,22 +116,13 @@ class ForRangeStatement extends Statement {
 			@while.translate()
 		}
 
-		@when.translate() if ?@when
-
-		@body.translate()
+		@when?.translate()
 	} # }}}
-	isJumpable() => true
-	isLoop() => true
-	isUsingVariable(name) => # {{{
-			@from.isUsingVariable(name)
-		||	@to.isUsingVariable(name)
-		||	@step?.isUsingVariable(name)
-		||	@until?.isUsingVariable(name)
-		||	@while?.isUsingVariable(name)
-		||	@when?.isUsingVariable(name)
-		||	@body.isUsingVariable(name)
-	# }}}
-	toStatementFragments(fragments, mode) { # {{{
+	override releaseVariables() { # {{{
+		@bindingScope.releaseTempName(@boundName) if ?@boundName
+		@bindingScope.releaseTempName(@stepName) if ?@stepName
+	} # }}}
+	override toIterationFragments(fragments) { # {{{
 		var mut ctrl = fragments.newControl().code('for(')
 
 		if @defineVariable {
@@ -197,19 +170,28 @@ class ForRangeStatement extends Statement {
 		ctrl.code(')').step()
 
 		if ?@when {
-			ctrl
+			var ctrl2 = ctrl
 				.newControl()
 				.code('if(')
 				.compileCondition(@when)
 				.code(')')
 				.step()
-				.compile(@body)
-				.done()
+
+			return {
+				fragments: ctrl2
+				close: () => {
+					ctrl2.done()
+					ctrl.done()
+				}
+			}
 		}
 		else {
-			ctrl.compile(@body)
+			return {
+				fragments: ctrl
+				close: () => {
+					ctrl.done()
+				}
+			}
 		}
-
-		ctrl.done()
 	} # }}}
 }

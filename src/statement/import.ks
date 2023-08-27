@@ -297,7 +297,7 @@ abstract class Importer extends Statement {
 		}
 
 		if argument.required {
-			if var variable ?= @scope.getVariable(data.value.name); !variable.getDeclaredType().isPredefined() {
+			if var variable ?= @scope.getVariable(data.value.name) ;; !variable.getDeclaredType().isPredefined() {
 				ReferenceException.throwDefined(data.value.name, this)
 			}
 
@@ -358,7 +358,7 @@ abstract class Importer extends Statement {
 		}
 	} # }}}
 	addVariable(external: String, internal: String, isVariable: Boolean, type: Type?) { # {{{
-		if var variable ?= @scope.getVariable(internal); !variable.isPredefined() {
+		if var variable ?= @scope.getVariable(internal) ;; !variable.isPredefined() {
 			if @parent.includePath() != null {
 				// TODO check & merge type
 				return

@@ -826,7 +826,7 @@ namespace Matching {
 					}
 
 					if cursor.spread && cursor.index == initialIndex {
-						if var next ?= arguments[cursor.index + 1]; next.isSpread() {
+						if var next ?= arguments[cursor.index + 1] ;; next.isSpread() {
 							if node.max != Infinity {
 								argMatches.precise = false
 							}
@@ -1190,7 +1190,7 @@ namespace Matching {
 		func pushCursor(cursor: Cursor, arguments: Type[], matches: CallMatchArgument[], force: Boolean = false): Cursor { # {{{
 			// echo(cursor.spread, cursor.index, matches.last()?.index, force)
 			if cursor.spread {
-				if var last ?= matches.last(); last.index == cursor.index {
+				if var last ?= matches.last() ;; last.index == cursor.index {
 					if ?last.to {
 						last.to = cursor.used + 1
 					}

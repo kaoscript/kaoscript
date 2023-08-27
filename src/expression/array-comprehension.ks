@@ -12,7 +12,7 @@ class ArrayComprehensionForFrom extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		for var modifier in @data.loop.modifiers {
+		for var modifier in @data.loop.iteration.modifiers {
 			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
@@ -25,32 +25,32 @@ class ArrayComprehensionForFrom extends Expression {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		if @declaration {
-			@bindingScope.define(@data.loop.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
+			@bindingScope.define(@data.loop.iteration.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
 		}
 		else {
-			@bindingScope.checkVariable(@data.loop.variable.name, true, this)
+			@bindingScope.checkVariable(@data.loop.iteration.variable.name, true, this)
 		}
 
-		@variable = $compile.expression(@data.loop.variable, this, @bindingScope)
+		@variable = $compile.expression(@data.loop.iteration.variable, this, @bindingScope)
 		@variable.analyse()
 
-		@from = $compile.expression(@data.loop.from, this, @scope)
+		@from = $compile.expression(@data.loop.iteration.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.loop.to, this, @scope)
+		@to = $compile.expression(@data.loop.iteration.to, this, @scope)
 		@to.analyse()
 
-		if ?@data.loop.step {
-			@step = $compile.expression(@data.loop.step, this, @scope)
+		if ?@data.loop.iteration.step {
+			@step = $compile.expression(@data.loop.iteration.step, this, @scope)
 			@step.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
-		if ?@data.loop.when {
-			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
+		if ?@data.loop.iteration.when {
+			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -92,7 +92,7 @@ class ArrayComprehensionForFrom extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.body, this)
+		var surround = $function.surround(@data.expression, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -107,7 +107,7 @@ class ArrayComprehensionForFrom extends Expression {
 			fragments.code(', 1')
 		}
 
-		fragments.code($comma, !$ast.hasModifier(@data.loop.from, ModifierKind.Ballpark), $comma, !$ast.hasModifier(@data.loop.to, ModifierKind.Ballpark), $comma)
+		fragments.code($comma, !$ast.hasModifier(@data.loop.iteration.from, ModifierKind.Ballpark), $comma, !$ast.hasModifier(@data.loop.iteration.to, ModifierKind.Ballpark), $comma)
 
 		fragments
 			.code(surround.beforeParameters)
@@ -120,7 +120,7 @@ class ArrayComprehensionForFrom extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
-			var surround = $function.surround(@data.loop.when, this)
+			var surround = $function.surround(@data.loop.iteration.when, this)
 
 			fragments
 				.code($comma)
@@ -161,7 +161,7 @@ class ArrayComprehensionForIn extends Expression {
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
-		for var modifier in @data.loop.modifiers {
+		for var modifier in @data.loop.iteration.modifiers {
 			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
@@ -173,11 +173,11 @@ class ArrayComprehensionForIn extends Expression {
 			}
 		}
 
-		@expression = $compile.expression(@data.loop.expression, this, @scope)
+		@expression = $compile.expression(@data.loop.iteration.expression, this, @scope)
 		@expression.analyse()
 
-		if ?@data.loop.value {
-			@value = $compile.expression(@data.loop.value, this, @bindingScope)
+		if ?@data.loop.iteration.value {
+			@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
@@ -196,26 +196,26 @@ class ArrayComprehensionForIn extends Expression {
 			@valueName = @bindingScope.acquireTempName()
 		}
 
-		if ?@data.loop.index {
+		if ?@data.loop.iteration.index {
 			if @declaration {
-				@bindingScope.define(@data.loop.index.name, @immutable, @bindingScope.reference('Number'), true, this)
+				@bindingScope.define(@data.loop.iteration.index.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 				@declareIndex = true
 			}
 			else {
-				@bindingScope.checkVariable(@data.loop.index.name, true, this)
+				@bindingScope.checkVariable(@data.loop.iteration.index.name, true, this)
 			}
 
-			@index = $compile.expression(@data.loop.index, this, @bindingScope)
+			@index = $compile.expression(@data.loop.iteration.index, this, @bindingScope)
 			@index.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
-		if ?@data.loop.when {
-			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
+		if ?@data.loop.iteration.when {
+			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -261,7 +261,7 @@ class ArrayComprehensionForIn extends Expression {
 
 		if ?@index {
 			unless @declareIndex {
-				@bindingScope.replaceVariable(@data.loop.index.name, @bindingScope.reference('Number'), this)
+				@bindingScope.replaceVariable(@data.loop.iteration.index.name, @bindingScope.reference('Number'), this)
 			}
 
 			@index.prepare(@scope.reference('Number'))
@@ -282,12 +282,12 @@ class ArrayComprehensionForIn extends Expression {
 	} # }}}
 	translate() { # {{{
 		@expression.translate()
-		@value.translate() if ?@value
-		@index.translate() if ?@index
+		@value?.translate()
+		@index?.translate()
 		@body.translate()
-		@when.translate() if ?@when
+		@when?.translate()
 	} # }}}
-	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
+	isUsingVariable(name) => @expression.isUsingVariable(name) || @when?.isUsingVariable(name) || @body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 		@when?.listNonLocalVariables(scope, variables)
@@ -298,7 +298,7 @@ class ArrayComprehensionForIn extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.body, this)
+		var surround = $function.surround(@data.expression, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
@@ -320,7 +320,7 @@ class ArrayComprehensionForIn extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
-			var surround = $function.surround(@data.loop.when, this)
+			var surround = $function.surround(@data.loop.iteration.when, this)
 
 			fragments
 				.code($comma)
@@ -362,7 +362,7 @@ class ArrayComprehensionForOf extends Expression {
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
-		for var modifier in @data.loop.modifiers {
+		for var modifier in @data.loop.iteration.modifiers {
 			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
@@ -371,28 +371,28 @@ class ArrayComprehensionForOf extends Expression {
 			}
 		}
 
-		@expression = $compile.expression(@data.loop.expression, this, @scope)
+		@expression = $compile.expression(@data.loop.iteration.expression, this, @scope)
 		@expression.analyse()
 
-		if ?@data.loop.key {
+		if ?@data.loop.iteration.key {
 			if @declaration {
-				@bindingScope.define(@data.loop.key.name, @immutable, @bindingScope.reference('String'), true, this)
+				@bindingScope.define(@data.loop.iteration.key.name, @immutable, @bindingScope.reference('String'), true, this)
 
 				@defineKey = true
 			}
 			else {
-				@bindingScope.checkVariable(@data.loop.key.name, true, this)
+				@bindingScope.checkVariable(@data.loop.iteration.key.name, true, this)
 			}
 
-			@key = $compile.expression(@data.loop.key, this, @bindingScope)
+			@key = $compile.expression(@data.loop.iteration.key, this, @bindingScope)
 			@key.analyse()
 		}
 		else {
 			@keyName = @bindingScope.acquireTempName()
 		}
 
-		if ?@data.loop.value {
-			@value = $compile.expression(@data.loop.value, this, @bindingScope)
+		if ?@data.loop.iteration.value {
+			@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
 			@value.setAssignment(AssignmentType.Expression)
 			@value.analyse()
 
@@ -408,12 +408,12 @@ class ArrayComprehensionForOf extends Expression {
 			}
 		}
 
-		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
-		if ?@data.loop.when {
-			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
+		if ?@data.loop.iteration.when {
+			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -473,12 +473,12 @@ class ArrayComprehensionForOf extends Expression {
 	} # }}}
 	translate() { # {{{
 		@expression.translate()
-		@key.translate() if ?@key
-		@value.translate() if ?@value
+		@key?.translate()
+		@value?.translate()
 		@body.translate()
-		@when.translate() if ?@when
+		@when?.translate()
 	} # }}}
-	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
+	isUsingVariable(name) => @expression.isUsingVariable(name) || @when?.isUsingVariable(name) || @body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 		@when?.listNonLocalVariables(scope, variables)
@@ -489,7 +489,7 @@ class ArrayComprehensionForOf extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.body, this)
+		var surround = $function.surround(@data.expression, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapObject(')
@@ -511,7 +511,7 @@ class ArrayComprehensionForOf extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
-			var surround = $function.surround(@data.loop.when, this)
+			var surround = $function.surround(@data.loop.iteration.when, this)
 
 			fragments
 				.code($comma)
@@ -548,7 +548,7 @@ class ArrayComprehensionForRange extends Expression {
 		@when								= null
 	}
 	analyse() { # {{{
-		for var modifier in @data.loop.modifiers {
+		for var modifier in @data.loop.iteration.modifiers {
 			if modifier.kind == ModifierKind.Declarative {
 				@declaration = true
 			}
@@ -561,32 +561,32 @@ class ArrayComprehensionForRange extends Expression {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		if @declaration {
-			@bindingScope.define(@data.loop.value.name, @immutable, @bindingScope.reference('Number'), true, this)
+			@bindingScope.define(@data.loop.iteration.value.name, @immutable, @bindingScope.reference('Number'), true, this)
 		}
 		else {
-			@bindingScope.checkVariable(@data.loop.value.name, true, this)
+			@bindingScope.checkVariable(@data.loop.iteration.value.name, true, this)
 		}
 
-		@value = $compile.expression(@data.loop.value, this, @bindingScope)
+		@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
 		@value.analyse()
 
-		@from = $compile.expression(@data.loop.from, this, @scope)
+		@from = $compile.expression(@data.loop.iteration.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.loop.to, this, @scope)
+		@to = $compile.expression(@data.loop.iteration.to, this, @scope)
 		@to.analyse()
 
-		if ?@data.loop.by {
-			@by = $compile.expression(@data.loop.by, this, @scope)
+		if ?@data.loop.iteration.by {
+			@by = $compile.expression(@data.loop.iteration.by, this, @scope)
 			@body.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.body), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
-		if ?@data.loop.when {
-			@when = $compile.statement($ast.return(@data.loop.when), this, @bodyScope)
+		if ?@data.loop.iteration.when {
+			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
 			@when.initiate()
 			@when.analyse()
 		}
@@ -607,14 +607,14 @@ class ArrayComprehensionForRange extends Expression {
 		@value.translate()
 		@from.translate()
 		@to.translate()
-		@by.translate() if ?@by
+		@by?.translate()
 		@body.translate()
-		@when.translate() if ?@when
+		@when?.translate()
 	} # }}}
 	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
 								@to.isUsingVariable(name) ||
-								(@by != null && @by.isUsingVariable(name)) ||
-								(@when != null && @when.isUsingVariable(name)) ||
+								@by?.isUsingVariable(name) ||
+								@when?.isUsingVariable(name) ||
 								@body.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@from.listNonLocalVariables(scope, variables)
@@ -628,7 +628,7 @@ class ArrayComprehensionForRange extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.body, this)
+		var surround = $function.surround(@data.expression, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -655,7 +655,7 @@ class ArrayComprehensionForRange extends Expression {
 		fragments.code(surround.footer)
 
 		if ?@when {
-			var surround = $function.surround(@data.loop.when, this)
+			var surround = $function.surround(@data.loop.iteration.when, this)
 
 			fragments
 				.code($comma)
@@ -687,7 +687,7 @@ class ArrayComprehensionRepeat extends Expression {
 		@to = $compile.expression(@data.loop.expression, this, @scope)
 		@to.analyse()
 
-		@body = $compile.block($ast.return(@data.body), this, @bodyScope)
+		@body = $compile.block($ast.return(@data.expression), this, @bodyScope)
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -712,7 +712,7 @@ class ArrayComprehensionRepeat extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.body, this)
+		var surround = $function.surround(@data.expression, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(0, ')

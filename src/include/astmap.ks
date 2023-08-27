@@ -47,23 +47,23 @@ var $binaryOperators = {
 var $expressions = {
 	`\(NodeKind.ArrayBinding)`					: ArrayBinding
 	`\(NodeKind.ArrayComprehension)`			: func(data, parent, scope) {
-		if data.loop.kind == NodeKind.ForFromStatement {
-			return ArrayComprehensionForFrom.new(data, parent, scope)
-		}
-		else if data.loop.kind == NodeKind.ForInStatement {
-			return ArrayComprehensionForIn.new(data, parent, scope)
-		}
-		else if data.loop.kind == NodeKind.ForOfStatement {
-			return ArrayComprehensionForOf.new(data, parent, scope)
-		}
-		else if data.loop.kind == NodeKind.ForRangeStatement {
-			return ArrayComprehensionForRange.new(data, parent, scope)
-		}
-		else if data.loop.kind == NodeKind.RepeatStatement {
-			return ArrayComprehensionRepeat.new(data, parent, scope)
-		}
-		else {
-			throw NotSupportedException.new(`Unexpected kind \(data.loop.kind)`, parent)
+		match data.loop.kind {
+			NodeKind.ForStatement {
+				return match data.loop.iteration.kind {
+					IterationKind.Array => ArrayComprehensionForIn.new(data, parent, scope)
+					IterationKind.From => ArrayComprehensionForFrom.new(data, parent, scope)
+					IterationKind.Object => ArrayComprehensionForOf.new(data, parent, scope)
+					IterationKind.Range => ArrayComprehensionForRange.new(data, parent, scope)
+					// TODO remove else
+					else => throw NotImplementedException.new()
+				}
+			}
+			NodeKind.RepeatStatement {
+				return ArrayComprehensionRepeat.new(data, parent, scope)
+			}
+			else {
+				throw NotSupportedException.new(`Unexpected kind \(data.loop.kind)`, parent)
+			}
 		}
 	}
 	`\(NodeKind.ArrayExpression)`				: ArrayExpression
@@ -130,10 +130,7 @@ var $statements = {
 	`\(NodeKind.ExternOrImportDeclaration)`		: ExternOrImportDeclaration
 	`\(NodeKind.ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
 	`\(NodeKind.FallthroughStatement)`			: FallthroughStatement
-	`\(NodeKind.ForFromStatement)`				: ForFromStatement
-	`\(NodeKind.ForInStatement)`				: ForInStatement
-	`\(NodeKind.ForOfStatement)`				: ForOfStatement
-	`\(NodeKind.ForRangeStatement)`				: ForRangeStatement
+	`\(NodeKind.ForStatement)`					: ForStatement
 	`\(NodeKind.FunctionDeclaration)`			: FunctionDeclaration
 	`\(NodeKind.IfStatement)`					: IfStatement
 	`\(NodeKind.ImplementDeclaration)`			: ImplementDeclaration

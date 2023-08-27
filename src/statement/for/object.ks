@@ -1,15 +1,10 @@
-class ForOfStatement extends Statement {
+class ObjectIteration extends IterationNode {
 	private late {
-		@bindingScope: Scope
 		@bindingValue						= null
-		@bodyScope: Scope
-		@body
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
 		@defineKey: Boolean					= false
 		@defineValue: Boolean				= false
-		@else
-		@elseScope
 		@expression
 		@expressionName: String
 		@key								= null
@@ -21,7 +16,7 @@ class ForOfStatement extends Statement {
 		@when
 		@while
 	}
-	analyse() { # {{{
+	override analyse() { # {{{
 		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
@@ -88,16 +83,6 @@ class ForOfStatement extends Statement {
 		if ?@data.when {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
-		}
-
-		@body = $compile.block(@data.body, this, @bodyScope)
-		@body.analyse()
-
-		if ?@data.else {
-			@elseScope = @newScope(@scope!?, ScopeType.InlineBlock)
-
-			@else = $compile.block(@data.else, this, @elseScope)
-			@else.analyse()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -194,26 +179,11 @@ class ForOfStatement extends Statement {
 
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
-
-		@body.prepare(target)
-
-		@else?.prepare(target)
-
-		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
-		@bindingScope.releaseTempName(@keyName) if ?@keyName
-
-		@bindingValue.releaseReusable()
-
-		for var inferable, name of @bodyScope.listUpdatedInferables() {
-			if inferable.isVariable && @scope.hasVariable(name) {
-				@scope.replaceVariable(name, inferable.type, true, false, this)
-			}
-		}
 	} # }}}
-	translate() { # {{{
+	override translate() { # {{{
 		@expression.translate()
 
-		@key.translate() if ?@key
+		@key?.translate()
 
 		if ?@until {
 			@until.translate()
@@ -222,11 +192,7 @@ class ForOfStatement extends Statement {
 			@while.translate()
 		}
 
-		@when.translate() if ?@when
-
-		@body.translate()
-
-		@else?.translate()
+		@when?.translate()
 	} # }}}
 	checkForRenamedVariables(expression, variables: Array) { # {{{
 		if @key != null && expression.isUsingVariable(@data.key.name) {
@@ -251,42 +217,36 @@ class ForOfStatement extends Statement {
 			}
 		}
 	} # }}}
-	isJumpable() => true
-	isLoop() => true
-	isUsingVariable(name) => # {{{
-			@expression.isUsingVariable(name)
-		||	@until?.isUsingVariable(name)
-		||	@while?.isUsingVariable(name)
-		||	@when?.isUsingVariable(name)
-		||	@body.isUsingVariable(name)
-		||	@else?.isUsingVariable(name)
-	# }}}
-	toStatementFragments(fragments, mode) { # {{{
+	override releaseVariables() { # {{{
+		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
+		@bindingScope.releaseTempName(@keyName) if ?@keyName
+
+		@bindingValue.releaseReusable()
+	} # }}}
+	override toIterationFragments(fragments) { # {{{
 		if ?@expressionName {
 			fragments
 				.newLine()
 				.code($runtime.scope(this), @expressionName, $equals)
 				.compile(@expression)
 				.done()
+		}
 
-			@toLoopFragments(fragments, mode)
-		}
-		else {
-			@toLoopFragments(fragments, mode)
-		}
-	} # }}}
-	toLoopFragments(fragments, mode) { # {{{
-		var mut ifCtrl = null
-		if ?@else {
-			ifCtrl = fragments
+		var mut elseCtrl = null
+		if @parent.hasElse() {
+			elseCtrl = fragments
 				.newControl()
 				.code(`if(\($runtime.type(this)).isNotEmpty(`)
 				.compile(@expressionName ?? @expression)
 				.code('))')
 				.step()
+
+			if @elseTest == .Setter {
+				elseCtrl.line(`\(@parent.getElseName()) = false`)
+			}
 		}
 
-		var ctrl = (ifCtrl ?? fragments).newControl().code('for(')
+		var ctrl = (elseCtrl ?? fragments).newControl().code('for(')
 
 		if @key != null {
 			if @declaration || @defineKey {
@@ -334,7 +294,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if ?@until {
-			@toDeclarationFragments(@loopTempVariables, ctrl)
+			@parent.toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
 				.newControl()
@@ -346,7 +306,7 @@ class ForOfStatement extends Statement {
 				.done()
 		}
 		else if ?@while {
-			@toDeclarationFragments(@loopTempVariables, ctrl)
+			@parent.toDeclarationFragments(@loopTempVariables, ctrl)
 
 			ctrl
 				.newControl()
@@ -359,30 +319,31 @@ class ForOfStatement extends Statement {
 		}
 
 		if ?@when {
-			@toDeclarationFragments(@conditionalTempVariables, ctrl)
+			@parent.toDeclarationFragments(@conditionalTempVariables, ctrl)
 
-			ctrl
+			var ctrl2 = ctrl
 				.newControl()
 				.code('if(')
 				.compileCondition(@when)
 				.code(')')
 				.step()
-				.compile(@body)
-				.done()
+
+			return {
+				fragments: ctrl2
+				// TODO!
+				// close() => {
+				close: () => {
+					ctrl2.done()
+
+					return @close(ctrl, elseCtrl)
+				}
+			}
 		}
 		else {
-			ctrl.compile(@body)
-		}
-
-		ctrl.done()
-
-		if ?ifCtrl {
-			ifCtrl
-				.step()
-				.code('else')
-				.step()
-				.compile(@else)
-				.done()
+			return {
+				fragments: ctrl
+				close: () => @close(ctrl, elseCtrl)
+			}
 		}
 	} # }}}
 }

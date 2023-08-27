@@ -220,25 +220,18 @@ class MatchStatement extends Statement {
 					var conditionHash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),`
 					var bindingHash = `$Array,false,"",\(type?.hashCode() ?? '')`
 
-					// TODO!
-					// if {
-					// 	var condition ?= @tests[conditionHash]
-					// 	var binding ?= @tests[bindingHash]
-					// }
-					// then {
-					// }
-					if ?@tests[conditionHash] && ?@tests[bindingHash] {
-						@tests[conditionHash].count += 1
-						@tests[bindingHash].count += 1
+					if {
+						var condition ?= @tests[conditionHash]
+						var binding ?= @tests[bindingHash]
+					}
+					then {
+						condition.count += 1
+						binding.count += 1
 
-						if !?@tests[conditionHash].name {
-							@tests[conditionHash].name = @scope.acquireTempName(false)
-						}
-						if !?@tests[bindingHash].name {
-							@tests[bindingHash].name = @scope.acquireTempName(false)
-						}
+						condition.name ??= @scope.acquireTempName(false)
+						binding.name ??= @scope.acquireTempName(false)
 
-						test.tests = [@tests[conditionHash].name, @tests[bindingHash].name]
+						test.tests = [condition.name, binding.name]
 					}
 				}
 			}
@@ -440,7 +433,7 @@ class MatchStatement extends Statement {
 	getArrayTests(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
 		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
 
-		if var data ?= @tests[hash]; ?data.tests {
+		if var data ?= @tests[hash] ;; ?data.tests {
 			return data.tests
 		}
 
@@ -460,7 +453,7 @@ class MatchStatement extends Statement {
 		else {
 			var hash1 = `$Array,true,\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
 
-			if var data ?= @tests[hash1]; ?data.tests {
+			if var data ?= @tests[hash1] ;; ?data.tests {
 				var tests = data.tests
 
 				@tests[hash] ??= {}
@@ -475,7 +468,7 @@ class MatchStatement extends Statement {
 	getObjectTests(testingType: Boolean, type: Type?) { # {{{
 		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
 
-		if var data ?= @tests[hash]; ?data.tests {
+		if var data ?= @tests[hash] ;; ?data.tests {
 			return data.tests
 		}
 		else {

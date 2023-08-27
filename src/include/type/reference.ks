@@ -357,7 +357,7 @@ class ReferenceType extends Type {
 		else if @name == 'this' {
 			return @type()
 		}
-		else if var variable ?= @scope.getVariable(@name); variable.getRealType() is not ReferenceType || variable.name() != @name {
+		else if var variable ?= @scope.getVariable(@name) ;; variable.getRealType() is not ReferenceType || variable.name() != @name {
 			return variable.getRealType().discardAlias()
 		}
 		else {
@@ -373,14 +373,11 @@ class ReferenceType extends Type {
 		else if @name == 'this' {
 			return @type()
 		}
-		// TODO! improve syntax
-		// else if {
-		// 	var variable ?= @scope.getVariable(@name, -1); variable.name() != @name
-		// 	var type ?= variable.getRealType(); type is not ReferenceType || type.scope() != @scope
-		// }
-		// then {
-		// }
-		else if (variable ?= @scope.getVariable(@name, -1)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
+		else if {
+			var variable ?= @scope.getVariable(@name, -1)
+			var type ?= variable.getRealType() ;; variable.name() != @name || type is not ReferenceType || type.scope() != @scope
+		}
+		then {
 			return type.discardReference()
 		}
 		else {

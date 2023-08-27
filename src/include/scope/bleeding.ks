@@ -70,9 +70,9 @@ class BleedingScope extends Scope {
 
 		return null
 	} # }}}
-	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
+	getRenamedIndex(name: String) => @renamedIndexes[name] ?? @parent.getRenamedIndex(name)
 	getVariable(name, line: Number = @parent.line()): Variable? { # {{{
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			var variables: Array = @variables[name]
 			var currentLine = @parent.line()
 			var mut variable = null
@@ -89,17 +89,17 @@ class BleedingScope extends Scope {
 			if variable == false {
 				return @parent.getVariable(name, -1)
 			}
-			else if variable != null {
+			else if ?variable {
 				return variable!!
 			}
 		}
 
 		return @parent.getVariable(name, line)
 	} # }}}
-	hasDeclaredVariable(name: String) => @variables[name] is Array || @parent.hasDeclaredVariable(name)
+	hasDeclaredVariable(name: String) => ?@variables[name] || @parent.hasDeclaredVariable(name)
 	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @parent.line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			var variables: Array = @variables[name]
 			var currentLine = @parent.line()
 			var mut variable = null
@@ -120,11 +120,11 @@ class BleedingScope extends Scope {
 
 		return false
 	} # }}}
-	hasVariable(name: String, line: Number? = null) => @variables[name] is Array || @parent.hasVariable(name, line)
+	hasVariable(name: String, line: Number? = null) => ?@variables[name] || @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
 	isRedeclaredVariable(name: String) { # {{{
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			return @variables[name].length != 2
 		}
 		else {
@@ -132,8 +132,8 @@ class BleedingScope extends Scope {
 		}
 	} # }}}
 	isRenamedVariable(name: String) { # {{{
-		if @variables[name] is Array {
-			return @renamedVariables[name] is String
+		if ?@variables[name] {
+			return ?@renamedVariables[name]
 		}
 		else {
 			return @parent.isRenamedVariable(name)
@@ -141,7 +141,7 @@ class BleedingScope extends Scope {
 	} # }}}
 	parent() => @parent
 	rename(name) { # {{{
-		return if @renamedVariables[name] is String
+		return if ?@renamedVariables[name]
 
 		var index = @parent.getRenamedIndex(name) + 1
 		var newName = '__ks_' + name + '_' + index
@@ -186,10 +186,8 @@ class BleedingScope extends Scope {
 		return variable
 	} # }}}
 	updateInferable(name, data, node) { # {{{
-		if data.isVariable {
-			if @hasVariable(name) {
-				@replaceVariable(name, data.type, true, true, node)
-			}
+		if data.isVariable && @hasVariable(name) {
+			@replaceVariable(name, data.type, true, true, node)
 		}
 	} # }}}
 

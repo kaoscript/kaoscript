@@ -327,7 +327,7 @@ class MatchExpression extends Expression {
 	getArrayTests(testingType: Boolean, minmax: Object?, type: Type?) { # {{{
 		var hash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),\(type?.hashCode() ?? '')`
 
-		if var data ?= @tests[hash]; ?data.tests {
+		if var data ?= @tests[hash] ;; ?data.tests {
 			return data.tests
 		}
 		else {
@@ -337,7 +337,7 @@ class MatchExpression extends Expression {
 	getObjectTests(testingType: Boolean, type: Type?) { # {{{
 		var hash = `$Object,\(testingType),\(type?.hashCode() ?? '')`
 
-		if var data ?= @tests[hash]; ?data.tests {
+		if var data ?= @tests[hash] ;; ?data.tests {
 			return data.tests
 		}
 		else {

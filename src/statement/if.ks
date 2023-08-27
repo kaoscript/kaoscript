@@ -2,12 +2,10 @@ class IfStatement extends Statement {
 	private late {
 		@analyzeStep: Boolean								= true
 		@assignedInstanceVariables							= {}
-		@bindingVariable: Expression?
 		@bindingScope: Scope
 		@cascade: Boolean									= false
-		@condition: Expression
-		@declaration: VariableDeclaration
-		@existential: Boolean								= false
+		@conditions: Expression[]							= []
+		@declarations										= []
 		@initializedVariables: Object						= {}
 		@lateInitVariables									= {}
 		@hasBinding: Boolean								= false
@@ -20,50 +18,86 @@ class IfStatement extends Statement {
 		@whenTrueScope: Scope?								= null
 	}
 	override initiate() { # {{{
-		if ?@data.declaration {
+		if ?@data.declarations {
 			@hasDeclaration = true
-			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind.Identifier
+			var mut bindingScope = @scope!?
+			var mut previousScope = @scope!?
 
-			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
+			for var data in @data.declarations {
+				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, @cascade || @hasBinding)
-			@declaration.initiate()
+				var hasBinding = data.declaration.variables[0].name.kind != NodeKind.Identifier
+				var existential = data.declaration.operator.assignment == AssignmentOperatorKind.Existential
+
+				var declaration = VariableDeclaration.new(data.declaration, this, bindingScope, previousScope, @cascade || hasBinding)
+
+				@declarations.push({
+					declaration
+					bindingScope
+					hasBinding
+					existential
+					data
+					hasCondition: false
+				})
+
+				@hasBinding ||= hasBinding
+
+				previousScope = bindingScope
+			}
+
+			for var { declaration } in @declarations {
+				declaration.initiate()
+			}
 		}
 	} # }}}
 	override analyse() { # {{{
 		@hasWhenFalse = ?@data.whenFalse
 
 		if @hasDeclaration {
-			@declaration.analyse()
+			var conditions = 0
 
-			if @hasBinding {
-				@bindingVariable = @declaration.value()
+			for var decl in @declarations {
+				var { declaration, hasBinding, bindingScope, data } = decl
+
+				bindingScope.line(data.declaration.start.line)
+
+				declaration.analyse()
+
+				if hasBinding {
+					decl.bindingVariable = declaration.value()
+				}
+
+				if ?data.condition {
+					var condition = $compile.expression(data.condition, this, bindingScope)
+						..analyse()
+
+					@conditions.push(condition)
+
+					decl
+						..condition = condition
+						..hasCondition = true
+				}
 			}
 
-			@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
-
-			if ?@data.condition {
-				@condition = $compile.expression(@data.condition, this, @bindingScope)
-				@condition.analyse()
-			}
-			else {
-				@hasCondition = false
-			}
+			@whenTrueScope = @newScope(@declarations.last().bindingScope, ScopeType.InlineBlock)
 		}
 		else {
 			@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
 			@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
-			@condition = $compile.expression(@data.condition, this, @bindingScope)
-			@condition.analyse()
+			var condition = $compile.expression(@data.condition, this, @bindingScope)
+				..analyse()
+
+			@conditions.push(condition)
 		}
+
+		@hasCondition = #@conditions
 
 		@scope.line(@data.whenTrue.start.line)
 
 		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
-		@whenTrueExpression.analyse()
+			..analyse()
 
 		if @hasWhenFalse {
 			@whenFalseScope = @newScope(@scope!?, ScopeType.InlineBlock)
@@ -72,52 +106,65 @@ class IfStatement extends Statement {
 
 			if @data.whenFalse.kind == NodeKind.IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
-				@whenFalseExpression.setCascade(true)
-				@whenFalseExpression.initiate()
-				@whenFalseExpression.analyse()
+					..setCascade(true)
+					..initiate()
+					..analyse()
 			}
 			else {
 				@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
-				@whenFalseExpression.analyse()
+					..analyse()
 			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @hasDeclaration {
-			@declaration.prepare(AnyType.NullableUnexplicit)
+			for var { declaration, hasBinding, bindingVariable? } in @declarations {
+				declaration.prepare(AnyType.NullableUnexplicit)
 
-			if @hasBinding {
-				@bindingVariable.acquireReusable(true)
-				@bindingVariable.releaseReusable()
-			}
+				if hasBinding {
+					bindingVariable
+						..acquireReusable(true)
+						..releaseReusable()
+				}
 
-			if var variable ?= @declaration.getIdentifierVariable() {
-				variable.setRealType(variable.getRealType().setNullable(false))
+				if var variable ?= declaration.getIdentifierVariable() {
+					variable.setRealType(variable.getRealType().setNullable(false))
+				}
 			}
 		}
 
 		if @hasCondition {
-			@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
+			for var condition in @conditions {
+				condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
-			unless @condition.type().canBeBoolean() {
-				TypeException.throwInvalidCondition(@condition, this)
-			}
-
-			for var data, name of @condition.inferWhenTrueTypes({}) {
-				@whenTrueScope.updateInferable(name, data, this)
-			}
-
-			if ?@whenFalseExpression {
-				for var data, name of @condition.inferWhenFalseTypes({}) {
-					@whenFalseScope.updateInferable(name, data, this)
+				unless condition.type().canBeBoolean() {
+					TypeException.throwInvalidCondition(condition, this)
 				}
-			}
 
-			@condition.acquireReusable(false)
-			@condition.releaseReusable()
+				for var data, name of condition.inferWhenTrueTypes({}) {
+					@whenTrueScope.updateInferable(name, data, this)
+				}
+
+				if ?@whenFalseExpression {
+					for var data, name of condition.inferWhenFalseTypes({}) {
+						@whenFalseScope.updateInferable(name, data, this)
+					}
+				}
+
+				condition
+					..acquireReusable(false)
+					..releaseReusable()
+			}
 		}
 
-		@assignTempVariables(@bindingScope)
+		if @hasDeclaration {
+			for var { bindingScope } in @declarations {
+				@assignTempVariables(bindingScope)
+			}
+		}
+		else {
+			@assignTempVariables(@bindingScope)
+		}
 
 		@scope.line(@data.whenTrue.start.line)
 
@@ -137,7 +184,7 @@ class IfStatement extends Statement {
 						}
 					}
 
-					for var data, name of @condition.inferWhenFalseTypes({}) {
+					for var data, name of @conditions[0].inferWhenFalseTypes({}) {
 						@scope.updateInferable(name, data, this)
 					}
 				}
@@ -160,7 +207,7 @@ class IfStatement extends Statement {
 						@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 					}
 
-					var conditionInferables = @condition.inferWhenFalseTypes({})
+					var conditionInferables = @conditions[0].inferWhenFalseTypes({})
 					var trueInferables = @whenTrueScope.listUpdatedInferables()
 
 					for var inferable, name of trueInferables {
@@ -294,10 +341,14 @@ class IfStatement extends Statement {
 	} # }}}
 	translate() { # {{{
 		if @hasDeclaration {
-			@declaration.translate()
+			for var { declaration } in @declarations {
+				declaration.translate()
+			}
 		}
 		if @hasCondition {
-			@condition.translate()
+			for var condition in @conditions {
+				condition.translate()
+			}
 		}
 
 		@whenTrueExpression.translate()
@@ -308,9 +359,11 @@ class IfStatement extends Statement {
 			@parent.addAssignments(variables)
 		}
 		else if @hasDeclaration && !@hasBinding {
-			for var variable in variables {
-				if !@declaration.isDeclararingVariable(variable) {
-					@assignments.pushUniq(variable)
+			for var { declaration, hasBinding } in @declarations when !hasBinding {
+				for var variable in variables {
+					if !declaration.isDeclararingVariable(variable) {
+						@assignments.pushUniq(variable)
+					}
 				}
 			}
 		}
@@ -381,7 +434,7 @@ class IfStatement extends Statement {
 	} # }}}
 	assignments() { # {{{
 		if @whenFalseExpression is IfStatement {
-			return [].concat(@assignments, @whenFalseExpression.assignments())
+			return [...@assignments, ...@whenFalseExpression.assignments()]
 		}
 		else {
 			return @assignments
@@ -412,8 +465,9 @@ class IfStatement extends Statement {
 				}
 			}
 			else {
-				map[whenTrue].initializable = true
-				map[whenTrue].type = type
+				map[whenTrue]
+					..initializable = true
+					..type = type
 			}
 
 			var clone = node.scope().getVariable(name).clone()
@@ -437,8 +491,9 @@ class IfStatement extends Statement {
 				}
 			}
 			else {
-				map[whenTrue].initializable = true
-				map[whenTrue].type = variable.type
+				map[whenTrue]
+					..initializable = true
+					..type = variable.type
 			}
 
 			node.scope().updateInferable(name, variable, expression)
@@ -460,8 +515,10 @@ class IfStatement extends Statement {
 	isCascade() => @cascade
 	isExit() => @hasWhenFalse && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInitializingInstanceVariable(name) { # {{{
-		if @condition.isInitializingInstanceVariable(name) {
-			return true
+		for var condition in @conditions {
+			if condition.isInitializingInstanceVariable(name) {
+				return true
+			}
 		}
 
 		if @hasWhenFalse {
@@ -472,8 +529,10 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	isInitializingStaticVariable(name) { # {{{
-		if @condition.isInitializingStaticVariable(name) {
-			return true
+		for var condition in @conditions {
+			if condition.isInitializingStaticVariable(name) {
+				return true
+			}
 		}
 
 		if @hasWhenFalse {
@@ -487,12 +546,14 @@ class IfStatement extends Statement {
 	isLateInitializable() => true
 	isUsingVariable(name) { # {{{
 		if @hasDeclaration {
-			if @declaration.isUsingVariable(name) {
-				return true
+			for var { declaration } in @declarations {
+				if declaration.isUsingVariable(name) {
+					return true
+				}
 			}
 		}
 		else {
-			if @condition.isUsingVariable(name) {
+			if @conditions[0].isUsingVariable(name) {
 				return true
 			}
 		}
@@ -505,88 +566,103 @@ class IfStatement extends Statement {
 	} # }}}
 	setCascade(@cascade)
 	toStatementFragments(fragments, mode) { # {{{
-		if @hasDeclaration && !@hasBinding {
-			fragments.compile(@declaration)
+		if @hasDeclaration {
+			with var { declaration, hasBinding } = @declarations[0] {
+				if !hasBinding {
+					fragments.compile(declaration)
+				}
+			}
 
-			var ctrl = fragments.newControl()
+			var assignments = []
 
-			@toIfFragments(ctrl, mode)
+			for var { declaration } in @declarations from 1 {
+				declaration.listAssignments(assignments)
+			}
 
-			ctrl.done()
+			if #assignments {
+				fragments.line(`let \([name for var { name } in assignments].join(', '))`)
+			}
 		}
-		else {
-			var ctrl = fragments.newControl()
 
-			@toIfFragments(ctrl, mode)
+		var ctrl = fragments.newControl()
 
-			ctrl.done()
-		}
+		@toIfFragments(ctrl, mode)
+
+		ctrl.done()
 	} # }}}
 	toIfFragments(fragments, mode) { # {{{
 		fragments.code('if(')
 
 		if @hasDeclaration {
-			if @hasBinding {
-				fragments
-					.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
-					.compileReusable(@bindingVariable)
-					.code(')')
+			for var { declaration, hasBinding, existential, bindingVariable?, hasCondition, condition? }, index in @declarations {
+				fragments.code(' && ') if index > 0
 
-				fragments.code(' ? (')
+				if hasBinding {
+					fragments
+						.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(')
+						.compileReusable(bindingVariable)
+						.code(') ? (')
 
-				var declarator = @declaration.declarator()
+					var declarator = declaration.declarator()
+						..toAssertFragments(fragments, bindingVariable)
+						..toAssignmentFragments(fragments, bindingVariable)
 
-				declarator.toAssertFragments(fragments, @bindingVariable)
-				declarator.toAssignmentFragments(fragments, @bindingVariable)
+					fragments.code(', true) : false')
+				}
+				else if index > 0 {
+					fragments.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(')
 
-				fragments.code(', true) : false')
-			}
-			else {
-				if @cascade {
-					var mut first = true
+					declaration.toInlineFragments(fragments, mode)
 
-					@declaration.walkVariable((name, _) => {
-						if first {
-							fragments.code($runtime.type(this), @existential ? '.isValue((' : '.isNotEmpty((')
-
-							@declaration.toInlineFragments(fragments, mode)
-
-							fragments.code('))')
-
-							first = false
-						}
-						else {
-							fragments.code(' && ', $runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
-						}
-					})
+					fragments.code(')')
 				}
 				else {
-					var mut first = true
+					if @cascade {
+						var mut first = true
 
-					@declaration.walkVariable((name, _) => {
-						if first {
-							first = false
-						}
-						else {
-							fragments.code(' && ')
-						}
+						declaration.walkVariable((name, _) => {
+							if first {
+								fragments.code($runtime.type(this), existential ? '.isValue((' : '.isNotEmpty((')
 
-						fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
-					})
+								declaration.toInlineFragments(fragments, mode)
+
+								fragments.code('))')
+
+								first = false
+							}
+							else {
+								fragments.code(' && ', $runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+							}
+						})
+					}
+					else {
+						var mut first = true
+
+						declaration.walkVariable((name, _) => {
+							if first {
+								first = false
+							}
+							else {
+								fragments.code(' && ')
+							}
+
+							fragments.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+						})
+					}
 				}
-			}
 
-			if @hasCondition {
-				fragments.code(' && ').compileCondition(@condition, mode, Junction.AND)
+				if hasCondition {
+					fragments.code(' && ').compileCondition(condition, mode, Junction.AND)
+				}
 			}
 		}
 		else {
-			fragments.compileCondition(@condition)
+			fragments.compileCondition(@conditions[0])
 		}
 
-		fragments.code(')').step()
-
-		fragments.compile(@whenTrueExpression, mode)
+		fragments
+			.code(')').step()
+			.compile(@whenTrueExpression, mode)
 
 		if @hasWhenFalse {
 			if @whenFalseExpression is IfStatement {
@@ -595,9 +671,9 @@ class IfStatement extends Statement {
 				@whenFalseExpression.toIfFragments(fragments, mode)
 			}
 			else {
-				fragments.step().code('else').step()
-
-				fragments.compile(@whenFalseExpression, mode)
+				fragments
+					.step().code('else').step()
+					.compile(@whenFalseExpression, mode)
 			}
 		}
 	} # }}}
