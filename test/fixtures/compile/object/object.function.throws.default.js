@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_SyntaxError = {};
 	const foobar = (() => {
 		const o = new OBJ();
-		o.corge = Helper.function(() => {
+		o.corge = Helper.function(function() {
 			throw new SyntaxError();
 		}, (that, fn, ...args) => {
 			if(args.length === 0) {

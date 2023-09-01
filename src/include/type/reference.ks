@@ -586,12 +586,7 @@ class ReferenceType extends Type {
 			type = type.type()
 		}
 
-		if type.isClass() {
-			return type.hasInstantiableProperty(name)
-		}
-		else {
-			return type.hasProperty(name)
-		}
+		return type.hasProperty(name)
 	} # }}}
 	hasRest() => @name == 'Object' || @type().hasRest()
 	isAlias() => @type().isAlias()

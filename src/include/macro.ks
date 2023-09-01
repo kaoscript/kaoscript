@@ -160,16 +160,9 @@ func $serialize(macro, data, context) { # {{{
 					name = key
 				}
 
-				if macro.getMark(value.index + 1) == NodeKind.ObjectMember {
-					context.data += `\(name): \(Generator.generate(macro.getMark(value.index), {
-						mode: Generator.KSWriterMode.Property
-					}))`
-				}
-				else {
-					context.data += `\(name)\(Generator.generate(macro.getMark(value.index), {
-						mode: Generator.KSWriterMode.Property
-					}))`
-				}
+				context.data += `\(name): \(Generator.generate(macro.getMark(value.index), {
+					mode: Generator.KSWriterMode.Property
+				}))`
 			}
 			else if ?computed {
 				context.data += `\(Generator.generate(macro.getMark(computed[1]), {

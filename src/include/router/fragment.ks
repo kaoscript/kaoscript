@@ -20,7 +20,7 @@ namespace Fragment {
 			}
 
 			return {
-				allArgs(index) {
+				allArgs: (index) => {
 					if !context.allArgs {
 						context.allArgsMark.line(`\($runtime.immutableScope(node))te = (pts, idx) => \($runtime.helper(node)).isUsingAllArgs(\(args), pts, idx)`)
 
@@ -29,7 +29,7 @@ namespace Fragment {
 
 					return `te(pts, \(index))`
 				}
-				points() {
+				points: () => {
 					if !context.points {
 						context.pointsMark.line(`\($runtime.scope(node))pts`)
 

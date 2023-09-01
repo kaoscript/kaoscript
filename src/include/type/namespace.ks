@@ -217,7 +217,7 @@ class NamespaceType extends Type {
 		return this
 	} # }}}
 	getProperty(name: String): Type? { # {{{
-		if @properties[name] is Type {
+		if ?@properties[name] {
 			return @properties[name].type()
 		}
 		else {
@@ -233,7 +233,7 @@ class NamespaceType extends Type {
 
 		return false
 	} # }}}
-	hasProperty(name: String): Boolean => @properties[name] is Type
+	hasProperty(name: String): Boolean => ?@properties[name]
 	isExhaustive() { # {{{
 		if @exhaustive {
 			return true

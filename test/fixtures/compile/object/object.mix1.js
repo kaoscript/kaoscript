@@ -4,7 +4,7 @@ module.exports = function() {
 		const o = new OBJ();
 		o.bar = (() => {
 			const o = new OBJ();
-			o.qux = Helper.function(() => {
+			o.qux = Helper.function(function() {
 				let i = 1;
 			}, (that, fn, ...args) => {
 				if(args.length === 0) {

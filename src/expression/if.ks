@@ -139,6 +139,16 @@ class IfExpression extends Expression {
 			if var variable ?= @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
+
+			if @cascade {
+				var variables = @declaration.listAssignments([])
+
+				if @hasBinding {
+					@bindingVariable.listAssignments(variables)
+				}
+
+				@statement().addAssignments(variables.map(func({name}, ...) => name))
+			}
 		}
 
 		if @hasCondition {
@@ -243,34 +253,45 @@ class IfExpression extends Expression {
 		fragments.code('if(')
 
 		if @hasDeclaration {
-			if @hasBinding {
-				fragments
-					.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
-					.compileReusable(@bindingVariable)
-					.code(')')
-
-				fragments.code(' ? (')
-
+			if @cascade {
 				var declarator = @declaration.declarator()
 
-				declarator.toAssertFragments(fragments, @bindingVariable)
+				fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
+
 				declarator.toAssignmentFragments(fragments, @bindingVariable)
 
-				fragments.code(', true) : false')
+				fragments.code(')')
 			}
 			else {
-				var mut first = true
+				if @hasBinding {
+					fragments
+						.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
+						.compileReusable(@bindingVariable)
+						.code(')')
 
-				@declaration.walkVariable((name, _) => {
-					if first {
-						first = false
-					}
-					else {
-						fragments.code(' && ')
-					}
+					fragments.code(' ? (')
 
-					fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
-				})
+					var declarator = @declaration.declarator()
+
+					declarator.toAssertFragments(fragments, @bindingVariable)
+					declarator.toAssignmentFragments(fragments, @bindingVariable)
+
+					fragments.code(', true) : false')
+				}
+				else {
+					var mut first = true
+
+					@declaration.walkVariable((name, _) => {
+						if first {
+							first = false
+						}
+						else {
+							fragments.code(' && ')
+						}
+
+						fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+					})
+				}
 			}
 
 			if @hasCondition {

@@ -11,7 +11,7 @@ namespace Method {
 		if class.isExtending() {
 			if class.isImplementing() {
 				return {
-					match(name: String): Array {
+					match: (name: String): Array => {
 						var result = class.extends().type().listInstanceMethods(name)
 
 						for var interface in class.listInterfaces() {
@@ -20,7 +20,7 @@ namespace Method {
 
 						return result
 					}
-					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+					matchAll: (name: String, type: FunctionType, mode: MatchingMode): Array => {
 						var result = class.extends().type().listInstantiableMethods(name, type, mode)
 
 						for var interface in class.listInterfaces() {
@@ -33,10 +33,10 @@ namespace Method {
 			}
 			else {
 				return {
-					match(name: String): Array {
+					match: (name: String): Array => {
 						return class.extends().type().listInstanceMethods(name)
 					}
-					matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+					matchAll: (name: String, type: FunctionType, mode: MatchingMode): Array => {
 						return class.extends().type().listInstantiableMethods(name, type, mode)
 					}
 				}
@@ -44,7 +44,7 @@ namespace Method {
 		}
 		else if class.isImplementing() {
 			return {
-				match(name: String): Array {
+				match: (name: String): Array => {
 					var result = []
 
 					for var interface in class.listInterfaces() {
@@ -53,7 +53,7 @@ namespace Method {
 
 					return result
 				}
-				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+				matchAll: (name: String, type: FunctionType, mode: MatchingMode): Array => {
 					var result = []
 
 					for var interface in class.listInterfaces() {
@@ -74,10 +74,10 @@ namespace Method {
 
 	func instance(class: ClassType): Matcher { # {{{
 		return {
-			match(name: String): Array {
+			match: (name: String): Array => {
 				return class.listInstantiableMethods(name)
 			}
-			matchAll(name: String, type: FunctionType, mode: MatchingMode): Array {
+			matchAll: (name: String, type: FunctionType, mode: MatchingMode): Array => {
 				return class.listInstantiableMethods(name, type, mode)
 			}
 		}
@@ -88,8 +88,8 @@ namespace Method {
 			var superClass = class.extends().type()
 
 			return {
-				match(name: String): Array => superClass.listStaticMethods(name)
-				matchAll(name: String, type: FunctionType, mode: MatchingMode): Array => superClass.listStaticMethods(name, type, mode)
+				match: (name: String): Array => superClass.listStaticMethods(name)
+				matchAll: (name: String, type: FunctionType, mode: MatchingMode): Array => superClass.listStaticMethods(name, type, mode)
 			}
 		}
 		else {

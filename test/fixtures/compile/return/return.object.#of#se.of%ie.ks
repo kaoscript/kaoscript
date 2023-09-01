@@ -1,6 +1,6 @@
 func foobar(): { foobar(): String } {
 	return {
-		foobar() {
+		foobar: func() {
 			return 0
 		}
 	}

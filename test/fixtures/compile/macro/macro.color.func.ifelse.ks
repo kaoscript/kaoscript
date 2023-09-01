@@ -9,7 +9,7 @@ export class Color {
 Color.registerSpace({
 	name: 'FBQ'
 	formatters: {
-		srgb(that: Color): String {
+		srgb: func(that: Color): String {
 			if that._foo {
 
 			}

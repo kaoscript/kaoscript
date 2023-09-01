@@ -1,0 +1,12 @@
+enum CardSuit {
+	Clubs
+	Diamonds
+	Hearts
+	Spades
+
+	foobar() {
+		var x = @quxbaz()
+	}
+
+	quxbaz() => 0
+}

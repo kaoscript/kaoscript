@@ -1,5 +1,5 @@
 var dyn foo = {
-	bar(name: string? = null) {
+	bar: func(name: string? = null) {
 		var n = 0
 	}
 }

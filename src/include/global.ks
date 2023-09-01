@@ -8,8 +8,8 @@ var $extensions = { # {{{
 	source: '.ks'
 } # }}}
 
-var $ast = {
-	block(data) { # {{{
+namespace $ast {
+	func block(data) { # {{{
 		if data.kind == NodeKind.Block {
 			return data
 		}
@@ -22,7 +22,7 @@ var $ast = {
 			}
 		}
 	} # }}}
-	body(data?) { # {{{
+	func body(data?) { # {{{
 		if !?data.body {
 			return {
 				kind: NodeKind.Block
@@ -51,7 +51,7 @@ var $ast = {
 			}
 		}
 	} # }}}
-	call(callee, arguments = []) { # {{{
+	func call(callee, arguments = []) { # {{{
 		return {
 			kind: NodeKind.CallExpression
 			modifiers: []
@@ -62,7 +62,7 @@ var $ast = {
 			end: callee.end
 		}
 	} # }}}
-	hasModifier(data, target: ModifierKind): Boolean { # {{{
+	func hasModifier(data, target: ModifierKind): Boolean { # {{{
 		for var modifier in data.modifiers {
 			if modifier.kind == target {
 				return true
@@ -71,7 +71,7 @@ var $ast = {
 
 		return false
 	} # }}}
-	identifier(name) { # {{{
+	func identifier(name) { # {{{
 		if name is String {
 			return {
 				kind: NodeKind.Identifier
@@ -82,7 +82,7 @@ var $ast = {
 			return name
 		}
 	} # }}}
-	isThisField(name: String, data): Boolean { # {{{
+	func isThisField(name: String, data): Boolean { # {{{
 		match data.kind {
 			NodeKind.ThisExpression {
 				return data.name.name == name
@@ -94,14 +94,14 @@ var $ast = {
 
 		return false
 	} # }}}
-	parameter() { # {{{
+	func parameter() { # {{{
 		return {
 			kind: NodeKind.Parameter
 			attributes: []
 			modifiers: []
 		}
 	} # }}}
-	path(data): String? { # {{{
+	func path(data): String? { # {{{
 		match data.kind {
 			NodeKind.Identifier {
 				return data.name
@@ -117,14 +117,14 @@ var $ast = {
 
 		return null
 	} # }}}
-	return(data? = null) { # {{{
+	func return(data? = null) { # {{{
 		return {
 			kind: NodeKind.ReturnStatement
 			value: data
 			start: data.start if ?data
 		}
 	} # }}}
-	some(data, filter): Boolean { # {{{
+	func some(data, filter): Boolean { # {{{
 		match data.kind {
 			NodeKind.BinaryExpression {
 				if filter(data.left) || filter(data.right) || $ast.some(data.left, filter) || $ast.some(data.right, filter) {
@@ -142,7 +142,7 @@ var $ast = {
 
 		return false
 	} # }}}
-	toIMString(data) { # {{{
+	func toIMString(data) { # {{{
 		var mut object = data
 		var mut property = ''
 
@@ -154,17 +154,19 @@ var $ast = {
 
 		return `\(object.name)\(property)`
 	} # }}}
-	topicReference() { # {{{
+	func topicReference() { # {{{
 		return {
 			kind: NodeKind.TopicReference
 			modifiers: []
 		}
 	} # }}}
+
+	export *
 }
 
-var $compile = {
-	block(data, parent, scope = parent.scope()) => Block.new($ast.block(data), parent, scope)
-	expression(data, parent, scope = parent.scope()) { # {{{
+namespace $compile {
+	func block(data, parent, scope = parent.scope()) => Block.new($ast.block(data), parent, scope)
+	func expression(data, parent, scope = parent.scope()) { # {{{
 		var dyn expression
 
 		if var clazz ?= $expressions[data.kind] {
@@ -211,8 +213,8 @@ var $compile = {
 
 		return expression
 	} # }}}
-	function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
-	statement(data, parent, scope = parent.scope()) { # {{{
+	func function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
+	func statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
 			if var clazz ?= $statements[data.kind] {
 				return clazz.new(data, parent, scope)
@@ -225,10 +227,12 @@ var $compile = {
 			return null
 		}
 	} # }}}
+
+	export *
 }
 
-var $runtime = {
-	getVariable(name, node) { # {{{
+namespace $runtime {
+	func getVariable(name, node) { # {{{
 		if node._options.runtime.object.alias == name || (node.isIncluded() && name == 'Object') {
 			node.module?().flag('Object')
 
@@ -248,38 +252,38 @@ var $runtime = {
 			return null
 		}
 	} # }}}
-	helper(node) { # {{{
+	func helper(node) { # {{{
 		node.module?().flag('Helper')
 
 		return node._options.runtime.helper.alias
 	} # }}}
-	immutableScope(node) { # {{{
+	func immutableScope(node) { # {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'const '
 	} # }}}
-	initFlag(node) { # {{{
+	func initFlag(node) { # {{{
 		node.module?().flag('initFlag')
 
 		return node._options.runtime.initFlag.alias
 	} # }}}
-	object(node) { # {{{
+	func object(node) { # {{{
 		node.module?().flag('Object')
 
 		return node._options.runtime.object.alias
 	} # }}}
-	operator(node) { # {{{
+	func operator(node) { # {{{
 		node.module?().flag('Operator')
 
 		return node._options.runtime.operator.alias
 	} # }}}
-	scope(node) { # {{{
+	func scope(node) { # {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
 	} # }}}
-	type(node) { # {{{
+	func type(node) { # {{{
 		node.module?().flag('Type')
 
 		return node._options.runtime.type.alias
 	} # }}}
-	typeof(type, node? = null) { # {{{
+	func typeof(type, node? = null) { # {{{
 		if ?node {
 			if $typeofs[type] {
 				return $runtime.type(node) + '.is' + type
@@ -292,6 +296,8 @@ var $runtime = {
 			return $typeofs[type]
 		}
 	} # }}}
+
+	export *
 }
 
 var $standardLibraryDirectory = fs.getStandardLibraryDirectory()
@@ -319,7 +325,7 @@ var $targets = {
 			}
 		}
 	} # }}}
-	v8(version, targets) { # {{{
+	v8: func(version, targets) { # {{{
 		if version[0] < 5 {
 			return targets.ecma['5']
 		}

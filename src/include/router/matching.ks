@@ -1339,7 +1339,7 @@ namespace Matching {
 						var mut matched = false
 
 						for var function in possibleFunctions {
-							if var { type } ?= parameters.find((data, _, _) => data.function == function) {
+							if var { type } ?= parameters.find((data, _, _) => !data.positional && data.function == function) {
 								if isPreciseMatch(argumentType, type) {
 									matched = true
 
@@ -1520,7 +1520,7 @@ namespace Matching {
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
-			if indexeds.length == 0 {
+			if !#indexeds {
 				possibleFunctions = possibleFunctions.filter((key, _, _) => route.functions[key].min(excludes) == 0)
 
 				if possibleFunctions.length == 0 {

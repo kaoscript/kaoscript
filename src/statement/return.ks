@@ -55,7 +55,7 @@ class ReturnStatement extends Statement {
 			@value.acquireReusable(false)
 			@value.releaseReusable()
 
-			if @afterwards.length != 0 {
+			if #@afterwards {
 				@temp = @scope.acquireTempName(this)
 			}
 

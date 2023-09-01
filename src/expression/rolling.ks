@@ -2,6 +2,7 @@ enum RollingMode {
 	Default
 	Cascade
 	Inline
+	Insitu
 	Statement
 }
 
@@ -11,6 +12,7 @@ class RollingExpression extends Expression {
 		@cascade
 		@declarator?
 		@expressions: Array				= []
+		@insitu: Boolean				= false
 		@mode: RollingMode				= .Default
 		@nullable: Boolean				= false
 		@object
@@ -56,8 +58,11 @@ class RollingExpression extends Expression {
 			else if @mode == .Cascade {
 				@cascade.addBeforehand(this)
 			}
-			else if @parent is not Statement {
+			else if @parent is not Statement || @parent is ReturnStatement {
 				statement.addBeforehand(this)
+			}
+			else if @parent.isInline() {
+				@mode = .Insitu
 			}
 		}
 
@@ -117,11 +122,24 @@ class RollingExpression extends Expression {
 		return null
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @mode == .Inline {
-			fragments.compile(@object)
-		}
-		else {
-			fragments.code(@valueName)
+		match @mode {
+			.Inline {
+				fragments.compile(@object)
+			}
+			.Insitu {
+				fragments
+					.code(`(\(@valueName) = `)
+					.compile(@object)
+
+				for var expression in @expressions {
+					fragments.code(', ').compile(expression)
+				}
+
+				fragments.code(`, \(@valueName))`)
+			}
+			else {
+				fragments.code(@valueName)
+			}
 		}
 	} # }}}
 	toAfterwardFragments(fragments, mode) { # {{{

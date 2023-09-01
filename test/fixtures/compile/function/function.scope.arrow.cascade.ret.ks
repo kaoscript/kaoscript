@@ -1,6 +1,6 @@
 func foobar(this) {
 	return {
-		value() {
+		value: () => {
 			return () => this.value()
 		}
 	}

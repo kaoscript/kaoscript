@@ -1,5 +1,5 @@
 func foobar(): { foobar(x: String): String } {
 	return {
-		foobar(x) => x
+		foobar: func(x) => x
 	}
 }

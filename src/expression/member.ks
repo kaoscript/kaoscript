@@ -65,7 +65,7 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property.prepare(AnyType.NullableUnexplicit)
 
-				unless @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) {
+				unless @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type) {
 					@type = type.parameter()
 				}
 
@@ -78,11 +78,11 @@ class MemberExpression extends Expression {
 						@inferable = true
 						@path = `\(@object.path())['\(@property.value())']`
 					}
+				}
 
-					if @inferable {
-						if var type ?= @scope.getChunkType(@path) {
-							@type = type
-						}
+				if @inferable {
+					if var type ?= @scope.getChunkType(@path) {
+						@type = type
 					}
 				}
 			}
@@ -95,8 +95,8 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				// TODO void
-				var ignore = @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type)
+				// TODO! void
+				var ignore = @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
 
 				if @assignable {
 					if var variable ?= this.declaration() {
@@ -335,6 +335,58 @@ class MemberExpression extends Expression {
 					return true
 				}
 			}
+
+			return false
+		}
+	} # }}}
+	prepareNamespace(type): Boolean { # {{{
+		return false unless type.isNamespace()
+
+		if @computed {
+			if @property is StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			if type is NamedType {
+				if var property ?= type.type().getProperty(@property) {
+					@type = property
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+			}
+			else if type is ReferenceType {
+				if var property ?= type.discard().getProperty(@property) {
+					@type = property
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+			}
+
 
 			return false
 		}

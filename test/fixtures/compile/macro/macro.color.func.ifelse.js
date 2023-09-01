@@ -23,7 +23,7 @@ module.exports = function() {
 		o["name"] = "FBQ";
 		o["formatters"] = (() => {
 			const o = new OBJ();
-			o.srgb = Helper.function((that) => {
+			o.srgb = Helper.function(function(that) {
 				if(that._foo === true) {
 				}
 				else if(that._bar === true) {

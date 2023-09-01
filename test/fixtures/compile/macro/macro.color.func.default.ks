@@ -50,10 +50,10 @@ Color.registerSpace({
 	name: Space.SRGB
 	alias: [Space.RGB]
 	formatters: {
-		hex(that: Color): String { # {{{
+		hex: func(that: Color): String { # {{{
 			return $hex(that)
 		} # }}}
-		srgb(that: Color): String { # {{{
+		srgb: func(that: Color): String { # {{{
 			if that._alpha == 1 {
 				return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 			}

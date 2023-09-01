@@ -47,8 +47,8 @@ export class Color {
 }
 
 var $util = {
-	formatToHex(that: Color): String => $hex(that)
-	formatToSRGB(that: Color): String { # {{{
+	formatToHex: func(that: Color): String => $hex(that)
+	formatToSRGB: func(that: Color): String { # {{{
 		if that._alpha == 1 {
 			return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 		}

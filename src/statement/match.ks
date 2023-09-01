@@ -776,6 +776,20 @@ class MatchStatement extends Statement {
 
 		ctrl.done()
 	} # }}}
+	type() { # {{{
+		if @hasDefaultClause {
+			var types = []
+
+			for var { body } in @clauses {
+				types.push(body.type())
+			}
+
+			return Type.union(@scope, ...types)
+		}
+		else {
+			return Type.Void
+		}
+	} # }}}
 	value() => @value
 }
 

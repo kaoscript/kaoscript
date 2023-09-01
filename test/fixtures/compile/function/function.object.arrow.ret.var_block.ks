@@ -3,7 +3,7 @@ func foobar(value) {
 		var box = value.box()
 
 		return {
-			value() {
+			value: () => {
 				return box.value()
 			}
 		}

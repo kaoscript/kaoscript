@@ -134,7 +134,7 @@ module.exports = function() {
 		o["alias"] = [Space.RGB];
 		o["formatters"] = (() => {
 			const o = new OBJ();
-			o.hex = Helper.function((that) => {
+			o.hex = Helper.function(function(that) {
 				return $hex(that);
 			}, (that, fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
@@ -145,7 +145,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			});
-			o.srgb = Helper.function((that) => {
+			o.srgb = Helper.function(function(that) {
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
 				}

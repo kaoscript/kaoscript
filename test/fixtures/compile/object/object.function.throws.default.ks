@@ -1,7 +1,7 @@
 extern sealed class SyntaxError
 
 var foobar = {
-	corge() ~ SyntaxError {
+	corge: func() ~ SyntaxError {
 		throw SyntaxError.new()
 	}
 }

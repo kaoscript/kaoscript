@@ -1,7 +1,7 @@
 var dyn x = 'y'
 
 var dyn foo = {
-	`\(x)`() {
+	`\(x)`: func() {
 		return 42
 	}
 }

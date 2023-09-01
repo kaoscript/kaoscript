@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function() {
 		return (() => {
 			const o = new OBJ();
-			o.foobar = Helper.function((x) => {
+			o.foobar = Helper.function(function(x) {
 				return x;
 			}, (that, fn, ...args) => {
 				const t0 = Type.isString;

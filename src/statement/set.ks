@@ -24,13 +24,17 @@ class SetStatement extends Statement {
 		@value.acquireReusable(false)
 		@value.releaseReusable()
 
+		@assignTempVariables(@scope!?)
+
 		@type = @value.type().asReference()
 	} # }}}
 	override translate() { # {{{
 		@value.translate()
 	} # }}}
+	override assignTempVariables(scope) => @parent.parent().assignTempVariables(scope)
 	isExit() => true
 	isExpectingType() => true
+	isInline() => @inline
 	toFragments(fragments, mode) { # {{{
 		if @inline {
 			fragments.compile(@value)

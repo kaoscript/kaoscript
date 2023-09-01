@@ -120,6 +120,9 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} # }}}
+	addVariable(variable: EnumVariableDeclaration) { # {{{
+		@variables[variable.name()] = variable
+	} # }}}
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
 	} # }}}
@@ -227,6 +230,7 @@ class EnumVariableDeclaration extends AbstractNode {
 		@type: Type
 	}
 	private {
+		@alias: Boolean					= false
 		@composite: Boolean				= false
 		@name: String
 	}
@@ -235,7 +239,7 @@ class EnumVariableDeclaration extends AbstractNode {
 
 		@name = data.name.name
 
-		parent._variables[@name] = this
+		parent.addVariable(this)
 	} # }}}
 	analyse() { # {{{
 		var enum = @parent.type().type()
@@ -257,18 +261,25 @@ class EnumVariableDeclaration extends AbstractNode {
 						@operands = value.operands
 					}
 					else {
-						if value.kind == NodeKind.NumericExpression {
-							if value.value > length {
-								SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
+						match value.kind {
+							NodeKind.NumericExpression {
+								if value.value > length {
+									SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
+								}
+
+								enum.index(value.value)
+
+								@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
 							}
+							NodeKind.Identifier {
+								@alias = true
 
-							enum.index(value.value)
+								@operands = [value]
+							}
+							else {
+								SyntaxException.throwInvalidEnumValue(value, this)
+							}
 						}
-						else {
-							SyntaxException.throwInvalidEnumValue(value, this)
-						}
-
-						@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
 					}
 				}
 				else {
@@ -315,23 +326,29 @@ class EnumVariableDeclaration extends AbstractNode {
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
-	isComposite() => @composite
+	isComposite() => @composite || @alias
 	name() => @name
 	toFragments(fragments) { # {{{
-		if @composite {
+		if @alias {
 			var name = @parent.name()
-			var line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
+			var operand = @operands[0]
+
+			fragments.line(`\(name).\(@name) = \(name).\(operand.name)`)
+		}
+		else if @composite {
+			var name = @parent.name()
+			var line = fragments.newLine().code(`\(name).\(@name) = \(name)(`)
 
 			for var operand, i in @operands {
 				line.code(' | ') if i > 0
 
-				line.code(name, '.', operand.name)
+				line.code(`\(name).\(operand.name)`)
 			}
 
 			line.code(')').done()
 		}
 		else {
-			fragments.line(@name, ': ', @value)
+			fragments.line(`\(@name): \(@value)`)
 		}
 	} # }}}
 	type() => @type
@@ -351,6 +368,7 @@ class EnumMethodDeclaration extends Statement {
 		@indigentValues: Array			= []
 		@instance: Boolean				= true
 		@parameters: Array<Parameter>	= []
+		@thisVarname: String			= 'that'
 		@topNodes: Array				= []
 	}
 	constructor(data, parent) { # {{{
@@ -402,9 +420,24 @@ class EnumMethodDeclaration extends Statement {
 			variable.renameAs(`\(enumName).\(name)`)
 		}
 
+		var names = []
+
+		for {
+			var parameter in @parameters
+			var { name } in parameter.listAssignments([])
+		}
+		then {
+			names.push(name)
+		}
+
 		if @instance {
 			@scope.define('this', true, enumRef, true, this)
-			@scope.rename('this', 'that')
+
+			if names.contains(@thisVarname) {
+				@thisVarname = @scope.acquireTempName(false)
+			}
+
+			@scope.rename('this', @thisVarname)
 		}
 
 		for var parameter in @parameters {
@@ -496,7 +529,7 @@ class EnumMethodDeclaration extends Statement {
 		ctrl.code(`\(@parent.name()).\(@internalName) = function(`)
 
 		if @instance {
-			ctrl.code('that')
+			ctrl.code(@thisVarname)
 		}
 
 		Parameter.toFragments(this, ctrl, ParameterMode.Default, node => node.code(')').step())

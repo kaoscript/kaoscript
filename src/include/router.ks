@@ -874,7 +874,6 @@ namespace Router {
 		matchArguments
 		toFragments
 
-		// TODO!
-		// RegroupTree for toSignature
+		RegroupTree for toSignature
 	}
 }

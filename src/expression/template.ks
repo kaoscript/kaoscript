@@ -32,6 +32,9 @@ class TemplateExpression extends Expression {
 		}
 	} # }}}
 	computing(@computing)
+	flagComputing(): valueof this { # {{{
+		@computing = true
+	} # }}}
 	isUsingVariable(name) { # {{{
 		for var element in @elements {
 			if element.isUsingVariable(name) {

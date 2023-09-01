@@ -1,7 +1,7 @@
 extern console
 
 var dyn foo = {
-	foo() {
+	foo: func() {
 		var dyn i = 0
 	}
 }

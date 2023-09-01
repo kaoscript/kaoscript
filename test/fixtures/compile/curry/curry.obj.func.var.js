@@ -2,7 +2,7 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Foobar = (() => {
 		const o = new OBJ();
-		o.foobar = Helper.function((name, data) => {
+		o.foobar = Helper.function(function(name, data) {
 			return data;
 		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
@@ -13,7 +13,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		});
-		o.quxbaz = Helper.function((fn, data) => {
+		o.quxbaz = Helper.function(function(fn, data) {
 		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;
 			if(args.length === 2) {

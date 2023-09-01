@@ -789,6 +789,7 @@ class Parameter extends AbstractNode {
 	isRequired() => @explicitlyRequired || !?@defaultValue
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
+	listAssignments(array: Array, immutable: Boolean? = null) => @internal.listAssignments(array, immutable)
 	max() => @arity?.max ?? 1
 	min() => @arity?.min ?? 1
 	setDefaultValue(data) { # {{{

@@ -1,8 +1,8 @@
 var Foobar = {
-	foobar(name, data) {
+	foobar: func(name, data) {
 		return data
 	}
-	quxbaz(fn, data) {
+	quxbaz: func(fn, data) {
 	}
 }
 

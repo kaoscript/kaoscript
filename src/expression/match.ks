@@ -312,6 +312,7 @@ class MatchExpression extends Expression {
 			}
 		}
 	} # }}}
+	assignTempVariables(scope: Scope) => @statement().assignTempVariables(scope)
 	flagImplementedTest(type, details? = null) { # {{{
 		if var data ?= @tests[type] {
 			if ?details || ?data.details {

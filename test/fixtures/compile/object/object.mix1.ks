@@ -1,6 +1,6 @@
 var dyn foo = {
 	bar: {
-		qux() {
+		qux: func() {
 			var dyn i = 1
 		}
 	}

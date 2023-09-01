@@ -248,11 +248,11 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
-			unless type.isIterable() || operand.isLateInit() || @options.rules.ignoreMisfit || operand is MemberExpression {
-				TypeException.throwNotIterable(operand, this)
-			}
-
 			if index < last {
+				unless type.isIterable() || operand.isLateInit() || @options.rules.ignoreMisfit || operand is MemberExpression {
+					TypeException.throwNotIterable(operand, this)
+				}
+
 				operand.acquireReusable(true)
 				operand.releaseReusable()
 			}

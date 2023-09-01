@@ -136,7 +136,7 @@ module.exports = function() {
 			const o = new OBJ();
 			o["from"] = (() => {
 				const o = new OBJ();
-				o[Space.YUV] = Helper.function(() => {
+				o[Space.YUV] = Helper.function(function() {
 					return "RGB -> UYV";
 				}, (that, fn, ...args) => {
 					if(args.length === 0) {

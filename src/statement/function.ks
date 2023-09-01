@@ -1,5 +1,5 @@
-var $function = {
-	surround(data, node) { # {{{
+namespace $function {
+	func surround(data, node) { # {{{
 		var mut parent = node._parent
 		while ?parent && !(parent is ClassMethodDeclaration || parent is ImplementDividedClassMethodDeclaration) {
 			parent = parent.parent()
@@ -42,7 +42,7 @@ var $function = {
 			}
 		}
 	} # }}}
-	useThisVariable(data, node) { # {{{
+	func useThisVariable(data, node) { # {{{
 		match data.kind {
 			NodeKind.ArrayExpression {
 				for var value in data.values {
@@ -129,6 +129,8 @@ var $function = {
 
 		return false
 	} # }}}
+
+	export *
 }
 
 class FunctionDeclaration extends Statement {

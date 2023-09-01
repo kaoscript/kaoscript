@@ -299,7 +299,7 @@ func $hex(that: Color) { # {{{
 } # }}}
 
 var $parsers = {
-	srgb(that: Color, args: array): bool { # {{{
+	srgb: func(that: Color, args: array): bool { # {{{
 		if args.length == 1 {
 			if args[0] is number {
 				that._space = Space.SRGB
@@ -454,7 +454,7 @@ var $parsers = {
 
 		return false
 	} # }}}
-	gray(that: Color, args: array): bool { # {{{
+	gray: func(that: Color, args: array): bool { # {{{
 		if args.length >= 1 {
 			if Number.isFinite(Float.parse(args[0])) {
 				that._space = Space.SRGB
@@ -1071,10 +1071,10 @@ Color.registerSpace({
 	name: 'srgb'
 	alias: ['rgb']
 	formatters: {
-		hex(that: Color): string { # {{{
+		hex: func(that: Color): string { # {{{
 			return $hex(that)
 		} # }}}
-		srgb(that: Color): string { # {{{
+		srgb: func(that: Color): string { # {{{
 			if that._alpha == 1 {
 				return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 			}

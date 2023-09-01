@@ -330,8 +330,6 @@ class ObjectIteration extends IterationNode {
 
 			return {
 				fragments: ctrl2
-				// TODO!
-				// close() => {
 				close: () => {
 					ctrl2.done()
 

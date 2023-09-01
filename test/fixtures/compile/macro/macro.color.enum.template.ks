@@ -47,7 +47,7 @@ Color.registerSpace({
 	alias: [Space.RGB]
 	parsers: {
 		from: {
-			`\(Space.YUV)`() {
+			`\(Space.YUV)`: func() {
 				return 'RGB -> UYV'
 			}
 		}

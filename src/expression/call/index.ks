@@ -806,7 +806,7 @@ class CallExpression extends Expression {
 
 						@prepareArguments()
 
-						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
+						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
 							is LenientCallMatchResult with var result {
 								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
 							}

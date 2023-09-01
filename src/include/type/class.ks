@@ -1397,6 +1397,7 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
+	hasProperty(name: String) => @hasStaticProperty(name)
 	hasSealedConstructors(): Boolean => @seal?.constructors
 	hasSealedInstanceMethod(name) { # {{{
 		if @seal.instanceMethods[name] {
@@ -1421,6 +1422,9 @@ class ClassType extends Type {
 		else {
 			return false
 		}
+	} # }}}
+	hasStaticProperty(name: String) { # {{{
+		return ?@staticMethods[name] || ?@staticVariables[name]
 	} # }}}
 	hasStaticVariable(name) { # {{{
 		if @staticVariables[name] is ClassVariableType {

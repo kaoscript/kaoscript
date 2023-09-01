@@ -1,0 +1,13 @@
+require {
+	func quxbaz()
+}
+
+func foobar(test) {
+	var x = if test {
+		set quxbaz()
+			..foobar()
+	}
+	else {
+		set 0
+	}
+}
