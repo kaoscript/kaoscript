@@ -9,7 +9,7 @@ func foobar(lines: Array<String>) {
 
 	for var i from 0 to~ lines.length {
 		if
-			(line = lines[i].trim()).length != 0
+			(line <- lines[i].trim()).length != 0
 			&&
 			line[0] != '#'
 		{

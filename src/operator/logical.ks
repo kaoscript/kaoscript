@@ -842,7 +842,8 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
-	type() => @type
+	// type() => @type
+	// type() => Type.Void
 }
 
 class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {

@@ -6,6 +6,6 @@ extern a
 
 var dyn b
 
-if ?(b = a.b).c {
+if ?(b <- a.b).c {
 	console.log(b)
 }

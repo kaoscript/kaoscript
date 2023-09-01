@@ -133,7 +133,8 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		fragments.compile(@left).code($equals).wrap(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
-	type() => @type
+	type() => @parent is AssignmentOperatorEquals ? @type : Type.Void
+	// type() => Type.Void
 	validate(target: Type) { # {{{
 		if !target.isVoid() && @parent is not AssignmentOperatorEquals {
 			SyntaxException.throwNoReturn(this)
@@ -144,4 +145,5 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 class AssignmentOperatorReturn extends AssignmentOperatorEquals {
 	override validate(target)
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
+	type() => @type
 }

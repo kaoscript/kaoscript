@@ -6,7 +6,7 @@ struct Event {
 func foobar() {
 	var dyn event
 
-	if (event = quxbaz()).ok {
+	if (event <- quxbaz()).ok {
 	}
 }
 

@@ -9,7 +9,7 @@ var dyn foo = {
 if true {
 	var dyn message
 
-	if (message = foo.message).length > 0 {
+	if (message <- foo.message).length > 0 {
 		console.log(message)
 	}
 }
