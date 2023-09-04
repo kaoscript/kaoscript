@@ -2,10 +2,12 @@ class LenientThisCallee extends Callee {
 	private {
 		@expression
 		@flatten: Boolean
+		@instance: Boolean
 		@methods: Array<FunctionType>
 		@node: CallExpression
 		@property: String
 		@scope: ScopeKind
+		@sealed: Boolean					= false
 		@type: Type
 	}
 	constructor(@data, @expression, @property, @methods, @node) { # {{{
@@ -14,12 +16,16 @@ class LenientThisCallee extends Callee {
 		@flatten = node._flatten
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
+		@instance = methods[0].isInstance()
 
 		var types = []
+
 		for var method in methods {
 			@validate(method, node)
 
 			types.push(method.getReturnType())
+
+			@sealed ||= method.isSealed()
 		}
 
 		@type = Type.union(@node.scope(), ...types)
@@ -37,28 +43,67 @@ class LenientThisCallee extends Callee {
 		return false
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
-		var name = @node.scope().getVariable('this').getSecureName()
-
 		if @flatten {
-			match @scope {
-				ScopeKind.Argument {
+			if @sealed {
+				var path = @expression.getClass().getSealedPath()
+
+				if @instance {
+					fragments.code(`\(path)._im_\(@property)`)
+				}
+				else {
+					fragments.code(`\(path)._sm_\(@property)`)
+				}
+
+				fragments.code('.apply(null')
+
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments(), 'this')
+			}
+			else {
+				if @scope == ScopeKind.Argument {
 					throw NotImplementedException.new(node)
 				}
-				ScopeKind.This {
+				else {
+					var name = @node.scope().getVariable('this').getSecureName()
+
 					fragments.code(`\(name).\(@property).apply(\(name)`)
 				}
-			}
 
-			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
+			}
 		}
 		else {
-			match @scope {
-				ScopeKind.Argument {
-					throw NotImplementedException.new(node)
-				}
-				ScopeKind.This {
-					fragments.code(`\(name).\(@property)(`)
+			if @sealed {
+				var path = @expression.getClass().getSealedPath()
 
+				if @instance {
+					fragments.code(`\(path)._im_\(@property)`)
+				}
+				else {
+					fragments.code(`\(path)._sm_\(@property)`)
+				}
+			}
+			else {
+				var name = @node.scope().getVariable('this').getSecureName()
+
+				fragments.code(`\(name).\(@property)`)
+			}
+
+			if @scope == ScopeKind.Argument {
+				throw NotImplementedException.new(node)
+			}
+			else {
+				fragments.code('(')
+
+				if @sealed && @instance {
+					fragments.code('this')
+
+					for var argument, index in node.arguments() {
+						fragments.code($comma)
+
+						DefaultCallee.toArgumentFragments(argument, fragments, mode)
+					}
+				}
+				else {
 					for var argument, index in node.arguments() {
 						fragments.code($comma) if index != 0
 

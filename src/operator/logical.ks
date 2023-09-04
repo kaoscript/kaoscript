@@ -6,10 +6,13 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
+		var void = target.isVoid()
+
 		var mut nullable = false
-		var mut boolean = target.canBeBoolean()
+		var mut boolean = void || target.canBeBoolean()
 		var mut number = target.canBeNumber()
 		var mut native = true
+		var mut callable = false
 
 		if !target.canBeEnum() {
 			@expectingEnum = false
@@ -17,6 +20,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		for var operand in @operands {
 			operand.prepare(target, TargetMode.Permissive)
+
+			callable ||= operand.isCallable()
 
 			var type = operand.type()
 
@@ -67,7 +72,12 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			}
 		}
 
-		if !boolean && !number {
+		if void {
+			unless callable {
+				SyntaxException.throwDeadCode(this)
+			}
+		}
+		else if !boolean && !number {
 			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
@@ -256,10 +266,13 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
+		var void = target.isVoid()
+
 		var mut nullable = false
-		var mut boolean = target.canBeBoolean()
+		var mut boolean = void || target.canBeBoolean()
 		var mut number = target.canBeNumber()
 		var mut native = true
+		var mut callable = false
 
 		if !target.canBeEnum() {
 			@expectingEnum = false
@@ -270,6 +283,8 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			operand.prepare(target)
+
+			callable ||= operand.isCallable()
 
 			var type = operand.type()
 
@@ -326,8 +341,13 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 		}
 
-		if !boolean && !number {
-			TypeException.throwInvalidOperation(this, this.operator(), this)
+		if void {
+			unless callable {
+				SyntaxException.throwDeadCode(this)
+			}
+		}
+		else if !boolean && !number {
+			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
 		if boolean {
@@ -842,8 +862,6 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
-	// type() => @type
-	// type() => Type.Void
 }
 
 class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {

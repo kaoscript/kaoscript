@@ -183,6 +183,15 @@ class UnionType extends Type {
 
 		return false
 	} # }}}
+	canBeObject(any = true) { # {{{
+		for var type in @types {
+			if type.canBeObject(any) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	canBeString(any = true) { # {{{
 		for var type in @types {
 			if type.canBeString(any) {

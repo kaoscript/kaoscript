@@ -267,6 +267,27 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
+	inferTypes(inferables) { # {{{
+		@left.inferTypes(inferables)
+
+		if @left.isInferable() {
+			var leftType = @left.type().setNullable(false)
+
+			var type = if leftType.equals(@right.type()) {
+				set leftType
+			}
+			else {
+				set Type.union(@scope, leftType, @right.type())
+			}
+
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type
+			}
+		}
+
+		return inferables
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @left.isNullable() {
 			fragments.code('(')

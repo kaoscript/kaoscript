@@ -211,7 +211,6 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		fragments.compile(@left).code($space).code(@symbol(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
-	// type() => @type
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
@@ -366,7 +365,6 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	toQuote() => `\(@left.toQuote()) += \(@right.toQuote())`
-	// type() => @type
 }
 
 class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {

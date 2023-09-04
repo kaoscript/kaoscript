@@ -17,9 +17,12 @@ class NamedType extends Type {
 		}
 	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
+	canBeEnum(any = true) => @type.canBeEnum(any)
 	canBeFunction(any = true) => @type.canBeFunction(any)
 	canBeNumber(any = true) => @type.canBeNumber(any)
+	canBeObject(any = true) => @type.canBeObject(any)
 	canBeString(any = true) => @type.canBeString(any)
+	canBeVirtual(name: String) => @type.canBeVirtual(name)
 	clone() { # {{{
 		@cloned = true
 

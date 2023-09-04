@@ -13,8 +13,9 @@ class ThisExpression extends Expression {
 		@name: String
 		@namesake: Boolean			= false
 		@nonNullable: Boolean		= false
+		@prepared: Boolean			= false
 		@sealed: Boolean			= false
-		@type: Type?				= null
+		@type: Type					= AnyType.NullableUnexplicit
 		@variableName: String?		= null
 	}
 	analyse() { # {{{
@@ -67,7 +68,9 @@ class ThisExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		return unless @type == null
+		return if @prepared
+
+		@prepared = true
 
 		var type = @class.type()
 
@@ -101,7 +104,7 @@ class ThisExpression extends Expression {
 						@lateInit = !@immutable && variable.isLateInit()
 					}
 					else {
-						@type = null
+						@type = AnyType.NullableUnexplicit
 						@variableName = null
 						@fragment = ''
 					}
@@ -126,6 +129,7 @@ class ThisExpression extends Expression {
 
 								if functions.some((fn, ...) => fn.isSealed()) {
 									@sealed = true
+									@fragment = `\(@class.getSealedName()).__ks_get_\(@name)`
 								}
 								else {
 									@fragment = `\(name).\(@name)`
@@ -142,8 +146,11 @@ class ThisExpression extends Expression {
 							}
 						}
 					}
-					else {
+					else if type.isExhaustive(this) {
 						ReferenceException.throwUndefinedInstanceField(@name, this)
+					}
+					else {
+						@fragment = `\(name).\(@name)`
 					}
 				}
 			}
@@ -216,8 +223,11 @@ class ThisExpression extends Expression {
 					@immutable = variable.isImmutable()
 					@sealed = variable.isSealed()
 				}
-				else {
+				else if type.isExhaustive(this) {
 					ReferenceException.throwUndefinedStaticField(@name, this)
+				}
+				else {
+					@fragment = `\(name).\(@variableName)`
 				}
 			}
 		}

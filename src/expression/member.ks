@@ -95,8 +95,7 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				// TODO! void
-				var ignore = @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
+				@prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
 
 				if @assignable {
 					if var variable ?= this.declaration() {

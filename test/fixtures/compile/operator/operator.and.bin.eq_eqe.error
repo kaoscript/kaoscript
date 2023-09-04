@@ -1,1 +1,0 @@
-TypeException: The expression "(x == 0) && (y == 0)" is expected to be of type "Void" (fixtures/compile/operator/operator.and.bin.eq_eqe.ks:2)

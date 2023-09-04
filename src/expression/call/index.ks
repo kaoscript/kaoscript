@@ -242,11 +242,13 @@ class CallExpression extends Expression {
 
 					}
 					else {
-						@addCallee(DefaultCallee.new(@data, null, null, this))
+						@addCallee(DefaultCallee.new(@data, expression, this))
 					}
 				}
 				else {
-					ReferenceException.throwUndefinedFunction(@property, this)
+					@prepareArguments()
+
+					@addCallee(DefaultCallee.new(@data, null, null, this))
 				}
 			}
 			else {
@@ -346,7 +348,7 @@ class CallExpression extends Expression {
 	getCallScope(): valueof @thisScope
 	getReuseName() => @reuseName
 	inferTypes(inferables) { # {{{
-		if @object != null {
+		if ?@object {
 			@object.inferTypes(inferables)
 
 			if @nullable && @object.isInferable() {
