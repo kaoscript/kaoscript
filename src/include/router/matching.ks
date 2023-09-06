@@ -1394,6 +1394,7 @@ namespace Matching {
 				if #perArguments {
 					for var perArgument of perArguments {
 						var newIndexeds = [...indexeds]
+
 						for var argument in perArgument.indexeds {
 							newIndexeds.pushUniq(argument)
 						}
@@ -1910,6 +1911,7 @@ namespace Matching {
 		func resolveCurryMatch(match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}): Void { # {{{
 			var indexes = {}
 			var positions = []
+			var mut shift = 0
 
 			for var parameter in match.function.parameters() {
 				var name = parameter.getExternalName()
@@ -1918,11 +1920,13 @@ namespace Matching {
 					positions.push(CallMatchArgument.new(argument.index))
 
 					indexes[argument.index] = 'n'
+					shift += 1
 				}
 				else if var argument ?= shorthands[name] {
 					positions.push(CallMatchArgument.new(argument.index))
 
 					indexes[argument.index] = 's'
+					shift += 1
 				}
 				else if var position ?= match.positions.shift() {
 					if position is Array {
@@ -1930,7 +1934,7 @@ namespace Matching {
 						var currents = {}
 
 						for var pos, j in position {
-							var mut { index } = pos
+							var mut index = pos.index + shift
 
 							if index !?= currents[index] {
 								while indexes[index] == 'n' | 's' {
@@ -1949,13 +1953,17 @@ namespace Matching {
 						positions.push(args)
 					}
 					else {
-						while indexes[position.index] == 'n' | 's' {
-							position.index += 1
+						var mut index = position.index + shift
+
+						while indexes[index] == 'n' | 's' {
+							index += 1
 						}
+
+						position.index = index
 
 						positions.push(position)
 
-						indexes[position.index] = 'i'
+						indexes[index] = 'i'
 					}
 				}
 				else {

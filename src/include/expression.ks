@@ -4,6 +4,7 @@ abstract class Expression extends AbstractNode {
 		@statement: Statement?		= null
 	}
 	acquireReusable(acquire)
+	argument() => this
 	flagAssignable() { # {{{
 		if !@isAssignable() {
 			ReferenceException.throwInvalidAssignment(this)
@@ -97,7 +98,7 @@ abstract class Expression extends AbstractNode {
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
 	setAttributes(data) { # {{{
-		@options = Attribute.configure({ attributes: data }, @parent._options, AttributeTarget.Statement, this.file())
+		@options = Attribute.configure({ attributes: data }, @parent._options, AttributeTarget.Statement, @file())
 	} # }}}
 	setReuseName(name: String)
 	statement() { # {{{
@@ -114,7 +115,7 @@ abstract class Expression extends AbstractNode {
 		return @statement
 	} # }}}
 	toArgumentFragments(fragments, mode = Mode.None) { # {{{
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 	} # }}}
 	toArgumentFragments(fragments, type: Type, mode = Mode.None) { # {{{
 		@toArgumentFragments(fragments, mode)
@@ -122,7 +123,7 @@ abstract class Expression extends AbstractNode {
 	toCastingFragments(fragments, mode) { # {{{
 		fragments.code($runtime.helper(this), '.valueOf(')
 
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 
 		fragments.code(')')
 	} # }}}
@@ -134,15 +135,15 @@ abstract class Expression extends AbstractNode {
 		}
 	} # }}}
 	toFragments(fragments, mode)
-	toNullableFragments(fragments) => this.toFragments(fragments, Mode.None)
-	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode.None)
+	toNullableFragments(fragments) => @toFragments(fragments, Mode.None)
+	toOperandFragments(fragments, operator, type) => @toFragments(fragments, Mode.None)
 	toQuote(): String { # {{{
 		throw NotSupportedException.new()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
 		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
 	} # }}}
-	toReusableFragments(fragments) => this.toFragments(fragments, Mode.None)
+	toReusableFragments(fragments) => @toFragments(fragments, Mode.None)
 	toStringFragments(fragments) { # {{{
 		var type = @type()
 		if type.isReference() && type.type().isEnum() {

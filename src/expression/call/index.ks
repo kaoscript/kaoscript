@@ -125,140 +125,142 @@ class CallExpression extends Expression {
 			}
 		}
 		else {
-			if @data.callee.kind == NodeKind.Identifier {
-				if var variable ?= @scope.getVariable(@data.callee.name) {
-					var type = variable.getRealType()
+			match @data.callee.kind {
+				NodeKind.Identifier {
+					if var variable ?= @scope.getVariable(@data.callee.name) {
+						var type = variable.getRealType()
 
-					if type.isFunction() {
-						if type.isAsync() {
-							if @parent is VariableDeclaration {
-								if !@parent.isAwait() {
+						if type.isFunction() {
+							if type.isAsync() {
+								if @parent is VariableDeclaration {
+									if !@parent.isAwait() {
+										TypeException.throwNotSyncFunction(@data.callee.name, this)
+									}
+								}
+								else if @parent is not AwaitExpression {
 									TypeException.throwNotSyncFunction(@data.callee.name, this)
 								}
 							}
-							else if @parent is not AwaitExpression {
-								TypeException.throwNotSyncFunction(@data.callee.name, this)
-							}
-						}
-						else {
-							if @parent is VariableDeclaration {
-								if @parent.isAwait() {
+							else {
+								if @parent is VariableDeclaration {
+									if @parent.isAwait() {
+										TypeException.throwNotAsyncFunction(@data.callee.name, this)
+									}
+								}
+								else if @parent is AwaitExpression {
 									TypeException.throwNotAsyncFunction(@data.callee.name, this)
 								}
 							}
-							else if @parent is AwaitExpression {
-								TypeException.throwNotAsyncFunction(@data.callee.name, this)
-							}
 						}
-					}
 
-					if ?variable.replaceCall {
-						@prepareArguments()
+						if ?variable.replaceCall {
+							@prepareArguments()
 
-						var substitute = variable.replaceCall(@data, @arguments, this)
+							var substitute = variable.replaceCall(@data, @arguments, this)
 
-						@addCallee(SubstituteCallee.new(@data, substitute, this))
-					}
-					else {
-						@makeCallee(type, variable.name())
-					}
-				}
-				else {
-					ReferenceException.throwUndefinedFunction(@data.callee.name, this)
-				}
-			}
-			else if @data.callee.kind == NodeKind.FunctionExpression {
-				throw NotImplementedException.new(this)
-			}
-			else if @data.callee.kind == NodeKind.LambdaExpression {
-				var expression = $compile.expression(@data.callee, this)
-				expression.analyse()
-				expression.prepare(AnyType.NullableUnexplicit)
-
-				var function = expression.type()
-
-				@assessment = function.assessment(expression.toQuote(), this)
-
-				@prepareArguments()
-
-				match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-					is LenientCallMatchResult with var result {
-						@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
-					}
-					is PreciseCallMatchResult with var { matches } {
-						var callee = PreciseFunctionCallee.new(@data, expression, @assessment, matches, this)
-
-						callee.flagDirect()
-
-						@addCallee(callee)
-					}
-					else {
-						ReferenceException.throwNoMatchingFunction(@assessment.name, @arguments, this)
-					}
-				}
-			}
-			else if @data.callee.kind == NodeKind.ThisExpression {
-				var expression = $compile.expression(@data.callee, this)
-				expression.analyse()
-				expression.prepare(AnyType.NullableUnexplicit)
-
-				@property = @data.callee.name.name
-
-				var type = expression.type()
-
-				if type is FunctionType | OverloadedFunctionType {
-					@assessment ??= type.assessment(@property, this)
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-						is LenientCallMatchResult with var { possibilities } {
-							@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							if matches.length == 1 {
-								var match = matches[0]
-								var class = expression.getClass()
-								var reference = @scope.reference(class)
-
-								@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
-							}
-							else {
-								throw NotImplementedException.new(this)
-							}
+							@addCallee(SubstituteCallee.new(@data, substitute, this))
 						}
 						else {
-							ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
+							@makeCallee(type, variable.name())
+						}
+					}
+					else {
+						ReferenceException.throwUndefinedFunction(@data.callee.name, this)
+					}
+				}
+				NodeKind.FunctionExpression {
+					throw NotImplementedException.new(this)
+				}
+				NodeKind.LambdaExpression {
+					var expression = $compile.expression(@data.callee, this)
+					expression.analyse()
+					expression.prepare(AnyType.NullableUnexplicit)
+
+					var function = expression.type()
+
+					@assessment = function.assessment(expression.toQuote(), this)
+
+					@prepareArguments()
+
+					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
+						is LenientCallMatchResult with var result {
+							@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
+						}
+						is PreciseCallMatchResult with var { matches } {
+							var callee = PreciseFunctionCallee.new(@data, expression, @assessment, matches, this)
+
+							callee.flagDirect()
+
+							@addCallee(callee)
+						}
+						else {
+							ReferenceException.throwNoMatchingFunction(@assessment.name, @arguments, this)
 						}
 					}
 				}
-				else if type.isFunction() {
-					@prepareArguments()
+				NodeKind.ThisExpression {
+					var expression = $compile.expression(@data.callee, this)
+					expression.analyse()
+					expression.prepare(AnyType.NullableUnexplicit)
 
-					if expression.isSealed() {
-						var object = IdentifierLiteral.new($ast.identifier('this'), this, @scope)
-						var class = expression.getClass()
-						var reference = @scope.reference(class)
+					@property = @data.callee.name.name
 
-						@addCallee(SealedMethodCallee.new(@data, object, reference, @property, true, this))
+					var type = expression.type()
 
+					if type is FunctionType | OverloadedFunctionType {
+						@assessment ??= type.assessment(@property, this)
+
+						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
+							is LenientCallMatchResult with var { possibilities } {
+								@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
+							}
+							is PreciseCallMatchResult with var { matches } {
+								if matches.length == 1 {
+									var match = matches[0]
+									var class = expression.getClass()
+									var reference = @scope.reference(class)
+
+									@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
+								}
+								else {
+									throw NotImplementedException.new(this)
+								}
+							}
+							else {
+								ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
+							}
+						}
+					}
+					else if type.isFunction() {
+						@prepareArguments()
+
+						if expression.isSealed() {
+							var object = IdentifierLiteral.new($ast.identifier('this'), this, @scope)
+							var class = expression.getClass()
+							var reference = @scope.reference(class)
+
+							@addCallee(SealedMethodCallee.new(@data, object, reference, @property, true, this))
+
+						}
+						else {
+							@addCallee(DefaultCallee.new(@data, expression, this))
+						}
 					}
 					else {
-						@addCallee(DefaultCallee.new(@data, expression, this))
+						@prepareArguments()
+
+						@addCallee(DefaultCallee.new(@data, null, null, this))
 					}
 				}
 				else {
+					if @named {
+						NotImplementedException.throw(this)
+					}
+
 					@prepareArguments()
 
 					@addCallee(DefaultCallee.new(@data, null, null, this))
 				}
-			}
-			else {
-				if @named {
-					NotImplementedException.throw(this)
-				}
-
-				@prepareArguments()
-
-				@addCallee(DefaultCallee.new(@data, null, null, this))
 			}
 		}
 

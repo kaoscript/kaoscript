@@ -25,7 +25,7 @@ class CurryExpression extends CallExpression {
 							fragments.code(')')
 						}
 						else {
-							arguments[passthru].toArgumentFragments(fragments, mode)
+							arguments[passthru].argument().toArgumentFragments(fragments, mode)
 						}
 					}
 					else {

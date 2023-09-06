@@ -325,8 +325,8 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	isRenamedVariable(name: String) { # {{{
-		if @variables[name] is Array {
-			return @renamedVariables[name] is String
+		if ?@variables[name] {
+			return ?@renamedVariables[name]
 		}
 		else {
 			return @parent.isRenamedVariable(name)
@@ -420,7 +420,16 @@ class BlockScope extends Scope {
 		variable.renameAs(newName)
 	} # }}}
 	rename(name, newName) { # {{{
-		if newName != name {
+		if newName == name {
+			if ?@renamedVariables[name] {
+				Object.delete(@renamedVariables, name)
+
+				var variable = @getVariable(name)
+
+				variable.renameAs(name)
+			}
+		}
+		else {
 			@renamedVariables[name] = newName
 
 			var variable = @getVariable(name)

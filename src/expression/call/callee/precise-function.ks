@@ -69,6 +69,9 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 			var [type, map] = @curries[0]
 
+			var useFunc = !(@expression is ArrowFunctionExpression || type.isMissingThis() || @scope == .Argument)
+			var useThis = useFunc && @node.arguments().some((argument, ...) => argument.isUsingVariable('this'))
+
 			var assessment = type.assessment('<router>', node)
 
 			fragments.code(`(that, fn, `)
@@ -87,7 +90,9 @@ class PreciseFunctionCallee extends PreciseCallee {
 						return false
 					}
 					else {
-						line.code(`fn[0].call(that`)
+						line
+							.code(`fn[0].call(that`)
+							.code(`, this`) if useThis
 
 						return true
 					}
@@ -167,10 +172,19 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 				ctrl.code('function(')
 
-				for var _, index in type.parameters() {
-					ctrl
-						..code($comma) if index != 0
-						..code(`__ks_\(index)`)
+				if useThis {
+					ctrl.code(`that`)
+
+					for var _, index in type.parameters() {
+						ctrl.code(`, __ks_\(index)`)
+					}
+				}
+				else {
+					for var _, index in type.parameters() {
+						ctrl
+							..code($comma) if index != 0
+							..code(`__ks_\(index)`)
+					}
 				}
 
 				ctrl.code(')').step()
@@ -180,7 +194,18 @@ class PreciseFunctionCallee extends PreciseCallee {
 
 				line.code('return ').compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(this, `)
 
-				CurryExpression.toArgumentFragments(map, arguments, true, line, mode)
+				if useThis {
+					var scope = @node.scope()
+
+					scope.rename('this', 'that')
+
+					CurryExpression.toArgumentFragments(map, arguments, true, line, mode)
+
+					scope.rename('this', 'this')
+				}
+				else {
+					CurryExpression.toArgumentFragments(map, arguments, true, line, mode)
+				}
 
 				line.code(')').done()
 
