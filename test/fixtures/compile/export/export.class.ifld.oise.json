@@ -27,7 +27,7 @@
               "rest": "Number"
             },
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

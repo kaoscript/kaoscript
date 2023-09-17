@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "x" isn't initialized (fixtures/compile/var/var.late.ninit.wuse.for.ks:4)

@@ -24,7 +24,7 @@
             "access": 4,
             "type": "Number",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           },
@@ -32,7 +32,7 @@
             "access": 4,
             "type": "Number",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           },
@@ -46,7 +46,7 @@
               }
             },
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           }

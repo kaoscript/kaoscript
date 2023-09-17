@@ -24,7 +24,7 @@
             "access": 2,
             "type": "String",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }
@@ -73,7 +73,7 @@
             "access": 2,
             "type": "String",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -81,7 +81,7 @@
             "access": 2,
             "type": "Any?",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

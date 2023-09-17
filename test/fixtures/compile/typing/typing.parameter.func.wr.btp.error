@@ -1,0 +1,1 @@
+ReferenceException: The function "fn" can't be matched to given arguments (Number) (fixtures/compile/typing/typing.parameter.func.wr.btp.ks:2)

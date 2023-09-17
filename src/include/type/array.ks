@@ -126,22 +126,13 @@ class ArrayType extends Type {
 			return 'Array'
 		}
 
-		var export = {
+		return {
 			kind: TypeKind.Array
+			mutable: true if @mutable
+			properties: [property.export(references, indexDelta, mode, module) for var property in @properties] if @length > 0
+			rest: @restType.export(references, indexDelta, mode, module) if @rest
+			destructuring: true if @destructuring
 		}
-
-		if @length > 0 {
-			export.properties = [property.export(references, indexDelta, mode, module) for var property in @properties]
-		}
-
-		if @rest {
-			export.rest = @restType.export(references, indexDelta, mode, module)
-		}
-		if @destructuring {
-			export.destructuring = true
-		}
-
-		return export
 	} # }}}
 	flagDestructuring() { # {{{
 		@destructuring = true

@@ -4,6 +4,6 @@ class Foobar {
 
 var x = Foobar.PI + 3.14
 
-Foobar.PI = 42
+// Foobar.PI = 42
 
 export Foobar

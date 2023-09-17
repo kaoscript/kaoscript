@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "x" isn't fully initialized by the clause at (fixtures/compile/var/var.late.try.wctc_nth.wfin_nth.ks:6)

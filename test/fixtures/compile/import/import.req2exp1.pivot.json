@@ -26,7 +26,7 @@
               "reference": 1
             },
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           }

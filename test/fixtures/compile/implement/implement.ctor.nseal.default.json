@@ -65,7 +65,7 @@
             "access": 2,
             "type": "String",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

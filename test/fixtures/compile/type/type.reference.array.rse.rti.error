@@ -1,1 +1,0 @@
-TypeException: The return type must be "Number" and not "String" (fixtures/compile/type/type.reference.array.rse.rti.ks:2)

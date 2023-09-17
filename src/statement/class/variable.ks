@@ -5,7 +5,7 @@ class ClassVariableDeclaration extends AbstractNode {
 	private {
 		@defaultValue: Boolean		= false
 		@dynamic: Boolean			= false
-		@immutable: Boolean			= false
+		@final: Boolean				= false
 		@instance: Boolean			= true
 		@initialized: Boolean		= true
 		@lateInit: Boolean			= false
@@ -26,8 +26,8 @@ class ClassVariableDeclaration extends AbstractNode {
 				ModifierKind.Dynamic {
 					@dynamic = true
 				}
-				ModifierKind.Immutable {
-					@immutable = true
+				ModifierKind.Final {
+					@final = true
 				}
 				ModifierKind.LateInit {
 					@lateInit = true
@@ -125,7 +125,7 @@ class ClassVariableDeclaration extends AbstractNode {
 					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 				}
 			}
-			else if @immutable {
+			else if @final {
 				if !@lateInit {
 					@type.type(type)
 				}
@@ -151,7 +151,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			@initialized = true
 		}
 	} # }}}
-	isImmutable() => @immutable
+	isImmutable() => @final
 	isInitialized() => @initialized
 	isInstance() => @instance
 	isLateInit() => @lateInit

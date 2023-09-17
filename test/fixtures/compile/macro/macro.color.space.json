@@ -42,7 +42,7 @@
             "access": 4,
             "type": "Number",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }
@@ -376,7 +376,7 @@
             "access": 4,
             "type": "Number",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }
@@ -553,7 +553,7 @@
             "access": 2,
             "type": "Boolean",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -563,7 +563,7 @@
               "reference": 8
             },
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -573,7 +573,7 @@
               "reference": 9
             },
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -581,7 +581,7 @@
             "access": 2,
             "type": "Number",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -589,7 +589,7 @@
             "access": 2,
             "type": "Number",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -597,7 +597,7 @@
             "access": 2,
             "type": "Number",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -605,7 +605,7 @@
             "access": 2,
             "type": "Number",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           },
@@ -613,7 +613,7 @@
             "access": 2,
             "type": "Number",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

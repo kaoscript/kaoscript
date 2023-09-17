@@ -13,7 +13,7 @@ class ArrayIteration extends IterationNode {
 		@fromAssert: Boolean				= false
 		@fromBallpark: Boolean
 		@fromName: String
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@index								= null
 		@indexName: String
 		@loopKind: LoopKind					= .Unknown
@@ -41,18 +41,20 @@ class ArrayIteration extends IterationNode {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Ascending {
-				@order = OrderKind.Ascending
-			}
-			else if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Descending {
-				@order = OrderKind.Descending
-				@ascending = false
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Ascending {
+					@order = OrderKind.Ascending
+				}
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Descending {
+					@order = OrderKind.Descending
+					@ascending = false
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 

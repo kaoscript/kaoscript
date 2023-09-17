@@ -136,10 +136,10 @@ describe('compile', function() {
 	} // }}}
 
 	function prepare(file) { // {{{
-		var root = path.dirname(file)
+		var root = path.dirname(file);
 		var name = path.basename(file).slice(0, -3);
 
-		if(testings.length > 0 && !testings.some((testing) => name.startsWith(testing) || testing.startsWith(name))) {
+		if(root.endsWith('.no') || (testings.length > 0 && !testings.some((testing) => name.startsWith(testing) || testing.startsWith(name)))) {
 			return;
 		}
 

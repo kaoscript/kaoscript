@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number?" (fixtures/compile/var/var.mut.wtnn_tn.ks:3)

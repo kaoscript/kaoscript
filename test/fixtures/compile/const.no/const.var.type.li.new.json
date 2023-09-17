@@ -1,0 +1,36 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "values"
+    ],
+    "references": [
+      {
+        "kind": "constant",
+        "value": {
+          "kind": "array",
+          "values": [
+            {
+              "kind": "number",
+              "value": 1
+            },
+            {
+              "kind": "number",
+              "value": 2
+            },
+            {
+              "kind": "number",
+              "value": 3
+            }
+          ]
+        }
+      }
+    ],
+    "macros": []
+  }
+]

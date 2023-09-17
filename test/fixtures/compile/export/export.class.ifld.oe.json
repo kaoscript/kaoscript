@@ -24,7 +24,7 @@
             "access": 4,
             "type": "Object",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

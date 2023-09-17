@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "value" isn't fully initialized due to the missing "else" statement (fixtures/compile/var/var.late.op.assign.exist.nval.ks:4)

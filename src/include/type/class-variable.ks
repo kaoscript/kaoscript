@@ -2,7 +2,7 @@ class ClassVariableType extends Type {
 	private {
 		@access: Accessibility	= Accessibility.Public
 		@default: Boolean		= false
-		@immutable: Boolean		= false
+		@final: Boolean			= false
 		@lateInit: Boolean		= false
 		@type: Type
 	}
@@ -20,8 +20,8 @@ class ClassVariableType extends Type {
 			if ?data.modifiers {
 				for var modifier in data.modifiers {
 					match modifier.kind {
-						ModifierKind.Immutable {
-							type._immutable = true
+						ModifierKind.Final {
+							type._final = true
 						}
 						ModifierKind.Internal {
 							type.access(Accessibility.Internal)
@@ -52,7 +52,7 @@ class ClassVariableType extends Type {
 
 			type._access = Accessibility(data.access) ?? .Public
 			type._default = data.default
-			type._immutable = data.immutable
+			type._final = data.final
 			type._lateInit = data.lateInit
 
 			return type
@@ -72,7 +72,7 @@ class ClassVariableType extends Type {
 			access: @access
 			type: @type.toReference(references, indexDelta, mode, module)
 			default: @default
-			immutable: @immutable
+			final: @final
 			lateInit: @lateInit
 			sealed: @sealed
 		}
@@ -83,9 +83,9 @@ class ClassVariableType extends Type {
 		@type = @type.setNullable(true)
 	} # }}}
 	hasDefaultValue() => @default
-	isImmutable() => @immutable
+	isImmutable() => @final
 	isLateInit() => @lateInit
-	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
+	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @final)
 	isSubsetOf(value: ClassVariableType, mode: MatchingMode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode.Exact)

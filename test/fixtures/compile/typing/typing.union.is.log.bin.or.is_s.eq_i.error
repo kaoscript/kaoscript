@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|Number) (fixtures/compile/typing/typing.union.is.log.bin.or.is_s.eq_i.ks:9)

@@ -1,0 +1,1 @@
+TypeException: The return type must be "String" and not "String?" (fixtures/compile/var/var.mut.init.while.ks:8)

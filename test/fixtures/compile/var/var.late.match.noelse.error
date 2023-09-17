@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "value" isn't fully initialized due to the missing default clause (fixtures/compile/var/var.late.match.noelse.ks:4)

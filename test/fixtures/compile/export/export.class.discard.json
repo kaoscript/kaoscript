@@ -76,7 +76,7 @@
               "reference": 1
             },
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           },
@@ -84,7 +84,7 @@
             "access": 2,
             "type": "String",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": true,
             "sealed": false
           }

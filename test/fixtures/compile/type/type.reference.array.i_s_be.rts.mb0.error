@@ -1,1 +1,0 @@
-TypeException: The return type must be "String" and not "Number" (fixtures/compile/type/type.reference.array.i_s_be.rts.mb0.ks:2)

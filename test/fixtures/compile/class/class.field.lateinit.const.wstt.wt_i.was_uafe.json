@@ -25,7 +25,7 @@
             "access": 4,
             "type": "Number",
             "default": false,
-            "immutable": true,
+            "final": true,
             "lateInit": true,
             "sealed": false
           }

@@ -50,7 +50,7 @@
             "access": 2,
             "type": "String?",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": true
           }

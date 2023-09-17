@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Number) (fixtures/compile/typing/typing.nulltype.param.null.ie.ks:5)

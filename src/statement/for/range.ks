@@ -4,7 +4,7 @@ class RangeIteration extends IterationNode {
 		@declaration: Boolean		= false
 		@defineVariable: Boolean	= false
 		@from
-		@immutable: Boolean			= false
+		@immutable: Boolean			= true
 		@step
 		@stepName
 		@to
@@ -18,11 +18,13 @@ class RangeIteration extends IterationNode {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 

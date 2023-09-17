@@ -5,7 +5,7 @@ class ArrayComprehensionForFrom extends Expression {
 		@bodyScope
 		@declaration: Boolean				= false
 		@from
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@to
 		@step								= null
 		@variable
@@ -13,11 +13,13 @@ class ArrayComprehensionForFrom extends Expression {
 	}
 	analyse() { # {{{
 		for var modifier in @data.loop.iteration.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 
@@ -151,7 +153,7 @@ class ArrayComprehensionForIn extends Expression {
 		@descending: Boolean				= false
 		@expression
 		@index
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@type: Type
 		@value
 		@valueName: String
@@ -162,14 +164,16 @@ class ArrayComprehensionForIn extends Expression {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.loop.iteration.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
-			}
-			else if modifier.kind == ModifierKind.Descending {
-				@descending = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Descending {
+					@descending = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 
@@ -354,7 +358,7 @@ class ArrayComprehensionForOf extends Expression {
 		@expression
 		@key
 		@keyName
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@value
 		@when								= null
 	}
@@ -363,11 +367,13 @@ class ArrayComprehensionForOf extends Expression {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.loop.iteration.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 
@@ -542,18 +548,20 @@ class ArrayComprehensionForRange extends Expression {
 		@by									= null
 		@declaration: Boolean				= false
 		@from
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@to
 		@value
 		@when								= null
 	}
 	analyse() { # {{{
 		for var modifier in @data.loop.iteration.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 

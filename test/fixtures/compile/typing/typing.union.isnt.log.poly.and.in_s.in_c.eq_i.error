@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Number) (fixtures/compile/typing/typing.union.isnt.log.poly.and.in_s.in_c.eq_i.ks:6)

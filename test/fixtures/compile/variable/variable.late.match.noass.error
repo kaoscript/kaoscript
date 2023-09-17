@@ -1,1 +1,0 @@
-SyntaxException: The lateinit variable "value" isn't fully initialized by the clause at (fixtures/compile/variable/variable.late.match.noass.ks:8)

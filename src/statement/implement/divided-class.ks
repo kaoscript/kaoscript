@@ -6,7 +6,7 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 		@class: ClassType
 		@classRef: ReferenceType
 		@defaultValue: Boolean				= false
-		@immutable: Boolean					= false
+		@final: Boolean					= false
 		@init: Number						= -1
 		@instance: Boolean					= true
 		@internalName: String
@@ -28,8 +28,8 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 
 		for var modifier in data.modifiers {
 			match modifier.kind {
-				ModifierKind.Immutable {
-					@immutable = true
+				ModifierKind.Final {
+					@final = true
 				}
 				ModifierKind.LateInit {
 					@lateInit = true
@@ -96,7 +96,7 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 		if @defaultValue {
 			@value.prepare()
 
-			if !?@data.type && @immutable && !@lateInit {
+			if !?@data.type && @final && !@lateInit {
 				@type.type(@value.type())
 			}
 

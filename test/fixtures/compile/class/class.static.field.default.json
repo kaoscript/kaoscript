@@ -45,7 +45,7 @@
             "access": 4,
             "type": "String",
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }
@@ -55,7 +55,7 @@
             "access": 4,
             "type": "String",
             "default": true,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

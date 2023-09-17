@@ -9,7 +9,7 @@ class ObjectIteration extends IterationNode {
 		@expressionName: String
 		@key								= null
 		@keyName: String
-		@immutable: Boolean					= false
+		@immutable: Boolean					= true
 		@loopTempVariables: Array			= []
 		@until
 		@value								= null
@@ -21,11 +21,13 @@ class ObjectIteration extends IterationNode {
 		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Declarative {
-				@declaration = true
-			}
-			else if modifier.kind == ModifierKind.Immutable {
-				@immutable = true
+			match modifier.kind {
+				ModifierKind.Declarative {
+					@declaration = true
+				}
+				ModifierKind.Mutable {
+					@immutable = false
+				}
 			}
 		}
 

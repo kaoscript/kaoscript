@@ -1,1 +1,0 @@
-TypeException: The expression "x" of type "Number" can't be compared to a value of type "Null" (fixtures/compile/type/type.refine.eq.if.we.t_i_i.psf_i.cd_n.ks:10)

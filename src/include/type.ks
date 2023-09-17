@@ -204,8 +204,10 @@ abstract class Type {
 	private {
 		@alien: Boolean					= false
 		@complete: Boolean				= false
+		@constant: Boolean?				= null
 		@exhaustive: Boolean? 			= null
 		@exported: Boolean				= false
+		@mutable: Boolean?				= null
 		@origin: TypeOrigin?			= null
 		@referenced: Boolean			= false
 		@referenceIndex: Number			= -1
@@ -407,6 +409,9 @@ abstract class Type {
 				}
 				NodeKind.UnaryTypeExpression {
 					match data.operator.kind {
+						UnaryTypeOperatorKind.Constant {
+							return Type.fromAST(data.argument, scope, defined, node).flagConstant()
+						}
 						UnaryTypeOperatorKind.TypeOf {
 							if data.argument.kind == NodeKind.Identifier && data.argument.name == 'this' {
 								return ReferenceType.new(scope, 'this')
@@ -684,6 +689,20 @@ abstract class Type {
 
 		return this
 	} # }}}
+	// TODO!
+	// flagConstant(): typeof this {
+	flagConstant() { # {{{
+		if @constant {
+			return this
+		}
+		else {
+			var type = @clone()
+
+			type._constant = true
+
+			return type
+		}
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		@exported = true
 
@@ -852,7 +871,11 @@ abstract class Type {
 	} # }}}
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
+	// TODO!
+	// setNullable(nullable: Boolean): typeof this => this
 	setNullable(nullable: Boolean) => this
+	// TODO!
+	// setNullable(type: Type): typeof this { # {{{
 	setNullable(type: Type): Type { # {{{
 		if !type.isNullable() {
 			return @setNullable(false)

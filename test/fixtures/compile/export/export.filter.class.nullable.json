@@ -80,7 +80,7 @@
               "nullable": true
             },
             "default": false,
-            "immutable": false,
+            "final": false,
             "lateInit": false,
             "sealed": false
           }

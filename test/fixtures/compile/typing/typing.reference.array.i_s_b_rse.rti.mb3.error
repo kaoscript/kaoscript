@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "String" (fixtures/compile/typing/typing.reference.array.i_s_b_rse.rti.mb3.ks:2)
