@@ -15,7 +15,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	});
 	const Point3D = Helper.struct(function(x, y, z) {
-		const _ = Point.__ks_new(x, y);
+		const _ = new OBJ();
+		_.x = x;
+		_.y = y;
 		_.z = z;
 		return _;
 	}, function(__ks_new, args) {
@@ -26,11 +28,21 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
-	}, Point);
-	let point = Point3D.__ks_new(0.3, 0.4, 0.5);
-	console.log(point.x + 1, point.y + 2, point.z + 3);
-	return {
-		Point,
-		Point3D
+	});
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(p) {
+		const d3 = p;
+		console.log(d3.x + 1, d3.y + 2, d3.z + 3);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	};
 };

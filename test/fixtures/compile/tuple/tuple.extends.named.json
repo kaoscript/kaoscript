@@ -23,13 +23,15 @@
             "index": 0,
             "name": "x",
             "required": false,
-            "type": "String"
+            "type": "String",
+            "default": true
           },
           {
             "index": 1,
             "name": "y",
             "required": false,
-            "type": "Number"
+            "type": "Number",
+            "default": true
           }
         ]
       },
@@ -40,7 +42,8 @@
             "index": 2,
             "name": "z",
             "required": false,
-            "type": "Boolean"
+            "type": "Boolean",
+            "default": true
           }
         ],
         "extends": [

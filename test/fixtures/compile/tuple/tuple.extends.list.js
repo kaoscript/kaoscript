@@ -13,9 +13,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	});
 	const Triple = Helper.tuple(function(__ks_0, __ks_1, __ks_2) {
-		const _ = Pair.__ks_builder(__ks_0, __ks_1);
-		_.push(__ks_2);
-		return _;
+		return [__ks_0, __ks_1, __ks_2];
 	}, function(__ks_new, args) {
 		const t0 = Type.isString;
 		const t1 = Type.isNumber;
@@ -26,7 +24,7 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
-	}, Pair);
+	});
 	const triple = Triple.__ks_new("x", 0.1, true);
 	console.log(triple[0], triple[1] + 1, !triple[2]);
 	return {

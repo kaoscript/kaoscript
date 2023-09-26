@@ -8,11 +8,11 @@ struct Quxbaz extends Foobar {
 
 }
 
-var x = Quxbaz.new()
+func foobar(x) {
+	if x is Quxbaz {
 
-if x is Quxbaz {
+	}
+	else if x is Foobar {
 
-}
-if x is Foobar {
-
+	}
 }

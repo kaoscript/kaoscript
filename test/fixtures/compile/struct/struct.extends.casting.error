@@ -1,0 +1,1 @@
+ReferenceException: The function "print" can't be matched to given arguments (Point3D) (fixtures/compile/struct/struct.extends.casting.ks:14)

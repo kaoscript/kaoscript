@@ -1,6 +1,6 @@
 extern console
 
-import './struct.extends.default.ks'
+import './struct.extends.nd.ks'
 
 var dyn point = Point3D.new(0.3, 0.4, 0.5)
 

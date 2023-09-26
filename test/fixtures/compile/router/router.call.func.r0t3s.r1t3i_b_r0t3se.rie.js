@@ -44,7 +44,7 @@ module.exports = function() {
 		return f.__ks_rt(this, arguments);
 	};
 	f.__ks_0 = function(args) {
-		return foobar(...args);
+		return Helper.toString(foobar(...args));
 	};
 	f.__ks_rt = function(that, args) {
 		const t0 = Type.isNumber;

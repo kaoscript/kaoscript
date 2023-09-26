@@ -1,7 +1,7 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const Foobar = Helper.struct(function() {
-		return new OBJ;
+		return new OBJ();
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();
@@ -11,17 +11,29 @@ module.exports = function() {
 	if(Type.isStruct(Foobar)) {
 	}
 	const Quxbaz = Helper.struct(function() {
-		const _ = Foobar.__ks_new();
-		return _;
+		return new OBJ();
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();
 		}
 		throw Helper.badArgs();
-	}, Foobar);
-	const x = Quxbaz.__ks_new();
-	if(Type.isStructInstance(x, Quxbaz)) {
-	}
-	if(Type.isStructInstance(x, Foobar)) {
-	}
+	});
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		if(Type.isStructInstance(x, Quxbaz)) {
+		}
+		else if(Type.isStructInstance(x, Foobar)) {
+		}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

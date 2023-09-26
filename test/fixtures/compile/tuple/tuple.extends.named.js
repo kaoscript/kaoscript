@@ -24,7 +24,7 @@ module.exports = function() {
 		if(z === void 0 || z === null) {
 			z = false;
 		}
-		const _ = Pair.__ks_builder(x, y);
+		const _ = Pair.__ks_create(x, y);
 		_.push(z);
 		return _;
 	}, function(__ks_new, args) {
@@ -39,7 +39,7 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
-	}, Pair);
+	});
 	const triple = Triple.__ks_new("x", 0.1, true);
 	console.log(triple[0], triple[1] + 1, !triple[2]);
 	return {

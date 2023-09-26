@@ -1013,9 +1013,7 @@ class OverloadedFunctionType extends Type {
 		@references.pushUniq(type)
 	} # }}}
 	assessment(name: String, node: AbstractNode) { # {{{
-		if @assessment == null {
-			@assessment = Router.assess(@functions, name, node)
-		}
+		@assessment ??= Router.assess(@functions, name, node)
 
 		return @assessment
 	} # }}}

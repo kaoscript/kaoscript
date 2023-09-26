@@ -15,7 +15,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	});
 	const Point3D = Helper.struct(function(x, y, z) {
-		const _ = Point.__ks_new(x, y);
+		const _ = new OBJ();
+		_.x = x;
+		_.y = y;
 		_.z = z;
 		return _;
 	}, function(__ks_new, args) {
@@ -26,18 +28,16 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
-	}, Point);
+	});
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		let d3 = Helper.cast(p, "Point3D", true, value => Type.isStructInstance(value, Point3D));
-		if(Type.isValue(d3)) {
-			console.log(d3.x + 1, d3.y + 2, d3.z + 3);
-		}
+		const d3 = Helper.cast(p, "Point3D", false, value => Type.isStructInstance(value, Point3D));
+		console.log(d3.x + 1, d3.y + 2, d3.z + 3);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isStructInstance(value, Point);
+		const t0 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

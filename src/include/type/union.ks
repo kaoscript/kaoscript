@@ -1,6 +1,7 @@
 class UnionType extends Type {
 	private {
 		@any: Boolean				= false
+		@assessment					= null
 		@explicit: Boolean
 		@explicitNullity: Boolean	= false
 		@never: Boolean				= false
@@ -146,6 +147,11 @@ class UnionType extends Type {
 		}
 
 		return this
+	} # }}}
+	assessment(name: String, node: AbstractNode) { # {{{
+		@assessment ??= Router.assess(@types, name, node)
+
+		return @assessment
 	} # }}}
 	canBeBoolean() { # {{{
 		for var type in @types {

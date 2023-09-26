@@ -3,8 +3,6 @@
 extern {
 	func describe(title: String, fn: (): Void): Void
 	func it(title: string, fn: (#[retain] done: Function): Void): Void
-
-	console
 }
 
 import {
@@ -18,7 +16,7 @@ describe('diskspace', func() {
 
 		expect(d).to.have.length.above(0)
 
-		console.log(d)
+		echo(d)
 
 		done()
 	}) # }}}

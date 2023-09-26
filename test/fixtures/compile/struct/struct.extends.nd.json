@@ -1,10 +1,6 @@
 [
   {
-    "aliens": [
-      "Any?",
-      "console",
-      true
-    ],
+    "aliens": [],
     "requirements": [],
     "references": []
   },

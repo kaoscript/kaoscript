@@ -21,6 +21,7 @@ class ReferenceType extends Type {
 	}
 	private {
 		@alias: String?
+		@assessment							= null
 		@explicitlyNull: Boolean
 		@name: String
 		@nullable: Boolean

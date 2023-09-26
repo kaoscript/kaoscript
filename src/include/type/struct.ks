@@ -131,6 +131,17 @@ class StructType extends Type {
 			return null
 		}
 	} # }}}
+	hasDefaultValues() { # {{{
+		if @extending && @extends.type().hasDefaultValues() {
+			return true
+		}
+
+		for var field of @fields {
+			return true if field.hasDefaultValue()
+		}
+
+		return false
+	} # }}}
 	hasProperty(name: String) { # {{{
 		if ?@fields[name] {
 			return true
@@ -193,7 +204,7 @@ class StructType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
+	isSubsetOf(value: StructType, mode: MatchingMode) => false
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
@@ -457,6 +468,7 @@ class StructType extends Type {
 
 class StructFieldType extends Type {
 	private {
+		@defaultValue: Boolean	= false
 		@index: Number
 		@name: String?
 		@type: Type
@@ -464,8 +476,13 @@ class StructFieldType extends Type {
 	static {
 		import(index: Number, name: String?, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			var type = StructFieldType.new(scope, name, index, fieldType, data.required)
 
-			return StructFieldType.new(scope, name, index, fieldType, data.required)
+			if data.default {
+				type.flagDefaultValue()
+			}
+
+			return type
 		} # }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { # {{{
@@ -478,10 +495,15 @@ class StructFieldType extends Type {
 	override export(references, indexDelta, mode, module) => { # {{{
 		required: @required
 		type: @type.export(references, indexDelta, mode, module)
+		default: @defaultValue if @defaultValue
+	} # }}}
+	flagDefaultValue() { # {{{
+		@defaultValue = true
 	} # }}}
 	flagNullable() { # {{{
 		@type = @type.setNullable(true)
 	} # }}}
+	hasDefaultValue() => @defaultValue
 	index() => @index
 	name() => @name
 	override toFragments(fragments, node) { # {{{

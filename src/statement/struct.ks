@@ -120,38 +120,38 @@ class StructDeclaration extends Statement {
 	isImplementing() => @implementing
 	listInterfaces() => @struct.listInterfaces()
 	toObjectFragments(fragments, mode) { # {{{
-		if !@extending && @fields.length == 0 {
-			fragments.line(`return new \($runtime.object(this))`)
-		}
-		else {
-			var mut varname = '_'
+		if @extending && @extendsType.type().hasDefaultValues() {
+			var line = fragments.newLine().code(`\($const(this))_ = \(@extendsName).__ks_create(`)
 
-			if @extending {
-				var line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_new(')
-
-				var mut nf = false
-				for var name in @extendsType.type().listAllFieldNames() {
-					if nf {
-						line.code($comma)
-					}
-					else {
-						nf = true
-					}
-
-					line.code(name)
-				}
-
-				line.code(')').done()
+			for var name, index in @extendsType.type().listAllFieldNames() {
+				line
+					..code($comma) if index > 0
+					..code(name)
 			}
-			else {
-				fragments.line($const(this), varname, ' = new ', $runtime.object(this), '()')
-			}
+
+			line.code(')').done()
 
 			for var field in @fields {
-				fragments.newLine().code(varname, '.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
+				fragments.newLine().code('_.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
 			}
 
-			fragments.line(`return \(varname)`)
+			fragments.line(`return _`)
+		}
+		else {
+			var fields = @function.fields()
+
+			if #fields {
+				fragments.line($const(this), '_ = new ', $runtime.object(this), '()')
+
+				for var field in fields {
+					fragments.newLine().code('_.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
+				}
+
+				fragments.line(`return _`)
+			}
+			else {
+				fragments.line(`return new \($runtime.object(this))()`)
+			}
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
@@ -183,10 +183,6 @@ class StructDeclaration extends Statement {
 
 		ctrl.done()
 
-		if @extending {
-			line.code($comma, @extendsName)
-		}
-
 		line.code(')').done()
 	} # }}}
 	type() => @type
@@ -194,7 +190,8 @@ class StructDeclaration extends Statement {
 
 class StructFunction extends AbstractNode {
 	private {
-		@parameters: Array<Parameter>	= []
+		@fields: StructFieldDeclaration[]	= []
+		@parameters: Parameter[]			= []
 		@type: FunctionType
 	}
 	constructor(@data, @parent, @scope) { # {{{
@@ -221,6 +218,8 @@ class StructFunction extends AbstractNode {
 				if field.index() > index {
 					index = field.index()
 				}
+
+				@fields.push(field)
 			}
 		}
 
@@ -236,9 +235,12 @@ class StructFunction extends AbstractNode {
 			@parameters.push(parameter)
 
 			@type.addParameter(parameter.type(), this)
+
+			@fields.push(field)
 		}
 	} # }}}
 	translate()
+	fields() => @fields
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewStruct
 	isAssertingParameterType() => @isAssertingParameter()
@@ -299,8 +301,12 @@ class StructFieldDeclaration extends AbstractNode {
 
 			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
-			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
-				@type.flagNullable()
+			if ?@data.defaultValue {
+				@type.flagDefaultValue()
+
+				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+					@type.flagNullable()
+				}
 			}
 		}
 

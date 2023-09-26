@@ -134,6 +134,17 @@ class TupleType extends Type {
 			return null
 		}
 	} # }}}
+	hasDefaultValues() { # {{{
+		if @extending && @extends.type().hasDefaultValues() {
+			return true
+		}
+
+		for var field in @fields {
+			return true if field.hasDefaultValue()
+		}
+
+		return false
+	} # }}}
 	hasProperty(index: Number) { # {{{
 		if ?@fieldsByIndex[index] {
 			return true
@@ -195,7 +206,7 @@ class TupleType extends Type {
 		return false
 	} # }}}
 	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
+	isSubsetOf(value: TupleType, mode: MatchingMode) => false
 	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
@@ -233,6 +244,7 @@ class TupleType extends Type {
 
 class TupleFieldType extends Type {
 	private {
+		@defaultValue: Boolean	= false
 		@index: Number
 		@name: String?
 		@named: Boolean
@@ -241,8 +253,13 @@ class TupleFieldType extends Type {
 	static {
 		import(index % data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): TupleFieldType { # {{{
 			var fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			var type = TupleFieldType.new(scope, data.name, data.index, fieldType, data.required)
 
-			return TupleFieldType.new(scope, data.name, data.index, fieldType, data.required)
+			if data.default {
+				type.flagDefaultValue()
+			}
+
+			return type
 		} # }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { # {{{
@@ -263,10 +280,15 @@ class TupleFieldType extends Type {
 		name: @name if @named
 		required: @required
 		type: @type.export(references, indexDelta, mode, module)
+		default: @defaultValue if @defaultValue
+	} # }}}
+	flagDefaultValue() { # {{{
+		@defaultValue = true
 	} # }}}
 	flagNullable() { # {{{
 		@type = @type.setNullable(true)
 	} # }}}
+	hasDefaultValue() => @defaultValue
 	index() => @index
 	isNamed() => @named
 	name() => @name

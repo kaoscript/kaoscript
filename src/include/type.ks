@@ -320,12 +320,20 @@ abstract class Type {
 					}
 
 					for var property in data.properties {
-						if ?property.type {
-							type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
+						var mut prop = if ?property.type {
+							set Type.fromAST(property.type, scope, defined, node)
 						}
 						else {
-							type.addProperty(property.name.name, AnyType.Unexplicit)
+							set AnyType.Unexplicit
 						}
+
+						for var modifier in property.modifiers {
+							if modifier.kind == ModifierKind.Nullable {
+								prop = prop.setNullable(true)
+							}
+						}
+
+						type.addProperty(property.name.name, prop)
 					}
 
 					if ?data.rest {

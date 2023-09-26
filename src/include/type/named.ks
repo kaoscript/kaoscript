@@ -126,10 +126,10 @@ class NamedType extends Type {
 				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 			}
 			else if @type.isStruct() && value.isStruct() {
-				return @name == 'Struct' || @isInheriting(value) || (downcast && value.isInheriting(this))
+				return @name == 'Struct' || @name == value.name()
 			}
 			else if @type.isTuple() && value.isTuple() {
-				return @name == 'Tuple' || @isInheriting(value) || (downcast && value.isInheriting(this))
+				return @name == 'Tuple' || @name == value.name()
 			}
 		}
 		else if value is ReferenceType {

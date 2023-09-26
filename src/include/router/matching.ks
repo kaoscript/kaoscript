@@ -25,8 +25,13 @@ namespace Matching {
 					mode
 					node
 				)
+				var length = getLength(context.arguments) + (assessment.async ? 1 : 0)
 
 				for var tree in route.trees {
+					if length != Infinity && (length < tree.min || 0 < tree.max < length) {
+						continue
+					}
+
 					WithIndex.match(tree, context)
 
 					if mode == .BestMatch && context.found && #context.matches && !#context.possibilities {
@@ -58,10 +63,15 @@ namespace Matching {
 
 				for var combination in combinations {
 					var context = MatchContext.new(combination, excludes, async: assessment.async, indexeds, mode, node)
+					var length = getLength(context.arguments)
 
 					var mut nf = true
 
 					for var tree in route.trees while nf {
+						if length != Infinity && (length < tree.min || 0 < tree.max < length) {
+							continue
+						}
+
 						WithIndex.match(tree, context)
 
 						if context.found && #context.matches && !#context.possibilities {
@@ -199,6 +209,24 @@ namespace Matching {
 			return [namedCount, shortCount]
 		} # }}}
 	}
+
+	func getLength(arguments: Type[]): Number { # {{{
+		var mut length = 0
+
+		for var argument in arguments {
+			if !argument.isSpread() {
+				length += 1
+			}
+			else if argument is ArrayType && !argument.hasRest() {
+				length += argument.length() as! Number
+			}
+			else {
+				return Infinity
+			}
+		}
+
+		return length
+	} # }}}
 
 	func getSpreadParameter(type: Type): Type { # {{{
 		if type is ArrayType && type.length() > 0 {
@@ -545,22 +573,18 @@ namespace Matching {
 			} # }}}
 
 			func matchArguments(
-				node: TreeNode
+				node: TreeColumn
 				arguments: Type[]
 				mut cursor: Cursor
 				argMatches: Matches
 				context: MatchContext
 			): { cursor: Cursor, argMatches: Matches }? { # {{{
 				var last = arguments.length - 1
-				// echo(node.type.hashCode(), node.min, node.max, cursor.index, cursor.spread, cursor.used, cursor.length, last)
 
 				if node.min == 0 && cursor.index > last {
 					argMatches.arguments.push([])
 
 					return { cursor, argMatches }
-				}
-				if node.min != 0 && cursor.index + node.min - 1 > last {
-					return null
 				}
 
 				if node.max == 1 {
@@ -694,9 +718,20 @@ namespace Matching {
 					}
 
 					if cursor.length == Infinity {
-						argMatches.precise = false
+						if cursor.used == 0 {
+							return null
+						}
 
-						return matchArguments(node, arguments, getNextCursor(cursor, arguments, true), argMatches, context)
+						cursor = getNextCursor(cursor, arguments, true)
+
+						if cursor.index < arguments.length {
+							argMatches.precise = false
+
+							return matchArguments(node, arguments, cursor, argMatches, context)
+						}
+						else {
+							return { cursor, argMatches }
+						}
 					}
 
 					if node.min == 0 {
@@ -868,7 +903,7 @@ namespace Matching {
 		func getCursor(index: Number, arguments: Type[]): Cursor { # {{{
 			if index >= arguments.length {
 				return Cursor.new(
-					argument: Type.Any
+					argument: Type.Void
 					index
 					length: 0
 					spread: false
@@ -959,7 +994,7 @@ namespace Matching {
 		} # }}}
 
 		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
-			// echo('-- branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise)
+			// echo('-- branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise, branch.type.hashCode(), branch.min, branch.max)
 			if cursor.spread && context.mode == .AllMatches  {
 				if var result ?= matchArguments(branch, context.arguments, cursor, Matches.new(
 						precise: argMatches.precise
@@ -1023,6 +1058,7 @@ namespace Matching {
 				var outOfBound = cursor.index >= context.arguments.length
 
 				if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+					// echo(null)
 					return false
 				}
 				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
@@ -1066,7 +1102,7 @@ namespace Matching {
 
 		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
 			if !leaf.function.isAsync() {
-				// echo('-- leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches)
+				// echo('-- leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches, leaf.type.hashCode(), leaf.min, leaf.max)
 				if cursor.spread && context.mode == .AllMatches  {
 					var result = matchArguments(leaf, context.arguments, cursor, Matches.new(
 						precise: argMatches.precise
@@ -1118,7 +1154,6 @@ namespace Matching {
 
 					if index < argMatches.arguments.length {
 						var arg = argMatches.arguments[index]
-
 						if ?pMatch && pMatch is Array {
 							// TODO
 							pMatch.push(...arg:Array)
@@ -1129,7 +1164,32 @@ namespace Matching {
 							if ?arg {
 								pMatch = arg
 
-								length += Math.max(parameter.min(), arg.length)
+								var mut l = 0
+
+								for var a in arg:Array {
+									var argument = context.arguments[a.index]
+
+									if argument.isSpread() {
+										if ?a.element {
+											l += 1
+										}
+										// TODO!
+										// else if a is { from: Number, to: Number } {
+										// 	l += a.to - a.from
+										// }
+										else if ?a.from && ?a.to {
+											l += a.to:Number - a.from:Number
+										}
+										else {
+											l += getLength(argument)
+										}
+									}
+									else {
+										l += 1
+									}
+								}
+
+								length += Math.max(parameter.min(), l)
 							}
 							else {
 								pMatch = []

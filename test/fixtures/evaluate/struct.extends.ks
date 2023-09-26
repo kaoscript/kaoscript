@@ -1,5 +1,7 @@
 require expect: func
 
+func any(x) => x
+
 struct Point {
     x: Number
     y: Number
@@ -14,8 +16,8 @@ expect(Type.typeOf(Point3D)).to.equal('struct')
 
 var point = Point3D.new(0.3, 0.4, 0.5)
 
-expect(point is Point).to.equal(true)
-expect(point is Point3D).to.equal(true)
+expect(any(point) is Point).to.equal(false)
+expect(any(point) is Point3D).to.equal(true)
 expect(Type.typeOf(point)).to.equal('struct-instance')
 
 expect(point.x).to.equal(0.3)

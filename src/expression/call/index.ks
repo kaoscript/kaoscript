@@ -207,31 +207,12 @@ class CallExpression extends Expression {
 
 					var type = expression.type()
 
-					if type is FunctionType | OverloadedFunctionType {
-						@assessment ??= type.assessment(@property, this)
+					if !type.isFunction() {
+						@prepareArguments()
 
-						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-							is LenientCallMatchResult with var { possibilities } {
-								@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
-							}
-							is PreciseCallMatchResult with var { matches } {
-								if matches.length == 1 {
-									var match = matches[0]
-									var class = expression.getClass()
-									var reference = @scope.reference(class)
-
-									@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
-								}
-								else {
-									throw NotImplementedException.new(this)
-								}
-							}
-							else {
-								ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
-							}
-						}
+						@addCallee(DefaultCallee.new(@data, null, null, this))
 					}
-					else if type.isFunction() {
+					else if type.isReference() {
 						@prepareArguments()
 
 						if expression.isSealed() {
@@ -247,9 +228,37 @@ class CallExpression extends Expression {
 						}
 					}
 					else {
+						@assessment ??= type.assessment(@property, this)
+
 						@prepareArguments()
 
-						@addCallee(DefaultCallee.new(@data, null, null, this))
+						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
+							is LenientCallMatchResult with var { possibilities } {
+								@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
+							}
+							is PreciseCallMatchResult with var { matches } {
+								if matches.length == 1 {
+									var match = matches[0]
+									var class = expression.getClass()
+									var reference = @scope.reference(class)
+
+									@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
+								}
+								else {
+									var functions = [match.function for var match in matches]
+
+									@addCallee(LenientThisCallee.new(@data, expression, @property, functions, this))
+								}
+							}
+							else {
+								if type.isExhaustive(this) {
+									ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
+								}
+								else {
+									@addCallee(DefaultCallee.new(@data, expression, this))
+								}
+							}
+						}
 					}
 				}
 				else {

@@ -1721,11 +1721,11 @@ namespace Build {
 			return tree.function.index() == function
 		} # }}}
 
-		func isSameFork(branch: TreeBranch, column: TreeNode): Boolean { # {{{
+		func isSameFork(branch: TreeBranch, column: TreeColumn): Boolean { # {{{
 			return branch.type == column.type && isSameParameter([branch, column], column)
 		} # }}}
 
-		func isSameFunction(...nodes: TreeNode): Boolean { # {{{
+		func isSameFunction(...nodes: TreeColumn): Boolean { # {{{
 			var function = nodes[0].rows[0].function
 
 			for var node in nodes {
@@ -1737,7 +1737,7 @@ namespace Build {
 			return true
 		} # }}}
 
-		func isSameParameter(arguments: TreeNode[], tree: TreeBranch): Boolean { # {{{
+		func isSameParameter(arguments: TreeColumn[], tree: TreeBranch): Boolean { # {{{
 			for var column of tree.columns {
 				if !isSameParameter(arguments, column) {
 					return false
@@ -1746,7 +1746,7 @@ namespace Build {
 
 			return true
 		} # }}}
-		func isSameParameter(arguments: TreeNode[], tree: TreeLeaf): Boolean { # {{{
+		func isSameParameter(arguments: TreeColumn[], tree: TreeLeaf): Boolean { # {{{
 			var map = {}
 			for var { index, parameter } in tree.rows[0].types {
 				map[index] = parameter

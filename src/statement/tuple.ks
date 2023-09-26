@@ -118,10 +118,8 @@ class TupleDeclaration extends Statement {
 	isImplementing() => @implementing
 	listInterfaces() => @tuple.listInterfaces()
 	toArrayFragments(fragments, mode) { # {{{
-		if @extending {
-			var mut varname = '_'
-
-			var line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
+		if @extending && @extendsType.type().hasDefaultValues() {
+			var line = fragments.newLine().code(`\($const(this))_ = \(@extendsName).__ks_create(`)
 
 			for var field, index in @extendsType.type().listAllFields() {
 				line.code($comma) if index != 0
@@ -132,18 +130,19 @@ class TupleDeclaration extends Statement {
 			line.code(')').done()
 
 			for var field in @fields {
-				fragments.line(varname, '.push(', field.type().name(), ')')
+				fragments.line('_.push(', field.type().name(), ')')
 			}
 
-			fragments.line(`return \(varname)`)
+			fragments.line(`return _`)
 		}
 		else {
+			var fields = @function.fields()
 			var line = fragments.newLine().code('return [')
 
-			for var field, index in @fields {
-				line.code($comma) if index != 0
-
-				line.compile(field.parameter().name())
+			for var field, index in fields {
+				line
+					..code($comma) if index != 0
+					..compile(field.parameter().name())
 			}
 
 			line.code(']').done()
@@ -178,10 +177,6 @@ class TupleDeclaration extends Statement {
 
 		ctrl.done()
 
-		if @extending {
-			line.code($comma, @extendsName)
-		}
-
 		line.code(')').done()
 	} # }}}
 	type() => @type
@@ -189,6 +184,7 @@ class TupleDeclaration extends Statement {
 
 class TupleFunction extends AbstractNode {
 	private {
+		@fields: StructFieldDeclaration[]	= []
 		@parameters: Array<Parameter>	= []
 		@type: FunctionType
 	}
@@ -215,6 +211,8 @@ class TupleFunction extends AbstractNode {
 				@parameters.push(parameter)
 
 				@type.addParameter(parameter.type(), this)
+
+				@fields.push(field)
 			}
 
 			index += parent.length()
@@ -232,9 +230,12 @@ class TupleFunction extends AbstractNode {
 			@parameters.push(parameter)
 
 			@type.addParameter(parameter.type(), this)
+
+			@fields.push(field)
 		}
 	} # }}}
 	translate()
+	fields() => @fields
 	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewTuple
 	isAssertingParameterType() => @isAssertingParameter()
@@ -302,8 +303,12 @@ class TupleFieldDeclaration extends AbstractNode {
 
 			@type = TupleFieldType.new(@scope, @data.name?.name, @index, type, @parameter.isRequired())
 
-			if ?@data.defaultValue && @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
-				@type.flagNullable()
+			if ?@data.defaultValue {
+				@type.flagDefaultValue()
+
+				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+					@type.flagNullable()
+				}
 			}
 		}
 

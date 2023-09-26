@@ -20,7 +20,7 @@ module.exports = function(expect) {
 		}
 	}
 	const StructA = Helper.struct(function() {
-		return new OBJ;
+		return new OBJ();
 	}, function(__ks_new, args) {
 		if(args.length === 0) {
 			return __ks_new();

@@ -1,0 +1,1 @@
+ReferenceException: The function "print" can't be matched to given arguments (Triple) (fixtures/compile/tuple/tuple.extends.casting.ks:9)

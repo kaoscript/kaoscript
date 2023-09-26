@@ -1,0 +1,1 @@
+TypeException: The type "Point" can't be casted as a "Point3D" (fixtures/compile/operator/operator.typecasting.struct.qe.default.ks:13)
