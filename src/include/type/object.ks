@@ -761,7 +761,19 @@ class ObjectType extends Type {
 		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw NotImplementedException.new()
+		if ?@testName {
+			fragments.code(`\(@testName)(`).compile(node).code(`)`)
+		}
+		else if !@destructuring && !@testRest && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isObject(`).compile(node).code(`)`)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexObject(`).compile(node)
+
+			@toSubtestFragments(true, fragments, node)
+
+			fragments.code(')')
+		}
 	} # }}}
 	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
 		if testingType {

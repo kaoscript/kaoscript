@@ -1173,12 +1173,8 @@ namespace Matching {
 										if ?a.element {
 											l += 1
 										}
-										// TODO!
-										// else if a is { from: Number, to: Number } {
-										// 	l += a.to - a.from
-										// }
-										else if ?a.from && ?a.to {
-											l += a.to:Number - a.from:Number
+										else if a is { from: Number, to: Number } {
+											l += a.to - a.from
 										}
 										else {
 											l += getLength(argument)

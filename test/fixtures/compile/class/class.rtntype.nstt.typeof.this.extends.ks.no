@@ -1,0 +1,12 @@
+abstract class Master {
+	foobar(): typeof this {
+		return this
+	}
+}
+
+class SubClass extends Master {
+}
+
+var mut x = SubClass.new()
+
+x = x.foobar()

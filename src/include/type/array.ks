@@ -621,7 +621,26 @@ class ArrayType extends Type {
 		fragments.code(')')
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw NotImplementedException.new()
+		if @length == 0 && !@destructuring && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
+
+			if @testRest {
+				fragments.code($comma)
+
+				var literal = Literal.new(false, node, node.scope(), 'value')
+
+				@restType.toTestFunctionFragments(fragments, literal)
+			}
+
+			fragments.code(')')
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
+
+			@toSubtestFragments(true, @testLength, fragments, node)
+
+			fragments.code(')')
+		}
 	} # }}}
 	toSubtestFragments(testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
 		if testingType {

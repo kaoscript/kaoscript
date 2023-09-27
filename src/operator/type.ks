@@ -132,7 +132,7 @@ class BinaryOperatorTypeEquality extends Expression {
 				}
 			}
 			else {
-				throw NotImplementedException.new(this)
+				@trueType = Type.fromAST(@data.right, this)
 			}
 		}
 
