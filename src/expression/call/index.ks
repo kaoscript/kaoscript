@@ -31,7 +31,7 @@ class CallExpression extends Expression {
 			if arguments.length == 0 {
 				fragments.code('[]')
 			}
-			else if arguments.length == 1 && !?prefill && arguments[0] is UnaryOperatorSpread && arguments[0].argument().type().isArray() {
+			else if arguments.length == 1 && !?prefill && arguments[0].isSpread() && arguments[0].argument().type().isArray() {
 				arguments[0].argument().toArgumentFragments(fragments)
 			}
 			else {
@@ -45,7 +45,7 @@ class CallExpression extends Expression {
 				var mut opened = false
 
 				for var argument, index in arguments {
-					if argument is UnaryOperatorSpread {
+					if argument.isSpread() {
 						if opened {
 							fragments.code('], ')
 
