@@ -743,7 +743,7 @@ namespace Router {
 				for var expression, i in expressions {
 					fragments.code($comma) if i != 0
 
-					if expression is UnaryOperatorSpread && expression.type().isArray() {
+					if expression.isSpread() && expression.type().isArray() {
 						expression.argument().toArgumentFragments(fragments, mode)
 					}
 					else {
@@ -793,14 +793,21 @@ namespace Router {
 
 			for var position, index in arguments {
 				if position is Array {
-					if position.length == 1 && expressions[position[0].index] is UnaryOperatorSpread && expressions[position[0].index].type().isArray() {
+					if position.length == 1 && expressions[position[0].index].isSpread() {
+						var expression = expressions[position[0].index]
+
 						if opened {
 							fragments.code('], ')
 
 							opened = false
 						}
 
-						expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
+						if expression.type().isArray() {
+							expression.argument().toArgumentFragments(fragments, mode)
+						}
+						else {
+							expression.toArgumentFragments(fragments, mode)
+						}
 					}
 					else {
 						if !opened {
@@ -821,7 +828,7 @@ namespace Router {
 				else if ?position.index {
 					var argument = expressions[position.index]
 
-					if argument is UnaryOperatorSpread {
+					if argument.isSpread() {
 						if opened {
 							fragments.code('], ')
 

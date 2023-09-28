@@ -1202,14 +1202,14 @@ class CallExpression extends Expression {
 
 		if @options.format.spreads == 'es5' {
 			for var argument in @arguments until @flatten {
-				if argument is UnaryOperatorSpread {
+				if argument.isSpread() {
 					@flatten = true
 				}
 			}
 		}
 		else {
 			for var argument in @arguments until @flatten {
-				if argument is UnaryOperatorSpread && !argument.argument().type().isArray() {
+				if argument.isSpread() && !argument.argument().type().isArray() {
 					@flatten = true
 				}
 			}

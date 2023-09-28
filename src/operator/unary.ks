@@ -214,6 +214,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		}
 	} # }}}
 	isExpectingType() => true
+	isSpread() => true
 	toFragments(fragments, mode) { # {{{
 		if @options.format.spreads == 'es5' {
 			throw NotSupportedException.new(this)

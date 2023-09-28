@@ -350,6 +350,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	private late {
+		@spread: Boolean
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -366,37 +367,67 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		else {
 			@type = Type.union(@scope, leftType, @right.type())
 		}
+
+		@spread = @left.isSpread() || @right.isSpread()
 	} # }}}
 	inferTypes(inferables) => @left.inferTypes(inferables)
+	isSpread() => @spread
 	toFragments(fragments, mode) { # {{{
-		if @left.isNullable() {
-			fragments.code('(')
+		if @spread {
+			var left = @left.isSpread() ? @left.argument() : @left
 
-			@left.toNullableFragments(fragments)
-
-			fragments
-				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compileReusable(@left)
-				.code('))')
-		}
-		else {
 			fragments
 				.code($runtime.type(this) + '.isValue(')
-				.compileReusable(@left)
-				.code(')')
-		}
+				.compileReusable(left)
+				.code(') ? ')
 
-		fragments
-			.code(' ? ')
-			.compile(@left)
-			.code(' : ')
-			.compile(@right)
+			if @left.isSpread() {
+				fragments.compile(@left.argument())
+			}
+			else {
+				fragments.code('[').compile(@left).code(']')
+			}
+
+			fragments.code(' : ')
+
+			if @right.isSpread() {
+				fragments.compile(@right.argument())
+			}
+			else {
+				fragments.code('[').compile(@right).code(']')
+			}
+		}
+		else {
+			if @left.isNullable() {
+				fragments.code('(')
+
+				@left.toNullableFragments(fragments)
+
+				fragments
+					.code(' && ' + $runtime.type(this) + '.isValue(')
+					.compileReusable(@left)
+					.code('))')
+			}
+			else {
+				fragments
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(@left)
+					.code(')')
+			}
+
+			fragments
+				.code(' ? ')
+				.compile(@left)
+				.code(' : ')
+				.compile(@right)
+		}
 	} # }}}}
 	type() => @type
 }
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private late {
+		@spread: Boolean
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -405,6 +436,8 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			operand.prepare(target, TargetMode.Permissive)
+
+			@spread ||= operand.isSpread()
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -447,40 +480,111 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			@type = Type.union(@scope, ...types)
 		}
 	} # }}}
+	isSpread() => @spread
 	operator() => Operator.NullCoalescing
 	symbol() => '??'
 	toFragments(fragments, mode) { # {{{
-		@module().flag('Type')
+		var last = @operands.length - 1
 
-		var mut l = @operands.length - 1
+		if @spread {
+			var spreads = []
+			var mut spread = false
 
-		for var i from 0 to~ l {
-			var operand = @operands[i]
+			for var operand in @operands down {
+				spread ||= operand.isSpread()
 
-			if operand.isNullable() {
-				fragments.code('(')
-
-				operand.toNullableFragments(fragments)
-
-				fragments
-					.code(' && ' + $runtime.type(this) + '.isValue(')
-					.compileReusable(operand)
-					.code('))')
-			}
-			else {
-				fragments
-					.code($runtime.type(this) + '.isValue(')
-					.compileReusable(operand)
-					.code(')')
+				spreads.unshift(spread)
 			}
 
-			fragments
-				.code(' ? ')
-				.compile(operand)
-				.code(' : ')
+			var mut opened = false
+
+			for var mut operand, index in @operands {
+				var spread = operand.isSpread()
+
+				if spread {
+					operand = operand.argument()
+
+					if opened {
+						fragments.code(']')
+
+						opened = false
+					}
+				}
+				else if spreads[index] {
+					if opened {
+						fragments.code(']')
+
+						opened = false
+					}
+				}
+				else {
+					if !opened {
+						fragments.code('[')
+
+						opened = true
+					}
+				}
+
+				if index != last {
+					if operand.isNullable() {
+						fragments.code('(')
+
+						operand.toNullableFragments(fragments)
+
+						fragments
+							.code(' && ' + $runtime.type(this) + '.isValue(')
+							.compileReusable(operand)
+							.code('))')
+					}
+					else {
+						fragments
+							.code($runtime.type(this) + '.isValue(')
+							.compileReusable(operand)
+							.code(')')
+					}
+
+					fragments.code(' ? ')
+				}
+
+				if !spread && !opened {
+					fragments.code('[').compile(operand).code(']')
+				}
+				else {
+					fragments.compile(operand)
+				}
+
+				fragments.code(' : ') if index != last
+			}
+
+			fragments.code(']') if opened
 		}
+		else {
+			for var operand in @operands to~ last {
+				if operand.isNullable() {
+					fragments.code('(')
 
-		fragments.compile(@operands[l])
+					operand.toNullableFragments(fragments)
+
+					fragments
+						.code(' && ' + $runtime.type(this) + '.isValue(')
+						.compileReusable(operand)
+						.code('))')
+				}
+				else {
+					fragments
+						.code($runtime.type(this) + '.isValue(')
+						.compileReusable(operand)
+						.code(')')
+				}
+
+				fragments
+					.code(' ? ')
+					.compile(operand)
+					.code(' : ')
+			}
+
+			fragments.compile(@operands[last])
+		}
 	} # }}}
 	type() => @type
 }

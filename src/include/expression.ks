@@ -80,6 +80,7 @@ abstract class Expression extends AbstractNode {
 	isReusingName(): Boolean => false
 	// if the expression should be skipped or not
 	isSkippable(): Boolean => false
+	isSpread(): Boolean => false
 	isUndisruptivelyNullable(): Boolean => @isNullable() && !@isDisrupted()
 	// if the expression is the given instance variable
 	isUsingInstanceVariable(name): Boolean => false

@@ -233,6 +233,7 @@ class AssignmentOperatorEmpty extends AssignmentOperatorNonEmpty {
 
 class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 	private late {
+		@spread: Boolean
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -241,6 +242,8 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 
 		for var operand, index in @operands {
 			operand.prepare()
+
+			@spread ||= operand.isSpread()
 
 			var type = operand.type()
 
@@ -277,19 +280,82 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 			@type = Type.union(@scope, ...types)
 		}
 	} # }}}
+	isSpread() => @spread
 	operator() => Operator.EmptyCoalescing
 	symbol() => '##'
 	toFragments(fragments, mode) { # {{{
-		for var operand in @operands to~ -1 {
-			fragments
-				.code($runtime.type(this) + '.isNotEmpty(')
-				.compileReusable(operand)
-				.code(') ? ')
-				.compile(operand)
-				.code(' : ')
-		}
+		var last = @operands.length - 1
 
-		fragments.compile(@operands.last())
+		if @spread {
+			var spreads = []
+			var mut spread = false
+
+			for var operand in @operands down {
+				spread ||= operand.isSpread()
+
+				spreads.unshift(spread)
+			}
+
+			var mut opened = false
+
+			for var mut operand, index in @operands {
+				var spread = operand.isSpread()
+
+				if spread {
+					operand = operand.argument()
+
+					if opened {
+						fragments.code(']')
+
+						opened = false
+					}
+				}
+				else if spreads[index] {
+					if opened {
+						fragments.code(']')
+
+						opened = false
+					}
+				}
+				else {
+					if !opened {
+						fragments.code('[')
+
+						opened = true
+					}
+				}
+
+				if index != last {
+					fragments
+						.code($runtime.type(this) + '.isNotEmpty(')
+						.compileReusable(operand)
+						.code(') ? ')
+				}
+
+				if !spread && !opened {
+					fragments.code('[').compile(operand).code(']')
+				}
+				else {
+					fragments.compile(operand)
+				}
+
+				fragments.code(' : ') if index != last
+			}
+
+			fragments.code(']') if opened
+		}
+		else {
+			for var operand in @operands to~ -1 {
+				fragments
+					.code($runtime.type(this) + '.isNotEmpty(')
+					.compileReusable(operand)
+					.code(') ? ')
+					.compile(operand)
+					.code(' : ')
+			}
+
+			fragments.compile(@operands[last])
+		}
 	} # }}}
 	type() => @type
 }
