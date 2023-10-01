@@ -98,11 +98,13 @@ abstract class Scope {
 	} # }}}
 	commitTempVariables(variables: Array): Void
 	getChunkType(name: String, line: Number?): Type? => null
+	getImplicitVariable() => null
 	getLineOffset(): Number => 0
 	getMacro(name: String): MacroDeclaration? => null
 	getRawLine(): Number => 0
 	getTempIndex(): Number => -1
 	hasBleedingVariable(name: String): Boolean => @hasDefinedVariable(name)
+	hasImplicitVariable(): Boolean => false
 	hasMacro(name: String): Boolean => false
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false

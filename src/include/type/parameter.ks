@@ -283,10 +283,10 @@ class ParameterType extends Type {
 	matchArgument(value: Type) => value.matchContentOf(@type)
 	max(): valueof @max
 	min(): valueof @min
-	setDefaultValue(@defaultValue, @comprehensive = true) { # {{{
+	setDefaultValue(@defaultValue, @comprehensive = true, @required = false) { # {{{
 		@default = true
 
-		@nullableByDefault = @max == 1 && !@type.isNullable()
+		@nullableByDefault = @max == 1 && !@required && !@type.isNullable()
 
 		if @nullableByDefault {
 			@min = 0

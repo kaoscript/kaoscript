@@ -731,7 +731,7 @@ class Parameter extends AbstractNode {
 			@comprehensive = !@defaultValue.isUsingNonLocalVariables(scope)
 
 			if @comprehensive {
-				@type.setDefaultValue(@data.defaultValue, true)
+				@type.setDefaultValue(@data.defaultValue, true, @explicitlyRequired)
 			}
 			else {
 				var variables = [variable.name() for var variable in @defaultValue.listLocalVariables(scope, [])]
@@ -740,7 +740,7 @@ class Parameter extends AbstractNode {
 
 				var call = `\(name)(\(variables.join(', ')))`
 
-				@type.setDefaultValue(call, false)
+				@type.setDefaultValue(call, false, @explicitlyRequired)
 
 				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(call)`, @parent)
 			}
@@ -1704,7 +1704,7 @@ class ObjectBindingParameter extends ObjectBinding {
 			fragments.compile(@tempName)
 		}
 		else {
-			fragments.compile(this)
+			super(fragments)
 		}
 	} # }}}
 	toValidationFragments(fragments, rest, value?, header, async) { # {{{

@@ -138,6 +138,9 @@ abstract class Expression extends AbstractNode {
 	toFragments(fragments, mode)
 	toNullableFragments(fragments) => @toFragments(fragments, Mode.None)
 	toOperandFragments(fragments, operator, type) => @toFragments(fragments, Mode.None)
+	toParameterFragments(fragments) { # {{{
+		@toFragments(fragments)
+	} # }}}
 	toQuote(): String { # {{{
 		throw NotSupportedException.new()
 	} # }}}

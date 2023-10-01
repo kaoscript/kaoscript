@@ -3,6 +3,8 @@ class BlockScope extends Scope {
 		@authority: Scope
 		@chunkTypes							= {}
 		@declarations						= {}
+		@implicitType: Type?				= null
+		@implicitVarname: String?			= null
 		@macros								= {}
 		@matchingTypes: Object<Array>		= {}
 		@module: ModuleScope
@@ -197,6 +199,17 @@ class BlockScope extends Scope {
 
 		return null
 	} # }}}
+	override getImplicitVariable() { # {{{
+		if ?@implicitVarname {
+			return {
+				name: @implicitVarname
+				type: @implicitType
+			}
+		}
+		else {
+			return @parent.getImplicitVariable()
+		}
+	} # }}}
 	getLineOffset() => @module.getLineOffset()
 	getMacro(name) { # {{{
 		return @macros[name] ?? @parent.getMacro(name)
@@ -269,6 +282,7 @@ class BlockScope extends Scope {
 
 		return false
 	} # }}}
+	override hasImplicitVariable() => ?@implicitVarname || @parent.hasImplicitVariable()
 	hasMacro(name) => @macros[name] is Array || @parent.hasMacro(name)
 	hasVariable(name: String, line: Number = @line()) { # {{{
 		if @variables[name] is Array {
@@ -516,6 +530,7 @@ class BlockScope extends Scope {
 			return @parent.resolveReference(name, explicitlyNull, parameters)
 		}
 	} # }}}
+	setImplicitVariable(@implicitVarname, @implicitType)
 	setLineOffset(offset: Number) => @module.setLineOffset(offset)
 	updateInferable(name, data, node) { # {{{
 		if data.isVariable {

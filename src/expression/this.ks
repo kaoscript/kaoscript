@@ -305,6 +305,7 @@ class ThisExpression extends Expression {
 	isInferable() => !@calling && !@composite
 	isInitializable() => true
 	isLateInit() => @lateInit
+	isRedeclared() => false
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name

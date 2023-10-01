@@ -177,6 +177,7 @@ var $polyadicOperators = {
 }
 
 var $unaryOperators = {
+	`\(UnaryOperatorKind.Default)`				: UnaryOperatorDefault
 	`\(UnaryOperatorKind.Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperatorKind.ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
 	`\(UnaryOperatorKind.Implicit)`				: UnaryOperatorImplicit

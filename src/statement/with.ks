@@ -2,15 +2,17 @@ class WithStatement extends Statement {
 	private late {
 		@body: Block
 		@bodyScope: Scope
-		@declarations			= []
-		@exit: Boolean			= false
-		@expressions			= []
+		@declarations					= []
+		@exit: Boolean					= false
+		@expressions					= []
 		@finally: Block
-		@hasFinally: Boolean	= false
-		@returnValue			= null
-		@returnVarname: String?	= null
-		@useTry: Boolean		= false
-		@variables				= []
+		@hasFinally: Boolean			= false
+		@implicit: Boolean				= false
+		@implicitVarname: String?		= null
+		@returnValue					= null
+		@returnVarname: String?			= null
+		@useTry: Boolean				= false
+		@variables						= []
 	}
 	constructor(@data, @parent, scope: Scope = parent.scope()!?) { # {{{
 		super(data, parent, scope, ScopeType.Bleeding)
@@ -38,13 +40,42 @@ class WithStatement extends Statement {
 			declaration.analyse()
 		}
 
-		for var expression in @expressions {
+		if !#@declarations && @expressions.length == 1 {
+			var expression = @expressions[0]
+
 			expression.analyse()
 
-			@variables.push({
-				name: expression.left()
-				temp: @scope.acquireTempName(false)
-			})
+			if expression is AssignmentOperatorExpression {
+				@variables.push({
+					name: expression.left()
+					temp: @scope.acquireTempName(false)
+				})
+			}
+			else {
+				@implicit = true
+
+				if expression is IdentifierLiteral {
+					@implicitVarname = expression.name()
+				}
+				else {
+					@implicitVarname = @scope.acquireTempName(false)
+
+					@variables.push({
+						name: expression
+						temp: @implicitVarname
+					})
+				}
+			}
+		}
+		else {
+			for var expression in @expressions {
+				expression.analyse()
+
+				@variables.push({
+					name: expression.left()
+					temp: @scope.acquireTempName(false)
+				})
+			}
 		}
 
 		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
@@ -58,12 +89,21 @@ class WithStatement extends Statement {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		for var declaration in @declarations {
-			declaration.prepare(Type.Void)
-		}
+		if @implicit {
+			var expression = @expressions[0]
 
-		for var expression in @expressions {
-			expression.prepare(Type.Void)
+			expression.prepare(AnyType.NullableUnexplicit)
+
+			@bodyScope.setImplicitVariable(@implicitVarname, expression.type())
+		}
+		else {
+			for var declaration in @declarations {
+				declaration.prepare(Type.Void)
+			}
+
+			for var expression in @expressions {
+				expression.prepare(Type.Void)
+			}
 		}
 
 		@body.prepare(target)
@@ -150,12 +190,14 @@ class WithStatement extends Statement {
 			fragments.newLine().code($runtime.scope(this), temp, $equals).compile(name).done()
 		}
 
-		for var declaration in @declarations {
-			fragments.compile(declaration)
-		}
+		if !@implicit {
+			for var declaration in @declarations {
+				fragments.compile(declaration)
+			}
 
-		for var expression in @expressions {
-			fragments.newLine().compile(expression).done()
+			for var expression in @expressions {
+				fragments.newLine().compile(expression).done()
+			}
 		}
 
 		if @useTry {
@@ -169,8 +211,10 @@ class WithStatement extends Statement {
 				ctrl.compile(@finally)
 			}
 
-			for var { name, temp } in @variables {
-				ctrl.newLine().compile(name).code($equals, temp).done()
+			if !@implicit {
+				for var { name, temp } in @variables {
+					ctrl.newLine().compile(name).code($equals, temp).done()
+				}
 			}
 
 			ctrl.done()
@@ -190,8 +234,10 @@ class WithStatement extends Statement {
 				fragments.compile(@finally)
 			}
 
-			for var { name, temp } in @variables {
-				fragments.newLine().compile(name).code($equals, temp).done()
+			if !@implicit {
+				for var { name, temp } in @variables {
+					fragments.newLine().compile(name).code($equals, temp).done()
+				}
 			}
 
 			if ?@returnVarname {
@@ -205,8 +251,10 @@ class WithStatement extends Statement {
 				fragments.compile(@finally)
 			}
 
-			for var { name, temp } in @variables {
-				fragments.newLine().compile(name).code($equals, temp).done()
+			if !@implicit {
+				for var { name, temp } in @variables {
+					fragments.newLine().compile(name).code($equals, temp).done()
+				}
 			}
 		}
 	} # }}}

@@ -2,6 +2,7 @@ class UnaryOperatorImplicit extends Expression {
 	private late {
 		@property: String
 		@type: Type
+		@varname: String?			= null
 	}
 	override analyse() { # {{{
 		@property = @data.argument.name
@@ -16,7 +17,7 @@ class UnaryOperatorImplicit extends Expression {
 					ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
 				}
 
-				@type = type
+				@type = type.setNullable(false)
 			}
 			else if var property ?= type.getProperty(@property) {
 				@type = property.discardVariable()
@@ -25,11 +26,22 @@ class UnaryOperatorImplicit extends Expression {
 				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 			}
 		}
+		else if var { name % @varname, type } ?= @scope.getImplicitVariable() {
+			if var property ?= type.getProperty(@property) {
+				@type = property.discardVariable()
+			}
+			else {
+				@type = AnyType.NullableUnexplicit
+			}
+		}
+		else {
+			ReferenceException.throwUnresolvedImplicitProperty(@property, this)
+		}
 	} # }}}
 	override translate()
 	property() => @property
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@type).code($dot).compile(@property)
+		fragments.compile(@varname ?? @type).code($dot).compile(@property)
 	} # }}}
 	type() => @type
 }
@@ -65,9 +77,9 @@ func findImplicitArgument(tree, min: Number, index: Number, property: String, ty
 	}
 } # }}}
 
-func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #property: String) {
+func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #property: String) { # {{{
 	match parent {
-		is AssignmentOperatorAddition | AssignmentOperatorSubtraction | BinaryOperatorSubtraction | PolyadicOperatorSubtraction {
+		is AssignmentOperatorAddition | AssignmentOperatorNullCoalescing | AssignmentOperatorSubtraction | BinaryOperatorSubtraction | PolyadicOperatorSubtraction {
 			return target
 		}
 		is AssignmentOperatorEquals | BinaryOperatorNullCoalescing {
@@ -106,8 +118,13 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 				}
 			}
 
-			unless #types {
-				ReferenceException.throwUnresolvedImplicitProperty(property, node)
+			if !#types {
+				if node.scope().hasImplicitVariable() {
+					return null
+				}
+				else {
+					ReferenceException.throwUnresolvedImplicitProperty(property, node)
+				}
 			}
 
 			return Type.union(node.scope(), ...types)
@@ -151,8 +168,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			return target
 		}
 		else {
-			echo(parent)
-			throw NotImplementedException.new()
+			return null
 		}
 	}
 } # }}}

@@ -269,6 +269,26 @@ class ObjectBinding extends Expression {
 			}
 		}
 	} # }}}
+	toParameterFragments(fragments) { # {{{
+		fragments.code('{')
+
+		var mut nc = true
+
+		for var element in @elements {
+			if !element.isAnonymous() {
+				if nc {
+					nc = false
+				}
+				else {
+					fragments.code($comma)
+				}
+
+				element.toParameterFragments(fragments)
+			}
+		}
+
+		fragments.code('}')
+	} # }}}
 	override toQuote() { # {{{
 		var mut fragments = '{'
 
@@ -495,7 +515,7 @@ class ObjectBindingElement extends Expression {
 			if @computed {
 				fragments.code('[').compile(@external).code(']: ').compile(@internal)
 			}
-			else if @sameName {
+			else if @sameName && !@thisAlias {
 				fragments.compile(@internal)
 			}
 			else {
@@ -576,6 +596,45 @@ class ObjectBindingElement extends Expression {
 				.wrap(value)
 				.code('.')
 				.compile($keywords[@name()] ? @name() : @external)
+		}
+	} # }}}
+	toParameterFragments(fragments) { # {{{
+		return unless @named
+
+		if @rest {
+			fragments.code('...')
+		}
+
+		if $keywords[this.name()] {
+			if @computed {
+				fragments.code(`[\(this.name())]: `)
+
+				@internal.toParameterFragments(fragments)
+			}
+			else {
+				fragments.code(`\(this.name()): `)
+
+				@internal.toParameterFragments(fragments)
+			}
+		}
+		else {
+			if @computed {
+				fragments.code('[').compile(@external).code(']: ')
+
+				@internal.toParameterFragments(fragments)
+			}
+			else if @sameName {
+				@internal.toParameterFragments(fragments)
+			}
+			else {
+				fragments.compile(@external).code(': ')
+
+				@internal.toParameterFragments(fragments)
+			}
+		}
+
+		if @hasDefaultValue {
+			fragments.code(' = ').compile(@defaultValue)
 		}
 	} # }}}
 	type() => @type

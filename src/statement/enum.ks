@@ -57,6 +57,10 @@ class EnumDeclaration extends Statement {
 			variable.prepare()
 
 			@enum.addVariable(name)
+
+			if variable.isDefault() {
+				@enum.setDefaultVariable(name)
+			}
 		}
 
 		for var methods, name of @instanceMethods {
@@ -232,6 +236,7 @@ class EnumVariableDeclaration extends AbstractNode {
 	private {
 		@alias: Boolean					= false
 		@composite: Boolean				= false
+		@default: Boolean				= false
 		@name: String
 	}
 	constructor(data, parent) { # {{{
@@ -263,13 +268,36 @@ class EnumVariableDeclaration extends AbstractNode {
 					else {
 						match value.kind {
 							NodeKind.NumericExpression {
-								if value.value > length {
-									SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
+								if value.radix == 2 {
+									@value = `\(value.value)`
+
+									if value.value > 0 {
+										var binary = value.value.toString(2)
+										var index = binary.length
+
+										if binary.lastIndexOf('1') != 0 {
+											NotImplementedException.throw(this)
+										}
+
+										if index > length {
+											SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
+										}
+
+										enum.index(index)
+									}
+									else {
+										enum.index(0)
+									}
 								}
+								else {
+									if value.value > length {
+										SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
+									}
 
-								enum.index(value.value)
+									enum.index(value.value)
 
-								@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
+									@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
+								}
 							}
 							NodeKind.Identifier {
 								@alias = true
@@ -323,10 +351,17 @@ class EnumVariableDeclaration extends AbstractNode {
 				@type = @scope.reference('Number')
 			}
 		}
+
+		for var modifier in @data.modifiers {
+			if modifier.kind == ModifierKind.Default {
+				@default = true
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
 	isComposite() => @composite || @alias
+	isDefault() => @default
 	name() => @name
 	toFragments(fragments) { # {{{
 		if @alias {

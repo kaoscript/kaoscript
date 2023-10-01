@@ -401,7 +401,7 @@ class BinaryOperatorMatch extends Expression {
 			TypeException.throwInvalidOperand(@subject, Operator.Match, this)
 		}
 
-		if !@subject.type().isNumber() || @subject.type().isNullable() {
+		if !@subject.type().isNumber() {
 			@native = false
 		}
 
