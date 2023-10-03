@@ -1,6 +1,6 @@
 struct Foobar {
-	argument
-	from
+	argument: String
+	from: String
 }
 
 func foobar(value?) {
@@ -8,6 +8,7 @@ func foobar(value?) {
 		Number {
 		}
 		Foobar with var { argument, from } {
+			echo(`\(from): \(argument)`)
 		}
 	}
 }

@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(value) {
-		if(Type.isDexObject(value, 0, 0, {qux: Type.isValue})) {
+		if(Type.isDexObject(value, 1, 0, {qux: Type.isValue})) {
 			let {qux: n} = value;
 			console.log(Helper.concatString("qux: ", n));
 		}

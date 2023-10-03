@@ -102,11 +102,13 @@ dev:
 	@# @make clean
 
 	@# compile compiler
-	@# @make comp
+	@make comp
 
 	@# tests
-	@# node test/compile.dev.js "compile "
+	node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
+	@# node test/compile.dev.js "compile match."
+	@# node test/compile.dev.js "compile match.stmt.struct.an.wci_nb.nc_wb<n_n>q<s_s>_nfe"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

@@ -1417,12 +1417,15 @@ class ReferenceType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toTestFragments(fragments, node, junction) { # {{{
+	toTestFragments(name: String, testingType: Boolean, fragments, node) { # {{{
+		@toTestFragments(name, fragments, node, Junction.NONE)
+	} # }}}
+	toTestFragments(varname: String, fragments, node, junction: Junction) { # {{{
 		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
 			if var tof ?= $runtime.typeof(@name, node) {
-				fragments.code(`\(tof)(value)`)
+				fragments.code(`\(tof)(\(varname))`)
 
 				return
 			}
@@ -1444,7 +1447,7 @@ class ReferenceType extends Type {
 			var name = unalias.name?() ?? @name
 
 			if var tof ?= $runtime.typeof(name, node) {
-				fragments.code(`\(tof)(value`)
+				fragments.code(`\(tof)(\(varname)`)
 			}
 			else {
 				fragments.code(`\($runtime.type(node)).`)
@@ -1465,7 +1468,7 @@ class ReferenceType extends Type {
 					throw NotSupportedException.new()
 				}
 
-				fragments.code(`(value, `)
+				fragments.code(`(\(varname), `)
 
 				if unalias is NamedType {
 					fragments.code(unalias.path())
@@ -1479,7 +1482,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			var literal = Literal.new(false, node, node.scope(), 'value')
+			var literal = Literal.new(false, node, node.scope(), varname)
 
 			@parameters[0].toTestFunctionFragments(fragments, literal)
 		}
@@ -1489,12 +1492,15 @@ class ReferenceType extends Type {
 		}
 
 		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(value)`)
+			fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 
 			if ?subjunction {
 				fragments.code(')')
 			}
 		}
+	} # }}}
+	override toTestFragments(fragments, node, junction) { # {{{
+		@toTestFragments('value', fragments, node, junction)
 	} # }}}
 	override toTestFunctionFragments(fragments, node) { # {{{
 		if @nullable {

@@ -52,6 +52,7 @@ namespace $match {
 class MatchStatement extends Statement {
 	private late {
 		@bindingScope: Scope
+		@bodyScope: Scope
 		@castingEnum: Boolean				= false
 		@clauses							= []
 		@declaration: VariableDeclaration?
@@ -80,6 +81,8 @@ class MatchStatement extends Statement {
 		else {
 			@bindingScope = @scope!?
 		}
+
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 	} # }}}
 	override analyse() { # {{{
 		if @hasDeclaration {
@@ -98,7 +101,7 @@ class MatchStatement extends Statement {
 				hasTest: ?data.filter
 				binding: null
 				conditions: []
-				scope: @newScope(@bindingScope, ScopeType.InlineBlock)
+				scope: @newScope(@bodyScope, ScopeType.InlineBlock)
 			}
 
 			@clauses.push(clause)
@@ -160,6 +163,8 @@ class MatchStatement extends Statement {
 				@name = @scope.getVariable(@data.expression.name).getSecureName()
 			}
 		}
+
+		@bodyScope.setImplicitVariable(@name, @valueType)
 
 		var inferables = {}
 		var mut enumConditions = 0
@@ -627,6 +632,7 @@ class MatchStatement extends Statement {
 
 		return false
 	} # }}}
+	name() => @name
 	throwExpectedType(type: String): Never ~ TypeException { # {{{
 		TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), type, this)
 	} # }}}
@@ -893,7 +899,7 @@ class MatchBindingArray extends AbstractNode {
 		var { min, max } = @minmax
 		var type = @binding.type()
 
-		if var tests ?= @parent.getArrayTests(@testingType, @minmax, @testingProperties ? @binding.type() : null) {
+		if var tests ?= @parent.getArrayTests(@testingType, @minmax, @testingProperties ? type : null) {
 			if junction == Junction.AND {
 				for var test in tests {
 					fragments.code(` && \(test)()`)
@@ -962,7 +968,7 @@ class MatchBindingObject extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if @declaration && ?@data.type {
+		if ?@data.type {
 			var type = Type.fromAST(@data.type, this)
 
 			if @binding is IdentifierLiteral {
@@ -988,23 +994,32 @@ class MatchBindingObject extends AbstractNode {
 		var bindingType = @binding.type()
 		var valueType = @parent.getValueType()
 
-		@testingType &&= !(bindingType.isBroadObject() || target.isBroadObject() || valueType.isBroadObject())
-		if bindingType.isBinding() && bindingType.isTestingProperties() {
-			if target.isBroadObject() && valueType.isBroadObject() {
-				for var _, name of bindingType.properties() {
-					unless target.hasProperty(name) || valueType.hasProperty(name) {
-						@testingProperties = true
+		@testingType &&= !(valueType.isBroadObject() || target.isBroadObject())
 
-						break
+		if bindingType.isBinding() && bindingType.isTestingProperties() {
+			if target.isBroadObject() && !valueType.isAny() && valueType.isBroadObject() {
+				for var _, name of bindingType.properties() {
+					if target.hasProperty(name) || valueType.hasProperty(name) {
+						var property = target.getProperty(name) ?? valueType.getProperty(name)
+						var type = property.discardVariable()
+
+						@binding.setPropertyType(name, type)
+					}
+					else {
+						@testingProperties = true
 					}
 				}
 			}
 			else if target.isBroadObject() {
 				for var _, name of bindingType.properties() {
-					unless target.hasProperty(name) {
-						@testingProperties = true
+					if target.hasProperty(name) {
+						var property = target.getProperty(name)
+						var type = property.discardVariable()
 
-						break
+						@binding.setPropertyType(name, type)
+					}
+					else {
+						@testingProperties = true
 					}
 				}
 			}
@@ -1014,7 +1029,7 @@ class MatchBindingObject extends AbstractNode {
 		}
 
 		if @testingType || @testingProperties {
-			@parent.addObjectTest(@testingType, @testingProperties ? @binding.type() : null)
+			@parent.addObjectTest(@testingType, @testingProperties ? bindingType : null)
 		}
 	} # }}}
 	translate() { # {{{
@@ -1036,7 +1051,7 @@ class MatchBindingObject extends AbstractNode {
 
 		var type = @binding.type()
 
-		if var tests ?= @parent.getObjectTests(@testingType, @testingProperties ? @binding.type() : null) {
+		if var tests ?= @parent.getObjectTests(@testingType, @testingProperties ? type : null) {
 			if junction == Junction.AND {
 				for var test in tests {
 					fragments.code(` && \(test)()`)
@@ -1664,9 +1679,16 @@ class MatchFilter extends AbstractNode {
 			}
 		}
 
-		var conditionType = Type.union(@scope, ...types)
+		if #types {
+			var conditionType = Type.union(@scope, ...types)
 
-		@binding?.prepare(conditionType)
+			@binding?.prepare(conditionType)
+
+			@scope.setImplicitVariable(@parent().name(), conditionType)
+		}
+		else {
+			@binding?.prepare(valueType)
+		}
 
 		@filter?.prepare(target)
 	} # }}}

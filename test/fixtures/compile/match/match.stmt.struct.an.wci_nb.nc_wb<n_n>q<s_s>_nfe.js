@@ -6,7 +6,7 @@ module.exports = function() {
 		_.from = from;
 		return _;
 	}, function(__ks_new, args) {
-		const t0 = Type.isValue;
+		const t0 = Type.isString;
 		if(args.length === 2) {
 			if(t0(args[0]) && t0(args[1])) {
 				return __ks_new(args[0], args[1]);
@@ -25,6 +25,7 @@ module.exports = function() {
 		}
 		else if(Type.isStructInstance(value, Foobar)) {
 			let {argument, from} = value;
+			console.log(from + ": " + argument);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

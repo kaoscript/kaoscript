@@ -1,6 +1,7 @@
 class MatchExpression extends Expression {
 	private late {
 		@bindingScope: Scope
+		@bodyScope: Scope
 		@castingEnum: Boolean				= false
 		@clauses							= []
 		@declaration: VariableDeclaration?
@@ -32,6 +33,8 @@ class MatchExpression extends Expression {
 		else {
 			@bindingScope = @scope!?
 		}
+
+		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 	} # }}}
 	override analyse() { # {{{
 		@initiate()
@@ -52,7 +55,7 @@ class MatchExpression extends Expression {
 				hasTest: ?data.filter
 				bindings: []
 				conditions: []
-				scope: @newScope(@bindingScope, ScopeType.InlineBlock)
+				scope: @newScope(@bodyScope, ScopeType.InlineBlock)
 			}
 
 			@clauses.push(clause)
@@ -153,6 +156,8 @@ class MatchExpression extends Expression {
 				@name = @scope.getVariable(@data.expression.name).getSecureName()
 			}
 		}
+
+		@bodyScope.setImplicitVariable(@name, @valueType)
 
 		var late tracker: PossibilityTracker
 
@@ -349,6 +354,7 @@ class MatchExpression extends Expression {
 	getValueType() => @valueType
 	isInline() => false
 	isInSituStatement() => @insitu
+	name() => @name
 	toFragments(fragments, mode) { # {{{
 		fragments.code(@valueName)
 	} # }}}

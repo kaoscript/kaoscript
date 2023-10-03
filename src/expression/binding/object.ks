@@ -191,6 +191,17 @@ class ObjectBinding extends Expression {
 		}
 	} # }}}
 	setAssignment(@assignment)
+	setPropertyType(name: String, type: Type): Void { # {{{
+		for var element in @elements {
+			if element.name() == name {
+				if type.isAssignableToVariable(element.type(), false, false, false) {
+					element.type(type)
+				}
+
+				break
+			}
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.code('{')
 
@@ -329,6 +340,7 @@ class ObjectBindingElement extends Expression {
 		@named: Boolean						= true
 		@nullable: Boolean					= false
 		@operator: AssignmentOperatorKind	= .Equals
+		@prepared: Boolean					 = false
 		@rest: Boolean						= false
 		@sameName: Boolean					= false
 		@thisAlias: Boolean					= false
@@ -401,6 +413,8 @@ class ObjectBindingElement extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
+		@prepared = true
+
 		if ?@data.type {
 			@type = Type.fromAST(@data.type, this)
 		}
@@ -638,7 +652,33 @@ class ObjectBindingElement extends Expression {
 		}
 	} # }}}
 	type() => @type
-	type(@type) => this
+	type(@type) { # {{{
+		if @prepared {
+			if !@named {
+				pass
+			}
+			else if @internal is ThisExpression {
+				pass
+			}
+			else if @internal is IdentifierLiteral {
+				var variable = @internal.variable()
+
+				variable.setDeclaredType(@type)
+
+				if @assignment == AssignmentType.Declaration {
+					variable.setRealType(@type)
+				}
+				else if @hasDefaultValue {
+					variable.setRealType(@defaultValue.type())
+				}
+			}
+			else {
+				@internal.type(@type)
+			}
+		}
+
+		return this
+	} # }}}
 	override walkVariable(fn) { # {{{
 		@internal?.walkVariable(fn)
 	} # }}}
