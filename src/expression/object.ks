@@ -107,43 +107,65 @@ class ObjectExpression extends Expression {
 
 		if #@properties {
 			if target is ObjectType {
-				var type = target.getRestType()
+				var keyed  = target.hasKeyType()
+				var keyType = keyed ? target.getKeyType() : AnyType.NullableUnexplicit
+				var valueType = target.getRestType()
 				var rest: Type[] = []
 
 				for var property in @properties {
-					if property is ObjectComputedMember {
-						if target.length() > 0 {
-							property.prepare(AnyType.NullableUnexplicit)
-						}
-						else {
-							property.prepare(type)
-						}
-					}
-					else if property is ObjectLiteralMember {
-						property.prepare(target.getProperty(property.name()))
+					match property {
+						ObjectComputedMember {
+							if target.length() > 0 {
+								property.prepare(AnyType.NullableUnexplicit, TargetMode.Strict, keyType)
+							}
+							else {
+								property.prepare(valueType, TargetMode.Strict, keyType)
+							}
 
-						@type.addProperty(property.name(), property.type())
-					}
-					else if property is ObjectSpreadMember {
-						property.prepare(type)
+							var kType = property.name().type()
 
-						var type = property.value().type().discard()
-
-						if type.isObject() && !type.hasRest() {
-							for var property, name of type.properties() {
-								if !@type.hasProperty(name) {
-									@type.addProperty(name, property.type())
-								}
+							if keyed && !kType.isAssignableToVariable(keyType, false, false, false) {
+								TypeException.throwInvalidObjectKeyType(kType, keyType, this)
 							}
 						}
-						else {
-							rest.push(property.type())
-						}
-					}
-					else if property is ObjectThisMember {
-						property.prepare(target.getProperty(property.name()))
+						ObjectLiteralMember {
+							if keyed && !keyType.canBeString() {
+								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+							}
 
-						@type.addProperty(property.name(), property.type())
+							property.prepare(target.getProperty(property.name()))
+
+							@type.addProperty(property.name(), property.type())
+						}
+						ObjectSpreadMember {
+							if keyed && !keyType.canBeString() {
+								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+							}
+
+							property.prepare(valueType)
+
+							var type = property.value().type().discard()
+
+							if type.isObject() && !type.hasRest() {
+								for var property, name of type.properties() {
+									if !@type.hasProperty(name) {
+										@type.addProperty(name, property.type())
+									}
+								}
+							}
+							else {
+								rest.push(property.type())
+							}
+						}
+						ObjectThisMember {
+							if keyed && !keyType.canBeString() {
+								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+							}
+
+							property.prepare(target.getProperty(property.name()))
+
+							@type.addProperty(property.name(), property.type())
+						}
 					}
 				}
 
@@ -353,8 +375,8 @@ class ObjectComputedMember extends Expression {
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
 	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@name.prepare(AnyType.NullableUnexplicit)
+	prepare(target, targetMode: TargetMode = .Strict, keyType: Type = AnyType.NullableUnexplicit) { # {{{
+		@name.prepare(keyType)
 		@value.prepare(target, targetMode)
 	} # }}}
 	translate() { # {{{

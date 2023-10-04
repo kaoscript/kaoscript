@@ -167,6 +167,9 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 		is ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
 			return target
 		}
+		is ObjectComputedMember {
+			return target
+		}
 		else {
 			return null
 		}

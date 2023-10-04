@@ -8,9 +8,7 @@ abstract class PolyadicOperatorExpression extends Expression {
 		operator(): Operator
 	}
 	analyse() { # {{{
-		// TODO!
-		// for var data in @data.operands ?? [@data.left, @data.right] {
-		for var data in (@data.operands ?? [@data.left, @data.right]) {
+		for var data in @data.operands ?? [@data.left, @data.right] {
 			var operand = $compile.expression(data, this)
 
 			operand.analyse()

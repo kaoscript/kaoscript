@@ -3,6 +3,8 @@ class ObjectType extends Type {
 		@computed: Boolean{}			 = {}
 		@destructuring: Boolean			= false
 		@empty: Boolean					= false
+		@key: Boolean					= false
+		@keyType: Type?					= null
 		@length: Number					= 0
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
@@ -39,6 +41,10 @@ class ObjectType extends Type {
 
 				if ?data.rest {
 					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
+				}
+
+				if ?data.key {
+					type.setKeyType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
@@ -165,6 +171,10 @@ class ObjectType extends Type {
 			export.destructuring = true
 		}
 
+		if @key {
+			export.key = @keyType.export(references, indexDelta, mode, module)
+		}
+
 		return export
 	} # }}}
 	flagAlien() { # {{{
@@ -194,6 +204,7 @@ class ObjectType extends Type {
 
 		return type
 	} # }}}
+	getKeyType(): valueof @keyType
 	getProperty(name: String): Type? { # {{{
 		if var type ?= @properties[name] {
 			return type
@@ -216,7 +227,12 @@ class ObjectType extends Type {
 
 		if @length == 0 {
 			if @rest {
-				str = `\(@restType.hashCode(fattenNull)){}`
+				if @key {
+					str = `Object<\(@restType.hashCode(fattenNull)), \(@keyType.hashCode(fattenNull))>`
+				}
+				else {
+					str = `\(@restType.hashCode(fattenNull)){}`
+				}
 			}
 			else {
 				str = `Object`
@@ -260,6 +276,7 @@ class ObjectType extends Type {
 
 		return str
 	} # }}}
+	hasKeyType() => @key
 	hasMutableAccess() => true
 	hasProperty(name: String) => ?@properties[name]
 	hasProperties() => @length > 0
@@ -676,6 +693,9 @@ class ObjectType extends Type {
 
 		return this
 	} # }}}
+	setKeyType(@keyType) { # {{{
+		@key = true
+	} # }}}
 	setNullable(nullable: Boolean) { # {{{
 		if @nullable == nullable {
 			return this
@@ -701,7 +721,12 @@ class ObjectType extends Type {
 
 		if @length == 0 {
 			if @rest {
-				str = `\(@restType.toQuote()){}`
+				if @key {
+					str = `Object<\(@restType.toQuote()), \(@keyType.toQuote())>`
+				}
+				else {
+					str = `\(@restType.toQuote()){}`
+				}
 			}
 			else {
 				str = `Object`

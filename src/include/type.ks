@@ -387,6 +387,10 @@ abstract class Type {
 
 							type.setRestType(Type.fromAST(parameter, scope, defined, node))
 
+							if var parameter ?= data.typeParameters[1] {
+								type.setKeyType(Type.fromAST(parameter, scope, defined, node))
+							}
+
 							return type.flagComplete()
 						}
 						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {

@@ -906,6 +906,9 @@ export class TypeException extends Exception {
 		throwInvalidLiteralType(value: String, current: Type, expected: Type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The literal \(value) of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
 		} # }}}
+		throwInvalidObjectKeyType(current: Type, expected: Type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The object's key of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
+		} # }}}
 		throwInvalidOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type \($joinQuote($operatorTypes[operator]))`, node)
 		} # }}}

@@ -394,6 +394,12 @@ class MemberExpression extends Expression {
 		if @computed {
 			return false unless type.isObject()
 
+			var oType = type.discard()
+
+			if oType is ObjectType && oType.hasKeyType() && !@property.type().isAssignableToVariable(oType.getKeyType(), true, false, false) {
+				TypeException.throwInvalidObjectKeyType(@property.type(), oType.getKeyType(), this)
+			}
+
 			if @property is NumberLiteral | StringLiteral {
 				if var property ?= type.getProperty(@property.value()) {
 					@type = property
@@ -415,6 +421,12 @@ class MemberExpression extends Expression {
 		else {
 			if type.isObject() {
 				@type = type.parameter()
+
+				var oType = type.discard()
+
+				if oType is ObjectType && oType.hasKeyType() && !oType.getKeyType().canBeString() {
+					TypeException.throwInvalidObjectKeyType(@scope.reference('String'), oType.getKeyType(), this)
+				}
 			}
 
 			if var property ?= type.getProperty(@property) {
