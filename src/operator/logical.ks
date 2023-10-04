@@ -1,24 +1,11 @@
-class PolyadicOperatorAnd extends PolyadicOperatorExpression {
+class PolyadicOperatorLogicalAnd extends PolyadicOperatorExpression {
 	private late {
-		@expectingEnum: Boolean		= true
-		@native: Boolean		= false
-		@operand: OperandType	= OperandType.Any
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		var void = target.isVoid()
-
-		var mut nullable = false
-		var mut boolean = void || target.canBeBoolean()
-		var mut number = target.canBeNumber()
-		var mut native = true
 		var mut callable = false
 
-		if !target.canBeEnum() {
-			@expectingEnum = false
-		}
-
-		for var operand in @operands {
+		for var operand, index in @operands {
 			operand.prepare(target, TargetMode.Permissive)
 
 			callable ||= operand.isCallable()
@@ -29,39 +16,8 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
-			if type.isBoolean() {
-				number = false
-			}
-			else if type.isNumber() {
-				if type.isNullable() {
-					nullable = true
-					native = false
-				}
-
-				boolean = false
-			}
-			else if type.isNull() {
-				nullable = true
-			}
-			else if type.canBeBoolean() {
-				if type.isNullable() {
-					nullable = true
-				}
-
-				if !type.canBeNumber() {
-					number = false
-				}
-				else if !boolean {
-					native = false
-				}
-			}
-			else if type.canBeNumber() {
-				if type.isNullable() {
-					nullable = true
-				}
-
-				boolean = false
-				native = false
+			if type.isBoolean() || type.canBeBoolean() {
+				pass
 			}
 			else {
 				TypeException.throwInvalidOperand(operand, this.operator(), this)
@@ -72,50 +28,18 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			}
 		}
 
-		if void {
+		if target.isVoid() {
 			unless callable {
 				SyntaxException.throwDeadCode(this)
 			}
 		}
-		else if !boolean && !number {
+		else if !target.canBeBoolean() {
 			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
-		if boolean {
-			if number {
-				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
-
-				if nullable {
-					@type = @type.setNullable(true)
-				}
-			}
-			else {
-				@type = @scope.reference('Boolean')
-				@operand = OperandType.Boolean
-				@native = true
-			}
-		}
-		else if number {
-			if target.isEnum() {
-				@type = target
-				@operand = OperandType.Enum
-			}
-			else {
-				@type = @scope.reference('Number')
-				@operand = OperandType.Number
-				@expectingEnum = false
-			}
-
-			@native = native
-
-			if nullable {
-				@type = @type.setNullable(true)
-			}
-		}
+		@type = @scope.reference('Boolean')
 	} # }}}
 	inferTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType.Boolean
-
 		var scope = @statement().scope()
 
 		for var operand, index in @operands {
@@ -161,8 +85,6 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	} # }}}
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	inferWhenTrueTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType.Boolean
-
 		for var operand in @operands {
 			for var data, name of operand.inferWhenTrueTypes({}) {
 				inferables[name] = data
@@ -172,111 +94,44 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	isBooleanComputed(junction: Junction) => junction != Junction.AND
-	operator() => Operator.And
+	operator() => Operator.LogicalAnd
 	symbol() => '&&'
 	toFragments(fragments, mode) { # {{{
-		if @native {
-			if @operand == OperandType.Boolean {
-				for var operand, index in @operands {
-					if index > 0 {
-						fragments
-							.code($space)
-							.code('&&', @data.operator)
-							.code($space)
-					}
-
-					fragments.wrapCondition(operand, Mode.None, Junction.AND)
-				}
-			}
-			else {
-				if @expectingEnum {
-					fragments.code(@type.name(), '(')
-				}
-
-				for var operand, index in @operands {
-					if index > 0 {
-						fragments
-							.code($space)
-							.code('&', @data.operator)
-							.code($space)
-					}
-
-					fragments.wrap(operand)
-				}
-
-				if @expectingEnum {
-					fragments.code(@type.name(), ')')
-				}
-			}
-		}
-		else {
-			fragments.code(`\($runtime.operator(this))`)
-
-			if @operand == OperandType.Number {
-				fragments.code('.andNum(')
-			}
-			else {
-				fragments.code('.and(')
+		for var operand, index in @operands {
+			if index > 0 {
+				fragments
+					.code($space)
+					.code('&&', @data.operator)
+					.code($space)
 			}
 
-			for var operand, index in @operands {
-				fragments.code($comma) if index > 0
-
-				fragments.compile(operand)
-			}
-
-			fragments.code(')')
+			fragments.wrapCondition(operand, Mode.None, Junction.AND)
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
 		if junction == Junction.OR {
 			fragments.code('(')
 
-			this.toFragments(fragments, mode)
+			@toFragments(fragments, mode)
 
 			fragments.code(')')
 		}
 		else {
-			this.toFragments(fragments, mode)
+			@toFragments(fragments, mode)
 		}
 	} # }}}
 	type(): valueof @type
 }
 
-class BinaryOperatorAnd extends PolyadicOperatorAnd {
-	analyse() { # {{{
-		for var data in [@data.left, @data.right] {
-			var operand = $compile.expression(data, this)
-
-			operand.analyse()
-
-			@operands.push(operand)
-		}
-	} # }}}
-}
-
-class PolyadicOperatorOr extends PolyadicOperatorExpression {
+class PolyadicOperatorLogicalOr extends PolyadicOperatorExpression {
 	private late {
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
-		@operand: OperandType		= OperandType.Any
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
-		var void = target.isVoid()
-
-		var mut nullable = false
-		var mut boolean = void || target.canBeBoolean()
-		var mut number = target.canBeNumber()
-		var mut native = true
 		var mut callable = false
-
-		if !target.canBeEnum() {
-			@expectingEnum = false
-		}
 
 		var lastIndex = @operands.length - 1
 		var originals = {}
@@ -292,42 +147,14 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
-			if type.isBoolean() {
-				number = false
-			}
-			else if type.isNumber() {
-				if type.isNullable() {
-					nullable = true
-					native = false
-				}
-
-				boolean = false
-			}
-			else if type.canBeBoolean() {
-				if type.isNullable() {
-					nullable = true
-				}
-
-				if !type.canBeNumber() {
-					number = false
-				}
-				else if !boolean {
-					native = false
-				}
-			}
-			else if type.canBeNumber() {
-				if type.isNullable() {
-					nullable = true
-				}
-
-				boolean = false
-				native = false
+			if type.isBoolean() || type.canBeBoolean() {
+				pass
 			}
 			else {
 				TypeException.throwInvalidOperand(operand, this.operator(), this)
 			}
 
-			if boolean && index < lastIndex {
+			if index < lastIndex {
 				for var data, name of operand.inferWhenFalseTypes({}) {
 					if data.isVariable && !?originals[name] {
 						originals[name] = {
@@ -341,54 +168,22 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 		}
 
-		if void {
+		if target.isVoid() {
 			unless callable {
 				SyntaxException.throwDeadCode(this)
 			}
 		}
-		else if !boolean && !number {
+		else if !target.canBeBoolean() {
 			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
-		if boolean {
-			if number {
-				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
+		@type = @scope.reference('Boolean')
 
-				if nullable {
-					@type = @type.setNullable(true)
-				}
-			}
-			else {
-				@type = @scope.reference('Boolean')
-				@operand = OperandType.Boolean
-				@native = true
-			}
-
-			for var data, name of originals {
-				@scope.updateInferable(name, data, this)
-			}
-		}
-		else if number {
-			if target.isEnum() {
-				@type = target
-				@operand = OperandType.Enum
-			}
-			else {
-				@type = @scope.reference('Number')
-				@operand = OperandType.Number
-				@expectingEnum = false
-			}
-
-			@native = native
-
-			if nullable {
-				@type = @type.setNullable(true)
-			}
+		for var data, name of originals {
+			@scope.updateInferable(name, data, this)
 		}
 	} # }}}
 	inferTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType.Boolean
-
 		var scope = @statement().scope()
 
 		for var operand, index in @operands {
@@ -433,8 +228,6 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenFalseTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType.Boolean
-
 		var scope = @statement().scope()
 
 		for var operand, index in @operands {
@@ -479,8 +272,6 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
-		return inferables unless @operand == OperandType.Boolean
-
 		var scope = @statement().scope()
 
 		var whenTrue = {}
@@ -545,100 +336,44 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} # }}}
 	isBooleanComputed(junction: Junction) => junction != Junction.OR
-	operator() => Operator.Or
+	operator() => Operator.LogicalOr
 	symbol() => '||'
 	toFragments(fragments, mode) { # {{{
-		if @native {
-			if @operand == OperandType.Boolean {
-				for var operand, index in @operands {
-					if index > 0 {
-						fragments
-							.code($space)
-							.code('||', @data.operator)
-							.code($space)
-					}
-
-					fragments.wrapCondition(operand, Mode.None, Junction.OR)
-				}
-			}
-			else {
-				if @expectingEnum {
-					fragments.code(@type.name(), '(')
-				}
-
-				for var operand, index in @operands {
-					if index > 0 {
-						fragments
-							.code($space)
-							.code('|', @data.operator)
-							.code($space)
-					}
-
-					fragments.wrap(operand)
-				}
-
-				if @expectingEnum {
-					fragments.code(')')
-				}
-			}
-		}
-		else {
-			fragments.code(`\($runtime.operator(this))`)
-
-			if @operand == OperandType.Boolean {
-				fragments.code('.orBool(')
-			}
-			else if @operand == OperandType.Number {
-				fragments.code('.orNum(')
-			}
-			else {
-				fragments.code('.or(')
+		for var operand, index in @operands {
+			if index > 0 {
+				fragments
+					.code($space)
+					.code('||', @data.operator)
+					.code($space)
 			}
 
-			for var operand, index in @operands {
-				fragments.code($comma) if index > 0
-
-				fragments.compile(operand)
-			}
-
-			fragments.code(')')
+			fragments.wrapCondition(operand, Mode.None, Junction.OR)
 		}
 	} # }}}
 	toBooleanFragments(fragments, mode, junction) { # {{{
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
 		if junction == Junction.AND {
 			fragments.code('(')
 
-			this.toFragments(fragments, mode)
+			@toFragments(fragments, mode)
 
 			fragments.code(')')
 		}
 		else {
-			this.toFragments(fragments, mode)
+			@toFragments(fragments, mode)
 		}
 	} # }}}
 	type(): valueof @type
 }
 
-class BinaryOperatorOr extends PolyadicOperatorOr {
-	analyse() { # {{{
-		for var data in [@data.left, @data.right] {
-			var operand = $compile.expression(data, this)
-
-			operand.analyse()
-
-			@operands.push(operand)
-		}
-	} # }}}
-}
-
-class PolyadicOperatorImply extends PolyadicOperatorOr {
-	operator() => Operator.Imply
+class PolyadicOperatorLogicalImply extends PolyadicOperatorLogicalOr {
+	operator() => Operator.LogicalImply
 	symbol() => '->'
 	toFragments(fragments, mode) { # {{{
 		var l = @operands.length - 2
+
 		fragments.code('!('.repeat(l))
 
 		fragments.code('!').wrapCondition(@operands[0])
@@ -651,98 +386,40 @@ class PolyadicOperatorImply extends PolyadicOperatorOr {
 	} # }}}
 }
 
-class BinaryOperatorImply extends BinaryOperatorOr {
-	toFragments(fragments, mode) { # {{{
-		fragments
-			.code('!')
-			.wrapCondition(@operands[0])
-			.code(' || ')
-			.wrapCondition(@operands[1])
-	} # }}}
-}
-
-class PolyadicOperatorXor extends PolyadicOperatorAnd {
+class PolyadicOperatorLogicalXor extends PolyadicOperatorLogicalAnd {
 	inferWhenFalseTypes(inferables) => @inferWhenTrueTypes(inferables)
-	operator() => Operator.Xor
+	operator() => Operator.LogicalXor
 	symbol() => '^^'
 	toFragments(fragments, mode) { # {{{
-		if @native {
-			if @operand == OperandType.Boolean {
-				var l = @operands.length - 2
+		var l = @operands.length - 2
 
-				if l > 0 {
-					fragments.code('('.repeat(l))
+		if l > 0 {
+			fragments.code('('.repeat(l))
 
-					fragments.wrapCondition(@operands[0])
+			fragments.wrapCondition(@operands[0])
 
-					for var operand in @operands from 1 to~ -1 {
-						fragments.code(' !== ').wrapCondition(operand).code(')')
-					}
-
-					fragments.code(' !== ').wrapCondition(@operands[@operands.length - 1])
-				}
-				else {
-					fragments
-						.wrapCondition(@operands[0])
-						.code($space)
-						.code('!==', @data.operator)
-						.code($space)
-						.wrapCondition(@operands[1])
-				}
+			for var operand in @operands from 1 to~ -1 {
+				fragments.code(' !== ').wrapCondition(operand).code(')')
 			}
-			else {
-				for var operand, index in @operands {
-					if index > 0 {
-						fragments
-							.code($space)
-							.code('^', @data.operator)
-							.code($space)
-					}
 
-					fragments.wrap(operand)
-				}
-			}
+			fragments.code(' !== ').wrapCondition(@operands[@operands.length - 1])
 		}
 		else {
-			fragments.code(`\($runtime.operator(this))`)
-
-			if @operand == OperandType.Number {
-				fragments.code('.xorNum(')
-			}
-			else {
-				fragments.code('.xor(')
-			}
-
-			for var operand, index in @operands {
-				fragments.code($comma) if index > 0
-
-				fragments.compile(operand)
-			}
-
-			fragments.code(')')
-		}
-	} # }}}
-}
-
-class BinaryOperatorXor extends PolyadicOperatorXor {
-	analyse() { # {{{
-		for var data in [@data.left, @data.right] {
-			var operand = $compile.expression(data, this)
-
-			operand.analyse()
-
-			@operands.push(operand)
+			fragments
+				.wrapCondition(@operands[0])
+				.code($space)
+				.code('!==', @data.operator)
+				.code($space)
+				.wrapCondition(@operands[1])
 		}
 	} # }}}
 }
 
 abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExpression {
 	private late {
-		@native: Boolean		= false
-		@operand: OperandType	= OperandType.Any
+		@native: Boolean		= true
 	}
 	abstract {
-		native(): String
 		operator(): Operator
 		runtime(): String
 		symbol(): String
@@ -752,106 +429,37 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 		super(target, TargetMode.Permissive)
 
 		var mut nullable = false
-		var mut boolean = true
-		var mut number = true
-		var mut native = true
 
 		if @type.isBoolean() {
-			number = false
-		}
-		else if @type.isNumber() {
-			if @type.isNullable() {
-				nullable = true
-				native = false
-			}
-
-			boolean = false
-		}
-		else if @type.isNull() {
-			nullable = true
+			pass
 		}
 		else if @type.canBeBoolean() {
-			if @type.isNullable() {
-				nullable = true
-			}
-			if !@type.canBeNumber() {
-				number = false
-			}
-
-			native = false
-		}
-		else if @type.canBeNumber() {
-			if @type.isNullable() {
-				nullable = true
-			}
-
-			boolean = false
-			native = false
+			@native = false
 		}
 		else {
 			TypeException.throwInvalidOperation(this, this.operator(), this)
 		}
 
-		if !boolean && !number {
-			TypeException.throwInvalidOperation(this, this.operator(), this)
-		}
+		@type = @scope.reference('Boolean')
 
-		if boolean {
-			if number {
-				@type = UnionType.new(@scope, [@scope.reference('Boolean'), @scope.reference('Number')])
-
-				if nullable {
-					@type = @type.setNullable(true)
-				}
-			}
-			else {
-				@type = @scope.reference('Boolean')
-				@operand = OperandType.Boolean
-				@native = native
-			}
-		}
-		else if number {
-			@type = @scope.reference('Number')
-			@operand = OperandType.Number
-			@native = native
-
-			if nullable {
-				@type = @type.setNullable(true)
-			}
-		}
-
-		if @operand == OperandType.Boolean || !@native {
-			@left.acquireReusable(true)
-			@left.releaseReusable()
-		}
+		@left.acquireReusable(true)
+		@left.releaseReusable()
 	} # }}}
+	native(): String => @symbol()
 	toFragments(fragments, mode) { # {{{
 		var mut next = true
 
-		if @operand == OperandType.Boolean {
-			next = @toBooleanFragments(fragments)
-		}
+		next = @toBooleanFragments(fragments)
 
 		if next && @native {
 			next = @toNativeFragments(fragments)
 		}
 
 		if next {
-			var late operator
-			if @operand == OperandType.Boolean {
-				operator = `\(@runtime())Bool`
-			}
-			else if @operand == OperandType.Number {
-				operator = `\(@runtime())Num`
-			}
-			else {
-				operator = @runtime()
-			}
-
 			fragments
 				.compileReusable(@left)
 				.code(' = ')
-				.code($runtime.operator(this), `.\(operator)(`)
+				.code($runtime.operator(this), `.\(@runtime())Bool(`)
 				.compileReusable(@left)
 				.code($comma)
 				.compile(@right)
@@ -860,14 +468,15 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 	} # }}}
 	toNativeFragments(fragments) { # {{{
 		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+
+		return false
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 }
 
-class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
+class AssignmentOperatorLogicalAnd extends LogicalAssignmentOperatorExpression {
 	isAcceptingEnum() => true
-	native() => @operand == OperandType.Boolean ? '&&' : '&='
-	operator() => Operator.And
+	operator() => Operator.LogicalAnd
 	runtime() => 'and'
 	symbol() => '&&='
 	toBooleanFragments(fragments) { # {{{
@@ -893,9 +502,8 @@ class AssignmentOperatorAnd extends LogicalAssignmentOperatorExpression {
 	} # }}}
 }
 
-class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
-	native() => @operand == OperandType.Boolean ? '||' : '|='
-	operator() => Operator.Or
+class AssignmentOperatorLogicalOr extends LogicalAssignmentOperatorExpression {
+	operator() => Operator.LogicalOr
 	runtime() => 'or'
 	symbol() => '||='
 	toBooleanFragments(fragments) { # {{{
@@ -921,18 +529,48 @@ class AssignmentOperatorOr extends LogicalAssignmentOperatorExpression {
 	} # }}}
 }
 
-class AssignmentOperatorXor extends LogicalAssignmentOperatorExpression {
-	native() => '^='
-	operator() => Operator.Xor
+class AssignmentOperatorLogicalXor extends LogicalAssignmentOperatorExpression {
+	operator() => Operator.LogicalXor
 	runtime() => 'xor'
 	symbol() => '^^='
 	toBooleanFragments(fragments) => true
 	toNativeFragments(fragments) { # {{{
-		if @operand == OperandType.Boolean {
-			fragments.compileReusable(@left).code(' = ').compileReusable(@left).code(` !== `).compile(@right)
+		fragments.compileReusable(@left).code(' = ').compileReusable(@left).code(` !== `).compile(@right)
+
+		return false
+	} # }}}
+}
+
+class UnaryOperatorLogicalNegation extends UnaryOperatorExpression {
+	private late {
+		@type: Type
+	}
+	override prepare(target, targetMode) { # {{{
+		super(target, TargetMode.Permissive)
+
+		if target.isVoid() {
+			SyntaxException.throwDeadCode(this)
+		}
+
+		if !target.canBeBoolean() {
+			TypeException.throwInvalidOperation(this, Operator.LogicalNegation, this)
+		}
+
+		var type = @argument.type()
+
+		if type.isBoolean() || type.canBeBoolean() {
+			pass
 		}
 		else {
-			fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
+			TypeException.throwInvalidOperand(@argument, Operator.LogicalNegation, this)
 		}
+
+		@type = @scope.reference('Boolean')
 	} # }}}
+	inferWhenFalseTypes(inferables) => @argument.inferWhenTrueTypes(inferables)
+	inferWhenTrueTypes(inferables) => @argument.inferWhenFalseTypes(inferables)
+	toFragments(fragments, mode) { # {{{
+		fragments.code('!', @data.operator).wrapCondition(@argument)
+	} # }}}
+	type(): valueof @type
 }

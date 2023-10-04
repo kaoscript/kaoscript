@@ -354,7 +354,7 @@ class ObjectComputedMember extends Expression {
 		@value.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@name.prepare()
+		@name.prepare(AnyType.NullableUnexplicit)
 		@value.prepare(target, targetMode)
 	} # }}}
 	translate() { # {{{

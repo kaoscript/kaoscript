@@ -15,49 +15,57 @@ enum OperandType {
 
 enum Operator<String> {
 	Addition			= 'additive'
-	And					= 'and'
+	BitwiseAnd			= 'bitwise-and'
+	BitwiseLeftShift	= 'left-shift'
+	BitwiseNegation		= 'bitwise-negation'
+	BitwiseOr			= 'bitwise-or'
+	BitwiseRightShift	= 'right-shift'
+	BitwiseXor			= 'bitwise-xor'
 	Division			= 'divisive'
 	EmptyCoalescing		= 'empty-coalescing'
 	GreaterThan			= 'greater-than'
 	GreaterThanOrEqual	= 'greater-than-or-equal'
-	Imply				= 'imply'
-	LeftShift			= 'left-shift'
 	LessThan			= 'less-than'
 	LessThanOrEqual		= 'less-than-or-equal'
+	LogicalAnd			= 'logical-and'
+	LogicalImply		= 'logical-imply'
+	LogicalNegation		= 'logical-negation'
+	LogicalOr			= 'logical-or'
+	LogicalXor			= 'logical-xor'
 	Match				= 'match'
 	Mismatch			= 'mismatch'
 	Modulo				= 'modulo'
 	Multiplication		= 'multiplicative'
-	Negation			= 'negation'
 	Negative			= 'negative'
 	NullCoalescing		= 'null-coalescing'
-	Or					= 'or'
 	Pipeline			= 'pipeline'
 	Quotient			= 'quotient'
-	RightShift			= 'right-shift'
 	Subtraction			= 'subtractive'
-	Xor					= 'xor'
 }
 
 var $operatorTypes = {
 	[Operator.Addition]: ['Number']
-	[Operator.And]: ['Boolean', 'Number']
+	[Operator.BitwiseAnd]: ['Number']
+	[Operator.BitwiseLeftShift]: ['Number']
+	[Operator.BitwiseNegation]: ['Number']
+	[Operator.BitwiseOr]: ['Number']
+	[Operator.BitwiseRightShift]: ['Number']
+	[Operator.BitwiseXor]: ['Number']
 	[Operator.Division]: ['Number']
 	[Operator.GreaterThan]: ['Number']
 	[Operator.GreaterThanOrEqual]: ['Number']
-	[Operator.Imply]: ['Boolean']
-	[Operator.LeftShift]: ['Number']
 	[Operator.LessThan]: ['Number']
 	[Operator.LessThanOrEqual]: ['Number']
+	[Operator.LogicalAnd]: ['Boolean']
+	[Operator.LogicalImply]: ['Boolean']
+	[Operator.LogicalNegation]: ['Boolean']
+	[Operator.LogicalOr]: ['Boolean']
+	[Operator.LogicalXor]: ['Boolean']
 	[Operator.Modulo]: ['Number']
 	[Operator.Multiplication]: ['Number']
-	[Operator.Negation]: ['Boolean', 'Number']
 	[Operator.Negative]: ['Number']
-	[Operator.Or]: ['Boolean', 'Number']
 	[Operator.Quotient]: ['Number']
-	[Operator.RightShift]: ['Number']
 	[Operator.Subtraction]: ['Number']
-	[Operator.Xor]: ['Boolean', 'Number']
 }
 
 include {
@@ -65,6 +73,8 @@ include {
 	'./polyadic.ks'
 	'./binary.ks'
 	'./unary.ks'
+	'./numeric.ks'
+	'./bitwise.ks'
 	'./comparison.ks'
 	'./empty.ks'
 	'./equals.ks'

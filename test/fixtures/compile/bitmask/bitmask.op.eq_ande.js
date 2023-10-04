@@ -8,5 +8,5 @@ module.exports = function() {
 		Endangered: 8
 	});
 	let animal;
-	animal = AnimalFlags(AnimalFlags.HasClaws & ~AnimalFlags.CanFlyAnimalFlags);
+	animal = AnimalFlags(AnimalFlags.HasClaws & ~AnimalFlags.CanFly);
 };

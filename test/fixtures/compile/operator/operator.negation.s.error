@@ -1,1 +1,0 @@
-TypeException: The expression "x" of type "String" is expected to be of type "Boolean" or "Number" (fixtures/compile/operator/operator.negation.s.ks:2)

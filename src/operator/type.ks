@@ -91,7 +91,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		if @data.right.kind == NodeKind.JunctionExpression {
 			var late type: Type
 
-			if @data.right.operator.kind == BinaryOperatorKind.And {
+			if @data.right.operator.kind == BinaryOperatorKind.JunctionAnd {
 				type = FusionType.new(@scope)
 
 				@junction = Junction.AND
@@ -226,7 +226,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		if @data.right.kind == NodeKind.JunctionExpression {
 			var late type: Type
 
-			if @data.right.operator.kind == BinaryOperatorKind.And {
+			if @data.right.operator.kind == BinaryOperatorKind.JunctionAnd {
 				type = FusionType.new(@scope)
 
 				@junction = Junction.AND

@@ -110,6 +110,10 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		@expectingEnum: Boolean		= true
 		@native: Boolean			= false
 	}
+	abstract {
+		runtime(): String
+		symbol(): String
+	}
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
@@ -176,8 +180,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		}
 	} # }}}
 	isAcceptingEnum() => false
-	abstract runtime(): String
-	abstract symbol(): String
+	native() => @symbol()
 	toFragments(fragments, mode) { # {{{
 		if @adjusted {
 			if @enum && @expectingEnum {
@@ -208,7 +211,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	} # }}}
 	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
-		fragments.compile(@left).code($space).code(@symbol(), @data.operator).code($space).compile(@right)
+		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 }
@@ -374,12 +377,6 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 }
 
 
-class AssignmentOperatorLeftShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator.LeftShift
-	runtime() => 'leftShift'
-	symbol() => '<<='
-}
-
 class AssignmentOperatorModulo extends NumericAssignmentOperatorExpression {
 	operator() => Operator.Modulo
 	runtime() => 'modulo'
@@ -399,11 +396,6 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 	toNativeFragments(fragments) { # {{{
 		fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
 	} # }}}
-}
-class AssignmentOperatorRightShift extends NumericAssignmentOperatorExpression {
-	operator() => Operator.RightShift
-	runtime() => 'rightShift'
-	symbol() => '>>='
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {

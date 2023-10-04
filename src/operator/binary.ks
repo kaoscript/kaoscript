@@ -106,99 +106,6 @@ class BinaryOperatorExpression extends Expression {
 	} # }}}
 }
 
-abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
-	private late {
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
-		@type: Type
-	}
-	abstract {
-		operator(): Operator
-		runtime(): String
-		symbol(): String
-	}
-	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode.Permissive)
-
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
-		}
-
-		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
-			@enum = true
-
-			if @expectingEnum {
-				@type = @left.type()
-			}
-			else {
-				@type = @left.type().discard().type()
-			}
-
-			@left.unflagExpectingEnum()
-			@right.unflagExpectingEnum()
-		}
-		else {
-			if @left.type().isNumber() && @right.type().isNumber() {
-				@native = true
-			}
-			else if @left.type().canBeNumber() {
-				unless @right.type().canBeNumber() {
-					TypeException.throwInvalidOperand(@right, this.operator(), this)
-				}
-			}
-			else {
-				TypeException.throwInvalidOperand(@left, this.operator(), this)
-			}
-
-			if @left.type().isNullable() || @right.type().isNullable() {
-				@type = @scope.reference('Number').setNullable(true)
-
-				@native = false
-			}
-			else {
-				@type = @scope.reference('Number')
-			}
-		}
-	} # }}}
-	isAcceptingEnum() => false
-	isComputed() => @native || (@enum && !@expectingEnum)
-	setOperands(@left, @right, @enum = false, @expectingEnum = false): valueof this
-	toEnumFragments(fragments)
-	toNativeFragments(fragments) { # {{{
-		fragments.wrap(@left).code($space).code(@symbol(), @data.operator).code($space).wrap(@right)
-	} # }}}
-	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == this.operator() && type == OperandType.Number {
-			fragments.compile(@left).code($comma).compile(@right)
-		}
-		else {
-			this.toOperatorFragments(fragments)
-		}
-	} # }}}
-	toOperatorFragments(fragments) { # {{{
-		if @enum {
-			@toEnumFragments(fragments)
-		}
-		else if @native {
-			@toNativeFragments(fragments)
-		}
-		else {
-			fragments
-				.code($runtime.operator(this), `.\(@runtime())(`)
-				.compile(@left)
-				.code($comma)
-				.compile(@right)
-				.code(')')
-		}
-	} # }}}
-	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
-	type() => @type
-	unflagExpectingEnum() { # {{{
-		@expectingEnum = false
-	} # }}}
-}
-
 class BinaryOperatorAddition extends BinaryOperatorExpression {
 	private late {
 		@enum: Boolean				= false
@@ -344,18 +251,6 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	} # }}}
 }
 
-class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
-	operator() => Operator.Division
-	runtime() => 'division'
-	symbol() => '/'
-}
-
-class BinaryOperatorLeftShift extends NumericBinaryOperatorExpression {
-	operator() => Operator.LeftShift
-	runtime() => 'leftShift'
-	symbol() => '<<'
-}
-
 class BinaryOperatorMatch extends Expression {
 	private late {
 		@await: Boolean				= false
@@ -379,10 +274,10 @@ class BinaryOperatorMatch extends Expression {
 				@addOperand(operand)
 			}
 
-			if @data.right.operator.kind == BinaryOperatorKind.And {
+			if @data.right.operator.kind == BinaryOperatorKind.JunctionAnd {
 				@junction = ' && '
 			}
-			else if @data.right.operator.kind == BinaryOperatorKind.Or {
+			else if @data.right.operator.kind == BinaryOperatorKind.JunctionOr {
 				@junction = ' || '
 			}
 		}
@@ -542,7 +437,7 @@ class BinaryOperatorMatch extends Expression {
 				}
 				else {
 					fragments
-						.code($runtime.operator(this), `.andNum(\(@reuseName) = `)
+						.code($runtime.operator(this), `.bitAnd(\(@reuseName) = `)
 						.compile(@subject)
 						.code($comma)
 						.compile(operand)
@@ -554,7 +449,7 @@ class BinaryOperatorMatch extends Expression {
 					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0`)
 				}
 				else {
-					fragments.code($runtime.operator(this), `.andNum(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
+					fragments.code($runtime.operator(this), `.bitAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
 				}
 			}
 		}
@@ -564,7 +459,7 @@ class BinaryOperatorMatch extends Expression {
 			}
 			else {
 				fragments
-					.code($runtime.operator(this), `.andNum(`)
+					.code($runtime.operator(this), `.bitAnd(`)
 					.compile(@subject)
 					.code($comma)
 					.compile(operand)
@@ -577,58 +472,4 @@ class BinaryOperatorMatch extends Expression {
 
 class BinaryOperatorMismatch extends BinaryOperatorMatch {
 	operator() => '=='
-}
-
-class BinaryOperatorModulo extends NumericBinaryOperatorExpression {
-	operator() => Operator.Modulo
-	runtime() => 'modulo'
-	symbol() => '%'
-}
-
-class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
-	operator() => Operator.Multiplication
-	runtime() => 'multiplication'
-	symbol() => '*'
-}
-class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
-	operator() => Operator.Quotient
-	runtime() => 'quotient'
-	symbol() => '/.'
-	toNativeFragments(fragments) { # {{{
-		fragments.code('Number.parseInt(').wrap(@left).code(' / ').wrap(@right).code(')')
-	} # }}}
-}
-
-class BinaryOperatorRightShift extends NumericBinaryOperatorExpression {
-	operator() => Operator.RightShift
-	runtime() => 'rightShift'
-	symbol() => '>>'
-}
-
-class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
-	isAcceptingEnum() => true
-	operator() => Operator.Subtraction
-	runtime() => 'subtraction'
-	symbol() => '-'
-	toOperandFragments(fragments, operator, type) { # {{{
-		if operator == Operator.Subtraction {
-			if type == OperandType.Enum {
-				fragments.wrap(@left).code(' & ~').wrap(@right)
-			}
-			else {
-				fragments.compile(@left).code($comma).compile(@right)
-			}
-		}
-		else {
-			this.toOperatorFragments(fragments)
-		}
-	} # }}}
-	toEnumFragments(fragments) { # {{{
-		if @expectingEnum {
-			fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
-		}
-		else {
-			fragments.wrap(@left).code(' & ~').wrap(@right)
-		}
-	} # }}}
 }

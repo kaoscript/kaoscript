@@ -1,0 +1,1 @@
+TypeException: The expression "x" of type "Number" is expected to be of type "Boolean" (fixtures/compile/operator/operator.lneg.i.ks:2)

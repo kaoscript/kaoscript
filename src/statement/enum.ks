@@ -255,12 +255,12 @@ class EnumVariableDeclaration extends AbstractNode {
 				var length = enum.length()
 
 				if ?value {
-					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
+					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
 						@composite = true
 
 						@operands = [value.left, value.right]
 					}
-					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
+					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
 						@composite = true
 
 						@operands = value.operands

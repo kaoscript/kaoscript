@@ -1,47 +1,53 @@
 var $assignmentOperators = {
 	`\(AssignmentOperatorKind.Addition)`			: AssignmentOperatorAddition
-	`\(AssignmentOperatorKind.And)`					: AssignmentOperatorAnd
+	`\(AssignmentOperatorKind.BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
+	`\(AssignmentOperatorKind.BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
+	`\(AssignmentOperatorKind.BitwiseOr)`			: AssignmentOperatorBitwiseOr
+	`\(AssignmentOperatorKind.BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
+	`\(AssignmentOperatorKind.BitwiseXor)`			: AssignmentOperatorBitwiseXor
 	`\(AssignmentOperatorKind.Division)`			: AssignmentOperatorDivision
 	`\(AssignmentOperatorKind.Empty)`				: AssignmentOperatorEmpty
 	`\(AssignmentOperatorKind.EmptyCoalescing)`		: AssignmentOperatorEmptyCoalescing
 	`\(AssignmentOperatorKind.Equals)`				: AssignmentOperatorEquals
 	`\(AssignmentOperatorKind.Existential)`			: AssignmentOperatorExistential
-	`\(AssignmentOperatorKind.LeftShift)`			: AssignmentOperatorLeftShift
+	`\(AssignmentOperatorKind.LogicalAnd)`			: AssignmentOperatorLogicalAnd
+	`\(AssignmentOperatorKind.LogicalOr)`			: AssignmentOperatorLogicalOr
+	`\(AssignmentOperatorKind.LogicalXor)`			: AssignmentOperatorLogicalXor
 	`\(AssignmentOperatorKind.Modulo)`				: AssignmentOperatorModulo
 	`\(AssignmentOperatorKind.Multiplication)`		: AssignmentOperatorMultiplication
 	`\(AssignmentOperatorKind.NonEmpty)`			: AssignmentOperatorNonEmpty
 	`\(AssignmentOperatorKind.NonExistential)`		: AssignmentOperatorNonExistential
 	`\(AssignmentOperatorKind.NullCoalescing)`		: AssignmentOperatorNullCoalescing
-	`\(AssignmentOperatorKind.Or)`					: AssignmentOperatorOr
 	`\(AssignmentOperatorKind.Quotient)`			: AssignmentOperatorQuotient
 	`\(AssignmentOperatorKind.Return)`				: AssignmentOperatorReturn
-	`\(AssignmentOperatorKind.RightShift)`			: AssignmentOperatorRightShift
 	`\(AssignmentOperatorKind.Subtraction)`			: AssignmentOperatorSubtraction
-	`\(AssignmentOperatorKind.Xor)`					: AssignmentOperatorXor
 }
 
 var $binaryOperators = {
 	`\(BinaryOperatorKind.Addition)`			: BinaryOperatorAddition
-	`\(BinaryOperatorKind.And)`					: BinaryOperatorAnd
 	`\(BinaryOperatorKind.BackwardPipeline)`	: BinaryOperatorBackwardPipeline
+	`\(BinaryOperatorKind.BitwiseAnd)`			: PolyadicOperatorBitwiseAnd
+	`\(BinaryOperatorKind.BitwiseLeftShift)`	: PolyadicOperatorBitwiseLeftShift
+	`\(BinaryOperatorKind.BitwiseOr)`			: PolyadicOperatorBitwiseOr
+	`\(BinaryOperatorKind.BitwiseRightShift)`	: PolyadicOperatorBitwiseRightShift
+	`\(BinaryOperatorKind.BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind.Division)`			: BinaryOperatorDivision
 	`\(BinaryOperatorKind.EmptyCoalescing)`		: BinaryOperatorEmptyCoalescing
 	`\(BinaryOperatorKind.ForwardPipeline)`		: BinaryOperatorForwardPipeline
-	`\(BinaryOperatorKind.Imply)`				: BinaryOperatorImply
-	`\(BinaryOperatorKind.LeftShift)`			: BinaryOperatorLeftShift
 	`\(BinaryOperatorKind.Match)`				: BinaryOperatorMatch
+	`\(BinaryOperatorKind.LogicalAnd)`			: PolyadicOperatorLogicalAnd
+	`\(BinaryOperatorKind.LogicalImply)`		: PolyadicOperatorLogicalImply
+	`\(BinaryOperatorKind.LogicalOr)`			: PolyadicOperatorLogicalOr
+	`\(BinaryOperatorKind.LogicalXor)`			: PolyadicOperatorLogicalXor
 	`\(BinaryOperatorKind.Mismatch)`			: BinaryOperatorMismatch
 	`\(BinaryOperatorKind.Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperatorKind.Multiplication)`		: BinaryOperatorMultiplication
 	`\(BinaryOperatorKind.NullCoalescing)`		: BinaryOperatorNullCoalescing
-	`\(BinaryOperatorKind.Or)`					: BinaryOperatorOr
 	`\(BinaryOperatorKind.Quotient)`			: BinaryOperatorQuotient
-	`\(BinaryOperatorKind.RightShift)`			: BinaryOperatorRightShift
 	`\(BinaryOperatorKind.Subtraction)`			: BinaryOperatorSubtraction
 	`\(BinaryOperatorKind.TypeCasting)`			: BinaryOperatorTypeCasting
 	`\(BinaryOperatorKind.TypeEquality)`		: BinaryOperatorTypeEquality
 	`\(BinaryOperatorKind.TypeInequality)`		: BinaryOperatorTypeInequality
-	`\(BinaryOperatorKind.Xor)`					: BinaryOperatorXor
 }
 
 var $expressions = {
@@ -161,27 +167,31 @@ var $statements = {
 
 var $polyadicOperators = {
 	`\(BinaryOperatorKind.Addition)`			: PolyadicOperatorAddition
-	`\(BinaryOperatorKind.And)`					: PolyadicOperatorAnd
+	`\(BinaryOperatorKind.BitwiseAnd)`			: PolyadicOperatorBitwiseAnd
+	`\(BinaryOperatorKind.BitwiseLeftShift)`	: PolyadicOperatorBitwiseLeftShift
+	`\(BinaryOperatorKind.BitwiseOr)`			: PolyadicOperatorBitwiseOr
+	`\(BinaryOperatorKind.BitwiseRightShift)`	: PolyadicOperatorBitwiseRightShift
+	`\(BinaryOperatorKind.BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind.Division)`			: PolyadicOperatorDivision
 	`\(BinaryOperatorKind.EmptyCoalescing)`		: PolyadicOperatorEmptyCoalescing
 	`\(BinaryOperatorKind.Modulo)`				: PolyadicOperatorModulo
-	`\(BinaryOperatorKind.Imply)`				: PolyadicOperatorImply
-	`\(BinaryOperatorKind.LeftShift)`			: PolyadicOperatorLeftShift
+	`\(BinaryOperatorKind.LogicalAnd)`			: PolyadicOperatorLogicalAnd
+	`\(BinaryOperatorKind.LogicalImply)`		: PolyadicOperatorLogicalImply
+	`\(BinaryOperatorKind.LogicalOr)`			: PolyadicOperatorLogicalOr
+	`\(BinaryOperatorKind.LogicalXor)`			: PolyadicOperatorLogicalXor
 	`\(BinaryOperatorKind.Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperatorKind.NullCoalescing)`		: PolyadicOperatorNullCoalescing
-	`\(BinaryOperatorKind.Or)`					: PolyadicOperatorOr
 	`\(BinaryOperatorKind.Quotient)`			: PolyadicOperatorQuotient
-	`\(BinaryOperatorKind.RightShift)`			: PolyadicOperatorRightShift
 	`\(BinaryOperatorKind.Subtraction)`			: PolyadicOperatorSubtraction
-	`\(BinaryOperatorKind.Xor)`					: PolyadicOperatorXor
 }
 
 var $unaryOperators = {
+	`\(UnaryOperatorKind.BitwiseNegation)`		: UnaryOperatorBitwiseNegation
 	`\(UnaryOperatorKind.Default)`				: UnaryOperatorDefault
 	`\(UnaryOperatorKind.Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperatorKind.ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
 	`\(UnaryOperatorKind.Implicit)`				: UnaryOperatorImplicit
-	`\(UnaryOperatorKind.Negation)`				: UnaryOperatorNegation
+	`\(UnaryOperatorKind.LogicalNegation)`		: UnaryOperatorLogicalNegation
 	`\(UnaryOperatorKind.Negative)`				: UnaryOperatorNegative
 	`\(UnaryOperatorKind.NonEmpty)`				: UnaryOperatorNonEmpty
 	`\(UnaryOperatorKind.NullableTypeCasting)`	: UnaryOperatorNullableTypeCasting

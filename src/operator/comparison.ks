@@ -9,7 +9,7 @@ class ComparisonExpression extends Expression {
 		@await: Boolean				= false
 		@composite: Boolean			= false
 		@computed: Boolean			= true
-		@junction: JunctionKind		= JunctionKind.And
+		@junction: JunctionKind		= JunctionKind.Xor
 		@junctive: Boolean			= false
 		@operands: Expression[]		= []
 		@operators					= []
@@ -31,14 +31,11 @@ class ComparisonExpression extends Expression {
 					@addOperator(@data.values[1], operand1, @addOperand(operand))
 				}
 
-				if value.operator.kind == BinaryOperatorKind.And {
-					pass
+				if value.operator.kind == BinaryOperatorKind.JunctionAnd {
+					@junction = JunctionKind.And
 				}
-				else if value.operator.kind == BinaryOperatorKind.Or {
+				else if value.operator.kind == BinaryOperatorKind.JunctionOr {
 					@junction = JunctionKind.Or
-				}
-				else {
-					@junction = JunctionKind.Xor
 				}
 			}
 			else {
@@ -356,7 +353,7 @@ class ComparisonExpression extends Expression {
 		}
 
 		for var i from 0 to~ @operators.length {
-			fragments += ` \(@operators[i].symbol()) `
+			fragments += ` \(@operators[i].native()) `
 
 			if @operands[i + 1].isComputed() {
 				fragments += `(\(@operands[i + 1].toQuote()))`
@@ -377,13 +374,16 @@ abstract class ComparisonOperator {
 		@node
 		@right
 	}
+	abstract {
+		symbol(): String
+	}
 	constructor(@node, @left, @right)
-	abstract symbol(): String
 	prepare()
 	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	inferWhenTrueTypes(inferables) => @inferTypes(inferables)
 	isComputed() => true
+	native() => @symbol()
 }
 
 class EqualityOperator extends ComparisonOperator {
@@ -714,6 +714,9 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 	private {
 		@isNative: Boolean		= false
 	}
+	abstract {
+		runtime(): String
+	}
 	prepare() { # {{{
 		super()
 
@@ -734,7 +737,6 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 		}
 	} # }}}
 	isComputed() => @isNative
-	abstract runtime(): String
 	toNativeFragments(fragments, reuseName?, leftReusable, rightReusable) { # {{{
 		if leftReusable && reuseName != null {
 			fragments.code(reuseName)
@@ -743,7 +745,7 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 			fragments.wrap(@left)
 		}
 
-		fragments.code($space, @symbol(), $space)
+		fragments.code($space, @native(), $space)
 
 		if rightReusable && reuseName != null {
 			fragments.code('(', reuseName, $equals).compile(@right).code(')')

@@ -1,4 +1,4 @@
-const {Operator, Type} = require("@kaoscript/runtime");
+const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let tt = Operator.or(foo.foo, Type.isValue(bar) ? bar.bar : null);
+	let tt = (foo.foo === true) || (Type.isValue(bar) ? bar.bar === true : false);
 };
