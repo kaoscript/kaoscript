@@ -59,7 +59,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@right.prepare(@type, targetMode)
 
-		var type = @right.type()
+		var type = @right.type().discardValue()
 
 		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)

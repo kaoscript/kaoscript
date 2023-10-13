@@ -492,7 +492,7 @@ class EqualityOperator extends ComparisonOperator {
 			else {
 				inferables[@right.path()] = {
 					isVariable: @right is IdentifierLiteral
-					type: @right.type().setNullable(false)
+					type: @right.type().discardValue().setNullable(false)
 				}
 			}
 		}
@@ -510,7 +510,7 @@ class EqualityOperator extends ComparisonOperator {
 			else {
 				inferables[@left.path()] = {
 					isVariable: @left is IdentifierLiteral
-					type: @left.type().setNullable(false)
+					type: @left.type().discardValue().setNullable(false)
 				}
 			}
 		}
@@ -523,8 +523,8 @@ class EqualityOperator extends ComparisonOperator {
 	inferWhenTrueTypes(mut inferables) { # {{{
 		inferables = @right.inferTypes(@left.inferTypes(inferables))
 
-		var leftType = @left.type()
-		var rightType = @right.type()
+		var leftType = @left.type().discardValue()
+		var rightType = @right.type().discardValue()
 
 		if @left.isInferable() {
 			if @right.isInferable() {

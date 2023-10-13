@@ -12,11 +12,13 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
+		var rightType = @right.type().discardValue()
+
 		if @condition && @lateinit {
-			@statement.initializeLateVariable(@left.name(), @right.type(), true)
+			@statement.initializeLateVariable(@left.name(), rightType, true)
 		}
 		else {
-			@left.initializeVariables(@right.type(), this)
+			@left.initializeVariables(rightType, this)
 		}
 
 		@type = @left.getDeclaredType()
@@ -25,12 +27,12 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 			@type = NullType.Explicit
 		}
 		else {
-			unless @right.type().isAssignableToVariable(@type, true, false, false) {
-				TypeException.throwInvalidAssignement(@left, @type, @right.type(), this)
+			unless rightType.isAssignableToVariable(@type, true, false, false) {
+				TypeException.throwInvalidAssignement(@left, @type, rightType, this)
 			}
 
-			if @left.isInferable() && @right.type().isMorePreciseThan(@type) {
-				@type = @right.type()
+			if @left.isInferable() && rightType.isMorePreciseThan(@type) {
+				@type = rightType
 			}
 		}
 	} # }}}

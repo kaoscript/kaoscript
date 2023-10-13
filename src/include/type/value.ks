@@ -40,9 +40,12 @@ class ValueType extends Type {
 		canBeNumber
 		canBeString
 		discard
+		isAny
 		isAssignableToVariable
 		isBoolean
+		isComparableWith
 		isEnum
+		isMorePreciseThan
 		isNull
 		isNullable
 		isNumber
