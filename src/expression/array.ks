@@ -31,10 +31,10 @@ class ArrayExpression extends Expression {
 		}
 
 		if spread {
-			var mut type = @values[0].type().discardSpread()
+			var mut type = @values[0].type().discardValue().discardSpread()
 
 			for var value in @values from 1 {
-				if !type.equals(value.type().discardSpread()) {
+				if !type.equals(value.type().discardValue().discardSpread()) {
 					type = null
 
 					break
@@ -52,7 +52,7 @@ class ArrayExpression extends Expression {
 			@type = ArrayType.new(@scope)
 
 			for var value in @values {
-				@type.addProperty(value.type())
+				@type.addProperty(value.type().discardValue())
 			}
 		}
 	} # }}}

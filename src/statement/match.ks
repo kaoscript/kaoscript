@@ -66,6 +66,7 @@ class MatchStatement extends Statement {
 		@reusableValue: Boolean				= false
 		@tests								= {}
 		@usingFallthrough: Boolean			= false
+		@usingTempName: Boolean			= false
 		@value								= null
 		@valueType: Type
 	}
@@ -127,10 +128,6 @@ class MatchStatement extends Statement {
 			clause.body = $compile.block(data.body, this, clause.scope)
 		}
 
-		for var clause in @clauses {
-			clause.body.analyse()
-		}
-
 		if @hasLateInitVariables && !@hasDefaultClause {
 			for var value, name of @lateInitVariables when value.variable.isImmutable() {
 				SyntaxException.throwMissingAssignmentMatchNoDefault(name, this)
@@ -158,6 +155,7 @@ class MatchStatement extends Statement {
 
 			if @reusableValue {
 				@name = @scope.acquireTempName(false)
+				@usingTempName = true
 			}
 			else {
 				@name = @scope.getVariable(@data.expression.name).getSecureName()
@@ -178,6 +176,7 @@ class MatchStatement extends Statement {
 			enumConditions += clause.filter:MatchFilter.getEnumConditions()
 			maxConditions += clause.filter:MatchFilter.getMaxConditions()
 
+			clause.body.analyse()
 			clause.body.prepare(target)
 
 			if @usingFallthrough {
@@ -612,6 +611,7 @@ class MatchStatement extends Statement {
 		return true
 	} # }}}
 	isLateInitializable() => true
+	isUsingTempName() => @usingTempName
 	isUsingVariable(name) { # {{{
 		if @hasDeclaration {
 			if @declaration.isUsingVariable(name) {
@@ -1380,13 +1380,13 @@ class MatchConditionType extends AbstractNode {
 	}
 	analyse()
 	override prepare(target, targetMode) { # {{{
-		@type = Type.fromAST(@data.type, this)
+		@type = Type.fromAST(@data.type, @parent.getValueType(), this)
 	} # }}}
 	translate()
 	isEnum() => false
 	setCastingEnum(_)
 	toConditionFragments(fragments, name, junction) { # {{{
-		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name))
+		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name, @parent.getValueType()))
 	} # }}}
 	type() => @type
 }
@@ -1451,13 +1451,37 @@ class MatchConditionValue extends AbstractNode {
 		}
 	} # }}}
 	isEnum() => @type.isEnum()
+	isVariant() => @type.isVariant()
 	setCastingEnum(@castingEnum)
 	toConditionFragments(fragments, name, junction) { # {{{
 		if @values.length == 1 {
 			var value = @values[0]
 
 			if @type.isContainer() {
-				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name))
+				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name, @scope.getImplicitType()))
+			}
+			else if @type.isVariant() {
+				var object = @type.discard()
+				var variant = object.getVariantType()
+				var subtypes = @type.getSubtypes()
+				var operand = `\(name).\(object.getVariantName()) === `
+
+				if subtypes.length == 1 {
+					var { name, type } = subtypes[0]
+
+					fragments.code(operand).compile(type).code(`.\(name)`)
+				}
+				else {
+					fragments.code('(') if junction == Junction.AND
+
+					for var { name, type }, index in subtypes {
+						fragments
+							..code(' || ') if index != 0
+							..code(operand).compile(type).code(`.\(name)`)
+					}
+
+					fragments.code(')') if junction == Junction.AND
+				}
 			}
 			else {
 				fragments.code(name, ' === ').compile(value)
@@ -1483,9 +1507,28 @@ class MatchConditionValue extends AbstractNode {
 				}
 
 				if value.type().isContainer() {
-					literal ??= Literal.new(false, this, @scope:Scope, name)
+					literal ??= Literal.new(false, this, @scope:Scope, name, @scope.getImplicitType())
 
 					value.type().toPositiveTestFragments(fragments, literal)
+				}
+				else if @type.isVariant() {
+					var object = @type.discard()
+					var variant = object.getVariantType()
+					var subtypes = @type.getSubtypes()
+					var operand = `\(name).\(object.getVariantName()) === `
+
+					if subtypes.length == 1 {
+						var { name, type } = subtypes[0]
+
+						fragments.code(operand).compile(type).code(`.\(name)`)
+					}
+					else {
+						for var { name, type }, index in subtypes {
+							fragments
+								..code(' || ') if index != 0
+								..code(operand).compile(type).code(`.\(name)`)
+						}
+					}
 				}
 				else {
 					fragments.code(name, ' === ').compile(value)
@@ -1666,12 +1709,15 @@ class MatchFilter extends AbstractNode {
 				if condition.isEnum() {
 					@enumConditions += 1
 
-					types.push(condition.type().reference(@scope))
+					types.push(condition.type().discardValue().reference(@scope))
 				}
 				else if condition.isContainer() {
 					@binding?.unflagTypeTesting()
 
 					types.push(condition.type().reference(@scope))
+				}
+				else if condition.isVariant() {
+					types.push(condition.type())
 				}
 			}
 			else {
@@ -1684,7 +1730,9 @@ class MatchFilter extends AbstractNode {
 
 			@binding?.prepare(conditionType)
 
-			@scope.setImplicitVariable(@parent().name(), conditionType)
+			var name = @parent().name()
+
+			@scope.setImplicitVariable(name, conditionType)
 		}
 		else {
 			@binding?.prepare(valueType)

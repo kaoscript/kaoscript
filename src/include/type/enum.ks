@@ -329,8 +329,6 @@ class EnumType extends Type {
 
 		return @function
 	} # }}}
-	hasProperty(name: String) => ?@variables[name]
-	hasVariable(name: String) => ?@variables[name]
 	getDefaultVariable() => @defaultVariable
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
 		if var assessment ?= @instanceAssessments[name] {
@@ -410,14 +408,6 @@ class EnumType extends Type {
 			return false
 		}
 	} # }}}
-	hasStaticMethod(name) { # {{{
-		if @staticMethods[name] is Array {
-			return true
-		}
-		else {
-			return false
-		}
-	} # }}}
 	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
 			for var method in @instanceMethods[name] {
@@ -440,6 +430,9 @@ class EnumType extends Type {
 
 		return false
 	} # }}}
+	hasProperty(name: String) => ?@variables[name]
+	hasStaticMethod(name: String) => ?@staticMethods[name]
+	hasVariable(name: String) => ?@variables[name]
 	incDefaultSequence() { # {{{
 		@sequences.defaults += 1
 

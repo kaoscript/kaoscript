@@ -52,7 +52,7 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
-			var type = @object.type()
+			var type = @object.type().discardValue()
 
 			unless type.isComplete() {
 				ReferenceException.throwUncompleteType(type, this, this)
@@ -119,7 +119,7 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			var type = @object.type()
+			var type = @object.type().discardValue()
 
 			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
 				ReferenceException.throwNullExpression(@object, this)
@@ -299,7 +299,7 @@ class MemberExpression extends Expression {
 		else {
 			if type is NamedType {
 				if type.type().hasVariable(@property) {
-					@type = type.reference(@scope)
+					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
 
 					if @object.isInferable() {
 						@inferable = true
@@ -419,7 +419,57 @@ class MemberExpression extends Expression {
 			return false
 		}
 		else {
-			if type.isObject() {
+			var mut found = false
+
+			if type.isVariant() {
+				if var property ?= type.getProperty(@property) {
+					@type = property.discardVariable()
+				}
+				else if type is ReferenceType {
+					if var subtypes #= type.getSubtypes() {
+						if subtypes.length == 1 {
+							var { name } = subtypes[0]
+							var variant = type.discard().getVariantType()
+
+							if var { type % subtype } ?= variant.getField(name) {
+								if var property ?= subtype.getProperty(@property) {
+									@type = property.discardVariable()
+
+									found = true
+								}
+								else if subtype.isExhaustive(this) {
+									if @assignable {
+										ReferenceException.throwInvalidAssignment(this)
+									}
+									else {
+										ReferenceException.throwNotDefinedProperty(@property, this)
+									}
+								}
+							}
+							else {
+								NotImplementedException.throw(this)
+							}
+						}
+						else {
+							NotImplementedException.throw(this)
+						}
+					}
+				}
+				else if type is NamedType {
+					var master = type.discard().getVariantType().getMaster()
+
+					if master.hasProperty(@property) {
+						@type = ReferenceType.new(@scope, type.name(), null, null, [{ name: @property, type: master }])
+
+						found = true
+					}
+					else {
+						NotImplementedException.throw(this)
+					}
+				}
+			}
+
+			if !found && type.isObject() {
 				@type = type.parameter()
 
 				var oType = type.discard()
@@ -429,7 +479,10 @@ class MemberExpression extends Expression {
 				}
 			}
 
-			if var property ?= type.getProperty(@property) {
+			if found {
+				pass
+			}
+			else if var property ?= type.getProperty(@property) {
 				var type = type.discardReference()
 				if type.isClass() && property is ClassVariableType && property.isSealed() {
 					@sealed = true
@@ -550,6 +603,7 @@ class MemberExpression extends Expression {
 			return true
 		}
 	} # }}}
+	property() => @property
 	releaseReusable() { # {{{
 		if @object.isCallable() {
 			@object.releaseReusable()

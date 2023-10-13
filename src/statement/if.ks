@@ -327,7 +327,7 @@ class IfStatement extends Statement {
 						}
 					}
 					else if inferable.isVariable && @scope.hasVariable(name) {
-						@scope.replaceVariable(name, inferable.type, true, false, this)
+						@scope.replaceVariable(name, trueType, true, false, this)
 					}
 				}
 

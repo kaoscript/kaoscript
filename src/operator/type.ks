@@ -103,17 +103,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 
 			for var operand in @data.right.operands {
-				if operand.kind == NodeKind.TypeReference && operand.typeName?.kind == NodeKind.Identifier {
-					if var variable ?= @scope.getVariable(operand.typeName.name) {
-						type.addType(@validateType(variable))
-					}
-					else {
-						ReferenceException.throwNotDefined(operand.typeName.name, this)
-					}
-				}
-				else {
-					throw NotImplementedException.new(this)
-				}
+				type.addType(@confirmType(Type.fromAST(operand, @subject.type(), this)))
 			}
 
 			@trueType = type.type()
@@ -123,17 +113,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			@subject.releaseReusable()
 		}
 		else {
-			if @data.right.kind == NodeKind.TypeReference && @data.right.typeName?.kind == NodeKind.Identifier {
-				if var variable ?= @scope.getVariable(@data.right.typeName.name) {
-					@trueType = @validateType(variable)
-				}
-				else {
-					ReferenceException.throwNotDefined(@data.right.typeName.name, this)
-				}
-			}
-			else {
-				@trueType = Type.fromAST(@data.right, this)
-			}
+			@trueType = @confirmType(Type.fromAST(@data.right, @subject.type(), this))
 		}
 
 		if @subject.isInferable() {
@@ -178,9 +158,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@trueType.toPositiveTestFragments(fragments, @subject, junction)
 	} # }}}
 	type() => @scope.reference('Boolean')
-	private validateType(variable: Variable) { # {{{
-		var type = variable.getRealType()
-
+	private confirmType(type: Type): Type { # {{{
 		if @subject.type().isNull() {
 			TypeException.throwNullTypeChecking(type, this)
 		}
@@ -190,16 +168,13 @@ class BinaryOperatorTypeEquality extends Expression {
 				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
 			}
 		}
-		else if type.isClass() || type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isFusion() || type.isExclusion() {
-			unless @scope.reference(type).isAssignableToVariable(@subject.type(), false, false, true) {
+		else {
+			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
 				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
 			}
 		}
-		else {
-			TypeException.throwNotClass(variable.name(), this)
-		}
 
-		return type.reference()
+		return type
 	} # }}}
 }
 

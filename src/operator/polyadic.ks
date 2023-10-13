@@ -140,12 +140,12 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 
 		if @operands[0].type().isEnum() {
-			var name = @operands[0].type().name()
+			var name = @operands[0].type().discardValue().name()
 
 			@enum = true
 
 			for var operand in @operands from 1 {
-				if !operand.type().isEnum() || operand.type().name() != name {
+				if !operand.type().isEnum() || operand.type().discardValue().name() != name {
 					@enum = false
 
 					break
@@ -157,7 +157,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 				@number = @left().type().discard().isFlags()
 
 				if @expectingEnum {
-					@type = @left().type()
+					@type = @left().type().discardValue()
 				}
 				else {
 					@type = @left().type().discard().type()
@@ -196,6 +196,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 
 				for var operand in @operands while @native || @number {
 					if operand.type().isNumber() {
+						pass
 					}
 					else if operand.type().isAny() {
 						@number = false

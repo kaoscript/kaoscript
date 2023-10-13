@@ -81,10 +81,6 @@ class MatchExpression extends Expression {
 			clause.body = $compile.block(data.body, this, clause.scope)
 		}
 
-		for var clause in @clauses {
-			clause.body.analyse()
-		}
-
 		if @hasLateInitVariables && !@hasDefaultClause {
 			for var value, name of @lateInitVariables when value.variable.isImmutable() {
 				SyntaxException.throwMissingAssignmentMatchNoDefault(name, this)
@@ -183,6 +179,7 @@ class MatchExpression extends Expression {
 				tracker.exclude(condition)
 			}
 
+			clause.body.analyse()
 			clause.body.prepare(target)
 
 			if @usingFallthrough {
@@ -503,8 +500,11 @@ abstract class PossibilityTracker {
 			if type is EnumType {
 				return EnumPossibilityTracker.new(type)
 			}
+			if type is ObjectType && type.isVariant() {
+				return EnumPossibilityTracker.new(type.getVariantType().getEnumType())
+			}
 
-			return DefaultPossibilityTracker.new()
+			return DummyPossibilityTracker.new()
 		} # }}}
 		dummy(): PossibilityTracker { # {{{
 			return DummyPossibilityTracker.new()
@@ -543,10 +543,18 @@ class EnumPossibilityTracker extends PossibilityTracker {
 
 		@possibilities = type.listVariables()
 	} # }}}
+	exclude(condition: MatchConditionType) { # {{{
+		for var { name } in condition.type().getSubtypes() {
+			@possibilities.remove(name)
+		}
+	} # }}}
 	exclude(condition: MatchConditionValue) { # {{{
 		for var value in condition.values() {
 			match value {
 				is UnaryOperatorImplicit {
+					@possibilities.remove(value.property())
+				}
+				is MemberExpression {
 					@possibilities.remove(value.property())
 				}
 				else {

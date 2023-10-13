@@ -121,13 +121,11 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			@expectingEnum = false
 		}
 
-		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
 			@enum = true
 
-			@type = @left.type()
-
 			if @expectingEnum {
-				@type = @left.type()
+				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
@@ -232,12 +230,12 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 			@expectingEnum = false
 		}
 
-		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		if @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
 			@enum = true
 			@number = @left.type().discard().isFlags()
 
 			if @expectingEnum {
-				@type = @left.type()
+				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()

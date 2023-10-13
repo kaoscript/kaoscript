@@ -17,11 +17,11 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 			@expectingEnum = false
 		}
 
-		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
 			@enum = true
 
 			if @expectingEnum {
-				@type = @left.type()
+				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
@@ -110,12 +110,12 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 
 		if @isAcceptingEnum() && @operands[0].type().isEnum() {
-			var name = @operands[0].type().name()
+			var name = @operands[0].type().discardValue().name()
 
 			@enum = true
 
 			for var operand in @operands from 1 {
-				if (operand.type().isEnum() && operand.type().name() != name) || !operand.type().isNumber() {
+				if (operand.type().isEnum() && operand.type().discardValue().name() != name) || !operand.type().isNumber() {
 					@enum = false
 
 					break
@@ -126,7 +126,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 				@native = true
 
 				if @expectingEnum {
-					@type = @left().type()
+					@type = @left().type().discardValue()
 				}
 				else {
 					@type = @left().type().discard().type()

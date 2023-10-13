@@ -16,6 +16,9 @@ class ObjectType extends Type {
 		@testName: String?
 		@testProperties: Boolean		= false
 		@testRest: Boolean				= false
+		@variant: Boolean				= false
+		@variantName: String?
+		@variantType: VariantType?
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ObjectType { # {{{
@@ -56,6 +59,12 @@ class ObjectType extends Type {
 		@computed[name] = computed
 		@length += 1
 		@testProperties ||= !type.isAny() || !type.isNullable()
+
+		if type is VariantType {
+			@variant = true
+			@variantName = name
+			@variantType = type
+		}
 	} # }}}
 	clone() { # {{{
 		var type = ObjectType.new(@scope)
@@ -222,6 +231,8 @@ class ObjectType extends Type {
 	} # }}}
 	getRestType(): valueof @restType
 	getTestName(): valueof @testName
+	getVariantName() => @variantName
+	getVariantType() => @variantType
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut str = ''
 
@@ -282,7 +293,7 @@ class ObjectType extends Type {
 	hasProperties() => @length > 0
 	hasRest() => @rest
 	hasTest() => ?@testName
-	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
+	override isAssignableToVariable(mut value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isAny() {
 			if @isNullable() {
 				return nullcast || value.isNullable()
@@ -291,8 +302,24 @@ class ObjectType extends Type {
 				return true
 			}
 		}
+		else if value.isUnion() {
+			for var type in value.discard().types() {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+					return true
+				}
+			}
 
-		if value.isAlias() {
+			return false
+		}
+		else if value.isVariant() {
+			if value is ReferenceType && value.hasSubtypes() {
+				NotImplementedException.throw()
+			}
+			else {
+				value = value.discard()!?
+			}
+		}
+		else if value.isAlias() {
 			return @isAssignableToVariable(value.discard(), anycast, nullcast, downcast, limited)
 		}
 
@@ -311,15 +338,7 @@ class ObjectType extends Type {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
 			}
 
-			return this.isSubsetOf(value, matchingMode)
-		}
-
-		if value is UnionType {
-			for var type in value.types() {
-				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
-					return true
-				}
-			}
+			return @isSubsetOf(value, matchingMode)
 		}
 
 		return false
@@ -434,6 +453,41 @@ class ObjectType extends Type {
 					}
 				}
 			}
+			else if value.isVariant() {
+				var newProperties = {}
+
+				for var type, name of value.properties() {
+					if var prop ?= @properties[name] {
+						return false unless prop.isSubsetOf(type, mode)
+
+						if type is VariantType {
+							if prop is ValueType {
+								if var field ?= type.getField(prop.value()) {
+									Object.merge(newProperties, field.type.properties())
+								}
+								else if !type.hasSubtype(prop.value()) {
+									NotImplementedException.throw()
+								}
+							}
+							else {
+								NotImplementedException.throw()
+							}
+						}
+					}
+					else {
+						return false unless type.isNullable()
+					}
+				}
+
+				for var type, name of newProperties {
+					if var prop ?= @properties[name] {
+						return false unless prop.isSubsetOf(type, mode)
+					}
+					else {
+						return false unless type.isNullable()
+					}
+				}
+			}
 			else {
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
@@ -509,6 +563,7 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	isTestingProperties() => @testProperties
+	isVariant() => @variant
 	length(): valueof @length
 	listFunctions(name: String): Array { # {{{
 		var result = []
@@ -800,6 +855,22 @@ class ObjectType extends Type {
 			fragments.code(')')
 		}
 	} # }}}
+	toPositiveTestFragments(fragments, node, junction, parameters, subtypes) { # {{{
+		if #subtypes && ?@testName {
+			fragments.code(`\(@testName)(`).compile(node).code(`, value => `)
+
+			for var { name, type }, index in subtypes {
+				fragments
+					..code(' || ') if index > 0
+					..code('value === ').compile(type).code(`.\(name)`)
+			}
+
+			fragments.code(')')
+		}
+		else {
+			@toPositiveTestFragments(fragments, node, junction)
+		}
+	} # }}}
 	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
 		if testingType {
 			fragments.code(', 1')
@@ -888,7 +959,7 @@ class ObjectType extends Type {
 				fragments.code(`\(@testName)`)
 			}
 		}
-		else if @length == 0 && !@rest && !@nullable {
+		else if @length == 0 && !@rest && !@nullable && !@variant {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
 			}
@@ -896,8 +967,13 @@ class ObjectType extends Type {
 				fragments.code($runtime.type(node), '.isObject')
 			}
 		}
-		else if @testRest || @testProperties || @nullable {
-			fragments.code(`value => `)
+		else if @testRest || @testProperties || @nullable || @variant {
+			if @variant {
+				fragments.code(`(value, filter) => `)
+			}
+			else {
+				fragments.code(`value => `)
+			}
 
 			@toTestFragments(fragments, node, Junction.NONE)
 		}
@@ -919,7 +995,7 @@ class ObjectType extends Type {
 				fragments.code(`\(@testName)`)
 			}
 		}
-		else if @length == 0 && !@rest && !@nullable {
+		else if @length == 0 && !@rest && !@nullable && !@variant {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
 			}
@@ -927,8 +1003,13 @@ class ObjectType extends Type {
 				fragments.code($runtime.type(node), '.isObject')
 			}
 		}
-		else if @testRest || @testProperties || @nullable {
-			fragments.code(`value => `)
+		else if @testRest || @testProperties || @nullable || @variant {
+			if @variant {
+				fragments.code(`(value, filter) => `)
+			}
+			else {
+				fragments.code(`value => `)
+			}
 
 			fragments.code(`\($runtime.type(node)).isDexObject(value`)
 

@@ -1,0 +1,1 @@
+TypeException: The variable "person" of type "SchoolPerson" can't be assigned with a value of type "{kind: PersonKind.Student}" (fixtures/compile/variant/variant.type.func.call.student.var.wt.oni.nn.ks:24)

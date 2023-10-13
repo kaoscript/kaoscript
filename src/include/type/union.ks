@@ -102,6 +102,11 @@ class UnionType extends Type {
 							@types[i] = t.unflagStrict()
 						}
 					}
+					else if type.isSameVariance(t) {
+						notMatched = false
+
+						@types[i] = t.mergeSubtypes(type)
+					}
 				}
 			}
 			else {
@@ -132,6 +137,11 @@ class UnionType extends Type {
 						if t.isStrict() != type.isStrict() {
 							@types[i] = t.unflagStrict()
 						}
+					}
+					else if type.isSameVariance(t) {
+						notMatched = false
+
+						@types[i] = t.mergeSubtypes(type)
 					}
 				}
 			}

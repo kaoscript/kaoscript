@@ -110,6 +110,7 @@ class AliasType extends Type {
 	proxy @type {
 		hasRest
 		isComplex
+		isVariant
 		toTestFunctionFragments
 	}
 }

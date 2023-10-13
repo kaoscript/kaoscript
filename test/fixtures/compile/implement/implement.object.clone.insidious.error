@@ -1,1 +1,1 @@
-TypeException: Identifier "dict" is not a class (fixtures/compile/implement/implement.object.clone.insidious.ks:18)
+TypeException: Identifier "dict" is not a type (fixtures/compile/implement/implement.object.clone.insidious.ks:18)

@@ -19,6 +19,7 @@ class TypeAliasDeclaration extends Statement {
 	override prepare(target, targetMode) { # {{{
 		if @type.isComplex() {
 			var authority = @recipient().authority()
+
 			authority.addTypeTest(@name, @type)
 		}
 	} # }}}

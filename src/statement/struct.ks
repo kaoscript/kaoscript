@@ -21,7 +21,7 @@ class StructDeclaration extends Statement {
 			@extending = true
 
 			var mut name = ''
-			var mut member = @data.extends
+			var mut member = @data.extends.typeName
 			while member.kind == NodeKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
@@ -50,7 +50,7 @@ class StructDeclaration extends Statement {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @extending {
-			if @extendsType !?= Type.fromAST(@data.extends, this) {
+			if @extendsType !?= Type.fromAST(@data.extends.typeName, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
 			}
 			else if @extendsType.discardName() is not StructType {

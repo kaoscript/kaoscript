@@ -25,10 +25,11 @@ class ReferenceType extends Type {
 		@explicitlyNull: Boolean
 		@name: String
 		@nullable: Boolean
-		@parameters: Array<Type>
+		@parameters: Type[]
 		@predefined: Boolean				= false
 		@spread: Boolean					= false
 		@strict: Boolean					= false
+		@subtypes: Subtype[]
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
@@ -44,14 +45,14 @@ class ReferenceType extends Type {
 
 			return ReferenceType.new(scope, name as String, data.nullable!?, null)
 		} # }}}
-		toQuote(name, nullable, parameters) { # {{{
+		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: Subtype[] = []): String { # {{{
 			if name == 'this' {
 				return 'typeof this'
 			}
 
 			var fragments = [name]
 
-			if parameters.length != 0 {
+			if #parameters {
 				fragments.push('<')
 
 				for var parameter, index in parameters {
@@ -65,6 +66,20 @@ class ReferenceType extends Type {
 				fragments.push('>')
 			}
 
+			if #subtypes {
+				fragments.push('(')
+
+				for var { name }, index in subtypes {
+					if index != 0 {
+						fragments.push(', ')
+					}
+
+					fragments.push(name)
+				}
+
+				fragments.push(')')
+			}
+
 			if nullable {
 				fragments.push('?')
 			}
@@ -72,11 +87,14 @@ class ReferenceType extends Type {
 			return fragments.join('')
 		} # }}}
 	}
-	constructor(@scope, name: String, @explicitlyNull = false, @parameters = []) { # {{{
+	constructor(@scope, name: String, @explicitlyNull = false, @parameters = [], @subtypes = []) { # {{{
 		super(scope)
 
 		@name = $types[name] ?? name
 		@nullable = @explicitlyNull
+	} # }}}
+	addSubtype(name: String, type: Type) { # {{{
+		@subtypes.push({ name, type })
 	} # }}}
 	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
@@ -95,7 +113,7 @@ class ReferenceType extends Type {
 	} # }}}
 	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
 	clone(): ReferenceType { # {{{
-		var type = ReferenceType.new(@scope, @name, @nullable, @parameters)
+		var type = ReferenceType.new(@scope, @name, @nullable, @parameters, @subtypes)
 
 		type._sealed = @sealed
 		type._spread = @spread
@@ -514,24 +532,59 @@ class ReferenceType extends Type {
 		if type.isClass() {
 			return type.getInstantiableProperty(name)
 		}
+		else if type.isVariant() {
+			if var property ?= type.getProperty(name) {
+				return property
+			}
+			else if #@subtypes {
+				var property = name
+				var variant = type.discard().getVariantType()
+
+				if @subtypes.length == 1 {
+					var { name } = @subtypes[0]
+
+					if var { type % subtype } ?= variant.getField(name) {
+						return subtype.getProperty(property)
+					}
+					else {
+						NotImplementedException.throw(this)
+					}
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
+			}
+			else {
+				var master = type.discard().getVariantType().getMaster()
+
+				if master.hasProperty(name) {
+					return ReferenceType.new(@scope, @name, null, null, [{ name: name, type: master }])
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
+			}
+		}
 		else {
 			return type.getProperty(name)
 		}
 	} # }}}
 	getSealedPath() => @type().getSealedPath()
+	getSubtypes() => @subtypes
+	getSubtypesCount() => @subtypes.length
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut hash = ''
 
-		if @name == 'Array' && @parameters.length == 1 {
+		if @name == 'Array' && @parameters.length == 1 && !#@subtypes {
 			hash = `\(@parameters[0].hashCode())[]`
 		}
-		else if @name == 'Object' && @parameters.length == 1 {
+		else if @name == 'Object' && @parameters.length == 1 && !#@subtypes {
 			hash = `\(@parameters[0].hashCode()){}`
 		}
 		else {
 			hash = @name
 
-			if @parameters.length > 0 {
+			if #@parameters {
 				hash += '<'
 
 				for var parameter, i in @parameters {
@@ -543,6 +596,20 @@ class ReferenceType extends Type {
 				}
 
 				hash += '>'
+			}
+
+			if #@subtypes {
+				hash += '('
+
+				for var { name }, i in @subtypes {
+					if i != 0 {
+						hash += ','
+					}
+
+					hash += name
+				}
+
+				hash += ')'
 			}
 		}
 
@@ -558,7 +625,7 @@ class ReferenceType extends Type {
 		return hash
 	} # }}}
 	hasMutableAccess() => @name == 'Array' | 'Object' || @type().hasMutableAccess()
-	hasParameters() => @parameters.length > 0
+	hasParameters() => #@parameters
 	hasProperty(index: Number) { # {{{
 		if @name == 'Array' {
 			return false
@@ -590,6 +657,7 @@ class ReferenceType extends Type {
 		return type.hasProperty(name)
 	} # }}}
 	hasRest() => @name == 'Object' || @type().hasRest()
+	hasSubtypes() => #@subtypes
 	isAlias() => @type().isAlias()
 	isAlien() => @type().isAlien()
 	isAny() => @name == 'Any'
@@ -615,6 +683,16 @@ class ReferenceType extends Type {
 				for var index from 0 to~ Math.max(@parameters.length, value.parameters().length) {
 					if !@parameter(index).isAssignableToVariable(value.parameter(index), true, nullcast, downcast) {
 						return false
+					}
+				}
+
+				if value.hasSubtypes() {
+					return false unless #@subtypes
+
+					var names = [name for var { name } in value.getSubtypes()]
+
+					for var { name } in @subtypes {
+						return false unless names.contains(name)
 					}
 				}
 
@@ -780,6 +858,9 @@ class ReferenceType extends Type {
 			else if @hasParameters() && !value.hasParameters() {
 				return true
 			}
+			else if @hasSubtypes() && (!value.hasSubtypes() || @getSubtypesCount() < value.getSubtypesCount()) {
+				return true
+			}
 			else {
 				return false
 			}
@@ -820,6 +901,7 @@ class ReferenceType extends Type {
 	isPrimitive() => @isBoolean() || @isNumber() || @isString()
 	isReference() => true
 	isReducible() => true
+	isSameVariance(value: ReferenceType) => @name == value.name() && @isVariant() && value.isVariant()
 	isSpread() => @spread
 	isStrict() => @strict
 	isString() => @name == 'String' || @type().isString()
@@ -925,7 +1007,7 @@ class ReferenceType extends Type {
 			return true
 		}
 		else if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			if @name != value._name || @parameters.length != value._parameters.length {
+			if @name != value._name || @parameters.length != value._parameters.length || @subtypes.length != value._subtypes.length {
 				return false
 			}
 
@@ -938,20 +1020,18 @@ class ReferenceType extends Type {
 				return false
 			}
 
-			if ?@parameters {
-				if ?value._parameters && @parameters.length == value._parameters.length {
-					for var parameter, i in @parameters {
-						if !parameter.isSubsetOf(value._parameters[i], mode) {
-							return false
-						}
-					}
-				}
-				else {
+			var parameters = value.parameters()
+
+			for var parameter, index in @parameters {
+				if !parameter.isSubsetOf(parameters[index], mode) {
 					return false
 				}
 			}
-			else {
-				if ?value._parameters {
+
+			var subtypes = value.getSubtypes()
+
+			for var { name, type }, index in @subtypes {
+				if name != subtypes[index].name || type != subtypes[index].type {
 					return false
 				}
 			}
@@ -969,6 +1049,18 @@ class ReferenceType extends Type {
 				if parameters.length == @parameters.length {
 					for var parameter, index in @parameters {
 						if !parameter.isSubsetOf(parameters[index], mode) {
+							return false
+						}
+					}
+
+					return true
+				}
+
+				var subtypes = value.getSubtypes()
+
+				if subtypes.length == @subtypes.length {
+					for var { name, type }, index in @subtypes {
+						if name != subtypes[index].name || type != subtypes[index].type {
 							return false
 						}
 					}
@@ -1025,9 +1117,12 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
+	isSubtypeOf(value: ReferenceType) => @name == value.name()
+	isSubtypeOf(value: Type) => false
 	isTuple() => @name == 'Tuple' || @type().isTuple()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => @type().isUnion()
+	isVariant() => @type().isVariant()
 	isVirtual() => @type().isVirtual()
 	isVoid() => @name == 'Void' || @type().isVoid()
 	listFunctions(name: String): Array => @type().listFunctions(name)
@@ -1078,6 +1173,24 @@ class ReferenceType extends Type {
 			return true
 		}
 	} # }}}
+	mergeSubtypes(value: ReferenceType): ReferenceType { # {{{
+		var nullable = @isNullable() || value.isNullable()
+
+		return this.setNullable(nullable) unless #@subtypes
+		return value.setNullable(nullable) unless value.hasSubtypes()
+
+		var subtypes = [...value.getSubtypes()]
+		var names = [name for var { name } in subtypes]
+
+		for var subtype in @subtypes {
+			if !names.contains(subtype.name) {
+				subtypes.push(subtype)
+				names.push(subtype.name)
+			}
+		}
+
+		return ReferenceType.new(@scope, @name, nullable, null, subtypes)
+	} # }}}
 	name(): String => @name
 	parameter(index: Number = 0) { # {{{
 		if @parameters.length == 0 {
@@ -1106,7 +1219,44 @@ class ReferenceType extends Type {
 	} # }}}
 	reduce(type: Type) { # {{{
 		if this == type {
-			return this
+			return Type.Void
+		}
+		else if type is ReferenceType && @name == type.name() {
+			var mut nullable = false
+
+			if @isNullable() && !type.isNullable() {
+				nullable = true
+			}
+
+			var subtypes = type.getSubtypes()
+
+			if #subtypes {
+				var names = [name for var { name } in subtypes]
+				var variant = @type.discard().getVariantType()
+				var master = variant.getMaster()
+				var enum = variant.getEnumType()
+				var newSubTypes = []
+
+				if #@subtypes {
+					for var subtype in @subtypes {
+						if !names.contains(subtype.name) {
+							newSubTypes.push(subtype)
+						}
+					}
+				}
+				else {
+					for var name in enum.listVariables() {
+						if !names.contains(name) {
+							newSubTypes.push({ name, type: master })
+						}
+					}
+				}
+
+				return ReferenceType.new(@scope, @name, @nullable, null, newSubTypes)
+			}
+			else {
+				return this
+			}
 		}
 		else {
 			var reduced = @type().reduce(type)
@@ -1298,7 +1448,7 @@ class ReferenceType extends Type {
 
 		return @referenceIndex
 	} # }}}
-	toQuote() => ReferenceType.toQuote(@name, @explicitlyNull, @parameters)
+	toQuote() => ReferenceType.toQuote(@name, @explicitlyNull, @parameters, @subtypes)
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		@resolve()
 
@@ -1363,7 +1513,22 @@ class ReferenceType extends Type {
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		@resolve()
 
-		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+		if @type.isVariant() {
+			if @isSubtypeOf(node.type()) {
+				var property = @type.discard().getVariantName()
+
+				for var { name, type }, index in @subtypes {
+					fragments
+						..code(' || ') if index != 0
+						..compile(node).code(`.\(property) === `).compile(type).code(`.\(name)`)
+
+				}
+			}
+			else {
+				@type.discard().toPositiveTestFragments(fragments, node, junction, @parameters, @subtypes)
+			}
+		}
+		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
 			@type.toPositiveTestFragments(fragments, node, junction)
 		}
 		else {

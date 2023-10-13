@@ -294,9 +294,6 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNotAType(name, node): Never ~ ReferenceException { # {{{
-			throw ReferenceException.new(`"\(name)" is not a type`, node)
-		} # }}}
 		throwNotDefined(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`"\(name)" is not defined`, node)
 		} # }}}
@@ -971,6 +968,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwNotTuple(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a tuple`, node)
+		} # }}}
+		throwNotType(name, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`Identifier "\(name)" is not a type`, node)
 		} # }}}
 		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The function "\(name)" is not synchronous`, node)

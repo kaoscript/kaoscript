@@ -1,11 +1,12 @@
 class Literal extends Expression {
-	private {
+	private late {
+		@type: Type
 		@value
 	}
 	constructor(@value, @parent) { # {{{
 		super(false, parent)
 	} # }}}
-	constructor(data, parent, scope, @value) { # {{{
+	constructor(data, parent, scope, @value, @type = AnyType.NullableUnexplicit) { # {{{
 		super(data, parent, scope)
 	} # }}}
 	analyse()
@@ -24,6 +25,7 @@ class Literal extends Expression {
 		}
 	} # }}}
 	toQuote() => @value
+	type() => @type
 	validateType(type: ReferenceType) { # {{{
 		if !@type().isAssignableToVariable(type, false) {
 			TypeException.throwInvalidAssignement(type, @type(), this)
@@ -40,7 +42,6 @@ class IdentifierLiteral extends Literal {
 		@isMacro: Boolean				= false
 		@isVariable: Boolean			= false
 		@line: Number
-		@realType: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.name)
@@ -60,10 +61,10 @@ class IdentifierLiteral extends Literal {
 			}
 			else if var name ?= $runtime.getVariable(@value, @parent) {
 				@value = name
-				@realType = @declaredType = Type.Any
+				@type = @declaredType = Type.Any
 			}
 			else if @options.rules.ignoreError {
-				@realType = @declaredType = Type.Any
+				@type = @declaredType = Type.Any
 			}
 			else {
 				ReferenceException.throwNotDefined(@value, this)
@@ -104,11 +105,11 @@ class IdentifierLiteral extends Literal {
 			}
 
 			@declaredType = variable.getDeclaredType()
-			@realType = variable.getRealType()
+			@type = variable.getRealType()
 		}
 
-		unless targetMode == TargetMode.Permissive || target.isVoid() || !@realType.isExplicit() || !target.isExplicit() || @realType.isSubsetOf(target, MatchingMode.Signature) {
-			TypeException.throwInvalidIdentifierType(@value, @realType, target, this)
+		unless targetMode == TargetMode.Permissive || target.isVoid() || !@type.isExplicit() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode.Signature) {
+			TypeException.throwInvalidIdentifierType(@value, @type, target, this)
 		}
 	} # }}}
 	caller() => 'null'
@@ -133,7 +134,7 @@ class IdentifierLiteral extends Literal {
 			return @scope.getVariable(@value, @line).getRealType()
 		}
 		else {
-			return @realType
+			return @type
 		}
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
@@ -223,16 +224,15 @@ class IdentifierLiteral extends Literal {
 			fragments.code(@value, @data)
 		}
 	} # }}}
-	type() => @realType
 	type(type: Type, scope: Scope, node) { # {{{
 		if @isVariable {
-			@realType = scope.replaceVariable(@value, type, node).getRealType()
+			@type = scope.replaceVariable(@value, type, node).getRealType()
 		}
 	} # }}}
 	variable() => @scope.getVariable(@value, @line)
 	walk(fn) { # {{{
 		if @isVariable {
-			fn(@value, @realType)
+			fn(@value, @type)
 		}
 		else {
 			throw NotSupportedException.new()
@@ -241,9 +241,6 @@ class IdentifierLiteral extends Literal {
 }
 
 class NumberLiteral extends Literal {
-	private {
-		@type: Type
-	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.value)
 
@@ -255,13 +252,9 @@ class NumberLiteral extends Literal {
 		}
 	} # }}}
 	getUnpreparedType(): valueof @type
-	type(): valueof @type
 }
 
 class StringLiteral extends Literal {
-	private {
-		@type: Type
-	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, $quote(data.value))
 
@@ -274,5 +267,4 @@ class StringLiteral extends Literal {
 	} # }}}
 	getUnpreparedType(): valueof @type
 	isNotEmpty() => @value.length > 0
-	type(): valueof @type
 }

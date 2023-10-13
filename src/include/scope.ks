@@ -98,6 +98,7 @@ abstract class Scope {
 	} # }}}
 	commitTempVariables(variables: Array): Void
 	getChunkType(name: String, line: Number?): Type? => null
+	getImplicitType() => null
 	getImplicitVariable() => null
 	getLineOffset(): Number => 0
 	getMacro(name: String): MacroDeclaration? => null

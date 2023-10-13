@@ -132,14 +132,19 @@ class InlineBlockScope extends BlockScope {
 		return newName
 	} # }}}
 	renameNext(name, line) { # {{{
-		return if @renamedVariables[name] is String
+		return if ?@renamedVariables[name]
 
-		var newName = @declareVariable(name, this)
+		var mut newName = @declareVariable(name, this)
 
-		@renamedVariables[name] = newName
 		@declarations[newName] = true
 
 		var variables: Array = @variables[name]
+
+		if !?@variables {
+			return
+		}
+
+		@renamedVariables[name] = newName
 
 		var mut i = 0
 		while i < variables.length && variables[i] < line {

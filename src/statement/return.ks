@@ -61,7 +61,7 @@ class ReturnStatement extends Statement {
 
 			@assignTempVariables(@scope!?)
 
-			@type = @value.type().asReference()
+			@type = @value.type().discardValue().asReference()
 
 			if @type == target {
 				pass

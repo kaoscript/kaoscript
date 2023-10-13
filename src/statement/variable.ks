@@ -244,7 +244,7 @@ class VariableDeclaration extends AbstractNode {
 		if @hasValue {
 			@value.prepare(declarator.type() ?? AnyType.NullableUnexplicit)
 
-			@type = @value.type().asReference()
+			@type = @value.type().discardValue().asReference()
 
 			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@value, this)

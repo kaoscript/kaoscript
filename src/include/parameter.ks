@@ -28,6 +28,7 @@ class Parameter extends AbstractNode {
 		@rest: Boolean						= false
 		@tempVariables: Array				= []
 		@type: ParameterType
+		@useLiteral: Boolean				= false
 	}
 	static {
 		compileExpression(data, node) { # {{{
@@ -743,6 +744,7 @@ class Parameter extends AbstractNode {
 				@type.setDefaultValue(call, false, @explicitlyRequired)
 
 				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(call)`, @parent)
+				@useLiteral = true
 			}
 		}
 
@@ -758,19 +760,26 @@ class Parameter extends AbstractNode {
 		@internal.translate()
 
 		if @hasDefaultValue {
-			@defaultValue.prepare(@type.getVariableType(), TargetMode.Permissive)
-
-			if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind.Equals {
-				@headedDefaultValue = @nullable || @internal.isBinding()
+			if @useLiteral {
+				if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind.Equals {
+					@headedDefaultValue = @nullable || @internal.isBinding()
+				}
 			}
 			else {
-				@headedDefaultValue = @defaultValue.type().isNull()
-			}
+				@defaultValue.prepare(@type.getVariableType(), TargetMode.Permissive)
 
-			@defaultValue.translate()
+				if ?@data.operator -> @data.operator.assignment == AssignmentOperatorKind.Equals {
+					@headedDefaultValue = @nullable || @internal.isBinding()
+				}
+				else {
+					@headedDefaultValue = @defaultValue.type().isNull()
+				}
 
-			unless @defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, false, false) {
-				TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
+				@defaultValue.translate()
+
+				unless @defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, false, false) {
+					TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
+				}
 			}
 		}
 	} # }}}
@@ -863,6 +872,7 @@ class Parameter extends AbstractNode {
 			}
 			else {
 				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(@type.getDefaultValue())`, @parent)
+				@useLiteral = true
 			}
 
 			@hasDefaultValue = true
@@ -1486,7 +1496,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 		variable.setDeclaredType(type).setRealType(type).setDefinitive(definitive)
 
-		@declaredType = @realType = type
+		@declaredType = @type = type
 	} # }}}
 	setDefaultValue(value) { # {{{
 		if @operator == AssignmentOperatorKind.EmptyCoalescing && value.isComposite() {

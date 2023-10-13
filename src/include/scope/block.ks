@@ -199,6 +199,7 @@ class BlockScope extends Scope {
 
 		return null
 	} # }}}
+	override getImplicitType() => @implicitType
 	override getImplicitVariable() { # {{{
 		if ?@implicitVarname {
 			return {
@@ -228,7 +229,7 @@ class BlockScope extends Scope {
 		return newName
 	} # }}}
 	getRawLine() => @module.getRawLine()
-	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+	getRenamedIndex(name: String) => @renamedIndexes[name] ?? 0
 	getReservedName() { # {{{
 		@reservedIndex += 1
 
@@ -493,7 +494,7 @@ class BlockScope extends Scope {
 		}
 
 		if !type.equals(variable.getRealType()) {
-			if @variables[name] is Array {
+			if ?@variables[name] {
 				variable = variable.setRealType(type, absolute, this)
 
 				@variables[name].push(@line(), variable)
@@ -539,7 +540,7 @@ class BlockScope extends Scope {
 			}
 		}
 		else {
-			if @chunkTypes[name] is Array {
+			if ?@chunkTypes[name] {
 				@chunkTypes[name].push(@line(), data.type)
 			}
 			else {

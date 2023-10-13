@@ -25,8 +25,8 @@ class ConditionalExpression extends Expression {
 		@whenTrue.prepare(target, targetMode)
 		@whenFalse.prepare(target, targetMode)
 
-		var t = @whenTrue.type()
-		var f = @whenFalse.type()
+		var t = @whenTrue.type().discardValue()
+		var f = @whenFalse.type().discardValue()
 
 		@type = Type.union(@scope, t, f)
 	} # }}}

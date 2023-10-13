@@ -13,28 +13,43 @@ class UnaryOperatorImplicit extends Expression {
 				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 			}
 			else if type.isEnum() {
-				if !type.discard().hasVariable(@property) {
+				unless type.discard().hasVariable(@property) {
 					ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
 				}
 
 				@type = type.setNullable(false)
 			}
+			else if type is VariantType {
+				var master = type.getMaster()
+
+				unless master.discard().hasVariable(@property) {
+					ReferenceException.throwNotDefinedEnumElement(@property, master.name(), this)
+				}
+
+				@varname = master.name()
+				@type = ValueType.new(@property, master.setNullable(false), `\(@varname).\(@property)`, @scope)
+			}
 			else if var property ?= type.getProperty(@property) {
 				@type = property.discardVariable()
 			}
-			else {
-				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
+		}
+
+		if !?@type {
+			// TODO!
+			// if var { name % @varname, type } ?= @scope.getImplicitVariable() {
+			if var { name % @varname, type % vartype } ?= @scope.getImplicitVariable() {
+				// TODO!
+				// echo('implicit:', type)
+				if var property ?= vartype.getProperty(@property) {
+					@type = property.discardVariable()
+				}
+				else {
+					@type = AnyType.NullableUnexplicit
+				}
 			}
 		}
-		else if var { name % @varname, type } ?= @scope.getImplicitVariable() {
-			if var property ?= type.getProperty(@property) {
-				@type = property.discardVariable()
-			}
-			else {
-				@type = AnyType.NullableUnexplicit
-			}
-		}
-		else {
+
+		unless ?@type {
 			ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 		}
 	} # }}}
@@ -135,9 +150,11 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 		is ComparisonExpression {
 			var operands = parent.operands()
 			var index = operands.indexOf(node)
-			var operand = operands[index - 1]
+			var operand = operands[index - 1] ?? operands[index + 1]
 
-			return operand.type().setNullable(false)
+			if var type ?= operand.type() {
+				return type.setNullable(false)
+			}
 		}
 		is ConditionalExpression {
 			if target == AnyType.NullableUnexplicit {
@@ -167,7 +184,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 		is ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
 			return target
 		}
-		is ObjectComputedMember {
+		is ObjectComputedMember | ObjectLiteralMember {
 			return target
 		}
 		else {

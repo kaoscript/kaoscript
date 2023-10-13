@@ -600,6 +600,7 @@ class NamedType extends Type {
 		hasTest
 		isComplete
 		isExportingType
+		isVariant
 		toTestFragments
 		toTestFunctionFragments
 	}

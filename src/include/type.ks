@@ -177,6 +177,7 @@ enum TypeKind<String> {
 	Tuple
 	Union
 	ValueOf
+	Variant
 }
 
 enum Junction {
@@ -198,6 +199,11 @@ bitmask TypeOrigin {
 	Import
 	Require
 	RequireOrExtern
+}
+
+type Subtype = {
+	name: String
+	type: Type
 }
 
 abstract class Type {
@@ -374,6 +380,26 @@ abstract class Type {
 						if name == 'Any' {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
+						else if #data.typeSubtypes {
+							var type = scope.reference(name, nullable)
+							var master = type.discard().getVariantType().getMaster()
+
+							if #data.typeParameters {
+								var parameter = data.typeParameters[0]
+
+								type.setRestType(Type.fromAST(parameter, scope, defined, node))
+
+								if var parameter ?= data.typeParameters[1] {
+									type.setKeyType(Type.fromAST(parameter, scope, defined, node))
+								}
+							}
+
+							for var subtype in data.typeSubtypes {
+								type.addSubtype(subtype.name, master)
+							}
+
+							return type.flagComplete()
+						}
 						else if #data.typeParameters {
 							var type = match name {
 								'Array'		=> ArrayType.new(scope).setNullable(nullable)
@@ -398,7 +424,7 @@ abstract class Type {
 								var type = variable.getDeclaredType()
 
 								if type.isReference() || type.isAny() {
-									ReferenceException.throwNotAType(name, node)
+									TypeException.throwNotType(name, node)
 								}
 							}
 
@@ -409,10 +435,20 @@ abstract class Type {
 						}
 					}
 					else if data.typeName.kind == NodeKind.MemberExpression && !data.typeName.computed {
-						var namespace = Type.fromAST(data.typeName.object, scope, defined, node)
+						var type = Type.fromAST(data.typeName.object, scope, defined, node)
+						var property = data.typeName.property.name
 
-						if !defined || namespace.scope().hasVariable(data.typeName.property.name, -1) {
-							return ReferenceType.new(namespace.scope(), data.typeName.property.name, nullable)
+						if type.isVariant() {
+							var object = type.discard()
+
+							if object.getVariantType().hasSubtype(property) {
+								var variant = object.getVariantType()
+
+								return ReferenceType.new(scope, type.name(), null, null, [{ name: property, type: variant.getMaster() }])
+							}
+						}
+						else if !defined || type.scope().hasVariable(data.typeName.property.name, -1) {
+							return ReferenceType.new(type.scope(), data.typeName.property.name, nullable)
 						}
 						else {
 							ReferenceException.throwNotDefinedType($ast.path(data.typeName), node)
@@ -455,10 +491,56 @@ abstract class Type {
 				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, node)
 				}
+				NodeKind.VariantType {
+					var type = VariantType.new(scope)
+						..setMaster(Type.fromAST(data.master, scope, defined, node))
+
+					for var property in data.properties {
+						match property.kind {
+							NodeKind.VariantField {
+								type.addField(property.name.name, Type.fromAST(property.type, scope, defined, node))
+							}
+						}
+					}
+
+					return type
+				}
 			}
 
 			console.info(data)
 			throw NotImplementedException.new(node)
+		} # }}}
+		fromAST(data, type: Type, node: AbstractNode): Type { # {{{
+			if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
+				var property = data.typeName.argument.name
+
+				if type.isEnum() {
+					unless type.discard().hasVariable(property) {
+						ReferenceException.throwNotDefinedEnumElement(property, type.name(), node)
+					}
+
+					return type.setNullable(false)
+				}
+
+				if type.isVariant() {
+					var object = type.discard()
+
+					if object.getVariantType().hasSubtype(property) {
+						var variant = object.getVariantType()
+
+						return ReferenceType.new(node.scope(), type.name(), null, null, [{ name: property, type: variant.getMaster() }])
+					}
+				}
+
+				if var property ?= type.getProperty(property) {
+					return property.discardVariable()
+				}
+
+				ReferenceException.throwUnresolvedImplicitProperty(property, node)
+			}
+			else {
+				return Type.fromAST(data, node)
+			}
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
@@ -581,6 +663,9 @@ abstract class Type {
 					TypeKind.ValueOf {
 						return ValueOfType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind.Variant {
+						return VariantType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 				}
 			}
 			else if ?data.type {
@@ -687,6 +772,7 @@ abstract class Type {
 	discardName(): Type => this
 	discardReference(): Type? => this
 	discardSpread(): Type => this
+	discardValue(): Type => this
 	discardVariable(): Type => this
 	// TODO to remove
 	equals(value?): Boolean => ?value && @isSubsetOf(value, MatchingMode.Exact)
@@ -850,6 +936,7 @@ abstract class Type {
 	isReferenced() => @referenced
 	isRequired() => @required
 	isRequirement() => @requirement
+	isSameVariance(value: Type) => false
 	isSealable() => false
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
@@ -863,7 +950,9 @@ abstract class Type {
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
+	isValue() => false
 	isValueOf() => false
+	isVariant() => false
 	isVirtual() => false
 	isVoid() => false
 	// TODO to remove
@@ -1081,7 +1170,9 @@ include {
 	'./type/exclusion.ks'
 	'./type/fusion.ks'
 	'./type/union.ks'
+	'./type/value.ks'
 	'./type/valueof.ks'
+	'./type/variant.ks'
 	'./type/void.ks'
 }
 
