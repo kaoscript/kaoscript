@@ -497,7 +497,7 @@ abstract class Type {
 
 					for var property in data.properties {
 						match property.kind {
-							NodeKind.VariantField {
+							NodeKind.VariantField when ?property.type {
 								type.addField(property.name.name, Type.fromAST(property.type, scope, defined, node))
 							}
 						}
