@@ -55,6 +55,14 @@ class IdentifierLiteral extends Literal {
 				if @value == 'Object' {
 					@module().flag('Object')
 				}
+
+				if var variable ?= @scope.getVariable(@value) {
+					var type = variable.getDeclaredType()
+
+					if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
+						ReferenceException.throwAliasTypeVariable(type.name(), this)
+					}
+				}
 			}
 			else if @scope.hasMacro(@value) {
 				@isMacro = true

@@ -1,0 +1,1 @@
+ReferenceException: The type "Position" is not a variable (fixtures/compile/type/type.alias.call.default.ks:6)

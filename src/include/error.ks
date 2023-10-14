@@ -188,6 +188,9 @@ export class NotSupportedException extends Exception {
 
 export class ReferenceException extends Exception {
 	static {
+		throwAliasTypeVariable(name, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The type "\(name)" is not a variable`, node)
+		} # }}}
 		throwAlreadyDefinedField(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`Field "\(name)" is already defined by its parent class`, node)
 		} # }}}
