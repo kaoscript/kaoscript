@@ -658,6 +658,9 @@ export class SyntaxException extends Exception {
 		throwNoOverridableConstructor(class, parameters, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The constructor "\(class.toQuote())\(FunctionType.toQuote(parameters))" can't override a suitable constructor`, node)
 		} # }}}
+		throwNoAssistableMethod(class, name, parameters, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't assist a suitable method`, node)
+		} # }}}
 		throwNoOverridableMethod(class, name, parameters, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't override a suitable method`, node)
 		} # }}}

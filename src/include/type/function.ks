@@ -194,6 +194,47 @@ class FunctionType extends Type {
 
 		return @assessment
 	} # }}}
+	assist(main: FunctionType, mainParameters: Parameter[]): Void { # {{{
+		if @missingReturn && !main.isMissingReturn() {
+			@returnType = main.getReturnType()
+			@missingReturn = false
+		}
+
+		for var parameter, index in @parameters {
+			var mainParameter = main.parameter(index)
+
+			if parameter.isMissingType() && !mainParameter.isMissingType() {
+				var externalName = parameter.getExternalName()
+				var internalName = parameter.getInternalName()
+				var passing = mainParameter.getPassingMode()
+				var type = mainParameter.type()
+				var min = mainParameter.min()
+				var max = mainParameter.max()
+
+				var newParameter = ParameterType.new(@scope, externalName, internalName, passing, type, min, max)
+
+				if parameter.hasDefaultValue() {
+					newParameter.setDefaultValue(parameter.getDefaultValue(), parameter.isComprehensive(), parameter.isRequiringValue())
+				}
+				else if mainParameter.hasDefaultValue() {
+					newParameter.setDefaultValue(mainParameter.getDefaultValue(), mainParameter.isComprehensive(), mainParameter.isRequiringValue())
+
+					mainParameters[index].setDefaultValue(mainParameter.getDefaultValue())
+				}
+
+				newParameter.index(index)
+
+				if newParameter.max() == Infinity {
+					@restIndex = index
+					@hasRest = true
+				}
+
+				@parameters[index] = newParameter
+
+				mainParameters[index].type(newParameter)
+			}
+		}
+	} # }}}
 	async() { # {{{
 		@async = true
 	} # }}}

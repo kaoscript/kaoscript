@@ -1790,6 +1790,8 @@ class AnonymousParameter extends AbstractNode {
 		@name = @scope.acquireTempName(false)
 	} # }}}
 	translate()
+	getDeclaredType() => @type
+	isBinding() => false
 	name() => null
 	operator(@operator): valueof this
 	setDeclaredType(@type, definitive)

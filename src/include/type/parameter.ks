@@ -193,6 +193,7 @@ class ParameterType extends Type {
 	getDefaultValue() => @defaultValue
 	getExternalName() => @externalName
 	getInternalName() => @internalName
+	getPassingMode() => @passing
 	getVariableType() => @variableType
 	hasDefaultValue() => @default
 	hashCode() => @toQuote()
@@ -211,6 +212,7 @@ class ParameterType extends Type {
 	isOnlyLabeled() => @passing == PassingMode.LABELED
 	isOnlyPositional() => @passing == PassingMode.POSITIONAL
 	isPositional() => @passing ~~ PassingMode.POSITIONAL
+	isRequiringValue() => @required
 	isRetained() => @retained
 	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
 		if mode !~ MatchingMode.IgnoreRetained && @retained != value.isRetained() {

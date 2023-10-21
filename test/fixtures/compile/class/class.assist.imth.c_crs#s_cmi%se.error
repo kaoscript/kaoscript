@@ -1,0 +1,1 @@
+SyntaxException: The method "Greetings.greet(person: Student, message: Number)" can't assist a suitable method (fixtures/compile/class/class.assist.imth.c_crs#s_cmi%se.ks:12)

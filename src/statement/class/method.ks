@@ -114,6 +114,7 @@ class ClassMethodDeclaration extends Statement {
 		@aliases: Array						= []
 		@analysed: Boolean					= false
 		@autoTyping: Boolean				= false
+		@assist: Boolean					= false
 		@awaiting: Boolean					= false
 		@exact: Boolean						= false
 		@exit: Boolean						= false
@@ -302,11 +303,16 @@ class ClassMethodDeclaration extends Statement {
 		@instance = instance
 
 		for var modifier in data.modifiers {
-			if modifier.kind == ModifierKind.Abstract {
-				@abstract = true
-			}
-			else if modifier.kind == ModifierKind.Override {
-				@override = true
+			match modifier.kind {
+				ModifierKind.Abstract {
+					@abstract = true
+				}
+				ModifierKind.Assist {
+					@assist = true
+				}
+				ModifierKind.Override {
+					@override = true
+				}
 			}
 		}
 
@@ -843,7 +849,32 @@ class ClassMethodDeclaration extends Statement {
 			var mut overridden = null
 			var mut overloaded = []
 
-			if @parent.isExtending() || @parent.isImplementing() {
+			if @assist {
+				var mode: MatchingMode = .IgnoreAnonymous + .MissingParameterType + .MissingParameterArity + .MissingParameterDefault + .MissingReturn + .MissingError
+				var assisteds = []
+
+				for var method in @listOverloadedMethods(Method.instance(@parent.class())) {
+					if !@type.isMissingReturn() && !@type.getReturnType().isSubsetOf(method.getReturnType(), MatchingMode.Default) {
+						pass
+					}
+					else if @type.isSubsetOf(method, mode) {
+						assisteds.push(method)
+					}
+				}
+
+				if assisteds.length == 1 {
+					@type.assist(assisteds[0], @parameters)
+
+					@parent.addForkedMethod(@name, assisteds[0], @type, null)
+				}
+				else if #assisteds {
+					NotImplementedException.throw(this)
+				}
+				else {
+					SyntaxException.throwNoAssistableMethod(@parent.type(), @name, @parameters, this)
+				}
+			}
+			else if @parent.isExtending() || @parent.isImplementing() {
 				var matcher = @instance ? Method.instance(@parent) : Method.static(@parent)
 
 				if var data ?= @getOveriddenMethod(matcher, @type.isUnknownReturnType()) {
