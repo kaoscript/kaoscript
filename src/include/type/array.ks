@@ -621,6 +621,8 @@ class ArrayType extends Type {
 		fragments.code(')')
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
+		fragments.code('(') if @nullable && junction == Junction.AND
+
 		if @length == 0 && !@destructuring && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
 
@@ -640,6 +642,12 @@ class ArrayType extends Type {
 			@toSubtestFragments(true, @testLength, fragments, node)
 
 			fragments.code(')')
+		}
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+
+			fragments.code(')') if junction == Junction.AND
 		}
 	} # }}}
 	toSubtestFragments(testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{

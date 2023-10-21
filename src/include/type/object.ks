@@ -841,6 +841,8 @@ class ObjectType extends Type {
 		throw NotImplementedException.new()
 	} # }}}
 	override toPositiveTestFragments(fragments, node, junction) { # {{{
+		fragments.code('(') if @nullable && junction == Junction.AND
+
 		if ?@testName {
 			fragments.code(`\(@testName)(`).compile(node).code(`)`)
 		}
@@ -853,6 +855,12 @@ class ObjectType extends Type {
 			@toSubtestFragments(true, fragments, node)
 
 			fragments.code(')')
+		}
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+
+			fragments.code(')') if junction == Junction.AND
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node, junction, parameters, subtypes) { # {{{
