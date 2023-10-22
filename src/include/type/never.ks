@@ -13,9 +13,6 @@ class NeverType extends Type {
 		fragments.code('Never')
 	} # }}}
 	toQuote(): String => `Never`
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw NotSupportedException.new(node)
-	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Never'
 	override toVariations(variations) { # {{{
 		variations.push('never')

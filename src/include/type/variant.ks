@@ -1,8 +1,16 @@
+enum VariantKind {
+	Boolean
+	Enum
+}
+
 class VariantType extends Type {
 	private late {
-		@enum: EnumType
-		@fields: Subtype{}				= {}
+		@deferrable: Boolean			= false
+		@enum: EnumType?
+		@fields: Variant[]				= []
+		@kind: VariantKind				= .Enum
 		@master: Type
+		@names: Variant{}				= {}
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): VariantType { # {{{
@@ -11,17 +19,46 @@ class VariantType extends Type {
 			queue.push(() => {
 				type.setMaster(Type.import(data.master, metadata, references, alterations, queue, scope, node))
 
-				for var data, name of data.fields {
-					type.addField(name, Type.import(data, metadata, references, alterations, queue, scope, node))
+				for var { names, type % data } in data.fields {
+					type.addField(names, Type.import(data, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
 			return type.flagComplete()
 		} # }}}
 	}
-	addField(name: String, type: Type) { # {{{
-		@fields[name] = { name, type }
+	addField(names: String[], type: Type) { # {{{
+		if @kind == .Boolean {
+			if names.contains('false') {
+				unless !names.contains('true') {
+					NotImplementedException.throw()
+				}
+			}
+			else if names.contains('true') {
+				unless !names.contains('false') {
+					NotImplementedException.throw()
+				}
+			}
+			else {
+				NotImplementedException.throw()
+			}
+		}
+
+		var variant = { names, type }
+
+		@fields.push(variant)
+		@deferrable ||= type.canBeDeferred()
+
+		for var name in names {
+			unless !?@names[name] {
+				NotImplementedException.throw()
+			}
+
+			@names[name] = variant
+		}
 	} # }}}
+	override canBeBoolean() => @kind == .Boolean
+	override canBeDeferred() => @deferrable
 	override clone() { # {{{
 		NotImplementedException.throw()
 	} # }}}
@@ -29,71 +66,155 @@ class VariantType extends Type {
 		var export = {
 			kind: TypeKind.Variant
 			master: @master.toReference(references, indexDelta, mode, module)
-			fields: {}
+			fields: []
 		}
 
-		for var { name, type } of @fields {
-			export.fields[name] = type.export(references, indexDelta, mode, module)
+		for var { names, type } in @fields {
+			export.fields.push({
+				names
+				type: type.export(references, indexDelta, mode, module)
+			})
 		}
 
 		return export
 	} # }}}
 	getEnumType() => @enum
-	getField(name: String) => @fields[name]
+	getField(name: String) => @names[name]
+	getKind() => @kind
 	getMaster() => @master
 	hasSubtype(name: String) => @enum.hasProperty(name)
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	setMaster(@master) { # {{{
-		var type = @master.discard()
+	override isBoolean() => @kind == .Boolean
+	isFalseValue(name: String): Boolean { # {{{
+		if var { names } ?= @names[name] {
+			return names.contains('false')
+		}
+		else {
+			return false
+		}
+	} # }}}
+	isValidField({ names }: Variant, subtypes: Subtype[]?) { # {{{
+		return true unless #subtypes
 
-		unless type is EnumType {
-			NotImplementedException.throw()
+		for var { name } in subtypes {
+			if names.contains(name) {
+				return true
+			}
 		}
 
-		@enum = type
+		return false
+	} # }}}
+	setMaster(@master) { # {{{
+		if @master.isBoolean() {
+			@kind = .Boolean
+		}
+		else if @master.isEnum() {
+			var type = @master.discard()
+
+			unless type is EnumType {
+				NotImplementedException.throw()
+			}
+
+			@enum = type
+		}
+		else {
+			NotImplementedException.throw()
+		}
+	} # }}}
+	override toBlindSubtestFunctionFragments(varname, _, generics, fragments, node) { # {{{
+		match @kind {
+			.Boolean {
+				var block = fragments.code('variant =>').newBlock()
+
+				block
+					.newControl()
+					.code(`if(!\($runtime.type(node)).isBoolean(variant))`)
+					.step()
+					.line('return false')
+					.done()
+
+				block
+					.newControl()
+					.code(`if(filter && !filter(variant))`)
+					.step()
+					.line('return false')
+					.done()
+
+				var ctrl = block
+					.newControl()
+					.code(`if(variant)`)
+					.step()
+
+				var mut line = ctrl.newLine().code(`return `)
+
+				@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+
+				line.done()
+
+				ctrl.step().code('else').step()
+
+				line = ctrl.newLine().code(`return `)
+
+				@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+
+				line.done()
+
+				ctrl.done()
+
+				block.done()
+			}
+			.Enum {
+				var block = fragments.code('variant =>').newBlock()
+
+				block
+					.newControl()
+					.code(`if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
+					.step()
+					.line('return false')
+					.done()
+
+				block
+					.newControl()
+					.code(`if(filter && !filter(variant))`)
+					.step()
+					.line('return false')
+					.done()
+
+				for var { names, type } in @fields {
+					var ctrl = block
+						.newControl()
+						.code(`if(variant === \(@master.name()).\(names[0]))`)
+						.step()
+
+					var line = ctrl.newLine().code(`return `)
+
+					type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+
+					line.done()
+					ctrl.done()
+				}
+
+				block
+					.line('return true')
+					.done()
+			}
+		}
 	} # }}}
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw()
-	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		var block = fragments.code('variant =>').newBlock()
+	override toQuote() { # {{{
+		var mut fragments = 'variant { '
 
-		block
-			.newControl()
-			.code(`if(!\($runtime.type(node)).isEnumInstance(variant))`)
-			.step()
-			.line('return false')
-			.done()
-
-		block
-			.newControl()
-			.code(`if(filter && !filter(variant))`)
-			.step()
-			.line('return false')
-			.done()
-
-		for var { name, type } of @fields {
-			var ctrl = block
-				.newControl()
-				.code(`if(variant === \(@master.name()).\(name))`)
-				.step()
-
-			var line = ctrl.newLine().code(`return `)
-
-			type.toTestFragments(line, node, Junction.NONE)
-
-			line.done()
-			ctrl.done()
+		for var name, index in Object.keys(@fields) {
+			fragments += index == 0 ? name : `, \(name)`
 		}
 
-		block
-			.line('return true')
-			.done()
+		fragments += ' }'
+
+		return fragments
 	} # }}}
 	override toVariations(variations) { # {{{
 		NotImplementedException.throw()

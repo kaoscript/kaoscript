@@ -196,6 +196,56 @@ class MemberExpression extends Expression {
 
 		return inferables
 	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
+		if @object.isInferable() && @object.type().isVariant() {
+			var type = @object.type().discard()
+			var variant = type.getVariantType()
+
+			if @property == type.getVariantName() && variant.canBeBoolean() {
+				var reference = @object.type().clone()
+					..addSubtype('true', @scope.reference('Boolean'))
+
+				inferables[@object.path()] = {
+					isVariable: @object is IdentifierLiteral
+					type: reference
+				}
+			}
+		}
+		else {
+			@object.inferTypes(inferables)
+		}
+
+		if @computed && !@stringProperty {
+			@property.inferTypes(inferables)
+		}
+
+		return inferables
+	} # }}}
+	inferWhenFalseTypes(inferables) { # {{{
+		if @object.isInferable() && @object.type().isVariant() {
+			var type = @object.type().discard()
+			var variant = type.getVariantType()
+
+			if @property == type.getVariantName() && variant.canBeBoolean() {
+				var reference = @object.type().clone()
+					..addSubtype('false', @scope.reference('Boolean'))
+
+				inferables[@object.path()] = {
+					isVariable: @object is IdentifierLiteral
+					type: reference
+				}
+			}
+		}
+		else {
+			@object.inferTypes(inferables)
+		}
+
+		if @computed && !@stringProperty {
+			@property.inferTypes(inferables)
+		}
+
+		return inferables
+	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
 		return if @computed
 
@@ -484,6 +534,7 @@ class MemberExpression extends Expression {
 			}
 			else if var property ?= type.getProperty(@property) {
 				var type = type.discardReference()
+
 				if type.isClass() && property is ClassVariableType && property.isSealed() {
 					@sealed = true
 					@usingGetter = property.hasDefaultValue()

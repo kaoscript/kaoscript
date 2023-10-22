@@ -1,19 +1,17 @@
-extern console, qux
-
 import '../_/_array.ks'
 
-func foo(mut x) {
+func foo(mut x, values) {
 	if x is Array {
-		console.log(x.last())
+		echo(x.last())
 
-		if qux[x <- x.last()] {
-			console.log(x.last())
+		if values[x <- x.last()] {
+			echo(x.last())
 		}
 		else {
-			console.log(x.last())
+			echo(x.last())
 		}
 	}
 	else {
-		console.log(x.last())
+		echo(x.last())
 	}
 }

@@ -122,7 +122,7 @@ class AnyType extends Type {
 	isIterable() => true
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Anycast && !@explicit {
 			return !@nullable || value.isNullable() || mode ~~ MatchingMode.NonNullToNull
 		}
@@ -175,6 +175,14 @@ class AnyType extends Type {
 
 		return types
 	} # }}}
+	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+		if @nullable {
+			fragments.code('() => true')
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isValue`)
+		}
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code(@nullable ? `Any?` : `Any`)
 	} # }}}
@@ -188,7 +196,7 @@ class AnyType extends Type {
 			return @nullable ? `Any?` : `Any`
 		}
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
+	override toNegativeTestFragments(_, _, _, fragments, node) { # {{{
 		if @nullable {
 			fragments.code('false')
 		}
@@ -196,7 +204,7 @@ class AnyType extends Type {
 			fragments.code(`\($runtime.type(node)).isNull(`).compile(node).code(`)`)
 		}
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
+	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
 		if @nullable {
 			fragments.code('true')
 		}
@@ -223,19 +231,6 @@ class AnyType extends Type {
 		}
 
 		fragments.code(')')
-	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if @nullable {
-			if node._options.format.functions == 'es5' {
-				fragments.code('function() { return true; }')
-			}
-			else {
-				fragments.code('() => true')
-			}
-		}
-		else {
-			fragments.code(`\($runtime.type(node)).isValue`)
-		}
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('any', @explicit, @nullable)

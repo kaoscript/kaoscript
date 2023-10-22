@@ -232,7 +232,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The constructor of class "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingFunction(name, arguments, node): Never ~ ReferenceException { # {{{
@@ -248,7 +248,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingEnumMethod(method, enum, arguments, node): Never ~ ReferenceException { # {{{
@@ -256,7 +256,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The method "\(method)" of the enum "\(enum)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingMacro(name, arguments, node): Never ~ ReferenceException { # {{{
@@ -264,7 +264,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The macro "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The macro "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The macro "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingStaticMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
@@ -272,7 +272,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingThis(name, node): Never ~ ReferenceException { # {{{
@@ -286,7 +286,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The struct "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingTuple(name, arguments, node): Never ~ ReferenceException { # {{{
@@ -294,7 +294,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The tuple "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNotDefined(name, node): Never ~ ReferenceException { # {{{
@@ -886,13 +886,13 @@ export class TypeException extends Exception {
 			throw TypeException.new(`Only variables can be casted`, node)
 		} # }}}
 		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The expression \(left.toQuote(true)) of type \(left.type().toQuote(true)) can't be compared to a value of type \(right.type().toQuote(true))`, node)
+			throw TypeException.new(`The expression \(left.toQuote(true)) of type \(left.toTypeQuote(true)) can't be compared to a value of type \(right.toTypeQuote(true))`, node)
 		} # }}}
 		throwInvalidComprehensionType(expected: Type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`An array comprehension can't be of type \(expected.toQuote(true))`, node)
 		} # }}}
 		throwInvalidCondition(expression, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The condition \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "Boolean"`, node)
+			throw TypeException.new(`The condition \(expression.toQuote(true)) of type \(expression.toTypeQuote(true)) is expected to be of type "Boolean"`, node)
 		} # }}}
 		throwInvalidForInExpression(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`"for..in" must be used with an array`, node)

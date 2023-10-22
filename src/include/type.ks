@@ -186,11 +186,6 @@ enum Junction {
 	OR
 }
 
-enum TestFunctionMode {
-	DEFINE
-	USE
-}
-
 bitmask TypeOrigin {
 	None
 
@@ -205,6 +200,13 @@ type Subtype = {
 	name: String
 	type: Type
 }
+
+type Variant = {
+	names: String[]
+	type: Type
+}
+
+type GenericDefinition = String
 
 abstract class Type {
 	private {
@@ -231,7 +233,7 @@ abstract class Type {
 
 			return type
 		} # }}}
-		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, node: AbstractNode): Type { # {{{
+		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, generics: String[]? = null, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
 			}
@@ -327,7 +329,7 @@ abstract class Type {
 
 					for var property in data.properties {
 						var mut prop = if ?property.type {
-							set Type.fromAST(property.type, scope, defined, node)
+							set Type.fromAST(property.type, scope, defined, generics, node)
 						}
 						else {
 							set AnyType.Unexplicit
@@ -344,7 +346,7 @@ abstract class Type {
 
 					if ?data.rest {
 						if ?data.rest.type {
-							type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
+							type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
 						}
 						else if data.modifiers.some(({ kind }) => kind == ModifierKind.Nullable) {
 							type.setRestType(AnyType.NullableUnexplicit)
@@ -380,19 +382,56 @@ abstract class Type {
 						if name == 'Any' {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
+						else if #data.typeParameters {
+							match name {
+								'Array' {
+									var type = ArrayType.new(scope).setNullable(nullable)
+
+									var parameter = data.typeParameters[0]
+
+									type.setRestType(Type.fromAST(parameter, scope, defined, node))
+
+									return type.flagComplete()
+								}
+								'Object' {
+									var type = ObjectType.new(scope).setNullable(nullable)
+
+									var parameter = data.typeParameters[0]
+
+									type.setRestType(Type.fromAST(parameter, scope, defined, node))
+
+									if var parameter ?= data.typeParameters[1] {
+										type.setKeyType(Type.fromAST(parameter, scope, defined, node))
+									}
+
+									return type.flagComplete()
+								}
+								else {
+									var parameters = [Type.fromAST(parameter, scope, defined, node) for var parameter in data.typeParameters]
+
+									var type = ReferenceType.new(scope, name, nullable, parameters)
+									var object = type.discard()
+
+									if object.isVariant() {
+										var master = object.getVariantType().getMaster()
+
+										if #data.typeSubtypes {
+											for var subtype in data.typeSubtypes {
+												type.addSubtype(subtype.name, master)
+											}
+										}
+									}
+									else if #data.typeSubtypes {
+										NotImplementedException.throw()
+									}
+
+									return type.flagComplete()
+								}
+							}
+						}
 						else if #data.typeSubtypes {
 							var type = scope.reference(name, nullable)
 							var master = type.discard().getVariantType().getMaster()
-
-							if #data.typeParameters {
-								var parameter = data.typeParameters[0]
-
-								type.setRestType(Type.fromAST(parameter, scope, defined, node))
-
-								if var parameter ?= data.typeParameters[1] {
-									type.setKeyType(Type.fromAST(parameter, scope, defined, node))
-								}
-							}
 
 							for var subtype in data.typeSubtypes {
 								type.addSubtype(subtype.name, master)
@@ -400,24 +439,8 @@ abstract class Type {
 
 							return type.flagComplete()
 						}
-						else if #data.typeParameters {
-							var type = match name {
-								'Array'		=> ArrayType.new(scope).setNullable(nullable)
-								'Object'	=> ObjectType.new(scope).setNullable(nullable)
-								else {
-									return scope.reference(name, nullable)
-								}
-							}
-
-							var parameter = data.typeParameters[0]
-
-							type.setRestType(Type.fromAST(parameter, scope, defined, node))
-
-							if var parameter ?= data.typeParameters[1] {
-								type.setKeyType(Type.fromAST(parameter, scope, defined, node))
-							}
-
-							return type.flagComplete()
+						else if generics?.contains(data.typeName.name) {
+							return DeferredType.new(data.typeName.name, scope)
 						}
 						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 							if var variable ?= scope.getVariable(name, -1) {
@@ -493,15 +516,7 @@ abstract class Type {
 				}
 				NodeKind.VariantType {
 					var type = VariantType.new(scope)
-						..setMaster(Type.fromAST(data.master, scope, defined, node))
-
-					for var property in data.properties {
-						match property.kind {
-							NodeKind.VariantField when ?property.type {
-								type.addField(property.name.name, Type.fromAST(property.type, scope, defined, node))
-							}
-						}
-					}
+						..setMaster(Type.fromAST(data.master, scope, defined, generics, node))
 
 					return type
 				}
@@ -735,11 +750,11 @@ abstract class Type {
 	abstract clone(): Type
 	abstract export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	abstract toFragments(fragments, node)
-	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction.NONE)
 	abstract toVariations(variations: Array<String>): Void
 	asReference(): Type => this
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
+	canBeDeferred(): Boolean => false
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
 	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && @isAny()) || @isNumber()
@@ -832,6 +847,7 @@ abstract class Type {
 		return @flagSealed()
 	} # }}}
 	getExhaustive() => @exhaustive
+	getGenericMapper(): { type: Type, mapper: Type[]?, subtypes: Subtype[]? } => { type: this, mapper: null, subtypes: null }
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getMajorReferenceIndex() => @referenceIndex
@@ -945,7 +961,7 @@ abstract class Type {
 	isStrict() => false
 	isString() => false
 	isStruct() => false
-	isSubsetOf(value: Type, mode: MatchingMode) => false
+	isSubsetOf(value: Type, mapper: Type[]? = null, subtypes: Subtype[]? = null, mode: MatchingMode): Boolean => false
 	isSystem() => @system
 	isTuple() => false
 	isTypeOf() => false
@@ -996,6 +1012,20 @@ abstract class Type {
 		}
 
 		return types
+	} # }}}
+	toAwareTestFunctionFragments(varname: String, nullable: Boolean, mapper: Type[]?, subtypes: Subtype[]?, fragments, node) { # {{{
+		fragments.code(`\(varname) => `)
+
+		@toBlindTestFragments(varname, null, Junction.NONE, fragments, node)
+	} # }}}
+	toBlindSubtestFunctionFragments(varname: String, nullable: Boolean, generics: GenericDefinition[]?, fragments, node) { # {{{
+		@toAwareTestFunctionFragments(varname, nullable, null, null, fragments, node)
+	} # }}}
+	toBlindTestFragments(varname: String, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+		NotImplementedException.throw()
+	} # }}}
+	toBlindTestFunctionFragments(varname: String, generics: GenericDefinition[]?, fragments, node) { # {{{
+		@toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() && !@isSystem() {
@@ -1074,7 +1104,12 @@ abstract class Type {
 
 		return @referenceIndex
 	} # }}}
-	toNegativeTestFragments(fragments, node, junction: Junction = Junction.NONE) => @toPositiveTestFragments(fragments.code('!'), node, junction)
+	toNegativeTestFragments(parameters: Type[]? = null, subtypes: Subtype[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+		@toPositiveTestFragments(parameters, subtypes, junction, fragments.code('!'), node)
+	} # }}}
+	toPositiveTestFragments(parameters: Type[]? = null, subtypes: Subtype[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+		NotImplementedException.throw()
+	} # }}}
 	toQuote(): String { # {{{
 		throw NotSupportedException.new()
 	} # }}}
@@ -1108,33 +1143,9 @@ abstract class Type {
 	toRouteTestFragments(fragments, node, argName: String, from: Number, to: Number, default: Boolean, junction: Junction) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	toTestFragments(fragments, node, junction: Junction) { # {{{
-		NotImplementedException.throw()
-	} # }}}
-	toTestFunctionFragments(fragments, node) { # {{{
-		if node._options.format.functions == 'es5' {
-			fragments.code('function(value) { return ')
-		}
-		else {
-			fragments.code('value => ')
-		}
-
-		@toTestFragments(fragments, node, Junction.NONE)
-
-		if node._options.format.functions == 'es5' {
-			fragments.code('; }')
-		}
-	} # }}}
-	toTestFunctionFragments(fragments, node, mode: TestFunctionMode) { # {{{
-		if mode == .USE {
-			@toTestFunctionFragments(fragments, node)
-		}
-		else {
-			NotImplementedException.throw()
-		}
-	} # }}}
 	toTestType() => this
 	toTypeQuote() => @toQuote()
+	tune(value: Type): Type? => null
 	// TODO
 	// type(): valueof this
 	type() => this
@@ -1159,6 +1170,7 @@ include {
 	'./type/class-destructor.ks'
 	'./type/class-method.ks'
 	'./type/class-variable.ks'
+	'./type/deferred.ks'
 	'./type/enum.ks'
 	'./type/namespace.ks'
 	'./type/never.ks'

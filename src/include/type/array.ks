@@ -288,7 +288,7 @@ class ArrayType extends Type {
 	isNullable() => @nullable
 	isSealable() => true
 	isSpread() => @spread
-	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
 		return true if this == value
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
@@ -360,7 +360,7 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		return false unless value.isArray()
 
 		if value.name() != 'Array' {
@@ -393,7 +393,7 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
@@ -615,173 +615,46 @@ class ArrayType extends Type {
 		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
 
 		if @testRest || @testProperties || @testLength {
-			@toSubtestFragments(testingType, @testLength, fragments, node)
+			@toSubtestFragments('value', testingType, @testLength, fragments, node)
 		}
 
 		fragments.code(')')
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if @nullable && junction == Junction.AND
-
-		if @length == 0 && !@destructuring && !@testProperties {
-			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
-
-			if @testRest {
-				fragments.code($comma)
-
-				var literal = Literal.new(false, node, node.scope(), 'value')
-
-				@restType.toTestFunctionFragments(fragments, literal)
-			}
-
-			fragments.code(')')
-		}
-		else {
-			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
-
-			@toSubtestFragments(true, @testLength, fragments, node)
-
-			fragments.code(')')
-		}
-
-		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
-
-			fragments.code(')') if junction == Junction.AND
-		}
+	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+		@toBlindTestFunctionFragments(varname, null, fragments, node)
 	} # }}}
-	toSubtestFragments(testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
-		if testingType {
-			fragments.code(', 1')
-		}
-		else {
-			fragments.code(', 0')
-		}
-
-		if testingLength {
-			fragments.code(`, \(@min ?? @length), 0`)
-		}
-		else {
-			fragments.code(`, 0, 0`)
-		}
-
-		if @testRest || @testProperties {
-			fragments.code($comma)
-
-			var literal = Literal.new(false, node, node.scope(), 'value')
-
-			if @testProperties {
-				if @testRest {
-					var mut onlyRest = @fullTest
-
-					if onlyRest {
-						for var type in @properties {
-							if type != @restType {
-								onlyRest = false
-								break
-							}
-						}
-					}
-
-					@restType.toTestFunctionFragments(fragments, literal)
-
-					if !onlyRest {
-						fragments.code(', [')
-
-						var mut comma = false
-
-						for var type in @properties {
-							if comma {
-								fragments.code($comma)
-							}
-							else {
-								comma = true
-							}
-
-							type.toTestFunctionFragments(fragments, literal)
-						}
-
-						fragments.code(']')
-					}
-				}
-				else {
-					var mut onlyRest = @fullTest
-					var baseType = @properties[0]
-
-					if onlyRest {
-						for var type in @properties from 1 {
-							if type != baseType {
-								onlyRest = false
-								break
-							}
-						}
-					}
-
-					if onlyRest {
-						baseType.toTestFunctionFragments(fragments, literal)
-					}
-					else {
-						fragments.code('0, [')
-
-						var mut comma = false
-
-						for var type in @properties {
-							if comma {
-								fragments.code($comma)
-							}
-							else {
-								comma = true
-							}
-
-							type.toTestFunctionFragments(fragments, literal)
-						}
-
-						fragments.code(']')
-					}
-				}
-			}
-			else {
-				@restType.toTestFunctionFragments(fragments, literal)
-			}
-		}
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+		@toBlindTestFragments(varname, true, @testLength, generics, junction, fragments, node)
 	} # }}}
-	toTestFragments(name: String, testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+		fragments.code('(') if @nullable && junction == .AND
+
 		if testingType && @length == 0 && !@destructuring && !@testProperties {
-			fragments.code(`\($runtime.type(node)).isArray(\(name)`)
+			fragments.code(`\($runtime.type(node)).isArray(\(varname)`)
 
 			if @testRest {
 				fragments.code($comma)
 
-				var literal = Literal.new(false, node, node.scope(), 'value')
-
-				@restType.toTestFunctionFragments(fragments, literal)
+				@restType.toBlindTestFunctionFragments(varname, generics, fragments, node)
 			}
 
 			fragments.code(')')
 		}
 		else {
-			fragments.code(`\($runtime.type(node)).isDexArray(\(name)`)
+			fragments.code(`\($runtime.type(node)).isDexArray(\(varname)`)
 
-			@toSubtestFragments(testingType, testingLength, fragments, node)
+			@toSubtestFragments(varname, testingType, testingLength, fragments, node)
 
 			fragments.code(')')
 		}
-	} # }}}
-	override toTestFragments(fragments, node, junction) { # {{{
+
 		if @nullable {
-			fragments.code('(') if junction == Junction.AND
-
-			@toTestFragments('value', true, @testLength, fragments, node)
-
-			fragments.code(` || \($runtime.type(node)).isNull(value)`)
-
-			fragments.code(')') if junction == Junction.AND
-		}
-		else {
-			@toTestFragments('value', true, @testLength, fragments, node)
+			fragments
+				..code(` || \($runtime.type(node)).isNull(\(varname))`)
+				..code(')') if junction == .AND
 		}
 	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
+	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexArray')
@@ -791,9 +664,9 @@ class ArrayType extends Type {
 			}
 		}
 		else if @rest || @testProperties || @nullable {
-			fragments.code(`value => `)
+			fragments.code(`\(varname) => `)
 
-			@toTestFragments(fragments, node, Junction.NONE)
+			@toBlindTestFragments(varname, true, @testLength, generics, Junction.NONE, fragments, node)
 		}
 		else {
 			if @destructuring {
@@ -802,6 +675,34 @@ class ArrayType extends Type {
 			else {
 				fragments.code($runtime.type(node), '.isArray')
 			}
+		}
+	} # }}}
+	override toPositiveTestFragments(_, _, junction, fragments, node) { # {{{
+		fragments.code('(') if @nullable && junction == Junction.AND
+
+		if @length == 0 && !@destructuring && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
+
+			if @testRest {
+				fragments.code($comma)
+
+				@restType.toAwareTestFunctionFragments('value', @nullable, null, null, fragments, node)
+			}
+
+			fragments.code(')')
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
+
+			@toSubtestFragments('value', true, @testLength, fragments, node)
+
+			fragments.code(')')
+		}
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+
+			fragments.code(')') if junction == Junction.AND
 		}
 	} # }}}
 	override toVariations(variations) { # {{{
@@ -830,4 +731,102 @@ class ArrayType extends Type {
 		}
 	} # }}}
 	walk(fn)
+
+	private {
+		toSubtestFragments(varname: String, testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
+			if testingType {
+				fragments.code(', 1')
+			}
+			else {
+				fragments.code(', 0')
+			}
+
+			if testingLength {
+				fragments.code(`, \(@min ?? @length), 0`)
+			}
+			else {
+				fragments.code(`, 0, 0`)
+			}
+
+			if @testRest || @testProperties {
+				fragments.code($comma)
+
+				var literal = Literal.new(false, node, node.scope(), 'value')
+
+				if @testProperties {
+					if @testRest {
+						var mut onlyRest = @fullTest
+
+						if onlyRest {
+							for var type in @properties {
+								if type != @restType {
+									onlyRest = false
+									break
+								}
+							}
+						}
+
+						@restType.toBlindTestFunctionFragments(varname, null, fragments, literal)
+
+						if !onlyRest {
+							fragments.code(', [')
+
+							var mut comma = false
+
+							for var type in @properties {
+								if comma {
+									fragments.code($comma)
+								}
+								else {
+									comma = true
+								}
+
+								type.toBlindTestFunctionFragments(varname, null, fragments, literal)
+							}
+
+							fragments.code(']')
+						}
+					}
+					else {
+						var mut onlyRest = @fullTest
+						var baseType = @properties[0]
+
+						if onlyRest {
+							for var type in @properties from 1 {
+								if type != baseType {
+									onlyRest = false
+									break
+								}
+							}
+						}
+
+						if onlyRest {
+							baseType.toBlindTestFunctionFragments(varname, null, fragments, literal)
+						}
+						else {
+							fragments.code('0, [')
+
+							var mut comma = false
+
+							for var type in @properties {
+								if comma {
+									fragments.code($comma)
+								}
+								else {
+									comma = true
+								}
+
+								type.toBlindTestFunctionFragments(varname, null, fragments, literal)
+							}
+
+							fragments.code(']')
+						}
+					}
+				}
+				else {
+					@restType.toBlindTestFunctionFragments(varname, null, fragments, literal)
+				}
+			}
+		} # }}}
+	}
 }

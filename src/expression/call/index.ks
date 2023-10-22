@@ -118,7 +118,7 @@ class CallExpression extends Expression {
 		if ?@object {
 			@object.prepare(AnyType.NullableUnexplicit)
 
-			@makeMemberCallee(@object.type())
+			@makeMemberCallee(@object.type().discardValue())
 
 			if @matchingMode == .BestMatch {
 				@object.flagMutating()
@@ -365,7 +365,7 @@ class CallExpression extends Expression {
 			if @nullable && @object.isInferable() {
 				inferables[@object.path()] = {
 					isVariable: @object is IdentifierLiteral
-					type: @object.type().setNullable(false)
+					type: @object.type().discardValue().setNullable(false)
 				}
 			}
 		}
@@ -774,7 +774,7 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with var result {
-							@addCallee(EnumMethodCallee.new(@data, @object.type(), @property, result.possibilities, this))
+							@addCallee(EnumMethodCallee.new(@data, @object.type().discardValue(), @property, result.possibilities, this))
 						}
 						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
@@ -789,7 +789,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), @arguments, this)
 							}
 							else {
-								@addCallee(EnumMethodCallee.new(@data, @object.type(), @property, null, this))
+								@addCallee(EnumMethodCallee.new(@data, @object.type().discardValue(), @property, null, this))
 							}
 						}
 					}
@@ -1549,9 +1549,6 @@ class PlaceholderType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => true
 	parameter(index) => AnyType.NullableUnexplicit
 	override toFragments(fragments, node) { # {{{
-		throw NotSupportedException.new()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw NotSupportedException.new()
 	} # }}}
 	override toQuote() { # {{{

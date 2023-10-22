@@ -1,0 +1,13 @@
+class Foobar<T> {
+	private {
+		@value: T
+	}
+	constructor(@value)
+}
+
+class Quxbaz {
+	private {
+		@parent: Foobar<Quxbaz>?
+	}
+	constructor(@parent)
+}

@@ -84,6 +84,10 @@ class ObjectExpression extends Expression {
 						}
 					}
 				}
+				NodeKind.SpreadExpression {
+					property = ObjectFilteredMember.new(data, this)
+					property.analyse()
+				}
 				NodeKind.UnaryExpression {
 					property = ObjectSpreadMember.new(data, this)
 					property.analyse()
@@ -99,17 +103,15 @@ class ObjectExpression extends Expression {
 		@empty = @properties.length == 0
 	} # }}}
 	override prepare(mut target, targetMode) { # {{{
-		while target.isAlias() {
-			target = target.discardAlias()
-		}
+		var root = target.discard()
 
 		@type = ObjectType.new(@scope)
 
 		if #@properties {
-			if target is ObjectType {
-				var keyed  = target.hasKeyType()
-				var keyType = keyed ? target.getKeyType() : AnyType.NullableUnexplicit
-				var valueType = target.getRestType()
+			if root is ObjectType {
+				var keyed  = root.hasKeyType()
+				var keyType = keyed ? root.getKeyType() : AnyType.NullableUnexplicit
+				var valueType = root.getRestType()
 				var rest: Type[] = []
 
 				for var property in @properties {
@@ -126,6 +128,17 @@ class ObjectExpression extends Expression {
 
 							if keyed && !kType.isAssignableToVariable(keyType, false, false, false) {
 								TypeException.throwInvalidObjectKeyType(kType, keyType, this)
+							}
+						}
+						ObjectFilteredMember {
+							if keyed && !keyType.canBeString() {
+								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+							}
+
+							property.prepare(valueType)
+
+							for var { name, type } in property.members() {
+								@type.addProperty(name, type)
 							}
 						}
 						ObjectLiteralMember {
@@ -162,7 +175,7 @@ class ObjectExpression extends Expression {
 								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
 							}
 
-							property.prepare(target.getProperty(property.name()))
+							property.prepare(root.getProperty(property.name()))
 
 							@type.addProperty(property.name(), property.type())
 						}
@@ -174,20 +187,27 @@ class ObjectExpression extends Expression {
 				}
 			}
 			else {
-				var type = target.isReference() ? target.parameter() : AnyType.NullableUnexplicit
+				var type = root.isReference() ? root.parameter() : AnyType.NullableUnexplicit
 				var rest: Type[] = []
 
 				for var property in @properties {
 					property.prepare(type)
 
-					if property is ObjectLiteralMember {
-						@type.addProperty(property.name(), property.type())
-					}
-					else if property is ObjectSpreadMember {
-						rest.push(property.type())
-					}
-					else if property is ObjectThisMember {
-						@type.addProperty(property.name(), property.type())
+					match property {
+						ObjectFilteredMember {
+							for var { name, type } in property.members() {
+								@type.addProperty(name, type)
+							}
+						}
+						ObjectLiteralMember {
+							@type.addProperty(property.name(), property.type())
+						}
+						ObjectSpreadMember {
+							rest.push(property.type())
+						}
+						ObjectThisMember {
+							@type.addProperty(property.name(), property.type())
+						}
 					}
 				}
 
@@ -430,6 +450,94 @@ class ObjectComputedMember extends Expression {
 	value() => @value
 }
 
+class ObjectFilteredMember extends Expression {
+	private {
+		@members: Array		= []
+		@value
+	}
+	analyse() { # {{{
+		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
+
+		@value = $compile.expression(@data.operand, this)
+		@value.analyse()
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		var targetObj = Type.objectOf(target, @scope)
+
+		@value.prepare(targetObj, targetMode)
+
+		var type = @value.type()
+
+		if type.isObject() {
+			for var member in @data.members {
+				var internal = member.internal.name
+				var external = member.external?.name ?? internal
+
+				if var type ?= @value.getProperty(external) {
+					@members.push({ name: internal, external, type })
+				}
+				else {
+					NotImplementedException.throw()
+				}
+			}
+		}
+		else {
+			for var member in @data.members {
+				var internal = member.internal.name
+				var external = member.external?.name ?? internal
+
+				@members.push({ name: internal, external, type: target })
+			}
+		}
+
+		if @members.length > 1 {
+			@value.acquireReusable(true)
+			@value.releaseReusable()
+
+			@statement().assignTempVariables(@scope)
+		}
+	} # }}}
+	translate() { # {{{
+		@value.translate()
+	} # }}}
+	isUsingVariable(name) => @value.isUsingVariable(name)
+	isInverted() => @value.isInverted()
+	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
+	members() => @members
+	toFragments(fragments, mode) { # {{{
+		if @members.length == 1 {
+			var { name, external } = @members[0]
+
+			fragments
+				.newLine()
+				.code(`\(@parent.varname()).\(name) = `)
+				.compile(@value)
+				.code(`.\(external)`)
+				.done()
+		}
+		else {
+			var { name, external } = @members[0]
+
+			fragments
+				.newLine()
+				.code(`\(@parent.varname()).\(name) = `)
+				.compileReusable(@value)
+				.code(`.\(external)`)
+				.done()
+
+			for var { name, external } in @members from 1 {
+				fragments
+					.newLine()
+					.code(`\(@parent.varname()).\(name) = `)
+					.compile(@value)
+					.code(`.\(external)`)
+					.done()
+			}
+		}
+	} # }}}
+	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
+}
+
 class ObjectLiteralMember extends Expression {
 	private late {
 		@computed: Boolean		= true
@@ -567,6 +675,10 @@ class ObjectRestrictiveMember extends Expression {
 						NotSupportedException.throw(this)
 					}
 				}
+			}
+			NodeKind.SpreadExpression {
+				@property = ObjectFilteredMember.new(@data.expression, this)
+				@property.analyse()
 			}
 			NodeKind.UnaryExpression {
 				@property = ObjectSpreadMember.new(@data.expression, this)

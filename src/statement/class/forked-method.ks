@@ -123,7 +123,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 						var literal = Literal.new(false, this, @scope(), `\(parameter.getExternalName())[0]`)
 
-						parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
+						parameter.type().toPositiveTestFragments(Junction.AND, ctrl2, literal)
 
 						index += 1
 					}
@@ -156,7 +156,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 					var literal = Literal.new(false, this, @scope(), parameter.getExternalName())
 
-					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
+					parameter.type().toPositiveTestFragments(Junction.AND, ctrl2, literal)
 
 					index += 1
 				}

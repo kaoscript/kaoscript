@@ -1,0 +1,62 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "PersonKind",
+      1,
+      "SchoolPerson"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": 3,
+        "exhaustive": true,
+        "variables": [
+          "Director",
+          "Student",
+          "Teacher"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "kind": {
+              "kind": "variant",
+              "master": {
+                "reference": 0
+              },
+              "fields": [
+                {
+                  "names": [
+                    "Student"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "name": "String"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "testIndex": 0
+      }
+    ],
+    "macros": []
+  }
+]

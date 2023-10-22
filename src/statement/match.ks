@@ -694,7 +694,7 @@ class MatchStatement extends Statement {
 				var { testingType, minmax?, type? } = test
 
 				if ?type {
-					type.toTestFragments(@name, testingType, ?minmax, line, this)
+					type.toBlindTestFragments(@name, testingType, ?minmax, null, Junction.NONE, line, this)
 				}
 				else if ?minmax {
 					var { min, max } = minmax
@@ -709,7 +709,7 @@ class MatchStatement extends Statement {
 				var { testingType, type? } = test
 
 				if ?type {
-					type.toTestFragments(@name, testingType, line, this)
+					type.toBlindTestFragments(@name, testingType, null, Junction.NONE, line, this)
 				}
 				else {
 					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
@@ -916,7 +916,7 @@ class MatchBindingArray extends AbstractNode {
 		else if @testingLength || @testingType || @testingProperties {
 			fragments.code(' && ') if junction == Junction.AND
 
-			type.toTestFragments(name, @testingType, true, fragments, this)
+			type.toBlindTestFragments(name, @testingType, true, null, junction, fragments, this)
 		}
 	} # }}}
 	unflagLengthTesting() { # {{{
@@ -1068,7 +1068,12 @@ class MatchBindingObject extends AbstractNode {
 		else if @testingType || @testingProperties {
 			fragments.code(' && ') if junction == Junction.AND
 
-			type.toTestFragments(name, @testingType, fragments, this)
+			if type is ObjectType {
+				type.toBlindTestFragments(name, false, @testingType, null, junction, fragments, this)
+			}
+			else {
+				type.toBlindTestFragments(name, null, junction, fragments, this)
+			}
 		}
 	} # }}}
 	unflagTypeTesting() { # {{{

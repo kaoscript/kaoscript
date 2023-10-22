@@ -474,8 +474,8 @@ class EnumType extends Type {
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
-	isSubsetOf(value: EnumType, mode: MatchingMode) => mode ~~ MatchingMode.Similar
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: EnumType, mapper, subtypes, mode) => mode ~~ MatchingMode.Similar
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
 			return value.name() == 'Enum'
 		}
@@ -512,9 +512,9 @@ class EnumType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw NotImplementedException.new()
-	} # }}}
+	// override toPositiveTestFragments(fragments, node, junction) { # {{{
+	// 	throw NotImplementedException.new()
+	// } # }}}
 	override toVariations(variations) { # {{{
 		variations.push('enum', @sequences.defaults)
 

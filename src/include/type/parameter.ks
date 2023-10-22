@@ -214,7 +214,7 @@ class ParameterType extends Type {
 	isPositional() => @passing ~~ PassingMode.POSITIONAL
 	isRequiringValue() => @required
 	isRetained() => @retained
-	isSubsetOf(value: ParameterType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ParameterType, mapper, subtypes, mode) { # {{{
 		if mode !~ MatchingMode.IgnoreRetained && @retained != value.isRetained() {
 			return false
 		}
@@ -349,12 +349,6 @@ class ParameterType extends Type {
 
 		return fragments
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		@type.toNegativeTestFragments(fragments, node, junction)
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		@type.toPositiveTestFragments(fragments, node, junction)
-	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('param', @externalName, @internalName, @min, @max, @default)
 
@@ -364,5 +358,7 @@ class ParameterType extends Type {
 
 	proxy @type {
 		isComplete
+		toNegativeTestFragments
+		toPositiveTestFragments
 	}
 }

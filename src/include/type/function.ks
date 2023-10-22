@@ -512,21 +512,21 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	isProxy() => false
-	isSubsetOf(value: AnyType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: AnyType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Missing {
 			return true
 		}
 
 		return false
 	} # }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		if value.isAlias() {
 			return @isSubsetOf(value.discardAlias(), mode)
 		}
 
 		return value.isFunction()
 	} # }}}
-	isSubsetOf(value: FunctionType, mut mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: FunctionType, mapper, subtypes, mut mode) { # {{{
 		if @async != value._async {
 			return false
 		}
@@ -899,6 +899,12 @@ class FunctionType extends Type {
 	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
+	override toAwareTestFunctionFragments(varname, nullable, mut mapper, subtypes, fragments, node) { # {{{
+		fragments.code(`\($runtime.typeof('Function', node))`)
+	} # }}}
+	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
+		fragments.code(`\($runtime.typeof('Function', node))`)
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code('Function')
 	} # }}}
@@ -936,14 +942,11 @@ class FunctionType extends Type {
 
 		return fragments
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
+	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)
 			.code(')')
-	} # }}}
-	toTestFunctionFragments(fragments, node) { # {{{
-		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('func', 1)
@@ -1143,14 +1146,14 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} # }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
 		return value.isFunction()
 	} # }}}
-	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: FunctionType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
@@ -1163,7 +1166,7 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} # }}}
-	isSubsetOf(value: OverloadedFunctionType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: OverloadedFunctionType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
@@ -1184,7 +1187,7 @@ class OverloadedFunctionType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: NamedType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NamedType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
@@ -1201,9 +1204,6 @@ class OverloadedFunctionType extends Type {
 		@altering = true
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		throw NotImplementedException.new()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
 	toQuote() { # {{{

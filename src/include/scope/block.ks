@@ -517,18 +517,18 @@ class BlockScope extends Scope {
 			reference.reset()
 		}
 	} # }}}
-	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
+	override resolveReference(name, explicitlyNull, parameters, subtypes) { # {{{
 		if @variables[name] is Array {
-			var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
+			var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
 			if @references[hash] is not ReferenceType {
-				@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
+				@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 			}
 
 			return @references[hash]
 		}
 		else {
-			return @parent.resolveReference(name, explicitlyNull, parameters)
+			return @parent.resolveReference(name, explicitlyNull, parameters, subtypes)
 		}
 	} # }}}
 	setImplicitVariable(@implicitVarname, @implicitType)

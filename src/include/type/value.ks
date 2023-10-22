@@ -17,14 +17,14 @@ class ValueType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	isSubsetOf(value: VariantType, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+		return @type.isSubsetOf(value, mapper, subtypes, mode)
+	} # }}}
+	assist isSubsetOf(value: VariantType, mapper, subtypes, mode) { # {{{
 		return @type == value.getMaster()
 	} # }}}
 	override isValue() => true
 	override toFragments(fragments, node) { # {{{
-		NotImplementedException.throw()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	override toQuote() => @path
@@ -45,11 +45,13 @@ class ValueType extends Type {
 		isBoolean
 		isComparableWith
 		isEnum
+		isExplicit
 		isMorePreciseThan
 		isNull
 		isNullable
 		isNumber
 		isString
 		isUnion
+		toTypeQuote
 	}
 }

@@ -466,14 +466,14 @@ class Parameter extends AbstractNode {
 
 					ctrl2.code(`else if(arguments[__ks_i] === null || `)
 
-					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.OR)
+					parameter.type().toPositiveTestFragments(Junction.OR, ctrl2, literal)
 
 					ctrl2.code(')').step()
 				}
 				else {
 					ctrl2.code('if(')
 
-					parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.NONE)
+					parameter.type().toPositiveTestFragments(Junction.NONE, ctrl2, literal)
 
 					ctrl2.code(')').step()
 				}
@@ -994,12 +994,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.NONE)
+						type.toNegativeTestFragments(Junction.NONE, ctrl2, Literal.new(false, that, that.scope(), '__ks__'))
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
+						type.toNegativeTestFragments(Junction.OR, ctrl2, Literal.new(false, that, that.scope(), '__ks__'))
 					}
 
 					ctrl2
@@ -1101,12 +1101,12 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
 
-							declaredType.toPositiveTestFragments(line, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
+							declaredType.toPositiveTestFragments(Junction.OR, line, Literal.new(false, that, that.scope(), '__ks__'))
 
 							line.code(')')
 						}
 						else {
-							declaredType.toPositiveTestFragments(line, Literal.new(false, that, that.scope(), '__ks__'), Junction.AND)
+							declaredType.toPositiveTestFragments(Junction.AND, line, Literal.new(false, that, that.scope(), '__ks__'))
 						}
 
 						line
@@ -1218,12 +1218,12 @@ class IdentifierParameter extends IdentifierLiteral {
 							.step()
 							.code('else if(')
 
-						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.NONE)
+						type.toNegativeTestFragments(Junction.NONE, ctrl2, Literal.new(false, that, that.scope(), '__ks__'))
 					}
 					else {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-						type.toNegativeTestFragments(ctrl2, Literal.new(false, that, that.scope(), '__ks__'), Junction.OR)
+						type.toNegativeTestFragments(Junction.OR, ctrl2, Literal.new(false, that, that.scope(), '__ks__'))
 					}
 
 					ctrl2
@@ -1343,10 +1343,10 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							ctrl2.compile(that).code(' !== null && ')
 
-							declaredType.toNegativeTestFragments(ctrl2, that, Junction.AND)
+							declaredType.toNegativeTestFragments(Junction.AND, ctrl2, that)
 						}
 						else {
-							declaredType.toNegativeTestFragments(ctrl2, that, Junction.NONE)
+							declaredType.toNegativeTestFragments(Junction.NONE, ctrl2, that)
 						}
 
 						ctrl2

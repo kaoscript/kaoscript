@@ -48,8 +48,8 @@ class SealableType extends Type {
 	isComplete() => true
 	isSealable() => true
 	isSealed() => @sealed || @type.isSealed()
-	isSubsetOf(value: SealableType, mode: MatchingMode) => @type.isSubsetOf(value.type(), mode)
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: SealableType, mapper, subtypes, mode) => @type.isSubsetOf(value.type(), mode)
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
 			return @type.isSubsetOf(value, mode)
 		}
@@ -58,7 +58,6 @@ class SealableType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{
 		variations.push('sealable')
 
@@ -66,7 +65,8 @@ class SealableType extends Type {
 	} # }}}
 	type() => @type
 
-	proxy {
-		toQuote = @type.toQuote
+	proxy @type {
+		toQuote
+		toPositiveTestFragments
 	}
 }

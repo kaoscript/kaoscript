@@ -157,7 +157,10 @@ abstract class Expression extends AbstractNode {
 			fragments.wrap(this)
 		}
 	} # }}}
-	toTypeQuote() => @type().toQuote()
+	toTypeQuote() => @type().toTypeQuote()
+	toTypeQuote(double: Boolean): String { # {{{
+		return double ? `"\(@toTypeQuote())"` : `'\(@toTypeQuote())'`
+	} # }}}
 	type() => AnyType.NullableUnexplicit
 	unflagExpectingEnum()
 	validateType(type: Type)

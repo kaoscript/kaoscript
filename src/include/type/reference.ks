@@ -45,7 +45,7 @@ class ReferenceType extends Type {
 
 			return ReferenceType.new(scope, name as String, data.nullable!?, null)
 		} # }}}
-		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: Subtype[] = []): String { # {{{
+		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: Subtype[]): String { # {{{
 			if name == 'this' {
 				return 'typeof this'
 			}
@@ -113,7 +113,7 @@ class ReferenceType extends Type {
 	} # }}}
 	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
 	clone(): ReferenceType { # {{{
-		var type = ReferenceType.new(@scope, @name, @nullable, @parameters, @subtypes)
+		var type = ReferenceType.new(@scope, @name, @nullable, [...@parameters], [...@subtypes])
 
 		type._sealed = @sealed
 		type._spread = @spread
@@ -492,6 +492,48 @@ class ReferenceType extends Type {
 
 		return type
 	} # }}}
+	override getGenericMapper() { # {{{
+		var type = @discard()!?
+
+		var mut mapper = null
+
+		if @type.isAlias() && @type is NamedType {
+			if var generics #= @type.type().generics() {
+				if @parameters.length > generics.length {
+					NotImplementedException.throw()
+				}
+
+				mapper = []
+
+				for var name, index in generics {
+					if var type ?= @parameters[index] {
+						mapper.push({ name, type })
+					}
+					else {
+						mapper.push({ name, type : AnyType.NullableUnexplicit })
+					}
+				}
+			}
+			else if #@parameters {
+				NotImplementedException.throw()
+			}
+		}
+		else if #@parameters {
+			NotImplementedException.throw()
+		}
+
+		var mut subtypes = null
+
+		if #@subtypes {
+			unless @type.isObject() && @type.isVariant() {
+				NotImplementedException.throw()
+			}
+
+			subtypes = @subtypes
+		}
+
+		return { type, mapper, subtypes }
+	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
 	getProperty(index: Number): Type { # {{{
 		if @name == 'Array' {
@@ -537,21 +579,31 @@ class ReferenceType extends Type {
 				return property
 			}
 			else if #@subtypes {
-				var property = name
+				var propname = name
 				var variant = type.discard().getVariantType()
 
 				if @subtypes.length == 1 {
 					var { name } = @subtypes[0]
 
 					if var { type % subtype } ?= variant.getField(name) {
-						return subtype.getProperty(property)
+						var property = subtype.getProperty(propname)
+
+						if property is DeferredType {
+							return AnyType.NullableUnexplicit if !#@parameters
+
+							var index = type.getGenericIndex(property.name())
+
+							return @parameters[index] ?? AnyType.NullableUnexplicit
+						}
+
+						return property
 					}
 					else {
-						NotImplementedException.throw(this)
+						NotImplementedException.throw()
 					}
 				}
 				else {
-					NotImplementedException.throw(this)
+					NotImplementedException.throw()
 				}
 			}
 			else {
@@ -561,12 +613,22 @@ class ReferenceType extends Type {
 					return ReferenceType.new(@scope, @name, null, null, [{ name: name, type: master }])
 				}
 				else {
-					NotImplementedException.throw(this)
+					return AnyType.NullableUnexplicit
 				}
 			}
 		}
 		else {
-			return type.getProperty(name)
+			var property = type.getProperty(name)
+
+			if property is DeferredType {
+				return AnyType.NullableUnexplicit if !#@parameters
+
+				var index = type.getGenericIndex(property.name())
+
+				return @parameters[index] ?? AnyType.NullableUnexplicit
+			}
+
+			return property
 		}
 	} # }}}
 	getSealedPath() => @type().getSealedPath()
@@ -681,7 +743,7 @@ class ReferenceType extends Type {
 				}
 
 				for var index from 0 to~ Math.max(@parameters.length, value.parameters().length) {
-					if !@parameter(index).isAssignableToVariable(value.parameter(index), true, nullcast, downcast) {
+					if !@parameter(index).isAssignableToVariable(value.parameter(index), anycast, nullcast, downcast) {
 						return false
 					}
 				}
@@ -906,7 +968,7 @@ class ReferenceType extends Type {
 	isStrict() => @strict
 	isString() => @name == 'String' || @type().isString()
 	isStruct() => @name == 'Struct' || @type().isStruct()
-	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
 		return false unless @isBroadArray()
 		return @discard().isSubsetOf(value, mode) unless @isArray()
 
@@ -946,47 +1008,20 @@ class ReferenceType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
-		return false unless @isBroadObject()
-		return @discard().isSubsetOf(value, mode) unless @isObject()
+	assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
+		if #mapper {
+			var valname = value.name()
 
-		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			return false unless !value.hasProperties()
-			return false unless @hasParameters() == value.hasRest()
-
-			if @hasParameters() {
-				var type = @parameters[0]
-
-				for var property of value.properties() {
-					return false unless type.isSubsetOf(property, mode)
-				}
-
-				return type.isSubsetOf(value.getRestType(), mode)
-			}
-		}
-		else {
-			if @hasParameters() {
-				var type = @parameters[0]
-
-				for var property of value.properties() {
-					return false unless type.isSubsetOf(property, mode)
-				}
-
-				if value.hasRest() {
-					return false unless type.isSubsetOf(value.getRestType(), mode)
+			for var { name, type } in mapper {
+				if name == valname {
+					return @isSubsetOf(type, mapper, subtypes, mode)
 				}
 			}
-		}
-
-		if @isAlias() {
-			var unalias = @discardAlias()
-
-			return unalias.isSubsetOf(value, mode + MatchingMode.Reference)
 		}
 
 		return true
 	} # }}}
-	isSubsetOf(value: FunctionType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: FunctionType, mapper, subtypes, mode) { # {{{
 		if @isAlias() {
 			return @discardAlias().isSubsetOf(value, mode)
 		}
@@ -1002,7 +1037,47 @@ class ReferenceType extends Type {
 
 		return @discard().isSubsetOf(value, mode)
 	} # }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
+		return false unless @isBroadObject()
+		return @discard().isSubsetOf(value, mode) unless @isObject()
+
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			return false unless !value.hasProperties()
+			return false unless @hasParameters() == value.hasRest()
+
+			if #@parameters {
+				var type = @parameters[0]
+
+				for var property of value.properties() {
+					return false unless type.isSubsetOf(property, mode)
+				}
+
+				return type.isSubsetOf(value.getRestType(), mode)
+			}
+		}
+		else {
+			if #@parameters {
+				var type = @parameters[0]
+
+				for var property of value.properties() {
+					return false unless type.isSubsetOf(property, mode)
+				}
+
+				if value.hasRest() {
+					return false unless type.isSubsetOf(value.getRestType(), mode)
+				}
+			}
+		}
+
+		if @isAlias() {
+			var unalias = @discardAlias()
+
+			return unalias.isSubsetOf(value, null, null, mode + MatchingMode.Reference)
+		}
+
+		return true
+	} # }}}
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1086,7 +1161,7 @@ class ReferenceType extends Type {
 			return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
 		}
 	} # }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
 		if @isAlias() {
 			return @discardAlias().isSubsetOf(value, mode)
 		}
@@ -1116,6 +1191,9 @@ class ReferenceType extends Type {
 				return value.isAny()
 			}
 		}
+	} # }}}
+	assist isSubsetOf(value: VariantType, mapper, subtypes, mode) { # {{{
+		return @isSubsetOf(value.getMaster(), mode)
 	} # }}}
 	isSubtypeOf(value: ReferenceType) => @name == value.name()
 	isSubtypeOf(value: Type) => false
@@ -1336,6 +1414,10 @@ class ReferenceType extends Type {
 					@type = @type.type()
 				}
 			}
+
+			// if #@parameters && !(@isArray() || @isObject() || @isAlias()) {
+			// 	NotImplementedException.throw()
+			// }
 		}
 	} # }}}
 	reset(): valueof this { # {{{
@@ -1352,7 +1434,7 @@ class ReferenceType extends Type {
 				return this
 			}
 			else {
-				return @scope.reference(@name, false, [...@parameters])
+				return @scope.reference(@name, false, [...@parameters], [...@subtypes])
 			}
 		}
 		else {
@@ -1364,7 +1446,7 @@ class ReferenceType extends Type {
 			else if @type.isUnion() {
 				if nullable {
 					if @type.isAlias() {
-						return @scope.reference(@name, true, [...@parameters])
+						return @scope.reference(@name, true, [...@parameters], [...@subtypes])
 					}
 
 					var types = @type.discard().types()
@@ -1393,7 +1475,7 @@ class ReferenceType extends Type {
 				}
 			}
 			else {
-				return @scope.reference(@name, nullable, [...@parameters])
+				return @scope.reference(@name, nullable, [...@parameters], [...@subtypes])
 			}
 		}
 	} # }}}
@@ -1500,92 +1582,99 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, mut mapper, subtypes, fragments, node) { # {{{
 		@resolve()
 
-		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toNegativeTestFragments(fragments, node, junction)
-		}
-		else {
-			@toReferenceTestFragments(fragments.code('!'), node, junction)
-		}
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		@resolve()
+		if @type.isAlias() && @type is NamedType {
+			if var generics #= @type.type().generics() {
+				if @parameters.length > generics.length {
+					NotImplementedException.throw()
+				}
 
-		if @type.isVariant() {
-			if @isSubtypeOf(node.type()) {
-				var property = @type.discard().getVariantName()
+				mapper = []
 
-				for var { name, type }, index in @subtypes {
-					fragments
-						..code(' || ') if index != 0
-						..compile(node).code(`.\(property) === `).compile(type).code(`.\(name)`)
-
+				for var name, index in generics {
+					if var type ?= @parameters[index] {
+						mapper.push({ name, type })
+					}
+					else {
+						mapper.push({ name, type : AnyType.NullableUnexplicit })
+					}
 				}
 			}
-			else {
-				@type.discard().toPositiveTestFragments(fragments, node, junction, @parameters, @subtypes)
-			}
+			// else if #@parameters {
+			// 	NotImplementedException.throw()
+			// }
 		}
-		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toPositiveTestFragments(fragments, node, junction)
+		// else if #@parameters {
+		// 	NotImplementedException.throw()
+		// }
+
+		if #@subtypes {
+			unless @type.isObject() && @type.isVariant() {
+				NotImplementedException.throw()
+			}
+
+			@discard().toAwareTestFunctionFragments(varname, @nullable, mapper, @subtypes, fragments, node)
+		}
+		else if #mapper {
+			@type.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
 		}
 		else {
-			@toReferenceTestFragments(fragments, node, junction)
+			var unalias = @discardAlias()
+			var name = unalias.name?() ?? @name
+			var tof = $runtime.typeof(name, node)
+
+			if ?tof {
+				if @nullable {
+					fragments.code(`\(varname) => \(tof)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+				}
+				else {
+					fragments.code(`\(tof)`)
+				}
+			}
+			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+				unalias.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
+			}
+			else {
+				super.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
+			}
 		}
 	} # }}}
-	override toRouteTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if @nullable && junction == Junction.AND
-
-		@toReferenceTestFragments(fragments, node, junction)
-
-		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(')')
-		}
-
-		fragments.code(')') if @nullable && junction == Junction.AND
-	} # }}}
-	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
+	override toBlindSubtestFunctionFragments(varname, mut nullable, generics, fragments, node) { # {{{
 		@resolve()
 
-		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
+		nullable ||= @nullable
 
-		var literal = Literal.new(false, node, node.scope(), 'value')
-
-		if node._options.format.functions == 'es5' {
-			fragments.code('function(value) { return ')
-
-			if @nullable {
-				@toReferenceTestFragments(fragments, literal, Junction.OR)
-
-				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
-			}
-			else {
-				@toReferenceTestFragments(fragments, literal, Junction.NONE)
+		if #@subtypes {
+			unless @type.isObject() && @type.isVariant() {
+				NotImplementedException.throw()
 			}
 
-			fragments.code('; }')
+			@discard().toAwareTestFunctionFragments(varname, nullable, null, @subtypes, fragments, node)
 		}
 		else {
-			fragments.code('value => ')
+			var unalias = @discardAlias()
+			var name = unalias.name?() ?? @name
+			var tof = $runtime.typeof(name, node)
 
-			if @nullable {
-				@toReferenceTestFragments(fragments, literal, Junction.OR)
-
-				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
+			if ?tof {
+				if @nullable {
+					fragments.code(`\(varname) => \(tof)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+				}
+				else {
+					fragments.code(`\(tof)`)
+				}
+			}
+			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+				unalias.toBlindSubtestFunctionFragments(varname, nullable, generics, fragments, node)
 			}
 			else {
-				@toReferenceTestFragments(fragments, literal, Junction.NONE)
+				super.toBlindSubtestFunctionFragments(varname, nullable, generics, fragments, node)
 			}
 		}
-
-		fragments.code(')')
 	} # }}}
-	toTestFragments(name: String, testingType: Boolean, fragments, node) { # {{{
-		@toTestFragments(name, fragments, node, Junction.NONE)
-	} # }}}
-	toTestFragments(varname: String, fragments, node, junction: Junction) { # {{{
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
@@ -1605,8 +1694,11 @@ class ReferenceType extends Type {
 
 		var unalias = @discardAlias()
 
-		if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-			unalias.toTestFragments(fragments, node, subjunction ?? junction)
+		if #@subtypes {
+			@type.discard().toPositiveTestFragments(@parameters, @subtypes, junction, fragments, node)
+		}
+		else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+			unalias.toBlindTestFragments(varname, generics, subjunction ?? junction, fragments, node)
 		}
 		else {
 			var name = unalias.name?() ?? @name
@@ -1647,9 +1739,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			var literal = Literal.new(false, node, node.scope(), varname)
-
-			@parameters[0].toTestFunctionFragments(fragments, literal)
+			@parameters[0].toBlindTestFunctionFragments(varname, generics, fragments, node)
 		}
 
 		if !@type.isAlias() {
@@ -1664,28 +1754,87 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toTestFragments(fragments, node, junction) { # {{{
-		@toTestFragments('value', fragments, node, junction)
-	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if @nullable {
-			super.toTestFunctionFragments(fragments, node)
+	override toNegativeTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		@resolve()
+
+		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 		else {
-			var unalias = @discardAlias()
-			var name = unalias.name?() ?? @name
-			var tof = $runtime.typeof(name, node)
+			@toReferenceTestFragments(junction, fragments.code('!'), node)
+		}
+	} # }}}
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		@resolve()
 
-			if !#@parameters && ?tof {
-				fragments.code(`\(tof)`)
-			}
-			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-				unalias.toTestFunctionFragments(fragments, node)
+		if @type.isVariant() {
+			if @isSubtypeOf(node.type()) {
+				var property = @type.discard().getVariantName()
+
+				for var { name, type }, index in @subtypes {
+					fragments
+						..code(' || ') if index != 0
+						..compile(node).code(`.\(property) === `).compile(type).code(`.\(name)`)
+
+				}
 			}
 			else {
-				super.toTestFunctionFragments(fragments, node)
+				@type.discard().toPositiveTestFragments(@parameters, @subtypes, junction, fragments, node)
 			}
 		}
+		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
+		}
+		else {
+			@toReferenceTestFragments(junction, fragments, node)
+		}
+	} # }}}
+	override toRouteTestFragments(fragments, node, junction) { # {{{
+		fragments.code('(') if @nullable && junction == Junction.AND
+
+		@toReferenceTestFragments(junction, fragments, node)
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(')')
+		}
+
+		fragments.code(')') if @nullable && junction == Junction.AND
+	} # }}}
+	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { # {{{
+		@resolve()
+
+		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
+
+		var literal = Literal.new(false, node, node.scope(), 'value')
+
+		if node._options.format.functions == 'es5' {
+			fragments.code('function(value) { return ')
+
+			if @nullable {
+				@toReferenceTestFragments(Junction.OR, fragments, literal)
+
+				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
+			}
+			else {
+				@toReferenceTestFragments(Junction.NONE, fragments, literal)
+			}
+
+			fragments.code('; }')
+		}
+		else {
+			fragments.code('value => ')
+
+			if @nullable {
+				@toReferenceTestFragments(Junction.OR, fragments, literal, Junction.OR)
+
+				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
+			}
+			else {
+				@toReferenceTestFragments(Junction.NONE, fragments, literal)
+			}
+		}
+
+		fragments.code(')')
 	} # }}}
 	override toVariations(variations) { # {{{
 		@resolve()
@@ -1697,6 +1846,67 @@ class ReferenceType extends Type {
 		}
 		else {
 			@type.toVariations(variations)
+		}
+	} # }}}
+	override tune(value) { # {{{
+		@resolve()
+
+		return null unless @type is NamedType && @type.isAlias() && @type.isObject() && value is ObjectType
+
+		var alias = @type.type()
+
+		return null unless alias.hasGenerics() || alias.isVariant()
+
+		var generics = alias.generics()
+		var object = alias.discard()
+		var parameters = []
+		var subtypes = []
+		var properties = {...object.properties()}
+
+		if object.isVariant() && !#@subtypes {
+			var name = object.getVariantName()
+			var variant = object.getVariantType()
+			var property = value.getProperty(name)
+
+			if property is ValueType {
+				subtypes.push({ name: property.value(), type: variant.getMaster() })
+
+				if var { type % subtype } ?= variant.getField(property.value()) {
+					Object.merge(properties, subtype.properties())
+				}
+			}
+		}
+
+		if generics.length > @parameters.length {
+			var map = {}
+
+			for var type, name of properties when type is DeferredType {
+				map[type.name()] = value.getProperty(name)
+			}
+
+			// TODO!
+			// for var name in generics while ?map[name] {
+			for var name in generics {
+				if ?map[name] {
+					parameters.push(map[name])
+				}
+				else {
+					break
+				}
+			}
+		}
+		else if #subtypes {
+			parameters.push(...@parameters)
+		}
+		else {
+			return null
+		}
+
+		if parameters.length > @parameters.length || subtypes.length > @subtypes.length {
+			return ReferenceType.new(@scope, @name, @nullable, parameters, subtypes)
+		}
+		else {
+			return null
 		}
 	} # }}}
 	type() { # {{{
@@ -1714,7 +1924,7 @@ class ReferenceType extends Type {
 		return type
 	} # }}}
 
-	private toReferenceTestFragments(fragments, node, junction) { # {{{
+	private toReferenceTestFragments(junction, fragments, node) { # {{{
 		if @nullable && junction == Junction.AND {
 			fragments.code('(')
 		}
@@ -1756,14 +1966,14 @@ class ReferenceType extends Type {
 			if node._options.format.functions == 'es5' {
 				fragments.code('function(value) { return ')
 
-				@parameters[0].toReferenceTestFragments(fragments, literal, Junction.NONE)
+				@parameters[0].toReferenceTestFragments(Junction.NONE, fragments, literal)
 
 				fragments.code('; }')
 			}
 			else {
 				fragments.code('value => ')
 
-				@parameters[0].toReferenceTestFragments(fragments, literal, Junction.NONE)
+				@parameters[0].toReferenceTestFragments(Junction.NONE, fragments, literal)
 			}
 		}
 

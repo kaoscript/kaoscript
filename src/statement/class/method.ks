@@ -592,7 +592,7 @@ class ClassMethodDeclaration extends Statement {
 
 				var literal = Literal.new(false, this, @scope(), parameter.getExternalName())
 
-				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction.AND)
+				parameter.type().toPositiveTestFragments(Junction.AND, ctrl2, literal)
 
 				index += 1
 			}

@@ -62,7 +62,7 @@ class ExclusionType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		return false if value.isNull()
 
 		return true
@@ -81,59 +81,59 @@ class ExclusionType extends Type {
 
 		return true
 	} # }}}
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .OR
+
+		if @types[0].isAny() {
+			@types[1].toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+
+			for var type in @types from 2 {
+				fragments.code(' && ')
+
+				type.toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+			}
+		}
+		else {
+			@types[0].toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+
+			for var type in @types from 1 {
+				fragments.code(' && ')
+
+				type.toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+			}
+		}
+
+		fragments.code(')') if junction == .OR
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .OR
+
+		if @types[0].isAny() {
+			@types[1].toNegativeTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+
+			for var type in @types from 2 {
+				fragments.code(' && ')
+
+				type.toNegativeTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+			}
+		}
+		else {
+			@types[0].toPositiveTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+
+			for var type in @types from 1 {
+				fragments.code(' && ')
+
+				type.toNegativeTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+			}
+		}
+
+		fragments.code(')') if junction == .OR
+	} # }}}
 	toQuote() => [type.toQuote() for var type in @types].join('^')
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
-	override toTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.OR
-
-		if @types[0].isAny() {
-			@types[1].toTestFragments(fragments.code('!'), node, Junction.AND)
-
-			for var type in @types from 2 {
-				fragments.code(' && ')
-
-				type.toTestFragments(fragments.code('!'), node, Junction.AND)
-			}
-		}
-		else {
-			@types[0].toTestFragments(fragments, node, Junction.AND)
-
-			for var type in @types from 1 {
-				fragments.code(' && ')
-
-				type.toTestFragments(fragments.code('!'), node, Junction.AND)
-			}
-		}
-
-		fragments.code(')') if junction == Junction.OR
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.OR
-
-		if @types[0].isAny() {
-			@types[1].toNegativeTestFragments(fragments, node, Junction.AND)
-
-			for var type in @types from 2 {
-				fragments.code(' && ')
-
-				type.toNegativeTestFragments(fragments, node, Junction.AND)
-			}
-		}
-		else {
-			@types[0].toPositiveTestFragments(fragments, node, Junction.AND)
-
-			for var type in @types from 1 {
-				fragments.code(' && ')
-
-				type.toNegativeTestFragments(fragments, node, Junction.AND)
-			}
-		}
-
-		fragments.code(')') if junction == Junction.OR
-	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('exclusion')
 	} # }}}

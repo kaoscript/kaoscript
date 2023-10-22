@@ -1,7 +1,8 @@
 class AliasType extends Type {
 	private late {
+		@generics: GenericDefinition[]		= []
 		@type: Type
-		@testIndex: Number?		= null
+		@testIndex: Number?					= null
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
@@ -25,6 +26,9 @@ class AliasType extends Type {
 	} # }}}
 	constructor(@scope, @type) { # {{{
 		super(scope)
+	} # }}}
+	addGeneric(name: String) { # {{{
+		@generics.push(name)
 	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
 	canBeEnum(any = true) => @type.canBeEnum(any)
@@ -50,10 +54,13 @@ class AliasType extends Type {
 			@testIndex if ?@testIndex
 		}
 	} # }}}
+	generics() => @generics
+	getGenericIndex(name: String) => @generics.indexOf(name)
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String): Type => @type.getProperty(name)
 	getTestIndex() => @testIndex
 	getTestName() => @type.getTestName()
+	hasGenerics() => #@generics
 	hasTest() => @type.hasTest()
 	isAlias() => true
 	isArray() => @type.isArray()
@@ -71,7 +78,7 @@ class AliasType extends Type {
 	isReducible() => true
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
-	isSubsetOf(value: AliasType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: AliasType, mapper, subtypes, mode) { # {{{
 		return this == value
 	} # }}}
 	isTuple() => @type.isTuple()
@@ -96,11 +103,12 @@ class AliasType extends Type {
 	type() => @type
 	type(@type) => this
 	override toExportFragment(fragments, name, variable)
+	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
+		@type.toBlindTestFunctionFragments(varname, @generics, fragments, node)
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) => @type.toNegativeTestFragments(fragments, node, junction)
-	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{
 		variations.push('alias')
 
@@ -111,6 +119,8 @@ class AliasType extends Type {
 		hasRest
 		isComplex
 		isVariant
-		toTestFunctionFragments
+		toAwareTestFunctionFragments
+		toNegativeTestFragments
+		toPositiveTestFragments
 	}
 }

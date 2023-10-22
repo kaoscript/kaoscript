@@ -1607,7 +1607,7 @@ class ClassType extends Type {
 	isPredefined() => @predefined
 	isSealable() => true
 	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
-	isSubsetOf(value: ClassType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ClassType, mapper, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1665,7 +1665,7 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
-	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
 		for var type, name of value.properties() {
 			if var prop ?= @getInstanceProperty(name) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -1692,7 +1692,7 @@ class ClassType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
+	assist isSubsetOf(value: NamedType, mapper, subtypes, mode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
 	listAbstractMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
 		if scope == MatchingScope.Element {
@@ -2164,9 +2164,6 @@ class ClassType extends Type {
 		}
 
 		return super(references, indexDelta, mode, module)
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		throw NotImplementedException.new(node)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)

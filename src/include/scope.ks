@@ -154,13 +154,13 @@ abstract class Scope {
 
 		return @resolveReference('Object', value.isNullable())
 	} # }}}
-	reference(value: ReferenceType): ReferenceType => @resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
+	reference(value: ReferenceType): ReferenceType => @resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()], [...value.getSubtypes()])
 	reference(value: Variable): ReferenceType => @resolveReference(value.name())
 	reference(value: Type): ReferenceType { # {{{
 		throw NotImplementedException.new()
 	} # }}}
-	reference(value: String, nullable: Boolean = false, parameters: Array = []): ReferenceType { # {{{
-		return @resolveReference(value, nullable, parameters)
+	reference(value: String, nullable: Boolean = false, parameters: Array = [], subtypes: Array = []): ReferenceType { # {{{
+		return @resolveReference(value, nullable, parameters, subtypes)
 	} # }}}
 	renameNext(name: String, line: Number): Void
 	abstract {
@@ -179,7 +179,7 @@ abstract class Scope {
 		hasVariable(name: String, line: Number = -1): Boolean
 		isMatchingType(a: Type, b: Type, mode: MatchingMode): Boolean
 		releaseTempName(name: String): Void
-		resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []): ReferenceType
+		resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = [], subtypes: Array = []): ReferenceType
 	}
 	private abstract {
 		declareVariable(name: String, scope: Scope): String?

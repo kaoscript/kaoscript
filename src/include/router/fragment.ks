@@ -233,7 +233,7 @@ namespace Fragment {
 
 		line.code(`\($runtime.immutableScope(node))\(name) = `)
 
-		type.toTestFunctionFragments(line, node)
+		type.toAwareTestFunctionFragments('value', false, null, null, line, node)
 
 		line.done()
 

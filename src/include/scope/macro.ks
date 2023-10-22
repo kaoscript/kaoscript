@@ -167,11 +167,11 @@ class MacroScope extends Scope {
 	releaseTempName(name) { # {{{
 		throw NotSupportedException.new()
 	} # }}}
-	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { # {{{
-		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
+	override resolveReference(name, explicitlyNull, parameters, subtypes) { # {{{
+		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters)
+			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 		}
 
 		return @references[hash]

@@ -12,6 +12,7 @@ class ObjectType extends Type {
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@spread: Boolean				= false
+		@testGenerics: Boolean			= false
 		// TODO move to alias
 		@testName: String?
 		@testProperties: Boolean		= false
@@ -59,6 +60,7 @@ class ObjectType extends Type {
 		@computed[name] = computed
 		@length += 1
 		@testProperties ||= !type.isAny() || !type.isNullable()
+		@testGenerics ||= type.canBeDeferred()
 
 		if type is VariantType {
 			@variant = true
@@ -66,6 +68,7 @@ class ObjectType extends Type {
 			@variantType = type
 		}
 	} # }}}
+	override canBeDeferred() => @testGenerics
 	clone() { # {{{
 		var type = ObjectType.new(@scope)
 
@@ -311,16 +314,58 @@ class ObjectType extends Type {
 
 			return false
 		}
-		else if value.isVariant() {
+
+		if value.isVariant() {
 			if value is ReferenceType && value.hasSubtypes() {
-				NotImplementedException.throw()
+				var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+
+				if anycast {
+					matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
+				}
+
+				var { type % object, mapper, subtypes } = value.getGenericMapper()
+				var variant = object.getVariantType()
+
+				for var type, name of object.properties() {
+					if var prop ?= @properties[name] {
+						return false unless prop.isSubsetOf(type, mapper, subtypes, matchingMode)
+					}
+					else {
+						return false unless type.isNullable()
+					}
+				}
+
+				var newProperties = {}
+
+				if var prop ?= @properties[object.getVariantName()] {
+					var mut matched = false
+					var propname = prop.value()
+
+					for var { name, type } of value.getSubtypes() {
+						if variant.getField(propname) == variant.getField(name) {
+							Object.merge(newProperties, variant.getField(propname).type.properties())
+
+							matched = true
+						}
+					}
+
+					return false unless matched
+				}
+				else {
+					return false
+				}
+
+				for var type, name of newProperties {
+					if var prop ?= @properties[name] {
+						return false unless prop.isSubsetOf(type, mapper, subtypes, matchingMode)
+					}
+					else {
+						return false unless type.isNullable()
+					}
+				}
+
+				return true
 			}
-			else {
-				value = value.discard()!?
-			}
-		}
-		else if value.isAlias() {
-			return @isAssignableToVariable(value.discard(), anycast, nullcast, downcast, limited)
 		}
 
 		if value.isObject() {
@@ -338,7 +383,14 @@ class ObjectType extends Type {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
 			}
 
-			return @isSubsetOf(value, matchingMode)
+			if value.isAlias() {
+				var { type, mapper, subtypes } = value.getGenericMapper()
+
+				return @isSubsetOf(type, mapper, subtypes, matchingMode)
+			}
+			else {
+				return @isSubsetOf(value, null, null, matchingMode)
+			}
 		}
 
 		return false
@@ -402,7 +454,31 @@ class ObjectType extends Type {
 	isLiberal() => @liberal
 	isMatching(value: Type, mode: MatchingMode) => false
 	isSealable() => true
-	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			if value is UnionType {
+				for var type in value.types() {
+					if this.isSubsetOf(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else {
+				return value.isAny()
+			}
+		}
+	} # }}}
+	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
 		return true if this == value || @empty
 
 		var reference = mode !~ MatchingMode.Reference
@@ -458,14 +534,21 @@ class ObjectType extends Type {
 
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mode)
+						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
 
 						if type is VariantType {
 							if prop is ValueType {
-								if var field ?= type.getField(prop.value()) {
-									Object.merge(newProperties, field.type.properties())
+								var value = prop.value()
+
+								if var field ?= type.getField(value) {
+									if type.isValidField(field, subtypes) {
+										Object.merge(newProperties, field.type.properties())
+									}
+									else {
+										return false
+									}
 								}
-								else if !type.hasSubtype(prop.value()) {
+								else if !type.hasSubtype(value) {
 									NotImplementedException.throw()
 								}
 							}
@@ -481,7 +564,7 @@ class ObjectType extends Type {
 
 				for var type, name of newProperties {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mode)
+						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
 					}
 					else {
 						return false unless type.isNullable()
@@ -491,7 +574,7 @@ class ObjectType extends Type {
 			else {
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mode)
+						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
 					}
 					else {
 						return false unless type.isNullable()
@@ -507,11 +590,13 @@ class ObjectType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
 		return false unless value.isObject()
 
 		if value.name() != 'Object' {
-			return this.isSubsetOf(value.discard(), mode + MatchingMode.Reference)
+			var { type, mapper, subtypes } = value.getGenericMapper()
+
+			return @isSubsetOf(type, mapper, subtypes, mode + MatchingMode.Reference)
 		}
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
@@ -537,30 +622,6 @@ class ObjectType extends Type {
 		}
 
 		return true
-	} # }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
-				return true
-			}
-			else {
-				return false
-			}
-		}
-		else {
-			if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
-					}
-				}
-
-				return false
-			}
-			else {
-				return value.isAny()
-			}
-		}
 	} # }}}
 	isTestingProperties() => @testProperties
 	isVariant() => @variant
@@ -741,6 +802,9 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	properties() => @properties
+	setDeferrable(deferrable) { # {{{
+		@testGenerics ||= deferrable
+	} # }}}
 	setExhaustive(@exhaustive) { # {{{
 		for var property of @properties {
 			property.setExhaustive(exhaustive)
@@ -832,19 +896,227 @@ class ObjectType extends Type {
 		fragments.code(`\($runtime.helper(node)).assertDexObject(`).compile(value)
 
 		if @testRest || @testProperties {
-			@toSubtestFragments(testingType, fragments, node)
+			@toSubtestFragments('value', testingType, null, fragments, node)
 		}
 
 		fragments.code(')')
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		throw NotImplementedException.new()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if @nullable && junction == Junction.AND
+	override toAwareTestFunctionFragments(varname, mut nullable, mapper, subtypes, fragments, node) { # {{{
+		nullable ||= @nullable
 
 		if ?@testName {
-			fragments.code(`\(@testName)(`).compile(node).code(`)`)
+			if nullable || #mapper || (@variant && #subtypes) {
+				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if #mapper {
+					fragments.code(`, [`)
+
+					for var { type }, index in mapper {
+						fragments.code($comma) if index != 0
+
+						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+					}
+
+					fragments.code(`]`)
+				}
+
+				if @variant && #subtypes {
+					fragments.code(`, \(varname) => `)
+
+					if @variantType.canBeBoolean() {
+						for var { name, type }, index in subtypes {
+							fragments
+								..code(' || ') if index > 0
+								..code('!') if @variantType.isFalseValue(name)
+								..code(varname)
+						}
+					}
+					else {
+						for var { name, type }, index in subtypes {
+							fragments
+								..code(' || ') if index > 0
+								..code(`\(varname) === `).compile(type).code(`.\(name)`)
+						}
+					}
+				}
+
+				fragments.code(`)`)
+
+				if nullable {
+					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+				}
+			}
+			else {
+				fragments.code(@testName)
+			}
+		}
+		else {
+			if @length == 0 && !@rest && !nullable && !@variant {
+				if @destructuring {
+					fragments.code($runtime.type(node), '.isDexObject')
+				}
+				else {
+					fragments.code($runtime.type(node), '.isObject')
+				}
+			}
+			else if @testRest || @testProperties || nullable || @variant {
+				if @variant {
+					fragments.code(`(\(varname), filter) => `)
+				}
+				else {
+					fragments.code(`\(varname) => `)
+				}
+
+				@toBlindTestFragments(varname, nullable, true, null, Junction.NONE, fragments, node)
+			}
+			else {
+				if @destructuring {
+					fragments.code($runtime.type(node), '.isDexObject')
+				}
+				else {
+					fragments.code($runtime.type(node), '.isObject')
+				}
+			}
+		}
+	} # }}}
+	override toBlindSubtestFunctionFragments(varname, nullable, generics, fragments, node) { # {{{
+		if ?@testName {
+			if nullable || @nullable {
+				fragments.code(`\(varname) => \(@testName)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+			}
+			else {
+				fragments.code(@testName)
+			}
+		}
+		else {
+			if @testRest || @testProperties || @nullable || @testGenerics || @variant || nullable {
+				if @testGenerics || @variant {
+					fragments.code(`(\(varname)`)
+
+					if @testGenerics {
+						fragments.code(', mapper')
+					}
+					if @variant {
+						fragments.code(', filter')
+					}
+
+					fragments.code(`) => `)
+				}
+				else {
+					fragments.code(`\(varname) => `)
+				}
+
+				fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
+
+				@toSubtestFragments(varname, true, generics, fragments, node)
+
+				fragments.code(')')
+
+				if @nullable || nullable {
+					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+				}
+			}
+			else {
+				if @destructuring {
+					fragments.code($runtime.type(node), '.isDexObject')
+				}
+				else {
+					fragments.code($runtime.type(node), '.isObject')
+				}
+			}
+		}
+	} # }}}
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+		@toBlindTestFragments(varname, @nullable, true, generics, junction, fragments, node)
+	} # }}}
+	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+		nullable ||= @nullable
+
+		fragments.code('(') if nullable && junction == .AND
+
+		if ?@testName {
+			fragments.code(`\(@testName)(\(varname))`)
+		}
+		else if testingType && !@destructuring && !@testRest && !@testProperties {
+			fragments.code(`\($runtime.type(node)).isObject(\(varname))`)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
+
+			@toSubtestFragments(varname, testingType, generics, fragments, node)
+
+			fragments.code(')')
+		}
+
+		if nullable {
+			fragments
+				..code(` || \($runtime.type(node)).isNull(\(varname))`)
+				..code(')') if junction == .AND
+		}
+	} # }}}
+	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
+		if !#@properties && !@rest && !@nullable && !@variant {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+		else if @testRest || @testProperties || @nullable || @testGenerics || @variant {
+			if @testGenerics || @variant {
+				fragments.code(`(\(varname)`)
+
+				if @testGenerics {
+					fragments.code(', mapper')
+				}
+				if @variant {
+					fragments.code(', filter')
+				}
+
+				fragments.code(`) => `)
+			}
+			else {
+				fragments.code(`\(varname) => `)
+			}
+
+			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
+
+			@toSubtestFragments(varname, true, generics, fragments, node)
+
+			fragments.code(')')
+
+			if @nullable {
+				fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+			}
+		}
+		else {
+			if @destructuring {
+				fragments.code($runtime.type(node), '.isDexObject')
+			}
+			else {
+				fragments.code($runtime.type(node), '.isObject')
+			}
+		}
+	} # }}}
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if @nullable && junction == .AND
+
+		if ?@testName {
+			if #subtypes {
+				fragments.code(`\(@testName)(`).compile(node).code(`, value => `)
+
+				for var { name, type }, index in subtypes {
+					fragments
+						..code(' || ') if index > 0
+						..code('value === ').compile(type).code(`.\(name)`)
+				}
+
+				fragments.code(')')
+			}
+			else {
+				fragments.code(`\(@testName)(`).compile(node).code(`)`)
+			}
 		}
 		else if !@destructuring && !@testRest && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isObject(`).compile(node).code(`)`)
@@ -852,190 +1124,15 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexObject(`).compile(node)
 
-			@toSubtestFragments(true, fragments, node)
+			@toSubtestFragments('value', true, null, fragments, node)
 
 			fragments.code(')')
 		}
 
 		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
-
-			fragments.code(')') if junction == Junction.AND
-		}
-	} # }}}
-	toPositiveTestFragments(fragments, node, junction, parameters, subtypes) { # {{{
-		if #subtypes && ?@testName {
-			fragments.code(`\(@testName)(`).compile(node).code(`, value => `)
-
-			for var { name, type }, index in subtypes {
-				fragments
-					..code(' || ') if index > 0
-					..code('value === ').compile(type).code(`.\(name)`)
-			}
-
-			fragments.code(')')
-		}
-		else {
-			@toPositiveTestFragments(fragments, node, junction)
-		}
-	} # }}}
-	toSubtestFragments(testingType: Boolean, fragments, node) { # {{{
-		if testingType {
-			fragments.code(', 1')
-		}
-		else {
-			fragments.code(', 0')
-		}
-
-		if @testRest || @testProperties {
-			fragments.code($comma)
-
-			var literal = Literal.new(false, node, node.scope(), 'value')
-
-			if @testProperties {
-				if @testRest {
-					@restType.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
-				}
-				else {
-					fragments.code('0')
-				}
-
-				fragments.code(', {')
-
-				var mut comma = false
-
-				for var type, name of @properties {
-					if comma {
-						fragments.code($comma)
-					}
-					else {
-						comma = true
-					}
-
-					if @computed[name] {
-						fragments.code(`[\(name)]: `)
-					}
-					else {
-						fragments.code(`\(name): `)
-					}
-
-					type.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
-				}
-
-				fragments.code('}')
-			}
-			else {
-				@restType.toTestFunctionFragments(fragments, literal, TestFunctionMode.USE)
-			}
-		}
-	} # }}}
-	toTestFragments(name: String, testingType: Boolean, fragments, node) { # {{{
-		if ?@testName {
-			fragments.code(`\(@testName)(\(name))`)
-		}
-		else if testingType && !@destructuring && !@testRest && !@testProperties {
-			fragments.code(`\($runtime.type(node)).isObject(\(name))`)
-		}
-		else {
-			fragments.code(`\($runtime.type(node)).isDexObject(\(name)`)
-
-			@toSubtestFragments(testingType, fragments, node)
-
-			fragments.code(')')
-		}
-	} # }}}
-	override toTestFragments(fragments, node, junction) { # {{{
-		if @nullable {
-			fragments.code('(') if junction == Junction.AND
-
-			@toTestFragments('value', true, fragments, node)
-
-			fragments.code(` || \($runtime.type(node)).isNull(value)`)
-
-			fragments.code(')') if junction == Junction.AND
-		}
-		else {
-			@toTestFragments('value', true, fragments, node)
-		}
-	} # }}}
-	override toTestFunctionFragments(fragments, node) { # {{{
-		if ?@testName {
-			if @nullable {
-				fragments.code(`value => \(@testName)(value) || \($runtime.type(node)).isNull(value)`)
-			}
-			else {
-				fragments.code(`\(@testName)`)
-			}
-		}
-		else if @length == 0 && !@rest && !@nullable && !@variant {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
-		}
-		else if @testRest || @testProperties || @nullable || @variant {
-			if @variant {
-				fragments.code(`(value, filter) => `)
-			}
-			else {
-				fragments.code(`value => `)
-			}
-
-			@toTestFragments(fragments, node, Junction.NONE)
-		}
-		else {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
-		}
-	} # }}}
-	override toTestFunctionFragments(fragments, node, mode) { # {{{
-		if mode == .USE && ?@testName {
-			if @nullable {
-				fragments.code(`value => \(@testName)(value) || \($runtime.type(node)).isNull(value)`)
-			}
-			else {
-				fragments.code(`\(@testName)`)
-			}
-		}
-		else if @length == 0 && !@rest && !@nullable && !@variant {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
-		}
-		else if @testRest || @testProperties || @nullable || @variant {
-			if @variant {
-				fragments.code(`(value, filter) => `)
-			}
-			else {
-				fragments.code(`value => `)
-			}
-
-			fragments.code(`\($runtime.type(node)).isDexObject(value`)
-
-			@toSubtestFragments(true, fragments, node)
-
-			fragments.code(')')
-
-			if @nullable {
-				fragments.code(` || \($runtime.type(node)).isNull(value)`)
-			}
-		}
-		else {
-			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexObject')
-			}
-			else {
-				fragments.code($runtime.type(node), '.isObject')
-			}
+			fragments
+				..code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+				..code(')') if junction == .AND
 		}
 	} # }}}
 	override toVariations(variations) { # {{{
@@ -1069,4 +1166,55 @@ class ObjectType extends Type {
 			fn(name, type)
 		}
 	} # }}}
+
+	private {
+		toSubtestFragments(varname: String, testingType: Boolean, generics: GenericDefinition[]?, fragments, node) { # {{{
+			if testingType {
+				fragments.code(', 1')
+			}
+			else {
+				fragments.code(', 0')
+			}
+
+			if @testRest || @testProperties {
+				fragments.code($comma)
+
+				if @testProperties {
+					if @testRest {
+						@restType.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+					}
+					else {
+						fragments.code('0')
+					}
+
+					fragments.code(', {')
+
+					var mut comma = false
+
+					for var type, name of @properties {
+						if comma {
+							fragments.code($comma)
+						}
+						else {
+							comma = true
+						}
+
+						if @computed[name] {
+							fragments.code(`[\(name)]: `)
+						}
+						else {
+							fragments.code(`\(name): `)
+						}
+
+						type.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+					}
+
+					fragments.code('}')
+				}
+				else {
+					@restType.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+				}
+			}
+		} # }}}
+	}
 }

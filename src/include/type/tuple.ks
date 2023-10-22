@@ -172,7 +172,7 @@ class TupleType extends Type {
 	isExtending() => @extending
 	isImplementing() => @implementing
 	override isTuple() => true
-	isSubsetOf(value: ArrayType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
 		for var type, index in value.properties() {
 			if var prop ?= @getProperty(index) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -198,16 +198,16 @@ class TupleType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NamedType | ReferenceType, mapper, subtypes, mode) { # {{{
 		if value.name() == 'Tuple' {
 			return true
 		}
 
 		return false
 	} # }}}
-	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: TupleType, mode: MatchingMode) => false
-	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => false
+	assist isSubsetOf(value: TupleType, mapper, subtypes, mode) => false
+	assist isSubsetOf(value: UnionType, mapper, subtypes, mode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
@@ -233,9 +233,6 @@ class TupleType extends Type {
 	shallBeNamed() => true
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw(node)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('tuple', @length)
@@ -296,9 +293,6 @@ class TupleFieldType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	toQuote() => @type.toQuote()
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw(node)
-	} # }}}
 	override toVariations(variations)
 	type() => @type
 	type(@type): valueof this

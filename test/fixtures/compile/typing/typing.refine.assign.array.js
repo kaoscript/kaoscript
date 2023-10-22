@@ -5,10 +5,10 @@ module.exports = function() {
 	function foo() {
 		return foo.__ks_rt(this, arguments);
 	};
-	foo.__ks_0 = function(x) {
+	foo.__ks_0 = function(x, values) {
 		if(Type.isArray(x)) {
 			console.log(__ks_Array.__ks_func_last_0.call(x));
-			if(qux[x = __ks_Array.__ks_func_last_0.call(x)] === true) {
+			if(values[x = __ks_Array.__ks_func_last_0.call(x)] === true) {
 				console.log(x.last());
 			}
 			else {
@@ -21,9 +21,9 @@ module.exports = function() {
 	};
 	foo.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		if(args.length === 1) {
-			if(t0(args[0])) {
-				return foo.__ks_0.call(that, args[0]);
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return foo.__ks_0.call(that, args[0], args[1]);
 			}
 		}
 		throw Helper.badArgs();

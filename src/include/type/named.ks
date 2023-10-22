@@ -77,6 +77,7 @@ class NamedType extends Type {
 		return this
 	} # }}}
 	getAlterationReference() => @type.getAlterationReference()
+	getGenericIndex(name) => @type.getGenericIndex(name)
 	getHierarchy() { # {{{
 		if @type is ClassType {
 			return @type.getHierarchy(@name)
@@ -280,7 +281,7 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -559,20 +560,20 @@ class NamedType extends Type {
 			return @type.toReference(references, indexDelta, mode, module)
 		}
 	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
+	override toNegativeTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`!\(tof)(`).compile(node).code(')')
 		}
 		else {
-			@type.toNegativeTestFragments(fragments, node, junction)
+			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
-			@reference().toPositiveTestFragments(fragments, node, junction)
+			@reference().toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)
@@ -601,8 +602,8 @@ class NamedType extends Type {
 		isComplete
 		isExportingType
 		isVariant
-		toTestFragments
-		toTestFunctionFragments
+		toAwareTestFunctionFragments
+		toBlindTestFragments
 	}
 }
 

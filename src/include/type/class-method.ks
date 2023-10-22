@@ -163,16 +163,16 @@ class ClassMethodType extends FunctionType {
 	} # }}}
 	isProxy() => @proxy
 	isSealable() => true
-	isSubsetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
+	isSubsetOf(methods: ClassMethodType[], mapper: Type[]? = null, subtypes: Subtype[]? = null, mode: MatchingMode): Boolean { # {{{
 		for var method in methods {
-			if this.isSubsetOf(method, mode) {
+			if @isSubsetOf(method, mapper, subtypes, mode) {
 				return true
 			}
 		}
 
 		return false
 	} # }}}
-	isSupersetOf(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { # {{{
+	isSupersetOf(methods: ClassMethodType[], mode: MatchingMode): Boolean { # {{{
 		for var method in methods {
 			if method.isSubsetOf(this, mode) {
 				return true

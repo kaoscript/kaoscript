@@ -28,9 +28,7 @@ class TryExpression extends Expression {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
 
-		if @defaultValue != null {
-			@defaultValue.prepare(target)
-		}
+		@defaultValue?.prepare(target)
 	} # }}}
 	translate() { # {{{
 		@argument.translate()

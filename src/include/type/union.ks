@@ -462,7 +462,7 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	isReducible() => true
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value is not UnionType || @types.length != value.length() {
 				return false
@@ -557,6 +557,17 @@ class UnionType extends Type {
 
 		return types
 	} # }}}
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .AND
+
+		for var type, index in @types {
+			fragments.code(' || ') if index != 0
+
+			type.toBlindTestFragments(varname, generics, Junction.OR, fragments, node)
+		}
+
+		fragments.code(')') if junction == .AND
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
@@ -590,42 +601,31 @@ class UnionType extends Type {
 		return `\(quote)\(elements.join(`\(quote), \(quote)`))\(quote) or \(quote)\(last)\(quote)`
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @export(references, indexDelta, mode, module)
-	override toTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.AND
-
-		for var type, index in @types {
-			fragments.code(' || ') if index != 0
-
-			type.toTestFragments(fragments, node, Junction.OR)
-		}
-
-		fragments.code(')') if junction == Junction.AND
-	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.OR
+	override toNegativeTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .OR
 
 		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
 
-			type.toNegativeTestFragments(fragments, node, Junction.AND)
+			type.toNegativeTestFragments(parameters, subtypes, Junction.AND, fragments, node)
 		}
 
-		fragments.code(')') if junction == Junction.OR
+		fragments.code(')') if junction == .OR
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.AND
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .AND
 
 		for var type, i in @types {
 			if i != 0 {
 				fragments.code(' || ')
 			}
 
-			type.toPositiveTestFragments(fragments, node, Junction.OR)
+			type.toPositiveTestFragments(parameters, subtypes, Junction.OR, fragments, node)
 		}
 
-		fragments.code(')') if junction == Junction.AND
+		fragments.code(')') if junction == .AND
 	} # }}}
 	override toRouteTestFragments(fragments, node, junction) { # {{{
 		fragments.code('(') if junction == Junction.AND

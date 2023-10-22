@@ -32,8 +32,8 @@ class NullType extends Type {
 	isNull() => true
 	isNullable() => true
 	isSplittable() => false
-	isSubsetOf(value: NullType, mode: MatchingMode) => true
-	isSubsetOf(value: Type, mode: MatchingMode) => value.isNullable() || value.isNull()
+	override isSubsetOf(value, mapper, subtypes, mode) => value.isNullable() || value.isNull()
+	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => true
 	matchContentOf(value: Type) => value.isNullable()
 	setNullable(nullable: Boolean) { # {{{
 		if nullable {
@@ -48,16 +48,16 @@ class NullType extends Type {
 
 		return types
 	} # }}}
-	toFragments(fragments, node)
-	toQuote() => 'Null'
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Null'
-	override toTestFragments(fragments, node, junction) { # {{{
-		fragments.code(`\($runtime.type(node)).isNull(value)`)
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction)
-	override toTestFunctionFragments(fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
 	} # }}}
+	override toBlindTestFragments(varname, _, _, fragments, node) { # {{{
+		fragments.code(`\($runtime.type(node)).isNull(\(varname))`)
+	} # }}}
+	toFragments(fragments, node)
+	toQuote() => 'Null'
+	override toPositiveTestFragments(_, _, _, fragments, node)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Null'
 	override toVariations(variations) { # {{{
 		variations.push('null')
 	} # }}}

@@ -113,11 +113,19 @@ class IdentifierLiteral extends Literal {
 			}
 
 			@declaredType = variable.getDeclaredType()
-			@type = variable.getRealType()
+
+			var type = variable.getRealType()
+
+			if variable.isPredefined() && type.isBoolean() {
+				@type = ValueType.new(@value, type, @value, @scope)
+			}
+			else {
+				@type = type
+			}
 		}
 
 		unless targetMode == TargetMode.Permissive || target.isVoid() || !@type.isExplicit() || !target.isExplicit() || @type.isSubsetOf(target, MatchingMode.Signature) {
-			TypeException.throwInvalidIdentifierType(@value, @type, target, this)
+			TypeException.throwInvalidIdentifierType(@value, @type.discardValue(), target, this)
 		}
 	} # }}}
 	caller() => 'null'

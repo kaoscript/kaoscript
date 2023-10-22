@@ -169,7 +169,7 @@ class NamespaceDeclaration extends Statement {
 			for var { type, name } in @tests {
 				var line = object.newLine().code(`is\(name): `)
 
-				type.toTestFunctionFragments(line, this, TestFunctionMode.DEFINE)
+				type.toBlindTestFunctionFragments('value', null, line, this)
 
 				line.done()
 			}

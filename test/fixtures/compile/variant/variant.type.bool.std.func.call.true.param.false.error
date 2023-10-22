@@ -1,0 +1,1 @@
+ReferenceException: The function "greeting" can't be matched to given arguments ({ok: false, expecting: String}) (fixtures/compile/variant/variant.type.bool.std.func.call.true.param.false.ks:2)

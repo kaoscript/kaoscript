@@ -1,0 +1,1 @@
+TypeException: The return type must be "Event<String>(Y)" and not "{ok: false, expecting: String}" (fixtures/compile/variant/variant.type.bool.gen.func.zs.call.call.zs§ye.os§ne.ks:19)

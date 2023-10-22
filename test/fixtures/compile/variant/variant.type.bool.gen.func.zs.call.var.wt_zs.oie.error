@@ -1,0 +1,1 @@
+TypeException: The variable "event" of type "Event<String>" can't be assigned with a value of type "{ok: true, value: Number}" (fixtures/compile/variant/variant.type.bool.gen.func.zs.call.var.wt_zs.oie.ks:18)

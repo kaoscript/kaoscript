@@ -126,7 +126,16 @@ class FusionType extends Type {
 
 		return false
 	} # }}}
-	isSubsetOf(value: FusionType, mode: MatchingMode) { # {{{
+	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+		for var type in @types {
+			if type.isSubsetOf(value, mode) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	assist isSubsetOf(value: FusionType, mapper, subtypes, mode) { # {{{
 		if @types.length != value._types.length {
 			return false
 		}
@@ -142,15 +151,6 @@ class FusionType extends Type {
 		}
 
 		return match == @types.length
-	} # }}}
-	isSubsetOf(value: Type, mode: MatchingMode) { # {{{
-		for var type in @types {
-			if type.isSubsetOf(value, mode) {
-				return true
-			}
-		}
-
-		return false
 	} # }}}
 	listFunctions(name: String): Array { # {{{
 		var result = []
@@ -190,47 +190,47 @@ class FusionType extends Type {
 
 		return AnyType.NullableUnexplicit
 	} # }}}
-	toFragments(fragments, node) { # {{{
-		throw NotImplementedException.new(node)
-	} # }}}
-	override toNegativeTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.OR
-
-		for var type, i in @types {
-			if i != 0 {
-				fragments.code(' && ')
-			}
-
-			type.toNegativeTestFragments(fragments, node, Junction.AND)
-		}
-
-		fragments.code(')') if junction == Junction.OR
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		fragments.code('(') if junction == Junction.OR
-
-		for var type, i in @types {
-			if i != 0 {
-				fragments.code(' && ')
-			}
-
-			type.toPositiveTestFragments(fragments, node, Junction.AND)
-		}
-
-		fragments.code(')') if junction == Junction.OR
-	} # }}}
-	toQuote() => @hashCode()
-	toTestFragments(fragments, node, junction) { # {{{
+	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
 		for var type, index in @types {
 			fragments.code(' && ') if index != 0
 
-			type.toTestFragments(fragments, node, Junction.AND)
+			type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
 		}
 
 		fragments.code(')') if junction == Junction.OR
 	} # }}}
+	toFragments(fragments, node) { # {{{
+		throw NotImplementedException.new(node)
+	} # }}}
+	override toNegativeTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .OR
+
+		for var type, i in @types {
+			if i != 0 {
+				fragments.code(' && ')
+			}
+
+			type.toNegativeTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+		}
+
+		fragments.code(')') if junction == .OR
+	} # }}}
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+		fragments.code('(') if junction == .OR
+
+		for var type, i in @types {
+			if i != 0 {
+				fragments.code(' && ')
+			}
+
+			type.toPositiveTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+		}
+
+		fragments.code(')') if junction == .OR
+	} # }}}
+	toQuote() => @hashCode()
 	override toVariations(variations) { # {{{
 		variations.push('fusion', @nullable)
 

@@ -11,9 +11,39 @@ class TypeAliasDeclaration extends Statement {
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	postInitiate() { # {{{
-		@type
-			..type(Type.fromAST(@data.type, this))
-			..flagComplete()
+		var generics = []
+
+		if #@data.generics {
+			for var generic in @data.generics {
+				@type.addGeneric(generic.name)
+
+				generics.push(generic.name)
+			}
+		}
+
+		var type = Type.fromAST(@data.type, generics, this)
+
+		@type.type(type)
+
+		if type is ObjectType && type.isVariant() {
+			var variant = type.getVariantType()
+
+			for var { kind, type } in @data.type.properties when kind == NodeKind.PropertyType && type.kind == NodeKind.VariantType {
+				for var property in type.properties {
+					if property.kind == NodeKind.VariantField && ?property.type {
+						var names = [name for var { name } in property.names]
+
+						variant.addField(names, Type.fromAST(property.type, @scope, false, generics, this))
+					}
+				}
+
+				break
+			}
+
+			type.setDeferrable(variant.canBeDeferred())
+		}
+
+		@type.flagComplete()
 	} # }}}
 	analyse()
 	override prepare(target, targetMode) { # {{{

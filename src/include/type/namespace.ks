@@ -250,7 +250,7 @@ class NamespaceType extends Type {
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
-	isSubsetOf(value: NamespaceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NamespaceType, mapper, subtypes, mode) { # {{{
 		for var property, name of value._properties {
 			if !@properties[name]?.isSubsetOf(property, mode) {
 				return false
@@ -273,9 +273,6 @@ class NamespaceType extends Type {
 	} # }}}
 	shallBeNamed() => true
 	toFragments(fragments, node) { # {{{
-		throw NotImplementedException.new()
-	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
 	override toVariations(variations) { # {{{
@@ -348,7 +345,7 @@ class NamespacePropertyType extends Type {
 		return this
 	} # }}}
 	isSealed() => @type.isSealed()
-	isSubsetOf(value: NamespacePropertyType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NamespacePropertyType, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode.Exact)
 		}
@@ -384,13 +381,13 @@ class NamespacePropertyType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	override toVariations(variations) { # {{{
 		@type.toVariations(variations)
 	} # }}}
 	type() => @type
 
-	proxy {
-		toQuote = @type.toQuote
+	proxy @type {
+		toPositiveTestFragments
+		toQuote
 	}
 }

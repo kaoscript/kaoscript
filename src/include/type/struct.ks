@@ -170,15 +170,15 @@ class StructType extends Type {
 	isExtending() => @extending
 	isImplementing() => @implementing
 	override isStruct() => true
-	isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NamedType | ReferenceType, mapper, subtypes, mode) { # {{{
 		if value.name() == 'Struct' {
 			return true
 		}
 
 		return false
 	} # }}}
-	isSubsetOf(value: NullType, mode: MatchingMode) => false
-	isSubsetOf(value: ObjectType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => false
+	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
 		for var type, name of value.properties() {
 			if var prop ?= @getProperty(name) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -204,8 +204,8 @@ class StructType extends Type {
 
 		return true
 	} # }}}
-	isSubsetOf(value: StructType, mode: MatchingMode) => false
-	isSubsetOf(value: UnionType, mode: MatchingMode) { # {{{
+	assist isSubsetOf(value: StructType, mapper, subtypes, mode) => false
+	assist isSubsetOf(value: UnionType, mapper, subtypes, mode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true
@@ -458,9 +458,6 @@ class StructType extends Type {
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw(node)
-	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('struct', @count)
 	} # }}}
@@ -510,9 +507,6 @@ class StructFieldType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	toQuote() => @type.toQuote()
-	override toPositiveTestFragments(fragments, node, junction) { # {{{
-		NotImplementedException.throw(node)
-	} # }}}
 	override toVariations(variations)
 	type() => @type
 	type(@type): valueof this

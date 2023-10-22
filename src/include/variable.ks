@@ -144,7 +144,10 @@ class Variable {
 	setRealType(type: Type) { # {{{
 		@initialized = true
 
-		if type.isMorePreciseThan(@declaredType) {
+		if var type ?= @declaredType.tune(type) {
+			@realType = type
+		}
+		else if type.isMorePreciseThan(@declaredType) {
 			@realType = type
 		}
 		else {

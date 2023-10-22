@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Event<Number>(true)) (fixtures/compile/variant/variant.type.bool.gen.func.zs.call.var.wt_z.oie.ks:20)

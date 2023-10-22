@@ -58,7 +58,7 @@ class BinaryOperatorTypeCasting extends Expression {
 
 			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, type.toQuote(true), $comma, @nullable, $comma)
 
-			type.toTestFunctionFragments(fragments, this)
+			type.toBlindTestFunctionFragments('value', null, fragments, this)
 
 			fragments.code(')')
 		}
@@ -155,7 +155,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
-		@trueType.toPositiveTestFragments(fragments, @subject, junction)
+		@trueType.toPositiveTestFragments(junction, fragments, @subject)
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private confirmType(type: Type): Type { # {{{
