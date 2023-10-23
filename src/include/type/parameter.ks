@@ -229,14 +229,13 @@ class ParameterType extends Type {
 			return false unless @externalName == value.getExternalName()
 		}
 
-		if mode ~~ MatchingMode.MissingDefault && @default && !value.hasDefaultValue() {
-			return false unless @type.setNullable(false).isSubsetOf(value.type(), mode)
-		}
-
 		var mut submode = mode
 		submode += MatchingMode.Missing - MatchingMode.MissingType if mode ~~ MatchingMode.MissingType
 
-		if mode ~~ MatchingMode.NonNullToNull && !@type.isNullable() && value.type().isNullable() {
+		if mode ~~ MatchingMode.MissingDefault && @default && !value.hasDefaultValue() {
+			return false unless @type.setNullable(false).isSubsetOf(value.type(), submode)
+		}
+		else if mode ~~ MatchingMode.NonNullToNull && !@type.isNullable() && value.type().isNullable() {
 			return false unless @type.setNullable(true).isSubsetOf(value.type(), submode)
 		}
 		else if mode ~~ MatchingMode.NullToNonNull && @type.isNullable() && !value.type().isNullable() {

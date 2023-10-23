@@ -690,12 +690,27 @@ class ClassMethodDeclaration extends Statement {
 					return null
 				}
 			}
-			else if var methods #= matchAll(@name, @type, mode) {
-				if methods.length == 1 {
-					method = methods[0]
+			else if @override {
+				if var methods #= matchAll(@name, @type, mode - MatchingMode.SubclassParameter) {
+					if methods.length == 1 {
+						method = methods[0]
+					}
+					else {
+						return null
+					}
 				}
-				else {
-					return null
+			}
+
+			// TODO!
+			// if !?method ;; var methods #= matchAll(@name, @type, mode) {
+			if !?method {
+				if var methods #= matchAll(@name, @type, mode) {
+					if methods.length == 1 {
+						method = methods[0]
+					}
+					else {
+						return null
+					}
 				}
 			}
 

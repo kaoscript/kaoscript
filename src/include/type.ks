@@ -963,6 +963,20 @@ abstract class Type {
 	isString() => false
 	isStruct() => false
 	isSubsetOf(value: Type, mapper: Type[]? = null, subtypes: Subtype[]? = null, mode: MatchingMode): Boolean => false
+	// TODO!
+	// assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
+	// 	if #mapper {
+	// 		var valname = value.name()
+
+	// 		for var { name, type } in mapper {
+	// 			if name == valname {
+	// 				return @isSubsetOf(type, mapper, subtypes, mode)
+	// 			}
+	// 		}
+	// 	}
+
+	// 	return true
+	// } # }}}
 	isSystem() => @system
 	isTuple() => false
 	isTypeOf() => false
@@ -974,7 +988,7 @@ abstract class Type {
 	isVoid() => false
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
-	merge(value: Type, node): Type { # {{{
+	merge(value: Type, mapper: Type[]?, subtypes: Subtype[]?, node): Type { # {{{
 		return @isMorePreciseThan(value) ? this : value
 	} # }}}
 	minorOriginal() => null

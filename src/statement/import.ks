@@ -368,7 +368,7 @@ abstract class Importer extends Statement {
 					ReferenceException.throwNotPassed(internal, @data.source.value, this)
 				}
 				else if variable.getDeclared().isMergeable(type) {
-					variable.getDeclared().merge(type, this)
+					variable.getDeclared().merge(type, null, null, this)
 				}
 				else {
 					ReferenceException.throwNotMergeable(internal, @data.source.value, this)

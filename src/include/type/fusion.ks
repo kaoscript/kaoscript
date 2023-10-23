@@ -126,7 +126,7 @@ class FusionType extends Type {
 
 		return false
 	} # }}}
-	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
 		for var type in @types {
 			if type.isSubsetOf(value, mode) {
 				return true

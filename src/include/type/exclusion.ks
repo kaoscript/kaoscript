@@ -62,7 +62,7 @@ class ExclusionType extends Type {
 
 		return true
 	} # }}}
-	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
 		return false if value.isNull()
 
 		return true

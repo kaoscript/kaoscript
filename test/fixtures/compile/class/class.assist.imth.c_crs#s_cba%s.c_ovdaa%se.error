@@ -1,0 +1,1 @@
+SyntaxException: The method "MyGreetings.greet(person, message)" can't override a suitable method (fixtures/compile/class/class.assist.imth.c_crs#s_cba%s.c_ovdaa%se.ks:18)

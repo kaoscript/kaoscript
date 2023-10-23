@@ -473,8 +473,8 @@ class ObjectFilteredMember extends Expression {
 				var internal = member.internal.name
 				var external = member.external?.name ?? internal
 
-				if var type ?= @value.getProperty(external) {
-					@members.push({ name: internal, external, type })
+				if var property ?= type.getProperty(external) {
+					@members.push({ name: internal, external, type: property })
 				}
 				else {
 					NotImplementedException.throw()

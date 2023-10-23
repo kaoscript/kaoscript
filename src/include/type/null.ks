@@ -32,7 +32,7 @@ class NullType extends Type {
 	isNull() => true
 	isNullable() => true
 	isSplittable() => false
-	override isSubsetOf(value, mapper, subtypes, mode) => value.isNullable() || value.isNull()
+	override isSubsetOf(value: Type, mapper, subtypes, mode) => value.isNullable() || value.isNull()
 	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => true
 	matchContentOf(value: Type) => value.isNullable()
 	setNullable(nullable: Boolean) { # {{{

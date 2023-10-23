@@ -454,7 +454,7 @@ class ObjectType extends Type {
 	isLiberal() => @liberal
 	isMatching(value: Type, mode: MatchingMode) => false
 	isSealable() => true
-	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
@@ -477,6 +477,19 @@ class ObjectType extends Type {
 				return value.isAny()
 			}
 		}
+	} # }}}
+	assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
+		if #mapper {
+			var valname = value.name()
+
+			for var { name, type } in mapper {
+				if name == valname {
+					return @isSubsetOf(type, mapper, subtypes, mode)
+				}
+			}
+		}
+
+		return true
 	} # }}}
 	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
 		return true if this == value || @empty
@@ -708,21 +721,41 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
-	merge(value: ObjectType, node): Type { # {{{
+	assist merge(value: ObjectType, mapper, subtypes, node) { # {{{
 		var result = ObjectType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
 		result.flagSpread() if @spread
 
 		if @hasProperties() {
+			var newProperties = {}
+
+			if value.isVariant() && #subtypes {
+				for var type, name of value.properties() when type is VariantType {
+					if subtypes.length == 1 {
+						if var field ?= type.getField(subtypes[0].name) {
+							Object.merge(newProperties, field.type.properties())
+						}
+					}
+					else {
+						NotImplementedException.throw()
+					}
+				}
+			}
+
 			if value.hasProperties() {
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], type.merge(value.getProperty(name), node))
+					if var property ?= value.getProperty(name) ?? newProperties[name] {
+						result.addProperty(name, @computed[name], type.merge(property, mapper, subtypes, node))
+					}
+					else {
+						NotImplementedException.throw()
+					}
 				}
 
 				if @rest {
 					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), node))
+						result.setRestType(@restType.merge(value.getRestType(), mapper, subtypes, node))
 					}
 					else {
 						result.setRestType(@restType)
@@ -733,11 +766,11 @@ class ObjectType extends Type {
 				var restType = value.getRestType()
 
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], type.merge(restType, node))
+					result.addProperty(name, @computed[name], type.merge(restType, mapper, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, node))
+					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
 				}
 			}
 			else {
@@ -750,7 +783,7 @@ class ObjectType extends Type {
 
 		return result
 	} # }}}
-	merge(value: ReferenceType, node): Type { # {{{
+	assist merge(value: ReferenceType, mapper, subtypes, node) { # {{{
 		unless value.isBroadObject() {
 			TypeException.throwIncompatible(value, this, node)
 		}
@@ -787,7 +820,9 @@ class ObjectType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			return @merge(value.discard(), node)
+			var { type, mapper, subtypes } = value.getGenericMapper()
+
+			return @merge(type, mapper, subtypes, node)
 		}
 		else {
 			return this

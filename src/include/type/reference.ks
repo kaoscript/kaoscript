@@ -969,6 +969,37 @@ class ReferenceType extends Type {
 	isStrict() => @strict
 	isString() => @name == 'String' || @type().isString()
 	isStruct() => @name == 'Struct' || @type().isStruct()
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+		if @isAlias() {
+			return @discardAlias().isSubsetOf(value, mode)
+		}
+
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			if value.isObject() && @type().isClass() {
+				return @type.type().matchInstanceWith(value, [])
+			}
+			else if value is UnionType {
+				for var type in value.types() {
+					if this.isSubsetOf(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else {
+				return value.isAny()
+			}
+		}
+	} # }}}
 	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
 		return false unless @isBroadArray()
 		return @discard().isSubsetOf(value, mode) unless @isArray()
@@ -1160,37 +1191,6 @@ class ReferenceType extends Type {
 			}
 
 			return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
-		}
-	} # }}}
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
-		if @isAlias() {
-			return @discardAlias().isSubsetOf(value, mode)
-		}
-
-		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
-				return true
-			}
-			else {
-				return false
-			}
-		}
-		else {
-			if value.isObject() && @type().isClass() {
-				return @type.type().matchInstanceWith(value, [])
-			}
-			else if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
-					}
-				}
-
-				return false
-			}
-			else {
-				return value.isAny()
-			}
 		}
 	} # }}}
 	assist isSubsetOf(value: VariantType, mapper, subtypes, mode) { # {{{

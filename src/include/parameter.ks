@@ -665,7 +665,6 @@ class Parameter extends AbstractNode {
 		}
 
 		if ?@data.type {
-			type = type?.merge(declaredType, this) ?? declaredType
 			type = declaredType
 		}
 
@@ -752,7 +751,12 @@ class Parameter extends AbstractNode {
 			@type.flagRetained()
 		}
 
-		type = @type.getVariableType()
+		if @internal.isBinding() {
+			type = @internal.type().asReference().merge(declaredType, null, null, this)
+		}
+		else {
+			type = @type.getVariableType()
+		}
 
 		@internal.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
 	} # }}}

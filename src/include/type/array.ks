@@ -393,7 +393,7 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	override isSubsetOf(value, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
@@ -451,7 +451,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
-	merge(value: ArrayType, node): Type { # {{{
+	assist merge(value: ArrayType, mapper, subtypes, node) { # {{{
 		var result = ArrayType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
@@ -460,12 +460,12 @@ class ArrayType extends Type {
 		if @hasProperties() {
 			if value.hasProperties() {
 				for var type, index in @properties {
-					result.addProperty(type.merge(value.getProperty(index), node))
+					result.addProperty(type.merge(value.getProperty(index), mapper, subtypes, node))
 				}
 
 				if @rest {
 					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), node))
+						result.setRestType(@restType.merge(value.getRestType(), mapper, subtypes, node))
 					}
 					else {
 						result.setRestType(@restType)
@@ -476,11 +476,11 @@ class ArrayType extends Type {
 				var restType = value.getRestType()
 
 				for var type in @properties {
-					result.addProperty(type.merge(restType, node))
+					result.addProperty(type.merge(restType, mapper, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, node))
+					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
 				}
 			}
 			else {
@@ -493,7 +493,7 @@ class ArrayType extends Type {
 
 		return result
 	} # }}}
-	merge(value: ReferenceType, node): Type { # {{{
+	assist merge(value: ReferenceType, mapper, subtypes, node) { # {{{
 		unless value.isBroadArray() {
 			TypeException.throwIncompatible(this, value, node)
 		}
@@ -516,11 +516,11 @@ class ArrayType extends Type {
 				var restType = value.parameter()
 
 				for var type in @properties {
-					result.addProperty(restType.merge(type, node))
+					result.addProperty(restType.merge(type, mapper, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, node))
+					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
 				}
 			}
 			else {
@@ -530,7 +530,7 @@ class ArrayType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			return @merge(value.discard(), node)
+			return @merge(value.discard(), mapper, subtypes, node)
 		}
 		else {
 			return this

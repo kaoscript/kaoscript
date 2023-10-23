@@ -512,9 +512,6 @@ class EnumType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
-	// override toPositiveTestFragments(fragments, node, junction) { # {{{
-	// 	throw NotImplementedException.new()
-	// } # }}}
 	override toVariations(variations) { # {{{
 		variations.push('enum', @sequences.defaults)
 
