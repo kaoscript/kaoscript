@@ -1,0 +1,1 @@
+ReferenceException: The variant "Event" doesn't have a field named "Y" (fixtures/compile/variant/variant.type.bool.gen.var.wt_z§by.ose.ks:12)

@@ -535,7 +535,7 @@ class ReferenceType extends Type {
 		return { type, mapper, subtypes }
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
-	getProperty(index: Number): Type { # {{{
+	override getProperty(index): Type { # {{{
 		if @name == 'Array' {
 			if @parameters.length > 0 {
 				return @parameters[0]
@@ -553,7 +553,8 @@ class ReferenceType extends Type {
 			return @getProperty(index.toString())
 		}
 	} # }}}
-	getProperty(name: String): Type { # {{{
+	override getProperty(name): Type => @getProperty(name, null)
+	override getProperty(name, node): Type { # {{{
 		if @isAny() {
 			return AnyType.NullableUnexplicit
 		}
@@ -599,7 +600,7 @@ class ReferenceType extends Type {
 						return property
 					}
 					else {
-						NotImplementedException.throw()
+						ReferenceException.throwUndefinedVariantField(@name, name, node)
 					}
 				}
 				else {

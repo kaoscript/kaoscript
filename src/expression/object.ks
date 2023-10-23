@@ -146,7 +146,7 @@ class ObjectExpression extends Expression {
 								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
 							}
 
-							property.prepare(target.getProperty(property.name()))
+							property.prepare(target.getProperty(property.name(), this))
 
 							@type.addProperty(property.name(), property.type())
 						}

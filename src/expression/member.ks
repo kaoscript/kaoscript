@@ -472,7 +472,7 @@ class MemberExpression extends Expression {
 			var mut found = false
 
 			if type.isVariant() {
-				if var property ?= type.getProperty(@property) {
+				if var property ?= type.getProperty(@property, this) {
 					@type = property.discardVariable()
 				}
 				else if type is ReferenceType {

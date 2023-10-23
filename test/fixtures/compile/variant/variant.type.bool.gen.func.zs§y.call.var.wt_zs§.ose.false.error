@@ -1,1 +1,0 @@
-TypeException: The variable "event" of type "Event<String>(true)" can't be assigned with a value of type "{ok: false, expecting: String}" (fixtures/compile/variant/variant.type.bool.gen.func.zs§y.call.var.wt_zs§.ose.false.ks:16)

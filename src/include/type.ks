@@ -430,7 +430,7 @@ abstract class Type {
 							}
 						}
 						else if #data.typeSubtypes {
-							var type = scope.reference(name, nullable)
+							var type = ReferenceType.new(scope, name, nullable)
 							var master = type.discard().getVariantType().getMaster()
 
 							for var subtype in data.typeSubtypes {
@@ -850,6 +850,7 @@ abstract class Type {
 	getGenericMapper(): { type: Type, mapper: Type[]?, subtypes: Subtype[]? } => { type: this, mapper: null, subtypes: null }
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
+	getProperty(name: String, node?) => @getProperty(name)
 	getMajorReferenceIndex() => @referenceIndex
 	// TODO merge
 	hashCode(): String => ''
