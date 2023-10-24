@@ -1,1 +1,1 @@
-TypeException: The return type must be "Event<String>(N)" and not "{ok: true, value: String}" (fixtures/compile/variant/variant.type.bool.gen.func.zs.call.call.zs§ne.os§ye.ks:19)
+TypeException: The return type must be "Event<String>(false)" and not "{ok: true, value: String}" (fixtures/compile/variant/variant.type.bool.gen.func.zs.call.call.zs§ne.os§ye.ks:19)

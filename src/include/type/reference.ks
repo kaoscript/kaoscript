@@ -93,8 +93,21 @@ class ReferenceType extends Type {
 		@name = $types[name] ?? name
 		@nullable = @explicitlyNull
 	} # }}}
-	addSubtype(name: String, type: Type) { # {{{
-		@subtypes.push({ name, type })
+	addSubtype(name: String, type: Type, node) { # {{{
+		@resolve()
+
+		var variant = @type.discard().getVariantType()
+
+		if var mainName ?= variant.getMainName(name) {
+			for var { name } in @subtypes {
+				return if name == mainName
+			}
+
+			@subtypes.push({ name: mainName, type })
+		}
+		else {
+			ReferenceException.throwUndefinedVariantField(@name, name, node)
+		}
 	} # }}}
 	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()

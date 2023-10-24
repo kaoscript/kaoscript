@@ -15,7 +15,7 @@ class DeferredType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	override isNullable(generics: AltType[]?) { # {{{
-		return false unless #generics
+		return true unless #generics
 
 		for var { name, type } in generics {
 			if name == @name {
@@ -23,7 +23,7 @@ class DeferredType extends Type {
 			}
 		}
 
-		return false
+		return true
 	} # }}}
 	name() => @name
 	override toFragments(fragments, node) { # {{{

@@ -203,7 +203,7 @@ class MemberExpression extends Expression {
 
 			if @property == type.getVariantName() && variant.canBeBoolean() {
 				var reference = @object.type().clone()
-					..addSubtype('true', @scope.reference('Boolean'))
+					..addSubtype('true', @scope.reference('Boolean'), this)
 
 				inferables[@object.path()] = {
 					isVariable: @object is IdentifierLiteral
@@ -228,7 +228,7 @@ class MemberExpression extends Expression {
 
 			if @property == type.getVariantName() && variant.canBeBoolean() {
 				var reference = @object.type().clone()
-					..addSubtype('false', @scope.reference('Boolean'))
+					..addSubtype('false', @scope.reference('Boolean'), this)
 
 				inferables[@object.path()] = {
 					isVariable: @object is IdentifierLiteral

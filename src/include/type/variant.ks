@@ -81,6 +81,19 @@ class VariantType extends Type {
 	getEnumType() => @enum
 	getField(name: String) => @names[name]
 	getKind() => @kind
+	getMainName(name: String): String? { # {{{
+		if var field ?= @names[name] {
+			return field.names[0]
+		}
+		else if @kind == .Enum {
+			return name if @enum.hasProperty(name)
+		}
+		else {
+			return name if name == 'true' | 'false'
+		}
+
+		return null
+	} # }}}
 	getMaster() => @master
 	hasSubtype(name: String) => @enum.hasProperty(name)
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{

@@ -318,57 +318,55 @@ class ObjectType extends Type {
 			return false
 		}
 
-		if value.isVariant() {
-			if value is ReferenceType && value.hasSubtypes() {
-				var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+		if value.isVariant() && value is ReferenceType && value.hasSubtypes() {
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
-				if anycast {
-					matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
-				}
+			if anycast {
+				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
+			}
 
-				var { type % object, generics, subtypes } = value.getGenericMapper()
-				var variant = object.getVariantType()
+			var { type % object, generics, subtypes } = value.getGenericMapper()
+			var variant = object.getVariantType()
 
-				for var type, name of object.properties() {
-					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
-					}
-					else {
-						return false unless type.isNullable()
-					}
-				}
-
-				var newProperties = {}
-
-				if var prop ?= @properties[object.getVariantName()] {
-					var mut matched = false
-					var propname = prop.value()
-
-					for var { name, type } of value.getSubtypes() {
-						if variant.getField(propname) == variant.getField(name) {
-							Object.merge(newProperties, variant.getField(propname).type.properties())
-
-							matched = true
-						}
-					}
-
-					return false unless matched
+			for var type, name of object.properties() {
+				if var prop ?= @properties[name] {
+					return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
 				}
 				else {
-					return false
+					return false unless type.isNullable()
 				}
-
-				for var type, name of newProperties {
-					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
-					}
-					else {
-						return false unless type.isNullable(generics)
-					}
-				}
-
-				return true
 			}
+
+			var newProperties = {}
+
+			if var prop ?= @properties[object.getVariantName()] {
+				var mut matched = false
+				var propname = prop.value()
+
+				for var { name, type } of value.getSubtypes() {
+					if variant.getField(propname) == variant.getField(name) {
+						Object.merge(newProperties, variant.getField(propname).type.properties())
+
+						matched = true
+					}
+				}
+
+				return false unless matched
+			}
+			else {
+				return false
+			}
+
+			for var type, name of newProperties {
+				if var prop ?= @properties[name] {
+					return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
+				}
+				else {
+					return false unless type.isNullable(generics)
+				}
+			}
+
+			return true
 		}
 
 		if value.isObject() {
@@ -586,7 +584,7 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 					}
 					else {
-						return false unless type.isNullable()
+						return false unless type.isNullable(generics)
 					}
 				}
 			}

@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (Event<String>(N)) (fixtures/compile/variant/variant.type.bool.gen.func.zs§y.call.call.zs§ne.os§ne.ks:20)
+ReferenceException: The function "foobar" can't be matched to given arguments (Event<String>(false)) (fixtures/compile/variant/variant.type.bool.gen.func.zs§y.call.call.zs§ne.os§ne.ks:20)
