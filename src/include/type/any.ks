@@ -122,7 +122,7 @@ class AnyType extends Type {
 	isIterable() => true
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Anycast && !@explicit {
 			return !@nullable || value.isNullable() || mode ~~ MatchingMode.NonNullToNull
 		}
@@ -175,7 +175,7 @@ class AnyType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
 		if @nullable {
 			fragments.code('() => true')
 		}

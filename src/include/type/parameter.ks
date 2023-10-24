@@ -214,7 +214,7 @@ class ParameterType extends Type {
 	isPositional() => @passing ~~ PassingMode.POSITIONAL
 	isRequiringValue() => @required
 	isRetained() => @retained
-	assist isSubsetOf(value: ParameterType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ParameterType, generics, subtypes, mode) { # {{{
 		if mode !~ MatchingMode.IgnoreRetained && @retained != value.isRetained() {
 			return false
 		}

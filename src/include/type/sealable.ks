@@ -48,8 +48,8 @@ class SealableType extends Type {
 	isComplete() => true
 	isSealable() => true
 	isSealed() => @sealed || @type.isSealed()
-	assist isSubsetOf(value: SealableType, mapper, subtypes, mode) => @type.isSubsetOf(value.type(), mode)
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: SealableType, generics, subtypes, mode) => @type.isSubsetOf(value.type(), mode)
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
 			return @type.isSubsetOf(value, mode)
 		}

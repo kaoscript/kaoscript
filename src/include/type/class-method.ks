@@ -163,9 +163,9 @@ class ClassMethodType extends FunctionType {
 	} # }}}
 	isProxy() => @proxy
 	isSealable() => true
-	isSubsetOf(methods: ClassMethodType[], mapper: Type[]? = null, subtypes: Subtype[]? = null, mode: MatchingMode): Boolean { # {{{
+	isSubsetOf(methods: ClassMethodType[], generics: AltType[]? = null, subtypes: AltType[]? = null, mode: MatchingMode): Boolean { # {{{
 		for var method in methods {
-			if @isSubsetOf(method, mapper, subtypes, mode) {
+			if @isSubsetOf(method, generics, subtypes, mode) {
 				return true
 			}
 		}

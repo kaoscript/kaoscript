@@ -95,7 +95,10 @@ class VariantType extends Type {
 			return false
 		}
 	} # }}}
-	isValidField({ names }: Variant, subtypes: Subtype[]?) { # {{{
+	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
+		return this == value
+	} # }}}
+	isValidField({ names }: Variant, subtypes: AltType[]?) { # {{{
 		return true unless #subtypes
 
 		for var { name } in subtypes {

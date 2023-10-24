@@ -29,7 +29,7 @@ class ReferenceType extends Type {
 		@predefined: Boolean				= false
 		@spread: Boolean					= false
 		@strict: Boolean					= false
-		@subtypes: Subtype[]
+		@subtypes: AltType[]
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
@@ -45,7 +45,7 @@ class ReferenceType extends Type {
 
 			return ReferenceType.new(scope, name as String, data.nullable!?, null)
 		} # }}}
-		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: Subtype[]): String { # {{{
+		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: AltType[]): String { # {{{
 			if name == 'this' {
 				return 'typeof this'
 			}
@@ -495,22 +495,22 @@ class ReferenceType extends Type {
 	override getGenericMapper() { # {{{
 		var type = @discard()!?
 
-		var mut mapper = null
+		var mut generics = null
 
 		if @type.isAlias() && @type is NamedType {
-			if var generics #= @type.type().generics() {
-				if @parameters.length > generics.length {
+			if var names #= @type.type().generics() {
+				if @parameters.length > names.length {
 					NotImplementedException.throw()
 				}
 
-				mapper = []
+				generics = []
 
-				for var name, index in generics {
+				for var name, index in names {
 					if var type ?= @parameters[index] {
-						mapper.push({ name, type })
+						generics.push({ name, type })
 					}
 					else {
-						mapper.push({ name, type : AnyType.NullableUnexplicit })
+						generics.push({ name, type : AnyType.NullableUnexplicit })
 					}
 				}
 			}
@@ -532,7 +532,7 @@ class ReferenceType extends Type {
 			subtypes = @subtypes
 		}
 
-		return { type, mapper, subtypes }
+		return { type, generics, subtypes }
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
 	override getProperty(index): Type { # {{{
@@ -844,7 +844,9 @@ class ReferenceType extends Type {
 			return false unless @isBroadObject()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			var mode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+
+			return @isSubsetOf(value, mode)
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -969,7 +971,7 @@ class ReferenceType extends Type {
 	isStrict() => @strict
 	isString() => @name == 'String' || @type().isString()
 	isStruct() => @name == 'Struct' || @type().isStruct()
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if @isAlias() {
 			return @discardAlias().isSubsetOf(value, mode)
 		}
@@ -1000,7 +1002,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ArrayType, generics, subtypes, mode) { # {{{
 		return false unless @isBroadArray()
 		return @discard().isSubsetOf(value, mode) unless @isArray()
 
@@ -1040,20 +1042,20 @@ class ReferenceType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
-		if #mapper {
+	assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
+		if #generics {
 			var valname = value.name()
 
-			for var { name, type } in mapper {
+			for var { name, type } in generics {
 				if name == valname {
-					return @isSubsetOf(type, mapper, subtypes, mode)
+					return @isSubsetOf(type, generics, subtypes, mode)
 				}
 			}
 		}
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: FunctionType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: FunctionType, generics, subtypes, mode) { # {{{
 		if @isAlias() {
 			return @discardAlias().isSubsetOf(value, mode)
 		}
@@ -1069,7 +1071,7 @@ class ReferenceType extends Type {
 
 		return @discard().isSubsetOf(value, mode)
 	} # }}}
-	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
 		return false unless @isBroadObject()
 		return @discard().isSubsetOf(value, mode) unless @isObject()
 
@@ -1109,7 +1111,7 @@ class ReferenceType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1193,7 +1195,7 @@ class ReferenceType extends Type {
 			return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
 		}
 	} # }}}
-	assist isSubsetOf(value: VariantType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return @isSubsetOf(value.getMaster(), mode)
 	} # }}}
 	isSubtypeOf(value: ReferenceType) => @name == value.name()
@@ -1360,7 +1362,7 @@ class ReferenceType extends Type {
 			}
 			else if @name == 'Null' {
 				@type = Type.Null
-				@nullable = false
+				@nullable = true
 				@predefined = true
 			}
 			else if @name == 'Void' {
@@ -1583,23 +1585,23 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mut mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, mut generics, subtypes, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isAlias() && @type is NamedType {
-			if var generics #= @type.type().generics() {
-				if @parameters.length > generics.length {
+			if var names #= @type.type().generics() {
+				if @parameters.length > names.length {
 					NotImplementedException.throw()
 				}
 
-				mapper = []
+				generics = []
 
-				for var name, index in generics {
+				for var name, index in names {
 					if var type ?= @parameters[index] {
-						mapper.push({ name, type })
+						generics.push({ name, type })
 					}
 					else {
-						mapper.push({ name, type : AnyType.NullableUnexplicit })
+						generics.push({ name, type : AnyType.NullableUnexplicit })
 					}
 				}
 			}
@@ -1616,10 +1618,10 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			@discard().toAwareTestFunctionFragments(varname, @nullable, mapper, @subtypes, fragments, node)
+			@discard().toAwareTestFunctionFragments(varname, @nullable, generics, @subtypes, fragments, node)
 		}
-		else if #mapper {
-			@type.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
+		else if #generics {
+			@type.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1635,10 +1637,10 @@ class ReferenceType extends Type {
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-				unalias.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
+				unalias.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
 			}
 			else {
-				super.toAwareTestFunctionFragments(varname, @nullable, mapper, subtypes, fragments, node)
+				super.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
 			}
 		}
 	} # }}}

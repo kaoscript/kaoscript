@@ -1,6 +1,6 @@
 class AliasType extends Type {
 	private late {
-		@generics: GenericDefinition[]		= []
+		@generics: String[]		= []
 		@type: Type
 		@testIndex: Number?					= null
 	}
@@ -78,7 +78,7 @@ class AliasType extends Type {
 	isReducible() => true
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
-	assist isSubsetOf(value: AliasType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: AliasType, generics, subtypes, mode) { # {{{
 		return this == value
 	} # }}}
 	isTuple() => @type.isTuple()

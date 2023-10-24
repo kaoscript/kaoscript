@@ -196,17 +196,17 @@ bitmask TypeOrigin {
 	RequireOrExtern
 }
 
-type Subtype = {
+type AltType = {
 	name: String
 	type: Type
 }
+// TODO!
+// type AltTypes = AltType[]
 
 type Variant = {
 	names: String[]
 	type: Type
 }
-
-type GenericDefinition = String
 
 abstract class Type {
 	private {
@@ -847,7 +847,7 @@ abstract class Type {
 		return @flagSealed()
 	} # }}}
 	getExhaustive() => @exhaustive
-	getGenericMapper(): { type: Type, mapper: Type[]?, subtypes: Subtype[]? } => { type: this, mapper: null, subtypes: null }
+	getGenericMapper(): { type: Type, generics: AltType[]?, subtypes: AltType[]? } => { type: this, generics: null, subtypes: null }
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getProperty(name: String, node?) => @getProperty(name)
@@ -944,6 +944,7 @@ abstract class Type {
 	isNumber() => false
 	isNull() => false
 	isNullable() => false
+	isNullable(generics: AltType[]?) => @isNullable()
 	isObject() => false
 	isPlaceholder() => false
 	isPredefined() => false
@@ -962,15 +963,15 @@ abstract class Type {
 	isStrict() => false
 	isString() => false
 	isStruct() => false
-	isSubsetOf(value: Type, mapper: Type[]? = null, subtypes: Subtype[]? = null, mode: MatchingMode): Boolean => false
+	isSubsetOf(value: Type, generics: AltType[]? = null, subtypes: AltType[]? = null, mode: MatchingMode): Boolean => false
 	// TODO!
-	// assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
-	// 	if #mapper {
+	// assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
+	// 	if #generics {
 	// 		var valname = value.name()
 
-	// 		for var { name, type } in mapper {
+	// 		for var { name, type } in generics {
 	// 			if name == valname {
-	// 				return @isSubsetOf(type, mapper, subtypes, mode)
+	// 				return @isSubsetOf(type, generics, subtypes, mode)
 	// 			}
 	// 		}
 	// 	}
@@ -988,7 +989,7 @@ abstract class Type {
 	isVoid() => false
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
-	merge(value: Type, mapper: Type[]?, subtypes: Subtype[]?, node): Type { # {{{
+	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, node): Type { # {{{
 		return @isMorePreciseThan(value) ? this : value
 	} # }}}
 	minorOriginal() => null
@@ -1028,18 +1029,18 @@ abstract class Type {
 
 		return types
 	} # }}}
-	toAwareTestFunctionFragments(varname: String, nullable: Boolean, mapper: Type[]?, subtypes: Subtype[]?, fragments, node) { # {{{
+	toAwareTestFunctionFragments(varname: String, nullable: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
 		@toBlindTestFragments(varname, null, Junction.NONE, fragments, node)
 	} # }}}
-	toBlindSubtestFunctionFragments(varname: String, nullable: Boolean, generics: GenericDefinition[]?, fragments, node) { # {{{
+	toBlindSubtestFunctionFragments(varname: String, nullable: Boolean, generics: String[]?, fragments, node) { # {{{
 		@toAwareTestFunctionFragments(varname, nullable, null, null, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, generics: String[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	toBlindTestFunctionFragments(varname: String, generics: GenericDefinition[]?, fragments, node) { # {{{
+	toBlindTestFunctionFragments(varname: String, generics: String[]?, fragments, node) { # {{{
 		@toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
@@ -1119,10 +1120,10 @@ abstract class Type {
 
 		return @referenceIndex
 	} # }}}
-	toNegativeTestFragments(parameters: Type[]? = null, subtypes: Subtype[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toNegativeTestFragments(parameters: Type[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		@toPositiveTestFragments(parameters, subtypes, junction, fragments.code('!'), node)
 	} # }}}
-	toPositiveTestFragments(parameters: Type[]? = null, subtypes: Subtype[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toPositiveTestFragments(parameters: Type[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toQuote(): String { # {{{

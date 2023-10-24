@@ -84,6 +84,9 @@ class ObjectType extends Type {
 		type._testName = @testName
 		type._testProperties = @testProperties
 		type._testRest = @testRest
+		type._variant = @variant
+		type._variantName = @variantName
+		type._variantType = @variantType
 
 		return type
 	} # }}}
@@ -323,12 +326,12 @@ class ObjectType extends Type {
 					matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
 				}
 
-				var { type % object, mapper, subtypes } = value.getGenericMapper()
+				var { type % object, generics, subtypes } = value.getGenericMapper()
 				var variant = object.getVariantType()
 
 				for var type, name of object.properties() {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mapper, subtypes, matchingMode)
+						return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
 					}
 					else {
 						return false unless type.isNullable()
@@ -357,10 +360,10 @@ class ObjectType extends Type {
 
 				for var type, name of newProperties {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mapper, subtypes, matchingMode)
+						return false unless prop.isSubsetOf(type, generics, subtypes, matchingMode)
 					}
 					else {
-						return false unless type.isNullable()
+						return false unless type.isNullable(generics)
 					}
 				}
 
@@ -384,9 +387,9 @@ class ObjectType extends Type {
 			}
 
 			if value.isAlias() {
-				var { type, mapper, subtypes } = value.getGenericMapper()
+				var { type, generics, subtypes } = value.getGenericMapper()
 
-				return @isSubsetOf(type, mapper, subtypes, matchingMode)
+				return @isSubsetOf(type, generics, subtypes, matchingMode)
 			}
 			else {
 				return @isSubsetOf(value, null, null, matchingMode)
@@ -454,7 +457,7 @@ class ObjectType extends Type {
 	isLiberal() => @liberal
 	isMatching(value: Type, mode: MatchingMode) => false
 	isSealable() => true
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
@@ -478,20 +481,20 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	assist isSubsetOf(value: DeferredType, mapper, subtypes, mode) { # {{{
-		if #mapper {
+	assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
+		if #generics {
 			var valname = value.name()
 
-			for var { name, type } in mapper {
+			for var { name, type } in generics {
 				if name == valname {
-					return @isSubsetOf(type, mapper, subtypes, mode)
+					return @isSubsetOf(type, generics, subtypes, mode)
 				}
 			}
 		}
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
 		return true if this == value || @empty
 
 		var reference = mode !~ MatchingMode.Reference
@@ -547,10 +550,13 @@ class ObjectType extends Type {
 
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
+						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 
 						if type is VariantType {
-							if prop is ValueType {
+							if type == prop {
+								pass
+							}
+							else if prop is ValueType {
 								var value = prop.value()
 
 								if var field ?= type.getField(value) {
@@ -577,7 +583,7 @@ class ObjectType extends Type {
 
 				for var type, name of newProperties {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
+						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 					}
 					else {
 						return false unless type.isNullable()
@@ -587,7 +593,7 @@ class ObjectType extends Type {
 			else {
 				for var type, name of value.properties() {
 					if var prop ?= @properties[name] {
-						return false unless prop.isSubsetOf(type, mapper, subtypes, mode)
+						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 					}
 					else {
 						return false unless type.isNullable()
@@ -603,13 +609,13 @@ class ObjectType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		return false unless value.isObject()
 
 		if value.name() != 'Object' {
-			var { type, mapper, subtypes } = value.getGenericMapper()
+			var { type, generics, subtypes } = value.getGenericMapper()
 
-			return @isSubsetOf(type, mapper, subtypes, mode + MatchingMode.Reference)
+			return @isSubsetOf(type, generics, subtypes, mode + MatchingMode.Reference)
 		}
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
@@ -721,7 +727,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
-	assist merge(value: ObjectType, mapper, subtypes, node) { # {{{
+	assist merge(value: ObjectType, generics, subtypes, node) { # {{{
 		var result = ObjectType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
@@ -746,7 +752,7 @@ class ObjectType extends Type {
 			if value.hasProperties() {
 				for var type, name of @properties {
 					if var property ?= value.getProperty(name) ?? newProperties[name] {
-						result.addProperty(name, @computed[name], type.merge(property, mapper, subtypes, node))
+						result.addProperty(name, @computed[name], type.merge(property, generics, subtypes, node))
 					}
 					else {
 						NotImplementedException.throw()
@@ -755,7 +761,7 @@ class ObjectType extends Type {
 
 				if @rest {
 					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), mapper, subtypes, node))
+						result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
 					}
 					else {
 						result.setRestType(@restType)
@@ -766,11 +772,11 @@ class ObjectType extends Type {
 				var restType = value.getRestType()
 
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], type.merge(restType, mapper, subtypes, node))
+					result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, node))
 				}
 			}
 			else {
@@ -783,7 +789,7 @@ class ObjectType extends Type {
 
 		return result
 	} # }}}
-	assist merge(value: ReferenceType, mapper, subtypes, node) { # {{{
+	assist merge(value: ReferenceType, generics, subtypes, node) { # {{{
 		unless value.isBroadObject() {
 			TypeException.throwIncompatible(value, this, node)
 		}
@@ -820,9 +826,9 @@ class ObjectType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			var { type, mapper, subtypes } = value.getGenericMapper()
+			var { type, generics, subtypes } = value.getGenericMapper()
 
-			return @merge(type, mapper, subtypes, node)
+			return @merge(type, generics, subtypes, node)
 		}
 		else {
 			return this
@@ -936,17 +942,17 @@ class ObjectType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{
 		nullable ||= @nullable
 
 		if ?@testName {
-			if nullable || #mapper || (@variant && #subtypes) {
+			if nullable || #generics || (@variant && #subtypes) {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
 
-				if #mapper {
+				if #generics {
 					fragments.code(`, [`)
 
-					for var { type }, index in mapper {
+					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
 						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
@@ -1064,7 +1070,7 @@ class ObjectType extends Type {
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		@toBlindTestFragments(varname, @nullable, true, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: String[]?, junction: Junction, fragments, node) { # {{{
 		nullable ||= @nullable
 
 		fragments.code('(') if nullable && junction == .AND
@@ -1203,7 +1209,7 @@ class ObjectType extends Type {
 	} # }}}
 
 	private {
-		toSubtestFragments(varname: String, testingType: Boolean, generics: GenericDefinition[]?, fragments, node) { # {{{
+		toSubtestFragments(varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
 			if testingType {
 				fragments.code(', 1')
 			}

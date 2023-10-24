@@ -170,15 +170,15 @@ class StructType extends Type {
 	isExtending() => @extending
 	isImplementing() => @implementing
 	override isStruct() => true
-	assist isSubsetOf(value: NamedType | ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NamedType | ReferenceType, generics, subtypes, mode) { # {{{
 		if value.name() == 'Struct' {
 			return true
 		}
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => false
-	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NullType, generics, subtypes, mode) => false
+	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
 		for var type, name of value.properties() {
 			if var prop ?= @getProperty(name) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -204,8 +204,8 @@ class StructType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: StructType, mapper, subtypes, mode) => false
-	assist isSubsetOf(value: UnionType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: StructType, generics, subtypes, mode) => false
+	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true

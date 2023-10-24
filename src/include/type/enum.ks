@@ -474,8 +474,8 @@ class EnumType extends Type {
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
-	assist isSubsetOf(value: EnumType, mapper, subtypes, mode) => mode ~~ MatchingMode.Similar
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: EnumType, generics, subtypes, mode) => mode ~~ MatchingMode.Similar
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
 			return value.name() == 'Enum'
 		}

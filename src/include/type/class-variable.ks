@@ -86,7 +86,7 @@ class ClassVariableType extends Type {
 	isImmutable() => @final
 	isLateInit() => @lateInit
 	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @final)
-	assist isSubsetOf(value: ClassVariableType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ClassVariableType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode.Exact)
 		}
@@ -94,7 +94,7 @@ class ClassVariableType extends Type {
 			return true
 		}
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) => @type.isSubsetOf(value, mode)
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) => @type.isSubsetOf(value, mode)
 	isUsingGetter() => @sealed && @default
 	isUsingSetter() => @sealed && @default
 	override toVariations(variations)

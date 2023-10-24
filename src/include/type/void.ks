@@ -9,7 +9,7 @@ class VoidType extends Type {
 	hashCode() => `Void`
 	isComplete() => true
 	isExportable() => true
-	assist isSubsetOf(value: VoidType, mapper, subtypes, mode) => true
+	assist isSubsetOf(value: VoidType, generics, subtypes, mode) => true
 	isVoid() => true
 	toFragments(fragments, node) { # {{{
 		fragments.code('Void')

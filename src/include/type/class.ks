@@ -1607,7 +1607,7 @@ class ClassType extends Type {
 	isPredefined() => @predefined
 	isSealable() => true
 	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
-	assist isSubsetOf(value: ClassType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ClassType, generics, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1665,7 +1665,7 @@ class ClassType extends Type {
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: ObjectType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
 		for var type, name of value.properties() {
 			if var prop ?= @getInstanceProperty(name) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -1692,7 +1692,7 @@ class ClassType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: NamedType, mapper, subtypes, mode) => this.isSubsetOf(value.type(), mode)
+	assist isSubsetOf(value: NamedType, generics, subtypes, mode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
 	listAbstractMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
 		if scope == MatchingScope.Element {

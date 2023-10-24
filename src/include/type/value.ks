@@ -17,10 +17,10 @@ class ValueType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
-		return @type.isSubsetOf(value, mapper, subtypes, mode)
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
+		return @type.isSubsetOf(value, generics, subtypes, mode)
 	} # }}}
-	assist isSubsetOf(value: VariantType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return @type == value.getMaster()
 	} # }}}
 	override isValue() => true

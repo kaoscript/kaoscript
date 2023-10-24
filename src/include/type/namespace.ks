@@ -250,7 +250,7 @@ class NamespaceType extends Type {
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
-	assist isSubsetOf(value: NamespaceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NamespaceType, generics, subtypes, mode) { # {{{
 		for var property, name of value._properties {
 			if !@properties[name]?.isSubsetOf(property, mode) {
 				return false
@@ -345,7 +345,7 @@ class NamespacePropertyType extends Type {
 		return this
 	} # }}}
 	isSealed() => @type.isSealed()
-	assist isSubsetOf(value: NamespacePropertyType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NamespacePropertyType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return @type.isSubsetOf(value.type(), MatchingMode.Exact)
 		}

@@ -172,7 +172,7 @@ class TupleType extends Type {
 	isExtending() => @extending
 	isImplementing() => @implementing
 	override isTuple() => true
-	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ArrayType, generics, subtypes, mode) { # {{{
 		for var type, index in value.properties() {
 			if var prop ?= @getProperty(index) {
 				return false unless prop.type().isSubsetOf(type, mode)
@@ -198,16 +198,16 @@ class TupleType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: NamedType | ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NamedType | ReferenceType, generics, subtypes, mode) { # {{{
 		if value.name() == 'Tuple' {
 			return true
 		}
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => false
-	assist isSubsetOf(value: TupleType, mapper, subtypes, mode) => false
-	assist isSubsetOf(value: UnionType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NullType, generics, subtypes, mode) => false
+	assist isSubsetOf(value: TupleType, generics, subtypes, mode) => false
+	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
 				return true

@@ -512,21 +512,21 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	isProxy() => false
-	assist isSubsetOf(value: AnyType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: AnyType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Missing {
 			return true
 		}
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if value.isAlias() {
 			return @isSubsetOf(value.discardAlias(), mode)
 		}
 
 		return value.isFunction()
 	} # }}}
-	assist isSubsetOf(value: FunctionType, mapper, subtypes, mut mode) { # {{{
+	assist isSubsetOf(value: FunctionType, generics, subtypes, mut mode) { # {{{
 		if @async != value._async {
 			return false
 		}
@@ -899,7 +899,7 @@ class FunctionType extends Type {
 	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mut mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, mut generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
@@ -1146,14 +1146,14 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
 
 		return value.isFunction()
 	} # }}}
-	assist isSubsetOf(value: FunctionType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: FunctionType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
@@ -1166,7 +1166,7 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: OverloadedFunctionType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: OverloadedFunctionType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}
@@ -1187,7 +1187,7 @@ class OverloadedFunctionType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: NamedType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: NamedType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact {
 			return false
 		}

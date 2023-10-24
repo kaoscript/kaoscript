@@ -281,7 +281,7 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if this == value {
 			return true
 		}

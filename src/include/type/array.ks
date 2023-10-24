@@ -288,7 +288,7 @@ class ArrayType extends Type {
 	isNullable() => @nullable
 	isSealable() => true
 	isSpread() => @spread
-	assist isSubsetOf(value: ArrayType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ArrayType, generics, subtypes, mode) { # {{{
 		return true if this == value
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
@@ -360,7 +360,7 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, mapper, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		return false unless value.isArray()
 
 		if value.name() != 'Array' {
@@ -393,7 +393,7 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
 				return true
@@ -451,7 +451,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
-	assist merge(value: ArrayType, mapper, subtypes, node) { # {{{
+	assist merge(value: ArrayType, generics, subtypes, node) { # {{{
 		var result = ArrayType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
@@ -460,12 +460,12 @@ class ArrayType extends Type {
 		if @hasProperties() {
 			if value.hasProperties() {
 				for var type, index in @properties {
-					result.addProperty(type.merge(value.getProperty(index), mapper, subtypes, node))
+					result.addProperty(type.merge(value.getProperty(index), generics, subtypes, node))
 				}
 
 				if @rest {
 					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), mapper, subtypes, node))
+						result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
 					}
 					else {
 						result.setRestType(@restType)
@@ -476,11 +476,11 @@ class ArrayType extends Type {
 				var restType = value.getRestType()
 
 				for var type in @properties {
-					result.addProperty(type.merge(restType, mapper, subtypes, node))
+					result.addProperty(type.merge(restType, generics, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, node))
 				}
 			}
 			else {
@@ -493,7 +493,7 @@ class ArrayType extends Type {
 
 		return result
 	} # }}}
-	assist merge(value: ReferenceType, mapper, subtypes, node) { # {{{
+	assist merge(value: ReferenceType, generics, subtypes, node) { # {{{
 		unless value.isBroadArray() {
 			TypeException.throwIncompatible(this, value, node)
 		}
@@ -516,11 +516,11 @@ class ArrayType extends Type {
 				var restType = value.parameter()
 
 				for var type in @properties {
-					result.addProperty(restType.merge(type, mapper, subtypes, node))
+					result.addProperty(restType.merge(type, generics, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, mapper, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, node))
 				}
 			}
 			else {
@@ -530,7 +530,7 @@ class ArrayType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			return @merge(value.discard(), mapper, subtypes, node)
+			return @merge(value.discard(), generics, subtypes, node)
 		}
 		else {
 			return this
@@ -620,13 +620,13 @@ class ArrayType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
 		@toBlindTestFunctionFragments(varname, null, fragments, node)
 	} # }}}
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		@toBlindTestFragments(varname, true, @testLength, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: GenericDefinition[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: String[]?, junction: Junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == .AND
 
 		if testingType && @length == 0 && !@destructuring && !@testProperties {

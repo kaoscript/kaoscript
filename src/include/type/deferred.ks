@@ -14,20 +14,30 @@ class DeferredType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	override isNullable(generics: AltType[]?) { # {{{
+		return false unless #generics
+
+		for var { name, type } in generics {
+			if name == @name {
+				return type.isNullable()
+			}
+		}
+
+		return false
+	} # }}}
 	name() => @name
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
 	} # }}}
 	override toBlindSubtestFunctionFragments(varname, _, generics, fragments, node) { # {{{
-		var index = generics.indexOf(@name)
-
-		unless ?index {
+		if var index ?= generics.indexOf(@name) {
+			fragments.code(`mapper[\(index)]`)
+		}
+		else {
 			NotImplementedException.throw()
 		}
-
-		fragments.code(`mapper[\(index)]`)
 	} # }}}
 	override toQuote() => `<\(@name)>`
 	override toVariations(variations) { # {{{

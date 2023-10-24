@@ -32,8 +32,8 @@ class NullType extends Type {
 	isNull() => true
 	isNullable() => true
 	isSplittable() => false
-	override isSubsetOf(value: Type, mapper, subtypes, mode) => value.isNullable() || value.isNull()
-	assist isSubsetOf(value: NullType, mapper, subtypes, mode) => true
+	override isSubsetOf(value: Type, generics, subtypes, mode) => value.isNullable() || value.isNull()
+	assist isSubsetOf(value: NullType, generics, subtypes, mode) => true
 	matchContentOf(value: Type) => value.isNullable()
 	setNullable(nullable: Boolean) { # {{{
 		if nullable {
@@ -48,7 +48,7 @@ class NullType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mapper, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
 	} # }}}
 	override toBlindTestFragments(varname, _, _, fragments, node) { # {{{

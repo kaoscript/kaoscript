@@ -462,7 +462,7 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	isReducible() => true
-	override isSubsetOf(value: Type, mapper, subtypes, mode) { # {{{
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			if value is not UnionType || @types.length != value.length() {
 				return false
