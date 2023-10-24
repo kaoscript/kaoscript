@@ -1021,9 +1021,9 @@ class ReferenceType extends Type {
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless !value.hasProperties()
-			return false unless @hasParameters() == value.hasRest()
+			return false unless #@parameters == value.hasRest()
 
-			if @hasParameters() {
+			if #@parameters {
 				var type = @parameters[0]
 
 				for var property in value.properties() {
@@ -1034,7 +1034,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			if @hasParameters() {
+			if #@parameters {
 				var type = @parameters[0]
 
 				for var property in value.properties() {
@@ -1102,17 +1102,15 @@ class ReferenceType extends Type {
 				return type.isSubsetOf(value.getRestType(), mode)
 			}
 		}
-		else {
-			if #@parameters {
-				var type = @parameters[0]
+		else if !@isVariant() && #@parameters {
+			var type = @parameters[0]
 
-				for var property of value.properties() {
-					return false unless type.isSubsetOf(property, mode)
-				}
+			for var property of value.properties() {
+				return false unless type.isSubsetOf(property, mode)
+			}
 
-				if value.hasRest() {
-					return false unless type.isSubsetOf(value.getRestType(), mode)
-				}
+			if value.hasRest() {
+				return false unless type.isSubsetOf(value.getRestType(), mode)
 			}
 		}
 
