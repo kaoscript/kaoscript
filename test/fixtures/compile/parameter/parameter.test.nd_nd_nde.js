@@ -1,9 +1,9 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = Helper.function(function(x = null, y = null, z = null) {
 		return [x, y, z];
 	}, (that, fn, ...args) => {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 3) {

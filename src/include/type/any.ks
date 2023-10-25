@@ -177,7 +177,7 @@ class AnyType extends Type {
 	} # }}}
 	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
 		if @nullable {
-			fragments.code('() => true')
+			fragments.code(`\($runtime.type(node)).any`)
 		}
 		else {
 			fragments.code(`\($runtime.type(node)).isValue`)

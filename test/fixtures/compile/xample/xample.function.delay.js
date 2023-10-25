@@ -8,7 +8,7 @@ module.exports = function() {
 		return __ks_Function.__ks_func_delay_rt(that, kws, args);
 	};
 	__ks_Function.__ks_func_delay_rt = function(that, kws, args) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const t1 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

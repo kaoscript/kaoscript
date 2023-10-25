@@ -1496,7 +1496,20 @@ class ReferenceType extends Type {
 	split(types: Array) { # {{{
 		@resolve()
 
-		if @type.isAlias() || @type.isUnion() {
+		if #@parameters || #@subtypes {
+			return super(types)
+		}
+		else if @type.isAlias() {
+			var alias = @type.discardName()
+
+			if alias.hasGenerics() {
+				return super(types)
+			}
+			else {
+				return alias.split(types)
+			}
+		}
+		else if @type.isUnion() {
 			return @type.split(types)
 		}
 		else {

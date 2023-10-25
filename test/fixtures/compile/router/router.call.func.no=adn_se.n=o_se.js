@@ -6,7 +6,7 @@ module.exports = function() {
 	curry.__ks_0 = function(bind = null, fn) {
 	};
 	curry.__ks_rt = function(that, args, kws) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const t1 = Type.isString;
 		if(t0(kws.bind)) {
 			if(args.length === 1) {

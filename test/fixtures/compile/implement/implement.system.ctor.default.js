@@ -46,7 +46,7 @@ module.exports = function() {
 		const t0 = Type.isNumber;
 		const t1 = value => Type.isClassInstance(value, Date);
 		const t2 = Type.isValue;
-		const t3 = () => true;
+		const t3 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
 		let pts;
 		if(arguments.length === 0) {

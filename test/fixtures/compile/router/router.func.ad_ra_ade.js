@@ -13,7 +13,7 @@ module.exports = function() {
 		return 0;
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const t1 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

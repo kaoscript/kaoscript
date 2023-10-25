@@ -30,7 +30,7 @@ module.exports = function() {
 		}
 	};
 	quxbaz.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value) || Type.isNull(value);
+		const t0 = value => __ksType.isEvent(value, [Type.any]) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 1) {

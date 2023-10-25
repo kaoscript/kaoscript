@@ -51,7 +51,7 @@ module.exports = function() {
 			return Helper.concatString(prefix, this.__message, suffix);
 		}
 		__ks_func_message_rt(that, proto, args) {
-			const t0 = () => true;
+			const t0 = Type.any;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length <= 2) {

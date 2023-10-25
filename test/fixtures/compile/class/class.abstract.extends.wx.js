@@ -63,7 +63,7 @@ module.exports = function() {
 			return this.__ks_func_greet_1(name);
 		}
 		__ks_func_greet_rt(that, proto, args) {
-			const t0 = () => true;
+			const t0 = Type.any;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length <= 2) {

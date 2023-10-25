@@ -7,7 +7,7 @@ module.exports = function(expect) {
 		return [items, x];
 	}, (that, fn, ...args) => {
 		const t0 = Type.isValue;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length - 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {

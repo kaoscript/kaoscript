@@ -14,7 +14,7 @@ module.exports = function() {
 		return __ks_String.__ks_func_quote_rt(that, args);
 	};
 	__ks_String.__ks_func_quote_rt = function(that, args) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const t1 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;

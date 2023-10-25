@@ -33,7 +33,7 @@ module.exports = function() {
 	};
 	__ks_Function.__ks_func_memoize_rt = function(that, args) {
 		const t0 = value => Type.isFunction(value) || Type.isNull(value);
-		const t1 = () => true;
+		const t1 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 2) {

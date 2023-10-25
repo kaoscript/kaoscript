@@ -60,7 +60,7 @@ module.exports = function() {
 	};
 	qux.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length >= 1) {
@@ -83,7 +83,7 @@ module.exports = function() {
 		console.log(x, items, z);
 	};
 	quux.__ks_rt = function(that, args) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const t1 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
@@ -138,7 +138,7 @@ module.exports = function() {
 	};
 	garply.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length - 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
@@ -174,7 +174,7 @@ module.exports = function() {
 	};
 	fred.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length === 2) {

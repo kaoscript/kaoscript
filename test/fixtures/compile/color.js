@@ -213,7 +213,7 @@ module.exports = function() {
 			return Number.isNaN(i) ? 1 : __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(percentage ? i / 100 : i, 0, 1), 3);
 		};
 		alpha.__ks_rt = function(that, args) {
-			const t0 = () => true;
+			const t0 = Type.any;
 			const t1 = value => Type.isBoolean(value) || Type.isNull(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;

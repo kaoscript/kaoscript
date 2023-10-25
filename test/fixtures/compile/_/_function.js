@@ -19,7 +19,7 @@ module.exports = function() {
 	};
 	__ks_Function._sm_vcurry = function() {
 		const t0 = Type.isFunction;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const t2 = Type.isValue;
 		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
 		let pts;

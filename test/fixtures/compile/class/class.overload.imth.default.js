@@ -68,7 +68,7 @@ module.exports = function() {
 		}
 		__ks_func_baz_rt(that, proto, args) {
 			const t0 = Type.isValue;
-			const t1 = () => true;
+			const t1 = Type.any;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length === 0) {
@@ -96,7 +96,7 @@ module.exports = function() {
 		}
 		__ks_func_qux_rt(that, proto, args) {
 			const t0 = Type.isValue;
-			const t1 = () => true;
+			const t1 = Type.any;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length === 0) {
@@ -236,7 +236,7 @@ module.exports = function() {
 		}
 		__ks_func_waldo_rt(that, proto, args) {
 			const t0 = Type.isValue;
-			const t1 = () => true;
+			const t1 = Type.any;
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length === 0) {

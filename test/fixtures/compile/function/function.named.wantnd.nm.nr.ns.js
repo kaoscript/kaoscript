@@ -1,4 +1,4 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo() {
 		return foo.__ks_rt(this, arguments);
@@ -6,7 +6,7 @@ module.exports = function() {
 	foo.__ks_0 = function(bar = null, qux = null) {
 	};
 	foo.__ks_rt = function(that, args) {
-		const t0 = () => true;
+		const t0 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 2) {

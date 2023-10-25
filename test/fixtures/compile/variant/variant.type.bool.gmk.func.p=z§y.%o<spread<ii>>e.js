@@ -28,7 +28,7 @@ module.exports = function() {
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value, [() => true], value => value);
+		const t0 = value => __ksType.isEvent(value, [Type.any], value => value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

@@ -27,7 +27,7 @@ module.exports = function() {
 	__ks_Date.new = function() {
 		const t0 = value => Type.isClassInstance(value, Date);
 		const t1 = Type.isValue;
-		const t2 = () => true;
+		const t2 = Type.any;
 		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
 		let pts;
 		if(arguments.length === 0) {

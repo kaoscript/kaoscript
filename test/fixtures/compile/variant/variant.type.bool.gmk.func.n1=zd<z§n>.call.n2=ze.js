@@ -28,7 +28,7 @@ module.exports = function() {
 		quxbaz.__ks_0(event);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value, [() => true]);
+		const t0 = value => __ksType.isEvent(value, [Type.any]);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
@@ -45,7 +45,7 @@ module.exports = function() {
 		}
 	};
 	quxbaz.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value) || Type.isNull(value);
+		const t0 = value => __ksType.isEvent(value, [Type.any]) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length <= 1) {

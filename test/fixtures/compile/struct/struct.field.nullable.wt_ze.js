@@ -12,7 +12,7 @@ module.exports = function() {
 		return _;
 	}, function(__ks_new, args) {
 		const t0 = Type.isBoolean;
-		const t1 = () => true;
+		const t1 = Type.any;
 		const t2 = value => __ksType.isPosition(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
