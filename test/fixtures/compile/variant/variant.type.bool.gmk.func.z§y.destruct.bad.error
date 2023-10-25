@@ -1,0 +1,1 @@
+ReferenceException: The destructuring variable "start" can't be matched (fixtures/compile/variant/variant.type.bool.gmk.func.z§y.destruct.bad.ks:14)

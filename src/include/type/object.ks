@@ -747,34 +747,29 @@ class ObjectType extends Type {
 				}
 			}
 
+			var rest = value.hasRest()
+			var restType = rest ? value.getRestType() : @restType
+
+			if @rest {
+				result.setRestType(restType)
+			}
+
 			if value.hasProperties() {
 				for var type, name of @properties {
 					if var property ?= value.getProperty(name) ?? newProperties[name] {
 						result.addProperty(name, @computed[name], type.merge(property, generics, subtypes, node))
 					}
-					else {
-						NotImplementedException.throw()
-					}
-				}
-
-				if @rest {
-					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
+					else if rest {
+						result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, node))
 					}
 					else {
-						result.setRestType(@restType)
+						ReferenceException.throwUndefinedBindingVariable(name, node)
 					}
 				}
 			}
-			else if value.hasRest() {
-				var restType = value.getRestType()
-
+			else if rest {
 				for var type, name of @properties {
 					result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, node))
-				}
-
-				if @rest {
-					result.setRestType(@restType.merge(restType, generics, subtypes, node))
 				}
 			}
 			else {

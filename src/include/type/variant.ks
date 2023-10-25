@@ -62,6 +62,7 @@ class VariantType extends Type {
 	override clone() { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	discardVariable() => @master
 	override export(references, indexDelta, mode, module) { # {{{
 		var export = {
 			kind: TypeKind.Variant
