@@ -32,6 +32,7 @@ class BreakStatement extends Statement {
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
+	isExit() => !?@name
 	toStatementFragments(fragments, mode) { # {{{
 		if ?@name {
 			fragments.line(`break \(@name)`)

@@ -289,7 +289,8 @@ export class Module {
 			return name
 		}
 
-		var mut output? = null
+		var mut output: String? = null
+
 		for var rewire in @rewire {
 			if rewire.input == filename {
 				output = path.relative(@output, rewire.output)
@@ -305,7 +306,7 @@ export class Module {
 			output = './' + output
 		}
 
-		return output
+		return output!?
 	} # }}}
 	scope() => @body.scope()
 	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { # {{{

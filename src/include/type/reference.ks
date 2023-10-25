@@ -617,7 +617,7 @@ class ReferenceType extends Type {
 					}
 				}
 				else {
-					NotImplementedException.throw()
+					TypeException.throwUndeterminedVariantType(@name, node)
 				}
 			}
 			else {

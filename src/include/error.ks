@@ -996,6 +996,9 @@ export class TypeException extends Exception {
 		throwRequireClass(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`An instance is required`, node)
 		} # }}}
+		throwUndeterminedVariantType(type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The variant of type "\(type)" hasn't been determinated`, node)
+		} # }}}
 		throwUnexpectedExportType(name, expected, unexpected, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type of export "\(name)" must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} # }}}
