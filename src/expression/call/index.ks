@@ -880,7 +880,7 @@ class CallExpression extends Expression {
 			is ReferenceType {
 				if value.isNullable() && !@options.rules.ignoreMisfit {
 					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
-						TypeException.throwNullableCaller(@property, this)
+						TypeException.throwNotNullableCaller(@property, this)
 					}
 				}
 

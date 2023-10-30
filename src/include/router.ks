@@ -637,8 +637,10 @@ namespace Router {
 					}
 
 					if position.length == 1 {
+						var expression = expressions[position[0].index]
+
 						if ?position[0].from {
-							expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
+							expression.argument().toArgumentFragments(fragments, mode)
 
 							fragments.code(`.slice(\(position[0].from)`)
 
@@ -650,12 +652,12 @@ namespace Router {
 
 							continue
 						}
-						else if expressions[position[0].index] is UnaryOperatorSpread && expressions[position[0].index].type().isArray() {
+						else if expression is UnaryOperatorSpread && expression.type().isArray() {
 							if precise {
-								expressions[position[0].index].argument().toArgumentFragments(fragments, mode)
+								expression.toFlatArgumentFragments(false, fragments, mode)
 							}
 							else {
-								expressions[position[0].index].toArgumentFragments(fragments, mode)
+								expression.toArgumentFragments(fragments, mode)
 							}
 
 							continue
@@ -732,23 +734,50 @@ namespace Router {
 				fragments.code($comma)
 			}
 
-			if ?prefill {
-				fragments.code('[').compile(prefill).code('].concat(')
+			var mut nullable = false
+
+			for var expression in expressions {
+				if expression.isSpread() {
+					var type = expression.argument().type()
+
+					if type.isNullable() {
+						nullable = true
+					}
+				}
+			}
+
+			if !#arguments && !#labels && !?prefill && expressions.length == 1 {
+				var expression = expressions[0]
+
+				if !nullable || (expression is UnaryOperatorSpread && expression.useHelper()) {
+					expression.toFlatArgumentFragments(false, fragments, mode)
+
+					return
+				}
+			}
+
+			if nullable {
+				if ?prefill {
+					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(nullable ? '1' : '0'), `).code('[').compile(prefill).code('], ')
+				}
+				else {
+					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(nullable ? '1' : '0'), `)
+				}
 			}
 			else {
-				fragments.code(`[].concat(`)
+				if ?prefill {
+					fragments.code('[').compile(prefill).code('].concat(')
+				}
+				else {
+					fragments.code(`[].concat(`)
+				}
 			}
 
 			if !#arguments && !#labels {
 				for var expression, i in expressions {
 					fragments.code($comma) if i != 0
 
-					if expression.isSpread() && expression.type().isArray() {
-						expression.argument().toArgumentFragments(fragments, mode)
-					}
-					else {
-						expression.toArgumentFragments(fragments, mode)
-					}
+					expression.toFlatArgumentFragments(false, fragments, mode)
 				}
 
 				fragments.code(')')
@@ -802,12 +831,7 @@ namespace Router {
 							opened = false
 						}
 
-						if expression.type().isArray() {
-							expression.argument().toArgumentFragments(fragments, mode)
-						}
-						else {
-							expression.toArgumentFragments(fragments, mode)
-						}
+						expression.toFlatArgumentFragments(false, fragments, mode)
 					}
 					else {
 						if !opened {
@@ -838,7 +862,7 @@ namespace Router {
 							fragments.code($comma)
 						}
 
-						argument.argument().toArgumentFragments(fragments)
+						argument.toFlatArgumentFragments(false, fragments, mode)
 					}
 					else {
 						if index != 0 {
@@ -851,7 +875,7 @@ namespace Router {
 							opened = true
 						}
 
-						argument.toArgumentFragments(fragments)
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
 				else {

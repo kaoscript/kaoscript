@@ -18,7 +18,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		const addOne = (__ks_0) => add(...values, ...__ks_0);
+		const addOne = (__ks_0) => add(...Helper.checkArray(values), ...__ks_0);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

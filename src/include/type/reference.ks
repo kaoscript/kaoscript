@@ -646,8 +646,8 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	getSealedPath() => @type().getSealedPath()
-	getSubtypes() => @subtypes
-	getSubtypesCount() => @subtypes.length
+	getSubtypes(): AltType[] => @subtypes
+	getSubtypesCount(): Number => @subtypes.length
 	hashCode(fattenNull: Boolean = false): String { # {{{
 		var mut hash = ''
 
@@ -1303,7 +1303,7 @@ class ReferenceType extends Type {
 			return @parameters[index]
 		}
 	} # }}}
-	parameters() => @parameters
+	parameters(): Type[] => @parameters
 	reassign(@name, @scope) { # {{{
 		@reset()
 
@@ -1463,7 +1463,7 @@ class ReferenceType extends Type {
 						return @scope.reference(@name, true, [...@parameters], [...@subtypes])
 					}
 
-					var types = @type.discard().types()
+					var types: Array = @type.discard().types()
 
 					types.push(Type.Null)
 
@@ -1888,7 +1888,7 @@ class ReferenceType extends Type {
 		var object = alias.discard()
 		var parameters = []
 		var subtypes = []
-		var properties = {...object.properties()}
+		var properties = {...object.properties()!?}
 
 		if object.isVariant() && !#@subtypes {
 			var name = object.getVariantName()

@@ -343,7 +343,7 @@ class ObjectType extends Type {
 				var mut matched = false
 				var propname = prop.value()
 
-				for var { name, type } of value.getSubtypes() {
+				for var { name, type } in value.getSubtypes() {
 					if variant.getField(propname) == variant.getField(name) {
 						Object.merge(newProperties, variant.getField(propname).type.properties())
 

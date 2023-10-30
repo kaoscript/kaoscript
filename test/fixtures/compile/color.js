@@ -440,17 +440,17 @@ module.exports = function() {
 					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha.__ks_0(args[0].a);
-						that._red = $caster.ff(args[0].r);
-						that._green = $caster.ff(args[0].g);
-						that._blue = $caster.ff(args[0].b);
+						that._red = $caster.ff.__ks_0(args[0].r);
+						that._green = $caster.ff.__ks_0(args[0].g);
+						that._blue = $caster.ff.__ks_0(args[0].b);
 						return true;
 					}
 					if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha.__ks_0(args[0].alpha);
-						that._red = $caster.ff(args[0].red);
-						that._green = $caster.ff(args[0].green);
-						that._blue = $caster.ff(args[0].blue);
+						that._red = $caster.ff.__ks_0(args[0].red);
+						that._green = $caster.ff.__ks_0(args[0].green);
+						that._blue = $caster.ff.__ks_0(args[0].blue);
 						return true;
 					}
 				}

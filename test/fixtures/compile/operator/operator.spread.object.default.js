@@ -8,7 +8,7 @@ module.exports = function() {
 	})();
 	const copy = (() => {
 		const o = new OBJ();
-		Helper.concatObject(o, original);
+		Helper.concatObject(0, o, original);
 		o.c = 3;
 		return o;
 	})();

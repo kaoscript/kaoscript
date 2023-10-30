@@ -374,15 +374,15 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	isSpread() => @spread
 	toFragments(fragments, mode) { # {{{
 		if @spread {
-			var left = @left.isSpread() ? @left.argument() : @left
+			var spread = @left.isSpread()
 
 			fragments
 				.code($runtime.type(this) + '.isValue(')
-				.compileReusable(left)
+				.compileReusable(spread ? @left.argument() : @left)
 				.code(') ? ')
 
-			if @left.isSpread() {
-				fragments.compile(@left.argument())
+			if spread {
+				@left.toFlatArgumentFragments(true, fragments, Mode.None)
 			}
 			else {
 				fragments.code('[').compile(@left).code(']')
@@ -391,7 +391,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			fragments.code(' : ')
 
 			if @right.isSpread() {
-				fragments.compile(@right.argument())
+				@right.toFlatArgumentFragments(false, fragments, Mode.None)
 			}
 			else {
 				fragments.code('[').compile(@right).code(']')
@@ -502,8 +502,6 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 				var spread = operand.isSpread()
 
 				if spread {
-					operand = operand.argument()
-
 					if opened {
 						fragments.code(']')
 
@@ -533,20 +531,23 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 
 						fragments
 							.code(' && ' + $runtime.type(this) + '.isValue(')
-							.compileReusable(operand)
+							.compileReusable(spread ? operand.argument() : operand)
 							.code('))')
 					}
 					else {
 						fragments
 							.code($runtime.type(this) + '.isValue(')
-							.compileReusable(operand)
+							.compileReusable(spread ? operand.argument() : operand)
 							.code(')')
 					}
 
 					fragments.code(' ? ')
 				}
 
-				if !spread && !opened {
+				if spread {
+					operand.toFlatArgumentFragments(true, fragments, Mode.None)
+				}
+				else if !opened {
 					fragments.code('[').compile(operand).code(']')
 				}
 				else {

@@ -7,7 +7,7 @@ module.exports = function() {
 		if(value === void 0) {
 			value = null;
 		}
-		quxbaz.apply(null, [].concat(Type.isNotEmpty(value) ? value : ["quxbaz"]));
+		quxbaz.apply(null, Type.isNotEmpty(value) ? value : ["quxbaz"]);
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 1) {

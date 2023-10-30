@@ -239,7 +239,7 @@ class TryStatement extends Statement {
 		for var data, name of @initVariables {
 			var types = []
 			var mut initializable = true
-			var clauses = [data.body, ...data.clauses]
+			var clauses = [data.body, ...data.clauses!?]
 			clauses.push(data.defaultClause) if ?data.defaultClause
 
 			if @hasFinally && data.finally.initializable {
@@ -273,7 +273,7 @@ class TryStatement extends Statement {
 
 		for var data, name of @initLateVariables {
 			var types = []
-			var clauses = [data.body, ...data.clauses]
+			var clauses = [data.body, ...data.clauses!?]
 			clauses.push(data.defaultClause) if ?data.defaultClause
 
 			if @hasFinally && data.finally.initializable {
@@ -425,7 +425,7 @@ class TryStatement extends Statement {
 
 			return unless ?branch
 
-			if branch.type != null {
+			if ?branch.type {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
 				}
@@ -472,7 +472,7 @@ class TryStatement extends Statement {
 
 			return unless ?branch
 
-			if branch.type != null {
+			if ?branch.type {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
 				}

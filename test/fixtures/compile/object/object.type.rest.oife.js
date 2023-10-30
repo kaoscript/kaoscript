@@ -26,7 +26,7 @@ module.exports = function() {
 		const clone = Foobar.__ks_new_0();
 		clone.args = (() => {
 			const o = new OBJ();
-			Helper.concatObject(o, source.args);
+			Helper.concatObject(0, o, source.args);
 			return o;
 		})();
 		return clone;

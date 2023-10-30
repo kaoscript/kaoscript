@@ -361,7 +361,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 				@internalName = `__ks_func_\(@name)_\(@type.index())`
 
-				var type = Type.union(@scope, ...methods)
+				var type = Type.union(@scope, ...methods!?)
 				var variable = @scope.define('precursor', true, type, this)
 
 				variable.replaceCall = (data, arguments, node) => CallOverwrittenMethodSubstitude.new(data, arguments, @variable, @name, methods, true, this)
@@ -393,7 +393,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 				@internalName = `__ks_sttc_\(@name)_\(@type.index())`
 
-				var type = Type.union(@scope, ...methods)
+				var type = Type.union(@scope, ...methods!?)
 				var variable = @scope.define('precursor', true, type, this)
 
 				variable.replaceCall = (data, arguments, node) => CallOverwrittenMethodSubstitude.new(data, arguments, @variable, @name, methods, false, this)

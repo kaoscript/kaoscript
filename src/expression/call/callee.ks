@@ -123,7 +123,7 @@ abstract class PreciseCallee extends Callee {
 	isUndisruptivelyNullable() => @expression.isUndisruptivelyNullable()
 	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
-		@functions.push(...that.functions())
+		@functions.push(...that.functions()!?)
 	} # }}}
 	releaseReusable() { # {{{
 		@expression.releaseReusable()

@@ -404,7 +404,7 @@ namespace Matching {
 
 				for var oldCombination in oldCombinations {
 					for var type in type.discardAlias().types() {
-						var combination = [...oldCombination]
+						var combination = [...oldCombination!?]
 
 						if type.isNullable() && !(type.isAny() || type.isNull()) {
 							combination.push(type.setNullable(false))
@@ -419,7 +419,7 @@ namespace Matching {
 					}
 
 					if nullable {
-						var combination = [...oldCombination, Type.Null]
+						var combination = [...oldCombination!?, Type.Null]
 
 						combinations.push(combination)
 					}
@@ -431,8 +431,8 @@ namespace Matching {
 				combinations = []
 
 				for var oldCombination in oldCombinations {
-					var combination1 = [...oldCombination, type.setNullable(false)]
-					var combination2 = [...oldCombination, Type.Null]
+					var combination1 = [...oldCombination!?, type.setNullable(false)]
+					var combination2 = [...oldCombination!?, Type.Null]
 
 					combinations.push(combination1, combination2)
 				}

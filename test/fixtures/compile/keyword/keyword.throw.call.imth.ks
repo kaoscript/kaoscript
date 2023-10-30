@@ -11,6 +11,6 @@ class Foobar {
 		throw Error.new(`Expecting "\(expecteds.join('", "'))"`)
 	}
 	foobar(event: Event): Event ~ Error {
-		@throw(...event.value)
+		@throw(...?event.value)
 	}
 }

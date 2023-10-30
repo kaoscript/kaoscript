@@ -5,7 +5,7 @@ class BlockScope extends Scope {
 		@declarations						= {}
 		@implicitType: Type?				= null
 		@implicitVarname: String?			= null
-		@macros								= {}
+		@macros: MacroDeclaration[]{}		= {}
 		@matchingTypes: Object<Array>		= {}
 		@module: ModuleScope
 		@parent: Scope
@@ -54,7 +54,7 @@ class BlockScope extends Scope {
 		return null
 	} # }}}
 	addMacro(name: String, macro: MacroDeclaration) { # {{{
-		if @macros[name] is Array {
+		if ?@macros[name] {
 			var type = macro.type()
 			var mut notAdded = true
 
@@ -212,9 +212,7 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	getLineOffset() => @module.getLineOffset()
-	getMacro(name) { # {{{
-		return @macros[name] ?? @parent.getMacro(name)
-	} # }}}
+	getMacro(name) => @macros[name] ?? @parent.getMacro(name)
 	getNewName(name: String): String { # {{{
 		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
 		var mut newName = '__ks_' + name + '_' + index
@@ -284,7 +282,7 @@ class BlockScope extends Scope {
 		return false
 	} # }}}
 	override hasImplicitVariable() => ?@implicitVarname || @parent.hasImplicitVariable()
-	hasMacro(name) => @macros[name] is Array || @parent.hasMacro(name)
+	hasMacro(name) => ?@macros[name] || @parent.hasMacro(name)
 	hasVariable(name: String, line: Number = @line()) { # {{{
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
@@ -368,14 +366,7 @@ class BlockScope extends Scope {
 
 		return variables
 	} # }}}
-	listMacros(name): Array { # {{{
-		if @macros[name] is Array {
-			return @macros[name]
-		}
-		else {
-			return @parent.listMacros(name)
-		}
-	} # }}}
+	listMacros(name): Array => @macros[name] ?? @parent.listMacros(name)
 	module() => @module
 	parent() => @parent
 	processStash(name) { # {{{

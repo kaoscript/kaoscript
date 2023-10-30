@@ -1,0 +1,9 @@
+func foobar(value?, type: String) {
+	if value.type != null {
+		echo(`\(value.type)`)
+	}
+	else {
+		value.type = type
+		echo(`\(value.type)`)
+	}
+}

@@ -141,7 +141,7 @@ abstract class DependencyStatement extends Statement {
 			NodeKind.VariableDeclarator {
 				var mut type = Type.fromAST(declaration.type, this)
 
-				var mut instance = type is ClassType
+				var instance = type is ClassType
 
 				if type is ReferenceType && type.isClass() {
 					type = ClassType.new(scope)

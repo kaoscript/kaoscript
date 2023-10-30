@@ -498,7 +498,11 @@ class MatchStatement extends Statement {
 				}
 			}
 
-			if clause.type != null {
+			unless ?clause {
+				NotImplementedException.throw(this)
+			}
+
+			if ?clause.type {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
 				}
@@ -539,7 +543,7 @@ class MatchStatement extends Statement {
 				}
 			}
 
-			if clause.type != null {
+			if ?clause.type {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
 				}

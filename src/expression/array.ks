@@ -1,20 +1,17 @@
 class ArrayExpression extends Expression {
 	private late {
-		@flatten: Boolean	= false
+		@canConcat: Boolean			= true
+		@flatten: Boolean			= false
+		@nullableHelper: Boolean	= false
 		@type: Type
-		@values: Array		= []
+		@useHelper: Boolean			= false
+		@values: Array				= []
 	}
 	analyse() { # {{{
-		var es5 = @options.format.spreads == 'es5'
-
 		for var data in @data.values {
 			var value = $compile.expression(data, this)
 
 			value.analyse()
-
-			if es5 && value is UnaryOperatorSpread {
-				@flatten = true
-			}
 
 			@values.push(value)
 		}
@@ -31,14 +28,19 @@ class ArrayExpression extends Expression {
 		}
 
 		if spread {
-			var mut type = @values[0].type().discardValue().discardSpread()
+			@canConcat = @values.length > 1
+
+			var value = @values[0]
+			var mut type = value.type().discardValue().discardSpread()
+
+			@prepareValue(value)
 
 			for var value in @values from 1 {
-				if !type.equals(value.type().discardValue().discardSpread()) {
+				if ?type && !type.equals(value.type().discardValue().discardSpread()) {
 					type = null
-
-					break
 				}
+
+				@prepareValue(value)
 			}
 
 			if ?type {
@@ -95,24 +97,52 @@ class ArrayExpression extends Expression {
 
 		return variables
 	} # }}}
+	prepareValue(value) { # {{{
+		if value.isSpread() {
+			if value.useHelper() {
+				@useHelper = true
+				@nullableHelper = value.argument().type().isNullable()
+			}
+		}
+		else {
+			@canConcat = false
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @flatten {
-			if @values.length == 1 {
-				fragments.code('[].concat(').compile(@values[0].argument()).code(')')
+		if @useHelper {
+			if @canConcat {
+				fragments.code(`\($runtime.helper(this)).concatArray(\(@nullableHelper ? '1' : '0')`)
+
+				for var value, index in @values {
+					fragments
+						..code($comma)
+						..compile(value.argument())
+				}
+
+				fragments.code(')')
 			}
 			else {
-				CallExpression.toFlattenArgumentsFragments(fragments, @values)
+				fragments.code('[')
+
+				for var value, index in @values {
+					fragments.code($comma) if index != 0
+
+					value.toArgumentFragments(fragments)
+				}
+
+				fragments.code(']')
 			}
+		}
+		else if @flatten {
+			CallExpression.toFlattenArgumentsFragments(fragments, @values)
 		}
 		else {
 			fragments.code('[')
 
 			for var value, index in @values {
-				if index != 0 {
-					fragments.code($comma)
-				}
-
-				fragments.compile(value)
+				fragments
+					..code($comma) if index != 0
+					..compile(value)
 			}
 
 			fragments.code(']')

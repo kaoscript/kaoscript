@@ -42,7 +42,15 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(event) {
-		__ks_throw_1.apply(null, [].concat(event.value));
+		if(Type.isArray(event.value)) {
+			__ks_throw_1(...event.value);
+		}
+		else if(Type.isValue(event.value)) {
+			__ks_throw_1(event.value);
+		}
+		else {
+			return event;
+		}
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isStructInstance(value, Event);

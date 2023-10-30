@@ -101,7 +101,7 @@ abstract class Scope {
 	getImplicitType() => null
 	getImplicitVariable() => null
 	getLineOffset(): Number => 0
-	getMacro(name: String): MacroDeclaration? => null
+	getMacro(name: String): MacroDeclaration[]? => null
 	getRawLine(): Number => 0
 	getTempIndex(): Number => -1
 	hasBleedingVariable(name: String): Boolean => @hasDefinedVariable(name)

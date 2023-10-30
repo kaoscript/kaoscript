@@ -721,39 +721,63 @@ class ObjectRestrictiveMember extends Expression {
 
 class ObjectSpreadMember extends Expression {
 	private {
-		@type: Type		= AnyType.NullableUnexplicit
+		@canBeNullable: Boolean	= false
+		@nullable: Boolean		= false
+		@type: Type				= AnyType.NullableUnexplicit
 		@value
 	}
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
+		for var modifier in @data.modifiers {
+			match modifier.kind {
+				ModifierKind.Nullable {
+					@canBeNullable = true
+				}
+			}
+		}
+
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var targetObj = Type.objectOf(target, @scope)
+		var targetObj = @amendTarget(target)
 
 		@value.prepare(targetObj, targetMode)
 
 		var type = @value.type()
 
-		if type.isObject() {
+		@nullable = type.isNullable()
+
+		if !@canBeNullable && @nullable {
+			TypeException.throwNotNullableOperand(@value, @operator(), this)
+		}
+		else if type.isObject() {
 			@type = type.parameter()
 		}
-		else {
+		else if type.canBeObject() {
 			@type = target
+		}
+		else {
+			TypeException.throwInvalidSpread(this)
 		}
 	} # }}}
 	translate() { # {{{
 		@value.translate()
 	} # }}}
+	amendTarget(target: Type): Type { # {{{
+		var type = Type.objectOf(target, @scope)
+
+		return @canBeNullable ? type.setNullable(true) : type
+	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	isInverted() => @value.isInverted()
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
+	operator() => @canBeNullable ? '...?' : '...'
 	toFragments(fragments, mode) { # {{{
 		fragments
 			.newLine()
-			.code($runtime.helper(this), '.concatObject(', @parent.varname(), $comma)
+			.code(`\($runtime.helper(this)).concatObject(\(@nullable ? '1' : '0'), \(@parent.varname()), `)
 			.compile(@value)
 			.code(')')
 			.done()

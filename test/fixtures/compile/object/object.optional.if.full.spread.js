@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(args, flag) {
 		const value = (() => {
 			const o = new OBJ();
-			Helper.concatObject(o, args);
+			Helper.concatObject(0, o, args);
 			if(flag === true) {
 				o.foobar = 1;
 			}

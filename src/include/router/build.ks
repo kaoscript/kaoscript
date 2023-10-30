@@ -657,8 +657,8 @@ namespace Build {
 
 			for var parameter of parameters {
 				parameter.argIndex = argCount
-				parameter.min = Math.min(...arguments[parameter.index])
-				parameter.max = Math.max(...arguments[parameter.index])
+				parameter.min = Math.min(...arguments[parameter.index]!?)
+				parameter.max = Math.max(...arguments[parameter.index]!?)
 
 				argCount += 1
 
@@ -667,7 +667,7 @@ namespace Build {
 				if type.isNullable() {
 					var types = type.split([Type.Null])
 
-					parameter.argType = Type.union(node.scope(), ...types).sort()
+					parameter.argType = Type.union(node.scope(), ...types!?).sort()
 				}
 				else {
 					parameter.argType = type.sort()
@@ -1448,7 +1448,7 @@ namespace Build {
 				}
 			}
 
-			var row = {...rows.last()}
+			var row = {...rows.last()!?}
 			row.types = row.types.filter(({ index }, _, _) => pIndex > index >= 0)
 
 			var lastParameter = keys.length - 1

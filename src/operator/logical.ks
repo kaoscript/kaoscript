@@ -328,7 +328,7 @@ class PolyadicOperatorLogicalOr extends PolyadicOperatorExpression {
 			if var variable ?= scope.getVariable(name) {
 				inferables[name] = {
 					isVariable: true
-					type: Type.union(@scope, ...types)
+					type: Type.union(@scope, ...types!?)
 				}
 			}
 		}

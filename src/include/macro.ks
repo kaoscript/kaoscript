@@ -367,7 +367,7 @@ class MacroDeclaration extends AbstractNode {
 		var args = [$autoEvaluate^^(this, parent, ^), $reificate^^(this, parent, ...)].concat(arguments)
 
 		// echo(args)
-		var mut data = @fn(...args)
+		var mut data = @fn(...args!?)
 		// echo(data)
 
 		try {

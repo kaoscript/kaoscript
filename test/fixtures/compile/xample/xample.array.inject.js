@@ -9,37 +9,38 @@ module.exports = function() {
 			}
 			while(index < 0)
 		}
-		if(args.length > 1) {
-			if(index !== 0) {
-				if(index >= this.length) {
-					for(let i = 0; i < args.length; ++i) {
-						this.push.call(this, ...args[i]);
+		if(index !== 0) {
+			if(index >= this.length) {
+				for(let i = 0; i < args.length; ++i) {
+					if(Type.isArray(args[i])) {
+						this.push(...args[i]);
 					}
-				}
-				else {
-					for(let i = 0; i < args.length; ++i) {
-						this.splice.call(this, index, 0, ...args[i]);
-						index += [].concat(args[i]).length;
+					else {
+						this.push(args[i]);
 					}
 				}
 			}
 			else {
-				for(let i = args.length - 1; i >= 0; --i) {
-					this.unshift.call(this, ...args[i]);
+				for(let i = 0; i < args.length; ++i) {
+					if(Type.isArray(args[i])) {
+						this.splice(index, 0, ...args[i]);
+						index += args[i].length;
+					}
+					else {
+						this.splice(index, 0, args[i]);
+						index += 1;
+					}
 				}
 			}
 		}
 		else {
-			if(index !== 0) {
-				if(index >= this.length) {
-					this.push.call(this, ...args[0]);
+			for(let i = args.length - 1; i >= 0; --i) {
+				if(Type.isArray(args[i])) {
+					this.unshift(...args[i]);
 				}
 				else {
-					this.splice.call(this, index, 0, ...args[0]);
+					this.unshift(args[i]);
 				}
-			}
-			else {
-				this.unshift.call(this, ...args[0]);
 			}
 		}
 		return this;

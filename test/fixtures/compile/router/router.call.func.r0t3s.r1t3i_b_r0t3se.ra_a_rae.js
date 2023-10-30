@@ -44,7 +44,7 @@ module.exports = function() {
 		return f.__ks_rt(this, arguments);
 	};
 	f.__ks_0 = function(numbers, flag, strings) {
-		return Helper.toString(foobar.apply(null, [].concat(numbers, [flag], strings)));
+		return Helper.toString(foobar.apply(null, [].concat(Helper.checkArray(numbers), [flag], Helper.checkArray(strings))));
 	};
 	f.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

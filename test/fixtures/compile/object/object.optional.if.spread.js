@@ -9,7 +9,7 @@ module.exports = function() {
 			o.x = 1;
 			o.y = 1;
 			if(_3d === true) {
-				Helper.concatObject(o, values);
+				Helper.concatObject(0, o, values);
 			}
 			return o;
 		})();

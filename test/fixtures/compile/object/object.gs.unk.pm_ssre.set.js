@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(o) {
 		console.log(Helper.toString(o.name));
 		o.name = "White";
-		console.log(Helper.toString(o.name));
+		console.log(o.name);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isDexObject(value, 1, Type.isValue, {color: Type.isString});

@@ -44,7 +44,7 @@ class InlineBlockScope extends BlockScope {
 		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @hasBleedingVariable(name)) {
 			var newName = @getNewName(name)
 
-			if @variables[name] is not Array {
+			if !?@variables[name] {
 				@declarations[newName] = true
 			}
 

@@ -5,7 +5,7 @@ class ModuleScope extends Scope {
 		@lastLine: Boolean					= false
 		@line: Number						= 0
 		@lineOffset: Number					= 0
-		@macros								= {}
+		@macros: MacroDeclaration[]{}		= {}
 		@matchingTypes: Object<Array>		= {}
 		@predefined							= {}
 		@references							= {}
@@ -117,7 +117,7 @@ class ModuleScope extends Scope {
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
 			var newName = @getNewName(name)
 
-			if @variables[name] is not Array {
+			if !?@variables[name] {
 				@declarations[newName] = true
 			}
 
@@ -238,9 +238,7 @@ class ModuleScope extends Scope {
 		return null
 	} # }}}
 	getLineOffset() => @lineOffset
-	getMacro(name) { # {{{
-		return @macros[name]
-	} # }}}
+	getMacro(name) => @macros[name]
 	getNewName(name: String): String { # {{{
 		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
 		var mut newName = '__ks_' + name + '_' + index
@@ -333,7 +331,7 @@ class ModuleScope extends Scope {
 
 		return false
 	} # }}}
-	hasMacro(name) => @macros[name] is Array
+	hasMacro(name) => ?@macros[name]
 	override hasPredefinedVariable(name) { # {{{
 		return @predefined[`__\(name)`] is Variable
 	} # }}}
@@ -417,14 +415,7 @@ class ModuleScope extends Scope {
 
 		return variables
 	} # }}}
-	listMacros(name): Array { # {{{
-		if @macros[name] is Array {
-			return @macros[name]
-		}
-		else {
-			return []
-		}
-	} # }}}
+	listMacros(name): Array => @macros[name] ?? []
 	module() => this
 	processStash(name) { # {{{
 		var stash = @stashes[name]

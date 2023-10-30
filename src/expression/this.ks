@@ -141,7 +141,7 @@ class ThisExpression extends Expression {
 								}
 								else {
 									@fragment = `\(name).\(@name)`
-									@type = @scope.getChunkType(@fragment) ?? Type.union(@scope, ...type.listInstantiableMethods(@name))
+									@type = @scope.getChunkType(@fragment) ?? Type.union(@scope, ...type.listInstantiableMethods(@name)!?)
 								}
 							}
 						}
@@ -180,7 +180,7 @@ class ThisExpression extends Expression {
 					@lateInit = !@immutable && variable.isLateInit()
 				}
 				else if type.hasInstantiableMethod(@name) {
-					@type = Type.union(@scope, ...type.listInstantiableMethods(@name))
+					@type = Type.union(@scope, ...type.listInstantiableMethods(@name)!?)
 					@fragment = `\($runtime.helper(this)).bindMethod(\(name), "\(@name)")`
 				}
 				else if type.isExhaustive(this) {

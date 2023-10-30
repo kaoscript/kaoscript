@@ -1,5 +1,5 @@
 func foobar(value?) {
-	quxbaz(...value ?? 'quxbaz')
+	quxbaz(...?value ?? 'quxbaz')
 }
 
 func quxbaz(...values) {

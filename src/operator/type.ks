@@ -189,7 +189,6 @@ class BinaryOperatorTypeInequality extends Expression {
 	analyse() { # {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
-
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@subject.prepare(AnyType.NullableUnexplicit)
@@ -313,31 +312,33 @@ class BinaryOperatorTypeInequality extends Expression {
 	} # }}}
 }
 
-class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
+class UnaryOperatorTypeFitting extends UnaryOperatorExpression {
 	private {
-		@type: Type		= AnyType.Unexplicit
+		@forced: Boolean	= false
+		@type: Type			= AnyType.Unexplicit
 	}
-	override prepare(target, targetMode) { # {{{
-		super(target, targetMode)
+	override analyse() { # {{{
+		super()
 
-		if !@parent.isExpectingType() {
-			SyntaxException.throwInvalidForcedTypeCasting(this)
+		for var modifier in @data.modifiers {
+			match modifier.kind {
+				ModifierKind.Forced {
+					@forced = true
+				}
+			}
 		}
 	} # }}}
-	toFragments(fragments, mode) { # {{{
-		fragments.compile(@argument)
-	} # }}}
-	type() => @type
-}
-
-class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
-	private late {
-		@type: Type
-	}
 	override prepare(target, targetMode) { # {{{
 		super(target, targetMode)
 
-		@type = @argument.type().setNullable(false)
+		if @forced {
+			if !@parent.isExpectingType() {
+				SyntaxException.throwInvalidForcedTypeCasting(this)
+			}
+		}
+		else {
+			@type = @argument.type().setNullable(false)
+		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)

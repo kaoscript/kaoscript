@@ -136,7 +136,7 @@ class CurryExpression extends CallExpression {
 			var type = FunctionType.new(node.scope())
 				..setThisType(function.getThisType()) if !function.isMissingThis()
 				..setReturnType(function.getReturnType())
-				..addError(...function.listErrors())
+				..addError(...function.listErrors()!?)
 
 			var map = []
 

@@ -33,7 +33,7 @@ module.exports = function() {
 		}
 		else if(!Type.isPrimitive(value)) {
 			if(Type.isObject(source[key])) {
-				$mergeObject(source[key], value);
+				$mergeObject.__ks_0(source[key], value);
 			}
 			else {
 				source[key] = $clone.__ks_0(value);
@@ -133,15 +133,15 @@ module.exports = function() {
 		return this;
 	};
 	__ks_Array.__ks_func_appendUniq_0 = function(args) {
-		if(args.length === 1) {
-			__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[0]));
-		}
-		else {
-			let __ks_0, __ks_1, __ks_2, __ks_3;
-			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
-			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
-				i = __ks_3(__ks_4);
-				__ks_Array.__ks_func_pushUniq_0.call(this, [].concat(args[i]));
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
+		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+			i = __ks_3(__ks_4);
+			if(Type.isArray(args[i])) {
+				__ks_Array.__ks_func_pushUniq_0.call(this, args[i]);
+			}
+			else {
+				__ks_Array.__ks_func_pushUniq_0.call(this, [args[i]]);
 			}
 		}
 		return this;

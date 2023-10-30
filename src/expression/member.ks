@@ -4,6 +4,7 @@ class MemberExpression extends Expression {
 		@assignment: AssignmentType		= AssignmentType.Neither
 		@callee
 		@computed: Boolean				= false
+		@declaredType: Type?			= null
 		@enumCasting: Boolean			= false
 		@inferable: Boolean				= false
 		@liberal: Boolean				= false
@@ -46,6 +47,9 @@ class MemberExpression extends Expression {
 				@property = $compile.expression(@data.property, this)
 				@property.analyse()
 			}
+			else {
+				@property = @data.property.name
+			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -58,8 +62,14 @@ class MemberExpression extends Expression {
 				ReferenceException.throwUncompleteType(type, this, this)
 			}
 
-			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
-				ReferenceException.throwNullExpression(@object, this)
+			if !@nullable && !@options.rules.ignoreMisfit {
+				if type.isNull() {
+					ReferenceException.throwNullExpression(@object, this)
+				}
+				// TODO
+				// else if type.isNullable() && !(type.isAny() && !type.isExplicit()) {
+				// 	TypeException.throwNotNullableMemberAccess(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
+				// }
 			}
 
 			if @computed {
@@ -70,7 +80,13 @@ class MemberExpression extends Expression {
 				}
 
 				if @object.isInferable() {
-					if @property is NumberLiteral {
+					if @property is IdentifierLiteral {
+						if var variable ?= @property.variable() ;; variable.isImmutable() {
+							@inferable = true
+							@path = `\(@object.path())[\(@property.name())]`
+						}
+					}
+					else if @property is NumberLiteral {
 						@inferable = true
 						@path = `\(@object.path())[\(@property.value())]`
 					}
@@ -79,16 +95,8 @@ class MemberExpression extends Expression {
 						@path = `\(@object.path())['\(@property.value())']`
 					}
 				}
-
-				if @inferable {
-					if var type ?= @scope.getChunkType(@path) {
-						@type = type
-					}
-				}
 			}
 			else {
-				@property = @data.property.name
-
 				unless type.isTuple() {
 					if 48 <= @property.charCodeAt(0) <= 57 {
 						SyntaxException.throwInvalidIdentifier(@property, this)
@@ -98,7 +106,7 @@ class MemberExpression extends Expression {
 				@prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
 
 				if @assignable {
-					if var variable ?= this.declaration() {
+					if var variable ?= @declaration() {
 						if variable.isImmutable() {
 							if variable.isLateInit() {
 								if variable.isInitialized() {
@@ -117,22 +125,34 @@ class MemberExpression extends Expression {
 					}
 				}
 			}
+
+			if @inferable {
+				if var type ?= @scope.getChunkType(@path) {
+					@declaredType = @type
+					@type = type
+				}
+			}
 		}
 		else {
 			var type = @object.type().discardValue()
 
-			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
-				ReferenceException.throwNullExpression(@object, this)
+			@property = @computed ? $compile.expression(@data.property, this) : @data.property.name
+
+			if !@nullable && !@options.rules.ignoreMisfit {
+				if type.isNull() {
+					ReferenceException.throwNullExpression(@object, this)
+				}
+				// TODO
+				// else if type.isNullable() && !(type.isAny() && !type.isExplicit()) {
+				// 	TypeException.throwNotNullableMemberAccess(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
+				// }
 			}
 
 			if @computed {
-				@property = $compile.expression(@data.property, this)
 				@property.analyse()
 				@property.prepare(AnyType.NullableUnexplicit)
 			}
 			else {
-				@property = @data.property.name
-
 				if 48 <= @property.charCodeAt(0) <= 57 {
 					unless type.isTuple() {
 						SyntaxException.throwInvalidIdentifier(@property, this)
@@ -187,6 +207,7 @@ class MemberExpression extends Expression {
 	flagAssignable() { # {{{
 		@assignable = true
 	} # }}}
+	getDeclaredType() => @declaredType ?? @type
 	inferTypes(inferables) { # {{{
 		@object.inferTypes(inferables)
 
@@ -677,8 +698,8 @@ class MemberExpression extends Expression {
 			@objectType.addProperty(@property, type)
 		}
 	} # }}}
-	toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{
-		this.toFragments(fragments, mode)
+	override toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{
+		@toFragments(fragments, mode)
 
 		if @type.isEnum() && !(type.isAny() || type.isEnum()) {
 			fragments.code('.value')

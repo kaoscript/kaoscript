@@ -57,7 +57,7 @@ class LenientFunctionCallee extends Callee {
 	isInitializingInstanceVariable(name: String): Boolean => false
 	mergeWith(that: Callee) { # {{{
 		@type = Type.union(@node.scope(), @type, that.type())
-		@functions.push(...that.functions())
+		@functions.push(...that.functions()!?)
 	} # }}}
 	releaseReusable() { # {{{
 		@expression.releaseReusable()

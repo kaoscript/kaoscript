@@ -966,8 +966,14 @@ export class TypeException extends Exception {
 		throwNotNamespace(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a namespace`, node)
 		} # }}}
+		throwNotNullableCaller(property, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The caller of "\(property)" can't be nullable`, node)
+		} # }}}
 		throwNotNullableExistential(expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The existential test of \(expression.toQuote(true)) is always positive`, node)
+		} # }}}
+		throwNotNullableMemberAccess(expression, property, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The expression \(expression.toQuote(true)) can't be nullable to access the property \(property)`, node)
 		} # }}}
 		throwNotNullableOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
@@ -983,9 +989,6 @@ export class TypeException extends Exception {
 		} # }}}
 		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The function "\(name)" is not synchronous`, node)
-		} # }}}
-		throwNullableCaller(property, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The caller of "\(property)" can't be nullable`, node)
 		} # }}}
 		throwNullTypeChecking(type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)

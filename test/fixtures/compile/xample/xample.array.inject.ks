@@ -9,38 +9,40 @@ impl Array {
 			while index < 0
 		}
 
-		if args.length > 1 {
-			if index != 0 {
-				if index >= this.length {
-					for i from 0 up to~ args.length {
+		if index != 0 {
+			if index >= this.length {
+				for i from 0 up to~ args.length {
+					if args[i] is Array {
 						this.push(...args[i])
 					}
-				}
-				else {
-					for i from 0 up to~ args.length {
-						this.splice(index, 0, ...args[i])
-
-						index += [].concat(args[i]).length
+					else {
+						this.push(args[i])
 					}
 				}
 			}
 			else {
-				for i from~ args.length down to 0 {
-					this.unshift(...args[i])
+				for i from 0 up to~ args.length {
+					if args[i] is Array {
+						this.splice(index, 0, ...args[i])
+
+						index += args[i].length
+					}
+					else {
+						this.splice(index, 0, args[i])
+
+						index += 1
+					}
 				}
 			}
 		}
 		else {
-			if index != 0 {
-				if index >= this.length {
-					this.push(...args[0])
+			for i from~ args.length down to 0 {
+				if args[i] is Array {
+					this.unshift(...args[i])
 				}
 				else {
-					this.splice(index, 0, ...args[0])
+					this.unshift(args[i])
 				}
-			}
-			else {
-				this.unshift(...args[0])
 			}
 		}
 

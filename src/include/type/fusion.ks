@@ -156,7 +156,7 @@ class FusionType extends Type {
 		var result = []
 
 		for var type in @types {
-			result.push(...type.listFunctions(name))
+			result.push(...type.listFunctions(name)!?)
 		}
 
 		return result
@@ -165,7 +165,7 @@ class FusionType extends Type {
 		var result = []
 
 		for var subtype in @types {
-			result.push(...subtype.listFunctions(name, type, mode))
+			result.push(...subtype.listFunctions(name, type, mode)!?)
 		}
 
 		return result
@@ -177,8 +177,8 @@ class FusionType extends Type {
 		for var subtype in @types {
 			var missing = subtype.listMissingProperties(class)
 
-			fields = { ...missing.fields, ...fields }
-			functions = { ...missing.functions, ...functions }
+			fields = { ...missing.fields!?, ...fields }
+			functions = { ...missing.functions!?, ...functions }
 		}
 
 		return { fields, functions }

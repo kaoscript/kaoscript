@@ -5,8 +5,14 @@ module.exports = function() {
 	__ks_Array.__ks_func_appendAny_0 = function(args) {
 		console.log(__ks_Array.__ks_func_last_0.call(args));
 		for(let i = 0; i < args.length; ++i) {
-			console.log(args[i].last());
-			this.push.call(this, ...args[i]);
+			if(Type.isArray(args[i])) {
+				console.log(__ks_Array.__ks_func_last_0.call(args[i]));
+				this.push(...args[i]);
+			}
+			else {
+				console.log(args[i]);
+				this.push(args[i]);
+			}
 		}
 		return this;
 	};

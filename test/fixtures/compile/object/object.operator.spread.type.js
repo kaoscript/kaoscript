@@ -9,7 +9,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(coord) {
 		const data = (() => {
 			const o = new OBJ();
-			Helper.concatObject(o, coord);
+			Helper.concatObject(0, o, coord);
 			return o;
 		})();
 	};

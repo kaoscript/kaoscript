@@ -9,7 +9,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(values) {
 		const copy = (() => {
 			const o = new OBJ();
-			Helper.concatObject(o, values);
+			Helper.concatObject(0, o, values);
 			return o;
 		})();
 		quxbaz.__ks_0(copy);

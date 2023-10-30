@@ -15,7 +15,7 @@ namespace Method {
 						var result = class.extends().type().listInstanceMethods(name)
 
 						for var interface in class.listInterfaces() {
-							result.push(...interface.listFunctions(name))
+							result.push(...interface.listFunctions(name)!?)
 						}
 
 						return result
@@ -24,7 +24,7 @@ namespace Method {
 						var result = class.extends().type().listInstantiableMethods(name, type, mode)
 
 						for var interface in class.listInterfaces() {
-							result.push(...interface.listFunctions(name, type, mode))
+							result.push(...interface.listFunctions(name, type, mode)!?)
 						}
 
 						return result
@@ -48,7 +48,7 @@ namespace Method {
 					var result = []
 
 					for var interface in class.listInterfaces() {
-						result.push(...interface.listFunctions(name))
+						result.push(...interface.listFunctions(name)!?)
 					}
 
 					return result
@@ -57,7 +57,7 @@ namespace Method {
 					var result = []
 
 					for var interface in class.listInterfaces() {
-						result.push(...interface.listFunctions(name, type, mode))
+						result.push(...interface.listFunctions(name, type, mode)!?)
 					}
 
 					return result
@@ -441,7 +441,7 @@ class ClassMethodDeclaration extends Statement {
 			}
 
 			if @type.isMissingError() && !overload.isMissingError() {
-				@type.addError(...overload.listErrors())
+				@type.addError(...overload.listErrors()!?)
 			}
 		}
 		else if overloaded.length > 1 {
@@ -787,7 +787,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 
 				if @type.isMissingError() {
-					type.addError(...method.listErrors())
+					type.addError(...method.listErrors()!?)
 				}
 				else {
 					var newTypes = @type.listErrors()

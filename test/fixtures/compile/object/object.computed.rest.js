@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(names, name, value) {
 		const result = (() => {
 			const o = new OBJ();
-			Helper.concatObject(o, names);
+			Helper.concatObject(0, o, names);
 			o[name] = value;
 			return o;
 		})();

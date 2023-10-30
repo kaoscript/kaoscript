@@ -35,7 +35,7 @@ func $listNPMModulePaths(mut start) { # {{{
 			continue
 		}
 
-		dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)), 'node_modules'))
+		dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)!?), 'node_modules'))
 	}
 
 	if process.platform == 'win32' {
@@ -1477,7 +1477,7 @@ class ImportWorker {
 		var queue = []
 		var variables = {}
 
-		var metadata = [...@metaRequirements.references, ...@metaExports.references]
+		var metadata = [...@metaRequirements.references!?, ...@metaExports.references!?]
 
 		var alterations = {mode: @node.mode()}
 

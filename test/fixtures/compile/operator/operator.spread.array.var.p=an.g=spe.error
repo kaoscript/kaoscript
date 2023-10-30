@@ -1,0 +1,1 @@
+TypeException: The operand "values" can't be nullable in a ... operation (fixtures/compile/operator/operator.spread.array.var.p=an.g=spe.ks:2)

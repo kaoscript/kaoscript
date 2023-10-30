@@ -115,10 +115,10 @@ abstract class Expression extends AbstractNode {
 
 		return @statement
 	} # }}}
-	toArgumentFragments(fragments, mode = Mode.None) { # {{{
+	toArgumentFragments(fragments, mode: Mode = Mode.None) { # {{{
 		@toFragments(fragments, mode)
 	} # }}}
-	toArgumentFragments(fragments, type: Type, mode = Mode.None) { # {{{
+	toArgumentFragments(fragments, type: Type, mode: Mode = Mode.None) { # {{{
 		@toArgumentFragments(fragments, mode)
 	} # }}}
 	toCastingFragments(fragments, mode) { # {{{
@@ -128,12 +128,15 @@ abstract class Expression extends AbstractNode {
 
 		fragments.code(')')
 	} # }}}
-	toConditionFragments(fragments, mode = Mode.None, junction = Junction.NONE) { # {{{
+	toConditionFragments(fragments, mode: Mode = Mode.None, junction: Junction = Junction.NONE) { # {{{
 		this.toFragments(fragments, mode)
 
 		if !@type().isBoolean() || @type().isNullable() {
 			fragments.code(' === true')
 		}
+	} # }}}
+	toFlatArgumentFragments(nullTested: Boolean, fragments, mode: Mode = Mode.None) { # {{{
+		@toArgumentFragments(fragments, mode)
 	} # }}}
 	toFragments(fragments, mode)
 	toNullableFragments(fragments) => @toFragments(fragments, Mode.None)

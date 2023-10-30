@@ -24,7 +24,7 @@ module.exports = function() {
 		__ks_func_foobar_0() {
 			const values = (() => {
 				const o = new OBJ();
-				Helper.concatObject(o, this._values);
+				Helper.concatObject(0, o, this._values);
 				return o;
 			})();
 		}

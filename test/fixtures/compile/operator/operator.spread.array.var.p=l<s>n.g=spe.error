@@ -1,0 +1,1 @@
+TypeException: The identifier "values" of type "String[]?" is expected to be of type "Any?[]" (fixtures/compile/operator/operator.spread.array.var.p=l<s>n.g=spe.ks:2)

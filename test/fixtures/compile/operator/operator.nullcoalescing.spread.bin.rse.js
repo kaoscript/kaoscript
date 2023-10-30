@@ -7,7 +7,7 @@ module.exports = function() {
 		if(value === void 0) {
 			value = null;
 		}
-		quxbaz.apply(null, [].concat(Type.isValue(value) ? value : ["quxbaz"]));
+		quxbaz.apply(null, Type.isValue(value) ? Helper.checkArray(value) : ["quxbaz"]);
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 1) {

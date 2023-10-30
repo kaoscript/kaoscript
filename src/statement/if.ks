@@ -434,7 +434,7 @@ class IfStatement extends Statement {
 	} # }}}
 	assignments() { # {{{
 		if @whenFalseExpression is IfStatement {
-			return [...@assignments, ...@whenFalseExpression.assignments()]
+			return [...@assignments, ...@whenFalseExpression.assignments()!?]
 		}
 		else {
 			return @assignments

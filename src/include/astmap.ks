@@ -189,11 +189,10 @@ var $unaryOperators = {
 	`\(UnaryOperatorKind.BitwiseNegation)`		: UnaryOperatorBitwiseNegation
 	`\(UnaryOperatorKind.Default)`				: UnaryOperatorDefault
 	`\(UnaryOperatorKind.Existential)`			: UnaryOperatorExistential
-	`\(UnaryOperatorKind.ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
 	`\(UnaryOperatorKind.Implicit)`				: UnaryOperatorImplicit
 	`\(UnaryOperatorKind.LogicalNegation)`		: UnaryOperatorLogicalNegation
 	`\(UnaryOperatorKind.Negative)`				: UnaryOperatorNegative
 	`\(UnaryOperatorKind.NonEmpty)`				: UnaryOperatorNonEmpty
-	`\(UnaryOperatorKind.NullableTypeCasting)`	: UnaryOperatorNullableTypeCasting
 	`\(UnaryOperatorKind.Spread)`				: UnaryOperatorSpread
+	`\(UnaryOperatorKind.TypeFitting)`			: UnaryOperatorTypeFitting
 }

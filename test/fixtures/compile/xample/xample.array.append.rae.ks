@@ -8,7 +8,12 @@ disclose Array {
 impl Array {
 	append(...args): Array {
 		for var i from 0 up to~ args.length {
-			@push(...args[i])
+			if args[i] is Array {
+				@push(...args[i])
+			}
+			else {
+				@push(args[i])
+			}
 		}
 
 		return this
