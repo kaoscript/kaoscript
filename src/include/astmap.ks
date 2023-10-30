@@ -187,7 +187,6 @@ var $polyadicOperators = {
 
 var $unaryOperators = {
 	`\(UnaryOperatorKind.BitwiseNegation)`		: UnaryOperatorBitwiseNegation
-	`\(UnaryOperatorKind.Default)`				: UnaryOperatorDefault
 	`\(UnaryOperatorKind.Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperatorKind.Implicit)`				: UnaryOperatorImplicit
 	`\(UnaryOperatorKind.LogicalNegation)`		: UnaryOperatorLogicalNegation

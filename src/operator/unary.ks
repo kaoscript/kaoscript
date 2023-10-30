@@ -23,60 +23,6 @@ class UnaryOperatorExpression extends Expression {
 	listAssignments(array: Array) => @argument.listAssignments(array)
 }
 
-class UnaryOperatorDefault extends UnaryOperatorExpression {
-	private late {
-		@type: Type
-	}
-	override prepare(target, targetMode) { # {{{
-		super(target, TargetMode.Permissive)
-
-		var type = @argument.type()
-
-		unless type.isNullable() {
-			NotImplementedException.throw(this)
-		}
-
-		if type.isEnum() {
-			var enum = type.discard()
-
-			unless enum.hasDefaultVariable() {
-				NotImplementedException.throw(this)
-			}
-
-			@type = type.setNullable(false)
-		}
-		else if type.isNumber() || type.isString() {
-			@type = type.setNullable(false)
-		}
-		else {
-			NotImplementedException.throw(this)
-		}
-	} # }}}
-	isComputed() => true
-	toFragments(fragments, mode) { # {{{
-		fragments
-			.code($runtime.type(this) + '.isValue(')
-			.compileReusable(@argument)
-			.code(') ? ')
-			.compile(@argument)
-			.code(' : ')
-
-		if @type.isEnum() {
-			var enum = @type.discardReference()
-			var default = enum.type().getDefaultVariable()
-
-			fragments.code(`\(enum.name()).\(default)`)
-		}
-		else if @type.isNumber() {
-			fragments.code('0')
-		}
-		else if @type.isString() {
-			fragments.code('""')
-		}
-	} # }}}
-	type(): valueof @type
-}
-
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private late {
 		@canBeNullable: Boolean	= false

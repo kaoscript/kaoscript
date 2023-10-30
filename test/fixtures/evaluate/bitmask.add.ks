@@ -1,15 +1,15 @@
 require expect: func
 
 bitmask AnimalFlags {
-	None**
+	None
 	HasClaws
 	CanFly
 	EatsFish
 	Endangered
 }
 
-func setEndangered(animal: AnimalFlags?): AnimalFlags {
-	return **animal + AnimalFlags.Endangered
+func setEndangered(animal: AnimalFlags = .None): AnimalFlags {
+	return animal + AnimalFlags.Endangered
 }
 
 expect(setEndangered(null)).to.eql(AnimalFlags.Endangered)

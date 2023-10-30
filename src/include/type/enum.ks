@@ -9,7 +9,6 @@ class EnumType extends Type {
 		@alteration: Boolean							= false
 		@alterationReference: ClassType?
 		@assessment										= null
-		@defaultVariable: String?						= null
 		@exhaustiveness									= {
 			instanceMethods: {}
 			staticMethods: {}
@@ -215,7 +214,6 @@ class EnumType extends Type {
 		@system = src._system
 		@requirement = src._requirement
 		@required = src._required
-		@defaultVariable = src._defaultVariable
 
 		for var methods, name of src._staticMethods {
 			@staticMethods[name] = [].concat(methods)
@@ -275,7 +273,6 @@ class EnumType extends Type {
 			variables: [name for var _, name of @variables]
 			instanceMethods: {}
 			staticMethods: {}
-			defaultVariable: @defaultVariable if ?@defaultVariable
 		}
 
 		if @kind == EnumTypeKind.Bit {
@@ -329,7 +326,6 @@ class EnumType extends Type {
 
 		return @function
 	} # }}}
-	getDefaultVariable() => @defaultVariable
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
 		if var assessment ?= @instanceAssessments[name] {
 			return assessment
@@ -399,7 +395,6 @@ class EnumType extends Type {
 
 		return null
 	} # }}}
-	hasDefaultVariable() => ?@defaultVariable
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
@@ -502,7 +497,6 @@ class EnumType extends Type {
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true
 	} # }}}
-	setDefaultVariable(@defaultVariable)
 	shallBeNamed() => true
 	step()  { # {{{
 		@index += 1

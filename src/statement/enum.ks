@@ -57,10 +57,6 @@ class EnumDeclaration extends Statement {
 			variable.prepare()
 
 			@enum.addVariable(name)
-
-			if variable.isDefault() {
-				@enum.setDefaultVariable(name)
-			}
 		}
 
 		for var methods, name of @instanceMethods {
@@ -236,7 +232,6 @@ class EnumVariableDeclaration extends AbstractNode {
 	private {
 		@alias: Boolean					= false
 		@composite: Boolean				= false
-		@default: Boolean				= false
 		@name: String
 	}
 	constructor(data, parent) { # {{{
@@ -351,17 +346,10 @@ class EnumVariableDeclaration extends AbstractNode {
 				@type = @scope.reference('Number')
 			}
 		}
-
-		for var modifier in @data.modifiers {
-			if modifier.kind == ModifierKind.Default {
-				@default = true
-			}
-		}
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
 	isComposite() => @composite || @alias
-	isDefault() => @default
 	name() => @name
 	toFragments(fragments) { # {{{
 		if @alias {
