@@ -41,6 +41,17 @@ class FusionType extends Type {
 			types: [type.toExportOrReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
+	getKeyType() { # {{{
+		for var type in @types {
+			var root = type.discard()
+
+			if root is ObjectType && root.hasKeyType() {
+				return root.getKeyType()
+			}
+		}
+
+		return null
+	} # }}}
 	getProperty(index: Number): Type? { # {{{
 		for var type in @types {
 			if var property ?= type.getProperty(index) {
@@ -70,14 +81,52 @@ class FusionType extends Type {
 
 		return null
 	} # }}}
-	hashCode(fattenNull: Boolean = false): String { # {{{
-		var types = [type for var type in @types when !type.isObject()]
+	getRestType(): Type? { # {{{
+		for var type in @types {
+			var root = type.discard()
 
-		if types.length == 1 {
-			return types[0].hashCode(fattenNull)
+			if root is ObjectType {
+				if var property ?= root.getRestType() {
+					return property
+				}
+			}
 		}
 
-		throw NotImplementedException.new()
+		return null
+	} # }}}
+	getVariantName() { # {{{
+		for var type in @types {
+			if type.isVariant() {
+				return type.getVariantName()
+			}
+		}
+
+		return null
+	} # }}}
+	getVariantType() { # {{{
+		for var type in @types {
+			if type.isVariant() {
+				return type.getVariantType()
+			}
+		}
+
+		return null
+	} # }}}
+	hashCode(fattenNull: Boolean = false): String { # {{{
+		var types = [type.hashCode(fattenNull) for var type in @types]
+
+		return types.join('&')
+	} # }}}
+	hasKeyType() { # {{{
+		for var type in @types {
+			var root = type.discard()
+
+			if root is ObjectType && root.hasKeyType() {
+				return true
+			}
+		}
+
+		return false
 	} # }}}
 	hasMutableAccess() { # {{{
 		for var type in @types {
@@ -152,6 +201,15 @@ class FusionType extends Type {
 
 		return match == @types.length
 	} # }}}
+	override isVariant() { # {{{
+		for var type in @types {
+			if type.isVariant() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	listFunctions(name: String): Array { # {{{
 		var result = []
 
@@ -189,6 +247,19 @@ class FusionType extends Type {
 		}
 
 		return AnyType.NullableUnexplicit
+	} # }}}
+	properties() { # {{{
+		var mut properties = {}
+
+		for var type in @types when type.isObject() {
+			var object = type.discard()
+
+			if object is ObjectType {
+				properties = { ...properties, ...object.properties()!? }
+			}
+		}
+
+		return properties
 	} # }}}
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR

@@ -108,7 +108,7 @@ class ObjectExpression extends Expression {
 		@type = ObjectType.new(@scope)
 
 		if #@properties {
-			if root is ObjectType {
+			if root is ObjectType || (root is FusionType && root.isObject()) {
 				var keyed  = root.hasKeyType()
 				var keyType = keyed ? root.getKeyType() : AnyType.NullableUnexplicit
 				var valueType = root.getRestType()
@@ -170,15 +170,15 @@ class ObjectExpression extends Expression {
 								rest.push(property.type())
 							}
 						}
-						ObjectThisMember {
-							if keyed && !keyType.canBeString() {
-								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
-							}
+						// ObjectThisMember {
+						// 	if keyed && !keyType.canBeString() {
+						// 		TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+						// 	}
 
-							property.prepare(root.getProperty(property.name()))
+						// 	property.prepare(root.getProperty(property.name()))
 
-							@type.addProperty(property.name(), property.type())
-						}
+						// 	@type.addProperty(property.name(), property.type())
+						// }
 					}
 				}
 

@@ -465,17 +465,28 @@ class ObjectType extends Type {
 			}
 		}
 		else {
-			if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
+			match value {
+				is FusionType {
+					for var type in value.types() {
+						if !@isSubsetOf(type, mode) {
+							return false
+						}
 					}
-				}
 
-				return false
-			}
-			else {
-				return value.isAny()
+					return true
+				}
+				is UnionType {
+					for var type in value.types() {
+						if @isSubsetOf(type, mode) {
+							return true
+						}
+					}
+
+					return false
+				}
+				else {
+					return value.isAny()
+				}
 			}
 		}
 	} # }}}

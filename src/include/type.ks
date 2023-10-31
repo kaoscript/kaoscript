@@ -417,7 +417,7 @@ abstract class Type {
 
 										if #data.typeSubtypes {
 											for var subtype in data.typeSubtypes {
-												type.addSubtype(subtype.name, master, node)
+												type.addSubtype(subtype.name, master, true, node)
 											}
 										}
 									}
@@ -434,7 +434,7 @@ abstract class Type {
 							var master = type.discard().getVariantType().getMaster()
 
 							for var subtype in data.typeSubtypes {
-								type.addSubtype(subtype.name, master, node)
+								type.addSubtype(subtype.name, master, true, node)
 							}
 
 							return type.flagComplete()
