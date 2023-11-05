@@ -981,6 +981,9 @@ export class TypeException extends Exception {
 		throwNotStruct(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a struct`, node)
 		} # }}}
+		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The function "\(name)" is not synchronous`, node)
+		} # }}}
 		throwNotTuple(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a tuple`, node)
 		} # }}}
@@ -990,8 +993,8 @@ export class TypeException extends Exception {
 		throwNotUniqueValue(expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) isn't an unique value`, node)
 		} # }}}
-		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The function "\(name)" is not synchronous`, node)
+		throwNotVariant(name, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`Identifier "\(name)" is not a variant`, node)
 		} # }}}
 		throwNullTypeChecking(type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)

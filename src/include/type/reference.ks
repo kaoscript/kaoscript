@@ -93,7 +93,7 @@ class ReferenceType extends Type {
 		@name = $types[name] ?? name
 		@nullable = @explicitlyNull
 	} # }}}
-	addSubtype(name: String, type: Type, initiating: Boolean = false, node) { # {{{
+	addSubtype(name: String, type: Type, node) { # {{{
 		@resolve()
 
 		var variant = @type.discard().getVariantType()
@@ -106,7 +106,7 @@ class ReferenceType extends Type {
 			@subtypes.push({ name: mainName, type })
 		}
 		// TODO skip valdation since enum isn't prepared yet
-		else if initiating {
+		else if !variant.isComplete() {
 			for var subtype in @subtypes {
 				return if name == subtype.name
 			}

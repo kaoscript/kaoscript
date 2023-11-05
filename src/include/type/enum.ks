@@ -396,14 +396,14 @@ class EnumType extends Type {
 
 		return null
 	} # }}}
-	getTopProperty(name: String): String {
+	getTopProperty(name: String): String { # {{{
 		if var variable ?= @variables[name] ;; variable.isAlias() {
 			return variable.getTopAlias() ?? name
 		}
 		else {
 			return name
 		}
-	}
+	} # }}}
 	getVariable(name: String) => @variables[name]
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {

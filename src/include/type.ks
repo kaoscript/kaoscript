@@ -411,14 +411,14 @@ abstract class Type {
 									var parameters = [Type.fromAST(parameter, scope, defined, node) for var parameter in data.typeParameters]
 
 									var type = ReferenceType.new(scope, name, nullable, parameters)
-									var object = type.discard()
+									var root = type.discard()
 
-									if object.isVariant() {
-										var master = object.getVariantType().getMaster()
+									if root.isVariant() {
+										var master = root.getVariantType().getMaster()
 
 										if #data.typeSubtypes {
 											for var subtype in data.typeSubtypes {
-												type.addSubtype(subtype.name, master, true, node)
+												type.addSubtype(subtype.name, master, node)
 											}
 										}
 									}
@@ -432,13 +432,20 @@ abstract class Type {
 						}
 						else if #data.typeSubtypes {
 							var type = ReferenceType.new(scope, name, nullable)
-							var master = type.discard().getVariantType().getMaster()
+							var root = type.discard()
 
-							for var subtype in data.typeSubtypes {
-								type.addSubtype(subtype.name, master, true, node)
+							if root.isVariant() {
+								var master = root.getVariantType().getMaster()
+
+								for var subtype in data.typeSubtypes {
+									type.addSubtype(subtype.name, master, node)
+								}
+
+								return type.flagComplete()
 							}
-
-							return type.flagComplete()
+							else {
+								TypeException.throwNotVariant(name, node)
+							}
 						}
 						else if generics?.contains(data.typeName.name) {
 							return DeferredType.new(data.typeName.name, scope)

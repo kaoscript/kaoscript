@@ -41,6 +41,8 @@ class TypeAliasDeclaration extends Statement {
 			}
 
 			type.setDeferrable(variant.canBeDeferred())
+
+			variant.flagComplete()
 		}
 
 		@type.flagComplete()

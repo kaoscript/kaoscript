@@ -1,0 +1,1 @@
+TypeException: Identifier "SchoolPerson" is not a variant (fixtures/compile/variant/variant.type.enum.bad.notvariant.ks:10)
