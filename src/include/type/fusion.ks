@@ -284,11 +284,11 @@ class FusionType extends Type {
 				}
 
 				if @variant && #subtypes {
-					fragments.code(`, \(varname) => `)
-
 					var variantType = @getVariantType()
 
 					if variantType.canBeBoolean() {
+						fragments.code(`, \(varname) => `)
+
 						for var { name, type }, index in subtypes {
 							fragments
 								..code(' || ') if index > 0
@@ -296,11 +296,41 @@ class FusionType extends Type {
 								..code(varname)
 						}
 					}
+					else if subtypes.length == 1 {
+						var { name, type } = subtypes[0]
+						var variable = type.discard().getVariable(name)
+
+						if variable.isAlias() {
+							if variable.isDerivative() {
+								fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
+							}
+							else {
+								fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(variable.original())`)
+							}
+						}
+						else {
+							fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(name)`)
+						}
+					}
 					else {
+						fragments.code(`, \(varname) => `)
+
 						for var { name, type }, index in subtypes {
-							fragments
-								..code(' || ') if index > 0
-								..code(`\(varname) === `).compile(type).code(`.\(name)`)
+							fragments.code(' || ') if index > 0
+
+							var variable = type.discard().getVariable(name)
+
+							if variable.isAlias() {
+								if variable.isDerivative() {
+									fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(\(varname))`)
+								}
+								else {
+									fragments.code(`\(varname) === `).compile(type).code(`.\(variable.original())`)
+								}
+							}
+							else {
+								fragments.code(`\(varname) === `).compile(type).code(`.\(name)`)
+							}
 						}
 					}
 				}
