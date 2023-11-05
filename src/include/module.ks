@@ -810,17 +810,43 @@ class ModuleBlock extends AbstractNode {
 		if #@typeTests {
 			var line = fragments.newLine().code(`\($runtime.immutableScope(this))__ksType = `)
 			var object = line.newObject()
+			var variants = []
 
 			for var { type, name } in @typeTests {
-				var line = object.newLine().code(`is\(name): `)
+				var funcname = `is\(name)`
+				var line = object.newLine().code(`\(funcname): `)
 
-				type.toBlindTestFunctionFragments('value', null, line, this)
+				type.toBlindTestFunctionFragments(funcname, 'value', true, null, line, this)
 
 				line.done()
+
+				if type.isVariant() && type.canBeDeferred() {
+					variants.push({
+						name
+						variant: type.discard().getVariantType()
+						generics: type.generics()
+					})
+				}
 			}
 
 			object.done()
 			line.done()
+
+			if #variants {
+				for var { name, variant, generics } in variants {
+					// TODO!
+					// for var { type }, index in variant.getFields() {
+					for var { type % subtype }, index in variant.getFields() {
+						var funcname = `is\(name).__\(index)`
+
+						var line = fragments.newLine().code(`__ksType.\(funcname) = `)
+
+						subtype.toBlindTestFunctionFragments(funcname, 'value', false, generics, line, this)
+
+						line.done()
+					}
+				}
+			}
 		}
 
 		for var node in @topNodes {

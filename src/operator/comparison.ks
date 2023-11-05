@@ -17,11 +17,8 @@ class ComparisonExpression extends Expression {
 		@tested: Boolean			= false
 	}
 	analyse() { # {{{
-		var dyn operand1, operand2, operator
-
-		operand1 = @addOperand(@data.values[0])
-
 		if @data.values.length == 3 {
+			var operand1 = @addOperand(@data.values[0])
 			var value = @data.values[2]
 
 			if value.kind == NodeKind.JunctionExpression {
@@ -43,8 +40,10 @@ class ComparisonExpression extends Expression {
 			}
 		}
 		else {
+			var mut operand1 = @addOperand(@data.values[0])
+
 			for var i from 1 to~ @data.values.length step 2 {
-				operand2 = @addOperand(@data.values[i + 1])
+				var operand2 = @addOperand(@data.values[i + 1])
 
 				@addOperator(@data.values[i], operand1, operand2)
 
@@ -573,7 +572,20 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 		else if @enumRight && @left.type().isAny() && !@left.type().isNull() {
-			if @left.type().isNullable() {
+			if @right.isDerivative() {
+				var type = @right.type().discardValue()
+
+				fragments
+					.code($runtime.helper(@right), '.equalEnum(')
+					.compile(@right.type().discardValue())
+					.code($comma)
+					.compile(type)
+					.code(`.__ks_eq_\(type.discard().getTopProperty(@right.property())), `)
+
+				wrap = false
+				suffix = ')'
+			}
+			else if @left.type().isNullable() {
 				fragments.code($runtime.helper(@left), '.valueOf(')
 				wrap = false
 				suffix = ')'
@@ -598,7 +610,7 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.compile(@left)
 		}
 
-		if suffix != null {
+		if ?suffix {
 			fragments.code(suffix)
 		}
 	} # }}}
@@ -621,6 +633,34 @@ class EqualityOperator extends ComparisonOperator {
 		}
 		else if @infinity {
 			fragments.code($runtime.operator(@node), '.eq(').compile(@left).code(', ').compile(@right).code(')')
+		}
+		else if @left.isDerivative() {
+			if @enumLeft {
+				@toRightFragments(fragments, reuseName, leftReusable, leftAssignable)
+			}
+			else {
+				var type = @left.type().discardValue()
+
+				fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
+
+				@toRightFragments(fragments, reuseName, leftReusable, leftAssignable)
+
+				fragments.code(')')
+			}
+		}
+		else if @right.isDerivative() {
+			if @enumRight {
+				@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
+			}
+			else {
+				var type = @right.type().discardValue()
+
+				fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
+
+				@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
+
+				fragments.code(')')
+			}
 		}
 		else {
 			@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
@@ -645,7 +685,20 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 		else if @enumLeft && @right.type().isAny() && !@right.type().isNull() {
-			if @right.type().isNullable() {
+			if @left.isDerivative() {
+				var type = @right.type().discardValue()
+
+				fragments
+					.code($runtime.helper(@left), '.equalEnum(')
+					.compile(@left.type().discardValue())
+					.code($comma)
+					.compile(type)
+					.code(`.__ks_eq_\(type.discard().getTopProperty(@left.property())), `)
+
+				wrap = false
+				suffix = ')'
+			}
+			else if @right.type().isNullable() {
 				fragments.code($runtime.helper(@right), '.valueOf(')
 				wrap = false
 				suffix = ')'
@@ -670,7 +723,7 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.compile(@right)
 		}
 
-		if suffix != null {
+		if ?suffix {
 			fragments.code(suffix)
 		}
 	} # }}}
@@ -699,6 +752,34 @@ class InequalityOperator extends EqualityOperator {
 		}
 		else if @infinity {
 			fragments.code($runtime.operator(@node), '.neq(').compile(@left).code(', ').compile(@right).code(')')
+		}
+		else if @left.isDerivative() {
+			if @enumRight {
+				@toRightFragments(fragments.code('!'), reuseName, leftReusable, leftAssignable)
+			}
+			else {
+				var type = @left.type().discardValue()
+
+				fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
+
+				@toRightFragments(fragments, reuseName, leftReusable, leftAssignable)
+
+				fragments.code(')')
+			}
+		}
+		else if @right.isDerivative() {
+			if @enumRight {
+				@toLeftFragments(fragments.code('!'), reuseName, leftReusable, leftAssignable)
+			}
+			else {
+				var type = @right.type().discardValue()
+
+				fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
+
+				@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
+
+				fragments.code(')')
+			}
 		}
 		else {
 			@toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)

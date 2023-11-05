@@ -43,12 +43,24 @@
         "sequenceIndex": 5,
         "exhaustive": true,
         "variables": [
-          "Red",
-          "Green",
-          "Blue",
-          "DarkRed",
-          "DarkGreen",
-          "DarkBlue"
+          {
+            "name": "Red"
+          },
+          {
+            "name": "Green"
+          },
+          {
+            "name": "Blue"
+          },
+          {
+            "name": "DarkRed"
+          },
+          {
+            "name": "DarkGreen"
+          },
+          {
+            "name": "DarkBlue"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},

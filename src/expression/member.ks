@@ -5,12 +5,14 @@ class MemberExpression extends Expression {
 		@callee
 		@computed: Boolean				= false
 		@declaredType: Type?			= null
+		@derivative: Boolean			= false
 		@enumCasting: Boolean			= false
 		@inferable: Boolean				= false
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
 		@object: Expression
 		@objectType: ObjectType?
+		@originalProperty: String?
 		@path: String
 		@prepareObject: Boolean			= true
 		@property
@@ -295,6 +297,7 @@ class MemberExpression extends Expression {
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
+	isDerivative() => @derivative
 	isInferable() => @inferable
 	isInverted() => @object.isInverted() || (@computed && @property.isInverted())
 	isLiberal() => @liberal
@@ -369,12 +372,21 @@ class MemberExpression extends Expression {
 		}
 		else {
 			if type is NamedType {
-				if type.type().hasVariable(@property) {
+				if var variable ?= type.type().getVariable(@property) {
 					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
 
 					if @object.isInferable() {
 						@inferable = true
 						@path = `\(@object.path()).\(@property)`
+					}
+
+					if variable.isAlias() {
+						if variable.isDerivative() {
+							@derivative = true
+						}
+						else {
+							@originalProperty = variable.original()
+						}
 					}
 
 					return true
@@ -711,76 +723,7 @@ class MemberExpression extends Expression {
 		fragments.code('.value')
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @isNullable() && !@tested {
-			fragments.wrapNullable(this).code(' ? ').compile(@object)
-
-			if @computed {
-				fragments.code('[').compile(@property).code('] : null')
-			}
-			else {
-				fragments.code($dot).compile(@property).code(' : null')
-			}
-		}
-		else {
-			var type = @object.type()
-
-			if @usingGetter {
-				if @sealed {
-					var name = @property[0] == '_' ? @property.substr(1) : @property
-
-					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
-				}
-				else {
-					NotImplementedException.throw(this)
-				}
-			}
-			else if @prepareObject && @type.isMethod() && @parent is not ClassProxyDeclaration | ClassProxyGroupDeclaration {
-				fragments.code(`\($runtime.helper(this)).bindMethod(`)
-
-				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
-					fragments.compile(@object)
-				}
-				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
-					fragments.code(type.getSealedName())
-				}
-				else {
-					fragments.compile(@object)
-				}
-
-				fragments.code($comma)
-
-				if @computed {
-					fragments.compile(@property)
-				}
-				else {
-					fragments.code('"').compile(@property).code('"')
-				}
-
-				fragments.code(')')
-			}
-			else {
-				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
-					fragments.code('(').compile(@object).code(')')
-				}
-				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
-					fragments.code(type.getSealedName())
-				}
-				else {
-					fragments.compile(@object)
-				}
-
-				if @computed {
-					fragments.code('[').compile(@property).code(']')
-				}
-				else {
-					fragments.code($dot).compile(@property)
-				}
-
-				if @enumCasting {
-					fragments.code('.value')
-				}
-			}
-		}
+		@toPropertyFragments(@originalProperty ?? @property, fragments, mode)
 	} # }}}
 	toDisruptedFragments(fragments) { # {{{
 		@object.toDisruptedFragments(fragments)
@@ -869,6 +812,78 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
+	toPropertyFragments(property, fragments, mode) { # {{{
+		if @isNullable() && !@tested {
+			fragments.wrapNullable(this).code(' ? ').compile(@object)
+
+			if @computed {
+				fragments.code('[').compile(property).code('] : null')
+			}
+			else {
+				fragments.code($dot).compile(property).code(' : null')
+			}
+		}
+		else {
+			var type = @object.type()
+
+			if @usingGetter {
+				if @sealed {
+					var name = property[0] == '_' ? property.substr(1) : property
+
+					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
+			}
+			else if @prepareObject && @type.isMethod() && @parent is not ClassProxyDeclaration | ClassProxyGroupDeclaration {
+				fragments.code(`\($runtime.helper(this)).bindMethod(`)
+
+				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
+					fragments.compile(@object)
+				}
+				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
+					fragments.code(type.getSealedName())
+				}
+				else {
+					fragments.compile(@object)
+				}
+
+				fragments.code($comma)
+
+				if @computed {
+					fragments.compile(property)
+				}
+				else {
+					fragments.code('"').compile(property).code('"')
+				}
+
+				fragments.code(')')
+			}
+			else {
+				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
+					fragments.code('(').compile(@object).code(')')
+				}
+				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
+					fragments.code(type.getSealedName())
+				}
+				else {
+					fragments.compile(@object)
+				}
+
+				if @computed {
+					fragments.code('[').compile(property).code(']')
+				}
+				else {
+					fragments.code($dot).compile(property)
+				}
+
+				if @enumCasting {
+					fragments.code('.value')
+				}
+			}
+		}
+	} # }}}
 	toQuote() { # {{{
 		var mut fragments = @object.toQuote()
 
@@ -945,4 +960,21 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	walkNode(fn) => fn(this) && @object.walkNode(fn)
+}
+
+class MemberAliasExpression extends Expression {
+	private {
+		@name: String
+	}
+	constructor(@name, @parent) { # {{{
+		super(null, parent)
+	} # }}}
+	override analyse()
+	override prepare(target, targetMode)
+	override translate()
+	name() => @name
+	type() => @parent.type()
+	override toFragments(fragments, mode) { # {{{
+		@parent.toPropertyFragments(@name, fragments, mode)
+	} # }}}
 }

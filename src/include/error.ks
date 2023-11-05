@@ -927,8 +927,8 @@ export class TypeException extends Exception {
 		throwInvalidSpread(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Spread operator require an array`, node)
 		} # }}}
-		throwInvalidTypeChecking(left, right, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The variable of type \(left.toQuote(true)) can never be of type \(right.toQuote(true))`, node)
+		throwInvalidTypeChecking(expression, type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) can never be of type \(type.toQuote(true))`, node)
 		} # }}}
 		throwNotAlien(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type "\(name)" must be declared externally`, node)
@@ -987,6 +987,9 @@ export class TypeException extends Exception {
 		throwNotType(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a type`, node)
 		} # }}}
+		throwNotUniqueValue(expression, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The expression \(expression.toQuote(true)) isn't an unique value`, node)
+		} # }}}
 		throwNotSyncFunction(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The function "\(name)" is not synchronous`, node)
 		} # }}}
@@ -1017,8 +1020,8 @@ export class TypeException extends Exception {
 		throwUnexpectedReturnType(expected, unexpected, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The return type must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} # }}}
-		throwUnnecessaryTypeChecking(type, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The variable is always of type \(type.toQuote(true))`, node)
+		throwUnnecessaryTypeChecking(expression, type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The variable \(expression.toQuote(true)) is always of type \(type.toQuote(true))`, node)
 		} # }}}
 	}
 }

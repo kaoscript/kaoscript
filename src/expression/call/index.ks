@@ -1193,6 +1193,10 @@ class CallExpression extends Expression {
 				..flagNewExpression()
 				..prepare(AnyType.NullableUnexplicit)
 
+			if argument.isDerivative() {
+				TypeException.throwNotUniqueValue(argument, this)
+			}
+
 			if argument.type()?.isInoperative() {
 				TypeException.throwUnexpectedInoperative(argument, this)
 			}

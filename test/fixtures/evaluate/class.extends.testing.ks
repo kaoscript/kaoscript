@@ -6,7 +6,7 @@ class Point {
 	constructor(@x, @y)
 }
 
-expect(Point is Class).to.equal(true)
+expect((() => Point)() is Class).to.equal(true)
 expect(Type.typeOf(Point)).to.equal('class')
 
 class Point3D extends Point {
@@ -16,13 +16,13 @@ class Point3D extends Point {
 	}
 }
 
-expect(Point3D is Class).to.equal(true)
+expect((() => Point3D)() is Class).to.equal(true)
 expect(Type.typeOf(Point3D)).to.equal('class')
 
 var point = Point3D.new(0.3, 0.4, 0.5)
 
-expect(point is Point).to.equal(true)
-expect(point is Point3D).to.equal(true)
+expect((() => point)() is Point).to.equal(true)
+expect((() => point)() is Point3D).to.equal(true)
 expect(Type.typeOf(point)).to.equal('object')
 
 expect(point.x).to.equal(0.3)

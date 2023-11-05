@@ -1,1 +1,1 @@
-TypeException: The variable of type "Object" can never be of type "Tuple" (fixtures/compile/tuple/tuple.test.tuple.is_o.ks:2)
+TypeException: The variable "item" of type "Object" can never be of type "Tuple" (fixtures/compile/tuple/tuple.test.tuple.is_o.ks:2)

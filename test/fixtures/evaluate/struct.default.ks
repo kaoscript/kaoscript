@@ -10,7 +10,7 @@ expect(Type.typeOf(Point)).to.equal('struct')
 
 var point = Point.new(0.3, 0.4)
 
-expect(point is Point).to.equal(true)
+expect((() => point)() is Point).to.equal(true)
 expect(Type.typeOf(point)).to.equal('struct-instance')
 
 expect(point.x).to.equal(0.3)

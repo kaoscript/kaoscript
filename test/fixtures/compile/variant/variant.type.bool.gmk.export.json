@@ -1,0 +1,61 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Event"
+    ],
+    "references": [
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "ok": {
+              "kind": "variant",
+              "master": "Boolean",
+              "fields": [
+                {
+                  "names": [
+                    "false",
+                    "N"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "expecting": "String"
+                    }
+                  }
+                },
+                {
+                  "names": [
+                    "true",
+                    "Y"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "value": {
+                        "kind": "deferred",
+                        "name": "T"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "testIndex": 0,
+        "generics": [
+          "T"
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

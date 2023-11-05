@@ -18,21 +18,20 @@ module.exports = function() {
 			}
 		}
 	}
-	if(Type.isClass(Foobar)) {
-	}
-	class Quxbaz extends Foobar {
-		static __ks_new_0() {
-			const o = Object.create(Quxbaz.prototype);
-			o.__ks_init();
-			return o;
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		if(Type.isClassInstance(x, Foobar)) {
 		}
-		__ks_cons_rt(that, args) {
-			super.__ks_cons_rt.call(null, that, args);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-	}
-	const x = Quxbaz.__ks_new_0();
-	if(Type.isClassInstance(x, Quxbaz)) {
-	}
-	if(Type.isClassInstance(x, Foobar)) {
-	}
+		throw Helper.badArgs();
+	};
 };

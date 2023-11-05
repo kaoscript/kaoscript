@@ -1,1 +1,1 @@
-TypeException: The variable is always of type "String" (fixtures/compile/operator/operator.typeinequality.invalid.ks:2)
+TypeException: The variable "value" of type "String" can never be of type "String" (fixtures/compile/operator/operator.typeinequality.invalid.ks:2)

@@ -81,7 +81,11 @@ module.exports = function() {
 		const l = args.length;
 		let source = [];
 		let i = 0;
-		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
+		while(i < l) {
+			if(Type.isArray(args[i])) {
+				source = args[i];
+				break;
+			}
 			i += 1;
 		}
 		i += 1;

@@ -69,9 +69,10 @@ class ImplementDeclaration extends Statement {
 	resolveType(class: Boolean) { # {{{
 		@type = @variable.getDeclaredType()
 
-		unless @type is NamedType {
+		unless ?@type {
 			TypeException.throwImplInvalidType(this)
 		}
+
 		if @type.isClass() && @type.isVirtual() {
 			TypeException.throwImplInvalidType(this)
 		}
@@ -92,7 +93,7 @@ class ImplementDeclaration extends Statement {
 
 		@type = @variable.getDeclaredType()
 
-		unless @type is NamedType {
+		unless ?@type {
 			TypeException.throwImplInvalidType(this)
 		}
 	} # }}}

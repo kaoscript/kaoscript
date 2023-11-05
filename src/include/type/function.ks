@@ -902,7 +902,7 @@ class FunctionType extends Type {
 	override toAwareTestFunctionFragments(varname, nullable, mut generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
-	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	toFragments(fragments, node) { # {{{

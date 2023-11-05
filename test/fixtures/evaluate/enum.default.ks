@@ -11,7 +11,7 @@ expect(CardSuit is Enum).to.equal(true)
 
 var x = CardSuit.Clubs
 
-expect(x is CardSuit).to.equal(true)
+expect((() => x)() is CardSuit).to.equal(true)
 expect(Type.typeOf(CardSuit)).to.equal('enum')
 expect(Type.typeOf(x)).to.equal('enum-member')
 

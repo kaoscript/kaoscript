@@ -1,1 +1,1 @@
-TypeException: The variable is always of type "Number" (fixtures/compile/typing/typing.union.isnt.log.poly.and.eq_i.in_s.in_ie.ks:5)
+TypeException: The variable "x" of type "Number" can never be of type "String" (fixtures/compile/typing/typing.union.isnt.log.poly.and.eq_i.in_s.in_ie.ks:5)

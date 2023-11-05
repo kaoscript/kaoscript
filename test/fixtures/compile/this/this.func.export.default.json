@@ -64,8 +64,12 @@
         "sequenceIndex": 1,
         "exhaustive": true,
         "variables": [
-          "Cat",
-          "Dog"
+          {
+            "name": "Cat"
+          },
+          {
+            "name": "Dog"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},

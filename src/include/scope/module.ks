@@ -78,7 +78,7 @@ class ModuleScope extends Scope {
 		return null
 	} # }}}
 	addMacro(name: String, macro: MacroDeclaration) { # {{{
-		if @macros[name] is Array {
+		if ?@macros[name] {
 			var type = macro.type()
 			var mut notAdded = true
 

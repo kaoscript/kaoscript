@@ -81,7 +81,11 @@ module.exports = function() {
 		const l = args.length;
 		let source = [];
 		let i = 0;
-		while((i < l) && !((KSType.isValue(args[i]) ? (source = args[i], true) : false) && KSType.isArray(source))) {
+		while(i < l) {
+			if(KSType.isArray(args[i])) {
+				source = args[i];
+				break;
+			}
 			i += 1;
 		}
 		i += 1;

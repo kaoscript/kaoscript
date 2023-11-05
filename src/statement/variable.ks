@@ -244,6 +244,10 @@ class VariableDeclaration extends AbstractNode {
 		if @hasValue {
 			@value.prepare(declarator.type() ?? AnyType.NullableUnexplicit)
 
+			if @value.isDerivative() {
+				TypeException.throwNotUniqueValue(@value, this)
+			}
+
 			@type = @value.type().discardValue().asReference()
 
 			if @type.isInoperative() {

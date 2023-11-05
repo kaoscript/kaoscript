@@ -397,7 +397,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isBinding() => true
-	isComplex() => @destructuring || @testRest || @testProperties
+	isComplex() => @destructuring || @testRest || @testProperties || @variant
 	isDestructuring() => @destructuring
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
@@ -816,11 +816,11 @@ class ObjectType extends Type {
 				var restType = value.parameter()
 
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], restType.merge(type, node))
+					result.addProperty(name, @computed[name], restType.merge(type, generics, subtypes, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, node))
 				}
 			}
 			else {
@@ -941,7 +941,7 @@ class ObjectType extends Type {
 		fragments.code(`\($runtime.helper(node)).assertDexObject(`).compile(value)
 
 		if @testRest || @testProperties {
-			@toSubtestFragments('value', testingType, null, fragments, node)
+			@toSubtestFragments(null, 'value', testingType, null, fragments, node)
 		}
 
 		fragments.code(')')
@@ -966,9 +966,9 @@ class ObjectType extends Type {
 				}
 
 				if @variant && #subtypes {
-					fragments.code(`, \(varname) => `)
-
 					if @variantType.canBeBoolean() {
+						fragments.code(`, \(varname) => `)
+
 						for var { name, type }, index in subtypes {
 							fragments
 								..code(' || ') if index > 0
@@ -976,11 +976,41 @@ class ObjectType extends Type {
 								..code(varname)
 						}
 					}
+					else if subtypes.length == 1 {
+						var { name, type } = subtypes[0]
+						var variable = type.discard().getVariable(name)
+
+						if variable.isAlias() {
+							if variable.isDerivative() {
+								fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
+							}
+							else {
+								fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(variable.original())`)
+							}
+						}
+						else {
+							fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(name)`)
+						}
+					}
 					else {
+						fragments.code(`, \(varname) => `)
+
 						for var { name, type }, index in subtypes {
-							fragments
-								..code(' || ') if index > 0
-								..code(`\(varname) === `).compile(type).code(`.\(name)`)
+							fragments.code(' || ') if index > 0
+
+							var variable = type.discard().getVariable(name)
+
+							if variable.isAlias() {
+								if variable.isDerivative() {
+									fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(\(varname))`)
+								}
+								else {
+									fragments.code(`\(varname) === `).compile(type).code(`.\(variable.original())`)
+								}
+							}
+							else {
+								fragments.code(`\(varname) === `).compile(type).code(`.\(name)`)
+							}
 						}
 					}
 				}
@@ -1024,7 +1054,7 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(varname, nullable, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, nullable, generics, fragments, node) { # {{{
 		if ?@testName {
 			if nullable || @nullable {
 				fragments.code(`\(varname) => \(@testName)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
@@ -1053,7 +1083,7 @@ class ObjectType extends Type {
 
 				fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-				@toSubtestFragments(varname, true, generics, fragments, node)
+				@toSubtestFragments(funcname, varname, true, generics, fragments, node)
 
 				fragments.code(')')
 
@@ -1088,7 +1118,7 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-			@toSubtestFragments(varname, testingType, generics, fragments, node)
+			@toSubtestFragments(null, varname, testingType, generics, fragments, node)
 
 			fragments.code(')')
 		}
@@ -1099,7 +1129,7 @@ class ObjectType extends Type {
 				..code(')') if junction == .AND
 		}
 	} # }}}
-	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
 		if !#@properties && !@rest && !@nullable && !@variant {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
@@ -1127,7 +1157,7 @@ class ObjectType extends Type {
 
 			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-			@toSubtestFragments(varname, true, generics, fragments, node)
+			@toSubtestFragments(funcname, varname, testingType, generics, fragments, node)
 
 			fragments.code(')')
 
@@ -1148,20 +1178,71 @@ class ObjectType extends Type {
 		fragments.code('(') if @nullable && junction == .AND
 
 		if ?@testName {
-			if #subtypes {
-				fragments.code(`\(@testName)(`).compile(node).code(`, value => `)
+			fragments.code(`\(@testName)(`).compile(node)
 
-				for var { name, type }, index in subtypes {
-					fragments
-						..code(' || ') if index > 0
-						..code('value === ').compile(type).code(`.\(name)`)
+			if #parameters {
+				fragments.code(`, [`)
+
+				for var { type }, index in parameters {
+					fragments.code($comma) if index > 0
+
+					type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
 				}
 
-				fragments.code(')')
+				fragments.code(`]`)
 			}
-			else {
-				fragments.code(`\(@testName)(`).compile(node).code(`)`)
+
+			if #subtypes {
+				if @variantType.canBeBoolean() {
+					fragments.code(`, value => `)
+
+					for var { name, type }, index in subtypes {
+						fragments
+							..code(' || ') if index > 0
+							..code('!') if @variantType.isFalseValue(name)
+							..code('value')
+					}
+				}
+				else if subtypes.length == 1 {
+					var { name, type } = subtypes[0]
+					var variable = type.discard().getVariable(name)
+
+					if variable.isAlias() {
+						if variable.isDerivative() {
+							fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
+						}
+						else {
+							fragments.code(`, value => value === `).compile(type).code(`.\(variable.original())`)
+						}
+					}
+					else {
+						fragments.code(`, value => value === `).compile(type).code(`.\(name)`)
+					}
+				}
+				else {
+					fragments.code(`, value => `)
+
+					for var { name, type }, index in subtypes {
+						fragments.code(' || ') if index > 0
+
+						var variable = type.discard().getVariable(name)
+
+						if variable.isAlias() {
+							if variable.isDerivative() {
+								fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(value)`)
+							}
+							else {
+								fragments.code(`value === `).compile(type).code(`.\(variable.original())`)
+							}
+						}
+						else {
+							fragments.code(`value === `).compile(type).code(`.\(name)`)
+						}
+					}
+				}
 			}
+
+			fragments.code(')')
 		}
 		else if !@destructuring && !@testRest && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isObject(`).compile(node).code(`)`)
@@ -1169,7 +1250,7 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexObject(`).compile(node)
 
-			@toSubtestFragments('value', true, null, fragments, node)
+			@toSubtestFragments(null, 'value', true, null, fragments, node)
 
 			fragments.code(')')
 		}
@@ -1179,6 +1260,19 @@ class ObjectType extends Type {
 				..code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
 				..code(')') if junction == .AND
 		}
+	} # }}}
+	toVariantTestFragments(name: String, parameters: AltType[], junction: Junction, fragments, node) { # {{{
+		var index = @variantType.getFieldIndex(name)
+
+		fragments.code(`\(@testName).__\(index)(`).compile(node).code(`, [`)
+
+		for var { type }, index in parameters {
+			fragments.code($comma) if index > 0
+
+			type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
+		}
+
+		fragments.code(`])`)
 	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('dict')
@@ -1213,7 +1307,7 @@ class ObjectType extends Type {
 	} # }}}
 
 	private {
-		toSubtestFragments(varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
+		toSubtestFragments(funcname: String?, varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
 			if testingType {
 				fragments.code(', 1')
 			}
@@ -1226,7 +1320,7 @@ class ObjectType extends Type {
 
 				if @testProperties {
 					if @testRest {
-						@restType.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+						@restType.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
 					}
 					else {
 						fragments.code('0')
@@ -1251,13 +1345,13 @@ class ObjectType extends Type {
 							fragments.code(`\(name): `)
 						}
 
-						type.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+						type.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
 					}
 
 					fragments.code('}')
 				}
 				else {
-					@restType.toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+					@restType.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
 				}
 			}
 		} # }}}

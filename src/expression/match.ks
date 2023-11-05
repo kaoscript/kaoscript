@@ -537,25 +537,37 @@ class DummyPossibilityTracker extends PossibilityTracker {
 class EnumPossibilityTracker extends PossibilityTracker {
 	private {
 		@possibilities: String[]
+		@type: EnumType
 	}
-	constructor(type: EnumType) { # {{{
+	constructor(@type) { # {{{
 		super()
 
-		@possibilities = type.listVariables()
+		@possibilities = type.listVariableNames()
 	} # }}}
 	exclude(condition: MatchConditionType) { # {{{
 		for var { name } in condition.type().getSubtypes() {
-			@possibilities.remove(name)
+			if var variable ?= @type.getVariable(name) {
+				if variable.isAlias() {
+					@possibilities.remove(...variable.originals()!?)
+				}
+				else {
+					@possibilities.remove(name)
+				}
+			}
 		}
 	} # }}}
 	exclude(condition: MatchConditionValue) { # {{{
 		for var value in condition.values() {
 			match value {
-				is UnaryOperatorImplicit {
-					@possibilities.remove(value.property())
-				}
-				is MemberExpression {
-					@possibilities.remove(value.property())
+				UnaryOperatorImplicit, MemberExpression {
+					if var variable ?= @type.getVariable(value.property()) {
+						if variable.isAlias() {
+							@possibilities.remove(...variable.originals()!?)
+						}
+						else {
+							@possibilities.remove(variable.name())
+						}
+					}
 				}
 				else {
 					throw NotImplementedException.new()

@@ -1,1 +1,1 @@
-TypeException: The variable is always of type "Array" (fixtures/compile/tuple/tuple.test.tuple.it_r.ks:2)
+TypeException: The variable "item" of type "Array" can never be of type "Tuple" (fixtures/compile/tuple/tuple.test.tuple.it_r.ks:2)

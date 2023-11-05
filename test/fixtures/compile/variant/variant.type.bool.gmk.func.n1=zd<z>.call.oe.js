@@ -9,13 +9,15 @@ module.exports = function() {
 				return false;
 			}
 			if(variant) {
-				return Type.isDexObject(value, 0, 0, {value: mapper[0], line: value => Type.isNumber(value) || Type.isNull(value), column: value => Type.isNumber(value) || Type.isNull(value)});
+				return __ksType.isEvent.__1(value, mapper);
 			}
 			else {
-				return Type.isDexObject(value, 0, 0, {expecting: value => Type.isString(value) || Type.isNull(value)});
+				return __ksType.isEvent.__0(value);
 			}
 		}})
 	};
+	__ksType.isEvent.__0 = value => Type.isDexObject(value, 0, 0, {expecting: value => Type.isString(value) || Type.isNull(value)});
+	__ksType.isEvent.__1 = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0], line: value => Type.isNumber(value) || Type.isNull(value), column: value => Type.isNumber(value) || Type.isNull(value)});
 	const NO = (() => {
 		const o = new OBJ();
 		o.ok = false;

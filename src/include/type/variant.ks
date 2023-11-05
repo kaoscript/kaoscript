@@ -81,6 +81,15 @@ class VariantType extends Type {
 	} # }}}
 	getEnumType() => @enum
 	getField(name: String) => @names[name]
+	getFieldIndex(name: String): Number? { # {{{
+		if var field ?= @names[name] {
+			return @fields.indexOf(field)
+		}
+		else {
+			return null
+		}
+	} # }}}
+	getFields() => @fields
 	getKind() => @kind
 	getMainName(name: String): String? { # {{{
 		if var field ?= @names[name] {
@@ -96,7 +105,14 @@ class VariantType extends Type {
 		return null
 	} # }}}
 	getMaster() => @master
-	hasSubtype(name: String) => @enum.hasProperty(name)
+	hasSubtype(name: String) { # {{{
+		if @kind == .Enum {
+			return @enum.hasProperty(name)
+		}
+		else {
+			return name == 'false' | 'true'
+		}
+	} # }}}
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		NotImplementedException.throw()
 	} # }}}
@@ -140,7 +156,7 @@ class VariantType extends Type {
 			NotImplementedException.throw()
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(varname, _, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, _, generics, fragments, node) { # {{{
 		match @kind {
 			.Boolean {
 				var block = fragments.code('variant =>').newBlock()
@@ -164,19 +180,29 @@ class VariantType extends Type {
 					.code(`if(variant)`)
 					.step()
 
-				var mut line = ctrl.newLine().code(`return `)
+				if @deferrable {
+					ctrl.line(`return __ksType.\(funcname).__1(\(varname)\(@names.true.type.canBeDeferred() ? ', mapper' : ''))`)
+				}
+				else {
+					var line = ctrl.newLine().code(`return `)
 
-				@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
 
-				line.done()
+					line.done()
+				}
 
 				ctrl.step().code('else').step()
 
-				line = ctrl.newLine().code(`return `)
+				if @deferrable {
+					ctrl.line(`return __ksType.\(funcname).__0(\(varname)\(@names.false.type.canBeDeferred() ? ', mapper' : ''))`)
+				}
+				else {
+					var line = ctrl.newLine().code(`return `)
 
-				@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
 
-				line.done()
+					line.done()
+				}
 
 				ctrl.done()
 
@@ -199,17 +225,23 @@ class VariantType extends Type {
 					.line('return false')
 					.done()
 
-				for var { names, type } in @fields {
+				for var { names, type }, index in @fields {
 					var ctrl = block
 						.newControl()
 						.code(`if(variant === \(@master.name()).\(names[0]))`)
 						.step()
 
-					var line = ctrl.newLine().code(`return `)
+					if @deferrable {
+						ctrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(type.canBeDeferred() ? ', mapper' : ''))`)
+					}
+					else {
+						var line = ctrl.newLine().code(`return `)
 
-					type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+						type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
 
-					line.done()
+						line.done()
+					}
+
 					ctrl.done()
 				}
 

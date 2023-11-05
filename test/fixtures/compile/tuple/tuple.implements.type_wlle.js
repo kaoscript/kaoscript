@@ -1,5 +1,8 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const __ksType = {
+		isTypeC: value => Type.isDexArray(value, 1, 1, 0, Type.isString) && Type.isDexArray(value, 1, 2, 0, 0, [Type.isValue, Type.isNumber])
+	};
 	const TupleA = Helper.tuple(function(foobar, quxbaz) {
 		return [foobar, quxbaz];
 	}, function(__ks_new, args) {

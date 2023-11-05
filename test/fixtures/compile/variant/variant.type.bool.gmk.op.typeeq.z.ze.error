@@ -1,0 +1,1 @@
+TypeException: The variable "event" is always of type "Event" (fixtures/compile/variant/variant.type.bool.gmk.op.typeeq.z.ze.ks:13)

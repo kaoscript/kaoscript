@@ -1,1 +1,0 @@
-TypeException: The variable of type "Foobar" can never be of type "Class" (fixtures/compile/operator/operator.typeequality.class.instance.ks:6)

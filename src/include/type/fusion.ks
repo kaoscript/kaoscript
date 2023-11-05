@@ -1,7 +1,11 @@
 class FusionType extends Type {
 	private {
+		@generics: Boolean			= false
 		@nullable: Boolean			= false
-		@types: Array<Type>
+		// TODO move to alias
+		@testName: String?
+		@types: Type[]				= []
+		@variant: Boolean			= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FusionType { # {{{
@@ -16,22 +20,25 @@ class FusionType extends Type {
 			return fusion
 		} # }}}
 	}
-	constructor(@scope, @types = []) { # {{{
+	// TODO!
+	// constructor(@scope, types: typeof @types) { # {{{
+	constructor(@scope, types: Type[]? = null) { # {{{
 		super(scope)
 
-		for var type in @types {
-			if type.isNullable() {
-				@nullable = true
+		if #types {
+			for var type in types {
+				@addType(type)
 			}
 		}
 	} # }}}
 	addType(type: Type) { # {{{
 		@types.push(type)
 
-		if type.isNullable() {
-			@nullable = true
-		}
+		@generics ||= type.canBeDeferred()
+		@nullable ||= type.isNullable()
+		@variant ||= type.isVariant()
 	} # }}}
+	canBeDeferred() => @generics
 	clone() { # {{{
 		throw NotSupportedException.new()
 	} # }}}
@@ -94,6 +101,7 @@ class FusionType extends Type {
 
 		return null
 	} # }}}
+	getTestName(): valueof @testName
 	getVariantName() { # {{{
 		for var type in @types {
 			if type.isVariant() {
@@ -137,6 +145,7 @@ class FusionType extends Type {
 
 		return false
 	} # }}}
+	hasTest() => ?@testName
 	isArray() { # {{{
 		for var type in @types {
 			if type.isArray() {
@@ -163,6 +172,7 @@ class FusionType extends Type {
 		return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
 	} # }}}
 	isComplete() => true
+	isComplex() => true
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable
@@ -201,15 +211,7 @@ class FusionType extends Type {
 
 		return match == @types.length
 	} # }}}
-	override isVariant() { # {{{
-		for var type in @types {
-			if type.isVariant() {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
+	override isVariant() => @variant
 	listFunctions(name: String): Array { # {{{
 		var result = []
 
@@ -261,6 +263,62 @@ class FusionType extends Type {
 
 		return properties
 	} # }}}
+	setTestName(@testName)
+	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{
+		nullable ||= @nullable
+
+		if ?@testName {
+			if nullable || #generics || (@variant && #subtypes) {
+				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if #generics {
+					fragments.code(`, [`)
+
+					for var { type }, index in generics {
+						fragments.code($comma) if index != 0
+
+						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+					}
+
+					fragments.code(`]`)
+				}
+
+				if @variant && #subtypes {
+					fragments.code(`, \(varname) => `)
+
+					var variantType = @getVariantType()
+
+					if variantType.canBeBoolean() {
+						for var { name, type }, index in subtypes {
+							fragments
+								..code(' || ') if index > 0
+								..code('!') if variantType.isFalseValue(name)
+								..code(varname)
+						}
+					}
+					else {
+						for var { name, type }, index in subtypes {
+							fragments
+								..code(' || ') if index > 0
+								..code(`\(varname) === `).compile(type).code(`.\(name)`)
+						}
+					}
+				}
+
+				fragments.code(`)`)
+
+				if nullable {
+					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+				}
+			}
+			else {
+				fragments.code(@testName)
+			}
+		}
+		else {
+			super(varname, nullable, generics, subtypes, fragments, node)
+		}
+	} # }}}
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
@@ -271,6 +329,25 @@ class FusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction.OR
+	} # }}}
+	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+		if @generics || @variant {
+			fragments.code(`(\(varname)`)
+
+			if @generics {
+				fragments.code(', mapper')
+			}
+			if @variant {
+				fragments.code(', filter')
+			}
+
+			fragments.code(`) => `)
+		}
+		else {
+			fragments.code(`\(varname) => `)
+		}
+
+		@toBlindTestFragments(varname, generics, Junction.NONE, fragments, node)
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)

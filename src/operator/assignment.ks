@@ -59,6 +59,10 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@right.prepare(@type, targetMode)
 
+		if @right.isDerivative() {
+			TypeException.throwNotUniqueValue(@right, this)
+		}
+
 		var type = @right.type().discardValue()
 
 		if type.isInoperative() {

@@ -164,6 +164,7 @@ enum TypeKind<String> {
 	Alias
 	Array
 	Class
+	Deferred
 	Enum
 	Exclusion
 	Function
@@ -645,6 +646,9 @@ abstract class Type {
 					TypeKind.Class {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind.Deferred {
+						return DeferredType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind.Enum {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -1034,14 +1038,14 @@ abstract class Type {
 
 		@toBlindTestFragments(varname, null, Junction.NONE, fragments, node)
 	} # }}}
-	toBlindSubtestFunctionFragments(varname: String, nullable: Boolean, generics: String[]?, fragments, node) { # {{{
+	toBlindSubtestFunctionFragments(funcname: String?, varname: String, nullable: Boolean, generics: String[]?, fragments, node) { # {{{
 		@toAwareTestFunctionFragments(varname, nullable, null, null, fragments, node)
 	} # }}}
 	toBlindTestFragments(varname: String, generics: String[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	toBlindTestFunctionFragments(varname: String, generics: String[]?, fragments, node) { # {{{
-		@toBlindSubtestFunctionFragments(varname, false, generics, fragments, node)
+	toBlindTestFunctionFragments(funcname: String?, varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
+		@toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() && !@isSystem() {
@@ -1120,10 +1124,10 @@ abstract class Type {
 
 		return @referenceIndex
 	} # }}}
-	toNegativeTestFragments(parameters: Type[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toNegativeTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		@toPositiveTestFragments(parameters, subtypes, junction, fragments.code('!'), node)
 	} # }}}
-	toPositiveTestFragments(parameters: Type[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toPositiveTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toQuote(): String { # {{{

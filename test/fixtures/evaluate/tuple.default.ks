@@ -7,7 +7,7 @@ expect(Type.typeOf(Pair)).to.equal('tuple')
 
 var pair = Pair.new('x', 0.1)
 
-expect(pair is Pair).to.equal(true)
+expect((() => pair)() is Pair).to.equal(true)
 expect(Type.typeOf(pair)).to.equal('tuple-instance')
 
 expect(pair.0).to.equal('x')

@@ -9,13 +9,15 @@ module.exports = function() {
 				return false;
 			}
 			if(variant) {
-				return Type.isDexObject(value, 0, 0, {value: mapper[0]});
+				return __ksType.isEvent.__1(value, mapper);
 			}
 			else {
-				return Type.isDexObject(value, 0, 0, {expecting: Type.isString});
+				return __ksType.isEvent.__0(value);
 			}
 		}})
 	};
+	__ksType.isEvent.__0 = value => Type.isDexObject(value, 0, 0, {expecting: Type.isString});
+	__ksType.isEvent.__1 = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0]});
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

@@ -58,7 +58,7 @@ class BinaryOperatorTypeCasting extends Expression {
 
 			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, type.toQuote(true), $comma, @nullable, $comma)
 
-			type.toBlindTestFunctionFragments('value', null, fragments, this)
+			type.toBlindTestFunctionFragments(null, 'value', true, null, fragments, this)
 
 			fragments.code(')')
 		}
@@ -155,7 +155,14 @@ class BinaryOperatorTypeEquality extends Expression {
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
-		@trueType.toPositiveTestFragments(junction, fragments, @subject)
+		var type = @subject.type()
+
+		if type is ReferenceType {
+			@trueType.toPositiveTestFragments(type.parameters(), type.getSubtypes(), junction, fragments, @subject)
+		}
+		else {
+			@trueType.toPositiveTestFragments(null, null, junction, fragments, @subject)
+		}
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private confirmType(type: Type): Type { # {{{
@@ -165,12 +172,16 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		if type.isVirtual() {
 			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
-				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else {
 			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
-				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
+			}
+
+			if @subject.type().isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
 			}
 		}
 
@@ -291,17 +302,17 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		if type.isVirtual() {
 			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
-				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else if type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isFusion() || type.isExclusion() {
 			if !@subject.type().isAny() && !type.matchContentOf(@subject.type()) {
-				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else if type.isClass() {
 			if !@subject.type().isAny() && (!type.matchContentOf(@subject.type()) || type.matchClassName(@subject.type())) {
-				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else {

@@ -1,0 +1,1 @@
+TypeException: The expression "CardSuit.Reds" isn't an unique value (fixtures/compile/enum/enum.junction.assg.var.ks:10)

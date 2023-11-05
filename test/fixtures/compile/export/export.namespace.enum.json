@@ -52,9 +52,15 @@
             "sequenceIndex": 2,
             "exhaustive": true,
             "variables": [
-              "FOO",
-              "BAR",
-              "QUX"
+              {
+                "name": "FOO"
+              },
+              {
+                "name": "BAR"
+              },
+              {
+                "name": "QUX"
+              }
             ],
             "instanceMethods": {},
             "staticMethods": {},

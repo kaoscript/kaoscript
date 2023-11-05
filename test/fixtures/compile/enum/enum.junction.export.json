@@ -1,0 +1,103 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "CardSuit"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": 4,
+        "exhaustive": true,
+        "variables": [
+          {
+            "name": "Clubs"
+          },
+          {
+            "name": "Diamonds"
+          },
+          {
+            "name": "Hearts"
+          },
+          {
+            "name": "Spades"
+          },
+          {
+            "name": "Blacks",
+            "originals": [
+              "Clubs",
+              "Spades"
+            ]
+          },
+          {
+            "name": "Reds",
+            "originals": [
+              "Diamonds",
+              "Hearts"
+            ]
+          },
+          {
+            "name": "NoHearts",
+            "originals": [
+              "Clubs",
+              "Spades",
+              "Diamonds"
+            ]
+          },
+          {
+            "name": "C",
+            "originals": [
+              "Clubs"
+            ]
+          },
+          {
+            "name": "B",
+            "originals": [
+              "Clubs",
+              "Spades"
+            ],
+            "top": "Blacks"
+          },
+          {
+            "name": "D",
+            "originals": [
+              "Diamonds"
+            ]
+          },
+          {
+            "name": "H",
+            "originals": [
+              "Hearts"
+            ]
+          },
+          {
+            "name": "R",
+            "originals": [
+              "Diamonds",
+              "Hearts"
+            ],
+            "top": "Reds"
+          },
+          {
+            "name": "S",
+            "originals": [
+              "Spades"
+            ]
+          }
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

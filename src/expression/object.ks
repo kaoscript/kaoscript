@@ -170,15 +170,6 @@ class ObjectExpression extends Expression {
 								rest.push(property.type())
 							}
 						}
-						// ObjectThisMember {
-						// 	if keyed && !keyType.canBeString() {
-						// 		TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
-						// 	}
-
-						// 	property.prepare(root.getProperty(property.name()))
-
-						// 	@type.addProperty(property.name(), property.type())
-						// }
 					}
 				}
 

@@ -16,9 +16,15 @@
         "sequenceIndex": 2,
         "exhaustive": true,
         "variables": [
-          "Red",
-          "Green",
-          "Blue"
+          {
+            "name": "Red"
+          },
+          {
+            "name": "Green"
+          },
+          {
+            "name": "Blue"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},

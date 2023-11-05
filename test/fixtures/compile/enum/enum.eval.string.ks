@@ -9,7 +9,7 @@ enum CardSuit<String> {
 
 expect(CardSuit is Enum).to.equal(true)
 
-var x = CardSuit.Clubs
+var x = (() => CardSuit.Clubs)()
 
 expect(x is CardSuit).to.equal(true)
 expect(Type.typeOf(x)).to.equal('enum-member')

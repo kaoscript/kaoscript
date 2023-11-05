@@ -42,6 +42,8 @@ abstract class Expression extends AbstractNode {
 	isComputed(): Boolean => false
 	// if the expression can be an assignment and be transformed as a declaration
 	isDeclarable(): Boolean => false
+	// if the expression can have several values
+	isDerivative(): Boolean => false
 	isDisrupted(): Boolean => false
 	// if the expression is always exiting
 	isExit(): Boolean => false

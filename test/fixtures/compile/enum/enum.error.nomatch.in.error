@@ -1,1 +1,1 @@
-TypeException: The variable is always of type "Foobar" (fixtures/compile/enum/enum.error.nomatch.in.ks:13)
+TypeException: The variable "x" of type "Foobar" can never be of type "Quxbaz" (fixtures/compile/enum/enum.error.nomatch.in.ks:13)

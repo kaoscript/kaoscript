@@ -8,10 +8,10 @@ class CardSuit {
 	constructor(@family, @value)
 }
 
-expect(CardSuit is Class).to.equal(true)
+expect((() => CardSuit)() is Class).to.equal(true)
 
 var x = CardSuit.new('clubs', 8)
 
-expect(x is CardSuit).to.equal(true)
+expect((() => x)() is CardSuit).to.equal(true)
 expect(Type.typeOf(CardSuit)).to.equal('class')
 expect(Type.typeOf(x)).to.equal('object')

@@ -12,6 +12,10 @@ class AliasType extends Type {
 				type.setTestIndex(data.testIndex)
 			}
 
+			if ?data.generics {
+				type._generics = data.generics
+			}
+
 			queue.push(() => {
 				type
 					..type(Type.import(data.of, metadata, references, alterations, queue, scope, node))
@@ -52,6 +56,7 @@ class AliasType extends Type {
 			kind: TypeKind.Alias
 			of: @type.export(references, indexDelta, mode, module)
 			@testIndex if ?@testIndex
+			@generics if #@generics
 		}
 	} # }}}
 	generics() => @generics
@@ -103,8 +108,8 @@ class AliasType extends Type {
 	type() => @type
 	type(@type) => this
 	override toExportFragment(fragments, name, variable)
-	override toBlindTestFunctionFragments(varname, generics, fragments, node) { # {{{
-		@type.toBlindTestFunctionFragments(varname, @generics, fragments, node)
+	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+		@type.toBlindTestFunctionFragments(funcname, varname, testingType, @generics, fragments, node)
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
@@ -116,6 +121,7 @@ class AliasType extends Type {
 	} # }}}
 
 	proxy @type {
+		canBeDeferred
 		hasRest
 		isComplex
 		isVariant

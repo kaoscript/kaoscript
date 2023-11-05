@@ -16,8 +16,12 @@
         "sequenceIndex": -1,
         "exhaustive": true,
         "variables": [
-          "RGB",
-          "SRGB"
+          {
+            "name": "RGB"
+          },
+          {
+            "name": "SRGB"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},

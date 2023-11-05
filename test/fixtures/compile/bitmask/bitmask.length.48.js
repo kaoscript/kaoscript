@@ -5,10 +5,10 @@ module.exports = function() {
 		HasClaws: 1n,
 		CanFly: 2n,
 		EatsFish: 4n,
-		Endangered: 8n
+		Endangered: 8n,
+		EndangeredFlyingClawedFishEating: 1n | 2n | 4n | 8n,
+		Predator: 2n | 1n
 	});
-	AnimalFlags.EndangeredFlyingClawedFishEating = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.Endangered);
-	AnimalFlags.Predator = AnimalFlags(AnimalFlags.CanFly | AnimalFlags.HasClaws);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

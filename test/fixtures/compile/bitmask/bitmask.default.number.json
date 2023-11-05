@@ -22,13 +22,27 @@
         "sequenceIndex": 4,
         "exhaustive": true,
         "variables": [
-          "None",
-          "HasClaws",
-          "CanFly",
-          "EatsFish",
-          "Endangered",
-          "EndangeredFlyingClawedFishEating",
-          "Predator"
+          {
+            "name": "None"
+          },
+          {
+            "name": "HasClaws"
+          },
+          {
+            "name": "CanFly"
+          },
+          {
+            "name": "EatsFish"
+          },
+          {
+            "name": "Endangered"
+          },
+          {
+            "name": "EndangeredFlyingClawedFishEating"
+          },
+          {
+            "name": "Predator"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},

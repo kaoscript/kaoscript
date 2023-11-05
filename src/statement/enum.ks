@@ -25,6 +25,8 @@ class EnumDeclaration extends Statement {
 		@variable = @scope.define(@name, true, @type, this)
 	} # }}}
 	analyse() { # {{{
+		@enum = @type.type()
+
 		for var data in @data.members {
 			match data.kind {
 				NodeKind.CommentBlock {
@@ -34,14 +36,16 @@ class EnumDeclaration extends Statement {
 					pass
 				}
 				NodeKind.FieldDeclaration {
-					var declaration = EnumVariableDeclaration.new(data, this)
+					var variable = @createVariable(data)
 
-					declaration.analyse()
+					variable.analyse()
+
+					@enum.addVariable(variable.type())
 				}
 				NodeKind.MethodDeclaration {
-					var declaration = EnumMethodDeclaration.new(data, this)
+					var method = EnumMethodDeclaration.new(data, this)
 
-					declaration.analyse()
+					method.analyse()
 				}
 				else {
 					throw NotSupportedException.new(`Unknow kind \(data.kind)`, this)
@@ -53,10 +57,8 @@ class EnumDeclaration extends Statement {
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
-		for var variable, name of @variables {
+		for var variable of @variables {
 			variable.prepare()
-
-			@enum.addVariable(name)
 		}
 
 		for var methods, name of @instanceMethods {
@@ -123,6 +125,7 @@ class EnumDeclaration extends Statement {
 	addVariable(variable: EnumVariableDeclaration) { # {{{
 		@variables[variable.name()] = variable
 	} # }}}
+	createVariable(data) => EnumVariableDeclaration.new(data, this)
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
 	} # }}}
@@ -144,7 +147,7 @@ class EnumDeclaration extends Statement {
 
 		var object = line.newObject()
 
-		for var variable of @variables when !variable.isComposite() {
+		for var variable of @variables when !variable.type().isAlias() {
 			variable.toFragments(object)
 		}
 
@@ -152,8 +155,14 @@ class EnumDeclaration extends Statement {
 
 		line.code(')').done()
 
-		for var variable of @variables when variable.isComposite() {
-			variable.toFragments(fragments)
+		for var variable of @variables when variable.type().isTopDerivative() {
+			var line = fragments.newLine()
+
+			line.code(`\(@name).__ks_eq_\(variable.name()) = value => `)
+
+			variable.toConditionFragments(@name, 'value', line)
+
+			line.done()
 		}
 
 		for var methods, name of @staticMethods {
@@ -225,13 +234,10 @@ class EnumDeclaration extends Statement {
 
 class EnumVariableDeclaration extends AbstractNode {
 	private late {
-		@operands: Array
-		@value: String
-		@type: Type
+		@type: EnumVariableType
+		@value: String?
 	}
 	private {
-		@alias: Boolean					= false
-		@composite: Boolean				= false
 		@name: String
 	}
 	constructor(data, parent) { # {{{
@@ -245,134 +251,59 @@ class EnumVariableDeclaration extends AbstractNode {
 		var enum = @parent.type().type()
 		var value = @data.value
 
-		match enum.kind() {
-			EnumTypeKind.Bit {
-				var length = enum.length()
+		if ?value {
+			match value.kind {
+				NodeKind.Identifier {
+					@type = EnumVariableAliasType.new(@name)
+						// TODO!
+						// ...setAlias(value.name, enum)
 
-				if ?value {
-					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
-						@composite = true
+					@type.setAlias(value.name, enum)
+				}
+				NodeKind.JunctionExpression when value.operator.kind == BinaryOperatorKind.JunctionOr {
+					@type = EnumVariableAliasType.new(@name)
 
-						@operands = [value.left, value.right]
+					for var { name } in value.operands {
+						@type.addAlias(name, enum)
 					}
-					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
-						@composite = true
-
-						@operands = value.operands
-					}
-					else {
-						match value.kind {
-							NodeKind.NumericExpression {
-								if value.radix == 2 {
-									@value = `\(value.value)`
-
-									if value.value > 0 {
-										var binary = value.value.toString(2)
-										var index = binary.length
-
-										if binary.lastIndexOf('1') != 0 {
-											NotImplementedException.throw(this)
-										}
-
-										if index > length {
-											SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
-										}
-
-										enum.index(index)
-									}
-									else {
-										enum.index(0)
-									}
-								}
-								else {
-									if value.value > length {
-										SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
-									}
-
-									enum.index(value.value)
-
-									@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
-								}
-							}
-							NodeKind.Identifier {
-								@alias = true
-
-								@operands = [value]
-							}
-							else {
-								SyntaxException.throwInvalidEnumValue(value, this)
-							}
-						}
-					}
+				}
+				NodeKind.Literal when enum.kind() == EnumTypeKind.String {
+					@value = $quote(value.value)
+					@type = EnumVariableType.new(@name)
+				}
+				NodeKind.NumericExpression when enum.kind() == EnumTypeKind.Number {
+					@value = `\(enum.index(value.value))`
+					@type = EnumVariableType.new(@name)
 				}
 				else {
-					if enum.step() > length {
-						SyntaxException.throwBitmaskOverflow(@parent.name(), length, this)
-					}
-
-					@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))\(length > 32 ? 'n' : '')`
+					echo(value)
+					throw NotSupportedException.new(this)
 				}
-
-				@type = @scope.reference('Number')
 			}
-			EnumTypeKind.String {
-				if ?value {
-					if value.kind == NodeKind.Literal {
-						@value = $quote(value.value)
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-				}
-				else {
-					@value = $quote(@name.toLowerCase())
-				}
-
-				@type = @scope.reference('String')
+		}
+		else {
+			if enum.kind() == EnumTypeKind.String {
+				@value = $quote(@name.toLowerCase())
 			}
-			EnumTypeKind.Number {
-				if ?value {
-					if value.kind == NodeKind.NumericExpression {
-						@value = `\(enum.index(value.value))`
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-				}
-				else {
-					@value = `\(enum.step())`
-				}
-
-				@type = @scope.reference('Number')
+			else {
+				@value = `\(enum.step())`
 			}
+
+			@type = EnumVariableType.new(@name)
 		}
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
-	isComposite() => @composite || @alias
 	name() => @name
+	toConditionFragments(enum, varname, fragments) { # {{{
+		for var name, index in @type.originals() {
+			fragments
+				..code(' || ') if index > 0
+				..code(`\(varname) === \(enum).\(name)`)
+		}
+	} # }}}
 	toFragments(fragments) { # {{{
-		if @alias {
-			var name = @parent.name()
-			var operand = @operands[0]
-
-			fragments.line(`\(name).\(@name) = \(name).\(operand.name)`)
-		}
-		else if @composite {
-			var name = @parent.name()
-			var line = fragments.newLine().code(`\(name).\(@name) = \(name)(`)
-
-			for var operand, i in @operands {
-				line.code(' | ') if i > 0
-
-				line.code(`\(name).\(operand.name)`)
-			}
-
-			line.code(')').done()
-		}
-		else {
-			fragments.line(`\(@name): \(@value)`)
-		}
+		fragments.line(`\(@name): \(@value)`)
 	} # }}}
 	type() => @type
 }

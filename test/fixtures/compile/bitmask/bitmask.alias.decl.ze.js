@@ -5,8 +5,7 @@ module.exports = function() {
 		HasClaws: 1,
 		CanFly: 2,
 		EatsFish: 4,
-		Endangered: 8
+		Endangered: 8,
+		Predator: 3
 	});
-	AnimalFlags.Predator = AnimalFlags(AnimalFlags.CanFly | AnimalFlags.HasClaws);
-	AnimalFlags.FlyingPredator = AnimalFlags.CanFly;
 };

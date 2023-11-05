@@ -16,13 +16,27 @@
         "sequenceIndex": 6,
         "exhaustive": true,
         "variables": [
-          "MONDAY",
-          "TUESDAY",
-          "WEDNESDAY",
-          "THURSDAY",
-          "FRIDAY",
-          "SATURDAY",
-          "SUNDAY"
+          {
+            "name": "MONDAY"
+          },
+          {
+            "name": "TUESDAY"
+          },
+          {
+            "name": "WEDNESDAY"
+          },
+          {
+            "name": "THURSDAY"
+          },
+          {
+            "name": "FRIDAY"
+          },
+          {
+            "name": "SATURDAY"
+          },
+          {
+            "name": "SUNDAY"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {

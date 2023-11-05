@@ -7,11 +7,13 @@ module.exports = function(expect) {
 		Spades: "spades"
 	});
 	expect(Type.isEnum(CardSuit)).to.equal(true);
-	const x = CardSuit.Clubs;
+	const x = (() => {
+		return CardSuit.Clubs;
+	})();
 	expect(Type.isEnumInstance(x, CardSuit)).to.equal(true);
 	expect(Type.typeOf(x)).to.equal("enum-member");
-	expect(">>> " + x).to.equal(">>> clubs");
-	expect(x.value).to.equal("clubs");
+	expect(Helper.concatString(">>> ", x)).to.equal(">>> clubs");
+	expect(Helper.toString(x)).to.equal("clubs");
 	expect(JSON.stringify((() => {
 		const o = new OBJ();
 		o.id = x;

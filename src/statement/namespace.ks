@@ -167,11 +167,25 @@ class NamespaceDeclaration extends Statement {
 			var object = line.newObject()
 
 			for var { type, name } in @tests {
-				var line = object.newLine().code(`is\(name): `)
+				var funcname = `is\(name)`
+				var line = object.newLine().code(`\(funcname): `)
 
-				type.toBlindTestFunctionFragments('value', null, line, this)
+				type.toBlindTestFunctionFragments(funcname, 'value', true, null, line, this)
 
 				line.done()
+
+				if type.isVariant() && type.canBeDeferred() {
+					var generics = type.generics()
+
+					for var { type % subtype }, index in type.discard().getVariantType().getFields() {
+						var funcname = `is\(name)__\(index)`
+						var line = object.newLine().code(`\(funcname): `)
+
+						subtype.toBlindTestFunctionFragments(funcname, 'value', false, generics, line, this)
+
+						line.done()
+					}
+				}
 			}
 
 			object.done()

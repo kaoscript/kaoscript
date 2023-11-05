@@ -1475,22 +1475,27 @@ class MatchConditionValue extends AbstractNode {
 				var subtypes = @type.getSubtypes()
 				var operand = `\(name).\(object.getVariantName()) === `
 
-				if subtypes.length == 1 {
-					var { name, type } = subtypes[0]
+				fragments.code('(') if junction == Junction.AND && subtypes.length > 1
 
-					fragments.code(operand).compile(type).code(`.\(name)`)
-				}
-				else {
-					fragments.code('(') if junction == Junction.AND
+				for var { name % varname, type }, index in subtypes {
+					fragments.code(' || ') if index > 0
 
-					for var { name, type }, index in subtypes {
-						fragments
-							..code(' || ') if index != 0
-							..code(operand).compile(type).code(`.\(name)`)
+					var variable = type.discard().getVariable(varname)
+
+					if variable.isAlias() {
+						if variable.isDerivative() {
+							fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(varname))(\(name).\(object.getVariantName()))`)
+						}
+						else {
+							fragments.code(operand).compile(type).code(`.\(variable.original())`)
+						}
 					}
-
-					fragments.code(')') if junction == Junction.AND
+					else {
+						fragments.code(operand).compile(type).code(`.\(varname)`)
+					}
 				}
+
+				fragments.code(')') if junction == Junction.AND && subtypes.length > 1
 			}
 			else {
 				fragments.code(name, ' === ').compile(value)

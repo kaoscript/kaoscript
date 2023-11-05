@@ -44,12 +44,15 @@ class EnumType extends Type {
 				type._length = data.length
 			}
 
-			if ?data.defaultVariable {
-				type._defaultVariable = data.defaultVariable
-			}
+			for var { name, originals?, top? } in data.variables {
+				var variable = if ?originals {
+					set EnumVariableAliasType.new(name, originals, top)
+				}
+				else {
+					set EnumVariableType.new(name)
+				}
 
-			for var name in data.variables {
-				type.addVariable(name)
+				type.addVariable(variable)
 			}
 
 			if data.exhaustive && ?data.exhaustiveness {
@@ -126,7 +129,7 @@ class EnumType extends Type {
 
 		match data.kind {
 			NodeKind.FieldDeclaration {
-				this.addVariable(data.name.name)
+				this.addVariable(EnumVariableType.new(data.name.name))
 			}
 			NodeKind.MethodDeclaration {
 				var mut instance = true
@@ -185,10 +188,8 @@ class EnumType extends Type {
 
 		return index
 	} # }}}
-	addVariable(name: String) { # {{{
-		var variable = EnumVariableType.new()
-
-		@variables[name] = variable
+	addVariable(variable: EnumVariableType) { # {{{
+		@variables[variable.name()] = variable
 
 		if @alteration {
 			variable.flagAlteration()
@@ -270,7 +271,7 @@ class EnumType extends Type {
 			type: @kind
 			sequenceIndex: @index
 			exhaustive
-			variables: [name for var _, name of @variables]
+			variables: [variable.export(references, indexDelta, mode, module) for var variable of @variables]
 			instanceMethods: {}
 			staticMethods: {}
 		}
@@ -395,6 +396,15 @@ class EnumType extends Type {
 
 		return null
 	} # }}}
+	getTopProperty(name: String): String {
+		if var variable ?= @variables[name] ;; variable.isAlias() {
+			return variable.getTopAlias() ?? name
+		}
+		else {
+			return name
+		}
+	}
+	getVariable(name: String) => @variables[name]
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
@@ -493,7 +503,7 @@ class EnumType extends Type {
 
 		return results
 	} # }}}
-	listVariables() => [name for var _, name of @variables]
+	listVariableNames() => [name for var variable, name of @variables when !variable.isAlias()]
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true
 	} # }}}
@@ -523,18 +533,81 @@ class EnumType extends Type {
 class EnumVariableType {
 	private {
 		@alteration: Boolean	= false
+		@name: String
+		@value: String?			= null
 	}
+	constructor(@name)
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		return {
+			@name
+		}
+	} # }}}
 	flagAlteration() { # {{{
 		@alteration = true
 
 		return this
 	} # }}}
+	isAlias() => false
 	isAlteration() => @alteration
+	isTopDerivative() => false
+	name() => @name
 	unflagAlteration() { # {{{
 		@alteration = false
 
 		return this
 	} # }}}
+	value() => @value
+	value(@value)
+}
+
+class EnumVariableAliasType extends EnumVariableType {
+	private {
+		@originals:	String[]	= []
+		@top: String?		= null
+	}
+	constructor(@name) { # {{{
+		super(name)
+	} # }}}
+	constructor(@name, @originals, @top) { # {{{
+		super(name)
+	} # }}}
+	addAlias(name: String, enum: EnumType) {
+		if var variable ?= enum.getVariable(name) ;; variable.isAlias() {
+			@originals.pushUniq(...variable.originals()!?)
+		}
+		else {
+			@originals.pushUniq(name)
+		}
+	}
+	addOriginals(...names: String) { # {{{
+		@originals.pushUniq(...names)
+	} # }}}
+	override export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		return {
+			@name
+			@originals
+			@top if ?@top
+		}
+	} # }}}
+	getTopAlias() => @top
+	override isAlias() => true
+	isDerivative() => @originals.length > 1
+	isTopDerivative() => @originals.length > 1 && !?@top
+	name() => @name
+	original() => @originals[0]
+	originals() => @originals
+	setAlias(name: String, enum: EnumType) {
+		if var variable ?= enum.getVariable(name) ;; variable.isAlias() {
+			@originals.pushUniq(...variable.originals()!?)
+
+			if @originals.length > 1 {
+				@top = variable.getTopAlias() ?? name
+			}
+		}
+		else {
+			@originals.pushUniq(name)
+		}
+	}
 }
 
 class EnumMethodType extends FunctionType {

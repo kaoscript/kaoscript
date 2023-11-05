@@ -1,8 +1,10 @@
 class UnaryOperatorImplicit extends Expression {
 	private late {
+		@derivative: Boolean				= false
+		@originalProperty: String?
 		@property: String
 		@type: Type
-		@varname: String?			= null
+		@varname: String?				= null
 	}
 	override analyse() { # {{{
 		@property = @data.argument.name
@@ -13,11 +15,26 @@ class UnaryOperatorImplicit extends Expression {
 				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 			}
 			else if type.isEnum() {
-				unless type.discard().hasVariable(@property) {
+				if var variable ?= type.discard().getVariable(@property) {
+					if type is ValueType {
+						@type = type.setNullable(false)
+					}
+					else {
+						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), `\(type.path()).\(@property)`, @scope)
+					}
+
+					if variable.isAlias() {
+						if variable.isDerivative() {
+							@derivative = true
+						}
+						else {
+							@originalProperty = variable.original()
+						}
+					}
+				}
+				else {
 					ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
 				}
-
-				@type = type.setNullable(false)
 			}
 			else if type is VariantType {
 				var master = type.getMaster()
@@ -55,9 +72,14 @@ class UnaryOperatorImplicit extends Expression {
 	} # }}}
 	override translate()
 	property() => @property
+	isDerivative() => @derivative
 	toFragments(fragments, mode) { # {{{
-		fragments.compile(@varname ?? @type).code($dot).compile(@property)
+		fragments.compile(@varname ?? @type.discardValue()).code($dot).compile(@originalProperty ?? @property)
 	} # }}}
+	toPropertyFragments(property: String, fragments, mode) { # {{{
+		fragments.compile(@varname ?? @type).code(`.\(property)`)
+	} # }}}
+	toQuote() => `.\(@property)`
 	type() => @type
 }
 

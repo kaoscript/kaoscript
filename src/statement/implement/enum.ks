@@ -89,7 +89,9 @@ class ImplementEnumFieldDeclaration extends Statement {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@variable = @enum.addVariable(@name)
+		@variable = EnumVariableType.new(@name)
+
+		@enum.addVariable(@variable)
 
 		@variable.flagAlteration()
 	} # }}}
@@ -175,7 +177,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			@scope.rename('this', 'that')
 		}
 
-		for var name in @enum.listVariables() {
+		for var name in @enum.listVariableNames() {
 			var variable = @scope.define(name, true, @enumRef, true, @parent)
 
 			variable.renameAs(`\(@enumName.name()).\(name)`)

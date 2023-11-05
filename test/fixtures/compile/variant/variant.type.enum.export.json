@@ -18,9 +18,15 @@
         "sequenceIndex": 3,
         "exhaustive": true,
         "variables": [
-          "Director",
-          "Student",
-          "Teacher"
+          {
+            "name": "Director"
+          },
+          {
+            "name": "Student"
+          },
+          {
+            "name": "Teacher"
+          }
         ],
         "instanceMethods": {},
         "staticMethods": {},
