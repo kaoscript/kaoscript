@@ -408,6 +408,10 @@ abstract class Type {
 									return type.flagComplete()
 								}
 								else {
+									unless scope.hasVariable(name, -1) {
+										ReferenceException.throwNotDefinedType(name, node)
+									}
+
 									var parameters = [Type.fromAST(parameter, scope, defined, node) for var parameter in data.typeParameters]
 
 									var type = ReferenceType.new(scope, name, nullable, parameters)
@@ -431,6 +435,10 @@ abstract class Type {
 							}
 						}
 						else if #data.typeSubtypes {
+							unless scope.hasVariable(name, -1) {
+								ReferenceException.throwNotDefinedType(name, node)
+							}
+
 							var type = ReferenceType.new(scope, name, nullable)
 							var root = type.discard()
 

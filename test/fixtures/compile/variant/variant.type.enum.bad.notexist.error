@@ -1,0 +1,1 @@
+ReferenceException: Type "SchoolPerson" is not defined (fixtures/compile/variant/variant.type.enum.bad.notexist.ks:7)
