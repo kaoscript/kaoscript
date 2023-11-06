@@ -263,6 +263,21 @@ class EnumType extends Type {
 
 		return @addStaticMethod(name, type)
 	} # }}}
+	explodeVarnames(values: { name: String }[]): String[] { # {{{
+		var result = []
+
+		for var { name } in values {
+			var variable = @variables[name]
+
+			result.pushUniq(name)
+
+			if variable.isAlias() {
+				result.pushUniq(...variable.originals()!?)
+			}
+		}
+
+		return result
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var exhaustive = @isExhaustive()
 
