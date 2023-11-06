@@ -25,25 +25,7 @@ class TypeAliasDeclaration extends Statement {
 
 		@type.type(type)
 
-		if type is ObjectType && type.isVariant() {
-			var variant = type.getVariantType()
-
-			for var { kind, type } in @data.type.properties when kind == NodeKind.PropertyType && type.kind == NodeKind.VariantType {
-				for var property in type.properties {
-					if property.kind == NodeKind.VariantField && ?property.type {
-						var names = [name for var { name } in property.names]
-
-						variant.addField(names, Type.fromAST(property.type, @scope, false, generics, this))
-					}
-				}
-
-				break
-			}
-
-			type.setDeferrable(variant.canBeDeferred())
-
-			variant.flagComplete()
-		}
+		type.finalize(@data.type, generics, this)
 
 		@type.flagComplete()
 	} # }}}

@@ -1,1 +1,0 @@
-ReferenceException: The variant "SchoolPerson" doesn't have a field named "Stident" (fixtures/compile/variant/variant.type.enum.bad.subtype.ks:15)

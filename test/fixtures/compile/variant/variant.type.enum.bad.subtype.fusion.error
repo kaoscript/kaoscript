@@ -1,0 +1,1 @@
+ReferenceException: The variant "SchoolPerson" doesn't have a field named "Staff" (fixtures/compile/variant/variant.type.enum.bad.subtype.fusion.ks:15)

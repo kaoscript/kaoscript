@@ -192,6 +192,27 @@ class ObjectType extends Type {
 
 		return export
 	} # }}}
+	override finalize(data, generics, node) {
+		if @variant {
+			var scope = node.scope()
+
+			for var { kind, type } in data.properties when kind == NodeKind.PropertyType && type.kind == NodeKind.VariantType {
+				for var property in type.properties {
+					if property.kind == NodeKind.VariantField && ?property.type {
+						var names = [name for var { name } in property.names]
+
+						@variantType.addField(names, Type.fromAST(property.type, scope, false, generics, node))
+					}
+				}
+
+				break
+			}
+
+			@testGenerics ||= @variantType.canBeDeferred()
+
+			@variantType.flagComplete()
+		}
+	}
 	flagAlien() { # {{{
 		@alien = true
 

@@ -48,6 +48,11 @@ class FusionType extends Type {
 			types: [type.toExportOrReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
+	override finalize(data, generics, node) {
+		for var data, index in data.types {
+			@types[index].finalize(data, generics, node)
+		}
+	}
 	getKeyType() { # {{{
 		for var type in @types {
 			var root = type.discard()

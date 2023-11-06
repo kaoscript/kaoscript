@@ -105,7 +105,6 @@ class ReferenceType extends Type {
 
 			@subtypes.push({ name: mainName, type })
 		}
-		// TODO skip valdation since enum isn't prepared yet
 		else if !variant.isComplete() {
 			for var subtype in @subtypes {
 				return if name == subtype.name
@@ -621,7 +620,8 @@ class ReferenceType extends Type {
 						return property
 					}
 					else if variant.hasSubtype(name) {
-						return AnyType.NullableUnexplicit
+						// return AnyType.NullableUnexplicit
+						return null
 					}
 					else {
 						ReferenceException.throwUndefinedVariantField(@name, name, node)

@@ -1,0 +1,1 @@
+ReferenceException: Property "age" is not defined (fixtures/compile/variant/variant.type.enum.member.nexist.ks:16)

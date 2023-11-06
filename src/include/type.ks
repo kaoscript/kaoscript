@@ -810,6 +810,7 @@ abstract class Type {
 	discardVariable(): Type => this
 	// TODO to remove
 	equals(value?): Boolean => ?value && @isSubsetOf(value, MatchingMode.Exact)
+	finalize(data, generics: String[], node: AbstractNode): Void
 	flagAlien() { # {{{
 		@alien = true
 

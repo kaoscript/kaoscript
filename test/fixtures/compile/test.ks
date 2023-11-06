@@ -15,15 +15,3 @@
 // 	quxbaz(x: Number) {
 // 	}
 // }
-
-
-
-
-// enum PersonKind {
-//     Director = 1
-//     Student
-//     Teacher
-// }
-
-// func SchoolPerson(): SchoolPerson(Student) {
-// }

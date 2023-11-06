@@ -507,6 +507,8 @@ class MemberExpression extends Expression {
 			if type.isVariant() {
 				if var property ?= type.getProperty(@property, this) {
 					@type = property.discardVariable()
+
+					found = true
 				}
 				else if type is ReferenceType {
 					if var subtypes #= type.getSubtypes() {
@@ -529,9 +531,6 @@ class MemberExpression extends Expression {
 									}
 								}
 							}
-							else {
-								NotImplementedException.throw(this)
-							}
 						}
 						else {
 							NotImplementedException.throw(this)
@@ -546,8 +545,14 @@ class MemberExpression extends Expression {
 
 						found = true
 					}
+				}
+
+				if !found && type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
 					else {
-						NotImplementedException.throw(this)
+						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
 				}
 			}
