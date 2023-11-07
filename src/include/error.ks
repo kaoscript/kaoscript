@@ -192,7 +192,7 @@ export class ReferenceException extends Exception {
 			throw ReferenceException.new(`The type "\(name)" is not a variable`, node)
 		} # }}}
 		throwAlreadyDefinedField(name, node): Never ~ ReferenceException { # {{{
-			throw ReferenceException.new(`Field "\(name)" is already defined by its parent class`, node)
+			throw ReferenceException.new(`Field "\(name)" is already defined`, node)
 		} # }}}
 		throwBindingExceedArray(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The destructuring variable "\(name)" can't be matched`, node)

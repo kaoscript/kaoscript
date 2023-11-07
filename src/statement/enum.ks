@@ -37,6 +37,11 @@ class EnumDeclaration extends Statement {
 				}
 				NodeKind.FieldDeclaration {
 					var variable = @createVariable(data)
+					var name = variable.name()
+
+					if @enum.hasVariable(name) || @enum.hasStaticMethod(name) {
+						ReferenceException.throwAlreadyDefinedField(name, variable)
+					}
 
 					variable.analyse()
 
@@ -44,6 +49,11 @@ class EnumDeclaration extends Statement {
 				}
 				NodeKind.MethodDeclaration {
 					var method = EnumMethodDeclaration.new(data, this)
+					var name = method.name()
+
+					if !method.isInstance() && @enum.hasVariable(name) {
+						ReferenceException.throwAlreadyDefinedField(name, method)
+					}
 
 					method.analyse()
 				}
@@ -461,7 +471,9 @@ class EnumMethodDeclaration extends Statement {
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
+	isInstance() => @instance
 	isOverridableFunction() => true
+	name() => @name
 	parameters() => @parameters
 	toIndigentFragments(fragments) { # {{{
 		for var {name, value, parameters} in @indigentValues {

@@ -1,0 +1,13 @@
+enum Weekday {
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
+    SUNDAY
+
+	WEEKEND = SATURDAY | SUNDAY
+
+    WEEKEND(): Boolean => this == SATURDAY | SUNDAY
+}

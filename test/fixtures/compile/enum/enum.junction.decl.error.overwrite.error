@@ -1,0 +1,1 @@
+ReferenceException: Field "Hearts" is already defined (fixtures/compile/enum/enum.junction.decl.error.overwrite.ks:9)

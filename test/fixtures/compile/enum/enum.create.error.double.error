@@ -1,0 +1,1 @@
+ReferenceException: Field "Red" is already defined (fixtures/compile/enum/enum.create.error.double.ks:5)
