@@ -1,0 +1,1 @@
+ReferenceException: The variant "SchoolPerson" doesn't have a field named "MainTeacher" (fixtures/compile/variant/variant.type.enum.bad.subtype.subtype.ks:7)

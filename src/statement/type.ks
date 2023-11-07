@@ -1,40 +1,40 @@
 class TypeAliasDeclaration extends Statement {
 	private late {
+		@alias: AliasType
 		@name: String
+		@generics: String[]		= []
+		@type: Type
 		@variable: Variable
-		@type: AliasType
 	}
 	override initiate() { # {{{
 		@name = @data.name.name
 
-		@type = AliasType.new(@scope)
-		@variable = @scope.define(@name, true, @type, this)
+		@alias = AliasType.new(@scope)
+		@variable = @scope.define(@name, true, @alias, this)
 	} # }}}
-	postInitiate() { # {{{
-		var generics = []
-
+	override postInitiate() { # {{{
 		if #@data.generics {
 			for var generic in @data.generics {
-				@type.addGeneric(generic.name)
+				@alias.addGeneric(generic.name)
 
-				generics.push(generic.name)
+				@generics.push(generic.name)
 			}
 		}
 
-		var type = Type.fromAST(@data.type, generics, this)
+		@type = Type.fromAST(@data.type, @generics, this)
 
-		@type.type(type)
-
-		type.finalize(@data.type, generics, this)
-
-		@type.flagComplete()
+		@alias.type(@type)
 	} # }}}
-	analyse()
+	override analyse() {
+		@type.finalize(@data.type, @generics, this)
+
+		@alias.flagComplete()
+	}
 	override prepare(target, targetMode) { # {{{
-		if @type.isComplex() {
+		if @alias.isComplex() {
 			var authority = @recipient().authority()
 
-			authority.addTypeTest(@name, @type)
+			authority.addTypeTest(@name, @alias)
 		}
 	} # }}}
 	translate()
