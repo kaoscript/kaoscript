@@ -60,7 +60,7 @@ class ObjectBinding extends Expression {
 
 			if type.isObject() {
 				for var element in @elements {
-					if var property ?= type.getProperty(element.name()) {
+					if var property ?= @type.getProperty(element.name()) {
 						element.type(property.discardVariable())
 					}
 					else if element.isRequired() {

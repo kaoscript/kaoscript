@@ -192,7 +192,7 @@ class ObjectType extends Type {
 
 		return export
 	} # }}}
-	override finalize(data, generics, node) {
+	override finalize(data, generics, node) { # {{{
 		if @variant {
 			var scope = node.scope()
 
@@ -212,7 +212,7 @@ class ObjectType extends Type {
 
 			@variantType.flagComplete()
 		}
-	}
+	} # }}}
 	flagAlien() { # {{{
 		@alien = true
 
@@ -617,6 +617,27 @@ class ObjectType extends Type {
 					}
 					else {
 						return false unless type.isNullable(generics)
+					}
+				}
+			}
+			else if @variant && #subtypes {
+				var newProperties = {}
+
+				if subtypes.length == 1 {
+					if var field ?= @variantType.getField(subtypes[0].name) {
+						Object.merge(newProperties, field.type.properties())
+					}
+				}
+				else {
+					NotImplementedException.throw()
+				}
+
+				for var type, name of value.properties() {
+					if var prop ?= @properties[name] ?? newProperties[name] {
+						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
+					}
+					else {
+						return false unless type.isNullable()
 					}
 				}
 			}

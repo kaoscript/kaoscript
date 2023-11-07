@@ -1145,9 +1145,9 @@ class ReferenceType extends Type {
 		}
 
 		if @isAlias() {
-			var unalias = @discardAlias()
+			var { type, generics, subtypes } = @getGenericMapper()
 
-			return unalias.isSubsetOf(value, null, null, mode + MatchingMode.Reference)
+			return type.isSubsetOf(value, generics, subtypes, mode + MatchingMode.Reference)
 		}
 
 		return true
