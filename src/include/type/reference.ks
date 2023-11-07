@@ -963,15 +963,26 @@ class ReferenceType extends Type {
 			if value.isNullable() && !@nullable {
 				return true
 			}
-			else if @hasParameters() && !value.hasParameters() {
+
+			if @hasParameters() && !value.hasParameters() {
 				return true
 			}
-			else if @hasSubtypes() && (!value.hasSubtypes() || @getSubtypesCount() < value.getSubtypesCount()) {
-				return true
+
+			if @hasSubtypes() {
+				return true if !value.hasSubtypes()
+
+				var variant = @discard().getVariantType()
+
+				if variant.canBeBoolean() {
+					return @getSubtypesCount() < value.getSubtypesCount()
+				}
+
+				var enum = variant.getEnumType()
+
+				return enum.getOriginalVariableCount(...@subtypes) < enum.getOriginalVariableCount(...value.getSubtypes())
 			}
-			else {
-				return false
-			}
+
+			return false
 		}
 		else if value.isUnion() {
 			for var type in value.discard().types() {

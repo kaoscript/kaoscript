@@ -387,6 +387,22 @@ class EnumType extends Type {
 			return null
 		}
 	} # }}}
+	getOriginalVariableCount(...names: { name: String }): Number { # {{{
+		var mut result = 0
+
+		for var { name } in names {
+			var variable = @variables[name]
+
+			if variable.isAlias() {
+				result += variable.originals().length:Number
+			}
+			else {
+				result += 1
+			}
+		}
+
+		return result
+	} # }}}
 	getStaticAssessment(name: String, node: AbstractNode) { # {{{
 		if var assessment ?= @staticAssessments[name] {
 			return assessment
@@ -586,14 +602,14 @@ class EnumVariableAliasType extends EnumVariableType {
 	constructor(@name, @originals, @top) { # {{{
 		super(name)
 	} # }}}
-	addAlias(name: String, enum: EnumType) {
+	addAlias(name: String, enum: EnumType) { # {{{
 		if var variable ?= enum.getVariable(name) ;; variable.isAlias() {
 			@originals.pushUniq(...variable.originals()!?)
 		}
 		else {
 			@originals.pushUniq(name)
 		}
-	}
+	} # }}}
 	addOriginals(...names: String) { # {{{
 		@originals.pushUniq(...names)
 	} # }}}
@@ -611,7 +627,7 @@ class EnumVariableAliasType extends EnumVariableType {
 	name() => @name
 	original() => @originals[0]
 	originals() => @originals
-	setAlias(name: String, enum: EnumType) {
+	setAlias(name: String, enum: EnumType) { # {{{
 		if var variable ?= enum.getVariable(name) ;; variable.isAlias() {
 			@originals.pushUniq(...variable.originals()!?)
 
@@ -622,7 +638,7 @@ class EnumVariableAliasType extends EnumVariableType {
 		else {
 			@originals.pushUniq(name)
 		}
-	}
+	} # }}}
 }
 
 class EnumMethodType extends FunctionType {
