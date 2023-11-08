@@ -1,0 +1,1 @@
+TypeException: The variable "event" of type "Event<String>(true)" can't be assigned with a value of type "{ok: true, data: String}" (fixtures/compile/variant/variant.type.bool.gmk.var.vv.wt_zs§y.o<b_n2=s>e.ks:12)

@@ -744,6 +744,22 @@ class ReferenceType extends Type {
 		return type.hasProperty(name)
 	} # }}}
 	hasRest() => @name == 'Object' || @type().hasRest()
+	override hasSameParameters(value) { # {{{
+		if !#@parameters {
+			return !value.hasParameters()
+		}
+		else if !value.hasParameters() {
+			return false
+		}
+
+		for var type in value.parameters() {
+			if !@parameters.contains(type) {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	hasSubtypes() => #@subtypes
 	isAlias() => @type().isAlias()
 	isAlien() => @type().isAlien()
@@ -1317,13 +1333,51 @@ class ReferenceType extends Type {
 		return this.setNullable(nullable) unless #@subtypes
 		return value.setNullable(nullable) unless value.hasSubtypes()
 
-		var subtypes = [...value.getSubtypes()]
-		var names = [name for var { name } in subtypes]
+		var variant = @discard().getVariantType()
+		var subtypes = []
 
-		for var subtype in @subtypes {
-			if !names.contains(subtype.name) {
+		if variant.canBeBoolean() {
+			var names = {}
+			var mut count = 0
+
+			for var subtype in @subtypes {
+				names[variant.getMainName(subtype.name)] = subtype
+				count += 1
+			}
+
+			for var subtype in value.getSubtypes() {
+				var name = variant.getMainName(subtype.name)
+
+				if !?names[name] {
+					names[name] = subtype
+					count += 1
+				}
+			}
+
+			if count == 1 {
+				for var subtype of names {
+					subtypes.push(subtype)
+				}
+			}
+		}
+		else {
+			var enum = variant.getEnumType()
+			var names = {}
+
+			for var subtype in @subtypes {
+				names[variant.getMainName(subtype.name)] = subtype
+			}
+
+			for var subtype in value.getSubtypes() {
+				var name = variant.getMainName(subtype.name)
+
+				if !?names[name] {
+					names[name] = subtype
+				}
+			}
+
+			for var subtype of names {
 				subtypes.push(subtype)
-				names.push(subtype.name)
 			}
 		}
 
@@ -1351,6 +1405,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	parameters(): Type[] => @parameters
+	parameters(@parameters)
 	reassign(@name, @scope) { # {{{
 		@reset()
 
@@ -1548,6 +1603,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
+	setSubtypes(@subtypes)
 	split(types: Array) { # {{{
 		@resolve()
 
@@ -1968,6 +2024,70 @@ class ReferenceType extends Type {
 		else {
 			@type.toVariations(variations)
 		}
+	} # }}}
+	override tryCasting(value) { # {{{
+		if @isAlias() && @type.isObject() && !value.isAlias() && value.isObject() {
+			var parameters = []
+			var subtypes = []
+			var mut cast = true
+			var mut subtypeObject = null
+			var object = @type.discard()
+
+			if object.isVariant() {
+				var name = object.getVariantName()
+				var variant = object.getVariantType()
+
+				if var property ?= value.getProperty(name) ;; property.isValue() {
+					var value = property.value()
+
+					subtypes.push({ name: variant.getMainName(value), type: variant.getMaster()})
+
+					if var field ?= variant.getField(value) {
+						subtypeObject = field.type
+					}
+				}
+				else {
+					cast = false
+				}
+			}
+
+			var perNames = {}
+
+			for var property, name of object.properties() {
+				if property is DeferredType {
+					if var value ?= value.getProperty(name)  {
+						perNames[name] ??= []
+							..push(value.type().reference())
+					}
+				}
+			}
+			if ?subtypeObject {
+				for var property, name of subtypeObject.properties() {
+					if property is DeferredType {
+						if var value ?= value.getProperty(name)  {
+							perNames[name] ??= []
+								..push(value.type().reference())
+						}
+					}
+				}
+			}
+
+			for var types, name of perNames {
+				parameters.push(Type.union(@scope, ...types!?))
+			}
+
+			if cast && (#parameters || #subtypes) {
+				return @clone()
+					..parameters(parameters)
+					..setSubtypes(subtypes)
+			}
+		}
+
+		if value.isMorePreciseThan(this) {
+			return value
+		}
+
+		return this
 	} # }}}
 	override tune(value) { # {{{
 		@resolve()

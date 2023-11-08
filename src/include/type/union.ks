@@ -102,7 +102,7 @@ class UnionType extends Type {
 							@types[i] = t.unflagStrict()
 						}
 					}
-					else if type.isSameVariance(t) {
+					else if type.isSameVariance(t) && type.hasSameParameters(t) {
 						notMatched = false
 
 						@types[i] = t.mergeSubtypes(type)
@@ -138,7 +138,7 @@ class UnionType extends Type {
 							@types[i] = t.unflagStrict()
 						}
 					}
-					else if type.isSameVariance(t) {
+					else if type.isSameVariance(t) && type.hasSameParameters(t) {
 						notMatched = false
 
 						@types[i] = t.mergeSubtypes(type)
@@ -438,6 +438,21 @@ class UnionType extends Type {
 				return true
 			}
 
+			var mut count = 0
+
+			for var type in @types {
+				if type.isMorePreciseThan(value) {
+					count += 1
+				}
+				else {
+					break
+				}
+			}
+
+			if count == @types.length {
+				return true
+			}
+
 			value = value.discardAlias()
 		}
 
@@ -491,6 +506,13 @@ class UnionType extends Type {
 		}
 	} # }}}
 	isUnion() => true
+	isVariant() { # {{{
+		for var type in @types {
+			return false unless type.isVariant()
+		}
+
+		return true
+	} # }}}
 	length() => @types.length
 	matchContentOf(value: Type) { # {{{
 		for var type in @types {

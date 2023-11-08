@@ -221,16 +221,53 @@ class MemberExpression extends Expression {
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
 		if @object.isInferable() && @object.type().isVariant() {
-			var type = @object.type().discard()
-			var variant = type.getVariantType()
+			var object = @object.type().discard()
 
-			if @property == type.getVariantName() && variant.canBeBoolean() {
-				var reference = @object.type().clone()
-					..addSubtype('true', @scope.reference('Boolean'), this)
+			if object.isUnion() {
+				var mut inferable = true
+				var types = []
 
-				inferables[@object.path()] = {
-					isVariable: @object is IdentifierLiteral
-					type: reference
+				for var type in object.types() {
+					var object = type.discard()
+					var variant = object.getVariantType()
+
+					if @property == object.getVariantName() && variant.canBeBoolean() {
+						var subtypes = type.getSubtypes()
+
+						if subtypes.length == 1 && variant.getMainName(subtypes[0].name) == 'false' {
+							continue
+						}
+
+						var reference = type.clone()
+							..setSubtypes([{ name: 'true', type: @scope.reference('Boolean') }])
+
+						types.push(reference)
+					}
+					else {
+						inferable = false
+
+						break
+					}
+				}
+
+				if inferable {
+					inferables[@object.path()] = {
+						isVariable: @object is IdentifierLiteral
+						type: Type.union(@scope, ...types)
+					}
+				}
+			}
+			else {
+				var variant = object.getVariantType()
+
+				if @property == object.getVariantName() && variant.canBeBoolean() {
+					var reference = @object.type().clone()
+						..setSubtypes([{ name: 'true', type: @scope.reference('Boolean') }])
+
+					inferables[@object.path()] = {
+						isVariable: @object is IdentifierLiteral
+						type: reference
+					}
 				}
 			}
 		}
@@ -246,16 +283,53 @@ class MemberExpression extends Expression {
 	} # }}}
 	inferWhenFalseTypes(inferables) { # {{{
 		if @object.isInferable() && @object.type().isVariant() {
-			var type = @object.type().discard()
-			var variant = type.getVariantType()
+			var object = @object.type().discard()
 
-			if @property == type.getVariantName() && variant.canBeBoolean() {
-				var reference = @object.type().clone()
-					..addSubtype('false', @scope.reference('Boolean'), this)
+			if object.isUnion() {
+				var mut inferable = true
+				var types = []
 
-				inferables[@object.path()] = {
-					isVariable: @object is IdentifierLiteral
-					type: reference
+				for var type in object.types() {
+					var object = type.discard()
+					var variant = object.getVariantType()
+
+					if @property == object.getVariantName() && variant.canBeBoolean() {
+						var subtypes = type.getSubtypes()
+
+						if subtypes.length == 1 && variant.getMainName(subtypes[0].name) == 'true' {
+							continue
+						}
+
+						var reference = type.clone()
+							..setSubtypes([{ name: 'false', type: @scope.reference('Boolean') }])
+
+						types.push(reference)
+					}
+					else {
+						inferable = false
+
+						break
+					}
+				}
+
+				if inferable {
+					inferables[@object.path()] = {
+						isVariable: @object is IdentifierLiteral
+						type: Type.union(@scope, ...types)
+					}
+				}
+			}
+			else {
+				var variant = object.getVariantType()
+
+				if @property == object.getVariantName() && variant.canBeBoolean() {
+					var reference = @object.type().clone()
+						..setSubtypes([{ name: 'false', type: @scope.reference('Boolean') }])
+
+					inferables[@object.path()] = {
+						isVariable: @object is IdentifierLiteral
+						type: reference
+					}
 				}
 			}
 		}

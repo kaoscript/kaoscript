@@ -878,6 +878,7 @@ abstract class Type {
 	hasMutableAccess() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false
+	hasSameParameters(value: Type): Boolean => false
 	hasTest() => false
 	isAlias() => false
 	isAlien() => @alien
@@ -1181,6 +1182,14 @@ abstract class Type {
 	} # }}}
 	toTestType() => this
 	toTypeQuote() => @toQuote()
+	tryCasting(value: Type): Type { # {{{
+		if value.isMorePreciseThan(this) {
+			return value
+		}
+		else {
+			return this
+		}
+	} # }}}
 	tune(value: Type): Type? => null
 	// TODO
 	// type(): valueof this

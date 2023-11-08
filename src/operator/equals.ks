@@ -31,8 +31,8 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 				TypeException.throwInvalidAssignement(@left, @type, rightType, this)
 			}
 
-			if @left.isInferable() && rightType.isMorePreciseThan(@type) {
-				@type = rightType
+			if @left.isInferable() {
+				@type = @type.tryCasting(rightType)
 			}
 		}
 	} # }}}

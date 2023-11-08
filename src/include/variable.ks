@@ -174,6 +174,9 @@ class Variable {
 			else if @realType.isMorePreciseThan(type) {
 				@realType = Type.union(scope, type, @realType)
 			}
+			else if @realType.isMorePreciseThan(@declaredType) && type.isMorePreciseThan(@declaredType) {
+				@realType = Type.union(scope, type, @realType)
+			}
 			else {
 				@realType = @declaredType
 			}
