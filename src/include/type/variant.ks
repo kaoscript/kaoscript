@@ -106,7 +106,10 @@ class VariantType extends Type {
 	} # }}}
 	getMaster() => @master
 	hasSubtype(name: String) { # {{{
-		if @kind == .Enum {
+		if ?@names[name] {
+			return true
+		}
+		else if @kind == .Enum {
 			return @enum.hasProperty(name)
 		}
 		else {
@@ -127,6 +130,14 @@ class VariantType extends Type {
 	} # }}}
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return this == value
+	} # }}}
+	isTrueValue(name: String): Boolean { # {{{
+		if var { names } ?= @names[name] {
+			return names.contains('true')
+		}
+		else {
+			return false
+		}
 	} # }}}
 	isValidField({ names }: Variant, subtypes: AltType[]?) { # {{{
 		return true unless #subtypes

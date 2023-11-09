@@ -400,7 +400,7 @@ class ReferenceType extends Type {
 			return variable.getRealType().discardAlias()
 		}
 		else {
-			return this
+			return @type().discardAlias()
 		}
 	} # }}}
 	discardReference(): Type? { # {{{
@@ -620,7 +620,6 @@ class ReferenceType extends Type {
 						return property
 					}
 					else if variant.hasSubtype(name) {
-						// return AnyType.NullableUnexplicit
 						return null
 					}
 					else {
@@ -1895,7 +1894,61 @@ class ReferenceType extends Type {
 	override toNegativeTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		@resolve()
 
-		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+		if @type.isVariant() {
+			if #@subtypes && @isSubtypeOf(node.type()) {
+				if #@parameters && !#parameters {
+					if !#subtypes {
+						var { type, generics, subtypes } = @getGenericMapper()
+
+						type.toNegativeTestFragments(generics, subtypes, junction, fragments, node)
+					}
+					else {
+						var { type, generics } = @getGenericMapper()
+
+						type.toVariantTestFragments(subtypes[0].name, generics, junction, fragments.code('!'), node)
+					}
+				}
+				else {
+					var root = @type.discard()
+					var variantType = root.getVariantType()
+					var property = root.getVariantName()
+
+					if variantType.canBeBoolean() {
+						for var { name, type }, index in @subtypes {
+							fragments
+								..code(' && ') if index > 0
+								..code('!') if variantType.isTrueValue(name)
+								..compile(node).code(`.\(property)`)
+						}
+					}
+					else {
+						for var { name, type }, index in @subtypes {
+							fragments.code(' && ') if index > 0
+
+							var variable = type.discard().getVariable(name)
+
+							if variable.isAlias() {
+								if variable.isDerivative() {
+									fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(`).compile(node).code(`.\(property))`)
+								}
+								else {
+									fragments.compile(node).code(`.\(property) !== `).compile(type).code(`.\(variable.original())`)
+								}
+							}
+							else {
+								fragments.compile(node).code(`.\(property) !== `).compile(type).code(`.\(name)`)
+							}
+						}
+					}
+				}
+			}
+			else {
+				var { type, generics, subtypes } = @getGenericMapper()
+
+				type.toNegativeTestFragments(generics, subtypes, junction, fragments, node)
+			}
+		}
+		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
 			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 		else {

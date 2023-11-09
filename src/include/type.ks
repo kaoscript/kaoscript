@@ -554,11 +554,9 @@ abstract class Type {
 				}
 
 				if type.isVariant() {
-					var object = type.discard()
+					var variant = type.discard().getVariantType()
 
-					if object.getVariantType().hasSubtype(property) {
-						var variant = object.getVariantType()
-
+					if variant.hasSubtype(property) {
 						return ReferenceType.new(node.scope(), type.name(), null, null, [{ name: property, type: variant.getMaster() }])
 					}
 				}
