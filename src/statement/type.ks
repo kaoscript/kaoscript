@@ -13,11 +13,11 @@ class TypeAliasDeclaration extends Statement {
 		@variable = @scope.define(@name, true, @alias, this)
 	} # }}}
 	override postInitiate() { # {{{
-		if #@data.generics {
-			for var generic in @data.generics {
-				@alias.addGeneric(generic.name)
+		if #@data.typeParameters {
+			for var parameter in @data.typeParameters {
+				@alias.addGeneric(parameter.name.name)
 
-				@generics.push(generic.name)
+				@generics.push(parameter.name.name)
 			}
 		}
 
