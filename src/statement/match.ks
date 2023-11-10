@@ -1497,6 +1497,16 @@ class MatchConditionValue extends AbstractNode {
 
 				fragments.code(')') if junction == Junction.AND && subtypes.length > 1
 			}
+			else if value.isDerivative() {
+				var type = value.type().discardValue()
+
+				fragments
+					.code($runtime.helper(this), '.equalEnum(')
+					.compile(type)
+					.code($comma)
+					.compile(type)
+					.code(`.__ks_eq_\(type.discard().getTopProperty(value.property())), \(name))`)
+			}
 			else {
 				fragments.code(name, ' === ').compile(value)
 

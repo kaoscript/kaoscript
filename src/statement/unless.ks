@@ -14,7 +14,10 @@ class UnlessStatement extends Statement {
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
+		@condition
+			..prepare(@scope.reference('Boolean'), TargetMode.Permissive)
+			..acquireReusable(false)
+			..releaseReusable()
 
 		unless @condition.type().canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)

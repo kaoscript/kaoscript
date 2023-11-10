@@ -1,4 +1,4 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	const CardSuit = Helper.enum(Number, {
 		Clubs: 0,
@@ -26,7 +26,7 @@ module.exports = function() {
 		foobar() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
-		__ks_func_foobar_0(card) {
+		__ks_func_foobar_0() {
 			if(this._card === CardSuit.Diamonds) {
 				this.__ks_func_quxbaz_0();
 				if(this._card === CardSuit.Clubs) {
@@ -34,11 +34,8 @@ module.exports = function() {
 			}
 		}
 		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = value => Type.isEnumInstance(value, CardSuit);
-			if(args.length === 1) {
-				if(t0(args[0])) {
-					return proto.__ks_func_foobar_0.call(that, args[0]);
-				}
+			if(args.length === 0) {
+				return proto.__ks_func_foobar_0.call(that);
 			}
 			throw Helper.badArgs();
 		}

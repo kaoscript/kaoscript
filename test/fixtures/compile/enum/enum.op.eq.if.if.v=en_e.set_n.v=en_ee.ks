@@ -9,7 +9,7 @@ class Foobar {
 	private {
 		@card: CardSuit?
 	}
-	foobar(card: CardSuit) {
+	foobar() {
 		if @card == CardSuit.Diamonds {
 			@quxbaz()
 
