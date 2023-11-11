@@ -906,6 +906,9 @@ class ReferenceType extends Type {
 
 			return @isSubsetOf(value, mode)
 		}
+		else if value is DeferredType {
+			return !@nullable || nullcast || value.isNullable()
+		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
@@ -1122,7 +1125,7 @@ class ReferenceType extends Type {
 			}
 		}
 
-		return true
+		return false
 	} # }}}
 	assist isSubsetOf(value: FunctionType, generics, subtypes, mode) { # {{{
 		if @isAlias() {

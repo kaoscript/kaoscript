@@ -25,11 +25,11 @@ class TypeAliasDeclaration extends Statement {
 
 		@alias.type(@type)
 	} # }}}
-	override analyse() {
+	override analyse() { # {{{
 		@type.finalize(@data.type, @generics, this)
 
 		@alias.flagComplete()
-	}
+	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @alias.isComplex() {
 			var authority = @recipient().authority()

@@ -1,8 +1,8 @@
 class AliasType extends Type {
 	private late {
-		@generics: String[]		= []
+		@generics: String[]			= []
 		@type: Type
-		@testIndex: Number?					= null
+		@testIndex: Number?			= null
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{

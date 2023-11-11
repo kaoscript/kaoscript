@@ -120,6 +120,7 @@ class ClassMethodDeclaration extends Statement {
 		@exit: Boolean						= false
 		@forked: Boolean					= false
 		@forks: Array<ClassMethodType>?		= null
+		@generics: String[]					= []
 		@hiddenOverride: Boolean			= false
 		@indigentValues: Array				= []
 		@instance: Boolean					= true
@@ -360,8 +361,14 @@ class ClassMethodDeclaration extends Statement {
 
 		@scope.line(@line())
 
+		if #@data.typeParameters {
+			for var parameter in @data.typeParameters {
+				@generics.push(parameter.name.name)
+			}
+		}
+
 		for var data in @data.parameters {
-			var parameter = Parameter.new(data, this)
+			var parameter = Parameter.new(data, @generics, this)
 
 			parameter.analyse()
 
@@ -387,7 +394,7 @@ class ClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @generics, @data, this)
 
 		@type
 			..unflagAssignableThis()

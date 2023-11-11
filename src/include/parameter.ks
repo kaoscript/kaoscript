@@ -19,6 +19,7 @@ class Parameter extends AbstractNode {
 		@defaultValue						= null
 		@existential: Boolean				= false
 		@explicitlyRequired: Boolean		= false
+		@generics: String[]					= []
 		@hasDefaultValue: Boolean			= false
 		@headedDefaultValue: Boolean		= false
 		@header: Boolean					= false
@@ -559,7 +560,7 @@ class Parameter extends AbstractNode {
 			}
 		} # }}}
 	}
-	constructor(@data, @parent, @scope = parent.scope()) { # {{{
+	constructor(@data, @generics = [], @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
 
 		@options = Attribute.configure(data, parent._options, AttributeTarget.Parameter, super.file())
@@ -601,7 +602,7 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var declaredType = Type.fromAST(@data.type, this)
+		var declaredType = Type.fromAST(@data.type, @generics, this)
 
 		@internal.prepare(declaredType)
 

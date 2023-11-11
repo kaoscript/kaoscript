@@ -14,6 +14,7 @@ class FunctionType extends Type {
 		@async: Boolean						= false
 		@autoTyping: Boolean				= false
 		@errors: Array<Type>				= []
+		@generics: String[]					= []
 		@hasRest: Boolean					= false
 		@index: Number						= -1
 		@maxs: Number{}						= {}
@@ -125,7 +126,7 @@ class FunctionType extends Type {
 	constructor(@scope, @index) { # {{{
 		super(scope)
 	} # }}}
-	constructor(parameters: Array<ParameterType>, data, node) { # {{{
+	constructor(parameters: ParameterType[]?, @generics = [], data, node) { # {{{
 		super(node.scope())
 
 		if ?data.type {
@@ -134,8 +135,10 @@ class FunctionType extends Type {
 			@missingReturn = false
 		}
 
-		for var parameter in parameters {
-			@addParameter(parameter, node)
+		if #parameters {
+			for var parameter in parameters {
+				@addParameter(parameter, node)
+			}
 		}
 
 		if ?data.modifiers {
@@ -146,7 +149,7 @@ class FunctionType extends Type {
 			var dyn type
 
 			for var throw in data.throws {
-				if (type ?= Type.fromAST(throw, node).discardReference()) && type.isNamed() && type.isClass() {
+				if (type ?= Type.fromAST(throw, generics, node).discardReference()) && type.isNamed() && type.isClass() {
 					@errors.push(type)
 				}
 				else {
@@ -155,11 +158,14 @@ class FunctionType extends Type {
 			}
 		}
 	} # }}}
-	constructor(parameters: Array<ParameterType>, data, @index, node) { # {{{
-		this(parameters, data, node)
+	constructor(parameters: ParameterType[]?, @generics = [], data, @index, node) { # {{{
+		this(parameters, generics, data, node)
 	} # }}}
 	addError(...types: Type) { # {{{
 		@errors.pushUniq(...types)
+	} # }}}
+	addGeneric(name: String) { # {{{
+		@generics.push(name)
 	} # }}}
 	addParameter(type: Type, name: String?, min, max) { # {{{
 		var parameter = ParameterType.new(@scope, name, name, type, min, max)
@@ -238,6 +244,52 @@ class FunctionType extends Type {
 	async() { # {{{
 		@async = true
 	} # }}}
+	buildGenericMap(positions: CallMatchPosition[], expressions: Expression[]?): AltType[] { # {{{
+		return [] unless #expressions
+
+		var map = {}
+
+		for var position, index in positions {
+			var parameter = @parameters[index].type()
+
+			continue unless parameter.type().isDeferred()
+
+			var name = parameter.type().name()
+
+			map[name] ??= []
+
+			if position is Array {
+				NotImplementedException.throw()
+			}
+			else {
+				var { index?, element? } = position
+
+				if !?index {
+					continue
+				}
+
+				if ?element {
+					map[name].push(expressions[index].argument().type())
+				}
+				else {
+					map[name].push(expressions[index].type())
+				}
+			}
+		}
+
+		var result = []
+
+		for var types, name of map {
+			if types.length == 1 {
+				result.push({ name, type: types[0] })
+			}
+			else {
+				NotImplementedException.throw()
+			}
+		}
+
+		return result
+	} # }}}
 	clone() { # {{{
 		var clone = FunctionType.new(@scope)
 
@@ -304,7 +356,24 @@ class FunctionType extends Type {
 	hashCode() { # {{{
 		var mut fragments = ''
 
+		if #@generics {
+			fragments += `<\(@generics.join(', '))>`
+		}
+
 		fragments += '('
+
+		if !@missingThis && @assignableThis {
+			if @thisType.isAny() {
+				fragments += 'this'
+			}
+			else {
+				fragments += `this: \(@thisType.toQuote())`
+			}
+
+			if #@parameters {
+				fragments += ', '
+			}
+		}
 
 		for var parameter, index in @parameters {
 			if index != 0 {
@@ -327,6 +396,7 @@ class FunctionType extends Type {
 		return fragments
 	} # }}}
 	hasAssignableThis() => @assignableThis
+	hasGenerics() => #@generics
 	hasRestParameter(): valueof @hasRest
 	hasVarargsParameter() { # {{{
 		for var parameter in @parameters {
@@ -892,7 +962,7 @@ class FunctionType extends Type {
 			@autoTyping = true
 		}
 		else {
-			@returnType = Type.fromAST(data, node)
+			@returnType = Type.fromAST(data, @generics, node)
 		}
 	} # }}}
 	setReturnType(@returnType): valueof this
@@ -910,6 +980,10 @@ class FunctionType extends Type {
 	} # }}}
 	toQuote() { # {{{
 		var mut fragments = ''
+
+		if #@generics {
+			fragments += `<\(@generics.join(', '))>`
+		}
 
 		fragments += '('
 

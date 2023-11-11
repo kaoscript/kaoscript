@@ -375,6 +375,7 @@ class FunctionDeclarator extends AbstractNode {
 		@awaiting: Boolean				= false
 		@block: Block
 		@exit: Boolean					= false
+		@generics: String[]				= []
 		@index: Number					= 0
 		@offset: Number
 		@parameters: Array<Parameter>	= []
@@ -392,6 +393,12 @@ class FunctionDeclarator extends AbstractNode {
 	analyse() { # {{{
 		@offset = @scope.module().getLineOffset()
 
+		if #@data.typeParameters {
+			for var parameter in @data.typeParameters {
+				@generics.push(parameter.name.name)
+			}
+		}
+
 		if #@data.parameters {
 			var mut firstParameter = 0
 			var parameter = @data.parameters[0]
@@ -408,7 +415,7 @@ class FunctionDeclarator extends AbstractNode {
 			}
 
 			for var data in @data.parameters from firstParameter {
-				var parameter = Parameter.new(data, this)
+				var parameter = Parameter.new(data, @generics, this)
 
 				parameter.analyse()
 
@@ -431,7 +438,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, @index, this)
+		@type = FunctionType.new([parameter.type() for var parameter in @parameters], @generics, @data, @index, this)
 
 		@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
 

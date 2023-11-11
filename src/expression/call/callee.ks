@@ -108,6 +108,19 @@ abstract class PreciseCallee extends Callee {
 		@positions = match.positions
 		@type = match.function.getReturnType()
 
+		if @type.isDeferred() {
+			var typeName = @type.name()
+			var generics = @function.buildGenericMap(@positions, node.arguments())
+
+			for var { name, type } in generics {
+				if name == typeName {
+					@type = type
+
+					break
+				}
+			}
+		}
+
 		@hash = @buildHashCode()
 	} # }}}
 	abstract buildHashCode(): String?

@@ -1,0 +1,1 @@
+TypeException: The return type must be "<T>" and not "String" (fixtures/compile/generics/generics.func.ret.se.ks:2)

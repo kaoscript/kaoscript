@@ -107,7 +107,7 @@ class ReturnStatement extends Statement {
 					@enumCasting = true
 				}
 			}
-			else if @type.isAssignableToVariable(target, true, false, false) {
+			else if !target.isDeferred() && @type.isAssignableToVariable(target, true, false, false) {
 				pass
 			}
 			else {
