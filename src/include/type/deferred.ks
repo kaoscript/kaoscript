@@ -90,6 +90,10 @@ class DeferredType extends Type {
 			}
 		}
 
+		if value.isAny() {
+			return true
+		}
+
 		return false
 	} # }}}
 	override isComplete() => true
@@ -157,18 +161,23 @@ class DeferredType extends Type {
 		}
 	} # }}}
 	override toBlindSubtestFunctionFragments(funcname, varname, _, generics, fragments, node) { # {{{
-		var mut nf = true
+		if #generics {
+			var mut nf = true
 
-		for var generic, index in generics while nf {
-			if @name == generic.name {
-				fragments.code(`mapper[\(index)]`)
+			for var generic, index in generics while nf {
+				if @name == generic.name {
+					fragments.code(`mapper[\(index)]`)
 
-				nf = false
+					nf = false
+				}
+			}
+
+			if nf {
+				NotImplementedException.throw()
 			}
 		}
-
-		if nf {
-			NotImplementedException.throw()
+		else {
+			fragments.code(`() => true`)
 		}
 	} # }}}
 	override toQuote() { # {{{
