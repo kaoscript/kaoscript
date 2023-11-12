@@ -116,6 +116,27 @@ class ReferenceType extends Type {
 			ReferenceException.throwUndefinedVariantField(@name, name, node)
 		}
 	} # }}}
+	applyGenerics(generics: AltType[]): ReferenceType {
+		var result = @clone()
+
+		for var parameter, index in result._parameters {
+			if parameter is DeferredType {
+				var deferName = parameter.name()
+
+				for var { name, type } in generics {
+					if name == deferName {
+						result._parameters[index] = type
+						break
+					}
+				}
+			}
+			else if parameter.isDeferrable() {
+				result._parameters[index] = parameter.applyGenerics(generics)
+			}
+		}
+
+		return result
+	}
 	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
 	canBeFunction(any = true) => @isUnion() ? @type.canBeFunction(any) : super(any)
@@ -927,6 +948,7 @@ class ReferenceType extends Type {
 	isClassInstance() => @name != 'Object' && @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
 	override isComplete() => @type().isComplete()
+	override isDeferrable() => #@parameters || @type().isDeferrable()
 	isEnum() => @name == 'Enum' || @type().isEnum()
 	isExhaustive() => @type().isExhaustive()
 	isExplicit() => @type().isExplicit()

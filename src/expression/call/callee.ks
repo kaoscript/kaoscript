@@ -120,6 +120,11 @@ abstract class PreciseCallee extends Callee {
 				}
 			}
 		}
+		else if @type.isDeferrable() {
+			var generics = @function.buildGenericMap(@positions, node.arguments())
+
+			@type = @type.applyGenerics(generics)
+		}
 
 		@hash = @buildHashCode()
 	} # }}}

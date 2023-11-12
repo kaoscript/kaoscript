@@ -76,6 +76,7 @@ class AliasType extends Type {
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
+	override isDeferrable() => #@generics || @type.isDeferrable()
 	isExclusion() => @type.isExclusion()
 	isExportable() => @type.isExportable()
 	isExportingFragment() => false

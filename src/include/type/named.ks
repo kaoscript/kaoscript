@@ -600,6 +600,7 @@ class NamedType extends Type {
 		hasRest
 		hasTest
 		isComplete
+		isDeferrable
 		isExportingType
 		isVariant
 		toAwareTestFunctionFragments
