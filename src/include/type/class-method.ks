@@ -17,7 +17,7 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
 			var scope = node.scope()
 
-			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
+			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		fromFunction(source: FunctionType): ClassMethodType { # {{{
 			var clone = ClassMethodType.new(source._scope)

@@ -375,7 +375,7 @@ class FunctionDeclarator extends AbstractNode {
 		@awaiting: Boolean				= false
 		@block: Block
 		@exit: Boolean					= false
-		@generics: String[]				= []
+		@generics: Generic[]			= []
 		@index: Number					= 0
 		@offset: Number
 		@parameters: Array<Parameter>	= []
@@ -395,7 +395,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		if #@data.typeParameters {
 			for var parameter in @data.typeParameters {
-				@generics.push(parameter.name.name)
+				@generics.push(Type.toGeneric(parameter, this))
 			}
 		}
 

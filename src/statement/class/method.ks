@@ -120,7 +120,7 @@ class ClassMethodDeclaration extends Statement {
 		@exit: Boolean						= false
 		@forked: Boolean					= false
 		@forks: Array<ClassMethodType>?		= null
-		@generics: String[]					= []
+		@generics: Generic[]					= []
 		@hiddenOverride: Boolean			= false
 		@indigentValues: Array				= []
 		@instance: Boolean					= true
@@ -363,7 +363,7 @@ class ClassMethodDeclaration extends Statement {
 
 		if #@data.typeParameters {
 			for var parameter in @data.typeParameters {
-				@generics.push(parameter.name.name)
+				@generics.push(Type.toGeneric(parameter, this))
 			}
 		}
 

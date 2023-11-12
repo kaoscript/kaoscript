@@ -10,7 +10,7 @@ class ClassConstructorType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassConstructorType { # {{{
 			var scope = node.scope()
 
-			return ClassConstructorType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
+			return ClassConstructorType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassConstructorType { # {{{
 			var data = index

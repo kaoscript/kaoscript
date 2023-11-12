@@ -224,11 +224,27 @@ class ArrayType extends Type {
 			return @isAssignableToVariable(value.discard(), anycast, nullcast, downcast, limited)
 		}
 
-		if value.isArray() {
-			if @isNullable() && !nullcast && !value.isNullable() {
-				return false
+		if value is UnionType {
+			for var type in value.types() {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+					return true
+				}
+			}
+		}
+
+		if @isNullable() && !nullcast && !value.isNullable() {
+			return false
+		}
+
+		if value is DeferredType {
+			if value.isConstrainted() {
+				return @isAssignableToVariable(value.constraint(), anycast, true, downcast)
 			}
 
+			return true
+		}
+
+		if value.isArray() {
 			if @length == 0 && !@rest {
 				return true
 			}
@@ -240,14 +256,6 @@ class ArrayType extends Type {
 			}
 
 			return this.isSubsetOf(value, matchingMode)
-		}
-
-		if value is UnionType {
-			for var type in value.types() {
-				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
-					return true
-				}
-			}
 		}
 
 		return false
@@ -626,7 +634,7 @@ class ArrayType extends Type {
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		@toBlindTestFragments(varname, true, @testLength, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: String[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == .AND
 
 		if testingType && @length == 0 && !@destructuring && !@testProperties {

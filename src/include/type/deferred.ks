@@ -1,31 +1,80 @@
 class DeferredType extends Type {
 	private {
+		@constraint: Type?
+		@constrainted: Boolean
+		@generic: Generic?		= null
 		@name: String
-		@nullable: Boolean			= false
+		@nullable: Boolean		= false
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): DeferredType { # {{{
-			return DeferredType.new(data.name, scope)
+			var type = DeferredType.new(data.name, null, scope)
+
+			if ?data.constraint {
+				queue.push(() => {
+					type._constraint = Type.import(data.type, metadata, references, alterations, queue, scope, node)
+					type._constrainted = true
+				})
+			}
+
+			return type
 		} # }}}
 	}
-	constructor(@name, @scope) { # {{{
+	constructor(@name, @constraint, @scope) { # {{{
 		super(scope)
+
+		@constrainted = ?@constraint
+	} # }}}
+	constructor(@generic, @scope) { # {{{
+		this(generic.name, generic.type, scope)
+	} # }}}
+	addConstraint(value: Type) { # {{{
+		if @constrainted {
+			NotImplementedException.throw()
+		}
+		else {
+			@constraint = value
+			@constrainted = true
+
+			if ?@generic {
+				@generic.type = value
+			}
+		}
 	} # }}}
 	override canBeDeferred() => true
 	override clone() { # {{{
-		var type = DeferredType.new(@name, @scope)
+		var type = DeferredType.new(@name, @constraint, @scope)
 
 		type._nullable = @nullable
 
 		return type
 	} # }}}
+	constraint() => @constraint
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
 			kind: TypeKind.Deferred
 			@name
+			constraint: @constraint.toReference(references, indexDelta, mode, module) if ?@constraint
 		}
 	} # }}}
-	override hashCode() => `<\(@name)>`
+	override getProperty(name) { # {{{
+		if @constrainted {
+			return @constraint.getProperty(name) ?? AnyType.NullableUnexplicit
+		}
+		else {
+			return AnyType.NullableUnexplicit
+		}
+	} # }}}
+	override hashCode() { # {{{
+		if @constrainted {
+			return `<\(@name) is \(@constraint.hashCode())>`
+		}
+		else {
+			return `<\(@name)>`
+		}
+	} # }}}
+	override isAny() => !@constrainted
+	override isArray() => @constrainted && @constraint.isArray()
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if this == value {
 			return true
@@ -43,6 +92,8 @@ class DeferredType extends Type {
 
 		return false
 	} # }}}
+	override isComplete() => true
+	isConstrainted() => @constrainted
 	override isDeferred() => true
 	override isNullable() => @nullable
 	override isNullable(generics: AltType[]?) { # {{{
@@ -56,6 +107,7 @@ class DeferredType extends Type {
 
 		return true
 	} # }}}
+	override isObject() => @constrainted && @constraint.isObject()
 	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Anycast {
 			return !@nullable || value.isNullable() || mode ~~ MatchingMode.NonNullToNull
@@ -94,7 +146,10 @@ class DeferredType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
-		if nullable || @nullable {
+		if @constrainted {
+			@constraint.toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node)
+		}
+		else if nullable || @nullable {
 			fragments.code(`\($runtime.type(node)).any`)
 		}
 		else {
@@ -102,14 +157,28 @@ class DeferredType extends Type {
 		}
 	} # }}}
 	override toBlindSubtestFunctionFragments(funcname, varname, _, generics, fragments, node) { # {{{
-		if var index ?= generics.indexOf(@name) {
-			fragments.code(`mapper[\(index)]`)
+		var mut nf = true
+
+		for var generic, index in generics while nf {
+			if @name == generic.name {
+				fragments.code(`mapper[\(index)]`)
+
+				nf = false
+			}
 		}
-		else {
+
+		if nf {
 			NotImplementedException.throw()
 		}
 	} # }}}
-	override toQuote() => `<\(@name)>`
+	override toQuote() { # {{{
+		if @constrainted {
+			return `<\(@name) is \(@constraint.toQuote())>`
+		}
+		else {
+			return `<\(@name)>`
+		}
+	} # }}}
 	override toVariations(variations) { # {{{
 		NotImplementedException.throw()
 	} # }}}

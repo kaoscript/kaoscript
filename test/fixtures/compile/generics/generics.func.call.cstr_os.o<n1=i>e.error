@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments ({name: Number}) (fixtures/compile/generics/generics.func.call.cstr_os.o<n1=i>e.ks:9)

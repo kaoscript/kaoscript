@@ -339,6 +339,18 @@ class ObjectType extends Type {
 			return false
 		}
 
+		if @isNullable() && !nullcast && !value.isNullable() {
+			return false
+		}
+
+		if value is DeferredType {
+			if value.isConstrainted() {
+				return @isAssignableToVariable(value.constraint(), anycast, true, downcast)
+			}
+
+			return true
+		}
+
 		if value.isVariant() && value is ReferenceType && value.hasSubtypes() {
 			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
@@ -391,10 +403,6 @@ class ObjectType extends Type {
 		}
 
 		if value.isObject() {
-			if @isNullable() && !nullcast && !value.isNullable() {
-				return false
-			}
-
 			if @length == 0 && !@rest {
 				return true
 			}
@@ -1146,7 +1154,7 @@ class ObjectType extends Type {
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		@toBlindTestFragments(varname, @nullable, true, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: String[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
 		nullable ||= @nullable
 
 		fragments.code('(') if nullable && junction == .AND
@@ -1349,7 +1357,7 @@ class ObjectType extends Type {
 	} # }}}
 
 	private {
-		toSubtestFragments(funcname: String?, varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
+		toSubtestFragments(funcname: String?, varname: String, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
 			if testingType {
 				fragments.code(', 1')
 			}

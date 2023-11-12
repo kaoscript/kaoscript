@@ -14,7 +14,7 @@ class FunctionType extends Type {
 		@async: Boolean						= false
 		@autoTyping: Boolean				= false
 		@errors: Array<Type>				= []
-		@generics: String[]					= []
+		@generics: Generic[]				= []
 		@hasRest: Boolean					= false
 		@index: Number						= -1
 		@maxs: Number{}						= {}
@@ -44,15 +44,6 @@ class FunctionType extends Type {
 			target._returnType = source._returnType
 
 			return target
-		} # }}}
-		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
-		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { # {{{
-			if ?data.parameters {
-				return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters], data, node)
-			}
-			else {
-				return FunctionType.new([ParameterType.new(scope, Type.Any, 0, Infinity)], data, node)
-			}
 		} # }}}
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): FunctionType { # {{{
 			var type = FunctionType.new(scope)
@@ -163,9 +154,6 @@ class FunctionType extends Type {
 	} # }}}
 	addError(...types: Type) { # {{{
 		@errors.pushUniq(...types)
-	} # }}}
-	addGeneric(name: String) { # {{{
-		@generics.push(name)
 	} # }}}
 	addParameter(type: Type, name: String?, min, max) { # {{{
 		var parameter = ParameterType.new(@scope, name, name, type, min, max)

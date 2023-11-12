@@ -2,7 +2,7 @@ class TypeAliasDeclaration extends Statement {
 	private late {
 		@alias: AliasType
 		@name: String
-		@generics: String[]		= []
+		@generics: Generic[]		= []
 		@type: Type
 		@variable: Variable
 	}
@@ -15,9 +15,11 @@ class TypeAliasDeclaration extends Statement {
 	override postInitiate() { # {{{
 		if #@data.typeParameters {
 			for var parameter in @data.typeParameters {
-				@alias.addGeneric(parameter.name.name)
+				var generic = Type.toGeneric(parameter, this)
 
-				@generics.push(parameter.name.name)
+				@alias.addGeneric(generic)
+
+				@generics.push(generic)
 			}
 		}
 

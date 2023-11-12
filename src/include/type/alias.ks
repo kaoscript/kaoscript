@@ -1,6 +1,6 @@
 class AliasType extends Type {
 	private late {
-		@generics: String[]			= []
+		@generics: Generic[]		= []
 		@type: Type
 		@testIndex: Number?			= null
 	}
@@ -31,8 +31,8 @@ class AliasType extends Type {
 	constructor(@scope, @type) { # {{{
 		super(scope)
 	} # }}}
-	addGeneric(name: String) { # {{{
-		@generics.push(name)
+	addGeneric(value: Generic) { # {{{
+		@generics.push(value)
 	} # }}}
 	canBeBoolean() => @type.canBeBoolean()
 	canBeEnum(any = true) => @type.canBeEnum(any)
@@ -60,7 +60,13 @@ class AliasType extends Type {
 		}
 	} # }}}
 	generics() => @generics
-	getGenericIndex(name: String) => @generics.indexOf(name)
+	getGenericIndex(name: String) { # {{{
+		for var generic, index in @generics {
+			return index if name == generic.name
+		}
+
+		return null
+	} # }}}
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String): Type => @type.getProperty(name)
 	getTestIndex() => @testIndex

@@ -204,6 +204,11 @@ type AltType = {
 // TODO!
 // type AltTypes = AltType[]
 
+
+type Generic = {
+	name: String
+	type: Type?
+}
 type Variant = {
 	names: String[]
 	type: Type
@@ -234,7 +239,7 @@ abstract class Type {
 
 			return type
 		} # }}}
-		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, generics: String[]? = null, node: AbstractNode): Type { # {{{
+		fromAST(mut data?, scope: Scope = node.scope(), defined: Boolean = true, generics: Generic[]? = null, node: AbstractNode): Type { # {{{
 			if !?data {
 				return AnyType.NullableUnexplicit
 			}
@@ -255,11 +260,11 @@ abstract class Type {
 					}
 
 					for var property in data.properties {
-						type.addProperty(Type.fromAST(property.type, scope, defined, node))
+						type.addProperty(Type.fromAST(property.type, scope, defined, generics, node))
 					}
 
 					if ?data.rest {
-						type.setRestType(Type.fromAST(data.rest.type, scope, defined, node))
+						type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
 					}
 
 					return type
@@ -279,21 +284,21 @@ abstract class Type {
 					return NamedType.new(data.name.name, type.flagComplete())
 				}
 				NodeKind.ExclusionType {
-					return ExclusionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return ExclusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
 				NodeKind.FunctionDeclaration, NodeKind.MethodDeclaration {
 					if ?data.parameters {
-						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters], data, node).flagComplete()
+						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
 						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
 					}
 				}
 				NodeKind.FunctionExpression {
-					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, node) for var parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
+					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
 				}
 				NodeKind.FusionType {
-					return FusionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return FusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
 				NodeKind.Identifier {
 					if var variable ?= scope.getVariable(data.name) {
@@ -307,7 +312,7 @@ abstract class Type {
 					}
 				}
 				NodeKind.MemberExpression {
-					var object = Type.fromAST(data.object, scope, defined, node)
+					var object = Type.fromAST(data.object, scope, defined, generics, node)
 
 					if object.isAny() {
 						return Type.Any
@@ -363,7 +368,7 @@ abstract class Type {
 					var mut type = NamespaceType.new(scope)
 
 					for var property in data.types {
-						type.addProperty(property.name.name, Type.fromAST(property, scope, defined, node))
+						type.addProperty(property.name.name, Type.fromAST(property, scope, defined, generics, node))
 					}
 
 					return type.flagComplete()
@@ -390,7 +395,7 @@ abstract class Type {
 
 									var parameter = data.typeParameters[0]
 
-									type.setRestType(Type.fromAST(parameter, scope, defined, node))
+									type.setRestType(Type.fromAST(parameter, scope, defined, generics, node))
 
 									return type.flagComplete()
 								}
@@ -399,10 +404,10 @@ abstract class Type {
 
 									var parameter = data.typeParameters[0]
 
-									type.setRestType(Type.fromAST(parameter, scope, defined, node))
+									type.setRestType(Type.fromAST(parameter, scope, defined, generics, node))
 
 									if var parameter ?= data.typeParameters[1] {
-										type.setKeyType(Type.fromAST(parameter, scope, defined, node))
+										type.setKeyType(Type.fromAST(parameter, scope, defined, generics, node))
 									}
 
 									return type.flagComplete()
@@ -412,7 +417,7 @@ abstract class Type {
 										ReferenceException.throwNotDefinedType(name, node)
 									}
 
-									var parameters = [Type.fromAST(parameter, scope, defined, node) for var parameter in data.typeParameters]
+									var parameters = [Type.fromAST(parameter, scope, defined, generics, node) for var parameter in data.typeParameters]
 
 									var type = ReferenceType.new(scope, name, nullable, parameters)
 									var root = type.discard()
@@ -455,10 +460,14 @@ abstract class Type {
 								TypeException.throwNotVariant(name, node)
 							}
 						}
-						else if generics?.contains(data.typeName.name) {
-							return DeferredType.new(data.typeName.name, scope)
+
+						if #generics {
+							for var generic in generics when generic.name == data.typeName.name {
+								return DeferredType.new(generic, scope)
+							}
 						}
-						else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
+
+						if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 							if var variable ?= scope.getVariable(name, -1) {
 								var type = variable.getDeclaredType()
 
@@ -474,7 +483,7 @@ abstract class Type {
 						}
 					}
 					else if data.typeName.kind == NodeKind.MemberExpression && !data.typeName.computed {
-						var type = Type.fromAST(data.typeName.object, scope, defined, node)
+						var type = Type.fromAST(data.typeName.object, scope, defined, generics, node)
 						var property = data.typeName.property.name
 
 						if type.isVariant() {
@@ -497,7 +506,7 @@ abstract class Type {
 				NodeKind.UnaryTypeExpression {
 					match data.operator.kind {
 						UnaryTypeOperatorKind.Constant {
-							return Type.fromAST(data.argument, scope, defined, node).flagConstant()
+							return Type.fromAST(data.argument, scope, defined, generics, node).flagConstant()
 						}
 						UnaryTypeOperatorKind.TypeOf {
 							if data.argument.kind == NodeKind.Identifier && data.argument.name == 'this' {
@@ -525,10 +534,10 @@ abstract class Type {
 					}
 				}
 				NodeKind.UnionType {
-					return UnionType.new(scope, [Type.fromAST(type, scope, defined, node) for var type in data.types])
+					return UnionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
 				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
-					return Type.fromAST(data.type, scope, defined, node)
+					return Type.fromAST(data.type, scope, defined, generics, node)
 				}
 				NodeKind.VariantType {
 					var type = VariantType.new(scope)
@@ -734,6 +743,14 @@ abstract class Type {
 			return type
 		} # }}}
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
+		toGeneric({ name, constraint? }, node: AbstractNode): Generic { # {{{
+			if ?constraint {
+				return { name: name.name, type: Type.fromAST(constraint, node) }
+			}
+			else {
+				return { name: name.name }
+			}
+		} # }}}
 		toNamedType(name: String, type: Type): Type { # {{{
 			return type unless type.shallBeNamed()
 
@@ -808,7 +825,7 @@ abstract class Type {
 	discardVariable(): Type => this
 	// TODO to remove
 	equals(value?): Boolean => ?value && @isSubsetOf(value, MatchingMode.Exact)
-	finalize(data, generics: String[], node: AbstractNode): Void
+	finalize(data, generics: Generic[], node: AbstractNode): Void
 	flagAlien() { # {{{
 		@alien = true
 
@@ -1054,13 +1071,13 @@ abstract class Type {
 
 		@toBlindTestFragments(varname, null, Junction.NONE, fragments, node)
 	} # }}}
-	toBlindSubtestFunctionFragments(funcname: String?, varname: String, nullable: Boolean, generics: String[]?, fragments, node) { # {{{
+	toBlindSubtestFunctionFragments(funcname: String?, varname: String, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
 		@toAwareTestFunctionFragments(varname, nullable, null, null, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, generics: String[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(varname: String, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	toBlindTestFunctionFragments(funcname: String?, varname: String, testingType: Boolean, generics: String[]?, fragments, node) { # {{{
+	toBlindTestFunctionFragments(funcname: String?, varname: String, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
 		@toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{

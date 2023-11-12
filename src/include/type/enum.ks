@@ -651,7 +651,7 @@ class EnumMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
 			var scope = node.scope()
 
-			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, node) for var parameter in data.parameters], data, node)
+			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
 			var data = index

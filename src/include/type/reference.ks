@@ -518,14 +518,14 @@ class ReferenceType extends Type {
 		var mut generics = null
 
 		if @type.isAlias() && @type is NamedType {
-			if var names #= @type.type().generics() {
-				if @parameters.length > names.length {
+			if var originals #= @type.type().generics() {
+				if @parameters.length > originals.length {
 					NotImplementedException.throw()
 				}
 
 				generics = []
 
-				for var name, index in names {
+				for var { name }, index in originals {
 					if var type ?= @parameters[index] {
 						generics.push({ name, type })
 					}
@@ -873,6 +873,15 @@ class ReferenceType extends Type {
 				return false
 			}
 		}
+		else if value is DeferredType {
+			return false unless !@nullable || nullcast || value.isNullable()
+
+			if value.isConstrainted() {
+				return @isAssignableToVariable(value.constraint(), anycast, true, downcast)
+			}
+
+			return true
+		}
 		else if value is FusionType {
 			for var type in value.types() {
 				if !@isAssignableToVariable(type, anycast, nullcast, downcast) {
@@ -905,9 +914,6 @@ class ReferenceType extends Type {
 			var mode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
 			return @isSubsetOf(value, mode)
-		}
-		else if value is DeferredType {
-			return !@nullable || nullcast || value.isNullable()
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -1120,7 +1126,12 @@ class ReferenceType extends Type {
 
 			for var { name, type } in generics {
 				if name == valname {
-					return @isSubsetOf(type, generics, subtypes, mode)
+					if ?type {
+						return @isSubsetOf(type, generics, subtypes, mode)
+					}
+					else {
+						return true
+					}
 				}
 			}
 		}
@@ -2182,8 +2193,8 @@ class ReferenceType extends Type {
 			}
 
 			// TODO!
-			// for var name in generics while ?map[name] {
-			for var name in generics {
+			// for var { name } in generics while ?map[name] {
+			for var { name } in generics {
 				if ?map[name] {
 					parameters.push(map[name])
 				}

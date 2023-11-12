@@ -52,7 +52,9 @@
         },
         "testIndex": 0,
         "generics": [
-          "T"
+          {
+            "name": "T"
+          }
         ]
       }
     ],

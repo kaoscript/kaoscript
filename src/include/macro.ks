@@ -476,7 +476,7 @@ class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode): MacroType { # {{{
 		var scope = node.scope()
 
-		return MacroType.new([ParameterType.fromAST(parameter, false, scope, false, node) for var parameter in data.parameters], data, node)
+		return MacroType.new([ParameterType.fromAST(parameter, false, scope, false, null, node) for var parameter in data.parameters], data, node)
 	} # }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { # {{{
 		var type = MacroType.new(scope)

@@ -19,7 +19,7 @@ class Parameter extends AbstractNode {
 		@defaultValue						= null
 		@existential: Boolean				= false
 		@explicitlyRequired: Boolean		= false
-		@generics: String[]					= []
+		@generics: Generic[]
 		@hasDefaultValue: Boolean			= false
 		@headedDefaultValue: Boolean		= false
 		@header: Boolean					= false
@@ -754,6 +754,10 @@ class Parameter extends AbstractNode {
 
 		if @internal.isBinding() {
 			type = @internal.type().asReference().merge(declaredType, null, null, this)
+
+			if declaredType is DeferredType {
+				declaredType.addConstraint(@internal.type())
+			}
 		}
 		else {
 			type = @type.getVariableType()
