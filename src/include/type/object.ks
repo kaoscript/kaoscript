@@ -68,6 +68,15 @@ class ObjectType extends Type {
 			@variantType = type
 		}
 	} # }}}
+	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
+		for var property of @properties when property.isDeferrable() {
+			property.buildGenericMap(position, expressions, decompose, genericMap)
+		}
+
+		if @rest && @restType.isDeferrable() {
+			@restType.buildGenericMap(position, expressions, value => decompose(value).getRestType(), genericMap)
+		}
+	} # }}}
 	override canBeDeferred() => @testGenerics
 	clone() { # {{{
 		var type = ObjectType.new(@scope)
@@ -427,6 +436,15 @@ class ObjectType extends Type {
 	} # }}}
 	isBinding() => true
 	isComplex() => @destructuring || @testRest || @testProperties || @variant
+	override isDeferrable() { # {{{
+		return true if @rest && @restType.isDeferrable()
+
+		for var property of @properties {
+			return true if property.isDeferrable()
+		}
+
+		return false
+	} # }}}
 	isDestructuring() => @destructuring
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false

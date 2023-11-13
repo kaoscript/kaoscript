@@ -116,7 +116,7 @@ class ReferenceType extends Type {
 			ReferenceException.throwUndefinedVariantField(@name, name, node)
 		}
 	} # }}}
-	applyGenerics(generics: AltType[]): ReferenceType {
+	override applyGenerics(generics) { # {{{
 		var result = @clone()
 
 		for var parameter, index in result._parameters {
@@ -136,7 +136,7 @@ class ReferenceType extends Type {
 		}
 
 		return result
-	}
+	} # }}}
 	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
 	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
 	canBeFunction(any = true) => @isUnion() ? @type.canBeFunction(any) : super(any)

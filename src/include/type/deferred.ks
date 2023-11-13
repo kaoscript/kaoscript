@@ -41,6 +41,26 @@ class DeferredType extends Type {
 			}
 		}
 	} # }}}
+	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
+		genericMap[@name] ??= []
+
+		if position is Array {
+			NotImplementedException.throw()
+		}
+		else {
+			var { index?, element? } = position
+
+			if !?index {
+				pass
+			}
+			else if ?element {
+				genericMap[@name].push(decompose(expressions[index].argument().type()))
+			}
+			else {
+				genericMap[@name].push(decompose(expressions[index].type()))
+			}
+		}
+	} # }}}
 	override canBeDeferred() => true
 	override clone() { # {{{
 		var type = DeferredType.new(@name, @constraint, @scope)
@@ -98,6 +118,7 @@ class DeferredType extends Type {
 	} # }}}
 	override isComplete() => true
 	isConstrainted() => @constrainted
+	override isDeferrable() => true
 	override isDeferred() => true
 	override isNullable() => @nullable
 	override isNullable(generics: AltType[]?) { # {{{

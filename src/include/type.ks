@@ -785,7 +785,9 @@ abstract class Type {
 	abstract export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	abstract toFragments(fragments, node)
 	abstract toVariations(variations: Array<String>): Void
+	applyGenerics(generics: AltType[]): Type => this
 	asReference(): Type => this
+	buildGenericMap(position: CallMatchPosition, expressions: Expression[], decompose: (value: Type): Type, genericMap: Type{})
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
 	canBeDeferred(): Boolean => false

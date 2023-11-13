@@ -41,6 +41,15 @@ class ArrayType extends Type {
 		@length += 1
 		@testProperties ||= !type.isAny() || !type.isNullable()
 	} # }}}
+	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
+		for var property in @properties when property.isDeferrable() {
+			property.buildGenericMap(position, expressions, decompose, genericMap)
+		}
+
+		if @rest && @restType.isDeferrable() {
+			@restType.buildGenericMap(position, expressions, value => decompose(value).getRestType(), genericMap)
+		}
+	} # }}}
 	clone() { # {{{
 		var type = ArrayType.new(@scope)
 
@@ -262,6 +271,15 @@ class ArrayType extends Type {
 	} # }}}
 	isBinding() => true
 	isComplete() => true
+	override isDeferrable() { # {{{
+		return true if @rest && @restType.isDeferrable()
+
+		for var property in @properties {
+			return true if property.isDeferrable()
+		}
+
+		return false
+	} # }}}
 	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Array').isExhaustive()
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false

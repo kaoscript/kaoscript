@@ -238,30 +238,10 @@ class FunctionType extends Type {
 		var map = {}
 
 		for var position, index in positions {
-			var parameter = @parameters[index].type()
+			var parameter = @parameters[index].type().type()
 
-			continue unless parameter.type().isDeferred()
-
-			var name = parameter.type().name()
-
-			map[name] ??= []
-
-			if position is Array {
-				NotImplementedException.throw()
-			}
-			else {
-				var { index?, element? } = position
-
-				if !?index {
-					continue
-				}
-
-				if ?element {
-					map[name].push(expressions[index].argument().type())
-				}
-				else {
-					map[name].push(expressions[index].type())
-				}
+			if parameter.isDeferrable() {
+				parameter.buildGenericMap(position, expressions, value => value, map)
 			}
 		}
 
