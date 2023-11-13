@@ -263,7 +263,7 @@ class EnumType extends Type {
 
 		return @addStaticMethod(name, type)
 	} # }}}
-	explodeVarnames(values: { name: String }[]): String[] { # {{{
+	explodeVarnames(...values: { name: String }): String[] { # {{{
 		var result = []
 
 		for var { name } in values {

@@ -63,9 +63,9 @@ class VariantType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	discardVariable() => @master
-	explodeVarnames(values: { name: String }[]): String[] { # {{{
+	explodeVarnames(...values: { name: String }): String[] { # {{{
 		if @kind == .Enum {
-			return @enum.explodeVarnames(values)
+			return @enum.explodeVarnames(...values)
 		}
 		else {
 			var result = []

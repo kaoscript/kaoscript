@@ -47,7 +47,7 @@ class ArrayType extends Type {
 		}
 
 		if @rest && @restType.isDeferrable() {
-			@restType.buildGenericMap(position, expressions, value => decompose(value).getRestType(), genericMap)
+			@restType.buildGenericMap(position, expressions, value => decompose(value).parameter(), genericMap)
 		}
 	} # }}}
 	clone() { # {{{

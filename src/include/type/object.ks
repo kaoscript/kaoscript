@@ -74,7 +74,7 @@ class ObjectType extends Type {
 		}
 
 		if @rest && @restType.isDeferrable() {
-			@restType.buildGenericMap(position, expressions, value => decompose(value).getRestType(), genericMap)
+			@restType.buildGenericMap(position, expressions, value => decompose(value).parameter(), genericMap)
 		}
 	} # }}}
 	override canBeDeferred() => @testGenerics
@@ -368,7 +368,7 @@ class ObjectType extends Type {
 			}
 
 			var { type % object, generics, subtypes } = value.getGenericMapper()
-			var variant = object.getVariantType()
+			var variant: VariantType = object.getVariantType()
 
 			for var type, name of object.properties() {
 				if var prop ?= @properties[name] {
@@ -385,11 +385,15 @@ class ObjectType extends Type {
 				var mut matched = false
 				var propname = prop.value()
 
-				for var { name, type } in value.getSubtypes() {
-					if variant.getField(propname) == variant.getField(name) {
-						Object.merge(newProperties, variant.getField(propname).type.properties())
+				for var { name } in value.getSubtypes() {
+					var names = variant.explodeVarnames({ name })
 
+					if names.contains(propname) {
 						matched = true
+
+						if var field ?= variant.getField(propname) {
+							Object.merge(newProperties, field.type.properties())
+						}
 					}
 				}
 

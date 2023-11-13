@@ -813,22 +813,12 @@ class ReferenceType extends Type {
 
 				if #@subtypes {
 					if value.hasSubtypes() {
-						var variant = @discard().getVariantType()
+						var variant: VariantType = @discard().getVariantType()
 
-						if variant.canBeBoolean() {
-							var names = [name for var { name } in value.getSubtypes()]
+						var names = variant.explodeVarnames(...value.getSubtypes())
 
-							for var { name } in @subtypes {
-								return false unless names.contains(name)
-							}
-						}
-						else {
-							var enum: EnumType = variant.getEnumType()
-							var names = enum.explodeVarnames(value.getSubtypes())
-
-							for var { name } in @subtypes {
-								return false unless names.contains(name)
-							}
+						for var { name } in @subtypes {
+							return false unless names.contains(name)
 						}
 					}
 				}
@@ -1275,7 +1265,7 @@ class ReferenceType extends Type {
 				if value.hasSubtypes() {
 					var variant: VariantType = value.discard().getVariantType()
 
-					var names = variant.explodeVarnames(value.getSubtypes())
+					var names = variant.explodeVarnames(...value.getSubtypes())
 
 					if #@subtypes {
 						for var { name } in @subtypes {
