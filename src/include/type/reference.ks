@@ -1157,6 +1157,9 @@ class ReferenceType extends Type {
 				}
 			}
 		}
+		else if value.isConstrainted() {
+			return @isSubsetOf(value.constraint(), generics, subtypes, mode)
+		}
 
 		return false
 	} # }}}
@@ -1269,9 +1272,11 @@ class ReferenceType extends Type {
 					return false
 				}
 
-				var names = [name for var { name } in value.getSubtypes()]
+				if value.hasSubtypes() {
+					var variant: VariantType = value.discard().getVariantType()
 
-				if #names {
+					var names = variant.explodeVarnames(value.getSubtypes())
+
 					if #@subtypes {
 						for var { name } in @subtypes {
 							return false unless names.contains(name)

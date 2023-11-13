@@ -255,7 +255,7 @@ class ArrayType extends Type {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
 			}
 
-			return this.isSubsetOf(value, matchingMode)
+			return @isSubsetOf(value, matchingMode)
 		}
 
 		return false
