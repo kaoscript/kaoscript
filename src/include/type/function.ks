@@ -238,7 +238,7 @@ class FunctionType extends Type {
 		var map = {}
 
 		for var position, index in positions {
-			var parameter = @parameters[index].type().type()
+			var parameter = @parameters[index].type()
 
 			if parameter.isDeferrable() {
 				parameter.buildGenericMap(position, expressions, value => value, map)

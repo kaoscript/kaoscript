@@ -787,7 +787,7 @@ abstract class Type {
 	abstract toVariations(variations: Array<String>): Void
 	applyGenerics(generics: AltType[]): Type => this
 	asReference(): Type => this
-	buildGenericMap(position: CallMatchPosition, expressions: Expression[], decompose: (value: Type): Type, genericMap: Type{})
+	buildGenericMap(position: CallMatchPosition, expressions: Expression[], decompose: (value: Type): Type, genericMap: Type[]{}): Void
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
 	canBeDeferred(): Boolean => false
