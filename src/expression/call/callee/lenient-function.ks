@@ -36,15 +36,38 @@ class LenientFunctionCallee extends Callee {
 		@scope = data.scope.kind
 		@function = @functions[0]
 
-		var types = []
+		if @functions.length == 1 {
+			@type = @function.getReturnType()
 
-		for var function in @functions {
-			@validate(function, node)
+			if @type.isDeferred() {
+				var typeName = @type.name()
+				var generics = @function.buildGenericMap(node.arguments())
 
-			types.pushUniq(function.getReturnType())
+				for var { name, type } in generics {
+					if name == typeName {
+						@type = type
+
+						break
+					}
+				}
+			}
+			else if @type.isDeferrable() {
+				var generics = @function.buildGenericMap(node.arguments())
+
+				@type = @type.applyGenerics(generics)
+			}
 		}
+		else {
+			var types = []
 
-		@type = Type.union(node.scope(), ...types)
+			for var function in @functions {
+				@validate(function, node)
+
+				types.pushUniq(function.getReturnType())
+			}
+
+			@type = Type.union(node.scope(), ...types)
+		}
 
 		@hash = 'lenient'
 		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`

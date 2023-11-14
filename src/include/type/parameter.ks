@@ -357,6 +357,7 @@ class ParameterType extends Type {
 
 	proxy @type {
 		isComplete
+		isDeferrable
 		toNegativeTestFragments
 		toPositiveTestFragments
 	}

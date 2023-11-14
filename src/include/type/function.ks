@@ -232,6 +232,30 @@ class FunctionType extends Type {
 	async() { # {{{
 		@async = true
 	} # }}}
+	buildGenericMap(expressions: Expression[]?): AltType[] { # {{{
+		return [] unless #expressions
+
+		var map = {}
+
+		for var parameter, index in @parameters {
+			if parameter.isDeferrable() {
+				parameter.type().buildGenericMap(CallMatchArgument.new(index), expressions, value => value, map)
+			}
+		}
+
+		var result = []
+
+		for var types, name of map {
+			if types.length == 1 {
+				result.push({ name, type: types[0] })
+			}
+			else {
+				NotImplementedException.throw()
+			}
+		}
+
+		return result
+	} # }}}
 	buildGenericMap(positions: CallMatchPosition[], expressions: Expression[]?): AltType[] { # {{{
 		return [] unless #expressions
 
