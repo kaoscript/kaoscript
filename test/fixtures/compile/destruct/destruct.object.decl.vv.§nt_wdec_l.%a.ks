@@ -1,3 +1,3 @@
 func foobar(values) {
-	var { x ##= [] } = values
+	var { x ?##= [] } = values
 }

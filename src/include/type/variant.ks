@@ -156,7 +156,7 @@ class VariantType extends Type {
 		}
 	} # }}}
 	isValidField({ names }: Variant, subtypes: AltType[]?) { # {{{
-		return true unless #subtypes
+		return true unless ?#subtypes
 
 		for var { name } in subtypes {
 			if names.contains(name) {

@@ -161,7 +161,7 @@ class DefaultCallee extends Callee {
 
 		for var argument in arguments {
 			if argument is PlaceholderArgument {
-				fragments.code($comma) if #parameters
+				fragments.code($comma) if ?#parameters
 
 				var name = `__ks_\(parameters.length)`
 

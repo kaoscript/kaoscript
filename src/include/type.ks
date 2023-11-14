@@ -388,7 +388,7 @@ abstract class Type {
 						if name == 'Any' {
 							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
 						}
-						else if #data.typeParameters {
+						else if ?#data.typeParameters {
 							match name {
 								'Array' {
 									var type = ArrayType.new(scope).setNullable(nullable)
@@ -425,13 +425,13 @@ abstract class Type {
 									if root.isVariant() {
 										var master = root.getVariantType().getMaster()
 
-										if #data.typeSubtypes {
+										if ?#data.typeSubtypes {
 											for var subtype in data.typeSubtypes {
 												type.addSubtype(subtype.name, master, node)
 											}
 										}
 									}
-									else if #data.typeSubtypes {
+									else if ?#data.typeSubtypes {
 										NotImplementedException.throw()
 									}
 
@@ -439,7 +439,7 @@ abstract class Type {
 								}
 							}
 						}
-						else if #data.typeSubtypes {
+						else if ?#data.typeSubtypes {
 							unless scope.hasVariable(name, -1) {
 								ReferenceException.throwNotDefinedType(name, node)
 							}
@@ -461,7 +461,7 @@ abstract class Type {
 							}
 						}
 
-						if #generics {
+						if ?#generics {
 							for var generic in generics when generic.name == data.typeName.name {
 								return DeferredType.new(generic, scope)
 							}
@@ -1006,7 +1006,7 @@ abstract class Type {
 	isSubsetOf(value: Type, generics: AltType[]? = null, subtypes: AltType[]? = null, mode: MatchingMode): Boolean => false
 	// TODO!
 	// assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
-	// 	if #generics {
+	// 	if ?#generics {
 	// 		var valname = value.name()
 
 	// 		for var { name, type } in generics {

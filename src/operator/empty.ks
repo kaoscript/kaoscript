@@ -195,7 +195,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 		fragments.code(', true) : false')
 	} # }}}
 	toQuote() { # {{{
-		return `\(@left.toQuote()) #= \(@right.toQuote())`
+		return `\(@left.toQuote()) ?#= \(@right.toQuote())`
 	} # }}}
 	type() => @scope.reference('Boolean')
 	override validate(target)

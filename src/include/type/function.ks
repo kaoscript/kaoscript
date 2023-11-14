@@ -126,7 +126,7 @@ class FunctionType extends Type {
 			@missingReturn = false
 		}
 
-		if #parameters {
+		if ?#parameters {
 			for var parameter in parameters {
 				@addParameter(parameter, node)
 			}
@@ -233,7 +233,7 @@ class FunctionType extends Type {
 		@async = true
 	} # }}}
 	buildGenericMap(expressions: Expression[]?): AltType[] { # {{{
-		return [] unless #expressions
+		return [] unless ?#expressions
 
 		var map = {}
 
@@ -257,7 +257,7 @@ class FunctionType extends Type {
 		return result
 	} # }}}
 	buildGenericMap(positions: CallMatchPosition[], expressions: Expression[]?): AltType[] { # {{{
-		return [] unless #expressions
+		return [] unless ?#expressions
 
 		var map = {}
 
@@ -348,7 +348,7 @@ class FunctionType extends Type {
 	hashCode() { # {{{
 		var mut fragments = ''
 
-		if #@generics {
+		if ?#@generics {
 			fragments += `<\(@generics.join(', '))>`
 		}
 
@@ -362,7 +362,7 @@ class FunctionType extends Type {
 				fragments += `this: \(@thisType.toQuote())`
 			}
 
-			if #@parameters {
+			if ?#@parameters {
 				fragments += ', '
 			}
 		}
@@ -388,7 +388,7 @@ class FunctionType extends Type {
 		return fragments
 	} # }}}
 	hasAssignableThis() => @assignableThis
-	hasGenerics() => #@generics
+	hasGenerics() => ?#@generics
 	hasRestParameter(): valueof @hasRest
 	hasVarargsParameter() { # {{{
 		for var parameter in @parameters {
@@ -820,7 +820,7 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	max(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
-		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
+		var key = ?#excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
 		if var max ?= @maxs[key] {
 			return max
@@ -867,7 +867,7 @@ class FunctionType extends Type {
 		return max
 	} # }}}
 	min(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
-		var key = #excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
+		var key = ?#excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
 
 		if var min ?= @mins[key] {
 			return min
@@ -973,7 +973,7 @@ class FunctionType extends Type {
 	toQuote() { # {{{
 		var mut fragments = ''
 
-		if #@generics {
+		if ?#@generics {
 			fragments += `<\(@generics.join(', '))>`
 		}
 
@@ -987,7 +987,7 @@ class FunctionType extends Type {
 				fragments += `this: \(@thisType.toQuote())`
 			}
 
-			if #@parameters {
+			if ?#@parameters {
 				fragments += ', '
 			}
 		}

@@ -122,7 +122,7 @@ class DeferredType extends Type {
 	override isDeferred() => true
 	override isNullable() => @nullable
 	override isNullable(generics: AltType[]?) { # {{{
-		return true if @nullable || !#generics
+		return true if @nullable || !?#generics
 
 		for var { name, type } in generics {
 			if name == @name {
@@ -182,7 +182,7 @@ class DeferredType extends Type {
 		}
 	} # }}}
 	override toBlindSubtestFunctionFragments(funcname, varname, _, generics, fragments, node) { # {{{
-		if #generics {
+		if ?#generics {
 			var mut nf = true
 
 			for var generic, index in generics while nf {

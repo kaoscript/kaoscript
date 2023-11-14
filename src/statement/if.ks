@@ -92,7 +92,7 @@ class IfStatement extends Statement {
 			@conditions.push(condition)
 		}
 
-		@hasCondition = #@conditions
+		@hasCondition = ?#@conditions
 
 		@scope.line(@data.whenTrue.start.line)
 
@@ -579,7 +579,7 @@ class IfStatement extends Statement {
 				declaration.listAssignments(assignments)
 			}
 
-			if #assignments {
+			if ?#assignments {
 				fragments.line(`let \([name for var { name } in assignments].join(', '))`)
 			}
 		}

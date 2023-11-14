@@ -1058,7 +1058,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
-		if #@aliases {
+		if ?#@aliases {
 			@block.analyse(0, index)
 
 			@block.analyse(@aliases)

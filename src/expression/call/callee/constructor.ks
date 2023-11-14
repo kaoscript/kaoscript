@@ -134,7 +134,7 @@ class ConstructorCallee extends Callee {
 					fragments.code('new ').compile(@factory).code('(')
 				}
 
-				if #@result.possibilities {
+				if ?#@result.possibilities {
 					Router.Argument.toFragments(@result.positions, null, arguments, @result.possibilities[0], @assessment.labelable, false, false, fragments, mode)
 				}
 				else {
@@ -149,7 +149,7 @@ class ConstructorCallee extends Callee {
 				if @hybrid {
 					fragments.code('new ').compile(@factory).code('(')
 
-					if #arguments {
+					if ?#arguments {
 						var { function, positions } = @result.matches[0]
 
 						Router.Argument.toFragments(positions, null, arguments, function, @assessment.labelable, false, true, fragments, mode)

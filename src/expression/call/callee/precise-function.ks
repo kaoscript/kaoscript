@@ -156,7 +156,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 							.compile(@expression)
 							.code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(`)
 							.compile(@node.getCallScope())
-							.code($comma) if #arguments
+							.code($comma) if ?#arguments
 					}
 					ScopeKind.This {
 						fragments.compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index())(`)

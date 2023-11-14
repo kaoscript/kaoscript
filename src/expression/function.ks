@@ -16,7 +16,7 @@ class AnonymousFunctionExpression extends Expression {
 	analyse() { # {{{
 		@scope.line(@data.start.line)
 
-		if #@data.parameters {
+		if ?#@data.parameters {
 			var mut firstParameter = 0
 			var parameter = @data.parameters[0]
 

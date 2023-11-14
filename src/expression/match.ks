@@ -576,6 +576,6 @@ class EnumPossibilityTracker extends PossibilityTracker {
 		}
 	} # }}}
 	override isFinite() => true
-	override isFullyMatched() => !#@possibilities
+	override isFullyMatched() => !?#@possibilities
 	override listUnmatched() => @possibilities
 }

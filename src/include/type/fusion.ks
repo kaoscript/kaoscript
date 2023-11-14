@@ -25,7 +25,7 @@ class FusionType extends Type {
 	constructor(@scope, types: Type[]? = null) { # {{{
 		super(scope)
 
-		if #types {
+		if ?#types {
 			for var type in types {
 				@addType(type)
 			}
@@ -273,10 +273,10 @@ class FusionType extends Type {
 		nullable ||= @nullable
 
 		if ?@testName {
-			if nullable || #generics || (@variant && #subtypes) {
+			if nullable || ?#generics || (@variant && ?#subtypes) {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
 
-				if #generics {
+				if ?#generics {
 					fragments.code(`, [`)
 
 					for var { type }, index in generics {
@@ -288,7 +288,7 @@ class FusionType extends Type {
 					fragments.code(`]`)
 				}
 
-				if @variant && #subtypes {
+				if @variant && ?#subtypes {
 					var variantType = @getVariantType()
 
 					if variantType.canBeBoolean() {

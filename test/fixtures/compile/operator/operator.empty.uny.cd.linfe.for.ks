@@ -1,5 +1,5 @@
 func foobar(values: Array<Number>?) {
-	if #values {
+	if ?#values {
 		var mut count = 0
 
 		for var value in values {

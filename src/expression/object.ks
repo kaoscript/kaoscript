@@ -107,7 +107,7 @@ class ObjectExpression extends Expression {
 
 		@type = ObjectType.new(@scope)
 
-		if #@properties {
+		if ?#@properties {
 			if root is ObjectType || (root is FusionType && root.isObject()) {
 				var keyed  = root.hasKeyType()
 				var keyType = keyed ? root.getKeyType() : AnyType.NullableUnexplicit
@@ -173,7 +173,7 @@ class ObjectExpression extends Expression {
 					}
 				}
 
-				if #rest {
+				if ?#rest {
 					@type.setRestType(Type.union(@scope, ...rest))
 				}
 			}
@@ -202,7 +202,7 @@ class ObjectExpression extends Expression {
 					}
 				}
 
-				if #rest {
+				if ?#rest {
 					@type.setRestType(Type.union(@scope, ...rest))
 				}
 			}

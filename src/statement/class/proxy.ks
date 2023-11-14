@@ -300,7 +300,7 @@ class ClassProxyGroupDeclaration extends Statement {
 
 					ctrl.done()
 
-					if #overloads {
+					if ?#overloads {
 						for var overload in overloads {
 							ctrl = fragments.newControl()
 

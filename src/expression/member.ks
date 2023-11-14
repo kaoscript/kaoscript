@@ -585,7 +585,7 @@ class MemberExpression extends Expression {
 					found = true
 				}
 				else if type is ReferenceType {
-					if var subtypes #= type.getSubtypes() {
+					if var subtypes ?#= type.getSubtypes() {
 						if subtypes.length == 1 {
 							var { name } = subtypes[0]
 							var variant = type.discard().getVariantType()

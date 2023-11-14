@@ -119,11 +119,11 @@ class ExpressionStatement extends Statement {
 			return this.toAwaitStatementFragments^^(fragments, ^)
 		}
 		else if @expression.isDeclarable() {
-			if #@assignments {
+			if ?#@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			if #@beforehands {
+			if ?#@beforehands {
 				for var beforehand in @beforehands {
 					beforehand.toBeforehandFragments(fragments, mode)
 				}
@@ -145,11 +145,11 @@ class ExpressionStatement extends Statement {
 			line.done()
 		}
 		else {
-			if #@assignments {
+			if ?#@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			if #@beforehands {
+			if ?#@beforehands {
 				for var beforehand in @beforehands {
 					beforehand.toBeforehandFragments(fragments, mode)
 				}

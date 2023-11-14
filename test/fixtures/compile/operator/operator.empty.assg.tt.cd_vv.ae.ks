@@ -1,4 +1,4 @@
 func foobar(x) {
-	if var t #= x {
+	if var t ?#= x {
 	}
 }

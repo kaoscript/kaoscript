@@ -598,7 +598,7 @@ export class SyntaxException extends Exception {
 		throwMissingProperties(kind, name, interface, { fields, functions }, node): Never ~ SyntaxException { # {{{
 			var mut message = `\(kind) "\(name)" doesn't implement `
 
-			if #fields {
+			if ?#fields {
 				var fragments = []
 
 				for var type, name of fields {
@@ -608,8 +608,8 @@ export class SyntaxException extends Exception {
 				message += `the following field\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
 			}
 
-			if #functions {
-				if #fields {
+			if ?#functions {
+				if ?#fields {
 					message += " and "
 				}
 

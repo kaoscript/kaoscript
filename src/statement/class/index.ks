@@ -410,7 +410,7 @@ class ClassDeclaration extends Statement {
 			if @extending {
 				var notImplemented = @class.listMissingAbstractMethods()
 
-				if #notImplemented {
+				if ?#notImplemented {
 					SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 				}
 			}
@@ -419,7 +419,7 @@ class ClassDeclaration extends Statement {
 				for var interface in @interfaces {
 					var notImplemented = interface.listMissingProperties(@class)
 
-					if #notImplemented.fields || #notImplemented.functions {
+					if ?#notImplemented.fields || ?#notImplemented.functions {
 						SyntaxException.throwMissingProperties('Class', @name, interface, notImplemented, this)
 					}
 				}
@@ -433,7 +433,7 @@ class ClassDeclaration extends Statement {
 				var mut found = false
 
 				if instance {
-					if #@instanceMethods[name] {
+					if ?#@instanceMethods[name] {
 						for var method in @instanceMethods[name] until found {
 							if index == method.type().index() {
 								if hidden == false {
@@ -449,7 +449,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				else {
-					if #@staticMethods[name] {
+					if ?#@staticMethods[name] {
 						for var method in @staticMethods[name] until found {
 							if index == method.type().index() {
 								if hidden == false {
@@ -575,13 +575,13 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				else {
-					if #variables {
+					if ?#variables {
 						SyntaxException.throwNotInitializedFields(variables, this)
 					}
 				}
 			}
 			else if !@abstract {
-				if #variables {
+				if ?#variables {
 					SyntaxException.throwNotInitializedFields(variables, this)
 				}
 			}

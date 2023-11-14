@@ -1,4 +1,4 @@
 func foobar(x: Boolean) {
-	if #x {
+	if ?#x {
 	}
 }

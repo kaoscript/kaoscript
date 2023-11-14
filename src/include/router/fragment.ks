@@ -142,7 +142,7 @@ namespace Fragment {
 				var mut comma = buildPath(tree.function, line.code('return '))
 
 				var mut varargs = tree.function.hasVarargsParameter()
-				if varargs || #labels {
+				if varargs || ?#labels {
 					var todoLabels = Object.keys(labels)
 
 					for var parameter in tree.function.parameters() {
@@ -158,14 +158,14 @@ namespace Fragment {
 
 							todoLabels.remove(parameter.getExternalName())
 
-							if !#todoLabels && !varargs {
+							if !?#todoLabels && !varargs {
 								break
 							}
 						}
 						else if parameter.isVarargs() {
 							line.code('[]')
 
-							if !#todoLabels {
+							if !?#todoLabels {
 								break
 							}
 							else {

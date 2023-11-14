@@ -15,7 +15,7 @@ class EnumMethodCallee extends Callee {
 		@flatten = node._flatten
 		@scope = data.scope.kind
 
-		if #methods {
+		if ?#methods {
 			var union = UnionType.new(node.scope())
 
 			for var method in methods {

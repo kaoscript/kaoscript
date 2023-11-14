@@ -1264,7 +1264,7 @@ class MatchConditionObject extends AbstractNode {
 	override prepare(target, targetMode) { # {{{
 		@type = ObjectType.new(@scope)
 
-		if #@properties {
+		if ?#@properties {
 			for var { name, value? } in @properties {
 				if ?value {
 					value.prepare()
@@ -1619,7 +1619,7 @@ class MatchFilter extends AbstractNode {
 			@binding.analyse()
 		}
 
-		if #@data.conditions {
+		if ?#@data.conditions {
 			@hasTest = true
 
 			for var data in @data.conditions {
@@ -1749,7 +1749,7 @@ class MatchFilter extends AbstractNode {
 			}
 		}
 
-		if #types {
+		if ?#types {
 			var conditionType = Type.union(@scope, ...types)
 
 			@binding?.prepare(conditionType)
@@ -1777,7 +1777,7 @@ class MatchFilter extends AbstractNode {
 	getMaxConditions(): Number => @conditions.length
 	hasTest() => @hasTest
 	isEnum() { # {{{
-		return false unless #@conditions
+		return false unless ?#@conditions
 
 		for var condition in @conditions {
 			if !condition.isEnum() {
@@ -1804,7 +1804,7 @@ class MatchFilter extends AbstractNode {
 	toConditionFragments(fragments, name) { # {{{
 		var mut junction = Junction.NONE
 
-		if #@conditions {
+		if ?#@conditions {
 			if @conditions.length == 1 {
 				@conditions[0].toConditionFragments(fragments, name, junction)
 			}

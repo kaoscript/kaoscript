@@ -195,7 +195,7 @@ namespace Router {
 	}
 
 	func assess(functions: FunctionType[], name: String, node: AbstractNode): Assessment { # {{{
-		if !#functions {
+		if !?#functions {
 			return Assessment.new(
 				name
 				async: false
@@ -316,7 +316,7 @@ namespace Router {
 
 			routes[key] = route
 
-			if #labels {
+			if ?#labels {
 				route.labelable = true
 				route.labels = types
 			}
@@ -342,7 +342,7 @@ namespace Router {
 
 	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
 		if assessment.length == 0 {
-			if !#arguments {
+			if !?#arguments {
 				return PreciseCallMatchResult.new([])
 			}
 			else {
@@ -400,7 +400,7 @@ namespace Router {
 			}
 		}
 
-		unless #functions {
+		unless ?#functions {
 			return NoMatchResult.NoThisMatch
 		}
 
@@ -414,12 +414,12 @@ namespace Router {
 				functions = functions.remove(...data.mandatories)
 			}
 
-			unless #functions {
+			unless ?#functions {
 				SyntaxException.throwNamedOnlyParameters([label], node)
 			}
 		}
 
-		unless #functions {
+		unless ?#functions {
 			return NoMatchResult.NoArgumentMatch
 		}
 
@@ -444,7 +444,7 @@ namespace Router {
 		footer: Function = Fragment.toDefaultFooter
 		node: AbstractNode
 	): Void { # {{{
-		if !#assessment.mainRoutes {
+		if !?#assessment.mainRoutes {
 			if footerType == FooterType.NO_THROW {
 				footer(fragments, node)
 			}
@@ -555,8 +555,8 @@ namespace Router {
 				}
 			}
 
-			if !#arguments && !#labels {
-				if #expressions {
+			if !?#arguments && !?#labels {
+				if ?#expressions {
 					if needSeparator {
 						fragments.code($comma)
 					}
@@ -586,7 +586,7 @@ namespace Router {
 				fragments.code($comma)
 			}
 
-			if #labels {
+			if ?#labels {
 				fragments.code('{')
 
 				var mut nf = false
@@ -606,14 +606,14 @@ namespace Router {
 
 				fragments.code('}')
 
-				if #arguments {
+				if ?#arguments {
 					fragments.code($comma)
 				}
 			}
 			else if labelable {
 				fragments.code('{}')
 
-				if #arguments {
+				if ?#arguments {
 					fragments.code($comma)
 				}
 			}
@@ -746,7 +746,7 @@ namespace Router {
 				}
 			}
 
-			if !#arguments && !#labels && !?prefill && expressions.length == 1 {
+			if !?#arguments && !?#labels && !?prefill && expressions.length == 1 {
 				var expression = expressions[0]
 
 				if !nullable || (expression is UnaryOperatorSpread && expression.useHelper()) {
@@ -773,7 +773,7 @@ namespace Router {
 				}
 			}
 
-			if !#arguments && !#labels {
+			if !?#arguments && !?#labels {
 				for var expression, i in expressions {
 					fragments.code($comma) if i != 0
 
@@ -785,7 +785,7 @@ namespace Router {
 				return
 			}
 
-			if #labels {
+			if ?#labels {
 				fragments.code('{')
 
 				var mut nf = false
@@ -805,14 +805,14 @@ namespace Router {
 
 				fragments.code('}')
 
-				if #arguments {
+				if ?#arguments {
 					fragments.code($comma)
 				}
 			}
 			else if labelable {
 				fragments.code('{}')
 
-				if #arguments {
+				if ?#arguments {
 					fragments.code($comma)
 				}
 			}

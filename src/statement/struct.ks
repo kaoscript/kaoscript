@@ -98,7 +98,7 @@ class StructDeclaration extends Statement {
 			for var interface in @struct.listInterfaces() {
 				var notImplemented = interface.listMissingProperties(@struct)
 
-				if #notImplemented.fields {
+				if ?#notImplemented.fields {
 					SyntaxException.throwMissingProperties('Struct', @name, interface, notImplemented, this)
 				}
 			}
@@ -140,7 +140,7 @@ class StructDeclaration extends Statement {
 		else {
 			var fields = @function.fields()
 
-			if #fields {
+			if ?#fields {
 				fragments.line($const(this), '_ = new ', $runtime.object(this), '()')
 
 				for var field in fields {

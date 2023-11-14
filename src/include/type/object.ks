@@ -542,7 +542,7 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
-		if #generics {
+		if ?#generics {
 			var valname = value.name()
 
 			for var { name, type } in generics {
@@ -650,7 +650,7 @@ class ObjectType extends Type {
 					}
 				}
 			}
-			else if @variant && #subtypes {
+			else if @variant && ?#subtypes {
 				var newProperties = {}
 
 				if subtypes.length == 1 {
@@ -694,7 +694,7 @@ class ObjectType extends Type {
 		return false unless value.isObject()
 
 		if value.name() != 'Object' {
-			if #generics || #subtypes {
+			if ?#generics || ?#subtypes {
 				return @isSubsetOf(value.discard(), generics, subtypes, mode + MatchingMode.Reference)
 			}
 			else {
@@ -822,7 +822,7 @@ class ObjectType extends Type {
 		if @hasProperties() {
 			var newProperties = {}
 
-			if value.isVariant() && #subtypes {
+			if value.isVariant() && ?#subtypes {
 				for var type, name of value.properties() when type is VariantType {
 					if subtypes.length == 1 {
 						if var field ?= type.getField(subtypes[0].name) {
@@ -1027,10 +1027,10 @@ class ObjectType extends Type {
 		nullable ||= @nullable
 
 		if ?@testName {
-			if nullable || #generics || (@variant && #subtypes) {
+			if nullable || ?#generics || (@variant && ?#subtypes) {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
 
-				if #generics {
+				if ?#generics {
 					fragments.code(`, [`)
 
 					for var { type }, index in generics {
@@ -1042,7 +1042,7 @@ class ObjectType extends Type {
 					fragments.code(`]`)
 				}
 
-				if @variant && #subtypes {
+				if @variant && ?#subtypes {
 					if @variantType.canBeBoolean() {
 						fragments.code(`, \(varname) => `)
 
@@ -1207,7 +1207,7 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
-		if !#@properties && !@rest && !@nullable && !@variant {
+		if !?#@properties && !@rest && !@nullable && !@variant {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
 			}
@@ -1257,7 +1257,7 @@ class ObjectType extends Type {
 		if ?@testName {
 			fragments.code(`\(@testName)(`).compile(node)
 
-			if #parameters {
+			if ?#parameters {
 				fragments.code(`, [`)
 
 				for var { type }, index in parameters {
@@ -1269,7 +1269,7 @@ class ObjectType extends Type {
 				fragments.code(`]`)
 			}
 
-			if #subtypes {
+			if ?#subtypes {
 				if @variantType.canBeBoolean() {
 					fragments.code(`, value => `)
 

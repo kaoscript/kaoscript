@@ -628,7 +628,7 @@ abstract class Importer extends Statement {
 
 		@scope.line(@line())
 
-		if !#@data.specifiers {
+		if !?#@data.specifiers {
 			for var i from 1 to~ @metaExports.exports.length step 2 {
 				var name = @metaExports.exports[i]
 
@@ -877,7 +877,7 @@ abstract class Importer extends Statement {
 			}
 		}
 
-		if !#@data.specifiers {
+		if !?#@data.specifiers {
 			if ?alias {
 				@alias = alias
 			}
@@ -931,7 +931,7 @@ abstract class Importer extends Statement {
 							}
 						}
 
-						if #data.elements {
+						if ?#data.elements {
 							for var data in data.elements {
 								match data.kind {
 									NodeKind.NamedSpecifier {

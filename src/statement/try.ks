@@ -30,7 +30,7 @@ class TryStatement extends Statement {
 		@hasFinally = ?@data.finalizer
 
 		if ?@data.catchClauses {
-			@hasClauses ||= #@data.catchClauses
+			@hasClauses ||= ?#@data.catchClauses
 
 			var dyn variable, scope, body, type
 
@@ -102,7 +102,7 @@ class TryStatement extends Statement {
 		}
 
 		if !@await || @hasClauses {
-			if !#@clauses && ?@data.catchClause?.binding {
+			if !?#@clauses && ?@data.catchClause?.binding {
 				@errorVarname = @data.catchClause.binding.name
 			}
 			else {

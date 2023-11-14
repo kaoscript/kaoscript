@@ -155,7 +155,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 				}
 			}
 
-			if !#types {
+			if !?#types {
 				if node.scope().hasImplicitVariable() {
 					return null
 				}
@@ -239,7 +239,7 @@ func findTypeFromParent(#parent: Expression, #node: Expression, #property: Strin
 				}
 			}
 
-			unless #types {
+			unless ?#types {
 				throw NotImplementedException.new()
 			}
 

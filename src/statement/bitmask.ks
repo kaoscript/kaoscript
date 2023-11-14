@@ -133,7 +133,7 @@ class BitmaskVariableDeclaration extends EnumVariableDeclaration {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if #@operands {
+		if ?#@operands {
 			var enum = @parent.type().type()
 
 			if enum.length() > 32 {

@@ -1,3 +1,3 @@
 func foobar(x: Number[], y: Number) {
-	var z = x ## y
+	var z = x ?## y
 }

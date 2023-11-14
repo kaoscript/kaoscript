@@ -96,7 +96,7 @@ class TupleDeclaration extends Statement {
 			for var interface in @tuple.listInterfaces() {
 				var notImplemented = interface.listMissingProperties(@tuple)
 
-				if #notImplemented.fields {
+				if ?#notImplemented.fields {
 					SyntaxException.throwMissingProperties('Tuple', @name, interface, notImplemented, this)
 				}
 			}

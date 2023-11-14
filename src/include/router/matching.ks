@@ -34,14 +34,14 @@ namespace Matching {
 
 					WithIndex.match(tree, context)
 
-					if mode == .BestMatch && context.found && #context.matches && !#context.possibilities {
+					if mode == .BestMatch && context.found && ?#context.matches && !?#context.possibilities {
 						return PreciseCallMatchResult.new(context.matches)
 					}
 				}
 
 				if context.found {
-					if #context.matches {
-						if !#context.possibilities {
+					if ?#context.matches {
+						if !?#context.possibilities {
 							return PreciseCallMatchResult.new(context.matches)
 						}
 
@@ -74,7 +74,7 @@ namespace Matching {
 
 						WithIndex.match(tree, context)
 
-						if context.found && #context.matches && !#context.possibilities {
+						if context.found && ?#context.matches && !?#context.possibilities {
 							results.push(PreciseCallMatchResult.new(context.matches))
 
 							nf = false
@@ -639,7 +639,7 @@ namespace Matching {
 										}
 									}
 
-									matched = #types
+									matched = ?#types
 
 									if matched {
 										value.type(Type.union(context.node.scope(), ...types))
@@ -679,7 +679,7 @@ namespace Matching {
 									}
 								}
 
-								if #types {
+								if ?#types {
 									value.type(Type.union(context.node.scope(), ...types))
 
 									cursor.used += 1
@@ -1377,7 +1377,7 @@ namespace Matching {
 				}
 			}
 
-			if #shorthands {
+			if ?#shorthands {
 				var perFunctions = {}
 
 				for var function in possibleFunctions {
@@ -1447,7 +1447,7 @@ namespace Matching {
 					}
 				}
 
-				if #perArguments {
+				if ?#perArguments {
 					for var perArgument of perArguments {
 						var newIndexeds = [...indexeds]
 
@@ -1577,7 +1577,7 @@ namespace Matching {
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
-			if !#indexeds {
+			if !?#indexeds {
 				possibleFunctions = possibleFunctions.filter((key, _, _) => route.functions[key].min(excludes) == 0)
 
 				if possibleFunctions.length == 0 {
@@ -1743,7 +1743,7 @@ namespace Matching {
 
 									return LenientCallMatchResult.new(possibilities, match.positions)
 								}
-								else if #result.positions || #result.labels {
+								else if ?#result.positions || ?#result.labels {
 									throw NotImplementedException.new()
 								}
 								else {

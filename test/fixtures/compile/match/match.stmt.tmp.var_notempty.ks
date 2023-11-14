@@ -3,7 +3,7 @@ func foobar(kind, node) {
 		1 {
 			var arguments = node.arguments()
 
-			if #arguments {
+			if ?#arguments {
 			}
 		}
 	}

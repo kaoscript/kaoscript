@@ -48,7 +48,7 @@ class Attribute {
 				}
 			}
 
-			if #data.attributes {
+			if ?#data.attributes {
 				var cloned = {}
 
 				if force {

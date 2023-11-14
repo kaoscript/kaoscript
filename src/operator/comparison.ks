@@ -164,7 +164,7 @@ class ComparisonExpression extends Expression {
 					}
 				}
 
-				return inferables unless #shares
+				return inferables unless ?#shares
 			}
 
 			for var { isVariable, types }, name of shares {
@@ -203,7 +203,7 @@ class ComparisonExpression extends Expression {
 					}
 				}
 
-				return inferables unless #shares
+				return inferables unless ?#shares
 			}
 
 			for var { isVariable, types }, name of shares {

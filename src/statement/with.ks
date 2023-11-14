@@ -40,7 +40,7 @@ class WithStatement extends Statement {
 			declaration.analyse()
 		}
 
-		if !#@declarations && @expressions.length == 1 {
+		if !?#@declarations && @expressions.length == 1 {
 			var expression = @expressions[0]
 
 			expression.analyse()
@@ -118,7 +118,7 @@ class WithStatement extends Statement {
 			}
 		}
 
-		if @hasFinally || #@variables {
+		if @hasFinally || ?#@variables {
 			if @exit {
 				for var statement in @body.statements() {
 					if statement.isExit() {

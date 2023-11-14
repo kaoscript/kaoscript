@@ -55,7 +55,7 @@ class ReturnStatement extends Statement {
 			@value.acquireReusable(false)
 			@value.releaseReusable()
 
-			if #@afterwards {
+			if ?#@afterwards {
 				@temp = @scope.acquireTempName(this)
 			}
 
@@ -197,11 +197,11 @@ class ReturnStatement extends Statement {
 			}
 		}
 		else if !?@temp {
-			if #@assignments {
+			if ?#@assignments {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			if #@beforehands {
+			if ?#@beforehands {
 				for var beforehand in @beforehands {
 					beforehand.toBeforehandFragments(fragments, mode)
 				}
@@ -234,11 +234,11 @@ class ReturnStatement extends Statement {
 			else {
 				@assignments.remove(@temp)
 
-				if #@assignments {
+				if ?#@assignments {
 					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 				}
 
-				if #@beforehands {
+				if ?#@beforehands {
 					for var beforehand in @beforehands {
 						beforehand.toBeforehandFragments(fragments, mode)
 					}

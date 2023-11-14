@@ -87,11 +87,11 @@ abstract class Statement extends AbstractNode {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		var variables = @assignments()
-		if #variables {
+		if ?#variables {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 
-		if #@beforehands {
+		if ?#@beforehands {
 			for var beforehand in @beforehands {
 				beforehand.toBeforehandFragments(fragments, mode)
 			}

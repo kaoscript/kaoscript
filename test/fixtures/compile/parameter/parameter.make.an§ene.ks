@@ -1,2 +1,2 @@
-func foobar(x? ##= null) {
+func foobar(x? ?##= null) {
 }

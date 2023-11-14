@@ -23,7 +23,7 @@ class VariableStatement extends Statement {
 		}
 	} # }}}
 	override initiate() { # {{{
-		var modifing = #@data.modifiers
+		var modifing = ?#@data.modifiers
 		var modifier = modifing ? @data.modifiers[0].kind : null
 
 		for var data in @data.declarations {
@@ -115,11 +115,11 @@ class VariableStatement extends Statement {
 	} # }}}
 	override toFragments(fragments, mode) { # {{{
 		var variables = @assignments()
-		if #variables {
+		if ?#variables {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 
-		if #@beforehands {
+		if ?#@beforehands {
 			for var beforehand in @beforehands {
 				beforehand.toBeforehandFragments(fragments, mode)
 			}

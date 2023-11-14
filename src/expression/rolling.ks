@@ -100,7 +100,7 @@ class RollingExpression extends Expression {
 			@expressions.push(expression)
 		}
 
-		if @mode == .Inline && #@beforehands {
+		if @mode == .Inline && ?#@beforehands {
 			@statement().addBeforehand(this)
 		}
 	} # }}}

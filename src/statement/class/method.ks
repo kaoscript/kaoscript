@@ -361,7 +361,7 @@ class ClassMethodDeclaration extends Statement {
 
 		@scope.line(@line())
 
-		if #@data.typeParameters {
+		if ?#@data.typeParameters {
 			for var parameter in @data.typeParameters {
 				@generics.push(Type.toGeneric(parameter, this))
 			}
@@ -688,7 +688,7 @@ class ClassMethodDeclaration extends Statement {
 			var mut method = null
 			var mut exact = false
 
-			if var methods #= matchAll(@name, @type, MatchingMode.ExactParameter) {
+			if var methods ?#= matchAll(@name, @type, MatchingMode.ExactParameter) {
 				if methods.length == 1 {
 					method = methods[0]
 					exact = true
@@ -698,7 +698,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 			else if @override {
-				if var methods #= matchAll(@name, @type, mode - MatchingMode.SubclassParameter) {
+				if var methods ?#= matchAll(@name, @type, mode - MatchingMode.SubclassParameter) {
 					if methods.length == 1 {
 						method = methods[0]
 					}
@@ -709,9 +709,9 @@ class ClassMethodDeclaration extends Statement {
 			}
 
 			// TODO!
-			// if !?method ;; var methods #= matchAll(@name, @type, mode) {
+			// if !?method ;; var methods ?#= matchAll(@name, @type, mode) {
 			if !?method {
-				if var methods #= matchAll(@name, @type, mode) {
+				if var methods ?#= matchAll(@name, @type, mode) {
 					if methods.length == 1 {
 						method = methods[0]
 					}
@@ -889,7 +889,7 @@ class ClassMethodDeclaration extends Statement {
 
 					@parent.addForkedMethod(@name, assisteds[0], @type, null)
 				}
-				else if #assisteds {
+				else if ?#assisteds {
 					NotImplementedException.throw(this)
 				}
 				else {
@@ -954,7 +954,7 @@ class ClassMethodDeclaration extends Statement {
 					@parent.addForkedMethod(@name, method, @type, hidden)
 				}
 
-				if #overload {
+				if ?#overload {
 					@type.overload(overload)
 				}
 

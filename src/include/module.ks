@@ -422,7 +422,7 @@ export class Module {
 				}
 			}
 
-			if #exportingFragments || #exportingTypes {
+			if ?#exportingFragments || ?#exportingTypes {
 				var line = block.newLine().code('return ')
 				var object = line.newObject()
 
@@ -430,7 +430,7 @@ export class Module {
 					export.type.toExportFragment(object, name, export.variable)
 				}
 
-				if #exportingTypes {
+				if ?#exportingTypes {
 					var line = object.newLine().code('__ksType: [')
 
 					for var { type }, index in exportingTypes {
@@ -807,7 +807,7 @@ class ModuleBlock extends AbstractNode {
 	} # }}}
 	target() => @options.target
 	toFragments(fragments) { # {{{
-		if #@typeTests {
+		if ?#@typeTests {
 			var line = fragments.newLine().code(`\($runtime.immutableScope(this))__ksType = `)
 			var object = line.newObject()
 			var variants = []
@@ -832,7 +832,7 @@ class ModuleBlock extends AbstractNode {
 			object.done()
 			line.done()
 
-			if #variants {
+			if ?#variants {
 				for var { name, variant, generics } in variants {
 					// TODO!
 					// for var { type }, index in variant.getFields() {

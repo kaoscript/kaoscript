@@ -1,2 +1,2 @@
-func foobar({ x ##= [] }) {
+func foobar({ x ?##= [] }) {
 }

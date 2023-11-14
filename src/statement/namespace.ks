@@ -162,7 +162,7 @@ class NamespaceDeclaration extends Statement {
 		var line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		var block = line.newBlock()
 
-		if #@tests {
+		if ?#@tests {
 			var line = block.newLine().code(`\($runtime.immutableScope(this))\(@testVariable) = `)
 			var object = line.newObject()
 

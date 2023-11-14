@@ -762,7 +762,7 @@ class ClassType extends Type {
 					}
 				}
 
-				if #exportedMethods {
+				if ?#exportedMethods {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
@@ -777,7 +777,7 @@ class ClassType extends Type {
 					}
 				}
 
-				if #exportedMethods {
+				if ?#exportedMethods {
 					export.staticMethods[name] = exportedMethods
 				}
 			}

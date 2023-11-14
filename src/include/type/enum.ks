@@ -361,7 +361,7 @@ class EnumType extends Type {
 		if name == 'value' {
 			return @type
 		}
-		else if var methods #= @instanceMethods[name] {
+		else if var methods ?#= @instanceMethods[name] {
 			if methods.length == 1 {
 				return methods[0]
 			}
@@ -419,7 +419,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getStaticMethod(name: String): Type? { # {{{
-		if var methods #= @staticMethods[name] {
+		if var methods ?#= @staticMethods[name] {
 			if methods.length == 1 {
 				return methods[0]
 			}

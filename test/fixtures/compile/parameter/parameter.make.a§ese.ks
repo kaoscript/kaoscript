@@ -1,2 +1,2 @@
-func foobar(x ##= 'abc') {
+func foobar(x ?##= 'abc') {
 }

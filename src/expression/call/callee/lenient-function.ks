@@ -114,7 +114,7 @@ class LenientFunctionCallee extends LenientCallee {
 			throw NotImplementedException.new()
 		}
 
-		if #@result.matches {
+		if ?#@result.matches {
 			if @result.matches.length > 1 {
 				var overloaded = OverloadedFunctionType.new(@node.scope())
 
@@ -133,7 +133,7 @@ class LenientFunctionCallee extends LenientCallee {
 			}
 		}
 
-		if #@result.positions && @result.possibilities.length == 1 {
+		if ?#@result.positions && @result.possibilities.length == 1 {
 			@curry = CurryExpression.toCurryType(@result.possibilities[0], @result.positions, false, @node)
 
 			return @curry[0]

@@ -393,13 +393,13 @@ class FunctionDeclarator extends AbstractNode {
 	analyse() { # {{{
 		@offset = @scope.module().getLineOffset()
 
-		if #@data.typeParameters {
+		if ?#@data.typeParameters {
 			for var parameter in @data.typeParameters {
 				@generics.push(Type.toGeneric(parameter, this))
 			}
 		}
 
-		if #@data.parameters {
+		if ?#@data.parameters {
 			var mut firstParameter = 0
 			var parameter = @data.parameters[0]
 

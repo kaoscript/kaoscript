@@ -56,7 +56,7 @@ class AliasType extends Type {
 			kind: TypeKind.Alias
 			of: @type.export(references, indexDelta, mode, module)
 			@testIndex if ?@testIndex
-			@generics if #@generics
+			@generics if ?#@generics
 		}
 	} # }}}
 	generics() => @generics
@@ -71,12 +71,12 @@ class AliasType extends Type {
 	getProperty(name: String): Type => @type.getProperty(name)
 	getTestIndex() => @testIndex
 	getTestName() => @type.getTestName()
-	hasGenerics() => #@generics
+	hasGenerics() => ?#@generics
 	hasTest() => @type.hasTest()
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
-	override isDeferrable() => #@generics || @type.isDeferrable()
+	override isDeferrable() => ?#@generics || @type.isDeferrable()
 	isExclusion() => @type.isExclusion()
 	isExportable() => @type.isExportable()
 	isExportingFragment() => false
