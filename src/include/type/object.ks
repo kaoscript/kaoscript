@@ -694,9 +694,14 @@ class ObjectType extends Type {
 		return false unless value.isObject()
 
 		if value.name() != 'Object' {
-			var { type, generics, subtypes } = value.getGenericMapper()
+			if #generics || #subtypes {
+				return @isSubsetOf(value.discard(), generics, subtypes, mode + MatchingMode.Reference)
+			}
+			else {
+				var { type, generics, subtypes } = value.getGenericMapper()
 
-			return @isSubsetOf(type, generics, subtypes, mode + MatchingMode.Reference)
+				return @isSubsetOf(type, generics, subtypes, mode + MatchingMode.Reference)
+			}
 		}
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
