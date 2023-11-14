@@ -189,3 +189,46 @@ abstract class MethodCallee extends PreciseCallee {
 		return false
 	} # }}}
 }
+
+abstract class LenientCallee extends Callee {
+	private late {
+		@type: Type
+	}
+	buildType(functions: FunctionType[], node: CallExpression): Void { # {{{
+		if functions.length == 1 {
+			var function = functions[0]
+
+			@type = function.getReturnType()
+
+			if @type.isDeferred() {
+				var typeName = @type.name()
+				var generics = function.buildGenericMap(node.arguments())
+
+				for var { name, type } in generics {
+					if name == typeName {
+						@type = type
+
+						break
+					}
+				}
+			}
+			else if @type.isDeferrable() {
+				var generics = function.buildGenericMap(node.arguments())
+
+				@type = @type.applyGenerics(generics)
+			}
+		}
+		else {
+			var types = []
+
+			for var function in functions {
+				@validate(function, node)
+
+				types.pushUniq(function.getReturnType())
+			}
+
+			@type = Type.union(node.scope(), ...types)
+		}
+	} # }}}
+	type() => @type
+}

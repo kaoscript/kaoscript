@@ -1,4 +1,4 @@
-class LenientFunctionCallee extends Callee {
+class LenientFunctionCallee extends LenientCallee {
 	private {
 		@curry
 		@expression
@@ -10,7 +10,6 @@ class LenientFunctionCallee extends Callee {
 		@node: CallExpression
 		@result: LenientCallMatchResult?
 		@scope: ScopeKind
-		@type: Type
 	}
 	constructor(@data, assessment: Router.Assessment, @result!?, @node) { # {{{
 		this(data, assessment, result.possibilities, node)
@@ -36,38 +35,7 @@ class LenientFunctionCallee extends Callee {
 		@scope = data.scope.kind
 		@function = @functions[0]
 
-		if @functions.length == 1 {
-			@type = @function.getReturnType()
-
-			if @type.isDeferred() {
-				var typeName = @type.name()
-				var generics = @function.buildGenericMap(node.arguments())
-
-				for var { name, type } in generics {
-					if name == typeName {
-						@type = type
-
-						break
-					}
-				}
-			}
-			else if @type.isDeferrable() {
-				var generics = @function.buildGenericMap(node.arguments())
-
-				@type = @type.applyGenerics(generics)
-			}
-		}
-		else {
-			var types = []
-
-			for var function in @functions {
-				@validate(function, node)
-
-				types.pushUniq(function.getReturnType())
-			}
-
-			@type = Type.union(node.scope(), ...types)
-		}
+		@buildType(@functions, @node)
 
 		@hash = 'lenient'
 		@hash += `:\(@functions.map((function, ...) => function.index()).join(','))`
@@ -199,5 +167,4 @@ class LenientFunctionCallee extends Callee {
 	translate() { # {{{
 		@expression.translate()
 	} # }}}
-	type() => @type
 }

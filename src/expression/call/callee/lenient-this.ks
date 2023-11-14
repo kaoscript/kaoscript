@@ -1,4 +1,4 @@
-class LenientThisCallee extends Callee {
+class LenientThisCallee extends LenientCallee {
 	private {
 		@expression
 		@flatten: Boolean
@@ -8,7 +8,6 @@ class LenientThisCallee extends Callee {
 		@property: String
 		@scope: ScopeKind
 		@sealed: Boolean					= false
-		@type: Type
 	}
 	constructor(@data, @expression, @property, @methods, @node) { # {{{
 		super(data)
@@ -18,17 +17,15 @@ class LenientThisCallee extends Callee {
 		@scope = data.scope.kind
 		@instance = methods[0].isInstance()
 
-		var types = []
-
 		for var method in methods {
-			@validate(method, node)
+			if method.isSealed() {
+				@sealed = true
 
-			types.push(method.getReturnType())
-
-			@sealed ||= method.isSealed()
+				break
+			}
 		}
 
-		@type = Type.union(@node.scope(), ...types)
+		@buildType(methods, node)
 	} # }}}
 	override hashCode() { # {{{
 		return `this`
@@ -119,5 +116,4 @@ class LenientThisCallee extends Callee {
 	translate() { # {{{
 		@expression.translate()
 	} # }}}
-	type() => @type
 }
