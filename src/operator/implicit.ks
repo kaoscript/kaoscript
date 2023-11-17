@@ -14,6 +14,16 @@ class UnaryOperatorImplicit extends Expression {
 			if type.isAny() || type.isUnion() {
 				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 			}
+			else if type is VariantType {
+				var master = type.getMaster()
+
+				unless master.discard().hasVariable(@property) {
+					ReferenceException.throwNotDefinedEnumElement(@property, master.name(), this)
+				}
+
+				@varname = master.name()
+				@type = ValueType.new(@property, master.setNullable(false), `\(@varname).\(@property)`, @scope)
+			}
 			else if type.isEnum() {
 				if var variable ?= type.discard().getVariable(@property) {
 					if type is ValueType {
@@ -36,15 +46,23 @@ class UnaryOperatorImplicit extends Expression {
 					ReferenceException.throwNotDefinedEnumElement(@property, type.name(), this)
 				}
 			}
-			else if type is VariantType {
-				var master = type.getMaster()
+			else if type.isVariant() {
+				var variant = type.discard().getVariantType()
+				var master = variant.getMaster()
 
-				unless master.discard().hasVariable(@property) {
+				unless variant.hasSubtype(@property) {
 					ReferenceException.throwNotDefinedEnumElement(@property, master.name(), this)
 				}
 
-				@varname = master.name()
-				@type = ValueType.new(@property, master.setNullable(false), `\(@varname).\(@property)`, @scope)
+				@type = ReferenceType.new(@scope, type.name(), false, null, [{ name: @property, type: master }])
+
+				unless @type.isAssignableToVariable(type!!, false, false, true) {
+					TypeException.throwInvalidTypeChecking(this, type, this)
+				}
+
+				if type.isSubsetOf(@type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+					TypeException.throwUnnecessaryTypeChecking(this, type, this)
+				}
 			}
 			else if var property ?= type.getProperty(@property) {
 				@type = property.discardVariable()
@@ -52,11 +70,7 @@ class UnaryOperatorImplicit extends Expression {
 		}
 
 		if !?@type {
-			// TODO!
-			// if var { name % @varname, type } ?= @scope.getImplicitVariable() {
 			if var { name % @varname, type % vartype } ?= @scope.getImplicitVariable() {
-				// TODO!
-				// echo('implicit:', type)
 				if var property ?= vartype.getProperty(@property) {
 					@type = property.discardVariable()
 				}

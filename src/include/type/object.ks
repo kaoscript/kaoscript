@@ -219,6 +219,8 @@ class ObjectType extends Type {
 				break
 			}
 
+			@variantType.buildAliases(node)
+
 			@testGenerics ||= @variantType.canBeDeferred()
 		}
 	} # }}}
@@ -863,12 +865,17 @@ class ObjectType extends Type {
 			else {
 				return this
 			}
+
+			return result
+		}
+		else if @rest && value.hasRest() {
+			result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
+
+			return result
 		}
 		else {
-			throw NotImplementedException.new()
+			return this
 		}
-
-		return result
 	} # }}}
 	assist merge(value: ReferenceType, generics, subtypes, node) { # {{{
 		unless value.isBroadObject() {

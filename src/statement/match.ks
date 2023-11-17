@@ -1757,6 +1757,10 @@ class MatchFilter extends AbstractNode {
 			var name = @parent().name()
 
 			@scope.setImplicitVariable(name, conditionType)
+
+			if @conditions.length == 1 && @conditions[0] is MatchConditionValue {
+				@scope.updateInferable(name, { isVariable: @scope.hasVariable(name), type: conditionType }, this)
+			}
 		}
 		else {
 			@binding?.prepare(valueType)

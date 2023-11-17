@@ -5,6 +5,7 @@ enum VariantKind {
 
 class VariantType extends Type {
 	private late {
+		@aliases: Variant{}				= {}
 		@deferrable: Boolean			= false
 		@enum: EnumType?
 		@fields: Variant[]				= []
@@ -22,6 +23,8 @@ class VariantType extends Type {
 				for var { names, type % data } in data.fields {
 					type.addField(names, Type.import(data, metadata, references, alterations, queue, scope, node))
 				}
+
+				type.buildAliases(node)
 			})
 
 			return type.flagComplete()
@@ -55,6 +58,28 @@ class VariantType extends Type {
 			}
 
 			@names[name] = variant
+		}
+	} # }}}
+	buildAliases(node: AbstractNode) { # {{{
+		return unless @kind == .Enum
+
+		for var variable of @enum.variables() when variable.isAlias() {
+			block variable {
+				if var field ?= @names[variable.original()] {
+					var mut type = field.type
+
+					for var original in variable.originals() from 1 {
+						if ?@names[original] {
+							type = type.merge(@names[original].type, null, null, node)
+						}
+						else {
+							break variable
+						}
+					}
+
+					@aliases[variable.name()] = { names: variable.originals(), type }
+				}
+			}
 		}
 	} # }}}
 	override canBeBoolean() => @kind == .Boolean
@@ -95,6 +120,7 @@ class VariantType extends Type {
 
 		return export
 	} # }}}
+	getAlias(name: String) => @aliases[name]
 	getEnumType() => @enum
 	getField(name: String) => @names[name]
 	getFieldIndex(name: String): Number? { # {{{
@@ -121,6 +147,7 @@ class VariantType extends Type {
 		return null
 	} # }}}
 	getMaster() => @master
+	getVariantType() => this
 	hasSubtype(name: String) { # {{{
 		if ?@names[name] {
 			return true

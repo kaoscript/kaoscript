@@ -1,0 +1,1 @@
+TypeException: The variable ".Clubs" of type "Card(Clubs)" can never be of type "Card(Reds)" (fixtures/compile/variant/variant.type.enum.match.z§r.z§ce.ks:22)

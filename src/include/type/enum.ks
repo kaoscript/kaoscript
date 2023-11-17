@@ -559,6 +559,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	type() => @type
+	variables() => @variables
 }
 
 class EnumVariableType {

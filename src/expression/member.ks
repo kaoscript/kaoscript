@@ -590,7 +590,7 @@ class MemberExpression extends Expression {
 							var { name } = subtypes[0]
 							var variant = type.discard().getVariantType()
 
-							if var { type % subtype } ?= variant.getField(name) {
+							if var { type % subtype } ?= variant.getField(name) ?? variant.getAlias(name) {
 								if var property ?= subtype.getProperty(@property) {
 									@type = property.discardVariable()
 
