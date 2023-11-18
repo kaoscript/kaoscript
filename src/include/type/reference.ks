@@ -1819,7 +1819,9 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			@discard().toAwareTestFunctionFragments(varname, nullable, null, @subtypes, fragments, node)
+			var { type, generics } = @getGenericMapper()
+
+			type.toAwareTestFunctionFragments(varname, nullable, generics, @subtypes, fragments, node)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1835,6 +1837,8 @@ class ReferenceType extends Type {
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+				var { generics } = @getGenericMapper()
+
 				unalias.toBlindSubtestFunctionFragments(funcname, varname, nullable, generics, fragments, node)
 			}
 			else {

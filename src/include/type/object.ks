@@ -1048,6 +1048,9 @@ class ObjectType extends Type {
 
 					fragments.code(`]`)
 				}
+				else if @testGenerics {
+					NotImplementedException.throw()
+				}
 
 				if @variant && ?#subtypes {
 					if @variantType.canBeBoolean() {
@@ -1138,10 +1141,30 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(funcname, varname, nullable, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, mut nullable, generics, fragments, node) { # {{{
+		nullable ||= @nullable
+
 		if ?@testName {
-			if nullable || @nullable {
-				fragments.code(`\(varname) => \(@testName)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+			if nullable || ?#generics {
+				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if ?#generics {
+					fragments.code(`, [`)
+
+					for var { type }, index in generics {
+						fragments.code($comma) if index != 0
+
+						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+					}
+
+					fragments.code(`]`)
+				}
+
+				fragments.code(`)`)
+
+				if nullable {
+					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+				}
 			}
 			else {
 				fragments.code(@testName)
@@ -1171,7 +1194,7 @@ class ObjectType extends Type {
 
 				fragments.code(')')
 
-				if @nullable || nullable {
+				if nullable {
 					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 				}
 			}
