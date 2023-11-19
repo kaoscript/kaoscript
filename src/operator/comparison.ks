@@ -551,7 +551,7 @@ class EqualityOperator extends ComparisonOperator {
 			}
 
 			if leftType.isEnum() && rightType.isEnum() {
-				if @left is MemberExpression && @left.caller().type().isVariant() {
+				if @left is MemberExpression && @left.caller().type().isVariant() && @right is MemberExpression | UnaryOperatorImplicit {
 					var caller = @left.caller()
 					var type = ReferenceType.new(@node.scope(), caller.type().name(), null, null, [{ name: @right.property(), type: rightType }])
 
