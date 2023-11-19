@@ -897,14 +897,18 @@ class ObjectType extends Type {
 			result.flagSpread() if @spread
 
 			if @hasProperties() {
-				var restType = value.parameter()
-
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], restType.merge(type, generics, subtypes, ignoreUndefined, node))
+					var valueType = value.getProperty(name)
+					var mergeType = valueType.merge(type, generics, subtypes, ignoreUndefined, node)
+
+					result.addProperty(name, @computed[name], mergeType)
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, generics, subtypes, ignoreUndefined, node))
+					var valueType = value.parameter()
+					var mergeType = valueType.merge(@restType, generics, subtypes, ignoreUndefined, node)
+
+					result.setRestType(mergeType)
 				}
 			}
 			else {
