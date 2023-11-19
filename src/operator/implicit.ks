@@ -1,6 +1,6 @@
 class UnaryOperatorImplicit extends Expression {
 	private late {
-		@derivative: Boolean				= false
+		@derivative: Boolean			= false
 		@originalProperty: String?
 		@property: String
 		@type: Type

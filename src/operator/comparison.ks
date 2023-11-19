@@ -549,6 +549,18 @@ class EqualityOperator extends ComparisonOperator {
 					type: rightType
 				}
 			}
+
+			if leftType.isEnum() && rightType.isEnum() {
+				if @left is MemberExpression && @left.caller().type().isVariant() {
+					var caller = @left.caller()
+					var type = ReferenceType.new(@node.scope(), caller.type().name(), null, null, [{ name: @right.property(), type: rightType }])
+
+					inferables[caller.path()] = {
+						isVariable: caller is IdentifierLiteral
+						type
+					}
+				}
+			}
 		}
 		else if @right.isInferable() && leftType.isAssignableToVariable(rightType, true) {
 			inferables[@right.path()] = {

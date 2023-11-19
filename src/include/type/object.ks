@@ -362,7 +362,7 @@ class ObjectType extends Type {
 			return true
 		}
 
-		if value.isVariant() && value is ReferenceType && value.hasSubtypes() {
+		if value.isVariant() && value is ReferenceType {
 			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
 			if anycast {
@@ -384,22 +384,27 @@ class ObjectType extends Type {
 			var newProperties = {}
 
 			if var prop ?= @properties[object.getVariantName()] {
-				var mut matched = false
 				var propname = prop.value()
 
-				for var { name } in value.getSubtypes() {
-					var names = variant.explodeVarnames({ name })
+				if value.hasSubtypes() {
+					var mut matched = false
 
-					if names.contains(propname) {
-						matched = true
+					for var { name } in value.getSubtypes() {
+						var names = variant.explodeVarnames({ name })
 
-						if var field ?= variant.getField(propname) {
-							Object.merge(newProperties, field.type.properties())
+						if names.contains(propname) {
+							matched = true
+
+							break
 						}
 					}
+
+					return false unless matched
 				}
 
-				return false unless matched
+				if var field ?= variant.getField(propname) {
+					Object.merge(newProperties, field.type.properties())
+				}
 			}
 			else {
 				return false
