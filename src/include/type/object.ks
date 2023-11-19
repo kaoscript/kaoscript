@@ -815,7 +815,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
-	assist merge(value: ObjectType, generics, subtypes, node) { # {{{
+	assist merge(value: ObjectType, generics, subtypes, ignoreUndefined, node) { # {{{
 		var result = ObjectType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
@@ -847,19 +847,19 @@ class ObjectType extends Type {
 			if value.hasProperties() {
 				for var type, name of @properties {
 					if var property ?= value.getProperty(name) ?? newProperties[name] {
-						result.addProperty(name, @computed[name], type.merge(property, generics, subtypes, node))
+						result.addProperty(name, @computed[name], type.merge(property, generics, subtypes, ignoreUndefined, node))
 					}
 					else if rest {
-						result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, node))
+						result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, ignoreUndefined, node))
 					}
-					else {
+					else if !ignoreUndefined {
 						ReferenceException.throwUndefinedBindingVariable(name, node)
 					}
 				}
 			}
 			else if rest {
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, node))
+					result.addProperty(name, @computed[name], type.merge(restType, generics, subtypes, ignoreUndefined, node))
 				}
 			}
 			else {
@@ -869,7 +869,7 @@ class ObjectType extends Type {
 			return result
 		}
 		else if @rest && value.hasRest() {
-			result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
+			result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, ignoreUndefined, node))
 
 			return result
 		}
@@ -877,7 +877,7 @@ class ObjectType extends Type {
 			return this
 		}
 	} # }}}
-	assist merge(value: ReferenceType, generics, subtypes, node) { # {{{
+	assist merge(value: ReferenceType, generics, subtypes, ignoreUndefined, node) { # {{{
 		unless value.isBroadObject() {
 			TypeException.throwIncompatible(value, this, node)
 		}
@@ -900,11 +900,11 @@ class ObjectType extends Type {
 				var restType = value.parameter()
 
 				for var type, name of @properties {
-					result.addProperty(name, @computed[name], restType.merge(type, generics, subtypes, node))
+					result.addProperty(name, @computed[name], restType.merge(type, generics, subtypes, ignoreUndefined, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, generics, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, ignoreUndefined, node))
 				}
 			}
 			else {
@@ -916,7 +916,7 @@ class ObjectType extends Type {
 		else if value.isAlias() {
 			var { type, generics, subtypes } = value.getGenericMapper()
 
-			return @merge(type, generics, subtypes, node)
+			return @merge(type, generics, subtypes, ignoreUndefined, node)
 		}
 		else {
 			return this

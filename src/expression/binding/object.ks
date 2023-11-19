@@ -426,7 +426,7 @@ class ObjectBindingElement extends Expression {
 				@type = @internal.type()
 			}
 			else {
-				@type = @internal.getDeclaredType().merge(@type, null, null, this)
+				@type = @internal.getDeclaredType().merge(@type, null, null, false, this)
 			}
 		}
 

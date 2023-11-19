@@ -70,7 +70,7 @@ class VariantType extends Type {
 
 					for var original in variable.originals() from 1 {
 						if ?@names[original] {
-							type = type.merge(@names[original].type, null, null, node)
+							type = type.merge(@names[original].type, null, null, true, node)
 						}
 						else {
 							break variable

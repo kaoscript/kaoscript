@@ -107,7 +107,7 @@ class ObjectIteration extends IterationNode {
 				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
 
-			var realType = valueType.merge(parameterType, null, null, this)
+			var realType = valueType.merge(parameterType, null, null, false, this)
 
 			if @value is IdentifierLiteral {
 				if @defineValue {

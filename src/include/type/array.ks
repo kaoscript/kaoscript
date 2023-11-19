@@ -477,7 +477,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
-	assist merge(value: ArrayType, generics, subtypes, node) { # {{{
+	assist merge(value: ArrayType, generics, subtypes, ignoreUndefined, node) { # {{{
 		var result = ArrayType.new(@scope)
 
 		result.flagDestructuring() if @destructuring
@@ -486,12 +486,12 @@ class ArrayType extends Type {
 		if @hasProperties() {
 			if value.hasProperties() {
 				for var type, index in @properties {
-					result.addProperty(type.merge(value.getProperty(index), generics, subtypes, node))
+					result.addProperty(type.merge(value.getProperty(index), generics, subtypes, ignoreUndefined, node))
 				}
 
 				if @rest {
 					if value.hasRest() {
-						result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
+						result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, ignoreUndefined, node))
 					}
 					else {
 						result.setRestType(@restType)
@@ -502,11 +502,11 @@ class ArrayType extends Type {
 				var restType = value.getRestType()
 
 				for var type in @properties {
-					result.addProperty(type.merge(restType, generics, subtypes, node))
+					result.addProperty(type.merge(restType, generics, subtypes, ignoreUndefined, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, generics, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, ignoreUndefined, node))
 				}
 			}
 			else {
@@ -516,7 +516,7 @@ class ArrayType extends Type {
 			return result
 		}
 		else if @rest && value.hasRest() {
-			result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, node))
+			result.setRestType(@restType.merge(value.getRestType(), generics, subtypes, ignoreUndefined, node))
 
 			return result
 		}
@@ -524,7 +524,7 @@ class ArrayType extends Type {
 			return this
 		}
 	} # }}}
-	assist merge(value: ReferenceType, generics, subtypes, node) { # {{{
+	assist merge(value: ReferenceType, generics, subtypes, ignoreUndefined, node) { # {{{
 		unless value.isBroadArray() {
 			TypeException.throwIncompatible(this, value, node)
 		}
@@ -547,11 +547,11 @@ class ArrayType extends Type {
 				var restType = value.parameter()
 
 				for var type in @properties {
-					result.addProperty(restType.merge(type, generics, subtypes, node))
+					result.addProperty(restType.merge(type, generics, subtypes, ignoreUndefined, node))
 				}
 
 				if @rest {
-					result.setRestType(@restType.merge(restType, generics, subtypes, node))
+					result.setRestType(@restType.merge(restType, generics, subtypes, ignoreUndefined, node))
 				}
 			}
 			else {
@@ -561,7 +561,7 @@ class ArrayType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			return @merge(value.discard(), generics, subtypes, node)
+			return @merge(value.discard(), generics, subtypes, ignoreUndefined, node)
 		}
 		else {
 			return this

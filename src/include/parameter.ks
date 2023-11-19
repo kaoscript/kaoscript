@@ -753,7 +753,7 @@ class Parameter extends AbstractNode {
 		}
 
 		if @internal.isBinding() {
-			type = @internal.type().asReference().merge(declaredType, null, null, this)
+			type = @internal.type().asReference().merge(declaredType, null, null, false, this)
 
 			if declaredType is DeferredType {
 				declaredType.addConstraint(@internal.type())

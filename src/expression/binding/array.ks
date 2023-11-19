@@ -392,7 +392,7 @@ class ArrayBindingElement extends Expression {
 				@type = @name.type()
 			}
 			else {
-				@type = @name.getDeclaredType().merge(@type, null, null, this)
+				@type = @name.getDeclaredType().merge(@type, null, null, false, this)
 			}
 		}
 

@@ -1029,7 +1029,7 @@ abstract class Type {
 	isVoid() => false
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
-	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, node): Type { # {{{
+	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, ignoreUndefined: Boolean, node): Type { # {{{
 		return @isMorePreciseThan(value) ? this : value
 	} # }}}
 	minorOriginal() => null
