@@ -1,4 +1,4 @@
-const {Helper, OBJ, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		isEvent: (value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
@@ -22,10 +22,15 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(event) {
-		console.log(Helper.toString(event.value));
+		if(event.ok) {
+			console.log(event.value);
+		}
+		else {
+			console.log(event.value + 1);
+		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value, [Type.any], value => value);
+		const t0 = value => __ksType.isEvent(value, [value => Type.isString(value) || Type.isNumber(value)], value => value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
@@ -33,22 +38,4 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	function quxbaz() {
-		return quxbaz.__ks_rt(this, arguments);
-	};
-	quxbaz.__ks_0 = function() {
-		return (() => {
-			const o = new OBJ();
-			o.ok = true;
-			o.value = 42;
-			return o;
-		})();
-	};
-	quxbaz.__ks_rt = function(that, args) {
-		if(args.length === 0) {
-			return quxbaz.__ks_0.call(that);
-		}
-		throw Helper.badArgs();
-	};
-	foobar(quxbaz.__ks_0());
 };

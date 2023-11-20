@@ -528,16 +528,6 @@ class UnionType extends Type {
 
 		return Type.union(@scope, ...types)
 	} # }}}
-	reduce(type: Type) { # {{{
-		var types = [t for var t in @types when !t.matchContentOf(type)]
-
-		if types.length == 1 {
-			return types[0]
-		}
-		else {
-			return Type.union(@scope, ...types)
-		}
-	} # }}}
 	setNullable(nullable: Boolean) { # {{{
 		if @nullable == nullable {
 			return this
@@ -709,6 +699,16 @@ class UnionType extends Type {
 
 		for var type in @types {
 			type.toVariations(variations)
+		}
+	} # }}}
+	trimOff(type: Type) { # {{{
+		var types = [t for var t in @types when !t.matchContentOf(type)]
+
+		if types.length == 1 {
+			return types[0]
+		}
+		else {
+			return Type.union(@scope, ...types)
 		}
 	} # }}}
 	type() { # {{{

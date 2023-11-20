@@ -104,7 +104,6 @@ class AliasType extends Type {
 	} # }}}
 	parameter() => @type.parameter()
 	properties() => @type.properties()
-	reduce(type: Type) => @type.reduce(type)
 	setNullable(nullable: Boolean) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
@@ -112,6 +111,7 @@ class AliasType extends Type {
 	setTestName(testName) => @type.setTestName(testName)
 	shallBeNamed() => true
 	override split(types) => @type.split(types)
+	trimOff(type: Type) => @type.trimOff(type)
 	type() => @type
 	type(@type) => this
 	override toExportFragment(fragments, name, variable)

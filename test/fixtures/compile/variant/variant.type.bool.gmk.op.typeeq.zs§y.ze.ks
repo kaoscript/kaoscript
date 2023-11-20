@@ -11,5 +11,6 @@ type Event<T> = {
 
 func foobar(event: Event<String>(Y)) {
 	if event is Event {
+		echo(`\(event.value)`)
 	}
 }

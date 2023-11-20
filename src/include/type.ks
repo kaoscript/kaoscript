@@ -580,6 +580,20 @@ abstract class Type {
 				return Type.fromAST(data, node)
 			}
 		} # }}}
+		getParameterCount(types: Type[], names: String[] = []): Number { # {{{
+			for var mut type in types {
+				type = type.discardAlias()
+
+				if type is UnionType {
+					Type.getParameterCount(type.types(), names)
+				}
+				else {
+					names.pushUniq(type.hashCode())
+				}
+			}
+
+			return names.length
+		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = index is Number ? metadata[index] : index
 
@@ -1036,7 +1050,6 @@ abstract class Type {
 	origin(): valueof @origin
 	origin(@origin): valueof this
 	parameter() => AnyType.NullableUnexplicit
-	reduce(type: Type) => this
 	reference(scope? = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	resetReferences() { # {{{
@@ -1201,6 +1214,7 @@ abstract class Type {
 	} # }}}
 	toTestType() => this
 	toTypeQuote() => @toQuote()
+	trimOff(type: Type): Type => this
 	tryCasting(value: Type): Type { # {{{
 		if value.isMorePreciseThan(this) {
 			return value

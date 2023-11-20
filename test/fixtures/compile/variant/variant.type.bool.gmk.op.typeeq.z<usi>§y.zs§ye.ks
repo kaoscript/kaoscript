@@ -9,8 +9,11 @@ type Event<T> = {
 	}
 }
 
-func foobar(event: Event(Y)) {
+func foobar(event: Event<String | Number>(Y)) {
 	if event is Event<String>(Y) {
 		echo(`\(event.value)`)
+	}
+	else {
+		echo(event.value + 1)
 	}
 }

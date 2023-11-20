@@ -509,14 +509,6 @@ class NamedType extends Type {
 		}
 	} # }}}
 	properties() => @type.properties()
-	reduce(type: Type) { # {{{
-		if @type.isReducible() {
-			return @type.reduce(type)
-		}
-		else {
-			return this
-		}
-	} # }}}
 	referenceIndex() => @type.referenceIndex()
 	resetReferences() => @type.resetReferences()
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
@@ -581,6 +573,14 @@ class NamedType extends Type {
 		variations.push('named', @name)
 
 		@type.toVariations(variations)
+	} # }}}
+	trimOff(type: Type) { # {{{
+		if @type.isReducible() {
+			return @type.trimOff(type)
+		}
+		else {
+			return this
+		}
 	} # }}}
 	type() => @type
 	unflagAltering(): valueof this { # {{{

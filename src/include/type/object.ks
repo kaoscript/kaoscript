@@ -383,7 +383,7 @@ class ObjectType extends Type {
 
 			var newProperties = {}
 
-			if var prop ?= @properties[object.getVariantName()] {
+			if var prop ?= @properties[object.getVariantName()] ;; prop.isValue() {
 				var propname = prop.value()
 
 				if value.hasSubtypes() {
@@ -638,8 +638,17 @@ class ObjectType extends Type {
 									NotImplementedException.throw()
 								}
 							}
+							else if mode ~~ MatchingMode.Exact {
+								return false
+							}
+							else if prop.isAny() {
+								return true
+							}
+							else if type.canBeBoolean() && prop.isBoolean() {
+								return true
+							}
 							else {
-								NotImplementedException.throw()
+								return false
 							}
 						}
 					}

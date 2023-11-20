@@ -208,6 +208,8 @@ class ReturnStatement extends Statement {
 			}
 
 			if @value.isAwaiting() {
+				// TODO!
+				// return @toAwaitStatementFragments^^(fragments, ^)
 				return this.toAwaitStatementFragments^^(fragments, ^)
 			}
 			else {

@@ -1,0 +1,41 @@
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
+module.exports = function() {
+	const __ksType = {
+		isSchoolPerson: (value, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
+			if(!Type.isEnumInstance(variant, PersonKind)) {
+				return false;
+			}
+			if(filter && !filter(variant)) {
+				return false;
+			}
+			if(variant === PersonKind.Student) {
+				return Type.isDexObject(value, 0, 0, {name: Type.isString});
+			}
+			return true;
+		}})
+	};
+	const PersonKind = Helper.enum(Number, {
+		Director: 1,
+		Student: 2,
+		Teacher: 3
+	});
+	function create() {
+		return create.__ks_rt(this, arguments);
+	};
+	create.__ks_0 = function(kind) {
+		return (() => {
+			const o = new OBJ();
+			o.kind = kind;
+			return o;
+		})();
+	};
+	create.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, PersonKind);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return create.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+};

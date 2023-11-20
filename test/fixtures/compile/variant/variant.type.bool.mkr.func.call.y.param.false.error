@@ -1,1 +1,0 @@
-ReferenceException: The function "greeting" can't be matched to given arguments ({ok: false, expecting: String}) (fixtures/compile/variant/variant.type.bool.mkr.func.call.y.param.false.ks:2)

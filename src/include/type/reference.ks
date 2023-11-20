@@ -823,9 +823,7 @@ class ReferenceType extends Type {
 					}
 				}
 				else {
-					if !downcast {
-						return !value.hasSubtypes()
-					}
+					return !value.hasSubtypes()
 				}
 
 				return true
@@ -1000,8 +998,9 @@ class ReferenceType extends Type {
 				return true
 			}
 
-			if @hasParameters() && !value.hasParameters() {
-				return true
+			if @hasParameters() {
+				return true if !value.hasParameters()
+				return true if Type.getParameterCount(@parameters) < Type.getParameterCount(value.parameters())
 			}
 
 			if @hasSubtypes() {
@@ -1285,7 +1284,7 @@ class ReferenceType extends Type {
 				}
 
 				if mode ~~ MatchingMode.AutoCast {
-					if @type().isEnum() {
+					if @type().isEnum() && !value.isEnum() {
 						return @type().discard().type().isSubsetOf(value, mode)
 					}
 				}
@@ -1440,66 +1439,6 @@ class ReferenceType extends Type {
 		@reset()
 
 		return this
-	} # }}}
-	reduce(type: Type) { # {{{
-		if this == type {
-			return Type.Void
-		}
-		else if type is ReferenceType && @name == type.name() {
-			var mut nullable = false
-
-			if @isNullable() && !type.isNullable() {
-				nullable = true
-			}
-
-			var subtypes = type.getSubtypes()
-
-			if ?#subtypes {
-				var names = [name for var { name } in subtypes]
-				var variant = @type.discard().getVariantType()
-				var master = variant.getMaster()
-				var newSubTypes = []
-
-				if ?#@subtypes {
-					for var subtype in @subtypes {
-						if !names.contains(subtype.name) {
-							newSubTypes.push(subtype)
-						}
-					}
-				}
-				else if variant.canBeBoolean() {
-					for var name in ['false', 'true'] {
-						if !names.contains(name) {
-							newSubTypes.push({ name, type: master })
-						}
-					}
-				}
-				else {
-					var enum = variant.getEnumType()
-
-					for var name in enum.listVariableNames() {
-						if !names.contains(name) {
-							newSubTypes.push({ name, type: master })
-						}
-					}
-				}
-
-				return ReferenceType.new(@scope, @name, @nullable, null, newSubTypes)
-			}
-			else {
-				return this
-			}
-		}
-		else {
-			var reduced = @type().reduce(type)
-
-			if @nullable && !type.isNullable() {
-				return (reduced.isUnion() ? reduced : @scope.reference(reduced)).setNullable(true)
-			}
-			else {
-				return reduced.isUnion() ? reduced : @scope.reference(reduced)
-			}
-		}
 	} # }}}
 	resolve(): Void { # {{{
 		if !?@type || @type.isCloned() {
@@ -2111,6 +2050,63 @@ class ReferenceType extends Type {
 		}
 		else {
 			@type.toVariations(variations)
+		}
+	} # }}}
+	override trimOff(type) { # {{{
+		if this == type {
+			return Type.Void
+		}
+		else if type is ReferenceType && @name == type.name() {
+			var mut nullable = false
+
+			if @isNullable() && !type.isNullable() {
+				nullable = true
+			}
+
+			var parameters = type.parameters()
+			var newParameters = []
+
+			if ?#parameters {
+				if ?#@parameters {
+					for var index from 0 to~ Math.max(@parameters.length, parameters.length) {
+						newParameters.push(@parameters[index].trimOff(parameters[index]))
+					}
+				}
+			}
+
+			var subtypes = type.getSubtypes()
+			var newSubtypes = []
+
+			if ?#subtypes {
+				var variant: VariantType = @type.discard().getVariantType()
+				var master = variant.getMaster()
+
+				var names = variant.explodeVarnames(...@subtypes)
+				var offNames = variant.explodeVarnames(...subtypes)
+
+				names.remove(...offNames)
+
+				if ?#names {
+					for var name in names {
+						newSubtypes.push({ name, type: master })
+					}
+				}
+				else {
+					newSubtypes.push(...subtypes)
+				}
+			}
+
+			return ReferenceType.new(@scope, @name, @nullable, newParameters, newSubtypes)
+		}
+		else {
+			var reduced = @type().trimOff(type)
+
+			if @nullable && !type.isNullable() {
+				return (reduced.isUnion() ? reduced : @scope.reference(reduced)).setNullable(true)
+			}
+			else {
+				return reduced.isUnion() ? reduced : @scope.reference(reduced)
+			}
 		}
 	} # }}}
 	override tryCasting(value) { # {{{

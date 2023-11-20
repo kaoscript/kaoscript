@@ -23,6 +23,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(event) {
 		if(__ksType.isEvent.__1(event, [Type.isString])) {
+			console.log(event.value);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

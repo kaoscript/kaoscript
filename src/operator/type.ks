@@ -117,7 +117,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		if @subject.isInferable() {
-			@falseType = @subject.type().reduce(@trueType)
+			@falseType = @subject.type().trimOff(@trueType)
 		}
 	} # }}}
 	translate() { # {{{
@@ -176,12 +176,12 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 		}
 		else {
-			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
-				TypeException.throwInvalidTypeChecking(@subject, type, this)
-			}
-
 			if @subject.type().isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
+			}
+
+			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 
@@ -237,7 +237,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		}
 
 		if @subject.isInferable() {
-			@trueType = @subject.type().reduce(@falseType)
+			@trueType = @subject.type().trimOff(@falseType)
 		}
 	} # }}}
 	translate() { # {{{
@@ -287,12 +287,12 @@ class BinaryOperatorTypeInequality extends Expression {
 			}
 		}
 		else {
-			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
-				TypeException.throwInvalidTypeChecking(@subject, type, this)
-			}
-
 			if @subject.type().isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
+			}
+
+			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
+				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 
