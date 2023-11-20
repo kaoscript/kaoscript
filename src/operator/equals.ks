@@ -144,6 +144,9 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorReturn extends AssignmentOperatorEquals {
+	override isInferable() => @left.isInferable()
+	override isVariable() => @left.isVariable()
+	path() => @left.path()
 	override validate(target)
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 	type() => @type

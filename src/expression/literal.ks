@@ -199,6 +199,7 @@ class IdentifierLiteral extends Literal {
 		return false
 	} # }}}
 	isUsingVariable(name) => @value == name
+	isVariable() => @isVariable
 	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
 		array.push({ name: @value, immutable })
 

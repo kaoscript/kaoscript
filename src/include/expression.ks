@@ -94,6 +94,7 @@ abstract class Expression extends AbstractNode {
 	isUsingStaticVariable(class, varname): Boolean => false
 	// if the expression is the given variable
 	isUsingVariable(name): Boolean => false
+	isVariable(): Boolean => false
 	// if the expression generates multiple assignments
 	isSplitAssignment(): Boolean => false
 	listLocalVariables(scope: Scope, variables: Array): Array => variables
