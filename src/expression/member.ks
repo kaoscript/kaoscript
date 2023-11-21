@@ -578,6 +578,11 @@ class MemberExpression extends Expression {
 		else {
 			var mut found = false
 
+			if @object.isInferable() {
+				@inferable = true
+				@path = `\(@object.path()).\(@property)`
+			}
+
 			if type.isVariant() {
 				if var property ?= type.getProperty(@property, this) {
 					@type = property.discardVariable()
@@ -622,7 +627,13 @@ class MemberExpression extends Expression {
 				}
 
 				if !found && type.isExhaustive(this) {
-					if @assignable {
+					if @parent is UnaryOperatorExistential {
+						pass
+					}
+					else if var type ?= @scope.getChunkType(@path) {
+						@type = type
+					}
+					else if @assignable {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
@@ -660,17 +671,18 @@ class MemberExpression extends Expression {
 				@objectType = type
 			}
 			else if type.isExhaustive(this) {
-				if @assignable {
+				if @parent is UnaryOperatorExistential {
+					pass
+				}
+				else if var type ?= @scope.getChunkType(@path) {
+					@type = type
+				}
+				else if @assignable {
 					ReferenceException.throwInvalidAssignment(this)
 				}
 				else {
 					ReferenceException.throwNotDefinedProperty(@property, this)
 				}
-			}
-
-			if @object.isInferable() {
-				@inferable = true
-				@path = `\(@object.path()).\(@property)`
 			}
 
 			return true

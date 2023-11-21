@@ -148,6 +148,7 @@ class VariantType extends Type {
 	} # }}}
 	getMaster() => @master
 	getVariantType() => this
+	hashCode() => `~\(@master.hashCode())`
 	hasSubtype(name: String) { # {{{
 		if ?@names[name] {
 			return true

@@ -32,15 +32,23 @@ class FusionType extends Type {
 		}
 	} # }}}
 	addType(type: Type) { # {{{
-		@types.push(type)
-
 		@generics ||= type.canBeDeferred()
 		@nullable ||= type.isNullable()
 		@variant ||= type.isVariant()
+
+		@types.push(type.setNullable(false))
 	} # }}}
 	canBeDeferred() => @generics
-	clone() { # {{{
-		throw NotSupportedException.new()
+	clone(): FusionType { # {{{
+		var result = FusionType.new(@scope)
+
+		result._generics = @generics
+		result._nullable = @nullable
+		result._testName = @testName
+		result._types = [...@types]
+		result._variant = @variant
+
+		return result
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
@@ -126,9 +134,14 @@ class FusionType extends Type {
 		return null
 	} # }}}
 	hashCode(fattenNull: Boolean = false): String { # {{{
-		var types = [type.hashCode(fattenNull) for var type in @types]
+		var hash = [type.hashCode(fattenNull) for var type in @types].join('&')
 
-		return types.join('&')
+		if @nullable {
+			return `\(hash)?`
+		}
+		else {
+			return hash
+		}
 	} # }}}
 	hasKeyType() { # {{{
 		for var type in @types {
@@ -267,6 +280,15 @@ class FusionType extends Type {
 		}
 
 		return properties
+	} # }}}
+	setNullable(nullable: Boolean): FusionType { # {{{
+		return this if nullable == @nullable
+
+		var result = @clone()
+
+		result._nullable = nullable
+
+		return result
 	} # }}}
 	setTestName(@testName)
 	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{

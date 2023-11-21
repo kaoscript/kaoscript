@@ -1582,6 +1582,10 @@ class ReferenceType extends Type {
 		else if @type.isAlias() {
 			var alias = @type.discardName()
 
+			if @nullable && !alias.isNullable() {
+				types.pushUniq(Type.Null)
+			}
+
 			if alias.hasGenerics() {
 				return super(types)
 			}
