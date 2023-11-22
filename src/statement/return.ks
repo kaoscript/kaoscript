@@ -15,16 +15,20 @@ class ReturnStatement extends Statement {
 
 		var mut ancestor = parent
 
-		while ?ancestor && ancestor is not AnonymousFunctionExpression & ArrowFunctionExpression & FunctionDeclarator & ClassMethodDeclaration & ImplementDividedClassMethodDeclaration & ImplementNamespaceFunctionDeclaration {
+		while ?ancestor {
 			if ancestor is IfExpression | MatchExpression {
 				@inline = true
 			}
+			else if ancestor is ArrayComprehensionForFrom | ArrayComprehensionForIn | ArrayComprehensionForOf | ArrayComprehensionForRange {
+				break
+			}
+			else if ancestor is AnonymousFunctionExpression | ArrowFunctionExpression | FunctionDeclarator | ClassMethodDeclaration | ImplementDividedClassMethodDeclaration | ImplementNamespaceFunctionDeclaration {
+				@function = ancestor
+
+				break
+			}
 
 			ancestor = ancestor.parent()
-		}
-
-		if ?ancestor {
-			@function = ancestor
 		}
 	} # }}}
 	constructor(@value, @parent) { # {{{

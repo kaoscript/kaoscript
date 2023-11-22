@@ -2,6 +2,9 @@
 	"explorer.fileNesting.patterns": {
 		"*.ks": ".${capture}.ks.*",
 	},
+	"files.associations": {
+		"compiler.js": "text"
+	},
 	"files.exclude": {
 		"**/.git": true,
 		"**/.svn": true,

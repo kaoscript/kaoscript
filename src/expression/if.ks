@@ -154,12 +154,17 @@ class IfExpression extends Expression {
 		if @hasCondition {
 			@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
-			for var data, name of @condition.inferTypes({}) {
-				@scope.updateInferable(name, data, this)
+			for var data, name of @condition.inferWhenTrueTypes({}) {
+				@whenTrueScope.updateInferable(name, data, this)
 			}
 
-			@condition.acquireReusable(false)
-			@condition.releaseReusable()
+			for var data, name of @condition.inferWhenFalseTypes({}) {
+				@whenFalseScope.updateInferable(name, data, this)
+			}
+
+			@condition
+				..acquireReusable(false)
+				..releaseReusable()
 		}
 
 		@statement().assignTempVariables(@bindingScope)

@@ -3,6 +3,7 @@ class ObjectIteration extends IterationNode {
 		@bindingValue						= null
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
+		@declareExpression: Boolean			= false
 		@defineKey: Boolean					= false
 		@defineValue: Boolean				= false
 		@expression
@@ -96,7 +97,10 @@ class ObjectIteration extends IterationNode {
 		}
 
 		if @expression.isLooseComposite() {
-			@expressionName = @bindingScope.acquireTempName(false)
+			if @expressionName !?= @scope.acquireUnusedTempName() {
+				@expressionName = @scope.acquireTempName(false)
+				@declareExpression = true
+			}
 		}
 
 		if ?@value {
@@ -220,7 +224,7 @@ class ObjectIteration extends IterationNode {
 		}
 	} # }}}
 	override releaseVariables() { # {{{
-		@bindingScope.releaseTempName(@expressionName) if ?@expressionName
+		@scope.releaseTempName(@expressionName) if ?@expressionName
 		@bindingScope.releaseTempName(@keyName) if ?@keyName
 
 		@bindingValue.releaseReusable()
@@ -229,7 +233,8 @@ class ObjectIteration extends IterationNode {
 		if ?@expressionName {
 			fragments
 				.newLine()
-				.code($runtime.scope(this), @expressionName, $equals)
+				.code($runtime.scope(this)) if @declareExpression
+				.code(@expressionName, $equals)
 				.compile(@expression)
 				.done()
 		}
