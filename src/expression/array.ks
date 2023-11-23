@@ -3,13 +3,33 @@ class ArrayExpression extends Expression {
 		@canConcat: Boolean			= true
 		@flatten: Boolean			= false
 		@nullableHelper: Boolean	= false
+		@restrictive: Boolean	= false
 		@type: Type
 		@useHelper: Boolean			= false
 		@values: Array				= []
 	}
 	analyse() { # {{{
 		for var data in @data.values {
-			var value = $compile.expression(data, this)
+			// TODO!
+			// var value =
+			// 	if data.kind == NodeKind.RestrictiveExpression {
+			// 		@restrictive = true
+
+			// 		set ArrayRestrictiveMember.new(data, this)
+			// 	}
+			// 	else {
+			// 		set $compile.expression(data, this)
+			// 	}
+			var late value
+
+			if data.kind == NodeKind.RestrictiveExpression {
+				@restrictive = true
+
+				value = ArrayRestrictiveMember.new(data, this)
+			}
+			else {
+				value = $compile.expression(data, this)
+			}
 
 			value.analyse()
 
@@ -109,7 +129,10 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @useHelper {
+		if @restrictive {
+			@toRestrictiveFragments(fragments, mode)
+		}
+		else if @useHelper {
 			if @canConcat {
 				fragments.code(`\($runtime.helper(this)).concatArray(\(@nullableHelper ? '1' : '0')`)
 
@@ -155,6 +178,85 @@ class ArrayExpression extends Expression {
 			}
 		}
 	} # }}}
+	toRestrictiveFragments(fragments, mode) { # {{{
+		var mut varname = 'a'
+
+		if @isUsingVariable('a') {
+			if !@isUsingVariable('l') {
+				varname = 'l'
+			}
+			else if !@isUsingVariable('_') {
+				varname = '_'
+			}
+			else {
+				varname = '__ks__'
+			}
+		}
+
+		fragments.code('(() =>')
+
+		var block = fragments.newBlock()
+
+		var mut line = block.newLine().code(`\($const(this))\(varname) = [`)
+
+		var mut arrayOpened = true
+		var mut pushOpened = false
+		var mut comma = false
+		var mut unknown = false
+
+		for var value, index in @values {
+			if value is ArrayRestrictiveMember {
+				if arrayOpened {
+					line.code(`]`).done()
+					arrayOpened = false
+				}
+				else if pushOpened {
+					line.code(`)`).done()
+					pushOpened = false
+				}
+
+				value.toRestrictiveFragments(block, (expression, fragments) => {
+					if unknown || expression.type().isSpread() {
+						fragments.newLine().code(`\(varname).push(`).compile(expression).code(')').done()
+					}
+					else {
+						fragments.newLine().code(`\(varname)[\(index)] = `).compile(expression).done()
+					}
+				})
+
+				unknown = true
+			}
+			else {
+				if arrayOpened || pushOpened {
+					if comma {
+						line.code($comma)
+					}
+					else {
+						comma = true
+					}
+
+					line.compile(value)
+				}
+				else {
+					line = block.newLine().code(`\(varname).push(`).compile(value)
+					pushOpened = true
+				}
+
+				unknown ||= value.type().isSpread()
+			}
+		}
+
+		if arrayOpened {
+			line.code(`]`).done()
+		}
+		else if pushOpened {
+			line.code(`)`).done()
+		}
+
+		block.line(`return \(varname)`).done()
+
+		fragments.code(')()')
+	} # }}}
 	toQuote() { # {{{
 		var mut fragments = '['
 
@@ -186,6 +288,49 @@ class ArrayExpression extends Expression {
 				value.validateType(parameter)
 			}
 		}
+	} # }}}
+}
+
+class ArrayRestrictiveMember extends Expression {
+	private late {
+		@condition
+		@expression
+	}
+	analyse() { # {{{
+		@condition = $compile.expression(@data.condition, this)
+			..analyse()
+
+		@expression = $compile.expression(@data.expression, this)
+			..analyse()
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
+
+		@expression.prepare(target, targetMode)
+	} # }}}
+	translate() { # {{{
+		@condition.translate()
+		@expression.translate()
+	} # }}}
+	toRestrictiveFragments(fragments, setter) { # {{{
+		var ctrl = fragments.newControl()
+
+		if @data.operator.kind == RestrictiveOperatorKind.If {
+			ctrl
+				.code('if(')
+				.compileCondition(@condition)
+		}
+		else {
+			ctrl
+				.code('if(!')
+				.wrapCondition(@condition)
+		}
+
+		ctrl.code(')').step()
+
+		setter(@expression, ctrl)
+
+		ctrl.done()
 	} # }}}
 }
 

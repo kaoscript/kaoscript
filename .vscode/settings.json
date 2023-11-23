@@ -3,7 +3,7 @@
 		"*.ks": ".${capture}.ks.*",
 	},
 	"files.associations": {
-		"compiler.js": "text"
+		"compiler*.js": "text"
 	},
 	"files.exclude": {
 		"**/.git": true,
