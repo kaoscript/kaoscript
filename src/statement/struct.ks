@@ -301,10 +301,10 @@ class StructFieldDeclaration extends AbstractNode {
 
 			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
-			if ?@data.defaultValue {
+			if ?@data.value {
 				@type.flagDefaultValue()
 
-				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+				if @data.value.kind == NodeKind.Identifier && @data.value.name == 'null' {
 					@type.flagNullable()
 				}
 			}
@@ -341,7 +341,15 @@ class StructFieldParameter extends Parameter {
 		@validation: Boolean			 = true
 	}
 	constructor(@field, parent) { # {{{
-		super(field._data, parent)
+		var data =
+			if ?field._data.value {
+				set { ...field._data!?, defaultValue: field._data.value }
+			}
+			else {
+				set field._data
+			}
+
+		super(data, parent)
 	} # }}}
 	analyse() { # {{{
 		@internal = IdentifierParameter.new({
