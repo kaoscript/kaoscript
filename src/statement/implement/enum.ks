@@ -1,8 +1,8 @@
-class ImplementEnumFieldDeclaration extends Statement {
+class ImplementEnumValueDeclaration extends Statement {
 	private late {
 		@operands: Array
+		@type: EnumValueType
 		@value: String
-		@variable: EnumVariableType
 	}
 	private {
 		@composite: Boolean					= false
@@ -19,103 +19,49 @@ class ImplementEnumFieldDeclaration extends Statement {
 		@enumRef = @scope.reference(@enumName)
 
 		@name = data.name.name
-
 	} # }}}
 	analyse() { # {{{
 		var value = @data.value
 
-		match @enum.kind() {
-			EnumTypeKind.Bit {
-				if ?value {
-					if value.kind == NodeKind.BinaryExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
-						@composite = true
-
-						@operands = [value.left, value.right]
-					}
-					else if value.kind == NodeKind.PolyadicExpression && value.operator.kind == BinaryOperatorKind.Or | BinaryOperatorKind.Addition {
-						@composite = true
-
-						@operands = value.operands
-					}
-					else {
-						if value.kind == NodeKind.NumericExpression {
-							if value.value > 53 {
-								SyntaxException.throwEnumOverflow(@enumName.name(), this)
-							}
-
-							var mut tmp = @enum.index(value.value)
-						}
-						else {
-							SyntaxException.throwInvalidEnumValue(value, this)
-						}
-
-						@value = `\(@enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1))`
-					}
+		if ?value {
+			match value.kind {
+				NodeKind.Literal when @enum.kind() == EnumTypeKind.String {
+					{ @type, @value } = @enum.createValue(@name, value.value)
+				}
+				NodeKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
+					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
 				else {
-					if @enum.step() > 53 {
-						SyntaxException.throwEnumOverflow(@enumName.name(), this)
-					}
-
-					@value = `\(@enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1))`
+					echo(value)
+					throw NotSupportedException.new(this)
 				}
-			}
-			EnumTypeKind.String {
-				if ?value {
-					if value.kind == NodeKind.Literal {
-						@value = $quote(value.value)
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-				}
-				else {
-					@value = $quote(@name.toLowerCase())
-				}
-			}
-			EnumTypeKind.Number {
-				if ?value {
-					if value.kind == NodeKind.NumericExpression {
-						@value = `\(@enum.index(value.value))`
-					}
-					else {
-						throw NotSupportedException.new(this)
-					}
-				}
-				else {
-					@value = `\(@enum.step())`
-				}
-			}
-		}
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		@variable = EnumVariableType.new(@name)
-
-		@enum.addVariable(@variable)
-
-		@variable.flagAlteration()
-	} # }}}
-	translate() { # {{{
-	} # }}}
-	getSharedName() => null
-	isMethod() => false
-	toFragments(fragments, mode) { # {{{
-		var name = @enumName.name()
-		var line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
-
-		if @composite {
-			for var operand, i in @operands {
-				line.code(' | ') if i > 0
-
-				line.code(name, '.', operand.name)
 			}
 		}
 		else {
-			line.code(@value)
+			{ @type, @value } = @enum.createValue(@name)
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@type.flagAlteration()
+	} # }}}
+	translate() { # {{{
+	} # }}}
+	getSharedName() => `__ks_value_\(@enumName.name())`
+	isMethod() => false
+	toFragments(fragments, mode)
+	toImplementFragments(fragments) { # {{{
+		fragments.code(`, \($quote(@name)), \(@value)`)
+	} # }}}
+	toSharedFragments(fragments, properties) { # {{{
+		var line = fragments.newLine().code(`\($runtime.helper(this)).implEnum(\(@enumName.name())`)
+
+		for var value of properties when !value.type().isAlias() {
+			value.toImplementFragments(line)
 		}
 
 		line.code(')').done()
 	} # }}}
+	type() => @type
 }
 
 class ImplementEnumMethodDeclaration extends Statement {
@@ -177,7 +123,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			@scope.rename('this', 'that')
 		}
 
-		for var name in @enum.listVariableNames() {
+		for var name in @enum.listValueNames() {
 			var variable = @scope.define(name, true, @enumRef, true, @parent)
 
 			variable.renameAs(`\(@enumName.name()).\(name)`)
@@ -291,7 +237,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 	} # }}}
 	getOverridableVarname() => @enumName.name()
 	getParameterOffset() => @instance ? 1 : 0
-	getSharedName() => @override ? null : @instance ? `__ks_func_\(@name)` : @name
+	getSharedName() => @override ? null : @instance ? `__ks_func_\(@name)` : `__ks_sttc_\(@name)`
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

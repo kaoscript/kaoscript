@@ -17,15 +17,28 @@ class UnaryOperatorImplicit extends Expression {
 			else if type is VariantType {
 				var master = type.getMaster()
 
-				unless master.discard().hasVariable(@property) {
-					ReferenceException.throwNotDefinedEnumElement(@property, master.name(), this)
+				unless master.discard().hasValue(@property) {
+					ReferenceException.throwNotDefinedVariantElement(@property, master.name(), this)
 				}
 
 				@varname = master.name()
 				@type = ValueType.new(@property, master.setNullable(false), `\(@varname).\(@property)`, @scope)
 			}
+			else if type.isBitmask() {
+				if var value ?= type.discard().getValue(@property) {
+					if type is ValueType {
+						@type = type.setNullable(false)
+					}
+					else {
+						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), `\(type.path()).\(@property)`, @scope)
+					}
+				}
+				else {
+					ReferenceException.throwNotDefinedBitmaskElement(@property, type.name(), this)
+				}
+			}
 			else if type.isEnum() {
-				if var variable ?= type.discard().getVariable(@property) {
+				if var value ?= type.discard().getValue(@property) {
 					if type is ValueType {
 						@type = type.setNullable(false)
 					}
@@ -33,12 +46,12 @@ class UnaryOperatorImplicit extends Expression {
 						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), `\(type.path()).\(@property)`, @scope)
 					}
 
-					if variable.isAlias() {
-						if variable.isDerivative() {
+					if value.isAlias() {
+						if value.isDerivative() {
 							@derivative = true
 						}
 						else {
-							@originalProperty = variable.original()
+							@originalProperty = value.original()
 						}
 					}
 				}
@@ -51,7 +64,7 @@ class UnaryOperatorImplicit extends Expression {
 				var master = variant.getMaster()
 
 				unless variant.hasSubtype(@property) {
-					ReferenceException.throwNotDefinedEnumElement(@property, master.name(), this)
+					ReferenceException.throwNotDefinedVariantElement(@property, master.name(), this)
 				}
 
 				@type = ReferenceType.new(@scope, type.name(), false, null, [{ name: @property, type: master }])

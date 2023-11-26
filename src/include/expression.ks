@@ -156,7 +156,8 @@ abstract class Expression extends AbstractNode {
 	toReusableFragments(fragments) => @toFragments(fragments, Mode.None)
 	toStringFragments(fragments) { # {{{
 		var type = @type()
-		if type.isReference() && type.type().isEnum() {
+
+		if type.isReference() && (type.type().isBitmask() || type.type().isEnum()) {
 			fragments.compile(this).code('.value')
 		}
 		else {
@@ -168,7 +169,7 @@ abstract class Expression extends AbstractNode {
 		return double ? `"\(@toTypeQuote())"` : `'\(@toTypeQuote())'`
 	} # }}}
 	type() => AnyType.NullableUnexplicit
-	unflagExpectingEnum()
+	unflagExpectingBitmask()
 	validateType(type: Type)
 	variable() => null
 }

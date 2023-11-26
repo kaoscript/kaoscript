@@ -149,7 +149,7 @@ class ReferenceType extends Type {
 			return true
 		}
 		else {
-			return @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+			return @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isBitmask() && !@isEnum())
 		}
 	} # }}}
 	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
@@ -297,7 +297,7 @@ class ReferenceType extends Type {
 		}
 
 		if @isTypeOf() {
-			if value.type().isEnum() {
+			if value.type().isBitmask() || value.type().isEnum() {
 				var name = value.discard().type().name()
 
 				return $weightTOFs[@name] - $weightTOFs[name]
@@ -337,7 +337,7 @@ class ReferenceType extends Type {
 		}
 
 		if value.isTypeOf() {
-			if @type().isEnum() {
+			if @type().isBitmask() || @type().isEnum() {
 				var name = @discard().type().name()
 
 				return $weightTOFs[@name] - $weightTOFs[name]
@@ -828,6 +828,9 @@ class ReferenceType extends Type {
 
 				return true
 			}
+			else if (value.name() == 'Bitmask' && @type().isBitmask()) || (@name == 'Bitmask' && value.type().isBitmask()) {
+				return false
+			}
 			else if (value.name() == 'Class' && @type().isClass()) || (@name == 'Class' && value.type().isClass()) {
 				return false
 			}
@@ -929,9 +932,10 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	isAsync() => false
+	isBitmask() => @name == 'Bitmask' || @type().isBitmask()
 	isBoolean() => @name == 'Boolean' || @type().isBoolean()
 	isBroadArray() => @name == 'Array' || @type().isArray() || @type().isTuple()
-	isBroadObject() => @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isEnum())
+	isBroadObject() => @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isBitmask() && !@isEnum())
 	isClass() => @name == 'Class'
 	isClassInstance() => @name != 'Object' && @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
@@ -1014,7 +1018,7 @@ class ReferenceType extends Type {
 
 				var enum = variant.getEnumType()
 
-				return enum.getOriginalVariableCount(...@subtypes) < enum.getOriginalVariableCount(...value.getSubtypes())
+				return enum.getOriginalValueCount(...@subtypes) < enum.getOriginalValueCount(...value.getSubtypes())
 			}
 
 			return false
@@ -1284,7 +1288,7 @@ class ReferenceType extends Type {
 				}
 
 				if mode ~~ MatchingMode.AutoCast {
-					if @type().isEnum() && !value.isEnum() {
+					if (@type().isBitmask() && !value.isBitmask()) || (@type().isEnum() && !value.isEnum()) {
 						return @type().discard().type().isSubsetOf(value, mode)
 					}
 				}
@@ -1824,7 +1828,10 @@ class ReferenceType extends Type {
 			else {
 				fragments.code(`\($runtime.type(node)).`)
 
-				if unalias.isClass() {
+				if unalias.isBitmask() {
+					fragments.code(`isBitmaskInstance`)
+				}
+				else if unalias.isClass() {
 					fragments.code(`isClassInstance`)
 				}
 				else if unalias.isEnum() {
@@ -1903,14 +1910,14 @@ class ReferenceType extends Type {
 						for var { name, type }, index in @subtypes {
 							fragments.code(' && ') if index > 0
 
-							var variable = type.discard().getVariable(name)
+							var value = type.discard().getValue(name)
 
-							if variable.isAlias() {
-								if variable.isDerivative() {
+							if value.isAlias() {
+								if value.isDerivative() {
 									fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(`).compile(node).code(`.\(property))`)
 								}
 								else {
-									fragments.compile(node).code(`.\(property) !== `).compile(type).code(`.\(variable.original())`)
+									fragments.compile(node).code(`.\(property) !== `).compile(type).code(`.\(value.original())`)
 								}
 							}
 							else {
@@ -1967,14 +1974,14 @@ class ReferenceType extends Type {
 						for var { name, type }, index in @subtypes {
 							fragments.code(' || ') if index > 0
 
-							var variable = type.discard().getVariable(name)
+							var value = type.discard().getValue(name)
 
-							if variable.isAlias() {
-								if variable.isDerivative() {
+							if value.isAlias() {
+								if value.isDerivative() {
 									fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(`).compile(node).code(`.\(property))`)
 								}
 								else {
-									fragments.compile(node).code(`.\(property) === `).compile(type).code(`.\(variable.original())`)
+									fragments.compile(node).code(`.\(property) === `).compile(type).code(`.\(value.original())`)
 								}
 							}
 							else {
@@ -2264,7 +2271,10 @@ class ReferenceType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).`)
 
-			if @type.isClass() {
+			if @type.isBitmask() {
+				fragments.code(`isBitmaskInstance`)
+			}
+			else if @type.isClass() {
 				fragments.code(`isClassInstance`)
 			}
 			else if @type.isEnum() {

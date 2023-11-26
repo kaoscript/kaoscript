@@ -2,7 +2,7 @@ require("kaoscript/register");
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Color, Space} = require("../.color.ks.j5k8r9.ksb")();
-	Space.RVB = Space("rvb");
+	Helper.implEnum(Space, "RVB", "rvb");
 	Color.__ks_sttc_addSpace_0((() => {
 		const o = new OBJ();
 		o["name"] = "rvb";
@@ -82,7 +82,7 @@ module.exports = function() {
 	Color.prototype.vert = function() {
 		return this.__ks_func_vert_rt.call(null, this, this, arguments);
 	};
-	Space.CMY = Space("cmy");
+	Helper.implEnum(Space, "CMY", "cmy");
 	Color.__ks_sttc_addSpace_0((() => {
 		const o = new OBJ();
 		o["name"] = "cmy";

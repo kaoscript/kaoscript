@@ -1,9 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const FontWeight = Helper.enum(Number, {
-		Bold: 0,
-		Normal: 1
-	});
+	const FontWeight = Helper.enum(Number, "Bold", 0, "Normal", 1);
 	const Style = Helper.struct(function(fontWeight) {
 		const _ = new OBJ();
 		_.fontWeight = fontWeight;

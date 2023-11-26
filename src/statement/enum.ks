@@ -6,7 +6,7 @@ class EnumDeclaration extends Statement {
 		@staticMethods: Object		= {}
 		@type: NamedType<EnumType>
 		@variable: Variable
-		@variables: Object			= {}
+		@values: Object				= {}
 	}
 	initiate() { # {{{
 		@name = @data.name.name
@@ -35,23 +35,21 @@ class EnumDeclaration extends Statement {
 				NodeKind.CommentLine {
 					pass
 				}
-				NodeKind.FieldDeclaration {
-					var variable = @createVariable(data)
-					var name = variable.name()
+				NodeKind.EnumValue {
+					var value = EnumValueDeclaration.new(data, @enum, this)
+					var name = value.name()
 
-					if @enum.hasVariable(name) || @enum.hasStaticMethod(name) {
-						ReferenceException.throwAlreadyDefinedField(name, variable)
+					if @enum.hasValue(name) || @enum.hasStaticMethod(name) {
+						ReferenceException.throwAlreadyDefinedField(name, value)
 					}
 
-					variable.analyse()
-
-					@enum.addVariable(variable.type())
+					value.analyse()
 				}
 				NodeKind.MethodDeclaration {
 					var method = EnumMethodDeclaration.new(data, this)
 					var name = method.name()
 
-					if !method.isInstance() && @enum.hasVariable(name) {
+					if !method.isInstance() && @enum.hasValue(name) {
 						ReferenceException.throwAlreadyDefinedField(name, method)
 					}
 
@@ -67,8 +65,8 @@ class EnumDeclaration extends Statement {
 		@type = @variable.getRealType()
 		@enum = @type.type()
 
-		for var variable of @variables {
-			variable.prepare()
+		for var value of @values {
+			value.prepare()
 		}
 
 		for var methods, name of @instanceMethods {
@@ -116,8 +114,8 @@ class EnumDeclaration extends Statement {
 		@enum.flagComplete()
 	} # }}}
 	translate() { # {{{
-		for var variable of @variables {
-			variable.translate()
+		for var value of @values {
+			value.translate()
 		}
 
 		for var methods of @instanceMethods {
@@ -132,10 +130,9 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	addVariable(variable: EnumVariableDeclaration) { # {{{
-		@variables[variable.name()] = variable
+	addValue(value: EnumValueDeclaration) { # {{{
+		@values[value.name()] = value
 	} # }}}
-	createVariable(data) => EnumVariableDeclaration.new(data, this)
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
 	} # }}}
@@ -153,24 +150,18 @@ class EnumDeclaration extends Statement {
 
 		@toMainTypeFragments(line)
 
-		line.code($comma)
-
-		var object = line.newObject()
-
-		for var variable of @variables when !variable.type().isAlias() {
-			variable.toFragments(object)
+		for var value of @values when !value.type().isAlias() {
+			value.toFragments(line)
 		}
-
-		object.done()
 
 		line.code(')').done()
 
-		for var variable of @variables when variable.type().isTopDerivative() {
+		for var value of @values when value.type().isTopDerivative() {
 			var line = fragments.newLine()
 
-			line.code(`\(@name).__ks_eq_\(variable.name()) = value => `)
+			line.code(`\(@name).__ks_eq_\(value.name()) = value => `)
 
-			variable.toConditionFragments(@name, 'value', line)
+			value.toConditionFragments(@name, 'value', line)
 
 			line.done()
 		}
@@ -242,48 +233,43 @@ class EnumDeclaration extends Statement {
 	type() => @type
 }
 
-class EnumVariableDeclaration extends AbstractNode {
+class EnumValueDeclaration extends AbstractNode {
 	private late {
-		@type: EnumVariableType
+		@enum: EnumType
+		@type: EnumValueType | EnumAliasType
 		@value: String?
 	}
 	private {
 		@name: String
 	}
-	constructor(data, parent) { # {{{
+	constructor(data, @enum, parent) { # {{{
 		super(data, parent)
 
 		@name = data.name.name
 
-		parent.addVariable(this)
+		parent.addValue(this)
 	} # }}}
 	analyse() { # {{{
-		var enum = @parent.type().type()
 		var value = @data.value
 
 		if ?value {
 			match value.kind {
 				NodeKind.Identifier {
-					@type = EnumVariableAliasType.new(@name)
-						// TODO!
-						// ...setAlias(value.name, enum)
-
-					@type.setAlias(value.name, enum)
+					@type = @enum.createAlias(@name)
+						..setAlias(value.name, @enum)
 				}
 				NodeKind.JunctionExpression when value.operator.kind == BinaryOperatorKind.JunctionOr {
-					@type = EnumVariableAliasType.new(@name)
+					@type = @enum.createAlias(@name)
 
 					for var { name } in value.operands {
-						@type.addAlias(name, enum)
+						@type.addAlias(name, @enum)
 					}
 				}
-				NodeKind.Literal when enum.kind() == EnumTypeKind.String {
-					@value = $quote(value.value)
-					@type = EnumVariableType.new(@name)
+				NodeKind.Literal when @enum.kind() == EnumTypeKind.String {
+					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
-				NodeKind.NumericExpression when enum.kind() == EnumTypeKind.Number {
-					@value = `\(enum.index(value.value))`
-					@type = EnumVariableType.new(@name)
+				NodeKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
+					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
 				else {
 					echo(value)
@@ -292,14 +278,7 @@ class EnumVariableDeclaration extends AbstractNode {
 			}
 		}
 		else {
-			if enum.kind() == EnumTypeKind.String {
-				@value = $quote(@name.toLowerCase())
-			}
-			else {
-				@value = `\(enum.step())`
-			}
-
-			@type = EnumVariableType.new(@name)
+			{ @type, @value } = @enum.createValue(@name)
 		}
 	} # }}}
 	override prepare(target, targetMode)
@@ -313,7 +292,7 @@ class EnumVariableDeclaration extends AbstractNode {
 		}
 	} # }}}
 	toFragments(fragments) { # {{{
-		fragments.line(`\(@name): \(@value)`)
+		fragments.code(`, \($quote(@name)), \(@value)`)
 	} # }}}
 	type() => @type
 }
@@ -378,7 +357,7 @@ class EnumMethodDeclaration extends Statement {
 		var enumName = @parent.name()
 		var enumRef = @scope.reference(enumName)
 
-		for var _, name of @parent._variables {
+		for var _, name of @parent._values {
 			var variable = @scope.define(name, true, enumRef, true, @parent)
 
 			variable.renameAs(`\(enumName).\(name)`)

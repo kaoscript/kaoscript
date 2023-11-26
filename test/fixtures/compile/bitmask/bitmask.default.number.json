@@ -17,36 +17,38 @@
     ],
     "references": [
       {
-        "kind": "enum",
-        "type": "bit",
-        "sequenceIndex": 4,
+        "kind": "bitmask",
+        "length": 16,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 5,
+        "generator": {
+          "initial": 0,
+          "next": 5
+        },
+        "values": [
           {
-            "name": "None"
+            "name": "None",
+            "index": 0
           },
           {
-            "name": "HasClaws"
+            "name": "HasClaws",
+            "index": 1
           },
           {
-            "name": "CanFly"
+            "name": "CanFly",
+            "index": 2
           },
           {
-            "name": "EatsFish"
+            "name": "EatsFish",
+            "index": 3
           },
           {
-            "name": "Endangered"
-          },
-          {
-            "name": "EndangeredFlyingClawedFishEating"
-          },
-          {
-            "name": "Predator"
+            "name": "Endangered",
+            "index": 4
           }
         ],
         "instanceMethods": {},
         "staticMethods": {},
-        "length": 16,
         "sequences": [
           -1
         ]

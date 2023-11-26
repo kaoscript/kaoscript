@@ -1,15 +1,11 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Color = Helper.enum(String, {
-		Red: "red",
-		Green: "green",
-		Blue: "blue"
-	});
+	const Color = Helper.enum(String, "Red", "red", "Green", "green", "Blue", "blue");
 	function color() {
 		return color.__ks_rt(this, arguments);
 	};
 	color.__ks_0 = function(value) {
-		return Color.__ks_from("red");
+		return Color("red");
 	};
 	color.__ks_rt = function(that, args) {
 		const t0 = Type.isString;

@@ -1,11 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const CardSuit = Helper.enum(Number, {
-		Clubs: 0,
-		Diamonds: 1,
-		Hearts: 2,
-		Spades: 3
-	});
+	const CardSuit = Helper.enum(Number, "Clubs", 0, "Diamonds", 1, "Hearts", 2, "Spades", 3);
 	CardSuit.__ks_func_foobar_0 = function(__ks_0, that) {
 		const x = CardSuit.__ks_func_quxbaz_0(__ks_0);
 		return that;

@@ -1,14 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const AnimalFlags = Helper.enum(Object, {
-		None: 0n,
-		HasClaws: 1n,
-		CanFly: 2n,
-		EatsFish: 4n,
-		Endangered: 8n,
-		EndangeredFlyingClawedFishEating: 1n | 2n | 4n | 8n,
-		Predator: 2n | 1n
-	});
+	const AnimalFlags = Helper.bitmask(Object, ["None", 0n, "HasClaws", 1n, "CanFly", 2n, "EatsFish", 4n, "Endangered", 8n], ["EndangeredFlyingClawedFishEating", 1n | 2n | 4n | 8n, "Predator", 2n | 1n]);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -39,7 +31,7 @@ module.exports = function() {
 		}
 	};
 	printAnimalAbilities.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, AnimalFlags);
+		const t0 = value => Type.isBitmaskInstance(value, AnimalFlags);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return printAnimalAbilities.__ks_0.call(that, args[0]);

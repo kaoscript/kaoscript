@@ -125,8 +125,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	Space.HSB = Space("hsb");
-	Space.HSL = Space("hsl");
+	Helper.implEnum(Space, "HSB", "hsb", "HSL", "hsl");
 	Color.__ks_sttc_addSpace_0((() => {
 		const o = new OBJ();
 		o.name = Space.HSL;

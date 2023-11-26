@@ -29,9 +29,7 @@ module.exports = function() {
 		}
 	}
 	ValueA.Foobar = ValueA.__ks_new_0();
-	const EnumA = Helper.enum(Number, {
-		Foobar: 0
-	});
+	const EnumA = Helper.enum(Number, "Foobar", 0);
 	class MainA {
 		static __ks_new_0() {
 			const o = Object.create(MainA.prototype);

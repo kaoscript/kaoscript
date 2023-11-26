@@ -123,7 +123,7 @@ class NamedType extends Type {
 			else if @type.isClass() && value.isClass() {
 				return @name == 'Class' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
-			else if @type.isEnum() {
+			else if @type.isBitmask() || @type.isEnum() {
 				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 			}
 			else if @type.isStruct() && value.isStruct() {
@@ -134,7 +134,10 @@ class NamedType extends Type {
 			}
 		}
 		else if value is ReferenceType {
-			if value.name() == 'Class' {
+			if value.name() == 'Bitmask' {
+				return @type.isBitmask()
+			}
+			else if value.name() == 'Class' {
 				return @type.isClass()
 			}
 			else if value.name() == 'Enum' {
@@ -148,6 +151,9 @@ class NamedType extends Type {
 			}
 			else if value.name() == 'Tuple' {
 				return @type.isTuple()
+			}
+			else if @type.isBitmask() {
+				return value.name() == 'Bitmask'
 			}
 			else if @type.isClass() {
 				return value.name() == 'Class'
@@ -310,6 +316,14 @@ class NamedType extends Type {
 						return @type.isSubsetOf(value.type(), mode + MatchingMode.Subclass)
 					}
 				}
+				else if value.type() is BitmaskType {
+					if @type is BitmaskType {
+						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
+					}
+					else {
+						return this.isSubsetOf(value.type().type(), mode)
+					}
+				}
 				else if value.type() is EnumType {
 					if @type is EnumType {
 						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
@@ -317,6 +331,9 @@ class NamedType extends Type {
 					else {
 						return this.isSubsetOf(value.type().type(), mode)
 					}
+				}
+				else if value.type() is ClassType && value.name() == 'Bitmask' {
+					return @isBitmask()
 				}
 				else if value.type() is ClassType && value.name() == 'Enum' {
 					return @isEnum()
@@ -599,6 +616,7 @@ class NamedType extends Type {
 		hasMutableAccess
 		hasRest
 		hasTest
+		isBitmask
 		isComplete
 		isDeferrable
 		isExportingType

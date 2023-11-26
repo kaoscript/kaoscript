@@ -64,11 +64,11 @@ ntest:
 	find test -name "*.no"
 
 patche:
-	node ./scripts/patch-error.js
+	node ./scripts/patch-error.js$(if $(value g), "$(g)")
 patchm:
-	node ./scripts/patch-metadata.js
+	node ./scripts/patch-metadata.js$(if $(value g), "$(g)")
 patchs:
-	node ./scripts/patch-source.js
+	node ./scripts/patch-source.js$(if $(value g), "$(g)")
 
 save:
 	cp lib/compiler.js lib/compiler.old.js
@@ -107,6 +107,8 @@ dev:
 	@# tests
 	@# node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
+	@# node test/compile.dev.js "compile variant"
+	@# node test/compile.dev.js "compile bitmask.length.8"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"

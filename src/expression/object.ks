@@ -611,7 +611,10 @@ class ObjectLiteralMember extends Expression {
 	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
 	type() => @type
 	validateType(type: Type) { # {{{
-		if @type.isEnum() && !type.isEnum() {
+		if @type.isBitmask() && !type.isBitmask() {
+			@enumCasting = true
+		}
+		else if @type.isEnum() && !type.isEnum() {
 			@enumCasting = true
 		}
 	} # }}}

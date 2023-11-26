@@ -1,10 +1,6 @@
 const {Helper, OBJ, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	const Foobar = Helper.enum(Number, {
-		foo: 1,
-		bar: 2,
-		qux: 4
-	});
+	const Foobar = Helper.bitmask(Number, ["foo", 1, "bar", 2, "qux", 4]);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -18,7 +14,7 @@ module.exports = function(expect) {
 		return "dictionary";
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, Foobar);
+		const t0 = value => Type.isBitmaskInstance(value, Foobar);
 		const t1 = Type.isNumber;
 		const t2 = Type.isObject;
 		if(args.length === 1) {
@@ -67,7 +63,7 @@ module.exports = function(expect) {
 		return results;
 	};
 	testIf.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, Foobar);
+		const t0 = value => Type.isBitmaskInstance(value, Foobar);
 		const t1 = Type.isNumber;
 		const t2 = Type.isValue;
 		if(args.length === 3) {

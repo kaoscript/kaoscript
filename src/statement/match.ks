@@ -1480,14 +1480,14 @@ class MatchConditionValue extends AbstractNode {
 				for var { name % varname, type }, index in subtypes {
 					fragments.code(' || ') if index > 0
 
-					var variable = type.discard().getVariable(varname)
+					var value = type.discard().getValue(varname)
 
-					if variable.isAlias() {
-						if variable.isDerivative() {
+					if value.isAlias() {
+						if value.isDerivative() {
 							fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(varname))(\(name).\(object.getVariantName()))`)
 						}
 						else {
-							fragments.code(operand).compile(type).code(`.\(variable.original())`)
+							fragments.code(operand).compile(type).code(`.\(value.original())`)
 						}
 					}
 					else {

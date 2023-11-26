@@ -141,7 +141,7 @@ class ImplementDeclaration extends Statement {
 
 				match data.kind {
 					NodeKind.FieldDeclaration {
-						property = ImplementEnumFieldDeclaration.new(data, this, @type)
+						property = ImplementEnumValueDeclaration.new(data, this, @type)
 					}
 					NodeKind.MethodDeclaration {
 						property = ImplementEnumMethodDeclaration.new(data, this, @type)

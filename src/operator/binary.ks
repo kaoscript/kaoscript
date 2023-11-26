@@ -72,7 +72,7 @@ class BinaryOperatorExpression extends Expression {
 				return @right.toFragments(fragments, mode)
 			}
 			else {
-				this.toOperatorFragments(fragments)
+				@toOperatorFragments(fragments)
 			}
 		}
 		else if @isNullable() && !@tested {
@@ -80,12 +80,12 @@ class BinaryOperatorExpression extends Expression {
 				.wrapNullable(this)
 				.code(' ? ')
 
-			this.toOperatorFragments(fragments)
+			@toOperatorFragments(fragments)
 
 			fragments.code(' : false')
 		}
 		else {
-			this.toOperatorFragments(fragments)
+			@toOperatorFragments(fragments)
 		}
 	} # }}}
 	toNullableFragments(fragments) { # {{{
@@ -108,8 +108,8 @@ class BinaryOperatorExpression extends Expression {
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
 	private late {
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
+		@bitmask: Boolean			= false
+		@expectingBitmask: Boolean	= true
 		@native: Boolean			= false
 		@number: Boolean			= false
 		@string: Boolean			= false
@@ -118,23 +118,22 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
-			@enum = true
-			@number = @left.type().discard().isFlags()
+		if @left.type().isBitmask() && @right.type().isBitmask() && @left.type().discardValue().name() == @right.type().discardValue().name() {
+			@bitmask = true
 
-			if @expectingEnum {
+			if @expectingBitmask {
 				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
 			}
 
-			@left.unflagExpectingEnum()
-			@right.unflagExpectingEnum()
+			@left.unflagExpectingBitmask()
+			@right.unflagExpectingBitmask()
 		}
 		else {
 			if @left.type().isString() || @right.type().isString() {
@@ -186,11 +185,11 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			}
 		}
 	} # }}}
-	isComputed() => @native || (@enum && !@expectingEnum)
-	setOperands(@left, @right, @enum = false, @number = false, @expectingEnum = false): valueof this
+	isComputed() => @native || (@bitmask && !@expectingBitmask)
+	setOperands(@left, @right, @bitmask = false, @number = false, @expectingBitmask = false): valueof this
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
-			if type == OperandType.Enum && (@enum || @number) {
+			if type == OperandType.Bitmask && @bitmask {
 				fragments.wrap(@left).code(' | ').wrap(@right)
 			}
 			else if ((@number && type == OperandType.Number) || (@string && type == OperandType.String)) {
@@ -205,21 +204,12 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @enum {
-			var late operator: String
-
-			if @number {
-				operator = ' | '
+		if @bitmask {
+			if @expectingBitmask {
+				fragments.code(@type.name(), '(').wrap(@left).code(' | ').wrap(@right).code(')')
 			}
 			else {
-				operator = ' + '
-			}
-
-			if @expectingEnum {
-				fragments.code(@type.name(), '(').wrap(@left).code(operator).wrap(@right).code(')')
-			}
-			else {
-				fragments.wrap(@left).code(operator).wrap(@right)
+				fragments.wrap(@left).code(' | ').wrap(@right)
 			}
 		}
 		else if @native {
@@ -246,8 +236,8 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	} # }}}
 	toQuote() => `\(@left.toQuote()) + \(@right.toQuote())`
 	type() => @type
-	unflagExpectingEnum() { # {{{
-		@expectingEnum = false
+	unflagExpectingBitmask() { # {{{
+		@expectingBitmask = false
 	} # }}}
 }
 

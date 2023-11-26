@@ -325,14 +325,14 @@ class FusionType extends Type {
 					}
 					else if subtypes.length == 1 {
 						var { name, type } = subtypes[0]
-						var variable = type.discard().getVariable(name)
+						var value = type.discard().getValue(name)
 
-						if variable.isAlias() {
-							if variable.isDerivative() {
+						if value.isAlias() {
+							if value.isDerivative() {
 								fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
 							}
 							else {
-								fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(variable.original())`)
+								fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(value.original())`)
 							}
 						}
 						else {
@@ -345,14 +345,14 @@ class FusionType extends Type {
 						for var { name, type }, index in subtypes {
 							fragments.code(' || ') if index > 0
 
-							var variable = type.discard().getVariable(name)
+							var value = type.discard().getValue(name)
 
-							if variable.isAlias() {
-								if variable.isDerivative() {
+							if value.isAlias() {
+								if value.isDerivative() {
 									fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(\(varname))`)
 								}
 								else {
-									fragments.code(`\(varname) === `).compile(type).code(`.\(variable.original())`)
+									fragments.code(`\(varname) === `).compile(type).code(`.\(value.original())`)
 								}
 							}
 							else {

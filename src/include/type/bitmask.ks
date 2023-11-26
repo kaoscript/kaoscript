@@ -1,11 +1,6 @@
-enum EnumTypeKind<String> {
-	Number
-	String
-}
-
-class EnumType extends Type {
+class BitmaskType extends Type {
 	private {
-		@aliases: Object<EnumAliasType>					= {}
+		@aliases: Object<BitmaskAliasType>					= {}
 		@alteration: Boolean							= false
 		@alterationReference: ClassType?
 		@assessment										= null
@@ -16,17 +11,16 @@ class EnumType extends Type {
 		@function: FunctionType?						= null
 		@generator 										= {
 			initial: 0
-			step: 1
 			next: 0
 		}
 		@instanceAssessments: Object					= {}
 		@instanceMethods: Object						= {}
-		@kind: EnumTypeKind
+		@length: Number									= 16
 		@nextIndex: Number								= 0
 		@staticAssessments: Object						= {}
 		@staticMethods: Object							= {}
 		@type: Type
-		@values: Object<EnumValueType>					= {}
+		@values: Object<BitmaskValueType>				= {}
 		@sequences	 									= {
 			defaults:			-1
 			instanceMethods:	{}
@@ -34,10 +28,11 @@ class EnumType extends Type {
 		}
 	}
 	static {
-		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumType { # {{{
-			var type = EnumType.new(scope, EnumTypeKind(data.type))
+		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): BitmaskType { # {{{
+			var type = BitmaskType.new(scope)
 
 			type._exhaustive = data.exhaustive
+			type._length = data.length
 			type._nextIndex = data.nextIndex
 
 			if ?data.generator {
@@ -49,13 +44,13 @@ class EnumType extends Type {
 			}
 
 			for var { name, index? } in data.values {
-				var value = EnumValueType.new(name, index)
+				var value = BitmaskValueType.new(name, index)
 
 				type.addValue(value)
 			}
 
 			for var { name, originals, top? } in data.aliases {
-				var value = EnumAliasType.new(name, originals, top)
+				var value = BitmaskAliasType.new(name, originals, top)
 
 				type.addAlias(value)
 			}
@@ -73,13 +68,13 @@ class EnumType extends Type {
 			queue.push(() => {
 				for var methods, name of data.instanceMethods {
 					for var method in methods {
-						type.dedupInstanceMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
+						type.dedupInstanceMethod(name, BitmaskMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
 				for var methods, name of data.staticMethods {
 					for var method in methods {
-						type.dedupStaticMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
+						type.dedupStaticMethod(name, BitmaskMethodType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 				}
 			})
@@ -87,17 +82,12 @@ class EnumType extends Type {
 			return type.flagComplete()
 		} # }}}
 	}
-	constructor(@scope, @kind = EnumTypeKind.Number) { # {{{
+	constructor(@scope) { # {{{
 		super(scope)
 
-		if @kind == EnumTypeKind.String {
-			@type = scope.reference('String')
-		}
-		else {
-			@type = scope.reference('Number')
-		}
+		@type = scope.reference('Number')
 	} # }}}
-	addAlias(value: EnumAliasType) { # {{{
+	addAlias(value: BitmaskAliasType) { # {{{
 		@aliases[value.name()] = value
 
 		if @alteration {
@@ -106,7 +96,7 @@ class EnumType extends Type {
 
 		return value
 	} # }}}
-	addInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
+	addInstanceMethod(name: String, type: BitmaskMethodType): Number? { # {{{
 		@sequences.instanceMethods[name] ??= 0
 
 		var mut index = type.index()
@@ -142,7 +132,7 @@ class EnumType extends Type {
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind.EnumValue {
+			NodeKind.BitmaskValue {
 				@createValue(data.name.name)
 			}
 			NodeKind.MethodDeclaration {
@@ -151,7 +141,7 @@ class EnumType extends Type {
 					instance = false if data.modifiers[i].kind == ModifierKind.Static
 				}
 
-				var type = EnumMethodType.fromAST(data, node)
+				var type = BitmaskMethodType.fromAST(data, node)
 
 				if options.rules.nonExhaustive {
 					if instance {
@@ -174,7 +164,7 @@ class EnumType extends Type {
 			}
 		}
 	} # }}}
-	addStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
+	addStaticMethod(name: String, type: BitmaskMethodType): Number? { # {{{
 		if @staticMethods[name] is not Array {
 			@staticMethods[name] = []
 			@sequences.staticMethods[name] = 0
@@ -202,7 +192,7 @@ class EnumType extends Type {
 
 		return index
 	} # }}}
-	addValue(value: EnumValueType) { # {{{
+	addValue(value: BitmaskValueType) { # {{{
 		@values[value.name()] = value
 
 		if @alteration {
@@ -219,16 +209,17 @@ class EnumType extends Type {
 		return @assessment
 	} # }}}
 	clone() { # {{{
-		var that = EnumType.new(@scope)
+		var that = BitmaskType.new(@scope)
 
 		return that.copyFrom(this)
 	} # }}}
-	copyFrom(src: EnumType) { # {{{
+	copyFrom(src: BitmaskType) { # {{{
 		@alien = src._alien
 		@sealed = src._sealed
 		@system = src._system
 		@requirement = src._requirement
 		@required = src._required
+		@length = src._length
 
 		@generator = {...src._generator}
 		@nextIndex = src._nextIndex
@@ -253,55 +244,37 @@ class EnumType extends Type {
 
 		return this
 	} # }}}
-	createAlias(name: String): EnumAliasType { # {{{
-		var type = EnumAliasType.new(name)
+	createAlias(name: String): BitmaskAliasType { # {{{
+		var type = BitmaskAliasType.new(name)
 
 		@addAlias(type)
 
 		return type
 	} # }}}
-	createValue(name: String): { type: EnumValueType, value: String } { # {{{
-		var late type, value
-
-		if @kind == .Number {
-			type = EnumValueType.new(name, @nextIndex)
-			value = `\(@generator.next)`
-
-			@generator.next += @generator.step
-		}
-		else {
-			type = EnumValueType.new(name, @nextIndex)
-			value = $quote(name.toLowerCase())
-		}
+	createValue(name: String): BitmaskValueType { # {{{
+		var value = `\(@generator.next == 0 ? 0 : Math.pow(2, @generator.next - 1))\(@length > 32 ? 'n' : '')`
+		var type = BitmaskValueType.new(name, @nextIndex, value)
 
 		@addValue(type)
 
 		@nextIndex += 1
+		@generator.next += 1
 
-		return { type, value }
+		return type
 	} # }}}
-	createValue(name: String, value: String): { type: EnumValueType, value: String } { # {{{
-		var type = EnumValueType.new(name, @nextIndex)
-		var result = $quote(value)
+	createValue(name: String, value: Number): BitmaskValueType { # {{{
+		var valueStr = `\(value == 0 ? 0 : Math.pow(2, value - 1))\(@length > 32 ? 'n' : '')`
+		var type = BitmaskValueType.new(name, @nextIndex, valueStr)
 
 		@addValue(type)
 
 		@nextIndex += 1
+		@generator.next = value + 1
 
-		return { type, value: result }
-	} # }}}
-	createValue(name: String, value: Number): { type: EnumValueType, value: String } { # {{{
-		var type = EnumValueType.new(name, @nextIndex)
-
-		@addValue(type)
-
-		@nextIndex += 1
-		@generator.next = value + @generator.step
-
-		return { type, value: `\(value)` }
+		return type
 
 	} # }}}
-	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
+	dedupInstanceMethod(name: String, type: BitmaskMethodType): Number? { # {{{
 		if var index ?= type.index() {
 			if @instanceMethods[name] is Array {
 				for var method in @instanceMethods[name] {
@@ -314,7 +287,7 @@ class EnumType extends Type {
 
 		return @addInstanceMethod(name, type)
 	} # }}}
-	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
+	dedupStaticMethod(name: String, type: BitmaskMethodType): Number? { # {{{
 		if var index ?= type.index() {
 			if @staticMethods[name] is Array {
 				for var method in @staticMethods[name] {
@@ -346,18 +319,14 @@ class EnumType extends Type {
 		var exhaustive = @isExhaustive()
 
 		var export = {
-			kind: TypeKind.Enum
-			type: @kind
+			kind: TypeKind.Bitmask
+			@length
 			exhaustive
 			nextIndex: @nextIndex
+			@generator
 			values: [value.export(references, indexDelta, mode, module) for var value of @values]
-			aliases: [alias.export(references, indexDelta, mode, module) for var alias of @aliases]
 			instanceMethods: {}
 			staticMethods: {}
-		}
-
-		if @kind == .Number {
-			export.generator = @generator
 		}
 
 		for var methods, name of @instanceMethods {
@@ -452,7 +421,7 @@ class EnumType extends Type {
 			return null
 		}
 	} # }}}
-	getOnlyAliases() => @aliases
+	getNextValue() => @generator.next
 	getOriginalValueCount(...names: { name: String }): Number { # {{{
 		var mut result = 0
 
@@ -542,14 +511,11 @@ class EnumType extends Type {
 		if @isNumber() {
 			return type.canBeNumber()
 		}
-		else if @isString() {
-			return type.canBeString()
-		}
 		else {
 			return false
 		}
 	} # }}}
-	isEnum() => true
+	isBitmask() => true
 	isExhaustiveInstanceMethod(name) { # {{{
 		if @exhaustiveness.instanceMethods[name] == false {
 			return false
@@ -568,18 +534,18 @@ class EnumType extends Type {
 		}
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
-	isMergeable(type) => type.isEnum()
-	isNumber() => @type.isNumber()
-	isString() => @type.isString()
-	assist isSubsetOf(value: EnumType, generics, subtypes, mode) => mode ~~ MatchingMode.Similar
+	isMergeable(type) => type.isBitmask()
+	isNumber() => true
+	assist isSubsetOf(value: BitmaskType, generics, subtypes, mode) => mode ~~ MatchingMode.Similar
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
-			return value.name() == 'Enum'
+			return value.name() == 'Bitmask'
 		}
 
 		return false
 	} # }}}
-	kind() => @kind
+	length(): valueof @length
+	length(@length): valueof this
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { # {{{
 		var results: Array = []
 
@@ -602,7 +568,7 @@ class EnumType extends Type {
 		throw NotImplementedException.new()
 	} # }}}
 	override toVariations(variations) { # {{{
-		variations.push('enum', @sequences.defaults)
+		variations.push('bitmask', @sequences.defaults)
 
 		for var sequence, name of @sequences.staticMethods {
 			variations.push(name, sequence)
@@ -615,14 +581,15 @@ class EnumType extends Type {
 	type() => @type
 }
 
-class EnumValueType {
+class BitmaskValueType {
 	private {
 		@alteration: Boolean	= false
 		@index: Number?			= null
 		@name: String
+		@value: String?
 	}
 	constructor(@name)
-	constructor(@name, @index)
+	constructor(@name, @index, @value)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			@name
@@ -637,40 +604,25 @@ class EnumValueType {
 	index() => @index
 	isAlias() => false
 	isAlteration() => @alteration
-	isTopDerivative() => false
 	name() => @name
 	unflagAlteration() { # {{{
 		@alteration = false
 
 		return this
 	} # }}}
+	value() => @value
 }
 
-class EnumAliasType {
+class BitmaskAliasType {
 	private {
 		@alteration: Boolean	= false
 		@name: String
-		@originals:	String[]	= []
-		@top: String?			= null
+		@value: String?
 	}
 	constructor(@name)
-	constructor(@name, @originals, @top)
-	addAlias(name: String, enum: EnumType) { # {{{
-		if var value ?= enum.getValue(name) ;; value.isAlias() {
-			@originals.pushUniq(...value.originals()!?)
-		}
-		else {
-			@originals.pushUniq(name)
-		}
-	} # }}}
-	addOriginals(...names: String) { # {{{
-		@originals.pushUniq(...names)
-	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			@name
-			@originals
-			@top if ?@top
 		}
 	} # }}}
 	flagAlteration() { # {{{
@@ -678,43 +630,28 @@ class EnumAliasType {
 
 		return this
 	} # }}}
-	getTopAlias() => @top
 	isAlias() => true
 	isAlteration() => @alteration
-	isDerivative() => @originals.length > 1
-	isTopDerivative() => @originals.length > 1 && !?@top
 	name() => @name
-	original() => @originals[0]
-	originals() => @originals
-	setAlias(name: String, enum: EnumType) { # {{{
-		if var value ?= enum.getValue(name) ;; value.isAlias() {
-			@originals.pushUniq(...value.originals()!?)
-
-			if @originals.length > 1 {
-				@top = value.getTopAlias() ?? name
-			}
-		}
-		else {
-			@originals.pushUniq(name)
-		}
-	} # }}}
+	value() => @value
+	value(@value)
 }
 
-class EnumMethodType extends FunctionType {
+class BitmaskMethodType extends FunctionType {
 	private {
 		@access: Accessibility					= Accessibility.Public
 		@alteration: Boolean					= false
 		@instance: Boolean						= false
 	}
 	static {
-		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
+		fromAST(data, node: AbstractNode): BitmaskMethodType { # {{{
 			var scope = node.scope()
 
-			return EnumMethodType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
+			return BitmaskMethodType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
 		} # }}}
-		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { # {{{
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): BitmaskMethodType { # {{{
 			var data = index
-			var type = EnumMethodType.new(scope)
+			var type = BitmaskMethodType.new(scope)
 
 			type._identifier = data.id
 			type._access = data.access
@@ -734,7 +671,7 @@ class EnumMethodType extends FunctionType {
 		} # }}}
 	}
 	clone() { # {{{
-		var clone = EnumMethodType.new(@scope)
+		var clone = BitmaskMethodType.new(@scope)
 
 		FunctionType.clone(this, clone)
 

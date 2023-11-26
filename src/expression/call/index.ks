@@ -386,6 +386,7 @@ class CallExpression extends Expression {
 
 		return false
 	} # }}}
+	isBitmaskCreate() => @callees.length == 1 && @callees[0] is BitmaskCreateCallee
 	isCallable() => !@reusable
 	isComposite() => !@reusable
 	isComputed() => ((@isNullable() || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
@@ -620,6 +621,23 @@ class CallExpression extends Expression {
 					}
 				}
 			}
+		}
+		else if type.isBitmask() {
+			var bitmask = type.discardName()
+
+			@prepareArguments()
+
+			if @arguments.length != 1 {
+				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+			}
+
+			var argument = @arguments[0]
+
+			if !argument.type().isAssignableToVariable(bitmask.type(), true, true, false) && type.isExhaustive(this) {
+				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+			}
+
+			@addCallee(BitmaskCreateCallee.new(@data, type, argument, this))
 		}
 		else if type.isEnum() {
 			var enum = type.discardName()
@@ -1596,6 +1614,7 @@ include {
 	'./callee.ks'
 	'./callee/constructor.ks'
 	'./callee/default.ks'
+	'./callee/bitmask-create.ks'
 	'./callee/enum-create.ks'
 	'./callee/enum-method.ks'
 	'./callee/inverted-precise-method.ks'

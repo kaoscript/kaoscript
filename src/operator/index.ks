@@ -7,6 +7,7 @@ enum AssignmentType {
 
 enum OperandType {
 	Any
+	Bitmask
 	Boolean
 	Enum
 	Number

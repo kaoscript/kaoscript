@@ -13,16 +13,19 @@
       {
         "kind": "enum",
         "type": "string",
-        "sequenceIndex": -1,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 2,
+        "values": [
           {
-            "name": "RGB"
+            "name": "RGB",
+            "index": 0
           },
           {
-            "name": "SRGB"
+            "name": "SRGB",
+            "index": 1
           }
         ],
+        "aliases": [],
         "instanceMethods": {},
         "staticMethods": {},
         "sequences": [

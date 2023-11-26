@@ -13,21 +13,27 @@
       {
         "kind": "enum",
         "type": "number",
-        "sequenceIndex": 4,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 4,
+        "values": [
           {
-            "name": "Clubs"
+            "name": "Clubs",
+            "index": 0
           },
           {
-            "name": "Diamonds"
+            "name": "Diamonds",
+            "index": 1
           },
           {
-            "name": "Hearts"
+            "name": "Hearts",
+            "index": 2
           },
           {
-            "name": "Spades"
-          },
+            "name": "Spades",
+            "index": 3
+          }
+        ],
+        "aliases": [
           {
             "name": "Blacks",
             "originals": [
@@ -93,6 +99,11 @@
         ],
         "instanceMethods": {},
         "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 5
+        },
         "sequences": [
           -1
         ]

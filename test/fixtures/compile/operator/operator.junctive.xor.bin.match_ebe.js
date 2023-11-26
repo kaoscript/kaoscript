@@ -1,12 +1,6 @@
 const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const AnimalFlags = Helper.enum(Number, {
-		None: 0,
-		HasClaws: 1,
-		CanFly: 2,
-		EatsFish: 4,
-		Endangered: 8
-	});
+	const AnimalFlags = Helper.bitmask(Number, ["None", 0, "HasClaws", 1, "CanFly", 2, "EatsFish", 4, "Endangered", 8]);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -15,7 +9,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, AnimalFlags);
+		const t0 = value => Type.isBitmaskInstance(value, AnimalFlags);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

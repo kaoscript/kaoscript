@@ -125,38 +125,35 @@ abstract class PolyadicOperatorExpression extends Expression {
 
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	private late {
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
-		@number: Boolean			= false
-		@string: Boolean			= false
+		@bitmask: Boolean				= false
+		@expectingBitmask: Boolean		= true
+		@native: Boolean				= false
+		@number: Boolean				= false
+		@string: Boolean				= false
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @operands[0].type().isEnum() {
+		if @operands[0].type().isBitmask() {
 			var name = @operands[0].type().discardValue().name()
 
-			@enum = true
+			@bitmask = true
 
 			for var operand in @operands from 1 {
-				if !operand.type().isEnum() || operand.type().discardValue().name() != name {
-					@enum = false
+				if !operand.type().isBitmask() || operand.type().discardValue().name() != name {
+					@bitmask = false
 
 					break
 				}
 			}
 
-			if @enum {
-				@enum = true
-				@number = @left().type().discard().isFlags()
-
-				if @expectingEnum {
+			if @bitmask {
+				if @expectingBitmask {
 					@type = @left().type().discardValue()
 				}
 				else {
@@ -164,12 +161,12 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 				}
 
 				for var operand in @operands {
-					operand.unflagExpectingEnum()
+					operand.unflagExpectingBitmask()
 				}
 			}
 		}
 
-		if !@enum {
+		if !@bitmask {
 			var mut nullable = false
 
 			@native = true
@@ -237,7 +234,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	symbol() => '+'
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
-			if type == OperandType.Enum && (@enum || @number) {
+			if type == OperandType.Bitmask && (@bitmask || @number) {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code(' | ')
@@ -264,29 +261,18 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @enum {
-			var late operator: String
-
-			if @number {
-				operator = ' | '
-			}
-			else {
-				operator = ' + '
-			}
-
-			if @expectingEnum {
+		if @bitmask {
+			if @expectingBitmask {
 				fragments.code(@type.name(), '(')
 			}
 
 			for var operand, index in @operands {
-				if index != 0 {
-					fragments.code(operator)
-				}
-
-				fragments.wrap(operand)
+				fragments
+					..code(' | ') if index != 0
+					..wrap(operand)
 			}
 
-			if @expectingEnum {
+			if @expectingBitmask {
 				fragments.code(')')
 			}
 		}
@@ -322,7 +308,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	type() => @type
-	unflagExpectingEnum() { # {{{
-		@expectingEnum = false
+	unflagExpectingBitmask() { # {{{
+		@expectingBitmask = false
 	} # }}}
 }

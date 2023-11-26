@@ -1,11 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const CardSuit = Helper.enum(String, {
-		Clubs: "clubs",
-		Diamonds: "diamonds",
-		Hearts: "hearts",
-		Spades: "spades"
-	});
+	const CardSuit = Helper.enum(String, "Clubs", "clubs", "Diamonds", "diamonds", "Hearts", "hearts", "Spades", "spades");
 	const Pair = Helper.tuple(function(__ks_0, __ks_1) {
 		return [__ks_0, __ks_1];
 	}, function(__ks_new, args) {

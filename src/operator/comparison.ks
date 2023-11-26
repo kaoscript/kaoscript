@@ -399,7 +399,7 @@ class EqualityOperator extends ComparisonOperator {
 		var leftType = @left.type()
 		var rightType = @right.type()
 
-		if leftType.isEnum() && @left is not NumericBinaryOperatorExpression {
+		if (leftType.isBitmask() || leftType.isEnum()) && @left is not NumericBinaryOperatorExpression {
 			@enumLeft = true
 		}
 		else if @left is IdentifierLiteral {
@@ -429,12 +429,12 @@ class EqualityOperator extends ComparisonOperator {
 			}
 			else {
 				if !leftType.isAssignableToVariable(rightType, false) && !rightType.isAssignableToVariable(leftType, false) {
-					if leftType.isEnum() {
+					if leftType.isBitmask() || leftType.isEnum() {
 						unless leftType.isComparableWith(rightType) {
 							TypeException.throwInvalidComparison(@left, @right, @node)
 						}
 					}
-					else if rightType.isEnum() {
+					else if rightType.isBitmask() || rightType.isEnum() {
 						unless rightType.isComparableWith(leftType) {
 							TypeException.throwInvalidComparison(@left, @right, @node)
 						}
@@ -444,7 +444,7 @@ class EqualityOperator extends ComparisonOperator {
 					}
 				}
 
-				if rightType.isEnum() && @right is not NumericBinaryOperatorExpression {
+				if (rightType.isBitmask() || rightType.isEnum()) && @right is not NumericBinaryOperatorExpression {
 					@enumRight = true
 				}
 				else if @right is IdentifierLiteral {
@@ -462,11 +462,11 @@ class EqualityOperator extends ComparisonOperator {
 		}
 
 		if @enumLeft && @enumRight {
-			if @left is CallExpression && @left.isEnumCreate() {
+			if @left is CallExpression && (@left.isBitmaskCreate() || @left.isEnumCreate()) {
 				@left = @left.argument(0)
 				@enumNullLeft = true
 			}
-			else if @right is CallExpression && @right.isEnumCreate() {
+			else if @right is CallExpression && (@right.isBitmaskCreate() || @right.isEnumCreate()) {
 				@right = @right.argument(0)
 				@enumNullRight = true
 			}
@@ -592,7 +592,7 @@ class EqualityOperator extends ComparisonOperator {
 				var type = @right.type().discardValue()
 
 				fragments
-					.code($runtime.helper(@right), '.equalEnum(')
+					.code(`\($runtime.helper(@right)).equal\(type.isEnum() ? 'Enum' : 'Bitmask')(`)
 					.compile(type)
 					.code($comma)
 					.compile(type)
@@ -704,7 +704,7 @@ class EqualityOperator extends ComparisonOperator {
 				var type = @left.type().discardValue()
 
 				fragments
-					.code($runtime.helper(@left), '.equalEnum(')
+					.code(`\($runtime.helper(@left)).equal\(type.isEnum() ? 'Enum' : 'Bitmask')(`)
 					.compile(type)
 					.code($comma)
 					.compile(type)

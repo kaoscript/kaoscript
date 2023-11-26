@@ -1,10 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Color = Helper.enum(Number, {
-		Red: 0,
-		Green: 1,
-		Blue: 2
-	});
+	const Color = Helper.bitmask(Number, ["Red", 0, "Green", 1, "Blue", 2]);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -15,7 +11,7 @@ module.exports = function() {
 		return 1;
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, Color);
+		const t0 = value => Type.isBitmaskInstance(value, Color);
 		const t1 = Type.isNumber;
 		if(args.length === 1) {
 			if(t0(args[0])) {

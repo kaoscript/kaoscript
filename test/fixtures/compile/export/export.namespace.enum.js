@@ -34,11 +34,7 @@ module.exports = function() {
 			}
 			throw Helper.badArgs();
 		};
-		const Type = Helper.enum(Number, {
-			FOO: 0,
-			BAR: 1,
-			QUX: 2
-		});
+		const Type = Helper.enum(Number, "FOO", 0, "BAR", 1, "QUX", 2);
 		return {
 			foo,
 			bar,

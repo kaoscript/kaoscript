@@ -521,6 +521,9 @@ export class SyntaxException extends Exception {
 		throwInvalidAwait(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`"await" can only be used in functions or binary module`, node)
 		} # }}}
+		throwInvalidBitmaskValue(data, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The bitmask's value isn't valid`, node, data)
+		} # }}}
 		throwInvalidEnumValue(data, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The enum's value isn't valid`, node, data)
 		} # }}}

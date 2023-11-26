@@ -1,10 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Foobar = Helper.enum(Number, {
-		X: 0,
-		Y: 1,
-		Z: 2
-	});
+	const Foobar = Helper.enum(Number, "X", 0, "Y", 1, "Z", 2);
 	function toString() {
 		return toString.__ks_rt(this, arguments);
 	};

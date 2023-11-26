@@ -61,18 +61,26 @@
       {
         "kind": "enum",
         "type": "number",
-        "sequenceIndex": 1,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 2,
+        "values": [
           {
-            "name": "Cat"
+            "name": "Cat",
+            "index": 0
           },
           {
-            "name": "Dog"
+            "name": "Dog",
+            "index": 1
           }
         ],
+        "aliases": [],
         "instanceMethods": {},
         "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 2
+        },
         "sequences": [
           -1
         ]

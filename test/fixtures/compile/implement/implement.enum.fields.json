@@ -17,30 +17,42 @@
       {
         "kind": "enum",
         "type": "number",
-        "sequenceIndex": 5,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 6,
+        "values": [
           {
-            "name": "Red"
+            "name": "Red",
+            "index": 0
           },
           {
-            "name": "Green"
+            "name": "Green",
+            "index": 1
           },
           {
-            "name": "Blue"
+            "name": "Blue",
+            "index": 2
           },
           {
-            "name": "DarkRed"
+            "name": "DarkRed",
+            "index": 3
           },
           {
-            "name": "DarkGreen"
+            "name": "DarkGreen",
+            "index": 4
           },
           {
-            "name": "DarkBlue"
+            "name": "DarkBlue",
+            "index": 5
           }
         ],
+        "aliases": [],
         "instanceMethods": {},
         "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 6
+        },
         "sequences": [
           -1
         ]

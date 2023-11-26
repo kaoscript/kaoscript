@@ -14,11 +14,7 @@ module.exports = function() {
 			return true;
 		}})
 	};
-	const PersonKind = Helper.enum(Number, {
-		Director: 1,
-		Student: 2,
-		Teacher: 3
-	});
+	const PersonKind = Helper.enum(Number, "Director", 1, "Student", 2, "Teacher", 3);
 	PersonKind.__ks_eq_ClassMember = value => value === PersonKind.Student || value === PersonKind.Teacher;
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

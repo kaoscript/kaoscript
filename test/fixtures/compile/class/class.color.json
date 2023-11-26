@@ -105,13 +105,15 @@
       {
         "kind": "enum",
         "type": "string",
-        "sequenceIndex": -1,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 1,
+        "values": [
           {
-            "name": "RGB"
+            "name": "RGB",
+            "index": 0
           }
         ],
+        "aliases": [],
         "instanceMethods": {},
         "staticMethods": {},
         "sequences": [

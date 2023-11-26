@@ -475,7 +475,7 @@ abstract class LogicalAssignmentOperatorExpression extends AssignmentOperatorExp
 }
 
 class AssignmentOperatorLogicalAnd extends LogicalAssignmentOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	operator() => Operator.LogicalAnd
 	runtime() => 'and'
 	symbol() => '&&='

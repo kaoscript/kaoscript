@@ -164,7 +164,7 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
-		var enumValue = @valueType.isEnum()
+		var enumValue = @valueType.isBitmask() || @valueType.isEnum()
 
 		var mut enumConditions = 0
 		var mut maxConditions = 0
@@ -369,7 +369,7 @@ class MatchExpression extends Expression {
 			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
 
 			if @castingEnum {
-				if @valueType.isEnum() {
+				if @valueType.isBitmask() || @valueType.isEnum() {
 					line.code('.value')
 				}
 				else if @valueType.isAny() {
@@ -382,7 +382,7 @@ class MatchExpression extends Expression {
 		else if @castingEnum {
 			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
 
-			if @valueType.isEnum() {
+			if @valueType.isBitmask() || @valueType.isEnum() {
 				line.code('.value')
 			}
 			else if @valueType.isAny() {
@@ -537,18 +537,20 @@ class DummyPossibilityTracker extends PossibilityTracker {
 class EnumPossibilityTracker extends PossibilityTracker {
 	private {
 		@possibilities: String[]
-		@type: EnumType
+		// TODO!
+		@type: BitmaskType | EnumType
+		@type
 	}
 	constructor(@type) { # {{{
 		super()
 
-		@possibilities = type.listVariableNames()
+		@possibilities = type.listValueNames()
 	} # }}}
 	exclude(condition: MatchConditionType) { # {{{
 		for var { name } in condition.type().getSubtypes() {
-			if var variable ?= @type.getVariable(name) {
-				if variable.isAlias() {
-					@possibilities.remove(...variable.originals()!?)
+			if var value ?= @type.getValue(name) {
+				if value.isAlias() {
+					@possibilities.remove(...value.originals()!?)
 				}
 				else {
 					@possibilities.remove(name)
@@ -560,12 +562,12 @@ class EnumPossibilityTracker extends PossibilityTracker {
 		for var value in condition.values() {
 			match value {
 				UnaryOperatorImplicit, MemberExpression {
-					if var variable ?= @type.getVariable(value.property()) {
-						if variable.isAlias() {
-							@possibilities.remove(...variable.originals()!?)
+					if var value ?= @type.getValue(value.property()) {
+						if value.isAlias() {
+							@possibilities.remove(...value.originals()!?)
 						}
 						else {
-							@possibilities.remove(variable.name())
+							@possibilities.remove(value.name())
 						}
 					}
 				}

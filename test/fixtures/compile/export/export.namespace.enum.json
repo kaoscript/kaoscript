@@ -49,21 +49,30 @@
           "Type": {
             "kind": "enum",
             "type": "number",
-            "sequenceIndex": 2,
             "exhaustive": true,
-            "variables": [
+            "nextIndex": 3,
+            "values": [
               {
-                "name": "FOO"
+                "name": "FOO",
+                "index": 0
               },
               {
-                "name": "BAR"
+                "name": "BAR",
+                "index": 1
               },
               {
-                "name": "QUX"
+                "name": "QUX",
+                "index": 2
               }
             ],
+            "aliases": [],
             "instanceMethods": {},
             "staticMethods": {},
+            "generator": {
+              "initial": 0,
+              "step": 1,
+              "next": 3
+            },
             "sequences": [
               -1
             ],

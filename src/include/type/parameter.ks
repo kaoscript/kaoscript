@@ -270,7 +270,7 @@ class ParameterType extends Type {
 		var type = value.type()
 
 		if type.matchContentOf(@type) {
-			if type.isReference() && type.isEnum() && !@type.isEnum() && !@type.isAny() {
+			if type.isReference() && !@type.isAny() && ((type.isBitmask() && !@type.isBitmask()) || (type.isEnum() && !@type.isEnum())) {
 				value.setCastingEnum(true)
 			}
 

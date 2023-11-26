@@ -109,10 +109,10 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {
 	private late {
-		@adjusted: Boolean			= false
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
+		@adjusted: Boolean				= false
+		@bitmask: Boolean				= false
+		@expectingBitmask: Boolean		= true
+		@native: Boolean				= false
 	}
 	abstract {
 		runtime(): String
@@ -121,22 +121,22 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
-			@enum = true
+		if @isAcceptingBitmask() && @left.type().isBitmask() && @right.type().isBitmask() && @left.type().discardValue().name() == @right.type().discardValue().name() {
+			@bitmask = true
 
-			if @expectingEnum {
+			if @expectingBitmask {
 				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
 			}
 
-			@left.unflagExpectingEnum()
-			@right.unflagExpectingEnum()
+			@left.unflagExpectingBitmask()
+			@right.unflagExpectingBitmask()
 
 			if @right is BinaryOperatorExpression | PolyadicOperatorExpression {
 				var mut leftMost = @right
@@ -147,7 +147,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 
 				var newLeft = BinaryOperatorSubtraction.new(@data, leftMost, @scope)
 
-				newLeft.setOperands(@left, leftMost.left(), enum: true, expectingEnum: false)
+				newLeft.setOperands(@left, leftMost.left(), bitmask: true, expectingBitmask: false)
 
 				leftMost.left(newLeft)
 
@@ -181,19 +181,20 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 		}
 	} # }}}
-	isAcceptingEnum() => false
+	isAcceptingBitmask() => false
 	native() => @symbol()
+	toBitmaskFragments(fragments)
 	toFragments(fragments, mode) { # {{{
 		if @adjusted {
-			if @enum && @expectingEnum {
+			if @bitmask && @expectingBitmask {
 				fragments.compile(@left).code($equals, @type.name(), '(').compile(@right).code(')')
 			}
 			else {
 				fragments.compile(@left).code($equals).compile(@right)
 			}
 		}
-		else if @enum {
-			@toEnumFragments(fragments)
+		else if @bitmask {
+			@toBitmaskFragments(fragments)
 		}
 		else if @native {
 			@toNativeFragments(fragments)
@@ -211,7 +212,6 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			fragments.code(')')
 		}
 	} # }}}
-	toEnumFragments(fragments)
 	toNativeFragments(fragments) { # {{{
 		fragments.compile(@left).code($space).code(@native(), @data.operator).code($space).compile(@right)
 	} # }}}
@@ -220,33 +220,32 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	private late {
-		@adjusted: Boolean			= false
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
-		@number: Boolean			= false
-		@string: Boolean			= false
+		@adjusted: Boolean				= false
+		@bitmask: Boolean				= false
+		@expectingBitmask: Boolean		= true
+		@native: Boolean				= false
+		@number: Boolean				= false
+		@string: Boolean				= false
 	}
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
-			@enum = true
-			@number = @left.type().discard().isFlags()
+		if @left.type().isBitmask() && @right.type().isBitmask() && @left.type().discardValue().name() == @right.type().discardValue().name() {
+			@bitmask = true
 
-			if @expectingEnum {
+			if @expectingBitmask {
 				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
 			}
 
-			@left.unflagExpectingEnum()
-			@right.unflagExpectingEnum()
+			@left.unflagExpectingBitmask()
+			@right.unflagExpectingBitmask()
 
 			if @right is BinaryOperatorExpression | PolyadicOperatorExpression {
 				var mut leftMost = @right
@@ -257,7 +256,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 
 				var newLeft = BinaryOperatorAddition.new(@data, leftMost, @scope)
 
-				newLeft.setOperands(@left, leftMost.left(), enum: true, number: @number, expectingEnum: false)
+				newLeft.setOperands(@left, leftMost.left(), bitmask: true, number: @number, expectingBitmask: false)
 
 				leftMost.left(newLeft)
 
@@ -318,24 +317,17 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @adjusted {
-			if @enum && @expectingEnum {
+			if @bitmask && @expectingBitmask {
 				fragments.compile(@left).code($equals, @type.name(), '(').compile(@right).code(')')
 			}
 			else {
 				fragments.compile(@left).code($equals).compile(@right)
 			}
 		}
-		else if @enum {
-			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left)
+		else if @bitmask {
+			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ')
 
-			if @number {
-				fragments.code(' | ')
-			}
-			else {
-				fragments.code(' + ')
-			}
-
-			@right.toOperandFragments(fragments, Operator.Addition, OperandType.Enum)
+			@right.toOperandFragments(fragments, Operator.Addition, OperandType.Bitmask)
 
 			fragments.code(')')
 		}
@@ -401,14 +393,14 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-='
-	toEnumFragments(fragments) { # {{{
+	toBitmaskFragments(fragments) { # {{{
 		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ~')
 
-		@right.toOperandFragments(fragments, Operator.Subtraction, OperandType.Enum)
+		@right.toOperandFragments(fragments, Operator.Subtraction, OperandType.Bitmask)
 
 		fragments.code(')')
 	} # }}}

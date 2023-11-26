@@ -77,7 +77,7 @@ class MemberExpression extends Expression {
 			if @computed {
 				@property.prepare(AnyType.NullableUnexplicit)
 
-				unless @prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type) {
+				unless @prepareTuple(type) || @prepareArray(type) || @prepareBitmask(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type) {
 					@type = type.parameter()
 				}
 
@@ -105,7 +105,7 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				@prepareTuple(type) || @prepareArray(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
+				@prepareTuple(type) || @prepareArray(type) || @prepareBitmask(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
 
 				if @assignable {
 					if var variable ?= @declaration() {
@@ -422,6 +422,70 @@ class MemberExpression extends Expression {
 			return @prepareObject(type)
 		}
 	} # }}}
+	prepareBitmask(type: Type): Boolean { # {{{
+		return false unless type.isBitmask()
+
+		if @computed {
+			if @property is NumberLiteral | StringLiteral {
+				if var property ?= type.getProperty(@property.value()) {
+					@type = property.type()
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+					}
+				}
+			}
+
+			return false
+		}
+		else {
+			if type is NamedType {
+				if var value ?= type.type().getValue(@property) {
+					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+				else if var property ?= type.type().getStaticMethod(@property) {
+					@type = property
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+				else if type.isExhaustive(this) {
+					ReferenceException.throwNotDefinedBitmaskElement(@property, type.name(), this)
+				}
+			}
+			else if type is ReferenceType {
+				if var property ?= type.discard().getInstanceProperty(@property) {
+					@type = property.discardVariable()
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					return true
+				}
+			}
+
+			return false
+		}
+	} # }}}
 	prepareEnum(type: Type): Boolean { # {{{
 		return false unless type.isEnum()
 
@@ -446,7 +510,7 @@ class MemberExpression extends Expression {
 		}
 		else {
 			if type is NamedType {
-				if var variable ?= type.type().getVariable(@property) {
+				if var value ?= type.type().getValue(@property) {
 					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
 
 					if @object.isInferable() {
@@ -454,12 +518,12 @@ class MemberExpression extends Expression {
 						@path = `\(@object.path()).\(@property)`
 					}
 
-					if variable.isAlias() {
-						if variable.isDerivative() {
+					if value.isAlias() {
+						if value.isDerivative() {
 							@derivative = true
 						}
 						else {
-							@originalProperty = variable.original()
+							@originalProperty = value.original()
 						}
 					}
 
@@ -804,7 +868,10 @@ class MemberExpression extends Expression {
 	override toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{
 		@toFragments(fragments, mode)
 
-		if @type.isEnum() && !(type.isAny() || type.isEnum()) {
+		if @type.isBitmask() && !(type.isAny() || type.isBitmask()) {
+			fragments.code('.value')
+		}
+		else if @type.isEnum() && !(type.isAny() || type.isEnum()) {
 			fragments.code('.value')
 		}
 	} # }}}
@@ -1044,10 +1111,11 @@ class MemberExpression extends Expression {
 	} # }}}
 	type() => @type
 	validateType(type: Type) { # {{{
-		if @type.isEnum() {
-			if !type.isAny() && !type.isEnum() {
-				@enumCasting = true
-			}
+		if @type.isBitmask() && !type.isAny() && !type.isBitmask() {
+			@enumCasting = true
+		}
+		else if @type.isEnum() && !type.isAny() && !type.isEnum() {
+			@enumCasting = true
 		}
 	} # }}}
 	walkNode(fn) => fn(this) && @object.walkNode(fn)

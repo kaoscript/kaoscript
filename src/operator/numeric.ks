@@ -1,8 +1,8 @@
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
 	private late {
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
+		@bitmask: Boolean				= false
+		@expectingBitmask: Boolean		= true
+		@native: Boolean				= false
 		@type: Type
 	}
 	abstract {
@@ -13,22 +13,22 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().discardValue().name() == @right.type().discardValue().name() {
-			@enum = true
+		if @isAcceptingBitmask() && @left.type().isBitmask() && @right.type().isBitmask() && @left.type().discardValue().name() == @right.type().discardValue().name() {
+			@bitmask = true
 
-			if @expectingEnum {
+			if @expectingBitmask {
 				@type = @left.type().discardValue()
 			}
 			else {
 				@type = @left.type().discard().type()
 			}
 
-			@left.unflagExpectingEnum()
-			@right.unflagExpectingEnum()
+			@left.unflagExpectingBitmask()
+			@right.unflagExpectingBitmask()
 		}
 		else {
 			if @left.type().isNumber() && @right.type().isNumber() {
@@ -53,11 +53,11 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 			}
 		}
 	} # }}}
-	isAcceptingEnum() => false
-	isComputed() => @native || (@enum && !@expectingEnum)
+	isAcceptingBitmask() => false
+	isComputed() => @native || (@bitmask && !@expectingBitmask)
 	native() => @symbol()
-	setOperands(@left, @right, @enum = false, @expectingEnum = false): valueof this
-	toEnumFragments(fragments)
+	setOperands(@left, @right, @bitmask = false, @expectingBitmask = false): valueof this
+	toBitmaskFragments(fragments)
 	toNativeFragments(fragments) { # {{{
 		fragments.wrap(@left).code($space).code(@native(), @data.operator).code($space).wrap(@right)
 	} # }}}
@@ -70,8 +70,8 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @enum {
-			@toEnumFragments(fragments)
+		if @bitmask {
+			@toBitmaskFragments(fragments)
 		}
 		else if @native {
 			@toNativeFragments(fragments)
@@ -87,16 +87,16 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	} # }}}
 	toQuote() => `\(@left.toQuote()) \(@symbol()) \(@right.toQuote())`
 	type() => @type
-	unflagExpectingEnum() { # {{{
-		@expectingEnum = false
+	unflagExpectingBitmask() { # {{{
+		@expectingBitmask = false
 	} # }}}
 }
 
 abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
 	private late {
-		@enum: Boolean				= false
-		@expectingEnum: Boolean		= true
-		@native: Boolean			= false
+		@bitmask: Boolean				= false
+		@expectingBitmask: Boolean		= true
+		@native: Boolean				= false
 		@type: Type
 	}
 	abstract {
@@ -105,27 +105,27 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if !target.isVoid() && !target.canBeEnum() {
-			@expectingEnum = false
+		if !target.isVoid() && !target.canBeBitmask() {
+			@expectingBitmask = false
 		}
 
-		if @isAcceptingEnum() && @operands[0].type().isEnum() {
+		if @isAcceptingBitmask() && @operands[0].type().isBitmask() {
 			var name = @operands[0].type().discardValue().name()
 
-			@enum = true
+			@bitmask = true
 
 			for var operand in @operands from 1 {
-				if (operand.type().isEnum() && operand.type().discardValue().name() != name) || !operand.type().isNumber() {
-					@enum = false
+				if (operand.type().isBitmask() && operand.type().discardValue().name() != name) || !operand.type().isNumber() {
+					@bitmask = false
 
 					break
 				}
 			}
 
-			if @enum {
+			if @bitmask {
 				@native = true
 
-				if @expectingEnum {
+				if @expectingBitmask {
 					@type = @left().type().discardValue()
 				}
 				else {
@@ -133,12 +133,12 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 				}
 
 				for var operand in @operands {
-					operand.unflagExpectingEnum()
+					operand.unflagExpectingBitmask()
 				}
 			}
 		}
 
-		if !@enum {
+		if !@bitmask {
 			var mut nullable = false
 
 			@native = true
@@ -163,9 +163,9 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 		}
 	} # }}}
-	isAcceptingEnum() => false
+	isAcceptingBitmask() => false
 	isComputed() => @native
-	toEnumFragments(fragments) { # {{{
+	toBitmaskFragments(fragments) { # {{{
 		fragments.code(@type.name(), '(')
 
 		if @native {
@@ -187,8 +187,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
-		if @enum {
-			@toEnumFragments(fragments)
+		if @bitmask {
+			@toBitmaskFragments(fragments)
 		}
 		else if operator == @operator() && type == OperandType.Number {
 			for var operand, index in @operands {
@@ -204,8 +204,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @enum {
-			@toEnumFragments(fragments)
+		if @bitmask {
+			@toBitmaskFragments(fragments)
 		}
 		else if @native {
 			@toNativeFragments(fragments)
@@ -228,14 +228,14 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		fragments.code(')')
 	} # }}}
 	type() => @type
-	unflagExpectingEnum() { # {{{
-		@expectingEnum = false
+	unflagExpectingBitmask() { # {{{
+		@expectingBitmask = false
 	} # }}}
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	private late {
-		@isEnum: Boolean		= false
+		@isBitmask: Boolean		= false
 		@isNative: Boolean		= false
 		@type: Type
 	}
@@ -247,8 +247,8 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	override prepare(target, targetMode) { # {{{
 		super(target, TargetMode.Permissive)
 
-		if @isAcceptingEnum() && @argument.type().isEnum() {
-			@isEnum = true
+		if @isAcceptingBitmask() && @argument.type().isBitmask() {
+			@isBitmask = true
 
 			@type = @argument.type()
 		}
@@ -267,10 +267,10 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 			@type = @scope.reference('Number')
 		}
 	} # }}}
-	isAcceptingEnum() => false
+	isAcceptingBitmask() => false
 	native() => @symbol()
 	toFragments(fragments, mode) { # {{{
-		if @isEnum {
+		if @isBitmask {
 			fragments.code(@native(), @data.operator).wrap(@argument)
 		}
 		else if @isNative {
@@ -346,13 +346,21 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 }
 
 class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
+	toBitmaskFragments(fragments) { # {{{
+		if @expectingBitmask {
+			fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
+		}
+		else {
+			fragments.wrap(@left).code(' & ~').wrap(@right)
+		}
+	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Subtraction {
-			if type == OperandType.Enum {
+			if type == OperandType.Bitmask {
 				fragments.wrap(@left).code(' & ~').wrap(@right)
 			}
 			else {
@@ -363,24 +371,33 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 			this.toOperatorFragments(fragments)
 		}
 	} # }}}
-	toEnumFragments(fragments) { # {{{
-		if @expectingEnum {
-			fragments.code(@type.name(), '(').wrap(@left).code(' & ~').wrap(@right).code(')')
-		}
-		else {
-			fragments.wrap(@left).code(' & ~').wrap(@right)
-		}
-	} # }}}
 }
 
 class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	operator() => Operator.Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
+	toBitmaskFragments(fragments) { # {{{
+		if @expectingBitmask {
+			fragments.code(@type.name(), '(')
+		}
+
+		for var operand, index in @operands {
+			if index != 0 {
+				fragments.code(' & ~')
+			}
+
+			fragments.wrap(operand)
+		}
+
+		if @expectingBitmask {
+			fragments.code(')')
+		}
+	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Subtraction {
-			if type == OperandType.Enum {
+			if type == OperandType.Bitmask {
 				for var operand, index in @operands {
 					if index != 0 {
 						fragments.code(' & ~')
@@ -401,23 +418,6 @@ class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
 		}
 		else {
 			this.toOperatorFragments(fragments)
-		}
-	} # }}}
-	toEnumFragments(fragments) { # {{{
-		if @expectingEnum {
-			fragments.code(@type.name(), '(')
-		}
-
-		for var operand, index in @operands {
-			if index != 0 {
-				fragments.code(' & ~')
-			}
-
-			fragments.wrap(operand)
-		}
-
-		if @expectingEnum {
-			fragments.code(')')
 		}
 	} # }}}
 }

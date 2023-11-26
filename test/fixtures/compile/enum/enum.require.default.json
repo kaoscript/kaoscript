@@ -10,31 +10,39 @@
       {
         "kind": "enum",
         "type": "number",
-        "sequenceIndex": -1,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 7,
+        "values": [
           {
-            "name": "MONDAY"
+            "name": "MONDAY",
+            "index": 0
           },
           {
-            "name": "TUESDAY"
+            "name": "TUESDAY",
+            "index": 1
           },
           {
-            "name": "WEDNESDAY"
+            "name": "WEDNESDAY",
+            "index": 2
           },
           {
-            "name": "THURSDAY"
+            "name": "THURSDAY",
+            "index": 3
           },
           {
-            "name": "FRIDAY"
+            "name": "FRIDAY",
+            "index": 4
           },
           {
-            "name": "SATURDAY"
+            "name": "SATURDAY",
+            "index": 5
           },
           {
-            "name": "SUNDAY"
+            "name": "SUNDAY",
+            "index": 6
           }
         ],
+        "aliases": [],
         "instanceMethods": {
           "isWeekend": [
             {
@@ -69,6 +77,11 @@
               "errors": []
             }
           ]
+        },
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 7
         },
         "sequences": [
           -1

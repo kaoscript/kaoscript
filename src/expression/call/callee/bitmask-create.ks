@@ -1,19 +1,23 @@
-class EnumCreateCallee extends Callee {
+class BitmaskCreateCallee extends Callee {
 	private {
 		@argument
-		@enum: NamedType<EnumType>
+		@bitmask: NamedType<BitmaskType>
 		@expression
 		@node: CallExpression
 		@type: Type
 	}
-	constructor(@data, @enum, @argument, @node) { # {{{
+	constructor(@data, @bitmask, @argument, @node) { # {{{
 		super(data)
 
 		@expression = $compile.expression(data.callee, node)
 		@expression.analyse()
 		@expression.prepare(AnyType.NullableUnexplicit)
 
-		@type = node.scope().reference(enum).setNullable(true)
+		@type = node.scope().reference(bitmask)
+
+		if !argument.type().isAssignableToVariable(bitmask.type().type(), false, false, false) {
+			@type = @type.setNullable(true)
+		}
 	} # }}}
 	override {
 		hashCode() => null

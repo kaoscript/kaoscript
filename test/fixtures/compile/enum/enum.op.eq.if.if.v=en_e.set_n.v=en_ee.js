@@ -1,11 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	const CardSuit = Helper.enum(Number, {
-		Clubs: 0,
-		Diamonds: 1,
-		Hearts: 2,
-		Spades: 3
-	});
+	const CardSuit = Helper.enum(Number, "Clubs", 0, "Diamonds", 1, "Hearts", 2, "Spades", 3);
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);

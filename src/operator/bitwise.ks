@@ -1,5 +1,5 @@
 class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	native() => '&'
 	operator() => Operator.BitwiseAnd
 	runtime() => 'bitAnd'
@@ -7,7 +7,7 @@ class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
 }
 
 class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
-	isAcceptingEnum() => true
+	isAcceptingBitmask() => true
 	native() => '|'
 	operator() => Operator.BitwiseOr
 	runtime() => 'bitOr'

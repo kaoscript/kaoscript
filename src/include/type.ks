@@ -163,6 +163,7 @@ bitmask QuoteMode {
 enum TypeKind<String> {
 	Alias
 	Array
+	Bitmask
 	Class
 	Deferred
 	Enum
@@ -554,8 +555,17 @@ abstract class Type {
 			if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
 				var property = data.typeName.argument.name
 
+				if type.isBitmask() {
+					unless type.discard().hasValue(property) {
+						ReferenceException.throwNotDefinedBitmaskElement(property, type.name(), node)
+					}
+
+					return type.setNullable(false)
+				}
+
+
 				if type.isEnum() {
-					unless type.discard().hasVariable(property) {
+					unless type.discard().hasValue(property) {
 						ReferenceException.throwNotDefinedEnumElement(property, type.name(), node)
 					}
 
@@ -803,6 +813,7 @@ abstract class Type {
 	asReference(): Type => this
 	buildGenericMap(position: CallMatchPosition, expressions: Expression[], decompose: (value: Type): Type, genericMap: Type[]{}): Void
 	canBeArray(any: Boolean = true): Boolean => (any && @isAny()) || @isArray()
+	canBeBitmask(any: Boolean = true): Boolean => (any && @isAny()) || @isBitmask()
 	canBeBoolean(): Boolean => @isAny() || @isBoolean()
 	canBeDeferred(): Boolean => false
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
@@ -816,6 +827,7 @@ abstract class Type {
 		}
 
 		match name {
+			'Bitmask'	=> return @isBitmask()
 			'Enum'		=> return @isEnum()
 			'Namespace'	=> return @isNamespace()
 			'Struct'	=> return @isStruct()
@@ -939,6 +951,7 @@ abstract class Type {
 		}
 	} # }}}
 	isBinding() => false
+	isBitmask() => false
 	isBoolean() => false
 	isBroadArray() => @isArray()
 	isBroadObject() => @isObject()
@@ -1243,6 +1256,7 @@ include {
 	'./type/alias.ks'
 	'./type/any.ks'
 	'./type/array.ks'
+	'./type/bitmask.ks'
 	'./type/class.ks'
 	'./type/class-constructor.ks'
 	'./type/class-destructor.ks'

@@ -17,9 +17,5 @@ module.exports = function() {
 			return true;
 		}})
 	};
-	const PersonKind = Helper.enum(Number, {
-		Director: 1,
-		Student: 2,
-		Teacher: 3
-	});
+	const PersonKind = Helper.enum(Number, "Director", 1, "Student", 2, "Teacher", 3);
 };

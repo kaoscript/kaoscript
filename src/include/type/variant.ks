@@ -63,21 +63,21 @@ class VariantType extends Type {
 	buildAliases(node: AbstractNode) { # {{{
 		return unless @kind == .Enum
 
-		for var variable of @enum.variables() when variable.isAlias() {
-			block variable {
-				if var field ?= @names[variable.original()] {
+		for var value of @enum.getOnlyAliases() {
+			block value {
+				if var field ?= @names[value.original()] {
 					var mut type = field.type
 
-					for var original in variable.originals() from 1 {
+					for var original in value.originals() from 1 {
 						if ?@names[original] {
 							type = type.merge(@names[original].type, null, null, true, node)
 						}
 						else {
-							break variable
+							break value
 						}
 					}
 
-					@aliases[variable.name()] = { names: variable.originals(), type }
+					@aliases[value.name()] = { names: value.originals(), type }
 				}
 			}
 		}

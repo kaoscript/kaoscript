@@ -42,6 +42,7 @@ class ValueType extends Type {
 		discard
 		isAny
 		isAssignableToVariable
+		isBitmask
 		isBoolean
 		isComparableWith
 		isEnum

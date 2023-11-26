@@ -13,21 +13,30 @@
       {
         "kind": "enum",
         "type": "number",
-        "sequenceIndex": 2,
         "exhaustive": true,
-        "variables": [
+        "nextIndex": 3,
+        "values": [
           {
-            "name": "Red"
+            "name": "Red",
+            "index": 0
           },
           {
-            "name": "Green"
+            "name": "Green",
+            "index": 1
           },
           {
-            "name": "Blue"
+            "name": "Blue",
+            "index": 2
           }
         ],
+        "aliases": [],
         "instanceMethods": {},
         "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 3
+        },
         "sequences": [
           -1
         ]

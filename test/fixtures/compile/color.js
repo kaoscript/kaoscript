@@ -306,7 +306,7 @@ module.exports = function() {
 			});
 			args.push(result);
 			s.converters[space](...args);
-			result._space = Space.__ks_from(space);
+			result._space = Space(space);
 			return result;
 		}
 		else {
@@ -625,7 +625,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const Space = Helper.enum(String, {});
+	const Space = Helper.enum(String);
 	class Color {
 		static __ks_new_0(...args) {
 			const o = Object.create(Color.prototype);
@@ -1072,7 +1072,7 @@ module.exports = function() {
 		}
 		__ks_func_like_0(space) {
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			let value = Space.__ks_from(space);
+			let value = Space(space);
 			if(Type.isValue(value)) {
 				if((this._space !== value) && Type.isValue($spaces[this._space].converters[space])) {
 					return $convert.__ks_0(this, value);
@@ -1257,7 +1257,7 @@ module.exports = function() {
 					throw new Error(Helper.concatString("The component '", space, "' has a conflict between the spaces '", $components[space].families.join("', '"), "'"));
 				}
 			}
-			let value = Space.__ks_from(space);
+			let value = Space(space);
 			if(Type.isValue(value)) {
 				if((this._space !== value) && Type.isValue($spaces[this._space].converters[space])) {
 					$convert.__ks_0(this, value, this);
@@ -1402,7 +1402,7 @@ module.exports = function() {
 				for(let __ks_1 = 0, __ks_0 = space.alias.length, alias; __ks_1 < __ks_0; ++__ks_1) {
 					alias = space.alias[__ks_1];
 					$spaces[space.name].alias[alias] = true;
-					$aliases[alias] = Space.__ks_from(space.name);
+					$aliases[alias] = Space(space.name);
 				}
 				if(Type.isValue($parsers[space.name])) {
 					for(let __ks_1 = 0, __ks_0 = space.alias.length, alias; __ks_1 < __ks_0; ++__ks_1) {
@@ -1571,8 +1571,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	Space.SRGB = Space("srgb");
-	Space.RGB = Space("rgb");
+	Helper.implEnum(Space, "SRGB", "srgb", "RGB", "rgb");
 	Color.__ks_sttc_addSpace_0((() => {
 		const o = new OBJ();
 		o["name"] = "srgb";

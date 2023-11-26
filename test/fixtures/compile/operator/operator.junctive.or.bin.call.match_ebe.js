@@ -1,12 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	const AnimalFlags = Helper.enum(Number, {
-		None: 0,
-		HasClaws: 1,
-		CanFly: 2,
-		EatsFish: 4,
-		Endangered: 8
-	});
+	const AnimalFlags = Helper.bitmask(Number, ["None", 0, "HasClaws", 1, "CanFly", 2, "EatsFish", 4, "Endangered", 8]);
 	function abilities() {
 		return abilities.__ks_rt(this, arguments);
 	};
