@@ -529,8 +529,8 @@ class MemberExpression extends Expression {
 
 					return true
 				}
-				else if var property ?= type.type().getStaticMethod(@property) {
-					@type = property
+				else if var property ?= type.type().getStaticProperty(@property) {
+					@type = property.discardVariable()
 
 					if @object.isInferable() {
 						@inferable = true

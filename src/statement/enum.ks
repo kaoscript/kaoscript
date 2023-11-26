@@ -1,12 +1,15 @@
 class EnumDeclaration extends Statement {
 	private late {
 		@enum: EnumType
-		@instanceMethods: Object	= {}
+		@fields: EnumFieldDeclaration[]		= []
+		@initial: Expression?
+		@instanceMethods: Object			= {}
 		@name: String
-		@staticMethods: Object		= {}
+		@staticMethods: Object				= {}
+		@step: Expression?
 		@type: NamedType<EnumType>
 		@variable: Variable
-		@values: Object				= {}
+		@values: Object						= {}
 	}
 	initiate() { # {{{
 		@name = @data.name.name
@@ -23,18 +26,34 @@ class EnumDeclaration extends Statement {
 		@type = NamedType.new(@name, @enum)
 
 		@variable = @scope.define(@name, true, @type, this)
+
+		@enum.fillProperties(@name, this)
 	} # }}}
 	analyse() { # {{{
 		@enum = @type.type()
 
+		if ?@data.initial {
+			@initial = $compile.expression(@data.initial, this)
+				..analyse()
+
+			if ?@data.step {
+				@step = $compile.expression(@data.step, this)
+					..analyse()
+			}
+
+			@enum.setGenerator(@initial, @step)
+		}
+
+		for var data in @data.members when data.kind == NodeKind.FieldDeclaration {
+			EnumFieldDeclaration.new(data, @enum, this).analyse()
+		}
+
+		if ?#@fields {
+			@enum.buildMatcher(@name, this)
+		}
+
 		for var data in @data.members {
 			match data.kind {
-				NodeKind.CommentBlock {
-					pass
-				}
-				NodeKind.CommentLine {
-					pass
-				}
 				NodeKind.EnumValue {
 					var value = EnumValueDeclaration.new(data, @enum, this)
 					var name = value.name()
@@ -45,12 +64,22 @@ class EnumDeclaration extends Statement {
 
 					value.analyse()
 				}
+				NodeKind.FieldDeclaration {
+					pass
+				}
 				NodeKind.MethodDeclaration {
 					var method = EnumMethodDeclaration.new(data, this)
 					var name = method.name()
 
-					if !method.isInstance() && @enum.hasValue(name) {
-						ReferenceException.throwAlreadyDefinedField(name, method)
+					if method.isInstance() {
+						if @enum.hasField(name) {
+							ReferenceException.throwAlreadyDefinedField(name, method)
+						}
+					}
+					else {
+						if @enum.hasValue(name) {
+							ReferenceException.throwAlreadyDefinedField(name, method)
+						}
 					}
 
 					method.analyse()
@@ -130,6 +159,24 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} # }}}
+	addField(field: EnumFieldDeclaration) { # {{{
+		if field.name() == 'value' {
+			var type = field.type().type()
+
+			unless type == Type.Unknown || type.isSubsetOf(@enum.type(), MatchingMode.Default) {
+				NotImplementedException.throw()
+			}
+
+			if var value ?= field.value() {
+				@enum.setGenerator(value)
+			}
+		}
+		else {
+			@fields.push(field)
+
+			@enum.addField(field.type())
+		}
+	} # }}}
 	addValue(value: EnumValueDeclaration) { # {{{
 		@values[value.name()] = value
 	} # }}}
@@ -149,6 +196,12 @@ class EnumDeclaration extends Statement {
 		var line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
 		@toMainTypeFragments(line)
+
+		line.code(`, \(@fields.length)`)
+
+		for var field in @fields {
+			line.code(`\($comma)\($quote(field.name()))`)
+		}
 
 		for var value of @values when !value.type().isAlias() {
 			value.toFragments(line)
@@ -235,6 +288,7 @@ class EnumDeclaration extends Statement {
 
 class EnumValueDeclaration extends AbstractNode {
 	private late {
+		@arguments: Expression[]					= []
 		@enum: EnumType
 		@type: EnumValueType | EnumAliasType
 		@value: String?
@@ -280,6 +334,53 @@ class EnumValueDeclaration extends AbstractNode {
 		else {
 			{ @type, @value } = @enum.createValue(@name)
 		}
+
+		if ?@data.arguments {
+			if @type.isAlias() {
+				NotImplementedException.throw()
+			}
+
+			var expressions = []
+
+			for var data in @data.arguments {
+				var argument = $compile.expression(data, this)
+					..analyse()
+					..flagNewExpression()
+					..prepare(AnyType.NullableUnexplicit)
+
+				expressions.push(argument)
+			}
+
+			match @enum.matchValueArguments(expressions, this) {
+				is PreciseCallMatchResult with var { matches } {
+					unless matches.length == 1 {
+						NotImplementedException.throw(this)
+					}
+
+					for var position, index in matches[0].positions {
+						if position is Array {
+							NotImplementedException.throw(this)
+						}
+						else {
+							var { index?, element? } = position
+
+							if !?index {
+								@arguments.push('void 0')
+							}
+							else if ?element {
+								NotImplementedException.throw(this)
+							}
+							else {
+								@arguments.push(expressions[index])
+							}
+						}
+					}
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
@@ -293,8 +394,49 @@ class EnumValueDeclaration extends AbstractNode {
 	} # }}}
 	toFragments(fragments) { # {{{
 		fragments.code(`, \($quote(@name)), \(@value)`)
+
+		for var argument in @arguments {
+			fragments.code($comma).compile(argument)
+		}
 	} # }}}
 	type() => @type
+}
+
+class EnumFieldDeclaration extends AbstractNode {
+	private late {
+		@enum: EnumType
+		@type: EnumFieldType
+		@value: Expression?
+	}
+	private {
+		@name: String
+	}
+	constructor(data, @enum, parent) { # {{{
+		super(data, parent)
+
+		@name = data.name.name
+	} # }}}
+	analyse() { # {{{
+		if ?@data.value {
+			@value = $compile.expression(@data.value, this)
+			@value.analyse()
+		}
+
+		@type = EnumFieldType.fromAST(@data!?, this)
+
+		@parent.addField(this)
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@value?.prepare()
+	} # }}}
+	translate() { # {{{
+		@value?.translate()
+	} # }}}
+	name() => @name
+	toFragments(fragments) { # {{{
+	} # }}}
+	type() => @type
+	value() => @value
 }
 
 class EnumMethodDeclaration extends Statement {

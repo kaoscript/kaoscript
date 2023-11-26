@@ -52,7 +52,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const Color = Helper.enum(Number, "Red", 0, "Green", 1, "Blue", 2);
+	const Color = Helper.enum(Number, 0, "Red", 0, "Green", 1, "Blue", 2);
 	return {
 		Foobar,
 		foobar,

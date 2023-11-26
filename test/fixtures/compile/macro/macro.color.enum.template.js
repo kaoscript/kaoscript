@@ -1,6 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Space = Helper.enum(String, "RGB", "rgb", "SRGB", "srgb", "YUV", "yuv");
+	const Space = Helper.enum(String, 0, "RGB", "rgb", "SRGB", "srgb", "YUV", "yuv");
 	class Color {
 		static __ks_new_0() {
 			const o = Object.create(Color.prototype);

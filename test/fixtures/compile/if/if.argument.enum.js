@@ -1,6 +1,6 @@
 const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Qux = Helper.enum(Number, "abc", 0, "def", 1, "ghi", 2);
+	const Qux = Helper.enum(Number, 0, "abc", 0, "def", 1, "ghi", 2);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

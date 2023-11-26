@@ -12,7 +12,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const Weekday = Helper.enum(Number, "MONDAY", 0, "TUESDAY", 1, "WEDNESDAY", 2, "THURSDAY", 3, "FRIDAY", 4, "SATURDAY", 5, "SUNDAY", 6);
+	const Weekday = Helper.enum(Number, 0, "MONDAY", 0, "TUESDAY", 1, "WEDNESDAY", 2, "THURSDAY", 3, "FRIDAY", 4, "SATURDAY", 5, "SUNDAY", 6);
 	Weekday.__ks_func_isWeekend_0 = function(that, sat) {
 		if(sat === void 0 || sat === null) {
 			sat = Weekday.__ks_default_0();

@@ -1,7 +1,7 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Parser = Helper.namespace(function() {
-		const Token = Helper.enum(Number, "INVALID", 0);
+		const Token = Helper.enum(Number, 0, "INVALID", 0);
 		class Scanner {
 			static __ks_new_0() {
 				const o = Object.create(Scanner.prototype);

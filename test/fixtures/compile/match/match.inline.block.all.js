@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const ANSIColor = Helper.enum(Number, "black", 0, "red", 1, "green", 2, "yellow", 3, "blue", 4, "magenta", 5, "cyan", 6, "white", 7, "default", 8);
+	const ANSIColor = Helper.enum(Number, 0, "black", 0, "red", 1, "green", 2, "yellow", 3, "blue", 4, "magenta", 5, "cyan", 6, "white", 7, "default", 8);
 	function color() {
 		return color.__ks_rt(this, arguments);
 	};

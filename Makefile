@@ -107,11 +107,10 @@ dev:
 	@# tests
 	@# node test/compile.dev.js "compile "
 	@# node test/compile.dev.js "compile test"
-	@# node test/compile.dev.js "compile variant"
-	@# node test/compile.dev.js "compile bitmask.length.8"
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"
+	@# node test/evaluate.dev.js "evaluate color"
 
 	@# npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.ks -g "disk"
 

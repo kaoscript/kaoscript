@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Accessibility = Helper.enum(Number, "Internal", 1, "Private", 2, "Protected", 3, "Public", 4);
+	const Accessibility = Helper.enum(Number, 0, "Internal", 1, "Private", 2, "Protected", 3, "Public", 4);
 	function isLessAccessibleThan() {
 		return isLessAccessibleThan.__ks_rt(this, arguments);
 	};

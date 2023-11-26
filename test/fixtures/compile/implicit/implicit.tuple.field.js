@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const FontWeight = Helper.enum(Number, "Bold", 0, "Normal", 1);
+	const FontWeight = Helper.enum(Number, 0, "Bold", 0, "Normal", 1);
 	const Style = Helper.tuple(function(fontWeight) {
 		if(fontWeight === void 0 || fontWeight === null) {
 			fontWeight = FontWeight.Normal;

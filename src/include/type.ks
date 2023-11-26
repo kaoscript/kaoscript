@@ -646,16 +646,12 @@ abstract class Type {
 						return references[data[0]].name(data[1])
 					}
 					else {
-						var type = Type.toNamedType(
-							Type.import(data[0], metadata, references, alterations, queue, scope, node)
-							false
-							scope
-							node
-						)
+						var type = Type.import(data[0], metadata, references, alterations, queue, scope, node)
+						var named = Type.toNamedType(type, false, scope, node)
 
-						references[data[0]] = type
+						references[data[0]] = named
 
-						return scope.reference(type)
+						return scope.reference(named)
 					}
 				}
 			}
@@ -669,16 +665,12 @@ abstract class Type {
 					}
 				}
 				else {
-					var type = Type.toNamedType(
-						Type.import(data.reference, metadata, references, alterations, queue, scope, node)
-						false
-						scope
-						node
-					)
+					var type = Type.import(data.reference, metadata, references, alterations, queue, scope, node)
+					var named = Type.toNamedType(type, false, scope, node)
 
-					references[data.reference] = type
+					references[data.reference] = named
 
-					return scope.reference(type)
+					return scope.reference(named)
 				}
 			}
 			else if ?data.kind {
@@ -1284,4 +1276,5 @@ Type.Any = AnyType.Unexplicit
 Type.Never = NeverType.new()
 Type.Null = NullType.Unexplicit
 Type.Undecided = AnyType.new(false, true)
+Type.Unknown = AnyType.new(false, true)
 Type.Void = VoidType.new()

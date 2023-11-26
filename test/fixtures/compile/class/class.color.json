@@ -114,6 +114,7 @@
           }
         ],
         "aliases": [],
+        "fields": [],
         "instanceMethods": {},
         "staticMethods": {},
         "sequences": [

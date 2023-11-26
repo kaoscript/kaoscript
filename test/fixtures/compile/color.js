@@ -625,7 +625,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const Space = Helper.enum(String);
+	const Space = Helper.enum(String, 0);
 	class Color {
 		static __ks_new_0(...args) {
 			const o = Object.create(Color.prototype);

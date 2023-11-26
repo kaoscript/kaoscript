@@ -228,7 +228,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	const Quxbaz = Helper.enum(Number);
+	const Quxbaz = Helper.enum(Number, 0);
 	function toEnumInstance() {
 		return toEnumInstance.__ks_rt(this, arguments);
 	};

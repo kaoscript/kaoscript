@@ -8,12 +8,12 @@ class EnumType extends Type {
 		@aliases: Object<EnumAliasType>					= {}
 		@alteration: Boolean							= false
 		@alterationReference: ClassType?
-		@assessment										= null
 		@exhaustiveness									= {
 			instanceMethods: {}
 			staticMethods: {}
 		}
-		@function: FunctionType?						= null
+		@fields: EnumFieldType{}						= {}
+		@fieldAssessment?
 		@generator 										= {
 			initial: 0
 			step: 1
@@ -24,6 +24,7 @@ class EnumType extends Type {
 		@kind: EnumTypeKind
 		@nextIndex: Number								= 0
 		@staticAssessments: Object						= {}
+		@staticFields: Object							= {}
 		@staticMethods: Object							= {}
 		@type: Type
 		@values: Object<EnumValueType>					= {}
@@ -71,6 +72,10 @@ class EnumType extends Type {
 			}
 
 			queue.push(() => {
+				for var field in data.fields {
+					type.addField(EnumFieldType.import(field, metadata, references, alterations, queue, scope, node))
+				}
+
 				for var methods, name of data.instanceMethods {
 					for var method in methods {
 						type.dedupInstanceMethod(name, EnumMethodType.import(method, metadata, references, alterations, queue, scope, node))
@@ -105,6 +110,13 @@ class EnumType extends Type {
 		}
 
 		return value
+	} # }}}
+	addField(type: EnumFieldType) { # {{{
+		@fields[type.name()] = type
+
+		if @alteration {
+			type.flagAlteration()
+		}
 	} # }}}
 	addInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
 		@sequences.instanceMethods[name] ??= 0
@@ -211,12 +223,14 @@ class EnumType extends Type {
 
 		return value
 	} # }}}
-	assessment(reference: ReferenceType, node: AbstractNode) { # {{{
-		if @assessment == null {
-			@assessment = Router.assess([@function(reference, node)], reference.name(), node)
+	buildMatcher(name: String, node) { # {{{
+		var fn = FunctionType.new(node.scope())
+
+		for var field of @fields when !field.isInbuilt() {
+			fn.addParameter(field.type(), field.name(), 1, 1)
 		}
 
-		return @assessment
+		@fieldAssessment = Router.assess([fn], name, node)
 	} # }}}
 	clone() { # {{{
 		var that = EnumType.new(@scope)
@@ -352,6 +366,7 @@ class EnumType extends Type {
 			nextIndex: @nextIndex
 			values: [value.export(references, indexDelta, mode, module) for var value of @values]
 			aliases: [alias.export(references, indexDelta, mode, module) for var alias of @aliases]
+			fields: [field.export(references, indexDelta, mode, module) for var field, name of @fields when !field.isInbuilt()]
 			instanceMethods: {}
 			staticMethods: {}
 		}
@@ -361,11 +376,15 @@ class EnumType extends Type {
 		}
 
 		for var methods, name of @instanceMethods {
-			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode)]
+
+			export.instanceMethods[name] = exports if ?#exports
 		}
 
 		for var methods, name of @staticMethods {
-			export.staticMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode)]
+
+			export.staticMethods[name] = exports if ?#exports
 		}
 
 		export.sequences = [
@@ -393,20 +412,27 @@ class EnumType extends Type {
 
 		return export
 	} # }}}
-	function(): valueof @function
-	function(reference, node) { # {{{
-		if @function == null {
-			var scope = node.scope()
+	fillProperties(name: String, node) { # {{{
+		@fields['index'] = EnumFieldType.new(@scope, 'index', @scope.reference('Number')).flagInbuilt()
+		@fields['name'] = EnumFieldType.new(@scope, 'name', @scope.reference('String')).flagInbuilt()
+		@fields['value'] = EnumFieldType.new(@scope, 'value', @type).flagInbuilt()
 
-			@function = FunctionType.new(scope)
+		@staticFields['values'] = Type.arrayOf(@scope.reference(name), @scope)
+		@staticFields['fields'] = Type.arrayOf(@scope.reference('String'), @scope)
 
-			@function.addParameter(@type, 'value', 1, 1)
+		var thisType = @scope.reference(name).setNullable(true)
 
-			@function.setReturnType(reference.setNullable(true))
-		}
-
-		return @function
+		@staticMethods['fromIndex'] = [
+			EnumMethodType.new([ParameterType.new(@scope, @scope.reference('Number').setNullable(true), 1, 1)], {}, node).setReturnType(thisType).flagInbuilt()
+		]
+		@staticMethods['fromName'] = [
+			EnumMethodType.new([ParameterType.new(@scope, @scope.reference('String').setNullable(true), 1, 1)], {}, node).setReturnType(thisType).flagInbuilt()
+		]
+		@staticMethods['fromValue'] = [
+			EnumMethodType.new([ParameterType.new(@scope, @type.setNullable(true), 1, 1)], {}, node).setReturnType(thisType).flagInbuilt()
+		]
 	} # }}}
+	getField(name: String) => @fields[name]
 	getInstanceAssessment(name: String, node: AbstractNode) { # {{{
 		if var assessment ?= @instanceAssessments[name] {
 			return assessment
@@ -423,13 +449,13 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getInstanceProperty(name: String) { # {{{
-		if name == 'value' {
-			return @type
-		}
-		else if var methods ?#= @instanceMethods[name] {
+		if var methods ?#= @instanceMethods[name] {
 			if methods.length == 1 {
 				return methods[0]
 			}
+		}
+		else if var field ?= @fields[name] {
+			return field
 		}
 
 		return null
@@ -491,6 +517,18 @@ class EnumType extends Type {
 
 		return null
 	} # }}}
+	getStaticProperty(name: String) { # {{{
+		if var methods ?#= @staticMethods[name] {
+			if methods.length == 1 {
+				return methods[0]
+			}
+		}
+		else if var field ?= @staticFields[name] {
+			return field
+		}
+
+		return null
+	} # }}}
 	getTopProperty(name: String): String { # {{{
 		if var value ?= @aliases[name] {
 			return value.getTopAlias() ?? name
@@ -500,6 +538,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	getValue(name: String) => @values[name] ?? @aliases[name]
+	hasField(name: String) => ?@fields[name]
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
@@ -594,8 +633,29 @@ class EnumType extends Type {
 		return results
 	} # }}}
 	listValueNames() => [name for var value, name of @values]
+	matchValueArguments(arguments, node) { # {{{
+		return Router.matchArguments(@fieldAssessment, null, arguments, null, node)
+	} # }}}
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true
+	} # }}}
+	setInitialValue()
+	setGenerator(initial: Expression, step: Expression? = null) { # {{{
+		if initial is NumberLiteral {
+			@generator.initial = @generator.next = initial.value()
+		}
+		else {
+			NotImplementedException.throw()
+		}
+
+		if ?step {
+			if step is NumberLiteral {
+				@generator.step = step.value()
+			}
+			else {
+				NotImplementedException.throw()
+			}
+		}
 	} # }}}
 	shallBeNamed() => true
 	toFragments(fragments, node) { # {{{
@@ -700,11 +760,95 @@ class EnumAliasType {
 	} # }}}
 }
 
+class EnumFieldType extends Type {
+	private {
+		@access: Accessibility	= Accessibility.Public
+		@default: Boolean		= false
+		@inbuilt: Boolean		= false
+		@name: String
+		@type: Type
+	}
+	static {
+		fromAST(data, node: AbstractNode): EnumFieldType { # {{{
+			var scope = node.scope()
+
+			var type = if ?data.type {
+				set EnumFieldType.new(scope, data.name.name, Type.fromAST(data.type, node))
+			}
+			else {
+				set EnumFieldType.new(scope, data.name.name, Type.Unknown)
+			}
+
+			if ?data.modifiers {
+				for var modifier in data.modifiers {
+					match modifier.kind {
+						ModifierKind.Internal {
+							type.access(Accessibility.Internal)
+						}
+						ModifierKind.Private {
+							type.access(Accessibility.Private)
+						}
+						ModifierKind.Protected {
+							type.access(Accessibility.Protected)
+						}
+					}
+				}
+			}
+
+			if ?data.value {
+				type._default = true
+			}
+
+			return type
+		} # }}}
+		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumFieldType { # {{{
+			var data = index
+			var type = EnumFieldType.new(scope, data.name, Type.import(data.type, metadata, references, alterations, queue, scope, node))
+
+			type._access = Accessibility(data.access) ?? .Public
+			type._default = data.default
+
+			return type
+		} # }}}
+	}
+	constructor(@scope, @name, @type) { # {{{
+		super(scope)
+	} # }}}
+	access() => @access
+	access(@access) => this
+	override clone() { # {{{
+		throw NotSupportedException.new()
+	} # }}}
+	discardVariable() => @type
+	override export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		var data = {
+			access: @access
+			name: @name
+			type: @type.toReference(references, indexDelta, mode, module)
+			default: @default
+		}
+
+		return data
+	} # }}}
+	flagInbuilt() { # {{{
+		@inbuilt = true
+
+		return this
+	} # }}}
+	isInbuilt() => @inbuilt
+	name() => @name
+	override toFragments(fragments, node)
+	override toVariations(variations)
+	type(): valueof @type
+	type(@type): valueof this
+}
+
 class EnumMethodType extends FunctionType {
 	private {
-		@access: Accessibility					= Accessibility.Public
-		@alteration: Boolean					= false
-		@instance: Boolean						= false
+		@access: Accessibility			= Accessibility.Public
+		@alteration: Boolean			= false
+		@inbuilt: Boolean				= false
+		@instance: Boolean				= false
 	}
 	static {
 		fromAST(data, node: AbstractNode): EnumMethodType { # {{{
@@ -761,11 +905,17 @@ class EnumMethodType extends FunctionType {
 
 		return this
 	} # }}}
+	flagInbuilt() { # {{{
+		@inbuilt = true
+
+		return this
+	} # }}}
 	flagInstance() { # {{{
 		@instance = true
 
 		return this
 	} # }}}
+	isInbuilt() => @inbuilt
 	isInstance() => @instance
 	isMethod() => true
 }

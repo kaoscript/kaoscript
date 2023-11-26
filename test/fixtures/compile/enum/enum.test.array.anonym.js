@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Color = Helper.enum(Number, "Red", 0, "Green", 1, "Blue", 2);
+	const Color = Helper.enum(Number, 0, "Red", 0, "Green", 1, "Blue", 2);
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);

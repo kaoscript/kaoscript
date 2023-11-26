@@ -69,6 +69,7 @@
           }
         ],
         "aliases": [],
+        "fields": [],
         "instanceMethods": {},
         "staticMethods": {},
         "generator": {

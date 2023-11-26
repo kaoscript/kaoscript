@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	const PetKind = Helper.enum(Number, "Cat", 0, "Dog", 1);
+	const PetKind = Helper.enum(Number, 0, "Cat", 0, "Dog", 1);
 	class Pet {
 		static __ks_new_0() {
 			const o = Object.create(Pet.prototype);

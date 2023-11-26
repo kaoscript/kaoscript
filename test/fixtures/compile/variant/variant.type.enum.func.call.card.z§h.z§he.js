@@ -11,7 +11,7 @@ module.exports = function() {
 			return true;
 		}, rank: Type.isNumber})
 	};
-	const CardSuit = Helper.enum(Number, "Clubs", 1, "Diamonds", 2, "Hearts", 3, "Spades", 4);
+	const CardSuit = Helper.enum(Number, 0, "Clubs", 1, "Diamonds", 2, "Hearts", 3, "Spades", 4);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
