@@ -379,10 +379,15 @@ class FusionType extends Type {
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
-		for var type, index in @types {
-			fragments.code(' && ') if index != 0
+		if ?@testName {
+			fragments.code(`\(@testName)(\(varname))`)
+		}
+		else {
+			for var type, index in @types {
+				fragments.code(' && ') if index != 0
 
-			type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
+				type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
+			}
 		}
 
 		fragments.code(')') if junction == Junction.OR
@@ -404,7 +409,11 @@ class FusionType extends Type {
 			fragments.code(`\(varname) => `)
 		}
 
-		@toBlindTestFragments(varname, generics, Junction.NONE, fragments, node)
+		for var type, index in @types {
+			fragments.code(' && ') if index != 0
+
+			type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
+		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
@@ -423,17 +432,76 @@ class FusionType extends Type {
 		fragments.code(')') if junction == .OR
 	} # }}}
 	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
-		fragments.code('(') if junction == .OR
+		if ?@testName {
+			fragments.code(`\(@testName)(`).compile(node)
 
-		for var type, i in @types {
-			if i != 0 {
-				fragments.code(' && ')
+			if ?#parameters {
+				fragments.code(`, [`)
+
+				for var { type }, index in parameters {
+					fragments.code($comma) if index > 0
+
+					type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
+				}
+
+				fragments.code(`]`)
 			}
 
-			type.toPositiveTestFragments(parameters, subtypes, Junction.AND, fragments, node)
-		}
+			if ?#subtypes {
+				if subtypes.length == 1 {
+					var { name, type } = subtypes[0]
+					var value = type.discard().getValue(name)
 
-		fragments.code(')') if junction == .OR
+					if value.isAlias() {
+						if value.isDerivative() {
+							fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
+						}
+						else {
+							fragments.code(`, value => value === `).compile(type).code(`.\(value.original())`)
+						}
+					}
+					else {
+						fragments.code(`, value => value === `).compile(type).code(`.\(name)`)
+					}
+				}
+				else {
+					fragments.code(`, value => `)
+
+					for var { name, type }, index in subtypes {
+						fragments.code(' || ') if index > 0
+
+						var value = type.discard().getValue(name)
+
+						if value.isAlias() {
+							if value.isDerivative() {
+								fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(value)`)
+							}
+							else {
+								fragments.code(`value === `).compile(type).code(`.\(value.original())`)
+							}
+						}
+						else {
+							fragments.code(`value === `).compile(type).code(`.\(name)`)
+						}
+					}
+				}
+			}
+
+			fragments.code(')')
+		}
+		else {
+			fragments.code('(') if junction == .OR
+
+			for var type, i in @types {
+				if i != 0 {
+					fragments.code(' && ')
+				}
+
+				type.toPositiveTestFragments(parameters, subtypes, Junction.AND, fragments, node)
+			}
+
+			fragments.code(')') if junction == .OR
+		}
 	} # }}}
 	toQuote() => @hashCode()
 	override toVariations(variations) { # {{{

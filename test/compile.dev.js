@@ -9,6 +9,8 @@ mocha.checkLeaks()
 mocha.addFile('./test/compile.test.js')
 mocha.grep(myArgs[0])
 
+Error.stackTraceLimit = Infinity
+
 mocha
 	.run()
 	.on('pass', (test) => {
