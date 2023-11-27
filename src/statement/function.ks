@@ -284,9 +284,9 @@ class FunctionDeclaration extends Statement {
 
 			if declarators.length == 1 && declarators[0].hasRetainedParameters() {
 				for var parameter, index in declarators[0].parameters() {
-					line.code($comma) unless index == 0
-
-					line.compile(parameter)
+					line
+						..code($comma) unless index == 0
+						..compile(parameter)
 				}
 			}
 

@@ -572,10 +572,12 @@ class UnionType extends Type {
 	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .AND
 
+		var literal = Literal.new(false, node, node.scope(), varname)
+
 		for var type, index in @types {
 			fragments.code(' || ') if index != 0
 
-			type.toBlindTestFragments(varname, generics, Junction.OR, fragments, node)
+			type.toBlindTestFragments(varname, generics, Junction.OR, fragments, literal)
 		}
 
 		fragments.code(')') if junction == .AND
