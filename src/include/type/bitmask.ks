@@ -49,8 +49,8 @@ class BitmaskType extends Type {
 				type.addValue(value)
 			}
 
-			for var { name, originals, top? } in data.aliases {
-				var value = BitmaskAliasType.new(name, originals, top)
+			for var { name } in data.aliases {
+				var value = BitmaskAliasType.new(name)
 
 				type.addAlias(value)
 			}
@@ -325,6 +325,7 @@ class BitmaskType extends Type {
 			nextIndex: @nextIndex
 			@generator
 			values: [value.export(references, indexDelta, mode, module) for var value of @values]
+			aliases: [alias.export(references, indexDelta, mode, module) for var alias of @aliases]
 			instanceMethods: {}
 			staticMethods: {}
 		}
@@ -584,12 +585,11 @@ class BitmaskType extends Type {
 class BitmaskValueType {
 	private {
 		@alteration: Boolean	= false
-		@index: Number?			= null
+		@index: Number
 		@name: String
 		@value: String?
 	}
-	constructor(@name)
-	constructor(@name, @index, @value)
+	constructor(@name, @index, @value = null)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			@name

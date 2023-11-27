@@ -681,6 +681,9 @@ abstract class Type {
 					TypeKind.Array {
 						return ArrayType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind.Bitmask {
+						return BitmaskType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind.Class {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
