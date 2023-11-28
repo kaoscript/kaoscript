@@ -1,7 +1,6 @@
 class MemberExpression extends Expression {
 	private late {
 		@assignable: Boolean			= false
-		@assignment: AssignmentType		= AssignmentType.Neither
 		@callee
 		@computed: Boolean				= false
 		@declaredType: Type?			= null
@@ -852,17 +851,19 @@ class MemberExpression extends Expression {
 			@property.releaseReusable()
 		}
 	} # }}}
-	setAssignment(@assignment)
 	setPropertyType(type: Type) { # {{{
+		var newType = @objectType.clone()
+
+		newType.addProperty(@property, type)
+
 		if @objectType.isNamed() {
-			var newType = @objectType.clone()
-
-			newType.addProperty(@property, type)
-
 			@scope.replaceVariable(newType.name(), newType, this)
 		}
-		else {
-			@objectType.addProperty(@property, type)
+		else if @object is IdentifierLiteral {
+			@scope.replaceVariable(@object.name(), newType, this)
+		}
+		else if @parent is Expression {
+			@parent.setPropertyType(newType)
 		}
 	} # }}}
 	override toArgumentFragments(fragments, type: Type, mode: Mode) { # {{{

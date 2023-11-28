@@ -110,7 +110,6 @@ dev:
 
 	@# node test/evaluate.dev.js "evaluate "
 	@# node test/evaluate.dev.js "evaluate test"
-	@# node test/evaluate.dev.js "evaluate color"
 
 	@# npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.ks -g "disk"
 
