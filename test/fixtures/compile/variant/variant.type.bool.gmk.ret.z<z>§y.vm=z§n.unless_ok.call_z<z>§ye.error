@@ -1,0 +1,1 @@
+TypeException: The condition "result.ok" has always the value "false" (fixtures/compile/variant/variant.type.bool.gmk.ret.z<z>§y.vm=z§n.unless_ok.call_z<z>§ye.ks:20)

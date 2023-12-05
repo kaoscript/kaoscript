@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(point) {
 		let __ks_0 = Helper.memo(Type.isDexArray(point, 1, 2, 2));
-		let __ks_1 = Helper.memo(Type.isDexArray(point, 0, 2, 0, Type.isValue));
+		let __ks_1 = Helper.memo(Type.isDexArray(point, 0, 2, 0, 0, [Type.isValue, Type.isValue]));
 		if(__ks_0() && point[0] === 0 && point[1] === 0) {
 			console.log("(0, 0) is at the origin");
 		}

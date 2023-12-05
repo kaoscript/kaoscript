@@ -12,7 +12,7 @@ module.exports = function() {
 				return Type.isDexObject(value, 0, 0, {value: Type.isString});
 			}
 			else {
-				return Type.isDexObject(value, 0);
+				return Type.isObject(value);
 			}
 		}})
 	};

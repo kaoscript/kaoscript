@@ -121,7 +121,7 @@ class CallExpression extends Expression {
 			@makeMemberCallee(@object.type().discardValue())
 
 			if @matchingMode == .BestMatch {
-				@object.flagMutating()
+				@object.unspecify()
 			}
 		}
 		else {
@@ -1219,7 +1219,7 @@ class CallExpression extends Expression {
 				TypeException.throwUnexpectedInoperative(argument, this)
 			}
 
-			argument.flagMutating()
+			argument.unspecify()
 		}
 
 		if @options.format.spreads == 'es5' {

@@ -1,9 +1,7 @@
-extern console
-
-func foobar(x = 'jane') {
-	if true {
+func foobar(test, x = 'jane') {
+	if test {
 		var dyn x = 'john'
 
-		console.log(x)
+		echo(x)
 	}
 }

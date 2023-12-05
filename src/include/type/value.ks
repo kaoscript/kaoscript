@@ -4,6 +4,10 @@ class ValueType extends Type {
 		@type: Type
 		@value?
 	}
+	// TODO! remove
+	constructor(@type, @path, @scope) { # {{{
+		super(scope)
+	} # }}}
 	constructor(@value, @type, @path, @scope) { # {{{
 		super(scope)
 	} # }}}

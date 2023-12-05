@@ -227,7 +227,7 @@ class ArrayComprehensionForIn extends Expression {
 		@bindingScope.releaseTempName(@valueName) if ?@valueName
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isArray() {
+		unless target.canBeArray() {
 			TypeException.throwInvalidComprehensionType(target, this)
 		}
 
@@ -243,7 +243,7 @@ class ArrayComprehensionForIn extends Expression {
 
 			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
-				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
 			}
 
 			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
@@ -443,7 +443,7 @@ class ArrayComprehensionForOf extends Expression {
 
 			var valueType = Type.fromAST(@data.type, this)
 			unless parameterType.matchContentOf(valueType) {
-				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
 			}
 
 			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType

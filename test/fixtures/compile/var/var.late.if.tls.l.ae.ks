@@ -1,7 +1,7 @@
-func foobar(result) {
+func foobar(test, result) {
 	var late values: []
 
-	if true {
+	if test {
 		values = []
 	}
 	else {

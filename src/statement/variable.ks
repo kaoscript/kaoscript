@@ -679,20 +679,26 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			@identifier.prepare()
 		}
 	} # }}}
-	setRealType(type: Type) { # {{{
+	setRealType(mut type: Type) { # {{{
 		if ?@type {
 			unless type.isAssignableToVariable(@type, true, false, false) {
-				TypeException.throwInvalidAssignement(@name, @type, type, this)
+				TypeException.throwInvalidAssignment(@name, @type, type, this)
 			}
 
-			if @type.isObject() && type is ObjectType && type.isLiberal() {
-				if @type.hasRest() {
-					if @type is ObjectType {
-						type.setRestType(@type.getRestType())
-					}
+			if type.isLiberal() {
+				if @type.isAlias() {
+					type = @type.tryCasting(type)
 				}
-				else {
-					type.unflagLiberal()
+
+				if @type.isObject() && type is ObjectType {
+					if @type.hasRest() {
+						if @type is ObjectType {
+							type.setRestType(@type.getRestType())
+						}
+					}
+					else {
+						type.unflagLiberal()
+					}
 				}
 			}
 		}

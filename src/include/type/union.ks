@@ -163,6 +163,15 @@ class UnionType extends Type {
 
 		return @assessment
 	} # }}}
+	canBeArray(any = true) { # {{{
+		for var type in @types {
+			if type.canBeArray(any) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	canBeBoolean() { # {{{
 		for var type in @types {
 			if type.canBeBoolean() {
@@ -328,15 +337,6 @@ class UnionType extends Type {
 		var elements = [type.hashCode() for var type in @types]
 
 		return elements.join('|')
-	} # }}}
-	hasMutableAccess() { # {{{
-		for var type in @types {
-			if type.hasMutableAccess() {
-				return true
-			}
-		}
-
-		return false
 	} # }}}
 	isArray() { # {{{
 		for var type in @types {
@@ -514,6 +514,19 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	length() => @types.length
+	override limitTo(value) { # {{{
+		var matches = [type for var type in @types when type.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)]
+
+		if matches.length == 0 | @types.length {
+			return this
+		}
+		else if matches.length == 1 {
+			return matches[0]
+		}
+		else {
+			return Type.union(@scope, ...matches)
+		}
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		for var type in @types {
 			if !type.matchContentOf(value) {
@@ -723,12 +736,20 @@ class UnionType extends Type {
 		if @types.length == 1 {
 			return @types[0]
 		}
-		if @types.length == 2 && @nullable {
-			if @types[0] == Type.Null {
-				return @types[1].setNullable(true)
+		if @types.length == 2 {
+			if @types[0] is ValueType && @types[0].type().isBoolean() && @types[1] is ValueType && @types[1].type().isBoolean() {
+				if (@types[0].value() == 'true' && @types[1].value() == 'false') || (@types[1].value() == 'true' && @types[0].value() == 'false') {
+					return @scope.reference('Boolean')
+				}
 			}
-			if @types[1] == Type.Null {
-				return @types[0].setNullable(true)
+
+			if @nullable {
+				if @types[0] == Type.Null {
+					return @types[1].setNullable(true)
+				}
+				if @types[1] == Type.Null {
+					return @types[0].setNullable(true)
+				}
 			}
 		}
 

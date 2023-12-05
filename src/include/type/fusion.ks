@@ -154,15 +154,6 @@ class FusionType extends Type {
 
 		return false
 	} # }}}
-	hasMutableAccess() { # {{{
-		for var type in @types {
-			if type.hasMutableAccess() {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
 	hasTest() => ?@testName
 	isArray() { # {{{
 		for var type in @types {

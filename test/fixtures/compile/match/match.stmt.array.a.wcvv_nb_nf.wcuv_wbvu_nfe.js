@@ -8,7 +8,7 @@ module.exports = function() {
 		if(__ks_0() && point[0] === 0 && point[1] === 0) {
 			console.log("(0, 0) is at the origin");
 		}
-		else if(__ks_0() && point[1] === 0 && Type.isDexArray(point, 0, 2, 0, Type.isValue)) {
+		else if(__ks_0() && point[1] === 0 && Type.isDexArray(point, 0, 2, 0, 0, [Type.isValue, Type.isValue])) {
 			let [x] = point;
 			console.log(Helper.concatString("(", x, ", 0) is on the x-axis"));
 		}

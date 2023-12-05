@@ -13,7 +13,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let  __ks_0 = foo.__ks_0();
-	Helper.assertDexArray(__ks_0, 1, 2, 0, Type.isValue);
+	Helper.assertDexArray(__ks_0, 1, 2, 0, 0, [Type.isValue, Type.isValue]);
 	let [x, y] = __ks_0;
 	console.log(x, y);
 };

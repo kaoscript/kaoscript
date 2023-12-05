@@ -1,4 +1,4 @@
-extern console
+extern test
 
 impl Number {
 	toString(): String => `\(this)`
@@ -10,17 +10,17 @@ impl String {
 
 var late x
 
-if true {
+if test {
 	x = 42
 
 	x = 24
 
-	console.log(`\(x.toString())`)
+	echo(`\(x.toString())`)
 }
 else {
 	x = 'quxbaz'
 
-	console.log(`\(x.toString())`)
+	echo(`\(x.toString())`)
 }
 
-console.log(`\(x.toString())`)
+echo(`\(x.toString())`)

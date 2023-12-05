@@ -1,0 +1,1 @@
+TypeException: The variable "result" of type "Event(false)" can't be assigned with a value of type "Event(true)" (fixtures/compile/variant/variant.type.bool.gmk.ret.z<z>§y.vm=z§n.if_ok.call_z<z>§ye.ks:20)

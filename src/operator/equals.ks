@@ -28,7 +28,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		}
 		else {
 			unless rightType.isAssignableToVariable(@type, true, false, false) {
-				TypeException.throwInvalidAssignement(@left, @type, rightType, this)
+				TypeException.throwInvalidAssignment(@left, @type, rightType, this)
 			}
 
 			if @left.isInferable() {

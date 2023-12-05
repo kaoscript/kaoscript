@@ -100,11 +100,6 @@ class Variable {
 
 		return this
 	} # }}}
-	flagMutating() { # {{{
-		if @declaredType.hasMutableAccess() {
-			@realType = @declaredType
-		}
-	} # }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
@@ -159,13 +154,7 @@ class Variable {
 	setRealType(type: Type, absolute: Boolean, scope: Scope) { # {{{
 		if absolute {
 			@initialized = true
-
-			if type.isMorePreciseThan(@declaredType) {
-				@realType = type
-			}
-			else {
-				@realType = @declaredType
-			}
+			@realType = @declaredType.limitTo(type)
 		}
 		else {
 			if @realType.isNull() {

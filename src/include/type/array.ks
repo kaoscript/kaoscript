@@ -8,6 +8,7 @@ class ArrayType extends Type {
 		@properties: Type[]				= []
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
+		@specific: Boolean				= false
 		@spread: Boolean				= false
 		@testLength: Boolean			= true
 		@testProperties: Boolean		= false
@@ -31,6 +32,8 @@ class ArrayType extends Type {
 				if ?data.rest {
 					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
+
+				type.flagComplete()
 			})
 
 			return type
@@ -143,6 +146,11 @@ class ArrayType extends Type {
 			destructuring: true if @destructuring
 		}
 	} # }}}
+	override flagComplete() { # {{{
+		@specific = !@rest && @length == 0
+
+		return super()
+	} # }}}
 	flagDestructuring() { # {{{
 		@destructuring = true
 	} # }}}
@@ -179,7 +187,7 @@ class ArrayType extends Type {
 				str = `\(@restType.hashCode(fattenNull))[]`
 			}
 			else {
-				str = `Array`
+				str = `[]`
 			}
 		}
 		else {
@@ -215,7 +223,6 @@ class ArrayType extends Type {
 
 		return str
 	} # }}}
-	hasMutableAccess() => true
 	hasProperties() => @length > 0
 	hasRest() => @rest
 	isArray() => true
@@ -280,7 +287,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
-	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Array').isExhaustive()
+	isExhaustive() => !@rest || @scope.reference('Array').isExhaustive()
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false
 	isIterable() => true
@@ -288,7 +295,12 @@ class ArrayType extends Type {
 	isMorePreciseThan(value: ArrayType) { # {{{
 		return true if this == value
 
-		return @restType.isMorePreciseThan(value.getRestType())
+		if !@nullable && value.isNullable() {
+			return @restType.equals(value.getRestType()) || @restType.isMorePreciseThan(value.getRestType())
+		}
+		else {
+			return @restType.isMorePreciseThan(value.getRestType())
+		}
 	} # }}}
 	isMorePreciseThan(value: ReferenceType) { # {{{
 		if value.isAlias() {
@@ -304,7 +316,7 @@ class ArrayType extends Type {
 	} # }}}
 	isMorePreciseThan(value: UnionType) { # {{{
 		for var type in value.types() {
-			if @isMorePreciseThan(type) {
+			if @equals(type) || @isMorePreciseThan(type) {
 				return true
 			}
 		}
@@ -313,7 +325,21 @@ class ArrayType extends Type {
 	} # }}}
 	isNullable() => @nullable
 	isSealable() => true
+	override isSpecific() => @specific
 	isSpread() => @spread
+	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
+		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
+			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			return value.isAny()
+		}
+	} # }}}
 	assist isSubsetOf(value: ArrayType, generics, subtypes, mode) { # {{{
 		return true if this == value
 
@@ -386,8 +412,23 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
+	assist isSubsetOf(value: FusionType, generics, subtypes, mode) { # {{{
+		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
+
+		for var type in value.types() {
+			if !@isSubsetOf(type, mode) {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		return false unless value.isArray()
+
+		if @isNullable() && !value.isNullable() {
+			return false
+		}
 
 		if value.name() != 'Array' {
 			return this.isSubsetOf(value.discard(), mode + MatchingMode.Reference)
@@ -419,29 +460,29 @@ class ArrayType extends Type {
 
 		return true
 	} # }}}
-	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
-		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode.Missing {
-				return true
-			}
-			else {
-				return false
+	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
+		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
+
+		if @isNullable() {
+			return false unless value.isNullable()
+
+			var notNull = @setNullable(false)
+
+			for var type in value.types() {
+				if !type.isNull() && notNull.isSubsetOf(type, mode) {
+					return true
+				}
 			}
 		}
 		else {
-			if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
-					}
+			for var type in value.types() {
+				if @isSubsetOf(type, mode) {
+					return true
 				}
-
-				return false
-			}
-			else {
-				return value.isAny()
 			}
 		}
+
+		return false
 	} # }}}
 	isTestingProperties() => @testProperties
 	length() => @length
@@ -645,6 +686,7 @@ class ArrayType extends Type {
 	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
 
+		// echo(@testRest , @testProperties , @testLength)
 		if @testRest || @testProperties || @testLength {
 			@toSubtestFragments('value', testingType, @testLength, fragments, node)
 		}
@@ -688,7 +730,8 @@ class ArrayType extends Type {
 	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexArray')
+				// fragments.code(`\(varname) => \($runtime.type(node)).isDexArray(\(varname), 1)`)
+				fragments.code(`\($runtime.type(node)).isDXArray`)
 			}
 			else {
 				fragments.code($runtime.type(node), '.isArray')
@@ -701,7 +744,8 @@ class ArrayType extends Type {
 		}
 		else {
 			if @destructuring {
-				fragments.code($runtime.type(node), '.isDexArray')
+				// fragments.code(`\(varname) => \($runtime.type(node)).isDexArray(\(varname), 1)`)
+				fragments.code(`\($runtime.type(node)).isDXArray`)
 			}
 			else {
 				fragments.code($runtime.type(node), '.isArray')
@@ -819,22 +863,25 @@ class ArrayType extends Type {
 						}
 					}
 					else {
-						var mut onlyRest = @fullTest
-						var baseType = @properties[0]
+						// echo(@fullTest)
+						// echo(@properties)
+						// var mut onlyRest = @fullTest
+						// var baseType = @properties[0]
 
-						if onlyRest {
-							for var type in @properties from 1 {
-								if type != baseType {
-									onlyRest = false
-									break
-								}
-							}
-						}
+						// if onlyRest {
+						// 	for var type in @properties from 1 {
+						// 		if type != baseType {
+						// 			onlyRest = false
+						// 			break
+						// 		}
+						// 	}
+						// }
+						// // echo(onlyRest)
 
-						if onlyRest {
-							baseType.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
-						}
-						else {
+						// if onlyRest {
+						// 	baseType.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+						// }
+						// else {
 							fragments.code('0, [')
 
 							var mut comma = false
@@ -851,7 +898,7 @@ class ArrayType extends Type {
 							}
 
 							fragments.code(']')
-						}
+						// }
 					}
 				}
 				else {

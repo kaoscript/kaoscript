@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(point) {
-		if(Type.isDexArray(point, 1, 2, 2) && point[0] === 0 && Type.isDexArray(point, 0, 2, 0, Type.isValue)) {
+		if(Type.isDexArray(point, 1, 2, 2) && point[0] === 0 && Type.isDexArray(point, 0, 2, 0, 0, [Type.isValue, Type.isValue])) {
 			let [, y] = point;
 			console.log(Helper.concatString("(0, ", y, ") is on the y-axis"));
 		}

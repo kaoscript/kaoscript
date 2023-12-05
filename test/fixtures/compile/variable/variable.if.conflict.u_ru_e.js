@@ -1,7 +1,7 @@
 module.exports = function() {
 	let index = 0;
 	console.log(index);
-	if(true) {
+	if(test === true) {
 		console.log(index);
 		let __ks_index_1 = index + 1;
 		console.log(__ks_index_1);

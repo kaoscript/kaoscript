@@ -1434,7 +1434,7 @@ module.exports = function() {
 					}
 				}
 			}
-			for(let __ks_1 = 0, __ks_0 = spaces.length, name; __ks_1 < __ks_0; ++__ks_1) {
+			for(let __ks_1 = 0, __ks_0 = Helper.length(spaces), name; __ks_1 < __ks_0; ++__ks_1) {
 				name = spaces[__ks_1];
 				if(!Type.isValue($spaces[name].converters[space.name])) {
 					$find(name, space.name);

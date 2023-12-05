@@ -430,7 +430,7 @@ class TryStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(branch.type) {
-					TypeException.throwInvalidAssignement(name, branch.type, type, expression)
+					TypeException.throwInvalidAssignment(name, branch.type, type, expression)
 				}
 			}
 			else {
@@ -477,7 +477,7 @@ class TryStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(branch.type) {
-					TypeException.throwInvalidAssignement(name, branch.type, type, expression)
+					TypeException.throwInvalidAssignment(name, branch.type, type, expression)
 				}
 			}
 			else {

@@ -200,7 +200,7 @@ class CreateExpression extends Expression {
 				TypeException.throwUnexpectedInoperative(argument, this)
 			}
 
-			argument.flagMutating()
+			argument.unspecify()
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{

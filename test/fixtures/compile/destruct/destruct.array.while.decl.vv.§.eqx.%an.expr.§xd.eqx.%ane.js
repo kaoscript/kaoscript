@@ -13,9 +13,9 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let x, __ks_0;
-	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexArray(__ks_0, 1, 1, 0, Type.isValue), [x] = __ks_0, true) : false) {
+	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexArray(__ks_0, 1, 1, 0, 0, [Type.isValue]), [x] = __ks_0, true) : false) {
 	}
 	x = null;
-	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexArray(__ks_0, 1, 1, 0, Type.isValue), ([x] = __ks_0), true) : false) {
+	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexArray(__ks_0, 1, 1, 0, 0, [Type.isValue]), ([x] = __ks_0), true) : false) {
 	}
 };

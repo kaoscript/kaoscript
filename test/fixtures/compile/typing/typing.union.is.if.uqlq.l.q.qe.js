@@ -21,7 +21,7 @@ module.exports = function() {
 		if(Type.isArray(values)) {
 			for(let __ks_1 = 0, __ks_0 = values.length, value; __ks_1 < __ks_0; ++__ks_1) {
 				value = values[__ks_1];
-				quxbaz(value);
+				quxbaz.__ks_0(value);
 			}
 		}
 		else {

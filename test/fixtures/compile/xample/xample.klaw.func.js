@@ -16,7 +16,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		});
 		return o;
-	})()), __ks_1 = 0, __ks_0 = __ks_2.length, file; __ks_1 < __ks_0; ++__ks_1) {
+	})()), __ks_1 = 0, __ks_0 = Helper.length(__ks_2), file; __ks_1 < __ks_0; ++__ks_1) {
 		file = __ks_2[__ks_1];
 		prepare(file.path);
 	}

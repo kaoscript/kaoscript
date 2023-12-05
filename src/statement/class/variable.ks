@@ -122,7 +122,7 @@ class ClassVariableDeclaration extends AbstractNode {
 
 			if @type.type().isExplicit() {
 				unless type.isAssignableToVariable(@type.type(), true, true, false) {
-					TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
+					TypeException.throwInvalidAssignment(@name, @type, @value.type(), this)
 				}
 			}
 			else if @final {

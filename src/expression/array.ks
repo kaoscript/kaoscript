@@ -71,7 +71,7 @@ class ArrayExpression extends Expression {
 			}
 		}
 		else {
-			@type = ArrayType.new(@scope)
+			@type = ArrayType.new(@scope).flagComplete()
 
 			for var value in @values {
 				@type.addProperty(value.type().discardValue())

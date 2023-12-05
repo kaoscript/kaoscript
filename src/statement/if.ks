@@ -137,9 +137,16 @@ class IfStatement extends Statement {
 			for var condition in @conditions {
 				condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
-				unless condition.type().canBeBoolean() {
+				var conditionType = condition.type()
+
+				unless conditionType.canBeBoolean() {
 					TypeException.throwInvalidCondition(condition, this)
 				}
+
+				// TODO
+				// if conditionType is ValueType && conditionType.type().isBoolean() && !@hasLoopAncestor() {
+				// 	TypeException.throwUnnecessaryCondition(condition, this)
+				// }
 
 				for var data, name of condition.inferWhenTrueTypes({}) {
 					@whenTrueScope.updateInferable(name, data, this)
@@ -461,7 +468,7 @@ class IfStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(map[whenTrue].type) {
-					TypeException.throwInvalidAssignement(name, map[whenTrue].type, type, expression)
+					TypeException.throwInvalidAssignment(name, map[whenTrue].type, type, expression)
 				}
 			}
 			else {
@@ -487,7 +494,7 @@ class IfStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !variable.type.matchContentOf(map[whenTrue].type) {
-					TypeException.throwInvalidAssignement(name, map[whenTrue].type, variable.type, expression)
+					TypeException.throwInvalidAssignment(name, map[whenTrue].type, variable.type, expression)
 				}
 			}
 			else {

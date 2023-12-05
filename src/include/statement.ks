@@ -56,6 +56,20 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	hasLoopAncestor() { # {{{
+		var authority = @authority()
+		var mut parent = @parent
+
+		while parent != authority {
+			if parent is ForStatement | RepeatStatement | WhileStatement | DoUntilStatement | DoWhileStatement {
+				return true
+			}
+
+			parent = parent.parent()
+		}
+
+		return false
+	} # }}}
 	includePath() => @parent.includePath()
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
 	isAwait() => false

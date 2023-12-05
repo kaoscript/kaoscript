@@ -507,7 +507,7 @@ class MatchStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(clause.type) {
-					TypeException.throwInvalidAssignement(name, clause.type, type, expression)
+					TypeException.throwInvalidAssignment(name, clause.type, type, expression)
 				}
 			}
 			else {
@@ -548,7 +548,7 @@ class MatchStatement extends Statement {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(clause.type) {
-					TypeException.throwInvalidAssignement(name, clause.type, type, expression)
+					TypeException.throwInvalidAssignment(name, clause.type, type, expression)
 				}
 			}
 			else {

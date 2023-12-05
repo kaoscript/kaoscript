@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(data) {
-		Helper.assertDexArray(data, 1, 1, 0, Type.isValue);
+		Helper.assertDexArray(data, 1, 1, 0, 0, [Type.isValue]);
 		const [__ks_class_1] = data;
 	};
 	foobar.__ks_rt = function(that, args) {

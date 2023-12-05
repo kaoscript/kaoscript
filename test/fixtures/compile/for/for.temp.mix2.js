@@ -10,7 +10,7 @@ module.exports = function() {
 				value = x.foo[__ks_1];
 				let __ks_2 = value.kind;
 				if(__ks_2 === 42) {
-					for(let __ks_4 = 0, __ks_3 = value.values.length; __ks_4 < __ks_3; ++__ks_4) {
+					for(let __ks_4 = 0, __ks_3 = Helper.length(value.values); __ks_4 < __ks_3; ++__ks_4) {
 						v = value.values[__ks_4];
 						console.log(value);
 					}

@@ -1,0 +1,1 @@
+TypeException: The return type must be "Event<SchoolPerson>(true)" and not "Event<SchoolPerson>(true)" or "Event(false)" (fixtures/compile/variant/variant.type.bool.gmk.ret.z<z>§y.p=z§n.unless_nok.call_z<z>§ye.ks:22)

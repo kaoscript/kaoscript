@@ -481,11 +481,11 @@ class ModuleScope extends Scope {
 				pass
 			}
 			else if variable.isInitialized() {
-				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+				TypeException.throwInvalidAssignment(name, variable.getDeclaredType(), type, node)
 			}
 			else if type.isNullable() {
 				unless type.setNullable(false).isAssignableToVariable(variable.getDeclaredType(), downcast) {
-					TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+					TypeException.throwInvalidAssignment(name, variable.getDeclaredType(), type, node)
 				}
 			}
 		}

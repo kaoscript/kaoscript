@@ -18,6 +18,7 @@ class ArrayIteration extends IterationNode {
 		@indexName: String
 		@loopKind: LoopKind					= .Unknown
 		@loopTempVariables: Array			= []
+		@nullable: Boolean					= false
 		@order: OrderKind					= .None
 		@split
 		@splitName: String
@@ -152,19 +153,21 @@ class ArrayIteration extends IterationNode {
 
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@expression.prepare(@scope.reference('Array'))
+		@expression.prepare(@scope.reference('Array').setNullable(true))
 
 		var type = @expression.type()
 		if !(type.isAny() || type.isArray()) {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
+		@nullable = type.isNullable()
+
 		if ?@value {
 			var parameterType = ?@split ? Type.arrayOf(type.parameter(), @scope) : type.parameter()
 			var valueType = Type.fromAST(@data.type, this)
 
 			unless parameterType.isAssignableToVariable(valueType, true, true, false) {
-				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
 			}
 
 			var realType = valueType.merge(parameterType, null, null, false, this)
@@ -650,19 +653,36 @@ class ArrayIteration extends IterationNode {
 
 			if value >= 0 {
 				if @ascending {
-					fragments
-						.code('Math.min(')
-						.compile(@expressionName ?? @expression)
-						.code(`.length\(@toBallpark ? '' : ' - 1'), \(value))`)
+					if @nullable {
+						fragments
+							.code('Math.min(')
+							.code(`\($runtime.helper(this)).length(`)
+							.compile(@expressionName ?? @expression)
+							.code(`)\(@toBallpark ? '' : ' - 1'), \(value))`)
+					}
+					else {
+						fragments
+							.code('Math.min(')
+							.compile(@expressionName ?? @expression)
+							.code(`.length\(@toBallpark ? '' : ' - 1'), \(value))`)
+					}
 				}
 				else {
 					fragments.code(value)
 				}
 			}
 			else {
-				fragments
-					.compile(@expressionName ?? @expression)
-					.code(`.length - \(-value)`)
+				if @nullable {
+					fragments
+						.code(`\($runtime.helper(this)).length(`)
+						.compile(@expressionName ?? @expression)
+						.code(`) - \(-value)`)
+				}
+				else {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(-value)`)
+				}
 			}
 		}
 		else if ?@to {
@@ -670,9 +690,17 @@ class ArrayIteration extends IterationNode {
 		}
 		else {
 			if @ascending {
-				fragments
-					.compile(@expressionName ?? @expression)
-					.code('.length')
+				if @nullable {
+					fragments
+						.code(`\($runtime.helper(this)).length(`)
+						.compile(@expressionName ?? @expression)
+						.code(`)`)
+				}
+				else {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code('.length')
+				}
 			}
 			else {
 				fragments.code('0')
@@ -688,17 +716,35 @@ class ArrayIteration extends IterationNode {
 					fragments.code(@fromBallpark ? value + 1 : value)
 				}
 				else {
-					fragments
-						.code('Math.min(')
-						.compile(@expressionName ?? @expression)
-						.code(`.length - 1, \(@fromBallpark ? value - 1 : value))`)
+					if @nullable {
+						fragments
+							.code('Math.min(')
+							.code(`\($runtime.helper(this)).length(`)
+							.compile(@expressionName ?? @expression)
+							.code(`) - 1, \(@fromBallpark ? value - 1 : value))`)
+					}
+					else {
+						fragments
+							.code('Math.min(')
+							.compile(@expressionName ?? @expression)
+							.code(`.length - 1, \(@fromBallpark ? value - 1 : value))`)
+					}
 				}
 			}
 			else {
-				fragments
-					.code('Math.max(0, ')
-					.compile(@expressionName ?? @expression)
-					.code(`.length - \(@fromBallpark ? 1 - value : -value))`)
+				if @nullable {
+					fragments
+						.code('Math.max(0, ')
+						.code(`\($runtime.helper(this)).length(`)
+						.compile(@expressionName ?? @expression)
+						.code(`) - \(@fromBallpark ? 1 - value : -value))`)
+				}
+				else {
+					fragments
+						.code('Math.max(0, ')
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(@fromBallpark ? 1 - value : -value))`)
+				}
 			}
 		}
 		else if ?@from {
@@ -709,9 +755,17 @@ class ArrayIteration extends IterationNode {
 				fragments.code('0')
 			}
 			else {
-				fragments
-					.compile(@expressionName ?? @expression)
-					.code(`.length - 1`)
+				if @nullable {
+					fragments
+						.code(`\($runtime.helper(this)).length(`)
+						.compile(@expressionName ?? @expression)
+						.code(`) - 1`)
+				}
+				else {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code(`.length - 1`)
+				}
 			}
 		}
 	} # }}}

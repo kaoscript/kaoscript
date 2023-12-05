@@ -5,7 +5,7 @@ module.exports = function() {
 		o.message = "hello";
 		return o;
 	})();
-	if(true) {
+	if(test === true) {
 		let message;
 		if(Operator.gt((message = foo.message).length, 0)) {
 			console.log(message);

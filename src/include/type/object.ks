@@ -11,6 +11,7 @@ class ObjectType extends Type {
 		@properties: Type{}				= {}
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
+		@specific: Boolean				= false
 		@spread: Boolean				= false
 		@testGenerics: Boolean			= false
 		// TODO move to alias
@@ -50,9 +51,11 @@ class ObjectType extends Type {
 				if ?data.key {
 					type.setKeyType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
 				}
+
+				type.flagComplete()
 			})
 
-			return type.flagComplete()
+			return type
 		} # }}}
 	}
 	addProperty(name: String, computed: Boolean = false, type: Type) { # {{{
@@ -233,6 +236,11 @@ class ObjectType extends Type {
 
 		return this
 	} # }}}
+	override flagComplete() { # {{{
+		@specific = !@rest && @length == 0
+
+		return super()
+	} # }}}
 	flagDestructuring() { # {{{
 		@destructuring = true
 	} # }}}
@@ -261,9 +269,9 @@ class ObjectType extends Type {
 			return @restType
 		}
 
-		if @length == 0 {
-			return AnyType.NullableUnexplicit
-		}
+		// if @length == 0 {
+		// 	return AnyType.NullableUnexplicit
+		// }
 
 		return null
 	} # }}}
@@ -284,7 +292,7 @@ class ObjectType extends Type {
 				}
 			}
 			else {
-				str = `Object`
+				str = `{}`
 			}
 		}
 		else {
@@ -326,7 +334,6 @@ class ObjectType extends Type {
 		return str
 	} # }}}
 	hasKeyType() => @key
-	hasMutableAccess() => true
 	hasProperty(name: String) => ?@properties[name]
 	hasProperties() => @length > 0
 	hasRest() => @rest
@@ -457,7 +464,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isDestructuring() => @destructuring
-	isExhaustive() => @rest ? false : @length > 0 || @scope.reference('Object').isExhaustive()
+	isExhaustive() => !@rest || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
@@ -500,7 +507,7 @@ class ObjectType extends Type {
 	} # }}}
 	isMorePreciseThan(value: UnionType) { # {{{
 		for var type in value.types() {
-			if @isMorePreciseThan(type) {
+			if @equals(type) || @isMorePreciseThan(type) {
 				return true
 			}
 		}
@@ -512,6 +519,7 @@ class ObjectType extends Type {
 	isExportable() => true
 	isLiberal() => @liberal
 	isMatching(value: Type, mode: MatchingMode) => false
+	override isSpecific() => @specific
 	isSealable() => true
 	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
@@ -523,29 +531,7 @@ class ObjectType extends Type {
 			}
 		}
 		else {
-			match value {
-				is FusionType {
-					for var type in value.types() {
-						if !@isSubsetOf(type, mode) {
-							return false
-						}
-					}
-
-					return true
-				}
-				is UnionType {
-					for var type in value.types() {
-						if @isSubsetOf(type, mode) {
-							return true
-						}
-					}
-
-					return false
-				}
-				else {
-					return value.isAny()
-				}
-			}
+			return value.isAny()
 		}
 	} # }}}
 	assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
@@ -556,6 +542,17 @@ class ObjectType extends Type {
 				if name == valname {
 					return @isSubsetOf(type, generics, subtypes, mode)
 				}
+			}
+		}
+
+		return true
+	} # }}}
+	assist isSubsetOf(value: FusionType, generics, subtypes, mode) { # {{{
+		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
+
+		for var type in value.types() {
+			if !@isSubsetOf(type, mode) {
+				return false
 			}
 		}
 
@@ -620,7 +617,7 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 
 						if type is VariantType {
-							if type == prop {
+							if type == prop || type.isEmpty() {
 								pass
 							}
 							else if prop is ValueType {
@@ -642,10 +639,12 @@ class ObjectType extends Type {
 								return false
 							}
 							else if prop.isAny() {
-								return true
+								// return true
+								pass
 							}
 							else if type.canBeBoolean() && prop.isBoolean() {
-								return true
+								// return true
+								pass
 							}
 							else {
 								return false
@@ -709,6 +708,10 @@ class ObjectType extends Type {
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		return false unless value.isObject()
 
+		if @isNullable() && !value.isNullable() {
+			return false
+		}
+
 		if value.name() != 'Object' {
 			if ?#generics || ?#subtypes {
 				return @isSubsetOf(value.discard(), generics, subtypes, mode + MatchingMode.Reference)
@@ -743,6 +746,30 @@ class ObjectType extends Type {
 		}
 
 		return true
+	} # }}}
+	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
+		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
+
+		if @isNullable() {
+			return false unless value.isNullable()
+
+			var notNull = @setNullable(false)
+
+			for var type in value.types() {
+				if !type.isNull() && notNull.isSubsetOf(type, mode) {
+					return true
+				}
+			}
+		}
+		else {
+			for var type in value.types() {
+				if @isSubsetOf(type, mode) {
+					return true
+				}
+			}
+		}
+
+		return false
 	} # }}}
 	isTestingProperties() => @testProperties
 	isVariant() => @variant

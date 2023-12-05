@@ -1,30 +1,28 @@
 #![format(variables='es6')]
 
-extern console: {
-	log(...args)
-}
+extern test
 
 var dyn x = 0
-console.log(x)
+echo(x)
 
-if true {
+if test {
 	var dyn x = 42
-	console.log(x)
+	echo(x)
 }
 
-console.log(x)
+echo(x)
 
 #[format(variables='es5')]
-if true {
+if test {
 	var dyn x = 24
-	console.log(x)
+	echo(x)
 }
 
-console.log(x)
+echo(x)
 
-if true {
+if test {
 	var dyn x = 10
-	console.log(x)
+	echo(x)
 }
 
-console.log(x)
+echo(x)

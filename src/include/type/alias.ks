@@ -48,7 +48,7 @@ class AliasType extends Type {
 
 		return clone
 	} # }}}
-	discard() => @type.discard()
+	discard() => @type?.discard()
 	discardAlias() => @type.discardAlias()
 	discardReference() => @type.discardAlias()
 	override export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -128,6 +128,7 @@ class AliasType extends Type {
 	} # }}}
 
 	proxy @type {
+		canBeArray
 		canBeDeferred
 		hasRest
 		isComplex

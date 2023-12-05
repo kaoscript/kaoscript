@@ -1,19 +1,17 @@
-extern console
-
-func foobar() {
+func foobar(test) {
 	var dyn data = 42
 
-	if true {
+	if test(0) {
 	}
-	else if false {
+	else if test(1) {
 		while var data ?= quxbaz() {
-			console.log(data)
+			echo(data)
 		}
 
-		console.log(data)
+		echo(data)
 	}
 
-	console.log(data)
+	echo(data)
 }
 
 func quxbaz() {

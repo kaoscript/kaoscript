@@ -1,6 +1,6 @@
 module.exports = function() {
 	let values;
-	if(true) {
+	if(test === true) {
 		values = [];
 	}
 	else {

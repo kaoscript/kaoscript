@@ -31,23 +31,32 @@ class VariantType extends Type {
 		} # }}}
 	}
 	addField(names: String[], type: Type) { # {{{
+		var mut value = null
+
 		if @kind == .Boolean {
 			if names.contains('false') {
 				unless !names.contains('true') {
 					NotImplementedException.throw()
 				}
+
+				value = ValueType.new(false, @scope.reference('Boolean'), 'false', @scope)
 			}
 			else if names.contains('true') {
 				unless !names.contains('false') {
 					NotImplementedException.throw()
 				}
+
+				value = ValueType.new(false, @scope.reference('Boolean'), 'true', @scope)
 			}
 			else {
 				NotImplementedException.throw()
 			}
 		}
+		else {
+			value = ValueType.new(@master, `\(@master.path()).\(names[0])`, @scope)
+		}
 
-		var variant = { names, type }
+		var variant = { names, type, value }
 
 		@fields.push(variant)
 		@deferrable ||= type.canBeDeferred()
@@ -164,6 +173,7 @@ class VariantType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	override isBoolean() => @kind == .Boolean
+	isEmpty() => @fields.length == 0
 	isFalseValue(name: String): Boolean { # {{{
 		if var { names } ?= @names[name] {
 			return names.contains('false')
@@ -241,7 +251,12 @@ class VariantType extends Type {
 				else {
 					var line = ctrl.newLine().code(`return `)
 
-					@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					if @names.true.type is ObjectType {
+						@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					}
+					else {
+						@names.true.type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+					}
 
 					line.done()
 				}
@@ -254,7 +269,12 @@ class VariantType extends Type {
 				else {
 					var line = ctrl.newLine().code(`return `)
 
-					@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					if @names.false.type is ObjectType {
+						@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+					}
+					else {
+						@names.false.type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+					}
 
 					line.done()
 				}
@@ -292,7 +312,12 @@ class VariantType extends Type {
 					else {
 						var line = ctrl.newLine().code(`return `)
 
-						type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+						if type is ObjectType {
+							type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+						}
+						else {
+							type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+						}
 
 						line.done()
 					}

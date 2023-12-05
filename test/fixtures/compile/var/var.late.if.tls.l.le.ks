@@ -1,6 +1,8 @@
+extern test
+
 var late values: []
 
-if true {
+if test {
 	values = []
 }
 else {

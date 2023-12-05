@@ -1,5 +1,5 @@
-extern Error
+extern Error, test
 
-if true {
+if test {
 	throw Error.new()
 }

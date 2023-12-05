@@ -124,6 +124,13 @@ class ObjectBinding extends Expression {
 		if @statement() is ExpressionStatement | VariableStatement {
 			@tested = true
 
+			// if ?@value {
+			// 	// echo(@value.type())
+			// 	// echo(@testType)
+			// 	echo(@value.type().hashCode(), @testType.hashCode())
+			// 	echo(@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast))
+			// 	// echo(@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.AutoCast))
+			// }
 			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				@statement().addBeforehand(this)
 
@@ -451,7 +458,7 @@ class ObjectBindingElement extends Expression {
 			@defaultValue.prepare(@type, TargetMode.Permissive)
 
 			unless @defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, false, false) {
-				TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
+				TypeException.throwInvalidAssignment(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
 			}
 		}
 

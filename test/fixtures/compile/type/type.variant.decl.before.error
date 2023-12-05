@@ -1,0 +1,1 @@
+ReferenceException: Type "SchoolPerson" isn't yet fully defined (fixtures/compile/type/type.variant.decl.before.ks:8)

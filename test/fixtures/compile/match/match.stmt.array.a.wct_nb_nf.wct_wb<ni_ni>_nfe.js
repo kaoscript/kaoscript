@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		if(Type.isNumber(value)) {
 		}
-		else if(Type.isArray(value) && Type.isDexArray(value, 0, 2, 0, Type.isNumber)) {
+		else if(Type.isArray(value) && Type.isDexArray(value, 0, 2, 0, 0, [Type.isNumber, Type.isNumber])) {
 			let [x, y] = value;
 		}
 	};

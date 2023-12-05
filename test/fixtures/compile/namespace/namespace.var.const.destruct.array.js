@@ -14,7 +14,7 @@ module.exports = function() {
 	};
 	let foo = Helper.namespace(function() {
 		let  __ks_0 = min.__ks_0();
-		Helper.assertDexArray(__ks_0, 1, 2, 0, Type.isValue);
+		Helper.assertDexArray(__ks_0, 1, 2, 0, 0, [Type.isValue, Type.isValue]);
 		const [gender, age] = __ks_0;
 		return {
 			gender,

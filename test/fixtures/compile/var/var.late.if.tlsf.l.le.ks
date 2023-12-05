@@ -1,6 +1,8 @@
+extern test
+
 var late values: Array<String>
 
-if true {
+if test {
 	values = []
 }
 else {

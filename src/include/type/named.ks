@@ -613,7 +613,7 @@ class NamedType extends Type {
 	} # }}}
 
 	proxy @type {
-		hasMutableAccess
+		canBeArray
 		hasRest
 		hasTest
 		isBitmask

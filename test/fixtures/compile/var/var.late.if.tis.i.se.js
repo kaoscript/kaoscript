@@ -33,7 +33,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let x;
-	if(true) {
+	if(test === true) {
 		x = 42;
 		console.log(__ks_Number.__ks_func_toString_0.call(x));
 	}

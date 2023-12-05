@@ -5,11 +5,11 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function(x) {
 		let value;
-		for(let __ks_1 = 0, __ks_0 = x.foo.length; __ks_1 < __ks_0; ++__ks_1) {
+		for(let __ks_1 = 0, __ks_0 = Helper.length(x.foo); __ks_1 < __ks_0; ++__ks_1) {
 			value = x.foo[__ks_1];
 			console.log(value);
 		}
-		for(let __ks_1 = 0, __ks_0 = x.bar.length; __ks_1 < __ks_0; ++__ks_1) {
+		for(let __ks_1 = 0, __ks_0 = Helper.length(x.bar); __ks_1 < __ks_0; ++__ks_1) {
 			value = x.bar[__ks_1];
 			console.log(value);
 		}

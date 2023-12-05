@@ -19,8 +19,14 @@ class UnlessStatement extends Statement {
 			..acquireReusable(false)
 			..releaseReusable()
 
-		unless @condition.type().canBeBoolean() {
+		var conditionType = @condition.type()
+
+		unless conditionType.canBeBoolean() {
 			TypeException.throwInvalidCondition(@condition, this)
+		}
+
+		if conditionType is ValueType && conditionType.type().isBoolean() {
+			TypeException.throwUnnecessaryCondition(@condition, this)
 		}
 
 		@assignTempVariables(@scope!?)

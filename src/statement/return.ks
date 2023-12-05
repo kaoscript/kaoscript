@@ -67,6 +67,8 @@ class ReturnStatement extends Statement {
 
 			@type = @value.type().discardValue().asReference()
 
+			// echo(@type.hashCode(), target.hashCode())
+
 			if @type == target {
 				pass
 			}

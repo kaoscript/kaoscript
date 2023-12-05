@@ -1,15 +1,15 @@
-extern console
+extern test
 
 var dyn index = 0
 
-console.log(index)
+echo(index)
 
-if true {
-	console.log(index)
+if test {
+	echo(index)
 
 	var dyn index = 42
 
-	console.log(index)
+	echo(index)
 }
 
-console.log(index)
+echo(index)

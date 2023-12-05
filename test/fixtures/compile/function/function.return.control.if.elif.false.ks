@@ -1,8 +1,8 @@
-func foobar(): String {
-	if false {
+func foobar(test): String {
+	if test(0) {
 		return ''
 	}
-	else if true {
+	else if test(1) {
 		return ''
 	}
 	else {

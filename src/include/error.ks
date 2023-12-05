@@ -3,7 +3,7 @@ extern sealed class Error
 Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
 	var mut message = error.toString()
 
-	for i from 0 to~ Math.min(12, stack.length) {
+	for i from 0 to~ Math.min(Error.stackTraceLimit ?? 12, stack.length) {
 		message += '\n    ' + stack[i].toString()
 	}
 
@@ -329,6 +329,9 @@ export class ReferenceException extends Exception {
 		} # }}}
 		throwNotNullableProxy(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The proxy "\(name)" can't be null`, node)
+		} # }}}
+		throwNotYetDefinedType(name, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`Type "\(name)" isn't yet fully defined`, node)
 		} # }}}
 		throwNoTypeProxy(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The proxy "\(name)" must be typed`, node)
@@ -861,7 +864,7 @@ export class TypeException extends Exception {
 		throwInvalidArgument(statement: String, argument: String, expectedType: Type, foundType: Type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`In the statement "\(statement)", the argument "\(argument)" must be of type \(expectedType.toQuote(true)) and not \(foundType.toQuote(true))`, node)
 		} # }}}
-		throwInvalidAssignement(declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
+		throwInvalidAssignment(declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw TypeException.new(`The variable of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -869,7 +872,7 @@ export class TypeException extends Exception {
 				throw TypeException.new(`The variable of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} # }}}
-		throwInvalidAssignement(name: String, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
+		throwInvalidAssignment(name: String, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw TypeException.new(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -877,7 +880,7 @@ export class TypeException extends Exception {
 				throw TypeException.new(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} # }}}
-		throwInvalidAssignement(name: AbstractNode, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
+		throwInvalidAssignment(name: AbstractNode, declaredType: Type, valueType: Type, node): Never ~ TypeException { # {{{
 			if valueType.isNull() {
 				throw TypeException.new(`The variable \(name.toQuote(true)) of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
@@ -1025,6 +1028,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwUnexpectedReturnType(expected, unexpected, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The return type must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
+		} # }}}
+		throwUnnecessaryCondition(expression, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The condition \(expression.toQuote(true)) has always the value \(expression.type().toQuote(true))`, node)
 		} # }}}
 		throwUnnecessaryTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) is always of type \(type.toQuote(true))`, node)

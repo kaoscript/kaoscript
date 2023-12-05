@@ -1,57 +1,65 @@
 class ConditionalExpression extends Expression {
 	private late {
 		@condition
-		@whenFalse
-		@whenTrue
+		@whenFalseExpression
+		@whenFalseScope: Scope
+		@whenTrueExpression
+		@whenTrueScope: Scope
 		@type: Type
 	}
 	analyse() { # {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 
-		@whenTrue = $compile.expression(@data.whenTrue, this)
-		@whenTrue.analyse()
+		@whenTrueScope = @newScope(@scope, ScopeType.InlineBlock)
+		@whenTrueExpression = $compile.expression(@data.whenTrue, this, @whenTrueScope)
+		@whenTrueExpression.analyse()
 
-		@whenFalse = $compile.expression(@data.whenFalse, this)
-		@whenFalse.analyse()
+		@whenFalseScope = @newScope(@scope, ScopeType.InlineBlock)
+		@whenFalseExpression = $compile.expression(@data.whenFalse, this, @whenFalseScope)
+		@whenFalseExpression.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
-		for var data, name of @condition.inferTypes({}) {
-			@scope.updateInferable(name, data, this)
+		for var data, name of @condition.inferWhenTrueTypes({}) {
+			@whenTrueScope.updateInferable(name, data, this)
 		}
 
-		@whenTrue.prepare(target, targetMode)
-		@whenFalse.prepare(target, targetMode)
+		for var data, name of @condition.inferWhenFalseTypes({}) {
+			@whenFalseScope.updateInferable(name, data, this)
+		}
 
-		var t = @whenTrue.type().discardValue()
-		var f = @whenFalse.type().discardValue()
+		@whenTrueExpression.prepare(target, targetMode)
+		@whenFalseExpression.prepare(target, targetMode)
+
+		var t = @whenTrueExpression.type().discardValue()
+		var f = @whenFalseExpression.type().discardValue()
 
 		@type = Type.union(@scope, t, f)
 	} # }}}
 	translate() { # {{{
 		@condition.translate()
-		@whenTrue.translate()
-		@whenFalse.translate()
+		@whenTrueExpression.translate()
+		@whenFalseExpression.translate()
 	} # }}}
 	acquireReusable(acquire) { # {{{
 		@condition.acquireReusable(false)
-		@whenTrue.acquireReusable(false)
-		@whenFalse.acquireReusable(false)
+		@whenTrueExpression.acquireReusable(false)
+		@whenFalseExpression.acquireReusable(false)
 	} # }}}
 	releaseReusable() { # {{{
 		@condition.releaseReusable()
-		@whenTrue.releaseReusable()
-		@whenFalse.releaseReusable()
+		@whenTrueExpression.releaseReusable()
+		@whenFalseExpression.releaseReusable()
 	} # }}}
 	isComputed() => true
-	isInverted() => @condition.isInverted() || @whenTrue.isInverted() || @whenFalse.isInverted()
-	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
+	isInverted() => @condition.isInverted() || @whenTrueExpression.isInverted() || @whenFalseExpression.isInverted()
+	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@condition.listNonLocalVariables(scope, variables)
-		@whenTrue.listNonLocalVariables(scope, variables)
-		@whenFalse.listNonLocalVariables(scope, variables)
+		@whenTrueExpression.listNonLocalVariables(scope, variables)
+		@whenFalseExpression.listNonLocalVariables(scope, variables)
 
 		return variables
 	} # }}}
@@ -59,21 +67,21 @@ class ConditionalExpression extends Expression {
 		fragments
 			.wrapCondition(@condition)
 			.code(' ? ')
-			.compile(@whenTrue)
+			.compile(@whenTrueExpression)
 			.code(' : ')
-			.compile(@whenFalse)
+			.compile(@whenFalseExpression)
 	} # }}}
 	toInvertedFragments(fragments, callback) { # {{{
 		if @condition.isInverted() {
 			@condition.toInvertedFragments(fragments, callback)
 		}
-		else if @whenTrue.isInverted() {
-			@whenTrue.toInvertedFragments(fragments, callback)
+		else if @whenTrueExpression.isInverted() {
+			@whenTrueExpression.toInvertedFragments(fragments, callback)
 		}
 		else {
-			@whenFalse.toInvertedFragments(fragments, callback)
+			@whenFalseExpression.toInvertedFragments(fragments, callback)
 		}
 	} # }}}
-	toQuote() => `\(@condition.toQuote()) ? \(@whenTrue.toQuote()) : \(@whenFalse.toQuote())`
+	toQuote() => `\(@condition.toQuote()) ? \(@whenTrueExpression.toQuote()) : \(@whenFalseExpression.toQuote())`
 	type() => @type
 }

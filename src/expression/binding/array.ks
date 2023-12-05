@@ -120,11 +120,15 @@ class ArrayBinding extends Expression {
 			}
 		}
 		else {
+			untested = ?#@elements
+
+			var mut optional = false
+
 			for var element in @elements {
 				var type = element.getExternalType()
 
 				if element.hasDefaultValue() && !element.isRequired() {
-					untested = true
+					optional = true
 
 					if !type.isAny() || !type.isNullable() {
 						@flatten = true
@@ -137,10 +141,10 @@ class ArrayBinding extends Expression {
 				else if element.isRest() {
 					@testType.setRestType(type)
 
-					untested = true
+					optional = true
 				}
 				else {
-					if untested {
+					if optional {
 						SyntaxException.throwUnsupportedDestructuringArray(this)
 					}
 
@@ -150,6 +154,7 @@ class ArrayBinding extends Expression {
 				}
 			}
 		}
+		// echo(untested)
 
 		if untested {
 			@testType.unflagFullTest(min)
@@ -158,6 +163,10 @@ class ArrayBinding extends Expression {
 		if @statement() is ExpressionStatement | VariableStatement {
 			@tested = true
 
+			// if ?@value {
+			// 	echo(@value.type().hashCode(), @testType.hashCode())
+			// 	echo(@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast))
+			// }
 			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				@statement().addBeforehand(this)
 
@@ -417,7 +426,7 @@ class ArrayBindingElement extends Expression {
 			@defaultValue.prepare(@type, TargetMode.Permissive)
 
 			unless !@named || @defaultValue.type().isAssignableToVariable(@name.getDeclaredType(), true, false, false) {
-				TypeException.throwInvalidAssignement(@name, @name.getDeclaredType(), @defaultValue.type(), this)
+				TypeException.throwInvalidAssignment(@name, @name.getDeclaredType(), @defaultValue.type(), this)
 			}
 		}
 

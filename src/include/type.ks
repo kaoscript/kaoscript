@@ -213,6 +213,7 @@ type Generic = {
 type Variant = {
 	names: String[]
 	type: Type
+	value: ValueType?
 }
 
 abstract class Type {
@@ -252,7 +253,7 @@ abstract class Type {
 
 			match data.kind {
 				NodeKind.ArrayType {
-					var mut type = ArrayType.new(scope)
+					var mut type: Type = ArrayType.new(scope)
 
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Nullable {
@@ -260,15 +261,20 @@ abstract class Type {
 						}
 					}
 
-					for var property in data.properties {
-						type.addProperty(Type.fromAST(property.type, scope, defined, generics, node))
+					if ?#data.properties || ?data.rest{
+						for var property in data.properties {
+							type.addProperty(Type.fromAST(property.type, scope, defined, generics, node))
+						}
+
+						if ?data.rest {
+							type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
+						}
+					}
+					else {
+						type = type.unspecify()
 					}
 
-					if ?data.rest {
-						type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
-					}
-
-					return type
+					return type.flagComplete()
 				}
 				NodeKind.ClassDeclaration {
 					var type = ClassType.new(scope)
@@ -326,7 +332,7 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind.ObjectType {
-					var mut type = ObjectType.new(scope)
+					var mut type: Type = ObjectType.new(scope)
 
 					for var modifier in data.modifiers {
 						if modifier.kind == ModifierKind.Nullable {
@@ -334,33 +340,40 @@ abstract class Type {
 						}
 					}
 
-					for var property in data.properties {
-						var mut prop = if ?property.type {
-							set Type.fromAST(property.type, scope, defined, generics, node)
-						}
-						else {
-							set AnyType.Unexplicit
+					if ?#data.properties || ?data.rest{
+						for var property in data.properties {
+							var mut prop = if ?property.type {
+								set Type.fromAST(property.type, scope, defined, generics, node)
+							}
+							else {
+								set AnyType.Unexplicit
+							}
+
+							for var modifier in property.modifiers {
+								if modifier.kind == ModifierKind.Nullable {
+									prop = prop.setNullable(true)
+								}
+							}
+
+							type.addProperty(property.name.name, prop)
 						}
 
-						for var modifier in property.modifiers {
-							if modifier.kind == ModifierKind.Nullable {
-								prop = prop.setNullable(true)
+						if ?data.rest {
+							if ?data.rest.type {
+								type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
+							}
+							else if data.modifiers.some(({ kind }) => kind == ModifierKind.Nullable) {
+								type.setRestType(AnyType.NullableUnexplicit)
+							}
+							else {
+								type.setRestType(AnyType.Unexplicit)
 							}
 						}
 
-						type.addProperty(property.name.name, prop)
-					}
 
-					if ?data.rest {
-						if ?data.rest.type {
-							type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
-						}
-						else if data.modifiers.some(({ kind }) => kind == ModifierKind.Nullable) {
-							type.setRestType(AnyType.NullableUnexplicit)
-						}
-						else {
-							type.setRestType(AnyType.Unexplicit)
-						}
+					}
+					else {
+						type = type.unspecify()
 					}
 
 					return type.flagComplete()
@@ -447,6 +460,10 @@ abstract class Type {
 
 							var type = ReferenceType.new(scope, name, nullable)
 							var root = type.discard()
+
+							if !?root {
+								ReferenceException.throwNotYetDefinedType(name, node)
+							}
 
 							if root.isVariant() {
 								var master = root.getVariantType().getMaster()
@@ -913,7 +930,6 @@ abstract class Type {
 	// TODO merge
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
-	hasMutableAccess() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false
 	hasSameParameters(value: Type): Boolean => false
@@ -1020,6 +1036,7 @@ abstract class Type {
 	isSealable() => false
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
+	isSpecific() => false
 	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
 	isStrict() => false
@@ -1049,6 +1066,14 @@ abstract class Type {
 	isVariant() => false
 	isVirtual() => false
 	isVoid() => false
+	limitTo(value: Type): Type { # {{{
+		if value.isMorePreciseThan(this) {
+			return value
+		}
+		else {
+			return this
+		}
+	} # }}}
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
 	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, ignoreUndefined: Boolean, node): Type { # {{{

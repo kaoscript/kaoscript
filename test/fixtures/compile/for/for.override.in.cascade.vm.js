@@ -8,13 +8,13 @@ module.exports = function() {
 		for(let i = 0, __ks_0 = values.length, value; i < __ks_0; ++i) {
 			value = values[i];
 			let x = i;
-			for(let i = 0, __ks_1 = value.values.length, __ks_value_1; i < __ks_1; ++i) {
+			for(let i = 0, __ks_1 = Helper.length(value.values), __ks_value_1; i < __ks_1; ++i) {
 				__ks_value_1 = value.values[i];
 				let x = i;
-				for(let i = 0, __ks_2 = __ks_value_1.values.length, __ks_value_2; i < __ks_2; ++i) {
+				for(let i = 0, __ks_2 = Helper.length(__ks_value_1.values), __ks_value_2; i < __ks_2; ++i) {
 					__ks_value_2 = __ks_value_1.values[i];
 					let x = i;
-					for(let i = 0, __ks_3 = __ks_value_2.values.length, __ks_value_3; i < __ks_3; ++i) {
+					for(let i = 0, __ks_3 = Helper.length(__ks_value_2.values), __ks_value_3; i < __ks_3; ++i) {
 						__ks_value_3 = __ks_value_2.values[i];
 						let x = i;
 					}

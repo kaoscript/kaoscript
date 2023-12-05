@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		for(let __ks_1 = 0, __ks_0 = values.length, line, element; __ks_1 < __ks_0; ++__ks_1) {
-			Helper.assertDexArray(values[__ks_1], 1, 2, 0, Type.isValue);
+			Helper.assertDexArray(values[__ks_1], 1, 2, 0, 0, [Type.isValue, Type.isValue]);
 			([line, element] = values[__ks_1]);
 		}
 	};

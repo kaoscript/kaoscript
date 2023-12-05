@@ -108,7 +108,7 @@ class ObjectIteration extends IterationNode {
 			var valueType = Type.fromAST(@data.type, this)
 
 			unless parameterType.isAssignableToVariable(valueType, true, true, false) {
-				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
 			}
 
 			var realType = valueType.merge(parameterType, null, null, false, this)

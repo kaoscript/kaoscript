@@ -1,5 +1,7 @@
+extern test
+
 var late x
 
-if true {
+if test {
 	x = 'foobar'
 }

@@ -605,7 +605,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 		@type = @argument.type().setNullable(false)
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
-		@argument.inferTypes(inferables)
+		@argument.inferWhenTrueTypes(inferables)
 
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {

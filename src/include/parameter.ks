@@ -787,7 +787,7 @@ class Parameter extends AbstractNode {
 				@defaultValue.translate()
 
 				unless @defaultValue.type().isAssignableToVariable(@internal.getDeclaredType(), true, false, false) {
-					TypeException.throwInvalidAssignement(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
+					TypeException.throwInvalidAssignment(@internal, @internal.getDeclaredType(), @defaultValue.type(), this)
 				}
 			}
 		}
@@ -1893,7 +1893,7 @@ class ThisExpressionParameter extends ThisExpression {
 	operator(@operator): valueof this
 	setDeclaredType(type, definitive) { # {{{
 		unless type.isSubsetOf(@type, MatchingMode.Signature) {
-			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
+			TypeException.throwInvalidAssignment(`@\(@name)`, @type, type, this)
 		}
 
 		var variable = @parent.scope().getVariable(@name)

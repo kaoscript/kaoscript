@@ -28,7 +28,7 @@ class Literal extends Expression {
 	type() => @type
 	validateType(type: ReferenceType) { # {{{
 		if !@type().isAssignableToVariable(type, false) {
-			TypeException.throwInvalidAssignement(type, @type(), this)
+			TypeException.throwInvalidAssignment(type, @type(), this)
 		}
 	} # }}}
 	value() => @value
@@ -135,11 +135,6 @@ class IdentifierLiteral extends Literal {
 	flagAssignable() { # {{{
 		@assignable = true
 	} # }}}
-	flagMutating() { # {{{
-		if @isVariable {
-			@variable().flagMutating()
-		}
-	} # }}}
 	getVariableDeclaration(class) { # {{{
 		return class.getInstanceVariable(@value)
 	} # }}}
@@ -166,7 +161,7 @@ class IdentifierLiteral extends Literal {
 				))
 			}
 			else {
-				variable.flagMutating()
+				@scope.replaceVariable(@value, type, this)
 			}
 		}
 	} # }}}
@@ -244,6 +239,17 @@ class IdentifierLiteral extends Literal {
 	type(type: Type, scope: Scope, node) { # {{{
 		if @isVariable {
 			@type = scope.replaceVariable(@value, type, node).getRealType()
+		}
+	} # }}}
+	unspecify() { # {{{
+		return unless @isVariable
+
+		if @type.isSpecific() {
+			@scope.replaceVariable(@value, @type.unspecify(), this)
+
+			var variable = @scope.getVariable(@value)
+
+			@type = variable.getRealType()
 		}
 	} # }}}
 	variable() => @scope.getVariable(@value, @line)

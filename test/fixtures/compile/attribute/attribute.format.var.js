@@ -4,10 +4,10 @@ module.exports = function() {
 	console.log(x);
 	let o = new OBJ();
 	o.x = 30;
-	if(true) {
+	if(test === true) {
 		let x = 42;
 		console.log(x);
-		if(true) {
+		if(test === true) {
 			let x = 10;
 			console.log(x);
 		}

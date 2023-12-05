@@ -731,7 +731,6 @@ class ReferenceType extends Type {
 
 		return hash
 	} # }}}
-	hasMutableAccess() => @name == 'Array' | 'Object' || @type().hasMutableAccess()
 	hasParameters() => ?#@parameters
 	hasProperty(index: Number) { # {{{
 		if @name == 'Array' {
@@ -994,36 +993,49 @@ class ReferenceType extends Type {
 		if value.isAny() {
 			return !@isAny() || (value.isNullable() && !@nullable)
 		}
-		else if @isAny() {
+
+		if @isAny() {
 			return false
 		}
-		else if value is ReferenceType && value.name() == @name {
-			if value.isNullable() && !@nullable {
-				return true
-			}
 
-			if @hasParameters() {
-				return true if !value.hasParameters()
-				return true if Type.getParameterCount(@parameters) < Type.getParameterCount(value.parameters())
-			}
-
-			if @hasSubtypes() {
-				return true if !value.hasSubtypes()
-
-				var variant = @discard().getVariantType()
-
-				if variant.canBeBoolean() {
-					return @getSubtypesCount() < value.getSubtypesCount()
+		if value is ReferenceType {
+			if value.name() == @name {
+				if value.isNullable() && !@nullable {
+					return true
 				}
 
-				var enum = variant.getEnumType()
+				if @hasParameters() {
+					return true if !value.hasParameters()
+					return true if Type.getParameterCount(@parameters) < Type.getParameterCount(value.parameters())
+				}
 
-				return enum.getOriginalValueCount(...@subtypes) < enum.getOriginalValueCount(...value.getSubtypes())
+				if @hasSubtypes() {
+					return true if !value.hasSubtypes()
+
+					var variant = @discard().getVariantType()
+
+					if variant.canBeBoolean() {
+						return @getSubtypesCount() < value.getSubtypesCount()
+					}
+
+					var enum = variant.getEnumType()
+
+					return enum.getOriginalValueCount(...@subtypes) < enum.getOriginalValueCount(...value.getSubtypes())
+				}
+
+				return false
 			}
 
-			return false
+			// if value.name() == 'Array' {
+			// 	return @type().isArray() || @type().isTuple()
+			// }
+
+			// if value.name() == 'Object' {
+			// 	return @isInstance() || @isVariant() || @type().isObject()
+			// }
 		}
-		else if value.isUnion() {
+
+		if value.isUnion() {
 			for var type in value.discard().types() {
 				if @matchContentOf(type) || @isMorePreciseThan(type) {
 					return true
@@ -1032,18 +1044,19 @@ class ReferenceType extends Type {
 
 			return false
 		}
-		else if @name == 'Array' && value.isBroadArray() {
-			return true
-		}
-		else if @name == 'Object' && value.isBroadObject() {
-			return true
-		}
-		else {
-			var a: Type = @discardReference()!?
-			var b: Type = value.discardReference()!?
 
-			return a.isMorePreciseThan(b)
+		if @name == 'Array' && value.isBroadArray() {
+			return true
 		}
+
+		if @name == 'Object' && value.isBroadObject() {
+			return true
+		}
+
+		var a: Type = @discardReference()!?
+		var b: Type = value.discardReference()!?
+
+		return a.isMorePreciseThan(b)
 	} # }}}
 	isNamespace() => @name == 'Namespace' || @type().isNamespace()
 	isNative() => $natives[@name] == true
@@ -1097,11 +1110,16 @@ class ReferenceType extends Type {
 	} # }}}
 	assist isSubsetOf(value: ArrayType, generics, subtypes, mode) { # {{{
 		return false unless @isBroadArray()
+
+		if @isNullable() && !value.isNullable() {
+			return false
+		}
+
 		return @discard().isSubsetOf(value, mode) unless @isArray()
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless !value.hasProperties()
-			return false unless ?#@parameters == value.hasRest()
+			return false unless !value.hasRest()
 
 			if ?#@parameters {
 				var type = @parameters[0]
@@ -1111,6 +1129,9 @@ class ReferenceType extends Type {
 				}
 
 				return @parameters[0].isSubsetOf(value.getRestType(), mode)
+			}
+			else {
+				return value.getRestType().isAny() && value.getRestType().isNullable() == @nullable
 			}
 		}
 		else {
@@ -1131,6 +1152,10 @@ class ReferenceType extends Type {
 			var unalias = @discardAlias()
 
 			return unalias.isSubsetOf(value, mode)
+		}
+
+		for var type in value.properties() {
+			return false unless type.isNullable()
 		}
 
 		return true
@@ -1174,11 +1199,16 @@ class ReferenceType extends Type {
 	} # }}}
 	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
 		return false unless @isBroadObject()
+
+		if @isNullable() && !value.isNullable() {
+			return false
+		}
+
 		return @discard().isSubsetOf(value, mode) unless @isObject()
 
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false unless !value.hasProperties()
-			return false unless @hasParameters() == value.hasRest()
+			return false unless !value.hasRest()
 
 			if ?#@parameters {
 				var type = @parameters[0]
@@ -1188,6 +1218,9 @@ class ReferenceType extends Type {
 				}
 
 				return type.isSubsetOf(value.getRestType(), mode)
+			}
+			else {
+				return value.getRestType().isAny() && value.getRestType().isNullable() == @nullable
 			}
 		}
 		else if !@isVariant() && ?#@parameters {
@@ -1206,6 +1239,10 @@ class ReferenceType extends Type {
 			var { type, generics, subtypes } = @getGenericMapper()
 
 			return type.isSubsetOf(value, generics, subtypes, mode + MatchingMode.Reference)
+		}
+
+		for var type of value.properties() {
+			return false unless type.isNullable()
 		}
 
 		return true
@@ -1439,6 +1476,7 @@ class ReferenceType extends Type {
 	} # }}}
 	parameters(): Type[] => @parameters
 	parameters(@parameters)
+	properties() => []
 	reassign(@name, @scope) { # {{{
 		@reset()
 

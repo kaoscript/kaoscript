@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_1 = values(), index = 0, __ks_0 = __ks_1.length, x, y; index < __ks_0; index += 2) {
+		for(let __ks_1 = values(), index = 0, __ks_0 = Helper.length(__ks_1), x, y; index < __ks_0; index += 2) {
 			x = __ks_1[index];
 			y = __ks_1[index + 1];
 			console.log(index, x, y);

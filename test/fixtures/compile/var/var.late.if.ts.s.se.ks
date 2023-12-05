@@ -1,4 +1,4 @@
-extern console
+extern test
 
 impl String {
 	toString(): String => this
@@ -6,15 +6,15 @@ impl String {
 
 var late x
 
-if true {
+if test {
 	x = 'foobar'
 
-	console.log(`\(x.toString())`)
+	echo(`\(x.toString())`)
 }
 else {
 	x = 'quxbaz'
 
-	console.log(`\(x.toString())`)
+	echo(`\(x.toString())`)
 }
 
-console.log(`\(x.toString())`)
+echo(`\(x.toString())`)

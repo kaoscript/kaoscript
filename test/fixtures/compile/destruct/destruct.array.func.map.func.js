@@ -18,7 +18,7 @@ module.exports = function() {
 		return x;
 	};
 	quxbaz.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexArray(value, 1, 1, 0, Type.isValue);
+		const t0 = value => Type.isDexArray(value, 1, 1, 0, 0, [Type.isValue]);
 		const t1 = Type.isValue;
 		if(args.length === 3) {
 			if(t0(args[0]) && t1(args[1]) && t1(args[2])) {

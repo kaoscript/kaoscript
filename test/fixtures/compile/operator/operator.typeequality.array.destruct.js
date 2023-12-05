@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(data) {
 		let x = 0;
-		if(Type.isDexArray(data, 1, 2, 0, Type.isNumber)) {
+		if(Type.isDexArray(data, 1, 2, 0, 0, [Type.isNumber, Type.isNumber])) {
 			x += data[1] - data[0];
 		}
 	};

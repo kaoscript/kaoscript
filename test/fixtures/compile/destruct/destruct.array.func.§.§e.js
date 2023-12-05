@@ -7,7 +7,7 @@ module.exports = function() {
 		console.log(Helper.concatString(x, ".", y));
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexArray(value, 1, 2, 0, Type.isValue);
+		const t0 = value => Type.isDexArray(value, 1, 2, 0, 0, [Type.isValue, Type.isValue]);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

@@ -10,7 +10,7 @@ module.exports = function() {
 		if(Type.isValue(values)) {
 		}
 		else {
-			for(let __ks_1 = 0, __ks_0 = values.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			for(let __ks_1 = 0, __ks_0 = Helper.length(values), value; __ks_1 < __ks_0; ++__ks_1) {
 				value = values[__ks_1];
 			}
 		}

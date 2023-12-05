@@ -1,5 +1,5 @@
-func foobar(): String {
-	if true {
+func foobar(test): String {
+	if test {
 		return 42
 	}
 

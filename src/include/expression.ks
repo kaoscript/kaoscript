@@ -10,7 +10,6 @@ abstract class Expression extends AbstractNode {
 			ReferenceException.throwInvalidAssignment(this)
 		}
 	} # }}}
-	flagMutating()
 	flagNewExpression()
 	getDeclaredType() => @type()
 	getDefaultValue(): String => 'null'
@@ -170,6 +169,7 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	type() => AnyType.NullableUnexplicit
 	unflagExpectingBitmask()
+	unspecify()
 	validateType(type: Type)
 	variable() => null
 }
