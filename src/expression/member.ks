@@ -57,10 +57,6 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
-			// if @assignable {
-			// 	@object.unspecify()
-			// }
-
 			var type = @object.type().discardValue()
 
 			unless type.isComplete() {
@@ -456,6 +452,9 @@ class MemberExpression extends Expression {
 					@type = property
 
 					return true
+				}
+				else if @statement().hasLoopAncestor() {
+					pass
 				}
 				else if type.isExhaustive(this) {
 					if @assignable {

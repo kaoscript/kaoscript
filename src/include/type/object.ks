@@ -639,11 +639,9 @@ class ObjectType extends Type {
 								return false
 							}
 							else if prop.isAny() {
-								// return true
 								pass
 							}
 							else if type.canBeBoolean() && prop.isBoolean() {
-								// return true
 								pass
 							}
 							else {

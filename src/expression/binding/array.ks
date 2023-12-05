@@ -154,7 +154,6 @@ class ArrayBinding extends Expression {
 				}
 			}
 		}
-		// echo(untested)
 
 		if untested {
 			@testType.unflagFullTest(min)
@@ -163,10 +162,6 @@ class ArrayBinding extends Expression {
 		if @statement() is ExpressionStatement | VariableStatement {
 			@tested = true
 
-			// if ?@value {
-			// 	echo(@value.type().hashCode(), @testType.hashCode())
-			// 	echo(@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast))
-			// }
 			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				@statement().addBeforehand(this)
 

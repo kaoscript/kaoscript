@@ -686,7 +686,6 @@ class ArrayType extends Type {
 	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
 
-		// echo(@testRest , @testProperties , @testLength)
 		if @testRest || @testProperties || @testLength {
 			@toSubtestFragments('value', testingType, @testLength, fragments, node)
 		}
@@ -730,7 +729,6 @@ class ArrayType extends Type {
 	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
-				// fragments.code(`\(varname) => \($runtime.type(node)).isDexArray(\(varname), 1)`)
 				fragments.code(`\($runtime.type(node)).isDXArray`)
 			}
 			else {
@@ -744,7 +742,6 @@ class ArrayType extends Type {
 		}
 		else {
 			if @destructuring {
-				// fragments.code(`\(varname) => \($runtime.type(node)).isDexArray(\(varname), 1)`)
 				fragments.code(`\($runtime.type(node)).isDXArray`)
 			}
 			else {
@@ -863,42 +860,22 @@ class ArrayType extends Type {
 						}
 					}
 					else {
-						// echo(@fullTest)
-						// echo(@properties)
-						// var mut onlyRest = @fullTest
-						// var baseType = @properties[0]
+						fragments.code('0, [')
 
-						// if onlyRest {
-						// 	for var type in @properties from 1 {
-						// 		if type != baseType {
-						// 			onlyRest = false
-						// 			break
-						// 		}
-						// 	}
-						// }
-						// // echo(onlyRest)
+						var mut comma = false
 
-						// if onlyRest {
-						// 	baseType.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
-						// }
-						// else {
-							fragments.code('0, [')
-
-							var mut comma = false
-
-							for var type in @properties {
-								if comma {
-									fragments.code($comma)
-								}
-								else {
-									comma = true
-								}
-
-								type.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+						for var type in @properties {
+							if comma {
+								fragments.code($comma)
+							}
+							else {
+								comma = true
 							}
 
-							fragments.code(']')
-						// }
+							type.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+						}
+
+						fragments.code(']')
 					}
 				}
 				else {

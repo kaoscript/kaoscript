@@ -1025,14 +1025,6 @@ class ReferenceType extends Type {
 
 				return false
 			}
-
-			// if value.name() == 'Array' {
-			// 	return @type().isArray() || @type().isTuple()
-			// }
-
-			// if value.name() == 'Object' {
-			// 	return @isInstance() || @isVariant() || @type().isObject()
-			// }
 		}
 
 		if value.isUnion() {
