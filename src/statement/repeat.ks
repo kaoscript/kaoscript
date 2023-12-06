@@ -40,6 +40,12 @@ class RepeatStatement extends Statement {
 
 		@scope.releaseTempName(@indexName) if ?@indexName
 		@scope.releaseTempName(@toName) if ?@toName
+
+		for var inferable, name of @bodyScope.listUpdatedInferables() {
+			if inferable.isVariable && @scope.hasVariable(name) {
+				@scope.replaceVariable(name, inferable.type, true, false, this)
+			}
+		}
 	} # }}}
 	translate() { # {{{
 		@to?.translate()
