@@ -32,7 +32,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 			}
 
 			if @left.isInferable() {
-				@type = @type.tryCasting(rightType)
+				@type = @type.tryCastingTo(rightType)
 			}
 		}
 	} # }}}

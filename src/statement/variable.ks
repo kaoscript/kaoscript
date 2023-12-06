@@ -687,7 +687,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 			if type.isLiberal() {
 				if @type.isAlias() {
-					type = @type.tryCasting(type)
+					type = @type.tryCastingTo(type)
 				}
 
 				if @type.isObject() && type is ObjectType {

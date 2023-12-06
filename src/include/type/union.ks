@@ -515,7 +515,21 @@ class UnionType extends Type {
 	} # }}}
 	length() => @types.length
 	override limitTo(value) { # {{{
-		var matches = [type for var type in @types when type.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)]
+		var matches = []
+		var variant = value.isVariant()
+
+		for var type in @types {
+			if type.isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+				matches.push(type)
+			}
+			else if variant && type.isVariant() && value.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+				var result = type.tryCastingTo(value)
+
+				if type != result {
+					matches.push(result)
+				}
+			}
+		}
 
 		if matches.length == 0 | @types.length {
 			return this

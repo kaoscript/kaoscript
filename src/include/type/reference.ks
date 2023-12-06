@@ -2150,7 +2150,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override tryCasting(value) { # {{{
+	override tryCastingTo(value) { # {{{
 		if @isAlias() && @type.isObject() && !value.isAlias() && value.isObject() {
 			var parameters = []
 			var subtypes = []

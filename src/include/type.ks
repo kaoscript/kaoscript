@@ -1248,7 +1248,7 @@ abstract class Type {
 	toTestType() => this
 	toTypeQuote() => @toQuote()
 	trimOff(type: Type): Type => this
-	tryCasting(value: Type): Type { # {{{
+	tryCastingTo(value: Type): Type { # {{{
 		if value.isMorePreciseThan(this) {
 			return value
 		}

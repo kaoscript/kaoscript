@@ -174,7 +174,6 @@ class IfStatement extends Statement {
 		}
 
 		@scope.line(@data.whenTrue.start.line)
-
 		@whenTrueExpression.prepare(target)
 
 		if !@hasWhenFalse {
