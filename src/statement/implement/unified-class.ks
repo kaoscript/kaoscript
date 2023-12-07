@@ -5,6 +5,7 @@ class ImplementUnifiedClassFieldDeclaration extends ClassVariableDeclaration {
 	constructor(data, parent, @implement) { # {{{
 		super(data, parent)
 	} # }}}
+	isImplementing() => true
 }
 
 class ImplementUnifiedClassConstructorDeclaration extends ClassConstructorDeclaration {

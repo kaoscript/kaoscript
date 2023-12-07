@@ -202,7 +202,7 @@ type AltType = {
 	name: String
 	type: Type
 }
-// TODO!
+// TODO
 // type AltTypes = AltType[]
 
 
@@ -877,7 +877,7 @@ abstract class Type {
 
 		return this
 	} # }}}
-	// TODO!
+	// TODO
 	// flagConstant(): typeof this {
 	flagConstant() { # {{{
 		if @constant {
@@ -1043,7 +1043,7 @@ abstract class Type {
 	isString() => false
 	isStruct() => false
 	isSubsetOf(value: Type, generics: AltType[]? = null, subtypes: AltType[]? = null, mode: MatchingMode): Boolean => false
-	// TODO!
+	// TODO
 	// assist isSubsetOf(value: DeferredType, generics, subtypes, mode) { # {{{
 	// 	if ?#generics {
 	// 		var valname = value.name()
@@ -1090,10 +1090,10 @@ abstract class Type {
 	} # }}}
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
-	// TODO!
+	// TODO
 	// setNullable(nullable: Boolean): typeof this => this
 	setNullable(nullable: Boolean) => this
-	// TODO!
+	// TODO
 	// setNullable(type: Type): typeof this { # {{{
 	setNullable(type: Type): Type { # {{{
 		if !type.isNullable() {

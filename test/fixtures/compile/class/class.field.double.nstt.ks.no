@@ -1,0 +1,6 @@
+class Foobar {
+	private {
+		@x
+		@x
+	}
+}

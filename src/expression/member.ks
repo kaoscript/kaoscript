@@ -665,10 +665,6 @@ class MemberExpression extends Expression {
 		if @computed {
 			return false unless type.isObject()
 
-			// TODO!
-			// var oType = type
-			// 	.discard()
-			// 	.unspecify() if @assignable
 			var oType = type.discard()
 
 			if oType is ObjectType && oType.hasKeyType() && !@property.type().isAssignableToVariable(oType.getKeyType(), true, false, false) {

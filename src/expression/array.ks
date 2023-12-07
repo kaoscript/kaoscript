@@ -10,26 +10,15 @@ class ArrayExpression extends Expression {
 	}
 	analyse() { # {{{
 		for var data in @data.values {
-			// TODO!
-			// var value =
-			// 	if data.kind == NodeKind.RestrictiveExpression {
-			// 		@restrictive = true
+			var value =
+				if data.kind == NodeKind.RestrictiveExpression {
+					@restrictive = true
 
-			// 		set ArrayRestrictiveMember.new(data, this)
-			// 	}
-			// 	else {
-			// 		set $compile.expression(data, this)
-			// 	}
-			var late value
-
-			if data.kind == NodeKind.RestrictiveExpression {
-				@restrictive = true
-
-				value = ArrayRestrictiveMember.new(data, this)
-			}
-			else {
-				value = $compile.expression(data, this)
-			}
+					set ArrayRestrictiveMember.new(data, this)
+				}
+				else {
+					set $compile.expression(data, this)
+				}
 
 			value.analyse()
 

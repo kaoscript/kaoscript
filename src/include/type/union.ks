@@ -531,11 +531,15 @@ class UnionType extends Type {
 			}
 		}
 
-		if matches.length == 0 | @types.length {
-			return this
+
+		if matches.length == 0 {
+			return value
 		}
 		else if matches.length == 1 {
 			return matches[0]
+		}
+		else if matches.length == @types.length {
+			return this
 		}
 		else {
 			return Type.union(@scope, ...matches)

@@ -1,0 +1,6 @@
+class Foobar {
+	static {
+		@x
+		@x
+	}
+}

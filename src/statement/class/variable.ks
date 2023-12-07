@@ -52,12 +52,22 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 
 		if @instance {
+			// TODO
+			// if ?parent._instanceVariables[@name] {
+			// 	SyntaxException.throwIdenticalField(@name, this)
+			// }
+
 			parent._instanceVariables[@name] = this
 		}
 		else if @name == 'name' || @name == 'version' {
 			SyntaxException.throwReservedStaticVariable(@name, parent)
 		}
 		else {
+			// TODO
+			// if ?parent._staticVariables[@name] {
+			// 	SyntaxException.throwIdenticalField(@name, this)
+			// }
+
 			parent._staticVariables[@name] = this
 		}
 	} # }}}
@@ -152,6 +162,7 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} # }}}
 	isImmutable() => @final
+	isImplementing() => false
 	isInitialized() => @initialized
 	isInstance() => @instance
 	isLateInit() => @lateInit

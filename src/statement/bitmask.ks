@@ -296,13 +296,9 @@ class BitmaskValueDeclaration extends AbstractNode {
 
 		if ?value {
 			match value.kind {
-				// TODO!
-				// NodeKind.BinaryExpression when value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
-				NodeKind.BinaryExpression {
-					if value.operator.kind == BinaryOperatorKind.Addition {
-						@type = @bitmask.createAlias(@name)
-						@operands = [value.left, value.right]
-					}
+				NodeKind.BinaryExpression when value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
+					@type = @bitmask.createAlias(@name)
+					@operands = [value.left, value.right]
 				}
 				NodeKind.Identifier {
 					@type = @bitmask.createAlias(@name)

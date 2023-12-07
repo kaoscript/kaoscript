@@ -431,6 +431,9 @@ export class SyntaxException extends Exception {
 		throwIdenticalConstructor(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The constructor is identical with another constructor`, node)
 		} # }}}
+		throwIdenticalField(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The field "\(name)" is identical with another field`, node)
+		} # }}}
 		throwIdenticalFunction(name, type, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The function "\(name)\(type.toQuote())" is a duplicate`, node)
 		} # }}}

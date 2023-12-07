@@ -201,6 +201,7 @@ class IfExpression extends Expression {
 	} # }}}
 	assignTempVariables(scope: Scope) => @statement().assignTempVariables(scope)
 	getValueName() => @valueName
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
 	isComputed() => true
 	isExit() => @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInline() => @inline

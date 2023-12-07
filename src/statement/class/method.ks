@@ -708,7 +708,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 
-			// TODO!
+			// TODO! parsing
 			// if !?method ;; var methods ?#= matchAll(@name, @type, mode) {
 			if !?method {
 				if var methods ?#= matchAll(@name, @type, mode) {

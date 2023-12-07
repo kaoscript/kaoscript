@@ -75,6 +75,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@falseType: Type
 		@junction: Junction		= Junction.NONE
 		@subject
+		@testType: Type
 		@trueType: Type
 	}
 	analyse() { # {{{
@@ -84,7 +85,9 @@ class BinaryOperatorTypeEquality extends Expression {
 	override prepare(target, targetMode) { # {{{
 		@subject.prepare(AnyType.NullableUnexplicit)
 
-		if @subject.type().isInoperative() {
+		var subjectType = @subject.type()
+
+		if subjectType.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
@@ -103,21 +106,22 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 
 			for var operand in @data.right.operands {
-				type.addType(@confirmType(Type.fromAST(operand, @subject.type(), this)))
+				type.addType(@confirmType(Type.fromAST(operand, subjectType, this)))
 			}
 
-			@trueType = type.type()
+			@testType = type.type()
 			@computed = true
 
 			@subject.acquireReusable(true)
 			@subject.releaseReusable()
 		}
 		else {
-			@trueType = @confirmType(Type.fromAST(@data.right, @subject.type(), this))
+			@testType = @confirmType(Type.fromAST(@data.right, subjectType, this))
 		}
 
 		if @subject.isInferable() {
-			@falseType = @subject.type().trimOff(@trueType)
+			@trueType = subjectType.limitTo(@testType)
+			@falseType = subjectType.trimOff(@trueType)
 		}
 	} # }}}
 	translate() { # {{{
@@ -152,35 +156,37 @@ class BinaryOperatorTypeEquality extends Expression {
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
 	listAssignments(array: Array) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { # {{{
-		@trueType.toPositiveTestFragments(fragments, @subject)
+		@testType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
 		var type = @subject.type()
 
 		if type is ReferenceType {
-			@trueType.toPositiveTestFragments(type.parameters(), type.getSubtypes(), junction, fragments, @subject)
+			@testType.toPositiveTestFragments(type.parameters(), type.getSubtypes(), junction, fragments, @subject)
 		}
 		else {
-			@trueType.toPositiveTestFragments(null, null, junction, fragments, @subject)
+			@testType.toPositiveTestFragments(null, null, junction, fragments, @subject)
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private confirmType(type: Type): Type { # {{{
-		if @subject.type().isNull() {
+		var subjectType = @subject.type()
+
+		if subjectType.isNull() {
 			TypeException.throwNullTypeChecking(type, this)
 		}
 
 		if type.isVirtual() {
-			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
+			if !subjectType.isAny() && !subjectType.canBeVirtual(type.name()) {
 				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else {
-			if @subject.type().isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
 			}
 
-			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
+			unless type.isAssignableToVariable(subjectType, false, false, true) {
 				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}

@@ -1,0 +1,1 @@
+TypeException: The return type must be "{value: Card[]|String}" and not "Object" (fixtures/compile/return/return.object.#o<ul<z>s>e.oe.ks:8)

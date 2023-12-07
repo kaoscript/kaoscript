@@ -834,14 +834,12 @@ class ModuleBlock extends AbstractNode {
 
 			if ?#variants {
 				for var { name, variant, generics } in variants {
-					// TODO!
-					// for var { type }, index in variant.getFields() {
-					for var { type % subtype }, index in variant.getFields() {
+					for var { type }, index in variant.getFields() {
 						var funcname = `is\(name).__\(index)`
 
 						var line = fragments.newLine().code(`__ksType.\(funcname) = `)
 
-						subtype.toBlindTestFunctionFragments(funcname, 'value', false, generics, line, this)
+						type.toBlindTestFunctionFragments(funcname, 'value', false, generics, line, this)
 
 						line.done()
 					}

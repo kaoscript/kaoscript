@@ -1,0 +1,1 @@
+TypeException: The return type must be "Result" and not "{line: Number, column: Number, values: CardSuit[]}", "{line: Number, column: Number, values: Card}" or "{line: Number, column: Number}" (fixtures/compile/variant/variant.type.bool.gmk.ret.jou<l<z>zn>.p=u<l<z>zn>.if_ex<l<e>.z>e.ks:37)

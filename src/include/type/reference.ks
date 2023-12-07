@@ -1086,15 +1086,6 @@ class ReferenceType extends Type {
 			if value.isObject() && @type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
-			else if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
-					}
-				}
-
-				return false
-			}
 			else {
 				return value.isAny()
 			}
@@ -1329,6 +1320,20 @@ class ReferenceType extends Type {
 				return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
 			}
 		}
+	} # }}}
+	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
+		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
+		return false if @isNullable() && !value.isNullable()
+
+		var nonNullType = @nullable ? @setNullable(false) : this
+
+		for var type in value.types() {
+			if nonNullType.isSubsetOf(type, mode) {
+				return true
+			}
+		}
+
+		return false
 	} # }}}
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return @isSubsetOf(value.getMaster(), mode)
@@ -2250,15 +2255,8 @@ class ReferenceType extends Type {
 				map[type.name()] = value.getProperty(name)
 			}
 
-			// TODO!
-			// for var { name } in generics while ?map[name] {
-			for var { name } in generics {
-				if ?map[name] {
-					parameters.push(map[name])
-				}
-				else {
-					break
-				}
+			for var { name } in generics while ?map[name] {
+				parameters.push(map[name])
 			}
 		}
 		else if ?#subtypes {

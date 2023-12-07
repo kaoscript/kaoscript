@@ -538,7 +538,7 @@ class EnumPossibilityTracker extends PossibilityTracker {
 	private {
 		@possibilities: String[]
 		// TODO!
-		@type: BitmaskType | EnumType
+		// @type: BitmaskType | EnumType
 		@type
 	}
 	constructor(@type) { # {{{

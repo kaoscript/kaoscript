@@ -266,6 +266,14 @@ class ComparisonExpression extends Expression {
 			operand.releaseReusable()
 		}
 	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if (@junctive || @operators.length > 1) && junction == Junction.AND {
+			fragments.code('(').compile(this, mode).code(')')
+		}
+		else {
+			fragments.compile(this, mode)
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @await {
 			NotSupportedException.throw(this)

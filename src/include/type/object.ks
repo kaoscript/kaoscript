@@ -430,10 +430,6 @@ class ObjectType extends Type {
 		}
 
 		if value.isObject() {
-			if @length == 0 && !@rest {
-				return true
-			}
-
 			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
 
 			if anycast {
@@ -559,7 +555,7 @@ class ObjectType extends Type {
 		return true
 	} # }}}
 	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
-		return true if this == value || @empty
+		return true if this == value
 
 		var reference = mode !~ MatchingMode.Reference
 
