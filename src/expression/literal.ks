@@ -42,9 +42,12 @@ class IdentifierLiteral extends Literal {
 		@isMacro: Boolean				= false
 		@isVariable: Boolean			= false
 		@line: Number
+		@path: String
 	}
 	constructor(data, parent, scope = parent.scope()) { # {{{
 		super(data, parent, scope, data.name)
+
+		@path = @value
 	} # }}}
 	analyse() { # {{{
 		if @assignment == AssignmentType.Neither {
@@ -59,16 +62,23 @@ class IdentifierLiteral extends Literal {
 				if var variable ?= @scope.getVariable(@value) {
 					var type = variable.getDeclaredType()
 
-					if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
+					if type.isView() {
+						@path = type.discard().name()
+					}
+					else if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
 						ReferenceException.throwAliasTypeVariable(type.name(), this)
 					}
+					// TODO
+					// if @parent.isAccessibleAliasType(this) {
+					// 	ReferenceException.throwAliasTypeVariable(type.name(), this)
+					// }
 				}
 			}
 			else if @scope.hasMacro(@value) {
 				@isMacro = true
 			}
 			else if var name ?= $runtime.getVariable(@value, @parent) {
-				@value = name
+				@path = @value = name
 				@type = @declaredType = Type.Any
 			}
 			else if @options.rules.ignoreError {
@@ -228,12 +238,27 @@ class IdentifierLiteral extends Literal {
 	toAssignmentFragments(fragments, value) { # {{{
 		fragments.compile(this).code($equals).compile(value)
 	} # }}}
-	toFragments(fragments, mode) { # {{{
+	override toCastingFragments(fragments, mode) { # {{{
 		if @isVariable {
-			fragments.compile(@scope.getVariable(@value, @line))
+			var variable = @scope.getVariable(@path, @line)
+
+			if variable.getRealType().isEnum() {
+				fragments.compile(variable).code('.value')
+			}
+			else {
+				super(fragments, mode)
+			}
 		}
 		else {
-			fragments.code(@value, @data)
+			super(fragments, mode)
+		}
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		if @isVariable {
+			fragments.compile(@scope.getVariable(@path, @line))
+		}
+		else {
+			fragments.code(@path, @data)
 		}
 	} # }}}
 	type(type: Type, scope: Scope, node) { # {{{

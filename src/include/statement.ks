@@ -72,6 +72,8 @@ abstract class Statement extends AbstractNode {
 	} # }}}
 	includePath() => @parent.includePath()
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
+	// TODO
+	// isAccessibleAliasType(value: IdentifierLiteral): Boolean => !(value is NamedType && value.type() is AliasType)
 	isAwait() => false
 	isCascade() => false
 	isEnhancementExport() => false

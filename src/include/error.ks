@@ -937,7 +937,7 @@ export class TypeException extends Exception {
 			throw TypeException.new(`Spread operator require an array`, node)
 		} # }}}
 		throwInvalidTypeChecking(expression, type, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) can never be of type \(type.toQuote(true))`, node)
+			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(expression.type().discardValue().toQuote(true)) can never be of type \(type.toQuote(true))`, node)
 		} # }}}
 		throwNotAlien(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type "\(name)" must be declared externally`, node)

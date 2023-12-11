@@ -1,1 +1,1 @@
-TypeException: The condition "result.ok" has always the value "false" (fixtures/compile/variant/variant.type.bool.gmk.ret.z<z>§y.vm=z§n.unless_ok.call_z<z>§ye.ks:20)
+TypeException: The variable "result" of type "Event(false)" can't be assigned with a value of type "Event<SchoolPerson>(true)" (fixtures/compile/variant/variant.type.bool.gmk.ret.z<z>§y.vm=z§n.unless_ok.call_z<z>§ye.ks:21)

@@ -167,6 +167,7 @@ enum TypeKind<String> {
 	Class
 	Deferred
 	Enum
+	EnumView
 	Exclusion
 	Function
 	Fusion
@@ -454,28 +455,40 @@ abstract class Type {
 							}
 						}
 						else if ?#data.typeSubtypes {
-							unless scope.hasVariable(name, -1) {
-								ReferenceException.throwNotDefinedType(name, node)
-							}
+							if var variable ?= scope.getVariable(name, -1) {
+								var root = variable.getRealType().discard()
 
-							var type = ReferenceType.new(scope, name, nullable)
-							var root = type.discard()
-
-							if !?root {
-								ReferenceException.throwNotYetDefinedType(name, node)
-							}
-
-							if root.isVariant() {
-								var master = root.getVariantType().getMaster()
-
-								for var subtype in data.typeSubtypes {
-									type.addSubtype(subtype.name, master, node)
+								if !?root {
+									ReferenceException.throwNotYetDefinedType(name, node)
 								}
 
-								return type.flagComplete()
+								if root.isEnum() {
+									var type = EnumViewType.new(scope, name, root)
+
+									if data.typeSubtypes is Array {
+										for var subtype in data.typeSubtypes {
+											type.addElement(subtype.name)
+										}
+									}
+
+									return type.flagComplete()
+								}
+								else if root.isVariant() {
+									var type = ReferenceType.new(scope, name, nullable)
+									var master = root.getVariantType().getMaster()
+
+									for var subtype in data.typeSubtypes {
+										type.addSubtype(subtype.name, master, node)
+									}
+
+									return type.flagComplete()
+								}
+								else {
+									TypeException.throwNotVariant(name, node)
+								}
 							}
 							else {
-								TypeException.throwNotVariant(name, node)
+								ReferenceException.throwNotDefinedType(name, node)
 							}
 						}
 
@@ -709,6 +722,9 @@ abstract class Type {
 					}
 					TypeKind.Enum {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind.EnumView {
+						return EnumViewType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind.Function {
 						return FunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
@@ -1064,6 +1080,7 @@ abstract class Type {
 	isValue() => false
 	isValueOf() => false
 	isVariant() => false
+	isView() => false
 	isVirtual() => false
 	isVoid() => false
 	limitTo(value: Type): Type { # {{{
@@ -1298,6 +1315,7 @@ include {
 	'./type/valueof.ks'
 	'./type/variant.ks'
 	'./type/void.ks'
+	'./type/enum-view.ks'
 }
 
 Type.Any = AnyType.Unexplicit

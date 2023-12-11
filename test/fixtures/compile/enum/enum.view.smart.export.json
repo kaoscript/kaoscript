@@ -1,0 +1,81 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Weekday",
+      1,
+      "Weekend"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "exhaustive": true,
+        "nextIndex": 7,
+        "values": [
+          {
+            "name": "MONDAY",
+            "index": 0
+          },
+          {
+            "name": "TUESDAY",
+            "index": 1
+          },
+          {
+            "name": "WEDNESDAY",
+            "index": 2
+          },
+          {
+            "name": "THURSDAY",
+            "index": 3
+          },
+          {
+            "name": "FRIDAY",
+            "index": 4
+          },
+          {
+            "name": "SATURDAY",
+            "index": 5
+          },
+          {
+            "name": "SUNDAY",
+            "index": 6
+          }
+        ],
+        "aliases": [],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 7
+        },
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "enumview",
+          "name": "Weekday",
+          "master": {
+            "reference": 0
+          },
+          "elements": [
+            "SATURDAY",
+            "SUNDAY"
+          ]
+        },
+        "testIndex": 0
+      }
+    ],
+    "macros": []
+  }
+]

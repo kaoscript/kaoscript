@@ -754,13 +754,9 @@ class ReferenceType extends Type {
 			return false
 		}
 
-		var mut type: Type = @type()
+		@resolve()
 
-		if type is NamedType {
-			type = type.type()
-		}
-
-		return type.hasProperty(name)
+		return @type.hasProperty(name)
 	} # }}}
 	hasRest() => @name == 'Object' || @type().hasRest()
 	override hasSameParameters(value) { # {{{
@@ -1021,6 +1017,16 @@ class ReferenceType extends Type {
 					var enum = variant.getEnumType()
 
 					return enum.getOriginalValueCount(...@subtypes) < enum.getOriginalValueCount(...value.getSubtypes())
+				}
+
+				return false
+			}
+
+			if @isView() {
+				var root = @discard()
+
+				if root.name() == value.name() {
+					return true
 				}
 
 				return false
@@ -1344,6 +1350,7 @@ class ReferenceType extends Type {
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => @type().isUnion()
 	isVariant() => @type().isVariant()
+	isView() => @type().isView()
 	isVirtual() => @type().isVirtual()
 	isVoid() => @name == 'Void' || @type().isVoid()
 	listFunctions(name: String): Array => @type().listFunctions(name)
@@ -1783,7 +1790,7 @@ class ReferenceType extends Type {
 					fragments.code(`\(tof)`)
 				}
 			}
-			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
 				unalias.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
 			}
 			else {
@@ -1851,7 +1858,7 @@ class ReferenceType extends Type {
 		if ?#@subtypes {
 			@type.discard().toPositiveTestFragments(@parameters, @subtypes, junction, fragments, node)
 		}
-		else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
+		else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
 			unalias.toBlindTestFragments(varname, generics, subjunction ?? junction, fragments, node)
 		}
 		else {

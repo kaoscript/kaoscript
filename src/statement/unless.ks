@@ -25,9 +25,10 @@ class UnlessStatement extends Statement {
 			TypeException.throwInvalidCondition(@condition, this)
 		}
 
-		if conditionType is ValueType && conditionType.type().isBoolean() {
-			TypeException.throwUnnecessaryCondition(@condition, this)
-		}
+		// TODO
+		// if conditionType is ValueType && conditionType.type().isBoolean() {
+		// 	TypeException.throwUnnecessaryCondition(@condition, this)
+		// }
 
 		@assignTempVariables(@scope!?)
 

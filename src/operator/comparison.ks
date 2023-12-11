@@ -404,8 +404,8 @@ class EqualityOperator extends ComparisonOperator {
 		@nanRight: Boolean		= false
 	}
 	override prepare() { # {{{
-		var leftType = @left.type()
-		var rightType = @right.type()
+		var leftType = @left.type().discardValue()
+		var rightType = @right.type().discardValue()
 
 		if (leftType.isBitmask() || leftType.isEnum()) && @left is not NumericBinaryOperatorExpression {
 			@enumLeft = true
@@ -530,8 +530,8 @@ class EqualityOperator extends ComparisonOperator {
 	inferWhenTrueTypes(mut inferables) { # {{{
 		inferables = @right.inferTypes(@left.inferTypes(inferables))
 
-		var leftType = @left.type().discardValue()
-		var rightType = @right.type().discardValue()
+		var leftType = @left.type()
+		var rightType = @right.type()
 
 		if @enumLeft != @enumRight {
 			pass

@@ -565,6 +565,45 @@ class BitmaskType extends Type {
 		@alteration = true
 	} # }}}
 	shallBeNamed() => true
+	toASTData(name: String) { # {{{
+		var start = { line: 0, column: 0 }
+		var end = { line: 0, column: 0 }
+
+		var node = {
+			kind: NodeKind.BitmaskDeclaration
+			attributes: []
+			modifiers: []
+			name: {
+				kind: NodeKind.Identifier
+				modifiers: []
+				name
+				start
+				end
+			}
+			members: []
+			start
+			end
+		}
+
+		for var value, name of @values {
+			node.members.push({
+				kind: NodeKind.BitmaskValue
+				attributes: []
+				modifiers: []
+				name: {
+					kind: NodeKind.Identifier
+					modifiers: []
+					name
+					start
+					end
+				}
+				start
+				end
+			})
+		}
+
+		return node
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}

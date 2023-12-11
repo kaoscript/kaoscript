@@ -79,6 +79,11 @@ class IncludeDeclaration extends Statement {
 			}
 		}
 	} # }}}
+	override postInitiate() { # {{{
+		for var declarator in @declarators {
+			declarator.postInitiate()
+		}
+	} # }}}
 	analyse() { # {{{
 		for var declarator in @declarators {
 			declarator.analyse()
@@ -223,15 +228,16 @@ class IncludeDeclarator extends Statement {
 			}
 		}
 
-		for var statement in @statements {
-			statement.postInitiate()
-		}
-
 		@scope.line(@data.end.line)
 
 		@offsetEnd = offset + @scope.line() - @offsetStart
 
 		@scope.setLineOffset(@offsetEnd)
+	} # }}}
+	override postInitiate() { # {{{
+		for var statement in @statements {
+			statement.postInitiate()
+		}
 	} # }}}
 	analyse() { # {{{
 		@scope.setLineOffset(@offsetStart)

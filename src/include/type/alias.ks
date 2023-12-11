@@ -130,9 +130,12 @@ class AliasType extends Type {
 	proxy @type {
 		canBeArray
 		canBeDeferred
+		hasProperty
 		hasRest
 		isComplex
+		isEnum
 		isVariant
+		isView
 		toAwareTestFunctionFragments
 		toNegativeTestFragments
 		toPositiveTestFragments

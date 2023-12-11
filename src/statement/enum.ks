@@ -340,16 +340,31 @@ class EnumValueDeclaration extends AbstractNode {
 				NotImplementedException.throw()
 			}
 
-			var expressions = []
-
 			for var data in @data.arguments {
+				// TODO!
+				// var argument = $compile.expression(data, this)
+				// 	..analyse()
+				// 	..flagNewExpression()
+				// 	..unflagCompleteObject() if _ is MemberExpression
+				// 	..prepare(AnyType.NullableUnexplicit)
+
 				var argument = $compile.expression(data, this)
 					..analyse()
 					..flagNewExpression()
-					..prepare(AnyType.NullableUnexplicit)
 
-				expressions.push(argument)
+				argument.unflagCompleteObject() if argument is MemberExpression
+
+				@arguments.push(argument)
 			}
+
+			for var argument in @arguments {
+				argument.prepare(AnyType.NullableUnexplicit)
+			}
+
+			var names = @enum.listFieldNames()
+			var expressions = @arguments
+
+			@arguments = []
 
 			match @enum.matchValueArguments(expressions, this) {
 				is PreciseCallMatchResult with var { matches } {
@@ -365,12 +380,16 @@ class EnumValueDeclaration extends AbstractNode {
 							var { index?, element? } = position
 
 							if !?index {
+								@type.setArgument(names[@arguments.length + 3], 'null')
+
 								@arguments.push('void 0')
 							}
 							else if ?element {
 								NotImplementedException.throw(this)
 							}
 							else {
+								@type.argument(names[@arguments.length + 3], expressions[index].type().path())
+
 								@arguments.push(expressions[index])
 							}
 						}
@@ -384,6 +403,8 @@ class EnumValueDeclaration extends AbstractNode {
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
+	arguments() => @arguments
+	assessment() => @enum.fieldAssessment()
 	name() => @name
 	toConditionFragments(enum, varname, fragments) { # {{{
 		for var name, index in @type.originals() {

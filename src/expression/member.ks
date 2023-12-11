@@ -2,6 +2,7 @@ class MemberExpression extends Expression {
 	private late {
 		@assignable: Boolean			= false
 		@callee
+		@completeObject: Boolean		= true
 		@computed: Boolean				= false
 		@declaredType: Type?			= null
 		@derivative: Boolean			= false
@@ -59,7 +60,7 @@ class MemberExpression extends Expression {
 
 			var type = @object.type().discardValue()
 
-			unless type.isComplete() {
+			if @completeObject && !type.isComplete() {
 				ReferenceException.throwUncompleteType(type, this, this)
 			}
 
@@ -415,6 +416,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
+	// override isAccessibleAliasType(value) => !(value is NamedType && value.type() is AliasType && @parent is not MatchConditionValue)
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
@@ -559,7 +561,30 @@ class MemberExpression extends Expression {
 			return false
 		}
 		else {
-			if type is NamedType {
+			if type.isView() {
+				var root = type.discard()
+
+				if var value ?= root.getValue(@property) {
+					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+
+					if value.isAlias() {
+						if value.isDerivative() {
+							@derivative = true
+						}
+						else {
+							@originalProperty = value.original()
+						}
+					}
+
+					return true
+				}
+			}
+			else if type is NamedType {
 				if var value ?= type.type().getValue(@property) {
 					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
 
@@ -954,7 +979,7 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	toCastingFragments(fragments, mode) { # {{{
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 
 		fragments.code('.value')
 	} # }}}
@@ -1188,6 +1213,9 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	type() => @type
+	unflagCompleteObject() {
+		@completeObject = false
+	}
 	validateType(type: Type) { # {{{
 		if @type.isBitmask() && !type.isAny() && !type.isBitmask() {
 			@enumCasting = true

@@ -283,21 +283,23 @@ class BinaryOperatorTypeInequality extends Expression {
 	} # }}}
 	type() => @scope.reference('Boolean')
 	private confirmType(type: Type): Type { # {{{
-		if @subject.type().isNull() {
+		var subjectType = @subject.type()
+
+		if subjectType.isNull() {
 			TypeException.throwNullTypeChecking(type, this)
 		}
 
 		if type.isVirtual() {
-			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
+			if !subjectType.isAny() && !subjectType.canBeVirtual(type.name()) {
 				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}
 		else {
-			if @subject.type().isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
 			}
 
-			unless type.isAssignableToVariable(@subject.type(), false, false, true) {
+			unless type.isAssignableToVariable(subjectType, false, false, true) {
 				TypeException.throwInvalidTypeChecking(@subject, type, this)
 			}
 		}

@@ -102,7 +102,6 @@ class NamedType extends Type {
 	getTestName() => @type.getTestName()
 	hasContainer() => ?@container
 	hashCode() => `&\(@name)`
-	hasProperty(name: String) => @type.hasProperty(name)
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
 	isAltering() => @type.isAltering()
@@ -573,6 +572,9 @@ class NamedType extends Type {
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`!\(tof)(`).compile(node).code(')')
 		}
+		else if @type.isComplex() {
+			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
+		}
 		else {
 			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
@@ -580,6 +582,9 @@ class NamedType extends Type {
 	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
+		}
+		else if @type.isComplex() {
+			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 		else {
 			@reference().toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
@@ -614,13 +619,16 @@ class NamedType extends Type {
 
 	proxy @type {
 		canBeArray
+		hasProperty
 		hasRest
 		hasTest
 		isBitmask
 		isComplete
+		isComplex
 		isDeferrable
 		isExportingType
 		isVariant
+		isView
 		toAwareTestFunctionFragments
 		toBlindTestFragments
 	}

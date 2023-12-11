@@ -202,7 +202,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			var operand = operands[index - 1] ?? operands[index + 1]
 
 			if var type ?= operand.type() {
-				return type.setNullable(false)
+				return type.discardValue().setNullable(false)
 			}
 		}
 		is ConditionalExpression {
@@ -212,6 +212,32 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			else {
 				return target
 			}
+		}
+		is EnumValueDeclaration {
+			var arguments = parent.arguments()
+			var length = arguments.length
+			var index = arguments.indexOf(node)
+			var types = []
+
+			for {
+				var route of parent.assessment().routes
+				var tree of route.trees when tree.min <= length <= tree.max
+				var column of tree.columns
+			}
+			then {
+				findImplicitArgument(column, 0, index, property, types)
+			}
+
+			if !?#types {
+				if node.scope().hasImplicitVariable() {
+					return null
+				}
+				else {
+					ReferenceException.throwUnresolvedImplicitProperty(property, node)
+				}
+			}
+
+			return Type.union(node.scope(), ...types)
 		}
 		is MatchConditionValue {
 			return parent.parent().getValueType()

@@ -50,7 +50,7 @@ class EnumType extends Type {
 			}
 
 			for var { name, index? } in data.values {
-				var value = EnumValueType.new(name, index)
+				var value = EnumValueType.new(name, index, null)
 
 				type.addValue(value)
 			}
@@ -278,14 +278,14 @@ class EnumType extends Type {
 		var late type, value
 
 		if @kind == .Number {
-			type = EnumValueType.new(name, @nextIndex)
-			value = `\(@generator.next)`
+			type = EnumValueType.new(name, @nextIndex, @generator.next)
+			value = `\(type.value())`
 
 			@generator.next += @generator.step
 		}
 		else {
-			type = EnumValueType.new(name, @nextIndex)
-			value = $quote(name.toLowerCase())
+			type = EnumValueType.new(name, @nextIndex, name.toLowerCase())
+			value = $quote(type.value())
 		}
 
 		@addValue(type)
@@ -295,8 +295,8 @@ class EnumType extends Type {
 		return { type, value }
 	} # }}}
 	createValue(name: String, value: String): { type: EnumValueType, value: String } { # {{{
-		var type = EnumValueType.new(name, @nextIndex)
-		var result = $quote(value)
+		var type = EnumValueType.new(name, @nextIndex, value)
+		var result = $quote(type.value())
 
 		@addValue(type)
 
@@ -305,14 +305,14 @@ class EnumType extends Type {
 		return { type, value: result }
 	} # }}}
 	createValue(name: String, value: Number): { type: EnumValueType, value: String } { # {{{
-		var type = EnumValueType.new(name, @nextIndex)
+		var type = EnumValueType.new(name, @nextIndex, value)
 
 		@addValue(type)
 
 		@nextIndex += 1
 		@generator.next = value + @generator.step
 
-		return { type, value: `\(value)` }
+		return { type, value: `\(type.value())` }
 
 	} # }}}
 	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
@@ -412,6 +412,8 @@ class EnumType extends Type {
 
 		return export
 	} # }}}
+	fields() => @fields
+	fieldAssessment() => @fieldAssessment
 	fillProperties(name: String, node) { # {{{
 		@fields['index'] = EnumFieldType.new(@scope, 'index', @scope.reference('Number')).flagInbuilt()
 		@fields['name'] = EnumFieldType.new(@scope, 'name', @scope.reference('String')).flagInbuilt()
@@ -632,7 +634,8 @@ class EnumType extends Type {
 
 		return results
 	} # }}}
-	listValueNames() => [name for var value, name of @values]
+	listFieldNames() => [name for var _, name of @fields]
+	listValueNames() => [name for var _, name of @values]
 	matchValueArguments(arguments, node) { # {{{
 		return Router.matchArguments(@fieldAssessment, null, arguments, null, node)
 	} # }}}
@@ -673,16 +676,25 @@ class EnumType extends Type {
 		}
 	} # }}}
 	type() => @type
+	values() => @values
 }
 
 class EnumValueType {
 	private {
 		@alteration: Boolean	= false
+		@arguments: String{}	= {}
 		@index: Number?			= null
 		@name: String
+		@value?
 	}
 	constructor(@name)
-	constructor(@name, @index)
+	// TODO!
+	// constructor(@name, @index, @value)
+	constructor(@name, @index, @value = null)
+	argument(name: String) => @arguments[name]
+	argument(name: String, value: String) { # {{{
+		@arguments[name] = value
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			@name
@@ -704,6 +716,7 @@ class EnumValueType {
 
 		return this
 	} # }}}
+	value() => @value
 }
 
 class EnumAliasType {

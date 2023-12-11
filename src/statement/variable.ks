@@ -248,7 +248,7 @@ class VariableDeclaration extends AbstractNode {
 				TypeException.throwNotUniqueValue(@value, this)
 			}
 
-			@type = @value.type().discardValue().asReference()
+			@type = @value.type()
 
 			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@value, this)
@@ -263,7 +263,7 @@ class VariableDeclaration extends AbstractNode {
 					declarator.setDeclaredType(AnyType.NullableExplicit)
 				}
 				else {
-					declarator.setDeclaredType(@type)
+					declarator.setDeclaredType(@type.discardValue().asReference())
 				}
 
 				declarator.flagDefinitive()

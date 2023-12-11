@@ -160,6 +160,9 @@ class Variable {
 			if @realType.isNull() {
 				@realType = type.setNullable(true)
 			}
+			else if @realType.isValue() && !type.isValue() {
+				@realType = type
+			}
 			else if @realType.isMorePreciseThan(type) {
 				@realType = Type.union(scope, type, @realType)
 			}

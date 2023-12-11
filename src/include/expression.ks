@@ -24,6 +24,7 @@ abstract class Expression extends AbstractNode {
 	// types if the condition is false
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
+	// isAccessibleAliasType(value: IdentifierLiteral): Boolean => !(value is NamedType && value.type() is AliasType)
 	// if the expression can be an assignment
 	isAssignable(): Boolean => false
 	// if the expression is an `await` expression
@@ -154,9 +155,7 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	toReusableFragments(fragments) => @toFragments(fragments, Mode.None)
 	toStringFragments(fragments) { # {{{
-		var type = @type()
-
-		if type.isReference() && (type.type().isBitmask() || type.type().isEnum()) {
+		if @type().isEnum() {
 			fragments.compile(this).code('.value')
 		}
 		else {

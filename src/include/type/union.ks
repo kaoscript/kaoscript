@@ -264,6 +264,11 @@ class UnionType extends Type {
 	compareToRef(value: UnionType, equivalences: String[][]? = null) { # {{{
 		return 1
 	} # }}}
+	override discardValue() { # {{{
+		var types = [type.discardValue() for var type in @types]
+
+		return Type.union(@scope, ...types)
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @explicitNullity {
 			return {
@@ -384,9 +389,27 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
+	isBitmask() { # {{{
+		for var type in @types {
+			if !type.isBitmask() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	isComplete() { # {{{
 		for var type in @types {
 			return false unless type.isComplete()
+		}
+
+		return true
+	} # }}}
+	isEnum() { # {{{
+		for var type in @types {
+			if !type.isEnum() {
+				return false
+			}
 		}
 
 		return true

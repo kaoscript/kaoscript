@@ -11,11 +11,30 @@ class ValueType extends Type {
 		NotImplementedException.throw()
 	} # }}}
 	override discardValue() => @type
+	assist equals(value: Type) { # {{{
+		return false
+	} # }}}
+	assist equals(value: ValueType) { # {{{
+		return true if this == value
+		return @path == value.path() && @value == value.value() && @type.equals(value.type())
+	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	override hashCode() => `=\(@path)`
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
-		NotImplementedException.throw()
+		if value.isView() {
+			var root = value.discard()
+
+			if root.master() == @type.discard() {
+				return root.hasValue(@value)
+			}
+		}
+
+		return @type.isAssignableToVariable(value, anycast, nullcast, downcast, limited)
+	} # }}}
+	override isMorePreciseThan(value) { # {{{
+		return @type.isSubsetOf(value, MatchingMode.Exact + MatchingMode.Subclass)
 	} # }}}
 	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		return @type.isSubsetOf(value, generics, subtypes, mode)
@@ -24,6 +43,7 @@ class ValueType extends Type {
 		return @type == value.getMaster()
 	} # }}}
 	override isValue() => true
+	path() => @path
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
@@ -41,13 +61,13 @@ class ValueType extends Type {
 		canBeString
 		discard
 		isAny
-		isAssignableToVariable
 		isBitmask
 		isBoolean
 		isComparableWith
 		isEnum
 		isExplicit
-		isMorePreciseThan
+		// TODO!
+		// isMorePreciseThan
 		isNull
 		isNullable
 		isNumber
