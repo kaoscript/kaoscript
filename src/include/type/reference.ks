@@ -43,7 +43,25 @@ class ReferenceType extends Type {
 				name = data.name
 			}
 
-			return ReferenceType.new(scope, name as String, data.nullable!?, null)
+			var type = ReferenceType.new(scope, name as String, data.nullable!?)
+
+			if ?data.parameters || ?data.subtypes {
+				queue.push(() => {
+					if ?data.parameters {
+						for var data of data.parameters {
+							type.addParameter(Type.import(data, metadata, references, alterations, queue, scope, node))
+						}
+					}
+
+					if ?data.subtypes {
+						for var { name, type % subtype } of data.subtypes {
+							type.addSubtype(name, Type.import(subtype, metadata, references, alterations, queue, scope, node), node)
+						}
+					}
+				})
+			}
+
+			return type
 		} # }}}
 		toQuote(name: String, nullable: Boolean, parameters: Type[], subtypes: AltType[]): String { # {{{
 			if name == 'this' {
@@ -92,6 +110,9 @@ class ReferenceType extends Type {
 
 		@name = $types[name] ?? name
 		@nullable = @explicitlyNull
+	} # }}}
+	addParameter(parameter: Type) { # {{{
+		@parameters.push(parameter)
 	} # }}}
 	addSubtype(name: String, type: Type, node) { # {{{
 		@resolve()
@@ -458,10 +479,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @parameters.length == 0 {
-			return @nullable ? `\(@name)?` : @name
-		}
-		else {
+		if ?#@parameters || ?#@subtypes {
 			var export = {
 				kind: TypeKind.Reference
 				name: @name
@@ -471,15 +489,31 @@ class ReferenceType extends Type {
 				export.nullable = @explicitlyNull
 			}
 
-			if @parameters.length != 0 {
+			if ?#@parameters {
 				export.parameters = [parameter.toGenericParameter(references, indexDelta, mode, module) for var parameter in @parameters]
+			}
+
+			if ?#@subtypes {
+				// TODO!
+				// export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
+				export.subtypes = []
+
+				for var { name, type } in @subtypes {
+					export.subtypes.push({
+						name
+						type: type.toReference(references, indexDelta, mode, module)
+					})
+				}
 			}
 
 			return export
 		}
+		else {
+			return @nullable ? `\(@name)?` : @name
+		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name) { # {{{
-		if @nullable || @parameters.length != 0 {
+		if @nullable || ?#@parameters || ?#@subtypes {
 			var export = {
 				kind: TypeKind.Reference
 				name: name.reference ?? name
@@ -489,8 +523,21 @@ class ReferenceType extends Type {
 				export.nullable = @explicitlyNull
 			}
 
-			if @parameters.length != 0 {
+			if ?#@parameters {
 				export.parameters = [parameter.toReference(references, indexDelta, mode, module) for var parameter in @parameters]
+			}
+
+			if ?#@subtypes {
+				// TODO!
+				// export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
+				export.subtypes = []
+
+				for var { name, type } in @subtypes {
+					export.subtypes.push({
+						name
+						type: type.toReference(references, indexDelta, mode, module)
+					})
+				}
 			}
 
 			return export

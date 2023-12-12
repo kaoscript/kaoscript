@@ -1,4 +1,4 @@
-import './variant.type.enum.export.ks'
+import './variant.type.enum.export.default.ks'
 
 func greeting(person: SchoolPerson): String {
     return match person {

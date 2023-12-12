@@ -1,0 +1,152 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "PersonKind",
+      1,
+      "SchoolPerson",
+      2,
+      "Group",
+      3,
+      "Lesson"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "exhaustive": true,
+        "nextIndex": 3,
+        "values": [
+          {
+            "name": "Director",
+            "index": 0
+          },
+          {
+            "name": "Student",
+            "index": 1
+          },
+          {
+            "name": "Teacher",
+            "index": 2
+          }
+        ],
+        "aliases": [],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 4
+        },
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "kind": {
+              "kind": "variant",
+              "master": {
+                "reference": 0
+              },
+              "fields": [
+                {
+                  "names": [
+                    "Student"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "name": "String"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "testIndex": 0
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "name": "String",
+            "students": {
+              "kind": "array",
+              "rest": {
+                "kind": "reference",
+                "name": "SchoolPerson",
+                "subtypes": [
+                  {
+                    "name": "Student",
+                    "type": {
+                      "reference": 0
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "testIndex": 1
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "name": "String",
+            "teacher": {
+              "kind": "reference",
+              "name": "SchoolPerson",
+              "subtypes": [
+                {
+                  "name": "Teacher",
+                  "type": {
+                    "reference": 0
+                  }
+                }
+              ]
+            },
+            "students": {
+              "kind": "union",
+              "types": [
+                {
+                  "reference": 2
+                },
+                {
+                  "kind": "array",
+                  "rest": {
+                    "kind": "reference",
+                    "name": "SchoolPerson",
+                    "subtypes": [
+                      {
+                        "name": "Student",
+                        "type": {
+                          "reference": 0
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "testIndex": 2
+      }
+    ],
+    "macros": []
+  }
+]
