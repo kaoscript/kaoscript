@@ -1,0 +1,45 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Position",
+      1,
+      "Result"
+    ],
+    "references": [
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "line": "Number",
+            "column": "Number"
+          }
+        },
+        "testIndex": 0
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            "Position",
+            {
+              "kind": "object",
+              "properties": {
+                "value": "String"
+              }
+            }
+          ]
+        },
+        "testIndex": 1
+      }
+    ],
+    "macros": []
+  }
+]

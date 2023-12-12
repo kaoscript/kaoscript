@@ -4,4 +4,7 @@ module.exports = function() {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
 		isResult: value => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {value: Type.isString})
 	};
+	return {
+		__ksType: [__ksType.isPosition, __ksType.isResult]
+	};
 };

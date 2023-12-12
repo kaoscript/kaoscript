@@ -6,3 +6,5 @@ type Position = {
 include {
 	'./include.type.fusion.core.ks'
 }
+
+export *

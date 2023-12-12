@@ -12,9 +12,17 @@ class FusionType extends Type {
 			var fusion = FusionType.new(scope)
 
 			queue.push(() => {
+				var types = []
+
 				for var type in data.types {
-					fusion.addType(Type.import(type, metadata, references, alterations, queue, scope, node))
+					types.push(Type.import(type, metadata, references, alterations, queue, scope, node))
 				}
+
+				queue.push(() => {
+					for var type in types {
+						fusion.addType(type)
+					}
+				})
 			})
 
 			return fusion
