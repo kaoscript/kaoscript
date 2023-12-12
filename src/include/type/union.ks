@@ -270,18 +270,10 @@ class UnionType extends Type {
 		return Type.union(@scope, ...types)
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @explicitNullity {
-			return {
-				kind: TypeKind.Union
-				nullable: @nullable
-				types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
-			}
-		}
-		else {
-			return {
-				kind: TypeKind.Union
-				types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
-			}
+		return {
+			kind: TypeKind.Union
+			nullable: true if @explicitNullity
+			types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
 	flagExported(explicitly: Boolean) { # {{{

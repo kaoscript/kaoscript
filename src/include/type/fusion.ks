@@ -61,7 +61,7 @@ class FusionType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind.Fusion
-			types: [type.toExportOrReference(references, indexDelta, mode, module) for var type in @types]
+			types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
 	override finalize(data, generics, node) { # {{{

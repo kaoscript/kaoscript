@@ -28,7 +28,9 @@
         "of": {
           "kind": "fusion",
           "types": [
-            "Position",
+            {
+              "reference": 0
+            },
             {
               "kind": "object",
               "properties": {

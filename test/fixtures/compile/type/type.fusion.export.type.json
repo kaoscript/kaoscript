@@ -1,0 +1,55 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Result"
+    ],
+    "references": [
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            {
+              "reference": 1
+            },
+            {
+              "kind": "object",
+              "properties": {
+                "values": {
+                  "kind": "union",
+                  "nullable": true,
+                  "types": [
+                    {
+                      "kind": "array",
+                      "rest": "Number"
+                    },
+                    "Number",
+                    "Null"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "testIndex": 0
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "line": "Number",
+            "column": "Number"
+          }
+        }
+      }
+    ],
+    "macros": []
+  }
+]

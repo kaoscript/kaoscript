@@ -1,4 +1,4 @@
-import './type.fusion.export.nrt.ks'
+import './type.fusion.export.func.nrt.ks'
 
 extern console
 
