@@ -16,9 +16,9 @@
           "kind": "object",
           "properties": {
             "values": {
-              "kind": "array",
-              "rest": "String",
-              "nullable": true
+              "kind": "object",
+              "nullable": true,
+              "rest": "String"
             }
           }
         },

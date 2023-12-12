@@ -22,6 +22,10 @@ class ArrayType extends Type {
 				type.flagDestructuring()
 			}
 
+			if data.nullable {
+				type._nullable = true
+			}
+
 			queue.push(() => {
 				if ?data.properties {
 					for var property in data.properties {
@@ -135,15 +139,16 @@ class ArrayType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @length == 0 && !@rest {
-			return 'Array'
+			return @nullable ? 'Array?' : 'Array'
 		}
 
 		return {
 			kind: TypeKind.Array
-			mutable: true if @mutable
 			properties: [property.export(references, indexDelta, mode, module) for var property in @properties] if @length > 0
 			rest: @restType.export(references, indexDelta, mode, module) if @rest
 			destructuring: true if @destructuring
+			mutable: true if @mutable
+			nullable: true if @nullable
 		}
 	} # }}}
 	override flagComplete() { # {{{

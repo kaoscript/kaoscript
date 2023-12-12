@@ -20,7 +20,8 @@
               "properties": {
                 "values": {
                   "kind": "array",
-                  "rest": "String"
+                  "rest": "String",
+                  "nullable": true
                 }
               }
             }

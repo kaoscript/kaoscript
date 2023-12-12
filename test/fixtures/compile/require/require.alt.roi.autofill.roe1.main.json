@@ -659,7 +659,8 @@
               ],
               "returns": {
                 "kind": "array",
-                "rest": "String"
+                "rest": "String",
+                "nullable": true
               },
               "errors": [],
               "inits": []

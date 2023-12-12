@@ -26,15 +26,19 @@ class ObjectType extends Type {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ObjectType { # {{{
 			var type = ObjectType.new(scope)
 
+			if data.destructuring {
+				type.flagDestructuring()
+			}
+
+			if data.nullable {
+				type._nullable = true
+			}
+
 			if data.system {
 				type.flagSystem()
 			}
 			else if data.sealed {
 				type.flagSealed()
-			}
-
-			if data.destructuring {
-				type.flagDestructuring()
 			}
 
 			queue.push(() => {
@@ -169,18 +173,17 @@ class ObjectType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if !@system && !@sealed && @length == 0 && !@rest {
-			return 'Object'
+			return @nullable ? 'Object?' : 'Object'
 		}
 
 		var export = {
 			kind: TypeKind.Object
+			// TODO!
+			// properties: { [name]: value.export(references, indexDelta, mode, module) for var value, name of @properties }
 		}
 
-		if @system {
-			export.system = true
-		}
-		else if @sealed {
-			export.sealed = true
+		if @key {
+			export.key = @keyType.export(references, indexDelta, mode, module)
 		}
 
 		if @length > 0 {
@@ -191,15 +194,23 @@ class ObjectType extends Type {
 			}
 		}
 
-		if @rest {
-			export.rest = @restType.export(references, indexDelta, mode, module)
-		}
 		if @destructuring {
 			export.destructuring = true
 		}
 
-		if @key {
-			export.key = @keyType.export(references, indexDelta, mode, module)
+		if @nullable {
+			export.nullable = true
+		}
+
+		if @rest {
+			export.rest = @restType.export(references, indexDelta, mode, module)
+		}
+
+		if @system {
+			export.system = true
+		}
+		else if @sealed {
+			export.sealed = true
 		}
 
 		return export
