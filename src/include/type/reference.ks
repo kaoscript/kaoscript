@@ -54,9 +54,20 @@ class ReferenceType extends Type {
 					}
 
 					if ?data.subtypes {
+						var subtypes = []
+
 						for var { name, type % subtype } of data.subtypes {
-							type.addSubtype(name, Type.import(subtype, metadata, references, alterations, queue, scope, node), node)
+							subtypes.push({
+								name
+								subtype: Type.import(subtype, metadata, references, alterations, queue, scope, node)
+							})
 						}
+
+						queue.push(() => {
+							for var { name, subtype } in subtypes {
+								type.addSubtype(name, subtype, node)
+							}
+						})
 					}
 				})
 			}
