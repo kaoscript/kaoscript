@@ -141,14 +141,41 @@ class ObjectExpression extends Expression {
 								@type.addProperty(name, type)
 							}
 						}
-						ObjectLiteralMember {
+						ObjectLiteralMember, ObjectThisMember {
 							if keyed && !keyType.canBeString() {
 								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
 							}
 
-							property.prepare(target.getProperty(property.name(), this) ?? AnyType.NullableUnexplicit)
+							property.prepare(target.getProperty(property.name(), this) ?? valueType)
 
 							@type.addProperty(property.name(), property.type())
+						}
+						ObjectRestrictiveMember when !property.isComputed() {
+							if keyed && !keyType.canBeString() {
+								TypeException.throwInvalidObjectKeyType(@scope.reference('String'), keyType, this)
+							}
+
+							if property.property() is ObjectSpreadMember {
+								property.prepare(valueType)
+
+								var type = property.property().value().type().discard()
+
+								if type.isObject() && !type.hasRest() {
+									for var property, name of type.properties() {
+										if !@type.hasProperty(name) {
+											@type.addProperty(name, property.property().type())
+										}
+									}
+								}
+								else {
+									rest.push(property.property().type())
+								}
+							}
+							else {
+								property.prepare(target.getProperty(property.name(), this) ?? valueType)
+
+								@type.addProperty(property.name(), property.property().type().setNullable(true))
+							}
 						}
 						ObjectSpreadMember {
 							if keyed && !keyType.canBeString() {
@@ -190,14 +217,19 @@ class ObjectExpression extends Expression {
 								@type.addProperty(name, type)
 							}
 						}
-						ObjectLiteralMember {
+						ObjectLiteralMember, ObjectThisMember {
 							@type.addProperty(property.name(), property.type())
+						}
+						ObjectRestrictiveMember when !property.isComputed() {
+							if property.property() is ObjectSpreadMember {
+								rest.push(property.property().type())
+							}
+							else {
+								@type.addProperty(property.name(), property.property().type().setNullable(true))
+							}
 						}
 						ObjectSpreadMember {
 							rest.push(property.type())
-						}
-						ObjectThisMember {
-							@type.addProperty(property.name(), property.type())
 						}
 					}
 				}
@@ -623,30 +655,36 @@ class ObjectLiteralMember extends Expression {
 
 class ObjectRestrictiveMember extends Expression {
 	private late {
+		@bindingScope: Scope
 		@condition
 		@property
+		@whenTrueScope: Scope
 	}
 	analyse() { # {{{
-		@condition = $compile.expression(@data.condition, this)
+		@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
+
+		@condition = $compile.expression(@data.condition, this, @bindingScope)
 		@condition.analyse()
+
+		@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		match @data.expression.kind {
 			NodeKind.ObjectMember {
 				match @data.expression.name.kind {
 					NodeKind.Identifier, NodeKind.Literal {
-						@property = ObjectLiteralMember.new(@data.expression, this)
+						@property = ObjectLiteralMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
 					NodeKind.ThisExpression {
-						@property = ObjectThisMember.new(@data.expression, this)
+						@property = ObjectThisMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
 					else {
-						@property = ObjectComputedMember.new(@data.expression, this)
+						@property = ObjectComputedMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 					}
 				}
@@ -654,13 +692,13 @@ class ObjectRestrictiveMember extends Expression {
 			NodeKind.ShorthandProperty {
 				match @data.expression.name.kind {
 					NodeKind.Identifier {
-						@property = ObjectLiteralMember.new(@data.expression, this)
+						@property = ObjectLiteralMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
 					NodeKind.ThisExpression {
-						@property = ObjectThisMember.new(@data.expression, this)
+						@property = ObjectThisMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
@@ -671,11 +709,11 @@ class ObjectRestrictiveMember extends Expression {
 				}
 			}
 			NodeKind.SpreadExpression {
-				@property = ObjectFilteredMember.new(@data.expression, this)
+				@property = ObjectFilteredMember.new(@data.expression, this, @whenTrueScope)
 				@property.analyse()
 			}
 			NodeKind.UnaryExpression {
-				@property = ObjectSpreadMember.new(@data.expression, this)
+				@property = ObjectSpreadMember.new(@data.expression, this, @whenTrueScope)
 				@property.analyse()
 			}
 			else {
@@ -686,13 +724,19 @@ class ObjectRestrictiveMember extends Expression {
 	override prepare(target, targetMode) { # {{{
 		@condition.prepare(@scope.reference('Boolean'), TargetMode.Permissive)
 
+		for var data, name of @condition.inferWhenTrueTypes({}) {
+			@whenTrueScope.updateInferable(name, data, this)
+		}
+
 		@property.prepare(target, targetMode)
 	} # }}}
 	translate() { # {{{
 		@condition.translate()
 		@property.translate()
 	} # }}}
+	isComputed() => @property is ObjectComputedMember
 	name() => @property.name()
+	property() => @property
 	toFragments(fragments, mode) { # {{{
 		var ctrl = fragments.newControl()
 
@@ -821,4 +865,5 @@ class ObjectThisMember extends Expression {
 			.done()
 	} # }}}
 	value() => @value
+	type() => @value.type()
 }

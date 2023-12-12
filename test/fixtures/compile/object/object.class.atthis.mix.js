@@ -22,7 +22,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			quxbaz((() => {
+			quxbaz.__ks_0((() => {
 				const o = new OBJ();
 				o.x = this._x;
 				o.y = 0;

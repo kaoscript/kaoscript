@@ -40,7 +40,7 @@ class ValueType extends Type {
 		return @type.isSubsetOf(value, generics, subtypes, mode)
 	} # }}}
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
-		return @type == value.getMaster()
+		return @type.equals(value.getMaster())
 	} # }}}
 	override isValue() => true
 	path() => @path
