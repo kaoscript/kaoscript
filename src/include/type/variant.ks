@@ -135,7 +135,7 @@ class VariantType extends Type {
 			var property of type.properties()
 		}
 		then {
-			property.flagReferenced()
+			property.flagReferenced() unless property.isDirectlyExportable()
 		}
 
 		return this

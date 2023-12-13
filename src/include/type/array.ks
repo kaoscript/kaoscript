@@ -27,17 +27,32 @@ class ArrayType extends Type {
 			}
 
 			queue.push(() => {
+				var properties = []
+				var mut restType = null
+
 				if ?data.properties {
 					for var property in data.properties {
-						type.addProperty(Type.import(property, metadata, references, alterations, queue, scope, node))
+						properties.push(Type.import(property, metadata, references, alterations, queue, scope, node))
 					}
 				}
 
 				if ?data.rest {
-					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
+					restType = Type.import(data.rest, metadata, references, alterations, queue, scope, node)
 				}
 
-				type.flagComplete()
+				queue.push(() => {
+					if ?data.properties {
+						for var property in properties {
+							type.addProperty(property)
+						}
+					}
+
+					if ?data.rest {
+						type.setRestType(restType)
+					}
+
+					type.flagComplete()
+				})
 			})
 
 			return type
