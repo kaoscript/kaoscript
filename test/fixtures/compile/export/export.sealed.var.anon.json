@@ -9,7 +9,6 @@
     "references": [
       {
         "kind": "object",
-        "sealed": true,
         "properties": {
           "innerHeight": "Number",
           "innerWidth": "Number",
@@ -58,7 +57,8 @@
             "returns": "Any?",
             "errors": []
           }
-        }
+        },
+        "sealed": true
       }
     ]
   },

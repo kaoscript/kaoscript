@@ -292,6 +292,7 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
+	isDirectlyExportable() => true
 	isExhaustive() => !@rest || @scope.reference('Array').isExhaustive()
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false

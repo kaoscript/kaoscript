@@ -331,7 +331,7 @@ class FunctionType extends Type {
 		@exported = true
 
 		for var parameter in @parameters {
-			parameter.type().flagExported(false)
+			parameter.getVariableType().flagExported(false)
 		}
 
 		for var error in @errors {
@@ -455,6 +455,7 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
+	isDirectlyExportable() => true
 	isExportable() { # {{{
 		for var parameter in @parameters {
 			if !parameter.isExportable() {

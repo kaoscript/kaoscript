@@ -1,3 +1,1 @@
-import {
-	'./variant.type.enum.loop.export.func.ks' for greeting
-}
+import './variant.type.enum.loop.export.func.ks' for greeting

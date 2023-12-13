@@ -285,7 +285,7 @@ class UnionType extends Type {
 		}
 
 		for var type in @types {
-			type.flagExported(explicitly)
+			type.flagExported(explicitly).flagReferenced()
 		}
 
 		return this
@@ -397,6 +397,7 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
+	isDirectlyExportable() => true
 	isEnum() { # {{{
 		for var type in @types {
 			if !type.isEnum() {

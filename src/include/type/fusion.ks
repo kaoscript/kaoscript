@@ -18,11 +18,28 @@ class FusionType extends Type {
 					types.push(Type.import(type, metadata, references, alterations, queue, scope, node))
 				}
 
-				queue.push(() => {
+				var finalize = () => {
+					var mut complete = true
+
 					for var type in types {
-						fusion.addType(type)
+						if !type.isComplete() {
+							complete = false
+
+							break
+						}
 					}
-				})
+
+					if complete {
+						for var type in types {
+							fusion.addType(type)
+						}
+					}
+					else {
+						queue.push(finalize)
+					}
+				}
+
+				finalize()
 			})
 
 			return fusion
@@ -78,7 +95,7 @@ class FusionType extends Type {
 		}
 
 		for var type in @types {
-			type.flagExported(explicitly)
+			type.flagExported(explicitly).flagReferenced()
 		}
 
 		return this
@@ -204,6 +221,7 @@ class FusionType extends Type {
 	} # }}}
 	isComplete() => true
 	isComplex() => true
+	isDirectlyExportable() => true
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable

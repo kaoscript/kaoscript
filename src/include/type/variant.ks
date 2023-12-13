@@ -129,6 +129,17 @@ class VariantType extends Type {
 
 		return export
 	} # }}}
+	override flagReferenced() { # {{{
+		for {
+			var { type } in @fields
+			var property of type.properties()
+		}
+		then {
+			property.flagReferenced()
+		}
+
+		return this
+	} # }}}
 	getAlias(name: String) => @aliases[name]
 	getEnumType() => @enum
 	getField(name: String) => @names[name]

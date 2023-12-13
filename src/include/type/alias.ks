@@ -59,6 +59,16 @@ class AliasType extends Type {
 			@generics if ?#@generics
 		}
 	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
+		@type.flagExported(explicitly)
+
+		return this
+	} # }}}
+	flagReferenced() { # {{{
+		@type.flagReferenced()
+
+		return this
+	} # }}}
 	generics() => @generics
 	getGenericIndex(name: String) { # {{{
 		for var generic, index in @generics {
@@ -134,6 +144,7 @@ class AliasType extends Type {
 		hasRest
 		isComplex
 		isEnum
+		isReferenced
 		isVariant
 		isView
 		toAwareTestFunctionFragments

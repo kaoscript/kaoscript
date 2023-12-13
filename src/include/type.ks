@@ -1000,6 +1000,7 @@ abstract class Type {
 	isContainer() => @isClass() || @isStruct() || @isTuple()
 	isDeferrable() => false
 	isDeferred() => false
+	isDirectlyExportable() => false
 	isEnum() => false
 	isExclusion() => false
 	isExhaustive() { # {{{

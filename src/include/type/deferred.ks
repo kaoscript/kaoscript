@@ -77,6 +77,7 @@ class DeferredType extends Type {
 			constraint: @constraint.toReference(references, indexDelta, mode, module) if ?@constraint
 		}
 	} # }}}
+	override flagReferenced() => this
 	override getProperty(name) { # {{{
 		if @constrainted {
 			return @constraint.getProperty(name) ?? AnyType.NullableUnexplicit

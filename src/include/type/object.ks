@@ -42,21 +42,41 @@ class ObjectType extends Type {
 			}
 
 			queue.push(() => {
+				var properties = {}
+				var mut restType = null
+				var mut keyType = null
+
 				if ?data.properties {
 					for var property, name of data.properties {
-						type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
+						properties[name] = Type.import(property, metadata, references, alterations, queue, scope, node)
 					}
 				}
 
 				if ?data.rest {
-					type.setRestType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
+					restType = Type.import(data.rest, metadata, references, alterations, queue, scope, node)
 				}
 
 				if ?data.key {
-					type.setKeyType(Type.import(data.rest, metadata, references, alterations, queue, scope, node))
+					keyType = Type.import(data.rest, metadata, references, alterations, queue, scope, node)
 				}
 
-				type.flagComplete()
+				queue.push(() => {
+					if ?data.properties {
+						for var property, name of properties {
+							type.addProperty(name, property)
+						}
+					}
+
+					if ?data.rest {
+						type.setRestType(restType)
+					}
+
+					if ?data.key {
+						type.setKeyType(keyType)
+					}
+
+					type.flagComplete()
+				})
 			})
 
 			return type
@@ -183,14 +203,14 @@ class ObjectType extends Type {
 		}
 
 		if @key {
-			export.key = @keyType.export(references, indexDelta, mode, module)
+			export.key = @keyType.toExportOrIndex(references, indexDelta, mode, module)
 		}
 
 		if @length > 0 {
 			export.properties = {}
 
 			for var value, name of @properties {
-				export.properties[name] = value.export(references, indexDelta, mode, module)
+				export.properties[name] = value.toExportOrIndex(references, indexDelta, mode, module)
 			}
 		}
 
@@ -203,7 +223,7 @@ class ObjectType extends Type {
 		}
 
 		if @rest {
-			export.rest = @restType.export(references, indexDelta, mode, module)
+			export.rest = @restType.toExportOrIndex(references, indexDelta, mode, module)
 		}
 
 		if @system {
@@ -260,6 +280,28 @@ class ObjectType extends Type {
 	} # }}}
 	flagLiberal(): valueof this { # {{{
 		@liberal = true
+	} # }}}
+	override flagReferenced() { # {{{
+		if @referenced {
+			return this
+		}
+		else {
+			@referenced = true
+		}
+
+		if @key {
+			@keyType.flagReferenced() unless @keyType.isDirectlyExportable()
+		}
+
+		for var type of @properties {
+			type.flagReferenced() unless type.isDirectlyExportable()
+		}
+
+		if @rest {
+			@restType.flagReferenced() unless @restType.isDirectlyExportable()
+		}
+
+		return this
 	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
@@ -471,6 +513,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isDestructuring() => @destructuring
+	isDirectlyExportable() => true
 	isExhaustive() => !@rest || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true

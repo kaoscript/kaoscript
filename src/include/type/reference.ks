@@ -24,6 +24,7 @@ class ReferenceType extends Type {
 		@assessment							= null
 		@explicitlyNull: Boolean
 		@name: String
+		@native: Boolean
 		@nullable: Boolean
 		@parameters: Type[]
 		@predefined: Boolean				= false
@@ -67,9 +68,17 @@ class ReferenceType extends Type {
 							for var { name, subtype } in subtypes {
 								type.addSubtype(name, subtype, node)
 							}
+
+							type.flagComplete()
 						})
 					}
+					else {
+						type.flagComplete()
+					}
 				})
+			}
+			else {
+				type.flagComplete()
 			}
 
 			return type
@@ -120,6 +129,7 @@ class ReferenceType extends Type {
 		super(scope)
 
 		@name = $types[name] ?? name
+		@native = $natives[@name]
 		@nullable = @explicitlyNull
 	} # }}}
 	addParameter(parameter: Type) { # {{{
@@ -491,11 +501,9 @@ class ReferenceType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if ?#@parameters || ?#@subtypes {
-			var index = @type.referenceIndex()
-
 			var export = {
 				kind: TypeKind.Reference
-				name: index == -1 ? @name : index
+				name: @type.isReferenced() ? @type.toMetadata(references, indexDelta, mode, module) : @name
 			}
 
 			if @explicitlyNull {
@@ -565,6 +573,18 @@ class ReferenceType extends Type {
 		}
 
 		return super.flagExported(explicitly)
+	} # }}}
+	override flagReferenced() { # {{{
+		if @referenced || @native {
+			return this
+		}
+		else if !?#@parameters && !?#@subtypes {
+			@referenced = true
+		}
+
+		@type().flagReferenced()
+
+		return this
 	} # }}}
 	flagSealed(): ReferenceType { # {{{
 		return this if @sealed

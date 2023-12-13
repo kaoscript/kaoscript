@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {PersonKind, __ksType: __ksType0} = require("./.variant.type.enum.fusion.export.ks.j5k8r9.ksb")();
+	var {PersonKind, __ksType: __ksType0} = require("./.variant.type.enum.fusion.export.alias.ks.j5k8r9.ksb")();
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
