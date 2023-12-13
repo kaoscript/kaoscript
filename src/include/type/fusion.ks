@@ -69,6 +69,20 @@ class FusionType extends Type {
 			@types[index].finalize(data, generics, node)
 		}
 	} # }}}
+	flagExported(explicitly: Boolean) { # {{{
+		if @exported {
+			return this
+		}
+		else {
+			@exported = true
+		}
+
+		for var type in @types {
+			type.flagExported(explicitly)
+		}
+
+		return this
+	} # }}}
 	getKeyType() { # {{{
 		for var type in @types {
 			var root = type.discard()

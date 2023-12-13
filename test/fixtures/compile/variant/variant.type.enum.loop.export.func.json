@@ -1,0 +1,117 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "greeting"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "external": "person",
+            "internal": "person",
+            "type": {
+              "reference": 1
+            },
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "kind": {
+              "kind": "variant",
+              "master": {
+                "reference": 2
+              },
+              "fields": [
+                {
+                  "names": [
+                    "Student"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "name": "String"
+                    }
+                  }
+                },
+                {
+                  "names": [
+                    "Teacher"
+                  ],
+                  "type": {
+                    "kind": "object",
+                    "properties": {
+                      "favorite": {
+                        "kind": "reference",
+                        "name": 1,
+                        "subtypes": [
+                          {
+                            "name": "Student",
+                            "type": {
+                              "reference": 2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "enum",
+        "type": "number",
+        "exhaustive": true,
+        "nextIndex": 3,
+        "values": [
+          {
+            "name": "Director",
+            "index": 0
+          },
+          {
+            "name": "Student",
+            "index": 1
+          },
+          {
+            "name": "Teacher",
+            "index": 2
+          }
+        ],
+        "aliases": [],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 4
+        },
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

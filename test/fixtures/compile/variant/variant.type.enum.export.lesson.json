@@ -86,7 +86,7 @@
               "kind": "array",
               "rest": {
                 "kind": "reference",
-                "name": "SchoolPerson",
+                "name": 1,
                 "subtypes": [
                   {
                     "name": "Student",
@@ -109,7 +109,7 @@
             "name": "String",
             "teacher": {
               "kind": "reference",
-              "name": "SchoolPerson",
+              "name": 1,
               "subtypes": [
                 {
                   "name": "Teacher",
@@ -129,7 +129,7 @@
                   "kind": "array",
                   "rest": {
                     "kind": "reference",
-                    "name": "SchoolPerson",
+                    "name": 1,
                     "subtypes": [
                       {
                         "name": "Student",

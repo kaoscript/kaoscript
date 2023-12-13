@@ -330,6 +330,10 @@ class FunctionType extends Type {
 
 		@exported = true
 
+		for var parameter in @parameters {
+			parameter.type().flagExported(false)
+		}
+
 		for var error in @errors {
 			error.flagExported(false)
 		}

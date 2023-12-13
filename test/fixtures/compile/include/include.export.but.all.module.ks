@@ -1,0 +1,1 @@
+include 'npm:@kaoscript/test-import/src/export.but.all.ks'

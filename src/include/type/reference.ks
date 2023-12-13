@@ -33,15 +33,15 @@ class ReferenceType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { # {{{
-			var late name
-			if data.name is Number {
-				var reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
+			var name =
+				if data.name is Number {
+					var reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
 
-				name = reference.name()
-			}
-			else {
-				name = data.name
-			}
+					set reference.name()
+				}
+				else {
+					set data.name
+				}
 
 			var type = ReferenceType.new(scope, name as String, data.nullable!?)
 
@@ -491,9 +491,11 @@ class ReferenceType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if ?#@parameters || ?#@subtypes {
+			var index = @type.referenceIndex()
+
 			var export = {
 				kind: TypeKind.Reference
-				name: @name
+				name: index == -1 ? @name : index
 			}
 
 			if @explicitlyNull {
