@@ -299,7 +299,7 @@ class VariantType extends Type {
 
 				block
 					.newControl()
-					.code(`if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
+					.code(`if((variant = `).compile(@master).code(`(variant)) === null)`)
 					.step()
 					.line('return false')
 					.done()

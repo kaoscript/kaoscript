@@ -3,7 +3,7 @@ module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
 		isNodeData: (value, filter) => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, NodeKind)) {
+			if((variant = NodeKind(variant)) === null) {
 				return false;
 			}
 			if(filter && !filter(variant)) {

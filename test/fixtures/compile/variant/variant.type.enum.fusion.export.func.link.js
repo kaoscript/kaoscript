@@ -4,7 +4,7 @@ module.exports = function() {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
 		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
 		isSchoolPerson: (value, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, PersonKind)) {
+			if((variant = PersonKind(variant)) === null) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -19,7 +19,7 @@ module.exports = function() {
 			return true;
 		}}),
 		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(!Type.isEnumInstance(variant, CardSuit)) {
+			if((variant = CardSuit(variant)) === null) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
