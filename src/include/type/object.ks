@@ -203,14 +203,14 @@ class ObjectType extends Type {
 		}
 
 		if @key {
-			export.key = @keyType.toExportOrIndex(references, indexDelta, mode, module)
+			export.key = @keyType.toExportOrReference(references, indexDelta, mode, module)
 		}
 
 		if @length > 0 {
 			export.properties = {}
 
 			for var value, name of @properties {
-				export.properties[name] = value.toExportOrIndex(references, indexDelta, mode, module)
+				export.properties[name] = value.toExportOrReference(references, indexDelta, mode, module)
 			}
 		}
 
@@ -223,7 +223,7 @@ class ObjectType extends Type {
 		}
 
 		if @rest {
-			export.rest = @restType.toExportOrIndex(references, indexDelta, mode, module)
+			export.rest = @restType.toExportOrReference(references, indexDelta, mode, module)
 		}
 
 		if @system {

@@ -9,8 +9,10 @@
       0,
       "Position",
       1,
-      "PersonKind",
+      "Range",
       2,
+      "PersonKind",
+      3,
       "SchoolPerson"
     ],
     "references": [
@@ -24,6 +26,21 @@
           }
         },
         "testIndex": 0
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "start": {
+              "reference": 0
+            },
+            "end": {
+              "reference": 0
+            }
+          }
+        },
+        "testIndex": 1
       },
       {
         "kind": "enum",
@@ -63,7 +80,7 @@
           "kind": "fusion",
           "types": [
             {
-              "reference": 0
+              "reference": 1
             },
             {
               "kind": "object",
@@ -71,7 +88,7 @@
                 "kind": {
                   "kind": "variant",
                   "master": {
-                    "reference": 1
+                    "reference": 2
                   },
                   "fields": [
                     {
@@ -91,7 +108,7 @@
             }
           ]
         },
-        "testIndex": 1
+        "testIndex": 2
       }
     ],
     "macros": []

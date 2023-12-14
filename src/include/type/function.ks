@@ -1145,11 +1145,11 @@ class OverloadedFunctionType extends Type {
 		for var reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
 				for var fn in reference.functions() when fn.isExportable(mode) {
-					functions.push(fn.toExportOrReference(references, indexDelta, overloadedMode, module))
+					functions.push(fn.toExportOrIndex(references, indexDelta, overloadedMode, module))
 				}
 			}
 			else if reference.isExportable(mode) {
-				functions.push(reference.toExportOrReference(references, indexDelta, overloadedMode, module))
+				functions.push(reference.toExportOrIndex(references, indexDelta, overloadedMode, module))
 			}
 		}
 

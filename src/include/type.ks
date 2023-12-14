@@ -1183,7 +1183,9 @@ abstract class Type {
 	} # }}}
 	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
-			return @referenceIndex
+			return {
+				reference: @referenceIndex
+			}
 		}
 		else if @isReferenced() {
 			return {

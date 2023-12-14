@@ -104,8 +104,12 @@
         "of": {
           "kind": "object",
           "properties": {
-            "start": 3,
-            "end": 3
+            "start": {
+              "reference": 3
+            },
+            "end": {
+              "reference": 3
+            }
           }
         }
       },
