@@ -1,1 +1,0 @@
-import './variant.type.enum.fusion.export.func.ks'

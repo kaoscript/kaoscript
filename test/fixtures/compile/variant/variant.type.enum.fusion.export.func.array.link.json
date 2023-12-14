@@ -1,0 +1,227 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "greeting"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "external": "person",
+            "internal": "person",
+            "type": {
+              "reference": 1
+            },
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            {
+              "reference": 2
+            },
+            {
+              "kind": "object",
+              "properties": {
+                "kind": {
+                  "kind": "variant",
+                  "master": {
+                    "reference": 4
+                  },
+                  "fields": [
+                    {
+                      "names": [
+                        "Student"
+                      ],
+                      "type": {
+                        "kind": "object",
+                        "properties": {
+                          "name": "String"
+                        }
+                      }
+                    },
+                    {
+                      "names": [
+                        "Teacher"
+                      ],
+                      "type": {
+                        "kind": "object",
+                        "properties": {
+                          "favorite": {
+                            "kind": "reference",
+                            "name": 1,
+                            "subtypes": [
+                              {
+                                "name": "Student",
+                                "type": {
+                                  "reference": 4
+                                }
+                              }
+                            ]
+                          },
+                          "cards": {
+                            "kind": "array",
+                            "rest": {
+                              "kind": "reference",
+                              "name": 5,
+                              "subtypes": [
+                                {
+                                  "name": "Reds",
+                                  "type": {
+                                    "reference": 6
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "start": 3,
+            "end": 3
+          }
+        }
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "line": "Number",
+            "column": "Number"
+          }
+        }
+      },
+      {
+        "kind": "enum",
+        "type": "number",
+        "exhaustive": true,
+        "nextIndex": 3,
+        "values": [
+          {
+            "name": "Director",
+            "index": 0
+          },
+          {
+            "name": "Student",
+            "index": 1
+          },
+          {
+            "name": "Teacher",
+            "index": 2
+          }
+        ],
+        "aliases": [],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 4
+        },
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "suit": {
+              "kind": "variant",
+              "master": {
+                "reference": 6
+              },
+              "fields": []
+            },
+            "rank": "Number"
+          }
+        }
+      },
+      {
+        "kind": "enum",
+        "type": "number",
+        "exhaustive": true,
+        "nextIndex": 4,
+        "values": [
+          {
+            "name": "Clubs",
+            "index": 0
+          },
+          {
+            "name": "Diamonds",
+            "index": 1
+          },
+          {
+            "name": "Hearts",
+            "index": 2
+          },
+          {
+            "name": "Spades",
+            "index": 3
+          }
+        ],
+        "aliases": [
+          {
+            "name": "Blacks",
+            "originals": [
+              "Clubs",
+              "Spades"
+            ]
+          },
+          {
+            "name": "Reds",
+            "originals": [
+              "Diamonds",
+              "Hearts"
+            ]
+          }
+        ],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generator": {
+          "initial": 0,
+          "step": 1,
+          "next": 5
+        },
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

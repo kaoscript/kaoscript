@@ -1602,6 +1602,7 @@ class ReferenceType extends Type {
 						}
 					}
 					else {
+						echo(@name)
 						NotSupportedException.throw()
 					}
 				}
@@ -1617,6 +1618,7 @@ class ReferenceType extends Type {
 						fullname += name
 
 						if type !?= type.getProperty(name) {
+							echo(@name)
 							NotSupportedException.throw()
 						}
 					}

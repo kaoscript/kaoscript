@@ -342,6 +342,7 @@ class FunctionType extends Type {
 
 		return this
 	} # }}}
+	override flagIndirectlyReferenced()
 	functions() => [this]
 	getCallIndex() => @alien ? 0 : @index
 	getProperty(name: String) => Type.Any
@@ -455,7 +456,6 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	isDirectlyExportable() => true
 	isExportable() { # {{{
 		for var parameter in @parameters {
 			if !parameter.isExportable() {

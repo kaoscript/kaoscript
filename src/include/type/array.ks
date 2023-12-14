@@ -174,6 +174,27 @@ class ArrayType extends Type {
 	flagDestructuring() { # {{{
 		@destructuring = true
 	} # }}}
+	override flagIndirectlyReferenced() { # {{{
+		for var type in @properties {
+			type.flagIndirectlyReferenced()
+		}
+
+		if @rest {
+			@restType.flagIndirectlyReferenced()
+		}
+	} # }}}
+	override flagReferenced() { # {{{
+		if @referenced {
+			return this
+		}
+		else {
+			@referenced = true
+		}
+
+		@flagIndirectlyReferenced()
+
+		return this
+	} # }}}
 	flagSpread() { # {{{
 		return this if @spread
 
@@ -307,7 +328,6 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
-	isDirectlyExportable() => true
 	isExhaustive() => !@rest || @scope.reference('Array').isExhaustive()
 	isExportable() => true
 	isInstanceOf(value: AnyType) => false

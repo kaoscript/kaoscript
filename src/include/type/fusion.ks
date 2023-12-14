@@ -100,6 +100,7 @@ class FusionType extends Type {
 
 		return this
 	} # }}}
+	override flagIndirectlyReferenced()
 	getKeyType() { # {{{
 		for var type in @types {
 			var root = type.discard()
@@ -221,7 +222,6 @@ class FusionType extends Type {
 	} # }}}
 	isComplete() => true
 	isComplex() => true
-	isDirectlyExportable() => true
 	isExportable() => true
 	isFusion() => true
 	isNullable() => @nullable

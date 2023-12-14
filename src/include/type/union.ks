@@ -290,6 +290,7 @@ class UnionType extends Type {
 
 		return this
 	} # }}}
+	override flagIndirectlyReferenced()
 	getProperty(index: Number) { # {{{
 		var types = []
 
@@ -397,7 +398,6 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
-	isDirectlyExportable() => true
 	isEnum() { # {{{
 		for var type in @types {
 			if !type.isEnum() {

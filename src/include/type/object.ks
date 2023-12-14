@@ -278,6 +278,19 @@ class ObjectType extends Type {
 	flagEmpty(): valueof this { # {{{
 		@empty = true
 	} # }}}
+	override flagIndirectlyReferenced() { # {{{
+		if @key {
+			@keyType.flagIndirectlyReferenced()
+		}
+
+		for var type of @properties {
+			type.flagIndirectlyReferenced()
+		}
+
+		if @rest {
+			@restType.flagIndirectlyReferenced()
+		}
+	} # }}}
 	flagLiberal(): valueof this { # {{{
 		@liberal = true
 	} # }}}
@@ -289,17 +302,7 @@ class ObjectType extends Type {
 			@referenced = true
 		}
 
-		if @key {
-			@keyType.flagReferenced() unless @keyType.isDirectlyExportable()
-		}
-
-		for var type of @properties {
-			type.flagReferenced() unless type.isDirectlyExportable()
-		}
-
-		if @rest {
-			@restType.flagReferenced() unless @restType.isDirectlyExportable()
-		}
+		@flagIndirectlyReferenced()
 
 		return this
 	} # }}}
@@ -513,7 +516,6 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isDestructuring() => @destructuring
-	isDirectlyExportable() => true
 	isExhaustive() => !@rest || @scope.reference('Object').isExhaustive()
 	isInstanceOf(value: AnyType) => false
 	isMorePreciseThan(value: AnyType) => true

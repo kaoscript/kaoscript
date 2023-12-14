@@ -132,10 +132,10 @@ class VariantType extends Type {
 	override flagReferenced() { # {{{
 		for {
 			var { type } in @fields
-			var property of type.properties()
+			var property, name of type.properties()
 		}
 		then {
-			property.flagReferenced() unless property.isDirectlyExportable()
+			property.flagIndirectlyReferenced()
 		}
 
 		return this

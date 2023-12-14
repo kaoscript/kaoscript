@@ -912,6 +912,7 @@ abstract class Type {
 
 		return this
 	} # }}}
+	flagIndirectlyReferenced() => @flagReferenced()
 	flagReferenced() { # {{{
 		@referenced = true
 
@@ -1000,7 +1001,6 @@ abstract class Type {
 	isContainer() => @isClass() || @isStruct() || @isTuple()
 	isDeferrable() => false
 	isDeferred() => false
-	isDirectlyExportable() => false
 	isEnum() => false
 	isExclusion() => false
 	isExhaustive() { # {{{
