@@ -16,7 +16,7 @@ module.exports = function() {
 			}
 		}}),
 		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if((variant = CardSuit(variant)) === null) {
+			if(!Type.isEnumInstance(variant, CardSuit)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {

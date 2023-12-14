@@ -2,7 +2,7 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		isSchoolPerson: (value, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
-			if((variant = PersonKind(variant)) === null) {
+			if(!Type.isEnumInstance(variant, PersonKind)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
