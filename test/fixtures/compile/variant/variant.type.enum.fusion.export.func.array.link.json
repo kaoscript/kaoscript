@@ -108,10 +108,12 @@
           "kind": "object",
           "properties": {
             "start": {
-              "reference": 3
+              "kind": "reference",
+              "name": 3
             },
             "end": {
-              "reference": 3
+              "kind": "reference",
+              "name": 3
             }
           }
         }

@@ -500,10 +500,10 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if ?#@parameters || ?#@subtypes {
+		if ?#@parameters || ?#@subtypes || (!@native && !@type.isExported()) {
 			var export = {
 				kind: TypeKind.Reference
-				name: @type.isReferenced() ? @type.toMetadata(references, indexDelta, mode, module) : @name
+				name: @type.isExported() ? @name : @type.toMetadata(references, indexDelta, mode, module)
 			}
 
 			if @explicitlyNull {

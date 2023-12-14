@@ -1181,21 +1181,6 @@ abstract class Type {
 			return @export(references, indexDelta, mode, module)
 		}
 	} # }}}
-	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @referenceIndex != -1 {
-			return {
-				reference: @referenceIndex
-			}
-		}
-		else if @isReferenced() {
-			return {
-				reference: @toMetadata(references, indexDelta, mode, module)
-			}
-		}
-		else {
-			return @export(references, indexDelta, mode, module)
-		}
-	} # }}}
 	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var reference = @getMajorReferenceIndex()
 		if reference != -1 {
