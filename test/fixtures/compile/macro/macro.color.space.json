@@ -874,7 +874,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3MCwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjQ5LCJtb2RpZmllcnMiOltdLCJuYW1lIjoidGhpcyIsInN0YXJ0Ijp7ImxpbmUiOjgzOSwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MzksImNvbHVtbiI6MzB9fSwicHJvcGVydHkiOnsia2luZCI6NDksIm1vZGlmaWVycyI6W10sIm5hbWUiOiJfc3BhY2UiLCJzdGFydCI6eyJsaW5lIjo4MzksImNvbHVtbiI6MzF9LCJlbmQiOnsibGluZSI6ODM5LCJjb2x1bW4iOjM3fX0sInN0YXJ0Ijp7ImxpbmUiOjgzOSwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MzksImNvbHVtbiI6Mzd9fQ=="
+                  "defaultValue": "eyJraW5kIjo3MCwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjcwLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NDksIm1vZGlmaWVycyI6W10sIm5hbWUiOiJ0aGlzIiwic3RhcnQiOnsibGluZSI6ODM5LCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjgzOSwiY29sdW1uIjozMH19LCJwcm9wZXJ0eSI6eyJraW5kIjo0OSwibW9kaWZpZXJzIjpbXSwibmFtZSI6Il9zcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjgzOSwiY29sdW1uIjozMX0sImVuZCI6eyJsaW5lIjo4MzksImNvbHVtbiI6Mzd9fSwic3RhcnQiOnsibGluZSI6ODM5LCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjgzOSwiY29sdW1uIjozN319LCJwcm9wZXJ0eSI6eyJraW5kIjo0OSwibW9kaWZpZXJzIjpbXSwibmFtZSI6InZhbHVlIiwic3RhcnQiOnsibGluZSI6ODM5LCJjb2x1bW4iOjM4fSwiZW5kIjp7ImxpbmUiOjgzOSwiY29sdW1uIjo0M319LCJzdGFydCI6eyJsaW5lIjo4MzksImNvbHVtbiI6MjZ9LCJlbmQiOnsibGluZSI6ODM5LCJjb2x1bW4iOjQzfX0="
                 }
               ],
               "returns": "Any?",
@@ -1045,13 +1045,36 @@
                 {
                   "external": "space",
                   "internal": "space",
-                  "type": "String",
+                  "type": {
+                    "reference": 8
+                  },
                   "min": 1,
                   "max": 1,
                   "default": false
                 }
               ],
               "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "str",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
               "errors": [],
               "inits": []
             }
@@ -1136,7 +1159,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OSwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTg3LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk4NywiY29sdW1uIjo0Nn19"
+                  "defaultValue": "eyJraW5kIjo0OSwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTk2LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk5NiwiY29sdW1uIjo0Nn19"
                 }
               ],
               "returns": "Boolean",
@@ -1270,6 +1293,29 @@
                 {
                   "external": "space",
                   "internal": "space",
+                  "type": {
+                    "reference": 8
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 2,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "str",
                   "type": "String",
                   "min": 1,
                   "max": 1,

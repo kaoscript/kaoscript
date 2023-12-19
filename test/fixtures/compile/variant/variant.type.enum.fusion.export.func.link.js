@@ -3,8 +3,14 @@ module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
 		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
-		isSchoolPerson: (value, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, PersonKind)) {
+		isSchoolPerson: (value, cast, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
+			if(cast) {
+				if((variant = PersonKind(variant)) === null) {
+					return false;
+				}
+				value["kind"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, PersonKind)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -14,12 +20,18 @@ module.exports = function() {
 				return Type.isDexObject(value, 0, 0, {name: Type.isString});
 			}
 			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorite: value => __ksType.isSchoolPerson(value, value => value === PersonKind.Student), card: value => __ksType.isCard(value, CardSuit.__ks_eq_Reds)});
+				return Type.isDexObject(value, 0, 0, {favorite: value => __ksType.isSchoolPerson(value, cast, value => value === PersonKind.Student), card: value => __ksType.isCard(value, cast, CardSuit.__ks_eq_Reds)});
 			}
 			return true;
 		}}),
-		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(!Type.isEnumInstance(variant, CardSuit)) {
+		isCard: (value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
+			if(cast) {
+				if((variant = CardSuit(variant)) === null) {
+					return false;
+				}
+				value["suit"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, CardSuit)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {

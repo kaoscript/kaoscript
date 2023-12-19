@@ -2,7 +2,6 @@ class MatchExpression extends Expression {
 	private late {
 		@bindingScope: Scope
 		@bodyScope: Scope
-		@castingEnum: Boolean				= false
 		@clauses							= []
 		@declaration: VariableDeclaration?
 		@declarator
@@ -164,15 +163,11 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
-		var enumValue = @valueType.isBitmask() || @valueType.isEnum()
-
-		var mut enumConditions = 0
 		var mut maxConditions = 0
 
 		for var clause, index in @clauses {
 			clause.filter.prepare(@scope.reference('Boolean'))
 
-			enumConditions += clause.filter:MatchFilter.getEnumConditions()
 			maxConditions += clause.filter:MatchFilter.getMaxConditions()
 
 			for var condition in clause.filter.conditions() {
@@ -199,27 +194,6 @@ class MatchExpression extends Expression {
 			}
 			else {
 				SyntaxException.throwNotMatchedPossibilities(this)
-			}
-		}
-
-		if enumConditions != 0 || enumValue {
-			if enumValue && enumConditions == maxConditions {
-				pass
-			}
-			else {
-				for var clause in @clauses {
-					clause.filter.setCastingEnum(true)
-				}
-
-				if enumValue || @valueType.isAny() {
-					@castingEnum = true
-
-					if !@reusableValue {
-						@name = @scope.acquireTempName(false)
-
-						@reusableValue = true
-					}
-				}
 			}
 		}
 
@@ -366,30 +340,7 @@ class MatchExpression extends Expression {
 			fragments.compile(@declaration)
 		}
 		else if @reusableValue {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
-
-			if @castingEnum {
-				if @valueType.isBitmask() || @valueType.isEnum() {
-					line.code('.value')
-				}
-				else if @valueType.isAny() {
-					line.code('.valueOf()')
-				}
-			}
-
-			line.done()
-		}
-		else if @castingEnum {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
-
-			if @valueType.isBitmask() || @valueType.isEnum() {
-				line.code('.value')
-			}
-			else if @valueType.isAny() {
-				line.code('.valueOf()')
-			}
-
-			line.done()
+			fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value).done()
 		}
 
 		for var test of @tests when test.count > 1 {
@@ -401,7 +352,7 @@ class MatchExpression extends Expression {
 				var { testingType, minmax, type } = test
 
 				if ?type {
-					type.toBlindTestFragments(@name, testingType, ?minmax, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, Junction.NONE, line, this)
 				}
 				else if ?minmax {
 					var { min, max } = minmax
@@ -416,7 +367,7 @@ class MatchExpression extends Expression {
 				var { testingType, type } = test
 
 				if ?type {
-					type.toBlindTestFragments(@name, testingType, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, null, Junction.NONE, line, this)
 				}
 				else {
 					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)

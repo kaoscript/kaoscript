@@ -3,8 +3,14 @@ module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
 		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
-		isSchoolPerson: (value, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, PersonKind)) {
+		isSchoolPerson: (value, cast, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
+			if(cast) {
+				if((variant = PersonKind(variant)) === null) {
+					return false;
+				}
+				value["kind"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, PersonKind)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {

@@ -6,8 +6,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(card) {
-		if(Helper.equalEnum(CardSuit, CardSuit.__ks_eq_Reds, card.suit)) {
-			if(Helper.valueOf(card.suit) === CardSuit.Hearts.value) {
+		if(CardSuit.__ks_eq_Reds(card.suit)) {
+			if(card.suit === CardSuit.Hearts) {
 			}
 			else {
 			}

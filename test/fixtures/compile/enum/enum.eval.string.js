@@ -42,8 +42,8 @@ module.exports = function(expect) {
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isEnum;
-		const t1 = Type.isNumber;
-		const t2 = value => Type.isEnumInstance(value, CardSuit);
+		const t1 = value => Type.isEnumInstance(value, CardSuit);
+		const t2 = Type.isNumber;
 		const t3 = Type.isString;
 		const t4 = Type.isObject;
 		const t5 = Type.isValue;
@@ -52,10 +52,10 @@ module.exports = function(expect) {
 				return foobar.__ks_0.call(that, args[0]);
 			}
 			if(t1(args[0])) {
-				return foobar.__ks_2.call(that, args[0]);
+				return foobar.__ks_1.call(that, args[0]);
 			}
 			if(t2(args[0])) {
-				return foobar.__ks_1.call(that, args[0]);
+				return foobar.__ks_2.call(that, args[0]);
 			}
 			if(t3(args[0])) {
 				return foobar.__ks_4.call(that, args[0]);
@@ -86,21 +86,21 @@ module.exports = function(expect) {
 		else {
 			results.push(null);
 		}
-		if(y === CardSuit.Clubs.value) {
+		if(CardSuit(y) === CardSuit.Clubs) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if(z.valueOf() === CardSuit.Clubs.value) {
+		if(CardSuit(z) === CardSuit.Clubs) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
 		results.push((x === CardSuit.Clubs) ? "c" : null);
-		results.push((y === CardSuit.Clubs.value) ? "c" : null);
-		results.push((z.valueOf() === CardSuit.Clubs.value) ? "c" : null);
+		results.push((CardSuit(y) === CardSuit.Clubs) ? "c" : null);
+		results.push((CardSuit(z) === CardSuit.Clubs) ? "c" : null);
 		return results;
 	};
 	testIf.__ks_rt = function(that, args) {
@@ -116,10 +116,10 @@ module.exports = function(expect) {
 	};
 	expect(testIf.__ks_0(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c", "c", "c", "c"]);
 	expect(testIf.__ks_0(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql([null, "c", "c", null, "c", "c"]);
-	function testSwitch() {
-		return testSwitch.__ks_rt(this, arguments);
+	function testMatch() {
+		return testMatch.__ks_rt(this, arguments);
 	};
-	testSwitch.__ks_0 = function(x, y, z) {
+	testMatch.__ks_0 = function(x, y, z) {
 		const results = [];
 		if(x === CardSuit.Clubs) {
 			results.push("c");
@@ -130,20 +130,21 @@ module.exports = function(expect) {
 		else {
 			results.push(null);
 		}
-		if(y === CardSuit.Clubs.value) {
+		let __ks_0 = CardSuit(y);
+		if(__ks_0 === CardSuit.Clubs) {
 			results.push("c");
 		}
-		else if(y === CardSuit.Diamonds.value) {
+		else if(__ks_0 === CardSuit.Diamonds) {
 			results.push("d");
 		}
 		else {
 			results.push(null);
 		}
-		let __ks_0 = Helper.valueOf(z);
-		if(__ks_0 === CardSuit.Clubs.value) {
+		__ks_0 = CardSuit(z);
+		if(__ks_0 === CardSuit.Clubs) {
 			results.push("c");
 		}
-		else if(__ks_0 === CardSuit.Diamonds.value) {
+		else if(__ks_0 === CardSuit.Diamonds) {
 			results.push("d");
 		}
 		else {
@@ -151,17 +152,17 @@ module.exports = function(expect) {
 		}
 		return results;
 	};
-	testSwitch.__ks_rt = function(that, args) {
+	testMatch.__ks_rt = function(that, args) {
 		const t0 = value => Type.isEnumInstance(value, CardSuit);
 		const t1 = Type.isString;
 		const t2 = Type.isValue;
 		if(args.length === 3) {
 			if(t0(args[0]) && t1(args[1]) && t2(args[2])) {
-				return testSwitch.__ks_0.call(that, args[0], args[1], args[2]);
+				return testMatch.__ks_0.call(that, args[0], args[1], args[2]);
 			}
 		}
 		throw Helper.badArgs();
 	};
-	expect(testSwitch.__ks_0(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c"]);
-	expect(testSwitch.__ks_0(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(["d", "c", "c"]);
+	expect(testMatch.__ks_0(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c"]);
+	expect(testMatch.__ks_0(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(["d", "c", "c"]);
 };

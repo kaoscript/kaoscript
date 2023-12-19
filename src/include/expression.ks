@@ -124,13 +124,6 @@ abstract class Expression extends AbstractNode {
 	toArgumentFragments(fragments, type: Type, mode: Mode = Mode.None) { # {{{
 		@toArgumentFragments(fragments, mode)
 	} # }}}
-	toCastingFragments(fragments, mode) { # {{{
-		fragments.code($runtime.helper(this), '.valueOf(')
-
-		@toFragments(fragments, mode)
-
-		fragments.code(')')
-	} # }}}
 	toConditionFragments(fragments, mode: Mode = Mode.None, junction: Junction = Junction.NONE) { # {{{
 		this.toFragments(fragments, mode)
 
@@ -154,14 +147,6 @@ abstract class Expression extends AbstractNode {
 		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
 	} # }}}
 	toReusableFragments(fragments) => @toFragments(fragments, Mode.None)
-	toStringFragments(fragments) { # {{{
-		if @type().isEnum() {
-			fragments.compile(this).code('.value')
-		}
-		else {
-			fragments.wrap(this)
-		}
-	} # }}}
 	toTypeQuote() => @type().toTypeQuote()
 	toTypeQuote(double: Boolean): String { # {{{
 		return double ? `"\(@toTypeQuote())"` : `'\(@toTypeQuote())'`

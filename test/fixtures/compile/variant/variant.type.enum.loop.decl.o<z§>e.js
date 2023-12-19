@@ -1,15 +1,21 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
-		isSchoolPerson: (value, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, PersonKind)) {
+		isSchoolPerson: (value, cast, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
+			if(cast) {
+				if((variant = PersonKind(variant)) === null) {
+					return false;
+				}
+				value["kind"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, PersonKind)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
 				return false;
 			}
 			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorite: value => __ksType.isSchoolPerson(value, value => value === PersonKind.Student)});
+				return Type.isDexObject(value, 0, 0, {favorite: value => __ksType.isSchoolPerson(value, cast, value => value === PersonKind.Student)});
 			}
 			return true;
 		}})

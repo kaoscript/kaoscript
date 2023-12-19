@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(color) {
-		if(color.valueOf() === Color.Red.value) {
+		if(color === Color.Red) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

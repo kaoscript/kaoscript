@@ -93,6 +93,7 @@ class VariantType extends Type {
 	} # }}}
 	override canBeBoolean() => @kind == .Boolean
 	override canBeDeferred() => @deferrable
+	override canBeRawCasted() => @master.canBeRawCasted()
 	override clone() { # {{{
 		NotImplementedException.throw()
 	} # }}}
@@ -232,7 +233,7 @@ class VariantType extends Type {
 			NotImplementedException.throw()
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(funcname, varname, _, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, _, generics, fragments, node) { # {{{
 		match @kind {
 			.Boolean {
 				var block = fragments.code('variant =>').newBlock()
@@ -263,10 +264,10 @@ class VariantType extends Type {
 					var line = ctrl.newLine().code(`return `)
 
 					if @names.true.type is ObjectType {
-						@names.true.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+						@names.true.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
 					}
 					else {
-						@names.true.type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+						@names.true.type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
 					}
 
 					line.done()
@@ -281,10 +282,10 @@ class VariantType extends Type {
 					var line = ctrl.newLine().code(`return `)
 
 					if @names.false.type is ObjectType {
-						@names.false.type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+						@names.false.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
 					}
 					else {
-						@names.false.type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+						@names.false.type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
 					}
 
 					line.done()
@@ -297,9 +298,22 @@ class VariantType extends Type {
 			.Enum {
 				var block = fragments.code('variant =>').newBlock()
 
-				block
+				var ctrl = block
 					.newControl()
-					.code(`if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
+					.code(`if(cast)`)
+					.step()
+
+				ctrl
+					.newControl()
+					.code(`if((variant = `).compile(@master).code(`(variant)) === null)`)
+					.step()
+					.line('return false')
+					.done()
+
+				ctrl
+					.line(`\(varname)[\(propname)] = variant`)
+					.step()
+					.code(`else if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
 					.step()
 					.line('return false')
 					.done()
@@ -324,10 +338,10 @@ class VariantType extends Type {
 						var line = ctrl.newLine().code(`return `)
 
 						if type is ObjectType {
-							type.toBlindTestFragments(varname, false, false, generics, Junction.NONE, line, node)
+							type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
 						}
 						else {
-							type.toBlindTestFragments(varname, generics, Junction.NONE, line, node)
+							type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
 						}
 
 						line.done()

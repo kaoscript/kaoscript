@@ -175,7 +175,7 @@ class AnyType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, generics, subtypes, fragments, node) { # {{{
 		if nullable || @nullable {
 			fragments.code(`\($runtime.type(node)).any`)
 		}
@@ -204,7 +204,7 @@ class AnyType extends Type {
 			fragments.code(`\($runtime.type(node)).isNull(`).compile(node).code(`)`)
 		}
 	} # }}}
-	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
+	override toPositiveTestFragments(_, _, _, _, fragments, node) { # {{{
 		if @nullable {
 			fragments.code('true')
 		}

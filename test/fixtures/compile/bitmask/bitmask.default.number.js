@@ -5,11 +5,11 @@ module.exports = function() {
 		return printAnimalAbilities.__ks_rt(this, arguments);
 	};
 	printAnimalAbilities.__ks_0 = function(animal) {
-		const animalFlags = animal.flags;
-		if((animalFlags & AnimalFlags.HasClaws) !== 0) {
+		const animalFlags = animal.flags.value;
+		if((animalFlags & AnimalFlags.HasClaws.value) !== 0) {
 			console.log("animal has claws");
 		}
-		if((animalFlags & AnimalFlags.CanFly) !== 0) {
+		if((animalFlags & AnimalFlags.CanFly.value) !== 0) {
 			console.log("animal can fly");
 		}
 		if(animalFlags === AnimalFlags.None.value) {

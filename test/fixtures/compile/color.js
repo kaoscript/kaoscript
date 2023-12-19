@@ -306,7 +306,7 @@ module.exports = function() {
 			});
 			args.push(result);
 			s.converters[space](...args);
-			result._space = Space(space);
+			result._space = space;
 			return result;
 		}
 		else {
@@ -315,7 +315,7 @@ module.exports = function() {
 	};
 	$convert.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Color);
-		const t1 = Type.isString;
+		const t1 = value => Type.isEnumInstance(value, Space);
 		const t2 = value => Type.isClassInstance(value, Color) || Type.isObject(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
@@ -821,8 +821,8 @@ module.exports = function() {
 		__ks_func_copy_0(target) {
 			const s1 = this._space;
 			const s2 = target._space;
-			this.__ks_func_space_1(Space.SRGB.value);
-			target.__ks_func_space_1(Space.SRGB.value);
+			this.__ks_func_space_1(Space.SRGB);
+			target.__ks_func_space_1(Space.SRGB);
 			target._red = this._red;
 			target._green = this._green;
 			target._blue = this._blue;
@@ -845,8 +845,8 @@ module.exports = function() {
 			return this.__ks_func_distance_rt.call(null, this, this, arguments);
 		}
 		__ks_func_distance_0(color) {
-			const that = this.__ks_func_like_0(Space.SRGB.value);
-			color = color.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB);
+			color = color.__ks_func_like_0(Space.SRGB);
 			return Math.sqrt((3 * (color._red - that._red) * (color._red - that._red)) + (4 * (color._green - that._green) * (color._green - that._green)) + (2 * (color._blue - that._blue) * (color._blue - that._blue)));
 		}
 		__ks_func_distance_rt(that, proto, args) {
@@ -878,7 +878,7 @@ module.exports = function() {
 		}
 		__ks_func_format_0(format) {
 			if(format === void 0 || format === null) {
-				format = this._space;
+				format = this._space.value;
 			}
 			let __ks_format_1 = $formatters[format];
 			if(Type.isValue(__ks_format_1)) {
@@ -944,8 +944,8 @@ module.exports = function() {
 		__ks_func_gradient_0(endColor, length) {
 			const gradient = [this];
 			if(length > 0) {
-				this.__ks_func_space_1(Space.SRGB.value);
-				endColor.__ks_func_space_1(Space.SRGB.value);
+				this.__ks_func_space_1(Space.SRGB);
+				endColor.__ks_func_space_1(Space.SRGB);
 				length += 1;
 				const red = endColor._red - this._red;
 				const green = endColor._green - this._green;
@@ -982,7 +982,7 @@ module.exports = function() {
 			if(model === void 0 || model === null) {
 				model = "BT709";
 			}
-			this.__ks_func_space_1(Space.SRGB.value);
+			this.__ks_func_space_1(Space.SRGB);
 			if(model === "BT709") {
 				this._red = this._green = this._blue = Math.round((0.2126 * this._red) + (0.7152 * this._green) + (0.0722 * this._blue));
 			}
@@ -1015,7 +1015,7 @@ module.exports = function() {
 			return this.__ks_func_hex_rt.call(null, this, this, arguments);
 		}
 		__ks_func_hex_0() {
-			return $hex(this.__ks_func_like_0(Space.SRGB.value));
+			return $hex(this.__ks_func_like_0(Space.SRGB));
 		}
 		__ks_func_hex_rt(that, proto, args) {
 			if(args.length === 0) {
@@ -1027,7 +1027,7 @@ module.exports = function() {
 			return this.__ks_func_isBlack_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isBlack_0() {
-			const that = this.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB);
 			return (that._red === 0) && (that._green === 0) && (that._blue === 0);
 		}
 		__ks_func_isBlack_rt(that, proto, args) {
@@ -1041,7 +1041,7 @@ module.exports = function() {
 		}
 		__ks_func_isTransparent_0() {
 			if(this._alpha === 0) {
-				const that = this.__ks_func_like_0(Space.SRGB.value);
+				const that = this.__ks_func_like_0(Space.SRGB);
 				return (that._red === 0) && (that._green === 0) && (that._blue === 0);
 			}
 			else {
@@ -1058,7 +1058,7 @@ module.exports = function() {
 			return this.__ks_func_isWhite_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isWhite_0() {
-			const that = this.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB);
 			return (that._red === 255) && (that._green === 255) && (that._blue === 255);
 		}
 		__ks_func_isWhite_rt(that, proto, args) {
@@ -1080,11 +1080,24 @@ module.exports = function() {
 			}
 			return this;
 		}
+		__ks_func_like_1(str) {
+			let space = Space(Type.isValue($aliases[str]) ? $aliases[str] : str);
+			if(Type.isValue(space)) {
+				return this.__ks_func_like_0(space);
+			}
+			else {
+				return this;
+			}
+		}
 		__ks_func_like_rt(that, proto, args) {
-			const t0 = Type.isString;
+			const t0 = value => Type.isEnumInstance(value, Space);
+			const t1 = Type.isString;
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_like_0.call(that, args[0]);
+				}
+				if(t1(args[0])) {
+					return proto.__ks_func_like_1.call(that, args[0]);
 				}
 			}
 			throw Helper.badArgs();
@@ -1093,7 +1106,7 @@ module.exports = function() {
 			return this.__ks_func_luminance_rt.call(null, this, this, arguments);
 		}
 		__ks_func_luminance_0() {
-			const that = this.__ks_func_like_0(Space.SRGB.value);
+			const that = this.__ks_func_like_0(Space.SRGB);
 			let r = that._red / 255;
 			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
 			let g = that._green / 255;
@@ -1112,7 +1125,7 @@ module.exports = function() {
 			return this.__ks_func_negative_rt.call(null, this, this, arguments);
 		}
 		__ks_func_negative_0() {
-			this.__ks_func_space_1(Space.SRGB.value);
+			this.__ks_func_space_1(Space.SRGB);
 			this._red ^= 255;
 			this._green ^= 255;
 			this._blue ^= 255;
@@ -1245,37 +1258,42 @@ module.exports = function() {
 			return this._space;
 		}
 		__ks_func_space_1(space) {
-			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			if(!Type.isValue($spaces[space]) && Type.isValue($components[space])) {
-				if(Type.isValue($spaces[this._space].components[space])) {
-					return this;
-				}
-				else if($components[space].families.length === 1) {
-					space = $components[space].families[0];
-				}
-				else {
-					throw new Error(Helper.concatString("The component '", space, "' has a conflict between the spaces '", $components[space].families.join("', '"), "'"));
-				}
-			}
-			let value = Space(space);
-			if(Type.isValue(value)) {
-				if((this._space !== value) && Type.isValue($spaces[this._space].converters[space])) {
-					$convert.__ks_0(this, value, this);
-				}
-			}
-			else {
+			if((this._space !== space) && Type.isValue($spaces[this._space].converters[space])) {
 				$convert.__ks_0(this, space, this);
 			}
 			return this;
 		}
+		__ks_func_space_2(str) {
+			let space = Space(Type.isValue($aliases[str]) ? $aliases[str] : str);
+			if(Type.isValue(space)) {
+				return this.__ks_func_space_1(space);
+			}
+			let component = $components[str];
+			if(Type.isValue(component)) {
+				if(Type.isValue($spaces[this._space].components[str])) {
+					return this;
+				}
+				else if(component.families.length === 1) {
+					return this.space(component.families[0]);
+				}
+				else {
+					throw new Error(Helper.concatString("The component '", str, "' has a conflict between the spaces '", component.families.join("', '"), "'"));
+				}
+			}
+			throw new Error("It can't convert a color from '" + this._space + "' to '" + str + "' spaces.");
+		}
 		__ks_func_space_rt(that, proto, args) {
-			const t0 = Type.isString;
+			const t0 = value => Type.isEnumInstance(value, Space);
+			const t1 = Type.isString;
 			if(args.length === 0) {
 				return proto.__ks_func_space_0.call(that);
 			}
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_space_1.call(that, args[0]);
+				}
+				if(t1(args[0])) {
+					return proto.__ks_func_space_2.call(that, args[0]);
 				}
 			}
 			throw Helper.badArgs();

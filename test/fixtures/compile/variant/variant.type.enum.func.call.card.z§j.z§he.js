@@ -1,8 +1,14 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
-		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(!Type.isEnumInstance(variant, CardSuit)) {
+		isCard: (value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
+			if(cast) {
+				if((variant = CardSuit(variant)) === null) {
+					return false;
+				}
+				value["suit"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, CardSuit)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -20,7 +26,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(value) {
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isCard(value, CardSuit.__ks_eq_Reds);
+		const t0 = value => __ksType.isCard(value, 0, CardSuit.__ks_eq_Reds);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

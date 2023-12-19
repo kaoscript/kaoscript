@@ -6,7 +6,7 @@ enum CardSuit<String> {
 }
 
 func foobar(card: String) {
-	match card {
+	match CardSuit(card) {
 		CardSuit.Clubs		=> echo('clubs')
 		CardSuit.Diamonds	=> echo('diamonds')
 		else				=> echo('hearts or spades')

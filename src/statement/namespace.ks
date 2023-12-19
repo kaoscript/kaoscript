@@ -170,7 +170,7 @@ class NamespaceDeclaration extends Statement {
 				var funcname = `is\(name)`
 				var line = object.newLine().code(`\(funcname): `)
 
-				type.toBlindTestFunctionFragments(funcname, 'value', true, null, line, this)
+				type.toBlindTestFunctionFragments(funcname, 'value', false, true, null, line, this)
 
 				line.done()
 
@@ -181,7 +181,7 @@ class NamespaceDeclaration extends Statement {
 						var funcname = `is\(name)__\(index)`
 						var line = object.newLine().code(`\(funcname): `)
 
-						subtype.toBlindTestFunctionFragments(funcname, 'value', false, generics, line, this)
+						subtype.toBlindTestFunctionFragments(funcname, 'value', false, false, generics, line, this)
 
 						line.done()
 					}

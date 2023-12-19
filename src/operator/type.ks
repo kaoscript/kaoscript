@@ -31,8 +31,24 @@ class BinaryOperatorTypeCasting extends Expression {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		unless type.isAny() || type is ArrayType | ObjectType | ReferenceType | UnionType {
+		if @forced || type.isAny() {
+			pass
+		}
+		else if type is not ArrayType & ObjectType & ReferenceType & UnionType {
 			TypeException.throwInvalidCasting(this)
+		}
+		else if @type.isEnum() {
+			unless @type.discard().type().isAssignableToVariable(type, true, true, true) {
+				TypeException.throwNotCastableTo(type, @type, this)
+			}
+		}
+		else if type.isEnum() {
+			unless @type.isAssignableToVariable(type.discard().type(), true, true, true) {
+				TypeException.throwNotCastableTo(type, @type, this)
+			}
+		}
+		else if !type.isAssignableToVariable(@type, true, true, true) {
+			TypeException.throwNotCastableTo(type, @type, this)
 		}
 	} # }}}
 	translate() { # {{{
@@ -47,24 +63,54 @@ class BinaryOperatorTypeCasting extends Expression {
 	listAssignments(array: Array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { # {{{
-		if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
+		if @type.isEnum() {
+			var type = @type.setNullable(false)
+
+			if @nullable {
+				fragments.compile(type).code('(').compile(@left).code(')')
+			}
+			else {
+				fragments.code(`\($runtime.helper(this)).notNull(`).compile(type).code('(').compile(@left).code('))')
+			}
+		}
+		else if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
 			fragments.compile(@left)
 		}
 		else if !@nullable && @left.type().isAssignableToVariable(@type, false, true, false) {
-			fragments.code($runtime.helper(this), '.notNull(').compile(@left).code(')')
+			fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
+		}
+		else if @left.type().isEnum() {
+			fragments.compile(@left).code('.value')
+		}
+		else if @type.isObject() && @type.canBeRawCasted() {
+			var type = @type.discard()
+
+			type.toCastFragments(fragments, @left)
+
+			fragments.code(' ? ').compile(@left).code(' : null')
 		}
 		else if @type.isAssignableToVariable(@left.type(), true, @nullable, true) {
 			var type = @type.setNullable(false)
 
 			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, type.toQuote(true), $comma, @nullable, $comma)
 
-			type.toBlindTestFunctionFragments(null, 'value', true, null, fragments, this)
+			type.toBlindTestFunctionFragments(null, 'value', false, true, null, fragments, this)
 
 			fragments.code(')')
 		}
 		else {
 			TypeException.throwNotCastableTo(@left.type(), @type, this)
 		}
+	} # }}}
+	toQuote() { # {{{
+		if @forced {
+			return `\(@left.toQuote()) as! \(@type.toQuote())`
+		}
+		if @nullable {
+			return `\(@left.toQuote()) as? \(@type.setNullable(false).toQuote())`
+		}
+
+		return `\(@left.toQuote()) as \(@type.toQuote())`
 	} # }}}
 	type() => @type
 }
@@ -162,10 +208,10 @@ class BinaryOperatorTypeEquality extends Expression {
 		var type = @subject.type()
 
 		if type is ReferenceType {
-			@testType.toPositiveTestFragments(type.parameters(), type.getSubtypes(), junction, fragments, @subject)
+			@testType.toPositiveTestFragments(null, type.parameters(), type.getSubtypes(), junction, fragments, @subject)
 		}
 		else {
-			@testType.toPositiveTestFragments(null, null, junction, fragments, @subject)
+			@testType.toPositiveTestFragments(null, null, null, junction, fragments, @subject)
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')

@@ -217,6 +217,15 @@ class UnionType extends Type {
 
 		return false
 	} # }}}
+	override canBeRawCasted() { # {{{
+		for var property in @types {
+			if property.canBeRawCasted() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	canBeString(any = true) { # {{{
 		for var type in @types {
 			if type.canBeString(any) {
@@ -616,7 +625,7 @@ class UnionType extends Type {
 
 		return types
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .AND
 
 		var literal = Literal.new(false, node, node.scope(), varname)
@@ -624,7 +633,7 @@ class UnionType extends Type {
 		for var type, index in @types {
 			fragments.code(' || ') if index != 0
 
-			type.toBlindTestFragments(varname, generics, Junction.OR, fragments, literal)
+			type.toBlindTestFragments(funcname, varname, casting, generics, Junction.OR, fragments, literal)
 		}
 
 		fragments.code(')') if junction == .AND
@@ -675,7 +684,7 @@ class UnionType extends Type {
 
 		fragments.code(')') if junction == .OR
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .AND
 
 		for var type, i in @types {
@@ -683,7 +692,7 @@ class UnionType extends Type {
 				fragments.code(' || ')
 			}
 
-			type.toPositiveTestFragments(parameters, subtypes, Junction.OR, fragments, node)
+			type.toPositiveTestFragments(casting, parameters, subtypes, Junction.OR, fragments, node)
 		}
 
 		fragments.code(')') if junction == .AND

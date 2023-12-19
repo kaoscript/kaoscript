@@ -835,7 +835,7 @@ namespace Build {
 					var hash = type.hashCode()
 
 					if var match ?= branch.columns[hash] {
-						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:TreeLeaf.function, row.function], node)
+						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:!TreeLeaf.function, row.function], node)
 					}
 
 					var key = `:\(row.function.index()):\(parameter)`
@@ -1339,7 +1339,7 @@ namespace Build {
 					node.variadic = true
 
 					if node.isNode {
-						applyMin2(node as TreeBranch, mins, type)
+						applyMin2(node as! TreeBranch, mins, type)
 					}
 				}
 			}
@@ -1832,7 +1832,7 @@ namespace Build {
 				key
 				node
 				type: node.type
-				usage: node.isNode ? node:TreeBranch.rows.length : 1
+				usage: node.isNode ? node:!TreeBranch.rows.length : 1
 				children: []
 				isAny: node.type.isAny() || node.type.isNull()
 				variadic: node.index < 0 || node.variadic

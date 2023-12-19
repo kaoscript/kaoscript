@@ -8,7 +8,7 @@ module.exports = function() {
 		if(color === void 0) {
 			color = null;
 		}
-		if(Helper.valueOf(color) === Color.Red.value) {
+		if(color === Color.Red) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

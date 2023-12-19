@@ -564,7 +564,6 @@ class ObjectFilteredMember extends Expression {
 class ObjectLiteralMember extends Expression {
 	private late {
 		@computed: Boolean		= true
-		@enumCasting: Boolean	= false
 		@function: Boolean		= false
 		@shorthand: Boolean		= true
 		@name
@@ -631,25 +630,13 @@ class ObjectLiteralMember extends Expression {
 			line.code(@parent.varname(), '.').compile(@name).code($equals)
 		}
 
-		if @enumCasting {
-			@value.toCastingFragments(line, mode)
-		}
-		else {
-			line.compile(@value)
-		}
+		line.compile(@value)
 
 		line.done()
 	} # }}}
 	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
 	type() => @type
-	validateType(type: Type) { # {{{
-		if @type.isBitmask() && !type.isBitmask() {
-			@enumCasting = true
-		}
-		else if @type.isEnum() && !type.isEnum() {
-			@enumCasting = true
-		}
-	} # }}}
+	validateType(type: Type)
 	value() => @value
 }
 

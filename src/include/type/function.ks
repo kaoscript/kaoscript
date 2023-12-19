@@ -711,7 +711,7 @@ class FunctionType extends Type {
 			paramMode += MatchingMode.Anycast if mode ~~ MatchingMode.AnycastParameter
 			paramMode += MatchingMode.IgnoreAnonymous if mode ~~ MatchingMode.IgnoreAnonymous
 
-			if paramMode != 0 {
+			if paramMode.value != 0 {
 				var valLabels = {}
 				var valPositions = []
 
@@ -762,7 +762,7 @@ class FunctionType extends Type {
 			returnMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarReturn
 			returnMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassReturn
 
-			if returnMode != 0 {
+			if returnMode.value != 0 {
 				var newType = value.getReturnType()
 
 				return false unless newType.isSubsetOf(@returnType, returnMode) || @returnType.isInstanceOf(newType)
@@ -782,7 +782,7 @@ class FunctionType extends Type {
 			errorMode += MatchingMode.Similar if mode ~~ MatchingMode.SimilarErrors
 			errorMode += MatchingMode.Subclass if mode ~~ MatchingMode.SubclassError
 
-			if errorMode != 0 {
+			if errorMode.value != 0 {
 				var newTypes = value.listErrors()
 
 				for var oldType in @errors {
@@ -966,10 +966,10 @@ class FunctionType extends Type {
 	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, mut generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	toFragments(fragments, node) { # {{{
@@ -1013,7 +1013,7 @@ class FunctionType extends Type {
 
 		return fragments
 	} # }}}
-	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
+	override toPositiveTestFragments(_, _, _, _, fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)

@@ -1,0 +1,1 @@
+TypeException: The return type must be "String" and not "Color" (fixtures/compile/enum/enum.stmt.return.#s.call.#e.nc.ks:8)

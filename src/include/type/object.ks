@@ -1,6 +1,7 @@
 class ObjectType extends Type {
 	private {
-		@computed: Boolean{}			 = {}
+		@builtFlags: Boolean			= false
+		@computed: Boolean{}			= {}
 		@destructuring: Boolean			= false
 		@empty: Boolean					= false
 		@key: Boolean					= false
@@ -13,6 +14,7 @@ class ObjectType extends Type {
 		@restType: Type					= AnyType.NullableUnexplicit
 		@specific: Boolean				= false
 		@spread: Boolean				= false
+		@testCast: Boolean				= false
 		@testGenerics: Boolean			= false
 		// TODO move to alias
 		@testName: String?
@@ -86,8 +88,6 @@ class ObjectType extends Type {
 		@properties[name] = type
 		@computed[name] = computed
 		@length += 1
-		@testProperties ||= !type.isAny() || !type.isNullable()
-		@testGenerics ||= type.canBeDeferred()
 
 		if type is VariantType {
 			@variant = true
@@ -104,7 +104,8 @@ class ObjectType extends Type {
 			@restType.buildGenericMap(position, expressions, value => decompose(value).parameter(), genericMap)
 		}
 	} # }}}
-	override canBeDeferred() => @testGenerics
+	override canBeDeferred() => @buildFlags() && @testGenerics
+	override canBeRawCasted() => @buildFlags() && @testCast
 	clone() { # {{{
 		var type = ObjectType.new(@scope)
 
@@ -118,8 +119,6 @@ class ObjectType extends Type {
 		type._restType = @restType
 		type._spread = @spread
 		type._testName = @testName
-		type._testProperties = @testProperties
-		type._testRest = @testRest
 		type._variant = @variant
 		type._variantName = @variantName
 		type._variantType = @variantType
@@ -325,10 +324,6 @@ class ObjectType extends Type {
 			return @restType
 		}
 
-		// if @length == 0 {
-		// 	return AnyType.NullableUnexplicit
-		// }
-
 		return null
 	} # }}}
 	getRestType(): valueof @restType
@@ -505,7 +500,7 @@ class ObjectType extends Type {
 		return false
 	} # }}}
 	isBinding() => true
-	isComplex() => @destructuring || @testRest || @testProperties || @variant
+	isComplex() => @buildFlags() && (@destructuring || @testRest || @testProperties || @variant)
 	override isDeferrable() { # {{{
 		return true if @rest && @restType.isDeferrable()
 
@@ -821,7 +816,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
-	isTestingProperties() => @testProperties
+	isTestingProperties() => @buildFlags() && @testProperties
 	isVariant() => @variant
 	length(): valueof @length
 	listFunctions(name: String): Array { # {{{
@@ -1053,7 +1048,6 @@ class ObjectType extends Type {
 	} # }}}
 	setRestType(@restType): valueof this { # {{{
 		@rest = true
-		@testRest = !@restType.isAny() || !@restType.isNullable()
 	} # }}}
 	setTestName(@testName)
 	toFragments(fragments, node) { # {{{
@@ -1117,20 +1111,33 @@ class ObjectType extends Type {
 		return @export(references, indexDelta, mode, module)
 	} # }}}
 	toAssertFragments(value, testingType: Boolean, fragments, node) { # {{{
+		@buildFlags()
+
 		fragments.code(`\($runtime.helper(node)).assertDexObject(`).compile(value)
 
 		if @testRest || @testProperties {
-			@toSubtestFragments(null, 'value', testingType, null, fragments, node)
+			@toSubtestFragments(null, 'value', false, testingType, null, fragments, node)
 		}
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+		@buildFlags()
+
 		nullable ||= @nullable
 
 		if ?@testName {
 			if nullable || ?#generics || (@variant && ?#subtypes) {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if @testCast {
+					if casting {
+						fragments.code(', cast')
+					}
+					else {
+						fragments.code(', 0')
+					}
+				}
 
 				if ?#generics {
 					fragments.code(`, [`)
@@ -1138,7 +1145,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, casting, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1203,6 +1210,9 @@ class ObjectType extends Type {
 					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 				}
 			}
+			else if casting && @testCast {
+				fragments.code(`\(varname) => \(@testName)(\(varname), cast)`)
+			}
 			else {
 				fragments.code(@testName)
 			}
@@ -1216,15 +1226,24 @@ class ObjectType extends Type {
 					fragments.code($runtime.type(node), '.isObject')
 				}
 			}
-			else if @testRest || @testProperties || nullable || @variant {
-				if @variant {
-					fragments.code(`(\(varname), filter) => `)
+			else if @testRest || @testProperties || nullable || @variant || @testCast {
+				if @testCast || @variant {
+					fragments.code(`(\(varname)`)
+
+					if @testCast {
+						fragments.code(', cast')
+					}
+					if @variant {
+						fragments.code(', filter')
+					}
+
+					fragments.code(`) => `)
 				}
 				else {
 					fragments.code(`\(varname) => `)
 				}
 
-				@toBlindTestFragments(varname, nullable, true, null, Junction.NONE, fragments, node)
+				@toBlindTestFragments(null, varname, @testCast, nullable, true, null, Junction.NONE, fragments, node)
 			}
 			else {
 				if @destructuring {
@@ -1236,12 +1255,18 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(funcname, varname, mut nullable, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, mut nullable, generics, fragments, node) { # {{{
+		@buildFlags()
+
 		nullable ||= @nullable
 
 		if ?@testName {
-			if nullable || ?#generics {
+			if @testCast || nullable || ?#generics {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if @testCast {
+					fragments.code(', cast')
+				}
 
 				if ?#generics {
 					fragments.code(`, [`)
@@ -1249,7 +1274,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, ?propname, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1266,10 +1291,13 @@ class ObjectType extends Type {
 			}
 		}
 		else {
-			if @testRest || @testProperties || @nullable || @testGenerics || @variant || nullable {
-				if @testGenerics || @variant {
+			if @testRest || @testProperties || @nullable || @testCast || @testGenerics || @variant || nullable {
+				if @testCast || @testGenerics || @variant {
 					fragments.code(`(\(varname)`)
 
+					if @testCast {
+						fragments.code(', cast')
+					}
 					if @testGenerics {
 						fragments.code(', mapper')
 					}
@@ -1285,7 +1313,7 @@ class ObjectType extends Type {
 
 				fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-				@toSubtestFragments(funcname, varname, true, generics, fragments, node)
+				@toSubtestFragments(funcname, varname, @testCast, true, generics, fragments, node)
 
 				fragments.code(')')
 
@@ -1303,16 +1331,23 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
-		@toBlindTestFragments(varname, @nullable, true, generics, junction, fragments, node)
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
+		@toBlindTestFragments(funcname, varname, casting, @nullable, true, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, mut nullable: Boolean, testingType: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, mut nullable: Boolean, testingType: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+		@buildFlags()
+
 		nullable ||= @nullable
 
 		fragments.code('(') if nullable && junction == .AND
 
 		if ?@testName {
-			fragments.code(`\(@testName)(\(varname))`)
+			if casting && @testCast {
+				fragments.code(`\(@testName)(\(varname), cast)`)
+			}
+			else {
+				fragments.code(`\(@testName)(\(varname))`)
+			}
 		}
 		else if testingType && !@destructuring && !@testRest && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isObject(\(varname))`)
@@ -1320,7 +1355,7 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-			@toSubtestFragments(null, varname, testingType, generics, fragments, node)
+			@toSubtestFragments(funcname, varname, casting, testingType, generics, fragments, node)
 
 			fragments.code(')')
 		}
@@ -1331,7 +1366,9 @@ class ObjectType extends Type {
 				..code(')') if junction == .AND
 		}
 	} # }}}
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
+		@buildFlags()
+
 		if !?#@properties && !@rest && !@nullable && !@variant {
 			if @destructuring {
 				fragments.code($runtime.type(node), '.isDexObject')
@@ -1340,10 +1377,13 @@ class ObjectType extends Type {
 				fragments.code($runtime.type(node), '.isObject')
 			}
 		}
-		else if @testRest || @testProperties || @nullable || @testGenerics || @variant {
-			if @testGenerics || @variant {
+		else if @testRest || @testProperties || @nullable || @testCast || @testGenerics || @variant {
+			if @testCast || @testGenerics || @variant {
 				fragments.code(`(\(varname)`)
 
+				if @testCast {
+					fragments.code(', cast')
+				}
 				if @testGenerics {
 					fragments.code(', mapper')
 				}
@@ -1359,7 +1399,7 @@ class ObjectType extends Type {
 
 			fragments.code(`\($runtime.type(node)).isDexObject(\(varname)`)
 
-			@toSubtestFragments(funcname, varname, testingType, generics, fragments, node)
+			@toSubtestFragments(funcname, varname, @testCast, testingType, generics, fragments, node)
 
 			fragments.code(')')
 
@@ -1376,11 +1416,20 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	toCastFragments(fragments, node) { # {{{
+		fragments.code(`\(@testName)(`).compile(node).code(`, true)`)
+	} # }}}
+	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+		@buildFlags()
+
 		fragments.code('(') if @nullable && junction == .AND
 
 		if ?@testName {
 			fragments.code(`\(@testName)(`).compile(node)
+
+			if @testCast {
+				fragments.code(', 0')
+			}
 
 			if ?#parameters {
 				fragments.code(`, [`)
@@ -1388,7 +1437,7 @@ class ObjectType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', casting, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)
@@ -1452,7 +1501,7 @@ class ObjectType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexObject(`).compile(node)
 
-			@toSubtestFragments(null, 'value', true, null, fragments, node)
+			@toSubtestFragments(null, 'value', casting, true, null, fragments, node)
 
 			fragments.code(')')
 		}
@@ -1471,7 +1520,7 @@ class ObjectType extends Type {
 		for var { type }, index in parameters {
 			fragments.code($comma) if index > 0
 
-			type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
+			type.toAwareTestFunctionFragments('value', false, false, null, null, fragments, node)
 		}
 
 		fragments.code(`])`)
@@ -1509,7 +1558,26 @@ class ObjectType extends Type {
 	} # }}}
 
 	private {
-		toSubtestFragments(funcname: String?, varname: String, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
+		buildFlags() { # {{{
+			return true if @builtFlags
+
+			@builtFlags = true
+
+			for var property of @properties {
+				@testProperties ||= !property.isAny() || !property.isNullable()
+				@testGenerics ||= property.canBeDeferred()
+				@testCast ||= property.canBeRawCasted()
+			}
+
+			if @rest {
+				@testRest ||= !@restType.isAny() || !@restType.isNullable()
+				@testGenerics ||= @restType.canBeDeferred()
+				@testCast ||= @restType.canBeRawCasted()
+			}
+
+			return true
+		} # }}}
+		toSubtestFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
 			if testingType {
 				fragments.code(', 1')
 			}
@@ -1522,7 +1590,7 @@ class ObjectType extends Type {
 
 				if @testProperties {
 					if @testRest {
-						@restType.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
+						@restType.toBlindSubtestFunctionFragments(funcname, varname, casting, null, false, generics, fragments, node)
 					}
 					else {
 						fragments.code('0')
@@ -1542,18 +1610,20 @@ class ObjectType extends Type {
 
 						if @computed[name] {
 							fragments.code(`[\(name)]: `)
+
+							type.toBlindSubtestFunctionFragments(funcname, varname, casting, name, false, generics, fragments, node)
 						}
 						else {
 							fragments.code(`\(name): `)
-						}
 
-						type.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
+							type.toBlindSubtestFunctionFragments(funcname, varname, casting, `"\(name)"`, false, generics, fragments, node)
+						}
 					}
 
 					fragments.code('}')
 				}
 				else {
-					@restType.toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
+					@restType.toBlindSubtestFunctionFragments(funcname, varname, casting, null, false, generics, fragments, node)
 				}
 			}
 		} # }}}

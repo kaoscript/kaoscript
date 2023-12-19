@@ -2,8 +2,8 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isCard: value => Type.isDexObject(value, 1, 0, {suit: value => Type.isEnumInstance(value, CardSuit)}),
-		isResult: value => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {values: value => Type.isArray(value, __ksType.isCard) || __ksType.isCard(value) || Type.isNull(value)})
+		isCard: (value, cast) => Type.isDexObject(value, 1, 0, {suit: () => Helper.castEnum(value, "suit", CardSuit, cast)}),
+		isResult: (value, cast) => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {values: value => Type.isArray(value, value => __ksType.isCard(value, cast)) || __ksType.isCard(value, cast) || Type.isNull(value)})
 	};
 	const CardSuit = Helper.enum(Number, 0, "Clubs", 1, "Diamonds", 2, "Hearts", 3, "Spades", 4);
 	function foobar() {

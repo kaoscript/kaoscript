@@ -218,7 +218,7 @@ func $component(component, name: string, space: string): void { # {{{
 	$components[name].spaces[space] = true
 } # }}}
 
-func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}): Color | object ~ Error { # {{{
+func $convert(that: Color, space: Space, result: Color | object = {_alpha: 0}): Color | object ~ Error { # {{{
 	var s = $spaces[that._space]
 
 	if ?s.converters[space] {
@@ -228,7 +228,7 @@ func $convert(that: Color, space: string, result: Color | object = {_alpha: 0}):
 
 		s.converters[space](...args)
 
-		result._space = Space(space)!?
+		result._space = space
 
 		return result
 	}
@@ -836,7 +836,7 @@ export class Color {
 		return this.hex() == color.hex()
 	} # }}}
 
-	format(format: string = this._space) { # {{{
+	format(format: string = this._space.value) { # {{{
 		if var format ?= $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
@@ -938,7 +938,7 @@ export class Color {
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} # }}}
 
-	like(mut space: string) { # {{{
+	like(mut space: Space) { # {{{
 		space = $aliases[space] ?? space
 
 		if var value ?= Space(space) {
@@ -948,6 +948,15 @@ export class Color {
 		}
 
 		return this
+	} # }}}
+
+	like(space % str: String): Color { # {{{
+		if var space ?= Space($aliases[str] ?? str) {
+			return @like(space)
+		}
+		else {
+			return this
+		}
 	} # }}}
 
 	luminance(): Number { # {{{
@@ -1031,31 +1040,32 @@ export class Color {
 
 	space(): Space => this._space
 
-	space(mut space: string): Color { # {{{
-		space = $aliases[space] ?? space
-
-		if !?$spaces[space] && ?$components[space] {
-			if ?$spaces[this._space].components[space] {
-				return this
-			}
-			else if $components[space].families.length == 1 {
-				space = $components[space].families[0]
-			}
-			else {
-				throw Error.new(`The component '\(space)' has a conflict between the spaces '\($components[space].families.join('\', \''))'`)
-			}
-		}
-
-		if var value ?= Space(space) {
-			if this._space != value && ?$spaces[this._space].converters[space] {
-				$convert(this, value, this)
-			}
-		}
-		else {
+	space(space: Space): Color { # {{{
+		if @space != space && ?$spaces[@space].converters[space] {
 			$convert(this, space, this)
 		}
 
 		return this
+	} # }}}
+
+	space(space % str: String): Color { # {{{
+		if var space ?= Space($aliases[str] ?? str) {
+			return @space(space)
+		}
+
+		if var component ?= $components[str] {
+			if ?$spaces[@space].components[str] {
+				return this
+			}
+			else if component.families.length == 1 {
+				return @space(component.families[0])
+			}
+			else {
+				throw Error.new(`The component '\(str)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
+			}
+		}
+
+		throw Error.new(`It can't convert a color from '\(@space)' to '\(str)' spaces.`)
 	} # }}}
 
 	tint(percentage: float): Color { # {{{

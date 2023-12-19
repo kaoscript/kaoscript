@@ -43,7 +43,7 @@ class ParameterType extends Type {
 			}
 
 			for var modifier in data.modifiers {
-				match modifier.kind {
+				match ModifierKind(modifier.kind) {
 					ModifierKind.Nullable {
 						type = type.setNullable(true)
 					}

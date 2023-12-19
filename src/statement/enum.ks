@@ -185,7 +185,7 @@ class EnumDeclaration extends Statement {
 	} # }}}
 	name() => @name
 	toMainTypeFragments(fragments) { # {{{
-		if @enum.isString() {
+		if @enum.type().isString() {
 			fragments.code('String')
 		}
 		else {

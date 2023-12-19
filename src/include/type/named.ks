@@ -119,11 +119,14 @@ class NamedType extends Type {
 					return @isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 				}
 			}
+			else if @type.isBitmask() && value.isBitmask() {
+				return @name == 'Bitmask' || @name == value.name()
+			}
 			else if @type.isClass() && value.isClass() {
 				return @name == 'Class' || @isInheriting(value) || (downcast && value.isInheriting(this))
 			}
-			else if @type.isBitmask() || @type.isEnum() {
-				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
+			else if @type.isEnum() && value.isEnum() {
+				return @name == 'Enum' || @name == value.name()
 			}
 			else if @type.isStruct() && value.isStruct() {
 				return @name == 'Struct' || @name == value.name()
@@ -319,17 +322,13 @@ class NamedType extends Type {
 					if @type is BitmaskType {
 						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
 					}
-					else {
-						return this.isSubsetOf(value.type().type(), mode)
-					}
+					return false
 				}
 				else if value.type() is EnumType {
 					if @type is EnumType {
 						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
 					}
-					else {
-						return this.isSubsetOf(value.type().type(), mode)
-					}
+					return false
 				}
 				else if value.type() is ClassType && value.name() == 'Bitmask' {
 					return @isBitmask()
@@ -557,7 +556,9 @@ class NamedType extends Type {
 		}
 	} # }}}
 	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toExportOrIndex(references, indexDelta, mode, module)
-	toFragments(fragments, node)
+	toFragments(fragments, node) { # {{{
+		fragments.code(@path())
+	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toMetadata(references, indexDelta, mode, module)
 	toQuote() => @name
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -579,15 +580,15 @@ class NamedType extends Type {
 			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else if @type.isComplex() {
-			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
+			@type.toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
 		}
 		else {
-			@reference().toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
+			@reference().toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)
@@ -619,6 +620,7 @@ class NamedType extends Type {
 
 	proxy @type {
 		canBeArray
+		canBeRawCasted
 		hasProperty
 		hasRest
 		hasTest

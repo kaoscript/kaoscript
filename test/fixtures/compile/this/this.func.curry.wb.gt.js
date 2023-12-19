@@ -35,7 +35,7 @@ module.exports = function() {
 		return isCat.__ks_rt(this, arguments);
 	};
 	isCat.__ks_0 = function() {
-		return Helper.valueOf(this.__ks_func_kind_0()) === PetKind.Cat.value;
+		return this.__ks_func_kind_0() === PetKind.Cat;
 	};
 	isCat.__ks_rt = function(that, args) {
 		if(args.length === 0) {

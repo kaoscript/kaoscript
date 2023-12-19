@@ -2,8 +2,14 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(!Type.isEnumInstance(variant, CardSuit)) {
+		isCard: (value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
+			if(cast) {
+				if((variant = CardSuit(variant)) === null) {
+					return false;
+				}
+				value["suit"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, CardSuit)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -11,7 +17,7 @@ module.exports = function() {
 			}
 			return true;
 		}}),
-		isResult: value => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {values: value => Type.isArray(value, __ksType.isCard) || __ksType.isCard(value) || Type.isNull(value)}),
+		isResult: (value, cast) => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {values: value => Type.isArray(value, value => __ksType.isCard(value, cast)) || __ksType.isCard(value, cast) || Type.isNull(value)}),
 		isEvent: (value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
 			if(!Type.isBoolean(variant)) {
 				return false;

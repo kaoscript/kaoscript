@@ -1,0 +1,1 @@
+TypeException: The expression "color" of type "Color" can't be compared to a value of type "Number" (fixtures/compile/enum/enum.op.eq.l_e.r_i.ks:8)

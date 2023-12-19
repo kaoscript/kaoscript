@@ -15,8 +15,14 @@ module.exports = function() {
 				return __ksType.isEvent.__0(value);
 			}
 		}}),
-		isCard: (value, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(!Type.isEnumInstance(variant, CardSuit)) {
+		isCard: (value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
+			if(cast) {
+				if((variant = CardSuit(variant)) === null) {
+					return false;
+				}
+				value["suit"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, CardSuit)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -24,7 +30,7 @@ module.exports = function() {
 			}
 			return true;
 		}, rank: Type.isNumber}),
-		isResult: value => Type.isDexObject(value, 1, 0, {reds: value => __ksType.isEvent(value, [__ksType.isCard], value => value)})
+		isResult: (value, cast) => Type.isDexObject(value, 1, 0, {reds: value => __ksType.isEvent(value, [value => __ksType.isCard(value, cast)], value => value)})
 	};
 	__ksType.isEvent.__0 = value => Type.isDexObject(value, 0, 0, {expecting: value => Type.isString(value) || Type.isNull(value)});
 	__ksType.isEvent.__1 = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0]});

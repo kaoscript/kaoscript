@@ -12,17 +12,17 @@ bitmask AnimalFlags {
 }
 
 func printAnimalAbilities(animal) {
-	var animalFlags: Number = animal.flags
+	var animalFlags: Number = animal.flags.value
 
-	if (animalFlags +& AnimalFlags.HasClaws) != 0 {
+	if (animalFlags +& AnimalFlags.HasClaws.value) != 0 {
 		console.log('animal has claws')
 	}
 
-	if (animalFlags +& AnimalFlags.CanFly) != 0 {
+	if (animalFlags +& AnimalFlags.CanFly.value) != 0 {
 		console.log('animal can fly')
 	}
 
-	if animalFlags == AnimalFlags.None {
+	if animalFlags == AnimalFlags.None.value {
 		console.log('nothing')
 	}
 }

@@ -8,8 +8,8 @@ module.exports = function() {
 		for(let __ks_1 = 0, __ks_0 = data.length, kind; __ks_1 < __ks_0; ++__ks_1) {
 			Helper.assertDexObject(data[__ks_1], 1, 0, {kind: Type.isValue});
 			({kind} = data[__ks_1]);
-			let __ks_2 = Helper.valueOf(kind);
-			if(__ks_2 === Color.Red.value) {
+			let __ks_2 = Color(kind);
+			if(__ks_2 === Color.Red) {
 				console.log("red");
 			}
 		}

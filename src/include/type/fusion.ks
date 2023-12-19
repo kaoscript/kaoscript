@@ -1,5 +1,7 @@
 class FusionType extends Type {
 	private {
+		@builtFlags: Boolean		= false
+		@cast: Boolean				= false
 		@generics: Boolean			= false
 		@nullable: Boolean			= false
 		// TODO move to alias
@@ -57,17 +59,16 @@ class FusionType extends Type {
 		}
 	} # }}}
 	addType(type: Type) { # {{{
-		@generics ||= type.canBeDeferred()
 		@nullable ||= type.isNullable()
 		@variant ||= type.isVariant()
 
 		@types.push(type.setNullable(false))
 	} # }}}
-	canBeDeferred() => @generics
+	canBeDeferred() => @buildFlags() && @generics
+	override canBeRawCasted() => @buildFlags() && @cast
 	clone(): FusionType { # {{{
 		var result = FusionType.new(@scope)
 
-		result._generics = @generics
 		result._nullable = @nullable
 		result._testName = @testName
 		result._types = [...@types]
@@ -322,12 +323,23 @@ class FusionType extends Type {
 		return result
 	} # }}}
 	setTestName(@testName)
-	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+		@buildFlags()
+
 		nullable ||= @nullable
 
 		if ?@testName {
 			if nullable || ?#generics || (@variant && ?#subtypes) {
 				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+
+				if @cast && (casting || ?#generics || (@variant && ?#subtypes)) {
+					if casting {
+						fragments.code(', cast')
+					}
+					else {
+						fragments.code(', 0')
+					}
+				}
 
 				if ?#generics {
 					fragments.code(`, [`)
@@ -335,7 +347,7 @@ class FusionType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, casting, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -404,10 +416,10 @@ class FusionType extends Type {
 			}
 		}
 		else {
-			super(varname, nullable, generics, subtypes, fragments, node)
+			super(varname, nullable, casting, generics, subtypes, fragments, node)
 		}
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR
 
 		if ?@testName {
@@ -417,16 +429,21 @@ class FusionType extends Type {
 			for var type, index in @types {
 				fragments.code(' && ') if index != 0
 
-				type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
+				type.toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments, node)
 			}
 		}
 
 		fragments.code(')') if junction == Junction.OR
 	} # }}}
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
-		if @generics || @variant {
+	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
+		@buildFlags()
+
+		if @cast || @generics || @variant {
 			fragments.code(`(\(varname)`)
 
+			if @cast {
+				fragments.code(', cast')
+			}
 			if @generics {
 				fragments.code(', mapper')
 			}
@@ -443,7 +460,7 @@ class FusionType extends Type {
 		for var type, index in @types {
 			fragments.code(' && ') if index != 0
 
-			type.toBlindTestFragments(varname, generics, Junction.AND, fragments, node)
+			type.toBlindTestFragments(funcname, varname, @cast, generics, Junction.AND, fragments, node)
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
@@ -462,9 +479,20 @@ class FusionType extends Type {
 
 		fragments.code(')') if junction == .OR
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+		@buildFlags()
+
 		if ?@testName {
 			fragments.code(`\(@testName)(`).compile(node)
+
+			if @cast && (casting || ?#parameters || ?#subtypes) {
+				if casting {
+					fragments.code(', cast')
+				}
+				else {
+					fragments.code(', 0')
+				}
+			}
 
 			if ?#parameters {
 				fragments.code(`, [`)
@@ -472,7 +500,7 @@ class FusionType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', false, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)
@@ -558,4 +586,19 @@ class FusionType extends Type {
 		}
 	} # }}}
 	types() => @types
+
+	private {
+		buildFlags() { # {{{
+			return true if @builtFlags
+
+			@builtFlags = true
+
+			for var type in @types {
+				@generics ||= type.canBeDeferred()
+				@cast ||= type.canBeRawCasted()
+			}
+
+			return true
+		} # }}}
+	}
 }

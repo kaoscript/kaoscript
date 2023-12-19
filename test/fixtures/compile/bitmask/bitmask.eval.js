@@ -45,13 +45,13 @@ module.exports = function(expect) {
 		else {
 			results.push(null);
 		}
-		if((y & Foobar.foo) != 0) {
+		if((Foobar(y) & Foobar.foo) != 0) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if(Operator.bitAnd(z, Foobar.foo) != 0) {
+		if((Foobar(z) & Foobar.foo) != 0) {
 			results.push("c");
 		}
 		else {
@@ -73,6 +73,6 @@ module.exports = function(expect) {
 		}
 		throw Helper.badArgs();
 	};
-	expect(testIf.__ks_0(Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar))).to.eql(["c", "c", "c", "c", "c", "c"]);
+	expect(testIf.__ks_0(Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar).value, Foobar(Foobar.foo | Foobar.bar))).to.eql(["c", "c", "c", "c", "c", "c"]);
 	expect(testIf.__ks_0(Foobar.bar, Foobar.foo.value | Foobar.bar.value, Foobar.foo.value | Foobar.bar.value)).to.eql([null, "c", "c", null, "c", "c"]);
 };

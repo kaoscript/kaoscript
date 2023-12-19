@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "Weekday" (fixtures/compile/enum/enum.stmt.return.#i.p=e.nc.ks:12)

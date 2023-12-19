@@ -1,0 +1,1 @@
+TypeException: The expression "card" of type "CardSuit" can't be compared to a value of type "String" (fixtures/compile/enum/enum.op.eq.l_es.r_l=s_n_nc.ks:9)

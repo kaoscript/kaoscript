@@ -16,6 +16,6 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	if(Helper.equalEnum(CardSuit, CardSuit.__ks_eq_Blacks, foobar.__ks_0())) {
+	if(CardSuit.__ks_eq_Blacks(foobar.__ks_0())) {
 	}
 };

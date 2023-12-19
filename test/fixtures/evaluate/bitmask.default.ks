@@ -24,13 +24,13 @@ func testIf(x: Foobar, y: Number, z) {
 	else {
 		results.push(null)
 	}
-	if y ~~ Foobar.foo {
+	if Foobar(y) ~~ Foobar.foo {
 		results.push('c')
 	}
 	else {
 		results.push(null)
 	}
-	if z ~~ Foobar.foo {
+	if Foobar(z) ~~ Foobar.foo {
 		results.push('c')
 	}
 	else {
@@ -44,5 +44,5 @@ func testIf(x: Foobar, y: Number, z) {
 	return results
 }
 
-expect(testIf(Foobar.foo + Foobar.bar, Foobar.foo + Foobar.bar, Foobar.foo + Foobar.bar)).to.eql(['c', 'c', 'c', 'c', 'c', 'c'])
+expect(testIf(Foobar.foo + Foobar.bar, (Foobar.foo + Foobar.bar).value, Foobar.foo + Foobar.bar)).to.eql(['c', 'c', 'c', 'c', 'c', 'c'])
 expect(testIf(Foobar.bar, Foobar.foo.value +| Foobar.bar.value, Foobar.foo.value +| Foobar.bar.value)).to.eql([null, 'c', 'c', null, 'c', 'c'])

@@ -252,13 +252,15 @@ abstract class Type {
 
 			data = data as Any
 
-			match data.kind {
+			match NodeKind(data.kind) {
 				NodeKind.ArrayType {
 					var mut type: Type = ArrayType.new(scope)
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind.Nullable {
-							type = type.setNullable(true)
+						match ModifierKind(modifier.kind) {
+							ModifierKind.Nullable {
+								type = type.setNullable(true)
+							}
 						}
 					}
 
@@ -281,11 +283,13 @@ abstract class Type {
 					var type = ClassType.new(scope)
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind.Abstract {
-							type._abstract = data.abstract
-						}
-						else if modifier.kind == ModifierKind.Sealed {
-							type.flagSealed()
+						match ModifierKind(modifier.kind) {
+							ModifierKind.Abstract {
+								type._abstract = data.abstract
+							}
+							ModifierKind.Sealed {
+								type.flagSealed()
+							}
 						}
 					}
 
@@ -341,7 +345,7 @@ abstract class Type {
 						}
 					}
 
-					if ?#data.properties || ?data.rest{
+					if ?#data.properties || ?data.rest {
 						for var property in data.properties {
 							var mut prop = if ?property.type {
 								set Type.fromAST(property.type, scope, defined, generics, node)
@@ -363,7 +367,7 @@ abstract class Type {
 							if ?data.rest.type {
 								type.setRestType(Type.fromAST(data.rest.type, scope, defined, generics, node))
 							}
-							else if data.modifiers.some(({ kind }) => kind == ModifierKind.Nullable) {
+							else if data.modifiers.some(({ kind }) => ModifierKind(kind) == ModifierKind.Nullable) {
 								type.setRestType(AnyType.NullableUnexplicit)
 							}
 							else {
@@ -392,12 +396,14 @@ abstract class Type {
 					var mut nullable = false
 
 					for var modifier in data.modifiers {
-						if modifier.kind == ModifierKind.Nullable {
-							nullable = true
+						match ModifierKind(modifier.kind) {
+							ModifierKind.Nullable {
+								nullable = true
+							}
 						}
 					}
 
-					if data.typeName.kind == NodeKind.Identifier {
+					if NodeKind(data.typeName.kind) == NodeKind.Identifier {
 						var name = Type.renameNative(data.typeName.name)
 
 						if name == 'Any' {
@@ -513,7 +519,7 @@ abstract class Type {
 							ReferenceException.throwNotDefinedType(data.typeName.name, node)
 						}
 					}
-					else if data.typeName.kind == NodeKind.MemberExpression && !data.typeName.computed {
+					else if NodeKind(data.typeName.kind) == NodeKind.MemberExpression && !data.typeName.computed {
 						var type = Type.fromAST(data.typeName.object, scope, defined, generics, node)
 						var property = data.typeName.property.name
 
@@ -535,12 +541,12 @@ abstract class Type {
 					}
 				}
 				NodeKind.UnaryTypeExpression {
-					match data.operator.kind {
+					match UnaryTypeOperatorKind(data.operator.kind) {
 						UnaryTypeOperatorKind.Constant {
 							return Type.fromAST(data.argument, scope, defined, generics, node).flagConstant()
 						}
 						UnaryTypeOperatorKind.TypeOf {
-							if data.argument.kind == NodeKind.Identifier && data.argument.name == 'this' {
+							if NodeKind(data.argument.kind) == NodeKind.Identifier && data.argument.name == 'this' {
 								return ReferenceType.new(scope, 'this')
 							}
 							else {
@@ -704,7 +710,7 @@ abstract class Type {
 				}
 			}
 			else if ?data.kind {
-				match data.kind {
+				match TypeKind(data.kind) {
 					TypeKind.Alias {
 						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -848,6 +854,7 @@ abstract class Type {
 	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()
 	canBeNumber(any: Boolean = true): Boolean => (any && @isAny()) || @isNumber()
 	canBeObject(any: Boolean = true): Boolean => (any && @isAny()) || @isObject()
+	canBeRawCasted(): Boolean => false
 	canBeString(any: Boolean = true): Boolean => (any && @isAny()) || @isString()
 	canBeVirtual(name: String) { # {{{
 		if @isAny() {
@@ -1133,19 +1140,19 @@ abstract class Type {
 
 		return types
 	} # }}}
-	toAwareTestFunctionFragments(varname: String, nullable: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
+	toAwareTestFunctionFragments(varname: String, nullable: Boolean, casting: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
-		@toBlindTestFragments(varname, null, Junction.NONE, fragments, node)
+		@toBlindTestFragments(null, varname, casting, null, Junction.NONE, fragments, node)
 	} # }}}
-	toBlindSubtestFunctionFragments(funcname: String?, varname: String, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
-		@toAwareTestFunctionFragments(varname, nullable, null, null, fragments, node)
+	toBlindSubtestFunctionFragments(funcname: String?, varname: String, casting: Boolean, propname: String?, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
+		@toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	toBlindTestFunctionFragments(funcname: String?, varname: String, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
-		@toBlindSubtestFunctionFragments(funcname, varname, false, generics, fragments, node)
+	toBlindTestFunctionFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
+		@toBlindSubtestFunctionFragments(funcname, varname, casting, null, false, generics, fragments, node)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() && !@isSystem() {
@@ -1214,7 +1221,7 @@ abstract class Type {
 	toNegativeTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		@toPositiveTestFragments(parameters, subtypes, junction, fragments.code('!'), node)
 	} # }}}
-	toPositiveTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toPositiveTestFragments(casting: Boolean = false, parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toQuote(): String { # {{{

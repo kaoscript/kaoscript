@@ -19,7 +19,7 @@ class ClassVariableType extends Type {
 
 			if ?data.modifiers {
 				for var modifier in data.modifiers {
-					match modifier.kind {
+					match ModifierKind(modifier.kind) {
 						ModifierKind.Final {
 							type._final = true
 						}

@@ -6,8 +6,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(card) {
 		let __ks_0;
-		if((__ks_0 = Helper.valueOf(card.suit)) === CardSuit.Diamonds.value || __ks_0 === CardSuit.Hearts.value) {
-			if(Helper.valueOf(card.suit) === CardSuit.Hearts.value) {
+		if((__ks_0 = card.suit) === CardSuit.Diamonds || __ks_0 === CardSuit.Hearts) {
+			if(card.suit === CardSuit.Hearts) {
 			}
 			else {
 			}

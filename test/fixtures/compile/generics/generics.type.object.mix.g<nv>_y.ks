@@ -24,7 +24,6 @@ type Card = {
 	rank: Number
 }
 
-
 type Result = {
 	reds: Event<Card>(Y)
 }

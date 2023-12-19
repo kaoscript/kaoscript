@@ -52,13 +52,13 @@ func testIf(x: CardSuit, y: Number, z) {
 	else {
 		results.push(null)
 	}
-	if y == CardSuit.Clubs {
+	if CardSuit(y) == CardSuit.Clubs {
 		results.push('c')
 	}
 	else {
 		results.push(null)
 	}
-	if z == CardSuit.Clubs {
+	if CardSuit(z) == CardSuit.Clubs {
 		results.push('c')
 	}
 	else {
@@ -66,16 +66,16 @@ func testIf(x: CardSuit, y: Number, z) {
 	}
 
 	results.push(x == CardSuit.Clubs ? 'c' : null)
-	results.push(y == CardSuit.Clubs ? 'c' : null)
-	results.push(z == CardSuit.Clubs ? 'c' : null)
+	results.push(CardSuit(y) == CardSuit.Clubs ? 'c' : null)
+	results.push(CardSuit(z) == CardSuit.Clubs ? 'c' : null)
 
 	return results
 }
 
-expect(testIf(CardSuit.Clubs, CardSuit.Clubs, CardSuit.Clubs)).to.eql(['c', 'c', 'c', 'c', 'c', 'c'])
+expect(testIf(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(['c', 'c', 'c', 'c', 'c', 'c'])
 expect(testIf(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql([null, 'c', 'c', null, 'c', 'c'])
 
-func testSwitch(x: CardSuit, y: Number, z) {
+func testMatch(x: CardSuit, y: Number, z) {
 	var results = []
 
 	match x {
@@ -84,13 +84,13 @@ func testSwitch(x: CardSuit, y: Number, z) {
 		else				=> results.push(null)
 	}
 
-	match y {
+	match CardSuit(y) {
 		CardSuit.Clubs		=> results.push('c')
 		CardSuit.Diamonds	=> results.push('d')
 		else				=> results.push(null)
 	}
 
-	match z {
+	match CardSuit(z) {
 		CardSuit.Clubs		=> results.push('c')
 		CardSuit.Diamonds	=> results.push('d')
 		else				=> results.push(null)
@@ -99,5 +99,5 @@ func testSwitch(x: CardSuit, y: Number, z) {
 	return results
 }
 
-expect(testSwitch(CardSuit.Clubs, CardSuit.Clubs, CardSuit.Clubs)).to.eql(['c', 'c', 'c'])
-expect(testSwitch(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(['d', 'c', 'c'])
+expect(testMatch(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(['c', 'c', 'c'])
+expect(testMatch(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(['d', 'c', 'c'])

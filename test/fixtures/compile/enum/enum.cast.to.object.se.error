@@ -1,0 +1,1 @@
+TypeException: The expression "aliases[x]" of type "String" can't be compared to a value of type "Color" (fixtures/compile/enum/enum.cast.to.object.se.ks:12)

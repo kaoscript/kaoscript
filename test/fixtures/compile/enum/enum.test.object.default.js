@@ -23,7 +23,7 @@ module.exports = function() {
 			return this.__ks_func_isRed_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isRed_0(name) {
-			return Helper.valueOf(this._colors[name]) === Color.Red.value;
+			return this._colors[name] === Color.Red;
 		}
 		__ks_func_isRed_rt(that, proto, args) {
 			const t0 = Type.isValue;

@@ -11,11 +11,6 @@ bitmask AnimalFlags<u16> {
 	Predator = CanFly + HasClaws
 }
 
-func foobar(x: Number) {
-}
-
-foobar(AnimalFlags.Predator)
-
 func printAnimalAbilities(abilities: AnimalFlags) {
 	if abilities ~~ AnimalFlags.HasClaws {
 		console.log('animal has claws')

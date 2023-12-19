@@ -20,17 +20,17 @@ module.exports = function() {
 		return "any";
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = Type.isNumber;
-		const t1 = value => Type.isEnumInstance(value, CardSuit);
+		const t0 = value => Type.isEnumInstance(value, CardSuit);
+		const t1 = Type.isNumber;
 		const t2 = Type.isString;
 		const t3 = Type.isObject;
 		const t4 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return foobar.__ks_2.call(that, args[0]);
+				return foobar.__ks_0.call(that, args[0]);
 			}
 			if(t1(args[0])) {
-				return foobar.__ks_0.call(that, args[0]);
+				return foobar.__ks_2.call(that, args[0]);
 			}
 			if(t2(args[0])) {
 				return foobar.__ks_3.call(that, args[0]);

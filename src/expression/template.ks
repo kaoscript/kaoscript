@@ -20,7 +20,10 @@ class TemplateExpression extends Expression {
 			if @isString {
 				var type = element.type()
 
-				if !type.isString() || type.isNullable() {
+				if type.isString() || (type.isEnum() && type.canBeString()) {
+					@isString = !type.isNullable()
+				}
+				else {
 					@isString = false
 				}
 			}
@@ -66,18 +69,32 @@ class TemplateExpression extends Expression {
 			fragments.code('""')
 		}
 		else if @elements.length == 1 {
+			var element = @elements[0]
+
 			if @computing {
-				fragments.wrap(@elements[0])
+				fragments.wrap(element)
 			}
 			else if @isString {
-				@elements[0].toStringFragments(fragments)
+				if element.type().isEnum() {
+					fragments.compile(element).code('.value')
+				}
+				else {
+					fragments.wrap(element)
+				}
 			}
 			else {
-				fragments.code($runtime.helper(this), '.toString(').compile(@elements[0]).code(')')
+				fragments.code($runtime.helper(this), '.toString(').compile(element).code(')')
 			}
 		}
 		else if @isString {
-			@elements[0].toStringFragments(fragments)
+			var element = @elements[0]
+
+			if element.type().isEnum() {
+				fragments.compile(element).code('.value')
+			}
+			else {
+				fragments.wrap(element)
+			}
 
 			for var element in @elements from 1 {
 				fragments.code(' + ').wrap(element)

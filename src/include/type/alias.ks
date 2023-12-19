@@ -125,8 +125,8 @@ class AliasType extends Type {
 	type() => @type
 	type(@type) => this
 	override toExportFragment(fragments, name, variable)
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
-		@type.toBlindTestFunctionFragments(funcname, varname, testingType, @generics, fragments, node)
+	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
+		@type.toBlindTestFunctionFragments(funcname, varname, casting, testingType, @generics, fragments, node)
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
@@ -140,6 +140,7 @@ class AliasType extends Type {
 	proxy @type {
 		canBeArray
 		canBeDeferred
+		canBeRawCasted
 		hasProperty
 		hasRest
 		isComplex

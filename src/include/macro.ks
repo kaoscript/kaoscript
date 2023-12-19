@@ -60,7 +60,7 @@ func $reificate(macro, node, data, ast, reification? = null, separator? = null) 
 		}
 	}
 	else {
-		match reification {
+		match ReificationKind(reification) {
 			ReificationKind.Argument {
 				if data is Array {
 					return data.join(', ')

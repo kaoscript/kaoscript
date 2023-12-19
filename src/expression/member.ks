@@ -6,7 +6,6 @@ class MemberExpression extends Expression {
 		@computed: Boolean				= false
 		@declaredType: Type?			= null
 		@derivative: Boolean			= false
-		@enumCasting: Boolean			= false
 		@inferable: Boolean				= false
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
@@ -416,7 +415,6 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	// override isAccessibleAliasType(value) => !(value is NamedType && value.type() is AliasType && @parent is not MatchConditionValue)
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
@@ -978,11 +976,6 @@ class MemberExpression extends Expression {
 			fragments.code('.value')
 		}
 	} # }}}
-	toCastingFragments(fragments, mode) { # {{{
-		@toFragments(fragments, mode)
-
-		fragments.code('.value')
-	} # }}}
 	toFragments(fragments, mode) { # {{{
 		@toPropertyFragments(@originalProperty ?? @property, fragments, mode)
 	} # }}}
@@ -1138,10 +1131,6 @@ class MemberExpression extends Expression {
 				else {
 					fragments.code($dot).compile(property)
 				}
-
-				if @enumCasting {
-					fragments.code('.value')
-				}
 			}
 		}
 	} # }}}
@@ -1216,14 +1205,7 @@ class MemberExpression extends Expression {
 	unflagCompleteObject() {
 		@completeObject = false
 	}
-	validateType(type: Type) { # {{{
-		if @type.isBitmask() && !type.isAny() && !type.isBitmask() {
-			@enumCasting = true
-		}
-		else if @type.isEnum() && !type.isAny() && !type.isEnum() {
-			@enumCasting = true
-		}
-	} # }}}
+	validateType(type: Type)
 	walkNode(fn) => fn(this) && @object.walkNode(fn)
 }
 

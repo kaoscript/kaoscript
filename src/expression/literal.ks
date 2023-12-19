@@ -238,21 +238,6 @@ class IdentifierLiteral extends Literal {
 	toAssignmentFragments(fragments, value) { # {{{
 		fragments.compile(this).code($equals).compile(value)
 	} # }}}
-	override toCastingFragments(fragments, mode) { # {{{
-		if @isVariable {
-			var variable = @scope.getVariable(@path, @line)
-
-			if variable.getRealType().isEnum() {
-				fragments.compile(variable).code('.value')
-			}
-			else {
-				super(fragments, mode)
-			}
-		}
-		else {
-			super(fragments, mode)
-		}
-	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @isVariable {
 			fragments.compile(@scope.getVariable(@path, @line))

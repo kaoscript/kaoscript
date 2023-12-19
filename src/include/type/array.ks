@@ -1,5 +1,5 @@
 class ArrayType extends Type {
-	private {
+	private late {
 		@destructuring: Boolean			= false
 		@fullTest: Boolean				= true
 		@length: Number					= 0
@@ -71,6 +71,15 @@ class ArrayType extends Type {
 		if @rest && @restType.isDeferrable() {
 			@restType.buildGenericMap(position, expressions, value => decompose(value).parameter(), genericMap)
 		}
+	} # }}}
+	override canBeRawCasted() { # {{{
+		for var property in @properties {
+			if property.canBeRawCasted() {
+				return true
+			}
+		}
+
+		return @rest && @restType.canBeRawCasted()
 	} # }}}
 	clone() { # {{{
 		var type = ArrayType.new(@scope)
@@ -728,18 +737,18 @@ class ArrayType extends Type {
 		fragments.code(`\($runtime.helper(node)).assertDexArray(`).compile(value)
 
 		if @testRest || @testProperties || @testLength {
-			@toSubtestFragments('value', testingType, @testLength, fragments, node)
+			@toSubtestFragments('value', false, testingType, @testLength, fragments, node)
 		}
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, generics, subtypes, fragments, node) { # {{{
-		@toBlindTestFunctionFragments(null, varname, true, null, fragments, node)
+	override toAwareTestFunctionFragments(varname, nullable, casting, generics, subtypes, fragments, node) { # {{{
+		@toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, node)
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
-		@toBlindTestFragments(varname, true, @testLength, generics, junction, fragments, node)
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
+		@toBlindTestFragments(funcname, varname, casting, true, @testLength, generics, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(varname: String, testingType: Boolean, testingLength: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, testingLength: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == .AND
 
 		if testingType && @length == 0 && !@destructuring && !@testProperties {
@@ -748,7 +757,7 @@ class ArrayType extends Type {
 			if @testRest {
 				fragments.code($comma)
 
-				@restType.toBlindTestFunctionFragments(null, varname, true, generics, fragments, node)
+				@restType.toBlindTestFunctionFragments(funcname, varname, casting, true, generics, fragments, node)
 			}
 
 			fragments.code(')')
@@ -756,7 +765,7 @@ class ArrayType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexArray(\(varname)`)
 
-			@toSubtestFragments(varname, testingType, testingLength, fragments, node)
+			@toSubtestFragments(varname, casting, testingType, testingLength, fragments, node)
 
 			fragments.code(')')
 		}
@@ -767,7 +776,7 @@ class ArrayType extends Type {
 				..code(')') if junction == .AND
 		}
 	} # }}}
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
 		if @length == 0 && !@rest && !@nullable {
 			if @destructuring {
 				fragments.code(`\($runtime.type(node)).isDXArray`)
@@ -779,7 +788,7 @@ class ArrayType extends Type {
 		else if @rest || @testProperties || @nullable {
 			fragments.code(`\(varname) => `)
 
-			@toBlindTestFragments(varname, testingType, @testLength, generics, Junction.NONE, fragments, node)
+			@toBlindTestFragments(funcname, varname, casting, testingType, @testLength, generics, Junction.NONE, fragments, node)
 		}
 		else {
 			if @destructuring {
@@ -790,7 +799,7 @@ class ArrayType extends Type {
 			}
 		}
 	} # }}}
-	override toPositiveTestFragments(_, _, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(casting, _, _, junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == Junction.AND
 
 		if @length == 0 && !@destructuring && !@testProperties {
@@ -799,7 +808,7 @@ class ArrayType extends Type {
 			if @testRest {
 				fragments.code($comma)
 
-				@restType.toAwareTestFunctionFragments('value', @nullable, null, null, fragments, node)
+				@restType.toAwareTestFunctionFragments('value', @nullable, casting, null, null, fragments, node)
 			}
 
 			fragments.code(')')
@@ -807,7 +816,7 @@ class ArrayType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
 
-			@toSubtestFragments('value', true, @testLength, fragments, node)
+			@toSubtestFragments('value', casting, true, @testLength, fragments, node)
 
 			fragments.code(')')
 		}
@@ -846,7 +855,7 @@ class ArrayType extends Type {
 	walk(fn)
 
 	private {
-		toSubtestFragments(varname: String, testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
+		toSubtestFragments(varname: String, casting: Boolean, testingType: Boolean, testingLength: Boolean, fragments, node) { # {{{
 			if testingType {
 				fragments.code(', 1')
 			}
@@ -879,7 +888,7 @@ class ArrayType extends Type {
 							}
 						}
 
-						@restType.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+						@restType.toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, literal)
 
 						if !onlyRest {
 							fragments.code(', [')
@@ -894,7 +903,7 @@ class ArrayType extends Type {
 									comma = true
 								}
 
-								type.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+								type.toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, literal)
 							}
 
 							fragments.code(']')
@@ -913,14 +922,14 @@ class ArrayType extends Type {
 								comma = true
 							}
 
-							type.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+							type.toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, literal)
 						}
 
 						fragments.code(']')
 					}
 				}
 				else {
-					@restType.toBlindTestFunctionFragments(null, varname, true, null, fragments, literal)
+					@restType.toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, literal)
 				}
 			}
 		} # }}}

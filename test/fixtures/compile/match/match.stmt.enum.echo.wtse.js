@@ -5,10 +5,11 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(card) {
-		if(card === CardSuit.Clubs.value) {
+		let __ks_0 = CardSuit(card);
+		if(__ks_0 === CardSuit.Clubs) {
 			console.log("clubs");
 		}
-		else if(card === CardSuit.Diamonds.value) {
+		else if(__ks_0 === CardSuit.Diamonds) {
 			console.log("diamonds");
 		}
 		else {

@@ -5,11 +5,11 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(card) {
-		if(card.value === "hearts") {
+		if(CardSuit.Diamonds === CardSuit(card)) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, CardSuit);
+		const t0 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

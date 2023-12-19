@@ -850,7 +850,7 @@ class ClassType extends Type {
 		if mode !~ ExportMode.Export && ?@origin && @origin ~~ TypeOrigin.Extern && @origin !~ TypeOrigin.Import {
 			var origin = @origin - TypeOrigin.Extern - TypeOrigin.Require
 
-			if origin != 0 {
+			if origin.value != 0 {
 				export.origin = origin
 			}
 		}

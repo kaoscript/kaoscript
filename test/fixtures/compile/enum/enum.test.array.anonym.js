@@ -39,7 +39,7 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(f, x) {
-		if(Helper.valueOf(f.color(x)) === Color.Red.value) {
+		if(f.color(x) === Color.Red) {
 		}
 	};
 	quxbaz.__ks_rt = function(that, args) {

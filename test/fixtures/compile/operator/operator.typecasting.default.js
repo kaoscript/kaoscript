@@ -64,7 +64,7 @@ module.exports = function() {
 		return toEnum.__ks_rt(this, arguments);
 	};
 	toEnum.__ks_0 = function(x) {
-		return Helper.cast(x, "Enum", true, Type.isEnum);
+		return Enum(x);
 	};
 	toEnum.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;
@@ -233,7 +233,7 @@ module.exports = function() {
 		return toEnumInstance.__ks_rt(this, arguments);
 	};
 	toEnumInstance.__ks_0 = function(x) {
-		return Helper.cast(x, "Quxbaz", true, value => Type.isEnumInstance(value, Quxbaz));
+		return Quxbaz(x);
 	};
 	toEnumInstance.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

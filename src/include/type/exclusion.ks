@@ -81,25 +81,25 @@ class ExclusionType extends Type {
 
 		return true
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .OR
 
 		if @types[0].isAny() {
-			@types[1].toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+			@types[1].toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments.code('!'), node)
 
 			for var type in @types from 2 {
 				fragments.code(' && ')
 
-				type.toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+				type.toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments.code('!'), node)
 			}
 		}
 		else {
-			@types[0].toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+			@types[0].toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments.code('!'), node)
 
 			for var type in @types from 1 {
 				fragments.code(' && ')
 
-				type.toBlindTestFragments(varname, generics, Junction.AND, fragments.code('!'), node)
+				type.toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments.code('!'), node)
 			}
 		}
 
@@ -108,7 +108,7 @@ class ExclusionType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(_, parameters, subtypes, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .OR
 
 		if @types[0].isAny() {

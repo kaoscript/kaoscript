@@ -208,6 +208,7 @@ class BitmaskType extends Type {
 
 		return @assessment
 	} # }}}
+	override canBeRawCasted() => true
 	clone() { # {{{
 		var that = BitmaskType.new(@scope)
 

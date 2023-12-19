@@ -194,7 +194,16 @@ class ReferenceType extends Type {
 			return @name == 'Object' || @type().isObject() || @type().isStruct() || (@type().isClass() && !@isPrimitive() && !@isArray() && !@isBitmask() && !@isEnum())
 		}
 	} # }}}
-	canBeString(any = true) => @isUnion() ? @type.canBeString(any) : super(any)
+	override canBeRawCasted() { # {{{
+		return true if @type().canBeRawCasted()
+
+		for var parameter in @parameters {
+			return true if parameter.canBeRawCasted()
+		}
+
+		return false
+	} # }}}
+	canBeString(any = true) => @isString() || @type.canBeString(any)
 	clone(): ReferenceType { # {{{
 		var type = ReferenceType.new(@scope, @name, @nullable, [...@parameters], [...@subtypes])
 
@@ -340,9 +349,7 @@ class ReferenceType extends Type {
 
 		if @isTypeOf() {
 			if value.type().isBitmask() || value.type().isEnum() {
-				var name = value.discard().type().name()
-
-				return $weightTOFs[@name] - $weightTOFs[name]
+				return $weightTOFs[@name] - $weightTOFs.Enum
 			}
 
 			if @isNullable() != value.isNullable() {
@@ -380,9 +387,7 @@ class ReferenceType extends Type {
 
 		if value.isTypeOf() {
 			if @type().isBitmask() || @type().isEnum() {
-				var name = @discard().type().name()
-
-				return $weightTOFs[@name] - $weightTOFs[name]
+				return $weightTOFs.Enum - $weightTOFs[value.name()]
 			}
 
 			if @isNullable() != value.isNullable() {
@@ -1393,12 +1398,6 @@ class ReferenceType extends Type {
 					return @type().canBeVirtual(value.name())
 				}
 
-				if mode ~~ MatchingMode.AutoCast {
-					if (@type().isBitmask() && !value.isBitmask()) || (@type().isEnum() && !value.isEnum()) {
-						return @type().discard().type().isSubsetOf(value, mode)
-					}
-				}
-
 				if @isAlias() {
 					return @discardAlias().isSubsetOf(value, null, @subtypes, mode)
 				}
@@ -1821,7 +1820,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, casting, mut generics, subtypes, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isAlias() && @type is NamedType {
@@ -1854,10 +1853,10 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			@discard().toAwareTestFunctionFragments(varname, @nullable, generics, @subtypes, fragments, node)
+			@discard().toAwareTestFunctionFragments(varname, @nullable, casting, generics, @subtypes, fragments, node)
 		}
 		else if ?#generics {
-			@type.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
+			@type.toAwareTestFunctionFragments(varname, @nullable, casting, generics, subtypes, fragments, node)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1873,14 +1872,14 @@ class ReferenceType extends Type {
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-				unalias.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
+				unalias.toAwareTestFunctionFragments(varname, @nullable, casting, generics, subtypes, fragments, node)
 			}
 			else {
-				super.toAwareTestFunctionFragments(varname, @nullable, generics, subtypes, fragments, node)
+				super(varname, @nullable, casting, generics, subtypes, fragments, node)
 			}
 		}
 	} # }}}
-	override toBlindSubtestFunctionFragments(funcname, varname, mut nullable, generics, fragments, node) { # {{{
+	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, mut nullable, generics, fragments, node) { # {{{
 		@resolve()
 
 		nullable ||= @nullable
@@ -1892,7 +1891,13 @@ class ReferenceType extends Type {
 
 			var { type, generics } = @getGenericMapper()
 
-			type.toAwareTestFunctionFragments(varname, nullable, generics, @subtypes, fragments, node)
+			type.toAwareTestFunctionFragments(varname, nullable, casting, generics, @subtypes, fragments, node)
+		}
+		else if @type.isBitmask() && ?propname {
+			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
+		}
+		else if @type.isEnum() && ?propname {
+			fragments.code(`() => \($runtime.helper(node)).castEnum(\(varname), \(propname), `).compile(@type).code(`, cast)`)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1910,14 +1915,14 @@ class ReferenceType extends Type {
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
 				var { generics } = @getGenericMapper()
 
-				unalias.toBlindSubtestFunctionFragments(funcname, varname, nullable, generics, fragments, node)
+				unalias.toBlindSubtestFunctionFragments(funcname, varname, casting, propname, nullable, generics, fragments, node)
 			}
 			else {
-				super.toBlindSubtestFunctionFragments(funcname, varname, nullable, generics, fragments, node)
+				super(funcname, varname, casting, propname, nullable, generics, fragments, node)
 			}
 		}
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
 		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
@@ -1938,10 +1943,10 @@ class ReferenceType extends Type {
 		var unalias = @discardAlias()
 
 		if ?#@subtypes {
-			@type.discard().toPositiveTestFragments(@parameters, @subtypes, junction, fragments, node)
+			@type.discard().toPositiveTestFragments(casting, @parameters, @subtypes, junction, fragments, node)
 		}
 		else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-			unalias.toBlindTestFragments(varname, generics, subjunction ?? junction, fragments, node)
+			unalias.toBlindTestFragments(funcname, varname, casting, generics, subjunction ?? junction, fragments, node)
 		}
 		else {
 			var name = unalias.name?() ?? @name
@@ -1985,7 +1990,7 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			fragments.code(', ')
 
-			@parameters[0].toBlindTestFunctionFragments(null, varname, true, generics, fragments, node)
+			@parameters[0].toBlindTestFunctionFragments(funcname, varname, casting, true, generics, fragments, node)
 		}
 
 		if !@type.isAlias() {
@@ -2064,7 +2069,7 @@ class ReferenceType extends Type {
 			@toReferenceTestFragments(junction, fragments.code('!'), node)
 		}
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isVariant() {
@@ -2073,7 +2078,7 @@ class ReferenceType extends Type {
 					if !?#subtypes {
 						var { type, generics, subtypes } = @getGenericMapper()
 
-						type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
+						type.toPositiveTestFragments(casting, generics, subtypes, junction, fragments, node)
 					}
 					else {
 						var { type, generics } = @getGenericMapper()
@@ -2118,11 +2123,11 @@ class ReferenceType extends Type {
 			else {
 				var { type, generics, subtypes } = @getGenericMapper()
 
-				type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
+				type.toPositiveTestFragments(casting, generics, subtypes, junction, fragments, node)
 			}
 		}
 		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
+			@type.toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
 		}
 		else {
 			@toReferenceTestFragments(junction, fragments, node)

@@ -2,7 +2,6 @@ class ReturnStatement extends Statement {
 	private {
 		@await: Boolean			= false
 		@async: Boolean			= false
-		@enumCasting: Boolean	= false
 		@exceptions: Boolean	= false
 		@function				= null
 		@inline: Boolean		= false
@@ -84,33 +83,6 @@ class ReturnStatement extends Statement {
 			else if @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				pass
 			}
-			else if (@type.isBitmask() || @type.isEnum()) && @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
-				@type = target!?
-				@enumCasting = true
-			}
-			else if @type.isUnion() {
-				var mut cast = false
-
-				for var tt in @type.types() {
-					if tt.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
-						pass
-					}
-					else if (tt.isBitmask() || tt.isEnum()) && tt.discard().type().isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
-						cast = true
-					}
-					else if tt.isAssignableToVariable(target, true, false, false) {
-						pass
-					}
-					else {
-						TypeException.throwUnexpectedReturnType(target, @type, this)
-					}
-				}
-
-				if cast {
-					@type = target!?
-					@enumCasting = true
-				}
-			}
 			else if !target.isDeferred() && @type.isAssignableToVariable(target, true, false, false) {
 				pass
 			}
@@ -184,12 +156,7 @@ class ReturnStatement extends Statement {
 		line.done()
 	} # }}}
 	toCastingFragments(fragments, mode) { # {{{
-		if @enumCasting {
-			@value.toCastingFragments(fragments, mode)
-		}
-		else {
-			fragments.compile(@value)
-		}
+		fragments.compile(@value)
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if !?@value {
@@ -218,14 +185,10 @@ class ReturnStatement extends Statement {
 				var line = fragments.newLine().code('return ')
 
 				if @async {
-					line.code('__ks_cb(null, ')
-
-					@toCastingFragments(line, mode)
-
-					line.code(')')
+					line.code('__ks_cb(null, ').compile(@value).code(')')
 				}
 				else {
-					@toCastingFragments(line, mode)
+					line.compile(@value)
 				}
 
 				line.done()
@@ -248,11 +211,7 @@ class ReturnStatement extends Statement {
 					}
 				}
 
-				var line = fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `)
-
-				@toCastingFragments(line, mode)
-
-				line.done()
+				fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `).compile(@value).done()
 
 				for var afterward in @afterwards {
 					afterward.toAfterwardFragments(fragments, mode)

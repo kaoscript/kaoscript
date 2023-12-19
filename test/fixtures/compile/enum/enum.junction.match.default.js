@@ -6,8 +6,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(card) {
-		let __ks_0 = Helper.valueOf(card.suit);
-		if(Helper.equalEnum(CardSuit, CardSuit.__ks_eq_Reds, __ks_0)) {
+		let __ks_0 = card.suit;
+		if(CardSuit.__ks_eq_Reds(__ks_0)) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

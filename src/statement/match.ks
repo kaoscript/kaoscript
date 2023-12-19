@@ -53,9 +53,9 @@ class MatchStatement extends Statement {
 	private late {
 		@bindingScope: Scope
 		@bodyScope: Scope
-		@castingEnum: Boolean				= false
 		@clauses							= []
 		@declaration: VariableDeclaration?
+		@declareTemp: Boolean				= false
 		@hasDeclaration: Boolean			= false
 		@hasDefaultClause: Boolean			= false
 		@hasLateInitVariables: Boolean		= false
@@ -154,7 +154,7 @@ class MatchStatement extends Statement {
 			@valueType = @value.type()
 
 			if @reusableValue {
-				@name = @scope.acquireTempName(false)
+				@name = @scope.acquireTempName()
 				@usingTempName = true
 			}
 			else {
@@ -162,10 +162,20 @@ class MatchStatement extends Statement {
 			}
 		}
 
+		@assignTempVariables(@scope)
+
+		if @reusableValue {
+			var index = @assignments.indexOf(@name)
+
+			if index != -1 {
+				@declareTemp = true
+				@assignments.splice(index, 1)
+			}
+		}
+
 		@bodyScope.setImplicitVariable(@name, @valueType)
 
 		var inferables = {}
-		var mut enumConditions = 0
 		var mut maxConditions = 0
 
 		var mut maxInferables = @clauses.length
@@ -173,7 +183,6 @@ class MatchStatement extends Statement {
 		for var clause, index in @clauses {
 			clause.filter.prepare(@scope.reference('Boolean'))
 
-			enumConditions += clause.filter:MatchFilter.getEnumConditions()
 			maxConditions += clause.filter:MatchFilter.getMaxConditions()
 
 			clause.body.analyse()
@@ -236,46 +245,6 @@ class MatchStatement extends Statement {
 						binding.name ??= @scope.acquireTempName(false)
 
 						test.tests = [condition.name, binding.name]
-					}
-				}
-			}
-		}
-
-		if enumConditions != 0 {
-			if @valueType.canBeEnum(false) {
-				if @value is CallExpression && @value.isEnumCreate() {
-					var mut recast = true
-
-					for var clause in @clauses {
-						if !clause.filter.isEnum() {
-							recast = false
-
-							break
-						}
-					}
-
-					if recast {
-						@castingEnum = true
-						@value = @value.argument(0)
-
-						for var clause in @clauses {
-							clause.filter.setCastingEnum(true)
-						}
-					}
-				}
-			}
-			else {
-				for var clause in @clauses {
-					clause.filter.setCastingEnum(true)
-				}
-
-				if @valueType.isAny() || @valueType.canBeEnum() {
-					@castingEnum = true
-
-					if !@reusableValue {
-						@name = @scope.acquireTempName(false)
-
-						@reusableValue = true
 					}
 				}
 			}
@@ -654,37 +623,9 @@ class MatchStatement extends Statement {
 			fragments.compile(@declaration)
 		}
 		else if @reusableValue {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
+			var line = fragments.newLine().code(`\(@declareTemp ? $runtime.scope(this) : '')\(@name) = `)
 
-			if @castingEnum {
-				if @valueType.isAny() || @valueType.isNullable() {
-					line.code($runtime.helper(this), '.valueOf(').compile(@value).code(')')
-				}
-				else if @valueType.isEnum() {
-					line.compile(@value).code('.value')
-				}
-				else {
-					line.compile(@value)
-				}
-			}
-			else {
-				line.compile(@value)
-			}
-
-			line.done()
-		}
-		else if @castingEnum {
-			var line = fragments.newLine().code($runtime.scope(this), @name, ' = ')
-
-			if @valueType.isAny() || @valueType.isNullable() {
-				line.code($runtime.helper(this), '.valueOf(', @data.expression.name, ')')
-			}
-			else if @valueType.isEnum() {
-				line.code(@data.expression.name, '.value')
-			}
-			else {
-				line.code(@data.expression.name)
-			}
+			line.compile(@value)
 
 			line.done()
 		}
@@ -698,7 +639,7 @@ class MatchStatement extends Statement {
 				var { testingType, minmax?, type? } = test
 
 				if ?type {
-					type.toBlindTestFragments(@name, testingType, ?minmax, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, Junction.NONE, line, this)
 				}
 				else if ?minmax {
 					var { min, max } = minmax
@@ -713,7 +654,7 @@ class MatchStatement extends Statement {
 				var { testingType, type? } = test
 
 				if ?type {
-					type.toBlindTestFragments(@name, testingType, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, null, Junction.NONE, line, this)
 				}
 				else {
 					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
@@ -920,7 +861,7 @@ class MatchBindingArray extends AbstractNode {
 		else if @testingLength || @testingType || @testingProperties {
 			fragments.code(' && ') if junction == Junction.AND
 
-			type.toBlindTestFragments(name, @testingType, true, null, junction, fragments, this)
+			type.toBlindTestFragments(null, name, false, @testingType, true, null, junction, fragments, this)
 		}
 	} # }}}
 	unflagLengthTesting() { # {{{
@@ -1073,10 +1014,10 @@ class MatchBindingObject extends AbstractNode {
 			fragments.code(' && ') if junction == Junction.AND
 
 			if type is ObjectType {
-				type.toBlindTestFragments(name, false, @testingType, null, junction, fragments, this)
+				type.toBlindTestFragments(null, name, false, false, @testingType, null, junction, fragments, this)
 			}
 			else {
-				type.toBlindTestFragments(name, null, junction, fragments, this)
+				type.toBlindTestFragments(null, name, false, null, junction, fragments, this)
 			}
 		}
 	} # }}}
@@ -1402,7 +1343,6 @@ class MatchConditionType extends AbstractNode {
 
 class MatchConditionValue extends AbstractNode {
 	private late {
-		@castingEnum: Boolean	= false
 		@values: Expression[]	= []
 		@type: Type
 	}
@@ -1461,7 +1401,6 @@ class MatchConditionValue extends AbstractNode {
 	} # }}}
 	isEnum() => @type.isEnum()
 	isVariant() => @type.isVariant()
-	setCastingEnum(@castingEnum)
 	toConditionFragments(fragments, name, junction) { # {{{
 		if @values.length == 1 {
 			var value = @values[0]
@@ -1501,23 +1440,11 @@ class MatchConditionValue extends AbstractNode {
 				var type = value.type().discardValue()
 
 				fragments
-					.code($runtime.helper(this), '.equalEnum(')
 					.compile(type)
-					.code($comma)
-					.compile(type)
-					.code(`.__ks_eq_\(type.discard().getTopProperty(value.property())), \(name))`)
+					.code(`.__ks_eq_\(type.discard().getTopProperty(value.property()))(\(name))`)
 			}
 			else {
 				fragments.code(name, ' === ').compile(value)
-
-				if @castingEnum {
-					if @type.isEnum() {
-						fragments.code('.value')
-					}
-					else if @type.isAny() {
-						fragments.code('.valueOf()')
-					}
-				}
 			}
 		}
 		else if @values.length > 1 {
@@ -1556,15 +1483,6 @@ class MatchConditionValue extends AbstractNode {
 				}
 				else {
 					fragments.code(name, ' === ').compile(value)
-
-					if @castingEnum {
-						if @type.isEnum() {
-							fragments.code('.value')
-						}
-						else if @type.isAny() {
-							fragments.code('.valueOf()')
-						}
-					}
 				}
 			}
 
@@ -1579,7 +1497,6 @@ class MatchFilter extends AbstractNode {
 	private late {
 		@conditions				= []
 		@binding				= null
-		@enumConditions: Number	= 0
 		@filter					= null
 		@hasTest: Boolean		= false
 		@kind: MatchClauseKind	= .DEFAULT
@@ -1730,12 +1647,7 @@ class MatchFilter extends AbstractNode {
 			condition.prepare()
 
 			if condition is MatchConditionValue {
-				if condition.isEnum() {
-					@enumConditions += 1
-
-					types.push(condition.type().discardValue().reference(@scope))
-				}
-				else if condition.isContainer() {
+				if condition.isContainer() {
 					@binding?.unflagTypeTesting()
 
 					types.push(condition.type().reference(@scope))
@@ -1777,7 +1689,6 @@ class MatchFilter extends AbstractNode {
 		@filter?.translate()
 	} # }}}
 	conditions() => @conditions
-	getEnumConditions(): Number => @enumConditions
 	getMaxConditions(): Number => @conditions.length
 	hasTest() => @hasTest
 	isEnum() { # {{{

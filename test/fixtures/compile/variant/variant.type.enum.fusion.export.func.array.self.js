@@ -2,8 +2,14 @@ const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isSchoolPerson: (value, filter) => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(!Type.isEnumInstance(variant, PersonKind)) {
+		isSchoolPerson: (value, cast, filter) => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
+			if(cast) {
+				if((variant = PersonKind(variant)) === null) {
+					return false;
+				}
+				value["kind"] = variant;
+			}
+			else if(!Type.isEnumInstance(variant, PersonKind)) {
 				return false;
 			}
 			if(filter && !filter(variant)) {
@@ -13,7 +19,7 @@ module.exports = function() {
 				return Type.isDexObject(value, 0, 0, {name: Type.isString});
 			}
 			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorites: value => Type.isArray(value, value => __ksType.isSchoolPerson(value, value => value === PersonKind.Student))});
+				return Type.isDexObject(value, 0, 0, {favorites: value => Type.isArray(value, value => __ksType.isSchoolPerson(value, cast, value => value === PersonKind.Student))});
 			}
 			return true;
 		}})

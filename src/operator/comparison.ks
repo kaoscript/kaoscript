@@ -395,10 +395,6 @@ abstract class ComparisonOperator {
 
 class EqualityOperator extends ComparisonOperator {
 	private {
-		@enumLeft: Boolean		= false
-		@enumNullLeft: Boolean	= false
-		@enumNullRight: Boolean	= false
-		@enumRight: Boolean		= false
 		@infinity: Boolean		= false
 		@nanLeft: Boolean		= false
 		@nanRight: Boolean		= false
@@ -407,10 +403,7 @@ class EqualityOperator extends ComparisonOperator {
 		var leftType = @left.type().discardValue()
 		var rightType = @right.type().discardValue()
 
-		if (leftType.isBitmask() || leftType.isEnum()) && @left is not NumericBinaryOperatorExpression {
-			@enumLeft = true
-		}
-		else if @left is IdentifierLiteral {
+		if @left is IdentifierLiteral {
 			if @left.value() == 'NaN' {
 				@nanLeft = true
 			}
@@ -426,8 +419,6 @@ class EqualityOperator extends ComparisonOperator {
 			unless leftType.isNullable() || @left.isLateInit() || @node._options.rules.ignoreMisfit {
 				TypeException.throwInvalidComparison(@left, @right, @node)
 			}
-
-			@enumLeft = false
 		}
 		else {
 			if leftType.isNull() {
@@ -435,51 +426,19 @@ class EqualityOperator extends ComparisonOperator {
 					TypeException.throwInvalidComparison(@left, @right, @node)
 				}
 			}
-			else {
-				if !leftType.isAssignableToVariable(rightType, false) && !rightType.isAssignableToVariable(leftType, false) {
-					if leftType.isBitmask() || leftType.isEnum() {
-						unless leftType.isComparableWith(rightType) {
-							TypeException.throwInvalidComparison(@left, @right, @node)
-						}
-					}
-					else if rightType.isBitmask() || rightType.isEnum() {
-						unless rightType.isComparableWith(leftType) {
-							TypeException.throwInvalidComparison(@left, @right, @node)
-						}
-					}
-					else {
-						TypeException.throwInvalidComparison(@left, @right, @node)
-					}
+			else if !leftType.isAssignableToVariable(rightType, false) && !rightType.isAssignableToVariable(leftType, false) {
+				TypeException.throwInvalidComparison(@left, @right, @node)
+			}
+			else if @right is IdentifierLiteral {
+				if @right.value() == 'NaN' {
+					@nanRight = true
 				}
-
-				if (rightType.isBitmask() || rightType.isEnum()) && @right is not NumericBinaryOperatorExpression {
-					@enumRight = true
-				}
-				else if @right is IdentifierLiteral {
-					if @right.value() == 'NaN' {
-						@nanRight = true
-					}
-					else if @right.value() == 'Infinity' {
-						@infinity = true
-					}
-				}
-				else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
-					@infinity = @right.argument().value() == 'Infinity'
+				else if @right.value() == 'Infinity' {
+					@infinity = true
 				}
 			}
-		}
-
-		if @enumLeft && @enumRight {
-			if @left is CallExpression && (@left.isBitmaskCreate() || @left.isEnumCreate()) {
-				@left = @left.argument(0)
-				@enumNullLeft = true
-			}
-			else if @right is CallExpression && (@right.isBitmaskCreate() || @right.isEnumCreate()) {
-				@right = @right.argument(0)
-				@enumNullRight = true
-			}
-			else {
-				@enumLeft = @enumRight = false
+			else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
+				@infinity = @right.argument().value() == 'Infinity'
 			}
 		}
 	} # }}}
@@ -533,10 +492,7 @@ class EqualityOperator extends ComparisonOperator {
 		var leftType = @left.type()
 		var rightType = @right.type()
 
-		if @enumLeft != @enumRight {
-			pass
-		}
-		else if @left.isInferable() {
+		if @left.isInferable() {
 			if @right.isInferable() {
 				if rightType.isMorePreciseThan(leftType) {
 					inferables[@left.path()] = {
@@ -585,42 +541,6 @@ class EqualityOperator extends ComparisonOperator {
 		var mut suffix = ''
 		var mut wrap = true
 
-		if @enumLeft {
-			if @enumNullLeft || @left.type().isNullable() {
-				prefix = `\($runtime.helper(@left)).valueOf(`
-				suffix = ')'
-				wrap = false
-			}
-			else {
-				suffix = '.value'
-			}
-		}
-		else if @enumRight && @left.type().isAny() && !@left.type().isNull() {
-			if @right.isDerivative() {
-				var type = @right.type().discardValue()
-
-				fragments
-					.code(`\($runtime.helper(@right)).equal\(type.isEnum() ? 'Enum' : 'Bitmask')(`)
-					.compile(type)
-					.code($comma)
-					.compile(type)
-					.code(`.__ks_eq_\(type.discard().getTopProperty(@right.property())), `)
-
-				wrap = false
-				suffix = ')'
-			}
-			else if castReusable {
-				if @left.type().isNullable() {
-					prefix = `\($runtime.helper(@left)).valueOf(`
-					suffix = ')'
-					wrap = false
-				}
-				else {
-					suffix = '.valueOf()'
-				}
-			}
-		}
-
 		if reusable && ?reuseName {
 			if assignable {
 				fragments.code('(', reuseName, $equals).code(prefix).compile(@left).code(suffix).code(')')
@@ -657,32 +577,22 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.code($runtime.operator(@node), '.eq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else if @left.isDerivative() {
-			if @enumLeft {
-				@toRightFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
-			}
-			else {
-				var type = @left.type().discardValue()
+			var type = @left.type().discardValue()
 
-				fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
+			fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
 
-				@toRightFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
+			@toRightFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
 
-				fragments.code(')')
-			}
+			fragments.code(')')
 		}
 		else if @right.isDerivative() {
-			if @enumRight {
-				@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
-			}
-			else {
-				var type = @right.type().discardValue()
+			var type = @right.type().discardValue()
 
-				fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
+			fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
 
-				@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
+			@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
 
-				fragments.code(')')
-			}
+			fragments.code(')')
 		}
 		else {
 			@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
@@ -696,42 +606,6 @@ class EqualityOperator extends ComparisonOperator {
 		var mut prefix = ''
 		var mut suffix = ''
 		var mut wrap = true
-
-		if @enumRight {
-			if @enumNullRight || @right.type().isNullable() {
-				prefix = `\($runtime.helper(@left)).valueOf(`
-				suffix = ')'
-				wrap = false
-			}
-			else {
-				suffix = '.value'
-			}
-		}
-		else if @enumLeft && @right.type().isAny() && !@right.type().isNull() {
-			if @left.isDerivative() {
-				var type = @left.type().discardValue()
-
-				fragments
-					.code(`\($runtime.helper(@left)).equal\(type.isEnum() ? 'Enum' : 'Bitmask')(`)
-					.compile(type)
-					.code($comma)
-					.compile(type)
-					.code(`.__ks_eq_\(type.discard().getTopProperty(@left.property())), `)
-
-				wrap = false
-				suffix = ')'
-			}
-			else if castReusable {
-				if @right.type().isNullable() {
-					prefix = `\($runtime.helper(@left)).valueOf(`
-					suffix = ')'
-					wrap = false
-				}
-				else {
-					suffix = '.valueOf()'
-				}
-			}
-		}
 
 		if reusable && ?reuseName {
 			if assignable {
@@ -775,32 +649,22 @@ class InequalityOperator extends EqualityOperator {
 			fragments.code($runtime.operator(@node), '.neq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else if @left.isDerivative() {
-			if @enumRight {
-				@toRightFragments(fragments.code('!'), reuseName, castReusable, leftReusable, leftAssignable)
-			}
-			else {
-				var type = @left.type().discardValue()
+			var type = @left.type().discardValue()
 
-				fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
+			fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@left.property()))(`)
 
-				@toRightFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
+			@toRightFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
 
-				fragments.code(')')
-			}
+			fragments.code(')')
 		}
 		else if @right.isDerivative() {
-			if @enumRight {
-				@toLeftFragments(fragments.code('!'), reuseName, castReusable, leftReusable, leftAssignable)
-			}
-			else {
-				var type = @right.type().discardValue()
+			var type = @right.type().discardValue()
 
-				fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
+			fragments.code('!').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(@right.property()))(`)
 
-				@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
+			@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)
 
-				fragments.code(')')
-			}
+			fragments.code(')')
 		}
 		else {
 			@toLeftFragments(fragments, reuseName, castReusable, leftReusable, leftAssignable)

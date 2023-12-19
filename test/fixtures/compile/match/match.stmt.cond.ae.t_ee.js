@@ -13,9 +13,9 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let __ks_0 = Helper.valueOf(foobar.__ks_0());
+	let __ks_0 = foobar.__ks_0();
 	if(Type.isString(__ks_0)) {
 	}
-	else if(__ks_0 === Foobar.Foobar.value) {
+	else if(__ks_0 === Foobar.Foobar) {
 	}
 };

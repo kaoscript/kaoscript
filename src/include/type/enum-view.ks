@@ -167,13 +167,13 @@ class EnumViewType extends Type {
 	master() => @master
 	name() => @name
 	setTestName(@testName)
-	override toAwareTestFunctionFragments(varname, mut nullable, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}
-	override toBlindTestFragments(varname, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(_, _, _, _, _, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}
-	override toBlindTestFunctionFragments(funcname, varname, testingType, generics, fragments, node) { # {{{
+	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
 		for var element, index in @elements {
@@ -197,7 +197,7 @@ class EnumViewType extends Type {
 
 		return fragments
 	} # }}}
-	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(_, parameters, subtypes, junction, fragments, node) { # {{{
 		fragments.code(`\(@testName)(`).compile(node).code(')')
 	} # }}}
 	override toVariations(variations) { # {{{

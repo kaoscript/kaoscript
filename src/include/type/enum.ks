@@ -232,6 +232,8 @@ class EnumType extends Type {
 
 		@fieldAssessment = Router.assess([fn], name, node)
 	} # }}}
+	override canBeRawCasted() => true
+	override canBeString(_) => @type.isString()
 	clone() { # {{{
 		var that = EnumType.new(@scope)
 
@@ -610,8 +612,8 @@ class EnumType extends Type {
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
 	isMergeable(type) => type.isEnum()
-	isNumber() => @type.isNumber()
-	isString() => @type.isString()
+	// isNumber() => @type.isNumber()
+	// isString() => @type.isString()
 	assist isSubsetOf(value: EnumType, generics, subtypes, mode) => mode ~~ MatchingMode.Similar
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {
@@ -794,7 +796,7 @@ class EnumFieldType extends Type {
 
 			if ?data.modifiers {
 				for var modifier in data.modifiers {
-					match modifier.kind {
+					match ModifierKind(modifier.kind) {
 						ModifierKind.Internal {
 							type.access(Accessibility.Internal)
 						}

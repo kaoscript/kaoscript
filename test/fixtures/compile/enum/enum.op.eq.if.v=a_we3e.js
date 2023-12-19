@@ -6,7 +6,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(card) {
 		let __ks_0;
-		if((__ks_0 = Helper.valueOf(card.suit)) === CardSuit.Diamonds.value || __ks_0 === CardSuit.Hearts.value || __ks_0 === CardSuit.Spades.value) {
+		if((__ks_0 = card.suit) === CardSuit.Diamonds || __ks_0 === CardSuit.Hearts || __ks_0 === CardSuit.Spades) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

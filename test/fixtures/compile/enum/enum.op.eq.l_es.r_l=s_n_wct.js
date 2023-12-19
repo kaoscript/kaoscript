@@ -1,18 +1,15 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const Color = Helper.enum(Number, 0, "Red", 0, "Green", 1, "Blue", 2);
+	const CardSuit = Helper.enum(String, 0, "Clubs", "clubs", "Diamonds", "diamonds", "Hearts", "hearts", "Spades", "spades");
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(color) {
-		if(color === void 0) {
-			color = null;
-		}
-		if(Helper.valueOf(color) === 42) {
+	foobar.__ks_0 = function(card) {
+		if(card === CardSuit("foobar")) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isEnumInstance(value, Color) || Type.isNull(value);
+		const t0 = value => Type.isEnumInstance(value, CardSuit);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
