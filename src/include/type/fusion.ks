@@ -463,6 +463,9 @@ class FusionType extends Type {
 			type.toBlindTestFragments(funcname, varname, @cast, generics, Junction.AND, fragments, node)
 		}
 	} # }}}
+	toCastFragments(fragments, node) { # {{{
+		fragments.code(`\(@testName)(`).compile(node).code(`, true)`)
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}

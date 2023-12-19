@@ -628,13 +628,13 @@ class CallExpression extends Expression {
 			@prepareArguments()
 
 			if @arguments.length != 1 {
-				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+				ReferenceException.throwNoMatchingBitmaskConstructor(name, @arguments, this)
 			}
 
 			var argument = @arguments[0]
 
 			if !argument.type().isAssignableToVariable(bitmask.type(), true, true, false) && type.isExhaustive(this) {
-				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+				ReferenceException.throwNoMatchingBitmaskConstructor(name, @arguments, this)
 			}
 
 			@addCallee(BitmaskCreateCallee.new(@data, type, argument, this))
@@ -645,13 +645,13 @@ class CallExpression extends Expression {
 			@prepareArguments()
 
 			if @arguments.length != 1 {
-				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+				ReferenceException.throwNoMatchingEnumConstructor(name, @arguments, this)
 			}
 
 			var argument = @arguments[0]
 
 			if !argument.type().isAssignableToVariable(enum.type(), true, true, false) && type.isExhaustive(this) {
-				ReferenceException.throwNoMatchingStruct(name, @arguments, this)
+				ReferenceException.throwNoMatchingEnumConstructor(name, @arguments, this)
 			}
 
 			@addCallee(EnumCreateCallee.new(@data, type, argument, this))

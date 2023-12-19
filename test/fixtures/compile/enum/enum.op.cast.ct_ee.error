@@ -1,0 +1,1 @@
+ReferenceException: The enum "CardSuit" can't be constructed with given arguments (CardSuit) (fixtures/compile/enum/enum.op.cast.ct_ee.ks:9)

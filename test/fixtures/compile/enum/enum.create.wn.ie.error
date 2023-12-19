@@ -1,1 +1,1 @@
-ReferenceException: The struct "Color" can't be matched to given arguments (Number) (fixtures/compile/enum/enum.create.wn.ie.ks:8)
+ReferenceException: The enum "Color" can't be constructed with given arguments (Number) (fixtures/compile/enum/enum.create.wn.ie.ks:8)

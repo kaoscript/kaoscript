@@ -1,0 +1,1 @@
+TypeException: The type "CardSuit" can't be casted as a "CardSuit" (fixtures/compile/enum/enum.op.cast.op_e_ee.ks:9)

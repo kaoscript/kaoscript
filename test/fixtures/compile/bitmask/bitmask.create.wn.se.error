@@ -1,1 +1,1 @@
-ReferenceException: The struct "AnimalFlags" can't be matched to given arguments (String) (fixtures/compile/bitmask/bitmask.create.wn.se.ks:13)
+ReferenceException: The bitmask "AnimalFlags" can't be constructed with given arguments (String) (fixtures/compile/bitmask/bitmask.create.wn.se.ks:13)

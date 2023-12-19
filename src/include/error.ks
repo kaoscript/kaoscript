@@ -227,6 +227,14 @@ export class ReferenceException extends Exception {
 		throwNoAssignableThisInMethod(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The method "\(name)" can't be rebinded to a new "this" context`, node)
 		} # }}}
+		throwNoMatchingBitmaskConstructor(name, arguments, node): Never ~ ReferenceException { # {{{
+			if arguments.length == 0 {
+				throw ReferenceException.new(`The bitmask "\(name)" can't be constructed with no arguments`, node)
+			}
+			else {
+				throw ReferenceException.new(`The bitmask "\(name)" can't be constructed with given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
+			}
+		} # }}}
 		throwNoMatchingConstructor(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw ReferenceException.new(`The constructor of class "\(name)" can't be matched to no arguments`, node)
@@ -249,6 +257,14 @@ export class ReferenceException extends Exception {
 			}
 			else {
 				throw ReferenceException.new(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
+			}
+		} # }}}
+		throwNoMatchingEnumConstructor(name, arguments, node): Never ~ ReferenceException { # {{{
+			if arguments.length == 0 {
+				throw ReferenceException.new(`The enum "\(name)" can't be constructed with no arguments`, node)
+			}
+			else {
+				throw ReferenceException.new(`The enum "\(name)" can't be constructed with given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingEnumMethod(method, enum, arguments, node): Never ~ ReferenceException { # {{{

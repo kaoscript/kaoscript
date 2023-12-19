@@ -1,1 +1,0 @@
-TypeException: The variable "aliases" of type "String[]" can't be assigned with a value of type "[Color]" (fixtures/compile/enum/enum.cast.to.array.se.ks:7)
