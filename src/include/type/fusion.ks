@@ -419,6 +419,21 @@ class FusionType extends Type {
 			super(varname, nullable, casting, generics, subtypes, fragments, node)
 		}
 	} # }}}
+	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, nullable, generics, fragments, node) { # {{{
+		@buildFlags()
+
+		if ?@testName {
+			if casting && @cast {
+				fragments.code(`\(varname) => \(@testName)(\(varname), cast)`)
+			}
+			else {
+				fragments.code(@testName)
+			}
+		}
+		else {
+			@toBlindTestFunctionFragments(funcname, varname, casting, true, generics, fragments, node)
+		}
+	} # }}}
 	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == Junction.OR
 

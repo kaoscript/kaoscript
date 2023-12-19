@@ -16,10 +16,10 @@ module.exports = function(expect) {
 				return false;
 			}
 			if(variant === PersonKind.Student) {
-				return Type.isDexObject(value, 0, 0, {age: Type.isNumber});
+				return Type.isDexObject(value, 0, 0, {name: Type.isString});
 			}
 			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorite: __ksType.isSchoolPerson});
+				return Type.isDexObject(value, 0, 0, {favorites: value => Type.isArray(value, value => __ksType.isSchoolPerson(value, cast))});
 			}
 			return true;
 		}})
@@ -43,19 +43,19 @@ module.exports = function(expect) {
 	let data = (() => {
 		const o = new OBJ();
 		o.kind = 3;
-		o.favorite = (() => {
+		o.favorites = [(() => {
 			const o = new OBJ();
 			o.kind = 2;
 			o.name = "John";
 			return o;
-		})();
+		})()];
 		return o;
 	})();
-	expect(data.favorite.kind).to.equal(2);
-	expect(data.favorite.kind).to.not.equal(PersonKind.Student);
+	expect(data.favorites[0].kind).to.equal(2);
+	expect(data.favorites[0].kind).to.not.equal(PersonKind.Student);
 	console.log(data);
 	restore.__ks_0(data);
 	console.log(data);
-	expect(data.favorite.kind).to.not.equal(2);
-	expect(data.favorite.kind).to.equal(PersonKind.Student);
+	expect(data.favorites[0].kind).to.not.equal(2);
+	expect(data.favorites[0].kind).to.equal(PersonKind.Student);
 };
