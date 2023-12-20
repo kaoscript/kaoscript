@@ -84,7 +84,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 				TypeException.throwUnexpectedInoperative(@right, this)
 			}
 
-			unless type.isIterable() || @right.isLateInit() || @options.rules.ignoreMisfit ||@right is MemberExpression {
+			unless type.isIterable() || @right.isLateInit() || @isMisfit() ||@right is MemberExpression {
 				TypeException.throwNotIterable(@right, this)
 			}
 
@@ -252,7 +252,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 			}
 
 			if index < last {
-				unless type.isIterable() || operand.isLateInit() || @options.rules.ignoreMisfit || operand is MemberExpression {
+				unless type.isIterable() || operand.isLateInit() || @isMisfit() || operand is MemberExpression {
 					TypeException.throwNotIterable(operand, this)
 				}
 
@@ -382,7 +382,7 @@ class UnaryOperatorEmpty extends UnaryOperatorExpression {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
 
-		unless type.isIterable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
+		unless type.isIterable() || @argument.isLateInit() || @isMisfit() || @argument is MemberExpression {
 			TypeException.throwNotIterable(@argument, this)
 		}
 	} # }}}
@@ -408,7 +408,7 @@ class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
 
-		unless type.isIterable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
+		unless type.isIterable() || @argument.isLateInit() || @isMisfit() || @argument is MemberExpression {
 			TypeException.throwNotIterable(@argument, this)
 		}
 

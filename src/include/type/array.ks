@@ -754,7 +754,7 @@ class ArrayType extends Type {
 		if testingType && @length == 0 && !@destructuring && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isArray(\(varname)`)
 
-			if @testRest {
+			if @testRest && !node.isMisfit() {
 				fragments.code($comma)
 
 				@restType.toBlindTestFunctionFragments(funcname, varname, casting, true, generics, fragments, node)
@@ -805,7 +805,7 @@ class ArrayType extends Type {
 		if @length == 0 && !@destructuring && !@testProperties {
 			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
 
-			if @testRest {
+			if @testRest && !node.isMisfit() {
 				fragments.code($comma)
 
 				@restType.toAwareTestFunctionFragments('value', @nullable, false, null, null, fragments, node)

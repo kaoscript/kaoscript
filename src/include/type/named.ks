@@ -221,7 +221,7 @@ class NamedType extends Type {
 	isEnum() => @type.isEnum()
 	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()
-	isExhaustive(node) => @isExhaustive() && !node._options.rules.ignoreMisfit
+	isExhaustive(node) => @isExhaustive() && !node.isMisfit()
 	isExplicit() => true
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()

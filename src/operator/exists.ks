@@ -598,7 +598,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	override prepare(target, targetMode) { # {{{
 		@argument.prepare()
 
-		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
+		unless @argument.type().isNullable() || @argument.isLateInit() || @isMisfit() || @argument is MemberExpression {
 			TypeException.throwNotNullableExistential(@argument, this)
 		}
 

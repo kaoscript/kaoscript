@@ -896,7 +896,7 @@ class CallExpression extends Expression {
 				@makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType {
-				if value.isNullable() && !@options.rules.ignoreMisfit {
+				if value.isNullable() && !@isMisfit() {
 					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
 						TypeException.throwNotNullableCaller(@property, this)
 					}

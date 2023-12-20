@@ -54,6 +54,11 @@ class BinaryOperatorTypeCasting extends Expression {
 	translate() { # {{{
 		@left.translate()
 	} # }}}
+	acquireReusable(acquire) { # {{{
+		if @type.isObject() && @type.canBeRawCasted() && @left.isComposite() {
+			@left.acquireReusable(true)
+		}
+	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	isComputed() => false
@@ -62,6 +67,9 @@ class BinaryOperatorTypeCasting extends Expression {
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array: Array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
+	releaseReusable() { # {{{
+		@left.releaseReusable()
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @type.isEnum() {
 			var type = @type.setNullable(false)

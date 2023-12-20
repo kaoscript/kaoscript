@@ -416,13 +416,13 @@ class EqualityOperator extends ComparisonOperator {
 		}
 
 		if rightType.isNull() {
-			unless leftType.isNullable() || @left.isLateInit() || @node._options.rules.ignoreMisfit {
+			unless leftType.isNullable() || @left.isLateInit() || @node.isMisfit() {
 				TypeException.throwInvalidComparison(@left, @right, @node)
 			}
 		}
 		else {
 			if leftType.isNull() {
-				unless rightType.isNullable() || @right.isLateInit() || @node._options.rules.ignoreMisfit {
+				unless rightType.isNullable() || @right.isLateInit() || @node.isMisfit() {
 					TypeException.throwInvalidComparison(@left, @right, @node)
 				}
 			}

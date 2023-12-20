@@ -1192,7 +1192,7 @@ module.exports = function() {
 			});
 		}
 		__ks_func_scheme_rt(that, proto, args) {
-			const t0 = value => Type.isArray(value, Type.isFunction);
+			const t0 = value => Type.isArray(value);
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_scheme_0.call(that, args[0]);

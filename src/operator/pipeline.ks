@@ -51,14 +51,14 @@ abstract class BinaryOperatorPipeline extends Expression {
 		if @existential {
 			var expression = @topic.expression()
 
-			unless expression.type().isNullable() || expression.isLateInit() || @options.rules.ignoreMisfit || expression is MemberExpression {
+			unless expression.type().isNullable() || expression.isLateInit() || @isMisfit() || expression is MemberExpression {
 				TypeException.throwNotNullableExistential(expression, this)
 			}
 		}
 		else if @nonEmpty {
 			var expression = @topic.expression()
 
-			unless expression.type().isIterable() || expression.isLateInit() || @options.rules.ignoreMisfit || expression is MemberExpression {
+			unless expression.type().isIterable() || expression.isLateInit() || @isMisfit() || expression is MemberExpression {
 				TypeException.throwNotIterable(expression, this)
 			}
 		}

@@ -1018,7 +1018,7 @@ abstract class Type {
 			return @exhaustive
 		}
 	} # }}}
-	isExhaustive(node) => @isExhaustive() && !node._options.rules.ignoreMisfit
+	isExhaustive(node) => @isExhaustive() && !node.isMisfit()
 	isExplicit() => true
 	isExplicitlyExported() => @exported
 	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1

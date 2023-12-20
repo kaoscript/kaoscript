@@ -63,7 +63,7 @@ class MemberExpression extends Expression {
 				ReferenceException.throwUncompleteType(type, this, this)
 			}
 
-			if !@nullable && !@options.rules.ignoreMisfit {
+			if !@nullable && !@isMisfit() {
 				if type.isNull() {
 					ReferenceException.throwNullExpression(@object, this)
 				}
@@ -139,7 +139,7 @@ class MemberExpression extends Expression {
 
 			@property = @computed ? $compile.expression(@data.property, this) : @data.property.name
 
-			if !@nullable && !@options.rules.ignoreMisfit {
+			if !@nullable && !@isMisfit() {
 				if type.isNull() {
 					ReferenceException.throwNullExpression(@object, this)
 				}
@@ -162,7 +162,7 @@ class MemberExpression extends Expression {
 			}
 		}
 
-		if @nullable && !@object.type().isNullable() && !@options.rules.ignoreMisfit {
+		if @nullable && !@object.type().isNullable() && !@isMisfit() {
 			unless @object is MemberExpression && @object.isComputedMember() {
 				TypeException.throwNotNullableExistential(@object, this)
 			}

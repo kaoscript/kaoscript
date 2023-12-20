@@ -1390,7 +1390,7 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	toCastFragments(fragments, node) { # {{{
-		fragments.code(`\(@testName)(`).compile(node).code(`, true)`)
+		fragments.code(`\(@testName)(`).compileReusable(node).code(`, true)`)
 	} # }}}
 	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		@buildFlags()

@@ -36,6 +36,7 @@ abstract class AbstractNode {
 	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => @file() != @module().file()
+	isMisfit() => @options.rules.ignoreMisfit
 	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { # {{{
 		match type {

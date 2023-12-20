@@ -461,7 +461,7 @@ class FusionType extends Type {
 		}
 	} # }}}
 	toCastFragments(fragments, node) { # {{{
-		fragments.code(`\(@testName)(`).compile(node).code(`, true)`)
+		fragments.code(`\(@testName)(`).compileReusable(node).code(`, true)`)
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
