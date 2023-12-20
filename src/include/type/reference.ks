@@ -733,7 +733,7 @@ class ReferenceType extends Type {
 					}
 				}
 				else {
-					TypeException.throwUndeterminedVariantType(@name, node)
+					return null
 				}
 			}
 			else {

@@ -13,6 +13,7 @@ class MatchExpression extends Expression {
 		@lateInitVariables					= {}
 		@name: String?						= null
 		@nextClauseIndex: Number
+		@path: String?						= null
 		@reusableValue: Boolean				= false
 		@tests								= {}
 		@usingFallthrough: Boolean			= false
@@ -138,6 +139,8 @@ class MatchExpression extends Expression {
 			else {
 				throw NotSupportedException.new()
 			}
+
+			@path = @name
 		}
 		else {
 			@value.prepare(AnyType.NullableUnexplicit)
@@ -146,9 +149,11 @@ class MatchExpression extends Expression {
 
 			if @reusableValue {
 				@name = @scope.acquireTempName(false)
+				@path = @value.path()
 			}
 			else {
 				@name = @scope.getVariable(@data.expression.name).getSecureName()
+				@path = @name
 			}
 		}
 
@@ -326,6 +331,7 @@ class MatchExpression extends Expression {
 	isInline() => false
 	isInSituStatement() => @insitu
 	name() => @name
+	path() => @path
 	toFragments(fragments, mode) { # {{{
 		fragments.code(@valueName)
 	} # }}}

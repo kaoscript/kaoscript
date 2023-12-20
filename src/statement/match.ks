@@ -63,6 +63,7 @@ class MatchStatement extends Statement {
 		@lateInitVariables					= {}
 		@name: String?						= null
 		@nextClauseIndex: Number
+		@path: String?						= null
 		@reusableValue: Boolean				= false
 		@tests								= {}
 		@usingFallthrough: Boolean			= false
@@ -147,6 +148,8 @@ class MatchStatement extends Statement {
 			else {
 				throw NotSupportedException.new()
 			}
+
+			@path = @name
 		}
 		else {
 			@value.prepare(AnyType.NullableUnexplicit)
@@ -156,9 +159,11 @@ class MatchStatement extends Statement {
 			if @reusableValue {
 				@name = @scope.acquireTempName()
 				@usingTempName = true
+				@path = @value.path()
 			}
 			else {
 				@name = @scope.getVariable(@data.expression.name).getSecureName()
+				@path = @name
 			}
 		}
 
@@ -606,6 +611,7 @@ class MatchStatement extends Statement {
 		return false
 	} # }}}
 	name() => @name
+	path() => @path
 	throwExpectedType(type: String): Never ~ TypeException { # {{{
 		TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), type, this)
 	} # }}}
@@ -1671,7 +1677,9 @@ class MatchFilter extends AbstractNode {
 			@scope.setImplicitVariable(name, conditionType)
 
 			if @conditions.length == 1 && @conditions[0] is MatchConditionValue {
-				@scope.updateInferable(name, { isVariable: @scope.hasVariable(name), type: conditionType }, this)
+				if var path ?= @parent().path() {
+					@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), type: conditionType }, this)
+				}
 			}
 		}
 		else {

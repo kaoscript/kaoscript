@@ -770,7 +770,7 @@ class MemberExpression extends Expression {
 							}
 						}
 						else {
-							NotImplementedException.throw(this)
+							ReferenceException.throwNotDeterminableProperty(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
 						}
 					}
 				}
@@ -1202,9 +1202,9 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	type() => @type
-	unflagCompleteObject() {
+	unflagCompleteObject() { # {{{
 		@completeObject = false
-	}
+	} # }}}
 	validateType(type: Type)
 	walkNode(fn) => fn(this) && @object.walkNode(fn)
 }
