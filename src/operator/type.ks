@@ -208,10 +208,10 @@ class BinaryOperatorTypeEquality extends Expression {
 		var type = @subject.type()
 
 		if type is ReferenceType {
-			@testType.toPositiveTestFragments(null, type.parameters(), type.getSubtypes(), junction, fragments, @subject)
+			@testType.toPositiveTestFragments(type.parameters(), type.getSubtypes(), junction, fragments, @subject)
 		}
 		else {
-			@testType.toPositiveTestFragments(null, null, null, junction, fragments, @subject)
+			@testType.toPositiveTestFragments(null, null, junction, fragments, @subject)
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')

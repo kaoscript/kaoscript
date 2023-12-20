@@ -745,10 +745,10 @@ class ArrayType extends Type {
 	override toAwareTestFunctionFragments(varname, nullable, casting, generics, subtypes, fragments, node) { # {{{
 		@toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, node)
 	} # }}}
-	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
-		@toBlindTestFragments(funcname, varname, casting, true, @testLength, generics, junction, fragments, node)
+	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
+		@toBlindTestFragments(funcname, varname, casting, true, @testLength, generics, subtypes, junction, fragments, node)
 	} # }}}
-	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, testingLength: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, testingLength: Boolean, generics: Generic[]?, subtypes: AltType[]?, junction: Junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == .AND
 
 		if testingType && @length == 0 && !@destructuring && !@testProperties {
@@ -788,7 +788,7 @@ class ArrayType extends Type {
 		else if @rest || @testProperties || @nullable {
 			fragments.code(`\(varname) => `)
 
-			@toBlindTestFragments(funcname, varname, casting, testingType, @testLength, generics, Junction.NONE, fragments, node)
+			@toBlindTestFragments(funcname, varname, casting, testingType, @testLength, generics, null, Junction.NONE, fragments, node)
 		}
 		else {
 			if @destructuring {
@@ -799,7 +799,7 @@ class ArrayType extends Type {
 			}
 		}
 	} # }}}
-	override toPositiveTestFragments(casting, _, _, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(_, _, junction, fragments, node) { # {{{
 		fragments.code('(') if @nullable && junction == Junction.AND
 
 		if @length == 0 && !@destructuring && !@testProperties {
@@ -808,7 +808,7 @@ class ArrayType extends Type {
 			if @testRest {
 				fragments.code($comma)
 
-				@restType.toAwareTestFunctionFragments('value', @nullable, casting, null, null, fragments, node)
+				@restType.toAwareTestFunctionFragments('value', @nullable, false, null, null, fragments, node)
 			}
 
 			fragments.code(')')
@@ -816,7 +816,7 @@ class ArrayType extends Type {
 		else {
 			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
 
-			@toSubtestFragments('value', casting, true, @testLength, fragments, node)
+			@toSubtestFragments('value', false, true, @testLength, fragments, node)
 
 			fragments.code(')')
 		}

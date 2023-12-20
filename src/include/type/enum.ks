@@ -612,8 +612,6 @@ class EnumType extends Type {
 	} # }}}
 	isExhaustiveStaticMethod(name, node) => @isExhaustive(node) && @isExhaustiveStaticMethod(name)
 	isMergeable(type) => type.isEnum()
-	// isNumber() => @type.isNumber()
-	// isString() => @type.isString()
 	assist isSubsetOf(value: EnumType, generics, subtypes, mode) => mode ~~ MatchingMode.Similar
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Similar {

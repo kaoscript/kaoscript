@@ -639,7 +639,7 @@ class MatchStatement extends Statement {
 				var { testingType, minmax?, type? } = test
 
 				if ?type {
-					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, null, Junction.NONE, line, this)
 				}
 				else if ?minmax {
 					var { min, max } = minmax
@@ -654,7 +654,7 @@ class MatchStatement extends Statement {
 				var { testingType, type? } = test
 
 				if ?type {
-					type.toBlindTestFragments(null, @name, false, testingType, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, null, null, Junction.NONE, line, this)
 				}
 				else {
 					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
@@ -861,7 +861,7 @@ class MatchBindingArray extends AbstractNode {
 		else if @testingLength || @testingType || @testingProperties {
 			fragments.code(' && ') if junction == Junction.AND
 
-			type.toBlindTestFragments(null, name, false, @testingType, true, null, junction, fragments, this)
+			type.toBlindTestFragments(null, name, false, @testingType, true, null, null, junction, fragments, this)
 		}
 	} # }}}
 	unflagLengthTesting() { # {{{
@@ -1014,10 +1014,10 @@ class MatchBindingObject extends AbstractNode {
 			fragments.code(' && ') if junction == Junction.AND
 
 			if type is ObjectType {
-				type.toBlindTestFragments(null, name, false, false, @testingType, null, junction, fragments, this)
+				type.toBlindTestFragments(null, name, false, false, @testingType, null, null, junction, fragments, this)
 			}
 			else {
-				type.toBlindTestFragments(null, name, false, null, junction, fragments, this)
+				type.toBlindTestFragments(null, name, false, null, null, junction, fragments, this)
 			}
 		}
 	} # }}}

@@ -625,7 +625,25 @@ class UnionType extends Type {
 
 		return types
 	} # }}}
-	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+		fragments.code(`\(varname) => `)
+
+		for var type, index in @types {
+			fragments.code(' || ') if index != 0
+
+			type.toBlindTestFragments(null, varname, casting, null, subtypes, Junction.OR, fragments, node)
+		}
+	} # }}}
+	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, mut nullable, generics, fragments, node) { # {{{
+		fragments.code(`\(varname) => `)
+
+		for var type, index in @types {
+			fragments.code(' || ') if index != 0
+
+			type.toBlindTestFragments(funcname, varname, casting, generics, null, Junction.OR, fragments, node)
+		}
+	} # }}}
+	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .AND
 
 		var literal = Literal.new(false, node, node.scope(), varname)
@@ -633,7 +651,7 @@ class UnionType extends Type {
 		for var type, index in @types {
 			fragments.code(' || ') if index != 0
 
-			type.toBlindTestFragments(funcname, varname, casting, generics, Junction.OR, fragments, literal)
+			type.toBlindTestFragments(funcname, varname, casting, generics, subtypes, Junction.OR, fragments, literal)
 		}
 
 		fragments.code(')') if junction == .AND
@@ -684,7 +702,7 @@ class UnionType extends Type {
 
 		fragments.code(')') if junction == .OR
 	} # }}}
-	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		fragments.code('(') if junction == .AND
 
 		for var type, i in @types {
@@ -692,7 +710,7 @@ class UnionType extends Type {
 				fragments.code(' || ')
 			}
 
-			type.toPositiveTestFragments(casting, parameters, subtypes, Junction.OR, fragments, node)
+			type.toPositiveTestFragments(parameters, subtypes, Junction.OR, fragments, node)
 		}
 
 		fragments.code(')') if junction == .AND

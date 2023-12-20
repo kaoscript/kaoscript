@@ -264,10 +264,10 @@ class VariantType extends Type {
 					var line = ctrl.newLine().code(`return `)
 
 					if @names.true.type is ObjectType {
-						@names.true.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
+						@names.true.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, null, Junction.NONE, line, node)
 					}
 					else {
-						@names.true.type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
+						@names.true.type.toBlindTestFragments(funcname, varname, casting, generics, null, Junction.NONE, line, node)
 					}
 
 					line.done()
@@ -282,10 +282,10 @@ class VariantType extends Type {
 					var line = ctrl.newLine().code(`return `)
 
 					if @names.false.type is ObjectType {
-						@names.false.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
+						@names.false.type.toBlindTestFragments(funcname, varname, casting, false, false, generics, null, Junction.NONE, line, node)
 					}
 					else {
-						@names.false.type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
+						@names.false.type.toBlindTestFragments(funcname, varname, casting, generics, null, Junction.NONE, line, node)
 					}
 
 					line.done()
@@ -338,10 +338,10 @@ class VariantType extends Type {
 						var line = ctrl.newLine().code(`return `)
 
 						if type is ObjectType {
-							type.toBlindTestFragments(funcname, varname, casting, false, false, generics, Junction.NONE, line, node)
+							type.toBlindTestFragments(funcname, varname, casting, false, false, generics, null, Junction.NONE, line, node)
 						}
 						else {
-							type.toBlindTestFragments(funcname, varname, casting, generics, Junction.NONE, line, node)
+							type.toBlindTestFragments(funcname, varname, casting, generics, null, Junction.NONE, line, node)
 						}
 
 						line.done()
@@ -356,6 +356,55 @@ class VariantType extends Type {
 			}
 		}
 	} # }}}
+	toFilterFragments(varname: String, subtypes: AltType[], fragments) {
+		if @canBeBoolean() {
+			fragments.code(`, \(varname) => `)
+
+			for var { name, type }, index in subtypes {
+				fragments
+					..code(' || ') if index > 0
+					..code('!') if @isFalseValue(name)
+					..code(varname)
+			}
+		}
+		else if subtypes.length == 1 {
+			var { name, type } = subtypes[0]
+			var value = type.discard().getValue(name)
+
+			if value.isAlias() {
+				if value.isDerivative() {
+					fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
+				}
+				else {
+					fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(value.original())`)
+				}
+			}
+			else {
+				fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(name)`)
+			}
+		}
+		else {
+			fragments.code(`, \(varname) => `)
+
+			for var { name, type }, index in subtypes {
+				fragments.code(' || ') if index > 0
+
+				var value = type.discard().getValue(name)
+
+				if value.isAlias() {
+					if value.isDerivative() {
+						fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(\(varname))`)
+					}
+					else {
+						fragments.code(`\(varname) === `).compile(type).code(`.\(value.original())`)
+					}
+				}
+				else {
+					fragments.code(`\(varname) === `).compile(type).code(`.\(name)`)
+				}
+			}
+		}
+	}
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}

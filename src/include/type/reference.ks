@@ -1922,7 +1922,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
+	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
 		@resolve()
 
 		if @parameters.length == 0 && !@nullable {
@@ -1943,10 +1943,10 @@ class ReferenceType extends Type {
 		var unalias = @discardAlias()
 
 		if ?#@subtypes {
-			@type.discard().toPositiveTestFragments(casting, @parameters, @subtypes, junction, fragments, node)
+			unalias.discard().toBlindTestFragments(funcname, varname, casting, generics, @subtypes, subjunction ?? junction, fragments, node)
 		}
 		else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-			unalias.toBlindTestFragments(funcname, varname, casting, generics, subjunction ?? junction, fragments, node)
+			unalias.toBlindTestFragments(funcname, varname, casting, generics, subtypes, subjunction ?? junction, fragments, node)
 		}
 		else {
 			var name = unalias.name?() ?? @name
@@ -2069,7 +2069,7 @@ class ReferenceType extends Type {
 			@toReferenceTestFragments(junction, fragments.code('!'), node)
 		}
 	} # }}}
-	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isVariant() {
@@ -2078,7 +2078,7 @@ class ReferenceType extends Type {
 					if !?#subtypes {
 						var { type, generics, subtypes } = @getGenericMapper()
 
-						type.toPositiveTestFragments(casting, generics, subtypes, junction, fragments, node)
+						type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
 					}
 					else {
 						var { type, generics } = @getGenericMapper()
@@ -2123,11 +2123,11 @@ class ReferenceType extends Type {
 			else {
 				var { type, generics, subtypes } = @getGenericMapper()
 
-				type.toPositiveTestFragments(casting, generics, subtypes, junction, fragments, node)
+				type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
 			}
 		}
 		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
+			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 		else {
 			@toReferenceTestFragments(junction, fragments, node)

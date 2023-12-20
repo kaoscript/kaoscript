@@ -1143,12 +1143,12 @@ abstract class Type {
 	toAwareTestFunctionFragments(varname: String, nullable: Boolean, casting: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
-		@toBlindTestFragments(null, varname, casting, null, Junction.NONE, fragments, node)
+		@toBlindTestFragments(null, varname, casting, null, null, Junction.NONE, fragments, node)
 	} # }}}
 	toBlindSubtestFunctionFragments(funcname: String?, varname: String, casting: Boolean, propname: String?, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
 		@toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
 	} # }}}
-	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, generics: Generic[]?, junction: Junction, fragments, node) { # {{{
+	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, generics: Generic[]?, subtypes: AltType[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toBlindTestFunctionFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
@@ -1221,7 +1221,7 @@ abstract class Type {
 	toNegativeTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		@toPositiveTestFragments(parameters, subtypes, junction, fragments.code('!'), node)
 	} # }}}
-	toPositiveTestFragments(casting: Boolean = false, parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
+	toPositiveTestFragments(parameters: AltType[]? = null, subtypes: AltType[]? = null, junction: Junction = Junction.NONE, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toQuote(): String { # {{{

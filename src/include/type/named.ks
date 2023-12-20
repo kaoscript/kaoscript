@@ -580,15 +580,15 @@ class NamedType extends Type {
 			@type.toNegativeTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
-	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		if var tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else if @type.isComplex() {
-			@type.toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
+			@type.toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 		else {
-			@reference().toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node)
+			@reference().toPositiveTestFragments(parameters, subtypes, junction, fragments, node)
 		}
 	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)

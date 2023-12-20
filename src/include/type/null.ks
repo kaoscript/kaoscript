@@ -51,12 +51,12 @@ class NullType extends Type {
 	override toAwareTestFunctionFragments(varname, nullable, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
 	} # }}}
-	override toBlindTestFragments(_, varname, _, _, _, fragments, node) { # {{{
+	override toBlindTestFragments(_, varname, _, _, _, _, fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull(\(varname))`)
 	} # }}}
 	toFragments(fragments, node)
 	toQuote() => 'Null'
-	override toPositiveTestFragments(_, _, _, _, fragments, node)
+	override toPositiveTestFragments(_, _, _, fragments, node)
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Null'
 	override toVariations(variations) { # {{{
 		variations.push('null')

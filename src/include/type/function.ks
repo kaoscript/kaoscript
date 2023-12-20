@@ -1013,7 +1013,7 @@ class FunctionType extends Type {
 
 		return fragments
 	} # }}}
-	override toPositiveTestFragments(_, _, _, _, fragments, node) { # {{{
+	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)

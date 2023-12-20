@@ -352,7 +352,7 @@ class MatchExpression extends Expression {
 				var { testingType, minmax, type } = test
 
 				if ?type {
-					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, ?minmax, null, null, Junction.NONE, line, this)
 				}
 				else if ?minmax {
 					var { min, max } = minmax
@@ -367,7 +367,7 @@ class MatchExpression extends Expression {
 				var { testingType, type } = test
 
 				if ?type {
-					type.toBlindTestFragments(null, @name, false, testingType, null, Junction.NONE, line, this)
+					type.toBlindTestFragments(null, @name, false, testingType, null, null, Junction.NONE, line, this)
 				}
 				else {
 					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)

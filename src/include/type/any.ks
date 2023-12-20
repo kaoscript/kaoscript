@@ -204,7 +204,7 @@ class AnyType extends Type {
 			fragments.code(`\($runtime.type(node)).isNull(`).compile(node).code(`)`)
 		}
 	} # }}}
-	override toPositiveTestFragments(_, _, _, _, fragments, node) { # {{{
+	override toPositiveTestFragments(_, _, _, fragments, node) { # {{{
 		if @nullable {
 			fragments.code('true')
 		}

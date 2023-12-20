@@ -356,53 +356,7 @@ class FusionType extends Type {
 				if @variant && ?#subtypes {
 					var variantType = @getVariantType()
 
-					if variantType.canBeBoolean() {
-						fragments.code(`, \(varname) => `)
-
-						for var { name, type }, index in subtypes {
-							fragments
-								..code(' || ') if index > 0
-								..code('!') if variantType.isFalseValue(name)
-								..code(varname)
-						}
-					}
-					else if subtypes.length == 1 {
-						var { name, type } = subtypes[0]
-						var value = type.discard().getValue(name)
-
-						if value.isAlias() {
-							if value.isDerivative() {
-								fragments.code(', ').compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))`)
-							}
-							else {
-								fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(value.original())`)
-							}
-						}
-						else {
-							fragments.code(`, \(varname) => \(varname) === `).compile(type).code(`.\(name)`)
-						}
-					}
-					else {
-						fragments.code(`, \(varname) => `)
-
-						for var { name, type }, index in subtypes {
-							fragments.code(' || ') if index > 0
-
-							var value = type.discard().getValue(name)
-
-							if value.isAlias() {
-								if value.isDerivative() {
-									fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(name))(\(varname))`)
-								}
-								else {
-									fragments.code(`\(varname) === `).compile(type).code(`.\(value.original())`)
-								}
-							}
-							else {
-								fragments.code(`\(varname) === `).compile(type).code(`.\(name)`)
-							}
-						}
-					}
+					variantType.toFilterFragments(varname, subtypes, fragments)
 				}
 
 				fragments.code(`)`)
@@ -443,21 +397,40 @@ class FusionType extends Type {
 			@toBlindTestFunctionFragments(funcname, varname, casting, true, generics, fragments, node)
 		}
 	} # }}}
-	override toBlindTestFragments(funcname, varname, casting, generics, junction, fragments, node) { # {{{
-		fragments.code('(') if junction == Junction.OR
+	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
+		@buildFlags()
 
 		if ?@testName {
-			fragments.code(`\(@testName)(\(varname))`)
+			fragments.code(`\(@testName)(\(varname)`)
+
+			if @cast && (casting || (@variant && ?#subtypes)) {
+				if casting {
+					fragments.code(', cast')
+				}
+				else {
+					fragments.code(', 0')
+				}
+			}
+
+			if @variant && ?#subtypes {
+				var variantType = @getVariantType()
+
+				variantType.toFilterFragments(varname, subtypes, fragments)
+			}
+
+			fragments.code(')')
 		}
 		else {
+			fragments.code('(') if junction == Junction.OR
+
 			for var type, index in @types {
 				fragments.code(' && ') if index != 0
 
-				type.toBlindTestFragments(funcname, varname, casting, generics, Junction.AND, fragments, node)
+				type.toBlindTestFragments(funcname, varname, casting, generics, subtypes, Junction.AND, fragments, node)
 			}
-		}
 
-		fragments.code(')') if junction == Junction.OR
+			fragments.code(')') if junction == Junction.OR
+		}
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
 		@buildFlags()
@@ -484,7 +457,7 @@ class FusionType extends Type {
 		for var type, index in @types {
 			fragments.code(' && ') if index != 0
 
-			type.toBlindTestFragments(funcname, varname, @cast, generics, Junction.AND, fragments, node)
+			type.toBlindTestFragments(funcname, varname, @cast, generics, null, Junction.AND, fragments, node)
 		}
 	} # }}}
 	toCastFragments(fragments, node) { # {{{
@@ -506,19 +479,14 @@ class FusionType extends Type {
 
 		fragments.code(')') if junction == .OR
 	} # }}}
-	override toPositiveTestFragments(casting, parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		@buildFlags()
 
 		if ?@testName {
 			fragments.code(`\(@testName)(`).compile(node)
 
-			if @cast && (casting || ?#parameters || ?#subtypes) {
-				if casting {
-					fragments.code(', cast')
-				}
-				else {
-					fragments.code(', 0')
-				}
+			if @cast && (?#parameters || ?#subtypes) {
+				fragments.code(', 0')
 			}
 
 			if ?#parameters {

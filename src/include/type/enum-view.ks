@@ -170,7 +170,7 @@ class EnumViewType extends Type {
 	override toAwareTestFunctionFragments(varname, mut nullable, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}
-	override toBlindTestFragments(_, _, _, _, _, fragments, node) { # {{{
+	override toBlindTestFragments(_, _, _, _, _, _, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{
@@ -197,7 +197,7 @@ class EnumViewType extends Type {
 
 		return fragments
 	} # }}}
-	override toPositiveTestFragments(_, parameters, subtypes, junction, fragments, node) { # {{{
+	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		fragments.code(`\(@testName)(`).compile(node).code(')')
 	} # }}}
 	override toVariations(variations) { # {{{
