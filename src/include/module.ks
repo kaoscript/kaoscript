@@ -85,19 +85,32 @@ export class Module {
 			@includePaths[path] = true
 		}
 	} # }}}
-	addInclude(path, modulePath, moduleVersion) { # {{{
+	addInclude(path, moduleName, modulePath, moduleVersion) { # {{{
 		if @includePaths[path] == true || @includePaths[path] is not String {
 			@includePaths[path] = modulePath
 		}
 
-		if @includeModules[modulePath] is Object {
-			@includeModules[modulePath].paths:Array.pushUniq(path)
-			@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
+		if ?@includeModules[moduleName] {
+			@includeModules[moduleName].paths:Array.pushUniq(path)
+			@includeModules[moduleName].versions:Array.pushUniq(moduleVersion)
 		}
 		else {
-			@includeModules[modulePath] = {
+			@includeModules[moduleName] = {
 				paths: [path]
 				versions: [moduleVersion]
+			}
+		}
+
+		if moduleName != modulePath {
+			if ?@includeModules[modulePath] {
+				@includeModules[modulePath].paths:Array.pushUniq(path)
+				@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
+			}
+			else {
+				@includeModules[modulePath] = {
+					paths: [path]
+					versions: [moduleVersion]
+				}
 			}
 		}
 	} # }}}
@@ -262,11 +275,14 @@ export class Module {
 
 		return true
 	} # }}}
-	listIncludeVersions(path, modulePath) { # {{{
-		if @includeModules[modulePath] is Object {
+	listIncludeVersions(path, moduleName, modulePath) { # {{{
+		if ?@includeModules[modulePath] {
 			return @includeModules[modulePath].versions
 		}
-		else if @includePaths[path] == true {
+		else if ?@includeModules[moduleName] {
+			return @includeModules[moduleName].versions
+		}
+		else if @includePaths[path] {
 			return ['']
 		}
 		else {

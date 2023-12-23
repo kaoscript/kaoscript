@@ -1,1 +1,1 @@
-SyntaxException: Inclusions of "@kaoscript/ast" should have the same version (../node_modules/@kaoscript/test-import/src/include.ast.ks:10)
+SyntaxException: Inclusions of "npm:@kaoscript/ast" should have the same version (../node_modules/@kaoscript/test-import/src/include.ast.ks:10)

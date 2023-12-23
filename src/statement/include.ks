@@ -70,8 +70,8 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
 
-				if @canLoadModuleFile(x, name, modulePath, moduleVersion) {
-					@loadModuleFile(data, x, name, modulePath, moduleVersion)
+				if @canLoadModuleFile(x, file, modulePath, moduleVersion) {
+					@loadModuleFile(data, x, file, modulePath, moduleVersion)
 				}
 			}
 			else {
@@ -106,7 +106,7 @@ class IncludeDeclaration extends Statement {
 	} # }}}
 	canLoadLocalFile(file) => !@module().hasInclude(file)
 	canLoadModuleFile(file, name, path, version) { # {{{
-		if var versions ?= @module().listIncludeVersions(file, path) {
+		if var versions ?= @module().listIncludeVersions(file, name, path) {
 			if versions.length > 1 || versions[0] == version {
 				return false
 			}
@@ -153,7 +153,7 @@ class IncludeDeclaration extends Statement {
 		var mut data = fs.readFile(path)
 
 		module.addHash(path, module.compiler().sha256(path, data))
-		module.addInclude(path, modulePath, moduleVersion)
+		module.addInclude(path, moduleName, modulePath, moduleVersion)
 
 		try {
 			data = module.parse(data, path)
@@ -203,7 +203,7 @@ class IncludeDeclarator extends Statement {
 			@includePath = parent.includePath()
 		}
 		else if parent.includePath() == null || !$localFileRegex.test(moduleName) {
-			@includePath = moduleName
+			@includePath = moduleName.substr(4)
 		}
 		else {
 			@includePath = path.join(parent.includePath(), moduleName)

@@ -27,10 +27,10 @@ class IfStatement extends Statement {
 			for var data in @data.declarations {
 				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 
-				var hasBinding = data.declaration.variables[0].name.kind != NodeKind.Identifier
-				var existential = data.declaration.operator.assignment == AssignmentOperatorKind.Existential
+				var hasBinding = data[0].variables[0].name.kind != NodeKind.Identifier
+				var existential = data[0].operator.assignment == AssignmentOperatorKind.Existential
 
-				var declaration = VariableDeclaration.new(data.declaration, this, bindingScope, previousScope, @cascade || hasBinding)
+				var declaration = VariableDeclaration.new(data[0], this, bindingScope, previousScope, @cascade || hasBinding)
 
 				@declarations.push({
 					declaration
@@ -60,7 +60,7 @@ class IfStatement extends Statement {
 			for var decl in @declarations {
 				var { declaration, hasBinding, bindingScope, data } = decl
 
-				bindingScope.line(data.declaration.start.line)
+				bindingScope.line(data[0].start.line)
 
 				declaration.analyse()
 
@@ -68,8 +68,8 @@ class IfStatement extends Statement {
 					decl.bindingVariable = declaration.value()
 				}
 
-				if ?data.condition {
-					var condition = $compile.expression(data.condition, this, bindingScope)
+				if ?data[1] {
+					var condition = $compile.expression(data[1], this, bindingScope)
 						..analyse()
 
 					@conditions.push(condition)
