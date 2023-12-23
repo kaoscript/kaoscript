@@ -1,1 +1,1 @@
-ReferenceException: Property "0" is not defined (fixtures/compile/member/member.array.v=a_l0.if.y<wmth.idx>.n<nmth.idx>e.ks:2)
+ReferenceException: The property "0" isn't defined in the expression "values" of type "Array" (fixtures/compile/member/member.array.v=a_l0.if.y<wmth.idx>.n<nmth.idx>e.ks:2)

@@ -1,1 +1,1 @@
-TypeException: The property "name" can't be ascertained from the expression "person" of type "SchoolPerson(Student, Teacher)" (fixtures/compile/variant/variant.type.enum.member.under.ks:2)
+ReferenceException: The property "name" can't be ascertained from the expression "person" of type "SchoolPerson(Student, Teacher)" (fixtures/compile/variant/variant.type.enum.member.under.ks:2)

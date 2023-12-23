@@ -1,1 +1,1 @@
-ReferenceException: Property "3" is not defined (fixtures/compile/typing/typing.reference.array.i_s_be.mb3.ks:2)
+ReferenceException: The property "3" isn't defined in the expression "values" of type "[Number, String, Boolean]" (fixtures/compile/typing/typing.reference.array.i_s_be.mb3.ks:2)

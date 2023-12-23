@@ -1,0 +1,1 @@
+TypeException: The expression "x" of type "Number" is expected to be of type "Boolean" (fixtures/compile/op.log/op.log.and.bin.i_a_rtae.ks:2)

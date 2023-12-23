@@ -1,1 +1,1 @@
-ReferenceException: Property "name" is not defined (fixtures/compile/object/object.gs.unk.var_zsre.get.ks:12)
+ReferenceException: The property "name" isn't defined in the expression "o" of type "{color: String}" (fixtures/compile/object/object.gs.unk.var_zsre.get.ks:12)

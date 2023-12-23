@@ -69,7 +69,7 @@ class MemberExpression extends Expression {
 				}
 				// TODO
 				// else if type.isNullable() && !(type.isAny() && !type.isExplicit()) {
-				// 	TypeException.throwNotNullableMemberAccess(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
+				// 	TypeException.throwNotNullableMemberAccess(@object, @toPropertyQuote(), this)
 				// }
 			}
 
@@ -145,7 +145,7 @@ class MemberExpression extends Expression {
 				}
 				// TODO
 				// else if type.isNullable() && !(type.isAny() && !type.isExplicit()) {
-				// 	TypeException.throwNotNullableMemberAccess(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
+				// 	TypeException.throwNotNullableMemberAccess(@object, @toPropertyQuote(), this)
 				// }
 			}
 
@@ -461,7 +461,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -487,7 +487,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -551,7 +551,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -647,7 +647,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -709,7 +709,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -764,13 +764,13 @@ class MemberExpression extends Expression {
 										ReferenceException.throwInvalidAssignment(this)
 									}
 									else {
-										ReferenceException.throwNotDefinedProperty(@property, this)
+										ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 									}
 								}
 							}
 						}
 						else {
-							ReferenceException.throwNotDeterminableProperty(@object, @computed ? @property.toQuote(true) : `"\(@property)"`, this)
+							ReferenceException.throwNotDeterminableProperty(@object, @toPropertyQuote(), this)
 						}
 					}
 				}
@@ -795,7 +795,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property, this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -839,7 +839,7 @@ class MemberExpression extends Expression {
 					ReferenceException.throwInvalidAssignment(this)
 				}
 				else {
-					ReferenceException.throwNotDefinedProperty(@property, this)
+					ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 				}
 			}
 
@@ -861,7 +861,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -877,7 +877,7 @@ class MemberExpression extends Expression {
 					ReferenceException.throwInvalidAssignment(this)
 				}
 				else {
-					ReferenceException.throwNotDefinedProperty(@property, this)
+					ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 				}
 			}
 
@@ -904,7 +904,7 @@ class MemberExpression extends Expression {
 						ReferenceException.throwInvalidAssignment(this)
 					}
 					else {
-						ReferenceException.throwNotDefinedProperty(@property.value(), this)
+						ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 					}
 				}
 			}
@@ -924,7 +924,7 @@ class MemberExpression extends Expression {
 					ReferenceException.throwInvalidAssignment(this)
 				}
 				else {
-					ReferenceException.throwNotDefinedProperty(@property, this)
+					ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
 				}
 			}
 
@@ -982,7 +982,7 @@ class MemberExpression extends Expression {
 	toDisruptedFragments(fragments) { # {{{
 		@object.toDisruptedFragments(fragments)
 	} # }}}
-	toConditionFragments(fragments, mode, junction) { # {{{
+	override toConditionFragments(fragments, mode, junction) { # {{{
 		if @isNullable() && !@tested {
 			if @computed {
 				fragments
@@ -1134,6 +1134,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
+	toPropertyQuote() => @computed ? @property.toQuote(true) : $quote(@property)
 	toQuote() { # {{{
 		var mut fragments = @object.toQuote()
 

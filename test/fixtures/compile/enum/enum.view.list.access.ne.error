@@ -1,1 +1,1 @@
-ReferenceException: Property "WEDNESDAY" is not defined (fixtures/compile/enum/enum.view.list.access.ne.ks:13)
+ReferenceException: The property "WEDNESDAY" isn't defined in the expression "Weekend" of type "Weekend" (fixtures/compile/enum/enum.view.list.access.ne.ks:13)

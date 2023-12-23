@@ -1,1 +1,1 @@
-ReferenceException: Property "root" is not defined (fixtures/compile/object/object.gs.unk.var_se.get.ks:7)
+ReferenceException: The property "root" isn't defined in the expression "o" of type "{name: String}" (fixtures/compile/object/object.gs.unk.var_se.get.ks:7)

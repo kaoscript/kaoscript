@@ -126,7 +126,7 @@ abstract class Expression extends AbstractNode {
 		@toArgumentFragments(fragments, mode)
 	} # }}}
 	toConditionFragments(fragments, mode: Mode = Mode.None, junction: Junction = Junction.NONE) { # {{{
-		this.toFragments(fragments, mode)
+		@toFragments(fragments, mode)
 
 		if !@type().isBoolean() || @type().isNullable() {
 			fragments.code(' === true')

@@ -1,1 +1,1 @@
-ReferenceException: Property "PI" is not defined (fixtures/compile/namespace/namespace.export.not.ks:10)
+ReferenceException: The property "PI" isn't defined in the expression "Float" of type "Float" (fixtures/compile/namespace/namespace.export.not.ks:10)

@@ -1,1 +1,1 @@
-ReferenceException: Property "d" is not defined (fixtures/compile/typing/typing.reference.object.i_s_be.mb3.ks:2)
+ReferenceException: The property "d" isn't defined in the expression "values" of type "{a: Number, b: String, c: Boolean}" (fixtures/compile/typing/typing.reference.object.i_s_be.mb3.ks:2)

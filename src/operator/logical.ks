@@ -1,7 +1,19 @@
 class PolyadicOperatorLogicalAnd extends PolyadicOperatorExpression {
 	private late {
+		@bindingScope: Scope
 		@type: Type
 	}
+	override analyse() { # {{{
+		@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
+
+		for var data in @data.operands ?? [@data.left, @data.right] {
+			var operand = $compile.expression(data, this, @bindingScope)
+
+			operand.analyse()
+
+			@operands.push(operand)
+		}
+	} # }}}
 	override prepare(target, targetMode) { # {{{
 		var mut callable = false
 
@@ -24,7 +36,7 @@ class PolyadicOperatorLogicalAnd extends PolyadicOperatorExpression {
 			}
 
 			for var data, name of operand.inferWhenTrueTypes({}) {
-				@scope.updateInferable(name, data, this)
+				@bindingScope.updateInferable(name, data, this)
 			}
 		}
 
@@ -368,9 +380,186 @@ class PolyadicOperatorLogicalOr extends PolyadicOperatorExpression {
 	type(): valueof @type
 }
 
-class PolyadicOperatorLogicalImply extends PolyadicOperatorLogicalOr {
+class PolyadicOperatorLogicalImply extends PolyadicOperatorExpression {
+	private late {
+		@bindingScope: Scope
+		@type: Type
+	}
+	override analyse() { # {{{
+		@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
+
+		for var data in @data.operands ?? [@data.left, @data.right] {
+			var operand = $compile.expression(data, this, @bindingScope)
+
+			operand.analyse()
+
+			@operands.push(operand)
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		var mut callable = false
+
+		for var operand, index in @operands {
+			operand.prepare(target, TargetMode.Permissive)
+
+			callable ||= operand.isCallable()
+
+			var type = operand.type()
+
+			if type.isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
+
+			if type.isBoolean() || type.canBeBoolean() {
+				pass
+			}
+			else {
+				TypeException.throwInvalidOperand(operand, this.operator(), this)
+			}
+
+			for var data, name of operand.inferWhenTrueTypes({}) {
+				@bindingScope.updateInferable(name, data, this)
+			}
+		}
+
+		if target.isVoid() {
+			unless callable {
+				SyntaxException.throwDeadCode(this)
+			}
+		}
+		else if !target.canBeBoolean() {
+			TypeException.throwUnexpectedExpression(this, target, this)
+		}
+
+		@type = @scope.reference('Boolean')
+	} # }}}
+	inferTypes(inferables) => @inferWhenFalseTypes(inferables)
+	inferWhenFalseTypes(inferables) { # {{{
+		var scope = @statement().scope()
+
+		for var operand, index in @operands {
+			for var data, name of operand.inferWhenFalseTypes({}) {
+				if ?inferables[name] {
+					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+						inferables[name] = data
+					}
+					else {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: Type.union(@scope, inferables[name].type, data.type)
+						}
+					}
+				}
+				else {
+					if index != 0 && data.isVariable {
+						if var variable ?= scope.getVariable(name) {
+							var type = variable.getRealType()
+
+							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
+								inferables[name] = data
+							}
+							else {
+								inferables[name] = {
+									isVariable: true
+									type: Type.union(@scope, type, data.type)
+								}
+							}
+						}
+						else {
+							inferables[name] = data
+						}
+					}
+					else {
+						inferables[name] = data
+					}
+				}
+			}
+		}
+
+		return inferables
+	} # }}}
+	inferWhenTrueTypes(inferables) { # {{{
+		var scope = @statement().scope()
+
+		var whenTrue = {}
+
+		for var operand, index in @operands {
+			for var data, name of operand.inferTypes({}) {
+				if ?inferables[name] {
+					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+						inferables[name] = data
+					}
+					else {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: Type.union(@scope, inferables[name].type, data.type)
+						}
+					}
+				}
+				else if index != 0 && data.isVariable {
+					if var variable ?= scope.getVariable(name) {
+						var type = variable.getRealType()
+
+						if data.type.equals(type) || data.type.isMorePreciseThan(type) {
+							inferables[name] = data
+						}
+						else {
+							inferables[name] = {
+								isVariable: true
+								type: Type.union(@scope, type, data.type)
+							}
+						}
+					}
+					else {
+						inferables[name] = data
+					}
+				}
+				else {
+					inferables[name] = data
+				}
+			}
+
+			if index == 0 {
+				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable {
+					whenTrue[name] = [data.type]
+				}
+			}
+			else {
+				for var data, name of operand.inferWhenTrueTypes({}) when data.isVariable && ?whenTrue[name] {
+					whenTrue[name].push(data.type)
+				}
+			}
+		}
+
+		for var types, name of whenTrue when types.length != 1 {
+			if var variable ?= scope.getVariable(name) {
+				inferables[name] = {
+					isVariable: true
+					type: Type.union(@scope, ...types!?)
+				}
+			}
+		}
+
+		return inferables
+	} # }}}
+	isBooleanComputed(junction: Junction) => junction != Junction.OR
 	operator() => Operator.LogicalImply
 	symbol() => '->'
+	toBooleanFragments(fragments, mode, junction) { # {{{
+		@toFragments(fragments, mode)
+	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if junction == Junction.AND {
+			fragments.code('(')
+
+			@toFragments(fragments, mode)
+
+			fragments.code(')')
+		}
+		else {
+			@toFragments(fragments, mode)
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		var l = @operands.length - 2
 
@@ -384,6 +573,7 @@ class PolyadicOperatorLogicalImply extends PolyadicOperatorLogicalOr {
 
 		fragments.code(' || ').wrapCondition(@operands[@operands.length - 1])
 	} # }}}
+	type(): valueof @type
 }
 
 class PolyadicOperatorLogicalXor extends PolyadicOperatorLogicalAnd {

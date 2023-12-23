@@ -1,1 +1,1 @@
-ReferenceException: Property "hello" is not defined (fixtures/compile/class/class.proxy.imth.uniq.1t1.nf.ks:9)
+ReferenceException: The property "hello" isn't defined in the expression "@component" of type "Hello" (fixtures/compile/class/class.proxy.imth.uniq.1t1.nf.ks:9)

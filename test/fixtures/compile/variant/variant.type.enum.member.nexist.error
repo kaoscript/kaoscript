@@ -1,1 +1,1 @@
-ReferenceException: Property "age" is not defined (fixtures/compile/variant/variant.type.enum.member.nexist.ks:16)
+ReferenceException: The property "age" isn't defined in the expression "student" of type "SchoolPerson(Student)" (fixtures/compile/variant/variant.type.enum.member.nexist.ks:16)

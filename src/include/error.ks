@@ -328,11 +328,14 @@ export class ReferenceException extends Exception {
 		throwNotDefinedProperty(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`Property "\(name)" is not defined`, node)
 		} # }}}
+		throwNotDefinedProperty(expression, property, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The property \(property) isn't defined in the expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true))`, node)
+		} # }}}
 		throwNotDefinedType(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`Type "\(name)" is not defined`, node)
 		} # }}}
-		throwNotDeterminableProperty(expression, property, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The property \(property) can't be ascertained from the expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true))`, node)
+		throwNotDeterminableProperty(expression, property, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The property \(property) can't be ascertained from the expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true))`, node)
 		} # }}}
 		throwNotExportable(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The exported variable "\(name)" is not exportable`, node)

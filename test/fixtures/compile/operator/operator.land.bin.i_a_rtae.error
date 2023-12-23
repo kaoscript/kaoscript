@@ -1,1 +1,0 @@
-TypeException: The expression "x" of type "Number" is expected to be of type "Boolean" (fixtures/compile/operator/operator.land.bin.i_a_rtae.ks:2)

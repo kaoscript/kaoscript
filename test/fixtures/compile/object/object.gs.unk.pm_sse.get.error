@@ -1,1 +1,1 @@
-ReferenceException: Property "name" is not defined (fixtures/compile/object/object.gs.unk.pm_sse.get.ks:4)
+ReferenceException: The property "name" isn't defined in the expression "o" of type "{color: String}" (fixtures/compile/object/object.gs.unk.pm_sse.get.ks:4)

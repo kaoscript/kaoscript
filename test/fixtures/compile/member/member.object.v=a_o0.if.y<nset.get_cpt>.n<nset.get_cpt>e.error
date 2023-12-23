@@ -1,1 +1,1 @@
-ReferenceException: Property ""foo"" is not defined (fixtures/compile/member/member.object.v=a_o0.if.y<nset.get_cpt>.n<nset.get_cpt>e.ks:2)
+ReferenceException: The property ""foo"" isn't defined in the expression "values" of type "Object" (fixtures/compile/member/member.object.v=a_o0.if.y<nset.get_cpt>.n<nset.get_cpt>e.ks:2)
