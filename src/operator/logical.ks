@@ -4,7 +4,7 @@ class PolyadicOperatorLogicalAnd extends PolyadicOperatorExpression {
 		@type: Type
 	}
 	override analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
+		@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
 
 		for var data in @data.operands ?? [@data.left, @data.right] {
 			var operand = $compile.expression(data, this, @bindingScope)
