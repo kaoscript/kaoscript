@@ -562,24 +562,38 @@ class MemberExpression extends Expression {
 			if type.isView() {
 				var root = type.discard()
 
-				if var value ?= root.getValue(@property) {
-					@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
+				if type is ReferenceType {
+					if var property ?= root.master().getInstanceProperty(@property) {
+						@type = property.discardVariable()
 
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path()).\(@property)`
-					}
-
-					if value.isAlias() {
-						if value.isDerivative() {
-							@derivative = true
+						if @object.isInferable() {
+							@inferable = true
+							@path = `\(@object.path()).\(@property)`
 						}
-						else {
-							@originalProperty = value.original()
-						}
-					}
 
-					return true
+						return true
+					}
+				}
+				else {
+					if var value ?= root.getValue(@property) {
+						@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
+
+						if @object.isInferable() {
+							@inferable = true
+							@path = `\(@object.path()).\(@property)`
+						}
+
+						if value.isAlias() {
+							if value.isDerivative() {
+								@derivative = true
+							}
+							else {
+								@originalProperty = value.original()
+							}
+						}
+
+						return true
+					}
 				}
 			}
 			else if type is NamedType {

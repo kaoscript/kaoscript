@@ -62,7 +62,7 @@ class IdentifierLiteral extends Literal {
 				if var variable ?= @scope.getVariable(@value) {
 					var type = variable.getDeclaredType()
 
-					if type.isView() {
+					if type.isView() && !type.isReference() {
 						@path = type.discard().name()
 					}
 					else if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
