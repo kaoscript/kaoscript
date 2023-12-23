@@ -285,6 +285,7 @@ class NumberLiteral extends Literal {
 		}
 	} # }}}
 	getUnpreparedType(): valueof @type
+	override path() => `\(@value)`
 }
 
 class StringLiteral extends Literal {
@@ -300,4 +301,5 @@ class StringLiteral extends Literal {
 	} # }}}
 	getUnpreparedType(): valueof @type
 	isNotEmpty() => @value.length > 0
+	override path() => @value
 }

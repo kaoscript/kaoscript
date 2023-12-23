@@ -2,6 +2,7 @@ class UnaryOperatorImplicit extends Expression {
 	private late {
 		@derivative: Boolean			= false
 		@originalProperty: String?
+		@path: String?					= null
 		@property: String
 		@type: Type
 		@varname: String?				= null
@@ -22,15 +23,18 @@ class UnaryOperatorImplicit extends Expression {
 				}
 
 				@varname = master.name()
-				@type = ValueType.new(@property, master.setNullable(false), `\(@varname).\(@property)`, @scope)
+				@path = `\(@varname).\(@property)`
+				@type = ValueType.new(@property, master.setNullable(false), @path, @scope)
 			}
 			else if type.isBitmask() {
 				if var value ?= type.discard().getValue(@property) {
+					@path = `\(type.path()).\(@property)`
+
 					if type is ValueType {
 						@type = type.setNullable(false)
 					}
 					else {
-						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), `\(type.path()).\(@property)`, @scope)
+						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), @path, @scope)
 					}
 				}
 				else {
@@ -39,11 +43,13 @@ class UnaryOperatorImplicit extends Expression {
 			}
 			else if type.isEnum() {
 				if var value ?= type.discard().getValue(@property) {
+					@path = `\(type.path()).\(@property)`
+
 					if type is ValueType {
 						@type = type.setNullable(false)
 					}
 					else {
-						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), `\(type.path()).\(@property)`, @scope)
+						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), @path, @scope)
 					}
 
 					if value.isAlias() {
@@ -67,6 +73,7 @@ class UnaryOperatorImplicit extends Expression {
 					ReferenceException.throwNotDefinedVariantElement(@property, master.name(), this)
 				}
 
+				@path = `\(master.path()).\(@property)`
 				@type = ReferenceType.new(@scope, type.name(), false, null, [{ name: @property, type: master }])
 
 				unless @type.isAssignableToVariable(type!!, false, false, true) {
@@ -78,12 +85,15 @@ class UnaryOperatorImplicit extends Expression {
 				}
 			}
 			else if var property ?= type.getProperty(@property) {
+				@path = `\(type.path()).\(@property)`
 				@type = property.discardVariable()
 			}
 		}
 
 		if !?@type {
 			if var { name % @varname, type % vartype } ?= @scope.getImplicitVariable() {
+				@path = `\(@varname).\(@property)`
+
 				if var property ?= vartype.getProperty(@property) {
 					@type = property.discardVariable()
 				}
@@ -98,6 +108,7 @@ class UnaryOperatorImplicit extends Expression {
 		}
 	} # }}}
 	override translate()
+	override path() => @path
 	property() => @property
 	isDerivative() => @derivative
 	toFragments(fragments, mode) { # {{{

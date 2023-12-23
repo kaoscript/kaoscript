@@ -388,7 +388,12 @@ class EnumValueDeclaration extends AbstractNode {
 								NotImplementedException.throw(this)
 							}
 							else {
-								@type.argument(names[@arguments.length + 3], expressions[index].type().path())
+								if var path ?= expressions[index].path() {
+									@type.argument(names[@arguments.length + 3], path)
+								}
+								else {
+									NotSupportedException.throw(expressions[index])
+								}
 
 								@arguments.push(expressions[index])
 							}

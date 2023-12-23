@@ -99,7 +99,7 @@ abstract class Expression extends AbstractNode {
 	isSplitAssignment(): Boolean => false
 	listLocalVariables(scope: Scope, variables: Array): Array => variables
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
-	path() => null
+	path(): String? => null
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
 	setAttributes(data) { # {{{

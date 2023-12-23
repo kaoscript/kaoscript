@@ -186,6 +186,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	isComputed() => @native || (@bitmask && !@expectingBitmask)
+	override path() => `\(@left.path()) + \(@right.path())`
 	setOperands(@left, @right, @bitmask = false, @number = false, @expectingBitmask = false): valueof this
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
