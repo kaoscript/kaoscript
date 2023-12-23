@@ -203,7 +203,7 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		return inferables
 	} # }}}
-	isBooleanComputed(junction: Junction) => @computed && junction != @junction
+	isBooleanComputed(junction: Junction) => (@computed && junction != @junction) || @testType.isVariant()
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)

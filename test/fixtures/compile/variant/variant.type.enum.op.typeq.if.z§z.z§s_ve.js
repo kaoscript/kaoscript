@@ -26,7 +26,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(person) {
-		if(person.kind === PersonKind.Student && (person.name === "arthur")) {
+		if((person.kind === PersonKind.Student) && (person.name === "arthur")) {
 			console.log(person.name);
 		}
 	};
