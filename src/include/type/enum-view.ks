@@ -2,6 +2,7 @@ class EnumViewType extends Type {
 	private late {
 		@elements: String[]		= []
 		@master: EnumType
+		// TODO NamedType
 		@name: String
 		// TODO move to alias
 		@testName: String?

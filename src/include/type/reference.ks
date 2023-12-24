@@ -1897,7 +1897,18 @@ class ReferenceType extends Type {
 			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
 		}
 		else if @type.isEnum() && ?propname {
-			fragments.code(`() => \($runtime.helper(node)).castEnum(\(varname), \(propname), `).compile(@type).code(`, cast)`)
+			if @type.isView() {
+				var root = @type.discard()
+
+				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), \(root.name()), cast, `)
+
+				root.toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
+
+				fragments.code(')')
+			}
+			else {
+				fragments.code(`() => \($runtime.helper(node)).castEnum(\(varname), \(propname), `).compile(@type).code(`, cast)`)
+			}
 		}
 		else {
 			var unalias = @discardAlias()
