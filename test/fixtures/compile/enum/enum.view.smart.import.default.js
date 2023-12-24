@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Weekday, __ksType: __ksType0} = require("./.enum.view.smart.export.ks.j5k8r9.ksb")();
+	var {Weekday, __ksType: __ksType0} = require("./.enum.view.smart.export.default.ks.j5k8r9.ksb")();
 	function isWeekend() {
 		return isWeekend.__ks_rt(this, arguments);
 	};

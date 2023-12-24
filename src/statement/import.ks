@@ -1624,6 +1624,8 @@ class ImportWorker {
 			references[index] = Type.toNamedType(name, type)
 		}
 
+		var enums = []
+
 		for var i from 0 to~ @metaExports.exports.length step 2 {
 			var index = @metaExports.exports[i]
 			var name = @metaExports.exports[i + 1]
@@ -1634,6 +1636,10 @@ class ImportWorker {
 			}
 			else {
 				type = references[index]
+			}
+
+			if type is EnumType {
+				enums.push({ type, name })
 			}
 
 			type = Type.toNamedType(name, type)
@@ -1683,6 +1689,10 @@ class ImportWorker {
 
 		while queue.length > 0 {
 			queue.shift()()
+		}
+
+		for var { type, name } in enums {
+			type.fillProperties(name, @node)
 		}
 	} # }}}
 	scope() => @scope

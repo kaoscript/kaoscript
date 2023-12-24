@@ -1108,13 +1108,9 @@ class ReferenceType extends Type {
 			}
 
 			if @isView() {
-				var root = @discard()
+				var master = @discard().master()
 
-				if root.name() == value.name() {
-					return true
-				}
-
-				return false
+				return master.path() == value.path()
 			}
 		}
 
@@ -1905,11 +1901,11 @@ class ReferenceType extends Type {
 		}
 		else if @type.isEnum() && ?propname {
 			if @type.isView() {
-				var root = @type.discard()
+				var view = @type.discard()
 
-				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), \(root.name()), cast, `)
+				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), `).compile(view).code(`, cast, `)
 
-				root.toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
+				view.toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
 
 				fragments.code(')')
 			}

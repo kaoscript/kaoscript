@@ -107,7 +107,6 @@
         "kind": "alias",
         "of": {
           "kind": "enumview",
-          "name": "Weekday",
           "master": {
             "reference": 1
           },

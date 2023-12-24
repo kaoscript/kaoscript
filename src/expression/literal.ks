@@ -63,7 +63,7 @@ class IdentifierLiteral extends Literal {
 					var type = variable.getDeclaredType()
 
 					if type.isView() && !type.isReference() {
-						@path = type.discard().name()
+						@path = type.discard().master().path()
 					}
 					else if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
 						ReferenceException.throwAliasTypeVariable(type.name(), this)

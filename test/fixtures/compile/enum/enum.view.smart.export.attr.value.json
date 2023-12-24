@@ -7,11 +7,39 @@
   {
     "exports": [
       0,
-      "Weekday",
+      "DayAttr",
       1,
+      "Weekday",
+      2,
       "Weekend"
     ],
     "references": [
+      {
+        "kind": "bitmask",
+        "length": 16,
+        "exhaustive": true,
+        "nextIndex": 2,
+        "generator": {
+          "initial": 0,
+          "next": 2
+        },
+        "values": [
+          {
+            "name": "Default",
+            "index": 0
+          },
+          {
+            "name": "Weekend",
+            "index": 1
+          }
+        ],
+        "aliases": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      },
       {
         "kind": "enum",
         "type": "number",
@@ -48,7 +76,16 @@
           }
         ],
         "aliases": [],
-        "fields": [],
+        "fields": [
+          {
+            "access": 4,
+            "name": "attribute",
+            "type": {
+              "reference": 0
+            },
+            "default": false
+          }
+        ],
         "instanceMethods": {},
         "staticMethods": {},
         "generator": {
@@ -64,9 +101,8 @@
         "kind": "alias",
         "of": {
           "kind": "enumview",
-          "name": "Weekday",
           "master": {
-            "reference": 0
+            "reference": 1
           },
           "elements": [
             "SATURDAY",

@@ -14,6 +14,7 @@ class EnumType extends Type {
 		}
 		@fields: EnumFieldType{}						= {}
 		@fieldAssessment?
+		@filled: Boolean								= false
 		@generator 										= {
 			initial: 0
 			step: 1
@@ -417,6 +418,10 @@ class EnumType extends Type {
 	fields() => @fields
 	fieldAssessment() => @fieldAssessment
 	fillProperties(name: String, node) { # {{{
+		return if @filled
+
+		@filled = true
+
 		@fields['index'] = EnumFieldType.new(@scope, 'index', @scope.reference('Number')).flagInbuilt()
 		@fields['name'] = EnumFieldType.new(@scope, 'name', @scope.reference('String')).flagInbuilt()
 		@fields['value'] = EnumFieldType.new(@scope, 'value', @type).flagInbuilt()

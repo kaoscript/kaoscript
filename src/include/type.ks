@@ -469,7 +469,8 @@ abstract class Type {
 								}
 
 								if root.isEnum() {
-									var type = EnumViewType.new(scope, name, root)
+									var type = EnumViewType.new(scope)
+										..master(ReferenceType.new(scope, name))
 
 									if data.typeSubtypes is Array {
 										for var subtype in data.typeSubtypes {

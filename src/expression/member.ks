@@ -560,10 +560,10 @@ class MemberExpression extends Expression {
 		}
 		else {
 			if type.isView() {
-				var root = type.discard()
+				var view = type.discard()
 
 				if type is ReferenceType {
-					if var property ?= root.master().getInstanceProperty(@property) {
+					if var property ?= view.root().getInstanceProperty(@property) {
 						@type = property.discardVariable()
 
 						if @object.isInferable() {
@@ -575,7 +575,7 @@ class MemberExpression extends Expression {
 					}
 				}
 				else {
-					if var value ?= root.getValue(@property) {
+					if var value ?= view.getValue(@property) {
 						@type = ValueType.new(@property, type.reference(@scope), `\(@object.path()).\(@property)`, @scope)
 
 						if @object.isInferable() {

@@ -17,12 +17,13 @@ class UnaryOperatorImplicit extends Expression {
 			}
 			else if type is VariantType {
 				var master = type.getMaster()
+				var root = master.discard()
 
-				unless master.discard().hasValue(@property) {
+				unless root.hasValue(@property) {
 					ReferenceException.throwNotDefinedVariantElement(@property, master.name(), this)
 				}
 
-				@varname = master.name()
+				@varname = root is EnumViewType ? root.master().path() : master.path()
 				@path = `\(@varname).\(@property)`
 				@type = ValueType.new(@property, master.setNullable(false), @path, @scope)
 			}

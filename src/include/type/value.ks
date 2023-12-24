@@ -24,10 +24,10 @@ class ValueType extends Type {
 	override hashCode() => `=\(@path)`
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value.isView() {
-			var root = value.discard()
+			var view = value.discard()
 
-			if root.master() == @type.discard() {
-				return root.hasValue(@value)
+			if view.root() == @type.discard() {
+				return view.hasValue(@value)
 			}
 		}
 
@@ -40,7 +40,19 @@ class ValueType extends Type {
 		return @type.isSubsetOf(value, generics, subtypes, mode)
 	} # }}}
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
-		return @type.equals(value.getMaster())
+		var master = value.getMaster()
+
+		if @type.equals(master) {
+			return true
+		}
+
+		if master.isView() {
+			var view = master.discard()
+
+			return @type.equals(view.master()) && view.hasProperty(@value)
+		}
+
+		return false
 	} # }}}
 	override isValue() => true
 	path() => @path

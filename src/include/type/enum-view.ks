@@ -2,32 +2,26 @@ class EnumViewType extends Type {
 	private late {
 		@aliases: Object<EnumAliasType>			= {}
 		@elements: String[]						= []
-		@master: EnumType
-		// TODO NamedType
-		@name: String
+		@master: Type
+		@root: EnumType | EnumViewType
 		// TODO move to alias
 		@testName: String?
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): EnumViewType { # {{{
-			var type = EnumViewType.new(scope, data.name)
+			var type = EnumViewType.new(scope)
 
 			for var element in data.elements {
 				type.addElement(element)
 			}
 
 			queue.push(() => {
-				var master = Type.import(data.master, metadata, references, alterations, queue, scope, node)
-
-				type.setMaster(master.discard())
+				type.master(Type.import(data.master, metadata, references, alterations, queue, scope, node))
 			})
 
 			return type.flagComplete()
 		} # }}}
 	}
-	constructor(@scope, @name, @master) { # {{{
-		super(scope)
-	} # }}}
 	addElement(name: String) { # {{{
 		@elements.pushUniq(name)
 	} # }}}
@@ -52,7 +46,6 @@ class EnumViewType extends Type {
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
 			kind: TypeKind.EnumView
-			@name
 			master: @master.toReference(references, indexDelta, mode, module)
 			@elements
 		}
@@ -66,7 +59,7 @@ class EnumViewType extends Type {
 		var types: Type{} = {}
 		var dynamics: String[]{} = {}
 
-		for var field, name of @master.fields() {
+		for var field, name of @root.fields() {
 			if comma {
 				source += ', '
 			}
@@ -113,7 +106,7 @@ class EnumViewType extends Type {
 
 			var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
 
-			for var value of @master.values() {
+			for var value of @root.values() {
 				var args = [value.index(), value.name(), value.value()]
 
 				for var name in fields from 3 {
@@ -130,7 +123,7 @@ class EnumViewType extends Type {
 
 			var filter = $evaluate($compileTest(source)).__ks_0
 
-			for var value of @master.values() {
+			for var value of @root.values() {
 				var args = [value.index(), value.name(), value.value()]
 
 				for var name in fields from 3 {
@@ -143,7 +136,7 @@ class EnumViewType extends Type {
 			}
 		}
 
-		for var alias, name of @master.getOnlyAliases() {
+		for var alias, name of @root.getOnlyAliases() {
 			var mut matched = true
 
 			for var original in alias.originals() {
@@ -166,14 +159,14 @@ class EnumViewType extends Type {
 	getOnlyAliases() => @aliases
 	getValue(name: String) { # {{{
 		if @elements.contains(name) {
-			return @master.getValue(name)
+			return @root.getValue(name)
 		}
 
 		return null
 	} # }}}
 	getTestName() => @testName
 	hashCode(): String { # {{{
-		var mut hash = `^\(@name)(`
+		var mut hash = `^\(@master.hashCode())(`
 
 		for var name, index in @elements {
 			hash += ',' if index != 0
@@ -188,18 +181,26 @@ class EnumViewType extends Type {
 	hasValue(name: String) => @elements.contains(name)
 	assist isAssignableToVariable(value: NamedType, anycast, nullcast, downcast, limited) { # {{{
 		return false unless value.isEnum()
-		return true if @name == value.name()
 		return @isAssignableToVariable(value.type(), anycast, nullcast, downcast, limited)
 	} # }}}
 	assist isAssignableToVariable(value: EnumType, anycast, nullcast, downcast, limited) { # {{{
-		return @master == value
+		return @root == value
 	} # }}}
 	override isComplex() => true
 	override isEnum() => true
 	override isExportable() => true
 	override isView() => true
 	master() => @master
-	name() => @name
+	master(@master) { # {{{
+		var type = @master.discard()
+
+		unless type is EnumType | EnumViewType {
+			NotImplementedException.throw()
+		}
+
+		@root = type
+	} # }}}
+	root() => @root
 	setTestName(@testName)
 	override toAwareTestFunctionFragments(varname, mut nullable, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
@@ -213,14 +214,14 @@ class EnumViewType extends Type {
 		for var element, index in @elements {
 			fragments
 				.code(' || ') if index != 0
-				.code(`\(varname) === \(@name).\(element)`)
+				.code(`\(varname) === `).compile(@master).code(`.\(element)`)
 		}
 	} # }}}
 	override toFragments(fragments, node) { # {{{
-		fragments.code(@name)
+		fragments.compile(@master)
 	} # }}}
 	override toQuote() { # {{{
-		var mut fragments = `\(@name)(`
+		var mut fragments = `\(@master.toQuote())(`
 
 		for var name, index in @elements {
 			fragments += ', ' if index != 0
@@ -237,13 +238,6 @@ class EnumViewType extends Type {
 	override toVariations(variations) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-
-	private {
-		constructor(@scope, @name) { # {{{
-			super(scope)
-		} # }}}
-		setMaster(@master)
-	}
 }
 
 func $compileTest(source: String, auxiliary: String = ''): String { # {{{
