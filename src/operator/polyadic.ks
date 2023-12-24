@@ -36,8 +36,6 @@ abstract class PolyadicOperatorExpression extends Expression {
 			operand.releaseReusable()
 		}
 	} # }}}
-	releaseReusable() { # {{{
-	} # }}}
 	hasExceptions() => false
 	isComputed() => true
 	isNullable() { # {{{
@@ -70,6 +68,8 @@ abstract class PolyadicOperatorExpression extends Expression {
 		return array
 	} # }}}
 	native() => @symbol()
+	override path() => [operand.path() for var operand in @operands].join(' + ')
+	releaseReusable()
 	toFragments(fragments, mode) { # {{{
 		var test = @isNullable() && !@tested
 		if test {
