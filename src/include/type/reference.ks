@@ -1738,7 +1738,14 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		fragments.code(@name)
+		@resolve()
+
+		if @type.isView() {
+			@type.discard().toFragments(fragments, node)
+		}
+		else {
+			fragments.code(@name)
+		}
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		@resolve()

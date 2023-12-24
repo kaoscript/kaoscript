@@ -5,13 +5,13 @@ enum VariantKind {
 
 class VariantType extends Type {
 	private late {
-		@aliases: Variant{}				= {}
-		@deferrable: Boolean			= false
-		@enum: EnumType?
-		@fields: Variant[]				= []
-		@kind: VariantKind				= .Enum
+		@aliases: Variant{}						= {}
+		@deferrable: Boolean					= false
+		@enum: EnumType | EnumViewType | Null
+		@fields: Variant[]						= []
+		@kind: VariantKind						= .Enum
 		@master: Type
-		@names: Variant{}				= {}
+		@names: Variant{}						= {}
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): VariantType { # {{{
@@ -223,7 +223,7 @@ class VariantType extends Type {
 		else if @master.isEnum() {
 			var type = @master.discard()
 
-			unless type is EnumType {
+			unless type is EnumType | EnumViewType {
 				NotImplementedException.throw()
 			}
 
@@ -303,9 +303,16 @@ class VariantType extends Type {
 					.code(`if(cast)`)
 					.step()
 
-				ctrl
-					.newControl()
-					.code(`if((variant = `).compile(@master).code(`(variant)) === null)`)
+				var ifCtrl = ctrl.newControl()
+
+				if @enum is EnumType {
+					ifCtrl.code(`if((variant = `).compile(@master).code(`(variant)) === null)`)
+				}
+				else {
+					ifCtrl.code(`if((variant = `).compile(@enum).code(`(variant)) === null || !\(@enum.getTestName())(variant))`)
+				}
+
+				ifCtrl
 					.step()
 					.line('return false')
 					.done()
@@ -313,7 +320,15 @@ class VariantType extends Type {
 				ctrl
 					.line(`\(varname)[\(propname)] = variant`)
 					.step()
-					.code(`else if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
+
+				if @enum is EnumType {
+					ctrl.code(`else if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
+				}
+				else {
+					ctrl.code(`else if(!\(@enum.getTestName())(variant))`)
+				}
+
+				ctrl
 					.step()
 					.line('return false')
 					.done()
@@ -325,10 +340,12 @@ class VariantType extends Type {
 					.line('return false')
 					.done()
 
+				var root = @enum is EnumType ? @master : @enum
+
 				for var { names, type }, index in @fields {
 					var ctrl = block
 						.newControl()
-						.code(`if(variant === \(@master.name()).\(names[0]))`)
+						.code(`if(variant === `).compile(root).code(`.\(names[0]))`)
 						.step()
 
 					if @deferrable {
@@ -356,7 +373,7 @@ class VariantType extends Type {
 			}
 		}
 	} # }}}
-	toFilterFragments(varname: String, subtypes: AltType[], fragments) {
+	toFilterFragments(varname: String, subtypes: AltType[], fragments) { # {{{
 		if @canBeBoolean() {
 			fragments.code(`, \(varname) => `)
 
@@ -404,7 +421,7 @@ class VariantType extends Type {
 				}
 			}
 		}
-	}
+	} # }}}
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}

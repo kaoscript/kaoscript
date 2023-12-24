@@ -1,6 +1,7 @@
 class EnumViewType extends Type {
 	private late {
-		@elements: String[]		= []
+		@aliases: Object<EnumAliasType>			= {}
+		@elements: String[]						= []
 		@master: EnumType
 		// TODO NamedType
 		@name: String
@@ -30,8 +31,23 @@ class EnumViewType extends Type {
 	addElement(name: String) { # {{{
 		@elements.pushUniq(name)
 	} # }}}
+	override canBeRawCasted() => true
 	override clone() { # {{{
 		NotImplementedException.throw()
+	} # }}}
+	explodeVarnames(...values: { name: String }): String[] { # {{{
+		var result = []
+
+		for var { name } in values {
+			if var alias ?= @aliases[name] {
+				result.pushUniq(name, ...alias.originals()!?)
+			}
+			else if @elements.contains(name) {
+				result.pushUniq(name)
+			}
+		}
+
+		return result
 	} # }}}
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
@@ -127,10 +143,27 @@ class EnumViewType extends Type {
 			}
 		}
 
+		for var alias, name of @master.getOnlyAliases() {
+			var mut matched = true
+
+			for var original in alias.originals() {
+				if !@elements.contains(original) {
+					matched = false
+
+					break
+				}
+			}
+
+			if matched {
+				@aliases[name] = alias
+			}
+		}
+
 		unless ?#@elements {
 			NotImplementedException.throw()
 		}
 	} # }}}
+	getOnlyAliases() => @aliases
 	getValue(name: String) { # {{{
 		if @elements.contains(name) {
 			return @master.getValue(name)
@@ -184,7 +217,7 @@ class EnumViewType extends Type {
 		}
 	} # }}}
 	override toFragments(fragments, node) { # {{{
-		NotImplementedException.throw()
+		fragments.code(@name)
 	} # }}}
 	override toQuote() { # {{{
 		var mut fragments = `\(@name)(`

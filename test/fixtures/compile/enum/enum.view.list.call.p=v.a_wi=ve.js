@@ -18,5 +18,5 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0(Weekend.SUNDAY);
+	foobar.__ks_0(Weekday.SUNDAY);
 };
