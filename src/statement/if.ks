@@ -126,11 +126,9 @@ class IfStatement extends Statement {
 				}
 
 				if var variable ?= declaration.getIdentifierVariable() {
-					variable.setRealType(variable.getRealType().setNullable(false))
-				}
+					var mut type = variable.getRealType().setNullable(false)
 
-				if operator == OperatorKind.VariantYes {
-					declaration.walkVariable((name, type) => {
+					if operator == OperatorKind.VariantYes {
 						if type.isVariant() {
 							var root = type.discard()
 							var variant = root.getVariantType()
@@ -138,11 +136,16 @@ class IfStatement extends Statement {
 							unless variant.canBeBoolean() {
 								TypeException.throwNotBooleanVariant(declaration.value(), this)
 							}
+
+							type = type.clone()
+								..addSubtype('true', @scope.reference('Boolean'), this)
 						}
 						else {
 							TypeException.throwNotBooleanVariant(declaration.value(), this)
 						}
-					})
+					}
+
+					variable.setRealType(type)
 				}
 			}
 		}

@@ -1350,6 +1350,8 @@ class MatchConditionType extends AbstractNode {
 class MatchConditionValue extends AbstractNode {
 	private late {
 		@values: Expression[]	= []
+		@variant: Boolean		= false
+		@variantName: String?
 		@type: Type
 	}
 	analyse() { # {{{
@@ -1375,6 +1377,25 @@ class MatchConditionValue extends AbstractNode {
 			value.prepare(target)
 
 			@type = value.type()
+
+			if @type is ValueType && @type.value() == 'true' | 'false' {
+				var valueType = @parent().getValueType()
+
+				if valueType.isVariant() {
+					var root = valueType.discard()
+					var variant = root.getVariantType()
+
+					if variant.canBeBoolean() {
+						@variant = true
+						@variantName = root.getVariantName()
+						@type = valueType.clone()
+							..addSubtype(@type.value(), @scope.reference('Boolean'), this)
+					}
+					else {
+						NotImplementedException.throw(this)
+					}
+				}
+			}
 		}
 		else {
 			var types = []
@@ -1411,7 +1432,14 @@ class MatchConditionValue extends AbstractNode {
 		if @values.length == 1 {
 			var value = @values[0]
 
-			if @type.isContainer() {
+			if @variant {
+				if value.value() == 'false' {
+					fragments.code('!')
+				}
+
+				fragments.code(`\(name).\(@variantName)`)
+			}
+			else if @type.isContainer() {
 				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType()))
 			}
 			else if @type.isVariant() {

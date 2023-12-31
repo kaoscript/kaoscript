@@ -38,6 +38,7 @@ ok:
 	make comp
 	make testks
 	make copy
+	make local
 
 new:
 	mv lib/compiler.js lib/compiler.new.js

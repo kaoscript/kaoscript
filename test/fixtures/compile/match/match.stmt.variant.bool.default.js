@@ -20,9 +20,10 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let t = x;
-		if(t.ok) {
-			console.log(t.value);
+		if(x.ok) {
+			console.log(x.value);
+		}
+		else if(!x.ok) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

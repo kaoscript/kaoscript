@@ -10,7 +10,11 @@ type Event = {
 }
 
 func foobar(x: Event) {
-	if var t ?|= x {
-		echo(`\(t.value)`)
+	match x {
+		true {
+			echo(`\(x.value)`)
+		}
+		false {
+		}
 	}
 }
