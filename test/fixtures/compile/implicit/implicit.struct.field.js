@@ -18,5 +18,19 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Style)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isEnumInstance(arg = item.fontWeight, FontWeight)) {
+			return null;
+		}
+		args[0] = arg;
+		return __ks_new.call(null, args);
 	});
 };

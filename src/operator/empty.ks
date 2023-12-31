@@ -1,4 +1,17 @@
 class AssignmentOperatorEmptyCoalescing extends AssignmentOperatorExpression {
+	override prepare(target, targetMode) { # {{{
+		super(target, targetMode)
+
+		var type = @left.type()
+
+		if type.isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
+		unless type.isIterable() || @isMisfit() || @left is MemberExpression {
+			TypeException.throwNotIterable(@left, this)
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @left.isNullable() {
 			fragments.code('(')
@@ -56,7 +69,7 @@ class AssignmentOperatorEmptyCoalescing extends AssignmentOperatorExpression {
 
 		ctrl.done()
 	} # }}}
-	toQuote() => `\(@left.toQuote()) ##= \(@right.toQuote())`
+	toQuote() => `\(@left.toQuote()) ?##= \(@right.toQuote())`
 }
 
 class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
@@ -77,17 +90,17 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 
+		var type = @right.type()
+
+		if type.isInoperative() {
+			TypeException.throwUnexpectedInoperative(@right, this)
+		}
+
+		unless type.isIterable() || @right.isLateInit() || @isMisfit() || @right is MemberExpression {
+			TypeException.throwNotIterable(@right, this)
+		}
+
 		if @left is IdentifierLiteral {
-			var type = @right.type()
-
-			if type.isInoperative() {
-				TypeException.throwUnexpectedInoperative(@right, this)
-			}
-
-			unless type.isIterable() || @right.isLateInit() || @isMisfit() ||@right is MemberExpression {
-				TypeException.throwNotIterable(@right, this)
-			}
-
 			if @condition {
 				if @lateinit {
 					@statement.initializeLateVariable(@left.name(), type, true)
@@ -145,15 +158,15 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 
 		fragments.code(' ? ')
@@ -172,15 +185,15 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 
 		fragments.code(' ? (')
@@ -207,15 +220,15 @@ class AssignmentOperatorEmpty extends AssignmentOperatorNonEmpty {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+				.code(`\($runtime.type(this)).isNotEmpty(`)
 				.compileReusable(@right)
-				.code(')', @data.operator)
+				.code(')')
 		}
 
 		fragments.code(' ? (')
@@ -228,6 +241,9 @@ class AssignmentOperatorEmpty extends AssignmentOperatorNonEmpty {
 		}
 
 		fragments.code(', false) : true')
+	} # }}}
+	toQuote() { # {{{
+		return `\(@left.toQuote()) !?#= \(@right.toQuote())`
 	} # }}}
 }
 
@@ -282,7 +298,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 	} # }}}
 	isSpread() => @spread
 	operator() => Operator.EmptyCoalescing
-	symbol() => '##'
+	symbol() => '?##'
 	toFragments(fragments, mode) { # {{{
 		var last = @operands.length - 1
 
@@ -373,6 +389,9 @@ class BinaryOperatorEmptyCoalescing extends PolyadicOperatorEmptyCoalescing {
 }
 
 class UnaryOperatorEmpty extends UnaryOperatorExpression {
+	private {
+		@mode: Number		= 0
+	}
 	override prepare(target, targetMode) { # {{{
 		@argument.prepare()
 
@@ -385,18 +404,28 @@ class UnaryOperatorEmpty extends UnaryOperatorExpression {
 		unless type.isIterable() || @argument.isLateInit() || @isMisfit() || @argument is MemberExpression {
 			TypeException.throwNotIterable(@argument, this)
 		}
+
+		if !type.isNullable() {
+			if type.isBroadArray() || type.isString() {
+				@mode = 1
+			}
+			else if type.isBroadObject() {
+				@mode = 2
+			}
+		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments
-			.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+			.code(`\($runtime.type(this)).isNotEmpty(`)
 			.compile(@argument)
-			.code(')', @data.operator)
+			.code(`, \(@mode))`)
 	} # }}}
 	type() => @scope.reference('Boolean')
 }
 
 class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 	private late {
+		@mode: Number		= 0
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -410,6 +439,15 @@ class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 
 		unless type.isIterable() || @argument.isLateInit() || @isMisfit() || @argument is MemberExpression {
 			TypeException.throwNotIterable(@argument, this)
+		}
+
+		if !type.isNullable() && !@argument.isLateInit() {
+			if type.isBroadArray() || type.isString() {
+				@mode = 1
+			}
+			else if type.isBroadObject() {
+				@mode = 2
+			}
 		}
 
 		@type = type.setNullable(false)
@@ -428,9 +466,9 @@ class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments
-			.code($runtime.type(this) + '.isNotEmpty(', @data.operator)
+			.code(`\($runtime.type(this)).isNotEmpty(`)
 			.compile(@argument)
-			.code(')', @data.operator)
+			.code(`, \(@mode))`)
 	} # }}}
 	type() => @scope.reference('Boolean')
 }

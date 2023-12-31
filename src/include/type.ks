@@ -134,7 +134,7 @@ bitmask MatchingMode<u48> {
 	IgnoreRetained
 	IgnoreReturn
 
-	AutoCast
+	TypeCasting
 
 	Signature = Similar + MissingParameter + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
 	FunctionSignature = ExactParameter +
@@ -250,7 +250,7 @@ abstract class Type {
 				return data
 			}
 
-			data = data as Any
+			data = data:&(Any)
 
 			match NodeKind(data.kind) {
 				NodeKind.ArrayType {
@@ -303,11 +303,11 @@ abstract class Type {
 						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
-						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node).flagComplete()
+						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)]:!(Array<ParameterType>), data, node).flagComplete()
 					}
 				}
 				NodeKind.FunctionExpression {
-					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters] as Array<ParameterType>, data, node).flagComplete()
+					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]:!(Array<ParameterType>), data, node).flagComplete()
 				}
 				NodeKind.FusionType {
 					return FusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
@@ -572,7 +572,7 @@ abstract class Type {
 					}
 				}
 				NodeKind.UnionType {
-					return UnionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
+					return Type.union(scope, ...[Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
 				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, generics, node)
@@ -1141,19 +1141,35 @@ abstract class Type {
 
 		return types
 	} # }}}
-	toAwareTestFunctionFragments(varname: String, nullable: Boolean, casting: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
+	toAssertFunctionFragments(value: Expression, nullable: Boolean, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+
+		@toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+
+		fragments.code(')')
+	} # }}}
+	toAssertFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
+	} # }}}
+	toAwareTestFunctionFragments(varname: String, nullable: Boolean, casting: Boolean, blind: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
 		@toBlindTestFragments(null, varname, casting, null, null, Junction.NONE, fragments, node)
 	} # }}}
 	toBlindSubtestFunctionFragments(funcname: String?, varname: String, casting: Boolean, propname: String?, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
-		@toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
+		@toAwareTestFunctionFragments(varname, nullable, casting, true, null, null, fragments, node)
 	} # }}}
 	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, generics: Generic[]?, subtypes: AltType[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
 	toBlindTestFunctionFragments(funcname: String?, varname: String, casting: Boolean, testingType: Boolean, generics: Generic[]?, fragments, node) { # {{{
 		@toBlindSubtestFunctionFragments(funcname, varname, casting, null, false, generics, fragments, node)
+	} # }}}
+	toCastFunctionFragments(value: Expression, nullable: Boolean, fragments, node) { # {{{
+		@toAssertFunctionFragments(value, nullable, fragments, node)
+	} # }}}
+	toCastFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
 	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		if !@isVirtual() && !@isSystem() {

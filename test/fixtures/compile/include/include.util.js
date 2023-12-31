@@ -105,7 +105,7 @@ module.exports = function() {
 			return false;
 		}
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", a.length, Infinity, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "", a.length, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			i = __ks_3(__ks_4);
 			if(a[i] !== b[i]) {
@@ -116,7 +116,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_append_0 = function(args) {
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "", args.length, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, k; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			k = __ks_3(__ks_4);
 			const arg = Helper.array(args[k]);
@@ -138,7 +138,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_appendUniq_0 = function(args) {
 		let __ks_0, __ks_1, __ks_2, __ks_3;
-		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "", args.length, Infinity, "", 1);
+		[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "", args.length, Infinity, "", 1);
 		for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 			i = __ks_3(__ks_4);
 			if(Type.isArray(args[i])) {
@@ -603,7 +603,7 @@ module.exports = function() {
 		return this.replace(/([A-Z])/g, "-$1").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase();
 	};
 	__ks_String.__ks_func_toFirstLowerCase_0 = function() {
-		return Helper.cast(this.charAt(0).toLowerCase(), "String", false, Type.isString) + Helper.cast(this.substring(1), "String", false, Type.isString);
+		return this.charAt(0).toLowerCase() + this.substring(1);
 	};
 	__ks_String._im_dasherize = function(that, ...args) {
 		return __ks_String.__ks_func_dasherize_rt(that, args);

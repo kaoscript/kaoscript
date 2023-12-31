@@ -1,0 +1,1 @@
+TypeException: The variable is "null" and can't be checked against the type "Array" (fixtures/compile/op.type/op.type.eq.null.decl.ks:3)

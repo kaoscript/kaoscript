@@ -26,6 +26,16 @@ module.exports = function(expect) {
 			return __ks_new();
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, StructA)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		return __ks_new.call(null, args);
 	});
 	const TupleA = Helper.tuple(function() {
 		return [];

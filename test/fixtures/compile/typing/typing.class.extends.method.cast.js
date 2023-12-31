@@ -80,7 +80,7 @@ module.exports = function() {
 			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_quxbaz_0() {
-			this._foobar = Helper.cast(this._foobar, "ClassX", false, value => Type.isClassInstance(value, ClassX)).__ks_func_foobar_0();
+			this._foobar = Helper.assert(this._foobar, "\"ClassX\"", 0, value => Type.isClassInstance(value, ClassX)).__ks_func_foobar_0();
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {
 			if(args.length === 0) {

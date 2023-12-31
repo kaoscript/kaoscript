@@ -21,7 +21,7 @@ module.exports = function() {
 		if(x === void 0) {
 			x = null;
 		}
-		foobar.__ks_0(Helper.notNull(x));
+		foobar.__ks_0(Any);
 	};
 	quzbaz.__ks_rt = function(that, args) {
 		if(args.length === 1) {

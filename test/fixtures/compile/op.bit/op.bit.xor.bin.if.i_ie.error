@@ -1,0 +1,1 @@
+TypeException: The condition "x +^ y" of type "Number" is expected to be of type "Boolean" (fixtures/compile/op.bit/op.bit.xor.bin.if.i_ie.ks:2)

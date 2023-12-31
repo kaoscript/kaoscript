@@ -12,6 +12,20 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Foobar)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isDexObject(arg = item.item, 1, 0, {values: value => Type.isArray(value, Type.isString) || Type.isNull(value)})) {
+			return null;
+		}
+		args[0] = arg;
+		return __ks_new.call(null, args);
 	});
 	return {
 		Foobar

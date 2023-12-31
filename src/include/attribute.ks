@@ -97,7 +97,7 @@ class Attribute {
 			}
 		} # }}}
 		register(class: Class) { # {{{
-			var mut name = class.name:String.toFirstLowerCase().dasherize()
+			var mut name = class.name:!(String).toFirstLowerCase().dasherize()
 
 			if name.length > 10 && name.substr(-10) == '-attribute' {
 				name = name.substr(0, name.length - 10)

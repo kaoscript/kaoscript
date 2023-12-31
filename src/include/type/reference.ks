@@ -44,7 +44,7 @@ class ReferenceType extends Type {
 					set data.name
 				}
 
-			var type = ReferenceType.new(scope, name as String, data.nullable!?)
+			var type = ReferenceType.new(scope, name:!(String), data.nullable!?)
 
 			if ?data.parameters || ?data.subtypes {
 				queue.push(() => {
@@ -997,13 +997,13 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
 		}
 		else if value is ObjectType {
 			return false unless @isBroadObject()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			var mode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			return @isSubsetOf(value, mode)
 		}
@@ -1723,6 +1723,14 @@ class ReferenceType extends Type {
 			return super(types)
 		}
 	} # }}}
+	override toAssertFunctionFragments(value, nullable, fragments, node) { # {{{
+		if $typeofs[@name] {
+			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(nullable ? '1' : '0'))`)
+		}
+		else {
+			super(value, nullable, fragments, node)
+		}
+	} # }}}
 	toExportFragment(fragments, name, variable) { # {{{
 		var varname = variable.name?()
 
@@ -1823,7 +1831,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, casting, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, casting, blind, mut generics, subtypes, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isAlias() && @type is NamedType {
@@ -1856,10 +1864,10 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			@discard().toAwareTestFunctionFragments(varname, @nullable, casting, generics, @subtypes, fragments, node)
+			@discard().toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, @subtypes, fragments, node)
 		}
 		else if ?#generics {
-			@type.toAwareTestFunctionFragments(varname, @nullable, casting, generics, subtypes, fragments, node)
+			@type.toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1875,10 +1883,34 @@ class ReferenceType extends Type {
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-				unalias.toAwareTestFunctionFragments(varname, @nullable, casting, generics, subtypes, fragments, node)
+				unalias.toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
 			}
 			else {
-				super(varname, @nullable, casting, generics, subtypes, fragments, node)
+				super(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
+			}
+		}
+	} # }}}
+	toCastFragments(varname, fragments, node) { # {{{
+		var unalias = @discardAlias()
+
+		unalias.type().toCastFragments(unalias.path(), varname, fragments, node)
+	} # }}}
+	override toCastFunctionFragments(value, nullable, fragments, node) { # {{{
+		if $typeofs[@name] {
+			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(nullable ? '1' : '0'))`)
+		}
+		else {
+			var unalias = @discardAlias()
+
+			if unalias.isObject() {
+				fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+
+				unalias.toAwareTestFunctionFragments('value', false, true, false, null, null, fragments, node)
+
+				fragments.code(')')
+			}
+			else {
+				unalias.type().toCastFunctionFragments(unalias.path(), @toQuote(true), value, nullable, fragments, node)
 			}
 		}
 	} # }}}
@@ -1894,7 +1926,7 @@ class ReferenceType extends Type {
 
 			var { type, generics } = @getGenericMapper()
 
-			type.toAwareTestFunctionFragments(varname, nullable, casting, generics, @subtypes, fragments, node)
+			type.toAwareTestFunctionFragments(varname, nullable, casting, true, generics, @subtypes, fragments, node)
 		}
 		else if @type.isBitmask() && ?propname {
 			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
@@ -1905,7 +1937,7 @@ class ReferenceType extends Type {
 
 				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), `).compile(view).code(`, cast, `)
 
-				view.toAwareTestFunctionFragments(varname, nullable, casting, null, null, fragments, node)
+				view.toAwareTestFunctionFragments(varname, nullable, casting, true, null, null, fragments, node)
 
 				fragments.code(')')
 			}

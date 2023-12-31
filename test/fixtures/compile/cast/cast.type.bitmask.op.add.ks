@@ -10,5 +10,5 @@ bitmask AnimalFlags {
 }
 
 func foobar(animal): AnimalFlags {
-	return animal:AnimalFlags + AnimalFlags.CanFly
+	return animal:>(AnimalFlags) + AnimalFlags.CanFly
 }

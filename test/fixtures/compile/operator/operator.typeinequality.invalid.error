@@ -1,1 +1,0 @@
-TypeException: The variable "value" is always of type "String" (fixtures/compile/operator/operator.typeinequality.invalid.ks:2)

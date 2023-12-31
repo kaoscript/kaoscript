@@ -12,6 +12,20 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Data)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isBoolean(arg = item.x)) {
+			return null;
+		}
+		args[0] = arg;
+		return __ks_new.call(null, args);
 	});
 	class Foobar {
 		static __ks_new_0(...args) {

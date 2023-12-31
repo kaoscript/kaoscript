@@ -171,9 +171,9 @@ class DeferredType extends Type {
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, _, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, blind, generics, subtypes, fragments, node) { # {{{
 		if @constrainted {
-			@constraint.toAwareTestFunctionFragments(varname, nullable, false, generics, subtypes, fragments, node)
+			@constraint.toAwareTestFunctionFragments(varname, nullable, false, blind, generics, subtypes, fragments, node)
 		}
 		else if nullable || @nullable {
 			fragments.code(`\($runtime.type(node)).any`)

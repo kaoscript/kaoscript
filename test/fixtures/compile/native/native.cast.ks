@@ -13,4 +13,4 @@ impl String {
 var dyn foo = 'HELLO!'
 
 console.log(foo)
-console.log((foo as string).lower())
+console.log(foo:&(string).lower())

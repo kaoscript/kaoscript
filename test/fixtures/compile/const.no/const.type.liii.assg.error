@@ -1,5 +1,1 @@
-type MyArr = const [1, 2, 3]
-
-func foobar(values: MyArr) {
-	values[0] = 0
-}
+SyntaxError: Expecting "type" but got "1" (/Users/baptiste/Development/Projects/Kaoscript/kaoscript/test/fixtures/compile/const.no/const.type.liii.assg.ks:1:21)

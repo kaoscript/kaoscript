@@ -1,0 +1,1 @@
+TypeException: The expression "x" of type "Number" isn't of an iterable type (fixtures/compile/operator/operator.length.i.#ie.ks:2)

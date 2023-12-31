@@ -64,9 +64,7 @@
                   "default": false
                 }
               ],
-              "returns": {
-                "reference": 0
-              },
+              "returns": "Any?",
               "errors": [],
               "inits": [
                 "_x"

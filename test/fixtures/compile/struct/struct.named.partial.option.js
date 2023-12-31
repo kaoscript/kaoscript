@@ -21,6 +21,24 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Point)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.x)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.y)) {
+			return null;
+		}
+		args[1] = arg;
+		return __ks_new.call(null, args);
 	});
 	const point = Point.__ks_new(void 0, 0.4);
 	console.log(point.x + 1, point.x + point.y);

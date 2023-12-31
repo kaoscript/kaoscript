@@ -910,14 +910,14 @@ class ClassMethodDeclaration extends Statement {
 
 				if @overriding {
 					if @exact {
-						overloaded:Array.remove(overridden)
+						overloaded:!(Array).remove(overridden)
 
 						overload.push(overridden.index())
 					}
-					else if overloaded:Array.contains(overridden) {
+					else if overloaded:!(Array).contains(overridden) {
 						@parent.addForkedMethod(@name, overridden, @type, true)
 
-						overloaded:Array.remove(overridden)
+						overloaded:!(Array).remove(overridden)
 
 						overload.push(overridden.index())
 					}

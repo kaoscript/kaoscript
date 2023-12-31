@@ -315,7 +315,7 @@ class ArrayType extends Type {
 				return true
 			}
 
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -742,7 +742,7 @@ class ArrayType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, casting, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
 		@toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, node)
 	} # }}}
 	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
@@ -808,7 +808,7 @@ class ArrayType extends Type {
 			if @testRest && !node.isMisfit() {
 				fragments.code($comma)
 
-				@restType.toAwareTestFunctionFragments('value', @nullable, false, null, null, fragments, node)
+				@restType.toAwareTestFunctionFragments('value', @nullable, false, false, null, null, fragments, node)
 			}
 
 			fragments.code(')')

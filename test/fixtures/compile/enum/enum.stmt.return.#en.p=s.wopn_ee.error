@@ -1,1 +1,1 @@
-TypeException: The type "String" can't be casted as a "Weekday?" (fixtures/compile/enum/enum.stmt.return.#en.p=s.wopn_ee.ks:12)
+TypeException: The type "String" can't be casted as a "Weekday" (fixtures/compile/enum/enum.stmt.return.#en.p=s.wopn_ee.ks:12)

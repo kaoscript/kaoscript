@@ -574,7 +574,7 @@ class ObjectLiteralMember extends Expression {
 		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
 		if @data.name.kind == NodeKind.Identifier	{
-			@name = Literal.new(@data.name, this, @scope:Scope, @data.name.name)
+			@name = Literal.new(@data.name, this, @scope:!(Scope), @data.name.name)
 
 			this.reference('.' + @data.name.name)
 
@@ -818,7 +818,7 @@ class ObjectThisMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@name = Literal.new(@data.name.name, this, @scope:Scope, @data.name.name.name)
+		@name = Literal.new(@data.name.name, this, @scope:!(Scope), @data.name.name.name)
 
 		@value = $compile.expression(@data.name, this)
 		@value.analyse()

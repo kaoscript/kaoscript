@@ -296,80 +296,89 @@ class NamedType extends Type {
 		else if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
 			return false
 		}
-		else {
-			if value.isAny() {
-				return true
+		else if value.isAny() {
+			return true
+		}
+		else if value.isVoid() {
+			return false
+		}
+		else if value is NamedType {
+			if @type is ClassType && value.type() is ClassType {
+				if value.isSystem() && !@type.isSystem() {
+					return false
+				}
+				else if value.isSealed() && !@type.isSealed() {
+					return false
+				}
+				else if @type.isPredefined() && value.isPredefined() {
+					return @scope.isRenamed(@name, value.name(), value.scope(), mode)
+				}
+				else if @isInheriting(value) {
+					return mode !~ MatchingMode.TypeCasting
+				}
+				else {
+					return @type.isSubsetOf(value.type(), mode + MatchingMode.Subclass)
+				}
 			}
-			else if value.isVoid() {
+			else if value.type() is BitmaskType {
+				if @type is BitmaskType {
+					return @scope.isRenamed(@name, value.name(), value.scope(), mode)
+				}
 				return false
 			}
-			else if value is NamedType {
-				if @type is ClassType && value.type() is ClassType {
-					if value.isSystem() && !@type.isSystem() {
-						return false
-					}
-					else if value.isSealed() && !@type.isSealed() {
-						return false
-					}
-					else if @type.isPredefined() && value.isPredefined() {
-						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
-					}
-					else {
-						return @type.isSubsetOf(value.type(), mode + MatchingMode.Subclass)
-					}
+			else if value.type() is EnumType {
+				if @type is EnumType {
+					return @scope.isRenamed(@name, value.name(), value.scope(), mode)
 				}
-				else if value.type() is BitmaskType {
-					if @type is BitmaskType {
-						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
-					}
-					return false
-				}
-				else if value.type() is EnumType {
-					if @type is EnumType {
-						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
-					}
-					return false
-				}
-				else if value.type() is ClassType && value.name() == 'Bitmask' {
-					return @isBitmask()
-				}
-				else if value.type() is ClassType && value.name() == 'Enum' {
-					return @isEnum()
-				}
-				else if value.isAlias() {
-					if @isAlias() {
-						return @scope.isRenamed(@name, value.name(), value.scope(), mode) || @discardAlias().isSubsetOf(value.discardAlias(), mode)
-					}
-					else {
-						return this.isSubsetOf(value.discardAlias(), mode)
-					}
+				return false
+			}
+			else if value.type() is ClassType && value.name() == 'Bitmask' {
+				return @isBitmask()
+			}
+			else if value.type() is ClassType && value.name() == 'Enum' {
+				return @isEnum()
+			}
+			else if @type is StructType && value.type() is StructType {
+				if mode ~~ MatchingMode.TypeCasting {
+					return value.isInheriting(this)
 				}
 				else {
 					return @type.isSubsetOf(value.type(), mode)
 				}
 			}
-			else if @isAlias() {
-				return @discardAlias().isSubsetOf(value, mode)
-			}
-			else if value is UnionType {
-				for var type in value.types() {
-					if this.isSubsetOf(type, mode) {
-						return true
-					}
+			else if value.isAlias() {
+				if @isAlias() {
+					return @scope.isRenamed(@name, value.name(), value.scope(), mode) || @discardAlias().isSubsetOf(value.discardAlias(), mode)
 				}
-
-				return false
-			}
-			else if value is ReferenceType {
-				if @type.isClass() && value.name() == 'Class' {
-					return true
+				else {
+					return @isSubsetOf(value.discardAlias(), mode)
 				}
-
-				return @scope.isRenamed(@name, value.name(), value.scope(), mode) || this.isSubsetOf(value.discardReference(), mode)
 			}
 			else {
-				return @type.isSubsetOf(value, mode)
+				return @type.isSubsetOf(value.type(), mode)
 			}
+		}
+		else if @isAlias() {
+			return @discardAlias().isSubsetOf(value, mode)
+		}
+		else if value is UnionType {
+			for var type in value.types() {
+				if @isSubsetOf(type, mode) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if value is ReferenceType {
+			if @type.isClass() && value.name() == 'Class' {
+				return true
+			}
+
+			return @scope.isRenamed(@name, value.name(), value.scope(), mode) || @isSubsetOf(value.discardReference(), mode)
+		}
+		else {
+			return @type.isSubsetOf(value, mode)
 		}
 	} # }}}
 	isSystem() => @type.isSystem()

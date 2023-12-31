@@ -12,6 +12,20 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Foobar)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.function)) {
+			return null;
+		}
+		args[0] = arg;
+		return __ks_new.call(null, args);
 	});
 	const s = Foobar.__ks_new(42);
 };

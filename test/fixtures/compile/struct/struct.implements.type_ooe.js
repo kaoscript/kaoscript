@@ -18,5 +18,23 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, StructA)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isString(arg = item.foobar)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.quxbaz)) {
+			return null;
+		}
+		args[1] = arg;
+		return __ks_new.call(null, args);
 	});
 };

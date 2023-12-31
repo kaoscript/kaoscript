@@ -162,7 +162,7 @@ class ArrayBinding extends Expression {
 		if @statement() is ExpressionStatement | VariableStatement {
 			@tested = true
 
-			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				@statement().addBeforehand(this)
 
 				if @value.isComposite() {
@@ -555,7 +555,7 @@ class ArrayBindingElement extends Expression {
 			if @assignment != .Parameter && !@isRequired() && !(@type.isAny() && @type.isNullable()) {
 				fragments.code($comma)
 
-				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, null, null, fragments, this)
+				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, this)
 			}
 
 			fragments.code(')')

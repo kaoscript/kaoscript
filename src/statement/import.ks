@@ -153,7 +153,7 @@ abstract class Importer extends Statement {
 				var variable = @scope.getVariable(def.internal)
 
 				if def.isAlias {
-					var type = NamedContainerType.new(def.internal, NamespaceType.new(@scope:Scope))
+					var type = NamedContainerType.new(def.internal, NamespaceType.new(@scope:!(Scope)))
 
 					for i from 1 to~ @metaExports.exports.length step 2 {
 						var name = @metaExports.exports[i]
@@ -598,7 +598,7 @@ abstract class Importer extends Statement {
 		var module = @module()
 
 		if moduleName == null {
-			moduleName = module.path(filename, @data.source.value) as String
+			moduleName = module.path(filename, @data.source.value):!(String)
 		}
 
 		if module.compiler().isInHierarchy(filename) {
@@ -790,7 +790,7 @@ abstract class Importer extends Statement {
 
 				var variationId = fs.djb2a(variations.join())
 
-				if upto.variations:Array.contains(variationId) {
+				if upto.variations:!(Array).contains(variationId) {
 					@metaRequirements = metadata
 					@arguments = arguments
 					@variationId = variationId
@@ -1494,7 +1494,7 @@ class ImportWorker {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin.Extern + TypeOrigin.Import)
+					type.origin(origin:!(TypeOrigin) + TypeOrigin.Extern + TypeOrigin.Import)
 				}
 				else {
 					type.origin(TypeOrigin.Extern + TypeOrigin.Import)
@@ -1614,7 +1614,7 @@ class ImportWorker {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin.Require)
+					type.origin(origin:!(TypeOrigin) + TypeOrigin.Require)
 				}
 				else {
 					type.origin(TypeOrigin.Require + TypeOrigin.Import)

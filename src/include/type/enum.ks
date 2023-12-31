@@ -493,7 +493,7 @@ class EnumType extends Type {
 
 		for var { name } in names {
 			if var value ?= @aliases[name] {
-				result += value.originals().length:Number
+				result += value.originals().length:!(Number)
 			}
 			else {
 				result += 1

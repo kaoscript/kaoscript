@@ -1,1 +1,1 @@
-TypeException: The type "PersonKind" can't be casted as a "CardSuit?" (fixtures/compile/enum/enum.op.cast.opn_e2_ee.ks:15)
+TypeException: The type "PersonKind" can't be casted as a "CardSuit" (fixtures/compile/enum/enum.op.cast.opn_e2_ee.ks:15)

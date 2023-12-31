@@ -218,7 +218,7 @@ namespace Matching {
 				length += 1
 			}
 			else if argument is ArrayType && !argument.hasRest() {
-				length += argument.length() as! Number
+				length += argument.length():!(Number)
 			}
 			else {
 				return Infinity
@@ -1156,7 +1156,7 @@ namespace Matching {
 						var arg = argMatches.arguments[index]
 						if ?pMatch && pMatch is Array {
 							// TODO
-							pMatch.push(...arg:Array)
+							pMatch.push(...arg:!(Array))
 
 							length += arg.length
 						}
@@ -1166,7 +1166,7 @@ namespace Matching {
 
 								var mut l = 0
 
-								for var a in arg:Array {
+								for var a in arg:!(Array) {
 									var argument = context.arguments[a.index]
 
 									if argument.isSpread() {
@@ -2060,10 +2060,10 @@ namespace Matching {
 			}
 
 			items.sort((a, b) => {
-				if a.children:Array.contains(b) {
+				if a.children:!(Array).contains(b) {
 					return 1
 				}
-				if b.children:Array.contains(a) {
+				if b.children:!(Array).contains(a) {
 					return -1
 				}
 

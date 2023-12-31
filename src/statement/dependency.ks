@@ -495,7 +495,7 @@ class RequireOrImportDeclarator extends Importer {
 							if type.isAlien() {
 								var origin = type.origin()
 								if ?origin {
-									type.origin(origin:TypeOrigin + TypeOrigin.RequireOrExtern)
+									type.origin(origin:!(TypeOrigin) + TypeOrigin.RequireOrExtern)
 								}
 								else {
 									type.origin(TypeOrigin.RequireOrExtern)
@@ -692,7 +692,7 @@ class ExternOrImportDeclarator extends Importer {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:TypeOrigin + TypeOrigin.ExternOrRequire)
+					type.origin(origin:!(TypeOrigin) + TypeOrigin.ExternOrRequire)
 				}
 				else {
 					type.origin(TypeOrigin.ExternOrRequire)

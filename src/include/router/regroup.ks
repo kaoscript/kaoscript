@@ -25,7 +25,7 @@ namespace RegroupTree {
 
 			for var value, index in values when value.length > 0{
 				for var val in values from index + 1 when val.length > 0 {
-					val:Array.remove(...value!?)
+					val:!(Array).remove(...value!?)
 				}
 			}
 

@@ -421,7 +421,7 @@ class ObjectType extends Type {
 		}
 
 		if value.isVariant() && value is ReferenceType {
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -481,7 +481,7 @@ class ObjectType extends Type {
 		}
 
 		if value.isObject() {
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -737,7 +737,7 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 					}
 					else {
-						return false unless type.isNullable()
+						return false unless type.isNullable() || mode ~~ .TypeCasting
 					}
 				}
 
@@ -1121,7 +1121,7 @@ class ObjectType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
 		@buildFlags()
 
 		nullable ||= @nullable
@@ -1145,7 +1145,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, casting, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, casting, blind, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1165,7 +1165,7 @@ class ObjectType extends Type {
 				}
 			}
 			else if casting && @testCast {
-				fragments.code(`\(varname) => \(@testName)(\(varname), cast)`)
+				fragments.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
 			}
 			else {
 				fragments.code(@testName)
@@ -1228,7 +1228,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, ?propname, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, ?propname, true, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1389,9 +1389,6 @@ class ObjectType extends Type {
 			}
 		}
 	} # }}}
-	toCastFragments(fragments, node) { # {{{
-		fragments.code(`\(@testName)(`).compileReusable(node).code(`, true)`)
-	} # }}}
 	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
 		@buildFlags()
 
@@ -1410,7 +1407,7 @@ class ObjectType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)
@@ -1447,7 +1444,7 @@ class ObjectType extends Type {
 		for var { type }, index in parameters {
 			fragments.code($comma) if index > 0
 
-			type.toAwareTestFunctionFragments('value', false, false, null, null, fragments, node)
+			type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
 		}
 
 		fragments.code(`])`)

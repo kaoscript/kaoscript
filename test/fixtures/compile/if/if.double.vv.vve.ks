@@ -1,5 +1,5 @@
 class ValueList {
-	getTop() :> 'foobar'
+	getTop(): String => 'foobar'
 }
 
 func loadValues(): ValueList {

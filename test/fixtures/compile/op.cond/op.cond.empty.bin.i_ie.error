@@ -1,0 +1,1 @@
+TypeException: The expression "x" of type "Number" isn't of an iterable type (fixtures/compile/op.cond/op.cond.empty.bin.i_ie.ks:2)

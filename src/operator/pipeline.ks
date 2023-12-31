@@ -17,7 +17,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 	}
 	override analyse() { # {{{
 		for var { kind } in @data.operator.modifiers {
-			match kind as ModifierKind {
+			match kind:!(ModifierKind) {
 				.Existential {
 					@existential = true
 				}
@@ -84,7 +84,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 			var mut destructuring = @destructuring
 
 			for var { kind } in data.modifiers {
-				match kind as ModifierKind {
+				match kind:!(ModifierKind) {
 					.Spread {
 						destructuring = true
 					}

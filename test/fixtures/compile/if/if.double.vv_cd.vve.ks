@@ -1,6 +1,6 @@
 class ValueList {
-	getTop() :> 'foobar'
-	hasValues() :> true
+	getTop(): String => 'foobar'
+	hasValues(): Boolean => true
 }
 
 func loadValues(): ValueList {

@@ -1,1 +1,0 @@
-TypeException: The variable "v = true" of type "Boolean" can never be of type "Array" (fixtures/compile/operator/operator.typeequality.boolean.inline.ks:3)

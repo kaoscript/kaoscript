@@ -1,0 +1,1 @@
+TypeException: The type "Number" or "String" can't be retyped as a "Number" (fixtures/compile/op.type/op.type.signal.default.uis.i.ks:8)

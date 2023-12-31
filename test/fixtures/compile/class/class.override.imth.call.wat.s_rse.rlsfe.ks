@@ -1,6 +1,6 @@
 class Foobar {
 	foobar(items) {
-		@quxbaz(...(items as Array<String>))
+		@quxbaz(...items:&(Array<String>))
 	}
 	quxbaz(values: String)
 	quxbaz(...values: String)

@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x, y, z) {
-		Helper.assertLoop(1, "x", x, "y", y, 0, "z", z);
+		Helper.assertLoopBounds(1, "x", x, "y", y, 0, "z", z);
 		for(let i = x; i >= y; i -= z) {
 		}
 	};

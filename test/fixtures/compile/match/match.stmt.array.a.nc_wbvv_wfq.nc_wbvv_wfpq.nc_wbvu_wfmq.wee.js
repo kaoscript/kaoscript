@@ -13,7 +13,7 @@ module.exports = function() {
 			let [x, y] = pair;
 			console.log("Antimatter, kaboom!");
 		}
-		else if(__ks_0() && (([x]) => Operator.modulo(x, 2) === 1)(pair)) {
+		else if(__ks_0() && (([x]) => Operator.remainder(x, 2) === 1)(pair)) {
 			let [x] = pair;
 			console.log("The first one is odd");
 		}

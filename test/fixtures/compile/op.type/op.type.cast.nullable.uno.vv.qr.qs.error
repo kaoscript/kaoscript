@@ -1,0 +1,1 @@
+TypeException: The type "Point" can't be casted as a "Point3D" (fixtures/compile/op.type/op.type.cast.nullable.uno.vv.qr.qs.ks:11)

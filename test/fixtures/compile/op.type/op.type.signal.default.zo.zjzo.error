@@ -1,0 +1,1 @@
+TypeException: The type "Point" can't be retyped as a "Point3D" (fixtures/compile/op.type/op.type.signal.default.zo.zjzo.ks:11)

@@ -6,5 +6,5 @@ enum CardSuit {
 }
 
 func foobar(data: CardSuit): CardSuit? {
-	return data as? CardSuit
+	return data:>?(CardSuit)
 }

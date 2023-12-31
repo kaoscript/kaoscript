@@ -1,0 +1,1 @@
+TypeException: The type "String" can't be casted as a "Number" (fixtures/compile/op.type/op.type.assert.default.uno.s.i.ks:2)

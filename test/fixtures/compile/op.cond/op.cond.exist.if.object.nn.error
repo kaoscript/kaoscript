@@ -1,0 +1,1 @@
+TypeException: The existential test of "x" is always positive (fixtures/compile/op.cond/op.cond.exist.if.object.nn.ks:2)

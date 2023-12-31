@@ -9,7 +9,7 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		if @tempIndex == -1 {
-			@tempIndex = @parent.getTempIndex():Number + 1
+			@tempIndex = @parent.getTempIndex():!(Number) + 1
 		}
 		else {
 			@tempIndex += 1

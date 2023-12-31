@@ -379,7 +379,7 @@ class FromIteration extends IterationNode {
 
 				fragments
 					.newLine()
-					.code(`\($runtime.helper(this)).assertNumber(\(@step.toQuote(true)), `)
+					.code(`\($runtime.helper(this)).assertLoopBoundsEdge(\(@step.toQuote(true)), `)
 					.compile(@stepName ?? @step)
 					.code(`, \(@order != OrderKind.None || @ascending ? 2 : 1))`)
 					.done()
@@ -401,7 +401,7 @@ class FromIteration extends IterationNode {
 					stepDecl = true
 				}
 
-				var line = fragments.newLine().code(`\($runtime.helper(this)).assertLoop(1`)
+				var line = fragments.newLine().code(`\($runtime.helper(this)).assertLoopBounds(1`)
 
 				if @fromAssert {
 					line.code(`, \(@from.toQuote(true)), `).compile(@fromName ?? @from)
@@ -619,7 +619,7 @@ class FromIteration extends IterationNode {
 
 		fragments
 			.newLine()
-			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoop(0, \(@fromAssert ? @from.toQuote(true) : '""'), `)
+			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoopBounds(0, \(@fromAssert ? @from.toQuote(true) : '""'), `)
 			.compile(@from)
 			.code(`, \(@toAssert ? @to.toQuote(true) : '""'), `)
 			.compile(@to)

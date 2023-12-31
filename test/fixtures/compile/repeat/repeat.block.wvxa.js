@@ -7,7 +7,7 @@ module.exports = function() {
 		let __ks_0, __ks_1;
 		__ks_0 = -1;
 		__ks_1 = n();
-		Helper.assertNumber("n()", __ks_1, 3);
+		Helper.assertLoopBoundsEdge("n()", __ks_1, 3);
 		while(++__ks_0 < __ks_1) {
 			console.log("hello!");
 		}

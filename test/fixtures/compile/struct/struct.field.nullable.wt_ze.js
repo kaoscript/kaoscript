@@ -22,5 +22,31 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Event)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isBoolean(arg = item.ok)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!true) {
+			return null;
+		}
+		args[1] = arg;
+		if(!__ksType.isPosition(arg = item.start)) {
+			return null;
+		}
+		args[2] = arg;
+		if(!__ksType.isPosition(arg = item.end)) {
+			return null;
+		}
+		args[3] = arg;
+		return __ks_new.call(null, args);
 	});
 };

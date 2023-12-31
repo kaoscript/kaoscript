@@ -333,7 +333,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 					var overloaded = @listOverloadedMethods(@class)
 
-					overloaded:Array.remove(overridden)
+					overloaded:!(Array).remove(overridden)
 
 					for var method in overloaded {
 						@parent.addForkedMethod(@name, method, @type)

@@ -81,7 +81,7 @@ class UnaryOperatorImplicit extends Expression {
 					TypeException.throwInvalidTypeChecking(this, type, this)
 				}
 
-				if type.isSubsetOf(@type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+				if type.isSubsetOf(@type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 					TypeException.throwUnnecessaryTypeChecking(this, type, this)
 				}
 			}

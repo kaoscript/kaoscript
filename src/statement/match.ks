@@ -77,7 +77,7 @@ class MatchStatement extends Statement {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, false)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!(Scope), false)
 			@declaration.initiate()
 		}
 		else {
@@ -188,7 +188,7 @@ class MatchStatement extends Statement {
 		for var clause, index in @clauses {
 			clause.filter.prepare(@scope.reference('Boolean'))
 
-			maxConditions += clause.filter:MatchFilter.getMaxConditions()
+			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
 
 			clause.body.analyse()
 			clause.body.prepare(target)
@@ -1342,7 +1342,7 @@ class MatchConditionType extends AbstractNode {
 	isEnum() => false
 	setCastingEnum(_)
 	toConditionFragments(fragments, name, junction) { # {{{
-		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name, @parent.getValueType()))
+		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @parent.getValueType()))
 	} # }}}
 	type() => @type
 }
@@ -1412,7 +1412,7 @@ class MatchConditionValue extends AbstractNode {
 			var value = @values[0]
 
 			if @type.isContainer() {
-				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:Scope, name, @scope.getImplicitType()))
+				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType()))
 			}
 			else if @type.isVariant() {
 				var object = @type.discard()
@@ -1464,7 +1464,7 @@ class MatchConditionValue extends AbstractNode {
 				}
 
 				if value.type().isContainer() {
-					literal ??= Literal.new(false, this, @scope:Scope, name, @scope.getImplicitType())
+					literal ??= Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType())
 
 					value.type().toPositiveTestFragments(fragments, literal)
 				}

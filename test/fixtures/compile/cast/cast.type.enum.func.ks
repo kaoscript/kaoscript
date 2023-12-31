@@ -10,7 +10,7 @@ type SchoolPerson = {
 }
 
 func foobar() {
-	var student = getStudent() as SchoolPerson
+	var student = getStudent():>(SchoolPerson)
 }
 
 func getStudent() => {

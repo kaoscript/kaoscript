@@ -12,5 +12,5 @@ enum PersonKind {
 }
 
 func foobar(data: PersonKind): CardSuit? {
-	return data as? CardSuit
+	return data:>?(CardSuit)
 }

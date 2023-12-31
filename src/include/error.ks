@@ -70,7 +70,7 @@ export class Exception extends Error {
 						var mut nf = true
 
 						for var name in hierarchy while nf {
-							if options.ignore:Array.contains(name) {
+							if options.ignore:!(Array).contains(name) {
 								nf = false
 							}
 						}
@@ -80,7 +80,7 @@ export class Exception extends Error {
 						}
 						else if options.raise.length != 0 {
 							for var name in hierarchy {
-								if options.raise:Array.contains(name) {
+								if options.raise:!(Array).contains(name) {
 									SyntaxException.throwUnreportedError(error.name(), node)
 								}
 							}
@@ -967,6 +967,9 @@ export class TypeException extends Exception {
 		throwNotAsyncFunction(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The function "\(name)" is not asynchronous`, node)
 		} # }}}
+		throwNotBooleanVariant(expression: Expression, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The expression \(expression.toQuote(true)) is not a boolean variant`, node)
+		} # }}}
 		throwNotCastableTo(valueType: Type, castingType: Type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type \(valueType.toQuote(true)) can't be casted as a \(castingType.toQuote(true))`, node)
 		} # }}}
@@ -992,7 +995,7 @@ export class TypeException extends Exception {
 			throw TypeException.new(`Identifier "\(name)" is not a function`, node)
 		} # }}}
 		throwNotIterable(expression, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The non-emptiness test of \(expression.toQuote(true)) is always negative`, node)
+			throw TypeException.new(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) isn't of an iterable type`, node)
 		} # }}}
 		throwNotNamespace(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a namespace`, node)
@@ -1009,6 +1012,12 @@ export class TypeException extends Exception {
 		throwNotNullableOperand(expression, operator, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
 		} # }}}
+		throwNotNumber(expression: Expression, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The expression \(expression.toQuote(true)) is not a number`, node)
+		} # }}}
+		throwNotRetypeableTo(valueType: Type, castingType: Type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The type \(valueType.toQuote(true)) can't be retyped as a \(castingType.toQuote(true))`, node)
+		} # }}}
 		throwNotStruct(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a struct`, node)
 		} # }}}
@@ -1024,7 +1033,7 @@ export class TypeException extends Exception {
 		throwNotUniqueValue(expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) isn't an unique value`, node)
 		} # }}}
-		throwNotVariant(name, node): Never ~ TypeException { # {{{
+		throwNotVariant(name: String, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a variant`, node)
 		} # }}}
 		throwNullTypeChecking(type, node): Never ~ TypeException { # {{{

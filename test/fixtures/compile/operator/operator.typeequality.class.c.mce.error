@@ -1,1 +1,0 @@
-TypeException: The variable "Foobar" is always of type "Class" (fixtures/compile/operator/operator.typeequality.class.c.mce.ks:4)

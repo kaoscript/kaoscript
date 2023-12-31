@@ -697,7 +697,7 @@ class CallExpression extends Expression {
 				@makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType {
-				name = name as NamedType
+				name = name:&(NamedType)
 
 				var reference = @scope().reference(name)
 
@@ -781,7 +781,7 @@ class CallExpression extends Expression {
 				}
 			}
 			is EnumType {
-				name = name as NamedType
+				name = name:&(NamedType)
 
 				var reference = @scope().reference(name)
 
@@ -915,7 +915,7 @@ class CallExpression extends Expression {
 				@makeMemberCallee(value.type(), name)
 			}
 			is StructType {
-				name = name as NamedType
+				name = name:&(NamedType)
 
 				var reference = @scope().reference(name)
 
@@ -948,7 +948,7 @@ class CallExpression extends Expression {
 				}
 			}
 			is TupleType {
-				name = name as NamedType
+				name = name:&(NamedType)
 
 				var reference = @scope().reference(name)
 
@@ -1075,18 +1075,18 @@ class CallExpression extends Expression {
 
 					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
 						is LenientCallMatchResult with var result {
-							@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
+							@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, result.possibilities, this))
 						}
 						is PreciseCallMatchResult with var { matches } {
 							if matches.length == 1 {
 								var match = matches[0]
 
-								@addCallee(InvertedPreciseMethodCallee.new(@data, reference.discardReference() as NamedType, @property, @assessment, match, this))
+								@addCallee(InvertedPreciseMethodCallee.new(@data, reference.discardReference():&(NamedType), @property, @assessment, match, this))
 							}
 							else {
 								var functions = [match.function for var match in matches]
 
-								@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, functions, this))
+								@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, functions, this))
 							}
 						}
 						else {
@@ -1094,7 +1094,7 @@ class CallExpression extends Expression {
 								ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
 							}
 							else {
-								@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+								@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, null, this))
 							}
 						}
 					}
@@ -1105,7 +1105,7 @@ class CallExpression extends Expression {
 				else {
 					@prepareArguments()
 
-					@addCallee(EnumMethodCallee.new(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, null, this))
+					@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, null, this))
 				}
 			}
 			is FunctionType {

@@ -315,7 +315,7 @@ export func isUpToDate(file, variationId, source) { # {{{
 		return false
 	}
 
-	if !data.variations:Array.contains(variationId) {
+	if !data.variations:!(Array).contains(variationId) {
 		return false
 	}
 

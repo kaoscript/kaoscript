@@ -475,10 +475,10 @@ class ClassType extends Type {
 					}
 
 					if instance {
-						@dedupInstanceMethod(data.name.name:String, type)
+						@dedupInstanceMethod(data.name.name:!(String), type)
 					}
 					else {
-						@dedupStaticMethod(data.name.name:String, type)
+						@dedupStaticMethod(data.name.name:!(String), type)
 					}
 				}
 			}
@@ -906,7 +906,7 @@ class ClassType extends Type {
 
 		var ignoredConstructors = overwritten.constructors ?? []
 		for var constructor in @constructors when constructor.isExportable(mode) {
-			if @alterations.constructors[constructor.index()] && !ignoredConstructors:Array.contains(constructor.index()) {
+			if @alterations.constructors[constructor.index()] && !ignoredConstructors:!(Array).contains(constructor.index()) {
 				export.constructors.push(constructor.export(references, indexDelta, mode, module, true))
 			}
 		}
@@ -916,7 +916,7 @@ class ClassType extends Type {
 			var ignoredMethods = overwritten.instanceMethods[name] ?? []
 
 			for var method in methods when method.isExportable(mode) {
-				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:Array.contains(method.index()) {
+				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:!(Array).contains(method.index()) {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
 			}
@@ -953,7 +953,7 @@ class ClassType extends Type {
 		@sequences.staticMethods = Object.clone(type._sequences.staticMethods)
 		@sequences.instanceMethods = Object.clone(type._sequences.instanceMethods)
 
-		@level = type.level():Number + 1
+		@level = type.level():!(Number) + 1
 	} # }}}
 	features(): valueof @features
 	features(@features): valueof this
@@ -1009,7 +1009,7 @@ class ClassType extends Type {
 					abstractMethods[name] = []
 				}
 
-				abstractMethods[name]:Array.append(methods)
+				abstractMethods[name]:!(Array).append(methods)
 			}
 		}
 
@@ -1467,7 +1467,7 @@ class ClassType extends Type {
 	isAltering() => @altering
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is ObjectType {
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -2040,7 +2040,7 @@ class ClassType extends Type {
 		return @addConstructor(type)
 	} # }}}
 	overwriteInstanceMethod(name: String, type, methods) { # {{{
-		@instanceMethods[name]:Array.remove(...methods)
+		@instanceMethods[name]:!(Array).remove(...methods)
 
 		if var alterMethods ?= @majorOriginal?._instanceMethods[name] {
 			var indexes = [method.index() for var method in alterMethods]

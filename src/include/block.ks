@@ -87,7 +87,7 @@ class Block extends AbstractNode {
 	addDataStatement(statement) { # {{{
 		@data.statements.push(statement)
 	} # }}}
-	analyse(from: Number, to: Number = @data.statements.length:Number + 1) { # {{{
+	analyse(from: Number, to: Number = @data.statements.length:!(Number) + 1) { # {{{
 		@scope.setLineOffset(@offset)
 
 		for var data in @data.statements from from to to {

@@ -91,8 +91,8 @@ export class Module {
 		}
 
 		if ?@includeModules[moduleName] {
-			@includeModules[moduleName].paths:Array.pushUniq(path)
-			@includeModules[moduleName].versions:Array.pushUniq(moduleVersion)
+			@includeModules[moduleName].paths:!(Array).pushUniq(path)
+			@includeModules[moduleName].versions:!(Array).pushUniq(moduleVersion)
 		}
 		else {
 			@includeModules[moduleName] = {
@@ -103,8 +103,8 @@ export class Module {
 
 		if moduleName != modulePath {
 			if ?@includeModules[modulePath] {
-				@includeModules[modulePath].paths:Array.pushUniq(path)
-				@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
+				@includeModules[modulePath].paths:!(Array).pushUniq(path)
+				@includeModules[modulePath].versions:!(Array).pushUniq(moduleVersion)
 			}
 			else {
 				@includeModules[modulePath] = {

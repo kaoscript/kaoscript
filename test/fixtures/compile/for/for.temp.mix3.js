@@ -11,7 +11,7 @@ module.exports = function() {
 				let __ks_2 = value.kind;
 				if(__ks_2 === 42) {
 					let __ks_3, __ks_4, __ks_5, __ks_6;
-					[__ks_3, __ks_4, __ks_5, __ks_6] = Helper.assertLoop(0, "", 0, "value.values.length", value.values.length, Infinity, "", 1);
+					[__ks_3, __ks_4, __ks_5, __ks_6] = Helper.assertLoopBounds(0, "", 0, "value.values.length", value.values.length, Infinity, "", 1);
 					for(let __ks_7 = __ks_3; __ks_7 < __ks_4; __ks_7 += __ks_5) {
 						i = __ks_6(__ks_7);
 						console.log(value.values[i]);

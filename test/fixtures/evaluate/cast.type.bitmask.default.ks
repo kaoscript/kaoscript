@@ -17,7 +17,7 @@ type Animal = {
 }
 
 func restore(mut animal) {
-	animal = animal as Animal
+	animal = animal:>(Animal)
 }
 
 var mut data = {

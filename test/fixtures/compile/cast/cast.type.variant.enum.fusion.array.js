@@ -29,7 +29,7 @@ module.exports = function(expect) {
 		return restore.__ks_rt(this, arguments);
 	};
 	restore.__ks_0 = function(student) {
-		student = __ksType.isSchoolPerson(student, true) ? student : null;
+		student = Helper.assert(student, "\"SchoolPerson\"", 0, __ksType.isSchoolPerson);
 	};
 	restore.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

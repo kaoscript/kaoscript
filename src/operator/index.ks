@@ -23,6 +23,8 @@ enum Operator<String> {
 	BitwiseRightShift	= 'right-shift'
 	BitwiseXor			= 'bitwise-xor'
 	Division			= 'divisive'
+	DivisionEuclidean	= 'euclidean-division'
+	DivisionInteger		= 'integer-division'
 	EmptyCoalescing		= 'empty-coalescing'
 	GreaterThan			= 'greater-than'
 	GreaterThanOrEqual	= 'greater-than-or-equal'
@@ -35,13 +37,16 @@ enum Operator<String> {
 	LogicalXor			= 'logical-xor'
 	Match				= 'match'
 	Mismatch			= 'mismatch'
-	Modulo				= 'modulo'
+	Modulus				= 'modulus'
 	Multiplication		= 'multiplicative'
 	Negative			= 'negative'
+	NonFiniteCoalescing	= 'non-finite-coalescing'
 	NullCoalescing		= 'null-coalescing'
 	Pipeline			= 'pipeline'
-	Quotient			= 'quotient'
+	Power				= 'power'
+	Remainder			= 'remainder'
 	Subtraction			= 'subtractive'
+	VariantCoalescing	= 'variant-coalescing'
 }
 
 var $operatorTypes = {
@@ -53,6 +58,8 @@ var $operatorTypes = {
 	[Operator.BitwiseRightShift]: ['Number']
 	[Operator.BitwiseXor]: ['Number']
 	[Operator.Division]: ['Number']
+	[Operator.DivisionEuclidean]: ['Number']
+	[Operator.DivisionInteger]: ['Number']
 	[Operator.GreaterThan]: ['Number']
 	[Operator.GreaterThanOrEqual]: ['Number']
 	[Operator.LessThan]: ['Number']
@@ -62,10 +69,11 @@ var $operatorTypes = {
 	[Operator.LogicalNegation]: ['Boolean']
 	[Operator.LogicalOr]: ['Boolean']
 	[Operator.LogicalXor]: ['Boolean']
-	[Operator.Modulo]: ['Number']
+	[Operator.Modulus]: ['Number']
 	[Operator.Multiplication]: ['Number']
 	[Operator.Negative]: ['Number']
-	[Operator.Quotient]: ['Number']
+	[Operator.Power]: ['Number']
+	[Operator.Remainder]: ['Number']
 	[Operator.Subtraction]: ['Number']
 }
 
@@ -74,14 +82,17 @@ include {
 	'./polyadic.ks'
 	'./binary.ks'
 	'./unary.ks'
-	'./numeric.ks'
+	'./arithmetic.ks'
 	'./bitwise.ks'
 	'./comparison.ks'
 	'./empty.ks'
 	'./equals.ks'
 	'./exists.ks'
+	'./finite.ks'
 	'./implicit.ks'
+	'./length.ks'
 	'./logical.ks'
 	'./pipeline.ks'
 	'./type.ks'
+	'./variant.ks'
 }

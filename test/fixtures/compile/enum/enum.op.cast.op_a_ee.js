@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(data) {
-		return Helper.notNull(CardSuit(data));
+		return Helper.assert(data, "\"CardSuit\"", 0, value => Type.isEnumInstance(value, CardSuit));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

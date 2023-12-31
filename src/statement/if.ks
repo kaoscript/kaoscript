@@ -28,15 +28,13 @@ class IfStatement extends Statement {
 				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 
 				var hasBinding = data[0].variables[0].name.kind != NodeKind.Identifier
-				var existential = data[0].operator.assignment == AssignmentOperatorKind.Existential
-
 				var declaration = VariableDeclaration.new(data[0], this, bindingScope, previousScope, @cascade || hasBinding)
 
 				@declarations.push({
 					declaration
 					bindingScope
 					hasBinding
-					existential
+					operator: data[0].operator.assignment
 					data
 					hasCondition: false
 				})
@@ -118,7 +116,7 @@ class IfStatement extends Statement {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @hasDeclaration {
-			for var { declaration, hasBinding, bindingVariable? } in @declarations {
+			for var { declaration, hasBinding, bindingVariable?, operator } in @declarations {
 				declaration.prepare(AnyType.NullableUnexplicit)
 
 				if hasBinding {
@@ -129,6 +127,22 @@ class IfStatement extends Statement {
 
 				if var variable ?= declaration.getIdentifierVariable() {
 					variable.setRealType(variable.getRealType().setNullable(false))
+				}
+
+				if operator == OperatorKind.VariantYes {
+					declaration.walkVariable((name, type) => {
+						if type.isVariant() {
+							var root = type.discard()
+							var variant = root.getVariantType()
+
+							unless variant.canBeBoolean() {
+								TypeException.throwNotBooleanVariant(declaration.value(), this)
+							}
+						}
+						else {
+							TypeException.throwNotBooleanVariant(declaration.value(), this)
+						}
+					})
 				}
 			}
 		}
@@ -600,14 +614,39 @@ class IfStatement extends Statement {
 		fragments.code('if(')
 
 		if @hasDeclaration {
-			for var { declaration, hasBinding, existential, bindingVariable?, hasCondition, condition? }, index in @declarations {
+			for var { declaration, hasBinding, operator, bindingVariable?, hasCondition, condition? }, index in @declarations {
 				fragments.code(' && ') if index > 0
 
 				if hasBinding {
-					fragments
-						.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(')
-						.compileReusable(bindingVariable)
-						.code(') ? (')
+					match operator {
+						OperatorKind.Existential {
+							fragments
+								.code(`\($runtime.type(this)).isValue(`)
+								.compileReusable(bindingVariable)
+								.code(')')
+						}
+						OperatorKind.Finite {
+							var type = declaration.type()
+
+							fragments
+								.code(`\($runtime.type(this)).isFinite(`)
+								.compileReusable(bindingVariable)
+								.code(`, \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+						}
+						OperatorKind.NonEmpty {
+							fragments
+								.code(`\($runtime.type(this)).isNotEmpty(`)
+								.compileReusable(bindingVariable)
+								.code(')')
+						}
+						OperatorKind.VariantYes {
+							var root = declaration.type().discard()
+
+							fragments.compileReusable(bindingVariable).code(`.\(root.getVariantName())`)
+						}
+					}
+
+					fragments.code(' ? (')
 
 					var declarator = declaration.declarator()
 						..toAssertFragments(fragments, bindingVariable)
@@ -616,35 +655,106 @@ class IfStatement extends Statement {
 					fragments.code(', true) : false')
 				}
 				else if index > 0 {
-					fragments.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(')
+					match operator {
+						OperatorKind.Existential {
+							fragments.code(`\($runtime.type(this)).isValue(`)
 
-					declaration.toInlineFragments(fragments, mode)
+							declaration.toInlineFragments(fragments, mode)
 
-					fragments.code(')')
+							fragments.code(')')
+						}
+						OperatorKind.Finite {
+							var type = declaration.type()
+
+							fragments.code(`\($runtime.type(this)).isFinite(`)
+
+							declaration.toInlineFragments(fragments, mode)
+
+							fragments.code(`, \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+						}
+						OperatorKind.NonEmpty {
+							fragments.code(`\($runtime.type(this)).isNotEmpty(`)
+
+							declaration.toInlineFragments(fragments, mode)
+
+							fragments.code(')')
+						}
+						OperatorKind.VariantYes {
+							var root = declaration.type().discard()
+
+							declaration.toInlineFragments(fragments, mode)
+
+							fragments.code(`.\(root.getVariantName())`)
+						}
+					}
 				}
 				else {
 					if @cascade {
 						var mut first = true
 
-						declaration.walkVariable((name, _) => {
+						declaration.walkVariable((name, type) => {
 							if first {
-								fragments.code($runtime.type(this), existential ? '.isValue((' : '.isNotEmpty((')
+								match operator {
+									OperatorKind.Existential {
+										fragments.code(`\($runtime.type(this)).isValue((`)
 
-								declaration.toInlineFragments(fragments, mode)
+										declaration.toInlineFragments(fragments, mode)
 
-								fragments.code('))')
+										fragments.code('))')
+									}
+									OperatorKind.Finite {
+										fragments.code(`\($runtime.type(this)).isFinite(`)
+
+										declaration.toInlineFragments(fragments, mode)
+
+										fragments.code(`, \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+									}
+									OperatorKind.NonEmpty {
+										fragments.code(`\($runtime.type(this)).isNotEmpty((`)
+
+										declaration.toInlineFragments(fragments, mode)
+
+										fragments.code('))')
+									}
+									OperatorKind.VariantYes {
+										var root = type.discard()
+
+										fragments.code('(')
+
+										declaration.toInlineFragments(fragments, mode)
+
+										fragments.code(`).\(root.getVariantName())`)
+									}
+								}
 
 								first = false
 							}
 							else {
-								fragments.code(' && ', $runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+								fragments.code(' && ')
+
+								match operator {
+									OperatorKind.Existential {
+										fragments.code(`\($runtime.type(this)).isValue(\(name))`)
+									}
+									OperatorKind.Finite {
+										fragments.code(`\($runtime.type(this)).isFinite(\(name), \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+									}
+									OperatorKind.NonEmpty {
+										fragments.code(`\($runtime.type(this)).isNotEmpty(\(name))`)
+									}
+									OperatorKind.VariantYes {
+										var root = type.discard()
+
+										fragments.code(`\(name).\(root.getVariantName())`)
+									}
+								}
 							}
 						})
 					}
 					else {
 						var mut first = true
 
-						declaration.walkVariable((name, _) => {
+						declaration.walkVariable((name, type) => {
 							if first {
 								first = false
 							}
@@ -652,7 +762,22 @@ class IfStatement extends Statement {
 								fragments.code(' && ')
 							}
 
-							fragments.code($runtime.type(this), existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+							match operator {
+								OperatorKind.Existential {
+									fragments.code(`\($runtime.type(this)).isValue(\(name))`)
+								}
+								OperatorKind.Finite {
+									fragments.code(`\($runtime.type(this)).isFinite(\(name), \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+								}
+								OperatorKind.NonEmpty {
+									fragments.code(`\($runtime.type(this)).isNotEmpty(\(name))`)
+								}
+								OperatorKind.VariantYes {
+									var root = type.discard()
+
+									fragments.code(`\(name).\(root.getVariantName())`)
+								}
+							}
 						})
 					}
 				}

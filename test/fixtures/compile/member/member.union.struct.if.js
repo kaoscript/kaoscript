@@ -15,6 +15,28 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, StructAB)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.a)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.b)) {
+			return null;
+		}
+		args[1] = arg;
+		if(!Type.isBoolean(arg = item.f)) {
+			return null;
+		}
+		args[2] = arg;
+		return __ks_new.call(null, args);
 	});
 	const StructABC = Helper.struct(function(a, b, f, c) {
 		const _ = new OBJ();
@@ -32,6 +54,32 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, StructABC)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.a)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.b)) {
+			return null;
+		}
+		args[1] = arg;
+		if(!Type.isBoolean(arg = item.f)) {
+			return null;
+		}
+		args[2] = arg;
+		if(!Type.isNumber(arg = item.c)) {
+			return null;
+		}
+		args[3] = arg;
+		return __ks_new.call(null, args);
 	});
 	const StructABD = Helper.struct(function(a, b, f, d) {
 		const _ = new OBJ();
@@ -49,6 +97,32 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, StructABD)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.a)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.b)) {
+			return null;
+		}
+		args[1] = arg;
+		if(!Type.isBoolean(arg = item.f)) {
+			return null;
+		}
+		args[2] = arg;
+		if(!Type.isNumber(arg = item.d)) {
+			return null;
+		}
+		args[3] = arg;
+		return __ks_new.call(null, args);
 	});
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

@@ -57,7 +57,7 @@ class StructType extends Type {
 	} # }}}
 	count(): Number { # {{{
 		if @extending {
-			return @count + @extends.type().count():Number
+			return @count + @extends.type().count():!(Number)
 		}
 		else {
 			return @count
@@ -156,7 +156,7 @@ class StructType extends Type {
 	} # }}}
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is ObjectType {
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -204,7 +204,22 @@ class StructType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: StructType, generics, subtypes, mode) => false
+	assist isSubsetOf(value: StructType, generics, subtypes, mode) { # {{{
+		return false unless mode ~~ .TypeCasting
+
+		for var field in value.listAllFields() {
+			if var property ?= @getProperty(field.name()) {
+				unless property.type().isSubsetOf(field.type(), generics, subtypes, mode) {
+					return false
+				}
+			}
+			else {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
 	assist isSubsetOf(value: UnionType, generics, subtypes, mode) { # {{{
 		for var type in value.types() {
 			if this.isSubsetOf(type) {
@@ -454,6 +469,52 @@ class StructType extends Type {
 		}
 
 		return order
+	} # }}}
+	toCastFragments(name, varname, fragments, node) { # {{{
+		fragments.code(`\(name).__ks_cast(\(varname))`)
+	} # }}}
+	override toCastFunctionFragments(name, quote, value, nullable, fragments, node) { # {{{
+		unless value.type().isStruct() {
+			return super(`\(name).__ks_cast`, quote, value, nullable, fragments, node)
+		}
+
+		var fields = @listAllFields()
+		var root = value.type().discard()
+		var mut matching = true
+
+		for var field in fields {
+			if var property ?= root.getProperty(field.name()) {
+				unless property.type().isAssignableToVariable(field.type(), false, false, false) {
+					matching = false
+
+					break
+				}
+			}
+			else if !(field.hasDefaultValue() || field.type().isNullable()){
+				matching = false
+
+				break
+			}
+		}
+
+		unless matching {
+			return super(`\(name).__ks_cast`, quote, value, nullable, fragments, node)
+		}
+
+		fragments.code(`\(name).__ks_new(`)
+
+		for var field, index in fields {
+			fragments.code($comma) if index != 0
+
+			if root.hasProperty(field.name()) {
+				fragments.compile(value).code(`.\(field.name())`)
+			}
+			else {
+				fragments.code('null')
+			}
+		}
+
+		fragments.code(')')
 	} # }}}
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()

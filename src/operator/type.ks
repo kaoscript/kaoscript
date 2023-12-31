@@ -1,21 +1,24 @@
-class BinaryOperatorTypeCasting extends Expression {
+class BinaryOperatorTypeAssertion extends Expression {
 	private late {
-		@forced: Boolean	= false
-		@left
-		@nullable: Boolean	= false
+		@left: Expression
+		@nullable: Boolean		= false
+		@reusable: Boolean		= false
+		@reuseName: String?
+		@right: Type
+		@toAssert: Boolean		= false
+		@toEnum: Boolean		= false
+		@toNonNull: Boolean		= false
+		@toRawValue: Boolean	= false
 		@type: Type
 	}
-	analyse() { # {{{
+	override analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
 
-		@type = Type.fromAST(@data.right, this)
+		@type = @right = Type.fromAST(@data.right, this)
 
 		for var modifier in @data.operator.modifiers {
-			if modifier.kind == ModifierKind.Forced {
-				@forced = true
-			}
-			else if modifier.kind == ModifierKind.Nullable {
+			if modifier.kind == ModifierKind.Nullable {
 				@nullable = true
 
 				@type = @type.setNullable(true)
@@ -31,94 +34,212 @@ class BinaryOperatorTypeCasting extends Expression {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		if @forced || type.isAny() {
-			pass
+		if type.isAny() {
+			@toAssert = true
 		}
 		else if type is not ArrayType & ObjectType & ReferenceType & UnionType {
 			TypeException.throwInvalidCasting(this)
 		}
-		else if @type.isEnum() {
-			unless @type.discard().type().isAssignableToVariable(type, true, true, true) {
-				TypeException.throwNotCastableTo(type, @type, this)
+		else if @right.isEnum() {
+			unless @right.discard().type().isAssignableToVariable(type, true, @nullable, false) {
+				TypeException.throwNotCastableTo(type, @right, this)
 			}
+
+			@toEnum = true
+		}
+		else if !type.isAssignableToVariable(@right, true, @nullable, false) {
+			if type.isAssignableToVariable(@right, true, true, false) {
+				@toNonNull = true
+			}
+			else if @right.isAssignableToVariable(type, true, @nullable, false) || type.isSubsetOf(@right, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+				@toAssert = true
+			}
+			else {
+				TypeException.throwNotCastableTo(type, @right, this)
+			}
+		}
+	} # }}}
+	override translate() { # {{{
+		@left.translate()
+	} # }}}
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
+		}
+	} # }}}
+	isLooseComposite() => @toAssert || @toEnum || @toNonNull || @toRawValue
+	listAssignments(array) => @left.listAssignments(array)
+	name() => @left is IdentifierLiteral ? @left.name() : null
+	releaseReusable() { # {{{
+		if ?@reuseName {
+			@scope.releaseTempName(@reuseName)
+		}
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @toEnum {
+			if @nullable {
+				fragments.compile(@right).code('(').compile(@left).code(')')
+			}
+			else {
+				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
+			}
+		}
+		else if @toNonNull {
+			fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
+		}
+		else if @toRawValue {
+			fragments.compile(@left).code('.value')
+		}
+		else if @toAssert {
+			@right.toAssertFunctionFragments(@left, @nullable, fragments, this)
+		}
+		else {
+			fragments.compile(@left)
+		}
+	} # }}}
+	override toQuote() { # {{{
+		return `\(@left.toQuote()):&\(@nullable ? '?' : '')(\(@right.toQuote()))`
+	} # }}}
+	toReusableFragments(fragments) { # {{{
+		fragments.code(`\(@reuseName) = `).compile(this)
+
+		@reusable = true
+	} # }}}
+	type() => @type
+
+	proxy @left {
+		hasExceptions
+		inferTypes
+		isNullable
+		isUsingVariable
+		isUsingInstanceVariable
+	}
+}
+
+class BinaryOperatorTypeCasting extends Expression {
+	private late {
+		@left: Expression
+		@nullable: Boolean		= false
+		@reusable: Boolean		= false
+		@reuseName: String?
+		@right: Type
+		@toCasting: Boolean		= false
+		@toEnum: Boolean		= false
+		@toNonNull: Boolean		= false
+		@toRawValue: Boolean	= false
+		@type: Type
+	}
+	analyse() { # {{{
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+
+		@type = @right = Type.fromAST(@data.right, this)
+
+		for var modifier in @data.operator.modifiers {
+			if modifier.kind == ModifierKind.Nullable {
+				@nullable = true
+
+				@type = @type.setNullable(true)
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@left.prepare(AnyType.NullableUnexplicit)
+
+		var type = @left.type()
+
+		if type.isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
+		if type.isAny() {
+			@toCasting = true
+		}
+		else if type is not ArrayType & ObjectType & ReferenceType & UnionType {
+			TypeException.throwInvalidCasting(this)
+		}
+		else if @right.isEnum() {
+			unless @right.discard().type().isAssignableToVariable(type, true, @nullable, false) {
+				TypeException.throwNotCastableTo(type, @right, this)
+			}
+
+			@toEnum = true
 		}
 		else if type.isEnum() {
-			unless @type.isAssignableToVariable(type.discard().type(), true, true, true) {
-				TypeException.throwNotCastableTo(type, @type, this)
+			unless @right.isAssignableToVariable(type.discard().type(), true, @nullable, false) {
+				TypeException.throwNotCastableTo(type, @right, this)
 			}
+
+			@toRawValue = true
 		}
-		else if !type.isAssignableToVariable(@type, true, true, true) {
-			TypeException.throwNotCastableTo(type, @type, this)
+		else if !type.isAssignableToVariable(@right, true, @nullable, false) {
+			if type.isAssignableToVariable(@right, true, true, false) {
+				@toNonNull = true
+			}
+			else if @right.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.TypeCasting) {
+				@toCasting = true
+			}
+			else {
+				TypeException.throwNotCastableTo(type, @right, this)
+			}
 		}
 	} # }}}
 	translate() { # {{{
 		@left.translate()
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		if @type.isObject() && @type.canBeRawCasted() && @left.isComposite() {
-			@left.acquireReusable(true)
+		if acquire {
+			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
 	hasExceptions() => false
 	inferTypes(inferables) => @left.inferTypes(inferables)
-	isComputed() => false
 	isNullable() => @left.isNullable()
+	isLooseComposite() => @toCasting || @toEnum || @toNonNull || @toRawValue
 	isUsingVariable(name) => @left.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array: Array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	releaseReusable() { # {{{
-		@left.releaseReusable()
+		if ?@reuseName {
+			@scope.releaseTempName(@reuseName)
+		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @type.isEnum() {
-			var type = @type.setNullable(false)
-
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @toEnum {
 			if @nullable {
-				fragments.compile(type).code('(').compile(@left).code(')')
+				fragments.compile(@right).code('(').compile(@left).code(')')
 			}
 			else {
-				fragments.code(`\($runtime.helper(this)).notNull(`).compile(type).code('(').compile(@left).code('))')
+				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
 			}
 		}
-		else if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
-			fragments.compile(@left)
-		}
-		else if !@nullable && @left.type().isAssignableToVariable(@type, false, true, false) {
+		else if @toNonNull {
 			fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
 		}
-		else if @left.type().isEnum() {
+		else if @toRawValue {
 			fragments.compile(@left).code('.value')
 		}
-		else if @type.isObject() && @type.canBeRawCasted() {
-			var type = @type.discard()
-
-			type.toCastFragments(fragments, @left)
-
-			fragments.code(' ? ').compile(@left).code(' : null')
-		}
-		else if @type.isAssignableToVariable(@left.type(), true, @nullable, true) {
-			var type = @type.setNullable(false)
-
-			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, type.toQuote(true), $comma, @nullable, $comma)
-
-			type.toBlindTestFunctionFragments(null, 'value', false, true, null, fragments, this)
-
-			fragments.code(')')
+		else if @toCasting {
+			@right.toCastFunctionFragments(@left, @nullable, fragments, this)
 		}
 		else {
-			TypeException.throwNotCastableTo(@left.type(), @type, this)
+			fragments.compile(@left)
 		}
 	} # }}}
 	toQuote() { # {{{
-		if @forced {
-			return `\(@left.toQuote()) as! \(@type.toQuote())`
-		}
-		if @nullable {
-			return `\(@left.toQuote()) as? \(@type.setNullable(false).toQuote())`
-		}
+		return `\(@left.toQuote()):>\(@nullable ? '?' : '')(\(@right.toQuote()))`
+	} # }}}
+	toReusableFragments(fragments) { # {{{
+		fragments.code(`\(@reuseName) = `).compile(this)
 
-		return `\(@left.toQuote()) as \(@type.toQuote())`
+		@reusable = true
 	} # }}}
 	type() => @type
 }
@@ -236,7 +357,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 		}
 		else {
-			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
 			}
 
@@ -349,7 +470,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			}
 		}
 		else {
-			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				TypeException.throwUnnecessaryTypeChecking(@subject, type, this)
 			}
 
@@ -394,4 +515,65 @@ class UnaryOperatorTypeFitting extends UnaryOperatorExpression {
 		fragments.compile(@argument)
 	} # }}}
 	type() => @type
+}
+
+class BinaryOperatorTypeSignalment extends Expression {
+	private late {
+		@forced: Boolean	= false
+		@left: Expression
+		@type: Type
+	}
+	override analyse() { # {{{
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+
+		@type = Type.fromAST(@data.right, this)
+
+		for var modifier in @data.operator.modifiers {
+			if modifier.kind == ModifierKind.Forced {
+				@forced = true
+			}
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		@left.prepare(AnyType.NullableUnexplicit)
+
+		var type = @left.type()
+
+		if type.isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
+		if @forced || type.isAny() {
+			pass
+		}
+		else if !type.isAssignableToVariable(@type, true, true, true) {
+			TypeException.throwNotRetypeableTo(type, @type, this)
+		}
+	} # }}}
+	override translate() { # {{{
+		@left.translate()
+	} # }}}
+	listAssignments(array) => @left.listAssignments(array)
+	name() => @left.name()
+	override toQuote() { # {{{
+		if @forced {
+			return `\(@left.toQuote()):!!(\(@type.toQuote()))`
+		}
+		else {
+			return `\(@left.toQuote()):!(\(@type.toQuote()))`
+		}
+	} # }}}
+	type() => @type
+
+	proxy @left {
+		acquireReusable
+		hasExceptions
+		isComputed
+		isNullable
+		isUsingVariable
+		isUsingInstanceVariable
+		releaseReusable
+		toFragments
+	}
 }

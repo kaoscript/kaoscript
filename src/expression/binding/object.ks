@@ -124,7 +124,7 @@ class ObjectBinding extends Expression {
 		if @statement() is ExpressionStatement | VariableStatement {
 			@tested = true
 
-			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast) {
+			if ?@value && !@value.type().isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				@statement().addBeforehand(this)
 
 				if @value.isComposite() {
@@ -133,7 +133,7 @@ class ObjectBinding extends Expression {
 			}
 		}
 		else {
-			@tested = @type != @testType && @type.isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+			@tested = @type != @testType && @type.isSubsetOf(@testType, MatchingMode.NonNullToNull + MatchingMode.Subclass)
 		}
 	} # }}}
 	translate() { # {{{
@@ -598,7 +598,7 @@ class ObjectBindingElement extends Expression {
 			if @assignment != .Parameter && !@isRequired() && !@type.isAny() {
 				fragments.code($comma)
 
-				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, null, null, fragments, this)
+				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, this)
 			}
 
 			fragments.code(')')

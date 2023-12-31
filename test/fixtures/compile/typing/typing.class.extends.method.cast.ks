@@ -15,6 +15,6 @@ class ClassY extends ClassA {
 		@foobar: ClassA	= ClassA.new()
 	}
 	quxbaz() {
-		@foobar = @foobar:ClassX.foobar()
+		@foobar = @foobar:&(ClassX).foobar()
 	}
 }

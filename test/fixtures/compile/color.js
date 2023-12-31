@@ -711,7 +711,7 @@ module.exports = function() {
 					if(Operator.gt(d, component.half)) {
 						d = component.mod - d;
 					}
-					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + (d * percentage), component.mod), component.round);
+					this[component.field] = __ks_Number._im_round(Operator.remainder(this[component.field] + (d * percentage), component.mod), component.round);
 				}
 				else {
 					this[component.field] = __ks_Number._im_round(__ks_Number._im_limit($blend(this[component.field], color[component.field], percentage), component.min, component.max), component.round);
@@ -951,7 +951,7 @@ module.exports = function() {
 				const green = endColor._green - this._green;
 				const blue = endColor._blue - this._blue;
 				let __ks_0, __ks_1, __ks_2, __ks_3;
-				[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 1, "", length, Infinity, "", 1);
+				[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 1, "", length, Infinity, "", 1);
 				for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 					i = __ks_3(__ks_4);
 					const offset = i / length;

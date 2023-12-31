@@ -1,1 +1,0 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (Number|String) (fixtures/compile/operator/operator.typecasting.forced.missing.ks:8)

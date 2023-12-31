@@ -1,0 +1,1 @@
+TypeException: The variable "x" is always of type "Quxbaz" (fixtures/compile/op.type/op.type.eq.class.icb.cbe.ks:9)

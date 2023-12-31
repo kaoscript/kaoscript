@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(n) {
 		let __ks_0;
 		__ks_0 = -1;
-		Helper.assertNumber("n", n, 3);
+		Helper.assertLoopBoundsEdge("n", n, 3);
 		while(++__ks_0 < n) {
 			console.log("hello!");
 		}

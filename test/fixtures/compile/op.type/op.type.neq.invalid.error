@@ -1,0 +1,1 @@
+TypeException: The variable "value" is always of type "String" (fixtures/compile/op.type/op.type.neq.invalid.ks:2)

@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(day) {
-		return Weekday(day);
+		return Helper.cast(day, "\"Weekday\"", 1, Weekday);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

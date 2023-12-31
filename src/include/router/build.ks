@@ -488,7 +488,7 @@ namespace Build {
 			type: Type
 		): Void { # {{{
 			if type.isUnion() {
-				for var value in type.discard():UnionType.types() {
+				for var value in type.discard():!(UnionType).types() {
 					expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
 				}
 			}
@@ -552,7 +552,7 @@ namespace Build {
 					}
 				}
 				else {
-					delta += parameter.min() as Number
+					delta += parameter.min():!(Number)
 
 					if d == 0 {
 						addToCount = false
@@ -690,10 +690,10 @@ namespace Build {
 
 				row.key += key
 				row.types.push(RowType.new(
-					index: (afterRest ? argIndex - argCount : argIndex) as Number
-					type: type as Type
+					index: (afterRest ? argIndex - argCount : argIndex):!(Number)
+					type: type:!(Type)
 					rest
-					parameter: index as Number
+					parameter: index:!(Number)
 				))
 
 				if rest {
@@ -723,10 +723,10 @@ namespace Build {
 
 				if index == lastIndex {
 					column.columns[hash] = TreeLeaf.new(
-						index: (afterRest ? argIndex - argCount : argIndex) as Number
-						type: type as Type
-						min: min as Number
-						max: max as Number
+						index: (afterRest ? argIndex - argCount : argIndex):!(Number)
+						type: type:!(Type)
+						min: min:!(Number)
+						max: max:!(Number)
 						variadic
 						rest
 						isNode: false
@@ -734,7 +734,7 @@ namespace Build {
 							[key]: TreeParameter.new(
 								key
 								function
-								parameter: index as Number
+								parameter: index:!(Number)
 								rows: [row.key]
 							)
 						}
@@ -746,17 +746,17 @@ namespace Build {
 				}
 				else {
 					column.columns[hash] = TreeBranch.new(
-						index: (afterRest ? argIndex - argCount : argIndex) as Number
-						type: type as Type
-						min: min as Number
-						max: max as Number
+						index: (afterRest ? argIndex - argCount : argIndex):!(Number)
+						type: type:!(Type)
+						min: min:!(Number)
+						max: max:!(Number)
 						variadic
 						rest
 						parameters: {
 							[key]: TreeParameter.new(
 								key
 								function
-								parameter: index as Number
+								parameter: index:!(Number)
 								rows: [row.key]
 							)
 						}
@@ -835,7 +835,7 @@ namespace Build {
 					var hash = type.hashCode()
 
 					if var match ?= branch.columns[hash] {
-						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:!TreeLeaf.function, row.function], node)
+						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:!!(TreeLeaf).function, row.function], node)
 					}
 
 					var key = `:\(row.function.index()):\(parameter)`
@@ -1110,7 +1110,7 @@ namespace Build {
 					for var parameter, key of first.parameters {
 						if var rows ?= param2row[key] {
 							for var row in parameter.rows {
-								return unless rows:Array.contains(row)
+								return unless rows:!(Array).contains(row)
 							}
 						}
 					}
@@ -1332,14 +1332,14 @@ namespace Build {
 				var node = tree.columns[key]
 
 				if var m ?= mins[key] {
-					applyMin(node, m as Array)
+					applyMin(node, m:!(Array))
 				}
 				else {
 					node.min = 0
 					node.variadic = true
 
 					if node.isNode {
-						applyMin2(node as! TreeBranch, mins, type)
+						applyMin2(node:!!(TreeBranch), mins, type)
 					}
 				}
 			}
@@ -1832,7 +1832,7 @@ namespace Build {
 				key
 				node
 				type: node.type
-				usage: node.isNode ? node:!TreeBranch.rows.length : 1
+				usage: node.isNode ? node:!!(TreeBranch).rows.length : 1
 				children: []
 				isAny: node.type.isAny() || node.type.isNull()
 				variadic: node.index < 0 || node.variadic
@@ -1874,11 +1874,11 @@ namespace Build {
 
 		// echo([item.key for var item in items])
 		items.sort((a, b) => {
-			if a.children:Array.contains(b) {
+			if a.children:!(Array).contains(b) {
 				// echo(a.key, b.key, 1, 'b⊂a')
 				return 1
 			}
-			if b.children:Array.contains(a) {
+			if b.children:!(Array).contains(a) {
 				// echo(a.key, b.key, -1, 'a⊂b')
 				return -1
 			}

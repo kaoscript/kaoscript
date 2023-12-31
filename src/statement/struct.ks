@@ -119,6 +119,42 @@ class StructDeclaration extends Statement {
 	isExtending() => @extending
 	isImplementing() => @implementing
 	listInterfaces() => @struct.listInterfaces()
+	toCastFragments(fragments, mode) { # {{{
+		var mut ctrl = fragments.newControl().code(`if(`)
+
+		var literal = Literal.new(false, this, @scope(), 'item')
+
+		@type.reference(@scope).toPositiveTestFragments(null, null, Junction.NONE, ctrl, literal)
+
+		ctrl
+			.code(')').step()
+			.line('return item')
+			.done()
+
+		fragments.newControl()
+			.code(`if(!\($runtime.type(this)).isObject(item))`).step()
+			.line('return null')
+			.done()
+
+		fragments.line(`const args = []`)
+		fragments.line(`let arg`)
+
+		for var field, index in @struct.listAllFields() {
+			var ctrl = fragments.newControl().code(`if(!`)
+			var literal = Literal.new(false, this, @scope(), `arg = item.\(field.name())`)
+
+			field.type().toPositiveTestFragments(null, null, Junction.NONE, ctrl, literal)
+
+			ctrl
+				.code(')').step()
+				.line('return null')
+				.done()
+
+			fragments.line(`args[\(index)] = arg`)
+		}
+
+		fragments.line(`return __ks_new.call(null, args)`)
+	} # }}}
 	toObjectFragments(fragments, mode) { # {{{
 		if @extending && @extendsType.type().hasDefaultValues() {
 			var line = fragments.newLine().code(`\($const(this))_ = \(@extendsName).__ks_create(`)
@@ -183,6 +219,12 @@ class StructDeclaration extends Statement {
 
 		ctrl.done()
 
+		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, item)`).step()
+
+		@toCastFragments(ctrl, mode)
+
+		ctrl.done()
+
 		line.code(')').done()
 	} # }}}
 	type() => @type
@@ -205,7 +247,7 @@ class StructFunction extends AbstractNode {
 
 		if @parent.isExtending() {
 			for var type in @parent._extendsType.type().listAllFields() {
-				var field = StructFieldDeclaration.new(type as StructFieldType, @parent!?)
+				var field = StructFieldDeclaration.new(type:!(StructFieldType), @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -299,7 +341,7 @@ class StructFieldDeclaration extends AbstractNode {
 				type = NullType.Explicit
 			}
 
-			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
+			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired():!(Boolean))
 
 			if ?@data.value {
 				@type.flagDefaultValue()

@@ -13,6 +13,24 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Foobar)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isValue(arg = item.argument)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isValue(arg = item.from)) {
+			return null;
+		}
+		args[1] = arg;
+		return __ks_new.call(null, args);
 	});
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);

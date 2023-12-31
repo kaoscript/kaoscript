@@ -1,0 +1,1 @@
+SyntaxException: The forced type casting "!!" can't determine the expected type (fixtures/compile/op.type/op.type.fit.forced.const.auto.ks:4)

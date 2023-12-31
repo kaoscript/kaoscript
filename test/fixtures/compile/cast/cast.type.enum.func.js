@@ -8,8 +8,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function() {
-		let __ks_0;
-		const student = __ksType.isSchoolPerson(__ks_0 = getStudent.__ks_0(), true) ? __ks_0 : null;
+		const student = Helper.assert(getStudent.__ks_0(), "\"SchoolPerson\"", 0, value => __ksType.isSchoolPerson(value, true));
 	};
 	foobar.__ks_rt = function(that, args) {
 		if(args.length === 0) {

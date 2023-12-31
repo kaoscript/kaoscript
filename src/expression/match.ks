@@ -27,7 +27,7 @@ class MatchExpression extends Expression {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, false)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!(Scope), false)
 			@declaration.initiate()
 		}
 		else {
@@ -173,7 +173,7 @@ class MatchExpression extends Expression {
 		for var clause, index in @clauses {
 			clause.filter.prepare(@scope.reference('Boolean'))
 
-			maxConditions += clause.filter:MatchFilter.getMaxConditions()
+			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
 
 			for var condition in clause.filter.conditions() {
 				tracker.exclude(condition)

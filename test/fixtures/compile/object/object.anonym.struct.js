@@ -15,6 +15,28 @@ module.exports = function() {
 			}
 		}
 		throw Helper.badArgs();
+	}, function(__ks_new, item) {
+		if(Type.isStructInstance(item, Coord)) {
+			return item;
+		}
+		if(!Type.isObject(item)) {
+			return null;
+		}
+		const args = [];
+		let arg;
+		if(!Type.isNumber(arg = item.x)) {
+			return null;
+		}
+		args[0] = arg;
+		if(!Type.isNumber(arg = item.y)) {
+			return null;
+		}
+		args[1] = arg;
+		if(!Type.isDexObject(arg = item.elevation, 1, 0, {unit: Type.isString, value: Type.isNumber})) {
+			return null;
+		}
+		args[2] = arg;
+		return __ks_new.call(null, args);
 	});
 	return {
 		Coord

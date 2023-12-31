@@ -113,6 +113,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		@bitmask: Boolean				= false
 		@expectingBitmask: Boolean		= true
 		@native: Boolean				= false
+		@tests: Boolean[]				= []
 	}
 	abstract {
 		runtime(): String
@@ -155,6 +156,10 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 		}
 		else {
+			for var operand in [@left, @right] {
+				@tests.push(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+			}
+
 			if @left.type().isNumber() && @right.type().isNumber() {
 				@native = true
 			}
@@ -203,11 +208,11 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			fragments
 				.compile(@left)
 				.code(' = ')
-				.code($runtime.operator(this), `.\(@runtime())(`)
+				.code(`\($runtime.operator(this)).\(@runtime())(`)
 				.compile(@left)
 				.code($comma)
 
-			@right.toOperandFragments(fragments, this.operator(), OperandType.Number)
+			@right.toOperandFragments(fragments, @operator(), OperandType.Number)
 
 			fragments.code(')')
 		}
@@ -370,11 +375,45 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 	symbol() => '/='
 }
 
+class AssignmentOperatorDivisionInteger extends NumericAssignmentOperatorExpression {
+	operator() => Operator.DivisionInteger
+	runtime() => 'division'
+	symbol() => '/#='
+	override toFragments(fragments, mode) { # {{{
+		if @native {
+			fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
+		}
+		else {
+			fragments.compile(@left).code(' = ').code(`\($runtime.operator(this)).modulus(`)
 
-class AssignmentOperatorModulo extends NumericAssignmentOperatorExpression {
-	operator() => Operator.Modulo
-	runtime() => 'modulo'
-	symbol() => '%='
+			for var operand, index in [@left, @right] {
+				fragments
+					.code($comma) if index != 0
+					.code(@tests[index])
+					.code($comma).compile(operand)
+			}
+
+			fragments.code(')')
+		}
+	} # }}}
+}
+
+class AssignmentOperatorModulus extends NumericAssignmentOperatorExpression {
+	operator() => Operator.Modulus
+	runtime() => 'modulus'
+	symbol() => '%%='
+	override toFragments(fragments, mode) { # {{{
+		fragments.compile(@left).code(' = ').code(`\($runtime.operator(this)).modulus(`)
+
+		for var operand, index in [@left, @right] {
+			fragments
+				.code($comma) if index != 0
+				.code(@tests[index])
+				.code($comma).compile(operand)
+		}
+
+		fragments.code(')')
+	} # }}}
 }
 
 class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpression {
@@ -383,13 +422,16 @@ class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpressi
 	symbol() => '*='
 }
 
-class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
-	operator() => Operator.Quotient
-	runtime() => 'quotient'
-	symbol() => '/.='
-	toNativeFragments(fragments) { # {{{
-		fragments.compile(@left).code($equals).code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
-	} # }}}
+class AssignmentOperatorPower extends NumericAssignmentOperatorExpression {
+	operator() => Operator.Power
+	runtime() => 'power'
+	symbol() => '**='
+}
+
+class AssignmentOperatorRemainder extends NumericAssignmentOperatorExpression {
+	operator() => Operator.Remainder
+	runtime() => 'remainder'
+	symbol() => '%='
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {

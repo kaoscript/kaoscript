@@ -29,7 +29,7 @@ module.exports = function() {
 		}
 		else {
 			let __ks_0, __ks_1, __ks_2, __ks_3;
-			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoop(0, "", 0, "args.length", args.length, Infinity, "", 1);
+			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "args.length", args.length, Infinity, "", 1);
 			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 				i = __ks_3(__ks_4);
 				__ks_Array._im_pushUniq.apply(null, [this].concat(Helper.checkArray(args[i])));

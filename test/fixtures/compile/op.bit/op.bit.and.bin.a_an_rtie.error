@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "Number?" (fixtures/compile/op.bit/op.bit.and.bin.a_an_rtie.ks:2)

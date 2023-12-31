@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(animal) {
-		return AnimalFlags(Helper.cast(animal, "AnimalFlags", false, value => Type.isBitmaskInstance(value, AnimalFlags)) | AnimalFlags.CanFly);
+		return AnimalFlags(Helper.cast(animal, "\"AnimalFlags\"", 0, AnimalFlags) | AnimalFlags.CanFly);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

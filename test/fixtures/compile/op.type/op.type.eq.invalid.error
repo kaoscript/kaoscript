@@ -1,0 +1,1 @@
+TypeException: The variable "value" of type "Array" can never be of type "String" (fixtures/compile/op.type/op.type.eq.invalid.ks:2)

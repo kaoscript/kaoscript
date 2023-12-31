@@ -1,0 +1,1 @@
+TypeException: The variable "x" is always of type "Foobar" (fixtures/compile/op.type/op.type.eq.class.icb.cre.ks:9)

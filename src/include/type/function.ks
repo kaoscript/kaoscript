@@ -966,7 +966,7 @@ class FunctionType extends Type {
 	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, _, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, _, mut generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{

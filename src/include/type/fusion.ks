@@ -219,7 +219,7 @@ class FusionType extends Type {
 			return false
 		}
 
-		return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.AutoCast)
+		return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
 	} # }}}
 	isComplete() => true
 	isComplex() => true
@@ -323,7 +323,7 @@ class FusionType extends Type {
 		return result
 	} # }}}
 	setTestName(@testName)
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
 		@buildFlags()
 
 		nullable ||= @nullable
@@ -347,7 +347,7 @@ class FusionType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, casting, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, casting, blind, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -370,7 +370,7 @@ class FusionType extends Type {
 			}
 		}
 		else {
-			super(varname, nullable, casting, generics, subtypes, fragments, node)
+			super(varname, nullable, casting, blind, generics, subtypes, fragments, node)
 		}
 	} # }}}
 	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, mut nullable, generics, fragments, node) { # {{{
@@ -460,9 +460,6 @@ class FusionType extends Type {
 			type.toBlindTestFragments(funcname, varname, @cast, generics, null, Junction.AND, fragments, node)
 		}
 	} # }}}
-	toCastFragments(fragments, node) { # {{{
-		fragments.code(`\(@testName)(`).compileReusable(node).code(`, true)`)
-	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
 	} # }}}
@@ -495,7 +492,7 @@ class FusionType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)

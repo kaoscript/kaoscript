@@ -67,7 +67,7 @@ class RepeatStatement extends Statement {
 		if @toAssert {
 			fragments
 				.newLine()
-				.code(`\($runtime.helper(this)).assertNumber(\(@to.toQuote(true)), `)
+				.code(`\($runtime.helper(this)).assertLoopBoundsEdge(\(@to.toQuote(true)), `)
 				.compile(@toName ?? @to)
 				.code(`, 3)`)
 				.done()

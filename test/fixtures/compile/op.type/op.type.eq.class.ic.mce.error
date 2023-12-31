@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "Foobar" can never be of type "Class" (fixtures/compile/op.type/op.type.eq.class.ic.mce.ks:6)

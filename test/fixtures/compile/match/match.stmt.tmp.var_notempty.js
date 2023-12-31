@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(kind, node) {
 		if(kind === 1) {
 			const __ks_arguments_1 = node.arguments();
-			if(Type.isNotEmpty(__ks_arguments_1)) {
+			if(Type.isNotEmpty(__ks_arguments_1, 0)) {
 			}
 		}
 	};

@@ -6,12 +6,12 @@ class IfExpression extends Expression {
 		@condition
 		@declaration: VariableDeclaration
 		@declarator
-		@existential: Boolean					= false
 		@hasBinding: Boolean					= false
 		@hasCondition: Boolean					= true
 		@hasDeclaration: Boolean				= false
 		@inline: Boolean						= false
 		@insitu: Boolean						= false
+		@operator
 		@type: Type
 		@valueName: String?						= null
 		@whenFalseExpression
@@ -25,10 +25,9 @@ class IfExpression extends Expression {
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
 			@hasBinding = @data.declaration.variables[0].name.kind != NodeKind.Identifier
+			@operator = @data.declaration.operator.assignment
 
-			@existential =  @data.declaration.operator.assignment == AssignmentOperatorKind.Existential
-
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:Scope, @hasBinding)
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!(Scope), @hasBinding)
 			@declaration.initiate()
 		}
 	} # }}}
@@ -220,7 +219,7 @@ class IfExpression extends Expression {
 			if @hasDeclaration {
 				var mut first = true
 
-				@declaration.walkVariable((name, _) => {
+				@declaration.walkVariable((name, type) => {
 					if first {
 						first = false
 					}
@@ -228,7 +227,22 @@ class IfExpression extends Expression {
 						fragments.code(' && ')
 					}
 
-					fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+					match @operator {
+						OperatorKind.Existential {
+							fragments.code(`\($runtime.type(this)).isValue(\(name))`)
+						}
+						OperatorKind.Finite {
+							fragments.code(`\($runtime.type(this)).isFinite(\(name), \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+						}
+						OperatorKind.NonEmpty {
+							fragments.code(`\($runtime.type(this)).isNotEmpty(\(name))`)
+						}
+						OperatorKind.VariantYes {
+							var root = type.discard()
+
+							fragments.code(`\(name).\(root.getVariantName())`)
+						}
+					}
 				})
 
 				if @hasCondition {
@@ -262,18 +276,68 @@ class IfExpression extends Expression {
 			if @cascade {
 				var declarator = @declaration.declarator()
 
-				fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
+				match @operator {
+					OperatorKind.Existential {
+						fragments.code(`\($runtime.type(this)).isValue(`)
 
-				declarator.toAssignmentFragments(fragments, @bindingVariable)
+						declarator.toAssignmentFragments(fragments, @bindingVariable)
 
-				fragments.code(')')
+						fragments.code(')')
+					}
+					OperatorKind.Finite {
+						var type = @declaration.type()
+
+						fragments.code(`\($runtime.type(this)).isFinite(`)
+
+						declarator.toAssignmentFragments(fragments, @bindingVariable)
+
+						fragments.code(`, \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+					}
+					OperatorKind.NonEmpty {
+						fragments.code(`\($runtime.type(this)).isNotEmpty(`)
+
+						declarator.toAssignmentFragments(fragments, @bindingVariable)
+
+						fragments.code(')')
+					}
+					OperatorKind.VariantYes {
+						var root = @declaration.type().discard()
+
+						declarator.toAssignmentFragments(fragments, @bindingVariable)
+
+						fragments.code(`.\(root.getVariantName())`)
+					}
+				}
 			}
 			else {
 				if @hasBinding {
-					fragments
-						.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(')
-						.compileReusable(@bindingVariable)
-						.code(')')
+					match @operator {
+						OperatorKind.Existential {
+							fragments
+								.code(`\($runtime.type(this)).isValue(`)
+								.compileReusable(@bindingVariable)
+								.code(')')
+						}
+						OperatorKind.Finite {
+							var type = @declaration.type()
+
+							fragments
+								.code(`\($runtime.type(this)).isFinite(`)
+								.compileReusable(@bindingVariable)
+								.code(`, \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+						}
+						OperatorKind.NonEmpty {
+							fragments
+								.code(`\($runtime.type(this)).isNotEmpty(`)
+								.compileReusable(@bindingVariable)
+								.code(')')
+						}
+						OperatorKind.VariantYes {
+							var root = @declaration.type().discard()
+
+							fragments.compileReusable(@bindingVariable).code(`.\(root.getVariantName())`)
+						}
+					}
 
 					fragments.code(' ? (')
 
@@ -287,7 +351,7 @@ class IfExpression extends Expression {
 				else {
 					var mut first = true
 
-					@declaration.walkVariable((name, _) => {
+					@declaration.walkVariable((name, type) => {
 						if first {
 							first = false
 						}
@@ -295,7 +359,22 @@ class IfExpression extends Expression {
 							fragments.code(' && ')
 						}
 
-						fragments.code($runtime.type(this), @existential ? '.isValue(' : '.isNotEmpty(', name, ')')
+						match @operator {
+							OperatorKind.Existential {
+								fragments.code(`\($runtime.type(this)).isValue(\(name))`)
+							}
+							OperatorKind.Finite {
+								fragments.code(`\($runtime.type(this)).isFinite(\(name), \(type.isNumber() && !type.isNullable() ? '0' : '1'))`)
+							}
+							OperatorKind.NonEmpty {
+								fragments.code(`\($runtime.type(this)).isNotEmpty(\(name))`)
+							}
+							OperatorKind.VariantYes {
+								var root = type.discard()
+
+								fragments.code(`\(name).\(root.getVariantName())`)
+							}
+						}
 					})
 				}
 			}

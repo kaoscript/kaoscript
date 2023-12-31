@@ -12,7 +12,7 @@ type SchoolPerson = {
 }
 
 func restore(mut student) {
-	student = student as SchoolPerson
+	student = student:>(SchoolPerson)
 }
 
 var mut data = {

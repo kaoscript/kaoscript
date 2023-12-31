@@ -9,5 +9,5 @@ enum Weekday {
 }
 
 func foobar(day): Weekday? {
-	return day as? Weekday
+	return day:>?(Weekday)
 }

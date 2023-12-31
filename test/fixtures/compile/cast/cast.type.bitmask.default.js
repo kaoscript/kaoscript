@@ -8,7 +8,7 @@ module.exports = function(expect) {
 		return restore.__ks_rt(this, arguments);
 	};
 	restore.__ks_0 = function(animal) {
-		animal = __ksType.isAnimal(animal, true) ? animal : null;
+		animal = Helper.assert(animal, "\"Animal\"", 0, value => __ksType.isAnimal(value, true));
 	};
 	restore.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

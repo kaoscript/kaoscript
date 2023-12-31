@@ -1,1 +1,0 @@
-TypeException: Identifier "NaN" is not a type (fixtures/compile/operator/operator.typeinequality.nan.ks:2)

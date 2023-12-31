@@ -594,7 +594,7 @@ class UnionType extends Type {
 		else if @explicitNullity {
 			var that = @clone()
 
-			that._types:Array.remove(Type.Null)
+			that._types:!(Array).remove(Type.Null)
 			that._nullable = false
 			that._explicitNullity = false
 
@@ -625,7 +625,14 @@ class UnionType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, generics, subtypes, fragments, node) { # {{{
+	toAssertFunctionFragments(value, nullable, fragments, node) { # {{{
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+
+		@toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+
+		fragments.code(')')
+	} # }}}
+	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
 		for var type, index in @types {
@@ -655,6 +662,81 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')') if junction == .AND
+	} # }}}
+	toCastFunctionFragments(value, nullable, fragments, node) { # {{{
+		var mut asserts = []
+		var mut casts = []
+
+		for var type in @types {
+			if type.isObject() {
+				asserts.push(type)
+			}
+			else {
+				casts.push(type)
+			}
+		}
+
+		if !?#casts {
+			fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+
+			@toAwareTestFunctionFragments('value', false, true, false, null, null, fragments, node)
+
+			fragments.code(')')
+		}
+		else {
+			fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), value =>`)
+
+			var block = fragments.newBlock()
+
+			if ?#asserts {
+				var ctrl = block.newControl().code('if(')
+
+				for var type, index in asserts {
+					ctrl.code(' || ') if index != 0
+
+					type.toBlindTestFragments(null, 'value', false, null, null, Junction.OR, ctrl, node)
+				}
+
+				ctrl
+					.code(')').step()
+					.line('return value')
+					.done()
+			}
+
+			if casts.length == 1 {
+				var line = block.newLine().code('return ')
+
+				casts[0].toCastFragments('value', line, node)
+
+				line.done()
+			}
+			else {
+				block.line('let __ks_0')
+
+				var ctrl = block.newControl().code('if(')
+
+				for var type, index in casts {
+					ctrl
+						.code(' || ') if index != 0
+						.code('(__ks_0 = ')
+
+					type.toCastFragments('value', ctrl, node)
+
+					ctrl.code(') !== null')
+				}
+
+				ctrl
+					.code(')').step()
+					.line('return __ks_0')
+					.done()
+
+				block.line('return null')
+			}
+
+			block.done()
+
+			fragments.code(')')
+		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new(node)
@@ -778,7 +860,8 @@ class UnionType extends Type {
 		}
 	} # }}}
 	trimOff(type: Type) { # {{{
-		var types = [t for var t in @types when !t.matchContentOf(type)]
+		// var types = [t for var t in @types when !t.matchContentOf(type)]
+		var types = [t for var t in @types when !t.isAssignableToVariable(type, false, false, false)]
 
 		if types.length == 1 {
 			return types[0]

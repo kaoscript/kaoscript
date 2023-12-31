@@ -185,7 +185,7 @@ class MemberExpression extends Expression {
 		}
 
 		if @object.isComposite() {
-			@object.acquireReusable(false)
+			@object.acquireReusable(@nullable || acquire)
 		}
 	} # }}}
 	caller() => @object
