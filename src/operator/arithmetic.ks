@@ -255,13 +255,13 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		else {
 			if @argument.type().isNumber() {
 				if @argument.type().isNullable() {
-					TypeException.throwNotNullableOperand(@argument, this.operator(), this)
+					TypeException.throwNotNullableOperand(@argument, @symbol(), this)
 				}
 
 				@isNative = true
 			}
 			else if !@argument.type().canBeNumber() {
-				TypeException.throwInvalidOperand(@argument, this.operator(), this)
+				TypeException.throwInvalidOperand(@argument, @operator(), this)
 			}
 
 			@type = @scope.reference('Number')

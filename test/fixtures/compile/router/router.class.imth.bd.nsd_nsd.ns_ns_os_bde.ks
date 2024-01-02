@@ -1,4 +1,3 @@
-
 class Foobar {
 	foobar(c: Boolean = true) {
 		return 0

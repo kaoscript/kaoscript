@@ -237,7 +237,7 @@ class FusionType extends Type {
 	} # }}}
 	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		for var type in @types {
-			if type.isSubsetOf(value, mode) {
+			if type.isSubsetOf(value, generics, subtypes, mode) {
 				return true
 			}
 		}
@@ -252,7 +252,7 @@ class FusionType extends Type {
 		var mut match = 0
 		for var aType in @types {
 			for var bType in value._types {
-				if aType.isSubsetOf(bType, mode) {
+				if aType.isSubsetOf(bType, generics, subtypes, mode) {
 					match += 1
 					break
 				}
@@ -364,6 +364,9 @@ class FusionType extends Type {
 				if nullable {
 					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 				}
+			}
+			else if casting && @cast {
+				fragments.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
 			}
 			else {
 				fragments.code(@testName)

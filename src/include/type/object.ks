@@ -197,7 +197,7 @@ class ObjectType extends Type {
 
 		var export = {
 			kind: TypeKind.Object
-			// TODO!
+			// TODO! parsing
 			// properties: { [name]: value.export(references, indexDelta, mode, module) for var value, name of @properties }
 		}
 
@@ -587,7 +587,7 @@ class ObjectType extends Type {
 
 			for var { name, type } in generics {
 				if name == valname {
-					return @isSubsetOf(type, generics, subtypes, mode)
+					return @isSubsetOf(type, generics, [], mode)
 				}
 			}
 		}

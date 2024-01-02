@@ -25,9 +25,11 @@ class UnaryOperatorExpression extends Expression {
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private late {
-		@canBeNullable: Boolean	= false
-		@helper: Boolean	= false
-		@nullable: Boolean	= false
+		@canBeNullable: Boolean		= false
+		@helper: Boolean			= false
+		@notNull: Boolean			= false
+		@notNullOperator: String?
+		@nullable: Boolean			= false
 		@type: Type
 	}
 	override analyse() { # {{{
@@ -48,13 +50,21 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 
 		var type = @argument.type()
 
-		@nullable = type.isNullable()
+		@nullable = !@notNull && type.isNullable()
 
 		if !@canBeNullable && @nullable {
 			TypeException.throwNotNullableOperand(@argument, @operator(), this)
 		}
+		else if @canBeNullable && !@nullable {
+			if @notNull {
+				TypeException.throwNeverNullableOperand(@argument, @notNullOperator, @operator(), this)
+			}
+			else {
+				TypeException.throwNullableOperand(@argument, @operator(), this)
+			}
+		}
 		else if type.isArray() {
-			@type = type.flagSpread()
+			@type = type.flagSpread().setNullable(false)
 			@helper = @nullable && @parent is ArrayExpression
 		}
 		else if type.canBeArray() {
@@ -65,11 +75,15 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			TypeException.throwInvalidSpread(this)
 		}
 	} # }}}
-	amendTarget(target: Type): Type {
+	amendTarget(target: Type): Type { # {{{
 		var type = @parent is ArrayExpression ? Type.arrayOf(target, @scope) : target
 
 		return @canBeNullable ? type.setNullable(true) : type
-	}
+	} # }}}
+	override flagNotNull(operator) { # {{{
+		@notNull = true
+		@notNullOperator = operator
+	} # }}}
 	isExpectingType() => true
 	isSpread() => true
 	operator() => @canBeNullable ? '...?' : '...'

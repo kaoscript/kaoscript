@@ -75,6 +75,10 @@ class ClassProxyDeclaration extends Statement {
 					var type = function.clone()
 					type.setProxy(@externalPath, @externalName)
 
+					if @parent.hasMatchingInstanceMethod(@name, type, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
+						SyntaxException.throwDuplicateMethod(@name, this)
+					}
+
 					if var method ?= class.getMatchingInstanceMethod(@name, type, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 						@overridenMethods.push({
 							index: method.index()
@@ -238,6 +242,10 @@ class ClassProxyGroupDeclaration extends Statement {
 
 						if type is ClassMethodGroupType {
 							for var function in type.functions() {
+								if @parent.hasMatchingInstanceMethod(internal, function, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
+									SyntaxException.throwDuplicateMethod(internal, this)
+								}
+
 								if var method ?= class.getMatchingInstanceMethod(internal, function, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 									overloads.push({
 										internal: method.index()
@@ -249,6 +257,10 @@ class ClassProxyGroupDeclaration extends Statement {
 							}
 						}
 						else {
+							if @parent.hasMatchingInstanceMethod(internal, type, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
+								SyntaxException.throwDuplicateMethod(internal, this)
+							}
+
 							if var method ?= class.getMatchingInstanceMethod(internal, type, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 								overloads.push({
 									internal: method.index()

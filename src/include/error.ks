@@ -961,6 +961,9 @@ export class TypeException extends Exception {
 		throwInvalidTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(expression.type().discardValue().toQuote(true)) can never be of type \(type.toQuote(true))`, node)
 		} # }}}
+		throwNeverNullableOperand(expression, dueOperator, mainOperator, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The operation "\(mainOperator)" expects the operand \(expression.toQuote(true)) to be nullable but it can never be null due to the operation "\(dueOperator)"`, node)
+		} # }}}
 		throwNotAlien(name, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type "\(name)" must be declared externally`, node)
 		} # }}}
@@ -1010,7 +1013,7 @@ export class TypeException extends Exception {
 			throw TypeException.new(`The expression \(expression.toQuote(true)) can't be nullable to access the property \(property)`, node)
 		} # }}}
 		throwNotNullableOperand(expression, operator, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
+			throw TypeException.new(`The operand \(expression.toQuote(true)) can't be nullable in the operation "\(operator)"`, node)
 		} # }}}
 		throwNotNumber(expression: Expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) is not a number`, node)
@@ -1035,6 +1038,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwNotVariant(name: String, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Identifier "\(name)" is not a variant`, node)
+		} # }}}
+		throwNullableOperand(expression, operator, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The operand \(expression.toQuote(true)) must be nullable in the operation "\(operator)"`, node)
 		} # }}}
 		throwNullTypeChecking(type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)

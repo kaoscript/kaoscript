@@ -96,7 +96,7 @@ namespace $function {
 			NodeKind.NumericExpression => return false
 			NodeKind.ObjectExpression {
 				for var property in data.properties {
-					if $function.useThisVariable(property.value, node) {
+					if ?property.value && $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}

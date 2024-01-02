@@ -1,6 +1,3 @@
-extern class Error
-extern console
-
 func foobar(test, resolve: (): String) ~ Error {
 	var value = if test() {
 		set resolve()
@@ -9,5 +6,5 @@ func foobar(test, resolve: (): String) ~ Error {
 		throw Error.new()
 	}
 
-	console.log(`\(value)`)
+	echo(`\(value)`)
 }

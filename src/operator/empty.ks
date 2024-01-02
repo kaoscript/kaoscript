@@ -257,7 +257,9 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 		var last = @operands.length - 1
 
 		for var operand, index in @operands {
-			operand.prepare()
+			operand
+				..flagNotNull(@symbol()) if index < last
+				..prepare()
 
 			@spread ||= operand.isSpread()
 

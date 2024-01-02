@@ -11,6 +11,7 @@ abstract class Expression extends AbstractNode {
 		}
 	} # }}}
 	flagNewExpression()
+	flagNotNull(operator: String)
 	getDeclaredType() => @type()
 	getDefaultValue(): String => 'null'
 	getReuseName(): String? => null

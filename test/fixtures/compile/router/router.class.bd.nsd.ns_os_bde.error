@@ -1,1 +1,0 @@
-SyntaxException: When there are no arguments, the function "foobar" can be matched with "foobar(c: Boolean?)" or "foobar(d: Number|String|Null)" (fixtures/compile/router/router.class.bd.nsd.ns_os_bde.ks:1)

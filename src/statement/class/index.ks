@@ -693,6 +693,17 @@ class ClassDeclaration extends Statement {
 	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
 	hasMacro(name) => @scope.hasMacro(name)
+	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
+		return false unless ?@instanceMethods[name]
+
+		for var method in @instanceMethods[name] {
+			if method.type().isSubsetOf(type, mode) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isAbstract() => @abstract
 	isEnhancementExport() => true
 	isExtending() => @extending

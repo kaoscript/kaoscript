@@ -1,0 +1,1 @@
+SyntaxException: The method "hello" is matching an existing method (fixtures/compile/class/class.proxy.imth.group.override.default.ks:12)

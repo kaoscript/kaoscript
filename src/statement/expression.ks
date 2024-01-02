@@ -170,5 +170,6 @@ class ExpressionStatement extends Statement {
 			afterward.toAfterwardFragments(fragments, mode)
 		}
 	} # }}}
+	type() => @expression.type()
 	walkNode(fn) => fn(this) && @expression.walkNode(fn)
 }

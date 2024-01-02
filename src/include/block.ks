@@ -262,12 +262,13 @@ class FunctionBlock extends Block {
 	addReturn(@return)
 	override checkExit(target?) { # {{{
 		if ?@return {
-			var toAdd = if var statement ?= @statements.last() {
-				set !statement.isExit()
-			}
-			else {
-				set true
-			}
+			var toAdd =
+				if var statement ?= @statements.last() {
+					set !statement.isExit()
+				}
+				else {
+					set true
+				}
 
 			if toAdd {
 				var statement = ReturnStatement.new(@return, this)

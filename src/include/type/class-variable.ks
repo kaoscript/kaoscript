@@ -10,11 +10,48 @@ class ClassVariableType extends Type {
 		fromAST(data, node: AbstractNode): ClassVariableType { # {{{
 			var scope = node.scope()
 
-			var type = if ?data.type {
-				set ClassVariableType.new(scope, Type.fromAST(data.type, node))
+			// TODO!
+			// var type = if ?data.type {
+			// 	set ClassVariableType.new(scope, Type.fromAST(data.type, node))
+			// }
+			// else {
+			// 	if ?data.modifiers {
+			// 		for var modifier in data.modifiers {
+			// 			match ModifierKind(modifier.kind) {
+			// 				ModifierKind.Nullable {
+			// 					set ClassVariableType.new(scope, AnyType.NullableExplicit)
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+
+			// 	set ClassVariableType.new(scope, AnyType.NullableUnexplicit)
+			// }
+
+			var mut type = null
+
+			if ?data.type {
+				type = ClassVariableType.new(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				set ClassVariableType.new(scope, AnyType.NullableUnexplicit)
+				var mut nf = true
+
+				if ?data.modifiers {
+					for var modifier in data.modifiers {
+						match ModifierKind(modifier.kind) {
+							ModifierKind.Nullable {
+								type = ClassVariableType.new(scope, AnyType.NullableExplicit)
+								nf = false
+
+								break
+							}
+						}
+					}
+				}
+
+				if nf {
+					type = ClassVariableType.new(scope, AnyType.NullableUnexplicit)
+				}
 			}
 
 			if ?data.modifiers {
@@ -44,7 +81,7 @@ class ClassVariableType extends Type {
 				type._lateInit = false
 			}
 
-			return type
+			return type!?
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ClassVariableType { # {{{
 			var data = index

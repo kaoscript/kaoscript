@@ -1,0 +1,1 @@
+TypeException: The operation "...?" expects the operand "bar" to be nullable but it can never be null due to the operation "??" (fixtures/compile/op.cond/op.cond.nullcoalescing.spread.poly.an.rnan.se.ks:2)

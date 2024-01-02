@@ -354,6 +354,8 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
+		@left.flagNotNull('??')
+
 		super(target, TargetMode.Permissive)
 
 		@left.acquireReusable(true)
@@ -435,7 +437,9 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		var last = @operands.length - 1
 
 		for var operand, index in @operands {
-			operand.prepare(target, TargetMode.Permissive)
+			operand
+				..flagNotNull(@symbol()) if index < last
+				..prepare(target, TargetMode.Permissive)
 
 			@spread ||= operand.isSpread()
 

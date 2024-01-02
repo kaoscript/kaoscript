@@ -54,6 +54,7 @@ class ConditionalExpression extends Expression {
 		@whenFalseExpression.releaseReusable()
 	} # }}}
 	isComputed() => true
+	isExit() => @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isInverted() => @condition.isInverted() || @whenTrueExpression.isInverted() || @whenFalseExpression.isInverted()
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{

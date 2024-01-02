@@ -1,1 +1,1 @@
-TypeException: The operand "x" can't be nullable in a negative operation (fixtures/compile/op.math/op.math.negative.ine.ks:2)
+TypeException: The operand "x" can't be nullable in the operation "-" (fixtures/compile/op.math/op.math.negative.ine.ks:2)

@@ -1419,6 +1419,13 @@ class ReferenceType extends Type {
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return @isSubsetOf(value.getMaster(), mode)
 	} # }}}
+	isSubtypeOf(value: DeferredType) { # {{{
+		if value.isConstrainted() {
+			return @isSubtypeOf(value.constraint())
+		}
+
+		return false
+	} # }}}
 	isSubtypeOf(value: ReferenceType) => @name == value.name()
 	isSubtypeOf(value: Type) => false
 	isTuple() => @name == 'Tuple' || @type().isTuple()

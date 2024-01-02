@@ -7,7 +7,6 @@ class BleedingScope extends Scope {
 		@variables					= {}
 	}
 	constructor(@parent)
-	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
