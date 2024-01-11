@@ -128,6 +128,7 @@ bitmask MatchingMode<u48> {
 	Reference
 
 	IgnoreAnonymous
+	IgnoreDeferred
 	IgnoreError
 	IgnoreName
 	IgnoreNullable
@@ -285,7 +286,7 @@ abstract class Type {
 					for var modifier in data.modifiers {
 						match ModifierKind(modifier.kind) {
 							ModifierKind.Abstract {
-								type._abstract = data.abstract
+								type.flagAbstract()
 							}
 							ModifierKind.Sealed {
 								type.flagSealed()
@@ -1099,6 +1100,18 @@ abstract class Type {
 		else {
 			return this
 		}
+	} # }}}
+	makeCallee(name: String, generics: AltType[] = [], node: CallExpression) { # {{{
+		NotSupportedException.throw(node)
+	} # }}}
+	makeMemberCallee(property: String, generics: AltType[] = [], node: CallExpression) { # {{{
+		NotSupportedException.throw(node)
+	} # }}}
+	makeMemberCallee(property: String, name: NamedType, generics: AltType[] = [], node: CallExpression) { # {{{
+		NotSupportedException.throw(node)
+	} # }}}
+	makeMemberCallee(property: String, reference: ReferenceType, generics: AltType[] = [], node: CallExpression) { # {{{
+		NotSupportedException.throw(node)
 	} # }}}
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)

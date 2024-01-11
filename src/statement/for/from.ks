@@ -329,6 +329,14 @@ class FromIteration extends IterationNode {
 			}
 		}
 	} # }}}
+	isUsingVariable(name) { # {{{
+		return	@from.isUsingVariable(name) ||
+				@to.isUsingVariable(name) ||
+				@step?.isUsingVariable(name) ||
+				@until?.isUsingVariable(name) ||
+				@while?.isUsingVariable(name) ||
+				@when?.isUsingVariable(name)
+	} # }}}
 	toBodyFragments(fragments, elseCtrl?) { # {{{
 		if ?@data.when {
 			@parent.toDeclarationFragments(@conditionalTempVariables, fragments)

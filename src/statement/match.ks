@@ -477,7 +477,7 @@ class MatchStatement extends Statement {
 			}
 
 			if ?clause.type {
-				if variable.isImmutable() {
+				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(clause.type) {
@@ -518,7 +518,7 @@ class MatchStatement extends Statement {
 			}
 
 			if ?clause.type {
-				if variable.isImmutable() {
+				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(clause.type) {

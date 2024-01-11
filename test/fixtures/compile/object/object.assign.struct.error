@@ -1,1 +1,1 @@
-TypeException: Identifier "Foobar" is not a function (fixtures/compile/object/object.assign.struct.ks:6)
+ReferenceException: The type "Foobar" is not a variable (fixtures/compile/object/object.assign.struct.ks:6)

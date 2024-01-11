@@ -108,6 +108,9 @@ class AliasType extends Type {
 	listFunctions(name: String): Array => @type.listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		@type.makeMemberCallee(property, reference, generics, node)
+	} # }}}
 	matchContentOf(value: Type): Boolean => @type.matchContentOf(value)
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { # {{{
 		return [@toMetadata(references, indexDelta, mode, module), name]

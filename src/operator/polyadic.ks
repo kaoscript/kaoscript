@@ -67,6 +67,11 @@ abstract class PolyadicOperatorExpression extends Expression {
 
 		return array
 	} # }}}
+	override makeCallee(generics, node) { # {{{
+		node.prepareArguments()
+
+		node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+	} # }}}
 	native() => @symbol()
 	override path() => [operand.path() for var operand in @operands].join(' + ')
 	releaseReusable()

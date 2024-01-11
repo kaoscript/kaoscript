@@ -47,7 +47,7 @@ class ArrayComprehensionForFrom extends Expression {
 			@step.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
@@ -94,7 +94,7 @@ class ArrayComprehensionForFrom extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.expression, this)
+		var surround = $function.surround(@data.value, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -214,7 +214,7 @@ class ArrayComprehensionForIn extends Expression {
 			@index.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
@@ -302,7 +302,7 @@ class ArrayComprehensionForIn extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.expression, this)
+		var surround = $function.surround(@data.value, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
@@ -414,7 +414,7 @@ class ArrayComprehensionForOf extends Expression {
 			}
 		}
 
-		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
@@ -495,7 +495,7 @@ class ArrayComprehensionForOf extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.expression, this)
+		var surround = $function.surround(@data.value, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapObject(')
@@ -589,7 +589,7 @@ class ArrayComprehensionForRange extends Expression {
 			@body.analyse()
 		}
 
-		@body = $compile.statement($ast.return(@data.expression), this, @bodyScope)
+		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
 		@body.initiate()
 		@body.analyse()
 
@@ -636,7 +636,7 @@ class ArrayComprehensionForRange extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.expression, this)
+		var surround = $function.surround(@data.value, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
@@ -695,7 +695,7 @@ class ArrayComprehensionRepeat extends Expression {
 		@to = $compile.expression(@data.loop.expression, this, @scope)
 		@to.analyse()
 
-		@body = $compile.block($ast.return(@data.expression), this, @bodyScope)
+		@body = $compile.block($ast.return(@data.value), this, @bodyScope)
 		@body.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -720,7 +720,7 @@ class ArrayComprehensionRepeat extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@module().flag('Helper')
 
-		var surround = $function.surround(@data.expression, this)
+		var surround = $function.surround(@data.value, this)
 
 		fragments
 			.code($runtime.helper(this), '.mapRange(0, ')

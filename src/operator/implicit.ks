@@ -184,7 +184,11 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 
 			for var function of parent.assessment().functions {
 				if function.min() <= length <= function.max() {
-					for var route of function.assessment('', node).routes {
+					var assessment = function.assessment('', node)
+
+					for var routeName of assessment.mainRoutes {
+						var route = assessment.routes[routeName]
+
 						for var tree of route.trees when tree.min <= length <= tree.max {
 							for var column of tree.columns {
 								findImplicitArgument(column, 0, index, property, types)

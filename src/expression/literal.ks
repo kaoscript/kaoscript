@@ -232,6 +232,62 @@ class IdentifierLiteral extends Literal {
 
 		return variables
 	} # }}}
+	override makeCallee(generics, node) { # {{{
+		if @isVariable {
+			var variable = @variable()
+			var type = variable.getRealType()
+
+			if type.isFunction() {
+				if type.isAsync() {
+					if node.parent() is VariableDeclaration {
+						if !node.parent().isAwait() {
+							TypeException.throwNotSyncFunction(@value, node)
+						}
+					}
+					else if node.parent() is not AwaitExpression {
+						TypeException.throwNotSyncFunction(@value, node)
+					}
+				}
+				else {
+					if node.parent() is VariableDeclaration {
+						if node.parent().isAwait() {
+							TypeException.throwNotAsyncFunction(@value, node)
+						}
+					}
+					else if node.parent() is AwaitExpression {
+						TypeException.throwNotAsyncFunction(@value, node)
+					}
+				}
+			}
+
+			if ?variable.replaceCall {
+				node.prepareArguments()
+
+				var substitute = variable.replaceCall(node.data(), node.arguments(), node)
+
+				node.addCallee(SubstituteCallee.new(node.data(), substitute, node))
+			}
+			else {
+				type.makeCallee(variable.name(), generics, node)
+			}
+		}
+		else {
+			ReferenceException.throwUndefinedFunction(@value, node)
+		}
+	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		if @isVariable {
+			@type.makeMemberCallee(property, generics, node)
+		}
+		else {
+			if property == 'new' {
+				node.addCallee(ConstructorCallee.new(node.data(), node.object(), AnyType.NullableUnexplicit, null, null, node))
+			}
+			else {
+				node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+			}
+		}
+	} # }}}
 	name() => @value
 	path() => @value
 	setAssignment(@assignment)

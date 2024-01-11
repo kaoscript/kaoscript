@@ -259,6 +259,72 @@ class NamespaceType extends Type {
 
 		return true
 	} # }}}
+	override makeMemberCallee(property % propName, name, generics, node) { # {{{
+		if var property ?= @getProperty(propName) {
+			if property is FunctionType || property is OverloadedFunctionType {
+				var assessment = property.assessment(propName, node)
+
+				match node.matchArguments(assessment) {
+					is LenientCallMatchResult with var result {
+						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
+					}
+					is PreciseCallMatchResult with var { matches } {
+						if matches.length == 1 {
+							var match = matches[0]
+
+							if match.function.isAlien() || match.function.index() == -1 {
+								node.addCallee(LenientFunctionCallee.new(node.data(), assessment, [match.function], node))
+							}
+							else {
+								node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+							}
+						}
+						else {
+							var functions = [match.function for var match in matches]
+
+							node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
+						}
+					}
+					else {
+						if property.isExhaustive(node) {
+							ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)
+						}
+						else {
+							node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+						}
+					}
+				}
+			}
+			else if property is SealableType {
+				@makeMemberCallee(propName, property.type(), property.isSealed(), name, generics, node)
+			}
+			else {
+				@makeMemberCallee(propName, property, @isSealedProperty(propName), name, generics, node)
+			}
+		}
+		else if @isExhaustive(node) {
+			ReferenceException.throwNotDefinedProperty(propName, node)
+		}
+		else {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+		}
+	} # }}}
+	makeMemberCallee(name: String, property: Type, sealed: Boolean, named: NamedType, generics: AltType[], node: CallExpression) { # {{{
+		if property is FunctionType {
+			if sealed {
+				node.addCallee(SealedFunctionCallee.new(node.data(), named, name, property.getReturnType(), node))
+			}
+			else {
+				property.makeCallee(name, generics, node)
+			}
+		}
+		else if property is OverloadedFunctionType {
+			property.makeCallee(name, generics, node)
+		}
+		else {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, property, node))
+		}
+	} # }}}
 	matchContentOf(value: Type) => value is ReferenceType && value.isNamespace()
 	originals(@majorOriginal): valueof this { # {{{
 		@altering = true

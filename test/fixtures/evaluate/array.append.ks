@@ -5,7 +5,12 @@ require expect: func
 impl Array {
 	append(...args): Array {
 		for i from 0 to~ args.length {
-			this.push(...args[i])
+			if args[i] is Array {
+				this.push(...args[i])
+			}
+			else {
+				this.push(args[i])
+			}
 		}
 
 		return this

@@ -27,58 +27,61 @@ bitmask ClassFeature {
 
 class ClassType extends Type {
 	private {
-		@abstract: Boolean					= false
-		@abstractMethods: Object			= {}
-		@alterations						= {
+		@abstract: Boolean								= false
+		@abstractMethods: Object						= {}
+		@alterations									= {
 			staticMethods:		{}
 			staticVariables:	{}
 			constructors:		{}
 			instanceMethods:	{}
 			instanceVariables:	{}
 		}
-		@altering: Boolean					= false
-		@constructors: Array				= []
-		@constructorAssessment				= null
-		@exhaustiveness						= {
+		@altering: Boolean								= false
+		@constructors: Array							= []
+		// TODO Type "Router" is not defined
+		// @constructorAssessments: Router.Assessment{}	= {}
+		@constructorAssessments							= {}
+		@exhaustiveness									= {
 			constructor:		false
 			staticMethods:		{}
 			instanceMethods:	{}
 		}
-		@explicitlyExported: Boolean		= false
-		@extending: Boolean					= false
-		@extends: NamedType<ClassType>?		= null
-		@features: ClassFeature				= ClassFeature.All
-		@fullyImplementedMethods: Boolean{}	= {}
-		@hybrid: Boolean					= false
-		@implementing: Boolean				= false
-		@init: Number						= 0
-		@instanceAssessments: Object		= {}
-		@instanceMethods: Object			= {}
-		@instanceVariables: Object			= {}
-		@interfaces	: NamedType[]			= []
-		@level: Number						= 0
+		@explicitlyExported: Boolean					= false
+		@extending: Boolean								= false
+		@extends: NamedType<ClassType>?					= null
+		@features: ClassFeature							= ClassFeature.All
+		@fullyImplementedMethods: Boolean{}				= {}
+		@generics: Generic[]							= []
+		@hybrid: Boolean								= false
+		@implementing: Boolean							= false
+		@init: Number									= 0
+		@instanceAssessments: Object					= {}
+		@instanceMethods: Object						= {}
+		@instanceVariables: Object						= {}
+		@interfaces	: NamedType[]						= []
+		@level: Number									= 0
 		@majorOriginal: ClassType?
 		@minorOriginal: ClassType?
-		@labelables							= {
+		@labelables										= {
 			constructors:		null
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
-		@overwritten						= {
+		@overwritten									= {
 			constructors:		null
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
-		@predefined: Boolean				= false
-		@sharedMethods: Object<Number>		= {}
-		@seal								= {
+		@predefined: Boolean							= false
+		@sharedMethods: Object<Number>					= {}
+		@seal											= {
 			constructors:		false
 			instanceMethods:	{}
 			instanceVariables:	{}
 			staticMethods:		{}
 			staticVariables:	{}
 		}
-		@sequences	 						= {
+		@sequences	 									= {
 			constructors:		-1
 			defaults:			-1
 			destructors:		-1
@@ -86,9 +89,9 @@ class ClassType extends Type {
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
-		@staticAssessments: Object			= {}
-		@staticMethods: Object				= {}
-		@staticVariables: Object			= {}
+		@staticAssessments: Object						= {}
+		@staticMethods: Object							= {}
+		@staticVariables: Object						= {}
 	}
 	static {
 		getExternReference(...types?): Number? { # {{{
@@ -427,8 +430,9 @@ class ClassType extends Type {
 		match data.kind {
 			NodeKind.FieldDeclaration {
 				var mut instance = true
-				for i from 0 to~ data.modifiers.length while instance {
-					instance = false if data.modifiers[i].kind == ModifierKind.Static
+
+				for var modifier in data.modifiers while instance {
+					instance = false if modifier.kind == ModifierKind.Static
 				}
 
 				var type = ClassVariableType.fromAST(data, node)
@@ -455,11 +459,12 @@ class ClassType extends Type {
 				}
 				else {
 					var mut instance = true
-					for i from 0 to~ data.modifiers.length while instance {
-						instance = false if data.modifiers[i].kind == ModifierKind.Static
+
+					for var modifier in data.modifiers while instance {
+						instance = false if modifier.kind == ModifierKind.Static
 					}
 
-					var type = ClassMethodType.fromAST(data, node)
+					var type = ClassMethodType.fromAST(data, @generics, node)
 
 					if options.rules.nonExhaustive {
 						if instance {
@@ -1045,6 +1050,8 @@ class ClassType extends Type {
 
 		return this
 	} # }}}
+	generics() => @generics
+	generics(@generics)
 	getAbstractMethod(name: String, type: Type) { # {{{
 		if @abstractMethods[name] is Array {
 			for var method in @abstractMethods[name] {
@@ -1091,14 +1098,19 @@ class ClassType extends Type {
 			return null
 		}
 	} # }}}
-	getConstructorAssessment(name: String, node: AbstractNode) { # {{{
-		if @constructorAssessment == null {
-			var methods = @listAccessibleConstructors()
+	getConstructorAssessment(name: String, generics: AltType[] = [], node: AbstractNode) { # {{{
+		var methods = @listAccessibleConstructors()
+		var hash = methods.map((method, ...) => method.index()).sort((a, b) => b - a).join(';')
 
-			@constructorAssessment = Router.assess(methods, name, node)
+		if var assessment ?= @constructorAssessments[hash] {
+			return assessment
 		}
 
-		return @constructorAssessment
+		var assessment = Router.assess(methods, name, node)
+
+		@constructorAssessments[hash] = assessment
+
+		return assessment
 	} # }}}
 	getConstructorCount() => @sequences.constructors + 1
 	getDestructorCount() => @sequences.destructors + 1
@@ -1170,16 +1182,27 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getInstantiableAssessment(name: String, node: AbstractNode) { # {{{
-		if var assessment ?= @instanceAssessments[name] {
+	getInstantiableAssessment(name: String, generics: AltType[] = [], node: AbstractNode) { # {{{
+		@instanceAssessments[name] ??= {}
+
+		// TODO!
+		// var methods = @listInstantiableMethods(name)
+		// 	.map((method, ...) => method.applyGenerics(generics)) if ?#generics
+		var mut methods = @listInstantiableMethods(name)
+
+		if ?#generics {
+			methods = methods.map((method, ...) => method.applyGenerics(generics))
+		}
+
+		var hash = methods.map((method, ...) => method.index()).sort((a, b) => b - a).join(';')
+
+		if var assessment ?= @instanceAssessments[name][hash] {
 			return assessment
 		}
 
-		var methods = @listInstantiableMethods(name)
-
 		var assessment = Router.assess(methods, name, node)
 
-		@instanceAssessments[name] = assessment
+		@instanceAssessments[name][hash] = assessment
 
 		return assessment
 	} # }}}
@@ -1240,34 +1263,35 @@ class ClassType extends Type {
 	} # }}}
 	getProperty(name: String) => @getStaticProperty(name)
 	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
-	getStaticAssessment(name: String, node: AbstractNode) { # {{{
-		if @staticMethods[name] is not Array {
+	getStaticAssessment(name: String, generics: AltType[], node: AbstractNode) { # {{{
+		if !?@staticMethods[name] {
 			if @extending {
-				return @extends.type().getStaticAssessment(name, node)
+				return @extends.type().getStaticAssessment(name, generics, node)
 			}
 			else {
 				return null
 			}
 		}
 
-		if @staticAssessments[name] is not Object {
-			var methods = [...@staticMethods[name]]
+		@staticAssessments[name] ??= {}
 
-			var mut that = this
-			while methods.length == 0 && that.isExtending() {
-				that = that.extends().type()
+		var mut methods = @staticMethods[name]
 
-				if var m ?= that.listStaticMethods(name) {
-					for var method in m {
-						method.pushTo(methods)
-					}
-				}
-			}
-
-			@staticAssessments[name] = Router.assess(methods, name, node)
+		if ?#generics {
+			methods = methods.map((method, ...) => method.applyGenerics(generics))
 		}
 
-		return @staticAssessments[name]
+		var hash = methods.map((method, ...) => method.index()).sort((a, b) => b - a).join(';')
+
+		if var assessment ?= @staticAssessments[name][hash] {
+			return assessment
+		}
+
+		var assessment = Router.assess(methods, name, node)
+
+		@staticAssessments[name][hash] = assessment
+
+		return assessment
 	} # }}}
 	getStaticProperty(name: String): Type { # {{{
 		if @staticMethods[name] is Array {
@@ -1296,7 +1320,7 @@ class ClassType extends Type {
 			return false
 		}
 	} # }}}
-	hasConstructors() => @constructors.length != 0
+	hasConstructors() => ?#@constructors
 	hasDestructors() => @sequences.destructors != -1
 	hasExportableOriginals() { # {{{
 		if ?@minorOriginal {
@@ -1310,6 +1334,7 @@ class ClassType extends Type {
 			return false
 		}
 	} # }}}
+	hasGenerics() => ?#@generics
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
 			return true
@@ -1710,7 +1735,7 @@ class ClassType extends Type {
 		return result
 	} # }}}
 	listAccessibleConstructors() { # {{{
-		if @constructors.length != 0 {
+		if ?#@constructors {
 			return @constructors
 		}
 		else if @extending {
@@ -1957,6 +1982,173 @@ class ClassType extends Type {
 		return result
 	} # }}}
 	majorOriginal() => @majorOriginal
+	override makeCallee(name, generics, node) { # {{{
+		TypeException.throwConstructorWithoutNew(name, node)
+	} # }}}
+	override makeMemberCallee(property, name, generics, node) { # {{{
+		var mut reference = node.scope().reference(name)
+
+		if reference.isVirtual() {
+			TypeException.throwNotCreatable(reference.toQuote(), node)
+		}
+
+		if ?#generics {
+			reference = reference.clone()
+
+			for var { name % gname } in @generics {
+				var mut nf = true
+
+				for var { name, type } in generics {
+					if name == gname {
+						reference.addParameter(type)
+
+						nf = false
+					}
+				}
+
+				break if nf
+			}
+		}
+
+		if property == 'new' {
+			var assessment = @getConstructorAssessment(name.name(), generics, node)
+
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult, PreciseCallMatchResult {
+					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
+				}
+				else {
+					if @isExhaustiveConstructor(node) {
+						ReferenceException.throwNoMatchingConstructor(name.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else {
+						node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					}
+				}
+			}
+		}
+		else if @hasStaticMethod(property) {
+			var assessment = @getStaticAssessment(property, generics, node)
+
+			match node.matchArguments(assessment) {
+				is LenientCallMatchResult with var result {
+					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, result, node))
+				}
+				is PreciseCallMatchResult with var { matches } {
+					if matches.length == 1 {
+						var match = matches[0]
+
+						if match.function.isSealed() {
+							node.addCallee(SealedPreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, match, node))
+						}
+						else {
+							node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+						}
+					}
+					else if node.getMatchingMode() == .AllMatches {
+						node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+					}
+					else {
+						var functions = [match.function for var match in matches]
+
+						if functions.some((function, _, _) => function.isSealed()) {
+							node.addCallee(SealedCallee.new(node.data(), name, false, functions, node))
+						}
+						else {
+							node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
+						}
+					}
+				}
+				else {
+					if @isExhaustiveStaticMethod(property, node) {
+						ReferenceException.throwNoMatchingStaticMethod(property, name.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else if assessment.sealed {
+						node.addCallee(SealedMethodCallee.new(node.data(), node.object(), reference, property, false, node))
+					}
+					else {
+						node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+					}
+				}
+			}
+		}
+		else if @isExhaustive(node) {
+			ReferenceException.throwNotFoundStaticMethod(property, name.name(), node)
+		}
+		else {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		if @hasInstantiableMethod(property) {
+			var assessment = @getInstantiableAssessment(property, generics, node)
+
+			match node.matchArguments(assessment) {
+				is LenientCallMatchResult with var result {
+					var class = @getClassWithInstantiableMethod(property, reference.type())
+					var reference = node.scope().reference(class)
+
+					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, result, node))
+				}
+				is PreciseCallMatchResult with var { matches } {
+					var class = @getClassWithInstantiableMethod(property, reference.type())
+					var reference = node.scope().reference(class)
+
+					if matches.length == 1 {
+						var match = matches[0]
+
+						if match.function.isSealed() {
+							node.addCallee(SealedPreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, match, node))
+						}
+						else {
+							node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+						}
+					}
+					else if node.getMatchingMode() == .AllMatches {
+						node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+					}
+					else {
+						var functions = [match.function for var match in matches]
+
+						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, functions, node))
+					}
+				}
+				NoMatchResult.NoArgumentMatch {
+					if @isExhaustiveInstanceMethod(property, node) {
+						ReferenceException.throwNoMatchingStaticMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else {
+						node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+					}
+				}
+				NoMatchResult.NoThisMatch {
+					ReferenceException.throwNoAssignableThisInMethod(property, node)
+				}
+			}
+		}
+		else {
+			var arguments = node.arguments()
+			var data = node.data()
+
+			var dyn callee, substitute
+
+			if	data.callee.object.kind == NodeKind.Identifier &&
+				(callee ?= @scope.getVariable(data.callee.object.name)) &&
+				(substitute ?= callee.replaceMemberCall?(property, arguments, node))
+			{
+				node.addCallee(SubstituteCallee.new(data, substitute, Type.Any, node))
+			}
+			else if @hasInstanceVariable(property) {
+				node.addCallee(DefaultCallee.new(data, node.object(), reference, node))
+			}
+			else if @isExhaustive(node) {
+				ReferenceException.throwNotFoundStaticMethod(property, reference.name(), node)
+			}
+			else {
+				node.addCallee(DefaultCallee.new(data, node.object(), reference, node))
+			}
+		}
+	} # }}}
 	matchArguments(arguments: Array<Type>, node: AbstractNode) { # {{{
 		if @constructors.length == 0 {
 			if @extending {

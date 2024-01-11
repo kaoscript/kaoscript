@@ -9,15 +9,23 @@ abstract class DependencyStatement extends Statement {
 				var type = @applyFlags(ClassType.new(scope))
 
 				for var modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind.Abstract {
-						type.flagAbstract()
+					match modifier.kind {
+						ModifierKind.Abstract {
+							type.flagAbstract()
+						}
+						ModifierKind.Sealed {
+							type.flagSealed()
+						}
+						ModifierKind.System {
+							type.flagSystem()
+						}
 					}
-					else if modifier.kind == ModifierKind.Sealed {
-						type.flagSealed()
-					}
-					else if modifier.kind == ModifierKind.System {
-						type.flagSystem()
-					}
+				}
+
+				if ?#declaration.typeParameters {
+					var generics = [Type.toGeneric(parameter, this) for var parameter in declaration.typeParameters]
+
+					type.generics(generics)
 				}
 
 				var variable = scope.define(declaration.name.name, true, type, this)

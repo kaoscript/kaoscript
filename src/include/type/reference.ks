@@ -520,16 +520,7 @@ class ReferenceType extends Type {
 			}
 
 			if ?#@subtypes {
-				// TODO!
-				// export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
-				export.subtypes = []
-
-				for var { name, type } in @subtypes {
-					export.subtypes.push({
-						name
-						type: type.toReference(references, indexDelta, mode, module)
-					})
-				}
+				export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
 			}
 
 			return export
@@ -554,16 +545,7 @@ class ReferenceType extends Type {
 			}
 
 			if ?#@subtypes {
-				// TODO!
-				// export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
-				export.subtypes = []
-
-				for var { name, type } in @subtypes {
-					export.subtypes.push({
-						name
-						type: type.toReference(references, indexDelta, mode, module)
-					})
-				}
+				export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
 			}
 
 			return export
@@ -619,11 +601,11 @@ class ReferenceType extends Type {
 		return type
 	} # }}}
 	override getGenericMapper() { # {{{
-		var type = @discard()!?
+		@resolve()
 
 		var mut generics = null
 
-		if @type.isAlias() && @type is NamedType {
+		if @type is NamedType {
 			if var originals ?#= @type.type().generics() {
 				if @parameters.length > originals.length {
 					NotImplementedException.throw()
@@ -640,12 +622,6 @@ class ReferenceType extends Type {
 					}
 				}
 			}
-			else if ?#@parameters {
-				NotImplementedException.throw()
-			}
-		}
-		else if ?#@parameters {
-			NotImplementedException.throw()
 		}
 
 		var mut subtypes = null
@@ -658,7 +634,7 @@ class ReferenceType extends Type {
 			subtypes = @subtypes
 		}
 
-		return { type, generics, subtypes }
+		return { type: @discard()!?, generics, subtypes }
 	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
 	override getProperty(index): Type { # {{{
@@ -1069,6 +1045,7 @@ class ReferenceType extends Type {
 
 		return false
 	} # }}}
+	isInstantiable() => @name == 'Class' | 'Struct' | 'Tuple'
 	isIterable() => @type().isIterable() || @isArray() || @isObject() || @isString()
 	isMorePreciseThan(value: Type) { # {{{
 		if value.isAny() {
@@ -1249,7 +1226,7 @@ class ReferenceType extends Type {
 			return @isSubsetOf(value.constraint(), generics, subtypes, mode)
 		}
 
-		return false
+		return mode ~~ MatchingMode.IgnoreDeferred
 	} # }}}
 	assist isSubsetOf(value: FunctionType, generics, subtypes, mode) { # {{{
 		if @isAlias() {
@@ -1438,6 +1415,43 @@ class ReferenceType extends Type {
 	listFunctions(name: String): Array => @type().listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type().listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type().listMissingProperties(class)
+	override makeCallee(name, generics, node) { # {{{
+		if @canBeFunction() {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+		}
+		else {
+			if @isExhaustive(node) {
+				TypeException.throwNotFunction(name, node)
+			}
+			else {
+				node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+			}
+		}
+	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		if @isNullable() && !node.isMisfit() {
+			unless node.data().callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
+				TypeException.throwNotNullableCaller(property, node)
+			}
+		}
+
+		if property == 'new' && @isInstantiable() {
+			node.prepareArguments()
+
+			node.addCallee(ConstructorCallee.new(node.data(), node.object(), this, null, null, node))
+		}
+		 else if ?#@parameters && !?#generics {
+			var { type, generics } = @getGenericMapper()
+
+			type.makeMemberCallee(property, this, generics, node)
+		}
+		else {
+			@type().makeMemberCallee(property, this, generics, node)
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		@type().makeMemberCallee(property, this, generics, node)
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if this == value {
 			return true

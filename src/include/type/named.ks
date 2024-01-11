@@ -390,6 +390,12 @@ class NamedType extends Type {
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
 	majorOriginal() => @type.majorOriginal()
+	override makeMemberCallee(property, generics, node) { # {{{
+		@type.makeMemberCallee(property, this, generics, node)
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		@type.makeMemberCallee(property, reference, generics, node)
+	} # }}}
 	matchClassName(that: Type?) { # {{{
 		if that == null {
 			return false
@@ -640,6 +646,7 @@ class NamedType extends Type {
 		isExportingType
 		isVariant
 		isView
+		makeCallee
 		toAwareTestFunctionFragments
 		toBlindTestFragments
 	}

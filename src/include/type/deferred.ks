@@ -41,6 +41,15 @@ class DeferredType extends Type {
 			}
 		}
 	} # }}}
+	override applyGenerics(generics) { # {{{
+		for var { name, type } in generics {
+			if name == @name {
+				return type.setNullable(@nullable)
+			}
+		}
+
+		return @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	} # }}}
 	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
 		genericMap[@name] ??= []
 

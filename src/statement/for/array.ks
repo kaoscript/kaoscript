@@ -517,6 +517,16 @@ class ArrayIteration extends IterationNode {
 			}
 		}
 	} # }}}
+	isUsingVariable(name) { # {{{
+		return	@expression.isUsingVariable(name) ||
+				@from?.isUsingVariable(name) ||
+				@to?.isUsingVariable(name) ||
+				@step?.isUsingVariable(name) ||
+				@split?.isUsingVariable(name) ||
+				@until?.isUsingVariable(name) ||
+				@while?.isUsingVariable(name) ||
+				@when?.isUsingVariable(name)
+	} # }}}
 	override releaseVariables() { # {{{
 		if ?@expressionName {
 			if @loopKind == LoopKind.Unknown {

@@ -174,6 +174,12 @@ export class NotSupportedException extends Exception {
 		throwBitmaskLength(name, length, node): Never ~ NotSupportedException { # {{{
 			throw ReferenceException.new(`Bitmask of length \(length) aren't supported`, node)
 		} # }}}
+		throwStructMethod(node): Never ~ NotSupportedException { # {{{
+			throw ReferenceException.new(`Struct methods aren't supported, yet`, node)
+		} # }}}
+		throwTupleMethod(node): Never ~ NotSupportedException { # {{{
+			throw ReferenceException.new(`Struct methods aren't supported, yet`, node)
+		} # }}}
 	}
 	constructor(message = 'Not Supported') { # {{{
 		super(message)
@@ -251,7 +257,7 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
-		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node): Never ~ ReferenceException { # {{{
+		throwNoMatchingFunctionInNamespace(name: String, namespace, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw ReferenceException.new(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to no arguments`, node)
 			}

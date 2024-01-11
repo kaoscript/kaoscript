@@ -1,1 +1,0 @@
-TypeException: The return type must be "valueof this" and not "Foobar" (fixtures/compile/class/class.rtntype.nstt.valueof.this.new.ks:3)

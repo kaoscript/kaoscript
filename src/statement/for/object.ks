@@ -223,6 +223,12 @@ class ObjectIteration extends IterationNode {
 			}
 		}
 	} # }}}
+	isUsingVariable(name) { # {{{
+		return	@expression.isUsingVariable(name) ||
+				@until?.isUsingVariable(name) ||
+				@while?.isUsingVariable(name) ||
+				@when?.isUsingVariable(name)
+	} # }}}
 	override releaseVariables() { # {{{
 		@scope.releaseTempName(@expressionName) if ?@expressionName
 		@bindingScope.releaseTempName(@keyName) if ?@keyName

@@ -14,10 +14,32 @@ class ClassMethodType extends FunctionType {
 		@unknownReturnType: Boolean				= false
 	}
 	static {
-		fromAST(data, node: AbstractNode): ClassMethodType { # {{{
+		fromAST(data, classGenerics: Generic[], node: AbstractNode): ClassMethodType { # {{{
 			var scope = node.scope()
 
-			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, null, node) for var parameter in data.parameters], data, node)
+			var methodGenerics = []
+
+			var availables =
+				if ?#data.typeParameters {
+					var result = [...classGenerics]
+
+					for var parameter in data.typeParameters {
+						var generic = Type.toGeneric(parameter, node)
+
+						if classGenerics.some(({ name }, ...) => name == generic.name) {
+							NotImplementedException.throw(node)
+						}
+
+						result.push(generic)
+					}
+
+					set result
+				}
+				else {
+					set classGenerics
+				}
+
+			return ClassMethodType.new([ParameterType.fromAST(parameter, true, scope, false, availables, node) for var parameter in data.parameters], methodGenerics, availables, data, node)
 		} # }}}
 		fromFunction(source: FunctionType): ClassMethodType { # {{{
 			var clone = ClassMethodType.new(source._scope)
@@ -67,6 +89,23 @@ class ClassMethodType extends FunctionType {
 	}
 	access() => @access
 	access(@access) => this
+	override applyGenerics(generics) { # {{{
+		return this unless @isDeferrable()
+
+		var result = @clone()
+
+		for var parameter, index in result._parameters {
+			if parameter.isDeferrable() {
+				result._parameters[index] = parameter.applyGenerics(generics)
+			}
+		}
+
+		if result._returnType.isDeferrable() {
+			result._returnType = result._returnType.applyGenerics(generics)
+		}
+
+		return result
+	} # }}}
 	clone() { # {{{
 		var clone = ClassMethodType.new(@scope)
 

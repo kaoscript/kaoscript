@@ -6,6 +6,7 @@ class ArrayType extends Type {
 		@nullable: Boolean				= false
 		@min: Number?					= null
 		@properties: Type[]				= []
+		@reference: ReferenceType?		= null
 		@rest: Boolean					= false
 		@restType: Type					= AnyType.NullableUnexplicit
 		@specific: Boolean				= false
@@ -62,6 +63,23 @@ class ArrayType extends Type {
 		@properties.push(type)
 		@length += 1
 		@testProperties ||= !type.isAny() || !type.isNullable()
+	} # }}}
+	override applyGenerics(generics) { # {{{
+		return this unless @isDeferrable()
+
+		var result = @clone()
+
+		for var property, index in result._properties {
+			if property.isDeferrable() {
+				result._properties[index] = property.applyGenerics(generics)
+			}
+		}
+
+		if @rest && result._restType.isDeferrable() {
+			result._restType = result._restType.applyGenerics(generics)
+		}
+
+		return result
 	} # }}}
 	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
 		for var property in @properties when property.isDeferrable() {
@@ -315,7 +333,7 @@ class ArrayType extends Type {
 				return true
 			}
 
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.IgnoreDeferred
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -552,6 +570,25 @@ class ArrayType extends Type {
 		}
 
 		return { fields, functions }
+	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		if !?@reference {
+			@reference = @scope.reference('Array').clone()
+
+			if @length > 0 {
+				if @rest {
+					@reference.addParameter(Type.union(@scope, ...@properties, @restType))
+				}
+				else {
+					@reference.addParameter(Type.union(@scope, ...@properties))
+				}
+			}
+			else if @rest {
+				@reference.addParameter(@restType)
+			}
+		}
+
+		@reference.makeMemberCallee(property, generics, node)
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isArray() {

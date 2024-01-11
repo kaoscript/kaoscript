@@ -25,18 +25,23 @@ class IfStatement extends Statement {
 			var mut previousScope = @scope!?
 
 			for var data in @data.declarations {
+				var declarationData = data[0].kind == NodeKind.VariableDeclaration ? data[0] : data[1]
+				var conditionData = data[0].kind != NodeKind.VariableDeclaration ? data[0] : ?data[1] && data[1].kind != NodeKind.VariableDeclaration ? data[1] : null
+
 				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 
-				var hasBinding = data[0].variables[0].name.kind != NodeKind.Identifier
-				var declaration = VariableDeclaration.new(data[0], this, bindingScope, previousScope, @cascade || hasBinding)
+				var hasBinding = declarationData.variables[0].name.kind != NodeKind.Identifier
+				var declaration = VariableDeclaration.new(declarationData, this, bindingScope, previousScope, @cascade || hasBinding)
 
 				@declarations.push({
 					declaration
+					declarationData
+					declarationFirst: data[0].kind == NodeKind.VariableDeclaration
 					bindingScope
 					hasBinding
-					operator: data[0].operator.assignment
-					data
-					hasCondition: false
+					operator: declarationData.operator.assignment
+					hasCondition: ?conditionData
+					conditionData
 				})
 
 				@hasBinding ||= hasBinding
@@ -56,9 +61,18 @@ class IfStatement extends Statement {
 			var conditions = 0
 
 			for var decl in @declarations {
-				var { declaration, hasBinding, bindingScope, data } = decl
+				var { declaration, declarationData, declarationFirst, hasBinding, bindingScope, hasCondition, conditionData? } = decl
 
-				bindingScope.line(data[0].start.line)
+				if hasCondition && !declarationFirst {
+					var condition = $compile.expression(conditionData, this, bindingScope)
+						..analyse()
+
+					@conditions.push(condition)
+
+					decl.condition = condition
+				}
+
+				bindingScope.line(declarationData.start.line)
 
 				declaration.analyse()
 
@@ -66,15 +80,13 @@ class IfStatement extends Statement {
 					decl.bindingVariable = declaration.value()
 				}
 
-				if ?data[1] {
-					var condition = $compile.expression(data[1], this, bindingScope)
+				if hasCondition && declarationFirst {
+					var condition = $compile.expression(conditionData, this, bindingScope)
 						..analyse()
 
 					@conditions.push(condition)
 
-					decl
-						..condition = condition
-						..hasCondition = true
+					decl.condition = condition
 				}
 			}
 
@@ -480,7 +492,7 @@ class IfStatement extends Statement {
 
 		if var map ?= @lateInitVariables[name] {
 			if map[whenTrue].type != null {
-				if variable.isImmutable() {
+				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(map[whenTrue].type) {
@@ -617,8 +629,12 @@ class IfStatement extends Statement {
 		fragments.code('if(')
 
 		if @hasDeclaration {
-			for var { declaration, hasBinding, operator, bindingVariable?, hasCondition, condition? }, index in @declarations {
+			for var { declaration, declarationFirst, hasBinding, operator, bindingVariable?, hasCondition, condition? }, index in @declarations {
 				fragments.code(' && ') if index > 0
+
+				if hasCondition && !declarationFirst {
+					fragments.compileCondition(condition, mode, Junction.AND).code(' && ')
+				}
 
 				if hasBinding {
 					match operator {
@@ -785,7 +801,7 @@ class IfStatement extends Statement {
 					}
 				}
 
-				if hasCondition {
+				if hasCondition && declarationFirst {
 					fragments.code(' && ').compileCondition(condition, mode, Junction.AND)
 				}
 			}

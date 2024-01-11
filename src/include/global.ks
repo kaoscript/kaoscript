@@ -278,6 +278,14 @@ namespace $runtime {
 	func scope(node) { # {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
 	} # }}}
+	func scope(immutable: Boolean, node) { # {{{
+		if immutable {
+			return node._options.format.variables == 'es5' ? 'var ' : 'const '
+		}
+		else {
+			return node._options.format.variables == 'es5' ? 'var ' : 'let '
+		}
+	} # }}}
 	func type(node) { # {{{
 		node.module?().flag('Type')
 

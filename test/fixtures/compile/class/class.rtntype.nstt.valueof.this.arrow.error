@@ -1,1 +1,0 @@
-TypeException: The return type must be "valueof this" and not "String" (fixtures/compile/class/class.rtntype.nstt.valueof.this.arrow.ks:2)

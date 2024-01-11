@@ -95,6 +95,23 @@ class ObjectType extends Type {
 			@variantType = type
 		}
 	} # }}}
+	override applyGenerics(generics) { # {{{
+		return this unless @isDeferrable()
+
+		var result = @clone()
+
+		for var property, name of result._properties {
+			if property.isDeferrable() {
+				result._properties[name] = property.applyGenerics(generics)
+			}
+		}
+
+		if @rest && result._restType.isDeferrable() {
+			result._restType = result._restType.applyGenerics(generics)
+		}
+
+		return result
+	} # }}}
 	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
 		for var property of @properties when property.isDeferrable() {
 			property.buildGenericMap(position, expressions, decompose, genericMap)
@@ -102,6 +119,10 @@ class ObjectType extends Type {
 
 		if @rest && @restType.isDeferrable() {
 			@restType.buildGenericMap(position, expressions, value => decompose(value).parameter(), genericMap)
+		}
+
+		if ?@keyType {
+			@keyType.buildGenericMap(position, expressions, value => decompose(value).getKeyType(), genericMap)
 		}
 	} # }}}
 	override canBeDeferred() => @buildFlags() && @testGenerics
@@ -481,7 +502,7 @@ class ObjectType extends Type {
 		}
 
 		if value.isObject() {
-			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
+			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.IgnoreDeferred
 
 			if anycast {
 				matchingMode += MatchingMode.Anycast + MatchingMode.AnycastParameter
@@ -592,7 +613,7 @@ class ObjectType extends Type {
 			}
 		}
 
-		return true
+		return mode ~~ MatchingMode.IgnoreDeferred
 	} # }}}
 	assist isSubsetOf(value: FusionType, generics, subtypes, mode) { # {{{
 		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
@@ -885,6 +906,63 @@ class ObjectType extends Type {
 		}
 
 		return { fields, functions }
+	} # }}}
+	override makeMemberCallee(property % propName, generics, node) { # {{{
+		if var property ?= @getProperty(propName) {
+			property.makeCallee(propName, generics, node)
+		}
+		else {
+			@scope.reference('Object').makeMemberCallee(propName, generics, node)
+		}
+	} # }}}
+	override makeMemberCallee(property % propName, reference, generics, node) { # {{{
+		if var property ?= @getProperty(propName) {
+			if property is FunctionType || property is OverloadedFunctionType {
+				var assessment = property.assessment(propName, node)
+
+				match node.matchArguments(assessment) {
+					is LenientCallMatchResult with var result {
+						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
+					}
+					is PreciseCallMatchResult with var { matches } {
+						if matches.length == 1 {
+							var match = matches[0]
+
+							if match.function.isAlien() || match.function.index() == -1 {
+								node.addCallee(LenientFunctionCallee.new(node.data(), assessment, [match.function], node))
+							}
+							else {
+								node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+							}
+						}
+						else {
+							var functions = [match.function for var match in matches]
+
+							node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
+						}
+					}
+					else {
+						if property.isExhaustive(node) {
+							ReferenceException.throwNoMatchingFunction(propName, reference.name(), node.arguments(), node)
+						}
+						else {
+							node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+						}
+					}
+				}
+			}
+			else {
+				throw NotImplementedException.new(node)
+			}
+		}
+		else if @isExhaustive(node) {
+			ReferenceException.throwNotDefinedProperty(propName, node)
+		}
+		else {
+			node.prepareArguments()
+
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+		}
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isObject() {

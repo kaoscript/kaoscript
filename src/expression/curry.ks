@@ -229,6 +229,11 @@ class CurryExpression extends CallExpression {
 		}
 	} # }}}
 	override isExit() => false
+	override makeCallee(generics, node) { # {{{
+		node.prepareArguments()
+
+		node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+	} # }}}
 	toCallFragments(fragments, mode) { # {{{
 		match @callees.length {
 			1 {

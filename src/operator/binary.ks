@@ -59,6 +59,11 @@ class BinaryOperatorExpression extends Expression {
 
 		return variables
 	} # }}}
+	override makeCallee(generics, node) { # {{{
+		node.prepareArguments()
+
+		node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+	} # }}}
 	releaseReusable() { # {{{
 		@left.releaseReusable()
 		@right.releaseReusable()

@@ -53,7 +53,7 @@
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
 		"@zokugun/istanbul.reporter.minimap": "^0.5.0",
-		"chai": "^4.2.0",
+		"chai": "4.3.10",
 		"coveralls": "^3.0.9",
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",

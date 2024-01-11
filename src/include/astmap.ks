@@ -105,6 +105,7 @@ var $expressions = {
 	[NodeKind.NamedArgument]				: NamedArgument
 	[NodeKind.NumericExpression]			: NumberLiteral
 	[NodeKind.ObjectBinding]				: ObjectBinding
+	[NodeKind.ObjectComprehension]			: ObjectComprehension
 	[NodeKind.ObjectExpression]				: ObjectExpression
 	[NodeKind.OmittedExpression]			: OmittedExpression
 	[NodeKind.PlaceholderArgument]			: PlaceholderArgument
@@ -126,6 +127,7 @@ var $expressions = {
 	}
 	[NodeKind.ThisExpression]				: ThisExpression
 	[NodeKind.TryExpression]				: TryExpression
+	[NodeKind.TypedExpression]				: TypedExpression
 }
 
 var $statements = {

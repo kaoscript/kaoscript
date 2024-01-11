@@ -252,6 +252,38 @@ class StructType extends Type {
 		return list
 	} # }}}
 	listInterfaces() => @interfaces
+	override makeCallee(name, generics, node) { # {{{
+		TypeException.throwConstructorWithoutNew(name, node)
+	} # }}}
+	override makeMemberCallee(property, name, generics, node) { # {{{
+		var reference = @scope.reference(name)
+
+		if property == 'new' {
+			// TODO!
+			// var assessment = @assessment(reference, node)
+			var assessment = this.assessment(reference, node)
+
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult, PreciseCallMatchResult {
+					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
+				}
+				else {
+					if @isExhaustive(node) {
+						ReferenceException.throwNoMatchingStruct(name.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else {
+						node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					}
+				}
+			}
+		}
+		else {
+			NotSupportedException.throwStructMethod(node)
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		NotSupportedException.throwStructMethod(node)
+	} # }}}
 	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { # {{{
 		var fields = @getAllFieldsMap()
 		var count = @count()

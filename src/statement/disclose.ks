@@ -22,6 +22,12 @@ class DiscloseDeclaration extends Statement {
 
 		@type = variable.getDeclaredType().type()
 
+		if ?#@data.typeParameters {
+			var generics = [Type.toGeneric(parameter, this) for var parameter in @data.typeParameters]
+
+			@type.generics(generics)
+		}
+
 		for var data in @data.members {
 			@type.addPropertyFromAST(data, this)
 		}

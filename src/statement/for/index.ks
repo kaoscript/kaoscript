@@ -13,16 +13,8 @@ class ForStatement extends Statement {
 		@bodyScope = @scope!?
 
 		for var data in @data.iterations {
-			var iteration = match data.kind {
-				IterationKind.Array => ArrayIteration.new(data, this, @bodyScope)
-				IterationKind.From => FromIteration.new(data, this, @bodyScope)
-				IterationKind.Object => ObjectIteration.new(data, this, @bodyScope)
-				IterationKind.Range => RangeIteration.new(data, this, @bodyScope)
-				// TODO remove else
-				else => throw NotImplementedException.new()
-			}
-
-			iteration.analyse()
+			var iteration = IterationNode.fromAST(data, this, @bodyScope)
+				..analyse()
 
 			@bodyScope = iteration.getBodyScope()
 
@@ -187,6 +179,18 @@ abstract class IterationNode extends AbstractNode {
 		@bindingScope: Scope
 		@bodyScope: Scope
 		@elseTest: ElseTestKind				= .None
+	}
+	static {
+		fromAST(data, node, scope) { # {{{
+			return match data.kind {
+				IterationKind.Array => ArrayIteration.new(data, node, scope)
+				IterationKind.From => FromIteration.new(data, node, scope)
+				IterationKind.Object => ObjectIteration.new(data, node, scope)
+				IterationKind.Range => RangeIteration.new(data, node, scope)
+				// TODO remove else
+				else => throw NotImplementedException.new()
+			} # }}}
+		}
 	}
 	abstract {
 		releaseVariables(): Void

@@ -131,12 +131,42 @@ class ParameterType extends Type {
 			@passing -= PassingMode.LABELED
 		}
 	} # }}}
+	override applyGenerics(generics) { # {{{
+		var result = @clone()
+
+		if @type is DeferredType {
+			var deferName = @type.name()
+			var mut nf = true
+
+			for var { name, type } in generics {
+				if name == deferName {
+					result._type = type
+					nf = false
+
+					break
+				}
+			}
+
+			if nf {
+				result._type =  @type.isNullable() ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+			}
+		}
+		else if @type.isDeferrable() {
+			result._type = @type.applyGenerics(generics)
+		}
+
+		result._variableType = result._type
+
+		return result
+	} # }}}
 	clone(): ParameterType { # {{{
 		var that = ParameterType.new(@scope, @externalName, @internalName, @passing, @type, @min, @max, @default)
 
 		if @retained {
 			that.flagRetained()
 		}
+
+		that._index = @index
 
 		return that
 	} # }}}

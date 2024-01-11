@@ -78,13 +78,13 @@ class ValueType extends Type {
 		isComparableWith
 		isEnum
 		isExplicit
-		// TODO!
-		// isMorePreciseThan
 		isNull
 		isNullable
 		isNumber
 		isString
 		isUnion
+		makeCallee
+		makeMemberCallee
 		toTypeQuote
 	}
 }

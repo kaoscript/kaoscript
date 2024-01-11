@@ -579,13 +579,10 @@ class Parameter extends AbstractNode {
 			}
 
 			@internal = Parameter.compileExpression(@data.internal, this)
-			@internal.setAssignment(AssignmentType.Parameter)
-
-			if ?@data.operator {
-				@internal.operator(@data.operator.assignment)
-			}
-
-			@internal.analyse()
+				..setAssignment(AssignmentType.Parameter)
+				..flagImmutable() if immutable
+				..operator(@data.operator.assignment) if ?@data.operator
+				..analyse()
 
 			for var assignment in @internal.listAssignments([]) {
 				var { name } = assignment
@@ -1497,6 +1494,7 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 		} # }}}
 	}
+	flagImmutable()
 	isBinding() => false
 	operator(): valueof @operator
 	operator(@operator): valueof this
@@ -1657,18 +1655,42 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 
 class ObjectBindingParameter extends ObjectBinding {
 	private late {
+		@alias: IdentifierLiteral?
 		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
 		@tempName: Literal
 	}
 	analyse() { # {{{
 		super()
 
-		if @flatten {
+		if ?@data.alias {
+			@alias = $compile.expression(@data.alias, this)
+				..setAssignment(AssignmentType.Declaration)
+				..analyse()
+		}
+		else if @flatten {
 			@tempName = Literal.new(@scope.acquireTempName(false), this)
+		}
+	} # }}}
+	override prepare(target, targetMode) { # {{{
+		super(target, targetMode)
+
+		if ?@alias {
+			@alias
+				..type(target, @scope, this)
+				..prepare(target, targetMode)
 		}
 	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
+	override listAssignments(array, immutable) { # {{{
+		super(array, immutable)
+
+		if ?@alias {
+			@alias.listAssignments(array, immutable)
+		}
+
+		return array
+	} # }}}
 	newElement(data) => ObjectBindingParameterElement.new(data, this, @scope)
 	operator(@operator): valueof this
 	setDeclaredType(mut type, definitive: Boolean = false) { # {{{
@@ -1719,7 +1741,10 @@ class ObjectBindingParameter extends ObjectBinding {
 		}
 	} # }}}
 	toParameterFragments(fragments) { # {{{
-		if @flatten {
+		if ?@alias {
+			fragments.compile(@alias)
+		}
+		else if @flatten {
 			fragments.compile(@tempName)
 		}
 		else {
@@ -1727,7 +1752,10 @@ class ObjectBindingParameter extends ObjectBinding {
 		}
 	} # }}}
 	toValidationFragments(fragments, rest, value?, header, async) { # {{{
-		if @flatten {
+		if ?@alias {
+			fragments.newLine().code($runtime.scope(@immutable, this)).compile(this).code($equals).compile(@alias).done()
+		}
+		else if @flatten {
 			if ?value {
 				var ctrl = fragments
 					.newControl()
@@ -1883,6 +1911,7 @@ class ThisExpressionParameter extends ThisExpression {
 		@parent.addAliasParameter(this)
 	} # }}}
 	getDeclaredType() => @type
+	flagImmutable()
 	isBinding() => false
 	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
 		array.push({ @name })

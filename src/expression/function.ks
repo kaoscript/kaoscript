@@ -351,6 +351,25 @@ class ArrowFunctionExpression extends Expression {
 
 		return @block?.isUsingVariable(name)
 	} # }}}
+	override makeCallee(generics, node) { # {{{
+		var assessment = @type.assessment(@toQuote(), node)
+
+		match node.matchArguments(assessment) {
+			is LenientCallMatchResult with var result {
+				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
+			}
+			is PreciseCallMatchResult with var { matches } {
+				var callee = PreciseFunctionCallee.new(node.data(), this, assessment, matches, node)
+
+				callee.flagDirect()
+
+				node.addCallee(callee)
+			}
+			else {
+				ReferenceException.throwNoMatchingFunction(assessment.name, node.arguments(), node)
+			}
+		}
+	} # }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { # {{{
 		if @shiftToAuthority {

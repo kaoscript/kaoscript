@@ -100,6 +100,12 @@ abstract class Expression extends AbstractNode {
 	isSplitAssignment(): Boolean => false
 	listLocalVariables(scope: Scope, variables: Array): Array => variables
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
+	makeCallee(generics: Generic[]?, node: CallExpression) { # {{{
+		NotSupportedException.throw(node)
+	} # }}}
+	makeMemberCallee(property: String, generics: Generic[]?, node: CallExpression) { # {{{
+		@type().makeMemberCallee(property, generics, node)
+	} # }}}
 	path(): String? => null
 	releaseReusable()
 	setAssignment(assignment: AssignmentType)
@@ -175,6 +181,7 @@ include {
 	'../expression/match.ks'
 	'../expression/member.ks'
 	'../expression/object.ks'
+	'../expression/object-comprehension.ks'
 	'../expression/omitted.ks'
 	'../expression/reference.ks'
 	'../expression/regex.ks'
@@ -184,6 +191,7 @@ include {
 	'../expression/template.ks'
 	'../expression/this.ks'
 	'../expression/try.ks'
+	'../expression/typed.ks'
 
 	'../expression/misc.ks'
 }

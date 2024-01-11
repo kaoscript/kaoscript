@@ -29,6 +29,7 @@ class FunctionType extends Type {
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { # {{{
+			target._alien = source._alien
 			target._async = source._async
 			target._autoTyping = source._autoTyping
 			target._errors = [...source._errors]
@@ -117,11 +118,11 @@ class FunctionType extends Type {
 	constructor(@scope, @index) { # {{{
 		super(scope)
 	} # }}}
-	constructor(parameters: ParameterType[]?, @generics = [], data, node) { # {{{
+	constructor(parameters: ParameterType[]?, @generics = [], availables: Generic[] = generics, data, node) { # {{{
 		super(node.scope())
 
 		if ?data.type {
-			@setReturnType(data.type, node)
+			@setReturnType(data.type, availables, node)
 
 			@missingReturn = false
 		}
@@ -140,7 +141,7 @@ class FunctionType extends Type {
 			var dyn type
 
 			for var throw in data.throws {
-				if (type ?= Type.fromAST(throw, generics, node).discardReference()) && type.isNamed() && type.isClass() {
+				if (type ?= Type.fromAST(throw, availables, node).discardReference()) && type.isNamed() && type.isClass() {
 					@errors.push(type)
 				}
 				else {
@@ -182,9 +183,7 @@ class FunctionType extends Type {
 		}
 	} # }}}
 	assessment(name: String, node: AbstractNode) { # {{{
-		if @assessment == null {
-			@assessment = Router.assess([this], name, node)
-		}
+		@assessment ??= Router.assess([this], name, node)
 
 		return @assessment
 	} # }}}
@@ -452,6 +451,23 @@ class FunctionType extends Type {
 		}
 		else if @returnType.isNever() {
 			return true
+		}
+
+		return false
+	} # }}}
+	isDeferrable() { # {{{
+		for var parameter in @parameters {
+			if parameter.isDeferrable() {
+				return true
+			}
+		}
+
+		return true if @returnType.isDeferrable()
+
+		for var error in @errors {
+			if error.isDeferrable() {
+				return true
+			}
 		}
 
 		return false
@@ -804,6 +820,56 @@ class FunctionType extends Type {
 	isUnknownReturnType() => @autoTyping
 	length() => 1
 	listErrors() => @errors
+	override makeCallee(name, generics, node) { # {{{
+		// TODO!
+		// var assessment = @assessment(name, node)
+		var assessment = this.assessment(name, node)
+
+		match node.matchArguments(assessment) {
+			is LenientCallMatchResult with var result {
+				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
+			}
+			is PreciseCallMatchResult with var { matches } {
+				if matches.length == 1 {
+					var match = matches[0]
+
+					if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
+						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, [match.function], node))
+					}
+					else {
+						node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+					}
+				}
+				else if node.getMatchingMode() == .AllMatches {
+					node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+				}
+				else {
+					var functions = [match.function for var match in matches]
+
+					node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
+				}
+			}
+			NoMatchResult.NoArgumentMatch {
+				if @isExhaustive(node) {
+					ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
+				}
+				else {
+					node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+				}
+			}
+			NoMatchResult.NoThisMatch {
+				if ?node.getCallScope() {
+					ReferenceException.throwNoMatchingThis(name, node)
+				}
+				else {
+					ReferenceException.throwMissingThisContext(name, node)
+				}
+			}
+		}
+	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		@scope.reference('Function').makeMemberCallee(property, generics, node)
+	} # }}}
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 
@@ -951,7 +1017,7 @@ class FunctionType extends Type {
 
 		methods.push(this)
 	} # }}}
-	setReturnType(data?, node) { # {{{
+	setReturnType(data?, generics: Generic[], node) { # {{{
 		if !?data {
 			@returnType = AnyType.NullableUnexplicit
 		}
@@ -959,7 +1025,7 @@ class FunctionType extends Type {
 			@autoTyping = true
 		}
 		else {
-			@returnType = Type.fromAST(data, @generics, node)
+			@returnType = Type.fromAST(data, generics, node)
 		}
 	} # }}}
 	setReturnType(@returnType): valueof this
@@ -1266,6 +1332,53 @@ class OverloadedFunctionType extends Type {
 		return this.isSubsetOf(value.type(), mode)
 	} # }}}
 	length() => @functions.length
+	override makeCallee(name, generics, node) { # {{{
+		// TODO!
+		// var assessment = @assessment(name, node)
+		var assessment = this.assessment(name, node)
+
+		match node.matchArguments(assessment) {
+			is LenientCallMatchResult with var result {
+				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
+			}
+			is PreciseCallMatchResult with var { matches } {
+				if matches.length == 1 {
+					var match = matches[0]
+
+					if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
+						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, [match.function], node))
+					}
+					else {
+						node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+					}
+				}
+				else if node.getMatchingMode() == .AllMatches {
+					node.addCallee(PreciseFunctionCallee.new(node.data(), assessment, matches, node))
+				}
+				else {
+					var functions = [match.function for var match in matches]
+
+					node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
+				}
+			}
+			NoMatchResult.NoArgumentMatch {
+				if @isExhaustive(node) {
+					ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
+				}
+				else {
+					node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+				}
+			}
+			NoMatchResult.NoThisMatch {
+				if ?node.getCallScope() {
+					ReferenceException.throwNoMatchingThis(name, node)
+				}
+				else {
+					ReferenceException.throwMissingThisContext(name, node)
+				}
+			}
+		}
+	} # }}}
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 

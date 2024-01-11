@@ -112,9 +112,9 @@ class ThisExpression extends Expression {
 
 				if !?@variableName {
 					if type.hasInstantiableMethod(@name) {
-						var assessment = type.getInstantiableAssessment(@name, this)
+						var assessment = type.getInstantiableAssessment(@name, null, this)
 
-						match Router.matchArguments(assessment, null, @parent.arguments(assessment), this) {
+						match Router.matchArguments(assessment, null, @parent.getArgumentsWith(assessment), this) {
 							is LenientCallMatchResult | PreciseCallMatchResult with var result {
 								var late functions: FunctionType[]
 
@@ -315,6 +315,53 @@ class ThisExpression extends Expression {
 		}
 
 		return array
+	} # }}}
+	override makeCallee(generics, node) { # {{{
+		if !@type.isFunction() {
+			node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+		}
+		else if @type.isReference() {
+			if @isSealed() {
+				var object = IdentifierLiteral.new($ast.identifier('this'), node, @scope)
+				var reference = @scope.reference(@class)
+
+				node.addCallee(SealedMethodCallee.new(node.data(), null, reference, @name, true, node))
+
+			}
+			else {
+				node.addCallee(DefaultCallee.new(node.data(), this, node))
+			}
+		}
+		else {
+			var assessment = @type.assessment(@name, node)
+
+			match node.matchArguments(assessment) {
+				is LenientCallMatchResult with var { possibilities } {
+					node.addCallee(LenientThisCallee.new(node.data(), this, @name, possibilities, node))
+				}
+				is PreciseCallMatchResult with var { matches } {
+					if matches.length == 1 {
+						var match = matches[0]
+						var reference = @scope.reference(@class)
+
+						node.addCallee(PreciseThisCallee.new(node.data(), this, reference, @name, assessment, match, node))
+					}
+					else {
+						var functions = [match.function for var match in matches]
+
+						node.addCallee(LenientThisCallee.new(node.data(), this, @name, functions, node))
+					}
+				}
+				else {
+					if @type.isExhaustive(node) {
+						ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else {
+						node.addCallee(DefaultCallee.new(node.data(), this, node))
+					}
+				}
+			}
+		}
 	} # }}}
 	name() => @name
 	path() => @fragment

@@ -562,6 +562,24 @@ class BitmaskType extends Type {
 		return results
 	} # }}}
 	listValueNames() => [name for var value, name of @values]
+	override makeCallee(name, generics, node) { # {{{
+		node.prepareArguments()
+
+		var arguments = node.arguments()
+
+		if arguments.length != 1 {
+			ReferenceException.throwNoMatchingBitmaskConstructor(name, arguments, node)
+		}
+
+		var argument = arguments[0]
+		var type = @scope.getVariable(name).getRealType()
+
+		if !argument.type().isAssignableToVariable(@type, true, true, false) && type.isExhaustive(node) {
+			ReferenceException.throwNoMatchingBitmaskConstructor(name, arguments, node)
+		}
+
+		node.addCallee(BitmaskCreateCallee.new(node.data(), type, argument, node))
+	} # }}}
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true
 	} # }}}

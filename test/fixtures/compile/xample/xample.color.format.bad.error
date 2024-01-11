@@ -1,1 +1,1 @@
-ReferenceException: The property "space" isn't defined in the expression "format" of type "String" (fixtures/compile/xample/xample.color.format.bad.ks:9)
+ReferenceException: The method "formatter" can't be found in the class "String" (fixtures/compile/xample/xample.color.format.bad.ks:9)

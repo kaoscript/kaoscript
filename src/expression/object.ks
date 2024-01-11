@@ -297,9 +297,7 @@ class ObjectExpression extends Expression {
 	} # }}}
 	reference() => @parent.reference()
 	releaseReusable() { # {{{
-		if @reuseName != null {
-			@scope.releaseTempName(@reuseName)
-		}
+		@scope.releaseTempName(@reuseName) if ?@reuseName
 
 		for var property in @properties {
 			property.releaseReusable()

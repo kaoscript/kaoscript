@@ -229,6 +229,38 @@ class TupleType extends Type {
 		return list
 	} # }}}
 	listInterfaces() => @interfaces
+	override makeCallee(name, generics, node) { # {{{
+		TypeException.throwConstructorWithoutNew(name, node)
+	} # }}}
+	override makeMemberCallee(property, name, generics, node) { # {{{
+		var reference = @scope.reference(name)
+
+		if property == 'new' {
+			// TODO!
+			// var assessment = @assessment(reference, node)
+			var assessment = this.assessment(reference, node)
+
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult, PreciseCallMatchResult {
+					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
+				}
+				else {
+					if @isExhaustive(node) {
+						ReferenceException.throwNoMatchingTuple(name.name(), [argument.type() for var argument in node.arguments()], node)
+					}
+					else {
+						@addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					}
+				}
+			}
+		}
+		else {
+			NotSupportedException.throwTupleMethod(node)
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		NotSupportedException.throwTupleMethod(node)
+	} # }}}
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [@toMetadata(references, indexDelta, mode, module), name]
 	shallBeNamed() => true
 	override toFragments(fragments, node) { # {{{

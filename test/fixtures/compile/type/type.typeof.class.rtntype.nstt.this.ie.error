@@ -1,0 +1,1 @@
+TypeException: The return type must be "typeof this" and not "Number" (fixtures/compile/type/type.typeof.class.rtntype.nstt.this.ie.ks:9)

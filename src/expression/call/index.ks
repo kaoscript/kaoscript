@@ -5,6 +5,7 @@ class CallExpression extends Expression {
 		@arguments: Array						= []
 		@assessment: Router.Assessment?
 		@await: Boolean							= false
+		@callee: Expression?					= null
 		@callees: Callee[]						= []
 		@calleeByHash: Object<Callee>			= {}
 		@flatten: Boolean						= false
@@ -101,11 +102,17 @@ class CallExpression extends Expression {
 			@arguments.push(argument)
 		}
 
-		if @data.callee.kind == NodeKind.MemberExpression && !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Computed) {
-			@object = $compile.expression(@data.callee.object, this)
-			@object.analyse()
+		if @data.callee.kind == NodeKind.MemberExpression {
+			if !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Computed) {
+				@object = $compile.expression(@data.callee.object, this)
+					..analyse()
 
-			@property = @data.callee.property.name
+				@property = @data.callee.property.name
+			}
+		}
+		else {
+			@callee = $compile.expression(@data.callee, this)
+				..analyse()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -118,159 +125,25 @@ class CallExpression extends Expression {
 		if ?@object {
 			@object.prepare(AnyType.NullableUnexplicit)
 
-			@makeMemberCallee(@object.type().discardValue())
+			@object.makeMemberCallee(@property, null, this)
 
 			if @matchingMode == .BestMatch {
 				@object.unspecify()
 			}
 		}
+		else if ?@callee {
+			@callee.prepare(AnyType.NullableUnexplicit)
+
+			@callee.makeCallee(null, this)
+		}
 		else {
-			match @data.callee.kind {
-				NodeKind.Identifier {
-					if var variable ?= @scope.getVariable(@data.callee.name) {
-						var type = variable.getRealType()
-
-						if type.isFunction() {
-							if type.isAsync() {
-								if @parent is VariableDeclaration {
-									if !@parent.isAwait() {
-										TypeException.throwNotSyncFunction(@data.callee.name, this)
-									}
-								}
-								else if @parent is not AwaitExpression {
-									TypeException.throwNotSyncFunction(@data.callee.name, this)
-								}
-							}
-							else {
-								if @parent is VariableDeclaration {
-									if @parent.isAwait() {
-										TypeException.throwNotAsyncFunction(@data.callee.name, this)
-									}
-								}
-								else if @parent is AwaitExpression {
-									TypeException.throwNotAsyncFunction(@data.callee.name, this)
-								}
-							}
-						}
-
-						if ?variable.replaceCall {
-							@prepareArguments()
-
-							var substitute = variable.replaceCall(@data, @arguments, this)
-
-							@addCallee(SubstituteCallee.new(@data, substitute, this))
-						}
-						else {
-							@makeCallee(type, variable.name())
-						}
-					}
-					else {
-						ReferenceException.throwUndefinedFunction(@data.callee.name, this)
-					}
-				}
-				NodeKind.FunctionExpression {
-					throw NotImplementedException.new(this)
-				}
-				NodeKind.LambdaExpression {
-					var expression = $compile.expression(@data.callee, this)
-					expression.analyse()
-					expression.prepare(AnyType.NullableUnexplicit)
-
-					var function = expression.type()
-
-					@assessment = function.assessment(expression.toQuote(), this)
-
-					@prepareArguments()
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-						is LenientCallMatchResult with var result {
-							@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							var callee = PreciseFunctionCallee.new(@data, expression, @assessment, matches, this)
-
-							callee.flagDirect()
-
-							@addCallee(callee)
-						}
-						else {
-							ReferenceException.throwNoMatchingFunction(@assessment.name, @arguments, this)
-						}
-					}
-				}
-				NodeKind.ThisExpression {
-					var expression = $compile.expression(@data.callee, this)
-					expression.analyse()
-					expression.prepare(AnyType.NullableUnexplicit)
-
-					@property = @data.callee.name.name
-
-					var type = expression.type()
-
-					if !type.isFunction() {
-						@prepareArguments()
-
-						@addCallee(DefaultCallee.new(@data, null, null, this))
-					}
-					else if type.isReference() {
-						@prepareArguments()
-
-						if expression.isSealed() {
-							var object = IdentifierLiteral.new($ast.identifier('this'), this, @scope)
-							var class = expression.getClass()
-							var reference = @scope.reference(class)
-
-							@addCallee(SealedMethodCallee.new(@data, object, reference, @property, true, this))
-
-						}
-						else {
-							@addCallee(DefaultCallee.new(@data, expression, this))
-						}
-					}
-					else {
-						@assessment ??= type.assessment(@property, this)
-
-						@prepareArguments()
-
-						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-							is LenientCallMatchResult with var { possibilities } {
-								@addCallee(LenientThisCallee.new(@data, expression, @property, possibilities, this))
-							}
-							is PreciseCallMatchResult with var { matches } {
-								if matches.length == 1 {
-									var match = matches[0]
-									var class = expression.getClass()
-									var reference = @scope.reference(class)
-
-									@addCallee(PreciseThisCallee.new(@data, expression, reference, @property, @assessment, match, this))
-								}
-								else {
-									var functions = [match.function for var match in matches]
-
-									@addCallee(LenientThisCallee.new(@data, expression, @property, functions, this))
-								}
-							}
-							else {
-								if type.isExhaustive(this) {
-									ReferenceException.throwNoMatchingStaticMethod(@property, expression.getClass().name(), [argument.type() for var argument in @arguments], this)
-								}
-								else {
-									@addCallee(DefaultCallee.new(@data, expression, this))
-								}
-							}
-						}
-					}
-				}
-				else {
-					if @named {
-						NotImplementedException.throw(this)
-					}
-
-					@prepareArguments()
-
-					@addCallee(DefaultCallee.new(@data, null, null, this))
-				}
+			if @named {
+				NotImplementedException.throw(this)
 			}
+
+			@prepareArguments()
+
+			@addCallee(DefaultCallee.new(@data, null, null, this))
 		}
 
 		if @callees.length == 1 {
@@ -347,16 +220,33 @@ class CallExpression extends Expression {
 			argument.acquireReusable(acquire)
 		}
 	} # }}}
+	addCallee(callee: Callee) { # {{{
+		@prepareArguments()
+
+		if var hash ?= callee.hashCode() {
+			if var main ?= @calleeByHash[hash] {
+				main.mergeWith(callee)
+			}
+			else {
+				@callees.push(callee)
+				@calleeByHash[hash] = callee
+			}
+		}
+		else {
+			@callees.push(callee)
+		}
+	} # }}}
 	argument(index: Number) => @arguments[index]
 	arguments() => @arguments
-	arguments(@assessment) { # {{{
+	assessment() => @assessment
+	callees() => @callees
+	getArgumentsWith(@assessment) { # {{{
 		@prepareArguments()
 
 		return @arguments
 	} # }}}
-	assessment() => @assessment
-	callees() => @callees
 	getCallScope(): valueof @thisScope
+	getMatchingMode(): valueof @matchingMode
 	getReuseName() => @reuseName
 	inferTypes(inferables) { # {{{
 		if ?@object {
@@ -570,639 +460,17 @@ class CallExpression extends Expression {
 
 		return variables
 	} # }}}
-	makeCallee(type: Type, name: String?) { # {{{
-		// echo('-- call.makeCallee --')
-		// echo(type)
-		// echo(name)
+	override makeCallee(generics, node) { # {{{
+		node.prepareArguments()
 
-		if type is FunctionType | OverloadedFunctionType {
-			@assessment = type.assessment(name!!, this)
-
-			@prepareArguments()
-
-			match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-				is LenientCallMatchResult with var result {
-					@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
-				}
-				is PreciseCallMatchResult with var { matches } {
-					if matches.length == 1 {
-						var match = matches[0]
-
-						if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
-							@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
-						}
-						else {
-							@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
-						}
-					}
-					else if @matchingMode == .AllMatches {
-						@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
-					}
-					else {
-						var functions = [match.function for var match in matches]
-
-						@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
-					}
-				}
-				NoMatchResult.NoArgumentMatch {
-					if type.isExhaustive(this) {
-						ReferenceException.throwNoMatchingFunction(name, @arguments, this)
-					}
-					else {
-						@addCallee(DefaultCallee.new(@data, @object, null, this))
-					}
-				}
-				NoMatchResult.NoThisMatch {
-					if ?@thisScope {
-						ReferenceException.throwNoMatchingThis(name, this)
-					}
-					else {
-						ReferenceException.throwMissingThisContext(name, this)
-					}
-				}
-			}
-		}
-		else if type.isBitmask() {
-			var bitmask = type.discardName()
-
-			@prepareArguments()
-
-			if @arguments.length != 1 {
-				ReferenceException.throwNoMatchingBitmaskConstructor(name, @arguments, this)
-			}
-
-			var argument = @arguments[0]
-
-			if !argument.type().isAssignableToVariable(bitmask.type(), true, true, false) && type.isExhaustive(this) {
-				ReferenceException.throwNoMatchingBitmaskConstructor(name, @arguments, this)
-			}
-
-			@addCallee(BitmaskCreateCallee.new(@data, type, argument, this))
-		}
-		else if type.isEnum() {
-			var enum = type.discardName()
-
-			@prepareArguments()
-
-			if @arguments.length != 1 {
-				ReferenceException.throwNoMatchingEnumConstructor(name, @arguments, this)
-			}
-
-			var argument = @arguments[0]
-
-			if !argument.type().isAssignableToVariable(enum.type(), true, true, false) && type.isExhaustive(this) {
-				ReferenceException.throwNoMatchingEnumConstructor(name, @arguments, this)
-			}
-
-			@addCallee(EnumCreateCallee.new(@data, type, argument, this))
-		}
-		else if type.isStruct() {
-			TypeException.throwConstructorWithoutNew(name, this)
-		}
-		else if type.isTuple() {
-			TypeException.throwConstructorWithoutNew(name, this)
-		}
-		else if type.isClass() {
-			TypeException.throwConstructorWithoutNew(name, this)
-		}
-		else if type.canBeFunction() {
-			@prepareArguments()
-
-			@addCallee(DefaultCallee.new(@data, @object, null, this))
-		}
-		else {
-			@prepareArguments()
-
-			if type.isExhaustive(this) {
-				TypeException.throwNotFunction(name, this)
-			}
-			else {
-				@addCallee(DefaultCallee.new(@data, @object, null, this))
-			}
-		}
+		node.addCallee(DefaultCallee.new(node.data(), null, null, node))
 	} # }}}
-	makeMemberCallee(value, mut name: NamedType? = null) { # {{{
-		// echo('-- call.makeMemberCallee --')
-		// echo(value)
-		// echo(@property)
+	matchArguments(@assessment): CallMatchResult { # {{{
+		@prepareArguments()
 
-		match value {
-			is AliasType {
-				@makeMemberCallee(value.type(), name)
-			}
-			is ArrayType {
-				@makeMemberCalleeFromReference(@scope.reference('Array'))
-			}
-			is ClassVariableType {
-				@makeMemberCalleeFromReference(value.type())
-			}
-			is ClassType {
-				name = name:&(NamedType)
-
-				var reference = @scope().reference(name)
-
-				if reference.isVirtual() {
-					TypeException.throwNotCreatable(reference.toQuote(), this)
-				}
-
-				if @property == 'new' {
-					@assessment = value.getConstructorAssessment(name.name(), this)
-
-					@prepareArguments()
-
-					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult, PreciseCallMatchResult {
-							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
-						}
-						else {
-							if value.isExhaustiveConstructor(this) {
-								ReferenceException.throwNoMatchingConstructor(name.name(), [argument.type() for var argument in @arguments], this)
-							}
-							else {
-								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
-							}
-						}
-					}
-				}
-				else if value.hasStaticMethod(@property) {
-					@assessment = value.getStaticAssessment(@property, this)
-
-					@prepareArguments()
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with var result {
-							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							if matches.length == 1 {
-								var match = matches[0]
-
-								if match.function.isSealed() {
-									@addCallee(SealedPreciseMethodCallee.new(@data, @object, reference, @property, @assessment, match, this))
-								}
-								else {
-									@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
-								}
-							}
-							else if @matchingMode == .AllMatches {
-								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
-							}
-							else {
-								var functions = [match.function for var match in matches]
-
-								if functions.some((function, _, _) => function.isSealed()) {
-									@addCallee(SealedCallee.new(@data, name, false, functions, this))
-								}
-								else {
-									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
-								}
-							}
-						}
-						else {
-							if value.isExhaustiveStaticMethod(@property, this) {
-								ReferenceException.throwNoMatchingStaticMethod(@property, name.name(), [argument.type() for var argument in @arguments], this)
-							}
-							else if @assessment.sealed {
-								@addCallee(SealedMethodCallee.new(@data, @object, reference, @property, false, this))
-							}
-							else {
-								@addCallee(DefaultCallee.new(@data, @object, reference, this))
-							}
-						}
-					}
-				}
-				else if value.isExhaustive(this) {
-					ReferenceException.throwNotFoundStaticMethod(@property, name.name(), this)
-				}
-				else {
-					@prepareArguments()
-
-					@addCallee(DefaultCallee.new(@data, @object, reference, this))
-				}
-			}
-			is EnumType {
-				name = name:&(NamedType)
-
-				var reference = @scope().reference(name)
-
-				if value.hasStaticMethod(@property) {
-					@assessment = value.getStaticAssessment(@property, this)
-
-					@prepareArguments()
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with var result {
-							@addCallee(EnumMethodCallee.new(@data, @object.type().discardValue(), @property, result.possibilities, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							if matches.length == 1 {
-								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
-							}
-							else {
-								throw NotImplementedException.new(this)
-							}
-						}
-						else {
-							if value.isExhaustiveStaticMethod(@property, this) {
-								ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), @arguments, this)
-							}
-							else {
-								@addCallee(EnumMethodCallee.new(@data, @object.type().discardValue(), @property, null, this))
-							}
-						}
-					}
-				}
-				else if value.isExhaustive(this) {
-					ReferenceException.throwNotFoundEnumMethod(@property, name.name(), this)
-				}
-				else {
-					@prepareArguments()
-
-					@addCallee(DefaultCallee.new(@data, @object, reference, this))
-				}
-			}
-			is ExclusionType {
-				@makeMemberCallee(value.getMainType())
-			}
-			is FunctionType {
-				@makeMemberCalleeFromReference(@scope.reference('Function'))
-			}
-			is NamedType {
-				@makeMemberCallee(value.type(), value)
-			}
-			is NamespaceType {
-				if var property ?= value.getProperty(@property) {
-					if property is FunctionType || property is OverloadedFunctionType {
-						@assessment = property.assessment(@property, this)
-
-						@prepareArguments()
-
-						match Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this) {
-							is LenientCallMatchResult with var result {
-								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
-							}
-							is PreciseCallMatchResult with var { matches } {
-								if matches.length == 1 {
-									var match = matches[0]
-
-									if match.function.isAlien() || match.function.index() == -1 {
-										@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
-									}
-									else {
-										@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
-									}
-								}
-								else {
-									var functions = [match.function for var match in matches]
-
-									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
-								}
-							}
-							else {
-								if property.isExhaustive(this) {
-									ReferenceException.throwNoMatchingFunctionInNamespace(@property, name, @arguments, this)
-								}
-								else {
-									@addCallee(DefaultCallee.new(@data, @object, null, this))
-								}
-							}
-						}
-					}
-					else if property is SealableType {
-						this.makeNamespaceCallee(property.type(), property.isSealed(), name)
-					}
-					else {
-						this.makeNamespaceCallee(property, value.isSealedProperty(@property), name)
-					}
-				}
-				else if value.isExhaustive(this) {
-					ReferenceException.throwNotDefinedProperty(@property, this)
-				}
-				else {
-					@prepareArguments()
-
-					@addCallee(DefaultCallee.new(@data, @object, null, this))
-				}
-			}
-			is ObjectType {
-				if var property ?= value.getProperty(@property) {
-					@makeCallee(property, @property)
-				}
-				else {
-					@makeMemberCalleeFromReference(@scope.reference('Object'))
-				}
-			}
-			is ParameterType {
-				@makeMemberCallee(value.type(), name)
-			}
-			is ReferenceType {
-				if value.isNullable() && !@isMisfit() {
-					unless @data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
-						TypeException.throwNotNullableCaller(@property, this)
-					}
-				}
-
-				if @property == 'new' && value.isClass() {
-					@prepareArguments()
-
-					@addCallee(ConstructorCallee.new(@data, @object, value, null, null, this))
-				}
-				else {
-					@makeMemberCalleeFromReference(value)
-				}
-			}
-			is SealableType {
-				@makeMemberCallee(value.type(), name)
-			}
-			is StructType {
-				name = name:&(NamedType)
-
-				var reference = @scope().reference(name)
-
-				if @property == 'new' {
-					@assessment = value.assessment(reference, this)
-
-					@prepareArguments()
-
-					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult, PreciseCallMatchResult {
-							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
-						}
-						else {
-							if value.isExhaustive(this) {
-								ReferenceException.throwNoMatchingStruct(name.name(), [argument.type() for var argument in @arguments], this)
-							}
-							else {
-								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
-							}
-						}
-					}
-				}
-				else {
-					throw NotSupportedException.new(this)
-				}
-			}
-			is UnionType {
-				for var type in value.types() {
-					@makeMemberCallee(type)
-				}
-			}
-			is TupleType {
-				name = name:&(NamedType)
-
-				var reference = @scope().reference(name)
-
-				if @property == 'new' {
-					@assessment = value.assessment(reference, this)
-
-					@prepareArguments()
-
-					match var result = Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult, PreciseCallMatchResult {
-							@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, result, this))
-						}
-						else {
-							if value.isExhaustive(this) {
-								ReferenceException.throwNoMatchingTuple(name.name(), [argument.type() for var argument in @arguments], this)
-							}
-							else {
-								@addCallee(ConstructorCallee.new(@data, @object, reference, @assessment, null, this))
-							}
-						}
-					}
-				}
-				else {
-					throw NotSupportedException.new(this)
-				}
-			}
-			else {
-				@prepareArguments()
-
-				if @property == 'new' {
-					@addCallee(ConstructorCallee.new(@data, @object, AnyType.NullableUnexplicit, null, null, this))
-				}
-				else {
-					@addCallee(DefaultCallee.new(@data, @object, null, this))
-				}
-			}
-		}
+		return Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this)
 	} # }}}
-	makeMemberCalleeFromReference(value, reference: ReferenceType = value) { # {{{
-		// echo('-- call.makeMemberCalleeFromReference --')
-		// echo(value)
-		// echo(@property)
-
-		match value {
-			is AliasType {
-				@makeMemberCalleeFromReference(value.type())
-			}
-			is ClassType {
-				if value.hasInstantiableMethod(@property) {
-					@assessment = value.getInstantiableAssessment(@property, this)
-
-					@prepareArguments()
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with var result {
-							var class = value.getClassWithInstantiableMethod(@property, reference.type())
-							var reference = @scope.reference(class)
-
-							@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, result, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							var class = value.getClassWithInstantiableMethod(@property, reference.type())
-							var reference = @scope.reference(class)
-
-							if matches.length == 1 {
-								var match = matches[0]
-
-								if match.function.isSealed() {
-									@addCallee(SealedPreciseMethodCallee.new(@data, @object, reference, @property, @assessment, match, this))
-								}
-								else {
-									@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
-								}
-							}
-							else if @matchingMode == .AllMatches {
-								@addCallee(PreciseMethodCallee.new(@data, @object, reference, @property, @assessment, matches, this))
-							}
-							else {
-								var functions = [match.function for var match in matches]
-
-								@addCallee(LenientMethodCallee.new(@data, @object, reference, @property, @assessment, functions, this))
-							}
-						}
-						NoMatchResult.NoArgumentMatch {
-							if value.isExhaustiveInstanceMethod(@property, this) {
-								ReferenceException.throwNoMatchingStaticMethod(@property, reference.name(), [argument.type() for var argument in @arguments], this)
-							}
-							else {
-								@addCallee(DefaultCallee.new(@data, @object, reference, this))
-							}
-						}
-						NoMatchResult.NoThisMatch {
-							ReferenceException.throwNoAssignableThisInMethod(@property, this)
-						}
-					}
-				}
-				else {
-					@prepareArguments()
-
-					var dyn callee, substitute
-
-					if	@data.callee.object.kind == NodeKind.Identifier &&
-							(callee ?= @scope.getVariable(@data.callee.object.name)) &&
-							(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
-					{
-						@addCallee(SubstituteCallee.new(@data, substitute, Type.Any, this))
-					}
-					else if value.hasInstanceVariable(@property) {
-						@addCallee(DefaultCallee.new(@data, @object, reference, this))
-					}
-					else if value.isExhaustive(this) {
-						ReferenceException.throwNotFoundStaticMethod(@property, reference.name(), this)
-					}
-					else {
-						@addCallee(DefaultCallee.new(@data, @object, reference, this))
-					}
-				}
-			}
-			is EnumType {
-				if value.hasInstanceMethod(@property) {
-					@assessment = value.getInstanceAssessment(@property, this)
-
-					@prepareArguments()
-
-					match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-						is LenientCallMatchResult with var result {
-							@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, result.possibilities, this))
-						}
-						is PreciseCallMatchResult with var { matches } {
-							if matches.length == 1 {
-								var match = matches[0]
-
-								@addCallee(InvertedPreciseMethodCallee.new(@data, reference.discardReference():&(NamedType), @property, @assessment, match, this))
-							}
-							else {
-								var functions = [match.function for var match in matches]
-
-								@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, functions, this))
-							}
-						}
-						else {
-							if value.isExhaustiveInstanceMethod(@property, this) {
-								ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), @arguments, this)
-							}
-							else {
-								@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, null, this))
-							}
-						}
-					}
-				}
-				else if reference.isExhaustive(this) {
-					ReferenceException.throwNotFoundEnumMethod(@property, reference.name(), this)
-				}
-				else {
-					@prepareArguments()
-
-					@addCallee(EnumMethodCallee.new(@data, reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(@property)`, null, this))
-				}
-			}
-			is FunctionType {
-				throw NotImplementedException.new(this)
-			}
-			is NamedType {
-				@makeMemberCalleeFromReference(value.type(), reference)
-			}
-			is ObjectType {
-				if var property ?= value.getProperty(@property) {
-					if property is FunctionType || property is OverloadedFunctionType {
-						@assessment = property.assessment(@property, this)
-
-						@prepareArguments()
-
-						match Router.matchArguments(@assessment, @thisType, @arguments, this) {
-							is LenientCallMatchResult with var result {
-								@addCallee(LenientFunctionCallee.new(@data, @assessment, result, this))
-							}
-							is PreciseCallMatchResult with var { matches } {
-								if matches.length == 1 {
-									var match = matches[0]
-
-									if match.function.isAlien() || match.function.index() == -1 {
-										@addCallee(LenientFunctionCallee.new(@data, @assessment, [match.function], this))
-									}
-									else {
-										@addCallee(PreciseFunctionCallee.new(@data, @assessment, matches, this))
-									}
-								}
-								else {
-									var functions = [match.function for var match in matches]
-
-									@addCallee(LenientFunctionCallee.new(@data, @assessment, functions, this))
-								}
-							}
-							else {
-								if property.isExhaustive(this) {
-									ReferenceException.throwNoMatchingFunction(@property, reference.name(), @arguments, this)
-								}
-								else {
-									@addCallee(DefaultCallee.new(@data, @object, reference, this))
-								}
-							}
-						}
-					}
-					else {
-						throw NotImplementedException.new(this)
-					}
-				}
-				else if value.isExhaustive(this) {
-					ReferenceException.throwNotDefinedProperty(@property, this)
-				}
-				else {
-					@prepareArguments()
-
-					@addCallee(DefaultCallee.new(@data, @object, reference, this))
-				}
-			}
-			is ParameterType {
-				throw NotImplementedException.new(this)
-			}
-			is ReferenceType {
-				@makeMemberCalleeFromReference(value.type(), value)
-			}
-			is UnionType {
-				for var type in value.types() {
-					@makeMemberCallee(type)
-				}
-			}
-			else {
-				@prepareArguments()
-
-				@addCallee(DefaultCallee.new(@data, @object, reference, this))
-			}
-		}
-	} # }}}
-	makeNamespaceCallee(property, sealed, name) { # {{{
-		if property is FunctionType {
-			if sealed {
-				@prepareArguments()
-
-				@addCallee(SealedFunctionCallee.new(@data, name, property, property.getReturnType(), this))
-			}
-			else {
-				@makeCallee(property, @property)
-			}
-		}
-		else if property is OverloadedFunctionType {
-			@makeCallee(property, @property)
-		}
-		else {
-			@prepareArguments()
-
-			@addCallee(DefaultCallee.new(@data, @object, null, property, this))
-		}
-	} # }}}
+	object() => @object
 	prepareArguments() { # {{{
 		return if @preparedArguments
 
@@ -1477,20 +745,6 @@ class CallExpression extends Expression {
 		}
 
 		return true
-	} # }}}
-	private addCallee(callee: Callee) { # {{{
-		if var hash ?= callee.hashCode() {
-			if var main ?= @calleeByHash[hash] {
-				main.mergeWith(callee)
-			}
-			else {
-				@callees.push(callee)
-				@calleeByHash[hash] = callee
-			}
-		}
-		else {
-			@callees.push(callee)
-		}
 	} # }}}
 }
 

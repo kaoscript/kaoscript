@@ -570,6 +570,16 @@ class UnionType extends Type {
 			return Type.union(@scope, ...matches)
 		}
 	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		for var type in @types {
+			type.makeMemberCallee(property, generics, node)
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		for var type in @types {
+			type.makeMemberCallee(property, generics, node)
+		}
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		for var type in @types {
 			if !type.matchContentOf(value) {
@@ -860,7 +870,6 @@ class UnionType extends Type {
 		}
 	} # }}}
 	trimOff(type: Type) { # {{{
-		// var types = [t for var t in @types when !t.matchContentOf(type)]
 		var types = [t for var t in @types when !t.isAssignableToVariable(type, false, false, false)]
 
 		if types.length == 1 {

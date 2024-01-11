@@ -641,6 +641,100 @@ class EnumType extends Type {
 	} # }}}
 	listFieldNames() => [name for var _, name of @fields]
 	listValueNames() => [name for var _, name of @values]
+	override makeCallee(name, generics, node) { # {{{
+		node.prepareArguments()
+
+		var arguments = node.arguments()
+
+		if arguments.length != 1 {
+			ReferenceException.throwNoMatchingEnumConstructor(name, arguments, node)
+		}
+
+		var argument = arguments[0]
+		var type = @scope.getVariable(name).getRealType()
+
+		if !argument.type().isAssignableToVariable(@type, true, true, false) && type.isExhaustive(node) {
+			ReferenceException.throwNoMatchingEnumConstructor(name, arguments, node)
+		}
+
+		node.addCallee(EnumCreateCallee.new(node.data(), type, argument, node))
+	} # }}}
+	override makeMemberCallee(property, name, generics, node) { # {{{
+		var reference = @scope.reference(name)
+
+		if @hasStaticMethod(property) {
+			var assessment = @getStaticAssessment(property, node)
+
+			match node.matchArguments(assessment) {
+				is LenientCallMatchResult with var result {
+					node.addCallee(EnumMethodCallee.new(node.data(), node.object().type().discardValue(), property, result.possibilities, node))
+				}
+				is PreciseCallMatchResult with var { matches } {
+					if matches.length == 1 {
+						node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+					}
+					else {
+						throw NotImplementedException.new(node)
+					}
+				}
+				else {
+					if @isExhaustiveStaticMethod(property, node) {
+						ReferenceException.throwNoMatchingEnumMethod(property, name.name(), node.arguments(), node)
+					}
+					else {
+						node.addCallee(EnumMethodCallee.new(node.data(), node.object().type().discardValue(), property, null, node))
+					}
+				}
+			}
+		}
+		else if @isExhaustive(node) {
+			ReferenceException.throwNotFoundEnumMethod(property, name.name(), node)
+		}
+		else {
+			@prepareArguments()
+
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		if @hasInstanceMethod(property) {
+			var assessment = @getInstanceAssessment(property, node)
+
+			match node.matchArguments(assessment) {
+				is LenientCallMatchResult with var result {
+					node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, result.possibilities, node))
+				}
+				is PreciseCallMatchResult with var { matches } {
+					if matches.length == 1 {
+						var match = matches[0]
+
+						node.addCallee(InvertedPreciseMethodCallee.new(node.data(), reference.discardReference():&(NamedType), property, assessment, match, node))
+					}
+					else {
+						var functions = [match.function for var match in matches]
+
+						node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, functions, node))
+					}
+				}
+				else {
+					if @isExhaustiveInstanceMethod(property, node) {
+						ReferenceException.throwNoMatchingEnumMethod(property, reference.name(), node.arguments(), node)
+					}
+					else {
+						node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+					}
+				}
+			}
+		}
+		else if reference.isExhaustive(node) {
+			ReferenceException.throwNotFoundEnumMethod(property, reference.name(), node)
+		}
+		else {
+			node.prepareArguments()
+
+			node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+		}
+	} # }}}
 	matchValueArguments(arguments, node) { # {{{
 		return Router.matchArguments(@fieldAssessment, null, arguments, null, node)
 	} # }}}
@@ -693,9 +787,7 @@ class EnumValueType {
 		@value?
 	}
 	constructor(@name)
-	// TODO!
-	// constructor(@name, @index, @value)
-	constructor(@name, @index, @value = null)
+	constructor(@name, @index, @value)
 	argument(name: String) => @arguments[name]
 	argument(name: String, value: String) { # {{{
 		@arguments[name] = value

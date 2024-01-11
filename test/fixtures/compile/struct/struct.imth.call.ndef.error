@@ -1,0 +1,1 @@
+ReferenceException: Struct methods aren't supported, yet (fixtures/compile/struct/struct.imth.call.ndef.ks:8)

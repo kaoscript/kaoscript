@@ -121,9 +121,9 @@ abstract class PreciseCallee extends Callee {
 			}
 		}
 		else if @type.isDeferrable() {
-			var generics = @function.buildGenericMap(@positions, node.arguments())
-
-			@type = @type.applyGenerics(generics)
+			if var generics ?#= @function.buildGenericMap(@positions, node.arguments()) {
+				@type = @type.applyGenerics(generics)
+			}
 		}
 
 		@hash = @buildHashCode()
@@ -213,9 +213,9 @@ abstract class LenientCallee extends Callee {
 				}
 			}
 			else if @type.isDeferrable() {
-				var generics = function.buildGenericMap(node.arguments())
-
-				@type = @type.applyGenerics(generics)
+				if var generics ?#= function.buildGenericMap(node.arguments()) {
+					@type = @type.applyGenerics(generics)
+				}
 			}
 		}
 		else {

@@ -426,7 +426,7 @@ class TryStatement extends Statement {
 			return unless ?branch
 
 			if ?branch.type {
-				if variable.isImmutable() {
+				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(branch.type) {
@@ -473,7 +473,7 @@ class TryStatement extends Statement {
 			return unless ?branch
 
 			if ?branch.type {
-				if variable.isImmutable() {
+				if variable.immutable {
 					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(branch.type) {

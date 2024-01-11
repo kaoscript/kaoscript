@@ -4,8 +4,7 @@ module.exports = function() {
 		return corge.__ks_rt(this, arguments);
 	};
 	corge.__ks_0 = function(foo, args) {
-		let __ks_0;
-		(__ks_0 = foo.bar(), __ks_0.qux).apply(__ks_0, [].concat(args));
+		foo.bar().qux(...Helper.checkArray(args));
 	};
 	corge.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

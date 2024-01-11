@@ -143,6 +143,20 @@ class AnyType extends Type {
 			return value.isAny() && (!@nullable || value.isNullable())
 		}
 	} # }}}
+	override makeCallee(name, generics, node) { # {{{
+		node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+	} # }}}
+	override makeMemberCallee(property, generics, node) { # {{{
+		if property == 'new' {
+			node.addCallee(ConstructorCallee.new(node.data(), node.object(), AnyType.NullableUnexplicit, null, null, node))
+		}
+		else {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+		}
+	} # }}}
+	override makeMemberCallee(property, reference, generics, node) { # {{{
+		@makeMemberCallee(property, generics, node)
+	} # }}}
 	matchContentOf(value) => !@explicit || (value.isAny() && (@nullable -> value.isNullable()))
 	parameter() => AnyType.NullableUnexplicit
 	reference() => this
