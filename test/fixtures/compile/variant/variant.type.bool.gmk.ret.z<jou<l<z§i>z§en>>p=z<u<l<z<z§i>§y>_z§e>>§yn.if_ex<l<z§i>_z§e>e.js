@@ -55,9 +55,14 @@ module.exports = function() {
 		})();
 		if(Type.isValue(subtypes)) {
 			if(Type.isArray(subtypes.value)) {
-				result.subtypes = Helper.mapArray(subtypes.value, function(subtype) {
-					return subtype.value;
-				});
+				result.subtypes = (() => {
+					const a = [];
+					for(let __ks_1 = 0, __ks_0 = subtypes.value.length, subtype; __ks_1 < __ks_0; ++__ks_1) {
+						subtype = subtypes.value[__ks_1];
+						a.push(subtype.value);
+					}
+					return a;
+				})();
 			}
 			else {
 				result.subtypes = subtypes.value;

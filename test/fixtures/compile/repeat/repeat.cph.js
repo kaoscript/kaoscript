@@ -1,6 +1,9 @@
-const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	const values = Helper.mapRange(0, 10, 1, true, true, function() {
-		return "Hello world!";
-	});
+	const values = (() => {
+		const a = [];
+		for(__ks_0 = 0; __ks_0 < 10; ++__ks_0) {
+			a.push("Hello world!");
+		}
+		return a;
+	})();
 };

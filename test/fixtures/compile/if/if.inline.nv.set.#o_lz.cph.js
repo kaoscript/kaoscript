@@ -12,9 +12,14 @@ module.exports = function() {
 		}
 		return (() => {
 			const o = new OBJ();
-			o.cards = Type.isValue(cards) ? Helper.mapArray(cards, function(card) {
-				return card.value;
-			}) : [];
+			o.cards = Type.isValue(cards) ? (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = cards.length, card; __ks_1 < __ks_0; ++__ks_1) {
+					card = cards[__ks_1];
+					a.push(card.value);
+				}
+				return a;
+			})() : [];
 			return o;
 		})();
 	};

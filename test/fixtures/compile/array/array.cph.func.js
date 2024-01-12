@@ -11,11 +11,16 @@ module.exports = function() {
 		return spicyHeroes.__ks_rt(this, arguments);
 	};
 	spicyHeroes.__ks_0 = function() {
-		return Helper.mapObject(likes, function(hero, like) {
-			return hero;
-		}, function(hero, like) {
-			return like === "spice";
-		});
+		return (() => {
+			const a = [];
+			for(const hero in likes) {
+				const like = likes[hero];
+				if(like === "spice") {
+					a.push(hero);
+				}
+			}
+			return a;
+		})();
 	};
 	spicyHeroes.__ks_rt = function(that, args) {
 		if(args.length === 0) {

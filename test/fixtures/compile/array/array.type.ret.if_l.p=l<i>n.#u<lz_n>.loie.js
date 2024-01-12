@@ -11,13 +11,18 @@ module.exports = function() {
 			suits = null;
 		}
 		if(Type.isArray(suits)) {
-			return Helper.mapArray(suits, function(suit) {
-				return (() => {
-					const o = new OBJ();
-					o.suit = suit;
-					return o;
-				})();
-			});
+			return (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = suits.length, suit; __ks_1 < __ks_0; ++__ks_1) {
+					suit = suits[__ks_1];
+					a.push((() => {
+						const o = new OBJ();
+						o.suit = suit;
+						return o;
+					})());
+				}
+				return a;
+			})();
 		}
 		return null;
 	};

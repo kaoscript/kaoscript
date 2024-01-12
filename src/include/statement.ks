@@ -139,7 +139,7 @@ include {
 	'../statement/export.ks'
 	'../statement/expression.ks'
 	'../statement/fallthrough.ks'
-	'../statement/for/index.ks'
+	'../statement/for.ks'
 	'../statement/function.ks'
 	'../statement/if.ks'
 	'../statement/implement/index.ks'

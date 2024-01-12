@@ -21,7 +21,12 @@ module.exports = function() {
 	};
 	const condition = true;
 	const values = [1, 2, 3];
-	foobar.__ks_0(condition ? Helper.mapArray(values, function(value) {
-		return value;
-	}) : null);
+	foobar.__ks_0(condition ? (() => {
+		const a = [];
+		for(let __ks_1 = 0, __ks_0 = values.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = values[__ks_1];
+			a.push(value);
+		}
+		return a;
+	})() : null);
 };

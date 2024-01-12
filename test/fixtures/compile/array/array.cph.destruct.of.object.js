@@ -4,9 +4,15 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(items) {
-		return Helper.mapObject(items, function(__ks_0, {key}) {
-			return key;
-		});
+		return (() => {
+			const a = [];
+			for(let __ks_0 in items) {
+				Helper.assertDexObject(items[__ks_0], 1, 0, {key: Type.isValue});
+				const {key} = items[__ks_0];
+				a.push(key);
+			}
+			return a;
+		})();
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isObject;

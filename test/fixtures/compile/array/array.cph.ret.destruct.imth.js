@@ -32,13 +32,19 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			return Helper.mapArray(this._values, function({name}) {
-				return (() => {
-					const o = new OBJ();
-					o.name = name;
-					return o;
-				})();
-			});
+			return (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = Helper.length(this._values), name; __ks_1 < __ks_0; ++__ks_1) {
+					Helper.assertDexObject(this._values[__ks_1], 1, 0, {name: Type.isValue});
+					({name} = this._values[__ks_1]);
+					a.push((() => {
+						const o = new OBJ();
+						o.name = name;
+						return o;
+					})());
+				}
+				return a;
+			})();
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			if(args.length === 0) {

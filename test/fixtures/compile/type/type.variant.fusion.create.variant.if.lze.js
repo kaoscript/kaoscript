@@ -35,13 +35,18 @@ module.exports = function() {
 		})();
 		if(Type.isValue(cards)) {
 			if(Type.isArray(cards, value => Type.isEnumInstance(value, CardSuit))) {
-				result.values = Helper.mapArray(cards, function(suit) {
-					return (() => {
-						const o = new OBJ();
-						o.suit = suit;
-						return o;
-					})();
-				});
+				result.values = (() => {
+					const a = [];
+					for(let __ks_1 = 0, __ks_0 = cards.length, suit; __ks_1 < __ks_0; ++__ks_1) {
+						suit = cards[__ks_1];
+						a.push((() => {
+							const o = new OBJ();
+							o.suit = suit;
+							return o;
+						})());
+					}
+					return a;
+				})();
 			}
 			else {
 				result.values = cards;

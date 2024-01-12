@@ -708,16 +708,12 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 
-			// TODO! parsing
-			// if !?method ;; var methods ?#= matchAll(@name, @type, mode) {
-			if !?method {
-				if var methods ?#= matchAll(@name, @type, mode) {
-					if methods.length == 1 {
-						method = methods[0]
-					}
-					else {
-						return null
-					}
+			if !?method ;; var methods ?#= matchAll(@name, @type, mode) {
+				if methods.length == 1 {
+					method = methods[0]
+				}
+				else {
+					return null
 				}
 			}
 

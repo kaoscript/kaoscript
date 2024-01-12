@@ -29,9 +29,14 @@ module.exports = function() {
 			const o = new OBJ();
 			o.kind = PersonKind.Student;
 			o.name = name;
-			o.ranks = Helper.mapArray(ranks, function(rank) {
-				return rank.value;
-			});
+			o.ranks = (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = ranks.length, rank; __ks_1 < __ks_0; ++__ks_1) {
+					rank = ranks[__ks_1];
+					a.push(rank.value);
+				}
+				return a;
+			})();
 			return o;
 		})();
 	};

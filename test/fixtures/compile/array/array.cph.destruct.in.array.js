@@ -4,9 +4,15 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(items) {
-		return Helper.mapArray(items, function([key]) {
-			return key;
-		});
+		return (() => {
+			const a = [];
+			for(let __ks_1 = 0, __ks_0 = items.length, key; __ks_1 < __ks_0; ++__ks_1) {
+				Helper.assertDexArray(items[__ks_1], 1, 1, 0, 0, [Type.isValue]);
+				([key] = items[__ks_1]);
+				a.push(key);
+			}
+			return a;
+		})();
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isArray;

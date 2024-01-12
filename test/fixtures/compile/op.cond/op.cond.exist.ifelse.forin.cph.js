@@ -10,9 +10,14 @@ module.exports = function() {
 		if(Type.isValue(values)) {
 		}
 		else {
-			return Helper.mapArray(values, function(value) {
-				return value;
-			});
+			return (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = Helper.length(values), value; __ks_1 < __ks_0; ++__ks_1) {
+					value = values[__ks_1];
+					a.push(value);
+				}
+				return a;
+			})();
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

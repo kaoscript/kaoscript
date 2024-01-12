@@ -1,741 +1,101 @@
-class ArrayComprehensionForFrom extends Expression {
-	private {
-		@bindingScope
-		@body
-		@bodyScope
-		@declaration: Boolean				= false
-		@from
-		@immutable: Boolean					= true
-		@to
-		@step								= null
-		@variable
-		@when								= null
-	}
-	analyse() { # {{{
-		for var modifier in @data.loop.iteration.modifiers {
-			match modifier.kind {
-				ModifierKind.Declarative {
-					@declaration = true
-				}
-				ModifierKind.Mutable {
-					@immutable = false
-				}
-			}
-		}
-
-		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
-
-		if @declaration {
-			@bindingScope.define(@data.loop.iteration.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
-		}
-		else {
-			@bindingScope.checkVariable(@data.loop.iteration.variable.name, true, this)
-		}
-
-		@variable = $compile.expression(@data.loop.iteration.variable, this, @bindingScope)
-		@variable.analyse()
-
-		@from = $compile.expression(@data.loop.iteration.from, this, @scope)
-		@from.analyse()
-
-		@to = $compile.expression(@data.loop.iteration.to, this, @scope)
-		@to.analyse()
-
-		if ?@data.loop.iteration.step {
-			@step = $compile.expression(@data.loop.iteration.step, this, @scope)
-			@step.analyse()
-		}
-
-		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
-		@body.initiate()
-		@body.analyse()
-
-		if ?@data.loop.iteration.when {
-			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
-			@when.initiate()
-			@when.analyse()
-		}
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isArray() {
-			TypeException.throwInvalidComprehensionType(target, this)
-		}
-
-		@variable.prepare(AnyType.NullableUnexplicit)
-		@from.prepare(@scope.reference('Number'))
-		@to.prepare(@scope.reference('Number'))
-		@step?.prepare(@scope.reference('Number'))
-		@when?.prepare(@scope.reference('Boolean'))
-		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
-	} # }}}
-	translate() { # {{{
-		@variable.translate()
-		@from.translate()
-		@to.translate()
-		@step?.translate()
-		@body.translate()
-		@when?.translate()
-	} # }}}
-	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
-								@to.isUsingVariable(name) ||
-								@step?.isUsingVariable(name) ||
-								@when?.isUsingVariable(name) ||
-								@body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { # {{{
-		@from.listNonLocalVariables(scope, variables)
-		@to.listNonLocalVariables(scope, variables)
-		@step?.listNonLocalVariables(scope, variables)
-		@when?.listNonLocalVariables(scope, variables)
-		@body?.listNonLocalVariables(scope, variables)
-
-		return variables
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		@module().flag('Helper')
-
-		var surround = $function.surround(@data.value, this)
-
-		fragments
-			.code($runtime.helper(this), '.mapRange(')
-			.compile(@from)
-			.code($comma)
-			.compile(@to)
-
-		if ?@step {
-			fragments.code($comma).compile(@step)
-		}
-		else {
-			fragments.code(', 1')
-		}
-
-		fragments.code($comma, !$ast.hasModifier(@data.loop.iteration.from, ModifierKind.Ballpark), $comma, !$ast.hasModifier(@data.loop.iteration.to, ModifierKind.Ballpark), $comma)
-
-		fragments
-			.code(surround.beforeParameters)
-			.compile(@variable)
-			.code(surround.afterParameters)
-			.newBlock()
-			.compile(@body)
-			.done()
-
-		fragments.code(surround.footer)
-
-		if ?@when {
-			var surround = $function.surround(@data.loop.iteration.when, this)
-
-			fragments
-				.code($comma)
-				.code(surround.beforeParameters)
-				.compile(@variable)
-				.code(surround.afterParameters)
-				.newBlock()
-				.compile(@when)
-				.done()
-
-			fragments.code(surround.footer)
-		}
-
-		fragments.code(')')
-	} # }}}
-	type() => @scope.reference('Array')
-}
-
-class ArrayComprehensionForIn extends Expression {
+class ArrayComprehension extends Expression {
 	private late {
-		@bindingScope
-		@body
-		@bodyScope
-		@declaration: Boolean				= false
-		@declaredVariables: Array			= []
-		@declareIndex: Boolean				= false
-		@declareValue: Boolean				= false
-		@descending: Boolean				= false
-		@expression
-		@index
-		@immutable: Boolean					= true
+		@bodyScope: Scope
+		@iteration: IterationNode
+		@reusable: Boolean			= false
+		@reuseName: String?			= null
 		@type: Type
 		@value
-		@valueName: String
-		@when								= null
+		@varname: String			= 'a'
 	}
-	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
+	override analyse() { # {{{
+		@iteration = IterationNode.fromAST(@data.iteration, this, @scope)
+			..analyse()
 
-		for var modifier in @data.loop.iteration.modifiers {
-			match modifier.kind {
-				ModifierKind.Declarative {
-					@declaration = true
-				}
-				ModifierKind.Descending {
-					@descending = true
-				}
-				ModifierKind.Mutable {
-					@immutable = false
-				}
-			}
-		}
+		@bodyScope = @iteration.getBodyScope()
 
-		@expression = $compile.expression(@data.loop.iteration.expression, this, @scope)
-		@expression.analyse()
-
-		if ?@data.loop.iteration.value {
-			@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType.Expression)
-			@value.analyse()
-
-			for var { name } in @value.listAssignments([]) {
-				if @declaration {
-					@declareValue = true
-
-					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
-				}
-				else {
-					@bindingScope.checkVariable(name, true, this)
-				}
-			}
-		}
-		else {
-			@valueName = @bindingScope.acquireTempName()
-		}
-
-		if ?@data.loop.iteration.index {
-			if @declaration {
-				@bindingScope.define(@data.loop.iteration.index.name, @immutable, @bindingScope.reference('Number'), true, this)
-
-				@declareIndex = true
-			}
-			else {
-				@bindingScope.checkVariable(@data.loop.iteration.index.name, true, this)
-			}
-
-			@index = $compile.expression(@data.loop.iteration.index, this, @bindingScope)
-			@index.analyse()
-		}
-
-		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
-		@body.initiate()
-		@body.analyse()
-
-		if ?@data.loop.iteration.when {
-			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
-			@when.initiate()
-			@when.analyse()
-		}
-
-		@bindingScope.releaseTempName(@valueName) if ?@valueName
+		@value = $compile.expression(@data.value, this, @bodyScope)
+			..initiate()
+			..analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless target.canBeArray() {
-			TypeException.throwInvalidComprehensionType(target, this)
-		}
+		@type = ArrayType.new(@scope)
 
-		@expression.prepare(@scope.reference('Array'))
-
-		var type = @expression.type()
-		unless type.isAny() || type.isArray() {
-			TypeException.throwInvalidForInExpression(this)
-		}
-
-		if ?@value {
-			var parameterType = type.parameter()
-
-			var valueType = Type.fromAST(@data.type, this)
-			unless parameterType.matchContentOf(valueType) {
-				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
-			}
-
-			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
-
-			if @value is IdentifierLiteral {
-				if @declareValue {
-					@value.type(realType, @bindingScope, this)
-				}
-				else {
-					@bindingScope.replaceVariable(@value.name(), realType, this)
-				}
-			}
-			else {
-				for var { name } in @value.listAssignments([]) {
-					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
-				}
-			}
-		}
-
-		if ?@index {
-			unless @declareIndex {
-				@bindingScope.replaceVariable(@data.loop.iteration.index.name, @bindingScope.reference('Number'), this)
-			}
-
-			@index.prepare(@scope.reference('Number'))
-		}
-
-		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
-
-		if @body.type().isAny() {
-			@type = @scope.reference('Array')
-		}
-		else {
-			@type = Type.arrayOf(@body.type(), @scope)
-		}
-
-		if ?@when {
-			@when.prepare(@scope.reference('Boolean'))
-		}
-	} # }}}
-	translate() { # {{{
-		@expression.translate()
-		@value?.translate()
-		@index?.translate()
-		@body.translate()
-		@when?.translate()
-	} # }}}
-	isUsingVariable(name) => @expression.isUsingVariable(name) || @when?.isUsingVariable(name) || @body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { # {{{
-		@expression.listNonLocalVariables(scope, variables)
-		@when?.listNonLocalVariables(scope, variables)
-		@body?.listNonLocalVariables(scope, variables)
-
-		return variables
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		@module().flag('Helper')
-
-		var surround = $function.surround(@data.value, this)
-
-		fragments
-			.code($runtime.helper(this), '.mapArray(')
-			.compile(@expression)
-			.code(', ')
-
-		fragments
-			.code(surround.beforeParameters)
-			.compile(@value ?? @valueName)
-
-		fragments.code($comma).compile(@index) if ?@index
-
-		fragments
-			.code(surround.afterParameters)
-			.newBlock()
-			.compile(@body)
-			.done()
-
-		fragments.code(surround.footer)
-
-		if ?@when {
-			var surround = $function.surround(@data.loop.iteration.when, this)
-
-			fragments
-				.code($comma)
-				.code(surround.beforeParameters)
-				.compile(@value ?? @valueName)
-
-			fragments.code($comma).compile(@index) if ?@index
-
-			fragments
-				.code(surround.afterParameters)
-				.newBlock()
-				.compile(@when)
-				.done()
-
-			fragments.code(surround.footer)
-		}
-
-		fragments.code(')')
-	} # }}}
-	type() => @type
-}
-
-class ArrayComprehensionForOf extends Expression {
-	private late {
-		@bindingScope
-		@body
-		@bodyScope
-		@declaration: Boolean				= false
-		@defineKey: Boolean					= false
-		@defineValue: Boolean				= false
-		@expression
-		@key
-		@keyName
-		@immutable: Boolean					= true
-		@value
-		@when								= null
-	}
-	analyse() { # {{{
-		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
-
-		for var modifier in @data.loop.iteration.modifiers {
-			match modifier.kind {
-				ModifierKind.Declarative {
-					@declaration = true
-				}
-				ModifierKind.Mutable {
-					@immutable = false
-				}
-			}
-		}
-
-		@expression = $compile.expression(@data.loop.iteration.expression, this, @scope)
-		@expression.analyse()
-
-		if ?@data.loop.iteration.key {
-			if @declaration {
-				@bindingScope.define(@data.loop.iteration.key.name, @immutable, @bindingScope.reference('String'), true, this)
-
-				@defineKey = true
-			}
-			else {
-				@bindingScope.checkVariable(@data.loop.iteration.key.name, true, this)
-			}
-
-			@key = $compile.expression(@data.loop.iteration.key, this, @bindingScope)
-			@key.analyse()
-		}
-		else {
-			@keyName = @bindingScope.acquireTempName()
-		}
-
-		if ?@data.loop.iteration.value {
-			@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
-			@value.setAssignment(AssignmentType.Expression)
-			@value.analyse()
-
-			for var { name } in @value.listAssignments([]) {
-				if @declaration {
-					@defineValue = true
-
-					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
-				}
-				else {
-					@bindingScope.checkVariable(name, true, this)
-				}
-			}
-		}
-
-		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
-		@body.initiate()
-		@body.analyse()
-
-		if ?@data.loop.iteration.when {
-			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
-			@when.initiate()
-			@when.analyse()
-		}
-
-		@bindingScope.releaseTempName(@keyName) if ?@keyName
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isArray() {
-			TypeException.throwInvalidComprehensionType(target, this)
-		}
-
-		@expression.prepare(AnyType.NullableUnexplicit)
-
-		var type = @expression.type()
-		if !(type.isAny() || type.isObject()) {
-			TypeException.throwInvalidForOfExpression(this)
-		}
-
-		if ?@value {
-			var parameterType = type.parameter()
-
-			var valueType = Type.fromAST(@data.type, this)
-			unless parameterType.matchContentOf(valueType) {
-				TypeException.throwInvalidAssignment(@value, valueType, parameterType, this)
-			}
-
-			var realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
-
-			if @value is IdentifierLiteral {
-				if @defineValue {
-					@value.type(realType, @bindingScope, this)
-				}
-				else {
-					@bindingScope.replaceVariable(@value.name(), realType, this)
-				}
-			}
-			else {
-				for var { name } in @value.listAssignments([]) {
-					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
-				}
-			}
-		}
-
-		if ?@key {
-			unless @defineKey {
-				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
-			}
-
-			@key.prepare(@scope.reference('String'))
-		}
-
-		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
-
-		if ?@when {
-			@when.prepare(@scope.reference('Boolean'))
-		}
-	} # }}}
-	translate() { # {{{
-		@expression.translate()
-		@key?.translate()
-		@value?.translate()
-		@body.translate()
-		@when?.translate()
-	} # }}}
-	isUsingVariable(name) => @expression.isUsingVariable(name) || @when?.isUsingVariable(name) || @body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { # {{{
-		@expression.listNonLocalVariables(scope, variables)
-		@when?.listNonLocalVariables(scope, variables)
-		@body?.listNonLocalVariables(scope, variables)
-
-		return variables
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		@module().flag('Helper')
-
-		var surround = $function.surround(@data.value, this)
-
-		fragments
-			.code($runtime.helper(this), '.mapObject(')
-			.compile(@expression)
-			.code(', ')
-
-		fragments
-			.code(surround.beforeParameters)
-			.compile(@key ?? @keyName)
-
-		fragments.code($comma).compile(@value) if ?@value
-
-		fragments
-			.code(surround.afterParameters)
-			.newBlock()
-			.compile(@body)
-			.done()
-
-		fragments.code(surround.footer)
-
-		if ?@when {
-			var surround = $function.surround(@data.loop.iteration.when, this)
-
-			fragments
-				.code($comma)
-				.code(surround.beforeParameters)
-				.compile(@key ?? @keyName)
-
-			fragments.code($comma).compile(@value) if ?@value
-
-			fragments
-				.code(surround.afterParameters)
-				.newBlock()
-				.compile(@when)
-				.done()
-
-			fragments.code(surround.footer)
-		}
-
-		fragments.code(')')
-	} # }}}
-	type() => @scope.reference('Array')
-}
-
-class ArrayComprehensionForRange extends Expression {
-	private {
-		@bindingScope
-		@body
-		@bodyScope
-		@by									= null
-		@declaration: Boolean				= false
-		@from
-		@immutable: Boolean					= true
-		@to
-		@value
-		@when								= null
-	}
-	analyse() { # {{{
-		for var modifier in @data.loop.iteration.modifiers {
-			match modifier.kind {
-				ModifierKind.Declarative {
-					@declaration = true
-				}
-				ModifierKind.Mutable {
-					@immutable = false
-				}
-			}
-		}
-
-		@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
-		@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
-
-		if @declaration {
-			@bindingScope.define(@data.loop.iteration.value.name, @immutable, @bindingScope.reference('Number'), true, this)
-		}
-		else {
-			@bindingScope.checkVariable(@data.loop.iteration.value.name, true, this)
-		}
-
-		@value = $compile.expression(@data.loop.iteration.value, this, @bindingScope)
-		@value.analyse()
-
-		@from = $compile.expression(@data.loop.iteration.from, this, @scope)
-		@from.analyse()
-
-		@to = $compile.expression(@data.loop.iteration.to, this, @scope)
-		@to.analyse()
-
-		if ?@data.loop.iteration.by {
-			@by = $compile.expression(@data.loop.iteration.by, this, @scope)
-			@body.analyse()
-		}
-
-		@body = $compile.statement($ast.return(@data.value), this, @bodyScope)
-		@body.initiate()
-		@body.analyse()
-
-		if ?@data.loop.iteration.when {
-			@when = $compile.statement($ast.return(@data.loop.iteration.when), this, @bodyScope)
-			@when.initiate()
-			@when.analyse()
-		}
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isArray() {
-			TypeException.throwInvalidComprehensionType(target, this)
-		}
+		@iteration.prepare(AnyType.NullableUnexplicit, targetMode)
 
 		@value.prepare(AnyType.NullableUnexplicit)
-		@from.prepare(@scope.reference('Number'))
-		@to.prepare(@scope.reference('Number'))
-		@by.prepare(@scope.reference('Number')) if ?@by
-		@when.prepare(@scope.reference('Boolean')) if ?@when
-		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
+
+		@type.setRestType(@value.type())
 	} # }}}
-	translate() { # {{{
+	override translate() { # {{{
+		@iteration.translate()
 		@value.translate()
-		@from.translate()
-		@to.translate()
-		@by?.translate()
-		@body.translate()
-		@when?.translate()
 	} # }}}
-	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
-								@to.isUsingVariable(name) ||
-								@by?.isUsingVariable(name) ||
-								@when?.isUsingVariable(name) ||
-								@body.isUsingVariable(name)
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
+		}
+	} # }}}
+	assignTempVariables(scope: Scope)
+	hasElse() => false
+	isComputed() => true
+	override isUsingVariable(name) { # {{{
+		return @iteration.isUsingVariable(name) || @value.isUsingVariable(name)
+	} # }}}
 	override listNonLocalVariables(scope, variables) { # {{{
-		@from.listNonLocalVariables(scope, variables)
-		@to.listNonLocalVariables(scope, variables)
-		@by?.listNonLocalVariables(scope, variables)
-		@when?.listNonLocalVariables(scope, variables)
-		@body?.listNonLocalVariables(scope, variables)
+		@iteration.listNonLocalVariables(scope, variables)
+		@value.listNonLocalVariables(scope, variables)
 
 		return variables
 	} # }}}
+	releaseReusable() { # {{{
+		@scope.releaseTempName(@reuseName) if ?@reuseName
+	} # }}}
+	toDeclarationFragments(variables, fragments) { # {{{
+		if variables.length != 0 {
+			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
+		}
+	} # }}}
 	toFragments(fragments, mode) { # {{{
-		@module().flag('Helper')
-
-		var surround = $function.surround(@data.value, this)
-
-		fragments
-			.code($runtime.helper(this), '.mapRange(')
-			.compile(@from)
-			.code($comma)
-			.compile(@to)
-
-		if ?@by {
-			fragments.code(', ').compile(@by)
+		if @reusable {
+			fragments.code(@reuseName)
 		}
 		else {
-			fragments.code(', 1')
-		}
+			if @isUsingVariable('a') {
+				if !@isUsingVariable('l') {
+					@varname = 'l'
+				}
+				else if !@isUsingVariable('_') {
+					@varname = '_'
+				}
+				else {
+					@varname = '__ks__'
+				}
+			}
 
+			fragments.code('(() =>')
+
+			var block = fragments.newBlock()
+
+			block.line($const(this), @varname, ' = []')
+
+			var { close, fragments % ctrl } = @iteration.toIterationFragments(block)
+
+			ctrl.newLine().code(`\(@varname).push(`).compile(@value).code(')').done()
+
+			close()
+
+			block.line(`return \(@varname)`).done()
+
+			fragments.code(')()')
+		}
+	} # }}}
+	toReusableFragments(fragments) { # {{{
 		fragments
-			.code($comma, 'true', $comma, 'true', $comma)
-			.code(surround.beforeParameters)
-			.compile(@value)
-			.code(surround.afterParameters)
-			.newBlock()
-			.compile(@body)
-			.done()
+			.code(@reuseName, $equals)
+			.compile(this)
 
-		fragments.code(surround.footer)
-
-		if ?@when {
-			var surround = $function.surround(@data.loop.iteration.when, this)
-
-			fragments
-				.code($comma)
-				.code(surround.beforeParameters)
-				.compile(@value)
-				.code(surround.afterParameters)
-				.newBlock()
-				.compile(@when)
-				.done()
-
-			fragments.code(surround.footer)
-		}
-
-		fragments.code(')')
+		@reusable = true
 	} # }}}
-	type() => @scope.reference('Array')
-}
-
-class ArrayComprehensionRepeat extends Expression {
-	private late {
-		@body
-		@bodyScope: Scope
-		@to
-		@toName: String
-	}
-	analyse() { # {{{
-		@bodyScope = @newScope(@scope!?, ScopeType.InlineBlock)
-
-		@to = $compile.expression(@data.loop.expression, this, @scope)
-		@to.analyse()
-
-		@body = $compile.block($ast.return(@data.value), this, @bodyScope)
-		@body.analyse()
-	} # }}}
-	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isArray() {
-			TypeException.throwInvalidComprehensionType(target, this)
-		}
-
-		@to.prepare(@scope.reference('Number'))
-		@body.prepare(target.isArray() ? target.parameter() : AnyType.NullableUnexplicit)
-	} # }}}
-	translate() { # {{{
-		@to.translate()
-		@body.translate()
-	} # }}}
-	isUsingVariable(name) => @to.isUsingVariable(name) || @body.isUsingVariable(name)
-	override listNonLocalVariables(scope, variables) { # {{{
-		@to.listNonLocalVariables(scope, variables)
-		@body?.listNonLocalVariables(scope, variables)
-
-		return variables
-	} # }}}
-	toFragments(fragments, mode) { # {{{
-		@module().flag('Helper')
-
-		var surround = $function.surround(@data.value, this)
-
-		fragments
-			.code($runtime.helper(this), '.mapRange(0, ')
-			.compile(@to)
-			.code(', 1')
-			.code($comma, 'true', $comma, 'true', $comma)
-			.code(surround.beforeParameters)
-			.code(surround.afterParameters)
-			.newBlock()
-			.compile(@body)
-			.done()
-
-		fragments.code(surround.footer)
-
-		fragments.code(')')
-	} # }}}
-	type() => @scope.reference('Array')
+	type() => @type
 }

@@ -10,13 +10,18 @@ module.exports = function() {
 		if(suits === void 0) {
 			suits = null;
 		}
-		return Type.isValue(suits) ? Helper.mapArray(suits, function(suit) {
-			return (() => {
-				const o = new OBJ();
-				o.suit = suit;
-				return o;
-			})();
-		}) : null;
+		return Type.isValue(suits) ? (() => {
+			const a = [];
+			for(let __ks_1 = 0, __ks_0 = suits.length, suit; __ks_1 < __ks_0; ++__ks_1) {
+				suit = suits[__ks_1];
+				a.push((() => {
+					const o = new OBJ();
+					o.suit = suit;
+					return o;
+				})());
+			}
+			return a;
+		})() : null;
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isArray(value, Type.isNumber) || Type.isNull(value);

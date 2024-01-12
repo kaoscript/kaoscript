@@ -67,26 +67,7 @@ var $binaryOperators = {
 
 var $expressions = {
 	[NodeKind.ArrayBinding]					: ArrayBinding
-	[NodeKind.ArrayComprehension]			: func(data, parent, scope) {
-		match data.loop.kind {
-			NodeKind.ForStatement {
-				return match data.loop.iteration.kind {
-					IterationKind.Array => ArrayComprehensionForIn.new(data, parent, scope)
-					IterationKind.From => ArrayComprehensionForFrom.new(data, parent, scope)
-					IterationKind.Object => ArrayComprehensionForOf.new(data, parent, scope)
-					IterationKind.Range => ArrayComprehensionForRange.new(data, parent, scope)
-					// TODO remove else
-					else => throw NotImplementedException.new()
-				}
-			}
-			NodeKind.RepeatStatement {
-				return ArrayComprehensionRepeat.new(data, parent, scope)
-			}
-			else {
-				throw NotSupportedException.new(`Unexpected kind \(data.loop.kind)`, parent)
-			}
-		}
-	}
+	[NodeKind.ArrayComprehension]			: ArrayComprehension
 	[NodeKind.ArrayExpression]				: ArrayExpression
 	[NodeKind.ArrayRange]					: ArrayRange
 	[NodeKind.AwaitExpression]				: AwaitExpression

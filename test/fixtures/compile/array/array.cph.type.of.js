@@ -1,4 +1,4 @@
-const {Helper, OBJ} = require("@kaoscript/runtime");
+const {OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
 	const likes = (() => {
 		const o = new OBJ();
@@ -8,11 +8,16 @@ module.exports = function() {
 		return o;
 	})();
 	const flag = false;
-	const spicyHeroes = flag ? Helper.mapObject(likes, function(hero, like) {
-		return hero;
-	}, function(hero, like) {
-		return like === "spice";
-	}) : [];
+	const spicyHeroes = flag ? (() => {
+		const a = [];
+		for(const hero in likes) {
+			const like = likes[hero];
+			if(like === "spice") {
+				a.push(hero);
+			}
+		}
+		return a;
+	})() : [];
 	return {
 		spicyHeroes
 	};

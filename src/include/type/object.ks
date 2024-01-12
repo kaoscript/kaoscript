@@ -216,44 +216,16 @@ class ObjectType extends Type {
 			return @nullable ? 'Object?' : 'Object'
 		}
 
-		var export = {
+		return {
 			kind: TypeKind.Object
-			// TODO! parsing
-			// properties: { [name]: value.export(references, indexDelta, mode, module) for var value, name of @properties }
+			key: @keyType.export(references, indexDelta, mode, module) if @key
+			properties: { [name]: value.export(references, indexDelta, mode, module) for var value, name of @properties } if @length > 0
+			rest: @restType.export(references, indexDelta, mode, module) if @rest
+			destructuring: true if @destructuring
+			nullable: true if @nullable
+			sealed: true if @sealed && !@system
+			system: true if @system
 		}
-
-		if @key {
-			export.key = @keyType.export(references, indexDelta, mode, module)
-		}
-
-		if @length > 0 {
-			export.properties = {}
-
-			for var value, name of @properties {
-				export.properties[name] = value.export(references, indexDelta, mode, module)
-			}
-		}
-
-		if @destructuring {
-			export.destructuring = true
-		}
-
-		if @nullable {
-			export.nullable = true
-		}
-
-		if @rest {
-			export.rest = @restType.export(references, indexDelta, mode, module)
-		}
-
-		if @system {
-			export.system = true
-		}
-		else if @sealed {
-			export.sealed = true
-		}
-
-		return export
 	} # }}}
 	override finalize(data, generics, node) { # {{{
 		if @variant {

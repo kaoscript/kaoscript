@@ -179,6 +179,17 @@ class ArrayType extends Type {
 			return this
 		}
 	} # }}}
+	discardValue() { # {{{
+		if @rest && @restType.isValue() && @length == 0 {
+			var result = ArrayType.new(@scope)
+
+			result.setRestType(@restType.discardValue())
+
+			return result
+		}
+
+		return this
+	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @length == 0 && !@rest {
 			return @nullable ? 'Array?' : 'Array'

@@ -13,13 +13,18 @@ module.exports = function() {
 			return o;
 		})();
 		if(Type.isArray(cards, Type.isNumber)) {
-			result.values = Helper.mapArray(cards, function(kind) {
-				return (() => {
-					const o = new OBJ();
-					o.kind = kind;
-					return o;
-				})();
-			});
+			result.values = (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = cards.length, kind; __ks_1 < __ks_0; ++__ks_1) {
+					kind = cards[__ks_1];
+					a.push((() => {
+						const o = new OBJ();
+						o.kind = kind;
+						return o;
+					})());
+				}
+				return a;
+			})();
 		}
 		else {
 			result.values = cards;

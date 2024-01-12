@@ -22,11 +22,16 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(fn) {
-			return Helper.mapArray(this._values, (value, index) => {
-				return fn(value, index, this);
-			}, function(value, index) {
-				return Type.isValue(value);
-			});
+			return (() => {
+				const a = [];
+				for(let index = 0, __ks_0 = this._values.length, value; index < __ks_0; ++index) {
+					value = this._values[index];
+					if(Type.isValue(value)) {
+						a.push(fn(value, index, this));
+					}
+				}
+				return a;
+			})();
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = Type.isValue;

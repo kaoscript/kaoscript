@@ -98,6 +98,7 @@ include {
 	'./scope.ks'
 	'./module.ks'
 	'./router.ks'
+	'./iteration/index.ks'
 	'./statement.ks'
 	'./expression.ks'
 	'./parameter.ks'

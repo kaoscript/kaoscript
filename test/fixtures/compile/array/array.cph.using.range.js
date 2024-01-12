@@ -4,9 +4,13 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_2 = Helper.mapRange(0, 10, 1, true, true, function(i) {
-			return values[i].values();
-		}), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
+		for(let __ks_2 = (() => {
+			const a = [];
+			for(let i = 0; i <= 10; ++i) {
+				a.push(values[i].values());
+			}
+			return a;
+		})(), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
 			__ks_values_1 = __ks_2[__ks_1];
 		}
 	};

@@ -57,7 +57,7 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
-			var type = @object.type().discardValue()
+			var type = @assignable && @computed ? @object.getDeclaredType().discardValue() : @object.type().discardValue()
 
 			if @completeObject && !type.isComplete() {
 				ReferenceException.throwUncompleteType(type, this, this)
@@ -712,11 +712,16 @@ class MemberExpression extends Expression {
 				if var property ?= oType.getProperty(@property.value()) {
 					@type = property
 
+					if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
+						@liberal = true
+						@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+					}
+
 					return true
 				}
-				else if @assignable && type.isLiberal() {
+				else if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 					@liberal = true
-					@objectType = type
+					@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
 				}
 				else if type.isExhaustive(this) {
 					if @assignable {
@@ -837,10 +842,15 @@ class MemberExpression extends Expression {
 				}
 
 				@type = property.discardVariable()
+
+				if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
+					@liberal = true
+					@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+				}
 			}
-			else if @assignable && type.isLiberal() {
+			else if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 				@liberal = true
-				@objectType = type
+				@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
 			}
 			else if type.isExhaustive(this) {
 				if @parent is UnaryOperatorExistential {
@@ -976,7 +986,7 @@ class MemberExpression extends Expression {
 		else if @object is IdentifierLiteral {
 			@scope.replaceVariable(@object.name(), newType, this)
 		}
-		else if @parent is Expression {
+		else if @parent is MemberExpression {
 			@parent.setPropertyType(newType)
 		}
 	} # }}}

@@ -6,13 +6,18 @@ module.exports = function() {
 	foobar.__ks_0 = function(values) {
 		if(Type.isArray(values)) {
 			console.log(values[0]);
-			const result = Helper.mapArray(values, function(value) {
-				return (() => {
-					const o = new OBJ();
-					o.value = value;
-					return o;
-				})();
-			});
+			const result = (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = values.length, value; __ks_1 < __ks_0; ++__ks_1) {
+					value = values[__ks_1];
+					a.push((() => {
+						const o = new OBJ();
+						o.value = value;
+						return o;
+					})());
+				}
+				return a;
+			})();
 			console.log(result[0].value);
 		}
 	};

@@ -814,7 +814,7 @@ abstract class Importer extends Statement {
 
 		@buildArguments(@metaRequirements, @arguments)
 
-		var arguments = [false for var i from 0 to~ @metaRequirements.requirements.length / 3]
+		var arguments: Any[] = [false for var i from 0 to~ @metaRequirements.requirements.length / 3]
 
 		for var argument in @arguments.values {
 			arguments[argument.index] = {

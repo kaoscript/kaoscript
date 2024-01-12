@@ -120,6 +120,14 @@ class RangeIteration extends IterationNode {
 
 		@when?.translate()
 	} # }}}
+	isUsingVariable(name) { # {{{
+		return	@from.isUsingVariable(name) ||
+				@to.isUsingVariable(name) ||
+				@step?.isUsingVariable(name) ||
+				@until?.isUsingVariable(name) ||
+				@while?.isUsingVariable(name) ||
+				@when?.isUsingVariable(name)
+	} # }}}
 	override releaseVariables() { # {{{
 		@bindingScope.releaseTempName(@boundName) if ?@boundName
 		@bindingScope.releaseTempName(@stepName) if ?@stepName

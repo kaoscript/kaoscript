@@ -4,10 +4,17 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		for(let __ks_2 = Helper.mapRange(0, values.length, 1, true, false, function(i) {
-			return values[i].values();
-		}), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
-			__ks_values_1 = __ks_2[__ks_1];
+		let __ks_0, __ks_1, __ks_2, __ks_3;
+		for(let __ks_6 = (() => {
+			const a = [];
+			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "values.length", values.length, Infinity, "", 1);
+			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
+				i = __ks_3(__ks_4);
+				a.push(values[i].values());
+			}
+			return a;
+		})(), __ks_5 = 0, __ks_4 = __ks_6.length, __ks_values_1; __ks_5 < __ks_4; ++__ks_5) {
+			__ks_values_1 = __ks_6[__ks_5];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -183,9 +183,14 @@ module.exports = function() {
 	};
 	$binder.__ks_0 = function(last, components, first, firstArgs) {
 		const that = first(...firstArgs);
-		const lastArgs = Helper.mapObject(components, function(name, component) {
-			return that[component.field];
-		});
+		const lastArgs = (() => {
+			const a = [];
+			for(const name in components) {
+				const component = components[name];
+				a.push(that[component.field]);
+			}
+			return a;
+		})();
 		lastArgs.push(that);
 		return last(...lastArgs);
 	};
@@ -301,9 +306,14 @@ module.exports = function() {
 		}
 		const s = $spaces[that._space];
 		if(Type.isValue(s.converters[space])) {
-			const args = Helper.mapObject(s.components, function(name, component) {
-				return that[component.field];
-			});
+			const args = (() => {
+				const a = [];
+				for(const name in s.components) {
+					const component = s.components[name];
+					a.push(that[component.field]);
+				}
+				return a;
+			})();
 			args.push(result);
 			s.converters[space](...args);
 			result._space = space;
@@ -1187,9 +1197,14 @@ module.exports = function() {
 			return this.__ks_func_scheme_rt.call(null, this, this, arguments);
 		}
 		__ks_func_scheme_0(functions) {
-			return Helper.mapArray(functions, (fn) => {
-				return fn(this.__ks_func_clone_0());
-			});
+			return (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = functions.length, fn; __ks_1 < __ks_0; ++__ks_1) {
+					fn = functions[__ks_1];
+					a.push(fn(this.__ks_func_clone_0()));
+				}
+				return a;
+			})();
 		}
 		__ks_func_scheme_rt(that, proto, args) {
 			const t0 = value => Type.isArray(value);

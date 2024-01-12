@@ -18,7 +18,7 @@ class ReturnStatement extends Statement {
 			if ancestor is IfExpression | MatchExpression {
 				@inline = true
 			}
-			else if ancestor is ArrayComprehensionForFrom | ArrayComprehensionForIn | ArrayComprehensionForOf | ArrayComprehensionForRange {
+			else if ancestor is ArrayComprehension | ObjectComprehension {
 				break
 			}
 			else if ancestor is AnonymousFunctionExpression | ArrowFunctionExpression | FunctionDeclarator | ClassMethodDeclaration | ImplementDividedClassMethodDeclaration | ImplementNamespaceFunctionDeclaration {

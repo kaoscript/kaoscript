@@ -51,13 +51,18 @@ module.exports = function() {
 		})();
 		if(Type.isValue(cards)) {
 			if(Type.isArray(cards.value)) {
-				result.values = Helper.mapArray(cards.value, function(suit) {
-					return (() => {
-						const o = new OBJ();
-						o.suit = suit;
-						return o;
-					})();
-				});
+				result.values = (() => {
+					const a = [];
+					for(let __ks_1 = 0, __ks_0 = cards.value.length, suit; __ks_1 < __ks_0; ++__ks_1) {
+						suit = cards.value[__ks_1];
+						a.push((() => {
+							const o = new OBJ();
+							o.suit = suit;
+							return o;
+						})());
+					}
+					return a;
+				})();
 			}
 			else {
 				result.values = cards.value;

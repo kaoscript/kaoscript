@@ -29,9 +29,14 @@ module.exports = function() {
 			return this.__ks_func_build_rt.call(null, this, this, arguments);
 		}
 		__ks_func_build_0() {
-			return Helper.mapArray(this._messages, (message) => {
-				return this.__ks_func_format_0(message);
-			});
+			return (() => {
+				const a = [];
+				for(let __ks_1 = 0, __ks_0 = this._messages.length, message; __ks_1 < __ks_0; ++__ks_1) {
+					message = this._messages[__ks_1];
+					a.push(this.__ks_func_format_0(message));
+				}
+				return a;
+			})();
 		}
 		__ks_func_build_rt(that, proto, args) {
 			if(args.length === 0) {

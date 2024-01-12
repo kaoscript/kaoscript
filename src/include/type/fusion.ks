@@ -47,15 +47,14 @@ class FusionType extends Type {
 			return fusion
 		} # }}}
 	}
-	// TODO! parsing
-	// constructor(@scope, types: typeof @types) { # {{{
-	constructor(@scope, types: Type[]? = null) { # {{{
+	constructor(@scope) { # {{{
+		super(scope)
+	} # }}}
+	constructor(@scope, types: typeof @types) { # {{{
 		super(scope)
 
-		if ?#types {
-			for var type in types {
-				@addType(type)
-			}
+		for var type in types {
+			@addType(type)
 		}
 	} # }}}
 	addType(type: Type) { # {{{
