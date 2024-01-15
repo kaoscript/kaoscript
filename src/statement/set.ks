@@ -1,5 +1,6 @@
 class SetStatement extends Statement {
 	private late {
+		@exitLabel: String?
 		@gateway
 		@inline: Boolean
 		@value
@@ -32,9 +33,11 @@ class SetStatement extends Statement {
 		@value.translate()
 	} # }}}
 	override assignTempVariables(scope) => @parent.parent().assignTempVariables(scope)
-	isExit() => true
+	isContinuousInlineReturn() => true
+	override isExit(mode) => mode ~~ .Expression
 	isExpectingType() => true
 	isInline() => @inline
+	override setExitLabel(label % @exitLabel)
 	toFragments(fragments, mode) { # {{{
 		if @inline {
 			fragments.compile(@value)
@@ -45,6 +48,10 @@ class SetStatement extends Statement {
 				.code(`\(@gateway.getValueName()) = `)
 				.compile(@value)
 				.done()
+
+			if ?@exitLabel {
+				fragments.line(`break \(@exitLabel)`)
+			}
 		}
 	} # }}}
 	type() => @type

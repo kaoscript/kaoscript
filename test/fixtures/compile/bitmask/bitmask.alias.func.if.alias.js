@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(animal) {
-		if((animal & AnimalFlags.FlyingPredator) != 0) {
+		if((animal & AnimalFlags.FlyingPredator) == AnimalFlags.FlyingPredator) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

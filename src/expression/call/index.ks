@@ -14,6 +14,7 @@ class CallExpression extends Expression {
 		@matchingMode: ArgumentMatchMode		= .BestMatch
 		@nullable: Boolean						= false
 		@nullableComputed: Boolean				= false
+		@nullableTesting: Boolean				= false
 		@object: Expression?					= null
 		@prepared: Boolean						= false
 		@preparedArguments: Boolean				= false
@@ -103,11 +104,26 @@ class CallExpression extends Expression {
 		}
 
 		if @data.callee.kind == NodeKind.MemberExpression {
-			if !@data.callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Computed) {
+			var mut computed = false
+			var mut nullable = false
+
+			for var modifier in @data.callee.modifiers {
+				if modifier.kind == ModifierKind.Computed {
+					computed = true
+
+					break
+				}
+				else if modifier.kind == ModifierKind.Nullable {
+					nullable = true
+				}
+			}
+
+			if !computed {
 				@object = $compile.expression(@data.callee.object, this)
 					..analyse()
 
 				@property = @data.callee.property.name
+				@nullableTesting = nullable
 			}
 		}
 		else {
@@ -125,7 +141,7 @@ class CallExpression extends Expression {
 		if ?@object {
 			@object.prepare(AnyType.NullableUnexplicit)
 
-			@object.makeMemberCallee(@property, null, this)
+			@object.makeMemberCallee(@property, @nullableTesting, null, this)
 
 			if @matchingMode == .BestMatch {
 				@object.unspecify()
@@ -278,11 +294,12 @@ class CallExpression extends Expression {
 	} # }}}
 	isBitmaskCreate() => @callees.length == 1 && @callees[0] is BitmaskCreateCallee
 	isCallable() => !@reusable
+	isContinuousInlineReturn() => @type.isNever()
 	isComposite() => !@reusable
 	isComputed() => ((@isNullable() || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
 	isDisrupted() => @object?.isDisrupted() ?? false
 	isEnumCreate() => @callees.length == 1 && @callees[0] is EnumCreateCallee
-	isExit() => @type.isNever()
+	override isExit(mode) => @type.isNever()
 	isExpectingType() => true
 	override isInitializingInstanceVariable(name) { # {{{
 		for var argument in @arguments {
@@ -617,7 +634,7 @@ class CallExpression extends Expression {
 			@callees[0].toDisruptedFragments(fragments, this)
 		}
 		else {
-			throw NotImplementedException.new()
+			NotImplementedException.throw(this)
 		}
 	} # }}}
 	toCallFragments(fragments, mode) { # {{{
@@ -712,12 +729,13 @@ class CallExpression extends Expression {
 		if !@tested {
 			@tested = true
 
-			if @callees.length == 1 {
-				@callees[0].toNullableFragments(fragments, this)
+			if @callees.length > 1 {
+				for var callee in @callees from 1 {
+					callee.flagNullTested()
+				}
 			}
-			else {
-				throw NotImplementedException.new(this)
-			}
+
+			@callees[0].toNullableFragments(fragments, this)
 		}
 	} # }}}
 	toReusableFragments(fragments) { # {{{
@@ -862,6 +880,12 @@ class PositionalArgument extends Expression {
 	toFragments(fragments, mode) { # {{{
 		@value.toFragments(fragments, mode)
 	} # }}}
+}
+
+class Substitude {
+	isInitializingInstanceVariable(name) => false
+	isSkippable() => false
+	toFragments(fragments, mode)
 }
 
 include {

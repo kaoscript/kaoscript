@@ -79,7 +79,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 
 		@expression.acquireReusable(false)
 	} # }}}
-	getTopicReference(data) { # {{{
+	override getTopicReference(data) { # {{{
 		if !?@topic {
 			var mut destructuring = @destructuring
 

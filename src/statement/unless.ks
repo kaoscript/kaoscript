@@ -1,6 +1,6 @@
 class UnlessStatement extends Statement {
 	private late {
-		@body
+		@body: Block
 		@bodyScope: Scope
 		@condition
 	}
@@ -34,7 +34,7 @@ class UnlessStatement extends Statement {
 
 		@body.prepare(target)
 
-		if @body.isExit() {
+		if @body.isExit(.Statement + .Always) {
 			for var data, name of @condition.inferWhenTrueTypes({}) {
 				@scope.updateInferable(name, data, this)
 			}

@@ -1,1 +1,0 @@
-SyntaxException: The block doesn't return a value for every case (fixtures/compile/if/if.inline.if.noelse.ks:2)

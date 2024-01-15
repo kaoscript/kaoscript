@@ -1,0 +1,1 @@
+SyntaxException: The call to "x" can match either the variable "@x" or the method "x" (fixtures/compile/class/class.homonym.nx.wat.at_call.nt.ks:6)

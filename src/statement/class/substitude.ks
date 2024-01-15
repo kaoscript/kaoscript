@@ -1,9 +1,3 @@
-class Substitude {
-	isInitializingInstanceVariable(name) => false
-	isSkippable() => false
-	toFragments(fragments, mode)
-}
-
 class CallThisConstructorSubstitude extends Substitude {
 	private {
 		@arguments

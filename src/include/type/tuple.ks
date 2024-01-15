@@ -236,8 +236,6 @@ class TupleType extends Type {
 		var reference = @scope.reference(name)
 
 		if property == 'new' {
-			// TODO!
-			// var assessment = @assessment(reference, node)
 			var assessment = this.assessment(reference, node)
 
 			match var result = node.matchArguments(assessment) {

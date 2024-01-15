@@ -99,6 +99,7 @@ class DefaultCallee extends Callee {
 	acquireReusable(acquire) { # {{{
 		@expression.acquireReusable(acquire || @nullable || (@flatten && @scope == ScopeKind.This))
 	} # }}}
+	flagNullTested() => @expression?.flagNullTested()
 	override hashCode() => `default`
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		return false

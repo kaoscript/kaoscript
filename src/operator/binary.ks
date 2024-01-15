@@ -114,9 +114,12 @@ class BinaryOperatorExpression extends Expression {
 class BinaryOperatorAddition extends BinaryOperatorExpression {
 	private late {
 		@bitmask: Boolean			= false
+		@computeable: Boolean		= false
 		@expectingBitmask: Boolean	= true
 		@native: Boolean			= false
 		@number: Boolean			= false
+		@reusable: Boolean			= false
+		@reuseName: String?			= null
 		@string: Boolean			= false
 		@type: Type
 	}
@@ -135,6 +138,8 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			}
 			else {
 				@type = @left.type().discard().type()
+
+				@computeable = @left.isImmutableValue() && @right.isImmutableValue()
 			}
 
 			@left.unflagExpectingBitmask()
@@ -190,9 +195,27 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			}
 		}
 	} # }}}
-	isComputed() => @native || (@bitmask && !@expectingBitmask)
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
+		}
+	} # }}}
+	isComposite() => !@reusable && !@computeable
+	isComputed() => !@reusable && !@computeable && (@native || (@bitmask && !@expectingBitmask))
+	override left(@left) { # {{{
+		if @bitmask && !@expectingBitmask {
+			@computeable = @left.isImmutableValue() && @right.isImmutableValue()
+		}
+	} # }}}
 	override path() => `\(@left.path()) + \(@right.path())`
-	setOperands(@left, @right, @bitmask = false, @number = false, @expectingBitmask = false): valueof this
+	releaseReusable() { # {{{
+		@scope.releaseTempName(@reuseName) if ?@reuseName
+	} # }}}
+	setOperands(@left, @right, @bitmask = false, @number = false, @expectingBitmask = false): valueof this { # {{{
+		if @bitmask && !@expectingBitmask {
+			@computeable = @left.isImmutableValue() && @right.isImmutableValue()
+		}
+	} # }}}
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
 			if type == OperandType.Bitmask && @bitmask {
@@ -202,20 +225,28 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 				fragments.compile(@left).code($comma).compile(@right)
 			}
 			else {
-				this.toOperatorFragments(fragments)
+				@toOperatorFragments(fragments)
 			}
 		}
 		else {
-			this.toOperatorFragments(fragments)
+			@toOperatorFragments(fragments)
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @bitmask {
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @bitmask {
 			if @expectingBitmask {
 				fragments.code(@type.name(), '(').wrap(@left).code(' | ').wrap(@right).code(')')
 			}
 			else {
-				fragments.wrap(@left).code(' | ').wrap(@right)
+				if @computeable {
+					fragments.code(parseInt(@left.getImmutableValue()) +| parseInt(@right.getImmutableValue()))
+				}
+				else {
+					fragments.wrap(@left).code(' | ').wrap(@right)
+				}
 			}
 		}
 		else if @native {
@@ -241,6 +272,18 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 		}
 	} # }}}
 	toQuote() => `\(@left.toQuote()) + \(@right.toQuote())`
+	toReusableFragments(fragments) { # {{{
+		if ?@reuseName {
+			fragments
+				.code(@reuseName, $equals)
+				.compile(this)
+
+			@reusable = true
+		}
+		else {
+			@toOperatorFragments(fragments)
+		}
+	} # }}}
 	type() => @type
 	unflagExpectingBitmask() { # {{{
 		@expectingBitmask = false
@@ -296,8 +339,10 @@ class BinaryOperatorMatch extends Expression {
 			@native = false
 		}
 
+		var operandTarget = @scope.reference('Number')
+
 		for var operand in @operands {
-			operand.prepare(AnyType.NullableUnexplicit)
+			operand.prepare(operandTarget, TargetMode.Permissive)
 
 			if operand.type().isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
@@ -325,7 +370,7 @@ class BinaryOperatorMatch extends Expression {
 		@subject.acquireReusable(acquire)
 
 		for var operand in @operands {
-			operand.acquireReusable(acquire)
+			operand.acquireReusable(acquire || operand.isComposite())
 		}
 	} # }}}
 	private addOperand(data) { # {{{
@@ -341,7 +386,7 @@ class BinaryOperatorMatch extends Expression {
 	} # }}}
 	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => true
-	operator() => '!='
+	operator() => '=='
 	releaseReusable() { # {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)
@@ -368,28 +413,28 @@ class BinaryOperatorMatch extends Expression {
 			if !?@junction {
 				fragments.code($runtime.operator(this), '.xor(')
 
-				this.toOperatorFragments(fragments, @operands[0], true)
+				@toOperatorFragments(fragments, @operands[0], true)
 
 				for var operand in @operands from 1 {
 					fragments.code($comma)
 
-					this.toOperatorFragments(fragments, operand, false)
+					@toOperatorFragments(fragments, operand, false)
 				}
 
 				fragments.code(')')
 			}
 			else {
-				this.toOperatorFragments(fragments, @operands[0], true)
+				@toOperatorFragments(fragments, @operands[0], true)
 
 				for var operand in @operands from 1 {
 					fragments.code(@junction)
 
-					this.toOperatorFragments(fragments, operand, false)
+					@toOperatorFragments(fragments, operand, false)
 				}
 			}
 		}
 		else {
-			this.toOperatorFragments(fragments, @operands[0], false)
+			@toOperatorFragments(fragments, @operands[0], false)
 		}
 
 		if test {
@@ -429,37 +474,39 @@ class BinaryOperatorMatch extends Expression {
 		if @composite {
 			if assignable {
 				if native {
-					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0`)
+					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrapReusable(operand).code(`) \(operator) `).compile(operand)
 				}
 				else {
 					fragments
 						.code($runtime.operator(this), `.bitAnd(\(@reuseName) = `)
 						.compile(@subject)
 						.code($comma)
+						.compileReusable(operand)
+						.code(`) \(operator) `)
 						.compile(operand)
-						.code(`) \(operator) 0`)
 				}
 			}
 			else {
 				if native {
-					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0`)
+					fragments.code(`(\(@reuseName) & `).wrapReusable(operand).code(`) \(operator) `).compile(operand)
 				}
 				else {
-					fragments.code($runtime.operator(this), `.bitAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
+					fragments.code($runtime.operator(this), `.bitAnd(\(@reuseName), `).compileReusable(operand).code(`) \(operator) `).compile(operand)
 				}
 			}
 		}
 		else {
 			if native {
-				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0`)
+				fragments.code('(').wrap(@subject).code(' & ').wrapReusable(operand).code(`) \(operator) `).compile(operand)
 			}
 			else {
 				fragments
 					.code($runtime.operator(this), `.bitAnd(`)
 					.compile(@subject)
 					.code($comma)
+					.compileReusable(operand)
+					.code(`) \(operator) `)
 					.compile(operand)
-					.code(`) \(operator) 0`)
 			}
 		}
 	} # }}}
@@ -467,5 +514,5 @@ class BinaryOperatorMatch extends Expression {
 }
 
 class BinaryOperatorMismatch extends BinaryOperatorMatch {
-	operator() => '=='
+	operator() => '!='
 }

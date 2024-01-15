@@ -124,7 +124,7 @@ class AnonymousFunctionExpression extends Expression {
 		@block.translate()
 
 		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
+		@exit = @block.isExit(.Statement + .Always)
 	} # }}}
 	addInitializableVariable(variable, node)
 	addTopNode(node) { # {{{
@@ -314,7 +314,7 @@ class ArrowFunctionExpression extends Expression {
 		@block.translate()
 
 		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
+		@exit = @block.isExit(.Statement + .Always)
 		@usingThis = @isUsingVariable('this')
 	} # }}}
 	addInitializableVariable(variable, node)

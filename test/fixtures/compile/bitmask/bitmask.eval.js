@@ -39,27 +39,27 @@ module.exports = function(expect) {
 	};
 	testIf.__ks_0 = function(x, y, z) {
 		const results = [];
-		if((x & Foobar.foo) != 0) {
+		if((x & Foobar.foo) == Foobar.foo) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if((Foobar(y) & Foobar.foo) != 0) {
+		if((Foobar(y) & Foobar.foo) == Foobar.foo) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if((Foobar(z) & Foobar.foo) != 0) {
+		if((Foobar(z) & Foobar.foo) == Foobar.foo) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		results.push(((x & Foobar.foo) != 0) ? "c" : null);
-		results.push(((y & Foobar.foo) != 0) ? "c" : null);
-		results.push((Operator.bitAnd(z, Foobar.foo) != 0) ? "c" : null);
+		results.push(((x & Foobar.foo) == Foobar.foo) ? "c" : null);
+		results.push(((y & Foobar.foo) == Foobar.foo) ? "c" : null);
+		results.push((Operator.bitAnd(z, Foobar.foo) == Foobar.foo) ? "c" : null);
 		return results;
 	};
 	testIf.__ks_rt = function(that, args) {

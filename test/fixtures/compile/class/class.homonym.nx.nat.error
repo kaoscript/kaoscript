@@ -1,0 +1,1 @@
+SyntaxException: The instance method "x" is matching a variable with the same name (fixtures/compile/class/class.homonym.nx.nat.ks:1)

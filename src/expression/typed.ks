@@ -35,7 +35,7 @@ class TypedExpression extends Expression {
 	override translate() { # {{{
 		@expression.translate()
 	} # }}}
-	override makeMemberCallee(property: String, generics: Generic[]?, node: CallExpression) { # {{{
+	override makeMemberCallee(property, testing, generics, node) { # {{{
 		@expression.type().makeMemberCallee(property, @generics, node)
 	} # }}}
 

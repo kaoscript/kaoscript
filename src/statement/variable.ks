@@ -714,11 +714,15 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		fragments.compile(@identifier)
 	} # }}}
 	toAssertFragments(fragments, value)
-	toAssignmentFragments(fragments, value? = null) { # {{{
-		fragments
-			.compile(@identifier)
-			.code($equals)
-			.compile(value ?? @parent.value())
+	toAssignmentFragments(fragments, value ??= @parent.value()) { # {{{
+		fragments.compile(@identifier).code($equals)
+
+		if value is DisruptiveExpression {
+			fragments.wrap(value)
+		}
+		else {
+			fragments.compile(value)
+		}
 	} # }}}
 	type() => @type
 	variable() => @variable

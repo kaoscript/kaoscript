@@ -341,18 +341,10 @@ class EnumValueDeclaration extends AbstractNode {
 			}
 
 			for var data in @data.arguments {
-				// TODO!
-				// var argument = $compile.expression(data, this)
-				// 	..analyse()
-				// 	..flagNewExpression()
-				// 	..unflagCompleteObject() if _ is MemberExpression
-				// 	..prepare(AnyType.NullableUnexplicit)
-
 				var argument = $compile.expression(data, this)
 					..analyse()
 					..flagNewExpression()
-
-				argument.unflagCompleteObject() if argument is MemberExpression
+					..unflagCompleteObject() if _ is MemberExpression
 
 				@arguments.push(argument)
 			}
@@ -596,7 +588,7 @@ class EnumMethodDeclaration extends Statement {
 		@block.translate()
 
 		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
+		@exit = @block.isExit(.Statement + .Always)
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
 		var name = `__ks_default_\(@parent.type().type().incDefaultSequence())`

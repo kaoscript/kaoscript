@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(kind) {
-		if((kind & Foobar.A) != 0) {
+		if((kind & Foobar.A) == Foobar.A) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -46,12 +46,13 @@ abstract class Expression extends AbstractNode {
 	// if the expression can have several values
 	isDerivative(): Boolean => false
 	isDisrupted(): Boolean => false
-	// if the expression is always exiting
-	isExit(): Boolean => false
+	// if the expression is exiting
+	isExit(mode: ExitMode): Boolean => false
 	// if the expression can be an assignment and the variable has a defined type
 	isExpectingType(): Boolean => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable(): Boolean => false
+	isImmutableValue(): Boolean => false
 	// if the expression is a variable and needs to be initialized
 	isInitializable(): Boolean => false
 	// if the expression is initializing the given instance variable
@@ -103,7 +104,7 @@ abstract class Expression extends AbstractNode {
 	makeCallee(generics: Generic[]?, node: CallExpression) { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, generics: Generic[]?, node: CallExpression) { # {{{
+	makeMemberCallee(property: String, testing: Boolean, generics: Generic[]?, node: CallExpression) { # {{{
 		@type().makeMemberCallee(property, generics, node)
 	} # }}}
 	path(): String? => null

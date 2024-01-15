@@ -191,6 +191,7 @@ class BleedingScope extends Scope {
 	} # }}}
 
 	proxy @parent {
+		acquireNewLabel
 		acquireTempName
 		acquireUnusedTempName
 		authority

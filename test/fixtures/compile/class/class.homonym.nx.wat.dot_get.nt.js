@@ -22,7 +22,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0() {
-			this._x();
+			const x = Helper.bindMethod(this, "x");
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			if(args.length === 0) {
@@ -44,7 +44,7 @@ module.exports = function() {
 			return this;
 		}
 		__ks_func_x_rt(that, proto, args) {
-			const t0 = value => Type.isFunction(value) || Type.isNull(value);
+			const t0 = Type.isValue;
 			if(args.length === 0) {
 				return proto.__ks_func_x_0.call(that);
 			}

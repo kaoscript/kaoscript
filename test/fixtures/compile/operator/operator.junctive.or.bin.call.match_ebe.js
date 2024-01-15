@@ -14,6 +14,6 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let __ks_0;
-	if(((__ks_0 = abilities.__ks_0()) & AnimalFlags.CanFly) != 0 || (__ks_0 & AnimalFlags.EatsFish) != 0) {
+	if(((__ks_0 = abilities.__ks_0()) & AnimalFlags.CanFly) == AnimalFlags.CanFly || (__ks_0 & AnimalFlags.EatsFish) == AnimalFlags.EatsFish) {
 	}
 };

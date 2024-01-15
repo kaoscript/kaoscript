@@ -514,7 +514,7 @@ class ClassMethodDeclaration extends Statement {
 			@block.translate()
 
 			@awaiting = @block.isAwait()
-			@exit = @block.isExit()
+			@exit = @block.isExit(.Statement + .Always)
 		}
 	} # }}}
 	addAtThisParameter(statement: AliasStatement) { # {{{

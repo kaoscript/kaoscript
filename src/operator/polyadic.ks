@@ -131,9 +131,12 @@ abstract class PolyadicOperatorExpression extends Expression {
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	private late {
 		@bitmask: Boolean				= false
+		@computeable: Boolean			= false
 		@expectingBitmask: Boolean		= true
 		@native: Boolean				= false
 		@number: Boolean				= false
+		@reusable: Boolean				= false
+		@reuseName: String?				= null
 		@string: Boolean				= false
 		@type: Type
 	}
@@ -163,10 +166,14 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 				}
 				else {
 					@type = @left().type().discard().type()
-				}
 
-				for var operand in @operands {
-					operand.unflagExpectingBitmask()
+					@computeable = true
+
+					for var operand in @operands {
+						operand.unflagExpectingBitmask()
+
+						@computeable &&= operand.isImmutableValue()
+					}
 				}
 			}
 		}
@@ -234,8 +241,24 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			}
 		}
 	} # }}}
-	isComputed() => @native
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
+		}
+	} # }}}
+	isComposite() => !@reusable && !@computeable
+	isComputed() => !@reusable && !@computeable && (@native || (@bitmask && !@expectingBitmask))
+	override left(left) { # {{{
+		if @bitmask && !@expectingBitmask {
+			@computeable &&= left.isImmutableValue()
+		}
+
+		return super(left)
+	} # }}}
 	operator() => Operator.Addition
+	releaseReusable() { # {{{
+		@scope.releaseTempName(@reuseName) if ?@reuseName
+	} # }}}
 	symbol() => '+'
 	toOperandFragments(fragments, operator, type) { # {{{
 		if operator == Operator.Addition {
@@ -266,19 +289,33 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @bitmask {
-			if @expectingBitmask {
-				fragments.code(@type.name(), '(')
-			}
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @bitmask {
+			if @computeable {
+				var mut value = parseInt(@operands[0].getImmutableValue())
 
-			for var operand, index in @operands {
-				fragments
-					..code(' | ') if index != 0
-					..wrap(operand)
-			}
+				for var operand in @operands from 1 {
+					value +|= parseInt(operand.getImmutableValue())
+				}
 
-			if @expectingBitmask {
-				fragments.code(')')
+				fragments.code(value)
+			}
+			else {
+				if @expectingBitmask {
+					fragments.code(@type.name(), '(')
+				}
+
+				for var operand, index in @operands {
+					fragments
+						..code(' | ') if index != 0
+						..wrap(operand)
+				}
+
+				if @expectingBitmask {
+					fragments.code(')')
+				}
 			}
 		}
 		else if @native {
@@ -310,6 +347,18 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			}
 
 			fragments.code(')')
+		}
+	} # }}}
+	toReusableFragments(fragments) { # {{{
+		if ?@reuseName {
+			fragments
+				.code(@reuseName, $equals)
+				.compile(this)
+
+			@reusable = true
+		}
+		else {
+			@toOperatorFragments(fragments)
 		}
 	} # }}}
 	type() => @type

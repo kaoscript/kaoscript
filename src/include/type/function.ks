@@ -9,6 +9,8 @@ bitmask MinMax {
 
 class FunctionType extends Type {
 	private late {
+		// TODO
+		// @assessment: Router.Assessment?		= null
 		@assessment							= null
 		@assignableThis: Boolean			= true
 		@async: Boolean						= false
@@ -821,8 +823,6 @@ class FunctionType extends Type {
 	length() => 1
 	listErrors() => @errors
 	override makeCallee(name, generics, node) { # {{{
-		// TODO!
-		// var assessment = @assessment(name, node)
 		var assessment = this.assessment(name, node)
 
 		match node.matchArguments(assessment) {
@@ -1333,8 +1333,6 @@ class OverloadedFunctionType extends Type {
 	} # }}}
 	length() => @functions.length
 	override makeCallee(name, generics, node) { # {{{
-		// TODO!
-		// var assessment = @assessment(name, node)
 		var assessment = this.assessment(name, node)
 
 		match node.matchArguments(assessment) {

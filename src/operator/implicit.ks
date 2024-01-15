@@ -1,6 +1,7 @@
 class UnaryOperatorImplicit extends Expression {
 	private late {
 		@derivative: Boolean			= false
+		@immutableValue: String?		= null
 		@originalProperty: String?
 		@path: String?					= null
 		@property: String
@@ -28,8 +29,9 @@ class UnaryOperatorImplicit extends Expression {
 				@type = ValueType.new(@property, master.setNullable(false), @path, @scope)
 			}
 			else if type.isBitmask() {
-				if var value ?= type.discard().getValue(@property) {
+				if var property ?= type.discard().getValue(@property) {
 					@path = `\(type.path()).\(@property)`
+					@immutableValue = property.value()
 
 					if type is ValueType {
 						@type = type.setNullable(false)
@@ -109,9 +111,11 @@ class UnaryOperatorImplicit extends Expression {
 		}
 	} # }}}
 	override translate()
+	getImmutableValue() => @immutableValue
+	isDerivative() => @derivative
+	isImmutableValue() => ?@immutableValue
 	override path() => @path
 	property() => @property
-	isDerivative() => @derivative
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@varname ?? @type.discardValue()).code($dot).compile(@originalProperty ?? @property)
 	} # }}}
@@ -165,12 +169,14 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			return parent.subject().type()
 		}
 		is BinaryOperatorAddition | PolyadicOperatorAddition {
-			if target == AnyType.NullableUnexplicit {
-				return findImplicitType(target, parent.parent(), parent, property)
-			}
-			else {
-				return target
-			}
+			// echo(target)
+			// if target == AnyType.NullableUnexplicit {
+			// 	return findImplicitType(target, parent.parent(), parent, property)
+			// }
+			// else {
+			// 	return target
+			// }
+			return findImplicitType(target, parent.parent(), parent, property)
 		}
 		is CallExpression {
 			if !?parent.assessment() {

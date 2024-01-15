@@ -97,6 +97,8 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		@bitmask: Boolean				= false
 		@expectingBitmask: Boolean		= true
 		@native: Boolean				= false
+		@reusable: Boolean				= false
+		@reuseName: String?				= null
 		@type: Type
 	}
 	abstract {
@@ -163,8 +165,17 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 		}
 	} # }}}
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
+		}
+	} # }}}
 	isAcceptingBitmask() => false
-	isComputed() => @native
+	isComposite() => !@reusable
+	isComputed() => !@reusable && (@native || ?@reuseName)
+	releaseReusable() { # {{{
+		@scope.releaseTempName(@reuseName) if ?@reuseName
+	} # }}}
 	toBitmaskFragments(fragments) { # {{{
 		fragments.code(@type.name(), '(')
 
@@ -204,7 +215,10 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} # }}}
 	toOperatorFragments(fragments) { # {{{
-		if @bitmask {
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @bitmask {
 			@toBitmaskFragments(fragments)
 		}
 		else if @native {
@@ -212,6 +226,18 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 		else {
 			@toRuntimeFragments(fragments)
+		}
+	} # }}}
+	toReusableFragments(fragments) { # {{{
+		if ?@reuseName {
+			fragments
+				.code(@reuseName, $equals)
+				.compile(this)
+
+			@reusable = true
+		}
+		else {
+			@toOperatorFragments(fragments)
 		}
 	} # }}}
 	toRuntimeFragments(fragments) { # {{{

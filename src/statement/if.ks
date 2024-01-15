@@ -12,9 +12,9 @@ class IfStatement extends Statement {
 		@hasCondition: Boolean								= true
 		@hasDeclaration: Boolean							= false
 		@hasWhenFalse: Boolean								= false
-		@whenFalseExpression								= null
+		@whenFalseExpression: Block | IfStatement | Null	= null
 		@whenFalseScope: Scope?								= null
-		@whenTrueExpression									= null
+		@whenTrueExpression: Block
 		@whenTrueScope: Scope?								= null
 	}
 	override initiate() { # {{{
@@ -209,7 +209,7 @@ class IfStatement extends Statement {
 			@scope.line(@data.end.line)
 
 			if !@hasDeclaration {
-				if @whenTrueExpression.isExit() {
+				if @whenTrueExpression.isExit(.Expression + .Statement + .Always) {
 					for var map, name of @lateInitVariables {
 						if map.false.initializable {
 							@parent.initializeVariable(VariableBrief.new(name, type: map.false.type), this, this)
@@ -271,11 +271,11 @@ class IfStatement extends Statement {
 		else {
 			@scope.line(@data.whenFalse.start.line)
 
-			@whenFalseExpression.prepare(target)
+			@whenFalseExpression!?.prepare(target)
 
 			@scope.line(@data.end.line)
 
-			if @whenTrueExpression.isExit() {
+			if @whenTrueExpression.isExit(.Expression + .Statement + .Always) {
 				for var data, name of @initializedVariables when data.false.initializable {
 					data.variable.type = data.false.type
 
@@ -295,7 +295,7 @@ class IfStatement extends Statement {
 					@scope.updateInferable(name, data, this)
 				}
 			}
-			else if @whenFalseExpression.isExit() {
+			else if @whenFalseExpression!?.isExit(.Expression + .Statement + .Always) {
 				for var data, name of @initializedVariables when data.true.initializable {
 					data.variable.type = data.true.type
 
@@ -548,7 +548,14 @@ class IfStatement extends Statement {
 		}
 	} # }}}
 	isCascade() => @cascade
-	isExit() => @hasWhenFalse && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	override isExit(mode) { # {{{
+		if mode ~~ .Always {
+			return @hasWhenFalse && @whenTrueExpression.isExit(mode) && @whenFalseExpression.isExit(mode)
+		}
+		else {
+			return @whenTrueExpression.isExit(mode) || (@hasWhenFalse && @whenFalseExpression.isExit(mode))
+		}
+	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
 		for var condition in @conditions {
 			if condition.isInitializingInstanceVariable(name) {
@@ -600,6 +607,13 @@ class IfStatement extends Statement {
 		return @hasWhenFalse && @whenFalseExpression.isUsingVariable(name)
 	} # }}}
 	setCascade(@cascade)
+	override setExitLabel(label) { # {{{
+		@whenTrueExpression.setExitLabel(label)
+
+		if @hasWhenFalse {
+			@whenFalseExpression.setExitLabel(label)
+		}
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if @hasDeclaration {
 			with var { declaration, hasBinding } = @declarations[0] {

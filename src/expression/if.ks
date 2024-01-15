@@ -2,21 +2,23 @@ class IfExpression extends Expression {
 	private late {
 		@bindingScope: Scope
 		@bindingVariable: Expression?
-		@cascade: Boolean						= false
+		@cascade: Boolean								= false
 		@condition
 		@declaration: VariableDeclaration
 		@declarator
-		@hasBinding: Boolean					= false
-		@hasCondition: Boolean					= true
-		@hasDeclaration: Boolean				= false
-		@inline: Boolean						= false
-		@insitu: Boolean						= false
+		@hasBinding: Boolean							= false
+		@hasCondition: Boolean							= true
+		@hasDeclaration: Boolean						= false
+		@inline: Boolean								= false
+		@insitu: Boolean								= false
+		@label: String
 		@operator
 		@type: Type
-		@valueName: String?						= null
-		@whenFalseExpression
+		@useLabel: Boolean								= false
+		@valueName: String?								= null
+		@whenFalseExpression: Block | IfExpression
 		@whenFalseScope: Scope
-		@whenTrueExpression
+		@whenTrueExpression: Block
 		@whenTrueScope: Scope
 	}
 	initiate() { # {{{
@@ -171,14 +173,14 @@ class IfExpression extends Expression {
 		@scope.line(@data.whenTrue.start.line)
 		@whenTrueExpression.prepare(target, targetMode)
 
-		unless @whenTrueExpression.isExit() {
+		unless @whenTrueExpression.isExit(.Expression + .Statement + .Always) {
 			SyntaxException.throwDoNoExit(@whenTrueExpression)
 		}
 
 		@scope.line(@data.whenFalse.start.line)
 		@whenFalseExpression.prepare(target, targetMode)
 
-		unless @whenFalseExpression.isExit() {
+		unless @whenFalseExpression.isExit(.Expression + .Statement + .Always) {
 			SyntaxException.throwDoNoExit(@whenFalseExpression)
 		}
 
@@ -186,6 +188,29 @@ class IfExpression extends Expression {
 		var falseType = @whenFalseExpression.type()
 
 		@type = Type.union(@scope, trueType, falseType)
+
+		if !@whenTrueExpression.isExit(.Expression + .Continuity) || !@whenFalseExpression.isExit(.Expression + .Continuity) {
+			@useLabel = true
+			@label = @scope.acquireNewLabel()
+
+			@whenTrueExpression.setExitLabel(@label)
+			@whenFalseExpression.setExitLabel(@label)
+
+			if @inline {
+				@inline = false
+
+				if @insitu {
+					@valueName = @declarator.variable().getSecureName()
+				}
+				else {
+					var statement = @statement()
+
+					@valueName = statement.scope().acquireTempName()
+
+					statement.assignTempVariables(statement.scope())
+				}
+			}
+		}
 	} # }}}
 	override translate() { # {{{
 		if @hasDeclaration {
@@ -202,7 +227,14 @@ class IfExpression extends Expression {
 	getValueName() => @valueName
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
 	isComputed() => true
-	isExit() => @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	override isExit(mode) { # {{{
+		if mode ~~ .Always {
+			return @whenTrueExpression.isExit(mode) && @whenFalseExpression.isExit(mode)
+		}
+		else {
+			return @whenTrueExpression.isExit(mode) || @whenFalseExpression.isExit(mode)
+		}
+	} # }}}
 	isInline() => @inline
 	isInSituStatement() => @insitu
 	isUsingVariable(name) => @condition?.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
@@ -412,20 +444,17 @@ class IfExpression extends Expression {
 		else {
 			if @hasDeclaration && !@hasBinding {
 				fragments.compile(@declaration)
-
-				var ctrl = fragments.newControl()
-
-				@toIfFragments(ctrl, mode)
-
-				ctrl.done()
 			}
-			else {
-				var ctrl = fragments.newControl()
 
-				@toIfFragments(ctrl, mode)
+			var ctrl = fragments.newControl()
 
-				ctrl.done()
+			if @useLabel {
+				ctrl.code(`\(@label): `)
 			}
+
+			@toIfFragments(ctrl, mode)
+
+			ctrl.done()
 		}
 	} # }}}
 	type() => @type

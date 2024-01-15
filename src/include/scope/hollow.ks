@@ -120,7 +120,7 @@ class HollowScope extends Scope {
 	} # }}}
 	parent() => @parent
 	reference(value) => @parent.reference(value)
-	reference(value: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(value, nullable, parameters)
+	override reference(value: String, nullable: Boolean = false, parameters: Array = [], subtypes: Array = []) => @parent.resolveReference(value, nullable, parameters, subtypes)
 	rename(name, newName) { # {{{
 		if newName != name {
 			var variable = @getVariable(name).clone()
@@ -175,6 +175,7 @@ class HollowScope extends Scope {
 	} # }}}
 
 	proxy @parent {
+		acquireNewLabel
 		acquireTempName
 		acquireUnusedTempName
 		authority

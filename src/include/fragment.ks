@@ -307,8 +307,8 @@ class LineBuilder extends ExpressionBuilder {
 
 			@notDone = false
 
-			if @whenDone != null {
-				@whenDone()
+			if ?@whenDone {
+				this._whenDone()
 
 				@whenDone = null
 			}

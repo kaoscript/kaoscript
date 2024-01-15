@@ -22,6 +22,9 @@ class RestrictiveExpression extends Expression {
 		@expression.translate()
 	} # }}}
 	expression() => @expression
+	override getTopicReference(data) { # {{{
+		return @getASTReference('main')
+	} # }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @expression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{

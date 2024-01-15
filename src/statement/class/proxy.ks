@@ -71,6 +71,10 @@ class ClassProxyDeclaration extends Statement {
 
 		if @type.isFunction() {
 			if @instance {
+				if class.hasInstanceVariable(@name) {
+					SyntaxException.throwHomonymInstanceMethod(@name, this)
+				}
+
 				for var function in @type.functions() {
 					var type = function.clone()
 					type.setProxy(@externalPath, @externalName)
@@ -97,6 +101,10 @@ class ClassProxyDeclaration extends Statement {
 			ReferenceException.throwNoTypeProxy(@external.toQuote(), this)
 		}
 		else {
+			if class.hasInstanceMethod(@name) {
+				SyntaxException.throwHomonymInstanceVariable(@name, this)
+			}
+
 			class.addInstanceVariable(@name, ClassVariableType.new(@scope(), @type))
 		}
 	} # }}}
@@ -236,6 +244,10 @@ class ClassProxyGroupDeclaration extends Statement {
 					var type = property.clone()
 
 					if type.isFunction() {
+						if class.hasInstanceVariable(internal) {
+							SyntaxException.throwHomonymInstanceMethod(internal, this)
+						}
+
 						type.setProxy(@recipientPath, external)
 
 						var overloads = []
@@ -281,6 +293,10 @@ class ClassProxyGroupDeclaration extends Statement {
 						ReferenceException.throwNoTypeProxy(@recipient.toQuote(), external, this)
 					}
 					else {
+						if class.hasInstanceMethod(internal) {
+							SyntaxException.throwHomonymInstanceVariable(internal, this)
+						}
+
 						class.addInstanceVariable(internal, ClassVariableType.new(@scope(), type))
 
 						@elements[internal] = {

@@ -45,7 +45,7 @@ class ThrowStatement extends Statement {
 			SyntaxException.throwUnreportedError(this)
 		}
 	} # }}}
-	isExit() => true
+	override isExit(mode) => mode ~~ .Statement
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	translate() { # {{{
 		@value.translate()

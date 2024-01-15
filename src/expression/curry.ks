@@ -228,7 +228,7 @@ class CurryExpression extends CallExpression {
 			}
 		}
 	} # }}}
-	override isExit() => false
+	override isExit(mode) => false
 	override makeCallee(generics, node) { # {{{
 		node.prepareArguments()
 

@@ -12,10 +12,9 @@ class TryStatement extends Statement {
 		@catchVarname: String
 		@clauses: Array				= []
 		@continueVarname: String
-		@defaultClause				= null
+		@defaultClause: Block?		= null
 		@errorVarname: String
-		@exit: Boolean				= false
-		@finally					= null
+		@finally: Block?			= null
 		@finallyVarname: String
 		@hasClauses: Boolean		= false
 		@hasDefaultClause: Boolean	= false
@@ -117,7 +116,7 @@ class TryStatement extends Statement {
 			clause.body.prepare(target)
 			clause.type.prepare()
 
-			if clause.body.isExit() {
+			if clause.body:!(Block).isExit(.Statement + .Always) {
 				maxInferables -= 1
 			}
 			else {
@@ -146,7 +145,7 @@ class TryStatement extends Statement {
 
 		@body.prepare(target)
 
-		if @body.isExit() {
+		if @body.isExit(.Statement + .Always) {
 			maxInferables -= 1
 		}
 		else {
@@ -175,7 +174,7 @@ class TryStatement extends Statement {
 		if @hasDefaultClause {
 			@defaultClause.prepare(target)
 
-			if @defaultClause.isExit() {
+			if @defaultClause.isExit(.Statement + .Always) {
 				maxInferables -= 1
 			}
 			else {
@@ -205,7 +204,7 @@ class TryStatement extends Statement {
 		if @hasFinally {
 			@finally.prepare(target)
 
-			if @finally.isExit() {
+			if @finally.isExit(.Expression + .Statement) {
 				SyntaxException.throwInvalidFinallyReturn(this)
 			}
 			else {
@@ -232,9 +231,7 @@ class TryStatement extends Statement {
 			}
 		}
 
-		@exit = maxInferables == 0 && @hasDefaultClause
-
-		return if @exit
+		return if maxInferables == 0 && @hasDefaultClause
 
 		for var data, name of @initVariables {
 			var types = []
@@ -256,7 +253,7 @@ class TryStatement extends Statement {
 					if clause.initializable {
 						types.push(clause.type)
 					}
-					else if !clause.body.isExit() {
+					else if !clause.body:!(Block).isExit(.Expression + .Statement + .Always) {
 						initializable = false
 
 						break
@@ -290,7 +287,7 @@ class TryStatement extends Statement {
 					if clause.initializable {
 						types.push(clause.type)
 					}
-					else if !clause.body.isExit() {
+					else if !clause.body:!(Block).isExit(.Expression + .Statement + .Always) {
 						SyntaxException.throwMissingAssignmentTryClause(name, clause.body)
 					}
 				}
@@ -549,7 +546,29 @@ class TryStatement extends Statement {
 			return true
 		}
 	} # }}}
-	isExit() => @exit
+	override isExit(mode) { # {{{
+		if mode ~~ .Always {
+			return false unless @hasDefaultClause
+			return false unless @body.isExit(mode)
+			return false unless @defaultClause.isExit(mode)
+
+			for var clause in @clauses {
+				return false unless clause.body:!(Block).isExit(mode)
+			}
+
+			return true
+		}
+		else {
+			return true if @body.isExit(mode)
+			return true if @hasDefaultClause && @defaultClause.isExit(mode)
+
+			for var clause in @clauses {
+				return true if clause.body:!(Block).isExit(mode)
+			}
+
+			return false
+		}
+	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
 	isUsingVariable(name) { # {{{

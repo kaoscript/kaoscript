@@ -6,10 +6,10 @@ module.exports = function() {
 		return printAnimalAbilities.__ks_rt(this, arguments);
 	};
 	printAnimalAbilities.__ks_0 = function(abilities) {
-		if((abilities & AnimalFlags.HasClaws) != 0) {
+		if((abilities & AnimalFlags.HasClaws) == AnimalFlags.HasClaws) {
 			console.log("animal has claws");
 		}
-		if((abilities & AnimalFlags.CanFly) != 0) {
+		if((abilities & AnimalFlags.CanFly) == AnimalFlags.CanFly) {
 			console.log("animal can fly");
 		}
 		if(abilities === AnimalFlags.None) {

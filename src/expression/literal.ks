@@ -275,9 +275,14 @@ class IdentifierLiteral extends Literal {
 			ReferenceException.throwUndefinedFunction(@value, node)
 		}
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, testing, generics, node) { # {{{
 		if @isVariable {
-			@type.makeMemberCallee(property, generics, node)
+			if testing {
+				@type.setNullable(false).makeMemberCallee(property, generics, node)
+			}
+			else {
+				@type.makeMemberCallee(property, generics, node)
+			}
 		}
 		else {
 			if property == 'new' {

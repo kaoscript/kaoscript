@@ -1,0 +1,12 @@
+class ClassA {
+	foobar(x: Number): Number => 0
+	foobar(x: String): String => ''
+}
+
+class ClassB extends ClassA {
+	private {
+		@parent: ClassA
+	}
+	constructor(@parent)
+	override foobar(x) => @parent.foobar(x)
+}

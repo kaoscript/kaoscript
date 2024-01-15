@@ -10,49 +10,23 @@ class ClassVariableType extends Type {
 		fromAST(data, node: AbstractNode): ClassVariableType { # {{{
 			var scope = node.scope()
 
-			// TODO!
-			// var type = if ?data.type {
-			// 	set ClassVariableType.new(scope, Type.fromAST(data.type, node))
-			// }
-			// else {
-			// 	if ?data.modifiers {
-			// 		for var modifier in data.modifiers {
-			// 			match ModifierKind(modifier.kind) {
-			// 				ModifierKind.Nullable {
-			// 					set ClassVariableType.new(scope, AnyType.NullableExplicit)
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-
-			// 	set ClassVariableType.new(scope, AnyType.NullableUnexplicit)
-			// }
-
-			var mut type = null
-
-			if ?data.type {
-				type = ClassVariableType.new(scope, Type.fromAST(data.type, node))
-			}
-			else {
-				var mut nf = true
-
-				if ?data.modifiers {
-					for var modifier in data.modifiers {
-						match ModifierKind(modifier.kind) {
-							ModifierKind.Nullable {
-								type = ClassVariableType.new(scope, AnyType.NullableExplicit)
-								nf = false
-
-								break
+			var type =
+				if ?data.type {
+					set ClassVariableType.new(scope, Type.fromAST(data.type, node))
+				}
+				else {
+					if ?data.modifiers {
+						for var modifier in data.modifiers {
+							match ModifierKind(modifier.kind) {
+								ModifierKind.Nullable {
+									set ClassVariableType.new(scope, AnyType.NullableExplicit)
+								}
 							}
 						}
 					}
-				}
 
-				if nf {
-					type = ClassVariableType.new(scope, AnyType.NullableUnexplicit)
+					set ClassVariableType.new(scope, AnyType.NullableUnexplicit)
 				}
-			}
 
 			if ?data.modifiers {
 				for var modifier in data.modifiers {

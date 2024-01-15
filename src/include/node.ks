@@ -1,3 +1,11 @@
+bitmask ExitMode {
+	Nil
+	Always
+	Continuity
+	Expression
+	Statement
+}
+
 enum TargetMode {
 	Ignore
 	Permissive
@@ -99,13 +107,13 @@ include {
 	'./module.ks'
 	'./router.ks'
 	'./iteration/index.ks'
-	'./statement.ks'
+	'./block.ks'
 	'./expression.ks'
+	'./statement.ks'
 	'./parameter.ks'
 	'../statement/struct.ks'
 	'../statement/tuple.ks'
 	'../operator/index.ks'
-	'./block.ks'
 	'./macro.ks'
 }
 

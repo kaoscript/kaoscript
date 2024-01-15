@@ -312,18 +312,30 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var variable, name of @staticVariables {
+			if @class.hasStaticMethod(name) {
+				SyntaxException.throwHomonymStaticVariable(name, this)
+			}
+
 			variable.prepare()
 
 			@class.addStaticVariable(name, variable.type())
 		}
 
 		for var variable, name of @instanceVariables {
+			if @class.hasInstanceMethod(name) {
+				SyntaxException.throwHomonymInstanceVariable(name, this)
+			}
+
 			variable.prepare()
 
 			@class.addInstanceVariable(name, variable.type())
 		}
 
 		for var methods, name of @instanceMethods {
+			if @class.hasInstanceVariable(name) {
+				SyntaxException.throwHomonymInstanceMethod(name, this)
+			}
+
 			var async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
 			for var method in methods {
@@ -342,6 +354,10 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var methods, name of @abstractMethods {
+			if @class.hasInstanceVariable(name) {
+				SyntaxException.throwHomonymAbstractMethod(name, this)
+			}
+
 			var async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
 			for var method in methods {
@@ -360,6 +376,10 @@ class ClassDeclaration extends Statement {
 		}
 
 		for var methods, name of @staticMethods {
+			if @class.hasStaticVariable(name) {
+				SyntaxException.throwHomonymStaticMethod(name, this)
+			}
+
 			var async = @extendsType?.type().isAsyncStaticMethod(name) ?? methods[0].type().isAsync()
 
 			for var method in methods {

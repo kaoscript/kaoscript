@@ -108,12 +108,12 @@ class WithStatement extends Statement {
 
 		@body.prepare(target)
 
-		@exit = @body.isExit()
+		@exit = @body.isExit(.Statement + .Always)
 
 		if @hasFinally {
 			@finally.prepare(Type.Void)
 
-			if @finally.isExit() {
+			if @finally.isExit(.Statement + .Always) {
 				SyntaxException.throwInvalidFinallyReturn(this)
 			}
 		}
@@ -121,7 +121,7 @@ class WithStatement extends Statement {
 		if @hasFinally || ?#@variables {
 			if @exit {
 				for var statement in @body.statements() {
-					if statement.isExit() {
+					if statement:!(Statement).isExit(.Statement + .Always) {
 						if statement is ReturnStatement {
 							@returnValue = statement.value()
 						}
@@ -152,7 +152,6 @@ class WithStatement extends Statement {
 
 		@finally.translate() if @hasFinally
 	} # }}}
-	override isExit() => @exit
 	override isInitializingInstanceVariable(name) { # {{{
 		if @hasFinally {
 			return @body.isInitializingInstanceVariable(name) || @finally.isInitializingInstanceVariable(name)
@@ -258,4 +257,8 @@ class WithStatement extends Statement {
 			}
 		}
 	} # }}}
+
+	proxy @body {
+		isExit
+	}
 }

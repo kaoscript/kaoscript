@@ -250,6 +250,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@falseType: Type
 		@junction: Junction		= Junction.NONE
 		@subject
+		@testNullable: Boolean	= false
 		@testType: Type
 		@trueType: Type
 	}
@@ -298,6 +299,8 @@ class BinaryOperatorTypeEquality extends Expression {
 			@trueType = subjectType.limitTo(@testType)
 			@falseType = subjectType.trimOff(@trueType)
 		}
+
+		@testNullable = @subject.isNullable()
 	} # }}}
 	translate() { # {{{
 		@subject.translate()
@@ -324,8 +327,8 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		return inferables
 	} # }}}
-	isBooleanComputed(junction: Junction) => (@computed && junction != @junction) || @testType.isVariant()
-	isComputed() => false
+	isBooleanComputed(junction: Junction) => @testNullable || (@computed && junction != @junction) || @testType.isVariant()
+	isComputed() => @testNullable
 	isNullable() => false
 	isUsingVariable(name) => @subject.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
@@ -334,6 +337,10 @@ class BinaryOperatorTypeEquality extends Expression {
 		@testType.toPositiveTestFragments(fragments, @subject)
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
+		if @testNullable {
+			fragments.wrapNullable(@subject).code(' ? ')
+		}
+
 		var type = @subject.type()
 
 		if type is ReferenceType {
@@ -341,6 +348,10 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 		else {
 			@testType.toPositiveTestFragments(null, null, junction, fragments, @subject)
+		}
+
+		if @testNullable {
+			fragments.code(' : false')
 		}
 	} # }}}
 	type() => @scope.reference('Boolean')

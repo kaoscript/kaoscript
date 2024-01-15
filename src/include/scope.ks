@@ -159,11 +159,15 @@ abstract class Scope {
 	reference(value: Type): ReferenceType { # {{{
 		throw NotImplementedException.new()
 	} # }}}
+	// TODO
+	// reference(value: UnionType): UnionType => value
+	reference(value: UnionType) => value
 	reference(value: String, nullable: Boolean = false, parameters: Array = [], subtypes: Array = []): ReferenceType { # {{{
 		return @resolveReference(value, nullable, parameters, subtypes)
 	} # }}}
 	renameNext(name: String, line: Number): Void
 	abstract {
+		acquireNewLabel(): String
 		acquireTempName(declare: Boolean = true): String
 		authority(): Scope
 		block(): Scope

@@ -104,7 +104,7 @@ class MemberExpression extends Expression {
 					}
 				}
 
-				@prepareTuple(type) || @prepareArray(type) || @prepareBitmask(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareObject(type) || @prepareNamespace(type)
+				@prepareTuple(type) || @prepareArray(type) || @prepareBitmask(type) || @prepareEnum(type) || @prepareStruct(type) || @prepareClass(type) || @prepareObject(type) || @prepareNamespace(type)
 
 				if @assignable {
 					if var variable ?= @declaration() {
@@ -208,7 +208,16 @@ class MemberExpression extends Expression {
 	flagAssignable() { # {{{
 		@assignable = true
 	} # }}}
+	flagNullTested() { # {{{
+		@tested = true
+	} # }}}
 	getDeclaredType() => @declaredType ?? @type
+	getImmutableValue() { # {{{
+		var type = @object.type().discard()
+		var property = type.getValue(@property)
+
+		return property.value()
+	} # }}}
 	inferTypes(inferables) { # {{{
 		@object.inferTypes(inferables)
 
@@ -419,6 +428,7 @@ class MemberExpression extends Expression {
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed
 	isDerivative() => @derivative
+	isImmutableValue() => @object.type().isBitmask()
 	isInferable() => @inferable
 	isInverted() => @object.isInverted() || (@computed && @property.isInverted())
 	isLiberal() => @liberal
@@ -535,6 +545,39 @@ class MemberExpression extends Expression {
 
 			return false
 		}
+	} # }}}
+	prepareClass(type: Type): Boolean { # {{{
+		return false unless @assignable && !@computed && type.isClassInstance()
+
+		var class = type.discard()
+
+		if class.hasInstanceMethod(@property) {
+			ReferenceException.throwInvalidMethodAssignment(@property, this)
+		}
+		else if var property ?= class.getInstanceVariable(@property) {
+			@type = property.type()
+
+			if property is ClassVariableType && property.isSealed() {
+				@sealed = true
+				@usingGetter = property.hasDefaultValue()
+				@usingSetter = property.hasDefaultValue()
+			}
+		}
+		else if type.isExhaustive(this) {
+			if @assignable {
+				ReferenceException.throwInvalidAssignment(this)
+			}
+			else {
+				ReferenceException.throwNotDefinedProperty(@object, @toPropertyQuote(), this)
+			}
+		}
+
+		if @object.isInferable() {
+			@inferable = true
+			@path = `\(@object.path()).\(@property)`
+		}
+
+		return true
 	} # }}}
 	prepareEnum(type: Type): Boolean { # {{{
 		return false unless type.isEnum()

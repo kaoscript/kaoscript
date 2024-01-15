@@ -1185,14 +1185,8 @@ class ClassType extends Type {
 	getInstantiableAssessment(name: String, generics: AltType[] = [], node: AbstractNode) { # {{{
 		@instanceAssessments[name] ??= {}
 
-		// TODO!
-		// var methods = @listInstantiableMethods(name)
-		// 	.map((method, ...) => method.applyGenerics(generics)) if ?#generics
-		var mut methods = @listInstantiableMethods(name)
-
-		if ?#generics {
-			methods = methods.map((method, ...) => method.applyGenerics(generics))
-		}
+		var methods = @listInstantiableMethods(name)
+			.map((method, ...) => method.applyGenerics(generics)) if ?#generics
 
 		var hash = methods.map((method, ...) => method.index()).sort((a, b) => b - a).join(';')
 

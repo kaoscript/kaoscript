@@ -478,7 +478,7 @@ class FunctionDeclarator extends AbstractNode {
 		@block.translate()
 
 		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
+		@exit = @block.isExit(.Statement + .Always)
 	} # }}}
 	addInitializableVariable(variable, node)
 	addTopNode(node) { # {{{
@@ -499,7 +499,6 @@ class FunctionDeclarator extends AbstractNode {
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isAwait() => @awaiting
-	isExit() => @exit
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isJumpable() => false
@@ -564,6 +563,10 @@ class FunctionDeclarator extends AbstractNode {
 		line.done()
 	} # }}}
 	type() => @type
+
+	proxy @block {
+		isExit
+	}
 }
 
 class FunctionVariable extends Variable {

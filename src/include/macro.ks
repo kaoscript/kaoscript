@@ -746,9 +746,9 @@ class CallMacroStatement extends Statement {
 
 		return false
 	} # }}}
-	isExit() { # {{{
+	override isExit(mode) { # {{{
 		for var statement in @statements {
-			if statement.isExit() {
+			if statement.isExit(mode) {
 				return true
 			}
 		}

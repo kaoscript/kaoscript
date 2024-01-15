@@ -5,6 +5,7 @@ class BlockScope extends Scope {
 		@declarations						= {}
 		@implicitType: Type?				= null
 		@implicitVarname: String?			= null
+		@labelIndex							= -1
 		@macros: MacroDeclaration[]{}		= {}
 		@matchingTypes: Object<Array>		= {}
 		@module: ModuleScope
@@ -24,6 +25,11 @@ class BlockScope extends Scope {
 
 		@authority = @parent.authority()
 		@module = @parent.module()!?
+	} # }}}
+	override acquireNewLabel() { # {{{
+		@labelIndex += 1
+
+		return `__ks_lbl_\(@labelIndex)`
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {

@@ -1,6 +1,6 @@
 class DoWhileStatement extends Statement {
 	private late {
-		@body
+		@body: Block
 		@bodyScope: Scope
 		@condition
 	}
@@ -34,7 +34,6 @@ class DoWhileStatement extends Statement {
 		@body.translate()
 		@condition.translate()
 	} # }}}
-	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
@@ -50,4 +49,8 @@ class DoWhileStatement extends Statement {
 			.code(')')
 			.done()
 	} # }}}
+
+	proxy @body {
+		isExit
+	}
 }

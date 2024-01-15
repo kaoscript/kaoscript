@@ -197,7 +197,7 @@ class MatchStatement extends Statement {
 				clause.name = @scope.acquireTempName(false)
 			}
 
-			if clause.body.isExit() {
+			if clause.body:!(Block).isExit(.Statement + .Always) {
 				maxInferables -= 1
 			}
 			else {
@@ -263,7 +263,7 @@ class MatchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !@clauses[index].body.isExit() {
+				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
 					initializable = false
 
 					break
@@ -284,7 +284,7 @@ class MatchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !@clauses[index].body.isExit() {
+				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
 					SyntaxException.throwMissingAssignmentMatchClause(name, @clauses[index].body)
 				}
 			}
@@ -556,18 +556,36 @@ class MatchStatement extends Statement {
 			@initializedVariables[name] = map
 		}
 	} # }}}
-	isExit() { # {{{
+	isContinuousInlineReturn() { # {{{
 		unless @hasDefaultClause {
 			return false
 		}
 
 		for var clause in @clauses {
-			if !clause.body.isExit() {
+			if !clause.body.isContinuousInlineReturn() {
 				return false
 			}
 		}
 
 		return true
+	} # }}}
+	override isExit(mode) { # {{{
+		if mode ~~ .Always {
+			return false unless @hasDefaultClause
+
+			for var clause in @clauses {
+				return false unless clause.body.isExit(mode)
+			}
+
+			return true
+		}
+		else {
+			for var clause in @clauses {
+				return true if clause.body.isExit(mode)
+			}
+
+			return false
+		}
 	} # }}}
 	isJumpable() => true
 	isInitializingInstanceVariable(name) { # {{{
@@ -612,6 +630,11 @@ class MatchStatement extends Statement {
 	} # }}}
 	name() => @name
 	path() => @path
+	override setExitLabel(label) { # {{{
+		for var { body } in @clauses {
+			body.setExitLabel(label)
+		}
+	} # }}}
 	throwExpectedType(type: String): Never ~ TypeException { # {{{
 		TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), type, this)
 	} # }}}

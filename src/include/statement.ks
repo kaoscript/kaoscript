@@ -77,9 +77,9 @@ abstract class Statement extends AbstractNode {
 	isAwait() => false
 	isCascade() => false
 	isEnhancementExport() => false
-	isExit() => false
+	isExit(mode: ExitMode) => false
 	isExportable() => false
-	isInitializingInstanceVariable(name) => false
+	isInitializingInstanceVariable(name: String): Boolean => false
 	isJumpable() => false
 	isLateInitializable() => false
 	isLoop() => false
@@ -94,6 +94,7 @@ abstract class Statement extends AbstractNode {
 	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
 	} # }}}
+	setExitLabel(label: String)
 	statement() => this
 	target() => @options.target
 	toDeclarationFragments(variables, fragments) { # {{{

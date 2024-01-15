@@ -5,7 +5,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(abilities) {
-		if((abilities & AnimalFlags.CanFly) != 0 || (abilities & AnimalFlags.EatsFish) != 0) {
+		if((abilities & AnimalFlags.CanFly) == AnimalFlags.CanFly || (abilities & AnimalFlags.EatsFish) == AnimalFlags.EatsFish) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -830,7 +830,7 @@ abstract class Type {
 
 			return namedType
 		} # }}}
-		union(scope: Scope, ...types) { # {{{
+		union(scope: Scope, ...types: Type?) { # {{{
 			if types.length == 1 {
 				return types[0]
 			}

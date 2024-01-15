@@ -27,10 +27,10 @@ class UnionType extends Type {
 			return type
 		} # }}}
 	}
-	constructor(@scope, types: Array = [], @explicit = true) { # {{{
+	constructor(@scope, types: Type?[] = [], @explicit = true) { # {{{
 		super(scope)
 
-		for var type in types {
+		for var type in types when ?type {
 			@addType(type)
 		}
 	} # }}}
@@ -886,22 +886,28 @@ class UnionType extends Type {
 		if @never {
 			return Type.Never
 		}
-		if @types.length == 1 {
-			return @types[0]
-		}
-		if @types.length == 2 {
-			if @types[0] is ValueType && @types[0].type().isBoolean() && @types[1] is ValueType && @types[1].type().isBoolean() {
-				if (@types[0].value() == 'true' && @types[1].value() == 'false') || (@types[1].value() == 'true' && @types[0].value() == 'false') {
-					return @scope.reference('Boolean')
-				}
-			}
 
-			if @nullable {
-				if @types[0] == Type.Null {
-					return @types[1].setNullable(true)
+		match #@types {
+			0 {
+				return AnyType.NullableUnexplicit
+			}
+			1 {
+				return @types[0]
+			}
+			2 {
+				if @types[0] is ValueType && @types[0].type().isBoolean() && @types[1] is ValueType && @types[1].type().isBoolean() {
+					if (@types[0].value() == 'true' && @types[1].value() == 'false') || (@types[1].value() == 'true' && @types[0].value() == 'false') {
+						return @scope.reference('Boolean')
+					}
 				}
-				if @types[1] == Type.Null {
-					return @types[0].setNullable(true)
+
+				if @nullable {
+					if @types[0] == Type.Null {
+						return @types[1].setNullable(true)
+					}
+					if @types[1] == Type.Null {
+						return @types[0].setNullable(true)
+					}
 				}
 			}
 		}

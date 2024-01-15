@@ -99,6 +99,10 @@ class ThisExpression extends Expression {
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
 
 					if @type.canBeFunction() {
+						if type.hasInstanceMethod(@name) {
+							SyntaxException.throwAmbiguousClassCall(@name, this)
+						}
+
 						@immutable = variable.isImmutable()
 						@sealed = variable.isSealed()
 						@lateInit = !@immutable && variable.isLateInit()

@@ -6,10 +6,10 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(state) {
 		let result = State.Step0;
-		if((state & State.Step1) != 0) {
+		if((state & State.Step1) == State.Step1) {
 			result = State(result | State.Step1);
 		}
-		if((state & State.Step2) != 0) {
+		if((state & State.Step2) == State.Step2) {
 			result = State(result | State.Step2);
 		}
 		return result;

@@ -2,6 +2,7 @@ class ModuleScope extends Scope {
 	private {
 		@chunkTypes							= {}
 		@declarations						= {}
+		@labelIndex							= -1
 		@lastLine: Boolean					= false
 		@line: Number						= 0
 		@lineOffset: Number					= 0
@@ -48,6 +49,11 @@ class ModuleScope extends Scope {
 		@predefined.__Primitive = Variable.new('Primitive', true, true, AliasType.new(this, UnionType.new(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')])))
 		@predefined.__Object = Variable.createPredefinedClass('Object', ClassFeature.StaticMethod, this)
 		@predefined.__Void = Variable.new('Void', true, true, Type.Void)
+	} # }}}
+	override acquireNewLabel() { # {{{
+		@labelIndex += 1
+
+		return `__ks_lbl_\(@labelIndex)`
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
 		for var _, name of @tempNames when @tempNames[name] {

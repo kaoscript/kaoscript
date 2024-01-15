@@ -65,7 +65,6 @@ class ExpressionStatement extends Statement {
 			@assignments.push(...assignments)
 		}
 	} # }}}
-	hasExceptions() => @expression.hasExceptions()
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
 			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
@@ -85,14 +84,8 @@ class ExpressionStatement extends Statement {
 			@parent.initializeVariable(variable, expression, this)
 		}
 	} # }}}
-	isAwait() => @expression.isAwait()
-	isExit() => @expression.isExit()
-	isInitializingInstanceVariable(name: String): Boolean => @expression.isInitializingInstanceVariable(name)
 	isJumpable() => true
 	isLateInitializable() => true
-	isUsingVariable(name) => @expression.isUsingVariable(name)
-	isUsingInstanceVariable(name) => @expression.isUsingInstanceVariable(name)
-	isUsingStaticVariable(class, varname) => @expression.isUsingStaticVariable(class, varname)
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 
@@ -170,6 +163,16 @@ class ExpressionStatement extends Statement {
 			afterward.toAfterwardFragments(fragments, mode)
 		}
 	} # }}}
-	type() => @expression.type()
 	walkNode(fn) => fn(this) && @expression.walkNode(fn)
+
+	proxy @expression {
+		hasExceptions
+		isAwait
+		isExit
+		isInitializingInstanceVariable
+		isUsingInstanceVariable
+		isUsingStaticVariable
+		isUsingVariable
+		type
+	}
 }

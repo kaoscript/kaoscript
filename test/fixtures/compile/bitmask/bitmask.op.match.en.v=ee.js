@@ -8,7 +8,7 @@ module.exports = function() {
 		if(animal === void 0) {
 			animal = null;
 		}
-		return (animal & AnimalFlags.Endangered) != 0;
+		return (animal & AnimalFlags.Endangered) == AnimalFlags.Endangered;
 	};
 	isEndangered.__ks_rt = function(that, args) {
 		const t0 = value => Type.isBitmaskInstance(value, AnimalFlags) || Type.isNull(value);

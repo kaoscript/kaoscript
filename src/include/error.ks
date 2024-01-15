@@ -224,6 +224,9 @@ export class ReferenceException extends Exception {
 		throwInvalidAssignment(node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`No value can be assigned to the expression \(node.toQuote(true))`, node)
 		} # }}}
+		throwInvalidMethodAssignment(name, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`No value can be assigned to the method "\(name)"`, node)
+		} # }}}
 		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`Alias "@\(name)" is looping on itself`, node)
 		} # }}}
@@ -408,6 +411,9 @@ export class SyntaxException extends Exception {
 		throwAlreadyImported(name, module, line, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The variable "\(name)" has already been imported by "\(module)" at line \(line)`, node)
 		} # }}}
+		throwAmbiguousClassCall(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The call to "\(name)" can match either the variable "@\(name)" or the method "\(name)"`, node)
+		} # }}}
 		throwBitmaskOverflow(name, length, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The bitmask "\(name)" can only have at most \(length) bits.`, node)
 		} # }}}
@@ -455,6 +461,18 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwHiddenMethod(name, class1, method1, class2, method2, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The method "\(class1.toQuote()).\(name)\(method1.toQuote())" hides the method "\(class2.toQuote()).\(name)\(method2.toQuote())"`, node)
+		} # }}}
+		throwHomonymInstanceMethod(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The instance method "\(name)" is matching a variable with the same name`, node)
+		} # }}}
+		throwHomonymInstanceVariable(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The instance variable "\(name)" is matching a method with the same name`, node)
+		} # }}}
+		throwHomonymStaticMethod(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The static method "\(name)" is matching a variable with the same name`, node)
+		} # }}}
+		throwHomonymStaticVariable(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The static variable "\(name)" is matching a method with the same name`, node)
 		} # }}}
 		throwIdenticalConstructor(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The constructor is identical with another constructor`, node)

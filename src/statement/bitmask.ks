@@ -536,7 +536,7 @@ class BitmaskMethodDeclaration extends Statement {
 		@block.translate()
 
 		@awaiting = @block.isAwait()
-		@exit = @block.isExit()
+		@exit = @block.isExit(.Statement + .Always)
 	} # }}}
 	addIndigentValue(value: Expression, parameters) { # {{{
 		var name = `__ks_default_\(@parent.type().type().incDefaultSequence())`

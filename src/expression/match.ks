@@ -210,7 +210,7 @@ class MatchExpression extends Expression {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !!@clauses[index].body.isExit() {
+				else if !!@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
 					initializable = false
 
 					break
@@ -231,7 +231,7 @@ class MatchExpression extends Expression {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !@clauses[index].body.isExit() {
+				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
 					SyntaxException.throwMissingAssignmentMatchClause(name, @clauses[index].body)
 				}
 			}
@@ -494,9 +494,7 @@ class DummyPossibilityTracker extends PossibilityTracker {
 class EnumPossibilityTracker extends PossibilityTracker {
 	private {
 		@possibilities: String[]
-		// TODO!
-		// @type: BitmaskType | EnumType
-		@type
+		@type: BitmaskType | EnumType
 	}
 	constructor(@type) { # {{{
 		super()

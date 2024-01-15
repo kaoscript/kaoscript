@@ -1,9 +1,9 @@
 class ForStatement extends Statement {
 	private late {
-		@bodyBlock
+		@bodyBlock: Block
 		@bodyScope: Scope
 		@else: Boolean					= false
-		@elseBlock
+		@elseBlock: Block
 		@elseName: String?
 		@elseScope: Scope?
 		@iterations: IterationNode[]	= []
@@ -105,8 +105,23 @@ class ForStatement extends Statement {
 	getElseName() => @elseName
 	hasElse() => @else
 	hasManyIterations() => @manyIterations
+	override isExit(mode) { # {{{
+		if mode ~~ .Always {
+			return @else && @bodyBlock.isExit(mode) && @elseBlock.isExit(mode)
+		}
+		else {
+			return @bodyBlock.isExit(mode) || (@else && @elseBlock.isExit(mode))
+		}
+	} # }}}
 	override isJumpable() => true
 	override isLoop() => true
+	override setExitLabel(label) { # {{{
+		@bodyBlock.setExitLabel(label)
+
+		if @else {
+			@elseBlock.setExitLabel(label)
+		}
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if @manyIterations {
 			var mut ctrl = fragments

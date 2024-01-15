@@ -1,11 +1,11 @@
 class Block extends AbstractNode {
 	private {
-		@awaiting: Boolean	= false
-		@empty: Boolean		= false
-		@exit: Boolean		= false
-		@length: Number		= 0
-		@offset: Number		= 0
-		@statements: Array	= []
+		@awaiting: Boolean			= false
+		@empty: Boolean				= false
+		@exit: Boolean				= false
+		@length: Number				= 0
+		@offset: Number				= 0
+		@statements: Statement[]	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { # {{{
 		super(data, parent, scope)
@@ -40,9 +40,7 @@ class Block extends AbstractNode {
 
 			statement.analyse()
 
-			if statement.isAwait() {
-				@awaiting = true
-			}
+			@awaiting ||= statement.isAwait()
 		}
 
 		@scope.setLineOffset(@offset)
@@ -65,7 +63,7 @@ class Block extends AbstractNode {
 
 			statement.prepare(target, index, @length)
 
-			@exit = statement.isExit()
+			@exit ||= statement.isExit(.Expression + .Statement + .Always)
 		}
 
 		@checkExit(target)
@@ -126,7 +124,7 @@ class Block extends AbstractNode {
 		var types = []
 
 		for var statement in @statements {
-			if statement.isExit() {
+			if statement.isExit(.Statement) {
 				types.push(statement.getUnpreparedType())
 			}
 		}
@@ -150,7 +148,33 @@ class Block extends AbstractNode {
 	} # }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
-	isExit() => @exit
+	isExit(mode: ExitMode) { # {{{
+		if mode ~~ .Expression + .Continuity {
+			var mut set = true
+
+			for var statement in @statements {
+				if set {
+					if statement.isExit(.Expression) {
+						set = false
+					}
+				}
+				else {
+					if !statement.isExit(.Statement + .Always) {
+						return false
+					}
+				}
+			}
+
+			return true
+		}
+		else {
+			for var statement, index in @statements {
+				return true if statement.isExit(mode)
+			}
+
+			return false
+		}
+	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
 		for var statement in @statements {
 			if statement.isInitializingInstanceVariable(name) {
@@ -201,6 +225,18 @@ class Block extends AbstractNode {
 
 		return variables
 	} # }}}
+	setExitLabel(label: String) { # {{{
+		if @parent is Expression {
+			for var statement in @statements to~ -1 {
+				statement.setExitLabel(label)
+			}
+		}
+		else {
+			for var statement in @statements {
+				statement.setExitLabel(label)
+			}
+		}
+	} # }}}
 	statements() => @statements
 	toFragments(fragments, mode) { # {{{
 		if @awaiting {
@@ -233,7 +269,7 @@ class Block extends AbstractNode {
 			var types = []
 
 			for var statement in @statements {
-				if statement.isExit() {
+				if statement.isExit(.Expression + .Statement + .Always) {
 					types.push(statement.type())
 				}
 			}
@@ -264,7 +300,7 @@ class FunctionBlock extends Block {
 		if ?@return {
 			var toAdd =
 				if var statement ?= @statements.last() {
-					set !statement.isExit()
+					set !statement:!(Statement).isExit(.Expression + .Statement + .Always)
 				}
 				else {
 					set true
@@ -288,7 +324,7 @@ class FunctionBlock extends Block {
 			else if target.isAny() && !target.isExplicit() {
 				pass
 			}
-			else if !?#@statements || !@statements.last().isExit() {
+			else if !?#@statements || !@statements.last():!(Statement).isExit(.Expression + .Statement + .Always) {
 				TypeException.throwExpectedReturnedValue(target, this)
 			}
 		}

@@ -1,7 +1,8 @@
 // natives
 class MacroScope extends Scope {
 	private {
-		@matchingTypes: Object<Array>	= {}
+		@labelIndex							= -1
+		@matchingTypes: Object<Array>		= {}
 		@predefined							= {}
 		@references							= {}
 		@renamedIndexes					 	= {}
@@ -42,6 +43,11 @@ class MacroScope extends Scope {
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
 		@predefined.__Identifier = Variable.createPredefinedClass('Identifier', this)
+	} # }}}
+	override acquireNewLabel() { # {{{
+		@labelIndex += 1
+
+		return `__ks_lbl_\(@labelIndex)`
 	} # }}}
 	acquireTempName(declare: Boolean = true) { # {{{
 		throw NotSupportedException.new()
