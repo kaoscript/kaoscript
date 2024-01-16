@@ -593,6 +593,10 @@ abstract class Type {
 			if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
 				var property = data.typeName.argument.name
 
+				if type.isAny() {
+					ReferenceException.throwUnresolvedImplicitProperty(property, node)
+				}
+
 				if type.isBitmask() {
 					unless type.discard().hasValue(property) {
 						ReferenceException.throwNotDefinedBitmaskElement(property, type.name(), node)

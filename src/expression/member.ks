@@ -818,7 +818,6 @@ class MemberExpression extends Expression {
 							if var { type % subtype } ?= variant.getField(name) ?? variant.getAlias(name) {
 								if var property ?= subtype.getProperty(@property) {
 									@type = property.discardVariable()
-
 									found = true
 								}
 								else if subtype.isExhaustive(this) {
@@ -832,7 +831,26 @@ class MemberExpression extends Expression {
 							}
 						}
 						else {
-							ReferenceException.throwNotDeterminableProperty(@object, @toPropertyQuote(), this)
+							var types = []
+
+							for var { name } in subtypes {
+								var variant = type.discard().getVariantType()
+
+								if var { type % subtype } ?= variant.getField(name) ?? variant.getAlias(name) {
+									if var property ?= subtype.getProperty(@property) {
+										types.push(property.discardVariable())
+									}
+									else {
+										ReferenceException.throwNotDeterminableProperty(@object, @toPropertyQuote(), this)
+									}
+								}
+								else {
+									ReferenceException.throwNotDeterminableProperty(@object, @toPropertyQuote(), this)
+								}
+							}
+
+							@type = Type.union(@scope, ...types)
+							found = true
 						}
 					}
 				}

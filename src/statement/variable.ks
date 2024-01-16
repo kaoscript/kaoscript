@@ -588,8 +588,8 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@redeclared = @scope.hasDeclaredVariable(@name)
 
 		@identifier = IdentifierLiteral.new(@data.name, this, @scope)
-		@identifier.setAssignment(AssignmentType.Declaration)
-		@identifier.analyse()
+			..setAssignment(AssignmentType.Declaration)
+			..analyse()
 
 		@parent.defineVariables(@identifier)
 

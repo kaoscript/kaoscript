@@ -285,7 +285,7 @@ class BinaryOperatorVariantCoalescing extends PolyadicOperatorVariantCoalescing 
 class UnaryOperatorVariant extends UnaryOperatorExpression {
 	private late {
 		@name: String
-		@type: Type
+		@trueType: Type
 	}
 	override prepare(target, targetMode) { # {{{
 		@argument.prepare()
@@ -301,7 +301,9 @@ class UnaryOperatorVariant extends UnaryOperatorExpression {
 			var variant = root.getVariantType()
 
 			if variant.canBeBoolean() {
-				@type = type
+				@trueType = type.clone()
+					..setSubtypes([{ name: 'true', type: @scope.reference('Boolean') }])
+
 				@name = root.getVariantName()
 			}
 			else {
@@ -318,7 +320,7 @@ class UnaryOperatorVariant extends UnaryOperatorExpression {
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {
 				isVariable: @argument is IdentifierLiteral
-				type: @type
+				type: @trueType
 			}
 		}
 

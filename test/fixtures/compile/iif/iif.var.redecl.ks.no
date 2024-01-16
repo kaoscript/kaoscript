@@ -1,0 +1,13 @@
+func foobar(test) {
+	var value =
+		if test(0) {
+			var value = 0
+
+			echo(value)
+
+			set 1
+		}
+		else {
+			set 0
+		}
+}

@@ -1,0 +1,1 @@
+ReferenceException: The implicit property ".ObjectComprehension" couldn't be resolved (fixtures/compile/variant/variant.type.bool.gmk.op.typeeq.z<za>.mbr.eq_zce.ks:27)

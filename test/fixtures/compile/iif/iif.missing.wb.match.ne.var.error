@@ -1,0 +1,1 @@
+SyntaxException: The block doesn't return a value for every case (fixtures/compile/iif/iif.missing.wb.match.ne.var.ks:3)

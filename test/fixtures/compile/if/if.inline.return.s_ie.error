@@ -1,1 +1,0 @@
-TypeException: The return type must be "String" and not "Number" (fixtures/compile/if/if.inline.return.s_ie.ks:8)

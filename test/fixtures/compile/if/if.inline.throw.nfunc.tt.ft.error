@@ -1,1 +1,0 @@
-TypeException: The operand "if test() { ... }" can't be of type "Never" (fixtures/compile/if/if.inline.throw.nfunc.tt.ft.ks:2)

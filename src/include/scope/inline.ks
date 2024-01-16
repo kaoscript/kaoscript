@@ -138,11 +138,9 @@ class InlineBlockScope extends BlockScope {
 
 		@declarations[newName] = true
 
-		var variables: Array = @variables[name]
+		var variables: Array? = @variables[name]
 
-		if !?@variables {
-			return
-		}
+		return unless ?#variables
 
 		@renamedVariables[name] = newName
 
