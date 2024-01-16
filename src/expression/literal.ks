@@ -160,9 +160,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	initializeVariables(type: Type, node: Expression) { # {{{
 		if @isVariable {
-			var variable = @scope.getVariable(@value, @line)
-
-			if variable.isLateInit() {
+			if @scope.getVariable(@value, @line).isLateInit() {
 				node.initializeVariable(VariableBrief.new(
 					name: @value
 					type: type.unspecify()
@@ -172,6 +170,8 @@ class IdentifierLiteral extends Literal {
 			}
 			else {
 				@scope.replaceVariable(@value, type, this)
+
+				@type = @scope.getVariable(@value, @line).getRealType()
 			}
 		}
 	} # }}}

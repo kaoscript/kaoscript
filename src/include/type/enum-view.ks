@@ -157,6 +157,20 @@ class EnumViewType extends Type {
 		}
 	} # }}}
 	getOnlyAliases() => @aliases
+	getOriginalValueCount(...names: { name: String }): Number { # {{{
+		var mut result = 0
+
+		for var { name } in names {
+			if var value ?= @aliases[name] {
+				result += value.originals().length:!(Number)
+			}
+			else {
+				result += 1
+			}
+		}
+
+		return result
+	} # }}}
 	getValue(name: String) { # {{{
 		if @elements.contains(name) {
 			return @root.getValue(name)

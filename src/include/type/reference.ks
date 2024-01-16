@@ -1064,7 +1064,14 @@ class ReferenceType extends Type {
 
 				if @hasParameters() {
 					return true if !value.hasParameters()
-					return true if Type.getParameterCount(@parameters) < Type.getParameterCount(value.parameters())
+
+					var parameters = value.parameters()
+
+					return true if Type.getParameterCount(@parameters) < Type.getParameterCount(parameters)
+
+					if #@parameters == #parameters == 1 {
+						return true if @parameters[0].isMorePreciseThan(parameters[0])
+					}
 				}
 
 				if @hasSubtypes() {

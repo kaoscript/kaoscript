@@ -159,7 +159,7 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	getChunkType(name, line: Number = @line()) { # {{{
-		if @chunkTypes[name] is Array {
+		if ?@chunkTypes[name] {
 			var types: Array = @chunkTypes[name]
 			var mut type = null
 
@@ -172,7 +172,7 @@ class BlockScope extends Scope {
 				}
 			}
 
-			if type != null {
+			if ?type {
 				return type
 			}
 		}
@@ -490,6 +490,8 @@ class BlockScope extends Scope {
 			}
 		}
 
+		var oldHash = variable.getRealType().hashCode()
+
 		if !type.equals(variable.getRealType()) {
 			if ?@variables[name] {
 				variable = variable.setRealType(type, absolute, this)
@@ -505,6 +507,14 @@ class BlockScope extends Scope {
 
 		if var reference ?= @references[name] {
 			reference.reset()
+		}
+
+		if variable.getRealType().hashCode() != oldHash {
+			var prefix = `\(name).`
+
+			for var chunks, key of @chunkTypes when key.startsWith(prefix) {
+				chunks.push(@line(), null)
+			}
 		}
 
 		return variable
