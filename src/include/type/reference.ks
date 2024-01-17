@@ -1723,6 +1723,19 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
+	override setProperty(name, type) { # {{{
+		return if !?#@parameters
+
+		var property = @getProperty(name)
+
+		for var parameter, index in @parameters {
+			if property == parameter {
+				@parameters[index] = type
+
+				break
+			}
+		}
+	} # }}}
 	setSubtypes(@subtypes)
 	split(types: Array) { # {{{
 		@resolve()

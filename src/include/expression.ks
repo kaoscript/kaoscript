@@ -18,6 +18,7 @@ abstract class Expression extends AbstractNode {
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions(): Boolean => true
+	inferProperty(property: Type, inferables) => inferables
 	// types after of the expression block
 	inferTypes(inferables) => inferables
 	// types if the condition is true

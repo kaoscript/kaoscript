@@ -67,6 +67,7 @@ class BinaryOperatorTypeAssertion extends Expression {
 			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
+	expression() => @left
 	isLooseComposite() => @toAssert || @toEnum || @toNonNull || @toRawValue
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
@@ -195,6 +196,7 @@ class BinaryOperatorTypeCasting extends Expression {
 			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
+	expression() => @left
 	hasExceptions() => false
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	isNullable() => @left.isNullable()
@@ -313,6 +315,8 @@ class BinaryOperatorTypeEquality extends Expression {
 				isTyping: true
 				type: @trueType
 			}
+
+			@subject.inferProperty(@trueType, inferables)
 		}
 
 		return inferables
@@ -323,6 +327,8 @@ class BinaryOperatorTypeEquality extends Expression {
 				isVariable: @subject is IdentifierLiteral
 				type: @falseType
 			}
+
+			@subject.inferProperty(@falseType, inferables)
 		}
 
 		return inferables
@@ -565,6 +571,7 @@ class BinaryOperatorTypeSignalment extends Expression {
 	override translate() { # {{{
 		@left.translate()
 	} # }}}
+	expression() => @left
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left.name()
 	override toQuote() { # {{{

@@ -1146,6 +1146,7 @@ abstract class Type {
 			return this
 		}
 	} # }}}
+	setProperty(name: String, type: Type)
 	shallBeNamed() => false
 	sort() => this
 	split(types: Array): Array { # {{{

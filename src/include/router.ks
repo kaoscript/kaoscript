@@ -372,7 +372,7 @@ namespace Router {
 		}
 		else {
 			for var argument, index in arguments {
-				if argument is RestrictiveExpression {
+				if argument is RestrictiveExpression | BinaryOperatorTypeAssertion | BinaryOperatorTypeCasting | UnaryOperatorTypeFitting | BinaryOperatorTypeSignalment {
 					[namedCount, shortCount] = Matching.prepare(argument.expression(), index, nameds, shorthands, indexeds, invalids, namedCount, shortCount)
 				}
 				else {

@@ -1096,6 +1096,9 @@ class ObjectType extends Type {
 			return type
 		}
 	} # }}}
+	override setProperty(name, type) { # {{{
+		@properties[name] = type
+	} # }}}
 	setRestType(@restType): valueof this { # {{{
 		@rest = true
 	} # }}}

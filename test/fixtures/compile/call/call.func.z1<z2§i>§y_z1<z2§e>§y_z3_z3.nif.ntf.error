@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Event<NodeData(Expression)>(true), Event<NodeData(Expression)>(true), Event<NodeData(Expression)>(true), Event<NodeData(Expression)>(true)) (fixtures/compile/call/call.func.z1<z2§i>§y_z1<z2§e>§y_z3_z3.nif.ntf.ks:38)

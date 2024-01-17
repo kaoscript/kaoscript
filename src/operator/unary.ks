@@ -17,6 +17,7 @@ class UnaryOperatorExpression extends Expression {
 		@argument.translate()
 	} # }}}
 	argument() => @argument
+	expression() => @argument
 	hasExceptions() => false
 	inferTypes(inferables) => @argument.inferTypes(inferables)
 	isUsingVariable(name) => @argument.isUsingVariable(name)

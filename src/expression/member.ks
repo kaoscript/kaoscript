@@ -218,6 +218,22 @@ class MemberExpression extends Expression {
 
 		return property.value()
 	} # }}}
+	override inferProperty(property, inferables) { # {{{
+		if !@computed {
+			var type = @object.type().clone()
+
+			type.setProperty(@property, property)
+
+			inferables[@object.path()] = {
+				isVariable: @object is IdentifierLiteral
+				type
+			}
+
+			@object.inferProperty(type, inferables)
+		}
+
+		return inferables
+	} # }}}
 	inferTypes(inferables) { # {{{
 		@object.inferTypes(inferables)
 
