@@ -10,7 +10,7 @@ class CallThisConstructorSubstitude extends Substitude {
 
 		var assessment = class.type().getConstructorAssessment(class.name(), null, node)
 
-		match Router.matchArguments(assessment, null, @arguments, node) {
+		match Router.matchArguments(assessment, null, @arguments, [], node) {
 			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 			}
@@ -104,7 +104,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		var extends = @class.type().extends()
 		var assessment = extends.type().getConstructorAssessment(extends.name(), null, node)
 
-		match Router.matchArguments(assessment, null, @arguments, node) {
+		match Router.matchArguments(assessment, null, @arguments, [], node) {
 			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 				@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
@@ -199,7 +199,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), null, @method)
 
-		match Router.matchArguments(assessment, null, @arguments, @method) {
+		match Router.matchArguments(assessment, null, @arguments, [], @method) {
 			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 
@@ -273,7 +273,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 
 		var assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), null, @method)
 
-		match Router.matchArguments(assessment, null, @arguments, @method) {
+		match Router.matchArguments(assessment, null, @arguments, [], @method) {
 			is LenientCallMatchResult | PreciseCallMatchResult with var result {
 				@result = result
 

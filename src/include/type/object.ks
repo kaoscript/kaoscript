@@ -951,6 +951,39 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
+	matchDeferred(type: ObjectType, generics: Type{}) { # {{{
+		var result = @clone()
+
+		if @rest && @restType.isDeferrable() && type.hasRest() {
+			result.setRestType(@restType.matchDeferred(type.getRestType(), generics).type)
+		}
+
+		if type.hasProperties() {
+			var properties = type.properties()
+
+			if @length != 0 {
+				for var property, name of @properties {
+					if property.isDeferrable() {
+						result._properties[name] = property.matchDeferred(properties[name], generics).type
+					}
+				}
+			}
+			else if @rest && @restType.isDeferrable() {
+				result.setRestType(@restType.matchDeferred(Type.union(@scope, ...Object.values(properties)!?), generics).type)
+			}
+		}
+
+		return {
+			type: result
+			match: false
+		}
+	} # }}}
+	matchDeferred(type: Type, generics: Type{}) { # {{{
+		return {
+			type: this
+			match: false
+		}
+	} # }}}
 	assist merge(value: ObjectType, generics, subtypes, ignoreUndefined, node) { # {{{
 		var result = ObjectType.new(@scope)
 

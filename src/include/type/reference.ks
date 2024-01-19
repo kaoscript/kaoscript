@@ -1504,6 +1504,19 @@ class ReferenceType extends Type {
 			return true
 		}
 	} # }}}
+	matchDeferred(type: Type, generics: Type{}) { # {{{
+		if ?#@parameters {
+			return {
+				type: this
+				match: false
+			}
+		}
+
+		return {
+			type: this
+			match: false
+		}
+	} # }}}
 	mergeSubtypes(value: ReferenceType): ReferenceType { # {{{
 		var nullable = @isNullable() || value.isNullable()
 

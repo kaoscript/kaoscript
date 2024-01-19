@@ -340,7 +340,7 @@ namespace Router {
 		)
 	} # }}}
 
-	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
+	func matchArguments(assessment: Assessment, thisType: Type?, arguments: Expression[], generics: AltType[], mode: ArgumentMatchMode = .BestMatch, node: AbstractNode): CallMatchResult { # {{{
 		if assessment.length == 0 {
 			if !?#arguments {
 				return PreciseCallMatchResult.new([])
@@ -427,11 +427,13 @@ namespace Router {
 
 		var route = Build.getRoute(assessment, labels, functionList, node)
 
+		var gg = { [name]: type for var { name, type } in generics }
+
 		if namedCount > 0 || shortCount > 0 {
-			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, mode, node)
+			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, gg, mode, node)
 		}
 		else {
-			return Matching.matchArguments(assessment, route, types, [], indexeds, mode, node)
+			return Matching.matchArguments(assessment, route, types, [], indexeds, gg, mode, node)
 		}
 	} # }}}
 

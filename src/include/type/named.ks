@@ -639,6 +639,7 @@ class NamedType extends Type {
 		hasProperty
 		hasRest
 		hasTest
+		generics
 		isBitmask
 		isComplete
 		isComplex

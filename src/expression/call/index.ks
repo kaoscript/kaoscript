@@ -482,10 +482,10 @@ class CallExpression extends Expression {
 
 		node.addCallee(DefaultCallee.new(node.data(), null, null, node))
 	} # }}}
-	matchArguments(@assessment): CallMatchResult { # {{{
+	matchArguments(@assessment, generics: AltType[] = []): CallMatchResult { # {{{
 		@prepareArguments()
 
-		return Router.matchArguments(@assessment, @thisType, @arguments, @matchingMode, this)
+		return Router.matchArguments(@assessment, @thisType, @arguments, generics, @matchingMode, this)
 	} # }}}
 	object() => @object
 	prepareArguments() { # {{{

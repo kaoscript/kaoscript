@@ -54,7 +54,21 @@ class DeferredType extends Type {
 		genericMap[@name] ??= []
 
 		if position is Array {
-			NotImplementedException.throw()
+			var types = []
+
+			for var { index?, element? } in position {
+				if !?index {
+					pass
+				}
+				else if ?element {
+					types.pushUniq(decompose(expressions[index].argument().type()))
+				}
+				else {
+					types.pushUniq(decompose(expressions[index].type()))
+				}
+			}
+
+			genericMap[@name].push(Type.union(@scope, ...types))
 		}
 		else {
 			var { index?, element? } = position
@@ -78,6 +92,8 @@ class DeferredType extends Type {
 
 		return type
 	} # }}}
+	compareToRef(value: NullType, equivalences: String[][]? = null) => 1
+	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => 1
 	constraint() => @constraint
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
@@ -97,10 +113,10 @@ class DeferredType extends Type {
 	} # }}}
 	override hashCode() { # {{{
 		if @constrainted {
-			return `<\(@name) is \(@constraint.hashCode())>`
+			return `<\(@name) is \(@constraint.hashCode())>\(@nullable ? '?' : '')`
 		}
 		else {
-			return `<\(@name)>`
+			return `<\(@name)>\(@nullable ? '?' : '')`
 		}
 	} # }}}
 	override isAny() => !@constrainted
@@ -163,6 +179,45 @@ class DeferredType extends Type {
 		}
 
 		return false
+	} # }}}
+	matchDeferred(type: Type, generics: Type{}) { # {{{
+		if type.isNull() {
+			if @nullable {
+				return {
+					type
+					match: true
+				}
+			}
+			else {
+				return {
+					type: this
+					match: false
+				}
+			}
+		}
+		else if ?generics[@name] {
+			return {
+				type: generics[@name]
+				match: false
+			}
+		}
+		else {
+			if @constrainted {
+				unless type.isSubsetOf(@constraint, null, null, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+					return {
+						type: this
+						match: false
+					}
+				}
+			}
+
+			generics[@name] = type
+
+			return {
+				type
+				match: true
+			}
+		}
 	} # }}}
 	name() => @name
 	setNullable(nullable: Boolean) { # {{{

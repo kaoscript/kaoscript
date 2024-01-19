@@ -345,6 +345,7 @@ class FunctionType extends Type {
 	} # }}}
 	override flagIndirectlyReferenced()
 	functions() => [this]
+	generics() => @generics
 	getCallIndex() => @alien ? 0 : @index
 	getProperty(name: String) => Type.Any
 	getRestIndex(): valueof @restIndex
@@ -355,7 +356,14 @@ class FunctionType extends Type {
 		var mut fragments = ''
 
 		if ?#@generics {
-			fragments += `<\(@generics.join(', '))>`
+			fragments += '<'
+
+			for var {name}, index in @generics {
+				fragments += ', ' if index != 0
+				fragments += name
+			}
+
+			fragments += '>'
 		}
 
 		fragments += '('
@@ -825,7 +833,7 @@ class FunctionType extends Type {
 	override makeCallee(name, generics, node) { # {{{
 		var assessment = this.assessment(name, node)
 
-		match node.matchArguments(assessment) {
+		match node.matchArguments(assessment, generics) {
 			is LenientCallMatchResult with var result {
 				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
 			}
@@ -873,7 +881,7 @@ class FunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 
-		return Router.matchArguments(assessment, null, arguments, node) is not NoMatchResult
+		return Router.matchArguments(assessment, null, arguments, [], node) is not NoMatchResult
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isFunction() {
@@ -1380,7 +1388,7 @@ class OverloadedFunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
 
-		return Router.matchArguments(assessment, null, arguments, node) is not NoMatchResult
+		return Router.matchArguments(assessment, null, arguments, [], node) is not NoMatchResult
 	} # }}}
 	originals(@majorOriginal): valueof this { # {{{
 		@altering = true

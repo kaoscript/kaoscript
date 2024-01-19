@@ -11,6 +11,7 @@ namespace Matching {
 			arguments: Type[]
 			excludes: String[]
 			indexeds: NamingArgument[]
+			generics: Type{}
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult { # {{{
@@ -32,7 +33,7 @@ namespace Matching {
 						continue
 					}
 
-					WithIndex.match(tree, context)
+					WithIndex.match(tree, context, generics)
 
 					if mode == .BestMatch && context.found && ?#context.matches && !?#context.possibilities {
 						return PreciseCallMatchResult.new(context.matches)
@@ -72,7 +73,7 @@ namespace Matching {
 							continue
 						}
 
-						WithIndex.match(tree, context)
+						WithIndex.match(tree, context, generics)
 
 						if context.found && ?#context.matches && !?#context.possibilities {
 							results.push(PreciseCallMatchResult.new(context.matches))
@@ -108,6 +109,7 @@ namespace Matching {
 			nameds: NamingArgument{}
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
+			generics: Type{}
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult { # {{{
@@ -116,7 +118,7 @@ namespace Matching {
 			var results = []
 
 			for var combination in combinations {
-				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], mode, node) {
+				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], generics, mode, node) {
 					is LenientCallMatchResult | PreciseCallMatchResult {
 						results.push(result)
 					}
@@ -459,7 +461,7 @@ namespace Matching {
 		}
 
 		export {
-			func match(tree: Tree, context: MatchContext): Void { # {{{
+			func match(tree: Tree, context: MatchContext, generics: Type{}): Void { # {{{
 				if context.arguments.length == 0 {
 					if context.async {
 						context.found = true
@@ -539,7 +541,7 @@ namespace Matching {
 							var mut nf = true
 
 							for var key in tree.order while nf {
-								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), Matches.new(), newContext) {
+								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), Matches.new(), newContext, generics) {
 									nf = false
 								}
 							}
@@ -564,7 +566,7 @@ namespace Matching {
 					else {
 						for var key in tree.order {
 							// echo('---', key)
-							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context) {
+							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context, generics) {
 								return
 							}
 						}
@@ -578,6 +580,7 @@ namespace Matching {
 				mut cursor: Cursor
 				argMatches: Matches
 				context: MatchContext
+				generics: Type{}
 			): { cursor: Cursor, argMatches: Matches }? { # {{{
 				var last = arguments.length - 1
 
@@ -625,15 +628,23 @@ namespace Matching {
 						}
 					}
 					else {
-						if isPreciseMatch(cursor.argument, node.type) {
+						var mut fullType = node.type
+						var mut fullMatch = false
+
+						if fullType.isDeferrable() {
+							{ type % fullType, match % fullMatch } = fullType.matchDeferred(cursor.argument.discardValue(), generics)
+						}
+						// echo(node.type.hashCode(), fullType.hashCode(), cursor.argument.hashCode(), fullMatch)
+
+						if fullMatch || isPreciseMatch(cursor.argument, fullType) {
 							var mut matched = true
 
 							if var value ?= getRefinableValue(cursor, context) {
-								if node.type.isUnion() {
+								if fullType.isUnion() {
 									var mode = MatchingMode.FunctionSignature + MatchingMode.IgnoreRetained
 									var types = []
 
-									for var type in node.type.types() {
+									for var type in fullType.types() {
 										if type.isSubsetOf(cursor.argument, mode) {
 											types.push(type)
 										}
@@ -646,7 +657,7 @@ namespace Matching {
 									}
 								}
 								else {
-									value.type(node.type)
+									value.type(fullType)
 								}
 							}
 
@@ -670,10 +681,10 @@ namespace Matching {
 								+ MatchingMode.RequireAllParameters
 								+ MatchingMode.IgnoreNullable
 
-							if node.type.isUnion() {
+							if fullType.isUnion() {
 								var types = []
 
-								for var type in node.type.types() {
+								for var type in fullType.types() {
 									if type.isSubsetOf(cursor.argument, mode) {
 										types.push(type)
 									}
@@ -691,8 +702,8 @@ namespace Matching {
 									return { cursor, argMatches }
 								}
 							}
-							else if node.type.isSubsetOf(cursor.argument, mode) {
-								value.type(node.type)
+							else if fullType.isSubsetOf(cursor.argument, mode) {
+								value.type(fullType)
 
 								cursor.used += 1
 
@@ -704,7 +715,7 @@ namespace Matching {
 							}
 						}
 
-						if isUnpreciseMatch(cursor.argument, node.type) {
+						if isUnpreciseMatch(cursor.argument, fullType) {
 							argMatches.precise = false
 
 							cursor.used += 1
@@ -993,19 +1004,19 @@ namespace Matching {
 			}
 		} # }}}
 
-		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
+		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext, generics: Type{}): Boolean { # {{{
 			// echo('-- branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise, branch.type.hashCode(), branch.min, branch.max)
 			if cursor.spread && context.mode == .AllMatches  {
 				if var result ?= matchArguments(branch, context.arguments, cursor, Matches.new(
 						precise: argMatches.precise
 						arguments: [...argMatches.arguments]
-					), context)
+					), context, generics)
 				{
 					for var key in branch.order {
 						if matchTreeNode(tree, branch.columns[key], result.cursor, Matches.new(
 							precise: result.argMatches.precise
 							arguments: [...result.argMatches.arguments]
-						), context) {
+						), context, generics) {
 							if context.mode == .BestMatch {
 								return true
 							}
@@ -1016,7 +1027,7 @@ namespace Matching {
 						cursor = getNextCursor(cursor, context.arguments, true)
 						// echo('branch', toString(cursor))
 
-						if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+						if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
 							return false
 						}
 						// echo(toString(cursor), argMatches, context.arguments.length)
@@ -1025,7 +1036,7 @@ namespace Matching {
 							if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
 								precise: argMatches.precise
 								arguments: [...argMatches.arguments]
-							), context) {
+							), context, generics) {
 								if context.mode == .BestMatch {
 									return true
 								}
@@ -1037,7 +1048,7 @@ namespace Matching {
 					cursor = getNextCursor(cursor, context.arguments, true)
 					// echo('branch', toString(cursor))
 
-					if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+					if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
 						return false
 					}
 					// echo(toString(cursor), argMatches, context.arguments.length)
@@ -1046,7 +1057,7 @@ namespace Matching {
 						if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
 							precise: argMatches.precise
 							arguments: [...argMatches.arguments]
-						), context) {
+						), context, generics) {
 							if context.mode == .BestMatch {
 								return true
 							}
@@ -1057,7 +1068,7 @@ namespace Matching {
 			else {
 				var outOfBound = cursor.index >= context.arguments.length
 
-				if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context) {
+				if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
 					// echo(null)
 					return false
 				}
@@ -1076,7 +1087,7 @@ namespace Matching {
 						if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
 							precise: argMatches.precise
 							arguments: [...argMatches.arguments]
-						), context) {
+						), context, generics) {
 							if context.mode == .BestMatch {
 								return true
 							}
@@ -1088,7 +1099,7 @@ namespace Matching {
 						if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
 							precise: argMatches.precise
 							arguments: [...argMatches.arguments]
-						), context) {
+						), context, generics) {
 							if context.mode == .BestMatch {
 								return true
 							}
@@ -1100,21 +1111,21 @@ namespace Matching {
 			return false
 		} # }}}
 
-		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext): Boolean { # {{{
+		func matchTreeNode(tree: Tree, leaf: TreeLeaf, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext, generics: Type{}): Boolean { # {{{
 			if !leaf.function.isAsync() {
 				// echo('-- leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches, leaf.type.hashCode(), leaf.min, leaf.max)
 				if cursor.spread && context.mode == .AllMatches  {
 					var result = matchArguments(leaf, context.arguments, cursor, Matches.new(
 						precise: argMatches.precise
 						arguments: [...argMatches.arguments]
-					), context)
+					), context, generics)
 					// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 
 					if !?result || result.cursor.index + 1 < context.arguments.length || (result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0) {
 						cursor = getNextCursor(cursor, context.arguments, true)
 						// echo('leaf', toString(cursor), leaf.function.hashCode())
 
-						if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context) {
+						if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context, generics) {
 							return false
 						}
 						// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
@@ -1124,7 +1135,7 @@ namespace Matching {
 					}
 				}
 				else {
-					if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context) {
+					if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context, generics) {
 						// echo(null)
 						return false
 					}
@@ -1306,6 +1317,7 @@ namespace Matching {
 			nameds: NamingArgument{}
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
+			generics: Type{}
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
@@ -1465,6 +1477,7 @@ namespace Matching {
 							perArgument.functions
 							perArgument.preciseness
 							[...excludes, ...Object.keys(perArgument.shorthands)]
+							generics
 							mode
 							node
 						) {
@@ -1487,6 +1500,7 @@ namespace Matching {
 						possibleFunctions
 						preciseness
 						excludes
+						generics
 						mode
 						node
 					)
@@ -1502,6 +1516,7 @@ namespace Matching {
 						possibleFunctions
 						preciseness
 						excludes
+						generics
 						mode
 						node
 					)
@@ -1518,6 +1533,7 @@ namespace Matching {
 					possibleFunctions
 					preciseness
 					excludes
+					generics
 					mode
 					node
 				)
@@ -1574,6 +1590,7 @@ namespace Matching {
 			mut possibleFunctions: []
 			preciseness: {}
 			excludes: String[]
+			generics: Type{}
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
@@ -1696,10 +1713,10 @@ namespace Matching {
 				var route = Build.getRoute(assessment, excludes, functions, node)
 
 				if indexeds.length == argumentTypes.length {
-					return matchArguments(assessment, route, arguments, excludes, indexeds, mode, node)
+					return matchArguments(assessment, route, arguments, excludes, indexeds, generics, mode, node)
 				}
 				else {
-					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, mode, node) {
+					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, generics, mode, node) {
 						is PreciseCallMatchResult {
 							var precise = possibleFunctions.every((key, _, _) => preciseness[key])
 

@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Number) (fixtures/compile/generics/generics.func.call.lzg_id.ie.ks:14)

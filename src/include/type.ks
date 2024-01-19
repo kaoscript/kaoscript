@@ -207,7 +207,6 @@ type AltType = {
 // TODO
 // type AltTypes = AltType[]
 
-
 type Generic = {
 	name: String
 	type: Type?
@@ -502,7 +501,7 @@ abstract class Type {
 
 						if ?#generics {
 							for var generic in generics when generic.name == data.typeName.name {
-								return DeferredType.new(generic, scope)
+								return DeferredType.new(generic, scope).setNullable(nullable)
 							}
 						}
 
@@ -951,6 +950,7 @@ abstract class Type {
 
 		return @flagSealed()
 	} # }}}
+	generics(): Generic[] => []
 	getExhaustive() => @exhaustive
 	getGenericMapper(): { type: Type, generics: AltType[]?, subtypes: AltType[]? } => { type: this, generics: null, subtypes: null }
 	getProperty(index: Number) => null

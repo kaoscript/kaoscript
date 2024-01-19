@@ -616,6 +616,39 @@ class ArrayType extends Type {
 
 		return false
 	} # }}}
+	matchDeferred(type: ArrayType, generics: Type{}) { # {{{
+		var result = @clone()
+
+		if @rest && @restType.isDeferrable() && type.hasRest() {
+			result.setRestType(@restType.matchDeferred(type.getRestType(), generics).type)
+		}
+
+		if type.hasProperties() {
+			var properties = type.properties()!?
+
+			if @length != 0 {
+				for var property, index in @properties {
+					if property.isDeferrable() {
+						result._properties[index] = property.matchDeferred(properties[index], generics).type
+					}
+				}
+			}
+			else if @rest && @restType.isDeferrable() {
+				result.setRestType(@restType.matchDeferred(Type.union(@scope, ...properties), generics).type)
+			}
+		}
+
+		return {
+			type: result
+			match: false
+		}
+	} # }}}
+	matchDeferred(type: Type, generics: Type{}) { # {{{
+		return {
+			type: this
+			match: false
+		}
+	} # }}}
 	assist merge(value: ArrayType, generics, subtypes, ignoreUndefined, node) { # {{{
 		var result = ArrayType.new(@scope)
 

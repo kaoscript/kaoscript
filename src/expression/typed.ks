@@ -1,7 +1,7 @@
 class TypedExpression extends Expression {
 	private late {
 		@expression: Expression
-		@generics: Generic[]		= []
+		@generics: AltType[]		= []
 		@parameters: Type[]
 	}
 	override analyse() { # {{{
@@ -15,25 +15,28 @@ class TypedExpression extends Expression {
 
 		var type = @expression.type()
 
-		if type is NamedType {
-			if var originals ?#= type.type().generics() {
-				if @parameters.length > originals.length {
-					NotImplementedException.throw()
-				}
+		var originals = type.generics()
 
-				for var { name }, index in originals {
-					if var type ?= @parameters[index] {
-						@generics.push({ name, type })
-					}
-					else {
-						@generics.push({ name, type : AnyType.NullableUnexplicit })
-					}
+		if ?#originals {
+			if @parameters.length > originals.length {
+				NotImplementedException.throw()
+			}
+
+			for var { name }, index in originals {
+				if var type ?= @parameters[index] {
+					@generics.push({ name, type })
+				}
+				else {
+					@generics.push({ name, type : AnyType.NullableUnexplicit })
 				}
 			}
 		}
 	} # }}}
 	override translate() { # {{{
 		@expression.translate()
+	} # }}}
+	override makeCallee(generics, node) { # {{{
+		@expression.makeCallee(@generics, node)
 	} # }}}
 	override makeMemberCallee(property, testing, generics, node) { # {{{
 		@expression.type().makeMemberCallee(property, @generics, node)

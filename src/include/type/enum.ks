@@ -736,7 +736,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	matchValueArguments(arguments, node) { # {{{
-		return Router.matchArguments(@fieldAssessment, null, arguments, null, node)
+		return Router.matchArguments(@fieldAssessment, null, arguments, [], null, node)
 	} # }}}
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true

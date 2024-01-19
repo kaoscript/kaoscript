@@ -118,7 +118,7 @@ class ThisExpression extends Expression {
 					if type.hasInstantiableMethod(@name) {
 						var assessment = type.getInstantiableAssessment(@name, null, this)
 
-						match Router.matchArguments(assessment, null, @parent.getArgumentsWith(assessment), this) {
+						match Router.matchArguments(assessment, null, @parent.getArgumentsWith(assessment), [], this) {
 							is LenientCallMatchResult | PreciseCallMatchResult with var result {
 								var late functions: FunctionType[]
 
