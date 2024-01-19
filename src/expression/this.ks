@@ -141,7 +141,7 @@ class ThisExpression extends Expression {
 							}
 							else {
 								if type.isExhaustive(this) && @parent is not CurryExpression {
-									ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
+									ReferenceException.throwNoMatchingInstanceMethod(@name, @class.name(), [argument.type() for var argument in @parent.arguments()], this)
 								}
 								else {
 									@fragment = `\(name).\(@name)`
@@ -358,7 +358,7 @@ class ThisExpression extends Expression {
 				}
 				else {
 					if @type.isExhaustive(node) {
-						ReferenceException.throwNoMatchingStaticMethod(@name, @class.name(), [argument.type() for var argument in node.arguments()], node)
+						ReferenceException.throwNoMatchingInstanceMethod(@name, @class.name(), [argument.type() for var argument in node.arguments()], node)
 					}
 					else {
 						node.addCallee(DefaultCallee.new(node.data(), this, node))

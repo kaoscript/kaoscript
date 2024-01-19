@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" of the class "Quxbaz" can't be matched to given arguments (Any, Any) (fixtures/compile/class/class.extends.imth.badmatch.ks:7)
+ReferenceException: The instance method "foobar" of the class "Quxbaz" can't be matched to given arguments (Any, Any) (fixtures/compile/class/class.extends.imth.badmatch.ks:7)

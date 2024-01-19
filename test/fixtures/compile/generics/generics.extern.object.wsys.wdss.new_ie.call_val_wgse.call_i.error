@@ -1,1 +1,1 @@
-ReferenceException: The method "values" of the class "Object" can't be matched to given arguments (Object<Number, CardSuit>) (fixtures/compile/generics/generics.extern.object.wsys.wdss.new_ie.call_val_wgse.call_i.ks:25)
+ReferenceException: The class method "values" of the class "Object" can't be matched to given arguments (Object<Number, CardSuit>) (fixtures/compile/generics/generics.extern.object.wsys.wdss.new_ie.call_val_wgse.call_i.ks:25)

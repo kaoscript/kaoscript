@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" of the class "NS" can't be matched to given arguments (String) (fixtures/compile/class/class.nex.iex.method.default.ks:7)
+ReferenceException: The class method "foobar" of the class "NS" can't be matched to given arguments (String) (fixtures/compile/class/class.nex.iex.method.default.ks:7)

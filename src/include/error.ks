@@ -284,6 +284,14 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
+		throwNoMatchingInstanceMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
+			if arguments.length == 0 {
+				throw ReferenceException.new(`The instance method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw ReferenceException.new(`The instance method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
+			}
+		} # }}}
 		throwNoMatchingMacro(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw ReferenceException.new(`The macro "\(name)" can't be matched to no arguments`, node)
@@ -294,10 +302,10 @@ export class ReferenceException extends Exception {
 		} # }}}
 		throwNoMatchingStaticMethod(method, class, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
-				throw ReferenceException.new(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
+				throw ReferenceException.new(`The class method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw ReferenceException.new(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
+				throw ReferenceException.new(`The class method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
 		throwNoMatchingThis(name, node): Never ~ ReferenceException { # {{{

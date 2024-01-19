@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Number, Null) (fixtures/compile/generics/generics.func.call.g_ge.v=i_ne.ks:4)

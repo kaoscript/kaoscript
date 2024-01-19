@@ -1,1 +1,1 @@
-ReferenceException: The method "foo" of the class "Foobar" can't be matched to no arguments (fixtures/compile/class/class.imth.call.nomatch.ks:9)
+ReferenceException: The instance method "foo" of the class "Foobar" can't be matched to no arguments (fixtures/compile/class/class.imth.call.nomatch.ks:9)

@@ -1,1 +1,1 @@
-ReferenceException: The method "push" of the class "Stack" can't be matched to given arguments (Number, Number, Number) (fixtures/compile/generics/generics.extern.array.nsys.ndss.new_s.call_ie.ks:8)
+ReferenceException: The instance method "push" of the class "Stack" can't be matched to given arguments (Number, Number, Number) (fixtures/compile/generics/generics.extern.array.nsys.ndss.new_s.call_ie.ks:8)

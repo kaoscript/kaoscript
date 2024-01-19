@@ -33,7 +33,7 @@ namespace Matching {
 						continue
 					}
 
-					WithIndex.match(tree, context, generics)
+					WithIndex.match(tree, context, {...generics})
 
 					if mode == .BestMatch && context.found && ?#context.matches && !?#context.possibilities {
 						return PreciseCallMatchResult.new(context.matches)
@@ -73,7 +73,7 @@ namespace Matching {
 							continue
 						}
 
-						WithIndex.match(tree, context, generics)
+						WithIndex.match(tree, context, {...generics})
 
 						if context.found && ?#context.matches && !?#context.possibilities {
 							results.push(PreciseCallMatchResult.new(context.matches))
@@ -118,7 +118,7 @@ namespace Matching {
 			var results = []
 
 			for var combination in combinations {
-				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], generics, mode, node) {
+				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], {...generics}, mode, node) {
 					is LenientCallMatchResult | PreciseCallMatchResult {
 						results.push(result)
 					}
@@ -541,7 +541,7 @@ namespace Matching {
 							var mut nf = true
 
 							for var key in tree.order while nf {
-								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), Matches.new(), newContext, generics) {
+								if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor, type), Matches.new(), newContext, {...generics}) {
 									nf = false
 								}
 							}
@@ -566,7 +566,7 @@ namespace Matching {
 					else {
 						for var key in tree.order {
 							// echo('---', key)
-							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context, generics) {
+							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context, {...generics}) {
 								return
 							}
 						}
@@ -635,6 +635,9 @@ namespace Matching {
 							{ type % fullType, match % fullMatch } = fullType.matchDeferred(cursor.argument.discardValue(), generics)
 						}
 						// echo(node.type.hashCode(), fullType.hashCode(), cursor.argument.hashCode(), fullMatch)
+						// for var type, name of generics {
+						// 	echo(name, type.hashCode())
+						// }
 
 						if fullMatch || isPreciseMatch(cursor.argument, fullType) {
 							var mut matched = true
@@ -1363,13 +1366,21 @@ namespace Matching {
 					var matchedFunctions = []
 
 					for var { function, type, positional } in parameters {
-						if isPreciseMatch(argumentType, type) {
+						var mut fullType = type
+						var mut fullMatch = false
+
+						if fullType.isDeferrable() {
+							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argumentType.discardValue(), generics)
+						}
+						// echo(type.hashCode(), fullType.hashCode(), argumentType.hashCode(), fullMatch)
+
+						if fullMatch || isPreciseMatch(argumentType, fullType) {
 							SyntaxException.throwPositionalOnlyParameter(name, node) if positional
 
 							matchedFunctions.push(function)
 
 						}
-						else if isUnpreciseMatch(argumentType, type) {
+						else if isUnpreciseMatch(argumentType, fullType) {
 							SyntaxException.throwPositionalOnlyParameter(name, node) if positional
 
 							matchedFunctions.push(function)
@@ -1408,12 +1419,23 @@ namespace Matching {
 
 						for var function in possibleFunctions {
 							if var { type } ?= parameters.find((data, _, _) => !data.positional && data.function == function) {
-								if isPreciseMatch(argumentType, type) {
+								var mut fullType = type
+								var mut fullMatch = false
+
+								if fullType.isDeferrable() {
+									{ type % fullType, match % fullMatch } = fullType.matchDeferred(argumentType.discardValue(), generics)
+								}
+								// echo(type.hashCode(), fullType.hashCode(), argumentType.hashCode(), fullMatch)
+								// for var type, name of generics {
+								// 	echo(name, type.hashCode())
+								// }
+
+								if fullMatch || isPreciseMatch(argumentType, fullType) {
 									matched = true
 
 									perFunctions[function].shorthands[name] = argument
 								}
-								else if isUnpreciseMatch(argumentType, type) {
+								else if isUnpreciseMatch(argumentType, fullType) {
 									matched = true
 
 									perFunctions[function].shorthands[name] = argument
@@ -1477,7 +1499,7 @@ namespace Matching {
 							perArgument.functions
 							perArgument.preciseness
 							[...excludes, ...Object.keys(perArgument.shorthands)]
-							generics
+							{...generics}
 							mode
 							node
 						) {

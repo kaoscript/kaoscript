@@ -2109,7 +2109,7 @@ class ClassType extends Type {
 				}
 				NoMatchResult.NoArgumentMatch {
 					if @isExhaustiveInstanceMethod(property, node) {
-						ReferenceException.throwNoMatchingStaticMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
+						ReferenceException.throwNoMatchingInstanceMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
 					}
 					else {
 						node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
