@@ -293,6 +293,14 @@ class ReferenceType extends Type {
 			return @compareToRef(@scope.reference('Array'), equivalences)
 		}
 	} # }}}
+	compareToRef(value: DeferredType, equivalences: String[][]? = null) { # {{{
+		if @isAny() {
+			return 1
+		}
+		else {
+			return -1
+		}
+	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) { # {{{
 		if @isNull() {
 			return 0

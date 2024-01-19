@@ -604,7 +604,14 @@ namespace Matching {
 
 						var argument = getSpreadParameter(cursor.argument)
 
-						if isPreciseMatch(argument, node.type) {
+						var mut fullType = node.type
+						var mut fullMatch = false
+
+						if fullType.isDeferrable() {
+							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
+						}
+
+						if fullMatch || isPreciseMatch(argument, fullType) {
 							argMatches.precise = cursor.length != Infinity
 
 							argMatches.arguments.push([CallMatchArgument.new(index: cursor.index, element: cursor.used)])
@@ -615,7 +622,7 @@ namespace Matching {
 
 							return { cursor, argMatches }
 						}
-						else if isUnpreciseMatch(argument, node.type) {
+						else if isUnpreciseMatch(argument, fullType) {
 							argMatches.precise = false
 
 							cursor.used += 1
@@ -766,12 +773,19 @@ namespace Matching {
 					while i < node.min {
 						var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
-						if isPreciseMatch(argument, node.type) {
+						var mut fullType = node.type
+						var mut fullMatch = false
+
+						if fullType.isDeferrable() {
+							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
+						}
+
+						if fullMatch || isPreciseMatch(argument, fullType) {
 							if cursor.used + 1 > getMinParameter(cursor.argument) {
 								argMatches.precise = false
 							}
 						}
-						else if isUnpreciseMatch(argument, node.type) {
+						else if isUnpreciseMatch(argument, fullType) {
 							argMatches.precise = false
 						}
 						else {
@@ -791,10 +805,17 @@ namespace Matching {
 								if cursor.argument is not PlaceholderType {
 									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
-									if isPreciseMatch(argument, node.type) {
+									var mut fullType = node.type
+									var mut fullMatch = false
+
+									if fullType.isDeferrable() {
+										{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
+									}
+
+									if fullMatch || isPreciseMatch(argument, fullType) {
 										pass
 									}
-									else if isUnpreciseMatch(argument, node.type) {
+									else if isUnpreciseMatch(argument, fullType) {
 										argMatches.precise = false
 									}
 									else {
@@ -814,10 +835,17 @@ namespace Matching {
 								if cursor.argument is not PlaceholderType {
 									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
-									if isPreciseMatch(argument, node.type) {
+									var mut fullType = node.type
+									var mut fullMatch = false
+
+									if fullType.isDeferrable() {
+										{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
+									}
+
+									if fullMatch || isPreciseMatch(argument, fullType) {
 										pass
 									}
-									else if isUnpreciseMatch(argument, node.type) {
+									else if isUnpreciseMatch(argument, fullType) {
 										argMatches.precise = false
 									}
 									else {
@@ -858,10 +886,17 @@ namespace Matching {
 						while i < node.max && cursor?.index <= last {
 							var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
-							if isPreciseMatch(argument, node.type) {
+							var mut fullType = node.type
+							var mut fullMatch = false
+
+							if fullType.isDeferrable() {
+								{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
+							}
+
+							if fullMatch || isPreciseMatch(argument, fullType) {
 								pass
 							}
-							else if isUnpreciseMatch(argument, node.type) {
+							else if isUnpreciseMatch(argument, fullType) {
 								argMatches.precise = false
 							}
 							else {

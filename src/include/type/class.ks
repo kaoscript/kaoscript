@@ -1188,7 +1188,7 @@ class ClassType extends Type {
 		var methods = @listInstantiableMethods(name)
 			.map((method, ...) => method.applyGenerics(generics)) if ?#generics
 
-		var hash = methods.map((method, ...) => method.index()).sort((a, b) => b - a).join(';')
+		var hash = methods.sort((a, b) => b.index() - a.index()).map((method, ...) => `\(method.index()):\(method.hashCode())`).join(';')
 
 		if var assessment ?= @instanceAssessments[name][hash] {
 			return assessment
