@@ -257,6 +257,15 @@ class ClassType extends Type {
 						}
 					}
 
+					if ?data.generics {
+						for var { name, type % subtype? } in data.generics {
+							type._generics.push({
+								name
+								type: Type.import(subtype, metadata, references, alterations, queue, scope, node) if ?subtype
+							})
+						}
+					}
+
 					Object.delete(references, 'this')
 
 					type.setExhaustive(data.exhaustive)
@@ -595,6 +604,7 @@ class ClassType extends Type {
 		@exhaustive = src._exhaustive
 		@exhaustiveness = Object.clone(src._exhaustiveness)
 		@sequences = Object.clone(src._sequences)
+		@generics = [...src._generics]
 
 		if src._requirement || src._alien {
 			@originals(src)
@@ -849,6 +859,17 @@ class ClassType extends Type {
 
 			if @features != ClassFeature.All {
 				export.features = @features
+			}
+
+			if ?#@generics {
+				export.generics = []
+
+				for var { name, type? } in @generics {
+					export.generics.push({
+						name
+						type: type.export(references, indexDelta, mode, module, module) if ?type
+					})
+				}
 			}
 		}
 
