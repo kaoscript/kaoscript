@@ -50,9 +50,6 @@ var _ = module.exports = {
 			}
 		}
 	}, // }}}
-	getStandardLibraryDirectory: function() { // {{{
-		return path.join(__dirname, '..', 'registry', 'std');
-	}, // }}}
 	hidden: function(file, variationId, extension) { // {{{
 		if(variationId) {
 			return path.join(path.dirname(file), '.' + path.basename(file) + '.' + variationId + extension)

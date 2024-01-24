@@ -264,8 +264,8 @@ class NamespaceType extends Type {
 			if property is FunctionType || property is OverloadedFunctionType {
 				var assessment = property.assessment(propName, node)
 
-				match node.matchArguments(assessment) {
-					is LenientCallMatchResult with var result {
+				match var result = node.matchArguments(assessment) {
+					is LenientCallMatchResult {
 						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
 					}
 					is PreciseCallMatchResult with var { matches } {
@@ -286,11 +286,20 @@ class NamespaceType extends Type {
 						}
 					}
 					else {
-						if property.isExhaustive(node) {
-							ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)
-						}
-						else {
-							node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+						// if property.isExhaustive(node) {
+						// 	ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)
+						// }
+						// else {
+						// 	node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+						// }
+						// return result!!
+						return () => {
+							if property.isExhaustive(node) {
+								ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)
+							}
+							else {
+								node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+							}
 						}
 					}
 				}
@@ -308,6 +317,8 @@ class NamespaceType extends Type {
 		else {
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
 		}
+
+		return null
 	} # }}}
 	makeMemberCallee(name: String, property: Type, sealed: Boolean, named: NamedType, generics: AltType[], node: CallExpression) { # {{{
 		if property is FunctionType {

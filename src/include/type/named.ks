@@ -251,7 +251,7 @@ class NamedType extends Type {
 		return @isInheriting(superclass.type())
 	} # }}}
 	isInheriting(superclass: Type) => false
-	isInstanceOf(value: Type) => @type.isInstanceOf(value)
+	// isInstanceOf(value: Type) => @type.isInstanceOf(value)
 	isMorePreciseThan(value: Type) { # {{{
 		if value is NamedType {
 			if @isClass() && value.isClass() {
@@ -391,10 +391,10 @@ class NamedType extends Type {
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
 	majorOriginal() => @type.majorOriginal()
 	override makeMemberCallee(property, generics, node) { # {{{
-		@type.makeMemberCallee(property, this, generics, node)
+		return @type.makeMemberCallee(property, this, generics, node)
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
-		@type.makeMemberCallee(property, reference, generics, node)
+		return @type.makeMemberCallee(property, reference, generics, node)
 	} # }}}
 	matchClassName(that: Type?) { # {{{
 		if that == null {
@@ -636,6 +636,7 @@ class NamedType extends Type {
 	proxy @type {
 		canBeArray
 		canBeRawCasted
+		extractFunction
 		hasProperty
 		hasRest
 		hasTest
@@ -645,6 +646,8 @@ class NamedType extends Type {
 		isComplex
 		isDeferrable
 		isExportingType
+		isFunction
+		isInstanceOf
 		isVariant
 		isView
 		makeCallee

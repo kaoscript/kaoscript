@@ -1,0 +1,1 @@
+SyntaxException: The return of type "Number" is expected to be of type "Void" (fixtures/compile/type/type.func.u<z<f#v>.i>e.anom.f#ie.ks:4)

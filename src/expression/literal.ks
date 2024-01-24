@@ -268,7 +268,11 @@ class IdentifierLiteral extends Literal {
 				node.addCallee(SubstituteCallee.new(node.data(), substitute, node))
 			}
 			else {
-				type.makeCallee(variable.name(), generics, node)
+				var name = variable.name()
+
+				if var callback ?= type.makeCallee(name, generics, node) {
+					callback()
+				}
 			}
 		}
 		else {
@@ -277,11 +281,20 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	override makeMemberCallee(property, testing, generics, node) { # {{{
 		if @isVariable {
-			if testing {
-				@type.setNullable(false).makeMemberCallee(property, generics, node)
-			}
-			else {
-				@type.makeMemberCallee(property, generics, node)
+			var type = testing ? @type.setNullable(false) : @type
+
+			if var callback ?= type.makeMemberCallee(property, generics, node) {
+				if @type == @declaredType {
+					callback()
+				}
+				else if var callback ?= @declaredType.makeMemberCallee(property, generics, node) {
+					callback()
+				}
+				else {
+					@scope.replaceVariable(@value, @declaredType, this)
+
+					@type = @declaredType
+				}
 			}
 		}
 		else {

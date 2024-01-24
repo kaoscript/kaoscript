@@ -1,0 +1,1 @@
+TypeException: The variable "view" of type "UIView" can never be of type "UIImageView" (fixtures/compile/match/match.stmt.typing.nsub.eq.ks:8)

@@ -270,7 +270,7 @@ class CallExpression extends Expression {
 
 			if @nullable && @object.isInferable() {
 				inferables[@object.path()] = {
-					isVariable: @object is IdentifierLiteral
+					isVariable: @object.isVariable()
 					type: @object.type().discardValue().setNullable(false)
 				}
 			}

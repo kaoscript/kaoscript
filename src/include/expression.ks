@@ -106,7 +106,9 @@ abstract class Expression extends AbstractNode {
 		NotSupportedException.throw(node)
 	} # }}}
 	makeMemberCallee(property: String, testing: Boolean, generics: Generic[]?, node: CallExpression) { # {{{
-		@type().makeMemberCallee(property, generics, node)
+		if var callback ?= @type().makeMemberCallee(property, generics, node) {
+			callback()
+		}
 	} # }}}
 	path(): String? => null
 	releaseReusable()

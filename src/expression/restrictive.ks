@@ -13,6 +13,11 @@ class RestrictiveExpression extends Expression {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		@condition.prepare(@scope.reference('Boolean'))
+
+		for var data, name of @condition.inferWhenTrueTypes({}) {
+			@scope.updateInferable(name, data, this)
+		}
+
 		@expression.prepare(target)
 
 		@type = @expression.type().setNullable(true)

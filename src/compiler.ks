@@ -32,8 +32,6 @@ include {
 	'./include/global.ks'
 	'./include/node.ks'
 	'./include/astmap.ks'
-
-	'../registry/std/index.ks'
 }
 
 export class Compiler {
@@ -46,7 +44,6 @@ export class Compiler {
 		@hashes: Object
 		@hierarchy: Array
 		@options: Object
-		@standardLibrary: Boolean	= false
 	}
 	static {
 		registerTarget(target: String, fn: Function) { # {{{
@@ -148,6 +145,10 @@ export class Compiler {
 					package: '@kaoscript/runtime'
 				}
 			}
+			libstd: {
+				enable: true
+				package: 'npm:@kaoscript/runtime/src/libstd/index.ks'
+			}
 		}, options)
 
 		if @options.target is String {
@@ -171,10 +172,6 @@ export class Compiler {
 	initiate(data: String? = null) { # {{{
 		@module = Module.new(data ?? fs.readFile(@file), this, @file)
 
-		if @standardLibrary {
-			@module.flagStandardLibrary()
-		}
-
 		@module.initiate()
 
 		return this
@@ -193,9 +190,6 @@ export class Compiler {
 		@fragments = @module.toFragments()
 
 		return this
-	} # }}}
-	private flagStandardLibrary() { # {{{
-		@standardLibrary = true
 	} # }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): valueof @module

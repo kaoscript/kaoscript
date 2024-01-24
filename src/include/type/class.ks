@@ -1628,19 +1628,19 @@ class ClassType extends Type {
 	isImplementing() => @implementing
 	isInitializing() => @sequences.initializations != -1
 	// TODO rename to `isSubclassOf`
-	isInstanceOf(value: AnyType) => false
-	isInstanceOf(value: ClassType) { # {{{
+	assist isInstanceOf(value: AnyType, generics, subtypes) => false
+	assist isInstanceOf(value: ClassType, generics, subtypes) { # {{{
 		if this == value {
 			return true
 		}
 
-		if @extending && @extends.type().isInstanceOf(value) {
+		if @extending && @extends.type().isInstanceOf(value, generics, subtypes) {
 			return true
 		}
 
 		return false
 	} # }}}
-	isInstanceOf(value: NamedType) => @isInstanceOf(value.type())
+	assist isInstanceOf(value: NamedType, generics, subtypes) => @isInstanceOf(value.type(), generics, subtypes)
 	isLabelableInstanceMethod(name: String): Boolean => @labelables.instanceMethods[name] ?? false
 	isLabelableStaticMethod(name: String): Boolean => @labelables.staticMethods[name] ?? false
 	isMergeable(type) => type.isClass()
@@ -1652,7 +1652,7 @@ class ClassType extends Type {
 			return true
 		}
 
-		if mode ~~ MatchingMode.Subclass && @extending && @extends.type().isInstanceOf(value) {
+		if mode ~~ MatchingMode.Subclass && @extending && @extends.type().isInstanceOf(value, generics, subtypes) {
 			return true
 		}
 
@@ -2033,11 +2033,13 @@ class ClassType extends Type {
 					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
 				}
 				else {
-					if @isExhaustiveConstructor(node) {
-						ReferenceException.throwNoMatchingConstructor(name.name(), [argument.type() for var argument in node.arguments()], node)
-					}
-					else {
-						node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					return () => {
+						if @isExhaustiveConstructor(node) {
+							ReferenceException.throwNoMatchingConstructor(name.name(), [argument.type() for var argument in node.arguments()], node)
+						}
+						else {
+							node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+						}
 					}
 				}
 			}
@@ -2045,8 +2047,8 @@ class ClassType extends Type {
 		else if @hasStaticMethod(property) {
 			var assessment = @getStaticAssessment(property, generics, node)
 
-			match node.matchArguments(assessment) {
-				is LenientCallMatchResult with var result {
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult {
 					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, result, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
@@ -2075,14 +2077,16 @@ class ClassType extends Type {
 					}
 				}
 				else {
-					if @isExhaustiveStaticMethod(property, node) {
-						ReferenceException.throwNoMatchingStaticMethod(property, name.name(), [argument.type() for var argument in node.arguments()], node)
-					}
-					else if assessment.sealed {
-						node.addCallee(SealedMethodCallee.new(node.data(), node.object(), reference, property, false, node))
-					}
-					else {
-						node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+					return () => {
+						if @isExhaustiveStaticMethod(property, node) {
+							ReferenceException.throwNoMatchingStaticMethod(property, name.name(), [argument.type() for var argument in node.arguments()], node)
+						}
+						else if assessment.sealed {
+							node.addCallee(SealedMethodCallee.new(node.data(), node.object(), reference, property, false, node))
+						}
+						else {
+							node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+						}
 					}
 				}
 			}
@@ -2093,13 +2097,15 @@ class ClassType extends Type {
 		else {
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
 		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
 		if @hasInstantiableMethod(property) {
 			var assessment = @getInstantiableAssessment(property, generics, node)
 
-			match node.matchArguments(assessment) {
-				is LenientCallMatchResult with var result {
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult {
 					var class = @getClassWithInstantiableMethod(property, reference.type())
 					var reference = node.scope().reference(class)
 
@@ -2128,16 +2134,23 @@ class ClassType extends Type {
 						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, functions, node))
 					}
 				}
-				NoMatchResult.NoArgumentMatch {
-					if @isExhaustiveInstanceMethod(property, node) {
-						ReferenceException.throwNoMatchingInstanceMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
+				else {
+					// return result!!
+					return () => {
+						match result:!!(NoMatchResult) {
+							.NoArgumentMatch {
+								if @isExhaustiveInstanceMethod(property, node) {
+									ReferenceException.throwNoMatchingInstanceMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
+								}
+								else {
+									node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+								}
+							}
+							.NoThisMatch {
+								ReferenceException.throwNoAssignableThisInMethod(property, node)
+							}
+						}
 					}
-					else {
-						node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
-					}
-				}
-				NoMatchResult.NoThisMatch {
-					ReferenceException.throwNoAssignableThisInMethod(property, node)
 				}
 			}
 		}
@@ -2163,6 +2176,8 @@ class ClassType extends Type {
 				node.addCallee(DefaultCallee.new(data, node.object(), reference, node))
 			}
 		}
+
+		return null
 	} # }}}
 	matchArguments(arguments: Array<Type>, node: AbstractNode) { # {{{
 		if @constructors.length == 0 {

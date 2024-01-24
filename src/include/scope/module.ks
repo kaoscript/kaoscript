@@ -421,6 +421,7 @@ class ModuleScope extends Scope {
 
 		return variables
 	} # }}}
+	listMacros(): MacroDeclaration[] => [...m for var m of @macros]
 	listMacros(name): Array => @macros[name] ?? []
 	module() => this
 	processStash(name) { # {{{

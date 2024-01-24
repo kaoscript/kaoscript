@@ -43,7 +43,7 @@ class AnonymousFunctionExpression extends Expression {
 		@isObjectMember = @parent.parent() is ObjectExpression
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isFunction() {
+		unless target.canBeFunction() {
 			TypeException.throwInvalidFunctionType(target, this)
 		}
 
@@ -55,27 +55,11 @@ class AnonymousFunctionExpression extends Expression {
 			@thisVariable.setDeclaredType(type)
 		}
 
-		if target.isAny() || target.isReference() {
-			for var parameter in @parameters {
-				parameter.prepare()
-			}
-
-			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
-
-			@block = $compile.function($ast.body(@data), this)
-			@block.analyse()
-
-			@autoTyping = @type.isAutoTyping()
-
-			if @autoTyping {
-				@type.setReturnType(@block.getUnpreparedType())
-			}
-		}
-		else {
-			var targetParameters = target.parameters()
+		if var root ?= target.extractFunction() {
+			var targetParameters = root.parameters()
 
 			unless @parameters.length == targetParameters.length {
-				TypeException.throwInvalidFunctionType(target, this)
+				TypeException.throwInvalidFunctionType(root, this)
 			}
 
 			for var parameter, index in @parameters {
@@ -83,7 +67,17 @@ class AnonymousFunctionExpression extends Expression {
 			}
 
 			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
-			@type.setReturnType(target.getReturnType())
+
+			if ?@data.type {
+				@type.setReturnType(@data.type, [], this)
+
+				unless @type.getReturnType().isSubsetOf(root.getReturnType(), MatchingMode.FunctionSignature) {
+					SyntaxException.throwInvalidReturnType(@type.getReturnType(), root.getReturnType(), this)
+				}
+			}
+			else {
+				@type.setReturnType(root.getReturnType())
+			}
 
 			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
@@ -98,6 +92,26 @@ class AnonymousFunctionExpression extends Expression {
 				}
 
 				@type.setReturnType(type)
+			}
+		}
+		else {
+			for var parameter in @parameters {
+				parameter.prepare()
+			}
+
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
+
+			if ?@data.type {
+				@type.setReturnType(@data.type, [], this)
+			}
+
+			@block = $compile.function($ast.body(@data), this)
+			@block.analyse()
+
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				@type.setReturnType(@block.getUnpreparedType())
 			}
 		}
 
@@ -243,33 +257,17 @@ class ArrowFunctionExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless target.isAny() || target.isFunction() {
+		unless target.canBeFunction() {
 			TypeException.throwInvalidFunctionType(target, this)
 		}
 
 		@scope.line(@data.start.line)
 
-		if target.isAny() || target.isReference() {
-			for var parameter in @parameters {
-				parameter.prepare()
-			}
-
-			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
-
-			@block = $compile.function($ast.body(@data), this)
-			@block.analyse()
-
-			@autoTyping = @type.isAutoTyping()
-
-			if @autoTyping {
-				@type.setReturnType(@block.getUnpreparedType())
-			}
-		}
-		else {
-			var targetParameters = target.parameters()
+		if var root ?= target.extractFunction() {
+			var targetParameters = root.parameters()
 
 			unless @parameters.length == targetParameters.length {
-				TypeException.throwInvalidFunctionType(target, this)
+				TypeException.throwInvalidFunctionType(root, this)
 			}
 
 			for var parameter, index in @parameters {
@@ -277,7 +275,17 @@ class ArrowFunctionExpression extends Expression {
 			}
 
 			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
-			@type.setReturnType(target.getReturnType())
+
+			if ?@data.type {
+				@type.setReturnType(@data.type, [], this)
+
+				unless @type.getReturnType().isSubsetOf(root.getReturnType(), MatchingMode.FunctionSignature) {
+					SyntaxException.throwInvalidReturnType(@type.getReturnType(), root.getReturnType(), this)
+				}
+			}
+			else {
+				@type.setReturnType(root.getReturnType())
+			}
 
 			@block = $compile.function($ast.body(@data), this)
 			@block.analyse()
@@ -292,6 +300,26 @@ class ArrowFunctionExpression extends Expression {
 				}
 
 				@type.setReturnType(type)
+			}
+		}
+		else {
+			for var parameter in @parameters {
+				parameter.prepare()
+			}
+
+			@type = FunctionType.new([parameter.type() for var parameter in @parameters], @data, 0, this)
+
+			if ?@data.type {
+				@type.setReturnType(@data.type, [], this)
+			}
+
+			@block = $compile.function($ast.body(@data), this)
+			@block.analyse()
+
+			@autoTyping = @type.isAutoTyping()
+
+			if @autoTyping {
+				@type.setReturnType(@block.getUnpreparedType())
 			}
 		}
 

@@ -307,7 +307,9 @@ abstract class Type {
 					}
 				}
 				NodeKind.FunctionExpression {
-					return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]:!(Array<ParameterType>), data, node).flagComplete()
+					var parameters = [ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]
+
+					return FunctionType.new(parameters:!(Array<ParameterType>), generics, data, node).flagComplete()
 				}
 				NodeKind.FusionType {
 					return FusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
@@ -893,6 +895,7 @@ abstract class Type {
 	discardVariable(): Type => this
 	// TODO to remove
 	equals(value?): Boolean => ?value && @isSubsetOf(value, MatchingMode.Exact)
+	extractFunction(): FunctionType? => null
 	finalize(data, generics: Generic[], node: AbstractNode): Void
 	flagAlien() { # {{{
 		@alien = true
@@ -1040,6 +1043,7 @@ abstract class Type {
 	isImmutable() => false
 	isInoperative() => @isNever() || @isVoid()
 	isInstance() => false
+	isInstanceOf(value: Type, generics: AltType[]?, subtypes: AltType[]?): Boolean => false
 	isIterable() => false
 	isLiberal() => false
 	isMergeable(type) => false
@@ -1105,16 +1109,16 @@ abstract class Type {
 			return this
 		}
 	} # }}}
-	makeCallee(name: String, generics: AltType[] = [], node: CallExpression) { # {{{
+	makeCallee(name: String, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, generics: AltType[] = [], node: CallExpression) { # {{{
+	makeMemberCallee(property: String, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, name: NamedType, generics: AltType[] = [], node: CallExpression) { # {{{
+	makeMemberCallee(property: String, name: NamedType, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, reference: ReferenceType, generics: AltType[] = [], node: CallExpression) { # {{{
+	makeMemberCallee(property: String, reference: ReferenceType, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
 	// TODO to remove

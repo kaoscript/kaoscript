@@ -32,10 +32,10 @@ module.exports = function() {
 		else if(person.kind === PersonKind.Director) {
 			__ks_0 = "Hello Director.";
 		}
-		else if(person.kind === PersonKind.Student && person.name === "Richard") {
+		else if(true && person.name === "Richard") {
 			__ks_0 = "Still here Ricky?";
 		}
-		else if(person.kind === PersonKind.Student) {
+		else if(true) {
 			__ks_0 = "Hey, " + person.name + ".";
 		}
 		return __ks_0;

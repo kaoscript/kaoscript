@@ -499,7 +499,7 @@ class ClassConstructorDeclaration extends Statement {
 						var mut matched = false
 
 						for var newType in newTypes until matched {
-							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType) {
+							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType, null, null) {
 								matched = true
 							}
 						}

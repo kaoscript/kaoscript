@@ -67,7 +67,7 @@ class MatchStatement extends Statement {
 		@reusableValue: Boolean				= false
 		@tests								= {}
 		@usingFallthrough: Boolean			= false
-		@usingTempName: Boolean			= false
+		@usingTempName: Boolean				= false
 		@value								= null
 		@valueType: Type
 	}
@@ -181,12 +181,17 @@ class MatchStatement extends Statement {
 		@bodyScope.setImplicitVariable(@name, @valueType)
 
 		var inferables = {}
-		var mut maxConditions = 0
+		var lastIndex = #@clauses - 1
+		var path = @path ?? @name
 
-		var mut maxInferables = @clauses.length
+		var mut maxConditions = 0
+		var mut maxInferables = #@clauses
+		var mut valueType = @valueType
 
 		for var clause, index in @clauses {
-			clause.filter.prepare(@scope.reference('Boolean'))
+			clause.filter.prepare(valueType)
+
+			valueType = clause.filter.inferTypes(path, @bodyScope, index == lastIndex) ?? valueType
 
 			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
 
@@ -222,6 +227,14 @@ class MatchStatement extends Statement {
 					}
 				}
 			}
+
+			// if index != lastIndex {
+			// 	var { scope } = @clauses[index + 1]
+
+			// 	for var data, name of clause.filter.inferWhenFalseTypes({}) {
+			// 		scope.updateInferable(name, data, this)
+			// 	}
+			// }
 		}
 
 		for var test of @tests when test.count > 1 {
@@ -302,7 +315,6 @@ class MatchStatement extends Statement {
 				@bindingScope.replaceVariable(name, inferable.data.type, true, false, this)
 			}
 		}
-
 
 		if @reusableValue {
 			@scope.releaseTempName(@name)
@@ -453,6 +465,7 @@ class MatchStatement extends Statement {
 			return null
 		}
 	} # }}}
+	getSubject() => @hasDeclaration ? @declaration : @value
 	getValueType() => @valueType
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		var {name, type} = variable
@@ -1247,7 +1260,7 @@ class MatchConditionObject extends AbstractNode {
 			}
 		}
 
-		@isObject = @parent.getValueType().isBroadObject()
+		@isObject = target.isBroadObject()
 
 		if !@isObject {
 			@parent.addObjectTest(true, null)
@@ -1355,27 +1368,58 @@ class MatchConditionRange extends AbstractNode {
 
 class MatchConditionType extends AbstractNode {
 	private late {
+		@skipTest: Boolean		= false
 		@type: Type
 	}
 	analyse()
 	override prepare(target, targetMode) { # {{{
-		@type = Type.fromAST(@data.type, @parent.getValueType(), this)
+		@type = @confirmType(Type.fromAST(@data.type, @parent.getValueType(), this), target)
 	} # }}}
 	translate()
 	isEnum() => false
 	setCastingEnum(_)
 	toConditionFragments(fragments, name, junction) { # {{{
-		@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @parent.getValueType()))
+		if @skipTest {
+			fragments.code('true')
+		}
+		else {
+			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @parent.getValueType()))
+		}
 	} # }}}
 	type() => @type
+	private confirmType(type: Type, subjectType: Type): Type { # {{{
+		if subjectType.isNull() {
+			TypeException.throwNullTypeChecking(type, this)
+		}
+
+		if type.isVirtual() {
+			if !subjectType.isAny() && !subjectType.canBeVirtual(type.name()) {
+				TypeException.throwInvalidTypeChecking(@parent.getSubject(), type, this)
+			}
+		}
+		else {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+				// TypeException.throwUnnecessaryTypeChecking(@parent.getSubject(), type, this)
+				@skipTest = true
+			}
+
+			unless type.isAssignableToVariable(subjectType, false, false, true) {
+				TypeException.throwInvalidTypeChecking(@parent.getSubject(), type, this)
+			}
+		}
+
+		return type
+	} # }}}
 }
 
 class MatchConditionValue extends AbstractNode {
 	private late {
+		@skipTest: Boolean		= false
+		@type: Type
+		@container: Boolean		= false
 		@values: Expression[]	= []
 		@variant: Boolean		= false
 		@variantName: String?
-		@type: Type
 	}
 	analyse() { # {{{
 		if @data.kind == NodeKind.JunctionExpression {
@@ -1397,7 +1441,7 @@ class MatchConditionValue extends AbstractNode {
 		if @values.length == 1 {
 			var value = @values[0]
 
-			value.prepare(target)
+			value.prepare()
 
 			@type = value.type()
 
@@ -1424,12 +1468,18 @@ class MatchConditionValue extends AbstractNode {
 			var types = []
 
 			for var value in @values {
-				value.prepare(target)
+				value.prepare()
 
 				types.push(value.type())
 			}
 
 			@type = Type.union(@scope, ...types)
+		}
+
+		if @type.isContainer() {
+			@container = true
+
+			@type = @confirmType(@type.reference(), target)
 		}
 	} # }}}
 	translate() { # {{{
@@ -1437,22 +1487,17 @@ class MatchConditionValue extends AbstractNode {
 			value.translate()
 		}
 	} # }}}
-	isContainer() { # {{{
-		if @values.length == 1 {
-			return @type.isContainer()
-		}
-		else {
-			for var value in @values {
-				return false unless value.type().isContainer()
-			}
-
-			return true
-		}
-	} # }}}
+	isContainer() => @container
 	isEnum() => @type.isEnum()
 	isVariant() => @type.isVariant()
 	toConditionFragments(fragments, name, junction) { # {{{
-		if @values.length == 1 {
+		if @skipTest {
+			fragments.code('true')
+		}
+		else if @container {
+			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType()))
+		}
+		else if @values.length == 1 {
 			var value = @values[0]
 
 			if @variant {
@@ -1461,9 +1506,6 @@ class MatchConditionValue extends AbstractNode {
 				}
 
 				fragments.code(`\(name).\(@variantName)`)
-			}
-			else if @type.isContainer() {
-				@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType()))
 			}
 			else if @type.isVariant() {
 				var object = @type.discard()
@@ -1514,12 +1556,13 @@ class MatchConditionValue extends AbstractNode {
 					fragments.code(' || ')
 				}
 
-				if value.type().isContainer() {
-					literal ??= Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType())
+				// if value.type().isContainer() {
+				// 	literal ??= Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType())
 
-					value.type().toPositiveTestFragments(fragments, literal)
-				}
-				else if @type.isVariant() {
+				// 	value.type().toPositiveTestFragments(fragments, literal)
+				// }
+				// else
+				if @type.isVariant() {
 					var object = @type.discard()
 					var variant = object.getVariantType()
 					var subtypes = @type.getSubtypes()
@@ -1548,15 +1591,42 @@ class MatchConditionValue extends AbstractNode {
 	} # }}}
 	type() => @type
 	values() => @values
+	private confirmType(type: Type, subjectType: Type): Type { # {{{
+		if subjectType.isNull() {
+			TypeException.throwNullTypeChecking(type, this)
+		}
+
+		if type.isVirtual() {
+			if !subjectType.isAny() && !subjectType.canBeVirtual(type.name()) {
+				TypeException.throwInvalidTypeChecking(@parent.getSubject(), type, this)
+			}
+		}
+		else {
+			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+				// TypeException.throwUnnecessaryTypeChecking(@parent.getSubject(), type, this)
+				@skipTest = true
+			}
+
+			unless type.isAssignableToVariable(subjectType, false, false, true) {
+				TypeException.throwInvalidTypeChecking(@parent.getSubject(), type, this)
+			}
+		}
+
+		return type
+	} # }}}
 }
 
 class MatchFilter extends AbstractNode {
 	private late {
 		@conditions				= []
 		@binding				= null
+		@falseType: Type?		= null
 		@filter					= null
 		@hasTest: Boolean		= false
+		@hasWhenFalse: Boolean	= true
 		@kind: MatchClauseKind	= .DEFAULT
+		@testType: Type?		= null
+		@trueType: Type?		= null
 	}
 	override analyse() { # {{{
 		var scope = @scope()
@@ -1669,11 +1739,11 @@ class MatchFilter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var valueType = @parent().getValueType()
+		// var valueType = @parent().getValueType()
 
 		match @kind {
 			.ARRAY {
-				if valueType.isArray() || valueType.canBeArray() {
+				if target.isArray() || target.canBeArray() {
 					pass
 				}
 				else {
@@ -1681,7 +1751,7 @@ class MatchFilter extends AbstractNode {
 				}
 			}
 			.NUMBER {
-				if valueType.isNumber() || valueType.canBeNumber() {
+				if target.isNumber() || target.canBeNumber() {
 					pass
 				}
 				else {
@@ -1689,7 +1759,7 @@ class MatchFilter extends AbstractNode {
 				}
 			}
 			.OBJECT {
-				if valueType.isObject() || valueType.canBeObject() {
+				if target.isObject() || target.canBeObject() {
 					pass
 				}
 				else {
@@ -1698,46 +1768,79 @@ class MatchFilter extends AbstractNode {
 			}
 		}
 
+		@hasWhenFalse = !?@filter
+
 		var types = []
 
 		for var condition in @conditions {
-			condition.prepare()
+			condition.prepare(target)
 
-			if condition is MatchConditionValue {
+			if condition is MatchConditionType {
+				types.push(condition.type())
+
+				@hasWhenFalse &&= true
+			}
+			else if condition is MatchConditionValue {
 				if condition.isContainer() {
 					@binding?.unflagTypeTesting()
 
 					types.push(condition.type().reference(@scope))
+
+					@hasWhenFalse &&= true
 				}
 				else if condition.isVariant() {
 					types.push(condition.type())
+
+					@hasWhenFalse &&= true
+				}
+				else {
+					@hasWhenFalse = false
 				}
 			}
 			else {
 				types.push(condition.type())
+
+				@hasWhenFalse = false
 			}
 		}
 
 		if ?#types {
-			var conditionType = Type.union(@scope, ...types)
+			@testType = Type.union(@scope, ...types)
 
-			@binding?.prepare(conditionType)
+			// @binding?.prepare(@testType)
 
+			// var name = @parent().name()
+
+			// @scope.setImplicitVariable(name, @testType)
+
+			// if @conditions.length == 1 && @conditions[0] is MatchConditionValue {
+			// 	if var path ?= @parent().path() {
+			// 		@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), type: conditionType }, this)
+			// 	}
+			// }
+			// if var path ?= @parent().path() {
+			// 	@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), @testType }, this)
+			// }
+
+			// var subject = @parent().getSubject()
 			var name = @parent().name()
 
-			@scope.setImplicitVariable(name, conditionType)
+			@binding?.prepare(@testType)
 
-			if @conditions.length == 1 && @conditions[0] is MatchConditionValue {
-				if var path ?= @parent().path() {
-					@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), type: conditionType }, this)
-				}
+			@scope.setImplicitVariable(@parent().name(), @testType)
+
+			if @hasWhenFalse {
+				@trueType = target.limitTo(@testType)
+				@falseType = target.trimOff(@trueType)
 			}
+
+			// echo(@hasWhenFalse, target.hashCode(), @testType.hashCode(), @trueType?.hashCode(), @falseType?.hashCode())
 		}
 		else {
-			@binding?.prepare(valueType)
+			@binding?.prepare(target)
 		}
 
-		@filter?.prepare(target)
+		@filter?.prepare(@scope.reference('Boolean'))
 	} # }}}
 	override translate() { # {{{
 		for var condition in @conditions {
@@ -1749,7 +1852,45 @@ class MatchFilter extends AbstractNode {
 	} # }}}
 	conditions() => @conditions
 	getMaxConditions(): Number => @conditions.length
+	// getFalseType() => @falseType
 	hasTest() => @hasTest
+	inferTypes(path, scope, last) { # {{{
+		if ?@testType && @hasWhenFalse {
+			// echo(last, path, @trueType?.hashCode(), @falseType?.hashCode())
+			var isVariable = scope.hasVariable(path)
+
+			@scope.updateInferable(path, { isVariable, type: @trueType }, this)
+
+			// scope
+			// 	..line(@data.start.line)
+			// 	..updateInferable(path, { isVariable, type: @trueType }, this)
+
+			if !last {
+				scope
+					..line(@data.end.line + 1)
+					..updateInferable(path, { isVariable, type: @falseType }, this)
+					..line(@data.start.line)
+
+				return @falseType
+			}
+		}
+
+		return null
+	} # }}}
+	// inferWhenFalseTypes(inferables) { # {{{
+	// 	var subject = @parent().getSubject()
+
+	// 	if subject.isInferable() {
+	// 		inferables[@parent().path()] = {
+	// 			isVariable: subject.isVariable()
+	// 			type: @falseType
+	// 		}
+
+	// 		subject.inferProperty(@falseType, inferables)
+	// 	}
+
+	// 	return inferables
+	// } # }}}
 	isEnum() { # {{{
 		return false unless ?#@conditions
 

@@ -368,11 +368,37 @@ class ArrayType extends Type {
 	} # }}}
 	isExhaustive() => !@rest || @scope.reference('Array').isExhaustive()
 	isExportable() => true
-	isInstanceOf(value: AnyType) => false
+	assist isInstanceOf(value: AnyType, generics, subtypes) => false
 	isIterable() => true
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ArrayType) { # {{{
 		return true if this == value
+
+		if !@rest {
+			if @length == 0 {
+				return !(value.hasProperties() || value.hasRest())
+			}
+
+			if value.hasRest() {
+				var rest = value.getRestType()
+
+				for var property in @properties {
+					return false unless property.isMorePreciseThan(rest)
+				}
+
+				return true
+			}
+
+			var properties = value.properties()
+
+			return false unless @length <= #properties
+
+			for var property, index in @properties {
+				return false unless property.isMorePreciseThan(properties[index])
+			}
+
+			return true
+		}
 
 		if !@nullable && value.isNullable() {
 			return @restType.equals(value.getRestType()) || @restType.isMorePreciseThan(value.getRestType())
@@ -599,7 +625,7 @@ class ArrayType extends Type {
 			}
 		}
 
-		@reference.makeMemberCallee(property, generics, node)
+		return @reference.makeMemberCallee(property, generics, node)
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isArray() {

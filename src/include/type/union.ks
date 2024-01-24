@@ -285,6 +285,22 @@ class UnionType extends Type {
 			types: [type.toReference(references, indexDelta, mode, module) for var type in @types]
 		}
 	} # }}}
+	override extractFunction() { # {{{
+		var functions = []
+
+		for var type in @types {
+			if var fn ?= type.extractFunction() {
+				functions.push(fn)
+			}
+		}
+
+		if #functions == 1 {
+			return functions[0]
+		}
+		else {
+			return null
+		}
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
@@ -435,9 +451,9 @@ class UnionType extends Type {
 
 		return true
 	} # }}}
-	isInstanceOf(target) { # {{{
+	override isInstanceOf(value, generics, subtypes) { # {{{
 		for var type in @types {
-			if type.isInstanceOf(target) {
+			if type.isInstanceOf(value, generics, subtypes) {
 				return true
 			}
 		}
@@ -574,11 +590,15 @@ class UnionType extends Type {
 		for var type in @types {
 			type.makeMemberCallee(property, generics, node)
 		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
 		for var type in @types {
 			type.makeMemberCallee(property, generics, node)
 		}
+
+		return null
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		for var type in @types {

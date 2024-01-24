@@ -70,7 +70,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	inferTypes(inferables) { # {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+				isVariable: @left.isVariable()
 				type: @type
 			}
 		}

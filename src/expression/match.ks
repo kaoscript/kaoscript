@@ -168,10 +168,15 @@ class MatchExpression extends Expression {
 			tracker = PossibilityTracker.create(@valueType.discard())
 		}
 
+		var lastIndex = #@clauses - 1
+
 		var mut maxConditions = 0
+		var mut valueType = @valueType
 
 		for var clause, index in @clauses {
-			clause.filter.prepare(@scope.reference('Boolean'))
+			clause.filter.prepare(valueType)
+
+			valueType = clause.filter.inferTypes(@path, @bodyScope, index == lastIndex) ?? valueType
 
 			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
 
@@ -326,6 +331,7 @@ class MatchExpression extends Expression {
 			return null
 		}
 	} # }}}
+	getSubject() => @hasDeclaration ? @declaration : @value
 	getValueName() => @valueName
 	getValueType() => @valueType
 	isInline() => false

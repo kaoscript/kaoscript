@@ -308,10 +308,20 @@ class BinaryOperatorTypeEquality extends Expression {
 		@subject.translate()
 	} # }}}
 	hasExceptions() => false
+	inferTypes(inferables) { # {{{
+		if @subject.isInferable() {
+			inferables[@subject.path()] = {
+				isVariable: @subject.isVariable()
+				type: @subject.type()
+			}
+		}
+
+		return inferables
+	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
-				isVariable: @subject is IdentifierLiteral
+				isVariable: @subject.isVariable()
 				isTyping: true
 				type: @trueType
 			}
@@ -324,7 +334,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	inferWhenFalseTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
-				isVariable: @subject is IdentifierLiteral
+				isVariable: @subject.isVariable()
 				type: @falseType
 			}
 
@@ -451,7 +461,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	inferWhenTrueTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
-				isVariable: @subject is IdentifierLiteral
+				isVariable: @subject.isVariable()
 				isTyping: true
 				type: @trueType
 			}
@@ -462,7 +472,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	inferWhenFalseTypes(inferables) { # {{{
 		if @subject.isInferable() {
 			inferables[@subject.path()] = {
-				isVariable: @subject is IdentifierLiteral
+				isVariable: @subject.isVariable()
 				type: @falseType
 			}
 		}

@@ -225,7 +225,7 @@ class MemberExpression extends Expression {
 			type.setProperty(@property, property)
 
 			inferables[@object.path()] = {
-				isVariable: @object is IdentifierLiteral
+				isVariable: @object.isVariable()
 				type
 			}
 
@@ -363,7 +363,7 @@ class MemberExpression extends Expression {
 
 					if inferable {
 						inferables[@object.path()] = {
-							isVariable: @object is IdentifierLiteral
+							isVariable: @object.isVariable()
 							type: Type.union(@scope, ...types)
 						}
 					}
@@ -376,7 +376,7 @@ class MemberExpression extends Expression {
 							..setSubtypes([{ name: 'false', type: @scope.reference('Boolean') }])
 
 						inferables[@object.path()] = {
-							isVariable: @object is IdentifierLiteral
+							isVariable: @object.isVariable()
 							type: reference
 						}
 					}

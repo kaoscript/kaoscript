@@ -28,11 +28,9 @@ export class Module {
 		@requirements					= []
 		@requirementByNames				= {}
 		@rewire
-		@standardLibrary: Boolean
 		@variationId
 	}
 	constructor(data, @compiler, @file) { # {{{
-		@standardLibrary = @isStandardLibrary(@file)
 		@data = @parse(data, file)
 
 		@directory = path.dirname(file)
@@ -218,9 +216,6 @@ export class Module {
 	flagRegister() { # {{{
 		@register = true
 	} # }}}
-	flagStandardLibrary() { # {{{
-		@standardLibrary = true
-	} # }}}
 	getAlien(name: String) => @aliens[name]
 	getArgument(index: Number) => @arguments[index]
 	getRequirement(name: String) => @requirementByNames[name]
@@ -236,8 +231,6 @@ export class Module {
 		@body.initiate()
 	} # }}}
 	isBinary() => @binary
-	isStandardLibrary() => @standardLibrary
-	isStandardLibrary(file: String) => file.startsWith($standardLibraryDirectory)
 	isUpToDate(file: String, source: String) { # {{{
 		var late data
 		try {
@@ -665,13 +658,13 @@ class ModuleBlock extends AbstractNode {
 			start = 1
 		}
 
-		if !@module.isStandardLibrary() {
-			var std = $compile.statement({
+		if @options.libstd.enable {
+			var statement = $compile.statement({
 				kind: NodeKind.ImportDeclaration
 				declarations: [{
 					kind: NodeKind.ImportDeclarator
 					source: {
-						value: fs.resolve($standardLibraryDirectory, 'index.ks')
+						value: @options.libstd.package
 					}
 					attributes: []
 					modifiers: []
@@ -684,9 +677,11 @@ class ModuleBlock extends AbstractNode {
 				end: { line: 1 }
 			}, this)
 
-			@statements.push(std)
+			@statements.push(statement)
 
-			std.initiate()
+			statement
+				..flagStandardLibrary()
+				..initiate()
 		}
 
 		for var statement in @data.body from start {

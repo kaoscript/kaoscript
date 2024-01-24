@@ -1,0 +1,37 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "external": "values",
+            "internal": "values",
+            "type": {
+              "kind": "array",
+              "rest": "String"
+            },
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

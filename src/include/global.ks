@@ -308,8 +308,6 @@ namespace $runtime {
 	export *
 }
 
-var $standardLibraryDirectory = fs.getStandardLibraryDirectory()
-
 var $targets = {
 	ecma: { # {{{
 		'5': {

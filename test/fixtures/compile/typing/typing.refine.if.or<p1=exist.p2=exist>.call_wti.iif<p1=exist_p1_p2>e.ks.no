@@ -1,0 +1,11 @@
+extern system class Array<T> {
+	push(...elements: T): Number
+}
+
+func foobar(x: Number?, y: Number?) {
+	var result = []
+
+	if ?x || ?y {
+		result.push(?x ? x : y)
+	}
+}

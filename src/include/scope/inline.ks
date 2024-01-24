@@ -156,7 +156,7 @@ class InlineBlockScope extends BlockScope {
 	replaceVariable(name: String, mut variable: Variable): Variable { # {{{
 		var newName = @renamedVariables[name] ?? name
 
-		variable = super.replaceVariable(name, variable)
+		variable = super(name, variable)
 
 		if !@declarations[newName] {
 			@updatedInferables[name] = {
@@ -169,7 +169,7 @@ class InlineBlockScope extends BlockScope {
 	} # }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
 		var newName = @renamedVariables[name] ?? name
-		var variable = super.replaceVariable(name, type, downcast, absolute, node)
+		var variable = super(name, type, downcast, absolute, node)
 
 		if !@declarations[newName] {
 			@updatedInferables[name] = {

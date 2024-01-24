@@ -184,6 +184,23 @@ class FunctionType extends Type {
 			@hasRest = true
 		}
 	} # }}}
+	override applyGenerics(generics) { # {{{
+		var result = @clone()
+
+		for var parameter, index in result._parameters {
+			result._parameters[index] = parameter.applyGenerics(generics)
+		}
+
+		if !@missingReturn {
+			result._returnType = result._returnType.applyGenerics(generics)
+		}
+
+		if !@missingThis {
+			result._thisType = result._thisType.applyGenerics(generics)
+		}
+
+		return result
+	} # }}}
 	assessment(name: String, node: AbstractNode) { # {{{
 		@assessment ??= Router.assess([this], name, node)
 
@@ -288,6 +305,9 @@ class FunctionType extends Type {
 
 		FunctionType.clone(this, clone)
 
+		clone._missingThis = @missingThis
+		clone._thisType = @thisType
+
 		return clone
 	} # }}}
 	compareToRef(value: AnyType, equivalences: String[][]? = null) { # {{{
@@ -324,6 +344,7 @@ class FunctionType extends Type {
 
 		return result
 	} # }}}
+	override extractFunction() => this
 	flagExported(explicitly: Boolean) { # {{{
 		if @exported {
 			return this
@@ -514,7 +535,7 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	isMorePreciseThan(value: Type) => value.isAny()
-	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
+	assist isInstanceOf(value: ReferenceType, generics, subtypes) => value.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => @isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { # {{{
 		// echo(pIndex, pStep, @parameters[pIndex]?.toQuote(), aIndex, aStep, arguments[aIndex]?.toQuote())
@@ -614,7 +635,9 @@ class FunctionType extends Type {
 	} # }}}
 	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
 		if value.isAlias() {
-			return @isSubsetOf(value.discardAlias(), mode)
+			var { type, generics, subtypes } = value.getGenericMapper()
+
+			return @isSubsetOf(type, generics, subtypes, mode)
 		}
 
 		return value.isFunction()
@@ -791,7 +814,7 @@ class FunctionType extends Type {
 			if returnMode.value != 0 {
 				var newType = value.getReturnType()
 
-				return false unless newType.isSubsetOf(@returnType, returnMode) || @returnType.isInstanceOf(newType)
+				return false unless newType.isSubsetOf(@returnType, generics, subtypes, returnMode) || @returnType.isInstanceOf(newType, generics, subtypes)
 			}
 		}
 
@@ -815,7 +838,7 @@ class FunctionType extends Type {
 					var mut matched = false
 
 					for var newType in newTypes until matched {
-						if newType.isSubsetOf(oldType, errorMode) || oldType.isInstanceOf(newType) {
+						if newType.isSubsetOf(oldType, errorMode) || oldType.isInstanceOf(newType, generics, subtypes) {
 							matched = true
 						}
 					}
@@ -833,8 +856,8 @@ class FunctionType extends Type {
 	override makeCallee(name, generics, node) { # {{{
 		var assessment = this.assessment(name, node)
 
-		match node.matchArguments(assessment, generics) {
-			is LenientCallMatchResult with var result {
+		match var result = node.matchArguments(assessment, generics) {
+			is LenientCallMatchResult {
 				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
 			}
 			is PreciseCallMatchResult with var { matches } {
@@ -857,26 +880,34 @@ class FunctionType extends Type {
 					node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
 				}
 			}
-			NoMatchResult.NoArgumentMatch {
-				if @isExhaustive(node) {
-					ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
-				}
-				else {
-					node.addCallee(DefaultCallee.new(node.data(), null, null, node))
-				}
-			}
-			NoMatchResult.NoThisMatch {
-				if ?node.getCallScope() {
-					ReferenceException.throwNoMatchingThis(name, node)
-				}
-				else {
-					ReferenceException.throwMissingThisContext(name, node)
+			else {
+				return () => {
+					match result {
+						.NoArgumentMatch {
+							if @isExhaustive(node) {
+								ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
+							}
+							else {
+								node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+							}
+						}
+						.NoThisMatch {
+							if ?node.getCallScope() {
+								ReferenceException.throwNoMatchingThis(name, node)
+							}
+							else {
+								ReferenceException.throwMissingThisContext(name, node)
+							}
+						}
+					}
 				}
 			}
 		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, generics, node) { # {{{
-		@scope.reference('Function').makeMemberCallee(property, generics, node)
+		return @scope.reference('Function').makeMemberCallee(property, generics, node)
 	} # }}}
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
@@ -1343,8 +1374,8 @@ class OverloadedFunctionType extends Type {
 	override makeCallee(name, generics, node) { # {{{
 		var assessment = this.assessment(name, node)
 
-		match node.matchArguments(assessment) {
-			is LenientCallMatchResult with var result {
+		match var result = node.matchArguments(assessment) {
+			is LenientCallMatchResult {
 				node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
 			}
 			is PreciseCallMatchResult with var { matches } {
@@ -1367,23 +1398,32 @@ class OverloadedFunctionType extends Type {
 					node.addCallee(LenientFunctionCallee.new(node.data(), assessment, functions, node))
 				}
 			}
-			NoMatchResult.NoArgumentMatch {
-				if @isExhaustive(node) {
-					ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
-				}
-				else {
-					node.addCallee(DefaultCallee.new(node.data(), null, null, node))
-				}
-			}
-			NoMatchResult.NoThisMatch {
-				if ?node.getCallScope() {
-					ReferenceException.throwNoMatchingThis(name, node)
-				}
-				else {
-					ReferenceException.throwMissingThisContext(name, node)
+			else {
+				// return result!!
+				return () => {
+					match result:!!(NoMatchResult) {
+						.NoArgumentMatch {
+							if @isExhaustive(node) {
+								ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)
+							}
+							else {
+								node.addCallee(DefaultCallee.new(node.data(), null, null, node))
+							}
+						}
+						.NoThisMatch {
+							if ?node.getCallScope() {
+								ReferenceException.throwNoMatchingThis(name, node)
+							}
+							else {
+								ReferenceException.throwMissingThisContext(name, node)
+							}
+						}
+					}
 				}
 			}
 		}
+
+		return null
 	} # }}}
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)

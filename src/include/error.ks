@@ -608,11 +608,14 @@ export class SyntaxException extends Exception {
 		throwInvalidIdentifier(value, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`"\(value)" is an invalid identifier`, node)
 		} # }}}
-		throwInvalidSyncMethods(className, methodName, node): Never ~ SyntaxException { # {{{
-			throw SyntaxException.new(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
+		throwInvalidReturnType(current: Type, expected: Type, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The return of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
 		} # }}}
 		throwInvalidRule(name, fileName, lineNumber): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The rule "\(name)" is invalid`, fileName, lineNumber)
+		} # }}}
+		throwInvalidSyncMethods(className, methodName, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} # }}}
 		throwLessAccessibleMethod(class, name, parameters, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" is less accessible than the overriden method`, node)

@@ -7,25 +7,22 @@ enum MacroVariableKind {
 
 var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
-func $autoEvaluate(macro, node, data) { # {{{
+func $autoEvaluate(macro, libstd, node, data) { # {{{
 	return $evaluate($compileMacro(Generator.generate(data, {
 		transformers: {
 			expression: $transformExpression^^(macro, node, ^, ^)
 		}
-	})))
+	}), libstd))
 } # }}}
 
-func $compileMacro(source: String, standardLibrary: Boolean = false): String { # {{{
+func $compileMacro(source: String, libstd): String { # {{{
 	// echo('--> ', source)
 
 	var compiler = Compiler.new('__ks__', {
 		register: false
 		target: $target
+		libstd
 	})
-
-	if standardLibrary {
-		compiler.flagStandardLibrary()
-	}
 
 	compiler.compile('extern console, JSON\nrequire class __ks_marker\nreturn ' + source)
 	// echo('=- ', compiler.toSource())
@@ -232,8 +229,6 @@ class MacroDeclaration extends AbstractNode {
 	constructor(@data, @parent, _: Scope?, @name = data.name.name, @standardLibrary = false) { # {{{
 		super(data, parent, MacroScope.new())
 
-		@standardLibrary ||= @parent.module().isStandardLibrary()
-
 		if @parent.scope().hasDefinedVariable(@name) {
 			SyntaxException.throwIdenticalIdentifier(@name, this)
 		}
@@ -307,7 +302,7 @@ class MacroDeclaration extends AbstractNode {
 				source += fragment.code
 			}
 
-			@source = $compileMacro(source, @standardLibrary)
+			@source = $compileMacro(source, @options.libstd)
 		}
 
 		@fn = $evaluate(@source)
@@ -364,7 +359,7 @@ class MacroDeclaration extends AbstractNode {
 		var module = @module()
 		@executeCount += 1
 
-		var args = [$autoEvaluate^^(this, parent, ^), $reificate^^(this, parent, ...)].concat(arguments)
+		var args = [$autoEvaluate^^(this, @options.libstd, parent, ^), $reificate^^(this, parent, ...)].concat(arguments)
 
 		// echo(args)
 		var mut data = @fn(...args!?)

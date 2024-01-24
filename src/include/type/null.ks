@@ -27,7 +27,7 @@ class NullType extends Type {
 	isComplete() => true
 	isExplicit() => @explicit
 	isExportable() => true
-	isInstanceOf(target: Type) => true
+	override isInstanceOf(value: Type, generics, subtypes) => true
 	isMorePreciseThan(value: Type) => value.isAny() || value.isNullable()
 	isNull() => true
 	isNullable() => true
@@ -41,6 +41,8 @@ class NullType extends Type {
 		else {
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
 		}
+
+		return null
 	} # }}}
 	matchContentOf(value: Type) => value.isNullable()
 	setNullable(nullable: Boolean) { # {{{

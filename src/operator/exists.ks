@@ -62,7 +62,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	inferWhenTrueTypes(inferables) { # {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+				isVariable: @left.isVariable()
 				type: @right.type().setNullable(false)
 			}
 		}
@@ -207,7 +207,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 	inferWhenFalseTypes(inferables) { # {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+				isVariable: @left.isVariable()
 				type: @right.type().setNullable(false)
 			}
 		}
@@ -281,7 +281,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 			}
 
 			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+				isVariable: @left.isVariable()
 				type
 			}
 		}
@@ -613,7 +613,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {
-				isVariable: @argument is IdentifierLiteral
+				isVariable: @argument.isVariable()
 				type: @type
 			}
 		}

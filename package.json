@@ -28,7 +28,6 @@
 		"bin/kaoscript",
 		"lib/bin.js",
 		"lib/compiler.json",
-		"registry/**/*.ks",
 		"scripts/install.js",
 		"src/fs.js",
 		"src/register.js"

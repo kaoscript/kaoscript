@@ -372,6 +372,7 @@ class BlockScope extends Scope {
 
 		return variables
 	} # }}}
+	listMacros(): MacroDeclaration[] => [...m for var m of @macros]
 	listMacros(name): Array => @macros[name] ?? @parent.listMacros(name)
 	module() => @module
 	parent() => @parent

@@ -241,13 +241,17 @@ class TupleType extends Type {
 			match var result = node.matchArguments(assessment) {
 				is LenientCallMatchResult, PreciseCallMatchResult {
 					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
+
+					return null
 				}
 				else {
-					if @isExhaustive(node) {
-						ReferenceException.throwNoMatchingTuple(name.name(), [argument.type() for var argument in node.arguments()], node)
-					}
-					else {
-						@addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					return () => {
+						if @isExhaustive(node) {
+							ReferenceException.throwNoMatchingTuple(name.name(), [argument.type() for var argument in node.arguments()], node)
+						}
+						else {
+							@addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+						}
 					}
 				}
 			}

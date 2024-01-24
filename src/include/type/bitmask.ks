@@ -562,6 +562,19 @@ class BitmaskType extends Type {
 		return results
 	} # }}}
 	listValueNames() => [name for var value, name of @values]
+	listVarnames(): String[] { # {{{
+		var result = []
+
+		for var _, name of @values {
+			result.push(name)
+		}
+
+		for var alias of @aliases {
+			result.pushUniq(...alias.originals()!?)
+		}
+
+		return result
+	} # }}}
 	override makeCallee(name, generics, node) { # {{{
 		node.prepareArguments()
 
@@ -579,6 +592,8 @@ class BitmaskType extends Type {
 		}
 
 		node.addCallee(BitmaskCreateCallee.new(node.data(), type, argument, node))
+
+		return null
 	} # }}}
 	setAlterationReference(@alterationReference) { # {{{
 		@alteration = true

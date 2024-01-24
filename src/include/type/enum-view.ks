@@ -204,6 +204,15 @@ class EnumViewType extends Type {
 	override isEnum() => true
 	override isExportable() => true
 	override isView() => true
+	listVarnames(): String[] { # {{{
+		var result = [...@elements]
+
+		for var alias of @aliases {
+			result.pushUniq(...alias.originals()!?)
+		}
+
+		return result
+	} # }}}
 	master() => @master
 	master(@master) { # {{{
 		var type = @master.discard()

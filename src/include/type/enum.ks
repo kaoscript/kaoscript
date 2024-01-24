@@ -641,6 +641,19 @@ class EnumType extends Type {
 	} # }}}
 	listFieldNames() => [name for var _, name of @fields]
 	listValueNames() => [name for var _, name of @values]
+	listVarnames(): String[] { # {{{
+		var result = []
+
+		for var _, name of @values {
+			result.push(name)
+		}
+
+		for var alias of @aliases {
+			result.pushUniq(...alias.originals()!?)
+		}
+
+		return result
+	} # }}}
 	override makeCallee(name, generics, node) { # {{{
 		node.prepareArguments()
 
@@ -658,6 +671,8 @@ class EnumType extends Type {
 		}
 
 		node.addCallee(EnumCreateCallee.new(node.data(), type, argument, node))
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, name, generics, node) { # {{{
 		var reference = @scope.reference(name)
@@ -665,8 +680,8 @@ class EnumType extends Type {
 		if @hasStaticMethod(property) {
 			var assessment = @getStaticAssessment(property, node)
 
-			match node.matchArguments(assessment) {
-				is LenientCallMatchResult with var result {
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult {
 					node.addCallee(EnumMethodCallee.new(node.data(), node.object().type().discardValue(), property, result.possibilities, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
@@ -678,11 +693,13 @@ class EnumType extends Type {
 					}
 				}
 				else {
-					if @isExhaustiveStaticMethod(property, node) {
-						ReferenceException.throwNoMatchingEnumMethod(property, name.name(), node.arguments(), node)
-					}
-					else {
-						node.addCallee(EnumMethodCallee.new(node.data(), node.object().type().discardValue(), property, null, node))
+					return () => {
+						if @isExhaustiveStaticMethod(property, node) {
+							ReferenceException.throwNoMatchingEnumMethod(property, name.name(), node.arguments(), node)
+						}
+						else {
+							node.addCallee(EnumMethodCallee.new(node.data(), node.object().type().discardValue(), property, null, node))
+						}
 					}
 				}
 			}
@@ -695,13 +712,15 @@ class EnumType extends Type {
 
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
 		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
 		if @hasInstanceMethod(property) {
 			var assessment = @getInstanceAssessment(property, node)
 
-			match node.matchArguments(assessment) {
-				is LenientCallMatchResult with var result {
+			match var result = node.matchArguments(assessment) {
+				is LenientCallMatchResult {
 					node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, result.possibilities, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
@@ -717,11 +736,13 @@ class EnumType extends Type {
 					}
 				}
 				else {
-					if @isExhaustiveInstanceMethod(property, node) {
-						ReferenceException.throwNoMatchingEnumMethod(property, reference.name(), node.arguments(), node)
-					}
-					else {
-						node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+					return () => {
+						if @isExhaustiveInstanceMethod(property, node) {
+							ReferenceException.throwNoMatchingEnumMethod(property, reference.name(), node.arguments(), node)
+						}
+						else {
+							node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+						}
 					}
 				}
 			}
@@ -734,6 +755,8 @@ class EnumType extends Type {
 
 			node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
 		}
+
+		return null
 	} # }}}
 	matchValueArguments(arguments, node) { # {{{
 		return Router.matchArguments(@fieldAssessment, null, arguments, [], null, node)

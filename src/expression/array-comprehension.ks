@@ -25,7 +25,12 @@ class ArrayComprehension extends Expression {
 
 		@value.prepare(AnyType.NullableUnexplicit)
 
-		@type.setRestType(@value.type())
+		if @value.isSpread() {
+			@type.setRestType(@value.type().parameter())
+		}
+		else {
+			@type.setRestType(@value.type())
+		}
 	} # }}}
 	override translate() { # {{{
 		@iteration.translate()

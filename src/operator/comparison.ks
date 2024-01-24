@@ -457,7 +457,7 @@ class EqualityOperator extends ComparisonOperator {
 			}
 			else {
 				inferables[@right.path()] = {
-					isVariable: @right is IdentifierLiteral
+					isVariable: @right.isVariable()
 					type: @right.type().discardValue().setNullable(false)
 				}
 			}
@@ -475,7 +475,7 @@ class EqualityOperator extends ComparisonOperator {
 			}
 			else {
 				inferables[@left.path()] = {
-					isVariable: @left is IdentifierLiteral
+					isVariable: @left.isVariable()
 					type: @left.type().discardValue().setNullable(false)
 				}
 			}
@@ -496,20 +496,20 @@ class EqualityOperator extends ComparisonOperator {
 			if @right.isInferable() {
 				if rightType.isMorePreciseThan(leftType) {
 					inferables[@left.path()] = {
-						isVariable: @left is IdentifierLiteral
+						isVariable: @left.isVariable()
 						type: rightType.setNullable(leftType)
 					}
 				}
 				else if leftType.isMorePreciseThan(rightType) {
 					inferables[@right.path()] = {
-						isVariable: @right is IdentifierLiteral
+						isVariable: @right.isVariable()
 						type: leftType.setNullable(rightType)
 					}
 				}
 			}
 			else if rightType.isAssignableToVariable(leftType, true) {
 				inferables[@left.path()] = {
-					isVariable: @left is IdentifierLiteral
+					isVariable: @left.isVariable()
 					type: rightType
 				}
 			}
@@ -528,7 +528,7 @@ class EqualityOperator extends ComparisonOperator {
 		}
 		else if @right.isInferable() && leftType.isAssignableToVariable(rightType, true) {
 			inferables[@right.path()] = {
-				isVariable: @right is IdentifierLiteral
+				isVariable: @right.isVariable()
 				type: leftType
 			}
 		}

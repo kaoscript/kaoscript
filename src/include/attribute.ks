@@ -353,6 +353,34 @@ class IfAttribute extends Attribute {
 	} # }}}
 }
 
+class LibstdAttribute extends Attribute {
+	private {
+		@data
+	}
+	static {
+		target() => AttributeTarget.Global
+	}
+	constructor(@data)
+	configure(options, fileName, lineNumber) { # {{{
+		for var arg in @data.arguments {
+			match arg.kind:!(NodeKind) {
+				.AttributeOperation {
+					if arg.name.name == 'package' {
+						options.libstd.package = arg.value.value
+					}
+				}
+				.Identifier {
+					if arg.name == 'off' {
+						options.libstd.enable = false
+					}
+				}
+			}
+		}
+
+		return options
+	} # }}}
+}
+
 class ParseAttribute extends Attribute {
 	private {
 		@data
@@ -562,6 +590,7 @@ Attribute.register(ElseAttribute)
 Attribute.register(ErrorAttribute)
 Attribute.register(FormatAttribute)
 Attribute.register(IfAttribute)
+Attribute.register(LibstdAttribute)
 Attribute.register(ParseAttribute)
 Attribute.register(ParseAttribute)
 Attribute.register(RetainAttribute)

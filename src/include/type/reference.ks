@@ -562,6 +562,18 @@ class ReferenceType extends Type {
 			return name
 		}
 	} # }}}
+	override extractFunction() { # {{{
+		var fn = @type().extractFunction()
+
+		if ?#@parameters {
+			var { generics } = @getGenericMapper()
+
+			return fn.applyGenerics(generics)
+		}
+		else {
+			return fn
+		}
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		if !@isAny() && !@isVoid() {
 			@type().flagExported(explicitly).flagReferenced()
@@ -1004,7 +1016,7 @@ class ReferenceType extends Type {
 	isClassInstance() => @name != 'Object' && @type().isClass()
 	override isComparableWith(type) => @type().isComparableWith(type)
 	override isComplete() => @type().isComplete()
-	override isDeferrable() => ?#@parameters || @type().isDeferrable()
+	override isDeferrable() => @type().isDeferrable()
 	isEnum() => @name == 'Enum' || @type().isEnum()
 	isExhaustive() => @type().isExhaustive()
 	isExplicit() => @type().isExplicit()
@@ -1019,8 +1031,8 @@ class ReferenceType extends Type {
 	isHybrid() => @type().isHybrid()
 	isInheriting(superclass) => @type().isInheriting(superclass)
 	isInstance() => @type().isClass() || @type().isStruct() || @type().isTuple()
-	isInstanceOf(value: AnyType) => false
-	isInstanceOf(value: ReferenceType) { # {{{
+	assist isInstanceOf(value: AnyType, generics, subtypes) => false
+	assist isInstanceOf(value: ReferenceType, generics, subtypes) { # {{{
 		@resolve()
 
 		return false unless @type.isClass()
@@ -1032,21 +1044,21 @@ class ReferenceType extends Type {
 		if var type ?= value.discardAlias() {
 			if type is UnionType {
 				for var type in type.types() {
-					if @isInstanceOf(type) {
+					if @isInstanceOf(type!!, generics, subtypes) {
 						return true
 					}
 				}
 			}
 			else if type.isClass() {
-				return @type.type().isInstanceOf(type.discardAlias().type())
+				return @type.type().isInstanceOf(type.discardAlias().type(), generics, subtypes)
 			}
 		}
 
 		return false
 	} # }}}
-	isInstanceOf(value: UnionType) { # {{{
+	assist isInstanceOf(value: UnionType, generics, subtypes) { # {{{
 		for var type in value.types() {
-			if @isInstanceOf(type) {
+			if @isInstanceOf(type, generics, subtypes) {
 				return true
 			}
 		}
@@ -1434,14 +1446,14 @@ class ReferenceType extends Type {
 		if @canBeFunction() {
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
 		}
-		else {
-			if @isExhaustive(node) {
-				TypeException.throwNotFunction(name, node)
-			}
-			else {
-				node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
-			}
+		else if @isExhaustive(node) {
+			TypeException.throwNotFunction(name, node)
 		}
+		else {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, generics, node) { # {{{
 		if @isNullable() && !node.isMisfit() {
@@ -1454,18 +1466,20 @@ class ReferenceType extends Type {
 			node.prepareArguments()
 
 			node.addCallee(ConstructorCallee.new(node.data(), node.object(), this, null, null, node))
+
+			return null
 		}
-		 else if ?#@parameters && !?#generics {
+		else if ?#@parameters && !?#generics {
 			var { type, generics } = @getGenericMapper()
 
-			type.makeMemberCallee(property, this, generics, node)
+			return type.makeMemberCallee(property, this, generics, node)
 		}
 		else {
-			@type().makeMemberCallee(property, this, generics, node)
+			return @type().makeMemberCallee(property, this, generics, node)
 		}
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
-		@type().makeMemberCallee(property, this, generics, node)
+		return @type().makeMemberCallee(property, this, generics, node)
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if this == value {
@@ -2329,7 +2343,7 @@ class ReferenceType extends Type {
 				var variant: VariantType = @type.discard().getVariantType()
 				var master = variant.getMaster()
 
-				var names = variant.explodeVarnames(...@subtypes)
+				var names = ?#@subtypes ? variant.explodeVarnames(...@subtypes) : variant.listVarnames()
 				var offNames = variant.explodeVarnames(...subtypes)
 
 				names.remove(...offNames)

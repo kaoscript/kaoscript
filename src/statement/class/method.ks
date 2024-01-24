@@ -425,7 +425,7 @@ class ClassMethodDeclaration extends Statement {
 			var oldType = overridden.getReturnType()
 			var newType = @type.getReturnType()
 
-			unless newType.isSubsetOf(oldType, MatchingMode.Exact + MatchingMode.Missing) || newType.isInstanceOf(oldType) {
+			unless newType.isSubsetOf(oldType, MatchingMode.Exact + MatchingMode.Missing) || newType.isInstanceOf(oldType, null, null) {
 				if @override {
 					if @isAssertingOverride() {
 						SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
@@ -765,7 +765,7 @@ class ClassMethodDeclaration extends Statement {
 						var oldType = method.getReturnType()
 						var newType = @type.getReturnType()
 
-						if !(newType.isSubsetOf(oldType, MatchingMode.Default + MatchingMode.Missing) || newType.isInstanceOf(oldType)) {
+						if !(newType.isSubsetOf(oldType, MatchingMode.Default + MatchingMode.Missing) || newType.isInstanceOf(oldType, null, null)) {
 							if @isAssertingOverride() {
 								SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 							}
@@ -799,7 +799,7 @@ class ClassMethodDeclaration extends Statement {
 						var mut matched = false
 
 						for var newType in newTypes until matched {
-							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType) {
+							if newType.isSubsetOf(oldType, MatchingMode.Default) || newType.isInstanceOf(oldType, null, null) {
 								matched = true
 							}
 						}

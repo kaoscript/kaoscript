@@ -216,6 +216,20 @@ class VariantType extends Type {
 
 		return false
 	} # }}}
+	listVarnames(): String[] { # {{{
+		if @kind == .Enum {
+			return @enum.listVarnames()
+		}
+		else {
+			var result = []
+
+			for var { names } in @fields {
+				result.pushUniq(...names)
+			}
+
+			return result
+		}
+	} # }}}
 	setMaster(@master) { # {{{
 		if @master.isBoolean() {
 			@kind = .Boolean

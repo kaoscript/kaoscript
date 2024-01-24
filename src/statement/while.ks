@@ -76,9 +76,9 @@ class WhileStatement extends Statement {
 
 		@body.prepare(target)
 
-		for var inferable, name of @bodyScope.listUpdatedInferables() {
-			if inferable.isVariable && @scope.hasVariable(name) {
-				@scope.replaceVariable(name, inferable.type, true, false, this)
+		for var { isVariable, type }, name of @bodyScope.listUpdatedInferables() {
+			if isVariable && @scope.hasVariable(name) {
+				@scope.replaceVariable(name, type, true, false, this)
 			}
 		}
 	} # }}}

@@ -144,7 +144,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 	inferWhenTrueTypes(inferables) { # {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+				isVariable: @left.isVariable()
 				type: @right.type()
 			}
 		}
@@ -459,7 +459,7 @@ class UnaryOperatorNonEmpty extends UnaryOperatorExpression {
 
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {
-				isVariable: @argument is IdentifierLiteral
+				isVariable: @argument.isVariable()
 				type: @type
 			}
 		}

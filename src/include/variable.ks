@@ -18,6 +18,7 @@ class Variable {
 		@predefined: Boolean		= false
 		@realType: Type				= Type.Null
 		@secureName: String
+		@standardLibrary: Boolean	= false
 	}
 	static {
 		createPredefinedClass(name: String, features: ClassFeature? = null, scope: Scope): Variable { # {{{
@@ -100,6 +101,9 @@ class Variable {
 
 		return this
 	} # }}}
+	flagStandardLibrary() { # {{{
+		@standardLibrary = true
+	} # }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
@@ -114,6 +118,7 @@ class Variable {
 	isModule() => @module
 	isPredefined() => @predefined
 	isRenamed() => @name != @secureName
+	isStandardLibrary() => @standardLibrary
 	name() => @name
 	prepareAlteration() { # {{{
 		if (@declaredType.isRequired() || @declaredType.isAlien()) && !@altereable {

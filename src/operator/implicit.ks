@@ -169,13 +169,6 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			return parent.subject().type()
 		}
 		is BinaryOperatorAddition | PolyadicOperatorAddition {
-			// echo(target)
-			// if target == AnyType.NullableUnexplicit {
-			// 	return findImplicitType(target, parent.parent(), parent, property)
-			// }
-			// else {
-			// 	return target
-			// }
 			return findImplicitType(target, parent.parent(), parent, property)
 		}
 		is CallExpression {
@@ -282,6 +275,9 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			return target
 		}
 		is ObjectComputedMember | ObjectLiteralMember {
+			return target
+		}
+		is ReturnStatement {
 			return target
 		}
 		else {

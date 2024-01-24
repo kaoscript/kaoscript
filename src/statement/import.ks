@@ -94,8 +94,6 @@ abstract class Importer extends Statement {
 		var mut x = @data.source.value
 		var mut y = @directory()
 
-		@standardLibrary = @module().isStandardLibrary(x)
-
 		if x.startsWith('node:') {
 			unless @loadNodeModule(x) {
 				IOException.throwNotFoundModule(x, y, this)
@@ -107,13 +105,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else if $localFileRegex.test(x) {
-			if !@standardLibrary {
-				x = fs.resolve(y, x)
-
-				if @module().isStandardLibrary() {
-					@standardLibrary = true
-				}
-			}
+			x = fs.resolve(y, x)
 
 			unless @loadFile(x, '', null) || @loadDirectory(x, null) {
 				IOException.throwNotFoundModule(x, y, this)
@@ -244,7 +236,7 @@ abstract class Importer extends Statement {
 				@count += 1
 			}
 
-			if @count != 0 || ?@alias {
+			if !@standardLibrary && (@count != 0 || ?@alias) {
 				module.flagRegister()
 			}
 		}
@@ -336,17 +328,21 @@ abstract class Importer extends Statement {
 		arguments.values.push(argument)
 	} # }}}
 	addImport(external: String, internal: String, isAlias: Boolean, type: Type? = null) { # {{{
-		var variable = @scope.getVariable(internal)
+		var mut variable = @scope.getVariable(internal)
 		var newVariable = !?variable || variable.isPredefined()
 
 		if newVariable {
-			@scope.define(internal, true, null, true, this)
+			variable = @scope.define(internal, true, null, true, this)
 		}
 		else if @parent.includePath() != null {
 			return
 		}
 		else if isAlias {
 			SyntaxException.throwAlreadyDeclared(internal, this)
+		}
+
+		if @standardLibrary {
+			variable.flagStandardLibrary()
 		}
 
 		@imports[external] = {
@@ -377,9 +373,17 @@ abstract class Importer extends Statement {
 			else {
 				SyntaxException.throwAlreadyDeclared(internal, this)
 			}
+
+			if @standardLibrary {
+				variable.flagStandardLibrary()
+			}
 		}
 		else {
-			@scope.define(internal, true, type, true, this)
+			var variable = @scope.define(internal, true, type, true, this)
+
+			if @standardLibrary {
+				variable.flagStandardLibrary()
+			}
 		}
 
 		@module().import(internal)
@@ -533,7 +537,11 @@ abstract class Importer extends Statement {
 
 		return arguments
 	} # }}}
+	flagStandardLibrary() { # {{{
+		@standardLibrary = true
+	} # }}}
 	getModuleName() => @moduleName
+	isStandardLibrary() => @standardLibrary
 	loadDirectory(dir, moduleName? = null, fromPackage: Boolean = false) { # {{{
 		var pkgfile = path.join(dir, 'package.json')
 
@@ -1420,12 +1428,13 @@ abstract class Importer extends Statement {
 class ImportDeclaration extends Statement {
 	private {
 		@declarators = []
+		@standardLibrary: Boolean			= false
 	}
 	initiate() { # {{{
 		for var data in @data.declarations {
 			var declarator = ImportDeclarator.new(data, this)
-
-			declarator.initiate()
+				..flagStandardLibrary() if @standardLibrary
+				..initiate()
 
 			@declarators.push(declarator)
 		}
@@ -1441,10 +1450,15 @@ class ImportDeclaration extends Statement {
 		}
 	} # }}}
 	translate()
+	flagStandardLibrary() { # {{{
+		@standardLibrary = true
+	} # }}}
 	registerMacro(name, macro) { # {{{
 		@parent.registerMacro(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
+		return if @standardLibrary
+
 		for var declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
@@ -1595,8 +1609,10 @@ class ImportWorker {
 			}
 		}
 
-		for var index, name of newAliens {
-			module.addAlien(name, references[index])
+		if !@node.isStandardLibrary() {
+			for var index, name of newAliens {
+				module.addAlien(name, references[index])
+			}
 		}
 
 		for var i from 0 to~ @metaRequirements.requirements.length step 3 {

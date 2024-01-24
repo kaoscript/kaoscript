@@ -264,13 +264,17 @@ class StructType extends Type {
 			match var result = node.matchArguments(assessment) {
 				is LenientCallMatchResult, PreciseCallMatchResult {
 					node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, result, node))
+
+					return null
 				}
 				else {
-					if @isExhaustive(node) {
-						ReferenceException.throwNoMatchingStruct(name.name(), [argument.type() for var argument in node.arguments()], node)
-					}
-					else {
-						node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+					return () => {
+						if @isExhaustive(node) {
+							ReferenceException.throwNoMatchingStruct(name.name(), [argument.type() for var argument in node.arguments()], node)
+						}
+						else {
+							node.addCallee(ConstructorCallee.new(node.data(), node.object(), reference, assessment, null, node))
+						}
 					}
 				}
 			}

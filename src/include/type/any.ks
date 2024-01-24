@@ -118,7 +118,7 @@ class AnyType extends Type {
 	isComplete() => true
 	isExplicit() => @explicit
 	isExportable() => true
-	isInstanceOf(target: Type) => false
+	override isInstanceOf(value, generics, subtypes) => false
 	isIterable() => true
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())
 	isNullable() => @nullable
@@ -145,6 +145,8 @@ class AnyType extends Type {
 	} # }}}
 	override makeCallee(name, generics, node) { # {{{
 		node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, generics, node) { # {{{
 		if property == 'new' {
@@ -153,9 +155,11 @@ class AnyType extends Type {
 		else {
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
 		}
+
+		return null
 	} # }}}
 	override makeMemberCallee(property, reference, generics, node) { # {{{
-		@makeMemberCallee(property, generics, node)
+		return @makeMemberCallee(property, generics, node)
 	} # }}}
 	matchContentOf(value) => !@explicit || (value.isAny() && (@nullable -> value.isNullable()))
 	parameter() => AnyType.NullableUnexplicit

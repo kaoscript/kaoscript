@@ -505,7 +505,7 @@ class ObjectType extends Type {
 	} # }}}
 	isDestructuring() => @destructuring
 	isExhaustive() => !@rest || @scope.reference('Object').isExhaustive()
-	isInstanceOf(value: AnyType) => false
+	assist isInstanceOf(value: AnyType, generics, subtypes) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
 		return true if this == value
@@ -881,10 +881,10 @@ class ObjectType extends Type {
 	} # }}}
 	override makeMemberCallee(property % propName, generics, node) { # {{{
 		if var property ?= @getProperty(propName) {
-			property.makeCallee(propName, generics, node)
+			return property.makeCallee(propName, generics, node)
 		}
 		else {
-			@scope.reference('Object').makeMemberCallee(propName, generics, node)
+			return @scope.reference('Object').makeMemberCallee(propName, generics, node)
 		}
 	} # }}}
 	override makeMemberCallee(property % propName, reference, generics, node) { # {{{
@@ -892,8 +892,8 @@ class ObjectType extends Type {
 			if property is FunctionType || property is OverloadedFunctionType {
 				var assessment = property.assessment(propName, node)
 
-				match node.matchArguments(assessment) {
-					is LenientCallMatchResult with var result {
+				match var result = node.matchArguments(assessment) {
+					is LenientCallMatchResult {
 						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, result, node))
 					}
 					is PreciseCallMatchResult with var { matches } {
@@ -914,11 +914,13 @@ class ObjectType extends Type {
 						}
 					}
 					else {
-						if property.isExhaustive(node) {
-							ReferenceException.throwNoMatchingFunction(propName, reference.name(), node.arguments(), node)
-						}
-						else {
-							node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+						return () => {
+							if property.isExhaustive(node) {
+								ReferenceException.throwNoMatchingFunction(propName, reference.name(), node.arguments(), node)
+							}
+							else {
+								node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+							}
 						}
 					}
 				}
@@ -935,6 +937,8 @@ class ObjectType extends Type {
 
 			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
 		}
+
+		return null
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isObject() {
