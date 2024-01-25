@@ -879,15 +879,15 @@ class ObjectType extends Type {
 
 		return { fields, functions }
 	} # }}}
-	override makeMemberCallee(property % propName, generics, node) { # {{{
+	override makeMemberCallee(property % propName, path, generics, node) { # {{{
 		if var property ?= @getProperty(propName) {
 			return property.makeCallee(propName, generics, node)
 		}
 		else {
-			return @scope.reference('Object').makeMemberCallee(propName, generics, node)
+			return @scope.reference('Object').makeMemberCallee(propName, path, generics, node)
 		}
 	} # }}}
-	override makeMemberCallee(property % propName, reference, generics, node) { # {{{
+	override makeMemberCallee(property % propName, path, reference, generics, node) { # {{{
 		if var property ?= @getProperty(propName) {
 			if property is FunctionType || property is OverloadedFunctionType {
 				var assessment = property.assessment(propName, node)

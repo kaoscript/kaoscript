@@ -260,7 +260,7 @@ class TupleType extends Type {
 			NotSupportedException.throwTupleMethod(node)
 		}
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
 		NotSupportedException.throwTupleMethod(node)
 	} # }}}
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [@toMetadata(references, indexDelta, mode, module), name]

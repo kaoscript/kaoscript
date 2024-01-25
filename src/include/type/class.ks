@@ -2100,7 +2100,7 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
 		if @hasInstantiableMethod(property) {
 			var assessment = @getInstantiableAssessment(property, generics, node)
 
@@ -2135,9 +2135,8 @@ class ClassType extends Type {
 					}
 				}
 				else {
-					// return result!!
 					return () => {
-						match result:!!(NoMatchResult) {
+						match result {
 							.NoArgumentMatch {
 								if @isExhaustiveInstanceMethod(property, node) {
 									ReferenceException.throwNoMatchingInstanceMethod(property, reference.name(), [argument.type() for var argument in node.arguments()], node)
@@ -2169,8 +2168,13 @@ class ClassType extends Type {
 			else if @hasInstanceVariable(property) {
 				node.addCallee(DefaultCallee.new(data, node.object(), reference, node))
 			}
+			else if ?path ;; var chunk ?= node.scope().getChunkType(`\(path).\(property)`) {
+				if var callback ?= chunk.makeCallee(property, generics, node) {
+					callback()
+				}
+			}
 			else if @isExhaustive(node) {
-				ReferenceException.throwNotFoundStaticMethod(property, reference.name(), node)
+				ReferenceException.throwNotFoundInstanceMethod(property, reference.name(), node)
 			}
 			else {
 				node.addCallee(DefaultCallee.new(data, node.object(), reference, node))

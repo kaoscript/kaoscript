@@ -34,7 +34,7 @@ class NullType extends Type {
 	isSplittable() => false
 	override isSubsetOf(value: Type, generics, subtypes, mode) => value.isNullable() || value.isNull()
 	assist isSubsetOf(value: NullType, generics, subtypes, mode) => true
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		if property == 'new' {
 			node.addCallee(ConstructorCallee.new(node.data(), node.object(), AnyType.NullableUnexplicit, null, null, node))
 		}

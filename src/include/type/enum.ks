@@ -715,7 +715,7 @@ class EnumType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
 		if @hasInstanceMethod(property) {
 			var assessment = @getInstanceAssessment(property, node)
 

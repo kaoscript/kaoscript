@@ -70,7 +70,7 @@ class ParameterType extends Type {
 			var parameter = ParameterType.new(scope, externalName, internalName, type, min, max, default)
 
 			if default {
-				parameter.setDefaultValue(data.defaultValue, true)
+				parameter.setDefaultValue(data.defaultValue, true, node)
 			}
 
 			for var attribute in data.attributes {
@@ -89,10 +89,10 @@ class ParameterType extends Type {
 
 			if data.default {
 				if data.comprehensive {
-					type.setDefaultValue(JSON.parse(Buffer.from(data.defaultValue, 'base64').toString('utf8')), true)
+					type.setDefaultValue(JSON.parse(Buffer.from(data.defaultValue, 'base64').toString('utf8')), true, node)
 				}
 				else {
-					type.setDefaultValue(data.defaultValue, false)
+					type.setDefaultValue(data.defaultValue, false, node)
 				}
 
 			}
@@ -314,7 +314,11 @@ class ParameterType extends Type {
 	matchArgument(value: Type) => value.matchContentOf(@type)
 	max(): valueof @max
 	min(): valueof @min
-	setDefaultValue(@defaultValue, @comprehensive = true, @required = false) { # {{{
+	setDefaultValue(@defaultValue, @comprehensive = true, @required = false, node) { # {{{
+		if !@variableType.isNullable() && defaultValue.kind == NodeKind.Identifier && defaultValue.name == 'null' {
+			TypeException.throwInvalidAssignment(@internalName, @variableType, Type.Null, node)
+		}
+
 		@default = true
 
 		@nullableByDefault = @max == 1 && !@required && !@type.isNullable()

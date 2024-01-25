@@ -283,7 +283,7 @@ class StructType extends Type {
 			NotSupportedException.throwStructMethod(node)
 		}
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
 		NotSupportedException.throwStructMethod(node)
 	} # }}}
 	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { # {{{

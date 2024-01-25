@@ -286,13 +286,6 @@ class NamespaceType extends Type {
 						}
 					}
 					else {
-						// if property.isExhaustive(node) {
-						// 	ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)
-						// }
-						// else {
-						// 	node.addCallee(DefaultCallee.new(node.data(), node.object(), null, node))
-						// }
-						// return result!!
 						return () => {
 							if property.isExhaustive(node) {
 								ReferenceException.throwNoMatchingFunctionInNamespace(propName, name, node.arguments(), node)

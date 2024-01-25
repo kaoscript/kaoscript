@@ -227,14 +227,6 @@ class MatchStatement extends Statement {
 					}
 				}
 			}
-
-			// if index != lastIndex {
-			// 	var { scope } = @clauses[index + 1]
-
-			// 	for var data, name of clause.filter.inferWhenFalseTypes({}) {
-			// 		scope.updateInferable(name, data, this)
-			// 	}
-			// }
 		}
 
 		for var test of @tests when test.count > 1 {
@@ -1399,7 +1391,6 @@ class MatchConditionType extends AbstractNode {
 		}
 		else {
 			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
-				// TypeException.throwUnnecessaryTypeChecking(@parent.getSubject(), type, this)
 				@skipTest = true
 			}
 
@@ -1556,12 +1547,6 @@ class MatchConditionValue extends AbstractNode {
 					fragments.code(' || ')
 				}
 
-				// if value.type().isContainer() {
-				// 	literal ??= Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType())
-
-				// 	value.type().toPositiveTestFragments(fragments, literal)
-				// }
-				// else
 				if @type.isVariant() {
 					var object = @type.discard()
 					var variant = object.getVariantType()
@@ -1603,7 +1588,6 @@ class MatchConditionValue extends AbstractNode {
 		}
 		else {
 			if subjectType.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
-				// TypeException.throwUnnecessaryTypeChecking(@parent.getSubject(), type, this)
 				@skipTest = true
 			}
 
@@ -1739,8 +1723,6 @@ class MatchFilter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		// var valueType = @parent().getValueType()
-
 		match @kind {
 			.ARRAY {
 				if target.isArray() || target.canBeArray() {
@@ -1807,22 +1789,6 @@ class MatchFilter extends AbstractNode {
 		if ?#types {
 			@testType = Type.union(@scope, ...types)
 
-			// @binding?.prepare(@testType)
-
-			// var name = @parent().name()
-
-			// @scope.setImplicitVariable(name, @testType)
-
-			// if @conditions.length == 1 && @conditions[0] is MatchConditionValue {
-			// 	if var path ?= @parent().path() {
-			// 		@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), type: conditionType }, this)
-			// 	}
-			// }
-			// if var path ?= @parent().path() {
-			// 	@scope.updateInferable(path, { isVariable: @scope.hasVariable(path), @testType }, this)
-			// }
-
-			// var subject = @parent().getSubject()
 			var name = @parent().name()
 
 			@binding?.prepare(@testType)
@@ -1833,8 +1799,6 @@ class MatchFilter extends AbstractNode {
 				@trueType = target.limitTo(@testType)
 				@falseType = target.trimOff(@trueType)
 			}
-
-			// echo(@hasWhenFalse, target.hashCode(), @testType.hashCode(), @trueType?.hashCode(), @falseType?.hashCode())
 		}
 		else {
 			@binding?.prepare(target)
@@ -1852,18 +1816,12 @@ class MatchFilter extends AbstractNode {
 	} # }}}
 	conditions() => @conditions
 	getMaxConditions(): Number => @conditions.length
-	// getFalseType() => @falseType
 	hasTest() => @hasTest
 	inferTypes(path, scope, last) { # {{{
 		if ?@testType && @hasWhenFalse {
-			// echo(last, path, @trueType?.hashCode(), @falseType?.hashCode())
 			var isVariable = scope.hasVariable(path)
 
 			@scope.updateInferable(path, { isVariable, type: @trueType }, this)
-
-			// scope
-			// 	..line(@data.start.line)
-			// 	..updateInferable(path, { isVariable, type: @trueType }, this)
 
 			if !last {
 				scope
@@ -1877,20 +1835,6 @@ class MatchFilter extends AbstractNode {
 
 		return null
 	} # }}}
-	// inferWhenFalseTypes(inferables) { # {{{
-	// 	var subject = @parent().getSubject()
-
-	// 	if subject.isInferable() {
-	// 		inferables[@parent().path()] = {
-	// 			isVariable: subject.isVariable()
-	// 			type: @falseType
-	// 		}
-
-	// 		subject.inferProperty(@falseType, inferables)
-	// 	}
-
-	// 	return inferables
-	// } # }}}
 	isEnum() { # {{{
 		return false unless ?#@conditions
 

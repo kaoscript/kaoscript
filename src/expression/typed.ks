@@ -39,7 +39,7 @@ class TypedExpression extends Expression {
 		@expression.makeCallee(@generics, node)
 	} # }}}
 	override makeMemberCallee(property, testing, generics, node) { # {{{
-		if var callback ?= @expression.type().makeMemberCallee(property, @generics, node) {
+		if var callback ?= @expression.type().makeMemberCallee(property, @expression.path(), @generics, node) {
 			callback()
 		}
 	} # }}}

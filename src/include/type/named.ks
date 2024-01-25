@@ -251,7 +251,6 @@ class NamedType extends Type {
 		return @isInheriting(superclass.type())
 	} # }}}
 	isInheriting(superclass: Type) => false
-	// isInstanceOf(value: Type) => @type.isInstanceOf(value)
 	isMorePreciseThan(value: Type) { # {{{
 		if value is NamedType {
 			if @isClass() && value.isClass() {
@@ -390,11 +389,11 @@ class NamedType extends Type {
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
 	majorOriginal() => @type.majorOriginal()
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		return @type.makeMemberCallee(property, this, generics, node)
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
-		return @type.makeMemberCallee(property, reference, generics, node)
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
+		return @type.makeMemberCallee(property, path, reference, generics, node)
 	} # }}}
 	matchClassName(that: Type?) { # {{{
 		if that == null {

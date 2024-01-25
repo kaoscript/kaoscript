@@ -1,1 +1,1 @@
-ReferenceException: The method "corge" can't be found in the class "Function" (fixtures/compile/call/call.mth.athis_mth_ns_wd.ks:9)
+ReferenceException: The instance method "corge" can't be found in the class "Function" (fixtures/compile/call/call.mth.athis_mth_ns_wd.ks:9)

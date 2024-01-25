@@ -608,7 +608,7 @@ class ArrayType extends Type {
 
 		return { fields, functions }
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		if !?@reference {
 			@reference = @scope.reference('Array').clone()
 
@@ -625,7 +625,7 @@ class ArrayType extends Type {
 			}
 		}
 
-		return @reference.makeMemberCallee(property, generics, node)
+		return @reference.makeMemberCallee(property, path, generics, node)
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isArray() {

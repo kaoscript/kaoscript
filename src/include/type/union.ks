@@ -586,16 +586,16 @@ class UnionType extends Type {
 			return Type.union(@scope, ...matches)
 		}
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		for var type in @types {
-			type.makeMemberCallee(property, generics, node)
+			type.makeMemberCallee(property, path, generics, node)
 		}
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
 		for var type in @types {
-			type.makeMemberCallee(property, generics, node)
+			type.makeMemberCallee(property, path, generics, node)
 		}
 
 		return null

@@ -148,7 +148,7 @@ class AnyType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		if property == 'new' {
 			node.addCallee(ConstructorCallee.new(node.data(), node.object(), AnyType.NullableUnexplicit, null, null, node))
 		}
@@ -158,8 +158,8 @@ class AnyType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
-		return @makeMemberCallee(property, generics, node)
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
+		return @makeMemberCallee(property, path, generics, node)
 	} # }}}
 	matchContentOf(value) => !@explicit || (value.isAny() && (@nullable -> value.isNullable()))
 	parameter() => AnyType.NullableUnexplicit

@@ -360,8 +360,11 @@ export class ReferenceException extends Exception {
 		throwNotFoundEnumMethod(method, enum, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The method "\(method)" can't be found in the enum "\(enum)"`, node)
 		} # }}}
+		throwNotFoundInstanceMethod(method, class, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The instance method "\(method)" can't be found in the class "\(class)"`, node)
+		} # }}}
 		throwNotFoundStaticMethod(method, class, node): Never ~ ReferenceException { # {{{
-			throw ReferenceException.new(`The method "\(method)" can't be found in the class "\(class)"`, node)
+			throw ReferenceException.new(`The class method "\(method)" can't be found in the class "\(class)"`, node)
 		} # }}}
 		throwNotPassed(name, module, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)

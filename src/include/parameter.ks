@@ -729,7 +729,7 @@ class Parameter extends AbstractNode {
 			@comprehensive = !@defaultValue.isUsingNonLocalVariables(scope)
 
 			if @comprehensive {
-				@type.setDefaultValue(@data.defaultValue, true, @explicitlyRequired)
+				@type.setDefaultValue(@data.defaultValue, true, @explicitlyRequired, this)
 			}
 			else {
 				var variables = [variable.name() for var variable in @defaultValue.listLocalVariables(scope, [])]
@@ -738,7 +738,7 @@ class Parameter extends AbstractNode {
 
 				var call = `\(name)(\(variables.join(', ')))`
 
-				@type.setDefaultValue(call, false, @explicitlyRequired)
+				@type.setDefaultValue(call, false, @explicitlyRequired, this)
 
 				@defaultValue = Literal.new(`\(@parent.getOverridableVarname()).\(call)`, @parent)
 				@useLiteral = true
@@ -813,7 +813,7 @@ class Parameter extends AbstractNode {
 
 		@hasDefaultValue = true
 
-		@type.setDefaultValue(data)
+		@type.setDefaultValue(data, this)
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@internal)

@@ -283,7 +283,7 @@ class IdentifierLiteral extends Literal {
 		if @isVariable {
 			var type = testing ? @type.setNullable(false) : @type
 
-			if var callback ?= type.makeMemberCallee(property, generics, node) {
+			if var callback ?= type.makeMemberCallee(property, @value, generics, node) {
 				if @type == @declaredType {
 					callback()
 				}

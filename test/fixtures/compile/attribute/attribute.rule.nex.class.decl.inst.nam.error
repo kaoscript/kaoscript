@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" can't be found in the class "Foobar" (fixtures/compile/attribute/attribute.rule.nex.class.decl.inst.nam.ks:6)
+ReferenceException: The instance method "foobar" can't be found in the class "Foobar" (fixtures/compile/attribute/attribute.rule.nex.class.decl.inst.nam.ks:6)

@@ -206,7 +206,7 @@ class FunctionType extends Type {
 
 		return @assessment
 	} # }}}
-	assist(main: FunctionType, mainParameters: Parameter[]): Void { # {{{
+	assist(main: FunctionType, mainParameters: Parameter[], node: AbstractNode): Void { # {{{
 		if @missingReturn && !main.isMissingReturn() {
 			@returnType = main.getReturnType()
 			@missingReturn = false
@@ -226,12 +226,10 @@ class FunctionType extends Type {
 				var newParameter = ParameterType.new(@scope, externalName, internalName, passing, type, min, max)
 
 				if parameter.hasDefaultValue() {
-					newParameter.setDefaultValue(parameter.getDefaultValue(), parameter.isComprehensive(), parameter.isRequiringValue())
+					newParameter.setDefaultValue(parameter.getDefaultValue(), parameter.isComprehensive(), parameter.isRequiringValue(), node)
 				}
 				else if mainParameter.hasDefaultValue() {
-					newParameter.setDefaultValue(mainParameter.getDefaultValue(), mainParameter.isComprehensive(), mainParameter.isRequiringValue())
-
-					mainParameters[index].setDefaultValue(mainParameter.getDefaultValue())
+					newParameter.setDefaultValue(mainParameter.getDefaultValue(), mainParameter.isComprehensive(), mainParameter.isRequiringValue(), node)
 				}
 
 				newParameter.index(index)
@@ -243,7 +241,9 @@ class FunctionType extends Type {
 
 				@parameters[index] = newParameter
 
-				mainParameters[index].type(newParameter)
+				mainParameters[index]
+					..type(newParameter)
+					..setDefaultValue(mainParameter.getDefaultValue()) if mainParameter.hasDefaultValue()
 			}
 		}
 	} # }}}
@@ -906,8 +906,8 @@ class FunctionType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
-		return @scope.reference('Function').makeMemberCallee(property, generics, node)
+	override makeMemberCallee(property, path, generics, node) { # {{{
+		return @scope.reference('Function').makeMemberCallee(property, path, generics, node)
 	} # }}}
 	matchArguments(arguments: Array, node: AbstractNode) { # {{{
 		var assessment = this.assessment('', node)
@@ -1399,9 +1399,8 @@ class OverloadedFunctionType extends Type {
 				}
 			}
 			else {
-				// return result!!
 				return () => {
-					match result:!!(NoMatchResult) {
+					match result {
 						.NoArgumentMatch {
 							if @isExhaustive(node) {
 								ReferenceException.throwNoMatchingFunction(name, node.arguments(), node)

@@ -1,0 +1,1 @@
+extern func split(separator: RegExp | String = null)

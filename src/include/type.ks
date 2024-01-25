@@ -1112,13 +1112,13 @@ abstract class Type {
 	makeCallee(name: String, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
-		NotSupportedException.throw(node)
-	} # }}}
 	makeMemberCallee(property: String, name: NamedType, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
-	makeMemberCallee(property: String, reference: ReferenceType, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
+	makeMemberCallee(property: String, path: String?, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
+		NotSupportedException.throw(node)
+	} # }}}
+	makeMemberCallee(property: String, path: String?, reference: ReferenceType, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
 		NotSupportedException.throw(node)
 	} # }}}
 	// TODO to remove

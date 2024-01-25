@@ -881,7 +881,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 
 				if assisteds.length == 1 {
-					@type.assist(assisteds[0], @parameters)
+					@type.assist(assisteds[0], @parameters, this)
 
 					@parent.addForkedMethod(@name, assisteds[0], @type, null)
 				}

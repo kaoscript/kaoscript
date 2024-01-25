@@ -1,1 +1,1 @@
-ReferenceException: The method "quxbaz" can't be found in the class "Foobar" (fixtures/compile/import/import.nex.class.iex.nmet.ks:5)
+ReferenceException: The instance method "quxbaz" can't be found in the class "Foobar" (fixtures/compile/import/import.nex.class.iex.nmet.ks:5)

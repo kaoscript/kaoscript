@@ -1455,7 +1455,7 @@ class ReferenceType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, generics, node) { # {{{
+	override makeMemberCallee(property, path, generics, node) { # {{{
 		if @isNullable() && !node.isMisfit() {
 			unless node.data().callee.modifiers.some((modifier, _, _) => modifier.kind == ModifierKind.Nullable) {
 				TypeException.throwNotNullableCaller(property, node)
@@ -1472,14 +1472,14 @@ class ReferenceType extends Type {
 		else if ?#@parameters && !?#generics {
 			var { type, generics } = @getGenericMapper()
 
-			return type.makeMemberCallee(property, this, generics, node)
+			return type.makeMemberCallee(property, path, this, generics, node)
 		}
 		else {
-			return @type().makeMemberCallee(property, this, generics, node)
+			return @type().makeMemberCallee(property, path, this, generics, node)
 		}
 	} # }}}
-	override makeMemberCallee(property, reference, generics, node) { # {{{
-		return @type().makeMemberCallee(property, this, generics, node)
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
+		return @type().makeMemberCallee(property, path, this, generics, node)
 	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if this == value {
