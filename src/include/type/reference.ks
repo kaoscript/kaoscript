@@ -656,6 +656,14 @@ class ReferenceType extends Type {
 
 		return { type: @discard()!?, generics, subtypes }
 	} # }}}
+	getKeyType() { # {{{
+		if #@parameters >= 2 {
+			return @parameters[1]
+		}
+		else {
+			return @scope.reference('String')
+		}
+	} # }}}
 	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
 	override getProperty(index): Type { # {{{
 		if @name == 'Array' {

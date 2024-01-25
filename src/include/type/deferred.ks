@@ -266,9 +266,9 @@ class DeferredType extends Type {
 			fragments.code(`() => true`)
 		}
 	} # }}}
-	override toReference(references, indexDelta, mode, module) {
+	override toReference(references, indexDelta, mode, module) { # {{{
 		return @export(references, indexDelta, mode, module)
-	}
+	} # }}}
 	override toQuote() { # {{{
 		if @constrainted {
 			return `<\(@name) is \(@constraint.toQuote())>`
