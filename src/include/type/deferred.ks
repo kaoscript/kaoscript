@@ -137,7 +137,11 @@ class DeferredType extends Type {
 			}
 		}
 
-		if value.isAny() {
+		if anycast {
+			if @nullable && !nullcast && !value.isNullable() {
+				return false
+			}
+
 			return true
 		}
 

@@ -681,6 +681,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} # }}}
 	setRealType(mut type: Type) { # {{{
 		if ?@type {
+			// echo(type)
+			// echo(@type)
+			// echo(type.hashCode(), @type.hashCode())
 			unless type.isAssignableToVariable(@type, true, false, false) {
 				TypeException.throwInvalidAssignment(@name, @type, type, this)
 			}
