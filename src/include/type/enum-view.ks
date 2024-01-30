@@ -203,6 +203,7 @@ class EnumViewType extends Type {
 	override isComplex() => true
 	override isEnum() => true
 	override isExportable() => true
+	override isExportable(module) => true
 	override isView() => true
 	listVarnames(): String[] { # {{{
 		var result = [...@elements]

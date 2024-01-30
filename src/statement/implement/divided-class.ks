@@ -227,9 +227,9 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 class ImplementDividedClassMethodDeclaration extends Statement {
 	private late {
 		@block: Block
+		@generics: Generic[]
 		@internalName: String
 		@name: String
-		@parameters: Array<Parameter>
 		@this: Variable
 		@type: ClassMethodType
 	}
@@ -244,6 +244,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		@instance: Boolean					= true
 		@override: Boolean					= false
 		@overwrite: Boolean					= false
+		@parameters: Parameter[]			= []
 		@variable: NamedType<ClassType>
 		@topNodes: Array					= []
 	}
@@ -281,13 +282,19 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 	analyse() { # {{{
 		@scope.line(@data.start.line)
 
+		@generics = [...@class.generics()]
+
+		if ?#@data.typeParameters {
+			for var parameter in @data.typeParameters {
+				@generics.push(Type.toGeneric(parameter, this))
+			}
+		}
+
 		@this = @scope.define('this', true, @classRef, true, this)
 
-		@parameters = []
 		for var data in @data.parameters {
-			var parameter = Parameter.new(data, this)
-
-			parameter.analyse()
+			var parameter = Parameter.new(data, @generics, this)
+				..analyse()
 
 			@parameters.push(parameter)
 		}
@@ -310,7 +317,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			}
 		}
 
-		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @data, this)
+		@type = ClassMethodType.new([parameter.type() for var parameter in @parameters], @generics, @data, this)
 
 		@type.flagAltering()
 

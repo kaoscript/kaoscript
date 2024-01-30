@@ -338,7 +338,7 @@ class UnionType extends Type {
 		var types = []
 
 		for var type in @types {
-			var mut property = type.getProperty(name) ?? Type.Any
+			var mut property = type.getProperty(name) ?? AnyType.NullableUnexplicit
 
 			if property is StructFieldType {
 				property = property.discardVariable()
@@ -433,9 +433,18 @@ class UnionType extends Type {
 		return true
 	} # }}}
 	isExplicit() => @explicit
-	isExportable() { # {{{
+	override isExportable() { # {{{
 		for var type in @types {
 			if !type.isExportable() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
+	override isExportable(module) { # {{{
+		for var type in @types {
+			if !type.isExportable(module) {
 				return false
 			}
 		}
@@ -459,6 +468,15 @@ class UnionType extends Type {
 		}
 
 		return false
+	} # }}}
+	override isLiberal() { # {{{
+		for var type in @types {
+			if !type.isLiberal() {
+				return false
+			}
+		}
+
+		return true
 	} # }}}
 	isMatchingParameter(value) { # {{{
 		for var type in @types {

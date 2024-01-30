@@ -120,7 +120,7 @@ class ClassMethodDeclaration extends Statement {
 		@exit: Boolean						= false
 		@forked: Boolean					= false
 		@forks: Array<ClassMethodType>?		= null
-		@generics: Generic[]					= []
+		@generics: Generic[]				= []
 		@hiddenOverride: Boolean			= false
 		@indigentValues: Array				= []
 		@instance: Boolean					= true

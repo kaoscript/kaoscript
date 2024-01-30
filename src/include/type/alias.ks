@@ -88,7 +88,6 @@ class AliasType extends Type {
 	isBoolean() => @type.isBoolean()
 	override isDeferrable() => ?#@generics || @type.isDeferrable()
 	isExclusion() => @type.isExclusion()
-	isExportable() => @type.isExportable()
 	isExportingFragment() => false
 	isExportingType() => @type.isComplex()
 	isFunction() => @type.isFunction()
@@ -127,7 +126,7 @@ class AliasType extends Type {
 	trimOff(type: Type) => @type.trimOff(type)
 	type() => @type
 	type(@type) => this
-	override toExportFragment(fragments, name, variable)
+	override toExportFragment(fragments, name, variable, module)
 	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
 		@type.toBlindTestFunctionFragments(funcname, varname, casting, testingType, @generics, fragments, node)
 	} # }}}
@@ -149,6 +148,7 @@ class AliasType extends Type {
 		hasRest
 		isComplex
 		isEnum
+		isExportable
 		isReferenced
 		isVariant
 		isView

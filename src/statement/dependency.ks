@@ -30,6 +30,10 @@ abstract class DependencyStatement extends Statement {
 
 				var variable = scope.define(declaration.name.name, true, type, this)
 
+				if @module().isStandardLibrary() {
+					variable.flagStandardLibrary()
+				}
+
 				if ?declaration.extends {
 					var superVar = @scope.getVariable(declaration.extends.name)
 
@@ -238,7 +242,7 @@ class ExternDeclaration extends DependencyStatement {
 				else if @parent.includePath() == null {
 					variable = @define(declaration)
 
-					if variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
+					if !module.isStandardLibrary() && variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
 						@lines.push(`var \(variable.getDeclaredType().getSealedName()) = {}`)
 					}
 				}
@@ -251,7 +255,7 @@ class ExternDeclaration extends DependencyStatement {
 
 				var type = variable.getDeclaredType()
 
-				if type.isSealed() && type.isExtendable() {
+				if type.isSealed() && type.isExtendable() && !module.isStandardLibrary() {
 					@lines.push(`var \(type.getSealedName()) = {}`)
 				}
 			}

@@ -232,7 +232,6 @@ class ParameterType extends Type {
 	isAnonymous(): valueof @anonymous
 	isAny() => @type.isAny()
 	isComprehensive() => @comprehensive
-	isExportable() => @type.isExportable()
 	isLabeled() => @passing ~~ PassingMode.LABELED
 	isLimited() => @max != Infinity
 	isMorePreciseThan(value: ParameterType) => @type.isMorePreciseThan(value.type())
@@ -392,6 +391,7 @@ class ParameterType extends Type {
 	proxy @type {
 		isComplete
 		isDeferrable
+		isExportable
 		toNegativeTestFragments
 		toPositiveTestFragments
 	}

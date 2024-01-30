@@ -117,7 +117,8 @@ class AnyType extends Type {
 	} # }}}
 	isComplete() => true
 	isExplicit() => @explicit
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	override isInstanceOf(value, generics, subtypes) => false
 	isIterable() => true
 	isMorePreciseThan(value: Type) => value.isAny() && (@nullable -> value.isNullable())

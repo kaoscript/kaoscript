@@ -849,7 +849,7 @@ export class Color {
 		return $from(this, args)
 	} # }}}
 
-	private getField(name) { # {{{
+	getField(name) { # {{{
 		var component = $components[name]
 
 		if ?component.spaces[this._space] {
@@ -1006,7 +1006,7 @@ export class Color {
 		return [fn(this.clone()) for var fn in functions]
 	} # }}}
 
-	private setField(name, value: number | string): Color { # {{{
+	setField(name, value: number | string): Color { # {{{
 		var mut component = $components[name]
 
 		if ?component.spaces[this._space] {

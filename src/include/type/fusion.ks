@@ -222,7 +222,8 @@ class FusionType extends Type {
 	} # }}}
 	isComplete() => true
 	isComplex() => true
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	isFusion() => true
 	isNullable() => @nullable
 	isObject() { # {{{

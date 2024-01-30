@@ -10,7 +10,7 @@ class MemberExpression extends Expression {
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
 		@object: Expression
-		@objectType: ObjectType?
+		@objectType: ObjectType|UnionType|?
 		@originalProperty: String?
 		@path: String
 		@prepareObject: Boolean			= true
@@ -1048,13 +1048,33 @@ class MemberExpression extends Expression {
 		}
 	} # }}}
 	setPropertyType(type: Type) { # {{{
-		var newType = @objectType.clone()
+		var late newType
 
-		if @computed {
-			newType.addProperty(@property.value(), type)
+		if @objectType is UnionType {
+			newType = UnionType.new(@scope())
+
+			for var oldSubtype in @objectType.types() {
+				var newSubtype = oldSubtype.clone()
+
+				if @computed {
+					newSubtype.addProperty(@property.value(), type)
+				}
+				else {
+					newSubtype.addProperty(@property, type)
+				}
+
+				newType.addType(newSubtype)
+			}
 		}
 		else {
-			newType.addProperty(@property, type)
+			newType = @objectType.clone()
+
+			if @computed {
+				newType.addProperty(@property.value(), type)
+			}
+			else {
+				newType.addProperty(@property, type)
+			}
 		}
 
 		if @objectType.isNamed() {

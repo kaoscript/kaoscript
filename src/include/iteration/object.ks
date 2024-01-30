@@ -34,7 +34,7 @@ class ObjectIteration extends IterationNode {
 
 		if ?@data.key {
 			if @declaration {
-				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), true, this)
+				@bindingScope.define(@data.key.name, @immutable, AnyType.Unexplicit, true, this)
 
 				@defineKey = true
 			}
@@ -92,6 +92,7 @@ class ObjectIteration extends IterationNode {
 		@expression.prepare(AnyType.NullableUnexplicit)
 
 		var type = @expression.type()
+
 		unless type.canBeObject(true) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
@@ -135,11 +136,19 @@ class ObjectIteration extends IterationNode {
 		}
 
 		if ?@key {
-			unless @defineKey {
-				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
+			var keyType =
+				if type.hasKeyType() {
+					set type.getKeyType()
+				}
+				else {
+					set @scope.reference('String')
+				}
+
+			if @defineKey -> !@key.type().isExplicit() {
+				@bindingScope.replaceVariable(@data.key.name, keyType, this)
 			}
 
-			@key.prepare(@scope.reference('String'))
+			@key.prepare(keyType)
 		}
 		else {
 			@keyName = @bindingScope.acquireTempName(false)

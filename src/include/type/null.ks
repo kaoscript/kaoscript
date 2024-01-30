@@ -26,7 +26,8 @@ class NullType extends Type {
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) => value.isNullable()
 	isComplete() => true
 	isExplicit() => @explicit
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	override isInstanceOf(value: Type, generics, subtypes) => true
 	isMorePreciseThan(value: Type) => value.isAny() || value.isNullable()
 	isNull() => true

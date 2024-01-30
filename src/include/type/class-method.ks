@@ -84,6 +84,10 @@ class ClassMethodType extends FunctionType {
 				type._proxyPath = data.proxyPath
 			}
 
+			if ?data.libstd {
+				type._standardLibrary = data.libstd
+			}
+
 			return type
 		} # }}}
 	}
@@ -129,6 +133,7 @@ class ClassMethodType extends FunctionType {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
 		var export = {
+			libstd: true if @standardLibrary || module.isStandardLibrary()
 			index: @index
 			access: @access
 			sealed: @sealed
@@ -142,7 +147,7 @@ class ClassMethodType extends FunctionType {
 		if ?originalMethods && ?@overwrite {
 			var overwrite = @overwrite.filter((index, _, _) => originalMethods:!(Array).contains(index))
 
-			if overwrite.length > 0 {
+			if ?#overwrite {
 				export.overwrite = overwrite
 			}
 		}
@@ -176,13 +181,6 @@ class ClassMethodType extends FunctionType {
 	getProxyName() => @proxyName
 	getProxyPath() => @proxyPath
 	isAbstract() => @abstract
-	isExportable() { # {{{
-		if !super() {
-			return false
-		}
-
-		return true
-	} # }}}
 	isForked() => @forked
 	isInitializingInstanceVariable(name) => @initVariables[name]
 	isInstance() => @instance

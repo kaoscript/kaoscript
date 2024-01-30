@@ -379,13 +379,13 @@ class EnumType extends Type {
 		}
 
 		for var methods, name of @instanceMethods {
-			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode)]
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode, module)]
 
 			export.instanceMethods[name] = exports if ?#exports
 		}
 
 		for var methods, name of @staticMethods {
-			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode)]
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when !method.isInbuilt() && method.isExportable(mode, module)]
 
 			export.staticMethods[name] = exports if ?#exports
 		}

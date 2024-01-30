@@ -112,6 +112,7 @@ class Variable {
 	isClassStatement() => @class
 	isComplete() => @complete
 	isDefinitive() => @definitive
+	isExportable() => !@standardLibrary || !@declaredType.isStandardLibrary(.Full)
 	isImmutable() => @immutable
 	isInitialized() => @initialized
 	isLateInit() => @lateInit
@@ -119,6 +120,7 @@ class Variable {
 	isPredefined() => @predefined
 	isRenamed() => @name != @secureName
 	isStandardLibrary() => @standardLibrary
+	isStandardLibrary(mode: LibSTDMode) => @standardLibrary && @declaredType.isStandardLibrary(mode)
 	name() => @name
 	prepareAlteration() { # {{{
 		if (@declaredType.isRequired() || @declaredType.isAlien()) && !@altereable {

@@ -3,6 +3,7 @@ class NamedType extends Type {
 		@cloned: Boolean 				= false
 		@container: NamedContainerType?	= null
 		@name: String
+		@sealedName: String?			= null
 		@type: Type
 	}
 	constructor(@name, @type) { # {{{
@@ -89,7 +90,7 @@ class NamedType extends Type {
 	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
-	getSealedName() => `__ks_\(@name)`
+	getSealedName() => @sealedName ?? `__ks_\(@name)`
 	getSealedPath() { # {{{
 		if ?@container {
 			return `\(@container.path()).\(this.getSealedName())`
@@ -224,7 +225,6 @@ class NamedType extends Type {
 	isExhaustive(node) => @isExhaustive() && !node.isMisfit()
 	isExplicit() => true
 	isExplicitlyExported() => @type.isExplicitlyExported()
-	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()
 	isExportingFragment() => @type.isExportingFragment()
 	isExtendable() => @type.isExtendable()
@@ -512,6 +512,7 @@ class NamedType extends Type {
 
 		return false
 	} # }}}
+	assist merge(value: NamedType) => @type.merge(value.type())
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is AliasType | ClassType | StructType | TupleType {
 			return @type.metaReference(references, indexDelta, mode, module, @name)
@@ -564,9 +565,14 @@ class NamedType extends Type {
 			throw NotSupportedException.new()
 		}
 	} # }}}
-	toExportFragment(fragments, name, variable) { # {{{
+	override toExportFragment(fragments, name, variable, module) { # {{{
 		if @type.isExportingFragment() {
-			super(fragments, name, variable)
+			if module.isStandardLibrary() {
+				fragments.line(@sealedName)
+			}
+			else {
+				super(fragments, name, variable, module)
+			}
 		}
 	} # }}}
 	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toExportOrIndex(references, indexDelta, mode, module)
@@ -623,6 +629,14 @@ class NamedType extends Type {
 	unflagAltering(): valueof this { # {{{
 		@type.unflagAltering()
 	} # }}}
+	useSealedName(module: Module) { # {{{
+		if module.isStandardLibrary() {
+			@sealedName = `LibSTD_\(@name.substr(0, 1).toLowerCase())`
+		}
+		else {
+			@sealedName = `__ks_\(@name)`
+		}
+	} # }}}
 	walk(fn) { # {{{
 		if @type is ObjectType || @type is NamespaceType {
 			@type.walk(fn)
@@ -636,6 +650,7 @@ class NamedType extends Type {
 		canBeArray
 		canBeRawCasted
 		extractFunction
+		flagStandardLibrary
 		hasProperty
 		hasRest
 		hasTest
@@ -644,9 +659,11 @@ class NamedType extends Type {
 		isComplete
 		isComplex
 		isDeferrable
+		isExportable
 		isExportingType
 		isFunction
 		isInstanceOf
+		isStandardLibrary
 		isVariant
 		isView
 		makeCallee

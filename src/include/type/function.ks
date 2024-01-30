@@ -503,7 +503,7 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	isExportable() { # {{{
+	override isExportable() { # {{{
 		for var parameter in @parameters {
 			if !parameter.isExportable() {
 				return false
@@ -515,6 +515,11 @@ class FunctionType extends Type {
 		}
 
 		return true
+	} # }}}
+	override isExportable(module) { # {{{
+		return false unless !@standardLibrary || module.isStandardLibrary()
+
+		return @isExportable()
 	} # }}}
 	isExtendable() => true
 	isFunction() => true
@@ -1249,11 +1254,11 @@ class OverloadedFunctionType extends Type {
 
 		for var reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
-				for var fn in reference.functions() when fn.isExportable(mode) {
+				for var fn in reference.functions() when fn.isExportable(mode, module) {
 					functions.push(fn.toExportOrIndex(references, indexDelta, overloadedMode, module))
 				}
 			}
-			else if reference.isExportable(mode) {
+			else if reference.isExportable(mode, module) {
 				functions.push(reference.toExportOrIndex(references, indexDelta, overloadedMode, module))
 			}
 		}
@@ -1303,9 +1308,18 @@ class OverloadedFunctionType extends Type {
 		}
 	} # }}}
 	isAsync() => @async
-	isExportable() { # {{{
+	override isExportable() { # {{{
 		for var reference in @references {
 			if reference.isExportable() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	override isExportable(module) { # {{{
+		for var reference in @references {
+			if reference.isExportable(module) {
 				return true
 			}
 		}

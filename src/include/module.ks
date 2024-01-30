@@ -28,6 +28,7 @@ export class Module {
 		@requirements					= []
 		@requirementByNames				= {}
 		@rewire
+		@standardLibrary: Boolean		= false
 		@variationId
 	}
 	constructor(data, @compiler, @file) { # {{{
@@ -35,6 +36,7 @@ export class Module {
 
 		@directory = path.dirname(file)
 		@options = Attribute.configure(@data, @compiler._options, AttributeTarget.Global, file, true)
+		@standardLibrary = @options.libstd.current
 
 		for var attr in @data.attributes {
 			if attr.declaration.kind == NodeKind.Identifier &&	attr.declaration.name == 'bin' {
@@ -202,7 +204,7 @@ export class Module {
 		@body.translate()
 
 		for var export, name of @exports {
-			if !export.type.isExportable() {
+			if !export.type.isExportable(this) {
 				ReferenceException.throwNotExportable(name, @body)
 			}
 		}
@@ -231,6 +233,7 @@ export class Module {
 		@body.initiate()
 	} # }}}
 	isBinary() => @binary
+	isStandardLibrary(): Boolean => @standardLibrary
 	isUpToDate(file: String, source: String) { # {{{
 		var late data
 		try {
@@ -422,12 +425,26 @@ export class Module {
 			var mut exportingFragments = {}
 			var mut exportingTypes = []
 
-			for var export, name of @exports {
-				if export.type.isExportingFragment() {
-					exportingFragments[name] = export
+			if @standardLibrary {
+				for var export, name of @exports {
+					if export.type.isExportingFragment() {
+						if export.type.isStandardLibrary(LibSTDMode.Partial) {
+							exportingFragments[name] = export
+						}
+					}
+					else if export.type.isExportingType() {
+						NotImplementedException.throw()
+					}
 				}
-				else if export.type.isExportingType() {
-					exportingTypes.push(export)
+			}
+			else {
+				for var export, name of @exports {
+					if export.type.isExportingFragment() {
+						exportingFragments[name] = export
+					}
+					else if export.type.isExportingType() {
+						exportingTypes.push(export)
+					}
 				}
 			}
 
@@ -436,7 +453,7 @@ export class Module {
 				var object = line.newObject()
 
 				for var export, name of exportingFragments {
-					export.type.toExportFragment(object, name, export.variable)
+					export.type.toExportFragment(object, name, export.variable, this)
 				}
 
 				if ?#exportingTypes {

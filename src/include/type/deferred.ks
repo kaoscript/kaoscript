@@ -99,6 +99,7 @@ class DeferredType extends Type {
 		return {
 			kind: TypeKind.Deferred
 			@name
+			nullable: true if @nullable
 			constraint: @constraint.toReference(references, indexDelta, mode, module) if ?@constraint
 		}
 	} # }}}

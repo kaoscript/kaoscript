@@ -59,7 +59,7 @@ class ObjectType extends Type {
 				}
 
 				if ?data.key {
-					keyType = Type.import(data.rest, metadata, references, alterations, queue, scope, node)
+					keyType = Type.import(data.key, metadata, references, alterations, queue, scope, node)
 				}
 
 				queue.push(() => {
@@ -134,6 +134,7 @@ class ObjectType extends Type {
 		type._destructuring = @destructuring
 		type._nullable = @nullable
 		type._length = @length
+		type._liberal = @liberal
 		type._properties = {...@properties}
 		type._computed = {...@computed}
 		type._rest = @rest
@@ -556,7 +557,8 @@ class ObjectType extends Type {
 	} # }}}
 	isNullable() => @nullable
 	isObject() => true
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	isLiberal() => @liberal
 	isMatching(value: Type, mode: MatchingMode) => false
 	override isSpecific() => @specific

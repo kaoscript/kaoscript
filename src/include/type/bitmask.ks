@@ -332,11 +332,11 @@ class BitmaskType extends Type {
 		}
 
 		for var methods, name of @instanceMethods {
-			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
+			export.instanceMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
 		}
 
 		for var methods, name of @staticMethods {
-			export.staticMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode)]
+			export.staticMethods[name] = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
 		}
 
 		export.sequences = [

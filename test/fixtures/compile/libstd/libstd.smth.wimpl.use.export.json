@@ -1,0 +1,92 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Object"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {
+          "key": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "object",
+                  "internal": "object",
+                  "type": {
+                    "kind": "object",
+                    "key": {
+                      "kind": "deferred",
+                      "name": "K"
+                    },
+                    "rest": {
+                      "kind": "deferred",
+                      "name": "V"
+                    }
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "index",
+                  "internal": "index",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "deferred",
+                "name": "K",
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "generics": [
+          {
+            "name": "V"
+          },
+          {
+            "name": "K"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

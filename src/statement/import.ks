@@ -166,19 +166,23 @@ abstract class Importer extends Statement {
 					}
 
 					if def.newVariable {
-						variable.setDeclaredType(type ?? def.type)
+						var declType = type ?? def.type
+							..flagStandardLibrary() if variable.isStandardLibrary()
+
+						variable.setDeclaredType(declType)
+					}
+					else if variable.isStandardLibrary(.Full) && type?.isStandardLibrary(LibSTDMode.Partial) {
+						variable.getDeclaredType().merge(type)
 					}
 					else if !variable.isPredefined() && @arguments.fromLocal[def.internal] is not Number {
 						ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
 					}
 					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode.Signature + MatchingMode.Renamed) {
-						var alien = variable.getDeclaredType().isAlien()
+						var declType = type ?? def.type
+							..flagStandardLibrary() if variable.isStandardLibrary()
+							..flagAlien() if variable.getDeclaredType().isAlien()
 
-						variable.setDeclaredType(type ?? def.type)
-
-						if alien {
-							variable.getDeclaredType().flagAlien()
-						}
+						variable.setDeclaredType(declType)
 					}
 					else {
 						TypeException.throwNotCompatibleArgument(def.internal, name, @data.source.value, this)

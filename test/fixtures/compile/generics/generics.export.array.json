@@ -57,7 +57,8 @@
               "parameters": [],
               "returns": {
                 "kind": "deferred",
-                "name": "T"
+                "name": "T",
+                "nullable": true
               },
               "errors": [],
               "inits": []

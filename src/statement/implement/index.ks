@@ -82,6 +82,14 @@ class ImplementDeclaration extends Statement {
 
 			@newSealedClass = @type.isSealed() && @type.isExtendable()
 		}
+		else if @variable.isStandardLibrary(.Full) {
+			@newSealedClass = true
+		}
+		else if @module().isStandardLibrary() {
+			@newSealedClass = true
+
+			@type.flagStandardLibrary()
+		}
 		else if (@type.isAlien() || @type.isRequired()) && !@variable.isAltereable() {
 			@variable.setDeclaredType(@type.unflagAltering())
 		}
@@ -96,6 +104,10 @@ class ImplementDeclaration extends Statement {
 		unless ?@type {
 			TypeException.throwImplInvalidType(this)
 		}
+
+		if @newSealedClass {
+			@type.useSealedName(@module())
+		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		return if @useDeclaration
@@ -108,27 +120,26 @@ class ImplementDeclaration extends Statement {
 
 		if type is ClassType {
 			for var data in @data.properties {
-				var late property
-
-				match data.kind {
-					NodeKind.FieldDeclaration {
-						property = ImplementDividedClassFieldDeclaration.new(data, this, @type)
-					}
-					NodeKind.MethodDeclaration {
-						if type.isConstructor(data.name.name) {
-							property = ImplementDividedClassConstructorDeclaration.new(data, this, @type)
+				var property =
+					match data.kind {
+						NodeKind.FieldDeclaration {
+							set ImplementDividedClassFieldDeclaration.new(data, this, @type)
 						}
-						else if type.isDestructor(data.name.name) {
-							NotImplementedException.throw(this)
+						NodeKind.MethodDeclaration {
+							if type.isConstructor(data.name.name) {
+								set ImplementDividedClassConstructorDeclaration.new(data, this, @type)
+							}
+							else if type.isDestructor(data.name.name) {
+								NotImplementedException.throw(this)
+							}
+							else {
+								set ImplementDividedClassMethodDeclaration.new(data, this, @type)
+							}
 						}
 						else {
-							property = ImplementDividedClassMethodDeclaration.new(data, this, @type)
+							throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
 						}
 					}
-					else {
-						throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
-					}
-				}
 
 				property.analyse()
 

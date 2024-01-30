@@ -8,7 +8,8 @@ class VoidType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Void'
 	hashCode() => `Void`
 	isComplete() => true
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	assist isSubsetOf(value: VoidType, generics, subtypes, mode) => true
 	isVoid() => true
 	toFragments(fragments, node) { # {{{

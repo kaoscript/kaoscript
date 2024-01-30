@@ -367,7 +367,8 @@ class ArrayType extends Type {
 		return false
 	} # }}}
 	isExhaustive() => !@rest || @scope.reference('Array').isExhaustive()
-	isExportable() => true
+	override isExportable() => true
+	override isExportable(module) => true
 	assist isInstanceOf(value: AnyType, generics, subtypes) => false
 	isIterable() => true
 	isMorePreciseThan(value: AnyType) => true

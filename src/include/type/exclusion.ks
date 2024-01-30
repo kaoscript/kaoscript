@@ -53,9 +53,9 @@ class ExclusionType extends Type {
 	getMainType() => @types[0]
 	isComplete() => true
 	isExclusion() => true
-	isExportable() { # {{{
+	override isExportable(module) { # {{{
 		for var type in @types {
-			if !type.isExportable() {
+			if !type.isExportable(module) {
 				return false
 			}
 		}

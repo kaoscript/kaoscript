@@ -1,0 +1,225 @@
+[
+  {
+    "aliens": [
+      0,
+      "Array",
+      true,
+      1,
+      "Object",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generics": [
+          {
+            "name": "T"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": true,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {
+          "entries": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "obj",
+                  "internal": "obj",
+                  "type": {
+                    "kind": "object",
+                    "key": {
+                      "kind": "deferred",
+                      "name": "K"
+                    },
+                    "rest": {
+                      "kind": "deferred",
+                      "name": "V"
+                    }
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": {
+                  "kind": "array",
+                  "properties": [
+                    {
+                      "kind": "deferred",
+                      "name": "K"
+                    },
+                    {
+                      "kind": "deferred",
+                      "name": "V"
+                    }
+                  ]
+                }
+              },
+              "errors": [],
+              "inits": [],
+              "libstd": true
+            }
+          ],
+          "keys": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "obj",
+                  "internal": "obj",
+                  "type": {
+                    "kind": "object",
+                    "key": {
+                      "kind": "deferred",
+                      "name": "K"
+                    },
+                    "rest": {
+                      "kind": "deferred",
+                      "name": "V"
+                    }
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": {
+                  "kind": "deferred",
+                  "name": "K"
+                }
+              },
+              "errors": [],
+              "inits": [],
+              "libstd": true
+            }
+          ]
+        },
+        "generics": [
+          {
+            "name": "V"
+          },
+          {
+            "name": "K"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Array",
+      2,
+      "Object"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "original": 1,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {
+          "length": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "object",
+                  "internal": "object",
+                  "type": "Object",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": [],
+              "libstd": true
+            }
+          ]
+        },
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

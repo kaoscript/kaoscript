@@ -934,7 +934,7 @@
           "getField": [
             {
               "index": 0,
-              "access": 2,
+              "access": 4,
               "sealed": false,
               "async": false,
               "parameters": [
@@ -1238,7 +1238,7 @@
           "setField": [
             {
               "index": 0,
-              "access": 2,
+              "access": 4,
               "sealed": false,
               "async": false,
               "parameters": [

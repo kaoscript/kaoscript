@@ -128,7 +128,7 @@ class ExportGroupSpecifier extends AbstractNode {
 	translate()
 	export(recipient) { # {{{
 		if @exclusion {
-			for var variable in @parent.parent().scope().listDefinedVariables() when !variable.isStandardLibrary() && @elements.indexOf(variable.name()) == -1 {
+			for var variable in @parent.parent().scope().listDefinedVariables() when variable.isExportable() && @elements.indexOf(variable.name()) == -1 {
 				recipient.export(variable.name(), variable)
 			}
 
@@ -137,7 +137,7 @@ class ExportGroupSpecifier extends AbstractNode {
 			}
 		}
 		else if @wildcard {
-			for var variable in @parent.parent().scope().listDefinedVariables() when !variable.isStandardLibrary() {
+			for var variable in @parent.parent().scope().listDefinedVariables() when variable.isExportable() {
 				recipient.export(variable.name(), variable)
 			}
 

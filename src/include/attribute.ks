@@ -366,7 +366,13 @@ class LibstdAttribute extends Attribute {
 			match arg.kind:!(NodeKind) {
 				.AttributeOperation {
 					if arg.name.name == 'package' {
-						options.libstd.package = arg.value.value
+						if arg.value.value == '.' {
+							options.libstd.enable = false
+							options.libstd.current = true
+						}
+						else {
+							options.libstd.package = arg.value.value
+						}
 					}
 				}
 				.Identifier {

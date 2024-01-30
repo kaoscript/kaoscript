@@ -145,6 +145,10 @@ class ClassType extends Type {
 
 			type._exhaustive = data.exhaustive
 
+			if ?data.libstd {
+				type._standardLibrary = data.libstd
+			}
+
 			if ?data.exhaustiveness {
 				if ?data.exhaustiveness.constructor {
 					type._exhaustiveness.constructor = data.exhaustiveness.constructor
@@ -577,6 +581,7 @@ class ClassType extends Type {
 		@hybrid = src._hybrid
 		@sealed = src._sealed
 		@system = src._system
+		@standardLibrary = src._standardLibrary
 
 		for var methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
@@ -703,6 +708,7 @@ class ClassType extends Type {
 		if exportSuper {
 			export = {
 				kind: TypeKind.Class
+				libstd: true if @standardLibrary || module.isStandardLibrary()
 			}
 
 			if mode ~~ ExportMode.Export {
@@ -749,7 +755,7 @@ class ClassType extends Type {
 			}
 
 			var originalConstructors = original?.listConstructors()?.map((method, _, _) => method.index())
-			for var constructor in @constructors when constructor.isExportable(mode) {
+			for var constructor in @constructors when constructor.isExportable(mode, module) {
 				if @alterations.constructors[constructor.index()] {
 					export.constructors.push(constructor.export(references, indexDelta, mode, module, originalConstructors))
 				}
@@ -771,7 +777,7 @@ class ClassType extends Type {
 				var exportedMethods = export.instanceMethods[name] ?? []
 				var originalMethods = original?.listInstanceMethods(name)?.map((method, _, _) => method.index())
 
-				for var method in methods when method.isExportable(mode) {
+				for var method in methods when method.isExportable(mode, module) {
 					if @alterations.instanceMethods[name]?[method.index()] {
 						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
 					}
@@ -786,7 +792,7 @@ class ClassType extends Type {
 				var exportedMethods = export.staticMethods[name] ?? []
 				var originalMethods = original?.listStaticMethods(name)?.map((method, _, _) => method.index())
 
-				for var method in methods when method.isExportable(mode) {
+				for var method in methods when method.isExportable(mode, module) {
 					if @alterations.staticMethods[name]?[method.index()] {
 						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
 					}
@@ -800,6 +806,7 @@ class ClassType extends Type {
 		else {
 			export = {
 				kind: TypeKind.Class
+				libstd: true if @standardLibrary || module.isStandardLibrary()
 				abstract: @abstract
 				alien: @alien
 				hybrid: @hybrid
@@ -822,17 +829,21 @@ class ClassType extends Type {
 			}
 
 			for var methods, name of @instanceMethods {
-				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
+				// for var method in methods {
+				// 	echo(name, method.hashCode(), method.isExportable(mode, module))
+				// }
 
-				if exportedMethods.length != 0 {
+				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode, module)]
+
+				if ?#exportedMethods {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for var methods, name of @staticMethods {
-				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
+				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode, module)]
 
-				if exportedMethods.length != 0 {
+				if ?#exportedMethods {
 					export.staticMethods[name] = exportedMethods
 				}
 			}
@@ -841,9 +852,9 @@ class ClassType extends Type {
 				export.abstractMethods = {}
 
 				for var methods, name of @abstractMethods {
-					var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode)]
+					var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode, module)]
 
-					if exportedMethods.length != 0 {
+					if ?#exportedMethods {
 						export.abstractMethods[name] = exportedMethods
 					}
 				}
@@ -931,7 +942,7 @@ class ClassType extends Type {
 		}
 
 		var ignoredConstructors = overwritten.constructors ?? []
-		for var constructor in @constructors when constructor.isExportable(mode) {
+		for var constructor in @constructors when constructor.isExportable(mode, module) {
 			if @alterations.constructors[constructor.index()] && !ignoredConstructors:!(Array).contains(constructor.index()) {
 				export.constructors.push(constructor.export(references, indexDelta, mode, module, true))
 			}
@@ -941,7 +952,7 @@ class ClassType extends Type {
 			var exportedMethods = export.instanceMethods[name] ?? []
 			var ignoredMethods = overwritten.instanceMethods[name] ?? []
 
-			for var method in methods when method.isExportable(mode) {
+			for var method in methods when method.isExportable(mode, module) {
 				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:!(Array).contains(method.index()) {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
@@ -955,7 +966,7 @@ class ClassType extends Type {
 		for var methods, name of @staticMethods {
 			var exportedMethods = export.staticMethods[name] ?? []
 
-			for var method in methods when method.isExportable(mode) {
+			for var method in methods when method.isExportable(mode, module) {
 				if @alterations.staticMethods[name]?[method.index()] {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
@@ -1070,6 +1081,21 @@ class ClassType extends Type {
 		@sealed = true
 
 		return this
+	} # }}}
+	override flagStandardLibrary() { # {{{
+		super()
+
+		for var methods of @instanceMethods {
+			for var method in methods {
+				method.flagStandardLibrary()
+			}
+		}
+
+		for var methods of @staticMethods {
+			for var method in methods {
+				method.flagStandardLibrary()
+			}
+		}
 	} # }}}
 	generics() => @generics
 	generics(@generics)
@@ -1647,6 +1673,25 @@ class ClassType extends Type {
 	isPredefined() => @predefined
 	isSealable() => true
 	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
+	override isStandardLibrary(mode) { # {{{
+		return false unless @standardLibrary
+
+		if mode == .Full {
+			for var methods, name of @instanceMethods {
+				for var method in methods {
+					return false unless method.isStandardLibrary(mode)
+				}
+			}
+
+			for var methods, name of @staticMethods {
+				for var method in methods {
+					return false unless method.isStandardLibrary(mode)
+				}
+			}
+		}
+
+		return true
+	} # }}}
 	assist isSubsetOf(value: ClassType, generics, subtypes, mode) { # {{{
 		if this == value {
 			return true
@@ -2225,6 +2270,19 @@ class ClassType extends Type {
 		}
 
 		return true
+	} # }}}
+	assist merge(value: ClassType) { # {{{
+		for var methods, name of value._instanceMethods {
+			for var method in methods {
+				@addInstanceMethod(name, method)
+			}
+		}
+
+		for var methods, name of value._staticMethods {
+			for var method in methods {
+				@addStaticMethod(name, method)
+			}
+		}
 	} # }}}
 	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { # {{{
 		if @predefined {

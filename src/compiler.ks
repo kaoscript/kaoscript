@@ -147,6 +147,7 @@ export class Compiler {
 			}
 			libstd: {
 				enable: true
+				current: false
 				package: 'npm:@kaoscript/runtime/src/libstd/index.ks'
 			}
 		}, options)

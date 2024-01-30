@@ -200,6 +200,11 @@ bitmask TypeOrigin {
 	RequireOrExtern
 }
 
+enum LibSTDMode {
+	Full
+	Partial
+}
+
 type AltType = {
 	name: String
 	type: Type
@@ -233,6 +238,7 @@ abstract class Type {
 		@scope: Scope?
 		@sealed: Boolean				= false
 		@system: Boolean				= false
+		@standardLibrary: Boolean		= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) { # {{{
@@ -948,6 +954,9 @@ abstract class Type {
 
 		return this
 	} # }}}
+	flagStandardLibrary(): Void { # {{{
+		@standardLibrary = true
+	} # }}}
 	flagSystem() { # {{{
 		@system = true
 
@@ -963,6 +972,7 @@ abstract class Type {
 	// TODO merge
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
+	hasKeyType() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false
 	hasSameParameters(value: Type): Boolean => false
@@ -1032,7 +1042,9 @@ abstract class Type {
 	isExplicitlyExported() => @exported
 	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1
 	isExportable(mode: ExportMode) => mode ~~ ExportMode.Requirement || @isExportable()
-	isExportingFragment() => (!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())
+	isExportable(mode: ExportMode, module: Module) => mode ~~ ExportMode.Requirement || @isExportable(module)
+	isExportable(module: Module) => @isExportable() && (module.isStandardLibrary() || !@isStandardLibrary(.Full))
+	isExportingFragment() => ((!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())) && !@isStandardLibrary(.Full)
 	isExportingType() => false
 	isExported() => @exported
 	isExtendable() => false
@@ -1058,6 +1070,7 @@ abstract class Type {
 	isNullable() => false
 	isNullable(generics: AltType[]?) => @isNullable()
 	isObject() => false
+	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary
 	isPlaceholder() => false
 	isPredefined() => false
 	isPrimitive() => false
@@ -1123,6 +1136,9 @@ abstract class Type {
 	} # }}}
 	// TODO to remove
 	matchContentOf(value: Type?): Boolean => @equals(value)
+	merge(value: Type): Void { # {{{
+		NotImplementedException.throw()
+	} # }}}
 	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, ignoreUndefined: Boolean, node): Type { # {{{
 		return @isMorePreciseThan(value) ? this : value
 	} # }}}
@@ -1193,7 +1209,7 @@ abstract class Type {
 	toCastFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
 	} # }}}
-	toExportFragment(fragments, name, variable) { # {{{
+	toExportFragment(fragments, name, variable, module: Module) { # {{{
 		if !@isVirtual() && !@isSystem() {
 			var varname = variable.getSecureName?()
 
@@ -1206,13 +1222,13 @@ abstract class Type {
 		}
 
 		if @isSealed() && @isExtendable() {
-			var varname = this.getSealedName()
+			var varname = @getSealedName()
 
 			if `__ks_\(name)` == varname {
 				fragments.line(varname)
 			}
 			else {
-				fragments.line(`__ks_\(name): \(this.getSealedName())`)
+				fragments.line(`__ks_\(name): \(@getSealedName())`)
 			}
 		}
 	} # }}}

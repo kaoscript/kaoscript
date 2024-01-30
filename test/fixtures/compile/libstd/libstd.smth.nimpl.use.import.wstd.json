@@ -1,0 +1,108 @@
+[
+  {
+    "aliens": [
+      "Any?",
+      "echo",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Object",
+      "Any?",
+      "echo",
+      1,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {
+          "length": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "object",
+                  "internal": "object",
+                  "type": "Object",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "new": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [],
+              "returns": "Object",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "generics": [
+          {
+            "name": "V"
+          },
+          {
+            "name": "K"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      },
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "external": "value",
+            "internal": "value",
+            "type": "Object",
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

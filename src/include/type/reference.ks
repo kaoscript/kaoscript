@@ -1030,7 +1030,8 @@ class ReferenceType extends Type {
 	isExplicit() => @type().isExplicit()
 	isExplicitlyExported() => @type().isExplicitlyExported()
 	isExplicitlyNull() => @explicitlyNull
-	isExportable() => @type().isExportable()
+	override isExportable() => @type().isExportable()
+	override isExportable(module) => @type().isExportable(module)
 	isExported() => @type().isExported()
 	isExportingFragment() => true
 	isExtendable() => @name == 'Function'
@@ -1815,7 +1816,7 @@ class ReferenceType extends Type {
 			super(value, nullable, fragments, node)
 		}
 	} # }}}
-	toExportFragment(fragments, name, variable) { # {{{
+	override toExportFragment(fragments, name, variable, module) { # {{{
 		var varname = variable.name?()
 
 		if name == varname {

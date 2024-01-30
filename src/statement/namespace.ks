@@ -127,13 +127,14 @@ class NamespaceDeclaration extends Statement {
 		@scope.addMacro(name, macro)
 	} # }}}
 	toExportFragments(fragments) { # {{{
+		var module = @module()
 		var line = fragments.newLine().code('return ')
 		var object = line.newObject()
 
 		for var variable, name of @exports {
 			var type = variable.getDeclaredType()
 
-			type.toExportFragment(object, name, variable)
+			type.toExportFragment(object, name, variable, module)
 		}
 
 		if @testIndex > 0 {

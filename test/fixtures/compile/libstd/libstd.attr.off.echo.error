@@ -1,0 +1,1 @@
+ReferenceException: "echo" is not defined (fixtures/compile/libstd/libstd.attr.off.echo.ks:4)
