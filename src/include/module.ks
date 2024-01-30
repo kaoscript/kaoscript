@@ -16,6 +16,8 @@ export class Module {
 		@imports						= {}
 		@includeModules					= {}
 		@includePaths					= {}
+		@libSTDType: Boolean			= false
+		@libSTDUsages: String[]			= []
 		@metaExports					= {
 			exports: []
 			references: []
@@ -217,6 +219,12 @@ export class Module {
 	} # }}}
 	flagRegister() { # {{{
 		@register = true
+	} # }}}
+	flagLibSTDType() { # {{{
+		@libSTDType = true
+	} # }}}
+	flagLibSTDUsage(name: String) { # {{{
+		@libSTDUsages.pushUniq(name)
 	} # }}}
 	getAlien(name: String) => @aliens[name]
 	getArgument(index: Number) => @arguments[index]
@@ -433,7 +441,7 @@ export class Module {
 						}
 					}
 					else if export.type.isExportingType() {
-						NotImplementedException.throw()
+						exportingTypes.push(export)
 					}
 				}
 			}
@@ -457,7 +465,7 @@ export class Module {
 				}
 
 				if ?#exportingTypes {
-					var line = object.newLine().code('__ksType: [')
+					var line = object.newLine().code(`\(@standardLibrary ? '__ksStd_types' : '__ksType'): [`)
 
 					for var { type }, index in exportingTypes {
 						line.code($comma) if index > 0
@@ -560,6 +568,10 @@ export class Module {
 			line.code(`} = require("\(name)")`)
 
 			line.done()
+		}
+
+		if @libSTDType || ?#@libSTDUsages {
+			@body._statements[0]._declarators[0].toLibSTDFragments(@libSTDType, @libSTDUsages, mark)
 		}
 
 		return fragments.toArray()

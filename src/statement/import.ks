@@ -231,10 +231,12 @@ abstract class Importer extends Statement {
 			}
 
 			if @typeTested {
-				@typeTestName = @recipient().authority().getTypeTestVariable()
+				@typeTestName = @standardLibrary ? '__ksStd_types' : @recipient().authority().getTypeTestVariable()
 
 				for var { def, type } in types {
-					type.setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
+					type
+						..setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
+						..flagStandardLibrary() if @standardLibrary
 				}
 
 				@count += 1
@@ -1242,6 +1244,27 @@ abstract class Importer extends Statement {
 				}
 			}
 		}
+	} # }}}
+	toLibSTDFragments(type: Boolean, usages: String[], fragments) { # {{{
+		var line = fragments.newLine().code('const {')
+
+		for var name, index in usages {
+			line
+				..code(', ') if index > 0
+				..code(`__ksStd_\(name.substr(0, 1).toLowerCase())`)
+		}
+
+		if type {
+			line
+				..code(', ') if ?#usages
+				..code(`__ksStd_types`)
+		}
+
+		line.code('} = ')
+
+		@toRequireFragments(line)
+
+		line.done()
 	} # }}}
 	toNodeFileFragments(fragments, destructuring) { # {{{
 		if @count == 0 {

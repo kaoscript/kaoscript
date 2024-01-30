@@ -144,12 +144,14 @@ class AliasType extends Type {
 		canBeDeferred
 		canBeRawCasted
 		extractFunction
+		flagStandardLibrary
 		hasProperty
 		hasRest
 		isComplex
 		isEnum
 		isExportable
 		isReferenced
+		isStandardLibrary
 		isVariant
 		isView
 		toAwareTestFunctionFragments

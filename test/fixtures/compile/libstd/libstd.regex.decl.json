@@ -1,0 +1,187 @@
+[
+  {
+    "aliens": [
+      0,
+      "RegExp",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "RegExp",
+      2,
+      "RegExpExecArray"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": true,
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "source": {
+            "access": 4,
+            "type": "String",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "global": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "ignoreCase": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "multiline": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "exec": [
+            {
+              "libstd": true,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "str",
+                  "internal": "str",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "index",
+                  "internal": "index",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTAsImNvbHVtbiI6MzZ9LCJlbmQiOnsibGluZSI6MTAsImNvbHVtbiI6Mzd9fQ=="
+                }
+              ],
+              "returns": {
+                "reference": 2
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "test": [
+            {
+              "libstd": true,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "str",
+                  "internal": "str",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toString": [
+            {
+              "libstd": true,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            {
+              "kind": "array",
+              "rest": "String?"
+            },
+            {
+              "kind": "object",
+              "properties": {
+                "index": "Number",
+                "input": "String"
+              }
+            }
+          ]
+        },
+        "testIndex": 0
+      }
+    ],
+    "macros": []
+  }
+]

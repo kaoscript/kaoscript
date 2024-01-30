@@ -371,6 +371,10 @@ class FusionType extends Type {
 			else {
 				fragments.code(@testName)
 			}
+
+			if @standardLibrary {
+				node.module().flagLibSTDType()
+			}
 		}
 		else {
 			super(varname, nullable, casting, blind, generics, subtypes, fragments, node)

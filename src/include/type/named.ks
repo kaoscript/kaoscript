@@ -91,12 +91,21 @@ class NamedType extends Type {
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => @sealedName ?? `__ks_\(@name)`
+	getSealedName(standardLibrary) => standardLibrary ? `__ksStd_\(@name.substr(0, 1).toLowerCase())` : @getSealedName()
 	getSealedPath() { # {{{
 		if ?@container {
-			return `\(@container.path()).\(this.getSealedName())`
+			return `\(@container.path()).\(@getSealedName())`
 		}
 		else {
-			return this.getSealedName()
+			return @getSealedName()
+		}
+	} # }}}
+	getSealedPath(standardLibrary) { # {{{
+		if ?@container {
+			return `\(@container.path()).\(@getSealedName(standardLibrary))`
+		}
+		else {
+			return @getSealedName(standardLibrary)
 		}
 	} # }}}
 	getTestIndex() => @type.getTestIndex()
@@ -631,7 +640,7 @@ class NamedType extends Type {
 	} # }}}
 	useSealedName(module: Module) { # {{{
 		if module.isStandardLibrary() {
-			@sealedName = `LibSTD_\(@name.substr(0, 1).toLowerCase())`
+			@sealedName = `__ksStd_\(@name.substr(0, 1).toLowerCase())`
 		}
 		else {
 			@sealedName = `__ks_\(@name)`

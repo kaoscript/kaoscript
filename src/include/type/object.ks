@@ -1262,6 +1262,10 @@ class ObjectType extends Type {
 			else {
 				fragments.code(@testName)
 			}
+
+			if @standardLibrary {
+				node.module().flagLibSTDType()
+			}
 		}
 		else {
 			if @length == 0 && !@rest && !nullable && !@variant {

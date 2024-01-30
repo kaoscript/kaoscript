@@ -766,6 +766,7 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	getSealedPath() => @type().getSealedPath()
+	getSealedPath(standardLibrary) => @type().getSealedPath(standardLibrary)
 	getSubtypes(): AltType[] => @subtypes
 	getSubtypesCount(): Number => @subtypes.length
 	hashCode(fattenNull: Boolean = false): String { # {{{

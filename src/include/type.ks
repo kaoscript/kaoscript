@@ -1070,6 +1070,7 @@ abstract class Type {
 	isNullable() => false
 	isNullable(generics: AltType[]?) => @isNullable()
 	isObject() => false
+	isStandardLibrary(): Boolean => @standardLibrary
 	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary
 	isPlaceholder() => false
 	isPredefined() => false

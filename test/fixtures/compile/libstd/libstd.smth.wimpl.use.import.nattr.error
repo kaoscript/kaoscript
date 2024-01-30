@@ -1,0 +1,1 @@
+ReferenceException: The class method "length" can't be found in the class "Object" (fixtures/compile/libstd/libstd.smth.wimpl.use.import.nattr.ks:2)
