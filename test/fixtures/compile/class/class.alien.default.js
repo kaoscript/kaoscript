@@ -1,5 +1,4 @@
 module.exports = function() {
-	var __ks_ClassA = {};
 	class ClassB extends ClassA {
 		constructor(x, y) {
 			super(x, y);
@@ -28,7 +27,7 @@ module.exports = function() {
 	}
 	return {
 		ClassA,
-		__ks_ClassA,
+		__ks_ClassA: {},
 		ClassB,
 		ClassC
 	};

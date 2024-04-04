@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = require("../_/._array.last.ks.ri6kvh.ksb")(__ks_Array).__ks_Array;
+	var __ks_Array = require("../_/._array.last.ks.ri6kvh.ksb")({}).__ks_Array;
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

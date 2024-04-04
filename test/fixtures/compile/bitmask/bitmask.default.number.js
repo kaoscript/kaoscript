@@ -5,7 +5,7 @@ module.exports = function() {
 		return printAnimalAbilities.__ks_rt(this, arguments);
 	};
 	printAnimalAbilities.__ks_0 = function(animal) {
-		const animalFlags = animal.flags.value;
+		const animalFlags = Helper.assert(animal.flags.value, "\"Number\"", 0, Type.isNumber);
 		if((animalFlags & AnimalFlags.HasClaws.value) !== 0) {
 			console.log("animal has claws");
 		}

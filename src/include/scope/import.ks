@@ -57,9 +57,7 @@ class ImportScope extends BlockScope {
 	override resolveReference(name, explicitlyNull, parameters, subtypes) { # {{{
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
-		if @references[hash] is not ReferenceType {
-			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
-		}
+		@references[hash] ??= ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 
 		return @references[hash]
 	} # }}}

@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern console
 
 import '../require/require.alt.roe.math.pi.default.ks'

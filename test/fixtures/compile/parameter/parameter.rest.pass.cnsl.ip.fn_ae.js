@@ -40,7 +40,7 @@ module.exports = function(expect) {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		a.foobar.apply(a, Helper.checkArray(values));
+		a.foobar(...Helper.checkArray(values));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

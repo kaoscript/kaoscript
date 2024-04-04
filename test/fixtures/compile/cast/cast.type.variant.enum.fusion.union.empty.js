@@ -19,7 +19,7 @@ module.exports = function() {
 				return Type.isDexObject(value, 0, 0, {age: Type.isNumber});
 			}
 			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorites: value => Type.isArray(value, value => __ksType.isSchoolPerson(value, cast, value => value === PersonKind.Student) || __ksType.isParent(value))});
+				return Type.isDexObject(value, 0, 0, {favorites: value => Type.isArray(value, value => __ksType.isParent(value))});
 			}
 			return true;
 		}}),

@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_SyntaxError = {};
+	const __ks_SyntaxError = {};
 	__ks_SyntaxError.__ks_func_foo_0 = function() {
 		return "bar";
 	};

@@ -19,6 +19,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -162,15 +163,13 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       },
       {
         "kind": "class",
         "original": 0,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -190,7 +189,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzUsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6MzUsImNvbHVtbiI6MjR9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzcsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6MzcsImNvbHVtbiI6MjR9fQ=="
                 }
               ],
               "returns": "Any?",
@@ -274,9 +273,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ]

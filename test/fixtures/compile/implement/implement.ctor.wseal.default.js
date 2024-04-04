@@ -1,6 +1,6 @@
 const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_new_0 = function(...args) {
 		return __ks_Date.__ks_cons_0.call(new Date(), ...args);
 	};
@@ -47,7 +47,6 @@ module.exports = function() {
 	const d3 = __ks_Date.__ks_new_1("2000-01-01");
 	const d4 = __ks_Date.__ks_new_2(2000);
 	return {
-		Date,
 		__ks_Date
 	};
 };

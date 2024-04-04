@@ -12,12 +12,14 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 10,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
-        "exhaustive": false,
+        "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -37,12 +39,14 @@
       },
       {
         "kind": "class",
+        "libstd": 26,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -50,7 +54,7 @@
         "staticMethods": {
           "entries": [
             {
-              "index": 0,
+              "index": 1,
               "access": 4,
               "sealed": false,
               "async": false,
@@ -96,7 +100,7 @@
           ],
           "keys": [
             {
-              "index": 0,
+              "index": 1,
               "access": 4,
               "sealed": false,
               "async": false,
@@ -132,6 +136,7 @@
             }
           ]
         },
+        "features": 8,
         "generics": [
           {
             "name": "V"
@@ -145,9 +150,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ]
@@ -162,8 +164,10 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 10,
         "original": 0,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -183,9 +187,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

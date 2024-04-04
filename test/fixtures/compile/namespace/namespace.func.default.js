@@ -5,7 +5,7 @@ module.exports = function() {
 			return toString.__ks_rt(this, arguments);
 		};
 		toString.__ks_0 = function(value) {
-			return value.toString();
+			return Helper.assertString(value.toString(), 0);
 		};
 		toString.__ks_rt = function(that, args) {
 			const t0 = Type.isNumber;

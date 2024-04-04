@@ -33,6 +33,7 @@
         "sealed": false,
         "system": false,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},

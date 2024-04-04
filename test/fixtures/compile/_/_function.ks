@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 #[rules(non-exhaustive)]
 extern system class Function {
 	toString(): String

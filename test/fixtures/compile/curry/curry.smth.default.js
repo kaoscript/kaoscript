@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
 	class Message {
 		static __ks_new_0() {
 			const o = Object.create(Message.prototype);

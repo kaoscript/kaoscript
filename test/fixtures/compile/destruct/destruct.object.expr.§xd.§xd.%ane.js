@@ -1,4 +1,4 @@
-const {Helper, OBJ} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo() {
 		return foo.__ks_rt(this, arguments);
@@ -19,7 +19,7 @@ module.exports = function() {
 	};
 	let bar = 0;
 	let baz;
-	({bar, baz} = foo.__ks_0());
+	({bar, baz} = Helper.assert(foo.__ks_0(), "\"{bar: Any, baz: Any}\"", 0, value => Type.isDexObject(value, 1, 0, {bar: Type.isValue, baz: Type.isValue})));
 	console.log(bar);
 	console.log(baz);
 };

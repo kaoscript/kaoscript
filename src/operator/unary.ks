@@ -27,10 +27,14 @@ class UnaryOperatorExpression extends Expression {
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	private late {
 		@canBeNullable: Boolean		= false
+		@fitting: Boolean			= false
 		@helper: Boolean			= false
 		@notNull: Boolean			= false
 		@notNullOperator: String?
 		@nullable: Boolean			= false
+		@object: Boolean			= false
+		@reusable: Boolean			= false
+		@reuseName: String?			= null
 		@type: Type
 	}
 	override analyse() { # {{{
@@ -48,6 +52,28 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		target = @amendTarget(target)
 
 		super(target, targetMode)
+
+		if @argument is UnaryOperatorTypeFitting && @argument.isForced() {
+			var type = @argument.argument().type()
+
+			if type.isArray() {
+				@type = type.flagSpread().setNullable(false)
+			}
+			else if type.isObject() {
+				@type = type.flagSpread().setNullable(false)
+				@object = true
+			}
+			else if type.canBeArray() {
+				@type = @scope.reference('Array').flagSpread()
+			}
+			else {
+				TypeException.throwInvalidSpread(this)
+			}
+
+			@fitting = true
+
+			return
+		}
 
 		var type = @argument.type()
 
@@ -68,12 +94,21 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			@type = type.flagSpread().setNullable(false)
 			@helper = @nullable && @parent is ArrayExpression
 		}
+		else if type.isObject() {
+			@type = type.flagSpread().setNullable(false)
+			@object = true
+		}
 		else if type.canBeArray() {
 			@type = @scope.reference('Array').flagSpread()
 			@helper = true
 		}
 		else {
 			TypeException.throwInvalidSpread(this)
+		}
+	} # }}}
+	acquireReusable(acquire) { # {{{
+		if acquire && !@helper && @argument.isComposite() {
+			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
 	amendTarget(target: Type): Type { # {{{
@@ -86,24 +121,60 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		@notNullOperator = operator
 	} # }}}
 	isExpectingType() => true
+	override isFitting() => @fitting
 	isSpread() => true
 	operator() => @canBeNullable ? '...?' : '...'
+	releaseReusable() { # {{{
+		@scope.releaseTempName(@reuseName) if ?@reuseName
+	} # }}}
 	override toArgumentFragments(fragments, mode) { # {{{
-		if @nullable {
+		if @object {
+			NotSupportedException.throw(this)
+		}
+		else if @nullable {
 			fragments
 				.code(`...\($runtime.helper(this)).toArray(`)
-				.compile(@argument)
+				.compileReusable(this)
 				.code(`, \(@helper ? '1' : '0'))`)
 		}
 		else if @helper {
 			fragments
 				.code(`...\($runtime.helper(this)).checkArray(`)
-				.compile(@argument)
+				.compileReusable(this)
 				.code(`)`)
 		}
 		else {
-			fragments.code('...').wrap(@argument)
+			fragments.code('...').wrapReusable(this)
 		}
+	} # }}}
+	override toArgumentFragments(fragments, property, mode) { # {{{
+		NotSupportedException.throw(this) unless @object
+
+		@toReusableFragments(fragments)
+
+		if $isVarname(property) {
+			fragments.code(`.\(property)`)
+		}
+		else {
+			fragments.code(`[\($quote(property))]`)
+		}
+	} # }}}
+	override toArgumentFragments(fragments, member, mode) { # {{{
+		@toReusableFragments(fragments)
+
+		fragments.code(`[\(member)]`)
+	} # }}}
+	toArgumentFragments(fragments, from: Number, to: Number?, mode: Mode?) { # {{{
+		@toReusableFragments(fragments)
+
+		fragments
+			..code(`.slice(\(from)`)
+			..code(`, \(to + 1)`) if ?to
+			..code(')')
+	} # }}}
+	// TODO! when removed, method should not be hidden
+	override toArgumentFragments(fragments, type, mode) { # {{{
+		@toArgumentFragments(fragments, mode)
 	} # }}}
 	override toFlatArgumentFragments(nullTested, fragments, _) { # {{{
 		if !nullTested && @nullable {
@@ -123,17 +194,33 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		}
 	} # }}}
 	toFragments(fragments, mode) { # {{{
-		if @nullable {
+		if ?@reuseName {
+			fragments.code(`...\(@reuseName)`)
+		}
+		else if @nullable {
 			NotSupportedException.throw(this)
 		}
 		else {
 			fragments.code('...').wrap(@argument)
 		}
 	} # }}}
-	toTypeQuote() { # {{{
-		var type = @type.parameter(0)
+	toReusableFragments(fragments) { # {{{
+		if ?@reuseName {
+			if @reusable {
+				fragments.code(`\(@reuseName)`)
+			}
+			else {
+				fragments.code(`(\(@reuseName) = `).compile(@argument).code(`)`)
 
-		return `\(@operator())\(type.toQuote())`
+				@reusable = true
+			}
+		}
+		else {
+			fragments.compile(@argument)
+		}
+	} # }}}
+	toTypeQuote() { # {{{
+		return `\(@operator())\(@type.toQuote())`
 	} # }}}
 	type() => @type
 	useHelper() => @helper

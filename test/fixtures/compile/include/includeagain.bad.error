@@ -1,1 +1,1 @@
-SyntaxException: Identifier "String" has already been declared (fixtures/compile/_/_string.ks:1)
+SyntaxException: Identifier "String" has already been declared (fixtures/compile/_/_string.ks:7)

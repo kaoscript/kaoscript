@@ -449,6 +449,9 @@ export class SyntaxException extends Exception {
 		throwDuplicateMethod(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The method "\(name)" is matching an existing method`, node)
 		} # }}}
+		throwDuplicateNamedArgument(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The named argument "\(name)" is given at least 2 times`, node)
+		} # }}}
 		throwExcessiveRequirement(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The import don't require the argument "\(name)"`, node)
 		} # }}}
@@ -592,9 +595,6 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwInvalidFinallyReturn(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`No "return" statements are allowed in a "finally" block`, node)
-		} # }}}
-		throwInvalidForcedTypeCasting(node): Never ~ SyntaxException { # {{{
-			throw SyntaxException.new(`The forced type casting "!!" can't determine the expected type`, node)
 		} # }}}
 		throwInvalidFunctionReturn(function, expectedReturn, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Function "\(function)" is expected to return the type "\(expectedReturn)"`, node)
@@ -760,6 +760,9 @@ export class SyntaxException extends Exception {
 		throwNotCompatibleConstructor(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Parent's constructor of class "\(name)" can't be called`, node)
 		} # }}}
+		throwNotEmptyInstantiation(name, node): Never ~ SyntaxException { # {{{
+			throw SyntaxException.new(`The instantation of the class "\(name)" mustn't have any arguments`, node)
+		} # }}}
 		throwNotEnoughStructFields(node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`There is not enough fields to create the struct`, node)
 		} # }}}
@@ -900,9 +903,6 @@ export class TypeException extends Exception {
 		throwExpectedType(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression "\(expression)" is expected to be of type "\(type)"`, node)
 		} # }}}
-		throwInvalidInstantiation(name, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`Class "\(name)" can't be instantiated`, node)
-		} # }}}
 		throwImplFieldToSealedType(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`impl can add field to only non-sealed type`, node)
 		} # }}}
@@ -957,6 +957,12 @@ export class TypeException extends Exception {
 		throwInvalidCasting(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`Only variables can be casted`, node)
 		} # }}}
+		throwInvalidClassInstanceMethod(name: String, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`Class "\(name)" doesn't support instance methods`, node)
+		} # }}}
+		throwInvalidClassStaticMethod(name: String, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`Class "\(name)" doesn't support static methods`, node)
+		} # }}}
 		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(left.toQuote(true)) of type \(left.toTypeQuote(true)) can't be compared to a value of type \(right.toTypeQuote(true))`, node)
 		} # }}}
@@ -994,7 +1000,7 @@ export class TypeException extends Exception {
 			throw TypeException.new(`The parameter \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
 		} # }}}
 		throwInvalidSpread(node): Never ~ TypeException { # {{{
-			throw TypeException.new(`Spread operator require an array`, node)
+			throw TypeException.new(`Spread operator require an array or an object`, node)
 		} # }}}
 		throwInvalidTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(expression.type().discardValue().toQuote(true)) can never be of type \(type.toQuote(true))`, node)
@@ -1098,6 +1104,9 @@ export class TypeException extends Exception {
 		throwUnexpectedExpression(expression, target, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) is expected to be of type \(target.toQuote(true))`, node)
 		} # }}}
+		throwUnexpectedForcedTypeFitting(expected, unexpected, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The forced type fitting "!!" must be compatible with \(expected.toQuote(true)) and not be of type \(unexpected.toQuote(true))`, node)
+		} # }}}
 		throwUnexpectedInoperative(operand, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)
 		} # }}}
@@ -1112,6 +1121,9 @@ export class TypeException extends Exception {
 		} # }}}
 		throwUnnecessaryTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) is always of type \(type.toQuote(true))`, node)
+		} # }}}
+		throwUnknownForcedTypeFitting(node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The forced type fitting "!!" can't determine the expected type`, node)
 		} # }}}
 	}
 }

@@ -1,1 +1,1 @@
-TypeException: The argument "Array" of the module "../require/require.alt.roe.array.ks" must have an unmodified type (fixtures/compile/import/import.roe.ir.wa.before.inline.ks:7)
+TypeException: The argument "Array" of the module "../require/require.alt.roe.array.ks" must have an unmodified type (fixtures/compile/import/import.roe.ir.wa.before.inline.ks:9)

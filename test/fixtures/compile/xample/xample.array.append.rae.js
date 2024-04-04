@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_func_append_0 = function(args) {
 		for(let i = 0; i < args.length; ++i) {
 			if(Type.isArray(args[i])) {

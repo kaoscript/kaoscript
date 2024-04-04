@@ -27,5 +27,5 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let x;
-	foo.__ks_0(x = bar.__ks_0());
+	foo.__ks_0(x = Helper.assertNumber(bar.__ks_0(), 0));
 };

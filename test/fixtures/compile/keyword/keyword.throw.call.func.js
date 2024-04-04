@@ -39,7 +39,7 @@ module.exports = function() {
 		throw new Error("Expecting \"" + expected + "\"");
 	};
 	__ks_throw_1.__ks_1 = function(expecteds) {
-		throw new Error(Helper.concatString("Expecting \"", expecteds.join("\", \""), "\""));
+		throw new Error("Expecting \"" + expecteds.join("\", \"") + "\"");
 	};
 	__ks_throw_1.__ks_rt = function(that, args) {
 		const t0 = Type.isString;

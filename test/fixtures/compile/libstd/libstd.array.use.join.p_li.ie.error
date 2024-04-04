@@ -1,0 +1,1 @@
+ReferenceException: The instance method "join" of the class "Array" can't be matched to given arguments (Number) (fixtures/compile/libstd/libstd.array.use.join.p_li.ie.ks:4)

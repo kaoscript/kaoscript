@@ -1,6 +1,6 @@
 const {Helper, initFlag, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_get_timezone = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);

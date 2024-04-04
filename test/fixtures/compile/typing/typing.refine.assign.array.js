@@ -8,7 +8,7 @@ module.exports = function() {
 	foo.__ks_0 = function(x, values) {
 		if(Type.isArray(x)) {
 			console.log(__ks_Array.__ks_func_last_0.call(x));
-			if(values[x = __ks_Array.__ks_func_last_0.call(x)] === true) {
+			if(values[x = Helper.assert(__ks_Array.__ks_func_last_0.call(x), "\"Any\"", 0, Type.isValue)] === true) {
 				console.log(x.last());
 			}
 			else {

@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import '../require/require.alt.roi.system.ks'
 
 import './import.roi.rr.ks'(Array)

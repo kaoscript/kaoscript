@@ -1,12 +1,11 @@
-const {Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
 		if(find.length === 0) {
 			return this.valueOf();
 		}
-		if(Operator.lte(find.length, 3)) {
+		if(find.length <= 3) {
 			return this.split(find).join(replacement);
 		}
 		else {

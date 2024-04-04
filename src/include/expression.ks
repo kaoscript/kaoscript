@@ -51,6 +51,7 @@ abstract class Expression extends AbstractNode {
 	isExit(mode: ExitMode): Boolean => false
 	// if the expression can be an assignment and the variable has a defined type
 	isExpectingType(): Boolean => false
+	isFitting(): Boolean => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable(): Boolean => false
 	isImmutableValue(): Boolean => false
@@ -86,6 +87,7 @@ abstract class Expression extends AbstractNode {
 	// if the expression should be skipped or not
 	isSkippable(): Boolean => false
 	isSpread(): Boolean => false
+	isSpreadable(): Boolean => true
 	isUndisruptivelyNullable(): Boolean => @isNullable() && !@isDisrupted()
 	// if the expression is the given instance variable
 	isUsingInstanceVariable(name): Boolean => false
@@ -132,6 +134,21 @@ abstract class Expression extends AbstractNode {
 	} # }}}
 	toArgumentFragments(fragments, mode: Mode = Mode.None) { # {{{
 		@toFragments(fragments, mode)
+	} # }}}
+	toArgumentFragments(fragments, member: Number, mode: Mode = Mode.None) { # {{{
+		@toArgumentFragments(fragments, mode)
+
+		fragments.code(`[\(member)]`)
+	} # }}}
+	toArgumentFragments(fragments, property: String, mode: Mode = Mode.None) { # {{{
+		@toArgumentFragments(fragments, mode)
+
+		if $isVarname(property) {
+			fragments.code(`.\(property)`)
+		}
+		else {
+			fragments.code(`[\($quote(property))]`)
+		}
 	} # }}}
 	toArgumentFragments(fragments, type: Type, mode: Mode = Mode.None) { # {{{
 		@toArgumentFragments(fragments, mode)

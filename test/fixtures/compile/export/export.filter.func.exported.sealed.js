@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Foobar = {};
+	const __ks_Foobar = {};
 	__ks_Foobar.__ks_func_foo_0 = function() {
 	};
 	__ks_Foobar._im_foo = function(that, ...args) {

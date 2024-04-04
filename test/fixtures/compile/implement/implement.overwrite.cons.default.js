@@ -1,6 +1,6 @@
 const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_new_3 = function(...args) {
 		return __ks_Date.__ks_cons_3(...args);
 	};
@@ -52,7 +52,6 @@ module.exports = function() {
 	const d2 = new Date(d1);
 	const d3 = __ks_Date.__ks_new_3(2000, 1, 1);
 	return {
-		Date,
 		__ks_Date
 	};
 };

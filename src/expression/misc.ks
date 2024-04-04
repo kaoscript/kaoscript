@@ -1,27 +1,42 @@
-class TempReusableExpression extends Expression {
+class TempAssertExpression extends Expression {
 	private {
-		@count: Number			= 0
 		@value
+		@reusable: Boolean		= false
+		@reuseName: String?		= null
+		@type
 	}
-	constructor(@value, parent) { # {{{
+	constructor(@value, @type, parent) { # {{{
 		super({}, parent)
 	} # }}}
 	analyse()
 	override prepare(target, targetMode)
 	translate()
-	isComputed() => @count == 0 && @value is not String && @value.isComposite()
-	toFragments(fragments, mode) { # {{{
-		if @value is String {
-			fragments.code(@value)
+	acquireReusable(acquire) { # {{{
+		if acquire {
+			@reuseName = @scope.acquireTempName()
 		}
-		else if @count == 0 && @value.isComposite() {
-			fragments.compileReusable(@value)
+	} # }}}
+	isComposite() => !@reusable && ?@reuseName
+	isComputed() => true
+	releaseReusable() { # {{{
+		if ?@reuseName {
+			@scope.releaseTempName(@reuseName)
+		}
+	} # }}}
+	toFragments(fragments, mode) { # {{{
+		if @reusable {
+			fragments.code(@reuseName)
 		}
 		else {
-			fragments.compile(@value)
+			@type.toAssertFragments(@value, fragments, @parent)
 		}
+	} # }}}
+	toReusableFragments(fragments) { # {{{
+		fragments
+			.code(@reuseName, $equals)
+			.compile(this)
 
-		@count += 1
+		@reusable = true
 	} # }}}
 }
 
@@ -85,5 +100,32 @@ class TempMemberExpression extends Expression {
 			.compile(this)
 
 		@reusable = true
+	} # }}}
+}
+
+class TempReusableExpression extends Expression {
+	private {
+		@count: Number			= 0
+		@value
+	}
+	constructor(@value, parent) { # {{{
+		super({}, parent)
+	} # }}}
+	analyse()
+	override prepare(target, targetMode)
+	translate()
+	isComputed() => @count == 0 && @value is not String && @value.isComposite()
+	toFragments(fragments, mode) { # {{{
+		if @value is String {
+			fragments.code(@value)
+		}
+		else if @count == 0 && @value.isComposite() {
+			fragments.compileReusable(@value)
+		}
+		else {
+			fragments.compile(@value)
+		}
+
+		@count += 1
 	} # }}}
 }

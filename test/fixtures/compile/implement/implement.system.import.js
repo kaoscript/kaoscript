@@ -1,7 +1,7 @@
 require("kaoscript/register");
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
-	if(!Type.isValue(__ks_Date)) {
+	if(!__ks_Date) {
 		var __ks_Date = require("../_/._date.ks.j5k8r9.ksb")().__ks_Date;
 	}
 	__ks_Date.__ks_sttc_today_0 = function() {

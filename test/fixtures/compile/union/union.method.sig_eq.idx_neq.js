@@ -75,7 +75,7 @@ module.exports = function() {
 		return foo.__ks_rt(this, arguments);
 	};
 	foo.__ks_0 = function(x, y) {
-		const z = Type.isClassInstance(y, Foo) ? y.__ks_func_y_0(x) : y.__ks_func_y_1(x);
+		const z = Type.isClassInstance(y, Bar) ? y.__ks_func_y_1(x) : y.__ks_func_y_0(x);
 		console.log(z);
 	};
 	foo.__ks_rt = function(that, args) {

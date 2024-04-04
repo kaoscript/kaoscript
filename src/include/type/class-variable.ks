@@ -94,6 +94,9 @@ class ClassVariableType extends Type {
 		@type = @type.setNullable(true)
 	} # }}}
 	hasDefaultValue() => @default
+	override isExportable() { # {{{
+		return @type.isExportable()
+	} # }}}
 	isImmutable() => @final
 	isLateInit() => @lateInit
 	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @final)

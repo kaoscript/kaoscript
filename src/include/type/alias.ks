@@ -144,7 +144,7 @@ class AliasType extends Type {
 		canBeDeferred
 		canBeRawCasted
 		extractFunction
-		flagStandardLibrary
+		getStandardLibrary
 		hasProperty
 		hasRest
 		isComplex
@@ -154,6 +154,7 @@ class AliasType extends Type {
 		isStandardLibrary
 		isVariant
 		isView
+		setStandardLibrary
 		toAwareTestFunctionFragments
 		toNegativeTestFragments
 		toPositiveTestFragments

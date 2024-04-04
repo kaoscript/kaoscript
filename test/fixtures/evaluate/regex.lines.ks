@@ -1,14 +1,5 @@
 require expect: func
 
-type RegExpExecArray = Array<String?> & {
-    index: Number
-    input: String
-}
-
-disclose String {
-	match(regexp: RegExp): RegExpExecArray?
-}
-
 func filter(match: RegExpExecArray): Array<String> {
 	var result = []
 

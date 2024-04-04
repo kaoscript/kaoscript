@@ -1,5 +1,7 @@
 class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	private late {
+		@assert: Boolean		= false
+		@assertion				= null
 		@condition: Boolean		= false
 		@ignorable: Boolean		= false
 		@lateinit: Boolean		= false
@@ -13,11 +15,12 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		super(target, TargetMode.Permissive)
 
 		var rightType = @right.type().discardValue()
+		var forcedFitting = @right is UnaryOperatorTypeFitting && @right.isForced()
 
 		if @condition && @lateinit {
 			@statement.initializeLateVariable(@left.name(), rightType, true)
 		}
-		else {
+		else if !forcedFitting {
 			@left.initializeVariables(rightType, this)
 		}
 
@@ -26,9 +29,13 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		if @isInDestructor() {
 			@type = NullType.Explicit
 		}
-		else {
+		else if !forcedFitting {
 			unless rightType.isAssignableToVariable(@type, true, false, false) {
 				TypeException.throwInvalidAssignment(@left, @type, rightType, this)
+			}
+
+			if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(@type, false, false, false) {
+				@assert = true
 			}
 
 			if @left.isInferable() {
@@ -37,7 +44,15 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		@right.acquireReusable(@left.isSplitAssignment())
+		var split = @left.isSplitAssignment()
+
+		if @assert && ?@left.toAssignmentFragments {
+			@assertion = TempAssertExpression.new(@right, @type, this)
+				..acquireReusable(split)
+		}
+		else {
+			@right.acquireReusable(split)
+		}
 	} # }}}
 	defineVariables(left) { # {{{
 		if @condition {
@@ -110,7 +125,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		return false
 	} # }}}
 	releaseReusable() { # {{{
-		@right.releaseReusable()
+		(@assertion ?? @right).releaseReusable()
 	} # }}}
 	toFragments(fragments, mode) { # {{{
 		if @right.isAwaiting() {
@@ -119,20 +134,37 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		else if @left.isUsingSetter() {
 			@left.toSetterFragments(fragments, @right)
 		}
+		else if @assert {
+			fragments.compile(@left).code($equals)
+
+			@type.toAssertFragments(@right, fragments, this)
+		}
 		else {
 			fragments.compile(@left).code($equals).compile(@right)
 		}
 	} # }}}
 	toAssignmentFragments(fragments) { # {{{
 		if ?@left.toAssignmentFragments {
-			@left.toAssignmentFragments(fragments, @right)
+			@left.toAssignmentFragments(fragments, @assertion ?? @right)
+		}
+		else if @assert {
+			fragments.compile(@left).code($equals)
+
+			@type.toAssertFragments(@right, fragments, this)
 		}
 		else {
 			fragments.compile(@left).code($equals).compile(@right)
 		}
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
-		fragments.compile(@left).code($equals).wrap(@right)
+		if @assert {
+			fragments.compile(@left).code($equals)
+
+			@type.toAssertFragments(@right, fragments, this)
+		}
+		else {
+			fragments.compile(@left).code($equals).wrap(@right)
+		}
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 	type() => @parent is AssignmentOperatorEquals ? @type : Type.Void

@@ -1,4 +1,4 @@
-const {Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
@@ -7,7 +7,7 @@ module.exports = function() {
 		let value = null;
 		let i = 0;
 		const l = args.length;
-		while(Operator.lt(i, l) && !Type.isArray(value = args[i])) {
+		while((i < l) && !Type.isArray(value = args[i])) {
 			i += 1;
 		}
 		if(Type.isArray(value)) {

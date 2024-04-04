@@ -17,8 +17,8 @@
           "properties": {
             "values": {
               "kind": "object",
-              "nullable": true,
-              "rest": "String"
+              "rest": "String",
+              "nullable": true
             }
           }
         },

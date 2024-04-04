@@ -9,19 +9,21 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 26,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
         "instanceMethods": {
           "replace": [
             {
-              "index": 0,
+              "index": 1,
               "access": 4,
               "sealed": false,
               "async": false,
@@ -47,9 +49,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ]
@@ -62,8 +61,10 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 26,
         "original": 0,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -103,9 +104,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

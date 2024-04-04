@@ -17,6 +17,7 @@ class PreciseMethodCallee extends MethodCallee {
 		@proxy = matches[0].function.isProxy()
 	} # }}}
 	override buildHashCode() => `method:\(@property):\(@index):\(@alien):\(@instance):\(Callee.buildPositionHash(@positions))`
+	getTestType() => @objectType
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			match @scope {
@@ -77,59 +78,92 @@ class PreciseMethodCallee extends MethodCallee {
 			}
 			ScopeKind.This {
 				if @curries.length == 1 {
-					fragments.code($runtime.helper(node), '.curry(')
-
 					var [type, map] = @curries[0]
-
-					var assessment = type.assessment('<router>', node)
-
-					fragments.code(`(that, fn, `)
-
-					if assessment.labelable {
-						fragments.code('kws, ')
-					}
-
-					var blockRouter = fragments.code(`...args) =>`).newBlock()
-
-					Router.toFragments(
-						(function, line) => {
-							line.code(`fn[0](`)
-
-							return false
-						}
-						null
-						assessment
-						blockRouter
-						node
-					)
-
-					blockRouter.done()
-
-					fragments.code($comma)
-
-					fragments.code('(')
-
-					for var _, index in type.parameters() {
-						fragments.code($comma) if index != 0
-
-						fragments.code(`__ks_\(index)`)
-					}
-
-					fragments.code(') => ')
-
-					if @alien {
-						fragments.compile(@object).code(`.\(@property)(`)
-					}
-					else if @instance {
-						fragments.compile(@object).code(`.__ks_func_\(@property)_\(@index)(`)
-					}
-					else {
-						fragments.compile(@object).code(`.__ks_sttc_\(@property)_\(@index)(`)
-					}
-
 					var arguments = @node.arguments()
 
-					for var { parameter, value?, values? }, index in map {
+					if #arguments == 1 && arguments[0].type().isPlaceholder() && arguments[0].type().isRest() {
+						var reference = @object.type().reference()
+						var { type % root, generics } = reference.getGenericMapper()
+						var generic = root.isGenericInstanceMethod(@property)
+
+						if type.isUsingAuxiliary() {
+							fragments
+								.code(`\($runtime.helper(node)).bindAuxiliaryMethod(\(@objectType.type().getSealedName()), `)
+								.code('"').compile(@property).code('"')
+								.code($comma).compile(@object)
+						}
+						else {
+							fragments
+								.code(`\($runtime.helper(node)).bindMethod(`)
+								.compile(@object)
+								.code($comma)
+								.code('"').compile(@property).code('"')
+						}
+
+						if generic {
+							fragments.code(`, {`)
+
+							for var { name, type }, index in generics {
+								fragments
+									..code(`, `) if index > 0
+									..code(`\(name): `)
+
+								type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
+							}
+
+							fragments.code(`}`)
+						}
+					}
+					else {
+						fragments.code($runtime.helper(node), '.curry(')
+
+						var assessment = type.assessment('<router>', node)
+
+						fragments.code(`(that, fn, `)
+
+						if assessment.labelable {
+							fragments.code('kws, ')
+						}
+
+						var blockRouter = fragments.code(`...args) =>`).newBlock()
+
+						Router.toFragments(
+							(function, line) => {
+								line.code(`fn[0](`)
+
+								return false
+							}
+							null
+							assessment
+							blockRouter
+							node
+						)
+
+						blockRouter.done()
+
+						fragments.code($comma)
+
+						fragments.code('(')
+
+						for var _, index in type.parameters() {
+							fragments.code($comma) if index != 0
+
+							fragments.code(`__ks_\(index)`)
+						}
+
+						fragments.code(') => ')
+
+						if @alien {
+							fragments.compile(@object).code(`.\(@property)(`)
+						}
+						else if @instance {
+							fragments.compile(@object).code(`.__ks_func_\(@property)_\(@index)(`)
+						}
+						else {
+							fragments.compile(@object).code(`.__ks_sttc_\(@property)_\(@index)(`)
+						}
+
+						for var { parameter, value?, values? }, index in map {
 							fragments.code($comma) if index != 0
 
 							if ?value {
@@ -156,11 +190,10 @@ class PreciseMethodCallee extends MethodCallee {
 
 								fragments.code(']')
 							}
-							else {
-							}
 						}
 
-					fragments.code(')')
+						fragments.code(')')
+					}
 				}
 				else {
 					fragments
@@ -250,13 +283,21 @@ class PreciseMethodCallee extends MethodCallee {
 		}
 		else {
 			var { function, positions } = @matches[0]
-			var curry = CurryExpression.toCurryType(function, positions, true, @node)
+			var [type, map] = CurryExpression.toCurryType(function, positions, true, @node)
 
-			curry[0].index(function.index())
+			type.index(function.index())
 
-			@curries.push(curry)
+			if function.isAlien() {
+				var arguments = @node.arguments()
 
-			return curry[0]
+				if #arguments == 1 && arguments[0].type().isPlaceholder() && arguments[0].type().isRest() && type.isUsingAuxiliary() {
+					type.flagAlien()
+				}
+			}
+
+			@curries.push([type, map])
+
+			return type
 		}
 	} # }}}
 	toPositiveTestFragments(fragments, node) { # {{{

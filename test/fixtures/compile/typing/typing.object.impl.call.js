@@ -3,7 +3,7 @@ module.exports = function() {
 	const __ksType = {
 		isT: value => Type.isDexObject(value, 1, 0, {PI: Type.isNumber})
 	};
-	var __ks_Number = {};
+	const __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function() {
 		return "00" + this.toString();
 	};

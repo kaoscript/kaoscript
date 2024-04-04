@@ -34,8 +34,6 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let  __ks_0 = foobar.__ks_0();
-	Helper.assertDexObject(__ks_0, 0, 0, {ok: Type.isBoolean});
-	let {ok} = __ks_0;
+	let {ok} = foobar.__ks_0();
 	ok = true;
 };

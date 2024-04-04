@@ -1,6 +1,6 @@
 const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_sttc_merge_0 = function(args) {
 		let i = 0;
 		let l = args.length;

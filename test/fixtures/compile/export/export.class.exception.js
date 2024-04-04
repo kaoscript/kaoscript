@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Error = {};
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);

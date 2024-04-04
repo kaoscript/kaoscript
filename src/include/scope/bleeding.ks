@@ -89,7 +89,7 @@ class BleedingScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if ?variable {
-				return variable!!
+				return variable
 			}
 		}
 

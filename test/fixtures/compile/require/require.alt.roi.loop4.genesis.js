@@ -1,9 +1,9 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_String) {
-	if(!Type.isValue(__ks_Array)) {
+	if(!__ks_Array) {
 		__ks_Array = {};
 	}
-	if(!Type.isValue(__ks_String)) {
+	if(!__ks_String) {
 		__ks_String = {};
 	}
 	__ks_Array.__ks_func_last_0 = function(index) {

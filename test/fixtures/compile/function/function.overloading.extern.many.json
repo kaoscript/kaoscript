@@ -18,13 +18,17 @@
               {
                 "external": "value",
                 "internal": "value",
-                "type": "Array",
+                "type": {
+                  "reference": 1
+                },
                 "min": 1,
                 "max": 1,
                 "default": false
               }
             ],
-            "returns": "Array",
+            "returns": {
+              "reference": 1
+            },
             "errors": []
           },
           {
@@ -44,12 +48,39 @@
             "errors": []
           }
         ]
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generics": [
+          {
+            "name": "T"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       }
     ]
   },
   {
     "exports": [
-      1,
+      2,
       "reverse"
     ],
     "references": [

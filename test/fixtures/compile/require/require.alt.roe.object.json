@@ -13,17 +13,29 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 26,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
-        "exhaustive": false,
+        "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
         "instanceMethods": {},
         "staticMethods": {},
+        "features": 8,
+        "generics": [
+          {
+            "name": "V",
+            "type": "Any!?"
+          },
+          {
+            "name": "K"
+          }
+        ],
         "origin": 16,
         "sequences": [
           -1,

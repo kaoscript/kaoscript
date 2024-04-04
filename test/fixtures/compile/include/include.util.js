@@ -75,18 +75,16 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	var __ks_Array = {};
-	var __ks_Object = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_sttc_merge_0 = function(args) {
 		const l = args.length;
-		let source = [];
+		let source = null;
 		let i = 0;
-		while(i < l) {
-			if(Type.isArray(args[i])) {
-				source = args[i];
-				break;
-			}
+		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
 			i += 1;
+		}
+		if(!Type.isArray(source)) {
+			return [];
 		}
 		i += 1;
 		while(i < l) {
@@ -242,8 +240,8 @@ module.exports = function() {
 		}
 		return this;
 	};
-	__ks_Array.__ks_func_sort_0 = function(compareFn) {
-		TimSort.sort(this, compareFn);
+	__ks_Array.__ks_func_sort_1 = function(compare) {
+		TimSort.sort(this, compare);
 		return this;
 	};
 	__ks_Array._sm_merge = function() {
@@ -253,9 +251,6 @@ module.exports = function() {
 		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
 		}
-		if(Array.merge) {
-			return Array.merge(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._sm_same = function() {
@@ -264,9 +259,6 @@ module.exports = function() {
 			if(t0(arguments[0]) && t0(arguments[1])) {
 				return __ks_Array.__ks_sttc_same_0(arguments[0], arguments[1]);
 			}
-		}
-		if(Array.same) {
-			return Array.same(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -292,9 +284,6 @@ module.exports = function() {
 				return __ks_Array.__ks_func_any_0.call(that, args[0]);
 			}
 		}
-		if(that.any) {
-			return that.any(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_clear = function(that, ...args) {
@@ -304,9 +293,6 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_clear_0.call(that);
 		}
-		if(that.clear) {
-			return that.clear(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_clone = function(that, ...args) {
@@ -315,9 +301,6 @@ module.exports = function() {
 	__ks_Array.__ks_func_clone_rt = function(that, args) {
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_clone_0.call(that);
-		}
-		if(that.clone) {
-			return that.clone(...args);
 		}
 		throw Helper.badArgs();
 	};
@@ -333,9 +316,6 @@ module.exports = function() {
 				return __ks_Array.__ks_func_contains_0.call(that, args[0], Helper.getVararg(args, 1, pts[1]));
 			}
 		}
-		if(that.contains) {
-			return that.contains(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_intersection = function(that, ...args) {
@@ -347,9 +327,6 @@ module.exports = function() {
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_func_intersection_0.call(that, Helper.getVarargs(args, 0, pts[1]));
-		}
-		if(that.intersection) {
-			return that.intersection(...args);
 		}
 		throw Helper.badArgs();
 	};
@@ -364,9 +341,6 @@ module.exports = function() {
 			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
 				return __ks_Array.__ks_func_last_0.call(that, Helper.getVararg(args, 0, pts[1]));
 			}
-		}
-		if(that.last) {
-			return that.last(...args);
 		}
 		throw Helper.badArgs();
 	};
@@ -389,14 +363,12 @@ module.exports = function() {
 		const t0 = Type.isValue;
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return __ks_Array.__ks_func_sort_0.call(that, args[0]);
+				return __ks_Array.__ks_func_sort_1.call(that, args[0]);
 			}
-		}
-		if(that.sort) {
-			return that.sort(...args);
 		}
 		throw Helper.badArgs();
 	};
+	const __ks_Object = {};
 	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(Type.isFunction(object.clone)) {
 			return object.clone();
@@ -490,9 +462,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Object.clone) {
-			return Object.clone(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object._sm_defaults = function() {
@@ -501,9 +470,6 @@ module.exports = function() {
 		let pts;
 		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Object.__ks_sttc_defaults_0(Helper.getVarargs(arguments, 0, pts[1]));
-		}
-		if(Object.defaults) {
-			return Object.defaults(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -515,9 +481,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_delete_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Object.delete) {
-			return Object.delete(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object._sm_isEmpty = function() {
@@ -526,9 +489,6 @@ module.exports = function() {
 			if(t0(arguments[0])) {
 				return __ks_Object.__ks_sttc_isEmpty_0(arguments[0]);
 			}
-		}
-		if(Object.isEmpty) {
-			return Object.isEmpty(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -540,9 +500,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_key_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Object.key) {
-			return Object.key(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object._sm_length = function() {
@@ -551,9 +508,6 @@ module.exports = function() {
 			if(t0(arguments[0])) {
 				return __ks_Object.__ks_sttc_length_0(arguments[0]);
 			}
-		}
-		if(Object.length) {
-			return Object.length(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -564,9 +518,6 @@ module.exports = function() {
 			if(t0(arguments[0]) && t1(arguments[1])) {
 				return __ks_Object.__ks_sttc_map_0(arguments[0], arguments[1]);
 			}
-		}
-		if(Object.map) {
-			return Object.map(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -580,9 +531,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_same_0(arguments[0], arguments[1]);
 			}
 		}
-		if(Object.same) {
-			return Object.same(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object._sm_value = function() {
@@ -592,9 +540,6 @@ module.exports = function() {
 			if(t0(arguments[0]) && t1(arguments[1])) {
 				return __ks_Object.__ks_sttc_value_0(arguments[0], arguments[1]);
 			}
-		}
-		if(Object.value) {
-			return Object.value(...arguments);
 		}
 		throw Helper.badArgs();
 	};
@@ -612,9 +557,6 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_dasherize_0.call(that);
 		}
-		if(that.dasherize) {
-			return that.dasherize(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_String._im_toFirstLowerCase = function(that, ...args) {
@@ -623,9 +565,6 @@ module.exports = function() {
 	__ks_String.__ks_func_toFirstLowerCase_rt = function(that, args) {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_toFirstLowerCase_0.call(that);
-		}
-		if(that.toFirstLowerCase) {
-			return that.toFirstLowerCase(...args);
 		}
 		throw Helper.badArgs();
 	};

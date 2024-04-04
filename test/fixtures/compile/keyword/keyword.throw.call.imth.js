@@ -56,7 +56,7 @@ module.exports = function() {
 			throw new Error("Expecting \"" + expected + "\"");
 		}
 		__ks_func_throw_1(expecteds) {
-			throw new Error(Helper.concatString("Expecting \"", expecteds.join("\", \""), "\""));
+			throw new Error("Expecting \"" + expecteds.join("\", \"") + "\"");
 		}
 		__ks_func_throw_rt(that, proto, args) {
 			const t0 = Type.isString;
@@ -77,7 +77,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(event) {
-			this.throw.apply(this, [].concat(event.value));
+			this.throw(...Helper.toArray(event.value, 1));
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = value => Type.isStructInstance(value, Event);

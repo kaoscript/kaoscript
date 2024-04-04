@@ -217,7 +217,7 @@ namespace Unbounded {
 			}
 
 			// TODO remove forced casting
-			from = to!!
+			from = to:!!(Any)!!
 		}
 
 		return unbounded

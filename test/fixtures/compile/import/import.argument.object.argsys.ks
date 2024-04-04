@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require system class String
 
 func corge(): Number => 42

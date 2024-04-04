@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
+	const __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function(length) {
 		return __ks_String._im_lpad(this.toString(), length, "0");
 	};
@@ -16,7 +16,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_lpad_0 = function(length, pad) {
 		return pad.repeat(length - this.length) + this;
 	};

@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_equals_0 = function(value) {
 		return this.getTime() === value.getTime();
 	};

@@ -49,13 +49,14 @@ export class Compiler {
 		registerTarget(target: String, fn: Function) { # {{{
 			$targets[target] = fn
 		} # }}}
-		registerTarget(mut target: String, options: Object) { # {{{
-			if target !?= $targetRegex.exec(target) {
+		registerTarget(target: String, options: Object) { # {{{
+			if var match ?= $targetRegex.exec(target) {
+				$targets[match[1]] ??= {}
+				$targets[match[1]][match[2]] = options
+			}
+			else {
 				throw Error.new(`Invalid target syntax: \(target)`)
 			}
-
-			$targets[target[1]] ??= {}
-			$targets[target[1]][target[2]] = options
 		} # }}}
 		registerTargets(targets) { # {{{
 			for var data, name of targets {
@@ -67,28 +68,30 @@ export class Compiler {
 				}
 			}
 		} # }}}
-		registerTargetAlias(mut target: String, mut alias: String) { # {{{
-			if alias !?= $targetRegex.exec(alias) {
-				if !?$targets[alias] || $targets[alias] is not Function {
+		registerTargetAlias(target: String, alias: String) { # {{{
+			if var aliasMatch ?= $targetRegex.exec(alias) {
+				var targetMatch = $targetRegex.exec(target)
+
+				if !?targetMatch {
+					throw Error.new(`Invalid target syntax: \(target)`)
+				}
+
+				if !?$targets[aliasMatch[1]] {
+					throw Error.new(`Undefined target '\(aliasMatch[1])'`)
+				}
+				else if !?$targets[aliasMatch[1]][aliasMatch[2]] {
+					throw Error.new(`Undefined target's version '\(aliasMatch[2])'`)
+				}
+
+				$targets[targetMatch[1]] ??= {}
+				$targets[targetMatch[1]][targetMatch[2]] = $targets[aliasMatch[1]][aliasMatch[2]]
+			}
+			else {
+				if $targets[alias] is not Function {
 					throw Error.new(`Invalid target syntax: \(alias)`)
 				}
 
 				$targets[target] = $targets[alias]
-			}
-			else {
-				if target !?= $targetRegex.exec(target) {
-					throw Error.new(`Invalid target syntax: \(target)`)
-				}
-
-				if !?$targets[alias[1]] {
-					throw Error.new(`Undefined target '\(alias[1])'`)
-				}
-				else if !?$targets[alias[1]][alias[2]] {
-					throw Error.new(`Undefined target's version '\(alias[2])'`)
-				}
-
-				$targets[target[1]] ??= {}
-				$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
 			}
 		} # }}}
 	}

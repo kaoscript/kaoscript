@@ -7,9 +7,6 @@ module.exports = function() {
 		if(arguments.length === 0) {
 			return __ks_Object.__ks_sttc_foobar_0();
 		}
-		if(Object.foobar) {
-			return Object.foobar(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 };

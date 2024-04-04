@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (...{values: [Number, Number, Number]}) (fixtures/compile/op.spread/op.spread.nnil.func.rse.rl=olie.ks:4)

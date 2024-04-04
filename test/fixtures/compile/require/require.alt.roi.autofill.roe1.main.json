@@ -25,6 +25,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -45,6 +46,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -61,6 +63,7 @@
         "kind": "class",
         "original": 0,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -120,7 +123,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjQ3fSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTF9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxMCwiY29sdW1uIjo0N30sImVuZCI6eyJsaW5lIjoxMCwiY29sdW1uIjo1MX19"
                 }
               ],
               "returns": "Boolean",
@@ -151,7 +154,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjQ5fSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6NTN9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxMSwiY29sdW1uIjo0OX0sImVuZCI6eyJsaW5lIjoxMSwiY29sdW1uIjo1M319"
                 }
               ],
               "returns": "Void",
@@ -182,7 +185,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTAsImNvbHVtbiI6NDV9LCJlbmQiOnsibGluZSI6MTAsImNvbHVtbiI6NDZ9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTIsImNvbHVtbiI6NDV9LCJlbmQiOnsibGluZSI6MTIsImNvbHVtbiI6NDZ9fQ=="
                 }
               ],
               "returns": "Number",
@@ -207,7 +210,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo1OSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOiIsIiwic3RhcnQiOnsibGluZSI6MTEsImNvbHVtbiI6Mjd9LCJlbmQiOnsibGluZSI6MTEsImNvbHVtbiI6MzB9fQ=="
+                  "defaultValue": "eyJraW5kIjo1OSwibW9kaWZpZXJzIjpbXSwidmFsdWUiOiIsIiwic3RhcnQiOnsibGluZSI6MTMsImNvbHVtbiI6Mjd9LCJlbmQiOnsibGluZSI6MTMsImNvbHVtbiI6MzB9fQ=="
                 }
               ],
               "returns": {
@@ -277,7 +280,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTUsImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6MTUsImNvbHVtbiI6MjV9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTcsImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6MTcsImNvbHVtbiI6MjV9fQ=="
                 },
                 {
                   "external": "end",
@@ -287,7 +290,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjQzfX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjE3LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjE3LCJjb2x1bW4iOjQzfX0="
                 }
               ],
               "returns": "Any?",
@@ -318,7 +321,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjo0Nn0sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjo1MH19"
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0Nn0sImVuZCI6eyJsaW5lIjoxOCwiY29sdW1uIjo1MH19"
                 }
               ],
               "returns": "Boolean",
@@ -341,7 +344,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNywiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjoxNywiY29sdW1uIjozMn19"
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxOSwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjoxOSwiY29sdW1uIjozMn19"
                 }
               ],
               "returns": {
@@ -374,7 +377,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjE4LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjE4LCJjb2x1bW4iOjQzfX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjIwLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjIwLCJjb2x1bW4iOjQzfX0="
                 },
                 {
                   "external": "items",
@@ -442,7 +445,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6NDYsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NDYsImNvbHVtbiI6MjR9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6NDgsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NDgsImNvbHVtbiI6MjR9fQ=="
                 }
               ],
               "returns": "Any?",
@@ -457,15 +460,13 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       },
       {
         "kind": "class",
         "original": 1,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -600,7 +601,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MjksImNvbHVtbiI6NDZ9LCJlbmQiOnsibGluZSI6MjksImNvbHVtbiI6NDd9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzEsImNvbHVtbiI6NDZ9LCJlbmQiOnsibGluZSI6MzEsImNvbHVtbiI6NDd9fQ=="
                 }
               ],
               "returns": "Number",
@@ -633,7 +634,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzAsImNvbHVtbiI6NTB9LCJlbmQiOnsibGluZSI6MzAsImNvbHVtbiI6NTF9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzIsImNvbHVtbiI6NTB9LCJlbmQiOnsibGluZSI6MzIsImNvbHVtbiI6NTF9fQ=="
                 }
               ],
               "returns": "Number",
@@ -757,7 +758,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM0LCJjb2x1bW4iOjQ3fSwiZW5kIjp7ImxpbmUiOjM0LCJjb2x1bW4iOjQ5fX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM2LCJjb2x1bW4iOjQ3fSwiZW5kIjp7ImxpbmUiOjM2LCJjb2x1bW4iOjQ5fX0="
                 }
               ],
               "returns": {
@@ -791,7 +792,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo0OH19"
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNywiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjozNywiY29sdW1uIjo0OH19"
                 },
                 {
                   "external": "limit",
@@ -801,7 +802,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM1LCJjb2x1bW4iOjY2fSwiZW5kIjp7ImxpbmUiOjM1LCJjb2x1bW4iOjY4fX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM3LCJjb2x1bW4iOjY2fSwiZW5kIjp7ImxpbmUiOjM3LCJjb2x1bW4iOjY4fX0="
                 }
               ],
               "returns": {
@@ -835,7 +836,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM2LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjM2LCJjb2x1bW4iOjQzfX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM4LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjM4LCJjb2x1bW4iOjQzfX0="
                 }
               ],
               "returns": {
@@ -868,7 +869,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM3LCJjb2x1bW4iOjUxfSwiZW5kIjp7ImxpbmUiOjM3LCJjb2x1bW4iOjUzfX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM5LCJjb2x1bW4iOjUxfSwiZW5kIjp7ImxpbmUiOjM5LCJjb2x1bW4iOjUzfX0="
                 }
               ],
               "returns": {
@@ -963,7 +964,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NTIsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTIsImNvbHVtbiI6MzV9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NTQsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTQsImNvbHVtbiI6MzV9fQ=="
                 }
               ],
               "returns": {
@@ -981,9 +982,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ]

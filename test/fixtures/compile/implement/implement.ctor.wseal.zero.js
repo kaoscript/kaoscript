@@ -1,5 +1,5 @@
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_new_0 = function() {
 		return __ks_Date.__ks_cons_0.call(new Date(), );
 	};
@@ -15,7 +15,6 @@ module.exports = function() {
 	};
 	const d = __ks_Date.__ks_new_0();
 	return {
-		Date,
 		__ks_Date
 	};
 };

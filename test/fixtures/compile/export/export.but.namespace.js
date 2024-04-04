@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
 	let Float = Helper.namespace(function() {
 		function toFloat() {
 			return toFloat.__ks_rt(this, arguments);

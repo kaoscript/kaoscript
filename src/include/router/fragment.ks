@@ -6,7 +6,7 @@ namespace Fragment {
 			tester(type: Type): String
 		}
 
-		func buildHelper(fragments: MarkWriter, args: String, node: AbstractNode): FragmentHelper { # {{{
+		func buildHelper(fragments: MarkWriter, args: String, hasDeferred: Boolean, node: AbstractNode): FragmentHelper { # {{{
 			var allArgsMark = fragments.mark()
 			var pointsMark = allArgsMark.mark()
 
@@ -38,7 +38,7 @@ namespace Fragment {
 
 					return `pts`
 				}
-				tester: getTester^$(context, fragments, node, ^)
+				tester: getTester^$(context, hasDeferred, fragments, node, ^)
 			}
 		} # }}}
 
@@ -156,7 +156,8 @@ namespace Fragment {
 						if parameter.isOnlyLabeled() && ?labels[parameter.getExternalName()] {
 							line.code(`kws.\(parameter.getExternalName())`)
 
-							todoLabels.remove(parameter.getExternalName())
+							// TODO! remove type signalment
+							todoLabels:!!(Array).remove(parameter.getExternalName())
 
 							if !?#todoLabels && !varargs {
 								break
@@ -218,7 +219,14 @@ namespace Fragment {
 		} # }}}
 	}
 
-	func getTester(this, fragments: MarkWriter, node: AbstractNode, type: Type): String { # {{{
+	func getMin(node: TreeBranch): Number { # {{{
+		var mins = [column.min + getMin(column) for var column of node.columns]
+
+		return Math.max(...mins)
+	} # }}}
+	func getMin(node: TreeLeaf): Number => 0
+
+	func getTester(this, hasDeferred: Boolean, fragments: MarkWriter, node: AbstractNode, type: Type): String { # {{{
 		var hash = type.hashCode(true)
 
 		if var name ?= this.testers[hash] {
@@ -233,7 +241,7 @@ namespace Fragment {
 
 		line.code(`\($runtime.immutableScope(node))\(name) = `)
 
-		type.toAwareTestFunctionFragments('value', false, false, false, null, null, line, node)
+		type.toAwareTestFunctionFragments('value', false, hasDeferred, false, false, null, null, line, node)
 
 		line.done()
 
@@ -284,6 +292,7 @@ namespace Fragment {
 
 	func toCallFragments(buildPath: PathBuilder, args: String, tree: Tree, leaf: TreeLeaf, fragments, node: AbstractNode): Void { # {{{
 		var { function, arguments } = leaf
+		var alien = function.isAlien()
 		var async = function.isAsync()
 		var parameters = function.parameters()
 		var scope = node.scope()
@@ -323,7 +332,9 @@ namespace Fragment {
 			if !((anyTested || type.isAny()) && type.isNullable()) {
 				if from.variadic || to.variadic || to.index - from.index > 5 {
 					if varargs {
-						line.code(`\($runtime.helper(node)).getVarargs(\(args)`)
+						line
+							.code('...') if alien
+							.code(`\($runtime.helper(node)).getVarargs(\(args)`)
 					}
 					else {
 						line.code(`\($runtime.helper(node)).getVararg(\(args)`)
@@ -377,7 +388,9 @@ namespace Fragment {
 			else {
 				if from.variadic || to.variadic {
 					if varargs {
-						line.code(`\($runtime.helper(node)).getVarargs(\(args)`)
+						line
+							.code('...') if alien
+							.code(`\($runtime.helper(node)).getVarargs(\(args)`)
 					}
 					else {
 						line.code(`\($runtime.helper(node)).getVararg(\(args)`)
@@ -548,7 +561,11 @@ namespace Fragment {
 			}
 			else {
 				var late max
-				if branch.max == Infinity {
+
+				if branch.dynamicMax {
+					max = `\($runtime.helper(node)).getVarargMax(\(args), \(getMin(branch)), \(helper.points()), \(startIndex), \(branch.max))`
+				}
+				else if branch.max == Infinity {
 					if tree.min > 0 {
 						max = `\(args).length - \(tree.min - branch.min)`
 					}

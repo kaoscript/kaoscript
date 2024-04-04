@@ -10,11 +10,12 @@
       {
         "kind": "class",
         "abstract": false,
-        "alien": false,
+        "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -39,6 +40,7 @@
         "kind": "class",
         "original": 0,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -58,7 +60,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6NCwiY29sdW1uIjoyM30sImVuZCI6eyJsaW5lIjo0LCJjb2x1bW4iOjI0fX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6NiwiY29sdW1uIjoyM30sImVuZCI6eyJsaW5lIjo2LCJjb2x1bW4iOjI0fX0="
                 }
               ],
               "returns": "Any?",

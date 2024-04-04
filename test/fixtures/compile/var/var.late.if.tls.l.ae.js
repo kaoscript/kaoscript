@@ -9,7 +9,7 @@ module.exports = function() {
 			values = [];
 		}
 		else {
-			values = result.values;
+			values = Helper.assertArray(result.values, 0);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

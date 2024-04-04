@@ -17,9 +17,38 @@
           "types": [
             "Any!",
             "Primitive",
-            "Array"
+            {
+              "reference": 1
+            }
           ]
         }
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generics": [
+          {
+            "name": "T"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       }
     ],
     "macros": []

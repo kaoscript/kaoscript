@@ -58,6 +58,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -207,9 +208,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       },
       {

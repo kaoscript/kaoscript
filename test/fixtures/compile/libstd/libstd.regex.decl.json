@@ -9,7 +9,7 @@
     "references": [
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 6,
         "abstract": false,
         "alien": true,
         "hybrid": false,
@@ -40,7 +40,7 @@
     "references": [
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 6,
         "original": 0,
         "exhaustive": true,
         "constructors": [],
@@ -82,7 +82,7 @@
         "instanceMethods": {
           "exec": [
             {
-              "libstd": true,
+              "libstd": 2,
               "index": 0,
               "access": 4,
               "sealed": false,
@@ -116,7 +116,7 @@
           ],
           "test": [
             {
-              "libstd": true,
+              "libstd": 2,
               "index": 0,
               "access": 4,
               "sealed": false,
@@ -138,7 +138,7 @@
           ],
           "toString": [
             {
-              "libstd": true,
+              "libstd": 2,
               "index": 0,
               "access": 4,
               "sealed": false,
@@ -156,9 +156,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       },
       {

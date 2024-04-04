@@ -1,4 +1,6 @@
-extern sealed class String
+#![libstd(off)]
+
+extern system class String
 
 disclose String {
 	length: Number

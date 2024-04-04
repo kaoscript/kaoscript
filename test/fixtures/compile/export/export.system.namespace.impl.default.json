@@ -7,7 +7,7 @@
       1,
       "Number",
       true,
-      2,
+      3,
       "Math",
       true
     ],
@@ -26,6 +26,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -37,7 +38,9 @@
               "sealed": false,
               "async": false,
               "parameters": [],
-              "returns": "String",
+              "returns": {
+                "reference": 2
+              },
               "errors": [],
               "inits": []
             }
@@ -49,17 +52,41 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
         "sharedMethods": {}
       },
       {
         "kind": "namespace",
+        "libstd": 26,
         "sealed": true,
         "system": true,
         "exhaustive": true,
         "properties": {
+          "E": {
+            "type": "Number",
+            "sealed": false
+          },
           "PI": {
             "reference": 1,
             "sealed": false
@@ -74,6 +101,643 @@
             },
             "errors": [],
             "sealed": false
+          },
+          "LN2": {
+            "type": "Number",
+            "sealed": false
+          },
+          "LN10": {
+            "type": "Number",
+            "sealed": false
+          },
+          "LOG2E": {
+            "type": "Number",
+            "sealed": false
+          },
+          "LOG10E": {
+            "type": "Number",
+            "sealed": false
+          },
+          "SQRT1_2": {
+            "type": "Number",
+            "sealed": false
+          },
+          "SQRT2": {
+            "type": "Number",
+            "sealed": false
+          },
+          "abs": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "acos": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "acosh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "asin": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "asinh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "atan": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "atanh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "atan2": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "a",
+                "internal": "a",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "external": "b",
+                "internal": "b",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "cbrt": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "ceil": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "clz32": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "cos": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "cosh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "exp": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "expm1": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "floor": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "fround": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "hypot": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Number?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "imul": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "a",
+                "internal": "a",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "external": "b",
+                "internal": "b",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "log": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "log1p": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "log10": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "log2": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "max": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Number?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "min": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Number?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "random": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "round": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "sign": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "sin": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "sinh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "sqrt": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "tan": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "tanh": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "trunc": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "external": "x",
+                "internal": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
           }
         }
       }
@@ -85,13 +749,14 @@
       "console",
       1,
       "Number",
-      3,
+      4,
       "Math"
     ],
     "references": [
       {
         "kind": "namespace",
-        "original": 2,
+        "libstd": 26,
+        "original": 3,
         "exhaustive": true,
         "properties": {
           "pi": {

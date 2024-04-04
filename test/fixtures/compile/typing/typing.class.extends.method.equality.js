@@ -81,7 +81,7 @@ module.exports = function() {
 		}
 		__ks_func_quxbaz_0() {
 			if(Type.isClassInstance(this._foobar, ClassX)) {
-				this._foobar = this._foobar.__ks_func_foobar_0();
+				this._foobar = Helper.assert(this._foobar.__ks_func_foobar_0(), "\"ClassA\"", 0, value => Type.isClassInstance(value, ClassA));
 			}
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {

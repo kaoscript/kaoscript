@@ -1,8 +1,8 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Object = {};
+	const __ks_Object = {};
 	__ks_Object.__ks_sttc_defaults_0 = function(args) {
-		return __ks_Object.__ks_sttc_merge_0([new OBJ(), ...args]);
+		return Helper.assertObject(__ks_Object.__ks_sttc_merge_0([new OBJ(), ...args]), 0);
 	};
 	__ks_Object.__ks_sttc_merge_0 = function(args) {
 		return new OBJ();
@@ -14,9 +14,6 @@ module.exports = function() {
 		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Object.__ks_sttc_defaults_0(Helper.getVarargs(arguments, 0, pts[1]));
 		}
-		if(Object.defaults) {
-			return Object.defaults(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object._sm_merge = function() {
@@ -25,9 +22,6 @@ module.exports = function() {
 		let pts;
 		if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Object.__ks_sttc_merge_0(Helper.getVarargs(arguments, 0, pts[1]));
-		}
-		if(Object.merge) {
-			return Object.merge(...arguments);
 		}
 		throw Helper.badArgs();
 	};

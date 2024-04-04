@@ -29,5 +29,4 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const __ks_ClassA = {};
 };

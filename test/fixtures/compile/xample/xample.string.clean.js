@@ -1,6 +1,6 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function(__ks_String) {
-	if(!Type.isValue(__ks_String)) {
+	if(!__ks_String) {
 		__ks_String = {};
 	}
 	__ks_String.__ks_func_clean_0 = function() {

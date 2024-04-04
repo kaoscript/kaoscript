@@ -31,7 +31,6 @@ module.exports = function(expect) {
 			throw Helper.badArgs();
 		}
 	}
-	const __ks_ClassA = {};
 	const a = ClassA.__ks_new_0();
 	const items = [];
 	function foobar() {

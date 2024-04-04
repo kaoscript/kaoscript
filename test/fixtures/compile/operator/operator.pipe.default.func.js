@@ -27,7 +27,7 @@ module.exports = function() {
 		}))(((score) => {
 			return __ks_double_1(score);
 		})(person.score)));
-		return newScore;
+		return Helper.assertNumber(newScore, 0);
 	};
 	getNewScore.__ks_rt = function(that, args) {
 		const t0 = value => Type.isDexObject(value, 1, 0, {score: Type.isNumber});

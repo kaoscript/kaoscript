@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require|import '../require/require.alt.roi.system.ks'
 
 impl Array {

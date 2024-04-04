@@ -1,4 +1,6 @@
-extern sealed class Array
+#![libstd(off)]
+
+extern system class Array
 
 impl Array {
 	static merge(...args) {
@@ -9,7 +11,7 @@ impl Array {
 		}
 
 		if i < l {
-			var source: Array = args[i]
+			var source = args[i]:!(Array)
 
 			i += 1
 

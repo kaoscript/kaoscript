@@ -1,4 +1,4 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
@@ -13,5 +13,5 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	let values = [];
-	values = [foobar.__ks_0()];
+	values = Helper.assert([foobar.__ks_0()], "\"Number[]\"", 0, value => Type.isArray(value, Type.isNumber));
 };

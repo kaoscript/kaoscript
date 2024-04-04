@@ -10,11 +10,12 @@
       {
         "kind": "class",
         "abstract": false,
-        "alien": false,
+        "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},

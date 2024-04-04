@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
 	function reverse() {
 		return reverse.__ks_rt(this, arguments);
 	};

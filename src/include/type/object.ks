@@ -5,7 +5,7 @@ class ObjectType extends Type {
 		@destructuring: Boolean			= false
 		@empty: Boolean					= false
 		@key: Boolean					= false
-		@keyType: Type?					= null
+		@keyType: Type
 		@length: Number					= 0
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
@@ -84,6 +84,11 @@ class ObjectType extends Type {
 			return type
 		} # }}}
 	}
+	constructor(@scope) { # {{{
+		super(scope)
+
+		@keyType = @scope.reference('String')
+	} # }}}
 	addProperty(name: String, computed: Boolean = false, type: Type) { # {{{
 		@properties[name] = type
 		@computed[name] = computed
@@ -122,7 +127,16 @@ class ObjectType extends Type {
 		}
 
 		if ?@keyType {
-			@keyType.buildGenericMap(position, expressions, value => decompose(value).getKeyType(), genericMap)
+			@keyType.buildGenericMap(position, expressions, (mut value) => {
+				value = decompose(value)
+
+				if value.hasKeyType() {
+					return value.getKeyType()
+				}
+				else {
+					return @scope.reference('String')
+				}
+			}, genericMap)
 		}
 	} # }}}
 	override canBeDeferred() => @buildFlags() && @testGenerics
@@ -506,6 +520,7 @@ class ObjectType extends Type {
 	} # }}}
 	isDestructuring() => @destructuring
 	isExhaustive() => !@rest || @scope.reference('Object').isExhaustive()
+	isFinite() => !@rest
 	assist isInstanceOf(value: AnyType, generics, subtypes) => false
 	isMorePreciseThan(value: AnyType) => true
 	isMorePreciseThan(value: ObjectType) { # {{{
@@ -814,6 +829,13 @@ class ObjectType extends Type {
 	isTestingProperties() => @buildFlags() && @testProperties
 	isVariant() => @variant
 	length(): valueof @length
+	assist limitTo(value: ReferenceType) { # {{{
+		if value.isObject() && @isNullable() && !value.isNullable() {
+			return @setNullable(false)
+		}
+
+		return this
+	} # }}}
 	listFunctions(name: String): Array { # {{{
 		var result = []
 
@@ -1213,14 +1235,16 @@ class ObjectType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node) { # {{{
 		@buildFlags()
 
 		nullable ||= @nullable
 
 		if ?@testName {
 			if nullable || ?#generics || (@variant && ?#subtypes) {
-				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+				fragments
+					.code('(') if hasDeferred
+					.code(`\(varname) => \(@testName)(\(varname)`)
 
 				if @testCast {
 					if casting {
@@ -1237,7 +1261,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, casting, blind, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, hasDeferred, casting, blind, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1255,15 +1279,20 @@ class ObjectType extends Type {
 				if nullable {
 					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 				}
+
+				fragments.code(')') if hasDeferred
 			}
 			else if casting && @testCast {
-				fragments.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
+				fragments
+					.code('(') if hasDeferred
+					.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
+					.code(')') if hasDeferred
 			}
 			else {
 				fragments.code(@testName)
 			}
 
-			if @standardLibrary {
+			if @standardLibrary ~~ .Yes {
 				node.module().flagLibSTDType()
 			}
 		}
@@ -1277,6 +1306,8 @@ class ObjectType extends Type {
 				}
 			}
 			else if @testRest || @testProperties || nullable || @variant || @testCast {
+				fragments.code('(') if hasDeferred
+
 				if @testCast || @variant {
 					fragments.code(`(\(varname)`)
 
@@ -1294,6 +1325,8 @@ class ObjectType extends Type {
 				}
 
 				@toBlindTestFragments(null, varname, @testCast, nullable, true, null, subtypes, Junction.NONE, fragments, node)
+
+				fragments.code(')') if hasDeferred
 			}
 			else {
 				if @destructuring {
@@ -1324,7 +1357,7 @@ class ObjectType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, ?propname, true, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, false, ?propname, true, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -1503,7 +1536,7 @@ class ObjectType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)
@@ -1540,7 +1573,7 @@ class ObjectType extends Type {
 		for var { type }, index in parameters {
 			fragments.code($comma) if index > 0
 
-			type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+			type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 		}
 
 		fragments.code(`])`)

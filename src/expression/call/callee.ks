@@ -60,6 +60,7 @@ abstract class Callee {
 	abstract translate()
 	abstract type(): Type
 	acquireReusable(acquire)
+	getTestType() => null
 	isComputed() => false
 	isNullable() => @nullable || @nullableProperty
 	isNullableComputed() => @nullable && @nullableProperty
@@ -68,6 +69,7 @@ abstract class Callee {
 		throw NotSupportedException.new()
 	} # }}}
 	releaseReusable()
+	shouldArgumentUseReusable(argument): Boolean => false
 	validate(type: FunctionType, node) { # {{{
 		for var error in type.listErrors() {
 			Exception.validateReportedError(error.discardReference(), node)
@@ -130,7 +132,7 @@ abstract class PreciseCallee extends Callee {
 	} # }}}
 	abstract buildHashCode(): String?
 	acquireReusable(acquire) { # {{{
-		@expression.acquireReusable(@flatten)
+		@expression.acquireReusable(acquire || @nullable || (@flatten && @scope == ScopeKind.This))
 	} # }}}
 	functions() => @functions
 	override hashCode() => @hash
@@ -145,6 +147,20 @@ abstract class PreciseCallee extends Callee {
 	} # }}}
 	releaseReusable() { # {{{
 		@expression.releaseReusable()
+	} # }}}
+	override shouldArgumentUseReusable(argument) { # {{{
+		for var position in @positions {
+			if position is Array {
+				for var { element?, property? } in position {
+					return true if ?element || ?property
+				}
+			}
+			else {
+				return true if ?position.element || ?position.property
+			}
+		}
+
+		return false
 	} # }}}
 	toNullableFragments(fragments, node) { # {{{
 		if @nullable {

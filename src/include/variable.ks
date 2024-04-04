@@ -31,6 +31,15 @@ class Variable {
 
 			return Variable.new(name, true, true, type)
 		} # }}}
+		createPredefinedNamespace(name: String, scope: Scope): Variable { # {{{
+			var type = NamespaceType.new(scope)
+				..flagAlien()
+				..flagComplete()
+				..flagPredefined()
+				..flagSystem()
+
+			return Variable.new(name, true, true, type)
+		} # }}}
 		fromAST(data, scope) { # {{{
 			match NodeKind(data.kind) {
 				NodeKind.Identifier {
@@ -112,7 +121,7 @@ class Variable {
 	isClassStatement() => @class
 	isComplete() => @complete
 	isDefinitive() => @definitive
-	isExportable() => !@standardLibrary || !@declaredType.isStandardLibrary(.Full)
+	isExportable() => !@standardLibrary || @declaredType.getStandardLibrary() ~~ .No | .Opened
 	isImmutable() => @immutable
 	isInitialized() => @initialized
 	isLateInit() => @lateInit

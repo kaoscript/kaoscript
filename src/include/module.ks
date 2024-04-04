@@ -206,7 +206,7 @@ export class Module {
 		@body.translate()
 
 		for var export, name of @exports {
-			if !export.type.isExportable(this) {
+			unless export.type.isExportable(this) {
 				ReferenceException.throwNotExportable(name, @body)
 			}
 		}
@@ -332,7 +332,7 @@ export class Module {
 	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { # {{{
 		var scope = @body.scope()
 
-		if arguments.length != 0 {
+		if ?#arguments {
 			var references = {}
 			var queue = []
 			var alterations = {}
@@ -385,7 +385,7 @@ export class Module {
 				}
 			}
 
-			while queue.length > 0 {
+			while #queue > 0 {
 				queue.shift()()
 			}
 
@@ -436,7 +436,7 @@ export class Module {
 			if @standardLibrary {
 				for var export, name of @exports {
 					if export.type.isExportingFragment() {
-						if export.type.isStandardLibrary(LibSTDMode.Partial) {
+						if export.type.isStandardLibrary(LibSTDMode.Yes) || export.type.hasAuxiliary() {
 							exportingFragments[name] = export
 						}
 					}
@@ -603,12 +603,13 @@ export class Module {
 		return @metaExports
 	} # }}}
 	toRequirements() { # {{{
-		if @metaRequirements == null {
+		if !?@metaRequirements {
 			@metaRequirements = {
 				aliens: []
 				requirements: []
 				references: []
 			}
+
 			for var type, name of @aliens {
 				@metaRequirements.aliens.push(
 					type.toMetadata(@metaRequirements.references, 0, ExportMode.Alien, this)
@@ -674,7 +675,7 @@ class ModuleBlock extends AbstractNode {
 		super()
 
 		@options = module._options
-		@scope = ModuleScope.new()
+		@scope = ModuleScope.new(@module.isStandardLibrary())
 	} # }}}
 	initiate() { # {{{
 		return unless @data.body.length > 0

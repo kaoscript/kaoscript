@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system class String
 
 disclose String {

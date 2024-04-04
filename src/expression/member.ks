@@ -924,6 +924,16 @@ class MemberExpression extends Expression {
 					@liberal = true
 					@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
 				}
+
+				if @type.isDeferrable() {
+					var objectType = @object.type()
+					var reference = objectType.reference()
+					var { generics? } = reference.getGenericMapper()
+
+					if ?generics {
+						@type = @type.applyGenerics(generics)
+					}
+				}
 			}
 			else if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 				@liberal = true
@@ -1212,25 +1222,65 @@ class MemberExpression extends Expression {
 				}
 			}
 			else if @prepareObject && @type.isMethod() && @parent is not ClassProxyDeclaration | ClassProxyGroupDeclaration {
-				fragments.code(`\($runtime.helper(this)).bindMethod(`)
+				var reference = type.reference()
+				// TODO!
+				// var { type % root, generics } = reference.getGenericMapper()
+				var { type % root, generics? } = reference.getGenericMapper()
+				var generic =
+					if root is ClassType {
+						set root.isGenericInstanceMethod(@property)
+					}
+					else {
+						set false
+					}
 
-				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
-					fragments.compile(@object)
-				}
-				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
-					fragments.code(type.getSealedName())
+				if @type.isUsingAuxiliary() {
+					fragments.code(`\($runtime.helper(this)).bindAuxiliaryMethod(\(reference.type().getSealedName()), `)
+
+					if @computed {
+						fragments.compile(property)
+					}
+					else {
+						fragments.code('"').compile(property).code('"')
+					}
+
+					fragments.code($comma).compile(@object)
 				}
 				else {
-					fragments.compile(@object)
+					fragments.code(`\($runtime.helper(this)).bindMethod(`)
+
+					if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
+						fragments.compile(@object)
+					}
+					else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
+						fragments.code(type.getSealedName())
+					}
+					else {
+						fragments.compile(@object)
+					}
+
+					fragments.code($comma)
+
+					if @computed {
+						fragments.compile(property)
+					}
+					else {
+						fragments.code('"').compile(property).code('"')
+					}
 				}
 
-				fragments.code($comma)
+				if generic {
+					fragments.code(`, {`)
 
-				if @computed {
-					fragments.compile(property)
-				}
-				else {
-					fragments.code('"').compile(property).code('"')
+					for var { name, type }, index in generics {
+						fragments
+							..code(`, `) if index > 0
+							..code(`\(name): `)
+
+						type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, this)
+					}
+
+					fragments.code(`}`)
 				}
 
 				fragments.code(')')

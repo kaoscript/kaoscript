@@ -1,11 +1,12 @@
 const {Helper, Type} = require("@kaoscript/runtime");
+const {__ksStd_a} = require("@kaoscript/runtime/src/libstd/.index.ks.j5k8r9.ksb")();
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(from === void 0 || from === null) {
 			from = 0;
 		}
-		return this.indexOf(item, from) !== -1;
+		return __ksStd_a._im_indexOf(this, {T: Type.any}, item, from) !== -1;
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(args) {
 		if(args.length === 1) {
@@ -25,14 +26,14 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_appendUniq_0 = function(args) {
 		if(args.length === 1) {
-			__ks_Array._im_pushUniq.apply(null, [this].concat(Helper.checkArray(args[0])));
+			__ks_Array._im_pushUniq(this, {T: Type.any}, ...Helper.checkArray(args[0]));
 		}
 		else {
 			let __ks_0, __ks_1, __ks_2, __ks_3;
-			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "args.length", args.length, Infinity, "", 1);
+			[__ks_0, __ks_1, __ks_2, __ks_3] = Helper.assertLoopBounds(0, "", 0, "", args.length, Infinity, "", 1);
 			for(let __ks_4 = __ks_0, i; __ks_4 < __ks_1; __ks_4 += __ks_2) {
 				i = __ks_3(__ks_4);
-				__ks_Array._im_pushUniq.apply(null, [this].concat(Helper.checkArray(args[i])));
+				__ks_Array._im_pushUniq(this, {T: Type.any}, ...Helper.checkArray(args[i]));
 			}
 		}
 		return this;
@@ -47,9 +48,6 @@ module.exports = function() {
 				return __ks_Array.__ks_func_contains_0.call(that, args[0], args[1]);
 			}
 		}
-		if(that.contains) {
-			return that.contains(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_pushUniq = function(that, ...args) {
@@ -62,9 +60,6 @@ module.exports = function() {
 		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_func_pushUniq_0.call(that, Helper.getVarargs(args, 0, pts[1]));
 		}
-		if(that.pushUniq) {
-			return that.pushUniq(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_appendUniq = function(that, ...args) {
@@ -76,9 +71,6 @@ module.exports = function() {
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_func_appendUniq_0.call(that, Helper.getVarargs(args, 0, pts[1]));
-		}
-		if(that.appendUniq) {
-			return that.appendUniq(...args);
 		}
 		throw Helper.badArgs();
 	};

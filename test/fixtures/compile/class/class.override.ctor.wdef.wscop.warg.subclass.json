@@ -20,6 +20,7 @@
         "sealed": false,
         "system": false,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [
           {
             "index": 0,
@@ -75,6 +76,7 @@
         "sealed": false,
         "system": false,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [
           {
             "index": 0,

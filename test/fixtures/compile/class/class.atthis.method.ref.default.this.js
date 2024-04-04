@@ -33,7 +33,7 @@ module.exports = function() {
 		}
 		__ks_func_quxbaz_0() {
 			const foobar = Helper.bindMethod(this, "foobar");
-			return foobar();
+			return foobar.__ks_0();
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {
 			if(args.length === 0) {

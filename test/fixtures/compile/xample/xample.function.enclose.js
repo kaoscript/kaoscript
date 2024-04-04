@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = {};
+	const __ks_Function = {};
 	__ks_Function.__ks_func_enclose_0 = function(enclosure) {
 		let f = this;
 		return Helper.function((args) => {

@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system class Array
 
 disclose Array {

@@ -1,7 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_RegExp = {};
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_foobar_0 = function() {
 		return this;
 	};
@@ -11,9 +10,6 @@ module.exports = function() {
 	__ks_String.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_foobar_0.call(that);
-		}
-		if(that.foobar) {
-			return that.foobar(...args);
 		}
 		throw Helper.badArgs();
 	};

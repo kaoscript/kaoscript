@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "String?" can't be assigned with a value of type "Number?" (fixtures/compile/generics/generics.extern.class_g.imth_#gn.func_wg<i>.var_sne.ks:6)

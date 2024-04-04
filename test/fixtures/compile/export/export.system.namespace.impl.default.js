@@ -1,7 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
-	var __ks_Math = {};
+	const __ks_Math = {};
 	__ks_Math.pi = Math.PI;
 	__ks_Math.foo = function() {
 		return __ks_Math.foo.__ks_rt(this, arguments);
@@ -16,7 +15,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	return {
-		__ks_Number,
+		__ks_Number: {},
 		__ks_Math
 	};
 };

@@ -64,7 +64,8 @@ class ClassProxyDeclaration extends Statement {
 		}
 		else {
 			@externalPath = `.\(path.slice(0, -1).join('.'))`
-			@externalName = path.last()
+			// TODO! remove type signalment
+			@externalName = path:!!(Array).last()
 		}
 
 		@type = @external.type()

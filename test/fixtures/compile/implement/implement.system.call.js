@@ -11,9 +11,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_length_0(arguments[0]);
 			}
 		}
-		if(Object.length) {
-			return Object.length(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	function length() {

@@ -143,6 +143,7 @@ class CallExpression extends Expression {
 
 			@object.makeMemberCallee(@property, @nullableTesting, null, this)
 
+			// TODO! test if method is modifing the object
 			if @matchingMode == .BestMatch {
 				@object.unspecify()
 			}
@@ -162,7 +163,7 @@ class CallExpression extends Expression {
 			@addCallee(DefaultCallee.new(@data, null, null, this))
 		}
 
-		if @callees.length == 1 {
+		if #@callees == 1 {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
 
@@ -171,6 +172,7 @@ class CallExpression extends Expression {
 		else {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
+			@callees = Type.sort(@callees, callee => callee.getTestType())
 
 			var types = [@callees[0].type()]
 
@@ -221,19 +223,20 @@ class CallExpression extends Expression {
 			@reuseName = @scope.acquireTempName()
 		}
 
-		if @callees.length == 1 {
+		if #@callees == 1 {
 			@callees[0].acquireReusable(acquire)
 		}
-		else if @callees.length > 1 {
+		else if #@callees > 1 {
 			for var callee in @callees to~ -1 {
 				callee.acquireReusable(true)
 			}
 
 			@callees.last().acquireReusable(acquire)
 		}
+		// echo(@callees)
 
 		for var argument in @arguments {
-			argument.acquireReusable(acquire)
+			argument.acquireReusable(@callees.some((callee, ...) => callee.shouldArgumentUseReusable(argument)))
 		}
 	} # }}}
 	addCallee(callee: Callee) { # {{{
@@ -507,18 +510,9 @@ class CallExpression extends Expression {
 			argument.unspecify()
 		}
 
-		if @options.format.spreads == 'es5' {
-			for var argument in @arguments until @flatten {
-				if argument.isSpread() {
-					@flatten = true
-				}
-			}
-		}
-		else {
-			for var argument in @arguments until @flatten {
-				if argument.isSpread() && !argument.argument().type().isArray() {
-					@flatten = true
-				}
+		for var argument in @arguments until @flatten {
+			if argument.isSpread() && !argument.isSpreadable() {
+				@flatten = true
 			}
 		}
 
@@ -638,12 +632,10 @@ class CallExpression extends Expression {
 		}
 	} # }}}
 	toCallFragments(fragments, mode) { # {{{
-		if @callees.length == 1 {
+		if #@callees == 1 {
 			@callees[0].toFragments(fragments, mode, this)
 		}
 		else {
-			@module().flag('Type')
-
 			for var callee in @callees to~ -1 {
 				callee.toPositiveTestFragments(fragments, this)
 
@@ -785,6 +777,8 @@ class NamedArgument extends Expression {
 	} # }}}
 	getDefaultValue() => 'void 0'
 	isAwait() => @value.isAwait()
+	isExpectingType() => true
+	override isFitting() => @value.isFitting()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	name() => @name
 	type() => @value.type()

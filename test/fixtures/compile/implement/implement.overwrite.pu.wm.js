@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_setDate_2 = function(value) {
 		this.setDate(value);
 		return this;
@@ -34,7 +34,6 @@ module.exports = function() {
 	const d = new Date();
 	foobar.__ks_0(__ks_Date.__ks_func_setDate_2.call(d, 1));
 	return {
-		Date,
 		__ks_Date
 	};
 };

@@ -32,7 +32,7 @@ module.exports = function() {
 			this._message = message;
 		}
 		__ks_cons_2(lines) {
-			Greetings.prototype.__ks_cons_rt.call(null, this, [lines.join("\n")]);
+			Greetings.prototype.__ks_cons_1.call(this, lines.join("\n"));
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isString;

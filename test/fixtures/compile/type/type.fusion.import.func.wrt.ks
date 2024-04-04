@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import './type.fusion.export.func.wrt.ks'
 
 extern console

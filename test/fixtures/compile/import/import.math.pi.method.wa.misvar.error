@@ -1,1 +1,1 @@
-TypeException: The variable "Math" and the argument "Math" of the module "../require/require.alt.roe.math.pi.default.ks" aren't compatible (fixtures/compile/import/import.math.pi.method.wa.misvar.ks:9)
+TypeException: The variable "Math" and the argument "Math" of the module "../require/require.alt.roe.math.pi.default.ks" aren't compatible (fixtures/compile/import/import.math.pi.method.wa.misvar.ks:11)

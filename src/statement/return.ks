@@ -1,11 +1,13 @@
 class ReturnStatement extends Statement {
 	private {
-		@await: Boolean			= false
+		@assert: Boolean		= false
 		@async: Boolean			= false
+		@await: Boolean			= false
 		@exceptions: Boolean	= false
 		@function				= null
 		@inline: Boolean		= false
 		@value					= null
+		@target: Type?			= null
 		@temp: String?			= null
 		@type: Type				= Type.Void
 	}
@@ -72,22 +74,35 @@ class ReturnStatement extends Statement {
 			else if target.isVoid() {
 				TypeException.throwUnexpectedReturnedValue(this) unless @type.isVoid()
 			}
-			else if !@type.isExplicit() && @type.isAny() {
-				pass
-			}
 			else if target.isValueOf() && target.isThisReference() {
 				if @value.toQuote() != 'this' {
 					TypeException.throwUnexpectedReturnType(target, @type, this)
 				}
 			}
-			else if @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+			else if target.isAny() && target.isNullable() {
 				pass
 			}
-			else if !target.isDeferred() && @type.isAssignableToVariable(target, true, false, false) {
+			else if @value is UnaryOperatorTypeFitting && @value.isForced() {
 				pass
 			}
 			else {
-				TypeException.throwUnexpectedReturnType(target, @type, this)
+				if @type.isAny() && !@type.isExplicit() {
+					pass
+				}
+				else if @type.isSubsetOf(target, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
+					pass
+				}
+				else if !target.isDeferred() && @type.isAssignableToVariable(target, true, false, false) {
+					pass
+				}
+				else {
+					TypeException.throwUnexpectedReturnType(target, @type, this)
+				}
+
+				if !@isMisfit() && !target.isDeferred() && !@type.isFunction() && !@type.isAssignableToVariable(target, false, false, false) {
+					@assert = true
+					@target = target
+				}
 			}
 		}
 		else {
@@ -185,11 +200,25 @@ class ReturnStatement extends Statement {
 			else {
 				var line = fragments.newLine().code('return ')
 
-				if @async {
-					line.code('__ks_cb(null, ').compile(@value).code(')')
+				if @assert {
+					if @async {
+						line.code('__ks_cb(null, ')
+
+						@target.toAssertFragments(@value, line, this)
+
+						line.code(')')
+					}
+					else {
+						@target.toAssertFragments(@value, line, this)
+					}
 				}
 				else {
-					line.compile(@value)
+					if @async {
+						line.code('__ks_cb(null, ').compile(@value).code(')')
+					}
+					else {
+						line.compile(@value)
+					}
 				}
 
 				line.done()

@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_getHours_1 = function() {
 		return this.getUTCHours();
 	};
@@ -33,7 +33,6 @@ module.exports = function(expect) {
 	expect(__ks_Date.__ks_func_setHours_1.call(d, 12)).to.equal(d);
 	expect(__ks_Date.__ks_func_getHours_1.call(d)).to.equal(12);
 	return {
-		Date,
 		__ks_Date
 	};
 };

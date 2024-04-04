@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_setDate_1 = function(value) {
 		this.setDate(value);
 		return this;
@@ -18,7 +18,6 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	return {
-		Date,
 		__ks_Date
 	};
 };

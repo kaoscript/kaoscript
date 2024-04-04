@@ -2,7 +2,6 @@ require("kaoscript/register");
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = require("../_/._array.ks.j5k8r9.ksb")().__ks_Array;
-	var __ks_Object = {};
 	function foo() {
 		return foo.__ks_rt(this, arguments);
 	};

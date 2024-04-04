@@ -9,12 +9,14 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 10,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
-        "exhaustive": false,
+        "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -37,8 +39,10 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 26,
         "original": 0,
-        "exhaustive": false,
+        "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},

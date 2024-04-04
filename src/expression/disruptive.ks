@@ -98,7 +98,14 @@ class DisruptiveExpression extends Expression {
 		@acquiredReusable = true
 
 		if acquire && !@newExpression && !?@reuseName {
-			@reuseName = @scope.acquireTempName()
+			@reuseName =
+				if @parent is CallExpression {
+					set @parent.getReuseName()
+				}
+				else {
+					set @scope.acquireTempName()
+				}
+
 			@rootExpression = true
 		}
 

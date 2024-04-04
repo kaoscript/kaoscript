@@ -128,7 +128,7 @@ module.exports = function() {
 	const $util = (() => {
 		const o = new OBJ();
 		o.formatToHex = Helper.function(function(that) {
-			return $hex(that);
+			return Helper.assertString($hex(that), 0);
 		}, (that, fn, ...args) => {
 			const t0 = value => Type.isClassInstance(value, Color);
 			if(args.length === 1) {

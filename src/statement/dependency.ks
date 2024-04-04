@@ -3,10 +3,53 @@ abstract class DependencyStatement extends Statement {
 	define(declaration) { # {{{
 		var options = Attribute.configure(declaration, @options, AttributeTarget.Statement, @file())
 		var scope = @parent.scope()
+		var module = @module()
+		var name = declaration.name.name
 
 		match declaration.kind {
 			NodeKind.ClassDeclaration {
-				var type = @applyFlags(ClassType.new(scope))
+				var mut exhaustive = options.rules.nonExhaustive ? false : null
+				// var mut libstd = false
+				// TODO! remove newline
+
+				var type =
+					// TODO!
+					// if !module.isStandardLibrary() ;; var variable ?= scope.getVariable(name) {
+					if module.isStandardLibrary() {
+						set ClassType.new(scope)
+					}
+					// TODO!
+					// else if var variable ?= scope.getVariable(name) {
+					else if var oldVariable ?= scope.getVariable(name) {
+						unless oldVariable.isStandardLibrary() || oldVariable.isPredefined() {
+							SyntaxException.throwAlreadyDeclared(name, this)
+						}
+
+						var original = oldVariable.getDeclaredType().type()
+
+						if original is ClassType {
+							var result = original.clone()
+								..setStandardLibrary(.Yes + .Opened) if original.isStandardLibrary(.Yes)
+
+							if oldVariable.isStandardLibrary() {
+								exhaustive ??= original.isExhaustive(this)
+							}
+
+							set result
+						}
+						else {
+							NotImplementedException.throw(this)
+						}
+					}
+					else {
+						set ClassType.new(scope)
+					}
+
+				if var original ?= scope.getPredefinedType(name) {
+					type.features(original.discard().features())
+				}
+
+				@applyFlags(type)
 
 				for var modifier in declaration.modifiers {
 					match modifier.kind {
@@ -28,9 +71,9 @@ abstract class DependencyStatement extends Statement {
 					type.generics(generics)
 				}
 
-				var variable = scope.define(declaration.name.name, true, type, this)
+				var variable = scope.define(name, true, type, this)
 
-				if @module().isStandardLibrary() {
+				if module.isStandardLibrary() {
 					variable.flagStandardLibrary()
 				}
 
@@ -47,17 +90,12 @@ abstract class DependencyStatement extends Statement {
 					type.extends(superVar.getDeclaredType())
 				}
 
-				if declaration.members.length != 0 {
-					for var member in declaration.members {
-						type.addPropertyFromAST(member, this)
-					}
-				}
+				exhaustive ??= ?#declaration.members
 
-				if options.rules.nonExhaustive || declaration.members.length == 0 {
-					type.setExhaustive(false)
-				}
-				else {
-					type.setExhaustive(true)
+				type.setExhaustive(exhaustive)
+
+				for var member in declaration.members {
+					type.addPropertyFromAST(member, name, this)
 				}
 
 				type.flagComplete()
@@ -74,7 +112,7 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				var type = @applyFlags(EnumType.new(scope, ekind))
-				var variable = scope.define(declaration.name.name, true, type, this)
+				var variable = scope.define(name, true, type, this)
 
 				if options.rules.nonExhaustive || declaration.members.length == 0 {
 					type.setExhaustive(false)
@@ -83,10 +121,8 @@ abstract class DependencyStatement extends Statement {
 					type.setExhaustive(true)
 				}
 
-				if declaration.members.length != 0 {
-					for var member in declaration.members {
-						type.addPropertyFromAST(member, this)
-					}
+				for var member in declaration.members {
+					type.addPropertyFromAST(member, name, this)
 				}
 
 				type.flagComplete()
@@ -120,30 +156,68 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind.NamespaceDeclaration {
-				var type = @applyFlags(NamespaceType.new(scope))
+				var mut exhaustive = options.rules.nonExhaustive ? false : null
+				// var mut libstd = false
+				// TODO! remove newline
+
+				var type =
+					// TODO!
+					// if !module.isStandardLibrary() ;; var variable ?= scope.getVariable(name) {
+					if module.isStandardLibrary() {
+						set NamespaceType.new(scope)
+					}
+					// TODO!
+					// else if var oldVariable ?= scope.getVariable(name) {
+					else if var oldVariable ?= scope.getVariable(name) {
+						unless oldVariable.isStandardLibrary() || oldVariable.isPredefined() {
+							SyntaxException.throwAlreadyDeclared(name, this)
+						}
+
+						var original = oldVariable.getDeclaredType().type()
+
+						if original is NamespaceType {
+							var result = original.clone()
+								..setStandardLibrary(.Yes + .Opened) if original.isStandardLibrary(.Yes)
+
+							if oldVariable.isStandardLibrary() {
+								exhaustive ??= original.isExhaustive(this)
+							}
+
+							set result
+						}
+						else {
+							NotImplementedException.throw(this)
+						}
+					}
+					else {
+						set NamespaceType.new(scope)
+					}
+
+				@applyFlags(type)
 
 				for var modifier in declaration.modifiers {
-					if modifier.kind == ModifierKind.Sealed {
-						type.flagSealed()
-					}
-					else if modifier.kind == ModifierKind.System {
-						type.flagSystem()
+					match modifier.kind {
+						ModifierKind.Sealed {
+							type.flagSealed()
+						}
+						ModifierKind.System {
+							type.flagSystem()
+						}
 					}
 				}
 
-				var variable = scope.define(declaration.name.name, true, type, this)
+				var variable = scope.define(name, true, type, this)
 
-				if options.rules.nonExhaustive || declaration.statements.length == 0 {
-					type.setExhaustive(false)
-				}
-				else {
-					type.setExhaustive(true)
+				if module.isStandardLibrary() {
+					variable.flagStandardLibrary()
 				}
 
-				if declaration.statements.length != 0 {
-					for var statement in declaration.statements {
-						type.addPropertyFromAST(statement, this)
-					}
+				exhaustive ??= ?#declaration.statements
+
+				type.setExhaustive(exhaustive)
+
+				for var statement in declaration.statements {
+					type.addPropertyFromAST(statement, name, this)
 				}
 
 				type.flagComplete()
@@ -194,7 +268,7 @@ abstract class DependencyStatement extends Statement {
 					type = @scope.reference(type)
 				}
 
-				return scope.define(declaration.name.name, true, type, true, this)
+				return scope.define(name, true, type, true, this)
 			}
 			else {
 				throw NotSupportedException.new(`Unexpected kind \(declaration.kind)`, this)
@@ -203,66 +277,117 @@ abstract class DependencyStatement extends Statement {
 	} # }}}
 }
 
-class ExternDeclaration extends DependencyStatement {
+class ExternDeclaration extends Statement {
 	private {
-		@lines = []
+		@declarators = []
 	}
 	initiate() { # {{{
-		var module = @module()
+		for var data in @data.declarations {
+			// TODO!
+			// var declarator = ExternDeclarator.new(data, this)
+			// 	|> ..initiate()
+			// 	|> @declarators.push(_)
 
-		var dyn variable
-		for var declaration in @data.declarations {
-			if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
-				if declaration.kind == NodeKind.FunctionDeclaration {
-					var late parameters
-					if declaration.parameters?.length != 0 {
-						parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
-					}
-					else {
-						parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
-					}
+			var declarator = ExternDeclarator.new(data, this)
 
-					var type = FunctionType.new(parameters, declaration, this).flagAlien()
+			declarator.initiate()
 
-					if variable.getDeclaredType() is FunctionType {
-						var newType = OverloadedFunctionType.new(@scope)
+			@declarators.push(declarator)
+		}
+	} # }}}
+	analyse()
+	override prepare(target, targetMode)
+	translate()
+	toStatementFragments(fragments, mode) { # {{{
+		for var declarator in @declarators {
+			declarator.toStatementFragments(fragments, mode)
+		}
+	} # }}}
+}
 
-						newType.addFunction(variable.getDeclaredType())
-						newType.addFunction(type)
+class ExternDeclarator extends DependencyStatement {
+	private late {
+		@auxiliary									= false
+		@instanceMethods: ClassMethodType[]{}		= {}
+		@name: String
+		@type: Type
+	}
+	initiate() { # {{{
+		// echo('extern.initiate')
+		@name = @data.name.name
 
-						variable.setDeclaredType(newType)
-					}
-					else if variable.getDeclaredType() is OverloadedFunctionType {
-						variable.getDeclaredType().addFunction(type)
-					}
-					else {
-						SyntaxException.throwAlreadyDeclared(declaration.name.name, this)
-					}
-				}
-				else if @parent.includePath() == null {
-					variable = @define(declaration)
+		var mut variable = @scope.getVariable(@name)
 
-					if !module.isStandardLibrary() && variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
-						@lines.push(`var \(variable.getDeclaredType().getSealedName()) = {}`)
-					}
+		if ?variable && !variable.isPredefined() {
+			if @data.kind == NodeKind.FunctionDeclaration {
+				var late parameters
+				if @data.parameters?.length != 0 {
+					parameters = [ParameterType.fromAST(parameter, this) for var parameter in @data.parameters]
 				}
 				else {
-					// TODO check & merge type
+					parameters = [ParameterType.new(@scope, Type.Any, 0, Infinity)]
 				}
+
+				var type = FunctionType.new(parameters, @data, this).flagAlien()
+
+				if variable.getDeclaredType() is FunctionType {
+					var newType = OverloadedFunctionType.new(@scope)
+
+					newType.addFunction(variable.getDeclaredType())
+					newType.addFunction(type)
+
+					variable.setDeclaredType(newType)
+				}
+				else if variable.getDeclaredType() is OverloadedFunctionType {
+					variable.getDeclaredType().addFunction(type)
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@name, this)
+				}
+			}
+			else if !?@parent.includePath() {
+				variable = @define(@data)
 			}
 			else {
-				variable = @define(declaration)
+				// TODO check & merge type
+			}
+		}
+		else {
+			variable = @define(@data)
+		}
 
-				var type = variable.getDeclaredType()
+		variable.setComplete(true)
 
-				if type.isSealed() && type.isExtendable() && !module.isStandardLibrary() {
-					@lines.push(`var \(type.getSealedName()) = {}`)
+		@module().addAlien(variable.name(), variable.getDeclaredType())
+
+		@type = variable.getDeclaredType().type()
+
+		if @type.isClass() && @type.isSealed() {
+			for var methods, name of @type.discard().listInstanceMethods() {
+				for var method in methods {
+					if !method.hasAuxiliary() && (method.hasGenerics() || method.hasDeferredParameter()) {
+						@instanceMethods[name] = methods
+
+						for var method in methods {
+							method.flagAuxiliary()
+						}
+
+						break
+					}
 				}
 			}
 
-			variable.setComplete(true)
+			if ?#@instanceMethods {
+				var type = variable.getDeclaredType()
 
-			module.addAlien(variable.name(), variable.getDeclaredType())
+				if !type.hasAuxiliary() {
+					type
+						..flagAuxiliary()
+						..useSealedName(@module())
+
+					@auxiliary = true
+				}
+			}
 		}
 	} # }}}
 	analyse()
@@ -272,11 +397,82 @@ class ExternDeclaration extends DependencyStatement {
 		return type
 			.flagAlien()
 			.flagRequired()
+			.origin(TypeOrigin.Extern)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		for var line in @lines {
-			fragments.line(line)
+		return unless ?#@instanceMethods
+
+		if @auxiliary {
+			var variable = @scope.getVariable(@name)
+			var sealedName = variable.getDeclaredType().getSealedName()
+
+			fragments.line(`\($runtime.immutableScope(this))\(sealedName) = {}`)
 		}
+
+		for var methods, name of @instanceMethods {
+			@toSealedInstanceFragments(name, methods, fragments)
+		}
+	} # }}}
+	toSealedInstanceFragments(name: String, methods: ClassMethodType[], fragments) { # {{{
+		var variable = @scope.getVariable(@name)
+		var sealedName = variable.getDeclaredType().getSealedName()
+		var labelable = @type.isLabelableInstanceMethod(@name)
+		var assessment = Router.assess(@type.listInstanceMethods(name), name, this)
+
+		var mut line = fragments.newLine()
+
+		if labelable {
+			line.code(`\(sealedName)._im_\(name) = function(that, gens, kws, ...args)`)
+		}
+		else {
+			line.code(`\(sealedName)._im_\(name) = function(that, gens, ...args)`)
+		}
+
+		var mut block = line.newBlock()
+
+		if labelable {
+			block.line(`return \(sealedName).__ks_func_\(name)_rt(that, gens || {}, kws, args)`)
+		}
+		else {
+			block.line(`return \(sealedName).__ks_func_\(name)_rt(that, gens || {}, args)`)
+		}
+
+		block.done()
+		line.done()
+
+		line = fragments.newLine()
+
+		if labelable {
+			line.code(`\(sealedName).__ks_func_\(name)_rt = function(that, gens, kws, args)`)
+		}
+		else {
+			line.code(`\(sealedName).__ks_func_\(name)_rt = function(that, gens, args)`)
+		}
+
+		block = line.newBlock()
+
+		Router.toFragments(
+			(function, line) => {
+				if function.isSealed() {
+					line.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
+
+					return true
+				}
+				else {
+					line.code(`that.\(name).call(that`)
+
+					return true
+				}
+			}
+			null
+			assessment
+			true
+			block
+			this
+		)
+
+		block.done()
+		line.done()
 	} # }}}
 }
 
@@ -356,8 +552,6 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 			SyntaxException.throwNotBinary('extern|require', this)
 		}
 
-		module.flag('Type')
-
 		if @parent.includePath() != null {
 			for var declaration in @data.declarations {
 				if var variable ?= @scope.getVariable(declaration.name.name) {
@@ -405,8 +599,6 @@ class RequireOrExternDeclaration extends DependencyStatement {
 			SyntaxException.throwNotBinary('require|extern', this)
 		}
 
-		module.flag('Type')
-
 		if @parent.includePath() != null {
 			for var data in @data.declarations {
 				if var variable ?= @scope.getVariable(data.name.name) {
@@ -429,10 +621,16 @@ class RequireOrExternDeclaration extends DependencyStatement {
 	addRequirement(declaration) { # {{{
 		var variable = @define(declaration)
 		var requirement = ROEDynamicRequirement.new(variable, this)
+		var type: Type = requirement.type()
+		var libstd = type.getStandardLibrary()
+
+		if libstd ~~ .Opened {
+			type.setStandardLibrary(libstd + .Augmented)
+		}
 
 		@module()
 			.addRequirement(requirement)
-			.addAlien(requirement.name(), requirement.type())
+			.addAlien(requirement.name(), type)
 	} # }}}
 	override applyFlags(type) { # {{{
 		return type
@@ -505,8 +703,7 @@ class RequireOrImportDeclarator extends Importer {
 							var type = requirement.type()
 
 							if type.isAlien() {
-								var origin = type.origin()
-								if ?origin {
+								if var origin ?= type.origin() {
 									type.origin(origin:!(TypeOrigin) + TypeOrigin.RequireOrExtern)
 								}
 								else {
@@ -542,10 +739,10 @@ class RequireOrImportDeclarator extends Importer {
 	toStatementFragments(fragments, mode) { # {{{
 		var module = @module()
 
-		if @requirements.length == 0 {
+		if !?#@requirements {
 			@toImportFragments(fragments)
 		}
-		else if @requirements.length == 1 {
+		else if #@requirements == 1 {
 			var requirement = @requirements[0]
 			var argument = module.getArgument(requirement.index())
 
@@ -553,7 +750,7 @@ class RequireOrImportDeclarator extends Importer {
 				var ctrl = fragments.newControl()
 
 				if requirement.isSystem() {
-					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.getSealedName(), '))').step()
+					ctrl.code(`if(!\(requirement.getSealedName()))`).step()
 				}
 				else {
 					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
@@ -570,45 +767,57 @@ class RequireOrImportDeclarator extends Importer {
 		else {
 			var unknowns = []
 			var notpasseds = []
+			var mut system = true
 
 			for var requirement in @requirements {
 				var argument = module.getArgument(requirement.index())
 
 				if !?argument {
-					if requirement.isSystem() {
-						fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
-					}
-					else {
-						fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
+					if !requirement.isSystem() {
+						fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
 					}
 
 					unknowns.push(requirement)
+
+					system = false
 				}
-				else if argument is Boolean {
-					notpasseds.push(requirement)
+				else {
+					if argument is Boolean {
+						notpasseds.push(requirement)
+					}
+
+					system &&= requirement.isSystem()
 				}
 			}
 
-			if notpasseds.length > 0 || unknowns.length > 0 {
+			if ?#notpasseds || ?#unknowns {
 				var mut ctrl = fragments
 
-				if unknowns.length > 0 {
+				if ?#unknowns {
 					ctrl = fragments.newControl().code(`if(`)
 
 					for var requirement, index in unknowns {
 						ctrl.code(' || ') unless index == 0
 
-						ctrl.code(`!\(requirement.tempName())_valuable`)
+						if requirement.isSystem() {
+							ctrl.code(`!\(requirement.getSealedName())`)
+						}
+						else {
+							ctrl.code(`!\(requirement.getTempName())_valuable`)
+						}
 					}
 
 					ctrl.code(')').step()
 				}
 
-				if notpasseds.length == @requirements.length {
+				if #notpasseds == #@requirements {
 					@toImportFragments(ctrl, true)
 				}
+				else if system {
+					@toImportFragments(ctrl, true, true)
+				}
 				else {
-					@toImportFragments(ctrl, false)
+					@toImportFragments(ctrl, false, true)
 
 					for var requirement in notpasseds {
 						if requirement.isSystem() {
@@ -624,25 +833,24 @@ class RequireOrImportDeclarator extends Importer {
 					}
 
 					for var requirement in unknowns {
-						var control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
-
 						if requirement.isSystem() {
-							control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+							ctrl.newControl()
+								..code(`if(!\(requirement.getSealedName()))`).step()
+								..line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+								..done()
 						}
 						else {
-							control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
-
-							if requirement.isSealed() {
-								control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
-							}
+							ctrl.newControl()
+								..code(`if(!\(requirement.getTempName())_valuable)`).step()
+								..line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+								..line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`) if requirement.isSealed()
+								..done()
 						}
-
-						control.done()
 					}
+				}
 
-					if unknowns.length > 0 {
-						ctrl.done()
-					}
+				if ?#unknowns {
+					ctrl.done()
 				}
 			}
 		}
@@ -702,8 +910,7 @@ class ExternOrImportDeclarator extends Importer {
 				var requirement = ROIDynamicRequirement.new(variable, this)
 				var type = requirement.type().flagAlien()
 
-				var origin = type.origin()
-				if ?origin {
+				if var origin ?= type.origin() {
 					type.origin(origin:!(TypeOrigin) + TypeOrigin.ExternOrRequire)
 				}
 				else {
@@ -753,10 +960,10 @@ class ExternOrImportDeclarator extends Importer {
 		else {
 			for var requirement in @requirements {
 				if requirement.isSystem() {
-					fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
+					fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
 				}
 				else {
-					fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
+					fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
 				}
 			}
 
@@ -767,7 +974,7 @@ class ExternOrImportDeclarator extends Importer {
 					ctrl.code(' || ')
 				}
 
-				ctrl.code(`!\(requirement.tempName())_valuable`)
+				ctrl.code(`!\(requirement.getTempName())_valuable`)
 			}
 
 			ctrl.code(')').step()
@@ -775,7 +982,7 @@ class ExternOrImportDeclarator extends Importer {
 			@toImportFragments(ctrl, false)
 
 			for var requirement in @requirements {
-				var control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
+				var control = ctrl.newControl().code(`if(!\(requirement.getTempName())_valuable)`).step()
 
 				if requirement.isSystem() {
 					control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
@@ -807,6 +1014,10 @@ abstract class Requirement {
 	constructor(@name, @type, @node) { # {{{
 		if @type.isSystem() && @name == 'Object' {
 			node.module().flag('Object')
+		}
+
+		if @type.isUsingAuxiliary() {
+			@type.flagAuxiliary()
 		}
 	} # }}}
 	constructor(variable: Variable, @node) { # {{{
@@ -1008,11 +1219,10 @@ class ROEDynamicRequirement extends DynamicRequirement {
 
 		if !?argument {
 			if @type.isSystem() {
-				var ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', @type.getSealedName(), '))').step()
-
-				ctrl.line(`\(@type.getSealedName()) = {}`)
-
-				ctrl.done()
+				fragments.newControl()
+					..code(`if(!\(@type.getSealedName()))`).step()
+					..line(`\(@type.getSealedName()) = {}`)
+					..done()
 			}
 			else {
 				var ctrl = fragments.newControl().code('if(', $runtime.type(@node), '.isValue(', @parameter, '))').step()
@@ -1050,7 +1260,9 @@ class ROIDynamicRequirement extends StaticRequirement {
 		super(variable, @importer <- importer)
 	} # }}}
 	acquireTempName() { # {{{
-		@tempName = @node.module().scope().acquireTempName(false)
+		if !@type.isSystem() {
+			@tempName = @node.module().scope().acquireTempName(false)
+		}
 	} # }}}
-	tempName() => @tempName
+	getTempName() => @tempName
 }

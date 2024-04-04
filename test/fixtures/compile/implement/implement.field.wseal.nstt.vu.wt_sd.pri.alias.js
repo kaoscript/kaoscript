@@ -1,6 +1,6 @@
 const {Helper, initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_get_culture = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);
@@ -47,7 +47,6 @@ module.exports = function(expect) {
 	expect(__ks_Date.__ks_func_culture_1.call(d, "en")).to.equal(d);
 	expect(__ks_Date.__ks_func_culture_0.call(d)).to.equal("en");
 	return {
-		Date,
 		__ks_Date
 	};
 };

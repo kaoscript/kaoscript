@@ -1,3 +1,5 @@
+#![libstd(package='npm:@kaoscript/runtime/src/libstd/atomic.ks')]
+
 extern system class Array<T>
 
 disclose Array<T> {

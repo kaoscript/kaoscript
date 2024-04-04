@@ -12,7 +12,7 @@
     "references": [
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 6,
         "abstract": false,
         "alien": true,
         "hybrid": false,
@@ -38,7 +38,7 @@
       },
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 6,
         "abstract": false,
         "alien": true,
         "hybrid": false,
@@ -52,6 +52,7 @@
         "staticMethods": {
           "entries": [
             {
+              "libstd": 2,
               "index": 0,
               "access": 4,
               "sealed": false,
@@ -93,12 +94,12 @@
                 }
               },
               "errors": [],
-              "inits": [],
-              "libstd": true
+              "inits": []
             }
           ],
           "keys": [
             {
+              "libstd": 2,
               "index": 0,
               "access": 4,
               "sealed": false,
@@ -131,11 +132,11 @@
                 }
               },
               "errors": [],
-              "inits": [],
-              "libstd": true
+              "inits": []
             }
           ]
         },
+        "features": 8,
         "generics": [
           {
             "name": "V"
@@ -149,9 +150,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ]
@@ -166,7 +164,7 @@
     "references": [
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 6,
         "original": 0,
         "exhaustive": true,
         "constructors": [],
@@ -188,9 +186,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

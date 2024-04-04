@@ -44,7 +44,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(name, value) {
-		quxbaz(name, value, name, value);
+		quxbaz.__ks_0(name, value, name, value);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => __ksType.isEvent(value, [value => __ksType.isNodeData(value, 0, NodeKind.__ks_eq_Expression)], value => value);

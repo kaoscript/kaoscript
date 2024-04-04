@@ -1,15 +1,11 @@
 const {Helper, Type} = require("@kaoscript/runtime");
-module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
-	if(Type.isValue(__ks_0)) {
-		Number = __ks_0;
-		__ks_Number = __ks___ks_0;
-	}
-	else {
+module.exports = function(__ks_Number, __ks_0, __ks___ks_0) {
+	if(!__ks_Number) {
 		__ks_Number = {};
 	}
-	if(Type.isValue(__ks_1)) {
-		Math = __ks_1;
-		__ks_Math = __ks___ks_1;
+	if(Type.isValue(__ks_0)) {
+		Math = __ks_0;
+		__ks_Math = __ks___ks_0;
 	}
 	else {
 		__ks_Math = {};

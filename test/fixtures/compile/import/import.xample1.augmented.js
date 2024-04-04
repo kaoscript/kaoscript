@@ -1,7 +1,7 @@
 require("kaoscript/register");
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
-	if(!Type.isValue(__ks_Date)) {
+	if(!__ks_Date) {
 		var __ks_Date = require("./.import.xample1.core.ks.np51g.ksb")().__ks_Date;
 	}
 	__ks_Date.__ks_func_getTime_1 = function() {

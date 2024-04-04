@@ -18,7 +18,7 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(values) {
-		foobar.apply(null, Helper.checkArray(values));
+		foobar(...Helper.checkArray(values));
 	};
 	quxbaz.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

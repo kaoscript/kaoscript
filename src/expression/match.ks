@@ -16,6 +16,7 @@ class MatchExpression extends Expression {
 		@path: String?						= null
 		@reusableValue: Boolean				= false
 		@tests								= {}
+		@type: Type
 		@usingFallthrough: Boolean			= false
 		@value								= null
 		@valueName: String?					= null
@@ -172,6 +173,7 @@ class MatchExpression extends Expression {
 
 		var mut maxConditions = 0
 		var mut valueType = @valueType
+		var types = []
 
 		for var clause, index in @clauses {
 			clause.filter.prepare(valueType)
@@ -190,6 +192,9 @@ class MatchExpression extends Expression {
 			if @usingFallthrough {
 				clause.name = @scope.acquireTempName(false)
 			}
+			else {
+				types.push(clause.body.type())
+			}
 		}
 
 		for var test of @tests when test.count > 1 {
@@ -206,6 +211,8 @@ class MatchExpression extends Expression {
 				SyntaxException.throwNotMatchedPossibilities(this)
 			}
 		}
+
+		@type = Type.union(@scope, ...types)
 
 		for var data, name of @initializedVariables {
 			var types = []
@@ -455,6 +462,7 @@ class MatchExpression extends Expression {
 
 		ctrl.done()
 	} # }}}
+	type() => @type
 }
 
 abstract class PossibilityTracker {

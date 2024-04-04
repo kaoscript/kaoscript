@@ -1,0 +1,108 @@
+[
+  {
+    "aliens": [
+      0,
+      "String",
+      false,
+      "Any?",
+      "parseFloat",
+      true,
+      "Any?",
+      "parseInt",
+      true
+    ],
+    "requirements": [
+      0,
+      "String",
+      false
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": 26,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "origin": 16,
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "String"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": 26,
+        "original": 0,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {
+          "toFloat": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toInt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "base",
+                  "internal": "base",
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjEwLCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjEwLCJjb2x1bW4iOjE3fX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,7 +1,6 @@
 require("kaoscript/register");
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
 	var __ks_Array = require("../require/.require.alt.roe.methods.ks.np51g.ksb")().__ks_Array;
 	const a = Helper.newArrayRange(1, 10, 1, true, true);
 	console.log(a.indexOf(5).toString());

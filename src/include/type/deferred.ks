@@ -73,7 +73,7 @@ class DeferredType extends Type {
 		else {
 			var { index?, element? } = position
 
-			if !?index {
+			if !?index || !?expressions[index] {
 				pass
 			}
 			else if ?element {
@@ -86,21 +86,22 @@ class DeferredType extends Type {
 	} # }}}
 	override canBeDeferred() => true
 	override clone() { # {{{
-		var type = DeferredType.new(@name, @constraint, @scope)
+		var clone = DeferredType.new(@name, @constraint, @scope)
+			.._nullable = @nullable
+			.._generic = @generic if ?@generic
 
-		type._nullable = @nullable
-
-		return type
+		return clone
 	} # }}}
 	compareToRef(value: NullType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => 1
 	constraint() => @constraint
+	override discardDeferred() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
 			kind: TypeKind.Deferred
 			@name
 			nullable: true if @nullable
-			constraint: @constraint.toReference(references, indexDelta, mode, module) if ?@constraint
+			constraint: @constraint.toReference(references, indexDelta, mode, module) if @constrainted && !?@generic
 		}
 	} # }}}
 	override flagReferenced() => this
@@ -151,6 +152,7 @@ class DeferredType extends Type {
 	isConstrainted() => @constrainted
 	override isDeferrable() => true
 	override isDeferred() => true
+	override isExportable() => true
 	override isNullable() => @nullable
 	override isNullable(generics: AltType[]?) { # {{{
 		return true if @nullable || !?#generics
@@ -184,6 +186,9 @@ class DeferredType extends Type {
 		}
 
 		return false
+	} # }}}
+	override makeMemberCallee(property, path, generics, node) { # {{{
+		return @discardDeferred().makeMemberCallee(property, path, generics, node)
 	} # }}}
 	matchDeferred(type: Type, generics: Type{}) { # {{{
 		if type.isNull() {
@@ -240,9 +245,13 @@ class DeferredType extends Type {
 	override toFragments(fragments, node) { # {{{
 		NotImplementedException.throw()
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, _, blind, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, hasDeferred, _, _, generics, subtypes, fragments, node) { # {{{
+		if hasDeferred {
+			fragments.code(`gens.\(@name) || `)
+		}
+
 		if @constrainted {
-			@constraint.toAwareTestFunctionFragments(varname, nullable, false, blind, generics, subtypes, fragments, node)
+			@constraint.toAwareTestFunctionFragments(varname, nullable, hasDeferred, false, false, generics, subtypes, fragments, node)
 		}
 		else if nullable || @nullable {
 			fragments.code(`\($runtime.type(node)).any`)

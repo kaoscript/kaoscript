@@ -19,9 +19,9 @@ class MacroScope extends Scope {
 		@predefined.__Enum = Variable.createPredefinedClass('Enum', this)
 		@predefined.__Error = Variable.createPredefinedClass('Error', this)
 		@predefined.__Function = Variable.createPredefinedClass('Function', this)
+		@predefined.__Math = Variable.createPredefinedNamespace('Math', this)
 		@predefined.__Namespace = Variable.createPredefinedClass('Namespace', this)
 		@predefined.__Number = Variable.createPredefinedClass('Number', this)
-		@predefined.__Object = Variable.createPredefinedClass('Object', this)
 		@predefined.__String = Variable.createPredefinedClass('String', this)
 		@predefined.__Struct = Variable.createPredefinedClass('Struct', this)
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
@@ -32,7 +32,6 @@ class MacroScope extends Scope {
 		@predefined.__true = Variable.new('true', true, true, this.reference('Boolean'))
 		@predefined.__Any = Variable.new('Any', true, true, AnyType.Explicit)
 		@predefined.__Infinity = Variable.new('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = Variable.new('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = Variable.new('NaN', true, true, this.reference('Number'))
 		@predefined.__Never = Variable.new('Null', true, true, Type.Never)
 		@predefined.__Null = Variable.new('Null', true, true, NullType.Explicit)
@@ -176,9 +175,7 @@ class MacroScope extends Scope {
 	override resolveReference(name, explicitlyNull, parameters, subtypes) { # {{{
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
-		if @references[hash] is not ReferenceType {
-			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
-		}
+		@references[hash] ??= ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 
 		return @references[hash]
 	} # }}}

@@ -1,6 +1,6 @@
 class ClassConstructorType extends FunctionType {
 	private late {
-		@access: Accessibility					= Accessibility.Public
+		@access: Accessibility					= .Public
 		@class: ClassType
 		@dependent: Boolean						= false
 		@initVariables: Object<Boolean>			= {}
@@ -17,7 +17,7 @@ class ClassConstructorType extends FunctionType {
 			var type = ClassConstructorType.new(scope)
 
 			type._index = data.index
-			type._access = data.access
+			type._access = Accessibility(data.access) ?? .Public
 			type._sealed = data.sealed
 
 			if data.dependent {

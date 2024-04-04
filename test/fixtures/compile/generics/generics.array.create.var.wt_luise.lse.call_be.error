@@ -1,1 +1,1 @@
-ReferenceException: The instance method "push" of the class "Array" can't be matched to given arguments (Boolean) (fixtures/compile/generics/generics.array.create.var.wt_luise.lse.call_be.ks:10)
+ReferenceException: The instance method "push" of the class "Array" can't be matched to given arguments (Boolean) (fixtures/compile/generics/generics.array.create.var.wt_luise.lse.call_be.ks:12)

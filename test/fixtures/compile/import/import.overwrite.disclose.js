@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Date, __ks_Date} = require("../implement/.implement.overwrite.disclose.ks.j5k8r9.ksb")();
+	var __ks_Date = require("../implement/.implement.overwrite.disclose.ks.j5k8r9.ksb")().__ks_Date;
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -19,7 +19,6 @@ module.exports = function() {
 	const d = new Date();
 	foobar.__ks_0(__ks_Date.__ks_func_setDate_1.call(d, 1));
 	return {
-		Date,
 		__ks_Date
 	};
 };

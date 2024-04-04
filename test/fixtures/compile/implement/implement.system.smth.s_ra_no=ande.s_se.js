@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = {};
+	const __ks_Function = {};
 	__ks_Function.__ks_sttc_curry_0 = function(fn, args, bind = null) {
 	};
 	__ks_Function._sm_curry = function(kws, ...args) {

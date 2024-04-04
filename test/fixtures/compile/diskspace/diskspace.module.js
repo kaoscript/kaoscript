@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
+	var {__ks_RegExp, __ks_String, __ksType: __ksType0} = require("../_/._string.wstd.ks.j5k8r9.ksb")();
 	var exec = require("child_process").exec;
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks() {
@@ -14,12 +14,11 @@ module.exports = function() {
 				__ks_cb(__ks_e);
 			}
 			else {
-				const stdout = __ks_0;
-				let matches;
+				const stdout = Helper.assert(__ks_0, "\"String\"", 0, Type.isString);
 				for(let __ks_3 = __ks_String.__ks_func_lines_0.call(stdout), __ks_2 = 0, __ks_1 = __ks_3.length, line; __ks_2 < __ks_1; ++__ks_2) {
 					line = __ks_3[__ks_2];
-					let __ks_4;
-					if(Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false) {
+					let matches = df_regex.exec(line);
+					if(Type.isValue(matches)) {
 						disks.push((() => {
 							const o = new OBJ();
 							o.device = matches[1].trim();

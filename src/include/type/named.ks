@@ -318,6 +318,9 @@ class NamedType extends Type {
 				else if value.isSealed() && !@type.isSealed() {
 					return false
 				}
+				else if value.isPredefined() && !@type.isPredefined() {
+					return false
+				}
 				else if @type.isPredefined() && value.isPredefined() {
 					return @scope.isRenamed(@name, value.name(), value.scope(), mode)
 				}
@@ -591,7 +594,7 @@ class NamedType extends Type {
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toMetadata(references, indexDelta, mode, module)
 	toQuote() => @name
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if @type is ClassType && @type.isPredefined() {
+		if @type.isPredefined() {
 			return @name
 		}
 		else {
@@ -635,7 +638,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	type() => @type
-	unflagAltering(): valueof this { # {{{
+	override unflagAltering() { # {{{
 		@type.unflagAltering()
 	} # }}}
 	useSealedName(module: Module) { # {{{
@@ -659,23 +662,28 @@ class NamedType extends Type {
 		canBeArray
 		canBeRawCasted
 		extractFunction
-		flagStandardLibrary
+		flagAuxiliary
+		generics
+		getStandardLibrary
+		hasAuxiliary
 		hasProperty
 		hasRest
 		hasTest
-		generics
 		isBitmask
 		isComplete
 		isComplex
 		isDeferrable
 		isExportable
 		isExportingType
+		isFinite
 		isFunction
 		isInstanceOf
 		isStandardLibrary
+		isUsingAuxiliary
 		isVariant
 		isView
 		makeCallee
+		setStandardLibrary
 		toAwareTestFunctionFragments
 		toBlindTestFragments
 	}

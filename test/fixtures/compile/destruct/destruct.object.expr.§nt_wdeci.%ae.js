@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(values) {
 		let x = null;
-		x = Helper.default(values.x, 2, () => []);
+		x = Helper.default((Helper.assert(values, "\"Object\"", 0, Type.isDexObject)).x, 2, () => []);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

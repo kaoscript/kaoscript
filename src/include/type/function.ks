@@ -264,11 +264,10 @@ class FunctionType extends Type {
 		var result = []
 
 		for var types, name of map {
-			if types.length == 1 {
-				result.push({ name, type: types[0] })
-			}
-			else {
-				NotImplementedException.throw()
+			match #types {
+				0 => pass
+				1 => result.push({ name, type: types[0] })
+				else => NotImplementedException.throw()
 			}
 		}
 
@@ -290,11 +289,10 @@ class FunctionType extends Type {
 		var result = []
 
 		for var types, name of map {
-			if types.length == 1 {
-				result.push({ name, type: types[0] })
-			}
-			else {
-				NotImplementedException.throw()
+			match #types {
+				0 => pass
+				1 => result.push({ name, type: types[0] })
+				else => NotImplementedException.throw()
 			}
 		}
 
@@ -423,6 +421,13 @@ class FunctionType extends Type {
 		return fragments
 	} # }}}
 	hasAssignableThis() => @assignableThis
+	hasDeferredParameter() { # {{{
+		for var parameter in @parameters {
+			return true if parameter.isDeferred()
+		}
+
+		return false
+	} # }}}
 	hasGenerics() => ?#@generics
 	hasRestParameter(): valueof @hasRest
 	hasVarargsParameter() { # {{{
@@ -516,11 +521,7 @@ class FunctionType extends Type {
 
 		return true
 	} # }}}
-	override isExportable(module) { # {{{
-		return false unless !@standardLibrary || module.isStandardLibrary()
-
-		return @isExportable()
-	} # }}}
+	override isExportable(module) => (module.isStandardLibrary() || @standardLibrary ~~ .No | .Opened) && @isExportable()
 	isExtendable() => true
 	isFunction() => true
 	isMissingError() => @errors.length == 0
@@ -856,6 +857,7 @@ class FunctionType extends Type {
 		return true
 	} # }}}
 	isUnknownReturnType() => @autoTyping
+	isUsingAuxiliary() => @auxiliary || super()
 	length() => 1
 	listErrors() => @errors
 	override makeCallee(name, generics, node) { # {{{
@@ -869,7 +871,7 @@ class FunctionType extends Type {
 				if matches.length == 1 {
 					var match = matches[0]
 
-					if match.function.isAlien() || match.function.index() == -1 || match.function is ClassMethodType {
+					if match.function.index() == -1 || (match.function.isAlien() && !match.function.isUsingAuxiliary()) {
 						node.addCallee(LenientFunctionCallee.new(node.data(), assessment, [match.function], node))
 					}
 					else {
@@ -1076,7 +1078,7 @@ class FunctionType extends Type {
 	setThisType(@thisType): valueof this { # {{{
 		@missingThis = false
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, _, _, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, _, _, mut generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.typeof('Function', node))`)
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{

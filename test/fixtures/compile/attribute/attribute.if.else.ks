@@ -1,3 +1,4 @@
+#![libstd(off)]
 #![target(ecma-v6)]
 
 #[rules(non-exhaustive)]

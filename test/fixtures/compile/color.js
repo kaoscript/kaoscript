@@ -326,7 +326,7 @@ module.exports = function() {
 	$convert.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Color);
 		const t1 = value => Type.isEnumInstance(value, Space);
-		const t2 = value => Type.isClassInstance(value, Color) || Type.isObject(value) || Type.isNull(value);
+		const t2 = value => Type.isObject(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length >= 2 && args.length <= 3) {

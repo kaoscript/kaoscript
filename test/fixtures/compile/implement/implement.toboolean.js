@@ -1,7 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Boolean = {};
-	var __ks_String = {};
+	const __ks_Boolean = {};
 	__ks_Boolean.__ks_func_toBoolean_0 = function() {
 		return this;
 	};
@@ -17,6 +16,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
+	const __ks_String = {};
 	__ks_String.__ks_func_toBoolean_0 = function() {
 		return /^(?:true|1|on|yes)$/i.test(this);
 	};
@@ -26,9 +26,6 @@ module.exports = function() {
 	__ks_String.__ks_func_toBoolean_rt = function(that, args) {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_toBoolean_0.call(that);
-		}
-		if(that.toBoolean) {
-			return that.toBoolean(...args);
 		}
 		throw Helper.badArgs();
 	};

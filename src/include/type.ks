@@ -198,11 +198,19 @@ bitmask TypeOrigin {
 	Import
 	Require
 	RequireOrExtern
+
+	Implements
 }
 
-enum LibSTDMode {
-	Full
-	Partial
+bitmask LibSTDMode {
+	// TODO!
+	No			 = 1
+	Yes
+
+	Closed
+	Opened
+
+	Augmented
 }
 
 type AltType = {
@@ -225,12 +233,14 @@ type Variant = {
 abstract class Type {
 	private {
 		@alien: Boolean					= false
+		@auxiliary: Boolean				= false
 		@complete: Boolean				= false
 		@constant: Boolean?				= null
 		@exhaustive: Boolean? 			= null
 		@exported: Boolean				= false
 		@mutable: Boolean?				= null
 		@origin: TypeOrigin?			= null
+		@predefined: Boolean			= false
 		@referenced: Boolean			= false
 		@referenceIndex: Number			= -1
 		@required: Boolean 				= false
@@ -238,7 +248,7 @@ abstract class Type {
 		@scope: Scope?
 		@sealed: Boolean				= false
 		@system: Boolean				= false
-		@standardLibrary: Boolean		= false
+		@standardLibrary: LibSTDMode	= .No
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) { # {{{
@@ -814,6 +824,54 @@ abstract class Type {
 			return type
 		} # }}}
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
+		// TODO!
+		// sort<T>(values: T[], resolve: (value: T): Type?): T[] { # {{{
+		sort(values: Array, resolve: Function): Array { # {{{
+			var items = []
+
+			for var value in values {
+				var type = resolve(value) ?? AnyType.NullableUnexplicit
+
+				items.push({
+					value
+					type
+					children: []
+					isAny: type.isAny() || type.isNull()
+				})
+			}
+
+			for var node in items {
+				if node.isAny {
+					for var item in items when item != node {
+						if !item.isAny {
+							node.children.push(item)
+						}
+					}
+				}
+				else {
+					for var item in items when item != node {
+						if !item.isAny && item.type.isAssignableToVariable(node.type, true, true, false) {
+							node.children.push(item)
+						}
+					}
+				}
+			}
+
+			var equivalences = []
+
+			items.sort((a, b) => {
+				if a.children:!(Array).contains(b) {
+					return 1
+				}
+				if b.children:!(Array).contains(a) {
+					return -1
+				}
+
+				return a.type.compareToRef(b.type)
+			})
+
+			return [value for var { value } in items]
+		} # }}}
 		toGeneric({ name, constraint? }, node: AbstractNode): Generic { # {{{
 			if ?constraint {
 				return { name: name.name, type: Type.fromAST(constraint, node) }
@@ -894,6 +952,7 @@ abstract class Type {
 	compareTo(value: Type) => false
 	discard(): Type? => this
 	discardAlias(): Type => this
+	discardDeferred(): Type => this
 	discardName(): Type => this
 	discardReference(): Type? => this
 	discardSpread(): Type => this
@@ -909,6 +968,9 @@ abstract class Type {
 		return this
 	} # }}}
 	flagAltering(): valueof this
+	flagAuxiliary() { # {{{
+		@auxiliary = true
+	} # }}}
 	flagComplete() { # {{{
 		@complete = true
 
@@ -928,12 +990,18 @@ abstract class Type {
 			return type
 		}
 	} # }}}
+	flagExhaustive() { # {{{
+		@exhaustive = true
+	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
 		@exported = true
 
 		return this
 	} # }}}
 	flagIndirectlyReferenced() => @flagReferenced()
+	flagPredefined() { # {{{
+		@predefined = true
+	} # }}}
 	flagReferenced() { # {{{
 		@referenced = true
 
@@ -954,9 +1022,6 @@ abstract class Type {
 
 		return this
 	} # }}}
-	flagStandardLibrary(): Void { # {{{
-		@standardLibrary = true
-	} # }}}
 	flagSystem() { # {{{
 		@system = true
 
@@ -969,9 +1034,11 @@ abstract class Type {
 	getProperty(name: String) => null
 	getProperty(name: String, node?) => @getProperty(name)
 	getMajorReferenceIndex() => @referenceIndex
+	getStandardLibrary(): LibSTDMode => @standardLibrary
 	// TODO merge
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
+	hasAuxiliary() => @auxiliary
 	hasKeyType() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false
@@ -983,8 +1050,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
-	isAssignableToVariable(value: Type): Boolean => @isAssignableToVariable(value, true, false, true)
-	isAssignableToVariable(value: Type, downcast: Boolean): Boolean => @isAssignableToVariable(value, true, false, downcast)
+	isAssignableToVariable(value: Type, downcast: Boolean = false): Boolean => @isAssignableToVariable(value, true, false, downcast)
 	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		if this == value {
 			return true
@@ -1043,11 +1109,12 @@ abstract class Type {
 	isExportable() => @isAlien() || @isExported() || @isNative() || @isRequirement() || @referenceIndex != -1
 	isExportable(mode: ExportMode) => mode ~~ ExportMode.Requirement || @isExportable()
 	isExportable(mode: ExportMode, module: Module) => mode ~~ ExportMode.Requirement || @isExportable(module)
-	isExportable(module: Module) => @isExportable() && (module.isStandardLibrary() || !@isStandardLibrary(.Full))
-	isExportingFragment() => ((!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())) && !@isStandardLibrary(.Full)
+	isExportable(module: Module) => @isExportable() && (module.isStandardLibrary() || @standardLibrary ~~ .No | .Opened)
+	isExportingFragment() => ((!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())) && @standardLibrary ~~ .No | .Opened
 	isExportingType() => false
 	isExported() => @exported
 	isExtendable() => false
+	isFinite() => false
 	isFlexible() => false
 	isFunction() => false
 	isFusion() => false
@@ -1070,10 +1137,9 @@ abstract class Type {
 	isNullable() => false
 	isNullable(generics: AltType[]?) => @isNullable()
 	isObject() => false
-	isStandardLibrary(): Boolean => @standardLibrary
-	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary
+	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary ~~ mode
 	isPlaceholder() => false
-	isPredefined() => false
+	isPredefined() => @predefined
 	isPrimitive() => false
 	isReducible() => false
 	isReference() => false
@@ -1109,6 +1175,7 @@ abstract class Type {
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
+	isUsingAuxiliary() => @isSealed() && @isExtendable()
 	isValue() => false
 	isValueOf() => false
 	isVariant() => false
@@ -1168,6 +1235,7 @@ abstract class Type {
 		}
 	} # }}}
 	setProperty(name: String, type: Type)
+	setStandardLibrary(@standardLibrary)
 	shallBeNamed() => false
 	sort() => this
 	split(types: Array): Array { # {{{
@@ -1180,23 +1248,30 @@ abstract class Type {
 
 		return types
 	} # }}}
+	toAssertFragments(value: Expression, fragments, node) { # {{{
+		@setNullable(false).toAssertFunctionFragments(value, @isNullable(), fragments, node)
+	} # }}}
 	toAssertFunctionFragments(value: Expression, nullable: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
 
-		@toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+		@toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 
 		fragments.code(')')
 	} # }}}
 	toAssertFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
 	} # }}}
-	toAwareTestFunctionFragments(varname: String, nullable: Boolean, casting: Boolean, blind: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
-		fragments.code(`\(varname) => `)
+	toAwareTestFunctionFragments(varname: String, nullable: Boolean, hasDeferred: Boolean, casting: Boolean, blind: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
+		fragments
+			.code('(') if hasDeferred
+			.code(`\(varname) => `)
 
 		@toBlindTestFragments(null, varname, casting, null, null, Junction.NONE, fragments, node)
+
+		fragments.code(')') if hasDeferred
 	} # }}}
 	toBlindSubtestFunctionFragments(funcname: String?, varname: String, casting: Boolean, propname: String?, nullable: Boolean, generics: Generic[]?, fragments, node) { # {{{
-		@toAwareTestFunctionFragments(varname, nullable, casting, true, null, null, fragments, node)
+		@toAwareTestFunctionFragments(varname, nullable, false, casting, true, null, null, fragments, node)
 	} # }}}
 	toBlindTestFragments(funcname: String?, varname: String, casting: Boolean, generics: Generic[]?, subtypes: AltType[]?, junction: Junction, fragments, node) { # {{{
 		NotImplementedException.throw()
@@ -1222,14 +1297,21 @@ abstract class Type {
 			}
 		}
 
-		if @isSealed() && @isExtendable() {
-			var varname = @getSealedName()
+		var libstd = @getStandardLibrary()
 
-			if `__ks_\(name)` == varname {
-				fragments.line(varname)
+		if @isUsingAuxiliary() && libstd ~~ .No | .Opened {
+			if @hasAuxiliary() && libstd ~~ .No | .Augmented {
+				var varname = @getSealedName()
+
+				if `__ks_\(name)` == varname {
+					fragments.line(varname)
+				}
+				else {
+					fragments.line(`__ks_\(name): \(varname)`)
+				}
 			}
 			else {
-				fragments.line(`__ks_\(name): \(@getSealedName())`)
+				fragments.line(`__ks_\(name): {}`)
 			}
 		}
 	} # }}}
@@ -1291,8 +1373,10 @@ abstract class Type {
 			return `'\(@toQuote())'`
 		}
 	} # }}}
-	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { # {{{
-		reference: @toMetadata(references, indexDelta, mode, module)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		return {
+			reference: @toMetadata(references, indexDelta, mode, module)
+		}
 	} # }}}
 	toRequiredMetadata(requirements: Array<Requirement>) { # {{{
 		if @required {
@@ -1334,6 +1418,22 @@ abstract class Type {
 	} # }}}
 	unflagStrict(): valueof this
 	unspecify(): Type => this
+}
+
+enum Accessibility {
+	Internal = 1
+	Private
+	Protected
+	Public
+
+	static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
+		return match source {
+			.Public => false
+			.Protected => target == .Public
+			.Private => target == .Protected | .Public
+			.Internal => target == .Private | .Protected | .Public
+		}
+	} # }}}
 }
 
 include {

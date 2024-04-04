@@ -1,0 +1,1 @@
+TypeException: Class "Object" doesn't support instance methods (fixtures/compile/libstd/libstd.object.imth.def.extern.ks:3)

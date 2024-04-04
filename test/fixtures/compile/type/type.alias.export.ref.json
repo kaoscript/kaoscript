@@ -44,6 +44,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},

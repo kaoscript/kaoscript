@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_culture_0 = function() {
 		return this._culture;
 	};

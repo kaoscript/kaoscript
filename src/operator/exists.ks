@@ -374,6 +374,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	} # }}}
 	inferTypes(inferables) => @left.inferTypes(inferables)
 	isSpread() => @spread
+	override isSpreadable() => false
 	toFragments(fragments, mode) { # {{{
 		if @spread {
 			var spread = @left.isSpread()
@@ -485,6 +486,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	isSpread() => @spread
+	override isSpreadable() => false
 	operator() => Operator.NullCoalescing
 	symbol() => '??'
 	toFragments(fragments, mode) { # {{{

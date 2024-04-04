@@ -45,7 +45,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function(name, value) {
 		if(name.value.kind === NodeKind.Identifier) {
-			quxbaz(name, value, name, value);
+			quxbaz.__ks_0(name, value, name, value);
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

@@ -74,7 +74,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(cursor) {
-		return Type.isClassInstance(cursor.argument, Quxbaz) ? cursor.argument.foobar() : cursor.argument.__ks_func_foobar_0();
+		return Type.isClassInstance(cursor.argument, Foobar) ? cursor.argument.__ks_func_foobar_0() : cursor.argument.foobar();
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isStructInstance(value, Cursor);

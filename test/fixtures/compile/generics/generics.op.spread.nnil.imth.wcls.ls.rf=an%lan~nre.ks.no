@@ -1,0 +1,12 @@
+class MyArray<T> {
+	push(...elements: T): Void {
+	}
+}
+
+func foobar(values: MyArray<String>) {
+	values.push(...quxbaz()!?)
+}
+
+func quxbaz() {
+	return []
+}

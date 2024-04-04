@@ -1,24 +1,32 @@
 class LenientMethodCallee extends LenientFunctionCallee {
 	private {
+		@auxiliary: Boolean				= false
+		@generics: AltType[]
 		@instance: Boolean
+		@misfit: Boolean
 		@object
 		@objectType: ReferenceType
 		@property: String
-		@sealed: Boolean					= false
+		@standardLibrary: Boolean		= false
 	}
-	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @result, @node) { # {{{
-		this(data, object, objectType, property, assessment, result.possibilities, node)
+	constructor(@data, @object, @objectType, @generics, @property, assessment: Router.Assessment, @result, @node) { # {{{
+		this(data, object, objectType, generics, property, assessment, result.possibilities, node)
 	} # }}}
-	constructor(@data, @object, @objectType, @property, assessment: Router.Assessment, @functions, @node) { # {{{
+	constructor(@data, @object, @objectType, @generics, @property, assessment: Router.Assessment, @functions, @node) { # {{{
 		super(data, assessment, functions, node)
 
 		@instance = @function.isInstance()
+		@misfit = @functions.every((function, ...) => @node.isMisfit() && !function.isSealed())
 
 		for var function in @functions {
-			if function.isSealed() {
-				@sealed = true
+			if function.isUsingAuxiliary() && !@misfit {
+				@auxiliary = true
+			}
 
-				break
+			if @auxiliary && function.isStandardLibrary(.Yes) {
+				@standardLibrary = true
+
+				@node.module().flagLibSTDUsage(@objectType.name())
 			}
 		}
 	} # }}}
@@ -29,39 +37,42 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		@object.releaseReusable()
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
+		var root = @objectType.discard()
+		var generic = !@misfit && root.isGenericInstanceMethod(@property)
+
 		if @flatten {
-			if @sealed {
+			if @auxiliary {
 				if @instance {
-					fragments.code(`\(@objectType.getSealedPath())._im_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._im_\(@property)`)
 				}
 				else {
-					fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._sm_\(@property)`)
 				}
-				
+
 				fragments.code('.apply(null')
-				
+
 				Router.Argument.toFlatFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, @object, fragments, mode)
 			}
 			else {
 				fragments.compileReusable(@object).code(`.\(@property)`)
-				
+
 				if @scope == ScopeKind.Argument {
 					fragments.code('.apply(').compile(node.getCallScope(), mode)
 				}
 				else {
 					fragments.code('.apply(').compile(@object, mode)
 				}
-				
+
 				Router.Argument.toFlatFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, null, fragments, mode)
 			}
 		}
 		else {
-			if @sealed {
+			if @auxiliary {
 				if @instance {
-					fragments.code(`\(@objectType.getSealedPath())._im_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._im_\(@property)`)
 				}
 				else {
-					fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)`)
+					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._sm_\(@property)`)
 				}
 			}
 			else {
@@ -77,7 +88,7 @@ class LenientMethodCallee extends LenientFunctionCallee {
 				ScopeKind.This {
 					fragments.code('(')
 
-					if @sealed && @instance {
+					if @auxiliary && @instance {
 						if var substitute ?= @getContextSubstitute(@object) {
 							substitute(fragments)
 						}
@@ -85,10 +96,48 @@ class LenientMethodCallee extends LenientFunctionCallee {
 							fragments.compile(@object)
 						}
 
+						if generic {
+							if @node.isMisfit() {
+								fragments.code(`, null`)
+							}
+							else {
+								fragments.code(`, {`)
+
+								for var { name, type }, index in @generics {
+									fragments
+										..code(`, `) if index > 0
+										..code(`\(name): `)
+
+									type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
+								}
+
+								fragments.code(`}`)
+							}
+						}
+
 						Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, true, false, fragments, mode)
 					}
 					else {
-						Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, false, false, fragments, mode)
+						if generic {
+							if @node.isMisfit() {
+								fragments.code(`null`)
+							}
+							else {
+								fragments.code(`{`)
+
+								for var { name, type }, index in @generics {
+									fragments
+										..code(`, `) if index > 0
+										..code(`\(name): `)
+
+									type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
+								}
+
+								fragments.code(`}`)
+							}
+						}
+
+						Router.Argument.toFragments(@result?.positions, @result?.labels, node.arguments(), @function, @labelable, generic, false, fragments, mode)
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = {};
+	const __ks_Function = {};
 	__ks_Function.__ks_func_foo_0 = function() {
 		return Helper.concatString("foo", this());
 	};

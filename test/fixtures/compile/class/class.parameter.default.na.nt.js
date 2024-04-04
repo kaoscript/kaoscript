@@ -29,7 +29,7 @@ module.exports = function() {
 		__ks_cons_0() {
 		}
 		__ks_cons_1(message) {
-			this._message = message;
+			this._message = Helper.assertString(message, 0);
 		}
 		__ks_cons_2(number) {
 			Greetings.prototype.__ks_cons_1.call(this, Helper.toString(number));

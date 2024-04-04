@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_sttc_today_0 = function() {
 		return __ks_Date.__ks_func_midnight_0.call(new Date());
 	};

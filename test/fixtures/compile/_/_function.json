@@ -15,6 +15,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -52,6 +53,7 @@
         "kind": "class",
         "original": 0,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -95,7 +97,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjMwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6MzR9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxMCwiY29sdW1uIjozMH0sImVuZCI6eyJsaW5lIjoxMCwiY29sdW1uIjozNH19"
                 },
                 {
                   "external": "args",

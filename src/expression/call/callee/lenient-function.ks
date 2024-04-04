@@ -53,6 +53,22 @@ class LenientFunctionCallee extends LenientCallee {
 	releaseReusable() { # {{{
 		@expression.releaseReusable()
 	} # }}}
+	override shouldArgumentUseReusable(argument) { # {{{
+		if ?@result {
+			for var position in @result.positions {
+				if position is Array {
+					for var { element?, property? } in position {
+						return true if ?element || ?property
+					}
+				}
+				else {
+					return true if ?position.element || ?position.property
+				}
+			}
+		}
+
+		return false
+	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @flatten {
 			if @scope == ScopeKind.Argument {

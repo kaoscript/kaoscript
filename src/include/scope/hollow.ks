@@ -99,7 +99,7 @@ class HollowScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if variable != null {
-				return variable!!
+				return variable
 			}
 		}
 

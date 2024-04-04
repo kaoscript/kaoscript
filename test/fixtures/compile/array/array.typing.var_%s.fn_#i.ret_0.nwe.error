@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "String" (fixtures/compile/array/array.typing.var_%s.fn_#i.ret_0.nwe.ks:6)

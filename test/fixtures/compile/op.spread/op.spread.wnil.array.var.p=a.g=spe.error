@@ -1,0 +1,1 @@
+TypeException: The operand "values" must be nullable in the operation "...?" (fixtures/compile/op.spread/op.spread.wnil.array.var.p=a.g=spe.ks:2)

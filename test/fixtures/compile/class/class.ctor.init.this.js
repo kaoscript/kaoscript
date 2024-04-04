@@ -23,7 +23,7 @@ module.exports = function() {
 			Foobar.prototype.__ks_cons_1.call(this, 0);
 		}
 		__ks_cons_1(x) {
-			this._x = x;
+			this._x = Helper.assertNumber(x, 0);
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isValue;

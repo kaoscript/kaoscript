@@ -12,9 +12,9 @@
     "exports": [
       0,
       "corge",
-      1,
-      "grault",
       2,
+      "grault",
+      3,
       "x",
       "Any?",
       "y"
@@ -29,7 +29,9 @@
           {
             "external": "x",
             "internal": "x",
-            "type": "String",
+            "type": {
+              "reference": 1
+            },
             "min": 1,
             "max": 1,
             "default": false
@@ -37,6 +39,28 @@
         ],
         "returns": "Any?",
         "errors": []
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       },
       {
         "kind": "function",

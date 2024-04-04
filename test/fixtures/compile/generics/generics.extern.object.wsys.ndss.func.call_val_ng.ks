@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system class Object<V, K> {
 	static {
 		keys(obj: Object<V, K>): Array<K>

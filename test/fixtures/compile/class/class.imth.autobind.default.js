@@ -33,6 +33,6 @@ module.exports = function() {
 	}
 	const f = Foobar.__ks_new_0();
 	let x = Helper.bindMethod(f, "x");
-	console.log(x());
+	console.log(x.__ks_0());
 	console.log(f.__ks_func_x_0());
 };

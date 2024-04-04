@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(from === void 0 || from === null) {
 			from = 0;

@@ -1,0 +1,11 @@
+class Foobar {
+	foobar<T>(x: T): T {
+		return x
+	}
+}
+
+func foobar(x) {
+	var value = Foobar.new()
+
+	echo(`\(value.foobar(x))`)
+}

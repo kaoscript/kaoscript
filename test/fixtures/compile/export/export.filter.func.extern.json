@@ -15,6 +15,7 @@
         "sealed": false,
         "system": false,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -26,7 +27,9 @@
               "sealed": false,
               "async": false,
               "parameters": [],
-              "returns": "String",
+              "returns": {
+                "reference": 1
+              },
               "errors": [],
               "inits": []
             }
@@ -37,16 +40,35 @@
           -1,
           -1,
           -1
+        ]
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        }
+        "sharedMethods": {}
       }
     ]
   },
   {
     "exports": [
-      1,
+      2,
       "foobar"
     ],
     "references": [

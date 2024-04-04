@@ -272,7 +272,12 @@ class VariableDeclaration extends AbstractNode {
 				declarator.setDeclaredType(AnyType.NullableUnexplicit)
 			}
 
-			declarator.setRealType(@type)
+			if @value is UnaryOperatorTypeFitting && @value.isForced() {
+				pass
+			}
+			else {
+				declarator.setRealType(@type)
+			}
 
 			@parent.assignTempVariables(@valueScope)
 
@@ -574,6 +579,7 @@ class VariableBindingDeclarator extends AbstractNode {
 
 class VariableIdentifierDeclarator extends AbstractNode {
 	private late {
+		@assert: Boolean					= false
 		@identifier: IdentifierLiteral
 		@lateInit: Boolean					= false
 		@name: String
@@ -681,12 +687,11 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} # }}}
 	setRealType(mut type: Type) { # {{{
 		if ?@type {
-			// echo(type)
-			// echo(@type)
-			// echo(type.hashCode(), @type.hashCode())
 			unless type.isAssignableToVariable(@type, true, false, false) {
 				TypeException.throwInvalidAssignment(@name, @type, type, this)
 			}
+
+			@assert = !type.isAssignableToVariable(@type, false, false, false)
 
 			if type.isLiberal() {
 				if @type.isAlias() {
@@ -720,11 +725,23 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	toAssignmentFragments(fragments, value ??= @parent.value()) { # {{{
 		fragments.compile(@identifier).code($equals)
 
+		if @assert {
+			fragments.code(`\($runtime.helper(this)).assert(`)
+		}
+
 		if value is DisruptiveExpression {
 			fragments.wrap(value)
 		}
 		else {
 			fragments.compile(value)
+		}
+
+		if @assert {
+			fragments.code(`, \($quote(@type.toQuote(true))), \(@nullable ? '1' : '0'), `)
+
+			@type.toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, this)
+
+			fragments.code(')')
 		}
 	} # }}}
 	type() => @type

@@ -24,7 +24,7 @@ module.exports = function() {
 			Greetings.prototype.__ks_cons_1.call(this, "Hello!");
 		}
 		__ks_cons_1(message) {
-			this._message = message;
+			this._message = Helper.assertString(message, 0);
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isValue;

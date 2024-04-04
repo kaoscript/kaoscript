@@ -58,6 +58,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -207,9 +208,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       },
       {
@@ -287,6 +285,7 @@
         "kind": "class",
         "original": 2,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -306,7 +305,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6MTgsImNvbHVtbiI6MjF9LCJlbmQiOnsibGluZSI6MTgsImNvbHVtbiI6MjZ9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6MjAsImNvbHVtbiI6MjF9LCJlbmQiOnsibGluZSI6MjAsImNvbHVtbiI6MjZ9fQ=="
                 }
               ],
               "returns": "Array",
@@ -355,7 +354,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjMxLCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjMxLCJjb2x1bW4iOjE3fX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjMzLCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjMzLCJjb2x1bW4iOjE3fX0="
                 }
               ],
               "returns": "Number",
@@ -370,9 +369,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

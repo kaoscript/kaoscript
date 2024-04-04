@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Number, __ks_Math) {
-	if(!Type.isValue(__ks_Number)) {
+	if(!__ks_Number) {
 		__ks_Number = {};
 	}
 	console.log(Math.PI.toString());
@@ -8,7 +8,7 @@ module.exports = function(__ks_Number, __ks_Math) {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
-		precision = Math.pow(10, precision).toFixed(0);
+		precision = Helper.assertNumber(Math.pow(10, precision).toFixed(0), 0);
 		return Math.round.__ks_0([this * precision]) / precision;
 	};
 	__ks_Number._im_round = function(that, ...args) {

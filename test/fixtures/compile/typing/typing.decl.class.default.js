@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Foobar = {};
+	const __ks_Foobar = {};
 	__ks_Foobar.__ks_func_foobar_0 = function() {
 	};
 	__ks_Foobar._im_foobar = function(that, ...args) {
@@ -20,7 +20,7 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function(x) {
 		let y = null;
-		y = bar.__ks_0();
+		y = Helper.assert(bar.__ks_0(), "\"Foobar\"", 1, value => Type.isClassInstance(value, Foobar));
 		if(y !== null) {
 			__ks_Foobar.__ks_func_foobar_0.call(y);
 		}

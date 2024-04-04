@@ -24,7 +24,7 @@ module.exports = function() {
 			Greetings.prototype.__ks_cons_1.call(this, "Hello!");
 		}
 		__ks_cons_1(message) {
-			this._message = message;
+			this._message = Helper.assertString(message, 0);
 		}
 		__ks_cons_rt(args) {
 			const t0 = Type.isValue;
@@ -51,7 +51,6 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const __ks_Greetings = {};
 	let hello = Greetings.__ks_new_1("Hello world!");
 	console.log(hello.__ks_func_greet_0("miss White"));
 };

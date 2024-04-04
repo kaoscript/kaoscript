@@ -161,25 +161,30 @@ abstract class Importer extends Statement {
 					}
 
 					var type = @worker.getType(name)
+
 					if ?def.type && !type.isSubsetOf(def.type, MatchingMode.Signature) {
 						TypeException.throwNotCompatibleDefinition(def.internal, name, @data.source.value, this)
 					}
 
 					if def.newVariable {
 						var declType = type ?? def.type
-							..flagStandardLibrary() if variable.isStandardLibrary()
+							..setStandardLibrary(LibSTDMode.Yes + LibSTDMode.Closed) if variable.isStandardLibrary()
 
 						variable.setDeclaredType(declType)
 					}
-					else if variable.isStandardLibrary(.Full) && type?.isStandardLibrary(LibSTDMode.Partial) {
+					else if variable.isStandardLibrary(.Closed) && type?.isStandardLibrary(LibSTDMode.Opened) {
 						variable.getDeclaredType().merge(type)
 					}
-					else if !variable.isPredefined() && @arguments.fromLocal[def.internal] is not Number {
-						ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
+					else if !variable.isPredefined() && !?@arguments.fromLocal[def.internal] {
+						unless variable.isStandardLibrary(.Closed) {
+							ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
+						}
+
+						variable.getDeclaredType().merge(type)
 					}
 					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode.Signature + MatchingMode.Renamed) {
 						var declType = type ?? def.type
-							..flagStandardLibrary() if variable.isStandardLibrary()
+							..setStandardLibrary(LibSTDMode.Yes + LibSTDMode.Closed) if variable.isStandardLibrary()
 							..flagAlien() if variable.getDeclaredType().isAlien()
 
 						variable.setDeclaredType(declType)
@@ -209,6 +214,10 @@ abstract class Importer extends Statement {
 							system: type.isSystem()
 						)
 
+						if !@standardLibrary && type.isUsingAuxiliary() && !type.hasAuxiliary() {
+							type.flagAuxiliary()
+						}
+
 						@variables[name] = var
 
 						if var.sealed {
@@ -218,7 +227,7 @@ abstract class Importer extends Statement {
 							@count += 1
 						}
 
-						if type.isSystem() && def.internal == 'Object' {
+						if !@standardLibrary && type.isSystem() && def.internal == 'Object' {
 							module.flag('Object')
 						}
 						else {
@@ -236,7 +245,7 @@ abstract class Importer extends Statement {
 				for var { def, type } in types {
 					type
 						..setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
-						..flagStandardLibrary() if @standardLibrary
+						..setStandardLibrary(LibSTDMode.Yes + LibSTDMode.Closed) if @standardLibrary
 				}
 
 				@count += 1
@@ -252,16 +261,8 @@ abstract class Importer extends Statement {
 			}
 		}
 
-		if @count != 0 {
-			if @alias == null {
-				if @count > 1 {
-					@reuseName = @scope.acquireTempName(false)
-					@scope.releaseTempName(@reuseName)
-				}
-			}
-			else {
-				@reuseName = @alias
-			}
+		if @count != 0 && ?@alias {
+			@reuseName = @alias
 		}
 	} # }}}
 	analyse() { # {{{
@@ -277,6 +278,7 @@ abstract class Importer extends Statement {
 	translate()
 	addArgument(data, autofill, arguments) { # {{{
 		var argument = {
+			auxiliary: false
 			index: @isKSFile ? null : 0
 			isApproved: true
 			isAutofill: autofill
@@ -399,7 +401,9 @@ abstract class Importer extends Statement {
 			@count += 1
 		}
 	} # }}}
-	buildArguments(metadata, arguments: Arguments = Arguments.new()): Arguments { # {{{
+	buildArguments(metadata): Arguments { # {{{
+		var arguments = Arguments.new()
+
 		@scope.line(@line() - 1)
 
 		if @data.arguments?.length != 0 {
@@ -485,6 +489,7 @@ abstract class Importer extends Statement {
 					argument.index = i / 3
 
 					argument.type = Type.import(index, metadata.references, reqReferences, alterations, queue, @scope, this)
+					argument.auxiliary = argument.type.hasAuxiliary()
 
 					reqReferences[index] = Type.toNamedType(name, argument.type)
 
@@ -529,12 +534,10 @@ abstract class Importer extends Statement {
 
 			if variable.getRealType().isSubsetOf(argument.type, MatchingMode.Signature) {
 				argument.type = variable.getRealType()
+				argument.auxiliary = argument.type.hasAuxiliary()
 			}
 			else if argument.isAutofill {
-				arguments.values.splice(index, 1)
-
-				Object.delete(arguments.fromLocal, argument.identifier)
-				Object.delete(arguments.toImport, argument.name)
+				pass
 			}
 			else {
 				TypeException.throwNotCompatibleArgument(argument.identifier, argument.name, @data.source.value, this)
@@ -826,7 +829,7 @@ abstract class Importer extends Statement {
 
 		@metaRequirements = compiler.toRequirements()
 
-		@buildArguments(@metaRequirements, @arguments)
+		@arguments = @buildArguments(@metaRequirements)
 
 		var arguments: Any[] = [false for var i from 0 to~ @metaRequirements.requirements.length / 3]
 
@@ -1051,29 +1054,29 @@ abstract class Importer extends Statement {
 	registerMacro(name, macro) { # {{{
 		@parent.registerMacro(name, macro)
 	} # }}}
-	toImportFragments(fragments, destructuring = true) { # {{{
+	toImportFragments(fragments, destructuring: Boolean = true, roi: Boolean = false) { # {{{
 		if @isKSFile {
-			@toKSFileFragments(fragments, destructuring)
+			@toKSFileFragments(fragments, destructuring, roi)
 		}
 		else {
-			@toNodeFileFragments(fragments, destructuring)
+			@toNodeFileFragments(fragments, destructuring, roi)
 		}
 	} # }}}
-	toKSFileFragments(fragments, destructuring) { # {{{
+	toKSFileFragments(fragments, destructuring: Boolean, roi: Boolean) { # {{{
 		if @count == 0 {
 			if ?@alias {
 				var line = fragments
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.done()
 			}
 			else if @arguments.values.length != 0 {
 				var line = fragments.newLine()
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.done()
 			}
@@ -1084,7 +1087,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.done()
 			}
@@ -1095,7 +1098,7 @@ abstract class Importer extends Statement {
 						.newLine()
 						.code(`var \(@typeTestName) = `)
 
-					@toRequireFragments(line)
+					@toRequireFragments(line, roi)
 
 					line.code(`.__ksType`).done()
 				}
@@ -1111,7 +1114,7 @@ abstract class Importer extends Statement {
 							.newLine()
 							.code(`var __ks_\(variable.name) = `)
 
-						@toRequireFragments(line)
+						@toRequireFragments(line, roi)
 
 						line.code(`.__ks_\(name)`).done()
 					}
@@ -1120,7 +1123,7 @@ abstract class Importer extends Statement {
 							.newLine()
 							.code(`var \(variable.name) = `)
 
-						@toRequireFragments(line)
+						@toRequireFragments(line, roi)
 
 						line.code(`.\(name)`).done()
 					}
@@ -1138,7 +1141,7 @@ abstract class Importer extends Statement {
 							.newLine()
 							.code('var __ks__ = ')
 
-						@toRequireFragments(line)
+						@toRequireFragments(line, roi)
 
 						line.done()
 
@@ -1238,7 +1241,7 @@ abstract class Importer extends Statement {
 
 					line.code('} = ')
 
-					@toRequireFragments(line)
+					@toRequireFragments(line, roi)
 
 					line.done()
 				}
@@ -1262,18 +1265,18 @@ abstract class Importer extends Statement {
 
 		line.code('} = ')
 
-		@toRequireFragments(line)
+		@toRequireFragments(line, false)
 
 		line.done()
 	} # }}}
-	toNodeFileFragments(fragments, destructuring) { # {{{
+	toNodeFileFragments(fragments, destructuring: Boolean, roi: Boolean) { # {{{
 		if @count == 0 {
 			if @alias != null {
 				var line = fragments
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.done()
 			}
@@ -1284,7 +1287,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.done()
 			}
@@ -1299,7 +1302,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code(`var \(variable.name) = `)
 
-				@toRequireFragments(line)
+				@toRequireFragments(line, roi)
 
 				line.code(`.\(name)`).done()
 			}
@@ -1309,7 +1312,7 @@ abstract class Importer extends Statement {
 						.newLine()
 						.code(`var __ks__ = `)
 
-					@toRequireFragments(line)
+					@toRequireFragments(line, roi)
 
 					line.done()
 
@@ -1353,14 +1356,14 @@ abstract class Importer extends Statement {
 
 					line.code(`} = `)
 
-					@toRequireFragments(line)
+					@toRequireFragments(line, roi)
 
 					line.done()
 				}
 			}
 		}
 	} # }}}
-	toRequireFragments(fragments) { # {{{
+	toRequireFragments(fragments, roi: Boolean) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -1409,24 +1412,39 @@ abstract class Importer extends Statement {
 			if @hasArguments {
 				fragments.code(`(`)
 
-				var mut nf = false
-
-				for var argument in @arguments.values when argument.isApproved && argument.index != null {
-					if nf {
-						fragments.code($comma)
-					}
-					else {
-						nf = true
-					}
+				for var argument, index in @arguments.values when argument.isApproved && argument.index != null {
+					fragments.code($comma) if index > 0
 
 					if argument.isIdentifier && argument.type.isSystem() {
-						fragments.code(`__ks_\(argument.identifier)`)
+						if argument.auxiliary {
+							fragments.code(`__ks_\(argument.identifier)`)
+						}
+						else if argument.required {
+							fragments.code(`__ks_\(argument.identifier) || {}`)
+						}
+						else if argument.type.isRequirement() {
+							fragments.code(`__ks_\(argument.identifier)`)
+						}
+						else {
+							fragments.code(`{}`)
+						}
 					}
 					else {
 						fragments.compile(argument.value)
 
 						 if argument.isIdentifier && argument.type.isSealed() {
-							fragments.code(`, __ks_\(argument.identifier)`)
+						 	if argument.auxiliary {
+								fragments.code(`, __ks_\(argument.identifier)`)
+							}
+							else if argument.required {
+								fragments.code(`, __ks_\(argument.identifier) || {}`)
+							}
+							else if argument.type.isRequirement() {
+								fragments.code(`, __ks_\(argument.identifier)`)
+							}
+							else {
+								fragments.code(`, {}`)
+							}
 						}
 					}
 				}
@@ -1533,8 +1551,7 @@ class ImportWorker {
 			if !?references[index] {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
 
-				var origin = type.origin()
-				if ?origin {
+				if var origin ?= type.origin() {
 					type.origin(origin:!(TypeOrigin) + TypeOrigin.Extern + TypeOrigin.Import)
 				}
 				else {
@@ -1619,6 +1636,7 @@ class ImportWorker {
 					if argument.isApproved {
 						if argument.required {
 							argument.type = reqReferences[reqIndex]
+							argument.auxiliary = argument.type.hasAuxiliary()
 						}
 
 						if var type ?= references[reqIndex] {
@@ -1730,7 +1748,7 @@ class ImportWorker {
 			}
 		}
 
-		while queue.length > 0 {
+		while ?#queue {
 			queue.shift()()
 		}
 

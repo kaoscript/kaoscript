@@ -298,8 +298,13 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		if @subject.isInferable() {
+			// echo(subjectType)
+			// echo(@testType)
+			// echo(subjectType.hashCode(), @testType.hashCode())
 			@trueType = subjectType.limitTo(@testType)
+			// echo(@trueType.hashCode())
 			@falseType = subjectType.trimOff(@trueType)
+			// echo(@falseType.hashCode())
 		}
 
 		@testNullable = @subject.isNullable()
@@ -530,14 +535,22 @@ class UnaryOperatorTypeFitting extends UnaryOperatorExpression {
 		super(target, targetMode)
 
 		if @forced {
-			if !@parent.isExpectingType() {
-				SyntaxException.throwInvalidForcedTypeCasting(this)
+			unless @parent.isExpectingType() {
+				TypeException.throwUnknownForcedTypeFitting(this)
 			}
+
+			unless target.isAssignableToVariable(@argument.type(), true, false, false) {
+				TypeException.throwUnexpectedForcedTypeFitting(target, @argument.type(), this)
+			}
+
+			@type = @argument.type()
 		}
 		else {
 			@type = @argument.type().setNullable(false)
 		}
 	} # }}}
+	override isFitting() => @forced
+	isForced() => @forced
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
 	} # }}}

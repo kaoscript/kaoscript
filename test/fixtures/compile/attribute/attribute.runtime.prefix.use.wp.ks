@@ -1,3 +1,4 @@
+#![libstd(off)]
 #![runtime(prefix='KS')]
 
 impl Object {

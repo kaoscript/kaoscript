@@ -9,7 +9,7 @@ module.exports = function() {
 			y = bar.__ks_0();
 		}
 		if(y !== null) {
-			return y.z.toString();
+			return Helper.assertString(y.z.toString(), 0);
 		}
 		else {
 			return "";

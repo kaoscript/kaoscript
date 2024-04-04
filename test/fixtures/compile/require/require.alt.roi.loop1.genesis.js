@@ -1,9 +1,9 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_Object) {
-	if(!Type.isValue(__ks_Array)) {
+	if(!__ks_Array) {
 		__ks_Array = {};
 	}
-	if(!Type.isValue(__ks_Object)) {
+	if(!__ks_Object) {
 		__ks_Object = {};
 	}
 	__ks_Array.__ks_sttc_clone_0 = function(value) {
@@ -16,9 +16,6 @@ module.exports = function(__ks_Array, __ks_Object) {
 				return __ks_Array.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Array.clone) {
-			return Array.clone(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Object.__ks_sttc_clone_0 = function(value) {
@@ -30,9 +27,6 @@ module.exports = function(__ks_Array, __ks_Object) {
 			if(t0(arguments[0])) {
 				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
-		}
-		if(Object.clone) {
-			return Object.clone(...arguments);
 		}
 		throw Helper.badArgs();
 	};

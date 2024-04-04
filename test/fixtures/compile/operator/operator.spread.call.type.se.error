@@ -1,1 +1,0 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (...String) (fixtures/compile/operator/operator.spread.call.type.se.ks:2)

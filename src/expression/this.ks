@@ -341,7 +341,7 @@ class ThisExpression extends Expression {
 
 			match node.matchArguments(assessment) {
 				is LenientCallMatchResult with var { possibilities } {
-					node.addCallee(LenientThisCallee.new(node.data(), this, @name, possibilities, node))
+					node.addCallee(LenientThisCallee.new(node.data(), this, @name, generics, possibilities, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
 					if matches.length == 1 {
@@ -353,7 +353,7 @@ class ThisExpression extends Expression {
 					else {
 						var functions = [match.function for var match in matches]
 
-						node.addCallee(LenientThisCallee.new(node.data(), this, @name, functions, node))
+						node.addCallee(LenientThisCallee.new(node.data(), this, @name, generics, functions, node))
 					}
 				}
 				else {

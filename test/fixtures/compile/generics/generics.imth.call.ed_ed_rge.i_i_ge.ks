@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system class Array<T> {
 	length: Number
 	splice(start: Number = 0, deleteCount: Number = 0, ...items: T): T[]

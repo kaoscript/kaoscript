@@ -2,7 +2,7 @@ require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array) {
 	const PI = 3.14;
-	if(!Type.isValue(__ks_Array)) {
+	if(!__ks_Array) {
 		var __ks_Array = require("../_/._array.ks.j5k8r9.ksb")().__ks_Array;
 	}
 	__ks_Array.__ks_func_contains_0 = function(item, from) {

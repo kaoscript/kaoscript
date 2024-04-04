@@ -3,6 +3,7 @@ struct CallMatchArgument {
 	element: Number?	= null
 	from: Number?		= null
 	to: Number?			= null
+	property: String?	= null
 }
 
 type CallMatchPosition = CallMatchArgument | CallMatchArgument[]
@@ -18,7 +19,7 @@ struct PreciseCallMatchResult {
 
 struct LenientCallMatchResult {
 	possibilities: FunctionType[]
-	positions: Number[]				= []
+	positions: CallMatchPosition[]	= []
 	labels: Number{}				= {}
 	matches: CallMatch[]?			= null
 }
@@ -80,10 +81,14 @@ namespace Router {
 	}
 
 	struct NamingArgument {
+		element: Number?	= null
+		fitting: Boolean	= false
 		index: Number
 		name: String?		= null
-		type: Type
+		property: Boolean	= false
+		spread: Boolean		= false
 		strict: Boolean
+		type: Type
 		value: Expression?	= null
 	}
 
@@ -133,6 +138,7 @@ namespace Router {
 		rest: Boolean
 		variadic: Boolean						= false
 		min: Number								= 1
+		dynamicMax: Boolean						= false
 		max: Number								= 1
 		parameters: Object<TreeParameter>		= {}
 		isNode: Boolean
@@ -168,6 +174,8 @@ namespace Router {
 
 	struct MatchContext {
 		async: Boolean
+		fitting: Boolean					= false
+		fittingSpread: Boolean				= false
 		found: Boolean						= false
 		arguments: Array<Type>
 		excludes: Array<String>
@@ -357,6 +365,8 @@ namespace Router {
 
 		var mut namedCount = 0
 		var mut shortCount = 0
+		var mut fitting = false
+		var mut fittingSpread = false
 		var invalids = {}
 
 		if assessment.macro {
@@ -373,10 +383,15 @@ namespace Router {
 		else {
 			for var argument, index in arguments {
 				if argument is RestrictiveExpression | BinaryOperatorTypeAssertion | BinaryOperatorTypeCasting | UnaryOperatorTypeFitting | BinaryOperatorTypeSignalment {
-					[namedCount, shortCount] = Matching.prepare(argument.expression(), index, nameds, shorthands, indexeds, invalids, namedCount, shortCount)
+					[namedCount, shortCount] = Matching.prepare(argument.expression(), index, argument.isFitting(), nameds, shorthands, indexeds, invalids, namedCount, shortCount, assessment, node)
 				}
 				else {
-					[namedCount, shortCount] = Matching.prepare(argument, index, nameds, shorthands, indexeds, invalids, namedCount, shortCount)
+					[namedCount, shortCount] = Matching.prepare(argument, index, argument.isFitting(), nameds, shorthands, indexeds, invalids, namedCount, shortCount, assessment, node)
+				}
+
+				if argument.isFitting() {
+					fitting = true
+					fittingSpread ||= argument.isSpread()
 				}
 
 				types.push(argument.type())
@@ -430,10 +445,10 @@ namespace Router {
 		var gg = { [name]: type for var { name, type } in generics }
 
 		if namedCount > 0 || shortCount > 0 {
-			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, gg, mode, node)
+			return Matching.matchArguments(assessment, route, types, nameds, shorthands, indexeds, gg, fitting, fittingSpread, mode, node)
 		}
 		else {
-			return Matching.matchArguments(assessment, route, types, [], indexeds, gg, mode, node)
+			return Matching.matchArguments(assessment, route, types, [], indexeds, gg, fitting, fittingSpread, mode, node)
 		}
 	} # }}}
 
@@ -441,6 +456,7 @@ namespace Router {
 		buildPath: PathBuilder
 		args!: String = 'args'
 		assessment: Assessment
+		hasDeferred: Boolean = false
 		fragments: BlockBuilder
 		footerType: FooterType = FooterType.MUST_THROW
 		footer: Function = Fragment.toDefaultFooter
@@ -465,7 +481,7 @@ namespace Router {
 		}
 
 		var mark = fragments.mark()
-		var helper = Fragment.buildHelper(mark, args, node)
+		var helper = Fragment.buildHelper(mark, args, hasDeferred, node)
 		var fallback = footerType != FooterType.MUST_THROW
 		var mut continuous = true
 		var mut useAllArgs = false
@@ -621,36 +637,33 @@ namespace Router {
 			}
 
 			var parameters = function.parameters()
+			var alien = function.isAlien()
 
 			for var position, index in arguments {
-				fragments.code($comma) if index != 0
-
 				var parameter = parameters[index].type()
 
 				if position is Array {
-					if function.isAlien() {
-						for var { index }, i in position {
-							fragments.code($comma) if i != 0
+					if alien {
+						if #position > 0 {
+							fragments.code($comma) if index != 0
 
-							expressions[index].toArgumentFragments(fragments, mode)
+							for var { index % eIndex }, i in position {
+								fragments.code($comma) if i != 0
+
+								expressions[eIndex].toArgumentFragments(fragments, mode)
+							}
 						}
 
 						continue
 					}
 
-					if position.length == 1 {
+					fragments.code($comma) if index != 0
+
+					if #position == 1 {
 						var expression = expressions[position[0].index]
 
 						if ?position[0].from {
-							expression.argument().toArgumentFragments(fragments, mode)
-
-							fragments.code(`.slice(\(position[0].from)`)
-
-							if ?position[0].to {
-								fragments.code(`, \(position[0].to + 1)`)
-							}
-
-							fragments.code(')')
+							expression.toArgumentFragments(fragments, position[0].from, position[0].to, mode)
 
 							continue
 						}
@@ -668,20 +681,19 @@ namespace Router {
 
 					fragments.code('[') if precise
 
-					for var { index?, element?, from? }, i in position {
+					for var { index?, element?, from?, property? }, i in position {
 						fragments.code($comma) if i != 0
 
 						if ?element {
-							expressions[index].argument().toArgumentFragments(fragments, mode)
-
-							fragments.code(`[\(element)]`)
+							expressions[index].toArgumentFragments(fragments, element, mode)
 						}
 						else if ?from {
 							fragments.code('...')
 
-							expressions[index].argument().toArgumentFragments(fragments, mode)
-
-							fragments.code(`.slice(\(from))`)
+							expressions[index].toArgumentFragments(fragments, from, mode)
+						}
+						else if ?property {
+							expressions[index].toArgumentFragments(fragments, property, mode)
 						}
 						else {
 							expressions[index].toArgumentFragments(fragments, parameter, mode)
@@ -691,18 +703,21 @@ namespace Router {
 					fragments.code(']') if precise
 				}
 				else {
-					var { index?, element? } = position
+					fragments.code($comma) if index != 0
 
-					if !?index {
+					var { index % eIndex?, element?, property? } = position
+
+					if !?eIndex {
 						fragments.code('void 0')
 					}
 					else if ?element {
-						expressions[index].argument().toArgumentFragments(fragments, mode)
-
-						fragments.code(`[\(element)]`)
+						expressions[eIndex].toArgumentFragments(fragments, element, mode)
+					}
+					else if ?property {
+						expressions[eIndex].toArgumentFragments(fragments, property, mode)
 					}
 					else {
-						expressions[index].toArgumentFragments(fragments, parameter, mode)
+						expressions[eIndex].toArgumentFragments(fragments, parameter, mode)
 					}
 				}
 			}

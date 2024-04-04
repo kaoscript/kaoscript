@@ -15,6 +15,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -26,7 +27,9 @@
               "sealed": false,
               "async": false,
               "parameters": [],
-              "returns": "String",
+              "returns": {
+                "reference": 1
+              },
               "errors": [],
               "inits": []
             }
@@ -39,14 +42,36 @@
           -1
         ],
         "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       }
     ]
   },
   {
     "exports": [
-      1,
-      "foobar",
       2,
+      "foobar",
+      3,
       "Function"
     ],
     "references": [
@@ -66,7 +91,7 @@
           }
         ],
         "returns": {
-          "reference": 2
+          "reference": 3
         },
         "errors": []
       },
@@ -74,6 +99,7 @@
         "kind": "class",
         "original": 0,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -103,7 +129,7 @@
                   "external": "self",
                   "internal": "self",
                   "type": {
-                    "reference": 2
+                    "reference": 3
                   },
                   "min": 1,
                   "max": 1,
@@ -117,7 +143,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjMwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6MzR9fQ=="
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxMCwiY29sdW1uIjozMH0sImVuZCI6eyJsaW5lIjoxMCwiY29sdW1uIjozNH19"
                 },
                 {
                   "external": "args",

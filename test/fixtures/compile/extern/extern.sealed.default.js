@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
+	const __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function() {
 		return "00" + this.toString();
 	};
@@ -13,7 +13,6 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	var __ks_Math = {};
 	__ks_Number.__ks_func_zeroPad_0.call(Math.pow(3, 2));
 	__ks_Number.__ks_func_zeroPad_0.call(Math.PI);
 };

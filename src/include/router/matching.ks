@@ -12,16 +12,20 @@ namespace Matching {
 			excludes: String[]
 			indexeds: NamingArgument[]
 			generics: Type{}
+			fitting: Boolean
+			fittingSpread: Boolean
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult { # {{{
-			var combinations = splitArguments(arguments)
+			var combinations = splitArguments(arguments, null, null, indexeds, fitting)
 
 			if combinations.length == 1 {
 				var context = MatchContext.new(
 					arguments: combinations[0]
 					excludes
 					async: assessment.async
+					fitting
+					fittingSpread
 					indexeds
 					mode
 					node
@@ -29,13 +33,13 @@ namespace Matching {
 				var length = getLength(context.arguments) + (assessment.async ? 1 : 0)
 
 				for var tree in route.trees {
-					if length != Infinity && (length < tree.min || 0 < tree.max < length) {
+					if length != Infinity && (length < tree.min || (!fittingSpread && 0 < tree.max < length)) {
 						continue
 					}
 
 					WithIndex.match(tree, context, {...generics})
 
-					if mode == .BestMatch && context.found && ?#context.matches && !?#context.possibilities {
+					if !fitting && mode == .BestMatch && context.found && ?#context.matches && !?#context.possibilities {
 						return PreciseCallMatchResult.new(context.matches)
 					}
 				}
@@ -69,7 +73,7 @@ namespace Matching {
 					var mut nf = true
 
 					for var tree in route.trees while nf {
-						if length != Infinity && (length < tree.min || 0 < tree.max < length) {
+						if length != Infinity && (length < tree.min || (!fittingSpread && 0 < tree.max < length)) {
 							continue
 						}
 
@@ -110,15 +114,17 @@ namespace Matching {
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
 			generics: Type{}
+			fitting: Boolean
+			fittingSpread: Boolean
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult { # {{{
-			var combinations = splitArguments(arguments)
+			var combinations = splitArguments(arguments, nameds, shorthands, indexeds, fitting)
 
 			var results = []
 
 			for var combination in combinations {
-				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], {...generics}, mode, node) {
+				match var result = WithName.match(assessment, route, combination, nameds, shorthands, [...indexeds], {...generics}, fitting, fittingSpread, mode, node) {
 					is LenientCallMatchResult | PreciseCallMatchResult {
 						results.push(result)
 					}
@@ -131,16 +137,19 @@ namespace Matching {
 			return mergeResults(results)
 		} # }}}
 
-		func prepare(argument, index, nameds, shorthands, indexeds, invalids, mut namedCount, mut shortCount) { # {{{
+		func prepare(argument, index, fitting: Boolean, nameds, shorthands, indexeds, invalids, mut namedCount, mut shortCount, assessment: Assessment, node: AbstractNode) { # {{{
 			match argument {
 				is NamedArgument {
 					var name = argument.name()
 
-					if ?nameds[name] {
-						throw NotSupportedException.new()
+					if var existing ?= nameds[name] {
+						unless existing.spread && existing.fitting {
+							SyntaxException.throwDuplicateNamedArgument(name, node)
+						}
 					}
 
 					nameds[name] = NamingArgument.new(
+						fitting
 						index
 						name
 						type: argument.type()
@@ -160,6 +169,7 @@ namespace Matching {
 
 					if argument.variable().isPredefined() {
 						indexeds.push(NamingArgument.new(
+							fitting
 							index
 							type: argument.type()
 							strict: false
@@ -170,6 +180,7 @@ namespace Matching {
 							invalids[name] = true
 
 							indexeds.push(shorthands[name], NamingArgument.new(
+								fitting
 								index
 								type: argument.type()
 								strict: false
@@ -183,6 +194,7 @@ namespace Matching {
 							shortCount += 1
 
 							shorthands[name] = NamingArgument.new(
+								fitting
 								index
 								name
 								type: argument.type()
@@ -192,14 +204,103 @@ namespace Matching {
 					}
 					else {
 						indexeds.push(NamingArgument.new(
+							fitting
 							index
 							type: argument.type()
 							strict: false
 						))
 					}
 				}
+				is UnaryOperatorSpread {
+					var type = argument.type()
+
+					if type.isObject() {
+						if type.isReference() {
+							var rest = type.parameter()
+
+							for var function of assessment.functions {
+								for var parameter in function.parameters() when parameter.isLabeled() {
+									var name = parameter.getExternalName()
+
+									nameds[name] = NamingArgument.new(
+										fitting
+										index
+										name
+										property: true
+										spread: true
+										strict: false
+										type: rest
+									)
+
+									namedCount += 1
+
+									if ?shorthands[name] {
+										Object.delete(shorthands, name)
+
+										shortCount -= 1
+									}
+								}
+							}
+						}
+						else {
+							var finite = type.isFinite()
+							var root = type.discard()
+							var rest = root.getRestType()
+
+							for var function of assessment.functions {
+								for var parameter in function.parameters() when parameter.isLabeled() {
+									var name = parameter.getExternalName()
+
+									if var type ?= root.getProperty(name) {
+										nameds[name] = NamingArgument.new(
+											fitting
+											index
+											name
+											property: true
+											spread: true
+											strict: true
+											type
+										)
+									}
+									else if finite {
+										continue
+									}
+									else {
+										nameds[name] = NamingArgument.new(
+											fitting
+											index
+											name
+											property: true
+											spread: true
+											strict: false
+											type: rest
+										)
+									}
+
+									namedCount += 1
+
+									if ?shorthands[name] {
+										Object.delete(shorthands, name)
+
+										shortCount -= 1
+									}
+								}
+							}
+						}
+					}
+					else {
+						indexeds.push(NamingArgument.new(
+							fitting
+							index
+							type
+							strict: false
+							value: argument
+						))
+					}
+				}
 				else {
 					indexeds.push(NamingArgument.new(
+						fitting
 						index
 						type: argument.type()
 						strict: false
@@ -244,6 +345,33 @@ namespace Matching {
 		else {
 			return type.parameter()
 		}
+	} # }}}
+
+	func isFitting(
+		index: Number
+		nameds: NamingArgument{}?
+		shorthands: NamingArgument{}?
+		indexeds: NamingArgument[]?
+	): Boolean { # {{{
+		if ?nameds {
+			for var arg of nameds {
+				return arg.fitting if arg.index == index
+			}
+		}
+
+		if ?shorthands {
+			for var arg of shorthands {
+				return arg.fitting if arg.index == index
+			}
+		}
+
+		if ?indexeds {
+			for var arg in indexeds {
+				return arg.fitting if arg.index == index
+			}
+		}
+
+		return false
 	} # }}}
 
 	func isPreciseMatch(argument: Type, parameter: Type): Boolean { # {{{
@@ -357,13 +485,24 @@ namespace Matching {
 		return LenientCallMatchResult.new(possibilities)
 	} # }}}
 
-	func splitArguments(types: Type[]): Type[][] { # {{{
+	func splitArguments(
+		types: Type[]
+		nameds: NamingArgument{}?
+		shorthands: NamingArgument{}?
+		indexeds: NamingArgument[]?
+		fitting: Boolean
+	): Type[][] { # {{{
 		var mut combinations = [[]]
 
-		for var type in types {
-			if type.isSpread() {
+		for var type, index in types {
+			if fitting && isFitting(index, nameds, shorthands, indexeds) {
+				for var combination in combinations {
+					combination.push(type)
+				}
+			}
+			else if type.isSpread() && type.type().isArray() {
 				// TODO split by properties if array
-				var parameters = splitArguments([getSpreadParameter(type)])
+				var parameters = splitArguments([getSpreadParameter(type)], null, null, null, false)
 
 				if parameters.length > 1 {
 					var scope = type.scope()
@@ -457,7 +596,7 @@ namespace Matching {
 			spread: Boolean
 			used: Number
 
-			// TODO add methods
+			// TODO! add methods
 		}
 
 		export {
@@ -532,9 +671,9 @@ namespace Matching {
 					}
 				}
 				else {
-					var cursor = getCursor(0, context.arguments)
+					var cursor = getCursor(0, context)
 
-					if cursor.argument.isUnion() {
+					if !isFitting(cursor, context) && cursor.argument.isUnion() {
 						var newContext = duplicateContext(context)
 
 						for var type in cursor.argument.discardAlias().types() {
@@ -566,7 +705,7 @@ namespace Matching {
 					else {
 						for var key in tree.order {
 							// echo('---', key)
-							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context, {...generics}) {
+							if matchTreeNode(tree, tree.columns[key], duplicateCursor(cursor), Matches.new(), context, {...generics}) && !context.fitting {
 								return
 							}
 						}
@@ -576,13 +715,13 @@ namespace Matching {
 
 			func matchArguments(
 				node: TreeColumn
-				arguments: Type[]
 				mut cursor: Cursor
 				argMatches: Matches
 				context: MatchContext
 				generics: Type{}
 			): { cursor: Cursor, argMatches: Matches }? { # {{{
-				var last = arguments.length - 1
+				var { arguments } = context
+				var last = #arguments - 1
 
 				if node.min == 0 && cursor.index > last {
 					argMatches.arguments.push([])
@@ -597,7 +736,7 @@ namespace Matching {
 
 							argMatches.arguments.push([CallMatchArgument.new(index: cursor.index)])
 
-							cursor = getNextCursor(cursor, arguments)
+							cursor = getNextCursor(cursor, context)
 
 							return { cursor, argMatches }
 						}
@@ -611,14 +750,16 @@ namespace Matching {
 							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
 						}
 
-						if fullMatch || isPreciseMatch(argument, fullType) {
-							argMatches.precise = cursor.length != Infinity
+						var fitting = isFittedMatch(cursor, context, argument, fullType)
+
+						if fullMatch || fitting || isPreciseMatch(argument, fullType) {
+							argMatches.precise = fitting || cursor.length != Infinity
 
 							argMatches.arguments.push([CallMatchArgument.new(index: cursor.index, element: cursor.used)])
 
 							cursor.used += 1
 
-							cursor = getNextCursor(cursor, arguments)
+							cursor = getNextCursor(cursor, context)
 
 							return { cursor, argMatches }
 						}
@@ -629,7 +770,7 @@ namespace Matching {
 
 							argMatches.arguments.push([CallMatchArgument.new(index: cursor.index, element: cursor.used)])
 
-							cursor = getNextCursor(cursor, arguments)
+							cursor = getNextCursor(cursor, context)
 
 							return { cursor, argMatches }
 						}
@@ -641,12 +782,8 @@ namespace Matching {
 						if fullType.isDeferrable() {
 							{ type % fullType, match % fullMatch } = fullType.matchDeferred(cursor.argument.discardValue(), generics)
 						}
-						// echo(node.type.hashCode(), fullType.hashCode(), cursor.argument.hashCode(), fullMatch)
-						// for var type, name of generics {
-						// 	echo(name, type.hashCode())
-						// }
 
-						if fullMatch || isPreciseMatch(cursor.argument, fullType) {
+						if fullMatch || isFittedMatch(cursor, context, null, fullType) || isPreciseMatch(cursor.argument, fullType) {
 							var mut matched = true
 
 							if var value ?= getRefinableValue(cursor, context) {
@@ -676,7 +813,7 @@ namespace Matching {
 
 								argMatches.arguments.push([CallMatchArgument.new(index: cursor.index)])
 
-								cursor = getNextCursor(cursor, arguments)
+								cursor = getNextCursor(cursor, context)
 
 								return { cursor, argMatches }
 							}
@@ -707,7 +844,7 @@ namespace Matching {
 
 									argMatches.arguments.push([CallMatchArgument.new(index: cursor.index)])
 
-									cursor = getNextCursor(cursor, arguments)
+									cursor = getNextCursor(cursor, context)
 
 									return { cursor, argMatches }
 								}
@@ -719,7 +856,7 @@ namespace Matching {
 
 								argMatches.arguments.push([CallMatchArgument.new(index: cursor.index)])
 
-								cursor = getNextCursor(cursor, arguments)
+								cursor = getNextCursor(cursor, context)
 
 								return { cursor, argMatches }
 							}
@@ -732,7 +869,7 @@ namespace Matching {
 
 							argMatches.arguments.push([CallMatchArgument.new(index: cursor.index)])
 
-							cursor = getNextCursor(cursor, arguments)
+							cursor = getNextCursor(cursor, context)
 
 							return { cursor, argMatches }
 						}
@@ -743,12 +880,12 @@ namespace Matching {
 							return null
 						}
 
-						cursor = getNextCursor(cursor, arguments, true)
+						cursor = getNextCursor(cursor, context, true)
 
 						if cursor.index < arguments.length {
 							argMatches.precise = false
 
-							return matchArguments(node, arguments, cursor, argMatches, context)
+							return matchArguments(node, cursor, argMatches, context)
 						}
 						else {
 							return { cursor, argMatches }
@@ -780,7 +917,10 @@ namespace Matching {
 							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
 						}
 
-						if fullMatch || isPreciseMatch(argument, fullType) {
+						if isFittedMatch(cursor, context, argument, fullType) {
+							pass
+						}
+						else if fullMatch || isPreciseMatch(argument, fullType) {
 							if cursor.used + 1 > getMinParameter(cursor.argument) {
 								argMatches.precise = false
 							}
@@ -794,7 +934,7 @@ namespace Matching {
 
 						i += 1
 
-						cursor = pushCursor(cursor, arguments, matches)
+						cursor = pushCursor(cursor, context, matches)
 					}
 
 					if node.max <= 0 {
@@ -812,7 +952,7 @@ namespace Matching {
 										{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
 									}
 
-									if fullMatch || isPreciseMatch(argument, fullType) {
+									if fullMatch || isFittedMatch(cursor, context, argument, fullType) || isPreciseMatch(argument, fullType) {
 										pass
 									}
 									else if isUnpreciseMatch(argument, fullType) {
@@ -825,7 +965,7 @@ namespace Matching {
 
 								i += 1
 
-								cursor = pushCursor(cursor, arguments, matches, cursor.index == last || cursor.spread && cursor.length == Infinity)
+								cursor = pushCursor(cursor, context, matches, cursor.index == last || cursor.spread && cursor.length == Infinity)
 							}
 						}
 						else {
@@ -842,7 +982,7 @@ namespace Matching {
 										{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
 									}
 
-									if fullMatch || isPreciseMatch(argument, fullType) {
+									if fullMatch || isFittedMatch(cursor, context, argument, fullType) || isPreciseMatch(argument, fullType) {
 										pass
 									}
 									else if isUnpreciseMatch(argument, fullType) {
@@ -857,7 +997,7 @@ namespace Matching {
 									if node.max == Infinity {
 										matches.push(CallMatchArgument.new(index: cursor.index, from: cursor.used))
 
-										cursor = getNextCursor(cursor, arguments, true)
+										cursor = getNextCursor(cursor, context, true)
 									}
 									else {
 										var to = cursor.length + node.max + cursor.used - 1
@@ -870,13 +1010,13 @@ namespace Matching {
 
 										cursor.used += 1 - node.max
 
-										cursor = getNextCursor(cursor, arguments)
+										cursor = getNextCursor(cursor, context)
 									}
 
 									if cursor.spread && cursor.argument is PlaceholderType {
 										matches.push(CallMatchArgument.new(index: cursor.index))
 
-										cursor = getNextCursor(cursor, arguments, true)
+										cursor = getNextCursor(cursor, context, true)
 									}
 								}
 							}
@@ -893,7 +1033,7 @@ namespace Matching {
 								{ type % fullType, match % fullMatch } = fullType.matchDeferred(argument.discardValue(), generics)
 							}
 
-							if fullMatch || isPreciseMatch(argument, fullType) {
+							if fullMatch || isFittedMatch(cursor, context, argument, fullType) || isPreciseMatch(argument, fullType) {
 								pass
 							}
 							else if isUnpreciseMatch(argument, fullType) {
@@ -905,7 +1045,7 @@ namespace Matching {
 
 							i += 1
 
-							cursor = pushCursor(cursor, arguments, matches)
+							cursor = pushCursor(cursor, context, matches)
 						}
 					}
 
@@ -915,7 +1055,7 @@ namespace Matching {
 								argMatches.precise = false
 							}
 
-							cursor = getNextCursor(cursor, arguments, true)
+							cursor = getNextCursor(cursor, context, true)
 						}
 					}
 
@@ -929,6 +1069,8 @@ namespace Matching {
 		func duplicateContext(context: MatchContext): MatchContext { # {{{
 			return MatchContext.new(
 				async: context.async
+				fitting: context.fitting
+				fittingSpread: context.fittingSpread
 				found: false
 				arguments: context.arguments
 				excludes: context.excludes
@@ -949,8 +1091,8 @@ namespace Matching {
 			)
 		} # }}}
 
-		func getCursor(index: Number, arguments: Type[]): Cursor { # {{{
-			if index >= arguments.length {
+		func getCursor(index: Number, { arguments }: MatchContext): Cursor { # {{{
+			if index >= #arguments {
 				return Cursor.new(
 					argument: Type.Void
 					index
@@ -1007,9 +1149,9 @@ namespace Matching {
 			}
 		} # }}}
 
-		func getNextCursor(current: Cursor, arguments: Type[], force: Boolean = false): Cursor { # {{{
+		func getNextCursor(current: Cursor, context: MatchContext, force: Boolean = false): Cursor { # {{{
 			if current.used >= current.length || (force && current.length != 0) {
-				return getCursor(current.index + 1, arguments)
+				return getCursor(current.index + 1, context)
 			}
 			else {
 				return current
@@ -1042,14 +1184,37 @@ namespace Matching {
 			}
 		} # }}}
 
+		func isFittedMatch(cursor: Cursor, context: MatchContext, argument: Type?, parameter: Type): Boolean { # {{{
+			return false unless context.fitting
+
+			for var arg in context.indexeds {
+				if arg.index == cursor.index && arg.fitting {
+					return parameter.isAssignableToVariable(argument ?? cursor.argument, true, false, false)
+				}
+			}
+
+			return false
+		} # }}}
+
+		func isFitting(cursor: Cursor, { indexeds }: MatchContext): Boolean { # {{{
+			for var argument in indexeds {
+				if argument.index == cursor.index {
+					return argument.fitting
+				}
+			}
+
+			return false
+		} # }}}
+
 		func matchTreeNode(tree: Tree, branch: TreeBranch, mut cursor: Cursor, mut argMatches: Matches, context: MatchContext, generics: Type{}): Boolean { # {{{
 			// echo('-- branch', toString(cursor), cursor.spread && context.mode == .AllMatches, argMatches.precise, branch.type.hashCode(), branch.min, branch.max)
 			if cursor.spread && context.mode == .AllMatches  {
-				if var result ?= matchArguments(branch, context.arguments, cursor, Matches.new(
+				if var result ?= matchArguments(branch, cursor, Matches.new(
 						precise: argMatches.precise
 						arguments: [...argMatches.arguments]
 					), context, generics)
 				{
+
 					for var key in branch.order {
 						if matchTreeNode(tree, branch.columns[key], result.cursor, Matches.new(
 							precise: result.argMatches.precise
@@ -1062,10 +1227,10 @@ namespace Matching {
 					}
 
 					if !context.found && cursor.argument is PlaceholderType {
-						cursor = getNextCursor(cursor, context.arguments, true)
+						cursor = getNextCursor(cursor, context, true)
 						// echo('branch', toString(cursor))
 
-						if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
+						if { cursor, argMatches } !?= matchArguments(branch, cursor, argMatches, context, generics) {
 							return false
 						}
 						// echo(toString(cursor), argMatches, context.arguments.length)
@@ -1083,10 +1248,10 @@ namespace Matching {
 					}
 				}
 				else if cursor.argument is PlaceholderType {
-					cursor = getNextCursor(cursor, context.arguments, true)
+					cursor = getNextCursor(cursor, context, true)
 					// echo('branch', toString(cursor))
 
-					if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
+					if { cursor, argMatches } !?= matchArguments(branch, cursor, argMatches, context, generics) {
 						return false
 					}
 					// echo(toString(cursor), argMatches, context.arguments.length)
@@ -1104,15 +1269,15 @@ namespace Matching {
 				}
 			}
 			else {
-				var outOfBound = cursor.index >= context.arguments.length
+				var outOfBound = cursor.index >= #context.arguments
 
-				if { cursor, argMatches } !?= matchArguments(branch, context.arguments, cursor, argMatches, context, generics) {
+				if { cursor, argMatches } !?= matchArguments(branch, cursor, argMatches, context, generics) {
 					// echo(null)
 					return false
 				}
 				// echo(toString(cursor), JSON.stringify(argMatches), context.arguments.length)
 
-				if !outOfBound && branch.min == 0 && cursor.index >= context.arguments.length {
+				if !outOfBound && branch.min == 0 && cursor.index >= #context.arguments {
 					var argument = context.arguments.last()
 
 					for var key in branch.order {
@@ -1128,6 +1293,36 @@ namespace Matching {
 						), context, generics) {
 							if context.mode == .BestMatch {
 								return true
+							}
+						}
+					}
+				}
+				else if cursor.spread && cursor.index + 1 < #context.arguments {
+					var oldCursor = duplicateCursor(cursor)
+
+					for var key in branch.order {
+						if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
+							precise: argMatches.precise
+							arguments: [...argMatches.arguments]
+						), context, generics) {
+							if context.mode == .BestMatch {
+								return true
+							}
+						}
+					}
+
+					if cursor.spread && cursor.index + 1 < #context.arguments {
+						cursor = getNextCursor(oldCursor, context, true)
+						// echo('branch', toString(cursor))
+
+						for var key in branch.order {
+							if matchTreeNode(tree, branch.columns[key], cursor, Matches.new(
+								precise: argMatches.precise
+								arguments: [...argMatches.arguments]
+							), context, generics) {
+								if context.mode == .BestMatch {
+									return true
+								}
 							}
 						}
 					}
@@ -1153,17 +1348,17 @@ namespace Matching {
 			if !leaf.function.isAsync() {
 				// echo('-- leaf', toString(cursor), leaf.function.hashCode(), cursor.spread && context.mode == .AllMatches, leaf.type.hashCode(), leaf.min, leaf.max)
 				if cursor.spread && context.mode == .AllMatches  {
-					var result = matchArguments(leaf, context.arguments, cursor, Matches.new(
+					var result = matchArguments(leaf, cursor, Matches.new(
 						precise: argMatches.precise
 						arguments: [...argMatches.arguments]
 					), context, generics)
 					// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
 
 					if !?result || result.cursor.index + 1 < context.arguments.length || (result.cursor.index + 1 == context.arguments.length && result.cursor.used == 0) {
-						cursor = getNextCursor(cursor, context.arguments, true)
+						cursor = getNextCursor(cursor, context, true)
 						// echo('leaf', toString(cursor), leaf.function.hashCode())
 
-						if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context, generics) {
+						if { cursor, argMatches } !?= matchArguments(leaf, cursor, argMatches, context, generics) {
 							return false
 						}
 						// echo(toString(result.cursor), JSON.stringify(result.argMatches), context.arguments.length)
@@ -1173,7 +1368,7 @@ namespace Matching {
 					}
 				}
 				else {
-					if { cursor, argMatches } !?= matchArguments(leaf, context.arguments, cursor, argMatches, context, generics) {
+					if { cursor, argMatches } !?= matchArguments(leaf, cursor, argMatches, context, generics) {
 						// echo(null)
 						return false
 					}
@@ -1292,8 +1487,7 @@ namespace Matching {
 			}
 		} # }}}
 
-		func pushCursor(cursor: Cursor, arguments: Type[], matches: CallMatchArgument[], force: Boolean = false): Cursor { # {{{
-			// echo(cursor.spread, cursor.index, matches.last()?.index, force)
+		func pushCursor(cursor: Cursor, context: MatchContext, matches: CallMatchArgument[], force: Boolean = false): Cursor { # {{{
 			if cursor.spread {
 				if var last ?= matches.last() ;; last.index == cursor.index {
 					if ?last.to {
@@ -1320,7 +1514,7 @@ namespace Matching {
 
 				cursor.used += 1
 
-				return getNextCursor(cursor, arguments, force)
+				return getNextCursor(cursor, context, force)
 			}
 			else {
 				matches.push(CallMatchArgument.new(
@@ -1329,7 +1523,7 @@ namespace Matching {
 
 				cursor.used += 1
 
-				return getNextCursor(cursor, arguments, force)
+				return getNextCursor(cursor, context, force)
 			}
 		} # }}}
 
@@ -1356,6 +1550,8 @@ namespace Matching {
 			shorthands: NamingArgument{}
 			indexeds: NamingArgument[]
 			generics: Type{}
+			fitting: Boolean
+			fittingSpread: Boolean
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
@@ -1364,7 +1560,7 @@ namespace Matching {
 			for var function, key of route.functions {
 				for var parameter, index in function.parameters() {
 					var name = parameter.getExternalName()
-					var type = parameter.type()
+					var type = parameter.isVarargs() ? Type.arrayOf(parameter.getArgumentType(), node.scope()) : parameter.getArgumentType()
 					var positional = parameter.isOnlyPositional()
 
 					if var parameters ?= perNames[name] {
@@ -1387,7 +1583,6 @@ namespace Matching {
 			}
 
 			var mut possibleFunctions: Array = Object.keys(route.functions)
-
 			var preciseness = {}
 			var excludes = Object.keys(nameds)
 
@@ -1397,37 +1592,36 @@ namespace Matching {
 
 			for var argument, name of nameds {
 				if var parameters ?= perNames[name] {
-					var argumentType = argumentTypes[argument.index]
+					var argumentType = argument.property ? argumentTypes[argument.index].getProperty(argument.name) : argumentTypes[argument.index]
 					var matchedFunctions = []
 
 					for var { function, type, positional } in parameters {
+						SyntaxException.throwPositionalOnlyParameter(name, node) if positional
+
 						var mut fullType = type
 						var mut fullMatch = false
 
 						if fullType.isDeferrable() {
 							{ type % fullType, match % fullMatch } = fullType.matchDeferred(argumentType.discardValue(), generics)
 						}
-						// echo(type.hashCode(), fullType.hashCode(), argumentType.hashCode(), fullMatch)
 
-						if fullMatch || isPreciseMatch(argumentType, fullType) {
-							SyntaxException.throwPositionalOnlyParameter(name, node) if positional
-
-							matchedFunctions.push(function)
-
+						if fullMatch || node.isMisfit() || isPreciseMatch(argumentType, fullType) {
+							matchedFunctions.pushUniq(function)
+						}
+						else if argument.fitting && fullType.isAssignableToVariable(argumentType, true, false, false) {
+							matchedFunctions.pushUniq(function)
 						}
 						else if isUnpreciseMatch(argumentType, fullType) {
-							SyntaxException.throwPositionalOnlyParameter(name, node) if positional
-
-							matchedFunctions.push(function)
+							matchedFunctions.pushUniq(function)
 
 							preciseness[function] = false
 						}
 					}
 
-					var functions = possibleFunctions.intersection(matchedFunctions)
+					possibleFunctions = possibleFunctions:!!(Array).intersection(matchedFunctions)
 
-					if functions.length != 0 {
-						possibleFunctions = functions
+					if !?#possibleFunctions {
+						return null
 					}
 				}
 				else {
@@ -1460,12 +1654,8 @@ namespace Matching {
 								if fullType.isDeferrable() {
 									{ type % fullType, match % fullMatch } = fullType.matchDeferred(argumentType.discardValue(), generics)
 								}
-								// echo(type.hashCode(), fullType.hashCode(), argumentType.hashCode(), fullMatch)
-								// for var type, name of generics {
-								// 	echo(name, type.hashCode())
-								// }
 
-								if fullMatch || isPreciseMatch(argumentType, fullType) {
+								if fullMatch || argument.fitting || isPreciseMatch(argumentType, fullType) {
 									matched = true
 
 									perFunctions[function].shorthands[name] = argument
@@ -1535,6 +1725,8 @@ namespace Matching {
 							perArgument.preciseness
 							[...excludes, ...Object.keys(perArgument.shorthands)]
 							{...generics}
+							fitting
+							fittingSpread
 							mode
 							node
 						) {
@@ -1558,6 +1750,8 @@ namespace Matching {
 						preciseness
 						excludes
 						generics
+						fitting
+						fittingSpread
 						mode
 						node
 					)
@@ -1574,6 +1768,8 @@ namespace Matching {
 						preciseness
 						excludes
 						generics
+						fitting
+						fittingSpread
 						mode
 						node
 					)
@@ -1591,6 +1787,8 @@ namespace Matching {
 					preciseness
 					excludes
 					generics
+					fitting
+					fittingSpread
 					mode
 					node
 				)
@@ -1648,19 +1846,21 @@ namespace Matching {
 			preciseness: {}
 			excludes: String[]
 			generics: Type{}
+			fitting: Boolean
+			fittingSpread: Boolean
 			mode: ArgumentMatchMode
 			node: AbstractNode
 		): CallMatchResult? { # {{{
 			if !?#indexeds {
 				possibleFunctions = possibleFunctions.filter((key, _, _) => route.functions[key].min(excludes) == 0)
 
-				if possibleFunctions.length == 0 {
+				if !?#possibleFunctions {
 					return null
 				}
 
 				var preciseFunctions = possibleFunctions.filter((key, _, _) => preciseness[key])
 
-				if preciseFunctions.length == possibleFunctions.length {
+				if #preciseFunctions == #possibleFunctions && (fitting -> #possibleFunctions == 1) {
 					var mut max = Infinity
 
 					for var key in preciseFunctions {
@@ -1672,7 +1872,6 @@ namespace Matching {
 					}
 
 					var shortestFunctions = preciseFunctions.filter((key, _, _) => route.functions[key].max() == max)
-
 					var function = getMostPreciseFunction([route.functions[key] for var key in shortestFunctions], nameds, shorthands)
 					var positions = []
 
@@ -1682,7 +1881,13 @@ namespace Matching {
 						var name = parameter.getExternalName()
 
 						if var argument ?= nameds[name] {
-							positions.push(CallMatchArgument.new(argument.index))
+							var arg = CallMatchArgument.new(argument.index)
+
+							if argument.property {
+								arg.property = argument.name
+							}
+
+							positions.push(arg)
 							namedLefts -= 1
 						}
 						else if var argument ?= shorthands[name] {
@@ -1731,7 +1936,14 @@ namespace Matching {
 							}
 							else {
 								if var argument ?= nameds[name] {
-									newPositions.push(CallMatchArgument.new(argument.index))
+									var arg = CallMatchArgument.new(argument.index)
+
+									if argument.property {
+										arg.property = argument.name
+									}
+
+									newPositions.push(arg)
+
 									namedLefts -= 1
 								}
 								else if var argument ?= shorthands[name] {
@@ -1769,11 +1981,11 @@ namespace Matching {
 
 				var route = Build.getRoute(assessment, excludes, functions, node)
 
-				if indexeds.length == argumentTypes.length {
-					return matchArguments(assessment, route, arguments, excludes, indexeds, generics, mode, node)
+				if #indexeds == #argumentTypes {
+					return matchArguments(assessment, route, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node)
 				}
 				else {
-					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, generics, mode, node) {
+					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node) {
 						is PreciseCallMatchResult {
 							var precise = possibleFunctions.every((key, _, _) => preciseness[key])
 
@@ -1853,7 +2065,11 @@ namespace Matching {
 										}
 										else {
 											if var argument ?= nameds[name] {
-												result.positions.push(CallMatchArgument.new(argument.index))
+												result.positions.push(CallMatchArgument.new(
+													index: argument.index
+													property: argument.name if argument.property
+												))
+
 												namedLefts -= 1
 												lastIndexed = null
 											}
@@ -1954,7 +2170,10 @@ namespace Matching {
 						}
 					}
 
-					positions.push(CallMatchArgument.new(argument.index))
+					positions.push(CallMatchArgument.new(
+						index: argument.index
+						property: argument.name if argument.property
+					))
 
 					indexes[argument.index] = true
 					latest = null
@@ -2047,7 +2266,10 @@ namespace Matching {
 				var name = parameter.getExternalName()
 
 				if var argument ?= nameds[name] {
-					positions.push(CallMatchArgument.new(argument.index))
+					positions.push(CallMatchArgument.new(
+						index: argument.index
+						property: argument.name if argument.property
+					))
 
 					indexes[argument.index] = 'n'
 					shift += 1

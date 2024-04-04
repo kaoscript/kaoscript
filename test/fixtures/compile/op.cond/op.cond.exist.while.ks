@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern sealed class RegExp
 
 type RegExpExecArray = Array<String?> & {

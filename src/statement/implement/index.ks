@@ -1,7 +1,7 @@
 class ImplementDeclaration extends Statement {
 	private late {
+		@auxiliary					= false
 		@forkedMethods				= {}
-		@newSealedClass				= false
 		@properties					= []
 		@sharingProperties			= {}
 		@type: NamedType
@@ -79,16 +79,12 @@ class ImplementDeclaration extends Statement {
 
 		if @variable.isPredefined() {
 			@variable = @scope.define(@variable.name(), true, @type.clone().unflagAltering(), this)
-
-			@newSealedClass = @type.isSealed() && @type.isExtendable()
 		}
-		else if @variable.isStandardLibrary(.Full) {
-			@newSealedClass = true
+		else if @variable.isStandardLibrary(.Closed) {
+			pass
 		}
 		else if @module().isStandardLibrary() {
-			@newSealedClass = true
-
-			@type.flagStandardLibrary()
+			@type.setStandardLibrary(.Yes + .Closed)
 		}
 		else if (@type.isAlien() || @type.isRequired()) && !@variable.isAltereable() {
 			@variable.setDeclaredType(@type.unflagAltering())
@@ -101,12 +97,24 @@ class ImplementDeclaration extends Statement {
 
 		@type = @variable.getDeclaredType()
 
+		@type.origin(@type.origin() + TypeOrigin.Implements)
+
+		if @type.isUsingAuxiliary() && !@type.hasAuxiliary() {
+			@type.flagAuxiliary()
+
+			@auxiliary = true
+		}
+
 		unless ?@type {
 			TypeException.throwImplInvalidType(this)
 		}
 
-		if @newSealedClass {
+		if @auxiliary {
 			@type.useSealedName(@module())
+
+			if @variable.isStandardLibrary(.Closed) {
+				@type.setStandardLibrary(.Yes + .Opened)
+			}
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -279,7 +287,7 @@ class ImplementDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { # {{{
 		return if @useDeclaration
 
-		if @newSealedClass {
+		if @auxiliary {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
 

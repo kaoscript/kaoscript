@@ -1,0 +1,376 @@
+[
+  {
+    "aliens": [
+      0,
+      "String",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "String"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": 6,
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "charAt": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "index",
+                  "internal": "index",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "charCodeAt": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "index",
+                  "internal": "index",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "repeat": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "count",
+                  "internal": "count",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "replace": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "pattern",
+                  "internal": "pattern",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "RegExp",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "replacement",
+                  "internal": "replacement",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Function",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "beginIndex",
+                  "internal": "beginIndex",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "endIndex",
+                  "internal": "endIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjExLCJjb2x1bW4iOjQ3fSwiZW5kIjp7ImxpbmUiOjExLCJjb2x1bW4iOjQ5fX0="
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "split": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "separator",
+                  "internal": "separator",
+                  "type": {
+                    "kind": "union",
+                    "nullable": true,
+                    "types": [
+                      "RegExp",
+                      "String",
+                      "Null"
+                    ]
+                  },
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxMiwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjoxMiwiY29sdW1uIjo0OH19"
+                },
+                {
+                  "external": "limit",
+                  "internal": "limit",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjY2fSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjY4fX0="
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": "String"
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "startsWith": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "search",
+                  "internal": "search",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "position",
+                  "internal": "position",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTMsImNvbHVtbiI6NDh9LCJlbmQiOnsibGluZSI6MTMsImNvbHVtbiI6NDl9fQ=="
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "substr": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "start",
+                  "internal": "start",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "length",
+                  "internal": "length",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjQzfX0="
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "substring": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "indexStart",
+                  "internal": "indexStart",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "indexEnd",
+                  "internal": "indexEnd",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjUxfSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjUzfX0="
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toLowerCase": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toUpperCase": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

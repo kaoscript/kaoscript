@@ -22,7 +22,7 @@ module.exports = function() {
 		return quxbaz.__ks_rt(this, arguments);
 	};
 	quxbaz.__ks_0 = function(day) {
-		foobar(day);
+		foobar.__ks_0(day);
 	};
 	quxbaz.__ks_rt = function(that, args) {
 		const t0 = value => Type.isEnumInstance(value, Weekday);

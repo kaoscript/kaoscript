@@ -47,7 +47,7 @@ class TryExpression extends Expression {
 	isUsingVariable(name) => @argument.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @argument.listNonLocalVariables(scope, variables)
 	releaseReusable() { # {{{
-		if @reuseName != null {
+		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
 		}
 	} # }}}

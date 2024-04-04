@@ -124,15 +124,12 @@ abstract class Scope {
 	parent(): Scope? => null
 	reference(value: AnyType): ReferenceType => @resolveReference('Any')
 	reference(value: ArrayType): ReferenceType { # {{{
-		if value.hasProperties() {
-			throw NotSupportedException.new()
-		}
-
-		if value.hasRest() {
+		if value.hasRest() || value.hasProperties() {
 			return @resolveReference('Array', value.isNullable(), [value.parameter()])
 		}
-
-		return @resolveReference('Array', value.isNullable())
+		else {
+			return @resolveReference('Array', value.isNullable())
+		}
 	} # }}}
 	reference(value: ClassVariableType): ReferenceType => @reference(value.type())
 	reference(value: NamedType): ReferenceType { # {{{

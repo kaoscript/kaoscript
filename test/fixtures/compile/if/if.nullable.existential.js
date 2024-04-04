@@ -52,7 +52,7 @@ module.exports = function() {
 		}
 	}
 	let x;
-	let __ks_0;
+	let __ks_0, __ks_1;
 	if((Type.isValue(__ks_0 = Foobar.__ks_sttc_create_0().__ks_func_foobar_0()) ? (x = __ks_0, true) : false) && x.__ks_func_quxbaz_0()) {
 	}
 };

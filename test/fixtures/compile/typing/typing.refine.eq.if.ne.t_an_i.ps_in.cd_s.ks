@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 func foobar(i: Number, b: Boolean) {
 	var dyn x = i
 

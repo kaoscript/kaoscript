@@ -1,6 +1,6 @@
 const {Helper, initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_get_culture = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);

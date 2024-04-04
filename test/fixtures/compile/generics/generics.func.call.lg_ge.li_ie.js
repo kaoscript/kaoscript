@@ -6,7 +6,7 @@ module.exports = function() {
 	foobar.__ks_0 = function(values, value) {
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isArray(value, () => true);
+		const t0 = value => Type.isArray(value, Type.isValue);
 		const t1 = Type.isValue;
 		if(args.length === 2) {
 			if(t0(args[0]) && t1(args[1])) {

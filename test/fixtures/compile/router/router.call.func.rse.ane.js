@@ -21,7 +21,7 @@ module.exports = function() {
 		if(values === void 0) {
 			values = null;
 		}
-		foobar.apply(null, Helper.toArray(values, 1));
+		foobar(...Helper.toArray(values, 1));
 	};
 	quxbaz.__ks_rt = function(that, args) {
 		if(args.length === 1) {

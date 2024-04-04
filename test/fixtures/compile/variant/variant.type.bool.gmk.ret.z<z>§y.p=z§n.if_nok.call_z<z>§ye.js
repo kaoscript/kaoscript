@@ -31,7 +31,7 @@ module.exports = function() {
 		if(!result.ok) {
 			result = loadJohn.__ks_0();
 		}
-		return result;
+		return Helper.assert(result, "\"Event<SchoolPerson>(true)\"", 0, value => __ksType.isEvent(value, [__ksType.isSchoolPerson], value => value));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => __ksType.isEvent(value, [Type.any]);

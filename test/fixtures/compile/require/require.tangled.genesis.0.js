@@ -1,4 +1,3 @@
-const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ks_Foobar = {};
 	const __ks_Error = {};

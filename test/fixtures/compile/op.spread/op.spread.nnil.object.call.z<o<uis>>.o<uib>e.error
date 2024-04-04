@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Number|String{}) (fixtures/compile/op.spread/op.spread.nnil.object.call.z<o<uis>>.o<uib>e.ks:6)

@@ -22,7 +22,7 @@ module.exports = function() {
 			return this.__ks_func_match_rt.call(null, this, this, arguments);
 		}
 		__ks_func_match_0(tokens) {
-			const c = this.skip(tokens.length);
+			const c = this.__ks_func_skip_0(tokens.length);
 			return Token.INVALID;
 		}
 		__ks_func_match_rt(that, proto, args) {

@@ -7,7 +7,7 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_Error) {
 	else {
 		__ks_Foobar = {};
 	}
-	if(!Type.isValue(__ks_Error)) {
+	if(!__ks_Error) {
 		__ks_Error = {};
 	}
 	class FooError extends Error {

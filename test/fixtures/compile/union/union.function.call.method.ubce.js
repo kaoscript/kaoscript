@@ -47,15 +47,17 @@ module.exports = function() {
 	function waldo() {
 		return waldo.__ks_rt(this, arguments);
 	};
-	waldo.__ks_0 = function() {
-		return false;
+	waldo.__ks_0 = function(x) {
+		let __ks_0;
+		Type.isBoolean(__ks_0 = quxbaz.__ks_0()) ? __ks_0.foobar(x) : __ks_0.__ks_func_foobar_0(x);
 	};
 	waldo.__ks_rt = function(that, args) {
-		if(args.length === 0) {
-			return waldo.__ks_0.call(that);
+		const t0 = value => Type.isClassInstance(value, Foobar);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return waldo.__ks_0.call(that, args[0]);
+			}
 		}
 		throw Helper.badArgs();
 	};
-	let __ks_0;
-	Type.isBoolean(__ks_0 = quxbaz.__ks_0()) ? __ks_0.foobar(waldo.__ks_0()) : __ks_0.foobar(waldo.__ks_0());
 };

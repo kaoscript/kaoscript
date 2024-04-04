@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_ClassA = {};
 	class ClassB extends ClassA {
 		constructor() {
 			const __ks_cons_0 = (foobar) => {

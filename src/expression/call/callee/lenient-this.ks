@@ -2,6 +2,7 @@ class LenientThisCallee extends LenientCallee {
 	private {
 		@expression
 		@flatten: Boolean
+		@generics: AltType[]
 		@instance: Boolean
 		@methods: Array<FunctionType>
 		@node: CallExpression
@@ -9,7 +10,7 @@ class LenientThisCallee extends LenientCallee {
 		@scope: ScopeKind
 		@sealed: Boolean					= false
 	}
-	constructor(@data, @expression, @property, @methods, @node) { # {{{
+	constructor(@data, @expression, @property, @generics = [], @methods, @node) { # {{{
 		super(data)
 
 		@flatten = node._flatten
@@ -40,6 +41,10 @@ class LenientThisCallee extends LenientCallee {
 		return false
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
+		var root = @expression.getClass().discard()
+		var generic = root.isGenericInstanceMethod(@property)
+		var arguments = node.arguments()
+
 		if @flatten {
 			if @sealed {
 				var path = @expression.getClass().getSealedPath()
@@ -53,7 +58,7 @@ class LenientThisCallee extends LenientCallee {
 
 				fragments.code('.apply(null')
 
-				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments(), 'this')
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), arguments, 'this')
 			}
 			else {
 				if @scope == ScopeKind.Argument {
@@ -65,7 +70,7 @@ class LenientThisCallee extends LenientCallee {
 					fragments.code(`\(name).\(@property).apply(\(name)`)
 				}
 
-				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node.arguments())
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), arguments)
 			}
 		}
 		else {
@@ -94,14 +99,30 @@ class LenientThisCallee extends LenientCallee {
 				if @sealed && @instance {
 					fragments.code('this')
 
-					for var argument, index in node.arguments() {
+					for var argument, index in arguments {
 						fragments.code($comma)
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)
 					}
 				}
 				else {
-					for var argument, index in node.arguments() {
+					if generic {
+						fragments.code(`{`)
+
+						for var { name, type }, index in @generics {
+							fragments
+								..code(`, `) if index > 0
+								..code(`\(name): `)
+
+							type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
+						}
+
+						fragments
+							.code(`}`)
+							.code(`, `) if ?#arguments
+					}
+
+					for var argument, index in arguments {
 						fragments.code($comma) if index != 0
 
 						DefaultCallee.toArgumentFragments(argument, fragments, mode)

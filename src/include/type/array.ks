@@ -254,7 +254,7 @@ class ArrayType extends Type {
 			return @properties[index]
 		}
 	} # }}}
-	getProperty(name: String): Type { # {{{
+	getProperty(name: String): Type? { # {{{
 		return @scope.reference('Array').getProperty(name)
 	} # }}}
 	getRestType(): valueof @restType
@@ -592,6 +592,13 @@ class ArrayType extends Type {
 	} # }}}
 	isTestingProperties() => @testProperties
 	length() => @length
+	assist limitTo(value: ReferenceType) { # {{{
+		if value.isArray() && @isNullable() && !value.isNullable() {
+			return @setNullable(false)
+		}
+
+		return this
+	} # }}}
 	listMissingProperties(tuple: TupleType) { # {{{
 		var fields = {}
 		var functions = {}
@@ -610,21 +617,7 @@ class ArrayType extends Type {
 		return { fields, functions }
 	} # }}}
 	override makeMemberCallee(property, path, generics, node) { # {{{
-		if !?@reference {
-			@reference = @scope.reference('Array').clone()
-
-			if @length > 0 {
-				if @rest {
-					@reference.addParameter(Type.union(@scope, ...@properties, @restType))
-				}
-				else {
-					@reference.addParameter(Type.union(@scope, ...@properties))
-				}
-			}
-			else if @rest {
-				@reference.addParameter(@restType)
-			}
-		}
+		@reference ??= @reference()
 
 		return @reference.makeMemberCallee(property, path, generics, node)
 	} # }}}
@@ -850,8 +843,49 @@ class ArrayType extends Type {
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
-		@toBlindTestFunctionFragments(null, varname, casting, true, null, fragments, node)
+	override toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node) { # {{{
+		if @length == 0 && !@rest && !@nullable {
+			if @destructuring {
+				fragments.code(`\($runtime.type(node)).isDXArray`)
+			}
+			else {
+				fragments.code($runtime.type(node), '.isArray')
+			}
+		}
+		else if @rest || @testProperties || @nullable {
+			fragments.code(`\(varname) => `)
+
+			if @length == 0 && !@destructuring && !@testProperties {
+				fragments.code(`\($runtime.type(node)).isArray(\(varname)`)
+
+				if @testRest && !node.isMisfit() {
+					fragments.code($comma)
+
+					@restType.toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
+				}
+
+				fragments.code(')')
+			}
+			else {
+				fragments.code(`\($runtime.type(node)).isDexArray(\(varname)`)
+
+				@toSubtestFragments(varname, casting, true, @testLength, fragments, node)
+
+				fragments.code(')')
+			}
+
+			if @nullable {
+				fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
+			}
+		}
+		else {
+			if @destructuring {
+				fragments.code(`\($runtime.type(node)).isDXArray`)
+			}
+			else {
+				fragments.code($runtime.type(node), '.isArray')
+			}
+		}
 	} # }}}
 	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
 		@toBlindTestFragments(funcname, varname, casting, true, @testLength, generics, subtypes, junction, fragments, node)
@@ -916,7 +950,7 @@ class ArrayType extends Type {
 			if @testRest && !node.isMisfit() {
 				fragments.code($comma)
 
-				@restType.toAwareTestFunctionFragments('value', @nullable, false, false, null, null, fragments, node)
+				@restType.toAwareTestFunctionFragments('value', @nullable, false, false, false, null, null, fragments, node)
 			}
 
 			fragments.code(')')

@@ -1,0 +1,1 @@
+SyntaxException: The instantation of the class "Object" mustn't have any arguments (fixtures/compile/libstd/libstd.object.new.off.wargs.ks:3)

@@ -132,7 +132,7 @@ module.exports = function() {
 		o["formatters"] = (() => {
 			const o = new OBJ();
 			o.hex = Helper.function(function(that) {
-				return $hex(that);
+				return Helper.assertString($hex(that), 0);
 			}, (that, fn, ...args) => {
 				const t0 = value => Type.isClassInstance(value, Color);
 				if(args.length === 1) {

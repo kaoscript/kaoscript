@@ -27,7 +27,6 @@ class ReferenceType extends Type {
 		@native: Boolean
 		@nullable: Boolean
 		@parameters: Type[]
-		@predefined: Boolean				= false
 		@spread: Boolean					= false
 		@strict: Boolean					= false
 		@subtypes: AltType[]
@@ -129,7 +128,8 @@ class ReferenceType extends Type {
 		super(scope)
 
 		@name = $types[name] ?? name
-		@native = $natives[@name]
+		// TODO! error when no else
+		@native = $natives[@name] ?? false
 		@nullable = @explicitlyNull
 	} # }}}
 	addParameter(parameter: Type) { # {{{
@@ -638,7 +638,7 @@ class ReferenceType extends Type {
 						generics.push({ name, type })
 					}
 					else {
-						generics.push({ name, type : AnyType.NullableUnexplicit })
+						generics.push({ name, type: AnyType.NullableUnexplicit })
 					}
 				}
 			}
@@ -888,27 +888,47 @@ class ReferenceType extends Type {
 					return false
 				}
 
-				if !downcast || (?#value.parameters() && ?#@parameters) {
-					for var index from 0 to~ Math.max(@parameters.length, value.parameters().length) {
-						if !@parameter(index).isAssignableToVariable(value.parameter(index), anycast, nullcast, downcast) {
-							return false
-						}
-					}
-				}
+				var mut testParameters = true
 
 				if ?#@subtypes {
-					if value.hasSubtypes() {
-						var variant: VariantType = @discard().getVariantType()
+					var root = @discard()
+					var variant: VariantType = root.getVariantType()
 
+					if value.hasSubtypes() {
 						var names = variant.explodeVarnames(...value.getSubtypes())
 
 						for var { name } in @subtypes {
 							return false unless names.contains(name)
 						}
 					}
+					else if !root.isDeferrable() {
+						var mut doTest = false
+
+						for var { name } in @subtypes {
+							// TODO!
+							// if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
+							if var { type } ?= variant.getField(name) {
+								if type.isDeferrable() {
+									doTest = true
+
+									break
+								}
+							}
+						}
+
+						testParameters = false unless doTest
+					}
 				}
 				else {
-					return !value.hasSubtypes()
+					return false if value.hasSubtypes()
+				}
+
+				if testParameters && (!downcast || (?#value.parameters() && ?#@parameters)) {
+					for var index from 0 to~ Math.max(@parameters.length, value.parameters().length) {
+						if !@parameter(index).isAssignableToVariable(value.parameter(index), anycast, nullcast, downcast) {
+							return false
+						}
+					}
 				}
 
 				return true
@@ -931,14 +951,7 @@ class ReferenceType extends Type {
 			else if (value.name() == 'Tuple' && @type().isTuple()) || (@name == 'Tuple' && value.type().isTuple()) {
 				return false
 			}
-			else if value.name() == 'Object' && @canBeObject() {
-				if @nullable && !nullcast && !value.isNullable() {
-					return false
-				}
-
-				return true
-			}
-			else if value.name() == 'Array' && @canBeArray() {
+			else if (value.name() == 'Object' && @canBeObject()) || (value.name() == 'Array' && @canBeArray()) {
 				if @nullable && !nullcast && !value.isNullable() {
 					return false
 				}
@@ -1027,15 +1040,23 @@ class ReferenceType extends Type {
 	override isComplete() => @type().isComplete()
 	override isDeferrable() => @type().isDeferrable()
 	isEnum() => @name == 'Enum' || @type().isEnum()
-	isExhaustive() => @type().isExhaustive()
+	isExhaustive() { # {{{
+		if @name == 'Object' {
+			return false
+		}
+		else {
+			return @type().isExhaustive()
+		}
+	} # }}}
 	isExplicit() => @type().isExplicit()
 	isExplicitlyExported() => @type().isExplicitlyExported()
 	isExplicitlyNull() => @explicitlyNull
 	override isExportable() => @type().isExportable()
-	override isExportable(module) => @type().isExportable(module)
+	override isExportable(module) => @type().isExportable()
 	isExported() => @type().isExported()
 	isExportingFragment() => true
 	isExtendable() => @name == 'Function'
+	isFinite() => @type().isFinite()
 	isFunction() => @name == 'Function' || @type().isFunction()
 	isFusion() => @type().isFusion()
 	isHybrid() => @type().isHybrid()
@@ -1443,7 +1464,7 @@ class ReferenceType extends Type {
 	isSubtypeOf(value: ReferenceType) => @name == value.name()
 	isSubtypeOf(value: Type) => false
 	isTuple() => @name == 'Tuple' || @type().isTuple()
-	isTypeOf(): Boolean => $typeofs[@name]
+	isTypeOf(): Boolean => $typeofs[@name] ?? false
 	isUnion() => @type().isUnion()
 	isVariant() => @type().isVariant()
 	isView() => @type().isView()
@@ -1656,7 +1677,7 @@ class ReferenceType extends Type {
 			else {
 				var names = @name.split('.')
 
-				if names.length == 1 {
+				if #names == 1 {
 					if @variable ?= @scope.getVariable(@name, -1) {
 						@type = @variable.getRealType()
 						@nullable = @nullable || @type.isNullable()
@@ -1711,6 +1732,7 @@ class ReferenceType extends Type {
 	} # }}}
 	reset(): valueof this { # {{{
 		Object.delete(this, '_type')
+		Object.delete(this, '_variable')
 		@nullable = @explicitlyNull
 		@predefined = false
 	} # }}}
@@ -1843,7 +1865,7 @@ class ReferenceType extends Type {
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
-		else if @predefined {
+		else if @predefined || @type.isStandardLibrary(.Closed) {
 			return super.toMetadata(references, indexDelta, mode, module)
 		}
 		else if !@variable.getRealType().isClass() {
@@ -1879,6 +1901,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else if mode ~~ ExportMode.Alien {
+
 			if @type.isClass() {
 				return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
 			}
@@ -1917,7 +1940,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, casting, blind, mut generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, mut generics, subtypes, fragments, node) { # {{{
 		@resolve()
 
 		if @type.isAlias() && @type is NamedType {
@@ -1928,7 +1951,7 @@ class ReferenceType extends Type {
 
 				generics = []
 
-				for var name, index in names {
+				for var { name }, index in names {
 					if var type ?= @parameters[index] {
 						generics.push({ name, type })
 					}
@@ -1950,10 +1973,10 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			@discard().toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, @subtypes, fragments, node)
+			@discard().toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, @subtypes, fragments, node)
 		}
 		else if ?#generics {
-			@type.toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
+			@type.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 		}
 		else {
 			var unalias = @discardAlias()
@@ -1962,17 +1985,20 @@ class ReferenceType extends Type {
 
 			if ?tof {
 				if @nullable {
-					fragments.code(`\(varname) => \(tof)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+					fragments
+						.code('(') if hasDeferred
+						.code(`\(varname) => \(tof)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+						.code(')') if hasDeferred
 				}
 				else {
 					fragments.code(`\(tof)`)
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-				unalias.toAwareTestFunctionFragments(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
+				unalias.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 			}
 			else {
-				super(varname, @nullable, casting, blind, generics, subtypes, fragments, node)
+				super(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 			}
 		}
 	} # }}}
@@ -1991,7 +2017,7 @@ class ReferenceType extends Type {
 			if unalias.isObject() {
 				fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
 
-				unalias.toAwareTestFunctionFragments('value', false, true, false, null, null, fragments, node)
+				unalias.toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, node)
 
 				fragments.code(')')
 			}
@@ -2012,7 +2038,7 @@ class ReferenceType extends Type {
 
 			var { type, generics } = @getGenericMapper()
 
-			type.toAwareTestFunctionFragments(varname, nullable, casting, true, generics, @subtypes, fragments, node)
+			type.toAwareTestFunctionFragments(varname, nullable, false, casting, true, generics, @subtypes, fragments, node)
 		}
 		else if @type.isBitmask() && ?propname {
 			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
@@ -2023,7 +2049,7 @@ class ReferenceType extends Type {
 
 				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), `).compile(view).code(`, cast, `)
 
-				view.toAwareTestFunctionFragments(varname, nullable, casting, true, null, null, fragments, node)
+				view.toAwareTestFunctionFragments(varname, nullable, false, casting, true, null, null, fragments, node)
 
 				fragments.code(')')
 			}

@@ -194,6 +194,9 @@ class VariantType extends Type {
 			return false
 		}
 	} # }}}
+	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
+		return mode ~~ .Reference && @master.isSubsetOf(value, generics, subtypes, mode)
+	} # }}}
 	assist isSubsetOf(value: VariantType, generics, subtypes, mode) { # {{{
 		return this == value
 	} # }}}

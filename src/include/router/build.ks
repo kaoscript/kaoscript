@@ -926,9 +926,7 @@ namespace Build {
 
 			Regroup.regroupBranch_Children_ForkAlike_SiblingsEq(branch, node)
 
-			branch = Regroup.regroupBranch_EqParameter(branch)
-
-			return branch
+			return Regroup.regroupBranch_EqParameter(branch)
 		} # }}}
 
 		export func createTree(rows: Row{}, min: Number): Tree { # {{{
@@ -1137,7 +1135,7 @@ namespace Build {
 				}
 			} # }}}
 
-			func regroupBranch_EqParameter(branch: TreeBranch): TreeBranch { # {{{
+			func regroupBranch_EqParameter(branch: TreeBranch): TreeColumn { # {{{
 				var columns = Object.values(branch.columns)
 
 				if	columns.length == 1 &&
@@ -1840,7 +1838,7 @@ namespace Build {
 			})
 		}
 
-		if items.length == 1 {
+		if #items == 1 {
 			tree.order = [items[0].key]
 
 			return

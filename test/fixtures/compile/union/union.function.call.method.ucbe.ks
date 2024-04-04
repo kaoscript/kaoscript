@@ -6,8 +6,6 @@ func quxbaz(): Foobar | Boolean {
 	return false
 }
 
-func waldo(): Foobar | Boolean {
-	return false
+func waldo(x: Foobar) {
+	quxbaz().foobar(x)
 }
-
-quxbaz().foobar(waldo()!!)

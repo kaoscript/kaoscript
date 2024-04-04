@@ -31,20 +31,20 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	function foovar() {
-		return foovar.__ks_rt(this, arguments);
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
 	};
-	foovar.__ks_0 = function(x) {
+	foobar.__ks_0 = function(x) {
 		let value = x.__ks_func_value_0();
 		if(Type.isValue(value)) {
 			value.print();
 		}
 	};
-	foovar.__ks_rt = function(that, args) {
+	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Foobar);
 		if(args.length === 1) {
 			if(t0(args[0])) {
-				return foovar.__ks_0.call(that, args[0]);
+				return foobar.__ks_0.call(that, args[0]);
 			}
 		}
 		throw Helper.badArgs();

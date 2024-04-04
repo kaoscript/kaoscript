@@ -11,9 +11,6 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_toString_0.call(that);
 		}
-		if(that.toString) {
-			return that.toString(...args);
-		}
 		throw Helper.badArgs();
 	};
 	let x;

@@ -1,0 +1,1 @@
+TypeException: The literal "" of type "String" is expected to be of type "Number" (fixtures/compile/libstd/libstd.string.var.wt_ii.sie.ks:5)

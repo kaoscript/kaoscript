@@ -1,3 +1,4 @@
+#![libstd(off)]
 #![target(ecma-v6)]
 
 extern system class String

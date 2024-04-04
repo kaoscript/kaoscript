@@ -1,0 +1,1 @@
+ReferenceException: The instance method "foobar" of the class "Foobar" can't be matched to given arguments (Number) (fixtures/compile/generics/generics.imth.call.§=s.ie.ks:2)

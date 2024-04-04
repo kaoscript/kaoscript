@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system class Object<V, K>
 
 disclose Object<V, K> {

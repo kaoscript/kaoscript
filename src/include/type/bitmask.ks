@@ -128,7 +128,7 @@ class BitmaskType extends Type {
 
 		return index
 	} # }}}
-	addPropertyFromAST(data, node) { # {{{
+	addPropertyFromAST(data, name, node) { # {{{
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
@@ -712,7 +712,7 @@ class BitmaskAliasType {
 
 class BitmaskMethodType extends FunctionType {
 	private {
-		@access: Accessibility					= Accessibility.Public
+		@access: Accessibility					= .Public
 		@alteration: Boolean					= false
 		@instance: Boolean						= false
 	}
@@ -727,7 +727,9 @@ class BitmaskMethodType extends FunctionType {
 			var type = BitmaskMethodType.new(scope)
 
 			type._identifier = data.id
-			type._access = data.access
+			// TODO! error
+			// type._access = data.access
+			type._access = Accessibility(data.access) ?? .Public
 			type._async = data.async
 
 			queue.push(() => {

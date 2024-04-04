@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require|extern system class Number {
 	toString(): String
 }

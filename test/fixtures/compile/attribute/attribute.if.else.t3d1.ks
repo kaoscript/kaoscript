@@ -1,3 +1,4 @@
+#![libstd(off)]
 #![target(trident-v8)]
 
 #[rules(non-exhaustive)]

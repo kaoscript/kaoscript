@@ -15,6 +15,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -26,7 +27,9 @@
               "sealed": false,
               "async": false,
               "parameters": [],
-              "returns": "String",
+              "returns": {
+                "reference": 1
+              },
               "errors": [],
               "inits": []
             }
@@ -39,14 +42,36 @@
           -1
         ],
         "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       }
     ]
   },
   {
     "exports": [
-      1,
-      "Template",
       2,
+      "Template",
+      3,
       "template"
     ],
     "references": [
@@ -58,6 +83,7 @@
         "sealed": false,
         "system": false,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -104,7 +130,7 @@
         ]
       },
       {
-        "reference": 1
+        "reference": 2
       }
     ],
     "macros": []

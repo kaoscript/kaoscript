@@ -1,6 +1,5 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Object = {};
 	const CardSuit = Helper.enum(Number, 0, "Clubs", 0, "Diamonds", 1, "Hearts", 2, "Spades", 3);
 	function print() {
 		return print.__ks_rt(this, arguments);

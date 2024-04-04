@@ -22,14 +22,14 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(value) {
-		return (() => {
+		return Helper.assert((() => {
 			const o = new OBJ();
 			o.ok = true;
 			o.value = value;
 			o.line = value.line;
 			o.column = value.column;
 			return o;
-		})();
+		})(), "\"Event(true)\"", 0, value => __ksType.isEvent(value, [Type.any], value => value));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

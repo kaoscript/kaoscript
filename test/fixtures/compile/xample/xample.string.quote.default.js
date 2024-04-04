@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_quote_0 = function(quote, escape) {
 		if(quote === void 0 || quote === null) {
 			quote = "\"";
@@ -23,9 +23,6 @@ module.exports = function() {
 				return __ks_String.__ks_func_quote_0.call(that, Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
 			}
 		}
-		if(that.quote) {
-			return that.quote(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_String._im_replaceAll = function(that, ...args) {
@@ -37,9 +34,6 @@ module.exports = function() {
 			if(t0(args[0]) && t0(args[1])) {
 				return __ks_String.__ks_func_replaceAll_0.call(that, args[0], args[1]);
 			}
-		}
-		if(that.replaceAll) {
-			return that.replaceAll(...args);
 		}
 		throw Helper.badArgs();
 	};

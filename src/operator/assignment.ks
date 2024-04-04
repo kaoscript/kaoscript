@@ -143,7 +143,8 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 				var mut leftMost = @right
 
 				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
-					leftMost = leftMost.left()
+					// TODO! remove
+					leftMost = leftMost.left()!!
 				}
 
 				var newLeft = BinaryOperatorSubtraction.new(@data, leftMost, @scope)
@@ -256,7 +257,8 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				var mut leftMost = @right
 
 				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
-					leftMost = leftMost.left()
+					// TODO! remove
+					leftMost = leftMost.left()!!
 				}
 
 				var newLeft = BinaryOperatorAddition.new(@data, leftMost, @scope)

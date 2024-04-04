@@ -1,1 +1,1 @@
-TypeException: The return type must be "String[]" and not "RegExpExecArray" (fixtures/compile/type/type.array.lfse.ulfsnlse.ks:12)
+TypeException: The return type must be "String[]" and not "RegExpExecArray" (fixtures/compile/type/type.array.lfse.ulfsnlse.ks:14)

@@ -137,6 +137,8 @@ class CurryExpression extends CallExpression {
 				..setThisType(function.getThisType()) if !function.isMissingThis()
 				..setReturnType(function.getReturnType())
 				..addError(...function.listErrors()!?)
+				..flagAuxiliary() if function._auxiliary
+				..flagExhaustive() if function._exhaustive
 
 			var map = []
 

@@ -20,7 +20,7 @@ module.exports = function() {
 	};
 	bar.__ks_0 = function(x, y) {
 		if(KSType.isString(x)) {
-			return x.toInt();
+			return x;
 		}
 		else {
 			return y;

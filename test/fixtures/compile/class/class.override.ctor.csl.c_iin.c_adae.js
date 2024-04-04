@@ -1,5 +1,4 @@
 module.exports = function() {
-	var __ks_Foobar = {};
 	class Quxbaz extends Foobar {
 		constructor(x, y) {
 			if(y === void 0) {

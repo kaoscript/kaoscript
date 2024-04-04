@@ -17,7 +17,7 @@ class ValueOfType extends ReferenceType {
 			@this ||= expression is IdentifierLiteral && expression.name() == 'this'
 		}
 		else {
-			super(expression.scope(), type.hashCode())
+			super(expression.scope(), type.setNullable(false).hashCode(), type.isNullable())
 
 			@type = type
 		}

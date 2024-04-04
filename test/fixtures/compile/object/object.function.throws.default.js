@@ -1,6 +1,5 @@
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_SyntaxError = {};
 	const foobar = (() => {
 		const o = new OBJ();
 		o.corge = Helper.function(function() {

@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_sttc_map_0 = function(array, iterator) {
 		let results = [];
 		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {

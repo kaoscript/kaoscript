@@ -299,6 +299,7 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	isSpread() => @spread
+	override isSpreadable() => false
 	operator() => Operator.EmptyCoalescing
 	symbol() => '?##'
 	toFragments(fragments, mode) { # {{{

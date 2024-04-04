@@ -1,8 +1,8 @@
-const {Helper, Operator} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_lowerFirst_0 = function() {
-		return Operator.add(this.charAt(0).toLowerCase(), this.substring(1));
+		return Helper.concatString(this.charAt(0).toLowerCase(), this.substring(1));
 	};
 	__ks_String._im_lowerFirst = function(that, ...args) {
 		return __ks_String.__ks_func_lowerFirst_rt(that, args);
@@ -10,9 +10,6 @@ module.exports = function() {
 	__ks_String.__ks_func_lowerFirst_rt = function(that, args) {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_lowerFirst_0.call(that);
-		}
-		if(that.lowerFirst) {
-			return that.lowerFirst(...args);
 		}
 		throw Helper.badArgs();
 	};

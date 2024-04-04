@@ -1,4 +1,4 @@
-const {Helper, OBJ, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ks_Object = {};
 	__ks_Object.__ks_sttc_key_0 = function(object, index) {

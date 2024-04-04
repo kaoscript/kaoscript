@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import '../_/_array.last.ks'(...)
 
 func foobar(values: Array<Array<String>>) {

@@ -13,8 +13,9 @@
         "alien": true,
         "hybrid": false,
         "sealed": true,
-        "system": false,
+        "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -48,7 +49,9 @@
                 {
                   "external": "value",
                   "internal": "value",
-                  "type": "String",
+                  "type": {
+                    "reference": 1
+                  },
                   "min": 1,
                   "max": 1,
                   "default": false
@@ -66,16 +69,35 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
         "sharedMethods": {}
       }
     ]
   },
   {
     "exports": [
-      1,
+      2,
       "Date"
     ],
     "references": [
@@ -83,6 +105,7 @@
         "kind": "class",
         "original": 0,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -110,7 +133,7 @@
                 }
               ],
               "returns": {
-                "reference": 1
+                "reference": 2
               },
               "errors": [],
               "inits": [],
@@ -127,9 +150,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

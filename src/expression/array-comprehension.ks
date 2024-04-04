@@ -19,17 +19,15 @@ class ArrayComprehension extends Expression {
 			..analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@type = ArrayType.new(@scope)
-
 		@iteration.prepare(AnyType.NullableUnexplicit, targetMode)
 
 		@value.prepare(AnyType.NullableUnexplicit)
 
 		if @value.isSpread() {
-			@type.setRestType(@value.type().parameter())
+			@type = Type.arrayOf(@value.type().parameter(), @scope)
 		}
 		else {
-			@type.setRestType(@value.type())
+			@type = Type.arrayOf(@value.type(), @scope)
 		}
 	} # }}}
 	override translate() { # {{{

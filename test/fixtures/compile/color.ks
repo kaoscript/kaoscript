@@ -1,5 +1,6 @@
 #![rules(ignore-misfit)]
 #![error(off)]
+#![libstd(off)]
 
 extern console
 
@@ -795,7 +796,7 @@ export class Color {
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
 			)
 
-			var min: Number = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio
+			var min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio:!!(Number)
 
 			return {
 				ratio: ((min + max) / 2).round(2)
@@ -826,7 +827,8 @@ export class Color {
 	} # }}}
 
 	distance(mut color: Color): float { # {{{
-		var that: {_red: float, _green: float, _blue: float} = this.like(Space.SRGB)
+		var that = this.like(Space.SRGB):!!({_red: float, _green: float, _blue: float})
+
 		color = color.like(Space.SRGB)
 
 		return Math.sqrt(3 * (color._red - that._red) * (color._red - that._red) + 4 * (color._green - that._green) * (color._green - that._green) + 2 * (color._blue - that._blue) * (color._blue - that._blue))

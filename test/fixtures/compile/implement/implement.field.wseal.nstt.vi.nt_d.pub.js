@@ -1,6 +1,6 @@
 const {initFlag} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_get_culture = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);
@@ -20,7 +20,6 @@ module.exports = function(expect) {
 	const d = new Date();
 	expect(__ks_Date.__ks_get_culture(d)).to.not.exist;
 	return {
-		Date,
 		__ks_Date
 	};
 };

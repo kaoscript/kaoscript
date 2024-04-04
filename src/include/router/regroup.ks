@@ -79,33 +79,35 @@ namespace RegroupTree {
 	func applyMin(tree: TreeLeaf, max: Number, data: Array, shadows: Array, nodes: Array): Void { # {{{
 		nodes.unshift(tree)
 
+		// TODO!
+		// var i2p = { [type.index]: type.parameter for var type in tree.rows[0].types }
 		var i2p = {}
 		for var type in tree.rows[0].types {
 			i2p[type.index] = type.parameter
 		}
 
-		var shadow = shadows.shift()
-
-		if ?shadow && shadow.length > 1 {
-			if var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1]) {
-				if node.index >= 0 && node.max - max != 0 {
-					node.max = node.max - max
-				}
-			}
-		}
-
-		if data.length == 0 {
+		if !?#data {
 			for var node in nodes {
 				node.min = 0
+			}
+
+			if {
+				var shadow ?= shadows.shift()
+				var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1])
+			}
+			then {
+				if node.index >= 0 && node.max - max != 0 {
+					node.max -= max
+				}
 			}
 		}
 		else {
 			var d = data.shift()
 
 			var mut lastType = null
-			var mut lastMin = 0
+			var remax = []
 
-			for var node in nodes {
+			for var node, index in nodes {
 				if d.length == 0 {
 					node.min = 0
 				}
@@ -120,9 +122,12 @@ namespace RegroupTree {
 				}
 
 				if node.min == 0 {
-					if ?lastType && node.index >= 0 && node.max > 0 && node.max - max != 0  {
-						if node.type.isAssignableToVariable(lastType, true, true, false) {
-							node.max = node.max - max
+					if ?lastType && node.max > 0 && node.max - max != 0 {
+						if lastType.isAssignableToVariable(node.type, true, true, false) {
+							remax.push(index)
+						}
+						else if node.type.isAssignableToVariable(lastType, true, true, false) {
+							remax.push(index)
 						}
 					}
 
@@ -130,7 +135,55 @@ namespace RegroupTree {
 				}
 				else {
 					lastType = node.type
-					lastMin = node.min
+				}
+			}
+
+			if {
+				var shadow ?= shadows.shift()
+				var node ?= nodes.find((node, _, _) => i2p[node.index] == shadow[1])
+			}
+			then {
+				var mut shifted = false
+
+				if node.min == 0 {
+					var mut index = nodes.indexOf(node)
+
+					if remax.contains(index) {
+						shifted = true
+					}
+					else {
+						var len = #remax
+
+						while index > 0 {
+							index -= 1
+
+							var node = nodes[index]
+
+							if node.min == 0 {
+								node.dynamicMax = true
+
+								shifted = true
+							}
+							else {
+								break
+							}
+						}
+					}
+				}
+
+				if !shifted && node.index >= 0 && node.max - max != 0 {
+					node.max -= max
+				}
+			}
+
+			for var index in remax {
+				var node = nodes[index]
+
+				if node.index < 0 || nodes[index + 1]?.min == 0 {
+					node.dynamicMax = true
+				}
+				else {
+					node.max -= max
 				}
 			}
 		}
@@ -388,7 +441,7 @@ namespace RegroupTree {
 
 		var result = [ShadowKind.None, -1]
 
-		if data.length != 0 {
+		if ?#data {
 			var data = data.shift()
 
 			var parameters = {}
@@ -400,8 +453,7 @@ namespace RegroupTree {
 			}
 
 			var arguments = []
-			var dyn left = max
-			var dyn lastIndex = -1
+			var mut left = max
 			var mut canNegLength0 = true
 			var mut useNegLength0 = false
 			var mut useNegLengthN = true
@@ -414,10 +466,9 @@ namespace RegroupTree {
 			for var index from 0 to~ length {
 				if var maximus ?= data[index] {
 					if var parameter ?= parameters[index] {
-
 						if left < parameter.min {
 							for var i from 1 to parameter.min {
-								if var argType ?= arguments.shift() {
+								while var [lastIndex, argType] ?= arguments.shift() {
 									if parameter.type.isAssignableToVariable(argType, false, false, false, true) || (argType.isNullable() && parameter.type.isNullable()) {
 										if useNegLength0 {
 											useNegLength0 = false
@@ -437,6 +488,8 @@ namespace RegroupTree {
 										else {
 											setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 										}
+
+										break
 									}
 									else if argType.isAssignableToVariable(parameter.type, false, true, false) {
 										if useNegLength0 {
@@ -455,13 +508,15 @@ namespace RegroupTree {
 										else {
 											setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
 										}
+
+										break
 									}
 								}
 							}
 						}
 						else if left > parameter.min {
 							for var i from 1 to Math.min(parameter.min, arguments.length) {
-								if var argType ?= arguments.shift() {
+								if var [lastIndex, argType] ?= arguments.shift() {
 									var assignable = parameter.type.isAssignableToVariable(argType, false, false, false, true)
 									if (assignable && argType.isNullable()) || (!assignable && parameter.type.isAssignableToVariable(argType, false, true, false, true)) {
 										setResult(result, ShadowKind.Hard, lastIndex, max, ceiling, data, parameters)
@@ -471,14 +526,14 @@ namespace RegroupTree {
 						}
 
 						for var i from parameter.min to~ maximus.max {
-							arguments.unshift(parameter.type)
+							arguments.unshift([index, parameter.type])
 						}
 
 						canNegLength0 = false
 					}
 					else {
 						for var i from 0 to~ maximus.max {
-							arguments.unshift(maximus.type)
+							arguments.unshift([index, maximus.type])
 						}
 
 						if useNegLength0 {
@@ -494,9 +549,7 @@ namespace RegroupTree {
 						}
 					}
 
-					lastIndex = index
-
-					left -= maximus.max
+					left -= maximus.max!?
 				}
 			}
 		}
@@ -545,6 +598,7 @@ namespace RegroupTree {
 				}
 			}
 		}
+		// echo(shadows)
 
 		if ?lastMatches {
 			regroupTreesByGroup(group.slice(0, 1), trees, last, [])
@@ -554,6 +608,8 @@ namespace RegroupTree {
 
 		return if group.length == 0
 
+		// echo(toSignature(tree))
+
 		var first = group[0]
 
 		var mins = buildMin(first)
@@ -561,6 +617,8 @@ namespace RegroupTree {
 		trees.remove(...group)
 
 		applyMin(tree, first, mins, shadows)
+
+		// echo(toSignature(tree))
 	} # }}}
 
 	func replaceOrder(equivalences: String[], orders: String[][]): String[][] { # {{{

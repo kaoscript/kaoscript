@@ -1,0 +1,380 @@
+[
+  {
+    "aliens": [
+      0,
+      "Array",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "indexOf": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "auxiliary": true,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "searchElement",
+                  "internal": "searchElement",
+                  "type": {
+                    "kind": "deferred",
+                    "name": "T"
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "fromIndex",
+                  "internal": "fromIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6NSwiY29sdW1uIjo0OH0sImVuZCI6eyJsaW5lIjo1LCJjb2x1bW4iOjQ5fX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "join": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "separator",
+                  "internal": "separator",
+                  "type": "String?",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "map": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "callbackFn",
+                  "internal": "callbackFn",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "thisArg",
+                  "internal": "thisArg",
+                  "type": "Any?",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo3LCJjb2x1bW4iOjM5fSwiZW5kIjp7ImxpbmUiOjcsImNvbHVtbiI6NDN9fQ=="
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "pop": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "kind": "deferred",
+                "name": "T",
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "push": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "auxiliary": true,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "elements",
+                  "internal": "elements",
+                  "type": {
+                    "kind": "deferred",
+                    "name": "T"
+                  },
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shift": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "kind": "deferred",
+                "name": "T",
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "begin",
+                  "internal": "begin",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTEsImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6MTEsImNvbHVtbiI6MjV9fQ=="
+                },
+                {
+                  "external": "end",
+                  "internal": "end",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOi0xLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjExLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjExLCJjb2x1bW4iOjQzfX0="
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": {
+                  "kind": "deferred",
+                  "name": "T"
+                }
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "some": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "callback",
+                  "internal": "callback",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "splice": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "auxiliary": true,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "start",
+                  "internal": "start",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTMsImNvbHVtbiI6MjV9LCJlbmQiOnsibGluZSI6MTMsImNvbHVtbiI6MjZ9fQ=="
+                },
+                {
+                  "external": "deleteCount",
+                  "internal": "deleteCount",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTMsImNvbHVtbiI6NTB9LCJlbmQiOnsibGluZSI6MTMsImNvbHVtbiI6NTF9fQ=="
+                },
+                {
+                  "external": "items",
+                  "internal": "items",
+                  "type": {
+                    "kind": "deferred",
+                    "name": "T"
+                  },
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": {
+                  "kind": "deferred",
+                  "name": "T"
+                }
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "sort": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "compare",
+                  "internal": "compare",
+                  "type": "Function?",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNCwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjoxNCwiY29sdW1uIjozMn19"
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": {
+                  "kind": "deferred",
+                  "name": "T"
+                }
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "unshift": [
+            {
+              "libstd": 2,
+              "index": 0,
+              "access": 4,
+              "auxiliary": true,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "elements",
+                  "internal": "elements",
+                  "type": {
+                    "kind": "deferred",
+                    "name": "T"
+                  },
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "generics": [
+          {
+            "name": "T",
+            "type": "Any!?"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Array"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

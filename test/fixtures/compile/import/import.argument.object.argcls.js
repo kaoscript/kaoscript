@@ -31,7 +31,7 @@ module.exports = function(NewString) {
 		return garply.__ks_rt(this, arguments);
 	};
 	garply.__ks_0 = function(s) {
-		return s.toLowerCase();
+		return Helper.assert(s.toLowerCase(), "\"NewString\"", 0, value => Type.isClassInstance(value, NewString));
 	};
 	garply.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, NewString);

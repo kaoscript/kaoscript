@@ -31,7 +31,7 @@ module.exports = function(__ks_String) {
 		return garply.__ks_rt(this, arguments);
 	};
 	garply.__ks_0 = function(s) {
-		return s.toLowerCase();
+		return Helper.assertString(s.toLowerCase(), 0);
 	};
 	garply.__ks_rt = function(that, args) {
 		const t0 = Type.isString;

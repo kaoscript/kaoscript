@@ -598,7 +598,7 @@ class ObjectBindingElement extends Expression {
 			if @assignment != .Parameter && !@isRequired() && !@type.isAny() {
 				fragments.code($comma)
 
-				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, this)
+				@type.setNullable(false).toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, this)
 			}
 
 			fragments.code(')')

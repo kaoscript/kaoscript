@@ -1,6 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Object = {};
+	const __ks_Object = {};
 	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
 			return object.constructor.clone(object);

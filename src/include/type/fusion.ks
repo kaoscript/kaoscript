@@ -323,7 +323,7 @@ class FusionType extends Type {
 		return result
 	} # }}}
 	setTestName(@testName)
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node) { # {{{
 		@buildFlags()
 
 		nullable ||= @nullable
@@ -347,7 +347,7 @@ class FusionType extends Type {
 					for var { type }, index in generics {
 						fragments.code($comma) if index != 0
 
-						type.toAwareTestFunctionFragments(varname, false, casting, blind, null, null, fragments, node)
+						type.toAwareTestFunctionFragments(varname, false, hasDeferred, casting, blind, null, null, fragments, node)
 					}
 
 					fragments.code(`]`)
@@ -372,12 +372,12 @@ class FusionType extends Type {
 				fragments.code(@testName)
 			}
 
-			if @standardLibrary {
+			if @standardLibrary ~~ .Yes {
 				node.module().flagLibSTDType()
 			}
 		}
 		else {
-			super(varname, nullable, casting, blind, generics, subtypes, fragments, node)
+			super(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 		}
 	} # }}}
 	override toBlindSubtestFunctionFragments(funcname, varname, casting, propname, mut nullable, generics, fragments, node) { # {{{
@@ -499,7 +499,7 @@ class FusionType extends Type {
 				for var { type }, index in parameters {
 					fragments.code($comma) if index > 0
 
-					type.toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+					type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 				}
 
 				fragments.code(`]`)

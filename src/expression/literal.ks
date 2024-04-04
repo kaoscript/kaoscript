@@ -287,7 +287,7 @@ class IdentifierLiteral extends Literal {
 				if @type == @declaredType {
 					callback()
 				}
-				else if var callback ?= @declaredType.makeMemberCallee(property, generics, node) {
+				else if var callback ?= @declaredType.makeMemberCallee(property, @value, generics, node) {
 					callback()
 				}
 				else {

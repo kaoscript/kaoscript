@@ -1,5 +1,4 @@
 module.exports = function() {
-	var __ks_Error = {};
 	class FooError extends Error {
 		constructor() {
 			super(...arguments);
@@ -21,7 +20,7 @@ module.exports = function() {
 		}
 	}
 	return {
-		__ks_Error,
+		__ks_Error: {},
 		FooError
 	};
 };

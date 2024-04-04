@@ -1,0 +1,45 @@
+[
+  {
+    "aliens": [
+      0,
+      "Math",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "namespace",
+        "libstd": 6,
+        "sealed": true,
+        "system": true,
+        "exhaustive": false,
+        "properties": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Math"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "libstd": 6,
+        "original": 0,
+        "exhaustive": true,
+        "properties": {
+          "E": {
+            "type": "Number",
+            "sealed": false
+          },
+          "PI": {
+            "type": "Number",
+            "sealed": false
+          }
+        }
+      }
+    ],
+    "macros": []
+  }
+]

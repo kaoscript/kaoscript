@@ -21,7 +21,7 @@ module.exports = function() {
 			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foobar_0(items) {
-			this.quxbaz.apply(this, [].concat(items));
+			this.quxbaz(...Helper.checkArray(items));
 		}
 		__ks_func_foobar_rt(that, proto, args) {
 			const t0 = Type.isValue;

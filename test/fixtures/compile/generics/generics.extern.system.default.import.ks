@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import './generics.extern.system.default.export.ks'
 
 impl Object {

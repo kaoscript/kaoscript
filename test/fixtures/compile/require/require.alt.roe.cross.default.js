@@ -1,19 +1,19 @@
-const {Helper, Type} = require("@kaoscript/runtime");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function(__ks_Number, __ks_String) {
-	if(!Type.isValue(__ks_Number)) {
+	if(!__ks_Number) {
 		__ks_Number = {};
 	}
-	if(!Type.isValue(__ks_String)) {
+	if(!__ks_String) {
 		__ks_String = {};
 	}
 	__ks_String.__ks_func_toFloat_0 = function() {
-		return parseFloat(this);
+		return Helper.assertNumber(parseFloat(this), 0);
 	};
 	__ks_String.__ks_func_toInt_0 = function(base) {
 		if(base === void 0 || base === null) {
 			base = 10;
 		}
-		return parseInt(this, base);
+		return Helper.assertNumber(parseInt(this, base), 0);
 	};
 	__ks_String._im_toFloat = function(that, ...args) {
 		return __ks_String.__ks_func_toFloat_rt(that, args);

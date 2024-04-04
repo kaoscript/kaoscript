@@ -12,9 +12,6 @@ module.exports = function() {
 				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
 			}
 		}
-		if(Object.clone) {
-			return Object.clone(...arguments);
-		}
 		throw Helper.badArgs();
 	};
 	function foobar() {

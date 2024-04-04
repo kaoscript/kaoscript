@@ -10,8 +10,8 @@ module.exports = function(__ks_Array, __ks_Object, __ks_String) {
 		__ks_String = {};
 	}
 	return {
-		__ks_Array,
-		__ks_Object,
-		__ks_String
+		__ks_Array: {},
+		__ks_Object: {},
+		__ks_String: {}
 	};
 };

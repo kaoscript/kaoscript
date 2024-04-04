@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = {};
+	const __ks_Number = {};
 	__ks_Number.__ks_func_mod_0 = function(max) {
 		if(isNaN(this) === true) {
 			return 0;

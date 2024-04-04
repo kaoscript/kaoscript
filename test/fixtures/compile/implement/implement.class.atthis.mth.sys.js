@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_substringBefore_0 = function(pattern, position, missingValue) {
 		if(missingValue === void 0 || missingValue === null) {
 			missingValue = "";
@@ -46,6 +46,7 @@ module.exports = function() {
 			if(t1(args[0])) {
 				return __ks_String.__ks_func_substringBefore_2.call(that, args[0], void 0, void 0);
 			}
+			throw Helper.badArgs();
 		}
 		if(args.length === 2) {
 			if(t0(args[0])) {
@@ -72,6 +73,7 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			}
+			throw Helper.badArgs();
 		}
 		if(args.length === 3) {
 			if(t0(args[0])) {
@@ -98,9 +100,6 @@ module.exports = function() {
 				}
 				throw Helper.badArgs();
 			}
-		}
-		if(that.substringBefore) {
-			return that.substringBefore(...args);
 		}
 		throw Helper.badArgs();
 	};

@@ -1,4 +1,3 @@
-const {Type} = require("@kaoscript/runtime");
 module.exports = function(Foobar, __ks_Foobar, __ks_Error) {
 	class FooError extends Error {
 		constructor() {

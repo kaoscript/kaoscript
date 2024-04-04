@@ -2,6 +2,7 @@ require("kaoscript/register");
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Math, __ks_Math} = require("../export/.export.sealed.namespace.default.ks.j5k8r9.ksb")();
+	const __ks_Math = {};
 	__ks_Math.pi = function() {
 		return __ks_Math.pi.__ks_rt(this, arguments);
 	};

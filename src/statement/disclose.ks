@@ -1,21 +1,25 @@
 class DiscloseDeclaration extends Statement {
 	private late {
+		@auxiliary									= false
+		@instanceMethods: ClassMethodType[]{}		= {}
+		@name: String
 		@type: Type
 	}
 	analyse()
 	enhance() { # {{{
-		var variable = @scope.getVariable(@data.name.name)
+		@name = @data.name.name
+		var variable = @scope.getVariable(@name)
 
 		unless ?variable {
-			ReferenceException.throwNotDefined(@data.name.name, this)
+			ReferenceException.throwNotDefined(@name, this)
 		}
 
 		unless variable.getDeclaredType() is NamedType {
-			TypeException.throwNotClass(@data.name.name, this)
+			TypeException.throwNotClass(@name, this)
 		}
 
 		unless variable.getDeclaredType().isAlien() {
-			TypeException.throwNotAlien(@data.name.name, this)
+			TypeException.throwNotAlien(@name, this)
 		}
 
 		variable.prepareAlteration()
@@ -29,7 +33,7 @@ class DiscloseDeclaration extends Statement {
 		}
 
 		for var data in @data.members {
-			@type.addPropertyFromAST(data, this)
+			@type.addPropertyFromAST(data, @name, this)
 		}
 
 		if @options.rules.nonExhaustive {
@@ -38,8 +42,110 @@ class DiscloseDeclaration extends Statement {
 		else {
 			@type.setExhaustive(true)
 		}
+
+		if @type.isClass() && @type.isSealed() {
+			for var methods, name of @type.listInstanceMethods() {
+				for var method in methods {
+					if !method.hasAuxiliary() && (method.hasGenerics() || method.hasDeferredParameter()) {
+						@instanceMethods[name] = methods
+
+						for var method in methods {
+							method.flagAuxiliary()
+						}
+
+						break
+					}
+				}
+			}
+
+			if ?#@instanceMethods {
+				var type = variable.getDeclaredType()
+
+				if !type.hasAuxiliary() {
+					type
+						..flagAuxiliary()
+						..useSealedName(@module())
+
+					@auxiliary = true
+				}
+			}
+		}
 	} # }}}
 	override prepare(target, targetMode)
 	translate()
-	toStatementFragments(fragments, mode)
+	toStatementFragments(fragments, mode) { # {{{
+		return unless ?#@instanceMethods
+
+		if @auxiliary {
+			var variable = @scope.getVariable(@name)
+			var sealedName = variable.getDeclaredType().getSealedName()
+
+			fragments.line(`\($runtime.immutableScope(this))\(sealedName) = {}`)
+		}
+
+		for var methods, name of @instanceMethods {
+			@toSealedInstanceFragments(name, methods, fragments)
+		}
+	} # }}}
+	toSealedInstanceFragments(name: String, methods: ClassMethodType[], fragments) { # {{{
+		var variable = @scope.getVariable(@name)
+		var sealedName = variable.getDeclaredType().getSealedName()
+		var labelable = @type.isLabelableInstanceMethod(@name)
+		var assessment = Router.assess(@type.listInstanceMethods(name), name, this)
+
+		var mut line = fragments.newLine()
+
+		if labelable {
+			line.code(`\(sealedName)._im_\(name) = function(that, gens, kws, ...args)`)
+		}
+		else {
+			line.code(`\(sealedName)._im_\(name) = function(that, gens, ...args)`)
+		}
+
+		var mut block = line.newBlock()
+
+		if labelable {
+			block.line(`return \(sealedName).__ks_func_\(name)_rt(that, gens || {}, kws, args)`)
+		}
+		else {
+			block.line(`return \(sealedName).__ks_func_\(name)_rt(that, gens || {}, args)`)
+		}
+
+		block.done()
+		line.done()
+
+		line = fragments.newLine()
+
+		if labelable {
+			line.code(`\(sealedName).__ks_func_\(name)_rt = function(that, gens, kws, args)`)
+		}
+		else {
+			line.code(`\(sealedName).__ks_func_\(name)_rt = function(that, gens, args)`)
+		}
+
+		block = line.newBlock()
+
+		Router.toFragments(
+			(function, line) => {
+				if function.isSealed() {
+					line.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
+
+					return true
+				}
+				else {
+					line.code(`that.\(name).call(that`)
+
+					return true
+				}
+			}
+			null
+			assessment
+			true
+			block
+			this
+		)
+
+		block.done()
+		line.done()
+	} # }}}
 }

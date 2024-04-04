@@ -21,7 +21,7 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(options) {
-			this._x = options.x;
+			this._x = Helper.assertNumber(options.x, 0);
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isValue;

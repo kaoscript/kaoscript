@@ -8,7 +8,7 @@ module.exports = function() {
 		if(x !== "a") {
 			x = null;
 		}
-		quxbaz(x);
+		quxbaz.__ks_0(x);
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

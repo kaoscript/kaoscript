@@ -1,6 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Error = {};
 	class Exception extends Error {
 		constructor(message) {
 			super();

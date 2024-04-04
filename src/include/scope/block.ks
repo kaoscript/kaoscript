@@ -258,7 +258,7 @@ class BlockScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if variable != null {
-				return variable!!
+				return variable
 			}
 		}
 
@@ -529,9 +529,7 @@ class BlockScope extends Scope {
 		if @variables[name] is Array {
 			var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
-			if @references[hash] is not ReferenceType {
-				@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
-			}
+			@references[hash] ??= ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 
 			return @references[hash]
 		}

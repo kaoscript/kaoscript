@@ -23,27 +23,27 @@ class ConstructorCallee extends Callee {
 		super(data)
 
 		if @type is ReferenceType {
-			var raw = type.type().type()
-
-			match raw {
+			match var root = type.discard() {
 				is ClassType {
 					if @type.isVirtual() {
 						TypeException.throwNotClass(@type.name(), @node)
 					}
-					if raw.isAbstract() {
+					if root.isAbstract() {
 						TypeException.throwAbstractInstantiation(@type.name(), @node)
 					}
-					if raw.features() !~ ClassFeature.Constructor {
-						TypeException.throwInvalidInstantiation(@type.name(), @node)
+					if root.features() !~ ClassFeature.Constructor {
+						if ?#@node.arguments() {
+							SyntaxException.throwNotEmptyInstantiation(@type.name(), @node)
+						}
 					}
 
-					if raw.hasSealedConstructors() {
+					if root.hasSealedConstructors() {
 						@sealed = true
 					}
 
 					@container = .Class
-					@alien = raw.isAlien()
-					@hybrid = raw.isHybrid()
+					@alien = root.isAlien()
+					@hybrid = root.isHybrid()
 
 					@type = @type.flagStrict()
 				}
@@ -123,6 +123,12 @@ class ConstructorCallee extends Callee {
 		}
 	} # }}}
 	toClassFragments(fragments, mode) { # {{{
+		if @type.path() == 'Object' {
+			fragments.code(`new \($runtime.object(@node))(`)
+
+			return
+		}
+
 		var arguments = @node.arguments()
 
 		match @result {

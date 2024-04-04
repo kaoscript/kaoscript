@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import '../_/_number.ks'
 import '../_/_string.ks'
 

@@ -9,12 +9,14 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 10,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {
           "length": {
@@ -29,11 +31,32 @@
         "staticVariables": {},
         "instanceMethods": {},
         "staticMethods": {},
+        "generics": [
+          {
+            "name": "T"
+          }
+        ],
         "sequences": [
           -1,
           -1,
           -1
         ],
+        "exhaustiveness": {
+          "instanceMethods": {
+            "indexOf": true,
+            "join": true,
+            "map": true,
+            "pop": true,
+            "push": true,
+            "reverse": true,
+            "shift": true,
+            "slice": true,
+            "some": true,
+            "splice": true,
+            "sort": true,
+            "unshift": true
+          }
+        },
         "sharedMethods": {}
       }
     ]
@@ -46,8 +69,10 @@
     "references": [
       {
         "kind": "class",
+        "libstd": 26,
         "original": 0,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -151,6 +176,22 @@
           -1,
           -1
         ],
+        "exhaustiveness": {
+          "instanceMethods": {
+            "indexOf": true,
+            "join": true,
+            "map": true,
+            "pop": true,
+            "push": true,
+            "reverse": true,
+            "shift": true,
+            "slice": true,
+            "some": true,
+            "splice": true,
+            "sort": true,
+            "unshift": true
+          }
+        },
         "sharedMethods": {}
       }
     ],

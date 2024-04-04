@@ -44,6 +44,7 @@
         "sealed": true,
         "system": true,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -202,6 +203,7 @@
         "kind": "class",
         "original": 1,
         "exhaustive": false,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -283,7 +285,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzcsImNvbHVtbiI6Mjh9LCJlbmQiOnsibGluZSI6MzcsImNvbHVtbiI6Mjl9fQ=="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MzksImNvbHVtbiI6Mjh9LCJlbmQiOnsibGluZSI6MzksImNvbHVtbiI6Mjl9fQ=="
                 }
               ],
               "returns": {
@@ -324,7 +326,7 @@
                   "max": 1,
                   "default": true,
                   "comprehensive": true,
-                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjQyLCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjQyLCJjb2x1bW4iOjI1fX0="
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjQ0LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjQ0LCJjb2x1bW4iOjI1fX0="
                 }
               ],
               "returns": {

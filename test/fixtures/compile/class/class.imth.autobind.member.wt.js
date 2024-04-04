@@ -64,5 +64,5 @@ module.exports = function() {
 	}
 	const x = ClassA.__ks_new_0();
 	const quxbaz = Helper.bindMethod(x.__ks_func_foobar_0(), "quxbaz");
-	console.log(quxbaz());
+	console.log(quxbaz.__ks_0());
 };

@@ -92,9 +92,15 @@ class NamespaceType extends Type {
 
 		@alterations[name] = true
 
-		return variable.getDeclaredType()
+		var type = variable.getDeclaredType()
+
+		if @standardLibrary ~~ .Opened && type.isStandardLibrary(LibSTDMode.No) {
+			@standardLibrary += .Augmented
+		}
+
+		return type
 	} # }}}
-	addPropertyFromAST(data, node) { # {{{
+	addPropertyFromAST(data, name, node) { # {{{
 		var mut type = Type.fromAST(data, node)
 
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
@@ -154,11 +160,16 @@ class NamespaceType extends Type {
 	} # }}}
 	copyFrom(src: NamespaceType) { # {{{
 		@alien = src._alien
+		@auxiliary = src._auxiliary
 		@complete = src._complete
-		@sealed = src._sealed
-		@system = src._system
 		@requirement = src._requirement
 		@required = src._required
+		@sealed = src._sealed
+		@system = src._system
+
+		if src._standardLibrary > @standardLibrary {
+			@standardLibrary = src._standardLibrary
+		}
 
 		for var property, name of src._properties {
 			@properties[name] = property
@@ -170,9 +181,33 @@ class NamespaceType extends Type {
 		return this
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		var mut exportSuper = false
+
 		if ?@majorOriginal {
+			if mode ~~ ExportMode.Export {
+				exportSuper = @hasExportableOriginals()
+			}
+			else if mode ~~ ExportMode.Requirement {
+				var mut original? = @majorOriginal
+
+				while ?original {
+					if original.isRequirement() || original.referenceIndex() != -1 {
+						exportSuper = true
+						break
+					}
+					else {
+						original = original._majorOriginal
+					}
+				}
+			}
+		}
+
+		var libstd: LibSTDMode = module.isStandardLibrary() && @standardLibrary == .No ? .Yes + .Closed : @standardLibrary
+
+		if exportSuper {
 			var export = {
 				kind: TypeKind.Namespace
+				libstd if libstd != .No
 				original: @majorOriginal.referenceIndex()
 				exhaustive: @isExhaustive()
 				properties: {}
@@ -189,6 +224,7 @@ class NamespaceType extends Type {
 		else {
 			var export = {
 				kind: TypeKind.Namespace
+				libstd if libstd != .No
 				sealed: @sealed
 				system: @system
 				exhaustive: @isExhaustive()
@@ -222,6 +258,14 @@ class NamespaceType extends Type {
 		}
 		else {
 			return null
+		}
+	} # }}}
+	hasExportableOriginals() { # {{{
+		if ?@majorOriginal {
+			return @majorOriginal._referenceIndex != -1 || @majorOriginal.hasExportableOriginals()
+		}
+		else {
+			return false
 		}
 	} # }}}
 	hasMatchingFunction(name, type: FunctionType, mode: MatchingMode) { # {{{
@@ -330,6 +374,13 @@ class NamespaceType extends Type {
 		}
 	} # }}}
 	matchContentOf(value: Type) => value is ReferenceType && value.isNamespace()
+	assist merge(value: NamespaceType) { # {{{
+		@auxiliary ||= value.hasAuxiliary()
+
+		for var property, name of value._properties {
+			@addProperty(name, property)
+		}
+	} # }}}
 	originals(@majorOriginal): valueof this { # {{{
 		@altering = true
 	} # }}}
@@ -340,6 +391,15 @@ class NamespaceType extends Type {
 		}
 
 		return this
+	} # }}}
+	override setStandardLibrary(standardLibrary) { # {{{
+		super(standardLibrary)
+
+		var submode: LibSTDMode = @standardLibrary ~~ .Yes ? .Yes + .Closed : .No
+
+		for var property of @properties {
+			property.setStandardLibrary(submode)
+		}
 	} # }}}
 	shallBeNamed() => true
 	toFragments(fragments, node) { # {{{
@@ -459,5 +519,6 @@ class NamespacePropertyType extends Type {
 	proxy @type {
 		toPositiveTestFragments
 		toQuote
+		setExhaustive
 	}
 }

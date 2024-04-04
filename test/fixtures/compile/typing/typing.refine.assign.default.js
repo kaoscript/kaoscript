@@ -29,7 +29,7 @@ module.exports = function() {
 	};
 	corge.__ks_0 = function(x) {
 		console.log(x);
-		x = foo.__ks_0();
+		x = Helper.assertString(foo.__ks_0(), 0);
 		console.log(x);
 		x = bar.__ks_0();
 		console.log(x);
@@ -48,7 +48,7 @@ module.exports = function() {
 	};
 	grault.__ks_0 = function(x) {
 		console.log(Helper.toString(x));
-		x = foo.__ks_0();
+		x = Helper.assert(foo.__ks_0(), "\"Any\"", 0, Type.isValue);
 		console.log(Helper.toString(x));
 		x = bar.__ks_0();
 		console.log(x);
@@ -64,7 +64,7 @@ module.exports = function() {
 	};
 	let x = "";
 	console.log(x);
-	x = foo.__ks_0();
+	x = Helper.assertString(foo.__ks_0(), 0);
 	console.log(x);
 	x = bar.__ks_0();
 	console.log(x);

@@ -42,7 +42,6 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
-	const __ks_Shape = {};
 	class Rectangle extends Shape {
 		static __ks_new_0(...args) {
 			const o = Object.create(Rectangle.prototype);

@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "Any" (fixtures/compile/typing/typing.affix.ret.i.in~fae.ks:8)

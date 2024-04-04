@@ -1,6 +1,5 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_SyntaxError = {};
 	class MyError extends SyntaxError {
 		constructor() {
 			super(...arguments);

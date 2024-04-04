@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require|import './implement.system.ctor.clash.typing.ks'
 
 disclose Date {

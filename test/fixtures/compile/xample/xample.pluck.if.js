@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_func_pluck_0 = function(name) {
 		let result = [];
 		let value;
@@ -29,9 +29,6 @@ module.exports = function() {
 			if(t0(args[0])) {
 				return __ks_Array.__ks_func_pluck_0.call(that, args[0]);
 			}
-		}
-		if(that.pluck) {
-			return that.pluck(...args);
 		}
 		throw Helper.badArgs();
 	};

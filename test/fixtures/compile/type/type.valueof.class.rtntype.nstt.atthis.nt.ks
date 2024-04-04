@@ -5,7 +5,7 @@ class Foobar {
 	value(): valueof @value
 }
 
-func foovar(x: Foobar) {
+func foobar(x: Foobar) {
 	if var value ?= x.value() {
 		value.print()
 	}

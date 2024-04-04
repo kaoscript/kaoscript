@@ -1,10 +1,10 @@
-const {Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function camelize() {
 		return camelize.__ks_rt(this, arguments);
 	};
 	camelize.__ks_0 = function(value) {
-		return Operator.add(value.charAt(0).toLowerCase(), value.substring(1).replace(/[-_\s]+(.)/g, Helper.function((m, l) => {
+		return Helper.concatString(value.charAt(0).toLowerCase(), value.substring(1).replace(/[-_\s]+(.)/g, Helper.function((m, l) => {
 			return l.toUpperCase();
 		}, (that, fn, ...args) => {
 			const t0 = Type.isValue;

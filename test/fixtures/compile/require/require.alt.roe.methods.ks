@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 #[rules(non-exhaustive)]
 require|extern system class Array {
 	indexOf(...): Number
@@ -6,10 +8,10 @@ require|extern system class Array {
 }
 
 impl Array {
-	contains(item, from = 0): Boolean { # {{{
+	contains(item, from = 0): Boolean {
 		return this.indexOf(item, from) != -1
-	} # }}}
-	pushUniq(...args): Array { # {{{
+	}
+	pushUniq(...args): Array {
 		if args.length == 1 {
 			if !this.contains(args[0]) {
 				this.push(args[0])
@@ -23,7 +25,7 @@ impl Array {
 			}
 		}
 		return this
-	} # }}}
+	}
 }
 
 export Array

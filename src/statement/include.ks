@@ -187,7 +187,7 @@ class IncludeDeclarator extends Statement {
 	private {
 		@directory: String
 		@file: String
-		@includePath: String
+		@includePath: String?
 		@offsetEnd: Number		= 0
 		@offsetStart: Number	= 0
 		@statements				= []
@@ -199,14 +199,16 @@ class IncludeDeclarator extends Statement {
 
 		@directory = path.dirname(file)
 
-		if moduleName == null {
-			@includePath = parent.includePath()
+		var includePath = parent.includePath()
+
+		if !?moduleName {
+			@includePath = includePath
 		}
-		else if parent.includePath() == null || !$localFileRegex.test(moduleName) {
+		else if !?includePath || !$localFileRegex.test(moduleName) {
 			@includePath = moduleName.substr(4)
 		}
 		else {
-			@includePath = path.join(parent.includePath(), moduleName)
+			@includePath = path.join(includePath, moduleName)
 		}
 	} # }}}
 	initiate() { # {{{

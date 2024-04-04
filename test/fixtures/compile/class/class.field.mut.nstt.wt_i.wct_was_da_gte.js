@@ -14,7 +14,8 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(values) {
-			this._x = values.x, this._y = values.y;
+			let __ks_0;
+			this._x = (__ks_0 = Helper.assert(values, "\"{x: Number, y: Number}\"", 0, value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}))).x, this._y = __ks_0.y;
 		}
 		__ks_cons_rt(that, args) {
 			const t0 = Type.isValue;

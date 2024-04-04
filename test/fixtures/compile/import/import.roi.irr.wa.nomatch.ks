@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 import '../_/_array.ks'
 
 import './import.roi.rr.ks'(Array)

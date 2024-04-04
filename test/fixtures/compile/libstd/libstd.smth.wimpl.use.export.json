@@ -12,13 +12,14 @@
     "references": [
       {
         "kind": "class",
-        "libstd": true,
+        "libstd": 26,
         "abstract": false,
         "alien": true,
         "hybrid": false,
         "sealed": true,
         "system": true,
         "exhaustive": true,
+        "auxiliary": true,
         "constructors": [],
         "instanceVariables": {},
         "staticVariables": {},
@@ -68,6 +69,7 @@
             }
           ]
         },
+        "features": 8,
         "generics": [
           {
             "name": "V"
@@ -81,9 +83,6 @@
           -1,
           -1
         ],
-        "exhaustiveness": {
-          "constructor": false
-        },
         "sharedMethods": {}
       }
     ],

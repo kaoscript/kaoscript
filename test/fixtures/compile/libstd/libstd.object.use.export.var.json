@@ -1,0 +1,17 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [
+      "Object"
+    ],
+    "macros": []
+  }
+]

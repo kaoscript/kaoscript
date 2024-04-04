@@ -1,5 +1,4 @@
 module.exports = function() {
-	var __ks_Error = {};
 	class NotImplementedError extends Error {
 		constructor(message) {
 			if(message === void 0 || message === null) {

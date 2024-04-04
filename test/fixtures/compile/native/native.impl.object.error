@@ -1,0 +1,1 @@
+TypeException: Class "Object" doesn't accept new instance method (fixtures/compile/native/native.impl.object.ks:6)

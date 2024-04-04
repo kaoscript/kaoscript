@@ -20,8 +20,8 @@ module.exports = function() {
 				throw Helper.badArgs();
 			}
 		}
-		foobar() {
-			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		foobar(gens, ...args) {
+			return this.__ks_func_foobar_rt.call(null, this, this, gens || {}, args);
 		}
 		__ks_func_foobar_0(name, age) {
 			return (() => {
@@ -31,8 +31,8 @@ module.exports = function() {
 				return o;
 			})();
 		}
-		__ks_func_foobar_rt(that, proto, args) {
-			const t0 = Type.isValue;
+		__ks_func_foobar_rt(that, proto, gens, args) {
+			const t0 = gens.T || Type.isValue;
 			const t1 = Type.isNumber;
 			if(args.length === 2) {
 				if(t0(args[0]) && t1(args[1])) {
@@ -45,7 +45,7 @@ module.exports = function() {
 			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_quxbaz_0(name, age) {
-			return this.foobar(name, age);
+			return this.foobar({}, name, age);
 		}
 		__ks_func_quxbaz_rt(that, proto, args) {
 			const t0 = Type.isString;

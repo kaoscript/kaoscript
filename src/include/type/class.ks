@@ -1,19 +1,3 @@
-enum Accessibility {
-	Internal = 1
-	Private
-	Protected
-	Public
-
-	static isLessAccessibleThan(source: Accessibility, target: Accessibility): Boolean { # {{{
-		return match source {
-			.Public => false
-			.Protected => target == .Public
-			.Private => target == .Protected | .Public
-			.Internal => target == .Private | .Protected | .Public
-		}
-	} # }}}
-}
-
 bitmask ClassFeature {
 	None
 
@@ -72,7 +56,6 @@ class ClassType extends Type {
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
-		@predefined: Boolean							= false
 		@sharedMethods: Object<Number>					= {}
 		@seal											= {
 			constructors:		false
@@ -146,7 +129,11 @@ class ClassType extends Type {
 			type._exhaustive = data.exhaustive
 
 			if ?data.libstd {
-				type._standardLibrary = data.libstd
+				type._standardLibrary = LibSTDMode(data.libstd) ?? .No
+			}
+
+			if ?data.auxiliary {
+				type._auxiliary = data.auxiliary
 			}
 
 			if ?data.exhaustiveness {
@@ -208,8 +195,8 @@ class ClassType extends Type {
 					type.flagSealed()
 				}
 
-				if data.features {
-					type._features = data.features
+				if ?data.features {
+					type._features = ClassFeature(data.features) ?? .All
 				}
 
 				queue.push(() => {
@@ -417,6 +404,10 @@ class ClassType extends Type {
 
 		@labelables.instanceMethods[name] ||= type.hasOnlyLabeledParameter()
 
+		if @standardLibrary ~~ .Opened && type.isStandardLibrary(.No) {
+			@standardLibrary += .Augmented
+		}
+
 		return index
 	} # }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { # {{{
@@ -437,7 +428,7 @@ class ClassType extends Type {
 
 		@interfaces.push(type)
 	} # }}}
-	addPropertyFromAST(data, node) { # {{{
+	addPropertyFromAST(data, name, node) { # {{{
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
@@ -471,13 +462,26 @@ class ClassType extends Type {
 					throw NotImplementedException.new(node)
 				}
 				else {
+					var generics = [...@generics]
+
 					var mut instance = true
 
 					for var modifier in data.modifiers while instance {
 						instance = false if modifier.kind == ModifierKind.Static
 					}
 
-					var type = ClassMethodType.fromAST(data, @generics, node)
+					if instance {
+						if @features !~ .InstanceMethod {
+							TypeException.throwInvalidClassInstanceMethod(name, node)
+						}
+					}
+					else {
+						if @features !~ .StaticMethod {
+							TypeException.throwInvalidClassStaticMethod(name, node)
+						}
+					}
+
+					var type = ClassMethodType.fromAST(data, generics, node)
 
 					if options.rules.nonExhaustive {
 						if instance {
@@ -541,6 +545,10 @@ class ClassType extends Type {
 
 		@labelables.staticMethods[name] ||= type.hasOnlyLabeledParameter()
 
+		if @standardLibrary ~~ .Opened && type.isStandardLibrary(.No) {
+			@standardLibrary += .Augmented
+		}
+
 		return index
 	} # }}}
 	addStaticVariable(name: String, type: ClassVariableType) { # {{{
@@ -565,15 +573,12 @@ class ClassType extends Type {
 
 		that.copyFrom(this)
 
-		if @requirement || @alien {
-			that.originals(this)
-		}
-
 		return that
 	} # }}}
 	copyFrom(src: ClassType) { # {{{
 		@abstract = src._abstract
 		@alien = src._alien
+		@auxiliary = src._auxiliary
 		@complete = src._complete
 		@extending = src._extending
 		@extends = src._extends
@@ -581,7 +586,10 @@ class ClassType extends Type {
 		@hybrid = src._hybrid
 		@sealed = src._sealed
 		@system = src._system
-		@standardLibrary = src._standardLibrary
+
+		if src._standardLibrary > @standardLibrary {
+			@standardLibrary = src._standardLibrary
+		}
 
 		for var methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
@@ -683,14 +691,13 @@ class ClassType extends Type {
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var exhaustive = @isExhaustive()
 
-		var late export
-
 		var mut exportSuper = false
+
 		if ?@majorOriginal {
-			if mode ~~ ExportMode.Export {
+			if mode ~~ .Export {
 				exportSuper = @hasExportableOriginals()
 			}
-			else if mode ~~ ExportMode.Requirement {
+			else if mode ~~ .Requirement {
 				var mut original? = @majorOriginal
 
 				while ?original {
@@ -705,10 +712,14 @@ class ClassType extends Type {
 			}
 		}
 
+		var libstd: LibSTDMode = module.isStandardLibrary() && @standardLibrary == .No ? .Yes + .Closed : @standardLibrary
+
+		var late export
+
 		if exportSuper {
 			export = {
 				kind: TypeKind.Class
-				libstd: true if @standardLibrary || module.isStandardLibrary()
+				libstd if libstd != .No
 			}
 
 			if mode ~~ ExportMode.Export {
@@ -741,6 +752,7 @@ class ClassType extends Type {
 			}
 
 			export.exhaustive = exhaustive
+			export.auxiliary = true if @auxiliary || !module.isStandardLibrary()
 			export.constructors = []
 			export.instanceVariables = {}
 			export.staticVariables = {}
@@ -806,13 +818,14 @@ class ClassType extends Type {
 		else {
 			export = {
 				kind: TypeKind.Class
-				libstd: true if @standardLibrary || module.isStandardLibrary()
+				libstd if libstd != .No
 				abstract: @abstract
 				alien: @alien
 				hybrid: @hybrid
 				sealed: @sealed
 				system: @system
 				exhaustive
+				auxiliary: true if @auxiliary || !module.isStandardLibrary()
 				constructors: [constructor.export(references, indexDelta, mode, module, null) for var constructor in @constructors]
 				instanceVariables: {}
 				staticVariables: {}
@@ -820,19 +833,15 @@ class ClassType extends Type {
 				staticMethods: {}
 			}
 
-			for var variable, name of @instanceVariables {
+			for var variable, name of @instanceVariables when variable.isExportable(mode, module) {
 				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
-			for var variable, name of @staticVariables {
+			for var variable, name of @staticVariables when variable.isExportable(mode, module) {
 				export.staticVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
 			for var methods, name of @instanceMethods {
-				// for var method in methods {
-				// 	echo(name, method.hashCode(), method.isExportable(mode, module))
-				// }
-
 				var exportedMethods = [method.export(references, indexDelta, mode, module, null) for var method in methods when method.isExportable(mode, module)]
 
 				if ?#exportedMethods {
@@ -878,7 +887,7 @@ class ClassType extends Type {
 				for var { name, type? } in @generics {
 					export.generics.push({
 						name
-						type: type.export(references, indexDelta, mode, module, module) if ?type
+						type: type.export(references, indexDelta, mode, module) if ?type
 					})
 				}
 			}
@@ -994,6 +1003,35 @@ class ClassType extends Type {
 	} # }}}
 	features(): valueof @features
 	features(@features): valueof this
+	filterAbstractMethods(abstractMethods) { # {{{
+		if @extending {
+			@extends.type().filterAbstractMethods(abstractMethods)
+		}
+
+		if @abstract {
+			for var methods, name of @abstractMethods {
+				if abstractMethods[name] is not Array {
+					abstractMethods[name] = []
+				}
+
+				abstractMethods[name]:!(Array).append(methods)
+			}
+		}
+
+		var matchables = []
+
+		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
+			for var method, index in methods down {
+				if method.isSubsetOf(@instanceMethods[name], MatchingMode.FunctionSignature) {
+					methods.splice(index, 1)
+				}
+			}
+
+			if methods.length == 0 {
+				Object.delete(abstractMethods, name)
+			}
+		}
+	} # }}}
 	flagAbstract() { # {{{
 		@abstract = true
 	} # }}}
@@ -1035,42 +1073,10 @@ class ClassType extends Type {
 
 		return this
 	} # }}}
-	filterAbstractMethods(abstractMethods) { # {{{
-		if @extending {
-			@extends.type().filterAbstractMethods(abstractMethods)
-		}
-
-		if @abstract {
-			for var methods, name of @abstractMethods {
-				if abstractMethods[name] is not Array {
-					abstractMethods[name] = []
-				}
-
-				abstractMethods[name]:!(Array).append(methods)
-			}
-		}
-
-		var matchables = []
-
-		for var methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for var method, index in methods down {
-				if method.isSubsetOf(@instanceMethods[name], MatchingMode.FunctionSignature) {
-					methods.splice(index, 1)
-				}
-			}
-
-			if methods.length == 0 {
-				Object.delete(abstractMethods, name)
-			}
-		}
-	} # }}}
 	flagAltering(): valueof this { # {{{
 		if ?@majorOriginal {
 			@altering = true
 		}
-	} # }}}
-	flagPredefined() { # {{{
-		@predefined = true
 	} # }}}
 	flagRequirement(): valueof this { # {{{
 		super()
@@ -1081,21 +1087,6 @@ class ClassType extends Type {
 		@sealed = true
 
 		return this
-	} # }}}
-	override flagStandardLibrary() { # {{{
-		super()
-
-		for var methods of @instanceMethods {
-			for var method in methods {
-				method.flagStandardLibrary()
-			}
-		}
-
-		for var methods of @staticMethods {
-			for var method in methods {
-				method.flagStandardLibrary()
-			}
-		}
 	} # }}}
 	generics() => @generics
 	generics(@generics)
@@ -1202,8 +1193,8 @@ class ClassType extends Type {
 		return null
 	} # }}}
 	getInstanceProperty(name: String) { # {{{
-		if @instanceMethods[name] is Array {
-			if @instanceMethods[name].length == 1 {
+		if ?#@instanceMethods[name] {
+			if #@instanceMethods[name] == 1 {
 				return @instanceMethods[name][0]
 			}
 			else {
@@ -1574,9 +1565,7 @@ class ClassType extends Type {
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
 	isExhaustive() { # {{{
-		if @exhaustive {
-			return true
-		}
+		return true if @exhaustive
 
 		if @altering {
 			return @majorOriginal.isExhaustive()
@@ -1650,6 +1639,15 @@ class ClassType extends Type {
 
 		return @fullyImplementedMethods[name] <- true
 	} # }}}
+	isGenericInstanceMethod(name: String): Boolean { # {{{
+		for var method in @instanceMethods[name] {
+			if method.hasGenerics() || method.hasDeferredParameter() {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isHybrid() => @hybrid
 	isImplementing() => @implementing
 	isInitializing() => @sequences.initializations != -1
@@ -1670,28 +1668,8 @@ class ClassType extends Type {
 	isLabelableInstanceMethod(name: String): Boolean => @labelables.instanceMethods[name] ?? false
 	isLabelableStaticMethod(name: String): Boolean => @labelables.staticMethods[name] ?? false
 	isMergeable(type) => type.isClass()
-	isPredefined() => @predefined
 	isSealable() => true
 	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
-	override isStandardLibrary(mode) { # {{{
-		return false unless @standardLibrary
-
-		if mode == .Full {
-			for var methods, name of @instanceMethods {
-				for var method in methods {
-					return false unless method.isStandardLibrary(mode)
-				}
-			}
-
-			for var methods, name of @staticMethods {
-				for var method in methods {
-					return false unless method.isStandardLibrary(mode)
-				}
-			}
-		}
-
-		return true
-	} # }}}
 	assist isSubsetOf(value: ClassType, generics, subtypes, mode) { # {{{
 		if this == value {
 			return true
@@ -1722,9 +1700,7 @@ class ClassType extends Type {
 			functionMode += MatchingMode.Renamed if mode ~~ MatchingMode.Renamed
 
 			for var methods, name of value._instanceMethods {
-				if @instanceMethods[name] is not Array {
-					return false
-				}
+				return false unless ?@instanceMethods[name]
 
 				for var method in methods {
 					if !method.isSupersetOf(@instanceMethods[name], functionMode) {
@@ -1734,9 +1710,7 @@ class ClassType extends Type {
 			}
 
 			for var methods, name of value._staticMethods {
-				if @staticMethods[name] is not Array {
-					return false
-				}
+				return false unless ?@staticMethods[name]
 
 				for var method in methods {
 					if !method.isSupersetOf(@staticMethods[name], functionMode) {
@@ -1825,13 +1799,8 @@ class ClassType extends Type {
 
 		return result
 	} # }}}
-	listInstanceMethods(name: String) { # {{{
-		if @instanceMethods[name] is Array {
-			return @instanceMethods[name]
-		}
-
-		return null
-	} # }}}
+	listInstanceMethods() => @instanceMethods
+	listInstanceMethods(name: String) => @instanceMethods[name] ?? null
 	listInstanceMethods(name: String, scope: MatchingScope, result: ClassMethodType[] = []): ClassMethodType[] { # {{{
 		if scope == MatchingScope.Element {
 			return @instanceMethods[name] ?? []
@@ -2013,13 +1982,8 @@ class ClassType extends Type {
 
 		return abstractMethods
 	} # }}}
-	listStaticMethods(name: String) { # {{{
-		if @staticMethods[name] is Array {
-			return @staticMethods[name]
-		}
-
-		return null
-	} # }}}
+	listStaticMethods() => @staticMethods
+	listStaticMethods(name: String) => @staticMethods[name] ?? null
 	listStaticMethods(name: String, type: FunctionType, mode: MatchingMode): Array { # {{{
 		var result = []
 
@@ -2094,7 +2058,7 @@ class ClassType extends Type {
 
 			match var result = node.matchArguments(assessment) {
 				is LenientCallMatchResult {
-					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, result, node))
+					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, generics, property, assessment, result, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
 					if matches.length == 1 {
@@ -2145,8 +2109,21 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	override makeMemberCallee(property, path, reference, generics, node) { # {{{
-		if @hasInstantiableMethod(property) {
+	override makeMemberCallee(property, path, reference, mut generics, node) { # {{{
+		if reference.path() == 'Object' {
+			node.addCallee(DefaultCallee.new(node.data(), node.object(), reference, node))
+		}
+		else if @hasInstantiableMethod(property) {
+			if ?#@generics {
+				generics = [...generics]
+
+				for var { name, type = AnyType.NullableUnexplicit } in @generics {
+					if !generics.some((g, ...) => g.name == name) {
+						generics.push({ name, type })
+					}
+				}
+			}
+
 			var assessment = @getInstantiableAssessment(property, generics, node)
 
 			match var result = node.matchArguments(assessment) {
@@ -2154,7 +2131,7 @@ class ClassType extends Type {
 					var class = @getClassWithInstantiableMethod(property, reference.type())
 					var reference = node.scope().reference(class)
 
-					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, result, node))
+					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, generics, property, assessment, result, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
 					var class = @getClassWithInstantiableMethod(property, reference.type())
@@ -2176,7 +2153,7 @@ class ClassType extends Type {
 					else {
 						var functions = [match.function for var match in matches]
 
-						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, property, assessment, functions, node))
+						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, generics, property, assessment, functions, node))
 					}
 				}
 				else {
@@ -2202,6 +2179,13 @@ class ClassType extends Type {
 			var arguments = node.arguments()
 			var data = node.data()
 
+			// TODO!
+			// if {
+			// 	data.callee.object.kind == NodeKind.Identifier ;;
+			// 	var callee ?= @scope.getVariable(data.callee.object.name)
+			// 	var substitute ?= callee.replaceMemberCall?(property, arguments, node)
+			// }
+			// then {
 			var dyn callee, substitute
 
 			if	data.callee.object.kind == NodeKind.Identifier &&
@@ -2272,6 +2256,12 @@ class ClassType extends Type {
 		return true
 	} # }}}
 	assist merge(value: ClassType) { # {{{
+		@auxiliary ||= value.hasAuxiliary()
+
+		if value.getStandardLibrary() > @standardLibrary {
+			@standardLibrary = value.getStandardLibrary()
+		}
+
 		for var methods, name of value._instanceMethods {
 			for var method in methods {
 				@addInstanceMethod(name, method)
@@ -2345,7 +2335,7 @@ class ClassType extends Type {
 			if @extending {
 				var extends = @extends.type()
 
-				@exhaustiveness.constructor = @constructors.length != 0 || extends.isExhaustiveConstructor()
+				@exhaustiveness.constructor = ?#@constructors || extends.isExhaustiveConstructor()
 
 				for var _, name of @instanceMethods {
 					@exhaustiveness.instanceMethods[name] = extends.isExhaustiveInstanceMethod(name)
@@ -2356,12 +2346,7 @@ class ClassType extends Type {
 				}
 			}
 			else {
-				if @alien {
-					@exhaustiveness.constructor = @constructors.length != 0
-				}
-				else {
-					@exhaustiveness.constructor = true
-				}
+				@exhaustiveness.constructor = true
 
 				for var _, name of @instanceMethods {
 					@exhaustiveness.instanceMethods[name] ??= true
@@ -2386,6 +2371,31 @@ class ClassType extends Type {
 
 		return this
 	} # }}}
+	override setStandardLibrary(standardLibrary) { # {{{
+		super(standardLibrary)
+
+		var submode: LibSTDMode = @standardLibrary ~~ .Yes ? .Yes + .Closed : .No
+
+		for var variable of @instanceVariables {
+			variable.setStandardLibrary(submode)
+		}
+
+		for var variable of @staticVariables {
+			variable.setStandardLibrary(submode)
+		}
+
+		for var methods of @instanceMethods {
+			for var method in methods {
+				method.setStandardLibrary(submode)
+			}
+		}
+
+		for var methods of @staticMethods {
+			for var method in methods {
+				method.setStandardLibrary(submode)
+			}
+		}
+	} # }}}
 	shallBeNamed() => true
 	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @referenceIndex != -1 {
@@ -2405,7 +2415,7 @@ class ClassType extends Type {
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if mode ~~ ExportMode.Export {
-			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin.ExternOrRequire | TypeOrigin.RequireOrExtern {
+			if !?@minorOriginal && ?@origin && @origin ~~ .ExternOrRequire | .RequireOrExtern && @origin !~ .Implements {
 				var require = ClassType.getRequireReference(this)
 				var extern = ClassType.getExternReference(this)
 
@@ -2413,7 +2423,7 @@ class ClassType extends Type {
 					var referenceIndex = references.length + indexDelta
 
 					references.push({
-						originals: @origin ~~ TypeOrigin.ExternOrRequire ? [extern, require] : [require, extern]
+						originals: @origin ~~ .ExternOrRequire ? [extern, require] : [require, extern]
 					})
 
 					@referenceIndex = referenceIndex
@@ -2433,15 +2443,21 @@ class ClassType extends Type {
 		return super(references, indexDelta, mode, module)
 	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
-		if mode ~~ ExportMode.Alien {
-			if ?@minorOriginal {
+		if mode ~~ .Alien {
+			if @origin ~~ .Import + .ExternOrRequire {
+				pass
+			}
+			else if ?@minorOriginal {
 				return @minorOriginal.toReference(references, indexDelta, mode, module)
 			}
-			else if ?@majorOriginal && !@majorOriginal.isPredefined() {
+			else if ?@majorOriginal && !(@majorOriginal.isPredefined() || @majorOriginal.isStandardLibrary(.Yes)) {
+				return @majorOriginal.toReference(references, indexDelta, mode, module)
+			}
+			else if ?@majorOriginal && @origin ~~ .Implements {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
 		}
-		else if mode ~~ ExportMode.Requirement {
+		else if mode ~~ .Requirement {
 			if ?@majorOriginal && !@isRequirement() {
 				return @majorOriginal.toReference(references, indexDelta, mode, module)
 			}
@@ -2460,30 +2476,7 @@ class ClassType extends Type {
 			variations.push(name, sequence)
 		}
 	} # }}}
-	unflagAltering(): valueof this { # {{{
-		for var methods of this._abstractMethods {
-			for var method in methods {
-				method.unflagAltering()
-			}
-		}
-		for var methods of this._staticMethods {
-			for var method in methods {
-				method.unflagAltering()
-			}
-		}
-		for var methods of this._instanceMethods {
-			for var method in methods {
-				method.unflagAltering()
-			}
-		}
-
-		for var variable of this._staticVariables {
-			variable.unflagAltering()
-		}
-		for var variable of this._instanceVariables {
-			variable.unflagAltering()
-		}
-
+	override unflagAltering() { # {{{
 		@altering = false
 	} # }}}
 	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { # {{{

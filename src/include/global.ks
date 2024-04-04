@@ -381,3 +381,7 @@ func $expandOptions(options) { # {{{
 		return Object.defaults(options, engine[options.target.version])
 	}
 } # }}}
+
+func $isVarname(name: String): Boolean { # {{{
+	return /^[a-zA-Z_$][\w$]*$/.test(name)
+} # }}}

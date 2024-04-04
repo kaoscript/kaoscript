@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern console
 
 import '../_/_string.ks'

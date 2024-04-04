@@ -202,10 +202,13 @@ class ClassMethodDeclaration extends Statement {
 	static toInstanceHeadFragments(name: String, class: ClassType, fragments) { # {{{
 		var ctrl = fragments.newControl()
 
-		if class.isLabelableInstanceMethod(name) {
-			ctrl.code(`\(name)(kws, ...args)`).step()
+		var labelable = class.isLabelableInstanceMethod(name)
+		var generic = class.isGenericInstanceMethod(name)
 
-			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this, kws, args)`)
+		if labelable || generic {
+			ctrl.code(`\(name)(\(generic ? `gens\(labelable ? ', kws' : '')` : 'kws'), ...args)`).step()
+
+			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this\(generic ? ', gens || {}' : '')\(labelable ? ', kws' : ''), args)`)
 		}
 		else {
 			ctrl.code(`\(name)()`).step()
@@ -218,9 +221,10 @@ class ClassMethodDeclaration extends Statement {
 	static toInstanceRouterFragments(node, fragments, variable, methods, overflow, name: String, class: ClassType, header, footer) { # {{{
 		var classname = variable.name()
 		var labelable = class.isLabelableInstanceMethod(name)
+		var generic = class.isGenericInstanceMethod(name)
 		var assessment = Router.assess(methods, name, node)
 
-		header(node, fragments, labelable)
+		header(node, fragments, generic, labelable)
 
 		if variable.type().isExtending() {
 			var extends = variable.type().extends()
@@ -236,6 +240,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 				null
 				assessment
+				generic
 				fragments.block()
 				extends.type().hasInstanceMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
 				(fragments, _) => {
@@ -280,6 +285,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 				null
 				assessment
+				generic
 				fragments.block()
 				node
 			)

@@ -1,13 +1,12 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Error = {};
 	class Exception extends Error {
 		constructor() {
 			const __ks_cons_0 = (message) => {
 				super();
 				this.__ks_init();
 				this.message = message;
-				this.name = this.constructor.name;
+				this.name = Helper.assertString(this.constructor.name, 0);
 			};
 			const __ks_cons_1 = (message, fileName, lineNumber) => {
 				if(fileName === void 0) {

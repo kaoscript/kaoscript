@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require|extern system class String {
 	split(...): Array<String>
 	replace(...): String

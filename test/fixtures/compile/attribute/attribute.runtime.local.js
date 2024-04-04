@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foo.__ks_0 = function(x, y) {
 		if(Type.isString(x)) {
-			return x.toInt();
+			return x;
 		}
 		else {
 			return y;

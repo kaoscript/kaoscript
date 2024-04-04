@@ -1,6 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_JSON) {
-	if(!Type.isValue(__ks_JSON)) {
+	if(!__ks_JSON) {
 		__ks_JSON = {};
 	}
 	__ks_JSON.foobar = function() {

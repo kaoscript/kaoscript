@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern system namespace Math {
 	abs(...): Number
 	max(...): Number

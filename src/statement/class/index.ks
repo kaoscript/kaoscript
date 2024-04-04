@@ -244,7 +244,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @inits {
-			@initsId = @class.incInitializationSequence()
+			@initsId = `\(@class.incInitializationSequence())`
 		}
 	} # }}}
 	enhance() { # {{{
@@ -891,13 +891,8 @@ class ClassDeclaration extends Statement {
 					false
 					name
 					@class
-					(node, fragments, labelable) => {
-						if labelable {
-							fragments.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
-						}
-						else {
-							fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
-						}
+					(node, fragments, generic, labelable) => {
+						fragments.code(`__ks_func_\(name)_rt(that, proto\(generic ? ', gens' : '')\(labelable ? ', kws' : ''), args)`).step()
 					}
 					(fragments) => fragments.done()
 				)
@@ -1091,7 +1086,7 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, labelable) => {
+				(node, fragments, _, labelable) => {
 					if labelable {
 						fragments.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
 					}
@@ -1277,7 +1272,7 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, labelable) => {
+				(node, fragments, _, labelable) => {
 					if labelable {
 						fragments.code(`\(name)(kws, ...args)`).step()
 					}
@@ -1370,10 +1365,7 @@ class ClassDeclaration extends Statement {
 			line.code(')').done()
 		}
 
-		if @sealed {
-			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
-		}
-		else {
+		if !@sealed {
 			for var {class, index}, name of @sharedMethods {
 				var line = fragments.newLine()
 				var block = line.code(`\(class.getSealedName())._im_\(name) = function(that, ...args)`).newBlock()

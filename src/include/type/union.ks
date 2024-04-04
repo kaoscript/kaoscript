@@ -676,14 +676,33 @@ class UnionType extends Type {
 	toAssertFunctionFragments(value, nullable, fragments, node) { # {{{
 		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
 
-		@toAwareTestFunctionFragments('value', false, false, false, null, null, fragments, node)
+		@toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 
 		fragments.code(')')
 	} # }}}
-	override toAwareTestFunctionFragments(varname, mut nullable, casting, blind, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, _, casting, blind, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
 
-		for var type, index in @types {
+		var types = [@types[0]]
+
+		for var typeA in @types from 1 {
+			var mut add = true
+
+			for var typeB, index in types {
+				if typeB.isAssignableToVariable(typeA, false, false, false) {
+					types[index] = typeA
+					add = false
+
+					break
+				}
+			}
+
+			if add {
+				types.push(typeA)
+			}
+		}
+
+		for var type, index in types {
 			fragments.code(' || ') if index != 0
 
 			type.toBlindTestFragments(null, varname, casting, null, subtypes, Junction.OR, fragments, node)
@@ -727,7 +746,7 @@ class UnionType extends Type {
 		if !?#casts {
 			fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
 
-			@toAwareTestFunctionFragments('value', false, true, false, null, null, fragments, node)
+			@toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, node)
 
 			fragments.code(')')
 		}

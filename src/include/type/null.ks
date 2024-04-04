@@ -15,8 +15,9 @@ class NullType extends Type {
 	clone() { # {{{
 		throw NotSupportedException.new()
 	} # }}}
-	compareToRef(value: AnyType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)
+	compareToRef(value: AnyType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) => 1
+	compareToRef(value: DeferredType, equivalences: String[][]? = null) => 1
 	compareToRef(value: NullType, equivalences: String[][]? = null) => 0
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)
@@ -59,7 +60,7 @@ class NullType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, _, _, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, nullable, _, _, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\($runtime.type(node)).isNull`)
 	} # }}}
 	override toBlindTestFragments(_, varname, _, _, _, _, fragments, node) { # {{{

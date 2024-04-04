@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require system class Array
 
 impl Array {

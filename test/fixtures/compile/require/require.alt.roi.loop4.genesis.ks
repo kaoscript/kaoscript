@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 require|extern system class Array
 require|extern system class String
 

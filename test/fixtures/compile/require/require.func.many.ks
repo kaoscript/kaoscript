@@ -1,3 +1,5 @@
+#![libstd(off)]
+
 extern console
 
 require {

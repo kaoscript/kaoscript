@@ -1,0 +1,1 @@
+ReferenceException: The instance method "push" of the class "Array" can't be matched to given arguments (Null) (fixtures/compile/libstd/libstd.array.use.push.v_li.ne.ks:6)

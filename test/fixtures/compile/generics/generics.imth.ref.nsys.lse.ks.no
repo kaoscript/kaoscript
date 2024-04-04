@@ -1,0 +1,14 @@
+class MyArray<T> {
+	push(...elements: T): Void {
+	}
+}
+
+func foobar(values: MyArray<String>) {
+	var fn = values.push
+
+	quxbaz(fn)
+}
+
+func quxbaz(fn: Function) {
+	fn('Hello!')
+}

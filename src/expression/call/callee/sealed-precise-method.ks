@@ -8,7 +8,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 	constructor(@data, @object, @objectType, @property, assessment, match: CallMatch, @node) { # {{{
 		super(data, MemberExpression.new(data.callee, node, node.scope(), object), false, assessment, match, node)
 
-		if @function.isStandardLibrary() {
+		if @function.isStandardLibrary(.Yes) {
 			@standardLibrary = true
 
 			@node.module().flagLibSTDUsage(@objectType.name())

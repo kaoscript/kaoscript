@@ -34,6 +34,6 @@ module.exports = function() {
 	var {foobar, qux} = require("../export/.export.filter.func.exported.sealed.ks.j5k8r9.ksb")();
 	console.log(qux.__ks_0("foobar"));
 	const x = foobar.__ks_0();
-	console.log(x.toString());
-	console.log(qux.__ks_1(x).toString());
+	console.log(Helper.toString(x.toString()));
+	console.log(Helper.toString(qux.__ks_1(x).toString()));
 };

@@ -5,7 +5,7 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function() {
 		let values = [];
-		values = quxbaz.__ks_0();
+		values = Helper.assertArray(quxbaz.__ks_0(), 0);
 		console.log(Helper.toString(values[0]));
 	};
 	foobar.__ks_rt = function(that, args) {

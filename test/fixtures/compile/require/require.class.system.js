@@ -1,10 +1,11 @@
 const {Helper, Type} = require("@kaoscript/runtime");
+const {__ksStd_a} = require("@kaoscript/runtime/src/libstd/.index.ks.j5k8r9.ksb")();
 module.exports = function(__ks_Array) {
 	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(from === void 0 || from === null) {
 			from = 0;
 		}
-		return this.indexOf(item, from) !== -1;
+		return __ksStd_a._im_indexOf(this, {T: Type.any}, item, from) !== -1;
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(args) {
 		if(args.length === 1) {
@@ -32,9 +33,6 @@ module.exports = function(__ks_Array) {
 				return __ks_Array.__ks_func_contains_0.call(that, args[0], args[1]);
 			}
 		}
-		if(that.contains) {
-			return that.contains(...args);
-		}
 		throw Helper.badArgs();
 	};
 	__ks_Array._im_pushUniq = function(that, ...args) {
@@ -46,9 +44,6 @@ module.exports = function(__ks_Array) {
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_func_pushUniq_0.call(that, Helper.getVarargs(args, 0, pts[1]));
-		}
-		if(that.pushUniq) {
-			return that.pushUniq(...args);
 		}
 		throw Helper.badArgs();
 	};

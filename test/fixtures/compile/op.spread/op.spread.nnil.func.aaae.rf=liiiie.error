@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (...[Number, Number, Number, Number]) (fixtures/compile/op.spread/op.spread.nnil.func.aaae.rf=liiiie.ks:8)

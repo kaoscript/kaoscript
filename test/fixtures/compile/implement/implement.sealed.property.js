@@ -1,6 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = {};
+	const __ks_Array = {};
 	__ks_Array.__ks_func_pushUniq_0 = function(args) {
 		return this;
 	};
@@ -13,9 +13,6 @@ module.exports = function() {
 		let pts;
 		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
 			return __ks_Array.__ks_func_pushUniq_0.call(that, Helper.getVarargs(args, 0, pts[1]));
-		}
-		if(that.pushUniq) {
-			return that.pushUniq(...args);
 		}
 		throw Helper.badArgs();
 	};

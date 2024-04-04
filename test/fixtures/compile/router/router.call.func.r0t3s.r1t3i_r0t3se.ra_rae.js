@@ -40,7 +40,7 @@ module.exports = function() {
 		return f.__ks_rt(this, arguments);
 	};
 	f.__ks_0 = function(vals1, vals2) {
-		return Helper.toString(foobar.apply(null, [].concat(Helper.checkArray(vals1), Helper.checkArray(vals2))));
+		return Helper.toString(foobar(...Helper.checkArray(vals1), ...Helper.checkArray(vals2)));
 	};
 	f.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

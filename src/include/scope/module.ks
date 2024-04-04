@@ -13,13 +13,14 @@ class ModuleScope extends Scope {
 		@renamedIndexes 					= {}
 		@renamedVariables					= {}
 		@reservedIndex		 				= -1
+		@standardLibrary: Boolean			= false
 		@stashes							= {}
 		@tempDeclarations: Array			= []
 		@tempIndex		 					= -1
 		@tempNames							= {}
 		@variables							= {}
 	}
-	constructor() { # {{{
+	constructor(@standardLibrary) { # {{{
 		super()
 
 		@predefined.__Array = Variable.createPredefinedClass('Array', this)
@@ -29,9 +30,9 @@ class ModuleScope extends Scope {
 		@predefined.__Enum = Variable.createPredefinedClass('Enum', this)
 		@predefined.__Error = Variable.createPredefinedClass('Error', this)
 		@predefined.__Function = Variable.createPredefinedClass('Function', this)
+		@predefined.__Math = Variable.createPredefinedNamespace('Math', this)
 		@predefined.__Namespace = Variable.createPredefinedClass('Namespace', this)
 		@predefined.__Number = Variable.createPredefinedClass('Number', this)
-		@predefined.__Object = Variable.createPredefinedClass('Object', this)
 		@predefined.__String = Variable.createPredefinedClass('String', this)
 		@predefined.__Struct = Variable.createPredefinedClass('Struct', this)
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
@@ -42,7 +43,6 @@ class ModuleScope extends Scope {
 		@predefined.__true = Variable.new('true', true, true, this.reference('Boolean'))
 		@predefined.__Any = Variable.new('Any', true, true, AnyType.Explicit)
 		@predefined.__Infinity = Variable.new('Infinity', true, true, this.reference('Number'))
-		@predefined.__Math = Variable.new('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = Variable.new('NaN', true, true, this.reference('Number'))
 		@predefined.__Never = Variable.new('Null', true, true, Type.Never)
 		@predefined.__Null = Variable.new('Null', true, true, NullType.Explicit)
@@ -137,7 +137,11 @@ class ModuleScope extends Scope {
 	} # }}}
 	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
 		if @hasDefinedVariable(name) {
-			SyntaxException.throwAlreadyDeclared(name, node)
+			var variable = @getVariable(name)
+
+			unless variable.isStandardLibrary() && node is DependencyStatement | ImplementDeclaration | Importer {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
 		}
 		else if @hasPredefinedVariable(name) {
 			var variable = @getPredefinedType(name)
@@ -167,11 +171,15 @@ class ModuleScope extends Scope {
 
 		if @variables[name] is Array {
 			var variables: Array = @variables[name]
-
 			var last = variables.last()
+
 			if last is Variable {
 				var declaration = last.declaration()
-				if declaration is ImportDeclarator {
+
+				if last.isStandardLibrary() && node is DependencyStatement {
+					pass
+				}
+				else if declaration is ImportDeclarator {
 					SyntaxException.throwAlreadyImported(name, declaration.getModuleName(), declaration.line(), node)
 				}
 				else {
@@ -275,12 +283,12 @@ class ModuleScope extends Scope {
 	} # }}}
 	getTempIndex() => @tempIndex
 	getVariable(mut name, line: Number = @line): Variable? { # {{{
-		if @variables[name] is not Array && $types[name] is String {
+		if !?@variables[name] && ?$types[name] {
 			name = $types[name]
 		}
 
-		if @variables[name] is Array {
-			var variables: Array = @variables[name]
+		if ?@variables[name] {
+			var variables = @variables[name]:!!(Array)
 			var mut variable = null
 
 			if line == -1 || line > @line {
@@ -292,20 +300,12 @@ class ModuleScope extends Scope {
 				}
 			}
 
-			if variable == false {
-				return null
-			}
-			else if variable != null {
-				return variable
+			if ?variable {
+				return variable == false ? null : variable
 			}
 		}
 
-		if @predefined[`__\(name)`] is Variable {
-			return @predefined[`__\(name)`]
-		}
-		else {
-			return null
-		}
+		return @predefined[`__\(name)`] ?? null
 	} # }}}
 	hasDeclaredVariable(name: String) => @declarations[name] == true
 	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @line)
@@ -398,6 +398,7 @@ class ModuleScope extends Scope {
 	isRenamedVariable(name: String) { # {{{
 		return @renamedVariables[name] is String
 	} # }}}
+	isStandardLibrary() => @standardLibrary
 	line() => @line
 	line(line: Number) { # {{{
 		@line = line + @lineOffset
@@ -514,12 +515,15 @@ class ModuleScope extends Scope {
 
 		return variable
 	} # }}}
+	resetReferences() { # {{{
+		for var reference of @references {
+			reference.reset()
+		}
+	} # }}}
 	override resolveReference(name, explicitlyNull, parameters, subtypes) { # {{{
 		var hash = ReferenceType.toQuote(name, explicitlyNull, parameters, subtypes)
 
-		if @references[hash] is not ReferenceType {
-			@references[hash] = ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
-		}
+		@references[hash] ??= ReferenceType.new(this, name, explicitlyNull, parameters, subtypes)
 
 		return @references[hash]
 	} # }}}

@@ -97,7 +97,7 @@ class EnumViewType extends Type {
 				auxiliary += `\(Generator.generate(data))\n`
 
 				for var field in dynamics[name] {
-					source += `var \(field): \(name) = eval(_\(field))\n`
+					source += `var \(field): \(name) = eval(_\(field))!!\n`
 				}
 			}
 
@@ -226,7 +226,7 @@ class EnumViewType extends Type {
 	} # }}}
 	root() => @root
 	setTestName(@testName)
-	override toAwareTestFunctionFragments(varname, mut nullable, _, _, generics, subtypes, fragments, node) { # {{{
+	override toAwareTestFunctionFragments(varname, mut nullable, _, _, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}
 	override toBlindTestFragments(_, _, _, _, _, _, fragments, node) { # {{{

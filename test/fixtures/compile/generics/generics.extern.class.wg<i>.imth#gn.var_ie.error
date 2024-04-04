@@ -1,1 +1,0 @@
-TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number?" (fixtures/compile/generics/generics.extern.class.wg<i>.imth#gn.var_ie.ks:6)

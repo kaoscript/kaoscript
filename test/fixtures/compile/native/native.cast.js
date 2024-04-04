@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = {};
+	const __ks_String = {};
 	__ks_String.__ks_func_lower_0 = function() {
 		return this.toLowerCase();
 	};

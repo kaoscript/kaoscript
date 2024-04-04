@@ -129,7 +129,7 @@ module.exports = function() {
 		return formatToHex.__ks_rt(this, arguments);
 	};
 	formatToHex.__ks_0 = function(that) {
-		return $hex(that);
+		return Helper.assertString($hex(that), 0);
 	};
 	formatToHex.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Color);

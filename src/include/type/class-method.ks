@@ -54,6 +54,7 @@ class ClassMethodType extends FunctionType {
 
 			type._index = data.index
 			type._access = Accessibility(data.access) ?? .Public
+			type._auxiliary = data.auxiliary if ?data.auxiliary
 			type._sealed = data.sealed
 			type._async = data.async
 			type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for var throw in data.errors]
@@ -85,7 +86,7 @@ class ClassMethodType extends FunctionType {
 			}
 
 			if ?data.libstd {
-				type._standardLibrary = data.libstd
+				type._standardLibrary = LibSTDMode(data.libstd) ?? .No
 			}
 
 			return type
@@ -108,6 +109,10 @@ class ClassMethodType extends FunctionType {
 			result._returnType = result._returnType.applyGenerics(generics)
 		}
 
+		unless result.isDeferrable() {
+			result.flagExhaustive()
+		}
+
 		return result
 	} # }}}
 	clone() { # {{{
@@ -116,9 +121,11 @@ class ClassMethodType extends FunctionType {
 		FunctionType.clone(this, clone)
 
 		clone._access = @access
+		clone._auxiliary = @auxiliary
 		clone._index = @index
 		clone._initVariables = {...@initVariables}
 		clone._instance = @instance
+		clone._standardLibrary = @standardLibrary
 
 		if ?@overwrite {
 			clone._overwrite = [...@overwrite]
@@ -132,10 +139,13 @@ class ClassMethodType extends FunctionType {
 		return clone
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
+		var libstd: LibSTDMode = @standardLibrary == .No && module.isStandardLibrary() ? .Yes : @standardLibrary
+
 		var export = {
-			libstd: true if @standardLibrary || module.isStandardLibrary()
+			libstd if libstd != .No
 			index: @index
 			access: @access
+			auxiliary: @auxiliary if @auxiliary
 			sealed: @sealed
 			async: @async
 			parameters: [parameter.export(references, indexDelta, mode, module) for var parameter in @parameters]

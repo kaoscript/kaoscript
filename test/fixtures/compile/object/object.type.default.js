@@ -1,6 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Object = {};
+	const __ks_Object = {};
 	__ks_Object.__ks_sttc_size_0 = function(item) {
 		return 0;
 	};
@@ -10,9 +10,6 @@ module.exports = function() {
 			if(t0(arguments[0])) {
 				return __ks_Object.__ks_sttc_size_0(arguments[0]);
 			}
-		}
-		if(Object.size) {
-			return Object.size(...arguments);
 		}
 		throw Helper.badArgs();
 	};
