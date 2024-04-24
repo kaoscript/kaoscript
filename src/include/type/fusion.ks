@@ -332,7 +332,7 @@ class FusionType extends Type {
 
 				if @cast && (casting || ?#generics || (@variant && ?#subtypes)) {
 					if casting {
-						fragments.code(', cast')
+						fragments.code(`, \(blind ? 'cast' : 'true')`)
 					}
 					else {
 						fragments.code(', 0')
