@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/variable/variable.overwrite.n1=var_dyn.func_n1=p_nkw.ks:3)

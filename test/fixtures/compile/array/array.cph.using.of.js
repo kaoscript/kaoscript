@@ -11,8 +11,8 @@ module.exports = function() {
 				a.push(value.values());
 			}
 			return a;
-		})(), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
-			__ks_values_1 = __ks_2[__ks_1];
+		})(), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_value_1; __ks_1 < __ks_0; ++__ks_1) {
+			__ks_value_1 = __ks_2[__ks_1];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

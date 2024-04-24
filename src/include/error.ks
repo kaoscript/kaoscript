@@ -3,7 +3,7 @@ extern sealed class Error
 Error.prepareStackTrace = func(error: Error, stack: Array) { # {{{
 	var mut message = error.toString()
 
-	for i from 0 to~ Math.min(12, stack.length) {
+	for var i from 0 to~ Math.min(12, stack.length) {
 		message += '\n    ' + stack[i].toString()
 	}
 
@@ -70,7 +70,7 @@ export class Exception extends Error {
 						var mut nf = true
 
 						for var name in hierarchy while nf {
-							if options.ignore:!(Array).contains(name) {
+							if options.ignore:!!!(Array).contains(name) {
 								nf = false
 							}
 						}
@@ -80,7 +80,7 @@ export class Exception extends Error {
 						}
 						else if options.raise.length != 0 {
 							for var name in hierarchy {
-								if options.raise:!(Array).contains(name) {
+								if options.raise:!!!(Array).contains(name) {
 									SyntaxException.throwUnreportedError(error.name(), node)
 								}
 							}
@@ -632,16 +632,16 @@ export class SyntaxException extends Exception {
 		throwMismatchedInclude(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`Inclusions of "\(name)" should have the same version`, node)
 		} # }}}
-		throwMissingAbstractMethods(name, methods, node): Never ~ SyntaxException { # {{{
+		throwMissingAbstractMethods(className, methods, node): Never ~ SyntaxException { # {{{
 			var fragments = []
 
-			for var methods, name of methods {
-				for var method in methods {
+			for var methodList, name of methods {
+				for var method in methodList {
 					fragments.push(`"\(name)\(method.toQuote())"`)
 				}
 			}
 
-			throw SyntaxException.new(`Class "\(name)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
+			throw SyntaxException.new(`Class "\(className)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} # }}}
 		throwMissingAssignmentIfFalse(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The lateinit variable "\(name)" isn't fully initialized when the condition is false`, node)
@@ -670,8 +670,8 @@ export class SyntaxException extends Exception {
 			if ?#fields {
 				var fragments = []
 
-				for var type, name of fields {
-					fragments.push(`"\(name): \(type.toQuote())"`)
+				for var type, fieldName of fields {
+					fragments.push(`"\(fieldName): \(type.toQuote())"`)
 				}
 
 				message += `the following field\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
@@ -684,8 +684,8 @@ export class SyntaxException extends Exception {
 
 				var fragments = []
 
-				for var type, name of functions {
-					fragments.push(`"\(name)\(type.toQuote())"`)
+				for var type, functionName of functions {
+					fragments.push(`"\(functionName)\(type.toQuote())"`)
 				}
 
 				message += `the following method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
@@ -791,9 +791,6 @@ export class SyntaxException extends Exception {
 		} # }}}
 		throwNotMatchedPossibilities(values, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The 'match' doesn't match the following values: \($joinQuote(values))`, node)
-		} # }}}
-		throwNotNamedParameter(node): Never ~ SyntaxException { # {{{
-			throw SyntaxException.new(`Parameter must be named`, node)
 		} # }}}
 		throwNotObjectInterface(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The interface "\(name)" is not an object`, node)
@@ -1104,9 +1101,6 @@ export class TypeException extends Exception {
 		throwUnexpectedExpression(expression, target, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The expression \(expression.toQuote(true)) is expected to be of type \(target.toQuote(true))`, node)
 		} # }}}
-		throwUnexpectedForcedTypeFitting(expected, unexpected, node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The forced type fitting "!!" must be compatible with \(expected.toQuote(true)) and not be of type \(unexpected.toQuote(true))`, node)
-		} # }}}
 		throwUnexpectedInoperative(operand, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)
 		} # }}}
@@ -1116,14 +1110,17 @@ export class TypeException extends Exception {
 		throwUnexpectedReturnType(expected, unexpected, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The return type must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} # }}}
+		throwUnexpectedTypeFitting(expected, unexpected, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The type fitting "!!" must be compatible with \(expected.toQuote(true)) and not be of type \(unexpected.toQuote(true))`, node)
+		} # }}}
 		throwUnnecessaryCondition(expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The condition \(expression.toQuote(true)) has always the value \(expression.type().toQuote(true))`, node)
 		} # }}}
 		throwUnnecessaryTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) is always of type \(type.toQuote(true))`, node)
 		} # }}}
-		throwUnknownForcedTypeFitting(node): Never ~ TypeException { # {{{
-			throw TypeException.new(`The forced type fitting "!!" can't determine the expected type`, node)
+		throwUnknownTypeFitting(node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The type fitting "!!" can't determine the expected type`, node)
 		} # }}}
 	}
 }

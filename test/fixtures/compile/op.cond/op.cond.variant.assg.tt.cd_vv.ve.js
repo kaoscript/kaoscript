@@ -20,8 +20,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let t = x;
-		if(t.ok) {
+		let t;
+		if((x.ok ? (t = x, true) : false)) {
 			console.log(t.value);
 		}
 	};

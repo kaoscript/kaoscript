@@ -42,6 +42,7 @@ abstract class Expression extends AbstractNode {
 	isComposite(): Boolean => true
 	// if parentheses are required around the expression to be wrapped
 	isComputed(): Boolean => false
+	isComputedMember(): Boolean => false
 	// if the expression can be an assignment and be transformed as a declaration
 	isDeclarable(): Boolean => false
 	// if the expression can have several values
@@ -99,6 +100,7 @@ abstract class Expression extends AbstractNode {
 	isUsingStaticVariable(class, varname): Boolean => false
 	// if the expression is the given variable
 	isUsingVariable(name): Boolean => false
+	isUsingVariableBefore(name: String, statement: Statement = @statement!?): Boolean => @statement?.isUsingVariableBefore(name, statement)
 	isVariable(): Boolean => false
 	// if the expression generates multiple assignments
 	isSplitAssignment(): Boolean => false

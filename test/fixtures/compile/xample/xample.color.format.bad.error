@@ -1,1 +1,0 @@
-ReferenceException: The instance method "formatter" can't be found in the class "String" (fixtures/compile/xample/xample.color.format.bad.ks:11)

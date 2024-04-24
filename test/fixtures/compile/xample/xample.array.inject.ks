@@ -13,7 +13,7 @@ impl Array {
 
 		if index != 0 {
 			if index >= this.length {
-				for i from 0 up to~ args.length {
+				for var i from 0 up to~ args.length {
 					if args[i] is Array {
 						this.push(...args[i])
 					}
@@ -23,7 +23,7 @@ impl Array {
 				}
 			}
 			else {
-				for i from 0 up to~ args.length {
+				for var i from 0 up to~ args.length {
 					if args[i] is Array {
 						this.splice(index, 0, ...args[i])
 
@@ -38,7 +38,7 @@ impl Array {
 			}
 		}
 		else {
-			for i from~ args.length down to 0 {
+			for var i from~ args.length down to 0 {
 				if args[i] is Array {
 					this.unshift(...args[i])
 				}

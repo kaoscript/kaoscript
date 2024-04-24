@@ -46,7 +46,7 @@ class ThrowStatement extends Statement {
 		}
 	} # }}}
 	override isExit(mode) => mode ~~ .Statement
-	isUsingVariable(name) => @value.isUsingVariable(name)
+	override isUsingVariable(name, _) => @value.isUsingVariable(name)
 	translate() { # {{{
 		@value.translate()
 	} # }}}

@@ -11,7 +11,7 @@ impl Array {
 		}
 
 		if i < l {
-			var source = args[i]:!(Array)
+			var source = args[i]:!!(Array)
 
 			i += 1
 

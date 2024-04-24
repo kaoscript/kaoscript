@@ -299,7 +299,7 @@ class CallExpression extends Expression {
 	isCallable() => !@reusable
 	isContinuousInlineReturn() => @type.isNever()
 	isComposite() => !@reusable
-	isComputed() => ((@isNullable() || @callees.length > 1) && !@tested) || (@callees.length == 1 && @callees[0].isComputed())
+	isComputed() => ((@isNullable() || #@callees > 1) && !@tested) || (#@callees == 1 && @callees[0].isComputed())
 	isDisrupted() => @object?.isDisrupted() ?? false
 	isEnumCreate() => @callees.length == 1 && @callees[0] is EnumCreateCallee
 	override isExit(mode) => @type.isNever()
@@ -605,11 +605,11 @@ class CallExpression extends Expression {
 
 			@tested = true
 
-			cb(fragments, true, (fragments) => @toFragments(fragments, Mode.None))
+			cb(fragments, true, (writer) => @toFragments(writer, Mode.None))
 
 			fragments.code(' : ')
 
-			cb(fragments, false, (fragments) => {})
+			cb(fragments, false, (_) => {})
 		}
 		else {
 			for var argument in @arguments {

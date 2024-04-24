@@ -23,13 +23,13 @@ module.exports = function() {
 		return clone.__ks_rt(this, arguments);
 	};
 	clone.__ks_0 = function(source) {
-		const clone = Foobar.__ks_new_0();
-		clone.args = (() => {
+		const result = Foobar.__ks_new_0();
+		result.args = (() => {
 			const o = new OBJ();
 			Helper.concatObject(0, o, source.args);
 			return o;
 		})();
-		return clone;
+		return result;
 	};
 	clone.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, Foobar);

@@ -313,9 +313,9 @@ class ThisExpression extends Expression {
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
 	isUsingInstanceVariable(name) => @instance && @variableName == name
-	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
 		if @variableName != null {
-			array.push({ name: @variableName })
+			array.push({ name: @variableName, immutable: true, overwrite: false })
 		}
 
 		return array

@@ -32,11 +32,15 @@ class AnonymousFunctionExpression extends Expression {
 			}
 
 			for var data in @data.parameters from firstParameter {
-				var parameter = Parameter.new(data, this)
+				// TODO!
+				// Parameter.new(data, this)
+				// 	..analyse()
+				// 	|> @parameters.push
 
-				parameter.analyse()
+				var param = Parameter.new(data, this)
+					..analyse()
 
-				@parameters.push(parameter)
+				@parameters.push(param)
 			}
 		}
 
@@ -167,7 +171,7 @@ class AnonymousFunctionExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code(`\($runtime.helper(this)).function(`)
 
-		var blockFunction = Parameter.toFragments(this, fragments.code('function('), ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var blockFunction = Parameter.toFragments(this, fragments.code('function('), ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		blockFunction.compile(@block, Mode.None)
 
@@ -424,7 +428,7 @@ class ArrowFunctionExpression extends Expression {
 		else {
 			fragments.code(`\($runtime.helper(this)).function(`)
 
-			var blockFunction = Parameter.toFragments(this, fragments.code('('), ParameterMode.Default, (fragments) => fragments.code(') =>').newBlock())
+			var blockFunction = Parameter.toFragments(this, fragments.code('('), ParameterMode.Default, (writer) => writer.code(') =>').newBlock())
 
 			blockFunction.compile(@block, Mode.None)
 
@@ -480,7 +484,7 @@ class ArrowFunctionExpression extends Expression {
 			ctrl.code(variable.getSecureName())
 		}
 
-		Parameter.toFragments(this, ctrl, ParameterMode.Default, (fragments) => fragments.code(')').step())
+		Parameter.toFragments(this, ctrl, ParameterMode.Default, (writer) => writer.code(')').step())
 
 		ctrl.compile(@block)
 

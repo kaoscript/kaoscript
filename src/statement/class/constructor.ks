@@ -49,10 +49,10 @@ class ClassConstructorDeclaration extends Statement {
 				assessment
 				fragments.block()
 				variable.type().hasConstructors() ? Router.FooterType.MUST_THROW : Router.FooterType.NO_THROW
-				(fragments, _) => {
+				(writer, _) => {
 					var constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons_rt'
 
-					fragments.line(`super.\(constructorName).call(null, that, args)`)
+					writer.line(`super.\(constructorName).call(null, that, args)`)
 				}
 				node
 			)
@@ -104,9 +104,9 @@ class ClassConstructorDeclaration extends Statement {
 		@block = ConstructorBlock.new($ast.block($ast.body(@data)), this, @scope)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@scope.module().setLineOffset(@offset)
-
-		@scope.line(@line())
+		@scope
+			..module().setLineOffset(@offset)
+			..line(@line())
 
 		for var parameter in @parameters {
 			parameter.prepare()
@@ -135,10 +135,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		@type = ClassConstructorType.new([parameter.type() for var parameter in @parameters], @data, this)
-
-		@type.unflagAssignableThis()
-
-		@type.setThisType(@parent.type().reference())
+			..unflagAssignableThis()
+			..setThisType(@parent.type().reference())
 
 		var dyn overridden
 
@@ -171,15 +169,14 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
-		if @aliases.length == 0 {
-			@block.analyse()
+		if ?#@aliases {
+			@block
+				..analyse(0, index)
+				..analyse(@aliases)
+				..analyse(index + 1)
 		}
 		else {
-			@block.analyse(0, index)
-
-			@block.analyse(@aliases)
-
-			@block.analyse(index + 1)
+			@block.analyse()
 		}
 
 		var class = @parent.type().type()

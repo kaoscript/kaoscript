@@ -42,9 +42,8 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let values = loadValues.__ks_0();
-	let value;
-	if(Type.isValue(values) && Type.isValue(value = values.__ks_func_getTop_0())) {
+	let values, value, __ks_0;
+	if((Type.isValue(__ks_0 = loadValues.__ks_0()) ? (values = __ks_0, true) : false) && (Type.isValue(__ks_0 = values.__ks_func_getTop_0()) ? (value = __ks_0, true) : false)) {
 		console.log(value);
 	}
 };

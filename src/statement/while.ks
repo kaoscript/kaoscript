@@ -1,6 +1,5 @@
 class WhileStatement extends Statement {
 	private late {
-		@bindingDeclaration: Boolean		= false
 		@bindingScope: Scope
 		@body								= null
 		@bodyScope: Scope
@@ -13,19 +12,14 @@ class WhileStatement extends Statement {
 			@declared = true
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind.Identifier
-
-			@declaration = VariableDeclaration.new(@data.condition, this, @bindingScope, @scope:!(Scope), true)
-			@declaration.initiate()
+			@declaration = VariableDeclaration.new(@data.condition, this, @bindingScope, @scope:!!!(Scope), true)
+				..flagUseExpression()
+				..initiate()
 		}
 	} # }}}
 	analyse() { # {{{
 		if @declared {
 			@declaration.analyse()
-
-			if @bindingDeclaration {
-				@condition = @declaration.value()
-			}
 
 			@bodyScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 		}
@@ -45,11 +39,6 @@ class WhileStatement extends Statement {
 	override prepare(target, targetMode) { # {{{
 		if @declared {
 			@declaration.prepare(AnyType.NullableUnexplicit)
-
-			if @bindingDeclaration {
-				@condition.acquireReusable(true)
-				@condition.releaseReusable()
-			}
 
 			if var variable ?= @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
@@ -95,9 +84,14 @@ class WhileStatement extends Statement {
 	isCascade() => @declared
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) { # {{{
+	override isUsingVariable(name, bleeding) { # {{{
+		return false if bleeding
+
 		if @declared {
-			if @declaration.isUsingVariable(name) {
+			if @declaration.isDeclararingVariable(name) {
+				return false
+			}
+			else if @declaration.isUsingVariable(name) {
 				return true
 			}
 		}
@@ -113,39 +107,7 @@ class WhileStatement extends Statement {
 		var ctrl = fragments.newControl().code('while(')
 
 		if @declared {
-			if @bindingDeclaration {
-				ctrl
-					.code($runtime.type(this) + '.isValue(')
-					.compileReusable(@condition)
-					.code(')')
-
-				ctrl.code(' ? (')
-
-				var declarator = @declaration.declarator()
-
-				declarator.toAssertFragments(ctrl, @condition)
-				declarator.toAssignmentFragments(ctrl, @condition)
-
-				ctrl.code(', true) : false')
-			}
-			else {
-				var mut first = true
-
-				@declaration.walkVariable((name, _) => {
-					if first {
-						ctrl.code($runtime.type(this) + '.isValue(')
-
-						@declaration.toInlineFragments(ctrl, mode)
-
-						ctrl.code(')')
-
-						first = false
-					}
-					else {
-						ctrl.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
-					}
-				})
-			}
+			ctrl.compileCondition(@declaration.expression())
 		}
 		else {
 			ctrl.compileCondition(@condition)

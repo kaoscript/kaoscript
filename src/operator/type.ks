@@ -5,10 +5,10 @@ class BinaryOperatorTypeAssertion extends Expression {
 		@reusable: Boolean		= false
 		@reuseName: String?
 		@right: Type
+		@testing: Boolean		= false
 		@toAssert: Boolean		= false
 		@toEnum: Boolean		= false
 		@toNonNull: Boolean		= false
-		@toRawValue: Boolean	= false
 		@type: Type
 	}
 	override analyse() { # {{{
@@ -36,6 +36,7 @@ class BinaryOperatorTypeAssertion extends Expression {
 
 		if type.isAny() {
 			@toAssert = true
+			@testing = true
 		}
 		else if type is not ArrayType & ObjectType & ReferenceType & UnionType {
 			TypeException.throwInvalidCasting(this)
@@ -46,13 +47,16 @@ class BinaryOperatorTypeAssertion extends Expression {
 			}
 
 			@toEnum = true
+			@testing = true
 		}
 		else if !type.isAssignableToVariable(@right, true, @nullable, false) {
 			if type.isAssignableToVariable(@right, true, true, false) {
 				@toNonNull = true
+				@testing = true
 			}
 			else if @right.isAssignableToVariable(type, true, @nullable, false) || type.isSubsetOf(@right, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass) {
 				@toAssert = true
+				@testing = true
 			}
 			else {
 				TypeException.throwNotCastableTo(type, @right, this)
@@ -63,12 +67,12 @@ class BinaryOperatorTypeAssertion extends Expression {
 		@left.translate()
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		if acquire {
+		if acquire && @left.isComposite() {
 			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
 	expression() => @left
-	isLooseComposite() => @toAssert || @toEnum || @toNonNull || @toRawValue
+	isLooseComposite() => @toAssert || @toEnum || @toNonNull
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	releaseReusable() { # {{{
@@ -80,22 +84,23 @@ class BinaryOperatorTypeAssertion extends Expression {
 		if @reusable {
 			fragments.code(@reuseName)
 		}
-		else if @toEnum {
-			if @nullable {
-				fragments.compile(@right).code('(').compile(@left).code(')')
+		else if @testing {
+			if @toEnum {
+				if @nullable {
+					fragments.compile(@right).code('(').compile(@left).code(')')
+				}
+				else {
+					fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
+				}
 			}
-			else {
-				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
+			else if @toAssert {
+				@right.toAssertFunctionFragments(@left, @nullable, fragments, this)
 			}
-		}
-		else if @toNonNull {
-			fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
-		}
-		else if @toRawValue {
-			fragments.compile(@left).code('.value')
-		}
-		else if @toAssert {
-			@right.toAssertFunctionFragments(@left, @nullable, fragments, this)
+			else if @toNonNull {
+				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
+			}
+
+			@testing = false
 		}
 		else {
 			fragments.compile(@left)
@@ -105,9 +110,14 @@ class BinaryOperatorTypeAssertion extends Expression {
 		return `\(@left.toQuote()):&\(@nullable ? '?' : '')(\(@right.toQuote()))`
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		fragments.code(`\(@reuseName) = `).compile(this)
+		if ?@reuseName {
+			fragments.code(`\(@reuseName) = `).compile(this)
 
-		@reusable = true
+			@reusable = true
+		}
+		else {
+			fragments.compile(this)
+		}
 	} # }}}
 	type() => @type
 
@@ -127,6 +137,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		@reusable: Boolean		= false
 		@reuseName: String?
 		@right: Type
+		@testing: Boolean		= false
 		@toCasting: Boolean		= false
 		@toEnum: Boolean		= false
 		@toNonNull: Boolean		= false
@@ -158,6 +169,7 @@ class BinaryOperatorTypeCasting extends Expression {
 
 		if type.isAny() {
 			@toCasting = true
+			@testing = true
 		}
 		else if type is not ArrayType & ObjectType & ReferenceType & UnionType {
 			TypeException.throwInvalidCasting(this)
@@ -168,6 +180,7 @@ class BinaryOperatorTypeCasting extends Expression {
 			}
 
 			@toEnum = true
+			@testing = true
 		}
 		else if type.isEnum() {
 			unless @right.isAssignableToVariable(type.discard().type(), true, @nullable, false) {
@@ -179,9 +192,11 @@ class BinaryOperatorTypeCasting extends Expression {
 		else if !type.isAssignableToVariable(@right, true, @nullable, false) {
 			if type.isAssignableToVariable(@right, true, true, false) {
 				@toNonNull = true
+				@testing = true
 			}
 			else if @right.isSubsetOf(type, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass + MatchingMode.TypeCasting) {
 				@toCasting = true
+				@testing = true
 			}
 			else {
 				TypeException.throwNotCastableTo(type, @right, this)
@@ -192,7 +207,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		@left.translate()
 	} # }}}
 	acquireReusable(acquire) { # {{{
-		if acquire {
+		if acquire && ((@toCasting && !@right.isAssertingWhenCasting()) || @left.isComposite()) {
 			@reuseName = @scope.acquireTempName()
 		}
 	} # }}}
@@ -214,34 +229,45 @@ class BinaryOperatorTypeCasting extends Expression {
 		if @reusable {
 			fragments.code(@reuseName)
 		}
-		else if @toEnum {
-			if @nullable {
-				fragments.compile(@right).code('(').compile(@left).code(')')
+		else if @testing {
+			if @toEnum {
+				if @nullable {
+					fragments.compile(@right).code('(').compile(@left).code(')')
+				}
+				else {
+					fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
+				}
 			}
-			else {
-				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@right).code('(').compile(@left).code('))')
+			else if @toCasting {
+				@right.toCastFunctionFragments(@left, @nullable, fragments, this)
 			}
-		}
-		else if @toNonNull {
-			fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
-		}
-		else if @toRawValue {
-			fragments.compile(@left).code('.value')
-		}
-		else if @toCasting {
-			@right.toCastFunctionFragments(@left, @nullable, fragments, this)
+			else if @toNonNull {
+				fragments.code(`\($runtime.helper(this)).notNull(`).compile(@left).code(')')
+			}
+
+			@testing = false
 		}
 		else {
-			fragments.compile(@left)
+			if @toRawValue {
+				fragments.compile(@left).code('.value')
+			}
+			else {
+				fragments.compile(@left)
+			}
 		}
 	} # }}}
 	toQuote() { # {{{
 		return `\(@left.toQuote()):>\(@nullable ? '?' : '')(\(@right.toQuote()))`
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		fragments.code(`\(@reuseName) = `).compile(this)
+		if ?@reuseName {
+			fragments.code(`\(@reuseName) = `).compile(this)
 
-		@reusable = true
+			@reusable = true
+		}
+		else {
+			fragments.compile(this)
+		}
 	} # }}}
 	type() => @type
 }
@@ -298,13 +324,8 @@ class BinaryOperatorTypeEquality extends Expression {
 		}
 
 		if @subject.isInferable() {
-			// echo(subjectType)
-			// echo(@testType)
-			// echo(subjectType.hashCode(), @testType.hashCode())
 			@trueType = subjectType.limitTo(@testType)
-			// echo(@trueType.hashCode())
 			@falseType = subjectType.trimOff(@trueType)
-			// echo(@falseType.hashCode())
 		}
 
 		@testNullable = @subject.isNullable()
@@ -532,25 +553,42 @@ class UnaryOperatorTypeFitting extends UnaryOperatorExpression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		super(target, targetMode)
-
 		if @forced {
+			@type = AnyType.NullableUnexplicit
+
+			super(@type, targetMode)
+		}
+		else {
+			super(target, targetMode)
+
 			unless @parent.isExpectingType() {
-				TypeException.throwUnknownForcedTypeFitting(this)
+				TypeException.throwUnknownTypeFitting(this)
 			}
 
 			unless target.isAssignableToVariable(@argument.type(), true, false, false) {
-				TypeException.throwUnexpectedForcedTypeFitting(target, @argument.type(), this)
+				TypeException.throwUnexpectedTypeFitting(target, @argument.type(), this)
 			}
 
 			@type = @argument.type()
 		}
-		else {
-			@type = @argument.type().setNullable(false)
-		}
 	} # }}}
-	override isFitting() => @forced
-	isForced() => @forced
+	override isFitting() => true
+	isForced() => true
+	toFragments(fragments, mode) { # {{{
+		fragments.compile(@argument)
+	} # }}}
+	type() => @type
+}
+
+class UnaryOperatorTypeNotNull extends UnaryOperatorExpression {
+	private {
+		@type: Type			= AnyType.Unexplicit
+	}
+	override prepare(target, targetMode) { # {{{
+		super(target, targetMode)
+
+		@type = @argument.type().setNullable(false)
+	} # }}}
 	toFragments(fragments, mode) { # {{{
 		fragments.compile(@argument)
 	} # }}}
@@ -599,10 +637,10 @@ class BinaryOperatorTypeSignalment extends Expression {
 	name() => @left.name()
 	override toQuote() { # {{{
 		if @forced {
-			return `\(@left.toQuote()):!!(\(@type.toQuote()))`
+			return `\(@left.toQuote()):!!!(\(@type.toQuote()))`
 		}
 		else {
-			return `\(@left.toQuote()):!(\(@type.toQuote()))`
+			return `\(@left.toQuote()):!!!(\(@type.toQuote()))`
 		}
 	} # }}}
 	type() => @type

@@ -198,5 +198,6 @@ var $unaryOperators = {
 	[OperatorKind.NonEmpty]				: UnaryOperatorNonEmpty
 	[OperatorKind.Spread]				: UnaryOperatorSpread
 	[OperatorKind.TypeFitting]			: UnaryOperatorTypeFitting
+	[OperatorKind.TypeNotNull]			: UnaryOperatorTypeNotNull
 	[OperatorKind.VariantYes]			: UnaryOperatorVariant
 }

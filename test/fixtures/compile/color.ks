@@ -187,7 +187,7 @@ func $binder(last: func, components, first: func, ...firstArgs): func { # {{{
 } # }}}
 
 namespace $caster {
-	func alpha(n? = null, percentage: bool = false): float { # {{{
+	func alpha(n? = null, #[overwrite] percentage: bool = false): float { # {{{
 		var mut i: Number = Float.parse(n)
 
 		return i == NaN ? 1 : (percentage ? i / 100 : i).limit(0, 1).round(3)
@@ -339,7 +339,7 @@ var $parsers = {
 				}
 			}
 			else if args[0] is string {
-				var mut color = args[0]:!(string).lower().replace(/[^a-z0-9,.()#%]/g, '')
+				var mut color = args[0]:!!(string).lower().replace(/[^a-z0-9,.()#%]/g, '')
 
 				if 'transparent' == color {
 					that._alpha = that._red = that._green = that._blue = 0
@@ -464,7 +464,7 @@ var $parsers = {
 				return true
 			}
 			else if args[0] is string {
-				var color = args[0]:!(string).lower().replace(/[^a-z0-9,.()#%]/g, '')
+				var color = args[0]:!!(string).lower().replace(/[^a-z0-9,.()#%]/g, '')
 
 				// gray(56)
 				if var match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
@@ -733,10 +733,10 @@ export class Color {
 				var mut d: Number = Math.abs(this[component.field] - color[component.field])
 
 				if d > component.half {
-					d = component.mod:!(Number) - d
+					d = component.mod:!!(Number) - d
 				}
 
-				this[component.field] = ((this[component.field]:!(Number) + (d * percentage)) % component.mod).round(component.round)
+				this[component.field] = ((this[component.field]:!!(Number) + (d * percentage)) % component.mod).round(component.round)
 			}
 			else {
 				this[component.field] = $blend(this[component.field], color[component.field], percentage).limit(component.min, component.max).round(component.round)
@@ -796,7 +796,7 @@ export class Color {
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
 			)
 
-			var min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio:!!(Number)
+			var min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio:!!!(Number)
 
 			return {
 				ratio: ((min + max) / 2).round(2)
@@ -827,7 +827,7 @@ export class Color {
 	} # }}}
 
 	distance(mut color: Color): float { # {{{
-		var that = this.like(Space.SRGB):!!({_red: float, _green: float, _blue: float})
+		var that = this.like(Space.SRGB):!!!({_red: float, _green: float, _blue: float})
 
 		color = color.like(Space.SRGB)
 
@@ -838,9 +838,9 @@ export class Color {
 		return this.hex() == color.hex()
 	} # }}}
 
-	format(format: string = this._space.value) { # {{{
-		if var format ?= $formatters[format] {
-			return format.formatter(?format.space ? this.like(format.space) : this)
+	format(name: string = this._space.value) { # {{{
+		if var formatter ?= $formatters[name] {
+			return formatter.formatter(?formatter.space ? this.like(formatter.space) : this)
 		}
 		else {
 			return false
@@ -964,13 +964,13 @@ export class Color {
 	luminance(): Number { # {{{
 		var that = this.like(Space.SRGB)
 
-		var mut r: float = that._red:!(float) / 255
+		var mut r: float = that._red:!!(float) / 255
 		r = r < 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
 
-		var mut g: float = that._green:!(float) / 255
+		var mut g: float = that._green:!!(float) / 255
 		g = g < 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
 
-		var mut b: float = that._blue:!(float) / 255
+		var mut b: float = that._blue:!!(float) / 255
 		b = b < 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)

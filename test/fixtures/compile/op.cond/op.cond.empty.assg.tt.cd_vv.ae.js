@@ -4,8 +4,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let t = x;
-		if(Type.isNotEmpty(t)) {
+		let t;
+		if((Type.isNotEmpty(x) ? (t = x, true) : false)) {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

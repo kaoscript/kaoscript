@@ -27,7 +27,7 @@ module.exports = function() {
 				data = null;
 			}
 			let color;
-			if(Type.isValue(data) ? (Helper.assertDexObject(data, 1, 0, {coord: value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}), color: Type.isValue}), {coord: {x: this._x, y: this._y}, color} = data, true) : false) {
+			if(((Type.isDexObject(data, 1, 0, {coord: value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}), color: Type.isValue})) ? (({coord: {x: this._x, y: this._y}, color} = data), true) : false)) {
 			}
 		}
 		__ks_func_foobar_rt(that, proto, args) {

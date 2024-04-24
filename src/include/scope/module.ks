@@ -56,10 +56,12 @@ class ModuleScope extends Scope {
 		return `__ks_lbl_\(@labelIndex)`
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		for var _, name of @tempNames when @tempNames[name] {
-			@tempNames[name] = false
+		if declare {
+			for var _, name of @tempNames when @tempNames[name] {
+				@tempNames[name] = false
 
-			return name
+				return name
+			}
 		}
 
 		@tempIndex += 1
@@ -119,8 +121,8 @@ class ModuleScope extends Scope {
 
 		@tempDeclarations.clear()
 	} # }}}
-	private declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
+	override declareVariable(name, scope) { # {{{
+		if $keywords[name] || (@declarations[name] && ?@variables[name]) {
 			var newName = @getNewName(name)
 
 			if !?@variables[name] {
@@ -135,7 +137,7 @@ class ModuleScope extends Scope {
 			return null
 		}
 	} # }}}
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
 		if @hasDefinedVariable(name) {
 			var variable = @getVariable(name)
 
@@ -166,10 +168,10 @@ class ModuleScope extends Scope {
 
 		return variable
 	} # }}}
-	defineVariable(variable: Variable, node: AbstractNode) { # {{{
+	override defineVariable(variable, node) { # {{{
 		var name = variable.name()
 
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			var variables: Array = @variables[name]
 			var last = variables.last()
 
@@ -288,7 +290,7 @@ class ModuleScope extends Scope {
 		}
 
 		if ?@variables[name] {
-			var variables = @variables[name]:!!(Array)
+			var variables = @variables[name]:!!!(Array)
 			var mut variable = null
 
 			if line == -1 || line > @line {

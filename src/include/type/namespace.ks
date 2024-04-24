@@ -148,7 +148,7 @@ class NamespaceType extends Type {
 		return variable.getDeclaredType()
 	} # }}}
 	clone() { # {{{
-		var that = NamespaceType.new(@scope:!(Scope))
+		var that = NamespaceType.new(@scope:!!!(Scope))
 
 		that.copyFrom(this)
 

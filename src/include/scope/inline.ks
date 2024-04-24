@@ -4,12 +4,12 @@ class InlineBlockScope extends BlockScope {
 		@updatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		if var name ?= @acquireUnusedTempName() {
+		if declare ;; var name ?= @acquireUnusedTempName() {
 			return name
 		}
 
 		if @tempIndex == -1 {
-			@tempIndex = @parent.getTempIndex():!(Number) + 1
+			@tempIndex = @parent.getTempIndex():!!!(Number) + 1
 		}
 		else {
 			@tempIndex += 1
@@ -41,7 +41,7 @@ class InlineBlockScope extends BlockScope {
 		return null
 	} # }}}
 	protected declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @hasBleedingVariable(name)) {
+		if $keywords[name] || (@declarations[name] && ?@variables[name]) || (scope.isBleeding() && @hasBleedingVariable(name)) {
 			var newName = @getNewName(name)
 
 			if !?@variables[name] {
@@ -69,7 +69,7 @@ class InlineBlockScope extends BlockScope {
 
 		return newName
 	} # }}}
-	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
+	getRenamedIndex(name: String) => @renamedIndexes[name] ?? @parent.getRenamedIndex(name)
 	getTempIndex() { # {{{
 		if @tempIndex == -1 {
 			@tempIndex = @parent.getTempIndex()
@@ -95,7 +95,7 @@ class InlineBlockScope extends BlockScope {
 	isInline() => true
 	listUpdatedInferables() => @updatedInferables
 	releaseTempName(name) { # {{{
-		if @tempParentNames[name] == true {
+		if @tempParentNames[name] {
 			@parent().releaseTempName(name)
 
 			@tempParentNames[name] = false

@@ -1,5 +1,4 @@
-func foobar(x) {
-	for var x in x.values() {
-
+func foobar(values) {
+	for var x in values.values() {
 	}
 }

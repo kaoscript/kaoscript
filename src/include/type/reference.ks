@@ -43,29 +43,29 @@ class ReferenceType extends Type {
 					set data.name
 				}
 
-			var type = ReferenceType.new(scope, name:!(String), data.nullable!?)
+			var type = ReferenceType.new(scope, name:!!!(String), data.nullable!?)
 
 			if ?data.parameters || ?data.subtypes {
 				queue.push(() => {
 					if ?data.parameters {
-						for var data of data.parameters {
-							type.addParameter(Type.import(data, metadata, references, alterations, queue, scope, node))
+						for var parameter of data.parameters {
+							type.addParameter(Type.import(parameter, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					if ?data.subtypes {
 						var subtypes = []
 
-						for var { name, type % subtype } of data.subtypes {
+						for var subtype of data.subtypes {
 							subtypes.push({
-								name
-								subtype: Type.import(subtype, metadata, references, alterations, queue, scope, node)
+								subname: subtype.name
+								subtype: Type.import(subtype.type, metadata, references, alterations, queue, scope, node)
 							})
 						}
 
 						queue.push(() => {
-							for var { name, subtype } in subtypes {
-								type.addSubtype(name, subtype, node)
+							for var { subname, subtype } in subtypes {
+								type.addSubtype(subname, subtype, node)
 							}
 
 							type.flagComplete()
@@ -106,12 +106,10 @@ class ReferenceType extends Type {
 			if ?#subtypes {
 				fragments.push('(')
 
-				for var { name }, index in subtypes {
-					if index != 0 {
-						fragments.push(', ')
-					}
-
-					fragments.push(name)
+				for var { name % subname }, index in subtypes {
+					fragments
+						..push(', ') if index != 0
+						..push(subname)
 				}
 
 				fragments.push(')')
@@ -141,15 +139,15 @@ class ReferenceType extends Type {
 		var variant = @type.discard().getVariantType()
 
 		if var mainName ?= variant.getMainName(name) {
-			for var { name } in @subtypes {
-				return if name == mainName
+			for var { name % subName } in @subtypes {
+				return if subName == mainName
 			}
 
 			@subtypes.push({ name: mainName, type })
 		}
 		else if !variant.isComplete() {
-			for var subtype in @subtypes {
-				return if name == subtype.name
+			for var { name % subName } in @subtypes {
+				return if subName == name
 			}
 
 			@subtypes.push({ name, type })
@@ -463,9 +461,7 @@ class ReferenceType extends Type {
 		return -value.compareToRef(this, equivalences)
 	} # }}}
 	discard() => @discardReference()?.discard()
-	discardAlias() { # {{{
-		var dyn variable
-
+	override discardAlias() { # {{{
 		if @name == 'Any' {
 			return Type.Any
 		}
@@ -480,8 +476,6 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	discardReference(): Type? { # {{{
-		var dyn variable, type
-
 		if @name == 'Any' {
 			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
@@ -553,7 +547,7 @@ class ReferenceType extends Type {
 			}
 
 			if ?#@subtypes {
-				export.subtypes = [{ name, type: type.toReference(references, indexDelta, mode, module) } for var { name, type } in @subtypes]
+				export.subtypes = [{ name: subName, type: type.toReference(references, indexDelta, mode, module) } for var { name % subName, type } in @subtypes]
 			}
 
 			return export
@@ -710,14 +704,13 @@ class ReferenceType extends Type {
 				return property
 			}
 			else if ?#@subtypes {
-				var propname = name
 				var variant = type.discard().getVariantType()
 
 				if @subtypes.length == 1 {
-					var { name } = @subtypes[0]
+					var { name % subName } = @subtypes[0]
 
-					if var { type % subtype } ?= variant.getField(name) {
-						var property = subtype.getProperty(propname)
+					if var { type % subtype } ?= variant.getField(subName) {
+						var property = subtype.getProperty(name)
 
 						if property is DeferredType {
 							return AnyType.NullableUnexplicit if !?#@parameters
@@ -729,11 +722,11 @@ class ReferenceType extends Type {
 
 						return property
 					}
-					else if variant.hasSubtype(name) {
+					else if variant.hasSubtype(subName) {
 						return null
 					}
 					else {
-						ReferenceException.throwUndefinedVariantField(@name, name, node)
+						ReferenceException.throwUndefinedVariantField(@name, subName, node)
 					}
 				}
 				else {
@@ -744,7 +737,7 @@ class ReferenceType extends Type {
 				var master = type.discard().getVariantType().getMaster()
 
 				if master.hasProperty(name) {
-					return ReferenceType.new(@scope, @name, null, null, [{ name: name, type: master }])
+					return ReferenceType.new(@scope, @name, null, null, [{ name, type: master }])
 				}
 				else {
 					return AnyType.NullableUnexplicit
@@ -870,6 +863,18 @@ class ReferenceType extends Type {
 	isAlien() => @type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || @type().isArray()
+	override isAssertingWhenCasting() { # {{{
+		return true if $typeofs[@name]
+
+		var unalias = @discardAlias()
+
+		if unalias.isObject() {
+			return unalias.isAssertingWhenCasting()
+		}
+		else {
+			return unalias.type().isAssertingWhenCasting()
+		}
+	} # }}}
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if this == value {
 			return true
@@ -973,6 +978,23 @@ class ReferenceType extends Type {
 
 				return @setNullable(false).isAssignableToVariable(value, anycast, nullcast, downcast, limited)
 			}
+			else if @isUnion() {
+				for var a in @discard().types() {
+					var mut matched = false
+
+					for var b in value.types() {
+						if a.isAssignableToVariable(b, anycast, nullcast, downcast, limited) {
+							matched = true
+
+							break
+						}
+					}
+
+					return false if !matched
+				}
+
+				return true
+			}
 			else {
 				for var type in value.types() {
 					if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
@@ -1005,8 +1027,8 @@ class ReferenceType extends Type {
 			return false unless @isBroadArray()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			if anycast && !@isAlias() && !@isFusion() && !@isInstance() && !@isUnion() {
-				return true if @parameters.length == 0
+			if anycast && @name == 'Array' {
+				return true unless ?#@parameters
 
 				var parameter = @parameters[0]
 
@@ -1021,9 +1043,17 @@ class ReferenceType extends Type {
 			return false unless @isBroadObject()
 			return false unless !@nullable || nullcast || value.isNullable()
 
-			var mode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
+			if anycast && @name == 'Object' {
+				return true unless ?#@parameters
 
-			return @isSubsetOf(value, mode)
+				var parameter = @parameters[0]
+
+				if parameter.isAny() && !parameter.isExplicit() {
+					return true
+				}
+			}
+
+			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -1072,17 +1102,17 @@ class ReferenceType extends Type {
 			return true
 		}
 
-		if var type ?= value.discardAlias() {
-			if type is UnionType {
-				for var type in type.types() {
-					if @isInstanceOf(type!!, generics, subtypes) {
-						return true
-					}
+		var type = value.discardAlias()
+
+		if type is UnionType {
+			for var subtype in type.types() {
+				if @isInstanceOf(subtype!!, generics, subtypes) {
+					return true
 				}
 			}
-			else if type.isClass() {
-				return @type.type().isInstanceOf(type.discardAlias().type(), generics, subtypes)
-			}
+		}
+		else if type.isClass() {
+			return @type.type().isInstanceOf(type.discardAlias().type(), generics, subtypes)
 		}
 
 		return false
@@ -1159,12 +1189,16 @@ class ReferenceType extends Type {
 			return false
 		}
 
+		if @isAlias() {
+			return @discardAlias().isMorePreciseThan(value)
+		}
+
 		if @name == 'Array' && value.isBroadArray() {
-			return true
+			return false
 		}
 
 		if @name == 'Object' && value.isBroadObject() {
-			return true
+			return false
 		}
 
 		var a: Type = @discardReference()!?
@@ -1302,7 +1336,7 @@ class ReferenceType extends Type {
 
 		return @discard().isSubsetOf(value, mode)
 	} # }}}
-	assist isSubsetOf(value: ObjectType, generics, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ObjectType, _, _, mode) { # {{{
 		return false unless @isBroadObject()
 
 		if @isNullable() && !value.isNullable() {
@@ -1352,7 +1386,7 @@ class ReferenceType extends Type {
 
 		return true
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, _, _, mode) { # {{{
 		if this == value {
 			return true
 		}
@@ -1394,30 +1428,52 @@ class ReferenceType extends Type {
 			}
 
 			if value.scope().isRenamed(value.name(), @name, @scope, mode) {
-				var parameters = value.parameters()
+				var mut testParameters = true
 
-				if parameters.length == @parameters.length {
-					for var parameter, index in @parameters {
-						if !parameter.isSubsetOf(parameters[index], mode) {
-							return false
-						}
-					}
-				}
-				else if parameters.length > @parameters.length {
-					return false
-				}
+				if ?#@subtypes {
+					var root = @discard()
+					var variant: VariantType = root.getVariantType()
 
-				if value.hasSubtypes() {
-					var variant: VariantType = value.discard().getVariantType()
+					if value.hasSubtypes() {
+						var names = variant.explodeVarnames(...value.getSubtypes())
 
-					var names = variant.explodeVarnames(...value.getSubtypes())
-
-					if ?#@subtypes {
 						for var { name } in @subtypes {
 							return false unless names.contains(name)
 						}
 					}
-					else {
+					else if !root.isDeferrable() {
+						var mut doTest = false
+
+						for var { name } in @subtypes {
+							// TODO!
+							// if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
+							if var { type } ?= variant.getField(name) {
+								if type.isDeferrable() {
+									doTest = true
+
+									break
+								}
+							}
+						}
+
+						testParameters = false unless doTest
+					}
+				}
+				else {
+					return false if value.hasSubtypes()
+				}
+
+				if testParameters {
+					var parameters = value.parameters()
+
+					if parameters.length == @parameters.length {
+						for var parameter, index in @parameters {
+							if !parameter.isSubsetOf(parameters[index], mode) {
+								return false
+							}
+						}
+					}
+					else if parameters.length > @parameters.length {
 						return false
 					}
 				}
@@ -1470,6 +1526,27 @@ class ReferenceType extends Type {
 	isView() => @type().isView()
 	isVirtual() => @type().isVirtual()
 	isVoid() => @name == 'Void' || @type().isVoid()
+	override limitTo(value) { # {{{
+		var mut current = this
+
+		if @isNullable() && !value.isNullable() {
+			current = @setNullable(false)
+		}
+
+		if current == value {
+			return current
+		}
+
+		if current.isUnion() {
+			return current.discard().limitTo(value)
+		}
+		else if value.isMorePreciseThan(current) {
+			return value
+		}
+		else {
+			return current
+		}
+	} # }}}
 	listFunctions(name: String): Array => @type().listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type().listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type().listMissingProperties(class)
@@ -1501,9 +1578,9 @@ class ReferenceType extends Type {
 			return null
 		}
 		else if ?#@parameters && !?#generics {
-			var { type, generics } = @getGenericMapper()
+			var { type, generics % mappedGenerics } = @getGenericMapper()
 
-			return type.makeMemberCallee(property, path, this, generics, node)
+			return type.makeMemberCallee(property, path, this, mappedGenerics, node)
 		}
 		else {
 			return @type().makeMemberCallee(property, path, this, generics, node)
@@ -1901,7 +1978,6 @@ class ReferenceType extends Type {
 			}
 		}
 		else if mode ~~ ExportMode.Alien {
-
 			if @type.isClass() {
 				return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
 			}
@@ -1927,7 +2003,12 @@ class ReferenceType extends Type {
 		}
 		else {
 			if !@type.isClass() {
-				return super.toReference(references, indexDelta, mode, module)
+				if @nullable {
+					return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
+				}
+				else {
+					return super(references, indexDelta, mode, module)
+				}
 			}
 			else if @type.isExplicitlyExported() || @type.isRequirement() {
 				return @export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
@@ -2036,9 +2117,9 @@ class ReferenceType extends Type {
 				NotImplementedException.throw()
 			}
 
-			var { type, generics } = @getGenericMapper()
+			var { type, generics % mappedGenerics } = @getGenericMapper()
 
-			type.toAwareTestFunctionFragments(varname, nullable, false, casting, true, generics, @subtypes, fragments, node)
+			type.toAwareTestFunctionFragments(varname, nullable, false, casting, true, mappedGenerics, @subtypes, fragments, node)
 		}
 		else if @type.isBitmask() && ?propname {
 			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
@@ -2071,9 +2152,9 @@ class ReferenceType extends Type {
 				}
 			}
 			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() {
-				var { generics } = @getGenericMapper()
+				var { generics % mappedGenerics } = @getGenericMapper()
 
-				unalias.toBlindSubtestFunctionFragments(funcname, varname, casting, propname, nullable, generics, fragments, node)
+				unalias.toBlindSubtestFunctionFragments(funcname, varname, casting, propname, nullable, mappedGenerics, fragments, node)
 			}
 			else {
 				super(funcname, varname, casting, propname, nullable, generics, fragments, node)
@@ -2170,9 +2251,9 @@ class ReferenceType extends Type {
 			if ?#@subtypes && @isSubtypeOf(node.type()) {
 				if ?#@parameters && !?#parameters {
 					if !?#subtypes {
-						var { type, generics, subtypes } = @getGenericMapper()
+						var { type, generics, subtypes % mappedSubtypes } = @getGenericMapper()
 
-						type.toNegativeTestFragments(generics, subtypes, junction, fragments, node)
+						type.toNegativeTestFragments(generics, mappedSubtypes, junction, fragments, node)
 					}
 					else {
 						var { type, generics } = @getGenericMapper()
@@ -2215,9 +2296,9 @@ class ReferenceType extends Type {
 				}
 			}
 			else {
-				var { type, generics, subtypes } = @getGenericMapper()
+				var { type, generics, subtypes % mappedSubtypes } = @getGenericMapper()
 
-				type.toNegativeTestFragments(generics, subtypes, junction, fragments, node)
+				type.toNegativeTestFragments(generics, mappedSubtypes, junction, fragments, node)
 			}
 		}
 		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
@@ -2234,9 +2315,9 @@ class ReferenceType extends Type {
 			if ?#@subtypes && @isSubtypeOf(node.type()) {
 				if ?#@parameters && !?#parameters {
 					if !?#subtypes {
-						var { type, generics, subtypes } = @getGenericMapper()
+						var { type, generics, subtypes % mappedSubtypes } = @getGenericMapper()
 
-						type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
+						type.toPositiveTestFragments(generics, mappedSubtypes, junction, fragments, node)
 					}
 					else {
 						var { type, generics } = @getGenericMapper()
@@ -2279,9 +2360,9 @@ class ReferenceType extends Type {
 				}
 			}
 			else {
-				var { type, generics, subtypes } = @getGenericMapper()
+				var { type, generics, subtypes % mappedSubtypes } = @getGenericMapper()
 
-				type.toPositiveTestFragments(generics, subtypes, junction, fragments, node)
+				type.toPositiveTestFragments(generics, mappedSubtypes, junction, fragments, node)
 			}
 		}
 		else if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
@@ -2420,11 +2501,11 @@ class ReferenceType extends Type {
 				var variant = object.getVariantType()
 
 				if var property ?= value.getProperty(name) ;; property.isValue() {
-					var value = property.value()
+					var propertyValue = property.value()
 
-					subtypes.push({ name: variant.getMainName(value), type: variant.getMaster()})
+					subtypes.push({ name: variant.getMainName(propertyValue), type: variant.getMaster()})
 
-					if var field ?= variant.getField(value) {
+					if var field ?= variant.getField(propertyValue) {
 						subtypeObject = field.type
 					}
 				}
@@ -2437,18 +2518,18 @@ class ReferenceType extends Type {
 
 			for var property, name of object.properties() {
 				if property is DeferredType {
-					if var value ?= value.getProperty(name)  {
+					if var propertyValue ?= value.getProperty(name)  {
 						perNames[name] ??= []
-							..push(value.type().reference())
+							..push(propertyValue.type().reference())
 					}
 				}
 			}
 			if ?subtypeObject {
 				for var property, name of subtypeObject.properties() {
 					if property is DeferredType {
-						if var value ?= value.getProperty(name)  {
+						if var propertyValue ?= value.getProperty(name)  {
 							perNames[name] ??= []
-								..push(value.type().reference())
+								..push(propertyValue.type().reference())
 						}
 					}
 				}
@@ -2465,11 +2546,7 @@ class ReferenceType extends Type {
 			}
 		}
 
-		if value.isMorePreciseThan(this) {
-			return value
-		}
-
-		return this
+		return super(value)
 	} # }}}
 	override tune(value) { # {{{
 		@resolve()

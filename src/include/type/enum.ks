@@ -50,8 +50,8 @@ class EnumType extends Type {
 				type._sequences.defaults = data.sequences[0]
 			}
 
-			for var { name, index? } in data.values {
-				var value = EnumValueType.new(name, index, null)
+			for var { name, index % valIndex? } in data.values {
+				var value = EnumValueType.new(name, valIndex, null)
 
 				type.addValue(value)
 			}
@@ -160,7 +160,8 @@ class EnumType extends Type {
 			}
 			NodeKind.MethodDeclaration {
 				var mut instance = true
-				for i from 0 to~ data.modifiers.length while instance {
+
+				for var i from 0 to~ data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind.Static
 				}
 
@@ -319,12 +320,12 @@ class EnumType extends Type {
 
 	} # }}}
 	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if var index ?= type.index() {
-			if @instanceMethods[name] is Array {
-				for var method in @instanceMethods[name] {
-					if method.index() == index {
-						return index
-					}
+		var index = type.index()
+
+		if @instanceMethods[name] is Array {
+			for var method in @instanceMethods[name] {
+				if method.index() == index {
+					return index
 				}
 			}
 		}
@@ -332,12 +333,12 @@ class EnumType extends Type {
 		return @addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
-		if var index ?= type.index() {
-			if @staticMethods[name] is Array {
-				for var method in @staticMethods[name] {
-					if method.index() == index {
-						return index
-					}
+		var index = type.index()
+
+		if @staticMethods[name] is Array {
+			for var method in @staticMethods[name] {
+				if method.index() == index {
+					return index
 				}
 			}
 		}
@@ -493,7 +494,7 @@ class EnumType extends Type {
 
 		for var { name } in names {
 			if var value ?= @aliases[name] {
-				result += value.originals().length:!(Number)
+				result += value.originals().length:!!!(Number)
 			}
 			else {
 				result += 1
@@ -721,7 +722,7 @@ class EnumType extends Type {
 
 			match var result = node.matchArguments(assessment) {
 				is LenientCallMatchResult {
-					node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, result.possibilities, node))
+					node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, result.possibilities, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
 					if matches.length == 1 {
@@ -732,7 +733,7 @@ class EnumType extends Type {
 					else {
 						var functions = [match.function for var match in matches]
 
-						node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, functions, node))
+						node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, functions, node))
 					}
 				}
 				else {
@@ -741,7 +742,7 @@ class EnumType extends Type {
 							ReferenceException.throwNoMatchingEnumMethod(property, reference.name(), node.arguments(), node)
 						}
 						else {
-							node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+							node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
 						}
 					}
 				}
@@ -753,7 +754,7 @@ class EnumType extends Type {
 		else {
 			node.prepareArguments()
 
-			node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
+			node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
 		}
 
 		return null

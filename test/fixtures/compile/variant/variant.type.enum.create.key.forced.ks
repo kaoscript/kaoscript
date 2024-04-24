@@ -15,5 +15,5 @@ type SchoolPerson = {
 func create(kind: PersonKind): SchoolPerson {
 	return {
 		kind
-	}!!
+	}!!!
 }

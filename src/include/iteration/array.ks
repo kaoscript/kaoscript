@@ -59,9 +59,11 @@ class ArrayIteration extends IterationNode {
 			}
 		}
 
+		var overwrite = @declaration && @hasAttribute('overwrite')
+
 		if ?@data.index {
 			if @declaration {
-				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), true, this)
+				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), true, overwrite, this)
 
 				@declareIndex = true
 			}
@@ -82,7 +84,7 @@ class ArrayIteration extends IterationNode {
 				if @declaration {
 					@declareValue = true
 
-					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
+					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, overwrite, this))
 				}
 				else {
 					@bindingScope.checkVariable(name, true, this)

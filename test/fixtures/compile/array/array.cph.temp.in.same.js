@@ -4,7 +4,7 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		const value = (() => {
+		const __ks_value_1 = (() => {
 			const a = [];
 			for(let __ks_1 = 0, __ks_0 = values.length, value; __ks_1 < __ks_0; ++__ks_1) {
 				value = values[__ks_1];
@@ -12,7 +12,7 @@ module.exports = function() {
 			}
 			return a;
 		})();
-		return value;
+		return __ks_value_1;
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

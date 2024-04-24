@@ -155,7 +155,7 @@ class ClassMethodType extends FunctionType {
 		}
 
 		if ?originalMethods && ?@overwrite {
-			var overwrite = @overwrite.filter((index, _, _) => originalMethods:!(Array).contains(index))
+			var overwrite = @overwrite.filter((index, _, _) => originalMethods:!!!(Array).contains(index))
 
 			if ?#overwrite {
 				export.overwrite = overwrite

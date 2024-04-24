@@ -1,5 +1,3 @@
-var dyn bar = []
-
-func foo(...args) {
-	var foo = [...args]
+func foobar(...args) {
+	var values = [...args]
 }

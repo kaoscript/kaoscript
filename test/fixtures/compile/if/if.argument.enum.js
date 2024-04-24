@@ -5,8 +5,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x, y, filter) {
-		let z = filter(x, y, Qux.abc);
-		if(Type.isValue(z)) {
+		let z, __ks_0;
+		if((Type.isValue(__ks_0 = filter(x, y, Qux.abc)) ? (z = __ks_0, true) : false)) {
 			return z;
 		}
 		return Operator.add(x, y);

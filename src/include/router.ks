@@ -64,22 +64,6 @@ namespace Router {
 		labels: Type{}				= {}
 	}
 
-	struct NamedLength {
-		functions: Array<String>
-		parameters: Object<NamedParameter>
-	}
-
-	struct NamedParameter {
-		indexes: Object<Number>
-		types: Object<NamedType>
-		order: Array<String>
-	}
-
-	struct NamedType {
-		type: Type
-		functions: Array<String>
-	}
-
 	struct NamingArgument {
 		element: Number?	= null
 		fitting: Boolean	= false
@@ -193,7 +177,7 @@ namespace Router {
 		'./router/regroup.ks'
 		'./router/unbounded.ks'
 		'./router/matching.ks'
-		'./router/fragment.ks'
+		'./router/generator.ks'
 	}
 
 	enum FooterType {
@@ -278,13 +262,13 @@ namespace Router {
 			}
 
 			if var perLabel ?= perLabels[key] {
-				perLabel.functions.push(function)
+				perLabel.funcs.push(function)
 			}
 			else {
 				perLabels[key] = {
 					labels
 					types
-					functions: [function]
+					funcs: [function]
 				}
 			}
 
@@ -315,12 +299,12 @@ namespace Router {
 		var mainRoutes = []
 
 		for var labelKey in labelKeys {
-			var { labels, types, functions } = perLabels[labelKey]
-			var functionKeys = [function.index() for var function in functions]
+			var { labels, types, funcs } = perLabels[labelKey]
+			var functionKeys = [function.index() for var function in funcs]
 
 			var key = `|\(functionKeys.sort((a, b) => a - b).join(','))`
 
-			var route = Build.buildRoute(functions, name, false, labels, node)
+			var route = Build.buildRoute(funcs, name, false, labels, node)
 
 			routes[key] = route
 
@@ -459,7 +443,7 @@ namespace Router {
 		hasDeferred: Boolean = false
 		fragments: BlockBuilder
 		footerType: FooterType = FooterType.MUST_THROW
-		footer: Function = Fragment.toDefaultFooter
+		footer: Function = Generator.toDefaultFooter
 		node: AbstractNode
 	): Void { # {{{
 		if !?#assessment.mainRoutes {
@@ -481,7 +465,7 @@ namespace Router {
 		}
 
 		var mark = fragments.mark()
-		var helper = Fragment.buildHelper(mark, args, hasDeferred, node)
+		var helper = Generator.buildHelper(mark, args, hasDeferred, node)
 		var fallback = footerType != FooterType.MUST_THROW
 		var mut continuous = true
 		var mut useAllArgs = false
@@ -491,17 +475,17 @@ namespace Router {
 			var mut block = fragments
 
 			if labelable {
-				block = Fragment.toLabelFragments(labels, helper, fragments, node)
+				block = Generator.toLabelFragments(labels, helper, fragments, node)
 			}
 
 			if trees.length == 1 && trees[0].min == 0 && trees[0].rest {
 				var tree = trees[0]
 
-				if tree.order.length == 1 && Fragment.isNeedingTestings(tree.columns[tree.order[0]]) {
-					Fragment.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, fallback, helper, block, node)
+				if tree.order.length == 1 && Generator.isNeedingTestings(tree.columns[tree.order[0]]) {
+					Generator.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, fallback, helper, block, node)
 				}
 				else {
-					Fragment.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, false, helper, block, node)
+					Generator.toTreeFragments(buildPath, args, tree, labels, 0, 1, true, false, helper, block, node)
 
 					useAllArgs = true
 				}
@@ -519,7 +503,7 @@ namespace Router {
 						}
 					}
 
-					useAllArgs = Fragment.toTreeFragments(buildPath, args, tree, labels, i, trees.length, continuous, fallback, helper, block, node)
+					useAllArgs = Generator.toTreeFragments(buildPath, args, tree, labels, i, trees.length, continuous, fallback, helper, block, node)
 				}
 			}
 
@@ -531,7 +515,7 @@ namespace Router {
 		if continuous {
 			if !useAllArgs {
 				if footerType == FooterType.MUST_THROW {
-					Fragment.toDefaultFooter(fragments, node)
+					Generator.toDefaultFooter(fragments, node)
 				}
 				else {
 					footer(fragments, node)
@@ -540,7 +524,7 @@ namespace Router {
 		}
 		else if !assessment.emptiable || !assessment.rest || !useAllArgs {
 			if footerType == FooterType.MUST_THROW {
-				Fragment.toDefaultFooter(fragments, node)
+				Generator.toDefaultFooter(fragments, node)
 			}
 			else {
 				footer(fragments, node)
@@ -639,25 +623,25 @@ namespace Router {
 			var parameters = function.parameters()
 			var alien = function.isAlien()
 
-			for var position, index in arguments {
-				var parameter = parameters[index].type()
+			for var position, pIndex in arguments {
+				var parameter = parameters[pIndex].type()
 
 				if position is Array {
 					if alien {
 						if #position > 0 {
-							fragments.code($comma) if index != 0
+							fragments.code($comma) if pIndex != 0
 
-							for var { index % eIndex }, i in position {
+							for var { index }, i in position {
 								fragments.code($comma) if i != 0
 
-								expressions[eIndex].toArgumentFragments(fragments, mode)
+								expressions[index].toArgumentFragments(fragments, mode)
 							}
 						}
 
 						continue
 					}
 
-					fragments.code($comma) if index != 0
+					fragments.code($comma) if pIndex != 0
 
 					if #position == 1 {
 						var expression = expressions[position[0].index]
@@ -703,21 +687,21 @@ namespace Router {
 					fragments.code(']') if precise
 				}
 				else {
-					fragments.code($comma) if index != 0
+					fragments.code($comma) if pIndex != 0
 
-					var { index % eIndex?, element?, property? } = position
+					var { index?, element?, property? } = position
 
-					if !?eIndex {
+					if !?index {
 						fragments.code('void 0')
 					}
 					else if ?element {
-						expressions[eIndex].toArgumentFragments(fragments, element, mode)
+						expressions[index].toArgumentFragments(fragments, element, mode)
 					}
 					else if ?property {
-						expressions[eIndex].toArgumentFragments(fragments, property, mode)
+						expressions[index].toArgumentFragments(fragments, property, mode)
 					}
 					else {
-						expressions[eIndex].toArgumentFragments(fragments, parameter, mode)
+						expressions[index].toArgumentFragments(fragments, parameter, mode)
 					}
 				}
 			}
@@ -837,7 +821,7 @@ namespace Router {
 			var parameters = function.parameters()
 			var mut opened = false
 
-			for var position, index in arguments {
+			for var position, pIndex in arguments {
 				if position is Array {
 					if position.length == 1 && expressions[position[0].index].isSpread() {
 						var expression = expressions[position[0].index]
@@ -875,14 +859,14 @@ namespace Router {
 
 							opened = false
 						}
-						else if index != 0 {
+						else if pIndex != 0 {
 							fragments.code($comma)
 						}
 
 						argument.toFlatArgumentFragments(false, fragments, mode)
 					}
 					else {
-						if index != 0 {
+						if pIndex != 0 {
 							fragments.code($comma)
 						}
 
@@ -896,7 +880,7 @@ namespace Router {
 					}
 				}
 				else {
-					if index == 0 {
+					if pIndex == 0 {
 						fragments.code('void 0')
 					}
 					else {

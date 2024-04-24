@@ -1,1 +1,0 @@
-SyntaxException: Variable "foo" is not an overloadable function (fixtures/compile/variable/variable.overwrite.let.func.ks:3)

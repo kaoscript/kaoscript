@@ -4,12 +4,12 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(text) {
-		let data;
-		while(Type.isValue(data = quxbaz.__ks_0(text))) {
+		let data, __ks_0;
+		while(Type.isValue(__ks_0 = quxbaz.__ks_0(text)) ? (data = __ks_0, true) : false) {
 			console.log(data);
 		}
 		let __ks_data_1;
-		while(Type.isValue(__ks_data_1 = quxbaz.__ks_0(text))) {
+		while(Type.isValue(__ks_0 = quxbaz.__ks_0(text)) ? (__ks_data_1 = __ks_0, true) : false) {
 			console.log(__ks_data_1);
 		}
 	};

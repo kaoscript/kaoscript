@@ -6,8 +6,7 @@ module.exports = function() {
 		return lines.__ks_rt(this, arguments);
 	};
 	lines.__ks_0 = function(value) {
-		let __ks_0;
-		return Type.isValue(__ks_0 = Helper.assertString(value, 1)) ? __ks_String.__ks_func_lines_0.call(__ks_0) : null;
+		return Type.isValue(Helper.assertString(value, 1)) ? __ks_String.__ks_func_lines_0.call(value) : null;
 	};
 	lines.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

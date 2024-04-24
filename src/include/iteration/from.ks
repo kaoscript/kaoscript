@@ -3,7 +3,6 @@ class FromIteration extends IterationNode {
 		@ascending: Boolean					= true
 		@conditionalTempVariables: Array	= []
 		@declaration: Boolean				= false
-		@declared: Boolean					= false
 		@from
 		@fromAssert: Boolean				= false
 		@fromBallpark: Boolean
@@ -26,7 +25,6 @@ class FromIteration extends IterationNode {
 		@while
 	}
 	override analyse() { # {{{
-		var mut rename = false
 		var variable = @scope.getVariable(@data.variable.name)
 
 		for var modifier in @data.modifiers {
@@ -47,9 +45,7 @@ class FromIteration extends IterationNode {
 			}
 		}
 
-		@declared = @declaration || variable == null
-
-		if @declared {
+		if @declaration {
 			@bindingScope = @newScope(@scope!?, ScopeType.InlineBlock)
 		}
 		else {
@@ -63,52 +59,29 @@ class FromIteration extends IterationNode {
 
 		@fromBallpark = $ast.hasModifier(@data.from, ModifierKind.Ballpark)
 
-		if @from.isUsingVariable(@data.variable.name) {
-			if @declared {
-				rename = true
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
-			}
-		}
-
 		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
 		@toBallpark = $ast.hasModifier(@data.to, ModifierKind.Ballpark)
 
-		if @to.isUsingVariable(@data.variable.name) {
-			if @declared {
-				rename = true
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
-			}
-		}
-
 		if ?@data.step {
 			@step = $compile.expression(@data.step, this, @scope)
 			@step.analyse()
-
-			if @step.isUsingVariable(@data.variable.name) {
-				if @declared {
-					rename = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
-				}
-			}
 		}
 
-		if @declared {
-			@bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
+		if @declaration {
+			var overwrite = @hasAttribute('overwrite')
 
-			if rename {
-				@bindingScope.rename(@data.variable.name)
-			}
+			@bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), true, overwrite, this)
 		}
 		else {
-			@bindingScope.checkVariable(@data.variable.name, true, this)
+			var name = @data.variable.name
+
+			if @from.isUsingVariable(name) || @to.isUsingVariable(name) || @step?.isUsingVariable(name) {
+				SyntaxException.throwAlreadyDeclared(name, this)
+			}
+
+			@bindingScope.checkVariable(name, true, this)
 		}
 
 		@variable = $compile.expression(@data.variable, this, @bindingScope)
@@ -129,7 +102,7 @@ class FromIteration extends IterationNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		unless @declared {
+		unless @declaration {
 			@bindingScope.replaceVariable(@data.variable.name, @bindingScope.reference('Number'), this)
 		}
 
@@ -485,7 +458,7 @@ class FromIteration extends IterationNode {
 
 		var mut ctrl = (elseCtrl ?? fragments).newControl().code('for(')
 
-		if @declared {
+		if @declaration {
 			ctrl.code($runtime.scope(this))
 		}
 
@@ -556,7 +529,7 @@ class FromIteration extends IterationNode {
 	toStaticFragments(fragments) { # {{{
 		var mut ctrl = fragments.newControl().code('for(')
 
-		if @declared {
+		if @declaration {
 			ctrl.code($runtime.scope(this))
 		}
 
@@ -657,7 +630,7 @@ class FromIteration extends IterationNode {
 			ctrl.code(` + \(@stepName)`)
 		}
 
-		if @declared {
+		if @declaration {
 			ctrl.code($comma).compile(@variable)
 		}
 

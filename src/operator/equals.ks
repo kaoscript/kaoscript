@@ -24,22 +24,28 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 			@left.initializeVariables(rightType, this)
 		}
 
-		@type = @left.getDeclaredType().discardValue()
+		var leftType = @left.getDeclaredType().discardValue()
 
 		if @isInDestructor() {
 			@type = NullType.Explicit
 		}
-		else if !forcedFitting {
-			unless rightType.isAssignableToVariable(@type, true, false, false) {
-				TypeException.throwInvalidAssignment(@left, @type, rightType, this)
+		else if forcedFitting {
+			@type = leftType
+		}
+		else {
+			unless rightType.isAssignableToVariable(leftType, true, false, false) {
+				TypeException.throwInvalidAssignment(@left, leftType, rightType, this)
 			}
 
-			if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(@type, false, false, false) {
+			if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(leftType, false, false, false) {
 				@assert = true
 			}
 
 			if @left.isInferable() {
-				@type = @type.tryCastingTo(rightType)
+				@type = leftType.tryCastingTo(rightType)
+			}
+			else {
+				@type = rightType
 			}
 		}
 	} # }}}
@@ -97,33 +103,16 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		return inferables
 	} # }}}
 	initializeVariable(variable: VariableBrief) { # {{{
-		@parent.initializeVariable(variable, this)
+		return @parent.initializeVariable(variable, this)
 	} # }}}
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
-		@parent.initializeVariable(variable, expression)
+		return @parent.initializeVariable(variable, expression)
 	} # }}}
 	initializeVariables(type: Type, node: Expression)
 	isAssigningBinding() => true
 	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
 	isIgnorable() => @ignorable
-	private isInDestructor() { # {{{
-		if @parent is not ExpressionStatement {
-			return false
-		}
-
-		var dyn parent = @parent
-
-		while ?parent {
-			parent = parent.parent()
-
-			if parent is ClassDestructorDeclaration {
-				return true
-			}
-		}
-
-		return false
-	} # }}}
 	releaseReusable() { # {{{
 		(@assertion ?? @right).releaseReusable()
 	} # }}}
@@ -169,7 +158,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 	type() => @parent is AssignmentOperatorEquals ? @type : Type.Void
 	validate(target: Type) { # {{{
-		if !target.isVoid() && @parent is not AssignmentOperatorEquals {
+		if !target.isVoid() && @parent is not AssignmentOperatorEquals & MatchStatement {
 			SyntaxException.throwNoReturn(this)
 		}
 	} # }}}

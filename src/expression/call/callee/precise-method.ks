@@ -103,12 +103,12 @@ class PreciseMethodCallee extends MethodCallee {
 						if generic {
 							fragments.code(`, {`)
 
-							for var { name, type }, index in generics {
+							for var { name, type % gType }, index in generics {
 								fragments
 									..code(`, `) if index > 0
 									..code(`\(name): `)
 
-								type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
+								gType.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 							}
 
 							fragments.code(`}`)
@@ -177,8 +177,8 @@ class PreciseMethodCallee extends MethodCallee {
 							else if ?values {
 								fragments.code('[')
 
-								for var { placeholder?, passthru? }, index in values {
-									fragments.code($comma) if index != 0
+								for var { placeholder?, passthru? }, vIndex in values {
+									fragments.code($comma) if vIndex != 0
 
 									if ?passthru {
 										arguments[passthru].toArgumentFragments(fragments, mode)
@@ -240,8 +240,8 @@ class PreciseMethodCallee extends MethodCallee {
 							else if ?values {
 								fragments.code('[')
 
-								for var { placeholder?, passthru? }, index in values {
-									fragments.code($comma) if index != 0
+								for var { placeholder?, passthru? }, vIndex in values {
+									fragments.code($comma) if vIndex != 0
 
 									if ?passthru {
 										arguments[passthru].toArgumentFragments(fragments, mode)

@@ -14,6 +14,6 @@ module.exports = function() {
 	};
 	let x;
 	let __ks_0;
-	if(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexObject(__ks_0, 1, 0, {x: Type.isValue}), ({x} = __ks_0), true) : false) {
+	if((Type.isDexObject(__ks_0 = foobar.__ks_0(), 1, 0, {x: Type.isValue})) ? (({x} = __ks_0), true) : false) {
 	}
 };

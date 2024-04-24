@@ -41,6 +41,28 @@ abstract class AbstractNode {
 	getASTReference(name: String) => @parent?.getASTReference(name)
 	getFunctionNode() => @parent?.getFunctionNode()
 	getTopicReference(data) => @parent?.getTopicReference(data)
+	hasAttribute(name: String): Boolean { # {{{
+		return false unless ?@data.attributes
+
+		for var attribute in @data.attributes when attribute.kind == NodeKind.AttributeDeclaration {
+			if attribute.declaration.kind == NodeKind.Identifier && attribute.declaration.name == name {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	hasModifier(kind: ModifierKind): Boolean { # {{{
+		return false unless ?@data.modifiers
+
+		for var modifier in @data.modifiers {
+			if modifier.kind == kind {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => @file() != @module().file()

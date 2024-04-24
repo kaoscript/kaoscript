@@ -133,11 +133,11 @@ class ForStatement extends Statement {
 			var stack = []
 
 			for var iteration in @iterations {
-				var { close, fragments } = iteration.toIterationFragments(ctrl)
+				var { close, fragments % writer } = iteration.toIterationFragments(ctrl)
 
 				stack.push(close)
 
-				ctrl = fragments
+				ctrl = writer
 			}
 
 			ctrl.compile(@bodyBlock)

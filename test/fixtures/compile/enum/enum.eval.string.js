@@ -2,21 +2,21 @@ const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	const CardSuit = Helper.enum(String, 0, "Clubs", "clubs", "Diamonds", "diamonds", "Hearts", "hearts", "Spades", "spades");
 	expect(Type.isEnum(CardSuit)).to.equal(true);
-	const x = (() => {
+	const a = (() => {
 		return CardSuit.Clubs;
 	})();
-	expect(Type.isEnumInstance(x, CardSuit)).to.equal(true);
-	expect(Type.typeOf(x)).to.equal("enum-member");
-	expect(Helper.concatString(">>> ", x)).to.equal(">>> clubs");
-	expect(Helper.toString(x)).to.equal("clubs");
+	expect(Type.isEnumInstance(a, CardSuit)).to.equal(true);
+	expect(Type.typeOf(a)).to.equal("enum-member");
+	expect(Helper.concatString(">>> ", a)).to.equal(">>> clubs");
+	expect(Helper.toString(a)).to.equal("clubs");
 	expect(JSON.stringify((() => {
 		const o = new OBJ();
-		o.id = x;
+		o.id = a;
 		return o;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	expect(JSON.stringify((() => {
 		const o = new OBJ();
-		o.id = x.value;
+		o.id = a.value;
 		return o;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {

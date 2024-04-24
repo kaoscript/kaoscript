@@ -167,22 +167,22 @@ namespace $ast {
 namespace $compile {
 	func block(data, parent, scope = parent.scope()) => Block.new($ast.block(data), parent, scope)
 	func expression(data, parent, scope = parent.scope()) { # {{{
-		var dyn expression
+		var dyn result
 
 		if var clazz ?= $expressions[data.kind] {
-			expression = clazz is Class ? clazz.new(data, parent, scope) : clazz(data, parent, scope)
+			result = clazz is Class ? clazz.new(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind.BinaryExpression {
 			if data.operator.kind == BinaryOperatorKind.Assignment {
 				if var clazz ?= $assignmentOperators[data.operator.assignment] {
-					expression = clazz.new(data, parent, scope)
+					result = clazz.new(data, parent, scope)
 				}
 				else {
 					throw NotSupportedException.new(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
 			else if var clazz ?= $binaryOperators[data.operator.kind] {
-				expression = clazz.new(data, parent, scope)
+				result = clazz.new(data, parent, scope)
 			}
 			else {
 				throw NotSupportedException.new(`Unexpected binary operator \(data.operator.kind)`, parent)
@@ -190,7 +190,7 @@ namespace $compile {
 		}
 		else if data.kind == NodeKind.PolyadicExpression {
 			if var clazz ?= $polyadicOperators[data.operator.kind] {
-				expression = clazz.new(data, parent, scope)
+				result = clazz.new(data, parent, scope)
 			}
 			else {
 				throw NotSupportedException.new(`Unexpected polyadic operator \(data.operator.kind)`, parent)
@@ -198,7 +198,7 @@ namespace $compile {
 		}
 		else if data.kind == NodeKind.UnaryExpression {
 			if var clazz ?= $unaryOperators[data.operator.kind] {
-				expression = clazz.new(data, parent, scope)
+				result = clazz.new(data, parent, scope)
 			}
 			else {
 				throw NotSupportedException.new(`Unexpected unary operator \(data.operator.kind)`, parent)
@@ -211,7 +211,7 @@ namespace $compile {
 			throw NotSupportedException.new(`Unexpected expression/statement \(data.kind)`, parent)
 		}
 
-		return expression
+		return result
 	} # }}}
 	func function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
 	func statement(data, parent, scope = parent.scope()) { # {{{
@@ -291,17 +291,17 @@ namespace $runtime {
 
 		return node._options.runtime.type.alias
 	} # }}}
-	func typeof(type, node? = null) { # {{{
+	func typeof(type % name, node? = null) { # {{{
 		if ?node {
-			if $typeofs[type] {
-				return $runtime.type(node) + '.is' + type
+			if $typeofs[name] {
+				return $runtime.type(node) + '.is' + name
 			}
 			else {
 				return null
 			}
 		}
 		else {
-			return $typeofs[type]
+			return $typeofs[name]
 		}
 	} # }}}
 

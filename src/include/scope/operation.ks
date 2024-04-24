@@ -1,6 +1,6 @@
 class OperationScope extends InlineBlockScope {
 	block() => @parent.block()
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable => @parent.define(name, immutable, type, initialized, node)
+	override define(name, immutable, type, initialized, overwrite, node) => @parent.define(name, immutable, type, initialized, node)
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { # {{{
 		var mut variable = @getVariable(name)!?
 

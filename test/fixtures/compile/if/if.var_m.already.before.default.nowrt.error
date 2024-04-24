@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/if/if.var_m.already.before.default.nowrt.ks:9)

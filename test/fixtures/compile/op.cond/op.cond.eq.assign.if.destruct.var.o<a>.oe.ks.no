@@ -1,0 +1,4 @@
+func foobar(x: Object) {
+	if var { y? } = x {
+	}
+}

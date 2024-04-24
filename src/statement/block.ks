@@ -27,7 +27,8 @@ class BlockStatement extends Statement {
 		@continuous = true
 	} # }}}
 	isJumpable() => true
-	isUsingVariable(name) { # {{{
+	override isUsingVariable(name, bleeding) { # {{{
+		return false if bleeding
 		return @body.isUsingVariable(name)
 	} # }}}
 	name() => @name

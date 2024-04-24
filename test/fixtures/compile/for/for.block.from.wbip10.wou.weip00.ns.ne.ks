@@ -1,7 +1,3 @@
-extern console: {
-	log(...args)
-}
-
-for x from 10 up to 0 {
-	console.log(x)
+for var x from 10 up to 0 {
+	echo(x)
 }

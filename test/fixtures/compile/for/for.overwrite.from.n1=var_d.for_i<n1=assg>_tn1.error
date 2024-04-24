@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/for/for.overwrite.from.n1=var_d.for_i<n1=assg>_tn1.ks:5)

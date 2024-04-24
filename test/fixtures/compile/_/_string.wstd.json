@@ -1,0 +1,303 @@
+[
+  {
+    "aliens": [
+      0,
+      "parseFloat",
+      true,
+      1,
+      "parseInt",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Number",
+        "errors": []
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Number",
+        "errors": []
+      }
+    ]
+  },
+  {
+    "exports": [
+      2,
+      "RegExp",
+      4,
+      "RegExpExecArray",
+      3,
+      "String"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {
+          "source": {
+            "access": 4,
+            "type": {
+              "reference": 3
+            },
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "global": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "ignoreCase": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "multiline": {
+            "access": 4,
+            "type": "Boolean",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "exec": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "str",
+                  "internal": "str",
+                  "type": {
+                    "reference": 3
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "index",
+                  "internal": "index",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjAsInJhZGl4IjoxMCwic3RhcnQiOnsibGluZSI6MTMsImNvbHVtbiI6MzZ9LCJlbmQiOnsibGluZSI6MTMsImNvbHVtbiI6Mzd9fQ=="
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 4,
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "test": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "str",
+                  "internal": "str",
+                  "type": {
+                    "reference": 3
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toString": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 3
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": false,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {
+          "lines": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "emptyLines",
+                  "internal": "emptyLines",
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0OCwibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6MjQsImNvbHVtbiI6MjF9LCJlbmQiOnsibGluZSI6MjQsImNvbHVtbiI6MjZ9fQ=="
+                }
+              ],
+              "returns": "Array",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "lower": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 3
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toFloat": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toInt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "base",
+                  "internal": "base",
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3NywibW9kaWZpZXJzIjpbXSwidmFsdWUiOjEwLCJyYWRpeCI6MTAsInN0YXJ0Ijp7ImxpbmUiOjM3LCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjM3LCJjb2x1bW4iOjE3fX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            {
+              "kind": "array",
+              "rest": "String?"
+            },
+            {
+              "kind": "object",
+              "properties": {
+                "index": "Number",
+                "input": "String"
+              }
+            }
+          ]
+        },
+        "testIndex": 0
+      }
+    ],
+    "macros": []
+  }
+]

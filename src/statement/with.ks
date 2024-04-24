@@ -40,7 +40,7 @@ class WithStatement extends Statement {
 			declaration.analyse()
 		}
 
-		if !?#@declarations && @expressions.length == 1 {
+		if !?#@declarations && #@expressions == 1 {
 			var expression = @expressions[0]
 
 			expression.analyse()
@@ -121,7 +121,7 @@ class WithStatement extends Statement {
 		if @hasFinally || ?#@variables {
 			if @exit {
 				for var statement in @body.statements() {
-					if statement:!(Statement).isExit(.Statement + .Always) {
+					if statement:!!!(Statement).isExit(.Statement + .Always) {
 						if statement is ReturnStatement {
 							@returnValue = statement.value()
 						}
@@ -160,7 +160,13 @@ class WithStatement extends Statement {
 			return @body.isInitializingInstanceVariable(name)
 		}
 	} # }}}
-	override isUsingVariable(name) { # {{{
+	override isUsingVariable(name, bleeding) { # {{{
+		for var declaration in @declarations {
+			return false if declaration.isDeclararingVariable(name)
+		}
+
+		return false if bleeding
+
 		if @hasFinally {
 			return @body.isUsingVariable(name) || @finally.isUsingVariable(name)
 		}

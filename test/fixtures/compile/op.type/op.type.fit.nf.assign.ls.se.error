@@ -1,0 +1,1 @@
+TypeException: The type fitting "!!" must be compatible with "String[]" and not be of type "String" (fixtures/compile/op.type/op.type.fit.nf.assign.ls.se.ks:6)

@@ -1,0 +1,1 @@
+ReferenceException: "foobar" is not defined (fixtures/compile/var/var.dyn.v=missing.ks:1)

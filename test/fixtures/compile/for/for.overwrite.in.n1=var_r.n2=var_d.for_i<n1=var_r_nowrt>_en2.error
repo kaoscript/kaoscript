@@ -1,0 +1,1 @@
+SyntaxException: Identifier "hero" has already been declared (fixtures/compile/for/for.overwrite.in.n1=var_r.n2=var_d.for_i<n1=var_r_nowrt>_en2.ks:7)

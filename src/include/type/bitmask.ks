@@ -43,8 +43,8 @@ class BitmaskType extends Type {
 				type._sequences.defaults = data.sequences[0]
 			}
 
-			for var { name, index? } in data.values {
-				var value = BitmaskValueType.new(name, index)
+			for var { name, index % valIndex? } in data.values {
+				var value = BitmaskValueType.new(name, valIndex)
 
 				type.addValue(value)
 			}
@@ -137,7 +137,8 @@ class BitmaskType extends Type {
 			}
 			NodeKind.MethodDeclaration {
 				var mut instance = true
-				for i from 0 to~ data.modifiers.length while instance {
+
+				for var i from 0 to~ data.modifiers.length while instance {
 					instance = false if data.modifiers[i].kind == ModifierKind.Static
 				}
 
@@ -276,12 +277,12 @@ class BitmaskType extends Type {
 
 	} # }}}
 	dedupInstanceMethod(name: String, type: BitmaskMethodType): Number? { # {{{
-		if var index ?= type.index() {
-			if @instanceMethods[name] is Array {
-				for var method in @instanceMethods[name] {
-					if method.index() == index {
-						return index
-					}
+		var index = type.index()
+
+		if @instanceMethods[name] is Array {
+			for var method in @instanceMethods[name] {
+				if method.index() == index {
+					return index
 				}
 			}
 		}
@@ -289,12 +290,12 @@ class BitmaskType extends Type {
 		return @addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: BitmaskMethodType): Number? { # {{{
-		if var index ?= type.index() {
-			if @staticMethods[name] is Array {
-				for var method in @staticMethods[name] {
-					if method.index() == index {
-						return index
-					}
+		var index = type.index()
+
+		if @staticMethods[name] is Array {
+			for var method in @staticMethods[name] {
+				if method.index() == index {
+					return index
 				}
 			}
 		}
@@ -429,7 +430,7 @@ class BitmaskType extends Type {
 
 		for var { name } in names {
 			if var value ?= @aliases[name] {
-				result += value.originals().length:!(Number)
+				result += value.originals().length:!!!(Number)
 			}
 			else {
 				result += 1
@@ -619,7 +620,7 @@ class BitmaskType extends Type {
 			end
 		}
 
-		for var value, name of @values {
+		for var value, valName of @values {
 			node.members.push({
 				kind: NodeKind.BitmaskValue
 				attributes: []
@@ -627,7 +628,7 @@ class BitmaskType extends Type {
 				name: {
 					kind: NodeKind.Identifier
 					modifiers: []
-					name
+					name: valName
 					start
 					end
 				}

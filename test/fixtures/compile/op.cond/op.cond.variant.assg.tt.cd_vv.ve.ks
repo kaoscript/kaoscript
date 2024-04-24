@@ -10,7 +10,7 @@ type Event = {
 }
 
 func foobar(x: Event) {
-	if var t ?|= x {
+	if var t ?]= x {
 		echo(`\(t.value)`)
 	}
 }

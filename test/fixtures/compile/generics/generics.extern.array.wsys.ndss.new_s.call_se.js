@@ -15,8 +15,8 @@ module.exports = function() {
 	};
 	const stack = [];
 	stack.push("hello", "world");
-	let value = stack.pop();
-	if(Type.isValue(value)) {
+	let value, __ks_0;
+	if((Type.isValue(__ks_0 = stack.pop()) ? (value = __ks_0, true) : false)) {
 		console.log(value);
 	}
 };

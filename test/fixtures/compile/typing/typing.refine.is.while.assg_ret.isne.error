@@ -1,0 +1,1 @@
+TypeException: The variable "value = args[i]" is always of type "Array" (fixtures/compile/typing/typing.refine.is.while.assg_ret.isne.ks:7)

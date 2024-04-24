@@ -19,16 +19,16 @@ class UnlessStatement extends Statement {
 			..acquireReusable(false)
 			..releaseReusable()
 
-		var conditionType = @condition.type()
+		with var conditionType = @condition.type() {
+			unless conditionType.canBeBoolean() {
+				TypeException.throwInvalidCondition(@condition, this)
+			}
 
-		unless conditionType.canBeBoolean() {
-			TypeException.throwInvalidCondition(@condition, this)
+			// TODO
+			// if conditionType is ValueType && conditionType.type().isBoolean() {
+			// 	TypeException.throwUnnecessaryCondition(@condition, this)
+			// }
 		}
-
-		// TODO
-		// if conditionType is ValueType && conditionType.type().isBoolean() {
-		// 	TypeException.throwUnnecessaryCondition(@condition, this)
-		// }
 
 		@assignTempVariables(@scope!?)
 
@@ -70,7 +70,10 @@ class UnlessStatement extends Statement {
 		@body.translate()
 	} # }}}
 	isJumpable() => true
-	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable(name)
+	override isUsingVariable(name, bleeding) { # {{{
+		return false if bleeding
+		return @condition.isUsingVariable(name) || @body.isUsingVariable(name)
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()

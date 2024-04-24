@@ -1,7 +1,7 @@
-extern x: Any, y: Any, z: Any
-
 func foobar(x, y, z) {
 	return 0
 }
 
-foobar(z, y, x)
+func quxbaz(x, y, z) {
+	foobar(z, y, x)
+}

@@ -148,7 +148,7 @@ class ReturnStatement extends Statement {
 	isContinuousInlineReturn() => true
 	override isExit(mode) => mode ~~ .Statement
 	isExpectingType() => true
-	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
+	override isUsingVariable(name, _) => @value?.isUsingVariable(name)
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		if @value != null {
 			@value.listNonLocalVariables(scope, variables)

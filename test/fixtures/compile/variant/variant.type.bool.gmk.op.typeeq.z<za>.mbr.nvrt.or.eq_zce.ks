@@ -24,6 +24,6 @@ type Event<T> = {
 }
 
 func foobar(data: Event<NodeData(Expression)>) {
-	if !?|data || data.value is .ObjectComprehension {
+	if !?]data || data.value is .ObjectComprehension {
 	}
 }

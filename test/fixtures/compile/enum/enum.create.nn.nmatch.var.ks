@@ -4,7 +4,7 @@ enum Color<String> {
 	Blue
 }
 
-func color(value: String): Color {
+func toColor(value: String): Color {
 	var color = Color('red')
 
 	return color

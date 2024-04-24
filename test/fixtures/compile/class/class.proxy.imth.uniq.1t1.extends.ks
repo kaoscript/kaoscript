@@ -17,6 +17,6 @@ var b = ClassB.new()
 a.foobar()
 b.foobar()
 
-func foobar(a: ClassA) {
-	a.foobar()
+func foobar(c: ClassA) {
+	c.foobar()
 }

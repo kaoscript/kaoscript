@@ -193,21 +193,23 @@ class EnumDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		var line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
+		with var line = fragments.newLine() {
+			line.code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
-		@toMainTypeFragments(line)
+			@toMainTypeFragments(line)
 
-		line.code(`, \(@fields.length)`)
+			line.code(`, \(@fields.length)`)
 
-		for var field in @fields {
-			line.code(`\($comma)\($quote(field.name()))`)
+			for var field in @fields {
+				line.code(`\($comma)\($quote(field.name()))`)
+			}
+
+			for var value of @values when !value.type().isAlias() {
+				value.toFragments(line)
+			}
+
+			line.code(')').done()
 		}
-
-		for var value of @values when !value.type().isAlias() {
-			value.toFragments(line)
-		}
-
-		line.code(')').done()
 
 		for var value of @values when value.type().isTopDerivative() {
 			var line = fragments.newLine()
@@ -236,8 +238,8 @@ class EnumDeclaration extends Statement {
 			ctrl.code(`\(@name).\(name) = function()`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(@name).__ks_sttc_\(name)_\(function.index())(`)
+				(function, writer) => {
+					writer.code(`\(@name).__ks_sttc_\(name)_\(function.index())(`)
 
 					return false
 				}
@@ -268,8 +270,8 @@ class EnumDeclaration extends Statement {
 			ctrl.code(`\(@name).__ks_func_\(name) = function(that, ...args)`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(@name).__ks_func_\(name)_\(function.index())(that`)
+				(function, writer) => {
+					writer.code(`\(@name).__ks_func_\(name)_\(function.index())(that`)
 
 					return true
 				}
@@ -364,7 +366,7 @@ class EnumValueDeclaration extends AbstractNode {
 						NotImplementedException.throw(this)
 					}
 
-					for var position, index in matches[0].positions {
+					for var position in matches[0].positions {
 						if position is Array {
 							NotImplementedException.throw(this)
 						}

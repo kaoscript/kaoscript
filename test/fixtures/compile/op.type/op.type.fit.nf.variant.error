@@ -1,0 +1,1 @@
+TypeException: The identifier "day" of type "Weekday" is expected to be of type "variant {  }" (fixtures/compile/op.type/op.type.fit.nf.variant.ks:27)

@@ -119,18 +119,20 @@ class MemberExpression extends Expression {
 							}
 						}
 					}
-					else if var property ?= @object.type().getProperty(@property) {
-						if property.isImmutable() {
-							ReferenceException.throwImmutable(this)
-						}
+					else if var property ?= @object.type().getProperty(@property) ;; property.isImmutable() {
+						ReferenceException.throwImmutable(this)
 					}
 				}
 			}
 
+			if @isNullable() && !@type.isNullable() {
+				@type = @type.setNullable(true)
+			}
+
 			if @inferable {
-				if var type ?= @scope.getChunkType(@path) {
+				if var chunkType ?= @scope.getChunkType(@path) {
 					@declaredType = @type
-					@type = type
+					@type = chunkType
 				}
 			}
 		}
@@ -253,10 +255,10 @@ class MemberExpression extends Expression {
 					var types = []
 
 					for var type in object.types() {
-						var object = type.discard()
-						var variant = object.getVariantType()
+						var root = type.discard()
+						var variant = root.getVariantType()
 
-						if @property == object.getVariantName() && variant.canBeBoolean() {
+						if @property == root.getVariantName() && variant.canBeBoolean() {
 							var subtypes = type.getSubtypes()
 
 							if subtypes.length == 1 && variant.getMainName(subtypes[0].name) == 'false' {
@@ -339,10 +341,10 @@ class MemberExpression extends Expression {
 					var types = []
 
 					for var type in object.types() {
-						var object = type.discard()
-						var variant = object.getVariantType()
+						var root = type.discard()
+						var variant = root.getVariantType()
 
-						if @property == object.getVariantName() && variant.canBeBoolean() {
+						if @property == root.getVariantName() && variant.canBeBoolean() {
 							var subtypes = type.getSubtypes()
 
 							if subtypes.length == 1 && variant.getMainName(subtypes[0].name) == 'true' {
@@ -884,8 +886,8 @@ class MemberExpression extends Expression {
 					if @parent is UnaryOperatorExistential {
 						pass
 					}
-					else if var type ?= @scope.getChunkType(@path) {
-						@type = type
+					else if var chunkType ?= @scope.getChunkType(@path) {
+						@type = chunkType
 					}
 					else if @assignable {
 						ReferenceException.throwInvalidAssignment(this)
@@ -910,9 +912,9 @@ class MemberExpression extends Expression {
 				pass
 			}
 			else if var property ?= type.getProperty(@property) {
-				var type = type.discardReference()
+				var propType = type.discardReference()
 
-				if type.isClass() && property is ClassVariableType && property.isSealed() {
+				if propType.isClass() && property is ClassVariableType && property.isSealed() {
 					@sealed = true
 					@usingGetter = property.hasDefaultValue()
 					@usingSetter = property.hasDefaultValue()
@@ -920,9 +922,9 @@ class MemberExpression extends Expression {
 
 				@type = property.discardVariable()
 
-				if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
+				if @assignable && (propType.isLiberal() || (propType.isReference() && propType.hasRest())) {
 					@liberal = true
-					@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+					@objectType = propType.isReference() ? ObjectType.new(@scope).flagComplete() : propType
 				}
 
 				if @type.isDeferrable() {
@@ -943,8 +945,8 @@ class MemberExpression extends Expression {
 				if @parent is UnaryOperatorExistential {
 					pass
 				}
-				else if var type ?= @scope.getChunkType(@path) {
-					@type = type
+				else if var chunkType ?= @scope.getChunkType(@path) {
+					@type = chunkType
 				}
 				else if @assignable {
 					ReferenceException.throwInvalidAssignment(this)
@@ -1272,12 +1274,12 @@ class MemberExpression extends Expression {
 				if generic {
 					fragments.code(`, {`)
 
-					for var { name, type }, index in generics {
+					for var { name, type % genType }, index in generics {
 						fragments
 							..code(`, `) if index > 0
 							..code(`\(name): `)
 
-						type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, this)
+						genType.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, this)
 					}
 
 					fragments.code(`}`)

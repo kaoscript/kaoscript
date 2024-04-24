@@ -1,0 +1,1 @@
+TypeException: The identifier "null" of type "Null" is expected to be of type "Number" (fixtures/compile/var/var.mut.wt_i.v=ne.ks:1)

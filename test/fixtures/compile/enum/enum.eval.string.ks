@@ -9,22 +9,22 @@ enum CardSuit<String> {
 
 expect(CardSuit is Enum).to.equal(true)
 
-var x = (() => CardSuit.Clubs)()
+var a = (() => CardSuit.Clubs)()
 
-expect(x is CardSuit).to.equal(true)
-expect(Type.typeOf(x)).to.equal('enum-member')
+expect(a is CardSuit).to.equal(true)
+expect(Type.typeOf(a)).to.equal('enum-member')
 
-expect(`>>> \(x)`).to.equal('>>> clubs')
-expect(`\(x)`).to.equal('clubs')
+expect(`>>> \(a)`).to.equal('>>> clubs')
+expect(`\(a)`).to.equal('clubs')
 
 extern JSON
 
 expect(JSON.stringify({
-	id: x
+	id: a
 })).to.equal('{"id":"clubs"}')
 
 expect(JSON.stringify({
-	id: x.value
+	id: a.value
 })).to.equal('{"id":"clubs"}')
 
 func foobar(x: Enum) => 'enum'

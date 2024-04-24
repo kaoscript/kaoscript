@@ -1,0 +1,1 @@
+ReferenceException: "i" is not defined (fixtures/compile/variable/variable.implicit.for.object.ks:3)

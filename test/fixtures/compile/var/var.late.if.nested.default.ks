@@ -1,4 +1,4 @@
-func quxbaz(): Number => 42
+func quxbaz(): Number? => 42
 
 func foobar() {
 	var late x

@@ -8,8 +8,8 @@ abstract class Callee {
 		buildPositionHash(positions: CallMatchPosition[]) { # {{{
 			var mut hash = ''
 
-			for var position, index in positions {
-				hash += ',' if index != 0
+			for var position, pIndex in positions {
+				hash += ',' if pIndex != 0
 
 				if position is Array {
 					for var { index?, element?, from? }, i in position {

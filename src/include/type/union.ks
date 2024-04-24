@@ -81,8 +81,8 @@ class UnionType extends Type {
 			}
 		}
 		else if type.isUnion() {
-			for var type in type.discard().types() {
-				@addType(type)
+			for var subtype in type.discard().types() {
+				@addType(subtype)
 			}
 		}
 		else if type.isNever() {
@@ -356,6 +356,24 @@ class UnionType extends Type {
 			return Type.union(@scope, ...types)
 		}
 	} # }}}
+	getVariantName() { # {{{
+		for var type in @types {
+			if type.isVariant() {
+				return type.discard().getVariantName()
+			}
+		}
+
+		return null
+	} # }}}
+	getVariantType() { # {{{
+		for var type in @types {
+			if type.isVariant() {
+				return type.discard().getVariantType()
+			}
+		}
+
+		return null
+	} # }}}
 	hashCode(): String { # {{{
 		var elements = [type.hashCode() for var type in @types]
 
@@ -364,6 +382,15 @@ class UnionType extends Type {
 	isArray() { # {{{
 		for var type in @types {
 			if !type.isArray() {
+				return false
+			}
+		}
+
+		return true
+	} # }}}
+	override isAssertingWhenCasting() { # {{{
+		for var type in @types {
+			if !type.isAssertingWhenCasting() {
 				return false
 			}
 		}
@@ -642,7 +669,7 @@ class UnionType extends Type {
 		else if @explicitNullity {
 			var that = @clone()
 
-			that._types:!(Array).remove(Type.Null)
+			that._types:!!!(Array).remove(Type.Null)
 			that._nullable = false
 			that._explicitNullity = false
 

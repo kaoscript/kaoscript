@@ -53,8 +53,10 @@ class RepeatStatement extends Statement {
 	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) { # {{{
-		return @to?.isUsingVariable(name) || @body.isUsingVariable(name)
+	override isUsingVariable(name, bleeding) { # {{{
+		return true if @to?.isUsingVariable(name)
+		return false if bleeding
+		return @body.isUsingVariable(name)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		if ?@indexName {

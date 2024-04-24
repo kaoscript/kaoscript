@@ -32,7 +32,7 @@ module.exports = function() {
 		for(let __ks_1 = 0, __ks_0 = lines.length, line; __ks_1 < __ks_0; ++__ks_1) {
 			line = lines[__ks_1];
 			let __ks_2;
-			if(Type.isValue(__ks_2 = parse(line, rules)) ? (Helper.assertDexObject(__ks_2, 1, 0, {tokens: Type.isValue, rules: Type.isValue}), ({tokens, rules} = __ks_2), true) : false) {
+			if((Type.isDexObject(__ks_2 = parse(line, rules), 1, 0, {tokens: Type.isValue, rules: Type.isValue})) ? (({tokens, rules} = __ks_2), true) : false) {
 			}
 		}
 	};

@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/var/var.late.func.overwrite.ks:14)

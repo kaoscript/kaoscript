@@ -10,8 +10,8 @@ module.exports = function() {
 				a.push(values[i].values());
 			}
 			return a;
-		})(), __ks_1 = 0, __ks_0 = __ks_2.length, __ks_values_1; __ks_1 < __ks_0; ++__ks_1) {
-			__ks_values_1 = __ks_2[__ks_1];
+		})(), __ks_1 = 0, __ks_0 = __ks_2.length, value; __ks_1 < __ks_0; ++__ks_1) {
+			value = __ks_2[__ks_1];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

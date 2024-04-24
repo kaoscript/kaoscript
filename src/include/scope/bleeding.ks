@@ -7,9 +7,11 @@ class BleedingScope extends Scope {
 		@variables					= {}
 	}
 	constructor(@parent)
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
 		if @hasDefinedVariable(name) {
-			SyntaxException.throwAlreadyDeclared(name, node)
+			if !overwrite || ?@variables[name] {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
 		}
 		else if @hasPredefinedVariable(name) {
 			var variable = @getPredefinedType(name)
@@ -28,10 +30,10 @@ class BleedingScope extends Scope {
 
 		return variable
 	} # }}}
-	defineVariable(variable: Variable, node: AbstractNode) { # {{{
+	override defineVariable(variable, node) { # {{{
 		var name = variable.name()
 
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
@@ -117,7 +119,7 @@ class BleedingScope extends Scope {
 			}
 		}
 
-		return false
+		return @parent.hasDefinedVariable(name, line)
 	} # }}}
 	hasVariable(name: String, line: Number? = null) => ?@variables[name] || @parent.hasVariable(name, line)
 	isBleeding() => true

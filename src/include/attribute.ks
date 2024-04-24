@@ -97,7 +97,7 @@ class Attribute {
 			}
 		} # }}}
 		register(class: Class) { # {{{
-			var mut name = class.name:!(String).toFirstLowerCase().dasherize()
+			var mut name = class.name:!!!(String).toFirstLowerCase().dasherize()
 
 			if name.length > 10 && name.substr(-10) == '-attribute' {
 				name = name.substr(0, name.length - 10)
@@ -363,7 +363,7 @@ class LibstdAttribute extends Attribute {
 	constructor(@data)
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			match arg.kind:!(NodeKind) {
+			match arg.kind:!!!(NodeKind) {
 				.AttributeOperation {
 					if arg.name.name == 'package' {
 						if arg.value.value == '.' {
@@ -504,34 +504,34 @@ class RuntimeAttribute extends Attribute {
 			}
 			else if arg.kind == NodeKind.AttributeExpression {
 				if arg.name.name == 'helper' {
-					for var arg in arg.arguments {
-						if arg.kind == NodeKind.AttributeOperation {
-							match arg.name.name {
-								'alias' => options.runtime.helper.alias = arg.value.value
-								'member' => options.runtime.helper.member = arg.value.value
-								'package' => options.runtime.helper.package = arg.value.value
+					for var argument in arg.arguments {
+						if argument.kind == NodeKind.AttributeOperation {
+							match argument.name.name {
+								'alias' => options.runtime.helper.alias = argument.value.value
+								'member' => options.runtime.helper.member = argument.value.value
+								'package' => options.runtime.helper.package = argument.value.value
 							}
 						}
 					}
 				}
 				else if arg.name.name == 'operator' {
-					for var arg in arg.arguments {
-						if arg.kind == NodeKind.AttributeOperation {
-							match arg.name.name {
-								'alias' => options.runtime.operator.alias = arg.value.value
-								'member' => options.runtime.operator.member = arg.value.value
-								'package' => options.runtime.operator.package = arg.value.value
+					for var argument in arg.arguments {
+						if argument.kind == NodeKind.AttributeOperation {
+							match argument.name.name {
+								'alias' => options.runtime.operator.alias = argument.value.value
+								'member' => options.runtime.operator.member = argument.value.value
+								'package' => options.runtime.operator.package = argument.value.value
 							}
 						}
 					}
 				}
 				else if arg.name.name == 'type' {
-					for var arg in arg.arguments {
-						if arg.kind == NodeKind.AttributeOperation {
-							match arg.name.name {
-								'alias' => options.runtime.type.alias = arg.value.value
-								'member' => options.runtime.type.member = arg.value.value
-								'package' => options.runtime.type.package = arg.value.value
+					for var argument in arg.arguments {
+						if argument.kind == NodeKind.AttributeOperation {
+							match argument.name.name {
+								'alias' => options.runtime.type.alias = argument.value.value
+								'member' => options.runtime.type.member = argument.value.value
+								'package' => options.runtime.type.package = argument.value.value
 							}
 						}
 					}

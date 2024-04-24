@@ -2,10 +2,15 @@ abstract class AssignmentOperatorExpression extends Expression {
 	private late {
 		@await: Boolean				= false
 		@bindingScope: Scope
+		@declaration: Boolean		= false
 		@left						= null
 		@right						= null
 		@type: Type
+		@valueScope: Scope?
 	}
+	constructor(@data, @parent, @scope, @valueScope = null) { # {{{
+		super(data, parent, scope)
+	} # }}}
 	analyse() { # {{{
 		@left = $compile.expression(@data.left, this)
 
@@ -19,7 +24,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		@left.analyse()
 
-		@bindingScope = @newScope(@scope!?, ScopeType.Hollow)
+		@bindingScope = @newScope(@valueScope ?? @scope!?, ScopeType.Hollow)
 
 		@right = $compile.expression(@data.right, this, @bindingScope)
 
@@ -32,7 +37,9 @@ abstract class AssignmentOperatorExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@left.flagAssignable()
+		if !@declaration {
+			@left.flagAssignable()
+		}
 
 		@validate(target)
 
@@ -82,6 +89,10 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
 	} # }}}
+	flagDeclaration() { # {{{
+		@declaration = true
+	} # }}}
+	getRightType() => @type
 	isAssigningBinding() => false
 	isAwait() => @await
 	isAwaiting() => @right.isAwaiting()
@@ -96,6 +107,7 @@ abstract class AssignmentOperatorExpression extends Expression {
 	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
 	left(): valueof @left
 	listAssignments(array: Array) => @left.listAssignments(@right.listAssignments(array))
+	right(): valueof @right
 	setAssignment(assignment)
 	toNullableFragments(fragments) { # {{{
 		fragments.compileNullable(@right)
@@ -105,6 +117,23 @@ abstract class AssignmentOperatorExpression extends Expression {
 		SyntaxException.throwNoReturn(this) unless target.isVoid() || @parent is ExpressionStatement
 	} # }}}
 	variable() => @left.variable()
+	protected isInDestructor() { # {{{
+		if @parent is not ExpressionStatement {
+			return false
+		}
+
+		var dyn parent = @parent
+
+		while ?parent {
+			parent = parent.parent()
+
+			if parent is ClassDestructorDeclaration {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 }
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {

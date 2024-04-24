@@ -1,38 +1,67 @@
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	private {
+		@assert: Boolean		= false
 		@condition: Boolean		= false
 		@lateinit: Boolean		= false
 	}
 	analyse() { # {{{
-		@condition = @statement() is IfStatement
+		@condition = @statement() is IfStatement | WhileStatement
 
 		super()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
+		unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement {
+			SyntaxException.throwNoReturn(this)
+		}
 
-		super(AnyType.NullableUnexplicit)
+		super(AnyType.NullableUnexplicit, TargetMode.Permissive)
+
+		unless @right.isComputedMember() || @right.type().isNullable() {
+			TypeException.throwNullableOperand(@right, '?=', this)
+		}
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 
-		if @left is IdentifierLiteral {
-			var type = @right.type().setNullable(false)
+		var leftType = @left.getDeclaredType().discardValue()
+		var rightType = @right.type().setNullable(false)
+		var forcedFitting = @right is UnaryOperatorTypeFitting && @right.isForced()
 
-			if @condition {
-				if @lateinit {
-					@statement.initializeLateVariable(@left.name(), type, true)
-				}
-				else {
-					@left.type(type, @scope, this)
-				}
+		if @left.isVariable() {
+			if @condition && @lateinit {
+				@statement.initializeLateVariable(@left.name(), rightType, true)
+			}
+			else if !forcedFitting {
+				@left.initializeVariables(rightType, this)
+			}
+		}
+
+		if @isInDestructor() {
+			@type = NullType.Explicit
+		}
+		else if forcedFitting {
+			@type = leftType.setNullable(false)
+		}
+		else {
+			unless rightType.isAssignableToVariable(leftType, true, false, false) {
+				TypeException.throwInvalidAssignment(@left, leftType, rightType, this)
+			}
+
+			if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(leftType, false, false, false) {
+				@assert = true
+			}
+
+			if @left.isInferable() {
+				@type = leftType.tryCastingTo(rightType)
 			}
 			else {
-				@left.type(type, @scope, this)
+				@type = rightType
 			}
 		}
 	} # }}}
 	defineVariables(left) { # {{{
+		return if @declaration
+
 		if @condition {
 			var names = []
 
@@ -63,11 +92,14 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left.isVariable()
-				type: @right.type().setNullable(false)
+				type: @type
 			}
 		}
 
 		return inferables
+	} # }}}
+	initializeVariable(variable: VariableBrief) { # {{{
+		return @parent.initializeVariable(variable, this)
 	} # }}}
 	isAssigningBinding() => true
 	isDeclararing() => true
@@ -76,9 +108,14 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
+		}
+
+		if @assert {
+			fragments.code('(')
+
+			@type.toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
 		}
 		else {
 			fragments
@@ -103,9 +140,14 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
+		}
+
+		if @assert {
+			fragments.code('(')
+
+			@type.toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
 		}
 		else {
 			fragments
@@ -117,10 +159,6 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		fragments.code(' ? (')
 
 		if ?@left.toAssignmentFragments {
-			if @left is ArrayBinding | ObjectBinding {
-				@left.toAssertFragments(fragments, @right, true)
-			}
-
 			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
@@ -138,6 +176,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 	private {
+		@assert: Boolean		= false
 		@condition: Boolean		= false
 		@lateinit: Boolean		= false
 	}
@@ -147,26 +186,57 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
+		unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement {
+			SyntaxException.throwNoReturn(this)
+		}
 
-		super(AnyType.NullableUnexplicit)
+		super(AnyType.NullableUnexplicit, TargetMode.Permissive)
+
+		unless @right.isComputedMember() || @right.type().isNullable() {
+			TypeException.throwNullableOperand(@right, '!?=', this)
+		}
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 
-		if @left is IdentifierLiteral {
-			var type = @right.type().setNullable(false)
+		var leftType = @left.getDeclaredType().discardValue()
+		var rightType = @right.type().setNullable(false)
+		var forcedFitting = @right is UnaryOperatorTypeFitting && @right.isForced()
 
+		if @left.isVariable() {
 			if @condition {
 				if @lateinit {
-					@statement.initializeLateVariable(@left.name(), type, false)
+					@statement.initializeLateVariable(@left.name(), rightType, false)
 				}
 				else if var scope ?= @statement.getWhenFalseScope() {
-					@left.type(type, scope, this)
+					@left.type(rightType, scope, this)
 				}
 			}
+			else if !forcedFitting {
+				@left.initializeVariables(rightType, this)
+			}
+		}
+
+		if @isInDestructor() {
+			@type = NullType.Explicit
+		}
+		else if forcedFitting {
+			@type = leftType.setNullable(false)
+		}
+		else {
+			unless rightType.isAssignableToVariable(leftType, true, false, false) {
+				TypeException.throwInvalidAssignment(@left, leftType, rightType, this)
+			}
+
+			if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(leftType, false, false, false) {
+				@assert = true
+			}
+
+			if @left.isInferable() {
+				@type = leftType.tryCastingTo(rightType)
+			}
 			else {
-				@left.type(type, @scope, this)
+				@type = rightType
 			}
 		}
 	} # }}}
@@ -221,9 +291,14 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
+		}
+
+		if @assert {
+			fragments.code('(')
+
+			@type.toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
 		}
 		else {
 			fragments
@@ -244,9 +319,14 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			fragments
 				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', @data.operator)
-				.compileReusable(@right)
-				.code(')', @data.operator)
+		}
+
+		if @assert {
+			fragments.code('(')
+
+			@type.toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
 		}
 		else {
 			fragments
@@ -267,6 +347,26 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
+	private {
+		@assert: Boolean		= false
+	}
+	override prepare(target, targetMode) { # {{{
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
+
+		super(AnyType.NullableUnexplicit)
+
+		var leftType = @left.getDeclaredType().discardValue()
+		var rightType = @right.type()
+
+		if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(leftType, false, false, false) {
+			@assert = true
+		}
+
+		if @assert {
+			@right.acquireReusable(true)
+			@right.releaseReusable()
+		}
+	} # }}}
 	inferTypes(inferables) { # {{{
 		@left.inferTypes(inferables)
 
@@ -306,11 +406,52 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 				.code(')')
 		}
 
+		if @assert {
+			fragments.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
+		}
+
 		fragments
 			.code(' ? null : ')
 			.compile(@left)
 			.code($equals)
-			.compile(@right)
+			.compileReusable(@right)
+	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if @left.isNullable() {
+			fragments.code('(')
+
+			@left.toNullableFragments(fragments)
+
+			fragments
+				.code(' && ' + $runtime.type(this) + '.isValue(')
+				.compile(@left)
+				.code('))')
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(')
+				.compile(@left)
+				.code(')')
+		}
+
+		if @assert {
+			fragments.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
+		}
+
+		fragments
+			.code(' ? false : (')
+			.compile(@left)
+			.code($equals)
+			.compileReusable(@right)
+			.code(', true)')
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		var mut ctrl = fragments.newControl()
@@ -334,18 +475,28 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 				.code(')')
 		}
 
+		if @assert {
+			ctrl.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(ctrl, @right)
+
+			ctrl.code(')')
+		}
+
 		ctrl
 			.code(')')
 			.step()
 			.newLine()
 			.compile(@left)
 			.code($equals)
-			.compile(@right)
+			.compileReusable(@right)
 			.done()
 
 		ctrl.done()
 	} # }}}
 	toQuote() => `\(@left.toQuote()) ??= \(@right.toQuote())`
+	type() => @scope.reference('Boolean')
+	override validate(target)
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
@@ -494,12 +645,13 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 
 		if @spread {
 			var spreads = []
-			var mut spread = false
 
-			for var operand in @operands down {
-				spread ||= operand.isSpread()
+			with var mut spread = false {
+				for var operand in @operands down {
+					spread ||= operand.isSpread()
 
-				spreads.unshift(spread)
+					spreads.unshift(spread)
+				}
 			}
 
 			var mut opened = false

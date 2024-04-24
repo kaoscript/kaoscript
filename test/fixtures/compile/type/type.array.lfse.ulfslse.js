@@ -27,8 +27,8 @@ module.exports = function() {
 	};
 	const __ks_String = {};
 	__ks_String.__ks_func_lines_0 = function() {
-		let lines = this.match(/[^\r\n]+/g);
-		if(Type.isValue(lines)) {
+		let lines, __ks_0;
+		if((Type.isValue(__ks_0 = this.match(/[^\r\n]+/g)) ? (lines = __ks_0, true) : false)) {
 			return filter.__ks_0(lines);
 		}
 		return [];

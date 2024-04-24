@@ -48,10 +48,9 @@ class TupleDeclaration extends Statement {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @extending {
-			if @extendsType !?= Type.fromAST(@data.extends, this) {
-				ReferenceException.throwNotDefined(@extendsName, this)
-			}
-			else if @extendsType.discardName() is not TupleType {
+			@extendsType = Type.fromAST(@data.extends, this)!!
+
+			if @extendsType.discardName() is not TupleType {
 				TypeException.throwNotTuple(@extendsName, this)
 			}
 
@@ -68,21 +67,18 @@ class TupleDeclaration extends Statement {
 					SyntaxException.throwInheritanceLoop(@name, this)
 				}
 
-				if var type ?= Type.fromAST(implement, this) {
-					if type.isAlias() {
-						unless type.isArray() {
-							SyntaxException.throwNotArrayInterface(name, this)
-						}
-					}
-					else {
-						throw NotImplementedException.new(this)
-					}
+				var type = Type.fromAST(implement, this)
 
-					@tuple.addInterface(type)
+				if type.isAlias() {
+					unless type.isArray() {
+						SyntaxException.throwNotArrayInterface(name, this)
+					}
 				}
 				else {
-					ReferenceException.throwNotDefined(name, this)
+					throw NotImplementedException.new(this)
 				}
+
+				@tuple.addInterface(type)
 			}
 		}
 
@@ -153,7 +149,7 @@ class TupleDeclaration extends Statement {
 
 		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
-		Parameter.toFragments(@function, ctrl, ParameterMode.Default, (fragments) => fragments.code(')').step())
+		Parameter.toFragments(@function, ctrl, ParameterMode.Default, (writer) => writer.code(')').step())
 
 		@toArrayFragments(ctrl, mode)
 
@@ -164,8 +160,8 @@ class TupleDeclaration extends Statement {
 		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`__ks_new(`)
+			(function, writer) => {
+				writer.code(`__ks_new(`)
 
 				return false
 			}

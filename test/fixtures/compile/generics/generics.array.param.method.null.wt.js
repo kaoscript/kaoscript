@@ -14,8 +14,8 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const regex = /foo/;
-	let match = regex.exec("foobar");
-	if(Type.isValue(match)) {
+	let match, __ks_0;
+	if((Type.isValue(__ks_0 = regex.exec("foobar")) ? (match = __ks_0, true) : false)) {
 		Type.isValue(match[0]) ? __ks_String.__ks_func_foobar_0.call(match[0]) : null;
 	}
 };

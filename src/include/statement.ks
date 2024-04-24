@@ -77,14 +77,16 @@ abstract class Statement extends AbstractNode {
 	isAwait() => false
 	isCascade() => false
 	isEnhancementExport() => false
-	isExit(mode: ExitMode) => false
+	isExit(mode: ExitMode): Boolean => false
 	isExportable() => false
 	isInitializingInstanceVariable(name: String): Boolean => false
 	isJumpable() => false
 	isLateInitializable() => false
 	isLoop() => false
-	isUsingVariable(name) => false
-	isUsingInstanceVariable(name) => false
+	isUsingVariable(name: String, bleeding: Boolean = false): Boolean => false
+	isUsingVariableBefore(name: String): Boolean => @parent.isUsingVariableBefore(name, this)
+	isUsingVariableBefore(name: String, statement: Statement): Boolean => @parent.isUsingVariableBefore(name, statement)
+	isUsingInstanceVariable(name: String) => false
 	isUsingStaticVariable(class, varname) => false
 	line() => @line
 	listNonLocalVariables(scope: Scope, variables: Array) => variables

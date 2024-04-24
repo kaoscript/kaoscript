@@ -31,9 +31,7 @@ class ExpressionStatement extends Statement {
 	} # }}}
 	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression? = null, leftMost: Boolean = false) { # {{{
 		var assignments = []
-		var mut variable = null
-
-		var mut declaration = names.length != 0
+		var mut declaration = ?#names
 
 		for var name in names {
 			if var variable ?= scope.getVariable(name) {
@@ -81,11 +79,12 @@ class ExpressionStatement extends Statement {
 			}
 		}
 		else {
-			@parent.initializeVariable(variable, expression, this)
+			return @parent.initializeVariable(variable, expression, this)
 		}
 	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
+	override isUsingVariable(name, _) => @expression.isUsingVariable(name)
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		@expression.listNonLocalVariables(scope, variables)
 
@@ -172,7 +171,6 @@ class ExpressionStatement extends Statement {
 		isInitializingInstanceVariable
 		isUsingInstanceVariable
 		isUsingStaticVariable
-		isUsingVariable
 		type
 	}
 }

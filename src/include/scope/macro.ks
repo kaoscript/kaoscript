@@ -53,12 +53,12 @@ class MacroScope extends Scope {
 	} # }}}
 	authority() => this
 	block() => this
-	private declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || @renamedIndexes[name] is Number {
-			var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
+	override declareVariable(name, scope) { # {{{
+		if $keywords[name] || ?@renamedIndexes[name] {
+			var mut index = (@renamedIndexes[name] ?? 0) + 1
 			var mut newName = '__ks_' + name + '_' + index
 
-			while @variables[newName] is Variable {
+			while ?@variables[newName] {
 				index += 1
 				newName = '__ks_' + name + '_' + index
 			}
@@ -71,7 +71,7 @@ class MacroScope extends Scope {
 			return null
 		}
 	} # }}}
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
 		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -92,10 +92,10 @@ class MacroScope extends Scope {
 
 		return variable
 	} # }}}
-	defineVariable(variable: Variable, node: AbstractNode) { # {{{
+	override defineVariable(variable, node) { # {{{
 		var name = variable.name()
 
-		if @variables[name] is Variable {
+		if ?@variables[name] {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
@@ -127,7 +127,7 @@ class MacroScope extends Scope {
 			return null
 		}
 	} # }}}
-	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+	getRenamedIndex(name: String) => ?@renamedIndexes[name] ? @renamedIndexes[name] : 0
 	getVariable(name, line = -1): Variable? { # {{{
 		if @variables[name] is Variable {
 			return @variables[name]
@@ -139,12 +139,12 @@ class MacroScope extends Scope {
 			return null
 		}
 	} # }}}
-	hasDeclaredVariable(name: String) => @variables[name] is Variable
-	hasDefinedVariable(name: String) => @variables[name] is Variable
+	hasDeclaredVariable(name: String) => ?@variables[name]
+	hasDefinedVariable(name: String) => ?@variables[name]
 	override hasPredefinedVariable(name) { # {{{
 		return @predefined[`__\(name)`] is Variable
 	} # }}}
-	hasVariable(name: String, line = -1) => @variables[name] is Variable
+	hasVariable(name: String, line = -1) => ?@variables[name]
 	isMatchingType(a: Type, b: Type, mode: MatchingMode) { # {{{
 		var hash = a.toQuote()
 

@@ -10,5 +10,5 @@ type Event = {
 }
 
 func foobar(mut x: Event, mut y: Event) {
-	x ?||= y
+	x ?]]= y
 }

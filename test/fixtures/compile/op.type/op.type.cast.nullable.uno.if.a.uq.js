@@ -73,14 +73,14 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		let d3 = Helper.cast(p, "\"Point\" or \"Point3D\"", 1, value => {
+		let d3, __ks_0;
+		if((Type.isValue(__ks_0 = Helper.cast(p, "\"Point\" or \"Point3D\"", 1, value => {
 			let __ks_0;
 			if((__ks_0 = Point.__ks_cast(value)) !== null || (__ks_0 = Point3D.__ks_cast(value)) !== null) {
 				return __ks_0;
 			}
 			return null;
-		});
-		if(Type.isValue(d3)) {
+		})) ? (d3 = __ks_0, true) : false)) {
 			console.log(d3.x + 1, d3.y + 2);
 		}
 	};

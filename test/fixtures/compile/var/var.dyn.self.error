@@ -1,0 +1,1 @@
+ReferenceException: "foo" is not defined (fixtures/compile/var/var.dyn.self.ks:1)

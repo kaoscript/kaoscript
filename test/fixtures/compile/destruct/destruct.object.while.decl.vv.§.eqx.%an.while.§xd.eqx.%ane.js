@@ -14,8 +14,8 @@ module.exports = function() {
 	};
 	let x;
 	let __ks_x_1, __ks_0;
-	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexObject(__ks_0, 1, 0, {x: Type.isValue}), {__ks_x_1} = __ks_0, true) : false) {
+	while((Type.isDexObject(__ks_0 = foobar.__ks_0(), 1, 0, {x: Type.isValue})) ? (({x: __ks_x_1} = __ks_0), true) : false) {
 	}
-	while(Type.isValue(__ks_0 = foobar.__ks_0()) ? (Helper.assertDexObject(__ks_0, 1, 0, {x: Type.isValue}), ({x} = __ks_0), true) : false) {
+	while((Type.isDexObject(__ks_0 = foobar.__ks_0(), 1, 0, {x: Type.isValue})) ? (({x} = __ks_0), true) : false) {
 	}
 };

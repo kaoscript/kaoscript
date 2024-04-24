@@ -5,7 +5,7 @@ enum Mode {
 	Async
 }
 
-class CodeFragment extends Fragment {
+class CodeFragment extends SourceGeneration.Fragment {
 	private {
 		end		= null
 		start	= null
@@ -35,20 +35,20 @@ var $dot = $code('.')
 var $equals = $code(' = ')
 var $space = $code(' ')
 
-class FragmentBuilder extends Writer {
+class FragmentBuilder extends SourceGeneration.Writer {
 	constructor(@indent) { # {{{
 		super({
 			indent: {
 				level: indent
 			}
 			classes: {
-				array: ArrayWriter
+				array: SourceGeneration.ArrayWriter
 				block: BlockBuilder
 				control: ControlBuilder
 				expression: ExpressionBuilder
 				fragment: CodeFragment
 				line: LineBuilder
-				object: ObjectWriter
+				object: SourceGeneration.ObjectWriter
 			}
 		})
 	} # }}}
@@ -68,7 +68,7 @@ class FragmentBuilder extends Writer {
 	} # }}}
 }
 
-class BlockBuilder extends BlockWriter {
+class BlockBuilder extends SourceGeneration.BlockWriter {
 	compile(node, mode = Mode.None) { # {{{
 		if node is not Primitive {
 			node.toFragments(this, mode)
@@ -95,7 +95,7 @@ class BlockBuilder extends BlockWriter {
 	} # }}}
 }
 
-class ControlBuilder extends ControlWriter {
+class ControlBuilder extends SourceGeneration.ControlWriter {
 	block(): BlockBuilder? { # {{{
 		if @step is BlockBuilder {
 			return @step
@@ -151,7 +151,7 @@ class ControlBuilder extends ControlWriter {
 	} # }}}
 }
 
-class ExpressionBuilder extends ExpressionWriter {
+class ExpressionBuilder extends SourceGeneration.ExpressionWriter {
 	code(...args) { # {{{
 		var dyn data
 

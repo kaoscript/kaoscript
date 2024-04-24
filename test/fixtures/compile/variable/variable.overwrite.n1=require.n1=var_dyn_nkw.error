@@ -1,0 +1,1 @@
+SyntaxException: Identifier "name" has already been declared (fixtures/compile/variable/variable.overwrite.n1=require.n1=var_dyn_nkw.ks:3)

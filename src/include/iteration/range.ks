@@ -29,7 +29,9 @@ class RangeIteration extends IterationNode {
 		}
 
 		if @declaration {
-			@bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
+			var overwrite = @hasAttribute('overwrite')
+
+			@bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, overwrite, this)
 
 			@defineVariable = true
 		}

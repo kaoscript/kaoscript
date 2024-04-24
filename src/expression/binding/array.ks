@@ -199,7 +199,6 @@ class ArrayBinding extends Expression {
 	} # }}}
 	isAssignable() => true
 	isDeclarable() => true
-	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { # {{{
 		for var element in @elements {
 			if element.isDeclararingVariable(name) {
@@ -209,6 +208,8 @@ class ArrayBinding extends Expression {
 
 		return false
 	} # }}}
+	isImmutable() => @immutable
+	isInferable() => true
 	isRedeclared() { # {{{
 		for var element in @elements {
 			if element.isRedeclared() {
@@ -219,9 +220,9 @@ class ArrayBinding extends Expression {
 		return false
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
 		for var element in @elements {
-			element.listAssignments(array, immutable)
+			element.listAssignments(array, immutable, overwrite)
 		}
 
 		return array
@@ -340,11 +341,14 @@ class ArrayBindingElement extends Expression {
 		@named: Boolean						= false
 		@nullable: Boolean					= false
 		@operator: AssignmentOperatorKind	= AssignmentOperatorKind.Equals
+		@overwrite: Boolean					= false
 		@rest: Boolean						= false
 		@thisAlias: Boolean					= false
 		@type: Type							= AnyType.Unexplicit
 	}
 	analyse() { # {{{
+		@overwrite = @hasAttribute('overwrite')
+
 		for var modifier in @data.modifiers {
 			match modifier.kind {
 				ModifierKind.Mutable {
@@ -481,7 +485,7 @@ class ArrayBindingElement extends Expression {
 	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
-	listAssignments(array: Array, immutable: Boolean? = null) => @named ? @name.listAssignments(array, @immutable) : array
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @named ? @name.listAssignments(array, ?immutable ? ?@immutable ? immutable || @immutable : immutable : @immutable, ?overwrite ? ?@overwrite ? overwrite || @overwrite : overwrite : @overwrite) : array
 	max(): Number => @rest ? Infinity : 1
 	min(): Number => @rest ? 0 : 1
 	setAssignment(@assignment)

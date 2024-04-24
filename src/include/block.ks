@@ -85,7 +85,7 @@ class Block extends AbstractNode {
 	addDataStatement(statement) { # {{{
 		@data.statements.push(statement)
 	} # }}}
-	analyse(from: Number, to: Number = @data.statements.length:!(Number) + 1) { # {{{
+	analyse(from: Number, to: Number = @data.statements.length:!!!(Number) + 1) { # {{{
 		@scope.setLineOffset(@offset)
 
 		for var data in @data.statements from from to to {
@@ -137,18 +137,25 @@ class Block extends AbstractNode {
 		}
 	} # }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		if !@scope.hasDeclaredVariable(variable.name) {
+		if @scope.hasDeclaredVariable(variable.name) {
+			if var var ?= @scope.getDefinedVariable(variable.name) ;; !var.isInitialized() {
+				var.setDeclaredType(variable.type)
+
+				return var.getRealType()
+			}
+		}
+		else {
 			if variable.lateInit && !@parent.isLateInitializable() {
 				SyntaxException.throwInvalidLateInitAssignment(variable.name, this)
 			}
 			else {
-				@parent.initializeVariable(variable, expression, this)
+				return @parent.initializeVariable(variable, expression, this)
 			}
 		}
 	} # }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
-	isExit(mode: ExitMode) { # {{{
+	isExit(mode: ExitMode): Boolean { # {{{
 		if mode ~~ .Expression + .Continuity {
 			var mut set = true
 
@@ -186,31 +193,46 @@ class Block extends AbstractNode {
 	} # }}}
 	isJumpable() => @parent.isJumpable()
 	isLoop() => @parent.isLoop()
+	isUsingInstanceVariableBefore(name: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
+
+		for var stmt in @statements while stmt.line() < line && statement != stmt {
+			if stmt.isUsingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isUsingStaticVariableBefore(class: String, varname: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
+
+		for var stmt in @statements while stmt.line() < line && statement != stmt {
+			if stmt.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isUsingVariable(name) { # {{{
 		for var statement in @statements {
 			if statement.isUsingVariable(name) {
 				return true
 			}
-		}
 
-		return false
-	} # }}}
-	isUsingInstanceVariableBefore(name: String, stmt: Statement): Boolean { # {{{
-		var line = stmt.line()
-
-		for var statement in @statements while statement.line() < line && statement != stmt {
-			if statement.isUsingInstanceVariable(name) {
-				return true
+			if statement is VariableStatement && statement.isDeclararingVariable(name) {
+				return false
 			}
 		}
 
 		return false
 	} # }}}
-	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
-		var line = stmt.line()
+	isUsingVariableBefore(name: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
 
-		for var statement in @statements while statement.line() < line && statement != stmt {
-			if statement.isUsingStaticVariable(class, varname) {
+		for var stmt in @statements while stmt.line() < line && statement != stmt {
+			if stmt.isUsingVariable(name, true) {
 				return true
 			}
 		}
@@ -300,7 +322,7 @@ class FunctionBlock extends Block {
 		if ?@return {
 			var toAdd =
 				if var statement ?= @statements.last() {
-					set !statement:!(Statement).isExit(.Expression + .Statement + .Always)
+					set !statement:!!!(Statement).isExit(.Expression + .Statement + .Always)
 				}
 				else {
 					set true
@@ -324,7 +346,7 @@ class FunctionBlock extends Block {
 			else if target.isAny() && !target.isExplicit() {
 				pass
 			}
-			else if !?#@statements || !@statements.last():!(Statement).isExit(.Expression + .Statement + .Always) {
+			else if !?#@statements || !@statements.last():!!!(Statement).isExit(.Expression + .Statement + .Always) {
 				TypeException.throwExpectedReturnedValue(target, this)
 			}
 		}
@@ -355,6 +377,10 @@ class ConstructorBlock extends FunctionBlock {
 		}
 		else {
 			@initializedVariables[name] = true
+
+			if !variable.instance {
+				return super(variable, expression, node)
+			}
 		}
 	} # }}}
 	isInitializedVariable(name: String): Boolean => @initializedVariables[name]
@@ -379,7 +405,7 @@ class MethodBlock extends FunctionBlock {
 			@parent().type().flagInitializingInstanceVariable(variable.name)
 		}
 		else {
-			super(variable, expression, node)
+			return super(variable, expression, node)
 		}
 	} # }}}
 }

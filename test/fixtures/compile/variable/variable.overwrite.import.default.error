@@ -1,1 +1,0 @@
-ReferenceException: The identifier "name" is immutable (fixtures/compile/variable/variable.overwrite.import.default.ks:3)

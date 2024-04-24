@@ -48,7 +48,7 @@ func assertEql(this, flag, obj, msg? = null) { # {{{
 	)
 } # }}}
 
-use(func({Assertion}, {flag}) {
+use(func({#[overwrite] Assertion}, {flag}) {
 	var fn = assertEql^^(flag, ...)
 
 	Assertion.addMethod('eql', fn)

@@ -497,10 +497,10 @@ class ClassType extends Type {
 					}
 
 					if instance {
-						@dedupInstanceMethod(data.name.name:!(String), type)
+						@dedupInstanceMethod(data.name.name:!!!(String), type)
 					}
 					else {
-						@dedupStaticMethod(data.name.name:!(String), type)
+						@dedupStaticMethod(data.name.name:!!!(String), type)
 					}
 				}
 			}
@@ -626,12 +626,12 @@ class ClassType extends Type {
 		return this
 	} # }}}
 	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id ?= type.index() {
-			if @abstractMethods[name] is Array {
-				for var method in @abstractMethods[name] {
-					if method.index() == id {
-						return id
-					}
+		var id = type.index()
+
+		if @abstractMethods[name] is Array {
+			for var method in @abstractMethods[name] {
+				if method.index() == id {
+					return id
 				}
 			}
 		}
@@ -639,12 +639,12 @@ class ClassType extends Type {
 		return @addAbstractMethod(name, type)
 	} # }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id ?= type.index() {
-			if @instanceMethods[name] is Array {
-				for var method in @instanceMethods[name] {
-					if method.index() == id {
-						return id
-					}
+		var id = type.index()
+
+		if @instanceMethods[name] is Array {
+			for var method in @instanceMethods[name] {
+				if method.index() == id {
+					return id
 				}
 			}
 		}
@@ -663,12 +663,12 @@ class ClassType extends Type {
 		return @addInstanceMethod(name, type)
 	} # }}}
 	dedupStaticMethod(name: String, type: ClassMethodType): Number? { # {{{
-		if var id ?= type.index() {
-			if @staticMethods[name] is Array {
-				for var method in @staticMethods[name] {
-					if method.index() == id {
-						return id
-					}
+		var id = type.index()
+
+		if @staticMethods[name] is Array {
+			for var method in @staticMethods[name] {
+				if method.index() == id {
+					return id
 				}
 			}
 		}
@@ -952,7 +952,7 @@ class ClassType extends Type {
 
 		var ignoredConstructors = overwritten.constructors ?? []
 		for var constructor in @constructors when constructor.isExportable(mode, module) {
-			if @alterations.constructors[constructor.index()] && !ignoredConstructors:!(Array).contains(constructor.index()) {
+			if @alterations.constructors[constructor.index()] && !ignoredConstructors:!!!(Array).contains(constructor.index()) {
 				export.constructors.push(constructor.export(references, indexDelta, mode, module, true))
 			}
 		}
@@ -962,7 +962,7 @@ class ClassType extends Type {
 			var ignoredMethods = overwritten.instanceMethods[name] ?? []
 
 			for var method in methods when method.isExportable(mode, module) {
-				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:!(Array).contains(method.index()) {
+				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:!!!(Array).contains(method.index()) {
 					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
 				}
 			}
@@ -999,7 +999,7 @@ class ClassType extends Type {
 		@sequences.staticMethods = Object.clone(type._sequences.staticMethods)
 		@sequences.instanceMethods = Object.clone(type._sequences.instanceMethods)
 
-		@level = type.level():!(Number) + 1
+		@level = type.level():!!!(Number) + 1
 	} # }}}
 	features(): valueof @features
 	features(@features): valueof this
@@ -1014,7 +1014,7 @@ class ClassType extends Type {
 					abstractMethods[name] = []
 				}
 
-				abstractMethods[name]:!(Array).append(methods)
+				abstractMethods[name]:!!!(Array).append(methods)
 			}
 		}
 
@@ -2019,11 +2019,11 @@ class ClassType extends Type {
 		if ?#generics {
 			reference = reference.clone()
 
-			for var { name % gname } in @generics {
+			for var { name % internal } in @generics {
 				var mut nf = true
 
-				for var { name, type } in generics {
-					if name == gname {
+				for var { name % external, type } in generics {
+					if external == internal {
 						reference.addParameter(type)
 
 						nf = false
@@ -2129,31 +2129,31 @@ class ClassType extends Type {
 			match var result = node.matchArguments(assessment) {
 				is LenientCallMatchResult {
 					var class = @getClassWithInstantiableMethod(property, reference.type())
-					var reference = node.scope().reference(class)
+					var classReference = node.scope().reference(class)
 
-					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, generics, property, assessment, result, node))
+					node.addCallee(LenientMethodCallee.new(node.data(), node.object(), classReference, generics, property, assessment, result, node))
 				}
 				is PreciseCallMatchResult with var { matches } {
 					var class = @getClassWithInstantiableMethod(property, reference.type())
-					var reference = node.scope().reference(class)
+					var classReference = node.scope().reference(class)
 
 					if matches.length == 1 {
 						var match = matches[0]
 
 						if match.function.isSealed() {
-							node.addCallee(SealedPreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, match, node))
+							node.addCallee(SealedPreciseMethodCallee.new(node.data(), node.object(), classReference, property, assessment, match, node))
 						}
 						else {
-							node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+							node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), classReference, property, assessment, matches, node))
 						}
 					}
 					else if node.getMatchingMode() == .AllMatches {
-						node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), reference, property, assessment, matches, node))
+						node.addCallee(PreciseMethodCallee.new(node.data(), node.object(), classReference, property, assessment, matches, node))
 					}
 					else {
 						var functions = [match.function for var match in matches]
 
-						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), reference, generics, property, assessment, functions, node))
+						node.addCallee(LenientMethodCallee.new(node.data(), node.object(), classReference, generics, property, assessment, functions, node))
 					}
 				}
 				else {
@@ -2314,7 +2314,7 @@ class ClassType extends Type {
 		return @addConstructor(type)
 	} # }}}
 	overwriteInstanceMethod(name: String, type, methods) { # {{{
-		@instanceMethods[name]:!(Array).remove(...methods)
+		@instanceMethods[name]:!!!(Array).remove(...methods)
 
 		if var alterMethods ?= @majorOriginal?._instanceMethods[name] {
 			var indexes = [method.index() for var method in alterMethods]

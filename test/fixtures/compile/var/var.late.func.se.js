@@ -29,7 +29,6 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	let x;
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -44,6 +43,4 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	x = 42;
-	console.log(__ks_Number.__ks_func_toString_0.call(x));
 };

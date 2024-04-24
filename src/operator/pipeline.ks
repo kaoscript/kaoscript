@@ -17,7 +17,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 	}
 	override analyse() { # {{{
 		for var { kind } in @data.operator.modifiers {
-			match kind:!(ModifierKind) {
+			match kind:!!!(ModifierKind) {
 				.Existential {
 					@existential = true
 				}
@@ -84,7 +84,7 @@ abstract class BinaryOperatorPipeline extends Expression {
 			var mut destructuring = @destructuring
 
 			for var { kind } in data.modifiers {
-				match kind:!(ModifierKind) {
+				match kind:!!!(ModifierKind) {
 					.Spread {
 						destructuring = true
 					}
@@ -121,8 +121,8 @@ abstract class BinaryOperatorPipeline extends Expression {
 		else if !@inverted && @expression.isInverted() {
 			@inverted = true
 
-			@expression.toInvertedFragments(fragments, (fragments) => {
-				@toInvertedFragments(fragments, (fragments) => {
+			@expression.toInvertedFragments(fragments, (#[overwrite] fragments) => {
+				@toInvertedFragments(fragments, (#[overwrite] fragments) => {
 					@expression.toFragments(fragments, mode)
 				})
 			})
@@ -140,8 +140,8 @@ abstract class BinaryOperatorPipeline extends Expression {
 		if !@inverted && @expression.isInverted() {
 			@inverted = true
 
-			@expression.toInvertedFragments(fragments, (fragments) => {
-				@toInvertedFragments(fragments, callback)
+			@expression.toInvertedFragments(fragments, (writer) => {
+				@toInvertedFragments(writer, callback)
 			})
 		}
 		else if @existential || @nonEmpty {

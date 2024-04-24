@@ -1,0 +1,1 @@
+SyntaxException: Identifier "value" has already been declared (fixtures/compile/for/for.overwrite.in.cascade.n1=var_d.n2=var_d.for_v<n1=assg>_i<n2=assg>.ks:8)

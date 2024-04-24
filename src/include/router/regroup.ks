@@ -25,7 +25,7 @@ namespace RegroupTree {
 
 			for var value, index in values when value.length > 0{
 				for var val in values from index + 1 when val.length > 0 {
-					val:!(Array).remove(...value!?)
+					val:!!!(Array).remove(...value!?)
 				}
 			}
 
@@ -157,10 +157,10 @@ namespace RegroupTree {
 						while index > 0 {
 							index -= 1
 
-							var node = nodes[index]
+							var priorNode = nodes[index]
 
-							if node.min == 0 {
-								node.dynamicMax = true
+							if priorNode.min == 0 {
+								priorNode.dynamicMax = true
 
 								shifted = true
 							}
@@ -411,17 +411,17 @@ namespace RegroupTree {
 		return hashes
 	} # }}}
 
-	func listShadows(tree: Tree, data: Array, ceiling: Number): Array { # {{{
-		var newData = [...data]
+	func listShadows(tree: Tree, datas: Array, ceiling: Number): Array { # {{{
+		var newDatas = [...datas]
 		var results = [ShadowKind.None]
 
 		for var key in tree.order {
-			listShadows(tree.columns[key], tree.max, ceiling, newData, {}, results)
+			listShadows(tree.columns[key], tree.max, ceiling, newDatas, {}, results)
 		}
 
 		return results
 	} # }}}
-	func listShadows(tree: TreeBranch, max: Number, ceiling: Number, data: Array, nodes: Object, results: Array): Void { # {{{
+	func listShadows(tree: TreeBranch, max: Number, ceiling: Number, datas: Array, nodes: Object, results: Array): Void { # {{{
 		nodes[tree.index] = {
 			type: tree.type
 			min: tree.min
@@ -429,10 +429,10 @@ namespace RegroupTree {
 		}
 
 		for var key in tree.order {
-			listShadows(tree.columns[key], max, ceiling, data, nodes, results)
+			listShadows(tree.columns[key], max, ceiling, datas, nodes, results)
 		}
 	} # }}}
-	func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, data: Array, nodes: Object, results: Array): Void { # {{{
+	func listShadows(tree: TreeLeaf, max: Number, ceiling: Number, datas: Array, nodes: Object, results: Array): Void { # {{{
 		nodes[tree.index] = {
 			type: tree.type
 			min: tree.min
@@ -441,8 +441,8 @@ namespace RegroupTree {
 
 		var result = [ShadowKind.None, -1]
 
-		if ?#data {
-			var data = data.shift()
+		if ?#datas {
+			var data = datas.shift()
 
 			var parameters = {}
 
@@ -561,11 +561,11 @@ namespace RegroupTree {
 		}
 	} # }}}
 
-	func regroupTreesByGroup(mut group: Tree[], trees: Tree[], last: Tree, mut shadows: Array): Void { # {{{
-		var tree = group.pop()
-		var max = tree.max
+	func regroupTreesByGroup(mut group: Tree[], trees: Tree[], latest: Tree, mut shadows: Array): Void { # {{{
+		var last = group.pop()
+		var max = last.max
 
-		var maxs = buildMax(tree, tree == last)
+		var maxs = buildMax(last, last == latest)
 		var mut lastMatches = null
 
 		for var tree, index in group down {
@@ -580,12 +580,12 @@ namespace RegroupTree {
 				}
 				else {
 					if isSameShadows(lastMatches, matches) {
-						regroupTreesByGroup(group.slice(0, index + 2), trees, last, lastMatches)
+						regroupTreesByGroup(group.slice(0, index + 2), trees, latest, lastMatches)
 
 						group = group.slice(index + 2)
 					}
 					else {
-						regroupTreesByGroup(group.slice(0, index + 1), trees, last, [])
+						regroupTreesByGroup(group.slice(0, index + 1), trees, latest, [])
 
 						group = group.slice(index + 1)
 
@@ -601,14 +601,14 @@ namespace RegroupTree {
 		// echo(shadows)
 
 		if ?lastMatches {
-			regroupTreesByGroup(group.slice(0, 1), trees, last, [])
+			regroupTreesByGroup(group.slice(0, 1), trees, latest, [])
 
 			group = group.slice(1)
 		}
 
 		return if group.length == 0
 
-		// echo(toSignature(tree))
+		// echo(toSignature(last))
 
 		var first = group[0]
 
@@ -616,9 +616,11 @@ namespace RegroupTree {
 
 		trees.remove(...group)
 
-		applyMin(tree, first, mins, shadows)
+		// TODO!
+		// applyMin(last, first, mins, shadows)
+		applyMin(tree: last, last: first, mins, shadows)
 
-		// echo(toSignature(tree))
+		// echo(toSignature(last))
 	} # }}}
 
 	func replaceOrder(equivalences: String[], orders: String[][]): String[][] { # {{{

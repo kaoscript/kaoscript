@@ -157,9 +157,7 @@ class ClassVariableDeclaration extends AbstractNode {
 	} # }}}
 	hasDefaultValue() => @defaultValue
 	initialize(type, node) { # {{{
-		if !@initialized {
-			@initialized = true
-		}
+		@initialized = true
 	} # }}}
 	isImmutable() => @final
 	isImplementing() => false

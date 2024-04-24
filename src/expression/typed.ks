@@ -23,12 +23,7 @@ class TypedExpression extends Expression {
 			}
 
 			for var { name }, index in originals {
-				if var type ?= @parameters[index] {
-					@generics.push({ name, type })
-				}
-				else {
-					@generics.push({ name, type : AnyType.NullableUnexplicit })
-				}
+				@generics.push({ name, type: @parameters[index] ?? AnyType.NullableUnexplicit })
 			}
 		}
 	} # }}}

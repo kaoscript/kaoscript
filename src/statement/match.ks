@@ -77,8 +77,8 @@ class MatchStatement extends Statement {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!(Scope), false)
-			@declaration.initiate()
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!!!(Scope), false)
+				..initiate()
 		}
 		else {
 			@bindingScope = @scope!?
@@ -193,7 +193,7 @@ class MatchStatement extends Statement {
 
 			valueType = clause.filter.inferTypes(path, @bodyScope, index == lastIndex) ?? valueType
 
-			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
+			maxConditions += clause.filter:!!!(MatchFilter).getMaxConditions()
 
 			clause.body.analyse()
 			clause.body.prepare(target)
@@ -202,7 +202,7 @@ class MatchStatement extends Statement {
 				clause.name = @scope.acquireTempName(false)
 			}
 
-			if clause.body:!(Block).isExit(.Statement + .Always) {
+			if clause.body:!!!(Block).isExit(.Statement + .Always) {
 				maxInferables -= 1
 			}
 			else {
@@ -268,7 +268,7 @@ class MatchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
+				else if !@clauses[index].body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 					initializable = false
 
 					break
@@ -289,7 +289,7 @@ class MatchStatement extends Statement {
 				if clause.initializable {
 					types.push(clause.type)
 				}
-				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
+				else if !@clauses[index].body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 					SyntaxException.throwMissingAssignmentMatchClause(name, @clauses[index].body)
 				}
 			}
@@ -502,7 +502,9 @@ class MatchStatement extends Statement {
 				clone.setDeclaredType(type, true).flagDefinitive()
 			}
 
-			node.scope().replaceVariable(name, clone)
+			var var = node.scope().replaceVariable(name, clone)
+
+			return var.getRealType()
 		}
 		else if !@hasDefaultClause {
 			pass
@@ -613,9 +615,12 @@ class MatchStatement extends Statement {
 	} # }}}
 	isLateInitializable() => true
 	isUsingTempName() => @usingTempName
-	isUsingVariable(name) { # {{{
+	override isUsingVariable(name, bleeding) { # {{{
 		if @hasDeclaration {
-			if @declaration.isUsingVariable(name) {
+			if @declaration.isDeclararingVariable(name) {
+				return false
+			}
+			else if @declaration.isUsingVariable(name) {
 				return true
 			}
 		}
@@ -624,6 +629,8 @@ class MatchStatement extends Statement {
 				return true
 			}
 		}
+
+		return false if bleeding
 
 		for var clause in @clauses {
 			if clause.body.isUsingVariable(name) {
@@ -657,11 +664,10 @@ class MatchStatement extends Statement {
 			fragments.compile(@declaration)
 		}
 		else if @reusableValue {
-			var line = fragments.newLine().code(`\(@declareTemp ? $runtime.scope(this) : '')\(@name) = `)
-
-			line.compile(@value)
-
-			line.done()
+			fragments.newLine()
+				..code(`\(@declareTemp ? $runtime.scope(this) : '')\(@name) = `)
+				..compile(@value)
+				..done()
 		}
 
 		for var test of @tests when test.count > 1 {
@@ -1375,7 +1381,7 @@ class MatchConditionType extends AbstractNode {
 			fragments.code('true')
 		}
 		else {
-			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @parent.getValueType()))
+			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!!!(Scope), name, @parent.getValueType()))
 		}
 	} # }}}
 	type() => @type
@@ -1486,7 +1492,7 @@ class MatchConditionValue extends AbstractNode {
 			fragments.code('true')
 		}
 		else if @container {
-			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!(Scope), name, @scope.getImplicitType()))
+			@type.toPositiveTestFragments(fragments, Literal.new(false, this, @scope:!!!(Scope), name, @scope.getImplicitType()))
 		}
 		else if @values.length == 1 {
 			var value = @values[0]
@@ -1509,14 +1515,14 @@ class MatchConditionValue extends AbstractNode {
 				for var { name % varname, type }, index in subtypes {
 					fragments.code(' || ') if index > 0
 
-					var value = type.discard().getValue(varname)
+					var generic = type.discard().getValue(varname)
 
-					if value.isAlias() {
-						if value.isDerivative() {
+					if generic.isAlias() {
+						if generic.isDerivative() {
 							fragments.compile(type).code(`.__ks_eq_\(type.discard().getTopProperty(varname))(\(name).\(object.getVariantName()))`)
 						}
 						else {
-							fragments.code(operand).compile(type).code(`.\(value.original())`)
+							fragments.code(operand).compile(type).code(`.\(generic.original())`)
 						}
 					}
 					else {
@@ -1553,17 +1559,10 @@ class MatchConditionValue extends AbstractNode {
 					var subtypes = @type.getSubtypes()
 					var operand = `\(name).\(object.getVariantName()) === `
 
-					if subtypes.length == 1 {
-						var { name, type } = subtypes[0]
-
-						fragments.code(operand).compile(type).code(`.\(name)`)
-					}
-					else {
-						for var { name, type }, index in subtypes {
-							fragments
-								..code(' || ') if index != 0
-								..code(operand).compile(type).code(`.\(name)`)
-						}
+					for var subtype, sIndex in subtypes {
+						fragments
+							..code(' || ') if sIndex != 0
+							..code(operand).compile(subtype.type).code(`.\(subtype.name)`)
 					}
 				}
 				else {

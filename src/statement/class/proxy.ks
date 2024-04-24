@@ -65,7 +65,7 @@ class ClassProxyDeclaration extends Statement {
 		else {
 			@externalPath = `.\(path.slice(0, -1).join('.'))`
 			// TODO! remove type signalment
-			@externalName = path:!!(Array).last()
+			@externalName = path:!!!(Array).last()
 		}
 
 		@type = @external.type()
@@ -242,19 +242,19 @@ class ClassProxyGroupDeclaration extends Statement {
 					throw NotImplementedException.new()
 				}
 				else if var property ?= type.getProperty(external) {
-					var type = property.clone()
+					var propType = property.clone()
 
-					if type.isFunction() {
+					if propType.isFunction() {
 						if class.hasInstanceVariable(internal) {
 							SyntaxException.throwHomonymInstanceMethod(internal, this)
 						}
 
-						type.setProxy(@recipientPath, external)
+						propType.setProxy(@recipientPath, external)
 
 						var overloads = []
 
-						if type is ClassMethodGroupType {
-							for var function in type.functions() {
+						if propType is ClassMethodGroupType {
+							for var function in propType.functions() {
 								if @parent.hasMatchingInstanceMethod(internal, function, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
 									SyntaxException.throwDuplicateMethod(internal, this)
 								}
@@ -270,27 +270,27 @@ class ClassProxyGroupDeclaration extends Statement {
 							}
 						}
 						else {
-							if @parent.hasMatchingInstanceMethod(internal, type, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
+							if @parent.hasMatchingInstanceMethod(internal, propType, MatchingMode.ExactParameter + MatchingMode.IgnoreName + MatchingMode.Superclass) {
 								SyntaxException.throwDuplicateMethod(internal, this)
 							}
 
-							if var method ?= class.getMatchingInstanceMethod(internal, type, MatchingMode.ExactParameter + MatchingMode.Superclass) {
+							if var method ?= class.getMatchingInstanceMethod(internal, propType, MatchingMode.ExactParameter + MatchingMode.Superclass) {
 								overloads.push({
 									internal: method.index()
-									external: type.index()
+									external: propType.index()
 								})
 							}
 
-							class.addInstanceMethod(internal, type)
+							class.addInstanceMethod(internal, propType)
 						}
 
 						@elements[internal] = {
 							external
-							type
+							type: propType
 							overloads
 						}
 					}
-					else if type.isAny() {
+					else if propType.isAny() {
 						ReferenceException.throwNoTypeProxy(@recipient.toQuote(), external, this)
 					}
 					else {
@@ -298,11 +298,11 @@ class ClassProxyGroupDeclaration extends Statement {
 							SyntaxException.throwHomonymInstanceVariable(internal, this)
 						}
 
-						class.addInstanceVariable(internal, ClassVariableType.new(@scope(), type))
+						class.addInstanceVariable(internal, ClassVariableType.new(@scope(), propType))
 
 						@elements[internal] = {
 							external
-							type
+							type: propType
 						}
 					}
 				}

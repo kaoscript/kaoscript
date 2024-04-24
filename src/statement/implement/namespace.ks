@@ -189,8 +189,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		var block = line.code(`\(namespace).\(@name).__ks_rt = function(that, args)`).newBlock()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`\(namespace).\(@name).__ks_\(function.index()).call(that`)
+			(function, writer) => {
+				writer.code(`\(namespace).\(@name).__ks_\(function.index()).call(that`)
 
 				return true
 			}
@@ -209,7 +209,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		line.code(`\(namespace).\(@name).\(@internalName) = function(`)
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		block.compile(@block, Mode.None)
 

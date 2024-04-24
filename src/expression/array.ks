@@ -39,10 +39,10 @@ class ArrayExpression extends Expression {
 		if spread {
 			@canConcat = @values.length > 1
 
-			var value = @values[0]
-			var mut type = value.type().discardValue().discardSpread()
+			var first = @values[0]
+			var mut type = first.type().discardValue().discardSpread()
 
-			@prepareValue(value)
+			@prepareValue(first)
 
 			for var value in @values from 1 {
 				if ?type && !type.equals(value.type().discardValue().discardSpread()) {
@@ -204,12 +204,12 @@ class ArrayExpression extends Expression {
 					pushOpened = false
 				}
 
-				value.toRestrictiveFragments(block, (expression, fragments) => {
+				value.toRestrictiveFragments(block, (expression, writer) => {
 					if unknown || expression.type().isSpread() {
-						fragments.newLine().code(`\(varname).push(`).compile(expression).code(')').done()
+						writer.newLine().code(`\(varname).push(`).compile(expression).code(')').done()
 					}
 					else {
-						fragments.newLine().code(`\(varname)[\(index)] = `).compile(expression).done()
+						writer.newLine().code(`\(varname)[\(index)] = `).compile(expression).done()
 					}
 				})
 

@@ -4,7 +4,7 @@ func foobar() {
 
 var dyn x
 
-while var {x} ?= foobar() {
+while #[overwrite] var {x} ?= foobar() {
 }
 
 

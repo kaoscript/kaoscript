@@ -3,12 +3,12 @@ module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(foobar) {
-		if(foobar === void 0) {
-			foobar = null;
+	foobar.__ks_0 = function(value) {
+		if(value === void 0) {
+			value = null;
 		}
-		if(Type.isValue(foobar)) {
-			return foobar;
+		if(Type.isValue(value)) {
+			return value;
 		}
 		else {
 			return "foobar";

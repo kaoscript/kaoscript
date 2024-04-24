@@ -1,0 +1,1 @@
+SyntaxException: Identifier "index" has already been declared (fixtures/compile/variable/variable.overwrite.n1=var_dyn.if<n1=var_dyn_nkw=n1_i>.ks:8)

@@ -50,10 +50,9 @@ class StructDeclaration extends Statement {
 	} # }}}
 	override prepare(target, targetMode) { # {{{
 		if @extending {
-			if @extendsType !?= Type.fromAST(@data.extends.typeName, this) {
-				ReferenceException.throwNotDefined(@extendsName, this)
-			}
-			else if @extendsType.discardName() is not StructType {
+			@extendsType = Type.fromAST(@data.extends.typeName, this)!!
+
+			if @extendsType.discardName() is not StructType {
 				TypeException.throwNotStruct(@extendsName, this)
 			}
 
@@ -70,21 +69,18 @@ class StructDeclaration extends Statement {
 					SyntaxException.throwInheritanceLoop(@name, this)
 				}
 
-				if var type ?= Type.fromAST(implement, this) {
-					if type.isAlias() {
-						unless type.isObject() {
-							SyntaxException.throwNotObjectInterface(name, this)
-						}
-					}
-					else {
-						throw NotImplementedException.new(this)
-					}
+				var type = Type.fromAST(implement, this)
 
-					@struct.addInterface(type)
+				if type.isAlias() {
+					unless type.isObject() {
+						SyntaxException.throwNotObjectInterface(name, this)
+					}
 				}
 				else {
-					ReferenceException.throwNotDefined(name, this)
+					throw NotImplementedException.new(this)
 				}
+
+				@struct.addInterface(type)
 			}
 		}
 
@@ -120,16 +116,18 @@ class StructDeclaration extends Statement {
 	isImplementing() => @implementing
 	listInterfaces() => @struct.listInterfaces()
 	toCastFragments(fragments, mode) { # {{{
-		var mut ctrl = fragments.newControl().code(`if(`)
+		with var ctrl = fragments.newControl() {
+			ctrl.code(`if(`)
 
-		var literal = Literal.new(false, this, @scope(), 'item')
+			var literal = Literal.new(false, this, @scope(), 'item')
 
-		@type.reference(@scope).toPositiveTestFragments(null, null, Junction.NONE, ctrl, literal)
+			@type.reference(@scope).toPositiveTestFragments(null, null, Junction.NONE, ctrl, literal)
 
-		ctrl
-			.code(')').step()
-			.line('return item')
-			.done()
+			ctrl
+				.code(')').step()
+				.line('return item')
+				.done()
+		}
 
 		fragments.newControl()
 			.code(`if(!\($runtime.type(this)).isObject(item))`).step()
@@ -195,7 +193,7 @@ class StructDeclaration extends Statement {
 
 		var mut ctrl = line.newControl(null, false, false).code(`function(`)
 
-		Parameter.toFragments(@function, ctrl, ParameterMode.Default, (fragments) => fragments.code(')').step())
+		Parameter.toFragments(@function, ctrl, ParameterMode.Default, (writer) => writer.code(')').step())
 
 		@toObjectFragments(ctrl, mode)
 
@@ -206,8 +204,8 @@ class StructDeclaration extends Statement {
 		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`__ks_new(`)
+			(function, writer) => {
+				writer.code(`__ks_new(`)
 
 				return false
 			}
@@ -247,7 +245,7 @@ class StructFunction extends AbstractNode {
 
 		if @parent.isExtending() {
 			for var type in @parent._extendsType.type().listAllFields() {
-				var field = StructFieldDeclaration.new(type:!(StructFieldType), @parent!?)
+				var field = StructFieldDeclaration.new(type:!!!(StructFieldType), @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -341,7 +339,7 @@ class StructFieldDeclaration extends AbstractNode {
 				type = NullType.Explicit
 			}
 
-			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired():!(Boolean))
+			@type = StructFieldType.new(@scope!?, @name, @index, type!?, @parameter.isRequired():!!!(Boolean))
 
 			if ?@data.value {
 				@type.flagDefaultValue()

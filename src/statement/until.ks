@@ -41,7 +41,10 @@ class UntilStatement extends Statement {
 	} # }}}
 	isJumpable() => true
 	isLoop() => true
-	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
+	override isUsingVariable(name, bleeding) { # {{{
+		return false if bleeding
+		return @condition.isUsingVariable(name) || @body.isUsingVariable(name)
+	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		fragments
 			.newControl()

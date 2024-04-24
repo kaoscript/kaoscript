@@ -272,8 +272,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 			ctrl.code(`\(name).__ks_func_\(@name) = function(that, ...args)`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(name).__ks_func_\(@name)_\(function.index())(that`)
+				(function, writer) => {
+					writer.code(`\(name).__ks_func_\(@name)_\(function.index())(that`)
 
 					return true
 				}
@@ -295,8 +295,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 			ctrl.code(`\(name).\(@name) = function()`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(name).__ks_sttc_\(@name)_\(function.index())(`)
+				(function, writer) => {
+					writer.code(`\(name).__ks_sttc_\(@name)_\(function.index())(`)
 
 					return false
 				}
@@ -320,7 +320,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.code(`\(@enumName.name()).__ks_sttc_\(@name)_\(@type.index()) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

@@ -1,8 +1,8 @@
 class ValueList {
-	getTop(): String => 'foobar'
+	getTop(): String? => 'foobar'
 }
 
-func loadValues(): ValueList {
+func loadValues(): ValueList? {
 	return ValueList.new()
 }
 

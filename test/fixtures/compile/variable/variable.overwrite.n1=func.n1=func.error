@@ -1,0 +1,1 @@
+SyntaxException: The function "name()" is a duplicate (fixtures/compile/variable/variable.overwrite.n1=func.n1=func.ks:4)

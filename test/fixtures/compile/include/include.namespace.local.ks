@@ -1,3 +1,5 @@
 namespace NS {
-	include './include.default.ks'
+	var mut x = 0
+
+	include again '../_/_includeagain.ks'
 }

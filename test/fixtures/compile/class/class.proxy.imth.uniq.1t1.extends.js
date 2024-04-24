@@ -60,8 +60,8 @@ module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(a) {
-		a.__ks_func_foobar_0();
+	foobar.__ks_0 = function(c) {
+		c.__ks_func_foobar_0();
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isClassInstance(value, ClassA);

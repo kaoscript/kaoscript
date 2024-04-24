@@ -12,6 +12,6 @@ type Event = {
 func foobar(x: Event) {
 	var mut t = null
 
-	if t !?|= x {
+	if t !?]= x {
 	}
 }

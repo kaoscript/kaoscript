@@ -49,8 +49,8 @@ class DiscloseDeclaration extends Statement {
 					if !method.hasAuxiliary() && (method.hasGenerics() || method.hasDeferredParameter()) {
 						@instanceMethods[name] = methods
 
-						for var method in methods {
-							method.flagAuxiliary()
+						for var mth in methods {
+							mth.flagAuxiliary()
 						}
 
 						break
@@ -126,14 +126,14 @@ class DiscloseDeclaration extends Statement {
 		block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
+			(function, writer) => {
 				if function.isSealed() {
-					line.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
+					writer.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
 
 					return true
 				}
 				else {
-					line.code(`that.\(name).call(that`)
+					writer.code(`that.\(name).call(that`)
 
 					return true
 				}

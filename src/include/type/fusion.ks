@@ -82,8 +82,8 @@ class FusionType extends Type {
 		}
 	} # }}}
 	override finalize(data, generics, node) { # {{{
-		for var data, index in data.types {
-			@types[index].finalize(data, generics, node)
+		for var type, index in data.types {
+			@types[index].finalize(type, generics, node)
 		}
 	} # }}}
 	flagExported(explicitly: Boolean) { # {{{
@@ -145,10 +145,8 @@ class FusionType extends Type {
 		for var type in @types {
 			var root = type.discard()
 
-			if root is ObjectType {
-				if var property ?= root.getRestType() {
-					return property
-				}
+			if root is ObjectType && root.hasRest() {
+				return root.getRestType()
 			}
 		}
 

@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/with/with.var.immu.before.nowrt.ks:10)

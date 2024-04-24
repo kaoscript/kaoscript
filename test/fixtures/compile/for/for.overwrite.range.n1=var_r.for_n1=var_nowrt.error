@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/for/for.overwrite.range.n1=var_r.for_n1=var_nowrt.ks:5)

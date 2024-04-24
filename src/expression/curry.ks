@@ -88,8 +88,8 @@ class CurryExpression extends CallExpression {
 						fragments.code('[')
 					}
 
-					for var { placeholder?, passthru?, element?, from?, to? }, index in values from first {
-						fragments.code($comma) if index != first
+					for var { placeholder?, passthru?, element?, from?, to? }, vIndex in values from first {
+						fragments.code($comma) if vIndex != first
 
 						if ?passthru {
 							if ?element {
@@ -149,12 +149,12 @@ class CurryExpression extends CallExpression {
 			var mut spreadIndex = 0
 			var mut spreadPosition = -1
 
-			for var parameter, index in parameters {
-				var position = positions[index]
+			for var parameter, pIndex in parameters {
+				var position = positions[pIndex]
 
 				if !?position {
 					if precise {
-						map.push({ parameter: index, values: [] })
+						map.push({ parameter: pIndex, values: [] })
 					}
 				}
 				else if position is Array {
@@ -185,7 +185,7 @@ class CurryExpression extends CallExpression {
 						}
 					}
 
-					map.push({ parameter: index, values })
+					map.push({ parameter: pIndex, values })
 				}
 				else if ?position.index {
 					var argument = arguments[position.index]
@@ -193,7 +193,7 @@ class CurryExpression extends CallExpression {
 					if argument is PlaceholderArgument {
 						type.addParameter(parameter.clone(), node)
 
-						map.push({ parameter: index, value: { placeholder }})
+						map.push({ parameter: pIndex, value: { placeholder }})
 
 						placeholder += 1
 					}
@@ -209,7 +209,7 @@ class CurryExpression extends CallExpression {
 					}
 				}
 				else {
-					map.push({ parameter: index })
+					map.push({ parameter: pIndex })
 				}
 			}
 

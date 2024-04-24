@@ -5,4 +5,4 @@ func foobar(): Number | String {
 func quxbaz(x: Number) {
 }
 
-quxbaz(foobar():!!(Number))
+quxbaz(foobar():!!!(Number))

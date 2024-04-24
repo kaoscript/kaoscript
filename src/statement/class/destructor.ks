@@ -23,7 +23,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
 		}
 
-		for i from 0 to~ variable.type().getDestructorCount() {
+		for var i from 0 to~ variable.type().getDestructorCount() {
 			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
 		}
 

@@ -28,8 +28,9 @@ class MatchExpression extends Expression {
 
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 
-			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!(Scope), false)
-			@declaration.initiate()
+			@declaration = VariableDeclaration.new(@data.declaration, this, @bindingScope, @scope:!!!(Scope), false)
+				..flagUseExpression()
+				..initiate()
 		}
 		else {
 			@bindingScope = @scope!?
@@ -180,7 +181,7 @@ class MatchExpression extends Expression {
 
 			valueType = clause.filter.inferTypes(@path, @bodyScope, index == lastIndex) ?? valueType
 
-			maxConditions += clause.filter:!(MatchFilter).getMaxConditions()
+			maxConditions += clause.filter:!!!(MatchFilter).getMaxConditions()
 
 			for var condition in clause.filter.conditions() {
 				tracker.exclude(condition)
@@ -215,14 +216,14 @@ class MatchExpression extends Expression {
 		@type = Type.union(@scope, ...types)
 
 		for var data, name of @initializedVariables {
-			var types = []
+			var varTypes = []
 			var mut initializable = true
 
 			for var clause, index in data.clauses {
 				if clause.initializable {
-					types.push(clause.type)
+					varTypes.push(clause.type)
 				}
-				else if !!@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
+				else if !!@clauses[index].body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 					initializable = false
 
 					break
@@ -230,25 +231,25 @@ class MatchExpression extends Expression {
 			}
 
 			if initializable {
-				data.variable.type = Type.union(@scope, ...types)
+				data.variable.type = Type.union(@scope, ...varTypes)
 
 				@parent.initializeVariable(data.variable, this, this)
 			}
 		}
 
 		for var data, name of @lateInitVariables {
-			var types = []
+			var varTypes = []
 
 			for var clause, index in data.clauses {
 				if clause.initializable {
-					types.push(clause.type)
+					varTypes.push(clause.type)
 				}
-				else if !@clauses[index].body:!(Block).isExit(.Expression + .Statement + .Always) {
+				else if !@clauses[index].body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 					SyntaxException.throwMissingAssignmentMatchClause(name, @clauses[index].body)
 				}
 			}
 
-			var type = Type.union(@scope, ...types)
+			var type = Type.union(@scope, ...varTypes)
 
 			@parent.initializeVariable(VariableBrief.new(name, type), this, this)
 		}
@@ -531,12 +532,12 @@ class EnumPossibilityTracker extends PossibilityTracker {
 		for var value in condition.values() {
 			match value {
 				UnaryOperatorImplicit, MemberExpression {
-					if var value ?= @type.getValue(value.property()) {
-						if value.isAlias() {
-							@possibilities.remove(...value.originals()!?)
+					if var property ?= @type.getValue(value.property()) {
+						if property.isAlias() {
+							@possibilities.remove(...property.originals()!?)
 						}
 						else {
-							@possibilities.remove(value.name())
+							@possibilities.remove(property.name())
 						}
 					}
 				}

@@ -32,10 +32,12 @@ class BlockScope extends Scope {
 		return `__ks_lbl_\(@labelIndex)`
 	} # }}}
 	acquireTempName(declare: Boolean = true): String { # {{{
-		for var _, name of @tempNames when @tempNames[name] {
-			@tempNames[name] = false
+		if declare {
+			for var _, name of @tempNames when @tempNames[name] {
+				@tempNames[name] = false
 
-			return name
+				return name
+			}
 		}
 
 		@tempIndex += 1
@@ -95,8 +97,8 @@ class BlockScope extends Scope {
 
 		@tempDeclarations.clear()
 	} # }}}
-	protected declareVariable(name: String, scope: Scope) { # {{{
-		if $keywords[name] == true || @declarations[name] == true {
+	override declareVariable(name, scope) { # {{{
+		if $keywords[name] || @declarations[name] {
 			var newName = @getNewName(name)
 
 			if !?@variables[name] {
@@ -111,9 +113,11 @@ class BlockScope extends Scope {
 			return null
 		}
 	} # }}}
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
 		if @hasDefinedVariable(name) {
-			SyntaxException.throwAlreadyDeclared(name, node)
+			if !overwrite || ?@variables[name] {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
 		}
 		else if @hasPredefinedVariable(name) {
 			var variable = @getPredefinedType(name)
@@ -132,27 +136,20 @@ class BlockScope extends Scope {
 
 		return variable
 	} # }}}
-	defineVariable(variable: Variable, node: AbstractNode) { # {{{
+	override defineVariable(variable, node) { # {{{
 		var name = variable.name()
 
-		if @variables[name] is Array {
-			var variables: Array = @variables[name]
-
-			if variables.last() is Variable {
-				SyntaxException.throwAlreadyDeclared(name, node)
-			}
-
-			variables.push(@line(), variable)
+		if ?@variables[name] {
+			SyntaxException.throwAlreadyDeclared(name, node)
 		}
-		else {
-			if var newName ?= @declareVariable(name, this) {
-				@renamedVariables[name] = newName
 
-				variable.renameAs(newName)
-			}
+		if var newName ?= @declareVariable(name, this) {
+			@renamedVariables[name] = newName
 
-			@variables[name] = [@line(), variable]
+			variable.renameAs(newName)
 		}
+
+		@variables[name] = [@line(), variable]
 
 		if var reference ?= @references[name] {
 			reference.reset()
@@ -267,7 +264,7 @@ class BlockScope extends Scope {
 	hasDeclaredVariable(name: String) => @declarations[name] || ?@renamedVariables[name]
 	hasDefinedVariable(name: String) => @hasDefinedVariable(name, @line())
 	hasDefinedVariable(name: String, line: Number) { # {{{
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			var variables: Array = @variables[name]
 			var mut variable = null
 
@@ -285,12 +282,12 @@ class BlockScope extends Scope {
 			}
 		}
 
-		return false
+		return @parent.hasDefinedVariable(name, line)
 	} # }}}
 	override hasImplicitVariable() => ?@implicitVarname || @parent.hasImplicitVariable()
 	hasMacro(name) => ?@macros[name] || @parent.hasMacro(name)
 	hasVariable(name: String, line: Number = @line()) { # {{{
-		if @variables[name] is Array {
+		if ?@variables[name] {
 			var variables: Array = @variables[name]
 			var mut variable = null
 

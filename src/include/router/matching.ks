@@ -251,7 +251,7 @@ namespace Matching {
 								for var parameter in function.parameters() when parameter.isLabeled() {
 									var name = parameter.getExternalName()
 
-									if var type ?= root.getProperty(name) {
+									if var property ?= root.getProperty(name) {
 										nameds[name] = NamingArgument.new(
 											fitting
 											index
@@ -259,7 +259,7 @@ namespace Matching {
 											property: true
 											spread: true
 											strict: true
-											type
+											type: property
 										)
 									}
 									else if finite {
@@ -321,7 +321,7 @@ namespace Matching {
 				length += 1
 			}
 			else if argument is ArrayType && !argument.hasRest() {
-				length += argument.length():!(Number)
+				length += argument.length():!!!(Number)
 			}
 			else {
 				return Infinity
@@ -416,8 +416,8 @@ namespace Matching {
 				return false unless b is Array
 				return false unless a.length == b.length
 
-				for var k, index in a {
-					return false unless isSameArgument(k, b[index])
+				for var k, i in a {
+					return false unless isSameArgument(k, b[i])
 				}
 			}
 			else {
@@ -544,16 +544,16 @@ namespace Matching {
 				var mut nullable = false
 
 				for var oldCombination in oldCombinations {
-					for var type in type.discardAlias().types() {
+					for var subtype in type.discardAlias().types() {
 						var combination = [...oldCombination!?]
 
-						if type.isNullable() && !(type.isAny() || type.isNull()) {
-							combination.push(type.setNullable(false))
+						if subtype.isNullable() && !(subtype.isAny() || subtype.isNull()) {
+							combination.push(subtype.setNullable(false))
 
 							nullable = true
 						}
 						else {
-							combination.push(type)
+							combination.push(subtype)
 						}
 
 						combinations.push(combination)
@@ -697,8 +697,8 @@ namespace Matching {
 								context.possibilities.pushUniq(function)
 							}
 
-							for var match in newContext.matches {
-								pushUniqCallMatch(context.matches, match)
+							for var m in newContext.matches {
+								pushUniqCallMatch(context.matches, m)
 							}
 						}
 					}
@@ -938,10 +938,10 @@ namespace Matching {
 					}
 
 					if node.max <= 0 {
-						var last = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
+						var lastIndex = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
 
-						if cursor.index <= last {
-							while cursor.index <= last {
+						if cursor.index <= lastIndex {
+							while cursor.index <= lastIndex {
 								if cursor.argument is not PlaceholderType {
 									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
 
@@ -965,12 +965,12 @@ namespace Matching {
 
 								i += 1
 
-								cursor = pushCursor(cursor, context, matches, cursor.index == last || cursor.spread && cursor.length == Infinity)
+								cursor = pushCursor(cursor, context, matches, cursor.index == lastIndex || cursor.spread && cursor.length == Infinity)
 							}
 						}
 						else {
 							if 0 < cursor.used <= cursor.length {
-								var mut match = true
+								var mut matched = true
 
 								if cursor.argument is not PlaceholderType {
 									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
@@ -989,11 +989,11 @@ namespace Matching {
 										argMatches.precise = false
 									}
 									else {
-										match = false
+										matched = false
 									}
 								}
 
-								if match {
+								if matched {
 									if node.max == Infinity {
 										matches.push(CallMatchArgument.new(index: cursor.index, from: cursor.used))
 
@@ -1400,7 +1400,7 @@ namespace Matching {
 						var arg = argMatches.arguments[index]
 						if ?pMatch && pMatch is Array {
 							// TODO
-							pMatch.push(...arg:!(Array))
+							pMatch.push(...arg:!!!(Array))
 
 							length += arg.length
 						}
@@ -1410,7 +1410,7 @@ namespace Matching {
 
 								var mut l = 0
 
-								for var a in arg:!(Array) {
+								for var a in arg:!!!(Array) {
 									var argument = context.arguments[a.index]
 
 									if argument.isSpread() {
@@ -1528,8 +1528,8 @@ namespace Matching {
 		} # }}}
 
 		func pushUniqCallMatch(matches, newMatch): Void { # {{{
-			for var match in matches {
-				if match.function != newMatch.function || !Array.same(match.arguments, newMatch.arguments) {
+			for var { function, arguments } in matches {
+				if function != newMatch.function || !Array.same(arguments, newMatch.arguments) {
 					return
 				}
 			}
@@ -1618,7 +1618,7 @@ namespace Matching {
 						}
 					}
 
-					possibleFunctions = possibleFunctions:!!(Array).intersection(matchedFunctions)
+					possibleFunctions = possibleFunctions:!!!(Array).intersection(matchedFunctions)
 
 					if !?#possibleFunctions {
 						return null
@@ -1685,22 +1685,22 @@ namespace Matching {
 				}
 
 				var perArguments = {}
-				for var { shorthands, indexeds, preciseness }, key of perFunctions {
-					var hash = Object.keys(shorthands).join()
+				for var function, key of perFunctions {
+					var hash = Object.keys(function.shorthands).join()
 
 					if hash.length > 0 {
 						if var perArgument ?= perArguments[hash] {
 							perArgument.functions.push(key)
-							perArgument.preciseness[key] = preciseness
+							perArgument.preciseness[key] = function.preciseness
 						}
 						else {
 							perArguments[hash] = {
 								functions: [key]
 								preciseness: {
-									[key]: preciseness
+									[key]: function.preciseness
 								}
-								shorthands
-								indexeds
+								shorthands: function.shorthands
+								indexeds: function.indexeds
 							}
 						}
 					}
@@ -1804,14 +1804,14 @@ namespace Matching {
 					var perType = {}
 
 					for var function in functions {
-						for var parameter in function.parameters() {
-							if parameter.getExternalName() == name {
-								types.push(parameter.type())
+						for var param in function.parameters() {
+							if param.getExternalName() == name {
+								types.push(param.type())
 
-								var key = parameter.type().hashCode()
+								var key = param.type().hashCode()
 
-								if var types ?= perType[key] {
-									types.push(function)
+								if var funcs ?= perType[key] {
+									funcs.push(function)
 								}
 								else {
 									perType[key] = [function]
@@ -1901,12 +1901,7 @@ namespace Matching {
 						}
 					}
 
-					var match = CallMatch.new(
-						function
-						positions
-					)
-
-					return PreciseCallMatchResult.new(matches: [match])
+					return PreciseCallMatchResult.new(matches: [CallMatch.new(function, positions)])
 				}
 				else {
 					var possibilities = []
@@ -1978,20 +1973,19 @@ namespace Matching {
 
 				var arguments = [argumentTypes[index] for var { index } in indexeds]
 				var functions = [assessment.functions[key] for var key in possibleFunctions]
-
-				var route = Build.getRoute(assessment, excludes, functions, node)
+				var newRoute = Build.getRoute(assessment, excludes, functions, node)
 
 				if #indexeds == #argumentTypes {
-					return matchArguments(assessment, route, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node)
+					return matchArguments(assessment, newRoute, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node)
 				}
 				else {
-					match var result = matchArguments(assessment, route, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node) {
+					match var result = matchArguments(assessment, newRoute, arguments, excludes, indexeds, generics, fitting, fittingSpread, mode, node) {
 						is PreciseCallMatchResult {
 							var precise = possibleFunctions.every((key, _, _) => preciseness[key])
 
 							if mode == .AllMatches {
-								for var match in result.matches {
-									resolveCurryMatch(match, nameds, shorthands)
+								for var m in result.matches {
+									resolveCurryMatch(m, nameds, shorthands)
 								}
 
 								if precise {
@@ -2004,8 +1998,8 @@ namespace Matching {
 								}
 							}
 							else if precise {
-								for var match in result.matches {
-									resolveCallMatch(match, nameds, shorthands, arguments, true)
+								for var m in result.matches {
+									resolveCallMatch(m, nameds, shorthands, arguments, true)
 								}
 
 								return result
@@ -2019,15 +2013,15 @@ namespace Matching {
 						is LenientCallMatchResult {
 							if result.possibilities.length == 1 {
 								if result.matches.length == 1 {
-									var match = result.matches[0]
+									var m = result.matches[0]
 
-									if !resolveCallMatch(match, nameds, shorthands, arguments, false) {
+									if !resolveCallMatch(m, nameds, shorthands, arguments, false) {
 										return null
 									}
 
-									var possibilities = [match.function]
+									var possibilities = [m.function]
 
-									return LenientCallMatchResult.new(possibilities, match.positions)
+									return LenientCallMatchResult.new(possibilities, m.positions)
 								}
 								else if ?#result.positions || ?#result.labels {
 									throw NotImplementedException.new()
@@ -2139,7 +2133,7 @@ namespace Matching {
 			}
 		} # }}}
 
-		func resolveCallMatch(match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}, arguments: Type[], precise: Boolean): Boolean { # {{{
+		func resolveCallMatch(#[overwrite] match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}, arguments: Type[], precise: Boolean): Boolean { # {{{
 			var indexes = {}
 			var positions = []
 			var lefts = []
@@ -2153,7 +2147,7 @@ namespace Matching {
 
 					if !precise && ?latest {
 
-						for var left, index in lefts while fill {
+						for var left in lefts while fill {
 							if isUnpreciseMatch(latest, left.type()) {
 								fill = false
 							}
@@ -2182,7 +2176,7 @@ namespace Matching {
 					var mut fill = true
 
 					if !precise && ?latest {
-						for var left, index in lefts while fill {
+						for var left in lefts while fill {
 							if isUnpreciseMatch(latest, left.type()) {
 								fill = false
 							}
@@ -2257,7 +2251,7 @@ namespace Matching {
 			return true
 		} # }}}
 
-		func resolveCurryMatch(match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}): Void { # {{{
+		func resolveCurryMatch(#[overwrite] match: CallMatch, nameds: NamingArgument{}, shorthands: NamingArgument{}): Void { # {{{
 			var indexes = {}
 			var positions = []
 			var mut shift = 0
@@ -2356,10 +2350,10 @@ namespace Matching {
 			}
 
 			items.sort((a, b) => {
-				if a.children:!(Array).contains(b) {
+				if a.children:!!!(Array).contains(b) {
 					return 1
 				}
-				if b.children:!(Array).contains(a) {
+				if b.children:!!!(Array).contains(a) {
 					return -1
 				}
 

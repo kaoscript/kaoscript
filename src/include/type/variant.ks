@@ -20,8 +20,8 @@ class VariantType extends Type {
 			queue.push(() => {
 				type.setMaster(Type.import(data.master, metadata, references, alterations, queue, scope, node))
 
-				for var { names, type % data } in data.fields {
-					type.addField(names, Type.import(data, metadata, references, alterations, queue, scope, node))
+				for var { names, type % fieldData } in data.fields {
+					type.addField(names, Type.import(fieldData, metadata, references, alterations, queue, scope, node))
 				}
 
 				type.buildAliases(node)
@@ -360,16 +360,16 @@ class VariantType extends Type {
 				var root = @enum is EnumType ? @master : @enum
 
 				for var { names, type }, index in @fields {
-					var ctrl = block
+					var fieldCtrl = block
 						.newControl()
 						.code(`if(variant === `).compile(root).code(`.\(names[0]))`)
 						.step()
 
 					if @deferrable {
-						ctrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(type.canBeDeferred() ? ', mapper' : ''))`)
+						fieldCtrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(type.canBeDeferred() ? ', mapper' : ''))`)
 					}
 					else {
-						var line = ctrl.newLine().code(`return `)
+						var line = fieldCtrl.newLine().code(`return `)
 
 						if type is ObjectType {
 							type.toBlindTestFragments(funcname, varname, casting, false, false, generics, null, Junction.NONE, line, node)
@@ -381,7 +381,7 @@ class VariantType extends Type {
 						line.done()
 					}
 
-					ctrl.done()
+					fieldCtrl.done()
 				}
 
 				block

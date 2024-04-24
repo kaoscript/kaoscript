@@ -115,7 +115,7 @@ class ObjectBinding extends Expression {
 				if element.isRest() {
 					@testType.setRestType(type)
 				}
-				else if @rest || (element.isRequired() && !(type.isAny() && type.isNullable())) {
+				else if @rest || element.isRequired() || !(type.isAny() && type.isNullable()) {
 					@testType.addProperty(element.name(), element.hasComputedKey(), type)
 				}
 			}
@@ -156,7 +156,6 @@ class ObjectBinding extends Expression {
 	} # }}}
 	isAssignable() => true
 	isDeclarable() => true
-	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { # {{{
 		for var element in @elements {
 			if element.isDeclararingVariable(name) {
@@ -166,6 +165,8 @@ class ObjectBinding extends Expression {
 
 		return false
 	} # }}}
+	isImmutable() => @immutable
+	isInferable() => true
 	isRedeclared() { # {{{
 		for var element in @elements {
 			if element.isRedeclared() {
@@ -176,9 +177,9 @@ class ObjectBinding extends Expression {
 		return false
 	} # }}}
 	isSplitAssignment() => @flatten && @elements.length > 1
-	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
 		for var element in @elements {
-			element.listAssignments(array, immutable)
+			element.listAssignments(array, immutable, overwrite)
 		}
 
 		return array
@@ -340,13 +341,16 @@ class ObjectBindingElement extends Expression {
 		@named: Boolean						= true
 		@nullable: Boolean					= false
 		@operator: AssignmentOperatorKind	= .Equals
-		@prepared: Boolean					 = false
+		@overwrite: Boolean					= false
+		@prepared: Boolean					= false
 		@rest: Boolean						= false
 		@sameName: Boolean					= false
 		@thisAlias: Boolean					= false
 		@type: Type							= AnyType.Unexplicit
 	}
 	analyse() { # {{{
+		@overwrite = @hasAttribute('overwrite')
+
 		for var modifier in @data.modifiers {
 			match modifier.kind {
 				ModifierKind.Computed {
@@ -507,7 +511,9 @@ class ObjectBindingElement extends Expression {
 	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
-	listAssignments(array: Array, immutable: Boolean? = null) => @internal?.listAssignments(array, @immutable) ?? array
+	// TODO!
+	// listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal?.listAssignments(array, immutable ?||?, overwrite ?||? @overwrite) ?? array
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal?.listAssignments(array, ?immutable ? ?@immutable ? immutable || @immutable : immutable : @immutable, ?overwrite ? ?@overwrite ? overwrite || @overwrite : overwrite : @overwrite) ?? array
 	name(): String? => @external?.value()
 	setAssignment(@assignment)
 	toFragments(fragments) { # {{{
@@ -517,12 +523,12 @@ class ObjectBindingElement extends Expression {
 			fragments.code('...')
 		}
 
-		if $keywords[this.name()] {
+		if $keywords[@name()] {
 			if @computed {
-				fragments.code(`[\(this.name())]: `).compile(@internal)
+				fragments.code(`[\(@name())]: `).compile(@internal)
 			}
 			else {
-				fragments.code(`\(this.name()): `).compile(@internal)
+				fragments.code(`\(@name()): `).compile(@internal)
 			}
 		}
 		else {
@@ -530,7 +536,12 @@ class ObjectBindingElement extends Expression {
 				fragments.code('[').compile(@external).code(']: ').compile(@internal)
 			}
 			else if @sameName && !@thisAlias {
-				fragments.compile(@internal)
+				if @internal.isRenamed() {
+					fragments.code(`\(@name()): `).compile(@internal)
+				}
+				else {
+					fragments.compile(@internal)
+				}
 			}
 			else {
 				fragments.compile(@external).code(': ').compile(@internal)
@@ -548,12 +559,12 @@ class ObjectBindingElement extends Expression {
 			fragments.code('...')
 		}
 
-		if $keywords[this.name()] {
+		if $keywords[@name()] {
 			if @computed {
-				fragments.code(`[\(this.name())]: \(name)`)
+				fragments.code(`[\(@name())]: \(name)`)
 			}
 			else {
-				fragments.code(`\(this.name()): \(name)`)
+				fragments.code(`\(@name()): \(name)`)
 			}
 		}
 		else {
@@ -619,14 +630,14 @@ class ObjectBindingElement extends Expression {
 			fragments.code('...')
 		}
 
-		if $keywords[this.name()] {
+		if $keywords[@name()] {
 			if @computed {
-				fragments.code(`[\(this.name())]: `)
+				fragments.code(`[\(@name())]: `)
 
 				@internal.toParameterFragments(fragments)
 			}
 			else {
-				fragments.code(`\(this.name()): `)
+				fragments.code(`\(@name()): `)
 
 				@internal.toParameterFragments(fragments)
 			}

@@ -8,7 +8,7 @@ type Point3D = Point & {
 }
 
 func foobar(p: Point3D) {
-	var d3 = p:!(Point)
+	var d3 = p:!!(Point)
 
 	echo(d3.x + 1, d3.y + 2)
 }

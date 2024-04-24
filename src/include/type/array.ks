@@ -621,6 +621,11 @@ class ArrayType extends Type {
 
 		return @reference.makeMemberCallee(property, path, generics, node)
 	} # }}}
+	override makeMemberCallee(property, path, reference, generics, node) { # {{{
+		@reference ??= @reference()
+
+		return @reference.makeMemberCallee(property, path, generics, node)
+	} # }}}
 	matchContentOf(value: Type) { # {{{
 		if value.isAny() || value.isArray() {
 			return true
@@ -945,7 +950,7 @@ class ArrayType extends Type {
 		fragments.code('(') if @nullable && junction == Junction.AND
 
 		if @length == 0 && !@destructuring && !@testProperties {
-			fragments.code(`\($runtime.type(node)).isArray(`).compile(node)
+			fragments.code(`\($runtime.type(node)).isArray(`).compileReusable(node)
 
 			if @testRest && !node.isMisfit() {
 				fragments.code($comma)
@@ -956,7 +961,7 @@ class ArrayType extends Type {
 			fragments.code(')')
 		}
 		else {
-			fragments.code(`\($runtime.type(node)).isDexArray(`).compile(node)
+			fragments.code(`\($runtime.type(node)).isDexArray(`).compileReusable(node)
 
 			@toSubtestFragments('value', false, true, @testLength, fragments, node)
 
@@ -964,7 +969,7 @@ class ArrayType extends Type {
 		}
 
 		if @nullable {
-			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+			fragments.code(` || \($runtime.type(node)).isNull(`).compileReusable(node).code(`)`)
 
 			fragments.code(')') if junction == Junction.AND
 		}

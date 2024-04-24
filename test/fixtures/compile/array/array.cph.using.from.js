@@ -13,8 +13,8 @@ module.exports = function() {
 				a.push(values[i].values());
 			}
 			return a;
-		})(), __ks_5 = 0, __ks_4 = __ks_6.length, __ks_values_1; __ks_5 < __ks_4; ++__ks_5) {
-			__ks_values_1 = __ks_6[__ks_5];
+		})(), __ks_5 = 0, __ks_4 = __ks_6.length, value; __ks_5 < __ks_4; ++__ks_5) {
+			value = __ks_6[__ks_5];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

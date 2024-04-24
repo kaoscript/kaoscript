@@ -32,9 +32,11 @@ class ObjectIteration extends IterationNode {
 			}
 		}
 
+		var overwrite = @declaration && @hasAttribute('overwrite')
+
 		if ?@data.key {
 			if @declaration {
-				@bindingScope.define(@data.key.name, @immutable, AnyType.Unexplicit, true, this)
+				@bindingScope.define(@data.key.name, @immutable, AnyType.Unexplicit, true, overwrite, this)
 
 				@defineKey = true
 			}
@@ -55,7 +57,7 @@ class ObjectIteration extends IterationNode {
 				if @declaration {
 					@defineValue = true
 
-					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
+					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, overwrite, this)
 				}
 				else {
 					@bindingScope.checkVariable(name, true, this)

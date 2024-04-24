@@ -10,7 +10,7 @@ enum ANSIColor {
 	DEFAULT
 }
 
-func color(color: ANSIColor) {
+func print(color: ANSIColor) {
 	if color == .BLACK {
 		echo('black')
 	}

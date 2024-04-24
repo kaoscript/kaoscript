@@ -8,8 +8,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		let d3 = p;
-		if(Type.isValue(d3)) {
+		let d3;
+		if((Type.isValue(p) ? (d3 = p, true) : false)) {
 			console.log(d3.x + 1, d3.y + 2);
 		}
 	};

@@ -87,13 +87,13 @@ class TemplateExpression extends Expression {
 			}
 		}
 		else if @isString {
-			var element = @elements[0]
-
-			if element.type().isEnum() {
-				fragments.compile(element).code('.value')
-			}
-			else {
-				fragments.wrap(element)
+			with var element = @elements[0] {
+				if element.type().isEnum() {
+					fragments.compile(element).code('.value')
+				}
+				else {
+					fragments.wrap(element)
+				}
 			}
 
 			for var element in @elements from 1 {

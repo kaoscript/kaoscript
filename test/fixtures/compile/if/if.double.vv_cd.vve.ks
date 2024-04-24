@@ -1,9 +1,9 @@
 class ValueList {
-	getTop(): String => 'foobar'
+	getTop(): String? => 'foobar'
 	hasValues(): Boolean => true
 }
 
-func loadValues(): ValueList {
+func loadValues(): ValueList? {
 	return ValueList.new()
 }
 

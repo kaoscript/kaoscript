@@ -8,8 +8,6 @@ impl String {
 	toString(): String => this
 }
 
-var late x
-
 func foobar() {
 	var late x
 
@@ -17,7 +15,3 @@ func foobar() {
 
 	console.log(`\(x.toString())`)
 }
-
-x = 42
-
-console.log(`\(x.toString())`)

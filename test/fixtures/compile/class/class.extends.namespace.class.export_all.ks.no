@@ -1,0 +1,15 @@
+namespace T {
+	class FooX {
+	}
+
+	var fox = FooX.new()
+
+	export *
+}
+
+var fox = T.FooX.new()
+
+class FooY extends T.FooX {
+}
+
+var foy = FooY.new()

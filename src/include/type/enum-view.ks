@@ -92,16 +92,16 @@ class EnumViewType extends Type {
 			var mut auxiliary = ''
 
 			for var type, name of types {
-				var data = type.toASTData(name)
+				var ast = type.toASTData(name)
 
-				auxiliary += `\(Generator.generate(data))\n`
+				auxiliary += `\(KSGeneration.generate(ast))\n`
 
 				for var field in dynamics[name] {
 					source += `var \(field): \(name) = eval(_\(field))!!\n`
 				}
 			}
 
-			source += `return \(Generator.generate(data.typeSubtypes))\n`
+			source += `return \(KSGeneration.generate(data.typeSubtypes))\n`
 			source += `}`
 
 			var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
@@ -119,7 +119,7 @@ class EnumViewType extends Type {
 			}
 		}
 		else {
-			source += ` => \(Generator.generate(data.typeSubtypes))`
+			source += ` => \(KSGeneration.generate(data.typeSubtypes))`
 
 			var filter = $evaluate($compileTest(source)).__ks_0
 
@@ -162,7 +162,7 @@ class EnumViewType extends Type {
 
 		for var { name } in names {
 			if var value ?= @aliases[name] {
-				result += value.originals().length:!(Number)
+				result += value.originals().length:!!!(Number)
 			}
 			else {
 				result += 1

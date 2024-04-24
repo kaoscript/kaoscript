@@ -116,9 +116,11 @@ class NamespaceDeclaration extends Statement {
 	} # }}}
 	getTypeTestVariable() => @parent.recipient().authority().getTypeTestVariable()
 	includePath() => null
-	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
-		if var var ?= @scope.getDefinedVariable(variable.name) {
-			var.setDeclaredType(variable.type)
+	initializeVariable({name, type}: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
+		if var variable ?= @scope.getDefinedVariable(name) {
+			variable.setDeclaredType(type)
+
+			return variable.getRealType()
 		}
 	} # }}}
 	name() => @name
@@ -138,22 +140,22 @@ class NamespaceDeclaration extends Statement {
 		}
 
 		if @testIndex > 0 {
-			var line = object.newLine().code(`__ksType: [`)
+			var typesLine = object.newLine().code(`__ksType: [`)
 			var mut index = 0
 
 			for var variable, name of @exports {
 				var type = variable.getDeclaredType()
 
 				if type.hasTest() {
-					line.code($comma) if index > 0
+					typesLine.code($comma) if index > 0
 
-					line.code(type.getTestName())
+					typesLine.code(type.getTestName())
 
 					index += 1
 				}
 			}
 
-			line.code(']').done()
+			typesLine.code(']').done()
 		}
 
 		object.done()
@@ -164,33 +166,36 @@ class NamespaceDeclaration extends Statement {
 		var block = line.newBlock()
 
 		if ?#@tests {
-			var line = block.newLine().code(`\($runtime.immutableScope(this))\(@testVariable) = `)
-			var object = line.newObject()
+			var testsLine = block.newLine().code(`\($runtime.immutableScope(this))\(@testVariable) = `)
+			var object = testsLine.newObject()
 
 			for var { type, name } in @tests {
-				var funcname = `is\(name)`
-				var line = object.newLine().code(`\(funcname): `)
+				with var funcLine = object.newLine() {
+					var funcName = `is\(name)`
 
-				type.toBlindTestFunctionFragments(funcname, 'value', false, true, null, line, this)
+					funcLine.code(`\(funcName): `)
 
-				line.done()
+					type.toBlindTestFunctionFragments(funcName, 'value', false, true, null, funcLine, this)
+
+					funcLine.done()
+				}
 
 				if type.isVariant() && type.canBeDeferred() {
 					var generics = type.generics()
 
 					for var { type % subtype }, index in type.discard().getVariantType().getFields() {
-						var funcname = `is\(name)__\(index)`
-						var line = object.newLine().code(`\(funcname): `)
+						var funcName = `is\(name)__\(index)`
+						var funcLine = object.newLine().code(`\(funcName): `)
 
-						subtype.toBlindTestFunctionFragments(funcname, 'value', false, false, generics, line, this)
+						subtype.toBlindTestFunctionFragments(funcName, 'value', false, false, generics, funcLine, this)
 
-						line.done()
+						funcLine.done()
 					}
 				}
 			}
 
 			object.done()
-			line.done()
+			testsLine.done()
 		}
 
 		for var node in @topNodes {

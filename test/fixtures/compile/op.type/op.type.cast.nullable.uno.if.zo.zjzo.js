@@ -8,8 +8,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		let d3 = Helper.assert(p, "\"Point3D\"", 1, __ksType.isPoint3D);
-		if(Type.isValue(d3)) {
+		let d3;
+		if((Type.isValue(Helper.assert(p, "\"Point3D\"", 1, __ksType.isPoint3D)) ? (d3 = p, true) : false)) {
 			console.log(d3.x + 1, d3.y + 2, d3.z + 3);
 		}
 	};

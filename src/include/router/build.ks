@@ -60,13 +60,13 @@ namespace Build {
 				parameters.functions[function.index()] = function
 
 				for var parameter in function.parameters() when !parameter.isOnlyLabeled() {
-					var name = parameter.getExternalName() ?? '_'
+					var external = parameter.getExternalName() ?? '_'
 
-					if var group ?= parameters.names[name] {
+					if var group ?= parameters.names[external] {
 						group.push(`\(function.index())`)
 					}
 					else {
-						parameters.names[name] = [`\(function.index())`]
+						parameters.names[external] = [`\(function.index())`]
 					}
 				}
 			}
@@ -239,20 +239,20 @@ namespace Build {
 		): Void { # {{{
 			if type.isSplittable() {
 				var types = type.split([])
-				var union = UnionMatch.new(
+				var newUnion = UnionMatch.new(
 					function
 					length: types.length
 					matches: []
 				)
 
 				if nullTested {
-					for var type in types when !type.isNull() {
-						addGroupRow(group, name, ignoreIndistinguishable, node, function, parameters, parameter, type, nullTested, union, paramIndex, argIndex)
+					for var subtype in types when !subtype.isNull() {
+						addGroupRow(group, name, ignoreIndistinguishable, node, function, parameters, parameter, subtype, nullTested, newUnion, paramIndex, argIndex)
 					}
 				}
 				else {
-					for var type in types {
-						addGroupRow(group, name, ignoreIndistinguishable, node, function, parameters, parameter, type, nullTested, union, paramIndex, argIndex)
+					for var subtype in types {
+						addGroupRow(group, name, ignoreIndistinguishable, node, function, parameters, parameter, subtype, nullTested, newUnion, paramIndex, argIndex)
 					}
 				}
 			}
@@ -263,8 +263,8 @@ namespace Build {
 				var mut addable = true
 
 				if rest {
-					for var parameter in parameters from paramIndex + 1 while addable {
-						if type.isAssignableToVariable(parameter.type(), false, false, true) {
+					for var param in parameters from paramIndex + 1 while addable {
+						if type.isAssignableToVariable(param.type(), false, false, true) {
 							addable = false
 						}
 					}
@@ -482,21 +482,22 @@ namespace Build {
 			stepCount: Number
 			rest: Boolean
 			argIndex: Number
-			key: String
-			types: RowType[]
+			mut key: String
+			mut types: RowType[]
 			mut names: String[]{}?
 			type: Type
 		): Void { # {{{
 			if type.isUnion() {
-				for var value in type.discard():!(UnionType).types() {
+				for var value in type.discard():!!!(UnionType).types() {
 					expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
 				}
 			}
 			else {
-				var key = `\(key);\(argIndex);\(type.hashCode())`
 				var parameter = parameters[paramIndex]
 
-				var types = [
+				key = `\(key);\(argIndex);\(type.hashCode())`
+
+				types = [
 					...types
 					RowType.new(
 						index: argIndex
@@ -509,13 +510,13 @@ namespace Build {
 				if ?names {
 					names = {...names}
 
-					var name = parameter.getExternalName()
+					var external = parameter.getExternalName()
 
-					if var hashes ?= names[name] {
-						names[name] = [...hashes, type.hashCode()]
+					if var hashes ?= names[external] {
+						names[external] = [...hashes, type.hashCode()]
 					}
 					else {
-						names[name] = [type.hashCode()]
+						names[external] = [type.hashCode()]
 					}
 				}
 
@@ -552,7 +553,7 @@ namespace Build {
 					}
 				}
 				else {
-					delta += parameter.min():!(Number)
+					delta += parameter.min():!!!(Number)
 
 					if d == 0 {
 						addToCount = false
@@ -690,10 +691,10 @@ namespace Build {
 
 				row.key += key
 				row.types.push(RowType.new(
-					index: (afterRest ? argIndex - argCount : argIndex):!(Number)
-					type: type:!(Type)
+					index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+					type: type:!!!(Type)
 					rest
-					parameter: index:!(Number)
+					parameter: index:!!!(Number)
 				))
 
 				if rest {
@@ -723,10 +724,10 @@ namespace Build {
 
 				if index == lastIndex {
 					column.columns[hash] = TreeLeaf.new(
-						index: (afterRest ? argIndex - argCount : argIndex):!(Number)
-						type: type:!(Type)
-						min: min:!(Number)
-						max: max:!(Number)
+						index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+						type: type:!!!(Type)
+						min: min:!!!(Number)
+						max: max:!!!(Number)
 						variadic
 						rest
 						isNode: false
@@ -734,7 +735,7 @@ namespace Build {
 							[key]: TreeParameter.new(
 								key
 								function
-								parameter: index:!(Number)
+								parameter: index:!!!(Number)
 								rows: [row.key]
 							)
 						}
@@ -746,17 +747,17 @@ namespace Build {
 				}
 				else {
 					column.columns[hash] = TreeBranch.new(
-						index: (afterRest ? argIndex - argCount : argIndex):!(Number)
-						type: type:!(Type)
-						min: min:!(Number)
-						max: max:!(Number)
+						index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+						type: type:!!!(Type)
+						min: min:!!!(Number)
+						max: max:!!!(Number)
 						variadic
 						rest
 						parameters: {
 							[key]: TreeParameter.new(
 								key
 								function
-								parameter: index:!(Number)
+								parameter: index:!!!(Number)
 								rows: [row.key]
 							)
 						}
@@ -835,7 +836,7 @@ namespace Build {
 					var hash = type.hashCode()
 
 					if var match ?= branch.columns[hash] {
-						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map(({ type }, _, _) => type), [match:!!(TreeLeaf).function, row.function], node)
+						SyntaxException.throwIndistinguishableFunctions(name, match.rows[0].types.map((val, _, _) => val.type), [match:!!!(TreeLeaf).function, row.function], node)
 					}
 
 					var key = `:\(row.function.index()):\(parameter)`
@@ -887,12 +888,12 @@ namespace Build {
 						)
 					}
 					else {
-						var branch: TreeBranch = branch.columns[hash]!!
+						var builtBranch: TreeBranch = branch.columns[hash]!!
 
-						branch.rows.push(row)
+						builtBranch.rows.push(row)
 
-						if !?branch.parameters[key] {
-							branch.parameters[key] = TreeParameter.new(
+						if !?builtBranch.parameters[key] {
+							builtBranch.parameters[key] = TreeParameter.new(
 								key
 								function: row.function
 								parameter
@@ -900,7 +901,7 @@ namespace Build {
 							)
 						}
 						else {
-							branch.parameters[key].rows.push(row.key)
+							builtBranch.parameters[key].rows.push(row.key)
 						}
 					}
 				}
@@ -1000,9 +1001,9 @@ namespace Build {
 						var branch: TreeBranch = tree.columns[hash]!!
 
 						if branch.index < 0 && index >= 0 {
-							for var row in branch.rows {
-								for var type in row.types when type.index == branch.index {
-									type.index = index
+							for var branchRow in branch.rows {
+								for var rowType in branchRow.types when rowType.index == branch.index {
+									rowType.index = index
 								}
 							}
 
@@ -1108,7 +1109,7 @@ namespace Build {
 					for var parameter, key of first.parameters {
 						if var rows ?= param2row[key] {
 							for var row in parameter.rows {
-								return unless rows:!(Array).contains(row)
+								return unless rows:!!!(Array).contains(row)
 							}
 						}
 					}
@@ -1208,12 +1209,12 @@ namespace Build {
 						column.min = 0
 						column.variadic = true
 
-						for var col, type of column.columns {
-							col.max = branch.columns[type].max
+						for var col, colType of column.columns {
+							col.max = branch.columns[colType].max
 
-							Object.delete(branch.columns, type)
+							Object.delete(branch.columns, colType)
 
-							branch.order.remove(type)
+							branch.order.remove(colType)
 						}
 					}
 				}
@@ -1330,14 +1331,14 @@ namespace Build {
 				var node = tree.columns[key]
 
 				if var m ?= mins[key] {
-					applyMin(node, m:!(Array))
+					applyMin(node, m:!!!(Array))
 				}
 				else {
 					node.min = 0
 					node.variadic = true
 
 					if node.isNode {
-						applyMin2(node:!!(TreeBranch), mins, type)
+						applyMin2(node:!!!(TreeBranch), mins, type)
 					}
 				}
 			}
@@ -1374,9 +1375,9 @@ namespace Build {
 				if var m ?= values?[type.parameter] {
 					if var value ?= m.shift() {
 						if value is Array {
-							var m = value.pop()
-							if value.every((m, _, _) => ancestors.contains(m)) {
-								setter(node, m)
+							var n = value.pop()
+							if value.every((k, _, _) => ancestors.contains(k)) {
+								setter(node, n)
 							}
 						}
 						else {
@@ -1788,7 +1789,7 @@ namespace Build {
 
 		for var row of group.rows when ?row.names {
 			var names = Object.keys(row.names).sort()
-			var key = names.map((name, _, _) => `;\(name);\(row.names[name].sort().join('|'))`).join(',')
+			var key = names.map((rowName, _, _) => `;\(rowName);\(row.names[rowName].sort().join('|'))`).join(',')
 
 			if var function ?= perNames[key] {
 				SyntaxException.throwIndistinguishableFunctions(name, [function, row.function], node) unless function == row.function
@@ -1830,7 +1831,7 @@ namespace Build {
 				key
 				node
 				type: node.type
-				usage: node.isNode ? node:!!(TreeBranch).rows.length : 1
+				usage: node.isNode ? node:!!!(TreeBranch).rows.length : 1
 				children: []
 				isAny: node.type.isAny() || node.type.isNull()
 				variadic: node.index < 0 || node.variadic
@@ -1872,11 +1873,11 @@ namespace Build {
 
 		// echo([item.key for var item in items])
 		items.sort((a, b) => {
-			if a.children:!(Array).contains(b) {
+			if a.children:!!!(Array).contains(b) {
 				// echo(a.key, b.key, 1, 'b⊂a')
 				return 1
 			}
-			if b.children:!(Array).contains(a) {
+			if b.children:!!!(Array).contains(a) {
 				// echo(a.key, b.key, -1, 'a⊂b')
 				return -1
 			}

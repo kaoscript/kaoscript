@@ -1,10 +1,7 @@
-extern console: {
-	log(...args)
+func foobar(x) {
+	var mut y = null
+
+	y ?= x()
+
+	echo(y)
 }
-
-var dyn foo = 'otto'
-var dyn bar
-
-bar ?= foo
-
-console.log(foo, bar)

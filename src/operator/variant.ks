@@ -65,25 +65,27 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 
-		var type = @right.type()
+		var rightType = @right.type()
 
-		if type.isInoperative() {
-			TypeException.throwUnexpectedInoperative(@right, this)
+		if rightType.isInoperative() {
+			TypeException.throwUnexpectedInoperative(rightType, this)
 		}
 
-		if type.isVariant() {
-			var root = type.discard()
+		if rightType.isVariant() {
+			var root = rightType.discard()
 			var variant = root.getVariantType()
 
 			if variant.canBeBoolean() {
 				@name = root.getVariantName()
+				@type = rightType.clone()
+					..addSubtype('true', @scope.reference('Boolean'), this)
 			}
 			else {
 				TypeException.throwNotBooleanVariant(@right, this)
@@ -93,21 +95,18 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 			TypeException.throwNotBooleanVariant(@right, this)
 		}
 
-		if @left is IdentifierLiteral {
-			if @condition {
-				if @lateinit {
-					@statement.initializeLateVariable(@left.name(), type, true)
-				}
-				else {
-					@left.type(type, @scope, this)
-				}
+		if @left.isVariable() {
+			if @condition && @lateinit {
+				@statement.initializeLateVariable(@left.name(), @type, true)
 			}
 			else {
-				@left.type(type, @scope, this)
+				@left.initializeVariables(@type, this)
 			}
 		}
 	} # }}}
 	defineVariables(left) { # {{{
+		return if @declaration
+
 		if @condition {
 			var names = []
 
@@ -138,7 +137,7 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left.isVariable()
-				type: @right.type()
+				type: @type
 			}
 		}
 
@@ -159,7 +158,14 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 		fragments.code(' : null')
 	} # }}}
 	toConditionFragments(fragments, mode, junction) { # {{{
-		fragments.wrapReusable(@right).code(`.\(@name) ? (`)
+		if @right.isReusingName() && !@right.isReusable() {
+			fragments.code('(').wrapReusable(@right).code(')')
+		}
+		else {
+			fragments.compile(@right)
+		}
+
+		fragments.code(`.\(@name) ? (`)
 
 		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
@@ -197,7 +203,8 @@ class AssignmentOperatorVariantNo extends AssignmentOperatorVariantYes {
 
 class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 	private late {
-		@names: String[]	= []
+		@names: String[]		= []
+		@nullables: Boolean[]	= []
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
@@ -207,45 +214,99 @@ class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 		for var operand, index in @operands {
 			operand.prepare()
 
-			var type = operand.type()
+			var mut type = operand.type()
 
 			if type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
 			if index < last {
-				if type.isVariant() {
-					var root = type.discard()
-					var variant = root.getVariantType()
-
-					unless variant.canBeBoolean() {
-						TypeException.throwNotBooleanVariant(operand, this)
-					}
-
-					@names.push(root.getVariantName())
-				}
-				else {
+				unless type.isVariant() {
 					TypeException.throwNotBooleanVariant(operand, this)
 				}
 
+				var root = type.discard()
+				var variant = root.getVariantType()
+
+				unless variant.canBeBoolean() {
+					TypeException.throwNotBooleanVariant(operand, this)
+				}
+
+				@names.push(root.getVariantName())
+				@nullables.push(type.isNullable())
+
 				operand.acquireReusable(true)
 				operand.releaseReusable()
-			}
 
-			var mut ne = true
+				match type {
+					ReferenceType {
+						if type.isNullable() {
+							type = type.setNullable(false)
+						}
+						else {
+							type = type.clone()
+						}
 
-			for var tt in types while ne {
-				if tt.equals(type) {
-					ne = false
+						type.addSubtype('true', @scope.reference('Boolean'), this)
+					}
+					UnionType {
+						var name = root.getVariantName()
+						var unionTypes = []
+
+						for var mut unionType in type.types() {
+							if var subtypes ?#= unionType.getSubtypes() {
+								if var filtereds ?#= [subtype for var subtype in subtypes when variant.getMainName(subtype.name) != 'false'] {
+									if unionType.isNullable() {
+										unionType = unionType.setNullable(false)
+									}
+									else {
+										unionType = unionType.clone()
+									}
+
+									unionType.setSubtypes(filtereds)
+
+									unionTypes.push(unionType)
+								}
+							}
+							else {
+								if unionType.isNullable() {
+									unionType = unionType.setNullable(false)
+								}
+								else {
+									unionType = unionType.clone()
+								}
+
+								unionType.addSubtype('true', @scope.reference('Boolean'), this)
+
+								unionTypes.push(unionType)
+							}
+						}
+
+						type = Type.union(@scope, ...unionTypes)
+					}
+					else {
+						NotImplementedException.throw(this)
+					}
+				}
+
+				var mut ne = true
+
+				for var tt in types while ne {
+					if tt.equals(type) {
+						ne = false
+					}
+				}
+
+				if ne {
+					types.push(type)
 				}
 			}
-
-			if ne {
+			else {
 				types.push(type)
 			}
 		}
 
-		if types.length == 1 {
+		if #types == 1 {
 			@type = types[0]
 		}
 		else {
@@ -258,11 +319,23 @@ class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 		var last = @operands.length - 1
 
 		for var operand, index in @operands to~ -1 {
-			fragments
-				.compileReusable(operand)
-				.code(`.\(@names[index]) ? `)
-				.compile(operand)
-				.code(' : ')
+			if @nullables[index] {
+				fragments
+					.code(`(\($runtime.type(this)).isValue(`)
+					.compileReusable(operand)
+					.code(') && ')
+					.compile(operand)
+					.code(`.\(@names[index])) ? `)
+					.compile(operand)
+					.code(' : ')
+			}
+			else {
+				fragments
+					.compileReusable(operand)
+					.code(`.\(@names[index]) ? `)
+					.compile(operand)
+					.code(' : ')
+			}
 		}
 
 		fragments.compile(@operands[last])

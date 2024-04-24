@@ -5,7 +5,7 @@ class HollowScope extends Scope {
 		@variables					= {}
 	}
 	constructor(@parent)
-	define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable { # {{{
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
 		if @hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -26,7 +26,7 @@ class HollowScope extends Scope {
 
 		return variable
 	} # }}}
-	defineVariable(variable: Variable, node: AbstractNode) { # {{{
+	override defineVariable(variable, node) { # {{{
 		var name = variable.name()
 
 		@parent.defineVariable(variable, node)

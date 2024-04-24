@@ -10,6 +10,10 @@ class DeferredType extends Type {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): DeferredType { # {{{
 			var type = DeferredType.new(data.name, null, scope)
 
+			if data.nullable {
+				type._nullable = true
+			}
+
 			if ?data.constraint {
 				queue.push(() => {
 					type._constraint = Type.import(data.type, metadata, references, alterations, queue, scope, node)

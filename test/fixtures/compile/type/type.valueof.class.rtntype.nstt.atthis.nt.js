@@ -35,8 +35,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(x) {
-		let value = x.__ks_func_value_0();
-		if(Type.isValue(value)) {
+		let value, __ks_0;
+		if((Type.isValue(__ks_0 = x.__ks_func_value_0()) ? (value = __ks_0, true) : false)) {
 			value.print();
 		}
 	};

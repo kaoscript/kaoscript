@@ -1,0 +1,1 @@
+SyntaxException: Variable "foo" is not an overloadable function (fixtures/compile/variable/variable.overwrite.n1=var_dyn.n1=func.ks:3)

@@ -1,3 +1,3 @@
 func foobar(value) {
-	var values = value:!!(String[])
+	var values = value:!!!(String[])
 }

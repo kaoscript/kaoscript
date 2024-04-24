@@ -3,9 +3,9 @@ class Foobar {
 }
 
 func clone(source: Foobar): Foobar {
-	var clone = Foobar.new()
+	var result = Foobar.new()
 
-	clone.args = {...source.args}
+	result.args = {...source.args}
 
-	return clone
+	return result
 }

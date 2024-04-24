@@ -13,15 +13,15 @@
 #![rules(ignore-misfit)]
 
 import {
-	'../package.json' => metadata
-	'./fs.js'
+	'../package.json' => $metadata
+	'./fs.js' => $fs
 	'node:path' {
 		var sep: String
 		func basename(path: String): String
 		func dirname(path: String): String
 		func join(...paths: String): String
 		func relative(from: String, to: String): String
-	}
+	} => $path
 }
 
 include {
@@ -174,7 +174,7 @@ export class Compiler {
 		@options = $expandOptions(@options)
 	} # }}}
 	initiate(data: String? = null) { # {{{
-		@module = Module.new(data ?? fs.readFile(@file), this, @file)
+		@module = Module.new(data ?? $fs.readFile(@file), this, @file)
 
 		@module.initiate()
 
@@ -197,10 +197,10 @@ export class Compiler {
 	} # }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): valueof @module
-	readFile() => fs.readFile(@file)
+	readFile() => $fs.readFile(@file)
 	setArguments(arguments: Array, module: String? = null, node: AbstractNode? = null) => @module.setArguments(arguments, module, node)
 	sha256(file, data? = null) { # {{{
-		return @hashes[file] ?? (@hashes[file] <- fs.sha256(data ?? fs.readFile(file)))
+		return @hashes[file] ?? (@hashes[file] <- $fs.sha256(data ?? $fs.readFile(file)))
 	} # }}}
 	toExports() => @module.toExports()
 	toHashes() => @module.toHashes()
@@ -222,7 +222,7 @@ export class Compiler {
 	toSourceMap() => @module.toSourceMap()
 	toVariationId() => @module.toVariationId()
 	writeFiles() { # {{{
-		fs.mkdir(path.dirname(@file))
+		$fs.mkdir($path.dirname(@file))
 
 		if @module.isBinary() {
 			@writeBinaryFiles()
@@ -234,7 +234,7 @@ export class Compiler {
 	private writeBinaryFiles() { # {{{
 		var variationId = @module.toVariationId()
 
-		fs.writeFile(getBinaryPath(@file, variationId), @toSource())
+		$fs.writeFile(getBinaryPath(@file, variationId), @toSource())
 
 		@writeHashFile(variationId)
 	} # }}}
@@ -244,7 +244,7 @@ export class Compiler {
 		var dyn data
 
 		try {
-			data = JSON.parse(fs.readFile(hashPath))
+			data = JSON.parse($fs.readFile(hashPath))
 		}
 		catch {
 			data = {
@@ -262,16 +262,16 @@ export class Compiler {
 			}
 		}
 
-		fs.writeFile(hashPath, JSON.stringify(data))
+		$fs.writeFile(hashPath, JSON.stringify(data))
 	} # }}}
 	private writeModuleFiles() { # {{{
 		var variationId = @module.toVariationId()
 
-		fs.writeFile(getBinaryPath(@file, variationId), @toSource())
+		$fs.writeFile(getBinaryPath(@file, variationId), @toSource())
 
-		fs.writeFile(getRequirementsPath(@file), JSON.stringify(@toRequirements(), fs.escapeJSON))
+		$fs.writeFile(getRequirementsPath(@file), JSON.stringify(@toRequirements(), $fs.escapeJSON))
 
-		fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(@toExports(), fs.escapeJSON))
+		$fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(@toExports(), $fs.escapeJSON))
 
 		@writeHashFile(variationId)
 	} # }}}
@@ -280,11 +280,11 @@ export class Compiler {
 			throw Error.new('Undefined option: output')
 		}
 
-		fs.mkdir(@options.output)
+		$fs.mkdir(@options.output)
 
-		var filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.js'
+		var filename = $path.join(@options.output, $path.basename(@file)).slice(0, -3) + '.js'
 
-		fs.writeFile(filename, @toSource())
+		$fs.writeFile(filename, @toSource())
 
 		return this
 	} # }}}
@@ -296,35 +296,35 @@ export func compileFile(file, options? = null) { # {{{
 	return compiler.compile().toSource()
 } # }}}
 
-export func getBinaryPath(file, variationId? = null) => fs.hidden(file, variationId, $extensions.binary)
+export func getBinaryPath(file, variationId? = null) => $fs.hidden(file, variationId, $extensions.binary)
 
-export func getExportsPath(file, variationId) => fs.hidden(file, variationId, $extensions.exports)
+export func getExportsPath(file, variationId) => $fs.hidden(file, variationId, $extensions.exports)
 
-export func getHashPath(file) => fs.hidden(file, null, $extensions.hash)
+export func getHashPath(file) => $fs.hidden(file, null, $extensions.hash)
 
-export func getRequirementsPath(file) => fs.hidden(file, null, $extensions.requirements)
+export func getRequirementsPath(file) => $fs.hidden(file, null, $extensions.requirements)
 
 export func isUpToDate(file, variationId, source) { # {{{
 	var late data
 	try {
-		data = JSON.parse(fs.readFile(getHashPath(file)))
+		data = JSON.parse($fs.readFile(getHashPath(file)))
 	}
 	catch {
 		return false
 	}
 
-	if !data.variations:!(Array).contains(variationId) {
+	if !data.variations:!!!(Array).contains(variationId) {
 		return false
 	}
 
-	var root = path.dirname(file)
+	var root = $path.dirname(file)
 
 	for var hash, name of data.hashes {
 		if name == '.' {
-			return null if fs.sha256(source) != hash
+			return null if $fs.sha256(source) != hash
 		}
 		else {
-			return null if fs.sha256(fs.readFile(path.join(root, name))) != hash
+			return null if $fs.sha256($fs.readFile($path.join(root, name))) != hash
 		}
 	}
 

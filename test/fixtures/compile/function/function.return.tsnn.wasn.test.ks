@@ -1,6 +1,6 @@
-func foobar(foobar: String?): String {
-	if ?foobar {
-		return foobar
+func foobar(value: String?): String {
+	if ?value {
+		return value
 	}
 	else {
 		return 'foobar'

@@ -4,12 +4,12 @@ class StructType extends Type {
 			var value = StructType.new(scope)
 
 			queue.push(() => {
-				var mut index = 0
+				var mut fieldIndex = 0
 
 				for var type, name of data.fields {
-					value.addField(StructFieldType.import(index, name, type, metadata, references, alterations, queue, scope, node))
+					value.addField(StructFieldType.import(fieldIndex, name, type, metadata, references, alterations, queue, scope, node))
 
-					index += 1
+					fieldIndex += 1
 				}
 
 				if ?data.extends {
@@ -57,7 +57,7 @@ class StructType extends Type {
 	} # }}}
 	count(): Number { # {{{
 		if @extending {
-			return @count + @extends.type().count():!(Number)
+			return @count + @extends.type().count():!!!(Number)
 		}
 		else {
 			return @count
@@ -154,6 +154,7 @@ class StructType extends Type {
 			return false
 		}
 	} # }}}
+	override isAssertingWhenCasting() => false
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if value is ObjectType {
 			var mut matchingMode = MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass
@@ -369,7 +370,7 @@ class StructType extends Type {
 			var mut countdown = leftovers.length - required
 			var mut leftover = 0
 
-			for var [index, field] in groups {
+			for var [_, field] in groups {
 				if field.isRequired() {
 					if !leftovers[leftover].type().matchContentOf(field.type()) {
 						ReferenceException.throwNoMatchingStruct(structName, arguments, node)

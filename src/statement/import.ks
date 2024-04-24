@@ -15,27 +15,29 @@ var $importExts = { # {{{
 } # }}}
 
 func $listNPMModulePaths(mut start) { # {{{
-	start = fs.resolve(start)
+	start = $fs.resolve(start)
 
-	var mut prefix = '/'
-	if /^([A-Za-z]:)/.test(start) {
-		prefix = ''
-	}
-	else if /^\\\\/.test(start) {
-		prefix = '\\\\'
-	}
+	var prefix =
+		if /^([A-Za-z]:)/.test(start) {
+			set ''
+		}
+		else if /^\\\\/.test(start) {
+			set '\\\\'
+		}
+		else {
+			set '/'
+		}
 
 	var mut splitRe = process.platform == 'win32' ? /[\/\\]/ : /\/+/
-
 	var mut parts = start.split(splitRe)
-
 	var mut dirs = []
-	for i from parts.length - 1 to 0 step -1 {
+
+	for var i from parts.length - 1 to 0 step -1 {
 		if parts[i] == 'node_modules' {
 			continue
 		}
 
-		dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)!?), 'node_modules'))
+		dirs.push(prefix + $path.join($path.join(...parts.slice(0, i + 1)!?), 'node_modules'))
 	}
 
 	if process.platform == 'win32' {
@@ -105,7 +107,7 @@ abstract class Importer extends Statement {
 			}
 		}
 		else if $localFileRegex.test(x) {
-			x = fs.resolve(y, x)
+			x = $fs.resolve(y, x)
 
 			unless @loadFile(x, '', null) || @loadDirectory(x, null) {
 				IOException.throwNotFoundModule(x, y, this)
@@ -145,12 +147,12 @@ abstract class Importer extends Statement {
 				var variable = @scope.getVariable(def.internal)
 
 				if def.isAlias {
-					var type = NamedContainerType.new(def.internal, NamespaceType.new(@scope:!(Scope)))
+					var type = NamedContainerType.new(def.internal, NamespaceType.new(@scope:!!!(Scope)))
 
-					for i from 1 to~ @metaExports.exports.length step 2 {
-						var name = @metaExports.exports[i]
+					for var i from 1 to~ @metaExports.exports.length step 2 {
+						var exportName = @metaExports.exports[i]
 
-						type.addProperty(name, @worker.getType(name))
+						type.addProperty(exportName, @worker.getType(exportName))
 					}
 
 					variable.setDeclaredType(type.flagComplete())
@@ -552,15 +554,15 @@ abstract class Importer extends Statement {
 	getModuleName() => @moduleName
 	isStandardLibrary() => @standardLibrary
 	loadDirectory(dir, moduleName? = null, fromPackage: Boolean = false) { # {{{
-		var pkgfile = path.join(dir, 'package.json')
+		var pkgfile = $path.join(dir, 'package.json')
 
-		if fs.isFile(pkgfile) {
-			if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
+		if $fs.isFile(pkgfile) {
+			if var pkg ?= try JSON.parse($fs.readFile(pkgfile)) {
 				if ?pkg.kaoscript {
-					var metadata = ?pkg.kaoscript.metadata ? path.join(dir, pkg.kaoscript.metadata) : null
+					var metadata = ?pkg.kaoscript.metadata ? $path.join(dir, pkg.kaoscript.metadata) : null
 
 					if ?pkg.kaoscript.main {
-						if @loadKSFile(path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
+						if @loadKSFile($path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
 							return true
 						}
 					}
@@ -571,23 +573,23 @@ abstract class Importer extends Statement {
 					}
 				}
 
-				if pkg.main is String && (@loadFile(path.join(dir, pkg.main), pkg.main, moduleName, true) || @loadDirectory(path.join(dir, pkg.main), moduleName, true)) {
+				if pkg.main is String && (@loadFile($path.join(dir, pkg.main), pkg.main, moduleName, true) || @loadDirectory($path.join(dir, pkg.main), moduleName, true)) {
 					return true
 				}
 
-				return @loadFile(path.join(dir, 'index'), 'index', moduleName, true)
+				return @loadFile($path.join(dir, 'index'), 'index', moduleName, true)
 			}
 		}
 
 		if fromPackage {
-			return @loadFile(path.join(dir, 'index'), 'index', moduleName, true)
+			return @loadFile($path.join(dir, 'index'), 'index', moduleName, true)
 		}
 		else {
 			return false
 		}
 	} # }}}
 	loadFile(filename, pathAddendum, moduleName? = null, fromPackage: Boolean = false) { # {{{
-		if fs.isFile(filename) {
+		if $fs.isFile(filename) {
 			if filename.endsWith($extensions.source) {
 				return @loadKSFile(filename, pathAddendum, null, moduleName)
 			}
@@ -597,12 +599,12 @@ abstract class Importer extends Statement {
 		}
 
 		if fromPackage {
-			if fs.isFile(filename + $extensions.source) {
+			if $fs.isFile(filename + $extensions.source) {
 				return @loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
 			}
 			else {
 				for var _, ext of require.extensions {
-					if fs.isFile(filename + ext) {
+					if $fs.isFile(filename + ext) {
 						return @loadNodeFile(filename, moduleName)
 					}
 				}
@@ -615,7 +617,7 @@ abstract class Importer extends Statement {
 		var module = @module()
 
 		if moduleName == null {
-			moduleName = module.path(filename, @data.source.value):!(String)
+			moduleName = module.path(filename, @data.source.value):!!!(String)
 		}
 
 		if module.compiler().isInHierarchy(filename) {
@@ -675,21 +677,21 @@ abstract class Importer extends Statement {
 						}
 
 						if alias {
-							for var data in data.elements {
-								match data.kind {
+							for var element in data.elements {
+								match element.kind {
 									NodeKind.NamedSpecifier {
-										match data.internal.kind {
+										match element.internal.kind {
 											NodeKind.Identifier {
 												if ?@alias {
 													throw NotSupportedException.new(this)
 												}
 
-												@alias = data.internal.name
+												@alias = element.internal.name
 											}
 											NodeKind.ObjectBinding {
-												for var data in data.internal.elements {
-													var internal = data.internal.name
-													var external = data.external?.name ?? internal
+												for var binding in element.internal.elements {
+													var internal = binding.internal.name
+													var external = binding.external?.name ?? internal
 
 													@addImport(external, internal, false, null)
 												}
@@ -707,8 +709,8 @@ abstract class Importer extends Statement {
 						}
 						else if exclusion {
 							var exclusions = []
-							for var data in data.elements {
-								exclusions.push(data.internal.name)
+							for var element in data.elements {
+								exclusions.push(element.internal.name)
 							}
 
 							for var i from 1 to~ @metaExports.exports.length step 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
@@ -718,21 +720,21 @@ abstract class Importer extends Statement {
 							}
 
 							for var datas, name of macros when exclusions.indexOf(name) == -1 {
-								for var data in datas {
-									MacroDeclaration.new(data, this, null, name, @standardLibrary)
+								for var d in datas {
+									MacroDeclaration.new(d, this, null, name, @standardLibrary)
 								}
 							}
 						}
 						else {
-							for var data in data.elements {
-								match data.kind {
+							for var element in data.elements {
+								match element.kind {
 									NodeKind.NamedSpecifier {
-										var internal = data.internal.name
-										var external = data.external?.name ?? internal
+										var internal = element.internal.name
+										var external = element.external?.name ?? internal
 
 										if ?macros[external] {
-											for var data in macros[external] {
-												MacroDeclaration.new(data, this, null, internal, @standardLibrary)
+											for var macro in macros[external] {
+												MacroDeclaration.new(macro, this, null, internal, @standardLibrary)
 											}
 										}
 										else {
@@ -740,9 +742,9 @@ abstract class Importer extends Statement {
 										}
 									}
 									NodeKind.TypedSpecifier {
-										if data.type.kind == NodeKind.TypeAliasDeclaration {
-											var name = data.type.name.name
-											var type = Type.fromAST(data.type.type, this)
+										if element.type.kind == NodeKind.TypeAliasDeclaration {
+											var name = element.type.name.name
+											var type = Type.fromAST(element.type.type, this)
 
 											@addImport(name, name, false, type)
 										}
@@ -777,7 +779,7 @@ abstract class Importer extends Statement {
 	} # }}}
 	loadMetadata() { # {{{
 		var module = @module()
-		var source = fs.readFile(@filename)
+		var source = $fs.readFile(@filename)
 		var target = @options.target
 
 		if var upto ?= module.isUpToDate(@filename, source) {
@@ -805,15 +807,15 @@ abstract class Importer extends Statement {
 					next += 1
 				}
 
-				var variationId = fs.djb2a(variations.join())
+				var variationId = $fs.djb2a(variations.join())
 
-				if upto.variations:!(Array).contains(variationId) {
+				if upto.variations:!!!(Array).contains(variationId) {
 					@metaRequirements = metadata
 					@arguments = arguments
 					@variationId = variationId
 
-					if var metadata ?= @readMetadata(getExportsPath(@filename, variationId)) {
-						@metaExports = metadata
+					if var data ?= @readMetadata(getExportsPath(@filename, variationId)) {
+						@metaExports = data
 
 						module.addHashes(@filename, upto.hashes)
 
@@ -889,8 +891,8 @@ abstract class Importer extends Statement {
 		var container = type is ObjectType | NamespaceType
 
 		if container {
-			for var type of type.properties() {
-				type.flagAlien().flagComplete()
+			for var property of type.properties() {
+				property.flagAlien().flagComplete()
 			}
 		}
 
@@ -899,12 +901,13 @@ abstract class Importer extends Statement {
 				@alias = alias
 			}
 			else {
-				var source = if var match ?= /^[A-Za-z]+:(.*)$/.exec(@data.source.value) {
-					set match[1]
-				}
-				else {
-					set @data.source.value
-				}
+				var source =
+					if var match ?= /^[A-Za-z]+:(.*)$/.exec(@data.source.value) {
+						set match[1]
+					}
+					else {
+						set @data.source.value
+					}
 
 				var parts = source.split('/')
 
@@ -937,11 +940,11 @@ abstract class Importer extends Statement {
 			for var data in @data.specifiers {
 				match data.kind {
 					NodeKind.GroupSpecifier {
-						var mut alias = false
+						var mut aliasing = false
 
 						for var modifier in data.modifiers {
 							if modifier.kind == ModifierKind.Alias {
-								alias = true
+								aliasing = true
 							}
 							else if modifier.kind == ModifierKind.Exclusion {
 								NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
@@ -949,15 +952,15 @@ abstract class Importer extends Statement {
 						}
 
 						if ?#data.elements {
-							for var data in data.elements {
-								match data.kind {
+							for var element in data.elements {
+								match element.kind {
 									NodeKind.NamedSpecifier {
-										match data.internal.kind {
+										match element.internal.kind {
 											NodeKind.Identifier {
-												var internal = data.internal.name
-												var external = data.external?.name ?? internal
+												var internal = element.internal.name
+												var external = element.external?.name ?? internal
 
-												if alias {
+												if aliasing {
 													@addVariable(external, internal, false, type)
 
 													@alias = internal
@@ -967,9 +970,9 @@ abstract class Importer extends Statement {
 												}
 											}
 											NodeKind.ObjectBinding {
-												for var data in data.internal.elements {
-													var internal = data.internal.name
-													var external = data.external?.name ?? internal
+												for var binding in element.internal.elements {
+													var internal = binding.internal.name
+													var external = binding.external?.name ?? internal
 
 													@addVariable(external, internal, true, null)
 												}
@@ -986,8 +989,8 @@ abstract class Importer extends Statement {
 							}
 						}
 						else if container {
-							for var type, name of type.properties() {
-								@addVariable(name, name, true, type.type())
+							for var property, name of type.properties() {
+								@addVariable(name, name, true, property.type())
 							}
 						}
 						else {
@@ -998,15 +1001,15 @@ abstract class Importer extends Statement {
 						var internal = data.internal.name
 						var external = data.external?.name ?? internal
 
-						var mut alias = false
+						var mut aliasing = false
 
 						for var modifier in data.modifiers {
 							if modifier.kind == ModifierKind.Alias {
-								alias = true
+								aliasing = true
 							}
 						}
 
-						if alias {
+						if aliasing {
 							@addVariable(external, internal, false, type)
 
 							@alias = internal
@@ -1034,7 +1037,7 @@ abstract class Importer extends Statement {
 		var dirs = $listNPMModulePaths(start)
 
 		for var dir in dirs {
-			var file = path.join(dir, name)
+			var file = $path.join(dir, name)
 
 			if @loadFile(file, '', name) || @loadDirectory(file, name) {
 				return true
@@ -1045,7 +1048,7 @@ abstract class Importer extends Statement {
 	} # }}}
 	readMetadata(file) { # {{{
 		try {
-			return JSON.parse(fs.readFile(file), fs.unescapeJSON)
+			return JSON.parse($fs.readFile(file), $fs.unescapeJSON)
 		}
 		catch {
 			return null
@@ -1372,35 +1375,35 @@ abstract class Importer extends Statement {
 				var mut modulePath = ''
 
 				if @pathAddendum.length > 0 {
-					var dirname = path.dirname(@pathAddendum)
-					var basename = path.basename(@pathAddendum)
+					var dirname = $path.dirname(@pathAddendum)
+					var basename = $path.basename(@pathAddendum)
 
-					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
+					modulePath = `\(@moduleName)\($path.sep)\(dirname)\($path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
 				}
 				else if $localFileRegex.test(@moduleName) {
-					var basename = path.basename(@moduleName)
+					var basename = $path.basename(@moduleName)
 
 					if basename.endsWith($extensions.source) {
 						var late dirname
 
 						if @parent.includePath() == null {
-							dirname = path.dirname(@moduleName)
+							dirname = $path.dirname(@moduleName)
 						}
 						else {
-							dirname = path.dirname(@parent.includePath())
+							dirname = $path.dirname(@parent.includePath())
 						}
 
-						modulePath = `\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
+						modulePath = `\(dirname)\($path.sep).\(basename).\(@variationId).ksb`
 					}
 					else {
 						modulePath = @moduleName
 					}
 				}
 				else {
-					var dirname = path.dirname(@moduleName)
-					var basename = path.basename(@moduleName)
+					var dirname = $path.dirname(@moduleName)
+					var basename = $path.basename(@moduleName)
 
-					modulePath = `\(dirname)\(path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
+					modulePath = `\(dirname)\($path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
 				}
 
 				fragments.code(`require(\($quote(modulePath)))`)
@@ -1552,7 +1555,7 @@ class ImportWorker {
 				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
 
 				if var origin ?= type.origin() {
-					type.origin(origin:!(TypeOrigin) + TypeOrigin.Extern + TypeOrigin.Import)
+					type.origin(origin:!!!(TypeOrigin) + TypeOrigin.Extern + TypeOrigin.Import)
 				}
 				else {
 					type.origin(TypeOrigin.Extern + TypeOrigin.Import)
@@ -1675,7 +1678,7 @@ class ImportWorker {
 
 				var origin = type.origin()
 				if ?origin {
-					type.origin(origin:!(TypeOrigin) + TypeOrigin.Require)
+					type.origin(origin:!!!(TypeOrigin) + TypeOrigin.Require)
 				}
 				else {
 					type.origin(TypeOrigin.Require + TypeOrigin.Import)

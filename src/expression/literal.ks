@@ -161,7 +161,7 @@ class IdentifierLiteral extends Literal {
 	initializeVariables(type: Type, node: Expression) { # {{{
 		if @isVariable {
 			if @scope.getVariable(@value, @line).isLateInit() {
-				node.initializeVariable(VariableBrief.new(
+				@type = node.initializeVariable(VariableBrief.new(
 					name: @value
 					type: type.unspecify()
 					immutable: true
@@ -169,9 +169,9 @@ class IdentifierLiteral extends Literal {
 				))
 			}
 			else {
-				@scope.replaceVariable(@value, type, this)
+				var variable = @scope.replaceVariable(@value, type, this)
 
-				@type = @scope.getVariable(@value, @line).getRealType()
+				@type = variable.getRealType()
 			}
 		}
 	} # }}}
@@ -205,8 +205,8 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	isUsingVariable(name) => @value == name
 	isVariable() => @isVariable
-	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
-		array.push({ name: @value, immutable })
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
+		array.push({ name: @value, immutable, overwrite })
 
 		return array
 	} # }}}
@@ -287,8 +287,8 @@ class IdentifierLiteral extends Literal {
 				if @type == @declaredType {
 					callback()
 				}
-				else if var callback ?= @declaredType.makeMemberCallee(property, @value, generics, node) {
-					callback()
+				else if var newCallback ?= @declaredType.makeMemberCallee(property, @value, generics, node) {
+					newCallback()
 				}
 				else {
 					@scope.replaceVariable(@value, @declaredType, this)

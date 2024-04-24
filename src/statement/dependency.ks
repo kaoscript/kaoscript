@@ -313,7 +313,6 @@ class ExternDeclarator extends DependencyStatement {
 		@type: Type
 	}
 	initiate() { # {{{
-		// echo('extern.initiate')
 		@name = @data.name.name
 
 		var mut variable = @scope.getVariable(@name)
@@ -368,8 +367,8 @@ class ExternDeclarator extends DependencyStatement {
 					if !method.hasAuxiliary() && (method.hasGenerics() || method.hasDeferredParameter()) {
 						@instanceMethods[name] = methods
 
-						for var method in methods {
-							method.flagAuxiliary()
+						for var mth in methods {
+							mth.flagAuxiliary()
 						}
 
 						break
@@ -452,9 +451,9 @@ class ExternDeclarator extends DependencyStatement {
 		block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
+			(function, writer) => {
 				if function.isSealed() {
-					line.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
+					writer.code(`\(sealedName).__ks_func_\(name)_\(function.index()).call(that`)
 
 					return true
 				}
@@ -704,7 +703,7 @@ class RequireOrImportDeclarator extends Importer {
 
 							if type.isAlien() {
 								if var origin ?= type.origin() {
-									type.origin(origin:!(TypeOrigin) + TypeOrigin.RequireOrExtern)
+									type.origin(origin:!!!(TypeOrigin) + TypeOrigin.RequireOrExtern)
 								}
 								else {
 									type.origin(TypeOrigin.RequireOrExtern)
@@ -911,7 +910,7 @@ class ExternOrImportDeclarator extends Importer {
 				var type = requirement.type().flagAlien()
 
 				if var origin ?= type.origin() {
-					type.origin(origin:!(TypeOrigin) + TypeOrigin.ExternOrRequire)
+					type.origin(origin:!!!(TypeOrigin) + TypeOrigin.ExternOrRequire)
 				}
 				else {
 					type.origin(TypeOrigin.ExternOrRequire)

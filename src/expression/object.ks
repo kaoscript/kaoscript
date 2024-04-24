@@ -161,9 +161,9 @@ class ObjectExpression extends Expression {
 								var type = property.property().value().type().discard()
 
 								if type.isObject() && !type.hasRest() {
-									for var property, name of type.properties() {
+									for var prop, name of type.properties() {
 										if !@type.hasProperty(name) {
-											@type.addProperty(name, property.property().type())
+											@type.addProperty(name, prop.property().type())
 										}
 									}
 								}
@@ -187,9 +187,9 @@ class ObjectExpression extends Expression {
 							var type = property.value().type().discard()
 
 							if type.isObject() && !type.hasRest() {
-								for var property, name of type.properties() {
+								for var prop, name of type.properties() {
 									if !@type.hasProperty(name) {
-										@type.addProperty(name, property.type())
+										@type.addProperty(name, prop.type())
 									}
 								}
 							}
@@ -213,8 +213,8 @@ class ObjectExpression extends Expression {
 
 					match property {
 						ObjectFilteredMember {
-							for var { name, type } in property.members() {
-								@type.addProperty(name, type)
+							for var member in property.members() {
+								@type.addProperty(member.name, member.type)
 							}
 						}
 						ObjectLiteralMember, ObjectThisMember {
@@ -365,11 +365,16 @@ class ObjectExpression extends Expression {
 		}
 	} # }}}
 	toReusableFragments(fragments) { # {{{
-		fragments
-			.code(@reuseName, $equals)
-			.compile(this)
+		if ?@reuseName {
+			fragments
+				.code(@reuseName, $equals)
+				.compile(this)
 
-		@reusable = true
+			@reusable = true
+		}
+		else {
+			fragments.compile(this)
+		}
 	} # }}}
 	type() => @type
 	validateType(type: ObjectType) { # {{{
@@ -537,14 +542,14 @@ class ObjectFilteredMember extends Expression {
 				.done()
 		}
 		else {
-			var { name, external } = @members[0]
-
-			fragments
-				.newLine()
-				.code(`\(@parent.varname()).\(name) = `)
-				.compileReusable(@value)
-				.code(`.\(external)`)
-				.done()
+			with var { name, external } = @members[0] {
+				fragments
+					.newLine()
+					.code(`\(@parent.varname()).\(name) = `)
+					.compileReusable(@value)
+					.code(`.\(external)`)
+					.done()
+			}
 
 			for var { name, external } in @members from 1 {
 				fragments
@@ -572,7 +577,7 @@ class ObjectLiteralMember extends Expression {
 		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
 		if @data.name.kind == NodeKind.Identifier	{
-			@name = Literal.new(@data.name, this, @scope:!(Scope), @data.name.name)
+			@name = Literal.new(@data.name, this, @scope:!!!(Scope), @data.name.name)
 
 			this.reference('.' + @data.name.name)
 
@@ -816,7 +821,7 @@ class ObjectThisMember extends Expression {
 		@value
 	}
 	analyse() { # {{{
-		@name = Literal.new(@data.name.name, this, @scope:!(Scope), @data.name.name.name)
+		@name = Literal.new(@data.name.name, this, @scope:!!!(Scope), @data.name.name.name)
 
 		@value = $compile.expression(@data.name, this)
 		@value.analyse()

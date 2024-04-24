@@ -639,7 +639,7 @@ class FunctionType extends Type {
 
 		return false
 	} # }}}
-	assist isSubsetOf(value: ReferenceType, generics, subtypes, mode) { # {{{
+	assist isSubsetOf(value: ReferenceType, _, _, mode) { # {{{
 		if value.isAlias() {
 			var { type, generics, subtypes } = value.getGenericMapper()
 

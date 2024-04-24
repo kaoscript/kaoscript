@@ -10,7 +10,7 @@ class AssignmentOperatorFinite extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
 
@@ -45,6 +45,8 @@ class AssignmentOperatorFinite extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	defineVariables(left) { # {{{
+		return if @declaration
+
 		if @condition {
 			var names = []
 

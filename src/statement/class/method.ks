@@ -1,6 +1,6 @@
 namespace Method {
 	type Matcher = {
-		match(name: String): Array
+		match(name: String): Array?
 		matchAll(name: String, type: FunctionType, mode: MatchingMode): Array
 	}
 
@@ -153,17 +153,17 @@ class ClassMethodDeclaration extends Statement {
 				assessment
 				fragments.block()
 				extends.type().hasStaticMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
-				(fragments, _) => {
+				(writer, _) => {
 					if extends.type().hasStaticMethod(name) {
 						if labelable {
-							fragments.line(`return \(parent).\(name).call(null, kws, ...args)`)
+							writer.line(`return \(parent).\(name).call(null, kws, ...args)`)
 						}
 						else {
-							fragments.line(`return \(parent).\(name).apply(null, arguments)`)
+							writer.line(`return \(parent).\(name).apply(null, arguments)`)
 						}
 					}
 					else {
-						var ctrl = fragments
+						var ctrl = writer
 							.newControl()
 							.code(`if(\(parent).\(name))`)
 							.step()
@@ -177,7 +177,7 @@ class ClassMethodDeclaration extends Statement {
 
 						ctrl.done()
 
-						fragments.line(`throw \($runtime.helper(node)).badArgs()`)
+						writer.line(`throw \($runtime.helper(node)).badArgs()`)
 					}
 				}
 				node
@@ -243,27 +243,27 @@ class ClassMethodDeclaration extends Statement {
 				generic
 				fragments.block()
 				extends.type().hasInstanceMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
-				(fragments, _) => {
+				(writer, _) => {
 					if extends.type().hasInstanceMethod(name) {
 						if extends.type().isSealedInstanceMethod(name) {
-							fragments.line(`return \(extends.getSealedName()).__ks_func_\(name)_rt(that, args)`)
+							writer.line(`return \(extends.getSealedName()).__ks_func_\(name)_rt(that, args)`)
 						}
 						else if extends.type().isAlien() {
-							fragments.line(`return super.\(name).apply(that, args)`)
+							writer.line(`return super.\(name).apply(that, args)`)
 						}
 						else {
-							fragments.line(`return super.__ks_func_\(name)_rt.call(null, that, \(parent).prototype, args)`)
+							writer.line(`return super.__ks_func_\(name)_rt.call(null, that, \(parent).prototype, args)`)
 						}
 					}
 					else {
-						fragments
+						writer
 							.newControl()
 							.code(`if(super.__ks_func_\(name)_rt)`)
 							.step()
 							.line(`return super.__ks_func_\(name)_rt.call(null, that, \(parent).prototype, args)`)
 							.done()
 
-						fragments.line(`throw \($runtime.helper(node)).badArgs()`)
+						writer.line(`throw \($runtime.helper(node)).badArgs()`)
 					}
 				}
 				node
@@ -912,14 +912,14 @@ class ClassMethodDeclaration extends Statement {
 
 				if @overriding {
 					if @exact {
-						overloaded:!(Array).remove(overridden)
+						overloaded:!!!(Array).remove(overridden)
 
 						overload.push(overridden.index())
 					}
-					else if overloaded:!(Array).contains(overridden) {
+					else if overloaded:!!!(Array).contains(overridden) {
 						@parent.addForkedMethod(@name, overridden, @type, true)
 
-						overloaded:!(Array).remove(overridden)
+						overloaded:!!!(Array).remove(overridden)
 
 						overload.push(overridden.index())
 					}

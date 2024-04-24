@@ -13,10 +13,10 @@ module.exports = function() {
 		if(!Type.isValue(enteredId)) {
 			return null;
 		}
-		let employee = repository.findById(parseInt(enteredId));
-		if(Type.isValue(employee) && Type.isValue(employee.supervisorId)) {
-			let supervisor = repository.findById(employee.supervisorId);
-			if(Type.isValue(supervisor)) {
+		let employee, __ks_0;
+		if((Type.isValue(__ks_0 = repository.findById(parseInt(enteredId))) ? (employee = __ks_0, true) : false) && Type.isValue(employee.supervisorId)) {
+			let supervisor;
+			if((Type.isValue(__ks_0 = repository.findById(employee.supervisorId)) ? (supervisor = __ks_0, true) : false)) {
 				return supervisor.name;
 			}
 		}

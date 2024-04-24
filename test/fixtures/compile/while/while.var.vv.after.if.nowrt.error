@@ -1,0 +1,1 @@
+SyntaxException: Identifier "data" has already been declared (fixtures/compile/while/while.var.vv.after.if.nowrt.ks:5)

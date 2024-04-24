@@ -333,15 +333,15 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 		@arguments
 		@class: NamedType<ClassType>
 		@extendsType: NamedType<ClassType>
-		@property: String
+		@name: String
 		@sealed: Boolean					= false
 	}
-	constructor(@property, @arguments, @class, node) { # {{{
+	constructor(@name, @arguments, @class, node) { # {{{
 		super()
 
 		@extendsType = @class.type().extends()
 
-		if var property ?= @extendsType.type().getInstanceProperty(@property) {
+		if var property ?= @extendsType.type().getInstanceProperty(@name) {
 			@sealed = property.isSealed()
 		}
 	} # }}}
@@ -349,11 +349,11 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 	setCallMatchResult(@result)
 	toFragments(fragments, mode) { # {{{
 		if @sealed {
-			if var index ?= @extendsType.type().getSharedMethodIndex(@property) {
-				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@property)(this`)
+			if var index ?= @extendsType.type().getSharedMethodIndex(@name) {
+				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@name)(this`)
 			}
 			else {
-				fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
+				fragments.code(`\(@extendsType.getSealedPath())._im_\(@name)(this`)
 			}
 
 			for var argument in @arguments {
@@ -361,7 +361,7 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 			}
 		}
 		else {
-			fragments.code(`super.\(@property)(`)
+			fragments.code(`super.\(@name)(`)
 
 			for var argument, index in @arguments {
 				if index != 0 {

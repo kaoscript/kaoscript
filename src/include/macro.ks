@@ -8,7 +8,7 @@ enum MacroVariableKind {
 var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
 func $autoEvaluate(macro, libstd, node, data) { # {{{
-	return $evaluate($compileMacro(Generator.generate(data, {
+	return $evaluate($compileMacro(KSGeneration.generate(data, {
 		transformers: {
 			expression: $transformExpression^^(macro, node, ^, ^)
 		}
@@ -35,7 +35,7 @@ func $evaluate(source: String): Function { # {{{
 } # }}}
 
 func $generate(macro, node, data) { # {{{
-	return Generator.generate(data)
+	return KSGeneration.generate(data)
 } # }}}
 
 class MacroMarker {
@@ -111,7 +111,7 @@ func $serialize(macro, data, context) { # {{{
 
 			$serialize(macro, data[0], context)
 
-			for i from 1 to~ data.length {
+			for var i from 1 to~ data.length {
 				context.data += ', '
 
 				$serialize(macro, data[i], context)
@@ -121,7 +121,7 @@ func $serialize(macro, data, context) { # {{{
 		}
 	}
 	else if data is MacroMarker {
-		context.data += Generator.generate(macro.getMark(data.index))
+		context.data += KSGeneration.generate(macro.getMark(data.index))
 	}
 	else if data is Number {
 		context.data += (data == NaN ? 'NaN' : data)
@@ -149,21 +149,21 @@ func $serialize(macro, data, context) { # {{{
 
 			if value is MacroMarker {
 				if ?computed {
-					name = `\(Generator.generate(macro.getMark(computed[1]), {
-						mode: Generator.KSWriterMode.Property
+					name = `\(KSGeneration.generate(macro.getMark(computed[1]), {
+						mode: KSGeneration.KSWriterMode.Property
 					}))`
 				}
 				else {
 					name = key
 				}
 
-				context.data += `\(name): \(Generator.generate(macro.getMark(value.index), {
-					mode: Generator.KSWriterMode.Property
+				context.data += `\(name): \(KSGeneration.generate(macro.getMark(value.index), {
+					mode: KSGeneration.KSWriterMode.Property
 				}))`
 			}
 			else if ?computed {
-				context.data += `\(Generator.generate(macro.getMark(computed[1]), {
-					mode: Generator.KSWriterMode.Property
+				context.data += `\(KSGeneration.generate(macro.getMark(computed[1]), {
+					mode: KSGeneration.KSWriterMode.Property
 				})): `
 
 				$serialize(macro, value, context)
@@ -245,7 +245,7 @@ class MacroDeclaration extends AbstractNode {
 			@source = @data.source
 		}
 		else {
-			var builder = Generator.KSWriter.new({
+			var builder = KSGeneration.KSWriter.new({
 				filters: {
 					expression: this.filter^^(false, ^, ^)
 					statement: this.filter^^(true, ^, ^)
@@ -366,7 +366,7 @@ class MacroDeclaration extends AbstractNode {
 		// echo(data)
 
 		try {
-			data = Parser.parseStatements(data + '\n', Parser.FunctionMode.Method)
+			data = SyntaxAnalysis.parseStatements(data + '\n', SyntaxAnalysis.FunctionMode.Method)
 		}
 		catch error {
 			error.fileName = `\(@parent.file())$\(@name)$\(@executeCount)`
@@ -449,6 +449,7 @@ class MacroDeclaration extends AbstractNode {
 	isExportable() => false
 	isInstanceMethod() => false
 	isStandardLibrary(): valueof @standardLibrary
+	isUsingVariable(name) => false
 	line() => @line
 	matchArguments(arguments: Array) => @type.matchArguments(arguments, this)
 	name() => @name
@@ -673,10 +674,10 @@ class CallMacroStatement extends Statement {
 
 		@options = Attribute.configure(data, @options, AttributeTarget.Global, file)
 
-		for var data in data.body {
-			@scope.line(data.start.line)
+		for var stmtData in data.body {
+			@scope.line(stmtData.start.line)
 
-			if var statement ?= $compile.statement(data, this) {
+			if var statement ?= $compile.statement(stmtData, this) {
 				@statements.push(statement)
 
 				statement.initiate()
@@ -744,6 +745,15 @@ class CallMacroStatement extends Statement {
 	override isExit(mode) { # {{{
 		for var statement in @statements {
 			if statement.isExit(mode) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	override isUsingVariable(name, bleeding) { # {{{
+		for var statement in @statements {
+			if statement.isUsingVariable(name, bleeding) {
 				return true
 			}
 		}

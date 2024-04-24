@@ -6,5 +6,6 @@ class RegularExpression extends Expression {
 	toFragments(fragments, mode) { # {{{
 		fragments.code(@data.value)
 	} # }}}
+	toQuote() => @data.value
 	type() => @scope.reference('RegExp')
 }

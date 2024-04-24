@@ -18,8 +18,8 @@ module.exports = function() {
 		return quzbaz.__ks_rt(this, arguments);
 	};
 	quzbaz.__ks_0 = function() {
-		let x = corge.__ks_0();
-		if(Type.isValue(x)) {
+		let x, __ks_0;
+		if((Type.isValue(__ks_0 = corge.__ks_0()) ? (x = __ks_0, true) : false)) {
 			foobar.__ks_0(x);
 		}
 	};

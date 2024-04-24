@@ -73,8 +73,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(p) {
-		let d3 = Point.__ks_new(p.x, p.y);
-		if(Type.isValue(d3)) {
+		let d3, __ks_0;
+		if((Type.isValue(__ks_0 = Point.__ks_new(p.x, p.y)) ? (d3 = __ks_0, true) : false)) {
 			console.log(d3.x + 1, d3.y + 2);
 		}
 	};

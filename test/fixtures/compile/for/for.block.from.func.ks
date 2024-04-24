@@ -1,5 +1,3 @@
-extern console
-
 var dyn foo = {
 	foo: func() {
 		var dyn i = 0
@@ -7,7 +5,7 @@ var dyn foo = {
 }
 
 func bar() {
-	for i from 0 to~ 10 {
-		console.log(i)
+	for var i from 0 to~ 10 {
+		echo(i)
 	}
 }

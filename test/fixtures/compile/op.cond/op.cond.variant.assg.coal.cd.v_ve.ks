@@ -10,6 +10,6 @@ type Event = {
 }
 
 func foobar(mut x: Event, mut y: Event) {
-	if x ?||= y {
+	if x ?]]= y {
 	}
 }

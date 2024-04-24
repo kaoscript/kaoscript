@@ -3,9 +3,9 @@ module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(x) {
-		for(let __ks_2 = x.values(), __ks_1 = 0, __ks_0 = Helper.length(__ks_2), __ks_x_1; __ks_1 < __ks_0; ++__ks_1) {
-			__ks_x_1 = __ks_2[__ks_1];
+	foobar.__ks_0 = function(values) {
+		for(let __ks_2 = values.values(), __ks_1 = 0, __ks_0 = Helper.length(__ks_2), x; __ks_1 < __ks_0; ++__ks_1) {
+			x = __ks_2[__ks_1];
 		}
 	};
 	foobar.__ks_rt = function(that, args) {

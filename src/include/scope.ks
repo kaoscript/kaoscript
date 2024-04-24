@@ -168,7 +168,7 @@ abstract class Scope {
 		acquireTempName(declare: Boolean = true): String
 		authority(): Scope
 		block(): Scope
-		define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, node: AbstractNode): Variable
+		define(name: String, immutable: Boolean, type: Type? = null, initialized: Boolean = false, overwrite: Boolean = false, node: AbstractNode): Variable
 		defineVariable(variable: Variable, node: AbstractNode): Void
 		getDefinedVariable(name: String): Variable?
 		getPredefinedType(name: String): Type?
@@ -182,7 +182,7 @@ abstract class Scope {
 		releaseTempName(name: String): Void
 		resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = [], subtypes: Array = []): ReferenceType
 	}
-	private abstract {
+	protected abstract {
 		declareVariable(name: String, scope: Scope): String?
 	}
 }

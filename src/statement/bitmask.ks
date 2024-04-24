@@ -169,42 +169,44 @@ class BitmaskDeclaration extends Statement {
 		}
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		var line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.bitmask(')
+		with var line = fragments.newLine() {
+			line.code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.bitmask(')
 
-		@toMainTypeFragments(line)
+			@toMainTypeFragments(line)
 
-		line.code(`, [`)
+			line.code(`, [`)
 
-		var mut first = true
-		var aliases = []
+			var mut first = true
+			var aliases = []
 
-		for var value of @values {
-			if value.type().isAlias() {
-				aliases.push(value)
-			}
-			else {
-				if first {
-					first = false
+			for var value of @values {
+				if value.type().isAlias() {
+					aliases.push(value)
 				}
 				else {
-					line.code($comma)
+					if first {
+						first = false
+					}
+					else {
+						line.code($comma)
+					}
+
+					value.toFragments(line)
 				}
-
-				value.toFragments(line)
 			}
-		}
 
-		if ?#aliases {
-			line.code(`], [`)
+			if ?#aliases {
+				line.code(`], [`)
 
-			for var value, index in aliases {
-				line.code($comma) if index != 0
+				for var value, index in aliases {
+					line.code($comma) if index != 0
 
-				value.toFragments(line)
+					value.toFragments(line)
+				}
 			}
-		}
 
-		line.code('])').done()
+			line.code('])').done()
+		}
 
 		for var methods, name of @staticMethods {
 			var types = []
@@ -223,8 +225,8 @@ class BitmaskDeclaration extends Statement {
 			ctrl.code(`\(@name).\(name) = function()`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(@name).__ks_sttc_\(name)_\(function.index())(`)
+				(function, writer) => {
+					writer.code(`\(@name).__ks_sttc_\(name)_\(function.index())(`)
 
 					return false
 				}
@@ -255,8 +257,8 @@ class BitmaskDeclaration extends Statement {
 			ctrl.code(`\(@name).__ks_func_\(name) = function(that, ...args)`).step()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(@name).__ks_func_\(name)_\(function.index())(that`)
+				(function, writer) => {
+					writer.code(`\(@name).__ks_func_\(name)_\(function.index())(that`)
 
 					return true
 				}

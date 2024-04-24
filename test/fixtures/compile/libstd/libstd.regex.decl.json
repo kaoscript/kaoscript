@@ -108,7 +108,9 @@
                 }
               ],
               "returns": {
-                "reference": 2
+                "kind": "reference",
+                "name": 2,
+                "nullable": true
               },
               "errors": [],
               "inits": []

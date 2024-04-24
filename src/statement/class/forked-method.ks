@@ -105,11 +105,11 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 		}
 		else if @type.hasVarargsParameter() {
 			if @type.parameters().length == 1 {
-				var parameter = @type.parameter(0)
+				var firstParameter = @type.parameter(0)
 
 				var ctrl3 = ctrl.newControl()
 
-				ctrl3.code(`if(\(parameter.getExternalName()).length === 1)`).step()
+				ctrl3.code(`if(\(firstParameter.getExternalName()).length === 1)`).step()
 
 				for var fork in @forks {
 					var ctrl2 = ctrl3.newControl()
@@ -130,7 +130,7 @@ class ClassForkedMethodDeclaration extends AbstractNode {
 
 					ctrl2.code(`)`).step()
 
-					ctrl2.line(`return this.__ks_func_\(@name)_\(fork.index())(\(parameter.getExternalName())[0])`)
+					ctrl2.line(`return this.__ks_func_\(@name)_\(fork.index())(\(firstParameter.getExternalName())[0])`)
 
 					ctrl2.done()
 				}

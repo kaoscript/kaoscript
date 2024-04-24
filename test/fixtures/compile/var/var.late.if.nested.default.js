@@ -17,8 +17,8 @@ module.exports = function() {
 	};
 	foobar.__ks_0 = function() {
 		let x;
-		let a = quxbaz.__ks_0();
-		if(Type.isValue(a)) {
+		let a, __ks_0;
+		if((Type.isValue(__ks_0 = quxbaz.__ks_0()) ? (a = __ks_0, true) : false)) {
 			if(a === 0) {
 				x = -1;
 			}

@@ -340,7 +340,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 					var overloaded = @listOverloadedMethods(@class)
 
-					overloaded:!(Array).remove(overridden)
+					overloaded:!!!(Array).remove(overridden)
 
 					for var method in overloaded {
 						@parent.addForkedMethod(@name, method, @type)
@@ -545,31 +545,31 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		var labelable = @class.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
 
-		var line = fragments.newLine()
-
-		if labelable {
-			line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, kws, args)`)
-		}
-		else {
-			line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`)
-		}
-
-		var block = line.newBlock()
-
-		Router.toFragments(
-			(function, line) => {
-				line.code(`proto.__ks_func_\(@name)_\(function.index()).call(that`)
-
-				return true
+		with var line = fragments.newLine() {
+			if labelable {
+				line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, kws, args)`)
 			}
-			null
-			assessment
-			block
-			this
-		)
+			else {
+				line.code(`\(name).prototype.__ks_func_\(@name)_rt = function(that, proto, args)`)
+			}
 
-		block.done()
-		line.done()
+			var block = line.newBlock()
+
+			Router.toFragments(
+				(function, writer) => {
+					writer.code(`proto.__ks_func_\(@name)_\(function.index()).call(that`)
+
+					return true
+				}
+				null
+				assessment
+				block
+				this
+			)
+
+			block.done()
+			line.done()
+		}
 
 		if !@exists {
 			var line = fragments.newLine()
@@ -612,8 +612,8 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		var block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`\(name).__ks_func_\(@name)_\(function.index())(`)
+			(function, writer) => {
+				writer.code(`\(name).__ks_func_\(@name)_\(function.index())(`)
 
 				return false
 			}
@@ -668,14 +668,14 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		var block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
+			(function, writer) => {
 				if function.isSealed() {
-					line.code(`\(sealedName).__ks_func_\(@name)_\(function.index()).call(that`)
+					writer.code(`\(sealedName).__ks_func_\(@name)_\(function.index()).call(that`)
 
 					return true
 				}
 				else {
-					line.code(`that.__ks_func_\(@name)_\(function.index())(`)
+					writer.code(`that.__ks_func_\(@name)_\(function.index())(`)
 
 					return false
 				}
@@ -684,9 +684,9 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			assessment
 			block
 			exhaustive ? null : Router.FooterType.NO_THROW
-			exhaustive ? null : (fragments, _) => {
+			exhaustive ? null : (writer, _) => {
 				if !labelable {
-					fragments
+					writer
 						.newControl()
 						.code(`if(that.\(@name))`)
 						.step()
@@ -694,7 +694,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 						.done()
 				}
 
-				fragments.line(`throw \($runtime.helper(this)).badArgs()`)
+				writer.line(`throw \($runtime.helper(this)).badArgs()`)
 			}
 			this
 		)
@@ -720,8 +720,8 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		var block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`\(name).__ks_sttc_\(@name)_\(function.index())(`)
+			(function, writer) => {
+				writer.code(`\(name).__ks_sttc_\(@name)_\(function.index())(`)
 
 				return false
 			}
@@ -729,9 +729,9 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			assessment
 			block
 			exhaustive ? null : Router.FooterType.NO_THROW
-			exhaustive ? null : (fragments, _) => {
+			exhaustive ? null : (writer, _) => {
 				if !labelable {
-					fragments
+					writer
 						.newControl()
 						.code(`if(\(@variable.name()).\(@name))`)
 						.step()
@@ -739,7 +739,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 						.done()
 				}
 
-				fragments.line(`throw \($runtime.helper(this)).badArgs()`)
+				writer.line(`throw \($runtime.helper(this)).badArgs()`)
 			}
 			this
 		)
@@ -782,7 +782,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			}
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)
@@ -1240,21 +1240,21 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 			var block = line.code(`\(sealedName).new = function()`).newBlock()
 
 			Router.toFragments(
-				(function, line) => {
+				(function, writer) => {
 					if function.isSealed() {
 						if function.isDependent() {
-							line.code(`\(sealedName).__ks_cons_\(function.index())(`)
+							writer.code(`\(sealedName).__ks_cons_\(function.index())(`)
 
 							return false
 						}
 						else {
-							line.code(`\(sealedName).__ks_cons_\(function.index()).call(new \(classname)()`)
+							writer.code(`\(sealedName).__ks_cons_\(function.index()).call(new \(classname)()`)
 
 							return true
 						}
 					}
 					else {
-						line.code(`new \(classname)(`)
+						writer.code(`new \(classname)(`)
 
 						return false
 					}
@@ -1263,8 +1263,8 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 				assessment
 				block
 				exhaustive ? null : Router.FooterType.NO_THROW
-				exhaustive ? null : (fragments, _) => {
-					fragments.line(`return new \(classname)(...arguments)`)
+				exhaustive ? null : (writer, _) => {
+					writer.line(`return new \(classname)(...arguments)`)
 				}
 				this
 			)
@@ -1275,8 +1275,8 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 			var block = line.code(`\(classname).prototype.__ks_cons_rt = function(that, args)`).newBlock()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`\(classname).prototype.__ks_cons_\(function.index()).call(that`)
+				(function, writer) => {
+					writer.code(`\(classname).prototype.__ks_cons_\(function.index()).call(that`)
 
 					return true
 				}
@@ -1303,7 +1303,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 		}
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

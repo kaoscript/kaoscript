@@ -1,1 +1,0 @@
-var dyn x = foo * bar

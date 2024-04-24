@@ -1,0 +1,1 @@
+ReferenceException: "a" is not defined (fixtures/compile/variable/variable.implicit.assign.func.ks:2)

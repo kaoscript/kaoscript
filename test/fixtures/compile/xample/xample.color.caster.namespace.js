@@ -28,8 +28,8 @@ module.exports = function() {
 		return srgb.__ks_rt(this, arguments);
 	};
 	srgb.__ks_0 = function(that, color) {
-		let match = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color);
-		if(Type.isValue(match)) {
+		let match, __ks_0;
+		if((Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false)) {
 			that._red = Math.round(2.55 * $caster.percentage(match[1]));
 			that._green = Math.round(2.55 * $caster.percentage(match[2]));
 			that._blue = Math.round(2.55 * $caster.percentage(match[3]));

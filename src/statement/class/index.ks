@@ -249,10 +249,9 @@ class ClassDeclaration extends Statement {
 	} # }}}
 	enhance() { # {{{
 		if @extending {
-			if @extendsType !?= Type.fromAST(@data.extends, this) {
-				ReferenceException.throwNotDefined(@extendsName, this)
-			}
-			else if @extendsType.discardName() is not ClassType {
+			@extendsType = Type.fromAST(@data.extends, this)!!
+
+			if @extendsType.discardName() is not ClassType {
 				TypeException.throwNotClass(@extendsName, this)
 			}
 
@@ -269,21 +268,18 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInheritanceLoop(@name, this)
 				}
 
-				if var type ?= Type.fromAST(implement, this) {
-					if type.isAlias() {
-						unless type.isObject() {
-							SyntaxException.throwNotObjectInterface(name, this)
-						}
-					}
-					else {
-						throw NotImplementedException.new(this)
-					}
+				var type = Type.fromAST(implement, this)
 
-					@interfaces.push(type)
+				if type.isAlias() {
+					unless type.isObject() {
+						SyntaxException.throwNotObjectInterface(name, this)
+					}
 				}
 				else {
-					ReferenceException.throwNotDefined(name, this)
+					throw NotImplementedException.new(this)
 				}
+
+				@interfaces.push(type)
 			}
 		}
 	} # }}}
@@ -823,22 +819,22 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		var m = []
+		var constructors = []
 
-		for var method in @constructors {
-			method.toFragments(clazz, Mode.None)
+		for var constructor in @constructors {
+			constructor.toFragments(clazz, Mode.None)
 
-			m.push(method.type())
+			constructors.push(constructor.type())
 		}
 
 		ClassConstructorDeclaration.toRouterFragments(
 			this
 			clazz.newControl()
 			@type
-			m
+			constructors
 			null
-			(node, fragments) => fragments.code('__ks_cons_rt(that, args)').step()
-			(fragments) => fragments.done()
+			(node, writer) => writer.code('__ks_cons_rt(that, args)').step()
+			(writer) => writer.done()
 		)
 
 		if ?@destructor {
@@ -891,10 +887,10 @@ class ClassDeclaration extends Statement {
 					false
 					name
 					@class
-					(node, fragments, generic, labelable) => {
-						fragments.code(`__ks_func_\(name)_rt(that, proto\(generic ? ', gens' : '')\(labelable ? ', kws' : ''), args)`).step()
+					(node, writer, generic, labelable) => {
+						writer.code(`__ks_func_\(name)_rt(that, proto\(generic ? ', gens' : '')\(labelable ? ', kws' : ''), args)`).step()
 					}
-					(fragments) => fragments.done()
+					(writer) => writer.done()
 				)
 			}
 		}
@@ -917,15 +913,15 @@ class ClassDeclaration extends Statement {
 				false
 				name
 				@class
-				(node, fragments, labelable) => {
+				(node, writer, labelable) => {
 					if labelable {
-						fragments.code(`static \(name)(kws, ...args)`).step()
+						writer.code(`static \(name)(kws, ...args)`).step()
 					}
 					else {
-						fragments.code(`static \(name)()`).step()
+						writer.code(`static \(name)()`).step()
 					}
 				}
-				(fragments) => fragments.done()
+				(writer) => writer.done()
 			)
 		}
 
@@ -981,8 +977,8 @@ class ClassDeclaration extends Statement {
 			var block = line.code('const __ks_cons_rt = (args) =>').newBlock()
 
 			Router.toFragments(
-				(function, line) => {
-					line.code(`__ks_cons_\(function.index())(`)
+				(function, writer) => {
+					writer.code(`__ks_cons_\(function.index())(`)
 
 					return false
 				}
@@ -1061,8 +1057,8 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listInstanceMethods(name) {
-					for var method in methods until overflow {
+				if var mths ?= @extendsType.type().listInstanceMethods(name) {
+					for var method in mths until overflow {
 						if method.isOverflowing(m) {
 							overflow = true
 						}
@@ -1086,15 +1082,15 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, _, labelable) => {
+				(node, writer, _, labelable) => {
 					if labelable {
-						fragments.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
+						writer.code(`__ks_func_\(name)_rt(that, proto, kws, args)`).step()
 					}
 					else {
-						fragments.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
+						writer.code(`__ks_func_\(name)_rt(that, proto, args)`).step()
 					}
 				}
-				(fragments) => fragments.done()
+				(writer) => writer.done()
 			)
 		}
 
@@ -1110,8 +1106,8 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listStaticMethods(name) {
-					for var method in methods {
+				if var mths ?= @extendsType.type().listStaticMethods(name) {
+					for var method in mths {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -1128,15 +1124,15 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, labelable) => {
+				(node, writer, labelable) => {
 					if labelable {
-						fragments.code(`static \(name)(kws, ...args)`).step()
+						writer.code(`static \(name)(kws, ...args)`).step()
 					}
 					else {
-						fragments.code(`static \(name)()`).step()
+						writer.code(`static \(name)()`).step()
 					}
 				}
-				(fragments) => fragments.done()
+				(writer) => writer.done()
 			)
 		}
 
@@ -1226,8 +1222,8 @@ class ClassDeclaration extends Statement {
 			@type
 			m
 			'this'
-			(node, fragments) => fragments.code('__ks_cons_rt(args)').step()
-			(fragments) => fragments.done()
+			(node, writer) => writer.code('__ks_cons_rt(args)').step()
+			(writer) => writer.done()
 		)
 
 		if ?@destructor {
@@ -1254,8 +1250,8 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listInstanceMethods(name) {
-					for var method in methods {
+				if var mths ?= @extendsType.type().listInstanceMethods(name) {
+					for var method in mths {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -1272,15 +1268,15 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, _, labelable) => {
+				(node, writer, _, labelable) => {
 					if labelable {
-						fragments.code(`\(name)(kws, ...args)`).step()
+						writer.code(`\(name)(kws, ...args)`).step()
 					}
 					else {
-						fragments.code(`\(name)(...args)`).step()
+						writer.code(`\(name)(...args)`).step()
 					}
 				}
-				(fragments) => fragments.done()
+				(writer) => writer.done()
 			)
 		}
 
@@ -1296,8 +1292,8 @@ class ClassDeclaration extends Statement {
 			var mut overflow = false
 
 			if @extending {
-				if var methods ?= @extendsType.type().listStaticMethods(name) {
-					for var method in methods {
+				if var mths ?= @extendsType.type().listStaticMethods(name) {
+					for var method in mths {
 						if method.isOverflowing(m) {
 							overflow = true
 							break
@@ -1314,15 +1310,15 @@ class ClassDeclaration extends Statement {
 				overflow
 				name
 				@class
-				(node, fragments, labelable) => {
+				(node, writer, labelable) => {
 					if labelable {
-						fragments.code(`static \(name)(kws, ...args)`).step()
+						writer.code(`static \(name)(kws, ...args)`).step()
 					}
 					else {
-						fragments.code(`static \(name)()`).step()
+						writer.code(`static \(name)()`).step()
 					}
 				}
-				(fragments) => fragments.done()
+				(writer) => writer.done()
 			)
 		}
 

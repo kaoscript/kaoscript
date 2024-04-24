@@ -65,7 +65,9 @@
                 }
               ],
               "returns": {
-                "reference": 0
+                "kind": "reference",
+                "name": 0,
+                "nullable": true
               },
               "errors": []
             }

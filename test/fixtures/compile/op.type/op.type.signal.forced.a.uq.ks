@@ -8,7 +8,7 @@ struct Point3D extends Point {
 }
 
 func foobar(p) {
-	var d3 = p:!!(Point | Point3D)
+	var d3 = p:!!!(Point | Point3D)
 
 	echo(d3.x + 1, d3.y + 2)
 }

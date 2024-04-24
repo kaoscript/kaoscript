@@ -4,8 +4,8 @@ module.exports = function() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(values) {
-		let value = values.pop();
-		if(Type.isValue(value)) {
+		let value, __ks_0;
+		if((Type.isValue(__ks_0 = values.pop()) ? (value = __ks_0, true) : false)) {
 			console.log(value);
 		}
 	};

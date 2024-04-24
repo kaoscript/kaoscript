@@ -8,7 +8,7 @@ module.exports = function() {
 		return disks.__ks_rt(this, arguments);
 	};
 	disks.__ks_0 = function(__ks_cb) {
-		const disks = [];
+		const result = [];
 		exec("df -k", (__ks_e, __ks_0) => {
 			if(__ks_e) {
 				__ks_cb(__ks_e);
@@ -17,9 +17,9 @@ module.exports = function() {
 				const stdout = Helper.assert(__ks_0, "\"String\"", 0, Type.isString);
 				for(let __ks_3 = __ks_String.__ks_func_lines_0.call(stdout), __ks_2 = 0, __ks_1 = __ks_3.length, line; __ks_2 < __ks_1; ++__ks_2) {
 					line = __ks_3[__ks_2];
-					let matches = df_regex.exec(line);
-					if(Type.isValue(matches)) {
-						disks.push((() => {
+					let matches, __ks_4;
+					if((Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false)) {
+						result.push((() => {
 							const o = new OBJ();
 							o.device = matches[1].trim();
 							o.mount = matches[9];
@@ -30,7 +30,7 @@ module.exports = function() {
 						})());
 					}
 				}
-				return __ks_cb(null, disks);
+				return __ks_cb(null, result);
 			}
 		});
 	};

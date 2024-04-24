@@ -3,11 +3,11 @@ module.exports = function() {
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
-	foobar.__ks_0 = function(foobar) {
-		if(foobar === void 0 || foobar === null) {
-			foobar = "foobar";
+	foobar.__ks_0 = function(value) {
+		if(value === void 0 || value === null) {
+			value = "foobar";
 		}
-		return foobar;
+		return value;
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = value => Type.isString(value) || Type.isNull(value);

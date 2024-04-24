@@ -6,5 +6,5 @@ func foobar(x) {
 		z = 1
 	}
 
-	y = z:!!(Any)!!
+	y = z:!!!(Any)!!!
 }

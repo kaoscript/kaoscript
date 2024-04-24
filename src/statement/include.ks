@@ -10,9 +10,9 @@ class IncludeDeclaration extends Statement {
 			var dyn x
 
 			if $localFileRegex.test(file) {
-				x = fs.resolve(directory, file)
+				x = $fs.resolve(directory, file)
 
-				if fs.isFile(x) {
+				if $fs.isFile(x) {
 					if x == @file() {
 						SyntaxException.throwIncludeSelf(this)
 					}
@@ -33,26 +33,26 @@ class IncludeDeclaration extends Statement {
 
 				var mut nf = true
 				for var dir in $listNPMModulePaths(directory) while nf {
-					x = fs.resolve(dir, name)
+					x = $fs.resolve(dir, name)
 
-					if fs.isFile(x) {
+					if $fs.isFile(x) {
 						nf = false
 					}
 					else {
-						var mut pkgfile = path.join(x, 'package.json')
+						var mut pkgfile = $path.join(x, 'package.json')
 
-						if fs.isFile(pkgfile) {
-							if var pkg ?= try JSON.parse(fs.readFile(pkgfile)) {
-								if ?pkg.kaoscript && fs.isFile(path.join(x, pkg.kaoscript.main)) {
-									x = path.join(x, pkg.kaoscript.main)
-									modulePath = path.join(modulePath, pkg.kaoscript.main)
+						if $fs.isFile(pkgfile) {
+							if var pkg ?= try JSON.parse($fs.readFile(pkgfile)) {
+								if ?pkg.kaoscript && $fs.isFile($path.join(x, pkg.kaoscript.main)) {
+									x = $path.join(x, pkg.kaoscript.main)
+									modulePath = $path.join(modulePath, pkg.kaoscript.main)
 
 									nf = false
 								}
 								else if ?pkg.main {
-									if fs.isFile(path.join(x, pkg.main)) {
-										x = path.join(x, pkg.main)
-										modulePath = path.join(modulePath, pkg.main)
+									if $fs.isFile($path.join(x, pkg.main)) {
+										x = $path.join(x, pkg.main)
+										modulePath = $path.join(modulePath, pkg.main)
 
 										nf = false
 									}
@@ -127,7 +127,7 @@ class IncludeDeclaration extends Statement {
 	loadLocalFile(declaration, path) { # {{{
 		var module = @module()
 
-		var mut data = fs.readFile(path)
+		var mut data = $fs.readFile(path)
 
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path)
@@ -150,7 +150,7 @@ class IncludeDeclaration extends Statement {
 	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { # {{{
 		var module = @module()
 
-		var mut data = fs.readFile(path)
+		var mut data = $fs.readFile(path)
 
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path, moduleName, modulePath, moduleVersion)
@@ -197,7 +197,7 @@ class IncludeDeclarator extends Statement {
 
 		@options = Attribute.configure(declaration, @options, AttributeTarget.Global, super.file(), true)
 
-		@directory = path.dirname(file)
+		@directory = $path.dirname(file)
 
 		var includePath = parent.includePath()
 
@@ -208,7 +208,7 @@ class IncludeDeclarator extends Statement {
 			@includePath = moduleName.substr(4)
 		}
 		else {
-			@includePath = path.join(includePath, moduleName)
+			@includePath = $path.join(includePath, moduleName)
 		}
 	} # }}}
 	initiate() { # {{{
@@ -293,11 +293,22 @@ class IncludeDeclarator extends Statement {
 	} # }}}
 	file() => @file
 	includePath() => @includePath
-	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { # {{{
-		var line = stmt.line()
+	isUsingStaticVariableBefore(class: String, varname: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
 
-		for var statement in @statements while statement.line() < line && statement != stmt {
-			if statement.isUsingStaticVariable(class, varname) {
+		for var stmt in @statements while stmt.line() < line && statement != stmt {
+			if stmt.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isUsingVariableBefore(name: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
+
+		for var stmt in @statements while stmt.line() < line && statement != stmt {
+			if stmt.isUsingVariable(name) {
 				return true
 			}
 		}

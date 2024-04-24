@@ -1,0 +1,1 @@
+TypeException: The variable "value" is always of type "Array" (fixtures/compile/typing/typing.refine.is.while.not<assg_exist.ise>e.ks:7)

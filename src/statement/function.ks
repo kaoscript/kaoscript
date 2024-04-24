@@ -176,11 +176,8 @@ class FunctionDeclaration extends Statement {
 		if @scope.hasMacro(@name) {
 			SyntaxException.throwIdenticalMacro(@name, this)
 		}
-		else if @variable ?= @scope.getDefinedVariable(@name) {
-			if @variable is FunctionVariable {
-				@continued = true
-			}
-			else if @variable.getDeclaredType().isFunction() {
+		else if @variable ?= @scope.getDefinedVariable(@name)!! {
+			if @variable.getDeclaredType().isFunction() {
 				@main = true
 				@continued = true
 			}
@@ -347,8 +344,8 @@ class FunctionDeclaration extends Statement {
 		var block = line.newBlock()
 
 		Router.toFragments(
-			(function, line) => {
-				line.code(`\(name).__ks_\(function.getCallIndex()).call(that`)
+			(function, writer) => {
+				writer.code(`\(name).__ks_\(function.getCallIndex()).call(that`)
 
 				return true
 			}
@@ -401,16 +398,17 @@ class FunctionDeclarator extends AbstractNode {
 
 		if ?#@data.parameters {
 			var mut firstParameter = 0
-			var parameter = @data.parameters[0]
 
-			if parameter.external?.name == 'this' || parameter.internal?.name == 'this' {
-				if parameter.external?.name == parameter.internal?.name == 'this' {
-					firstParameter = 1
+			with var parameter = @data.parameters[0] {
+				if parameter.external?.name == 'this' || parameter.internal?.name == 'this' {
+					if parameter.external?.name == parameter.internal?.name == 'this' {
+						firstParameter = 1
 
-					@thisVariable = @scope.define('this', true, Type.Any, this)
-				}
-				else {
-					throw NotImplementedException.new()
+						@thisVariable = @scope.define('this', true, Type.Any, this)
+					}
+					else {
+						throw NotImplementedException.new()
+					}
 				}
 			}
 
@@ -546,7 +544,7 @@ class FunctionDeclarator extends AbstractNode {
 	toStatementFragments(fragments) { # {{{
 		var line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
 
-		var block = Parameter.toFragments(this, line, ParameterMode.Default, (fragments) => fragments.code(')').newBlock())
+		var block = Parameter.toFragments(this, line, ParameterMode.Default, (writer) => writer.code(')').newBlock())
 
 		block.compile(@block, Mode.None)
 
@@ -612,10 +610,11 @@ class FunctionVariable extends Variable {
 			@realType = @declaredType
 		}
 		else {
-			var mut declarator = @declarators[0]
-			declarator.prepare()
+			var firstDeclarator = @declarators[0]
+				..prepare()
 
-			var mut type = declarator.type()
+			var mut type = firstDeclarator.type()
+
 			@declaredType.addFunction(type)
 
 			var async = type.isAsync()

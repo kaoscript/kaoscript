@@ -5,5 +5,5 @@ func foobar(x): Number {
 		z = 1
 	}
 
-	return z:!!(Any)!!
+	return z:!!!(Any)!!!
 }

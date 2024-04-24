@@ -116,7 +116,7 @@ class TryStatement extends Statement {
 			clause.body.prepare(target)
 			clause.type.prepare()
 
-			if clause.body:!(Block).isExit(.Statement + .Always) {
+			if clause.body:!!!(Block).isExit(.Statement + .Always) {
 				maxInferables -= 1
 			}
 			else {
@@ -253,7 +253,7 @@ class TryStatement extends Statement {
 					if clause.initializable {
 						types.push(clause.type)
 					}
-					else if !clause.body:!(Block).isExit(.Expression + .Statement + .Always) {
+					else if !clause.body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 						initializable = false
 
 						break
@@ -287,7 +287,7 @@ class TryStatement extends Statement {
 					if clause.initializable {
 						types.push(clause.type)
 					}
-					else if !clause.body:!(Block).isExit(.Expression + .Statement + .Always) {
+					else if !clause.body:!!!(Block).isExit(.Expression + .Statement + .Always) {
 						SyntaxException.throwMissingAssignmentTryClause(name, clause.body)
 					}
 				}
@@ -443,7 +443,9 @@ class TryStatement extends Statement {
 				clone.setDeclaredType(type, true).flagDefinitive()
 			}
 
-			node.scope().replaceVariable(name, clone)
+			var var = node.scope().replaceVariable(name, clone)
+
+			return var.getRealType()
 		}
 		else if var map ?= @initVariables[name] {
 			var mut branch = null
@@ -553,7 +555,7 @@ class TryStatement extends Statement {
 			return false unless @defaultClause.isExit(mode)
 
 			for var clause in @clauses {
-				return false unless clause.body:!(Block).isExit(mode)
+				return false unless clause.body:!!!(Block).isExit(mode)
 			}
 
 			return true
@@ -563,7 +565,7 @@ class TryStatement extends Statement {
 			return true if @hasDefaultClause && @defaultClause.isExit(mode)
 
 			for var clause in @clauses {
-				return true if clause.body:!(Block).isExit(mode)
+				return true if clause.body:!!!(Block).isExit(mode)
 			}
 
 			return false
@@ -571,7 +573,9 @@ class TryStatement extends Statement {
 	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
-	isUsingVariable(name) { # {{{
+	override isUsingVariable(name, bleeding) { # {{{
+		return false if bleeding
+
 		if @body.isUsingVariable(name) {
 			return true
 		}
@@ -749,7 +753,7 @@ class TryStatement extends Statement {
 				var mut index = -1
 				var mut item = null
 
-				for i from 0 to~ statements.length - 1 while index == -1 {
+				for var i from 0 to~ statements.length - 1 while index == -1 {
 					if item ?= statements[i].toFragments(ctrl2, Mode.None) {
 						index = i
 					}
@@ -799,7 +803,7 @@ class TryStatement extends Statement {
 			var mut index = -1
 			var mut item = null
 
-			for i from 0 to~ statements.length while index == -1 {
+			for var i from 0 to~ statements.length while index == -1 {
 				if item ?= statements[i].toFragments(ctrl, Mode.None) {
 					index = i
 				}

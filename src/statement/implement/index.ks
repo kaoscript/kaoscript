@@ -219,13 +219,13 @@ class ImplementDeclaration extends Statement {
 
 			if property.isMethod() {
 				var name = property.name()
-				var type = property.type()
+				var propType = property.type()
 				var instance = property.isInstance()
 				var mode = property.getMatchingMode()
 
-				if var methods ?= methods[instance][name] {
-					for var method in methods {
-						if method.isSubsetOf(type, mode) {
+				if var mths ?= methods[instance][name] {
+					for var method in mths {
+						if method.isSubsetOf(propType, mode) {
 							if property.isConstructor() {
 								SyntaxException.throwDuplicateConstructor(property)
 							}
@@ -235,16 +235,16 @@ class ImplementDeclaration extends Statement {
 						}
 					}
 
-					methods.push(type)
+					mths.push(propType)
 				}
 				else {
-					methods[instance][name] = [type]
+					methods[instance][name] = [propType]
 				}
 			}
 		}
 
-		for var methods, name of @forkedMethods {
-			for var { original, forks } of methods {
+		for var mths, name of @forkedMethods {
+			for var { original, forks } of mths {
 				var index = original.index()
 				var mut found = false
 

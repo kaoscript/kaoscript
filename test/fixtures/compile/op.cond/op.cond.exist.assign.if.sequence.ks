@@ -1,6 +1,7 @@
-var dyn foo = 'otto'
-var dyn quz = 0
+func foobar(x) {
+	var mut y = 0
+	var mut z = null
 
-var dyn bar
-if (quz += 1, true) && (quz += 1, bar ?= foo) {
+	if (y += 1, true) && (y += 1, z ?= x()) {
+	}
 }

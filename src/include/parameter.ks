@@ -298,11 +298,11 @@ class Parameter extends AbstractNode {
 			}
 		} # }}}
 		toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { # {{{
-			var parameter = parameters[restIndex]
+			var restParameter = parameters[restIndex]
 
 			var context = {
 				name
-				any: parameter.type().isAny()
+				any: restParameter.type().isAny()
 				increment: false
 				temp: beforeContext.temp
 				tempL: beforeContext.tempL
@@ -443,61 +443,61 @@ class Parameter extends AbstractNode {
 					ctrl.done()
 				}
 
-				var ctrl = fragments.newControl()
+				with var ctrl = fragments.newControl() {
+					if minAfter > 0 {
+						ctrl.code('while(__ks__ > ++__ks_i)')
+					}
+					else {
+						ctrl.code('while(arguments.length > ++__ks_i)')
+					}
 
-				if minAfter > 0 {
-					ctrl.code('while(__ks__ > ++__ks_i)')
+					ctrl.step()
+
+					var ctrl2 = ctrl.newControl()
+
+					var literal = Literal.new(false, node, node.scope(), 'arguments[__ks_i]')
+
+					if parameter.type().isNullable() {
+						ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
+
+						ctrl2.newLine().compile(parameter).code('.push(null)').done()
+
+						ctrl2.step()
+
+						ctrl2.code(`else if(arguments[__ks_i] === null || `)
+
+						parameter.type().toPositiveTestFragments(Junction.OR, ctrl2, literal)
+
+						ctrl2.code(')').step()
+					}
+					else {
+						ctrl2.code('if(')
+
+						parameter.type().toPositiveTestFragments(Junction.NONE, ctrl2, literal)
+
+						ctrl2.code(')').step()
+					}
+
+					if !parameter.isAnonymous() {
+						ctrl2
+							.newLine()
+							.compile(parameter)
+							.code('.push(arguments[__ks_i])')
+							.done()
+					}
+
+					ctrl2.step().code('else').step()
+
+					if minAfter != 0 || maxAfter != 0 {
+						ctrl2.line('--__ks_i').line('break')
+					}
+					else {
+						parameter.toErrorFragments(ctrl2, wrongdoer, signature.isAsync())
+					}
+
+					ctrl2.done()
+					ctrl.done()
 				}
-				else {
-					ctrl.code('while(arguments.length > ++__ks_i)')
-				}
-
-				ctrl.step()
-
-				var ctrl2 = ctrl.newControl()
-
-				var literal = Literal.new(false, node, node.scope(), 'arguments[__ks_i]')
-
-				if parameter.type().isNullable() {
-					ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
-
-					ctrl2.newLine().compile(parameter).code('.push(null)').done()
-
-					ctrl2.step()
-
-					ctrl2.code(`else if(arguments[__ks_i] === null || `)
-
-					parameter.type().toPositiveTestFragments(Junction.OR, ctrl2, literal)
-
-					ctrl2.code(')').step()
-				}
-				else {
-					ctrl2.code('if(')
-
-					parameter.type().toPositiveTestFragments(Junction.NONE, ctrl2, literal)
-
-					ctrl2.code(')').step()
-				}
-
-				if !parameter.isAnonymous() {
-					ctrl2
-						.newLine()
-						.compile(parameter)
-						.code('.push(arguments[__ks_i])')
-						.done()
-				}
-
-				ctrl2.step().code('else').step()
-
-				if minAfter != 0 || maxAfter != 0 {
-					ctrl2.line('--__ks_i').line('break')
-				}
-				else {
-					parameter.toErrorFragments(ctrl2, wrongdoer, signature.isAsync())
-				}
-
-				ctrl2.done()
-				ctrl.done()
 
 				if parameter.hasDefaultValue() {
 					var ctrl = fragments
@@ -568,15 +568,8 @@ class Parameter extends AbstractNode {
 	} # }}}
 	analyse() { # {{{
 		if ?@data.internal {
-			var mut immutable = true
-
-			for var modifier in @data.modifiers {
-				if modifier.kind == ModifierKind.Mutable {
-					immutable = false
-
-					break
-				}
-			}
+			var overwrite = @parent is AnonymousFunctionExpression | ArrowFunctionExpression || @hasAttribute('overwrite')
+			var immutable = !@hasModifier(.Mutable)
 
 			@internal = Parameter.compileExpression(@data.internal, this)
 				..setAssignment(AssignmentType.Parameter)
@@ -584,14 +577,14 @@ class Parameter extends AbstractNode {
 				..operator(@data.operator.assignment) if ?@data.operator
 				..analyse()
 
-			for var assignment in @internal.listAssignments([]) {
+			for var assignment in @internal.listAssignments([], immutable, overwrite) {
 				var { name } = assignment
 
-				if @scope.hasDefinedVariable(name) {
+				if !assignment.overwrite && @scope.hasDefinedVariable(name) {
 					SyntaxException.throwAlreadyDeclared(name, this)
 				}
 
-				@scope.define(name, assignment.immutable ?? immutable, null, this)
+				@scope.define(name, assignment.immutable, null, false, assignment.overwrite, this)
 			}
 		}
 		else {
@@ -804,7 +797,7 @@ class Parameter extends AbstractNode {
 	isRequired() => @explicitlyRequired || !?@defaultValue
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
-	listAssignments(array: Array, immutable: Boolean? = null) => @internal.listAssignments(array, immutable)
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal.listAssignments(array, immutable, overwrite)
 	max() => @arity?.max ?? 1
 	min() => @arity?.min ?? 1
 	setDefaultValue(data) { # {{{
@@ -1682,11 +1675,11 @@ class ObjectBindingParameter extends ObjectBinding {
 	} # }}}
 	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	isBinding() => true
-	override listAssignments(array, immutable) { # {{{
-		super(array, immutable)
+	override listAssignments(array, immutable, overwrite) { # {{{
+		super(array, immutable, overwrite)
 
 		if ?@alias {
-			@alias.listAssignments(array, immutable)
+			@alias.listAssignments(array, immutable, overwrite)
 		}
 
 		return array
@@ -1913,8 +1906,8 @@ class ThisExpressionParameter extends ThisExpression {
 	getDeclaredType() => @type
 	flagImmutable()
 	isBinding() => false
-	listAssignments(array: Array, immutable: Boolean? = null) { # {{{
-		array.push({ @name })
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
+		array.push({ @name, immutable: true, overwrite: false })
 
 		return array
 	} # }}}

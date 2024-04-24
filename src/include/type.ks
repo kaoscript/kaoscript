@@ -319,13 +319,13 @@ abstract class Type {
 						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters], data, node).flagComplete()
 					}
 					else {
-						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)]:!(Array<ParameterType>), data, node).flagComplete()
+						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)]:!!!(Array<ParameterType>), data, node).flagComplete()
 					}
 				}
 				NodeKind.FunctionExpression {
 					var parameters = [ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]
 
-					return FunctionType.new(parameters:!(Array<ParameterType>), generics, data, node).flagComplete()
+					return FunctionType.new(parameters:!!!(Array<ParameterType>), generics, data, node).flagComplete()
 				}
 				NodeKind.FusionType {
 					return FusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
@@ -441,9 +441,9 @@ abstract class Type {
 								'Object' {
 									var type = ObjectType.new(scope).setNullable(nullable)
 
-									var parameter = data.typeParameters[0]
-
-									type.setRestType(Type.fromAST(parameter, scope, defined, generics, node))
+									with var parameter = data.typeParameters[0] {
+										type.setRestType(Type.fromAST(parameter, scope, defined, generics, node))
+									}
 
 									if var parameter ?= data.typeParameters[1] {
 										type.setKeyType(Type.fromAST(parameter, scope, defined, generics, node))
@@ -608,15 +608,15 @@ abstract class Type {
 		} # }}}
 		fromAST(data, type: Type, node: AbstractNode): Type { # {{{
 			if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
-				var property = data.typeName.argument.name
+				var { name } = data.typeName.argument
 
 				if type.isAny() {
-					ReferenceException.throwUnresolvedImplicitProperty(property, node)
+					ReferenceException.throwUnresolvedImplicitProperty(name, node)
 				}
 
 				if type.isBitmask() {
-					unless type.discard().hasValue(property) {
-						ReferenceException.throwNotDefinedBitmaskElement(property, type.name(), node)
+					unless type.discard().hasValue(name) {
+						ReferenceException.throwNotDefinedBitmaskElement(name, type.name(), node)
 					}
 
 					return type.setNullable(false)
@@ -624,8 +624,8 @@ abstract class Type {
 
 
 				if type.isEnum() {
-					unless type.discard().hasValue(property) {
-						ReferenceException.throwNotDefinedEnumElement(property, type.name(), node)
+					unless type.discard().hasValue(name) {
+						ReferenceException.throwNotDefinedEnumElement(name, type.name(), node)
 					}
 
 					return type.setNullable(false)
@@ -634,16 +634,16 @@ abstract class Type {
 				if type.isVariant() {
 					var variant = type.discard().getVariantType()
 
-					if variant.hasSubtype(property) {
-						return ReferenceType.new(node.scope(), type.name(), null, null, [{ name: property, type: variant.getMaster() }])
+					if variant.hasSubtype(name) {
+						return ReferenceType.new(node.scope(), type.name(), null, null, [{ name, type: variant.getMaster() }])
 					}
 				}
 
-				if var property ?= type.getProperty(property) {
+				if var property ?= type.getProperty(name) {
 					return property.discardVariable()
 				}
 
-				ReferenceException.throwUnresolvedImplicitProperty(property, node)
+				ReferenceException.throwUnresolvedImplicitProperty(name, node)
 			}
 			else {
 				return Type.fromAST(data, node)
@@ -860,10 +860,10 @@ abstract class Type {
 			var equivalences = []
 
 			items.sort((a, b) => {
-				if a.children:!(Array).contains(b) {
+				if a.children:!!!(Array).contains(b) {
 					return 1
 				}
-				if b.children:!(Array).contains(a) {
+				if b.children:!!!(Array).contains(a) {
 					return -1
 				}
 
@@ -900,7 +900,7 @@ abstract class Type {
 			return namedType
 		} # }}}
 		union(scope: Scope, ...types: Type?) { # {{{
-			if types.length == 1 {
+			if #types == 1 || (#types == 2 && types[0] == types[1]) {
 				return types[0]
 			}
 
@@ -1050,6 +1050,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
+	isAssertingWhenCasting(): Boolean => true
 	isAssignableToVariable(value: Type, downcast: Boolean = false): Boolean => @isAssignableToVariable(value, true, false, downcast)
 	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { # {{{
 		if this == value {
@@ -1183,11 +1184,17 @@ abstract class Type {
 	isVirtual() => false
 	isVoid() => false
 	limitTo(value: Type): Type { # {{{
-		if value.isMorePreciseThan(this) {
+		var mut current = this
+
+		if @isNullable() && !value.isNullable() {
+			current = @setNullable(false)
+		}
+
+		if value.isMorePreciseThan(current) {
 			return value
 		}
 		else {
-			return this
+			return current
 		}
 	} # }}}
 	makeCallee(name: String, generics: AltType[] = [], node: CallExpression): VoidThunk? { # {{{
@@ -1401,11 +1408,17 @@ abstract class Type {
 	toTypeQuote() => @toQuote()
 	trimOff(type: Type): Type => this
 	tryCastingTo(value: Type): Type { # {{{
-		if value.isMorePreciseThan(this) {
+		var mut current = this
+
+		if @isNullable() && !value.isNullable() {
+			current = @setNullable(false)
+		}
+
+		if value.isMorePreciseThan(current) {
 			return value
 		}
 		else {
-			return this
+			return current
 		}
 	} # }}}
 	tune(value: Type): Type? => null

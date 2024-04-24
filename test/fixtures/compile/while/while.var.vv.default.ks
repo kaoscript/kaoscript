@@ -6,4 +6,4 @@ func foobar(text: String) {
 	}
 }
 
-func quxbaz(text: String): String => text
+func quxbaz(text: String): String? => text

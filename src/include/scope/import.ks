@@ -37,6 +37,27 @@ class ImportScope extends BlockScope {
 
 		return name == newName
 	} # }}}
+	hasDefinedVariable(name: String, line: Number) { # {{{
+		if ?@variables[name] {
+			var variables: Array = @variables[name]
+			var mut variable = null
+
+			if line == -1 || line > @line() {
+				variable = variables.last()
+			}
+			else {
+				for var i from 0 to~ variables.length step 2 while variables[i] <= line {
+					variable = variables[i + 1]
+				}
+			}
+
+			if variable != null {
+				return variable != false
+			}
+		}
+
+		return false
+	} # }}}
 	rename(name: String, newName: String, scope: Scope) { # {{{
 		if newName != name {
 			if var renames ?= @scopeRenames[name] {

@@ -83,7 +83,7 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 		super()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.isBoolean() || @parent is ExpressionStatement
+		SyntaxException.throwNoReturn(this) unless target.isVoid() || target.canBeBoolean() || @parent is ExpressionStatement
 
 		super(AnyType.NullableUnexplicit)
 
@@ -115,6 +115,8 @@ class AssignmentOperatorNonEmpty extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	defineVariables(left) { # {{{
+		return if @declaration
+
 		if @condition {
 			var names = []
 
@@ -307,12 +309,13 @@ class PolyadicOperatorEmptyCoalescing extends PolyadicOperatorExpression {
 
 		if @spread {
 			var spreads = []
-			var mut spread = false
 
-			for var operand in @operands down {
-				spread ||= operand.isSpread()
+			with var mut spread = false {
+				for var operand in @operands down {
+					spread ||= operand.isSpread()
 
-				spreads.unshift(spread)
+					spreads.unshift(spread)
+				}
 			}
 
 			var mut opened = false

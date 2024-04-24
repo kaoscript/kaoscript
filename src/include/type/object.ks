@@ -678,9 +678,9 @@ class ObjectType extends Type {
 								pass
 							}
 							else if prop is ValueType {
-								var value = prop.value()
+								var propValue = prop.value()
 
-								if var field ?= type.getField(value) {
+								if var field ?= type.getField(propValue) {
 									if type.isValidField(field, subtypes) {
 										Object.merge(newProperties, field.type.properties())
 									}
@@ -688,7 +688,7 @@ class ObjectType extends Type {
 										return false
 									}
 								}
-								else if !type.hasSubtype(value) {
+								else if !type.hasSubtype(propValue) {
 									NotImplementedException.throw()
 								}
 							}
@@ -772,9 +772,9 @@ class ObjectType extends Type {
 				return @isSubsetOf(value.discard(), generics, subtypes, mode + MatchingMode.Reference)
 			}
 			else {
-				var { type, generics, subtypes } = value.getGenericMapper()
+				var map = value.getGenericMapper()
 
-				return @isSubsetOf(type, generics, subtypes, mode + MatchingMode.Reference)
+				return @isSubsetOf(map.type, map.generics, map.subtypes, mode + MatchingMode.Reference)
 			}
 		}
 
@@ -1115,9 +1115,9 @@ class ObjectType extends Type {
 			return result
 		}
 		else if value.isAlias() {
-			var { type, generics, subtypes } = value.getGenericMapper()
+			var map = value.getGenericMapper()
 
-			return @merge(type, generics, subtypes, ignoreUndefined, node)
+			return @merge(map.type, map.generics, map.subtypes, ignoreUndefined, node)
 		}
 		else {
 			return this
@@ -1164,6 +1164,38 @@ class ObjectType extends Type {
 		@rest = true
 	} # }}}
 	setTestName(@testName)
+	override tryCastingTo(value) { # {{{
+		if @isNullable() && !value.isNullable() {
+			return @setNullable(false).tryCastingTo(value)
+		}
+
+		if value.isMorePreciseThan(this) {
+			return value
+		}
+
+		var root = value.discard()
+
+		return this unless root.isObject()
+
+		var result = ObjectType.new(@scope)
+
+		if @hasProperties() {
+			for var type, name of @properties {
+				if var property ?= root.getProperty(name) {
+					result.addProperty(name, type.tryCastingTo(property))
+				}
+				else {
+					result.addProperty(name, type)
+				}
+			}
+		}
+
+		if @rest {
+			result.setRestType(@restType.tryCastingTo(root.getRestType()))
+		}
+
+		return result
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
@@ -1524,7 +1556,7 @@ class ObjectType extends Type {
 		fragments.code('(') if @nullable && junction == .AND
 
 		if ?@testName {
-			fragments.code(`\(@testName)(`).compile(node)
+			fragments.code(`\(@testName)(`).compileReusable(node)
 
 			if @testCast {
 				fragments.code(', 0')
@@ -1549,10 +1581,10 @@ class ObjectType extends Type {
 			fragments.code(')')
 		}
 		else if !@destructuring && !@testRest && !@testProperties {
-			fragments.code(`\($runtime.type(node)).isObject(`).compile(node).code(`)`)
+			fragments.code(`\($runtime.type(node)).isObject(`).compileReusable(node).code(`)`)
 		}
 		else {
-			fragments.code(`\($runtime.type(node)).isDexObject(`).compile(node)
+			fragments.code(`\($runtime.type(node)).isDexObject(`).compileReusable(node)
 
 			@toSubtestFragments(null, 'value', false, true, null, fragments, node)
 
@@ -1570,8 +1602,8 @@ class ObjectType extends Type {
 
 		fragments.code(`\(@testName).__\(index)(`).compile(node).code(`, [`)
 
-		for var { type }, index in parameters {
-			fragments.code($comma) if index > 0
+		for var { type }, pIndex in parameters {
+			fragments.code($comma) if pIndex > 0
 
 			type.toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 		}

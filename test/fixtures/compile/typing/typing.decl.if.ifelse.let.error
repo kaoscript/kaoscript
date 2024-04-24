@@ -1,0 +1,1 @@
+SyntaxException: Identifier "y" has already been declared (fixtures/compile/typing/typing.decl.if.ifelse.let.ks:5)

@@ -3,5 +3,5 @@
 import '../_/_string.ks'
 
 func lines(value) {
-	return value:!(String).lines()
+	return value:!!(String).lines()
 }

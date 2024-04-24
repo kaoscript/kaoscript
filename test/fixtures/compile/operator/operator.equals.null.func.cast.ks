@@ -4,7 +4,7 @@ func quxbaz(mut x: String? = null): String {
 	var mut y? = null
 
 	if x == null {
-		y = x = foobar():!(String)
+		y = x = foobar():!!(String)
 	}
 
 	return x
