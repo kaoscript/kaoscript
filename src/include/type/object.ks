@@ -1280,7 +1280,7 @@ class ObjectType extends Type {
 
 				if @testCast {
 					if casting {
-						fragments.code(', cast')
+						fragments.code(`, \(blind ? 'cast' : 'true')`)
 					}
 					else {
 						fragments.code(', 0')
