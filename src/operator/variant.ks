@@ -84,8 +84,7 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 
 			if variant.canBeBoolean() {
 				@name = root.getVariantName()
-				@type = rightType.clone()
-					..addSubtype('true', @scope.reference('Boolean'), this)
+				@type = Type.setTrueSubtype(rightType, @scope, this)
 			}
 			else {
 				TypeException.throwNotBooleanVariant(@right, this)
@@ -238,56 +237,7 @@ class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 				operand.acquireReusable(true)
 				operand.releaseReusable()
 
-				match type {
-					ReferenceType {
-						if type.isNullable() {
-							type = type.setNullable(false)
-						}
-						else {
-							type = type.clone()
-						}
-
-						type.addSubtype('true', @scope.reference('Boolean'), this)
-					}
-					UnionType {
-						var name = root.getVariantName()
-						var unionTypes = []
-
-						for var mut unionType in type.types() {
-							if var subtypes ?#= unionType.getSubtypes() {
-								if var filtereds ?#= [subtype for var subtype in subtypes when variant.getMainName(subtype.name) != 'false'] {
-									if unionType.isNullable() {
-										unionType = unionType.setNullable(false)
-									}
-									else {
-										unionType = unionType.clone()
-									}
-
-									unionType.setSubtypes(filtereds)
-
-									unionTypes.push(unionType)
-								}
-							}
-							else {
-								if unionType.isNullable() {
-									unionType = unionType.setNullable(false)
-								}
-								else {
-									unionType = unionType.clone()
-								}
-
-								unionType.addSubtype('true', @scope.reference('Boolean'), this)
-
-								unionTypes.push(unionType)
-							}
-						}
-
-						type = Type.union(@scope, ...unionTypes)
-					}
-					else {
-						NotImplementedException.throw(this)
-					}
-				}
+				type = Type.setTrueSubtype(type, @scope, this)
 
 				var mut ne = true
 
@@ -374,9 +324,7 @@ class UnaryOperatorVariant extends UnaryOperatorExpression {
 			var variant = root.getVariantType()
 
 			if variant.canBeBoolean() {
-				@trueType = type.clone()
-					..setSubtypes([{ name: 'true', type: @scope.reference('Boolean') }])
-
+				@trueType = Type.setTrueSubtype(type, @scope, this)
 				@name = root.getVariantName()
 			}
 			else {

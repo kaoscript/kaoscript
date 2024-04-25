@@ -824,6 +824,55 @@ abstract class Type {
 			return type
 		} # }}}
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
+		setTrueSubtype(mut type: ReferenceType, scope: Scope, node): Type { # {{{
+			if type.isNullable() {
+				type = type.setNullable(false)
+			}
+			else {
+				type = type.clone()
+			}
+
+			type.setSubtypes([{ name: 'true', type: scope.reference('Boolean') }])
+
+			return type
+		} # }}}
+		setTrueSubtype(type % union: UnionType, scope: Scope, node): Type { # {{{
+			var root = union.discard()
+			var variant = root.getVariantType()
+			var name = root.getVariantName()
+			var types = []
+
+			for var mut type in union.types() {
+				if var subtypes ?#= type.getSubtypes() {
+					if var filtereds ?#= [subtype for var subtype in subtypes when variant.getMainName(subtype.name) != 'false'] {
+						if type.isNullable() {
+							type = type.setNullable(false)
+						}
+						else {
+							type = type.clone()
+						}
+
+						type.setSubtypes(filtereds)
+
+						types.push(type)
+					}
+				}
+				else {
+					if type.isNullable() {
+						type = type.setNullable(false)
+					}
+					else {
+						type = type.clone()
+					}
+
+					type.addSubtype('true', scope.reference('Boolean'), node)
+
+					types.push(type)
+				}
+			}
+
+			return Type.union(scope, ...types)
+		} # }}}
 		// TODO!
 		// sort<T>(values: T[], resolve: (value: T): Type?): T[] { # {{{
 		sort(values: Array, resolve: Function): Array { # {{{
