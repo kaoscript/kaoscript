@@ -1,0 +1,1 @@
+TypeException: The identifier "y" of type "Event" is expected to be of type "Event(false)" (fixtures/compile/op.cond/op.cond.variant.assg.coal.stm.v§n_ve.ks:12)

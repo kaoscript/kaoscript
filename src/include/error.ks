@@ -1119,6 +1119,9 @@ export class TypeException extends Exception {
 		throwUnnecessaryTypeChecking(expression, type, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The variable \(expression.toQuote(true)) is always of type \(type.toQuote(true))`, node)
 		} # }}}
+		throwUnnecessaryVariantChecking(expression, type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The variable \(expression.toQuote(true)) of type \(type.toQuote(true)) has already a known variance`, node)
+		} # }}}
 		throwUnknownTypeFitting(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The type fitting "!!" can't determine the expected type`, node)
 		} # }}}

@@ -170,6 +170,34 @@ class VariantType extends Type {
 	getMaster() => @master
 	getVariantType() => this
 	hashCode() => `~\(@master.hashCode())`
+	hasManyValues(type: ReferenceType): Boolean { # {{{
+		var subtypes = type.getSubtypes()
+
+		return true unless ?#subtypes
+
+		var names = []
+
+		for var { name } in subtypes {
+			names.pushUniq(@getMainName(name))
+		}
+
+		return #names > 1
+	} # }}}
+	hasManyValues(type % union: UnionType): Boolean { # {{{
+		var names = []
+
+		for var type in union.types() {
+			var subtypes = type.getSubtypes()
+
+			return true unless ?#subtypes
+
+			for var { name } in subtypes {
+				names.pushUniq(@getMainName(name))
+			}
+		}
+
+		return #names > 1
+	} # }}}
 	hasSubtype(name: String) { # {{{
 		if ?@names[name] {
 			return true

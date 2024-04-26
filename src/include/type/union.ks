@@ -356,6 +356,15 @@ class UnionType extends Type {
 			return Type.union(@scope, ...types)
 		}
 	} # }}}
+	getSubtypes() { # {{{
+		var subtypes= []
+
+		for var type in @types {
+			subtypes.pushUniq(...?type.getSubtypes())
+		}
+
+		return subtypes
+	} # }}}
 	getVariantName() { # {{{
 		for var type in @types {
 			if type.isVariant() {

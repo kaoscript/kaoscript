@@ -1,5 +1,6 @@
 class AssignmentOperatorVariantCoalescing extends AssignmentOperatorExpression {
 	private late {
+		@assert: Boolean		= false
 		@name: String
 	}
 	override prepare(target, targetMode) { # {{{
@@ -11,46 +12,140 @@ class AssignmentOperatorVariantCoalescing extends AssignmentOperatorExpression {
 			TypeException.throwUnexpectedInoperative(@left, this)
 		}
 
-		if type.isVariant() {
-			var root = type.discard()
-			var variant = root.getVariantType()
-
-			if variant.canBeBoolean() {
-				@name = root.getVariantName()
-			}
-			else {
-				TypeException.throwNotBooleanVariant(@left, this)
-			}
-		}
-		else {
+		unless type.isVariant() {
 			TypeException.throwNotBooleanVariant(@left, this)
 		}
+
+		var root = type.discard()
+		var variant = root.getVariantType()
+
+		unless variant.hasManyValues(type) {
+			TypeException.throwUnnecessaryVariantChecking(@left, type, this)
+		}
+
+		unless variant.canBeBoolean() {
+			TypeException.throwNotBooleanVariant(@left, this)
+		}
+
+		var leftType = @left.getDeclaredType().discardValue()
+		var rightType = @right.type()
+
+		if !@isMisfit() && @parent is not BinaryOperatorTypeEquality | BinaryOperatorTypeInequality && !rightType.isDeferred() && !rightType.isFunction() && !rightType.isAssignableToVariable(leftType, false, false, false) {
+			@assert = true
+		}
+
+		@name = root.getVariantName()
+
+		if @assert {
+			@right.acquireReusable(true)
+			@right.releaseReusable()
+		}
+	} # }}}
+	inferTypes(inferables) { # {{{
+		@left.inferTypes(inferables)
+
+		if @left.isInferable() {
+			var type = Type.union(@scope, Type.setTrueSubtype(@left.type().setNullable(false), @scope, this), @right.type())
+
+			inferables[@left.path()] = {
+				isVariable: @left.isVariable()
+				type
+			}
+		}
+
+		return inferables
 	} # }}}
 	toFragments(fragments, mode) { # {{{
+		if @left.isNullable() {
+			fragments.code('(')
+
+			@left.toNullableFragments(fragments)
+
+			fragments.code(' && ').compile(@left).code(`.\(@name)`)
+		}
+		else {
+			fragments.compile(@left).code(`.\(@name)`)
+		}
+
+		if @assert {
+			fragments.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
+		}
+
 		fragments
-			.compile(@left)
-			.code(`.\(@name) ? null : `)
+			.code(' ? null : ')
 			.compile(@left)
 			.code($equals)
-			.compile(@right)
+			.compileReusable(@right)
+	} # }}}
+	toConditionFragments(fragments, mode, junction) { # {{{
+		if @left.isNullable() {
+			fragments.code('(')
+
+			@left.toNullableFragments(fragments)
+
+			fragments.code(' && ').compile(@left).code(`.\(@name))`)
+		}
+		else {
+			fragments.compile(@left).code(`.\(@name)`)
+		}
+
+		if @assert {
+			fragments.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(fragments, @right)
+
+			fragments.code(')')
+		}
+
+		fragments
+			.code(' ? false : (')
+			.compile(@left)
+			.code($equals)
+			.compileReusable(@right)
+			.code(', true)')
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		var mut ctrl = fragments.newControl()
 
 		ctrl
 			.code('if(!')
-			.compile(@left)
-			.code(`.\(@name))`)
+
+		if @left.isNullable() {
+			ctrl.code('(')
+
+			@left.toNullableFragments(ctrl)
+
+			ctrl.code(' && ').compile(@left).code(`.\(@name))`)
+		}
+		else {
+			ctrl.compile(@left).code(`.\(@name)`)
+		}
+
+		if @assert {
+			ctrl.code(' && (')
+
+			@left.getDeclaredType().setNullable(false).toPositiveTestFragments(ctrl, @right)
+
+			ctrl.code(')')
+		}
+
+		ctrl
+			.code(')')
 			.step()
 			.newLine()
 			.compile(@left)
 			.code($equals)
-			.compile(@right)
+			.compileReusable(@right)
 			.done()
 
 		ctrl.done()
 	} # }}}
-	toQuote() => `\(@left.toQuote()) ?||= \(@right.toQuote())`
+	toQuote() => `\(@left.toQuote()) ?]]= \(@right.toQuote())`
+	type() => @scope.reference('Boolean')
 }
 
 class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
@@ -78,21 +173,23 @@ class AssignmentOperatorVariantYes extends AssignmentOperatorExpression {
 			TypeException.throwUnexpectedInoperative(rightType, this)
 		}
 
-		if rightType.isVariant() {
-			var root = rightType.discard()
-			var variant = root.getVariantType()
-
-			if variant.canBeBoolean() {
-				@name = root.getVariantName()
-				@type = Type.setTrueSubtype(rightType, @scope, this)
-			}
-			else {
-				TypeException.throwNotBooleanVariant(@right, this)
-			}
-		}
-		else {
+		unless rightType.isVariant() {
 			TypeException.throwNotBooleanVariant(@right, this)
 		}
+
+		var root = rightType.discard()
+		var variant = root.getVariantType()
+
+		unless variant.canBeBoolean() {
+			TypeException.throwNotBooleanVariant(@right, this)
+		}
+
+		unless variant.hasManyValues(rightType) {
+			TypeException.throwUnnecessaryVariantChecking(@right, rightType, this)
+		}
+
+		@name = root.getVariantName()
+		@type = Type.setTrueSubtype(rightType, @scope, this)
 
 		if @left.isVariable() {
 			if @condition && @lateinit {
@@ -231,6 +328,10 @@ class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 					TypeException.throwNotBooleanVariant(operand, this)
 				}
 
+				unless variant.hasManyValues(type) {
+					TypeException.throwUnnecessaryVariantChecking(operand, type, this)
+				}
+
 				@names.push(root.getVariantName())
 				@nullables.push(type.isNullable())
 
@@ -264,7 +365,7 @@ class PolyadicOperatorVariantCoalescing extends PolyadicOperatorExpression {
 		}
 	} # }}}
 	operator() => Operator.VariantCoalescing
-	symbol() => '?||'
+	symbol() => '?]]'
 	toFragments(fragments, mode) { # {{{
 		var last = @operands.length - 1
 
@@ -319,21 +420,23 @@ class UnaryOperatorVariant extends UnaryOperatorExpression {
 			TypeException.throwUnexpectedInoperative(@argument, this)
 		}
 
-		if type.isVariant() {
-			var root = type.discard()
-			var variant = root.getVariantType()
-
-			if variant.canBeBoolean() {
-				@trueType = Type.setTrueSubtype(type, @scope, this)
-				@name = root.getVariantName()
-			}
-			else {
-				TypeException.throwNotBooleanVariant(@argument, this)
-			}
-		}
-		else {
+		unless type.isVariant() {
 			TypeException.throwNotBooleanVariant(@argument, this)
 		}
+
+		var root = type.discard()
+		var variant = root.getVariantType()
+
+		unless variant.canBeBoolean() {
+			TypeException.throwNotBooleanVariant(@argument, this)
+		}
+
+		unless variant.hasManyValues(type) {
+			TypeException.throwUnnecessaryVariantChecking(@argument, type, this)
+		}
+
+		@trueType = Type.setTrueSubtype(type, @scope, this)
+		@name = root.getVariantName()
 	} # }}}
 	inferWhenTrueTypes(inferables) { # {{{
 		@argument.inferTypes(inferables)
