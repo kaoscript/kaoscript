@@ -1,7 +1,8 @@
 class EnumViewType extends Type {
 	private late {
-		@aliases: Object<EnumAliasType>			= {}
-		@elements: String[]						= []
+		@aliases: Object<EnumAliasType>		= {}
+		@elements: String[]					= []
+		@exclusion: Boolean					= false
 		@master: Type
 		@root: EnumType | EnumViewType
 		// TODO move to alias
@@ -51,110 +52,128 @@ class EnumViewType extends Type {
 		}
 	} # }}}
 	override finalize(data, generics, node) { # {{{
-		return if ?#@elements
+		if ?#@elements {
+			return unless @exclusion
 
-		var mut source = `func(`
-		var mut comma = false
-		var fields = ['index', 'name', 'value']
-		var types: Type{} = {}
-		var dynamics: String[]{} = {}
-
-		for var field, name of @root.fields() {
-			if comma {
-				source += ', '
-			}
-			else {
-				comma = true
-			}
-
-			var type = field.type()
-
-			if type.isNative() {
-				source += `\(name): \(type.name())`
-			}
-			else {
-				source += `mut _\(name)`
-
-				types[type.name()] = type.discard()
-
-				dynamics[type.name()] ??= []
-				dynamics[type.name()].push(name)
-			}
-
-			fields.pushUniq(name)
-		}
-
-		source += `): Boolean`
-
-		if ?#types {
-			source += ` {\n`
-
-			var mut auxiliary = ''
-
-			for var type, name of types {
-				var ast = type.toASTData(name)
-
-				auxiliary += `\(KSGeneration.generate(ast))\n`
-
-				for var field in dynamics[name] {
-					source += `var \(field): \(name) = eval(_\(field))!!\n`
-				}
-			}
-
-			source += `return \(KSGeneration.generate(data.typeSubtypes))\n`
-			source += `}`
-
-			var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
+			var elements = []
 
 			for var value of @root.values() {
-				var args = [value.index(), value.name(), value.value()]
-
-				for var name in fields from 3 {
-					args.push(value.argument(name))
-				}
-
-				if filter(...args) {
-					@elements.push(value.name())
-				}
+				elements.push(value.name())
 			}
+
+			for var element in @elements {
+				elements.remove(@root.getTopProperty(element))
+			}
+
+			@elements = elements
 		}
 		else {
-			source += ` => \(KSGeneration.generate(data.typeSubtypes))`
+			var mut source = `func(`
+			var mut comma = false
+			var fields = ['index', 'name', 'value']
+			var types: Type{} = {}
+			var dynamics: String[]{} = {}
 
-			var filter = $evaluate($compileTest(source)).__ks_0
-
-			for var value of @root.values() {
-				var args = [value.index(), value.name(), value.value()]
-
-				for var name in fields from 3 {
-					args.push(value.argument(name))
+			for var field, name of @root.fields() {
+				if comma {
+					source += ', '
+				}
+				else {
+					comma = true
 				}
 
-				if filter(...args) {
-					@elements.push(value.name())
+				var type = field.type()
+
+				if type.isNative() {
+					source += `\(name): \(type.name())`
+				}
+				else {
+					source += `mut _\(name)`
+
+					types[type.name()] = type.discard()
+
+					dynamics[type.name()] ??= []
+					dynamics[type.name()].push(name)
+				}
+
+				fields.pushUniq(name)
+			}
+
+			source += `): Boolean`
+
+			if ?#types {
+				source += ` {\n`
+
+				var mut auxiliary = ''
+
+				for var type, name of types {
+					var ast = type.toASTData(name)
+
+					auxiliary += `\(KSGeneration.generate(ast))\n`
+
+					for var field in dynamics[name] {
+						source += `var \(field): \(name) = eval(_\(field))!!\n`
+					}
+				}
+
+				source += `return \(KSGeneration.generate(data.typeSubtypes))\n`
+				source += `}`
+
+				var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
+
+				for var value of @root.values() {
+					var args = [value.index(), value.name(), value.value()]
+
+					for var name in fields from 3 {
+						args.push(value.argument(name))
+					}
+
+					if filter(...args) {
+						@elements.push(value.name())
+					}
 				}
 			}
-		}
+			else {
+				source += ` => \(KSGeneration.generate(data.typeSubtypes))`
 
-		for var alias, name of @root.getOnlyAliases() {
-			var mut matched = true
+				var filter = $evaluate($compileTest(source)).__ks_0
 
-			for var original in alias.originals() {
-				if !@elements.contains(original) {
-					matched = false
+				for var value of @root.values() {
+					var args = [value.index(), value.name(), value.value()]
 
-					break
+					for var name in fields from 3 {
+						args.push(value.argument(name))
+					}
+
+					if filter(...args) {
+						@elements.push(value.name())
+					}
 				}
 			}
 
-			if matched {
-				@aliases[name] = alias
+			for var alias, name of @root.getOnlyAliases() {
+				var mut matched = true
+
+				for var original in alias.originals() {
+					if !@elements.contains(original) {
+						matched = false
+
+						break
+					}
+				}
+
+				if matched {
+					@aliases[name] = alias
+				}
+			}
+
+			unless ?#@elements {
+				NotImplementedException.throw()
 			}
 		}
-
-		unless ?#@elements {
-			NotImplementedException.throw()
-		}
+	} # }}}
+	flagExclusion() { # {{{
+		@exclusion = true
 	} # }}}
 	getOnlyAliases() => @aliases
 	getOriginalValueCount(...names: { name: String }): Number { # {{{

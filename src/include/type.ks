@@ -491,6 +491,10 @@ abstract class Type {
 										..master(ReferenceType.new(scope, name))
 
 									if data.typeSubtypes is Array {
+										if $ast.hasModifier(data.typeSubtypes[0], .Exclusion) {
+											type.flagExclusion()
+										}
+
 										for var subtype in data.typeSubtypes {
 											type.addElement(subtype.name)
 										}
