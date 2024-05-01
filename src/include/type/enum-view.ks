@@ -245,6 +245,7 @@ class EnumViewType extends Type {
 	} # }}}
 	root() => @root
 	setTestName(@testName)
+	override shallBeNamed() => true
 	override toAwareTestFunctionFragments(varname, mut nullable, _, _, _, generics, subtypes, fragments, node) { # {{{
 		fragments.code(`\(@testName)`)
 	} # }}}

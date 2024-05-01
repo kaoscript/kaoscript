@@ -16,7 +16,7 @@ module.exports = function() {
 		}
 		else {
 			let __ks_0;
-			return Helper.assertArray(Type.isValue(__ks_0 = this.match(/[^\r\n]+/g)) ? __ks_0 : [], 0);
+			return Type.isValue(__ks_0 = this.match(/[^\r\n]+/g)) ? Helper.assertArray(__ks_0, 0) : [];
 		}
 	};
 	__ks_String.__ks_func_lower_0 = function() {

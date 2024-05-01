@@ -204,6 +204,9 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			fragments.code('...').wrap(@argument)
 		}
 	} # }}}
+	toQuote() { # {{{
+		return `\(@operator())\(@argument.toQuote())`
+	} # }}}
 	toReusableFragments(fragments) { # {{{
 		if ?@reuseName {
 			if @reusable {

@@ -1455,7 +1455,7 @@ class ClassType extends Type {
 		return false
 	} # }}}
 	hasProperty(name: String) => @hasStaticProperty(name)
-	hasSealedConstructors(): Boolean => @seal?.constructors
+	hasSealedConstructors(): Boolean => @seal.constructors
 	hasSealedInstanceMethod(name) { # {{{
 		if @seal.instanceMethods[name] {
 			return true

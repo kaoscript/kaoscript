@@ -1,1 +1,1 @@
-TypeException: The return type must be "String[]" and not "RegExpExecArray" (fixtures/compile/type/type.array.lfse.ulfsnlse.ks:14)
+TypeException: The expression "this.match() ?? []" of type "RegExpExecArray" is expected to be of type "String[]" (fixtures/compile/type/type.array.lfse.ulfsnlse.ks:14)

@@ -5,6 +5,7 @@ abstract class Expression extends AbstractNode {
 	}
 	acquireReusable(acquire)
 	argument() => this
+	canBeNull(): Boolean => @type().isNullable()
 	flagAssignable() { # {{{
 		if !@isAssignable() {
 			ReferenceException.throwInvalidAssignment(this)
@@ -15,6 +16,7 @@ abstract class Expression extends AbstractNode {
 	getDeclaredType() => @type()
 	getDefaultValue(): String => 'null'
 	getReuseName(): String? => null
+	getTestedType(): Type => @type()
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions(): Boolean => true
@@ -100,7 +102,7 @@ abstract class Expression extends AbstractNode {
 	isUsingStaticVariable(class, varname): Boolean => false
 	// if the expression is the given variable
 	isUsingVariable(name): Boolean => false
-	isUsingVariableBefore(name: String, statement: Statement = @statement!?): Boolean => @statement?.isUsingVariableBefore(name, statement)
+	isUsingVariableBefore(name: String, statement: Statement = @statement!?): Boolean => @statement?.isUsingVariableBefore(name, statement) ?? false
 	isVariable(): Boolean => false
 	// if the expression generates multiple assignments
 	isSplitAssignment(): Boolean => false
@@ -183,6 +185,7 @@ abstract class Expression extends AbstractNode {
 		return double ? `"\(@toTypeQuote())"` : `'\(@toTypeQuote())'`
 	} # }}}
 	type() => AnyType.NullableUnexplicit
+	unflagAssertable()
 	unflagExpectingBitmask()
 	unspecify()
 	validateType(type: Type)

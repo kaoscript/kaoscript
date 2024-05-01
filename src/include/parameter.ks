@@ -592,7 +592,19 @@ class Parameter extends AbstractNode {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var declaredType = Type.fromAST(@data.type, @generics, this)
+		var mut declaredType = Type.fromAST(@data.type, @generics, this)
+
+		if declaredType.shallBeNamed() {
+			var authority = @statement().recipient().authority()
+
+			declaredType.finalize(@data.type, @generics, this)
+
+			declaredType = Type.toNamedType(declaredType, false, authority.scope(), this)
+
+			if declaredType.isComplex() {
+				authority.addTypeTest(declaredType.name(), declaredType)
+			}
+		}
 
 		@internal.prepare(declaredType)
 

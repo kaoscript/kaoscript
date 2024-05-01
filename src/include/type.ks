@@ -1191,7 +1191,6 @@ abstract class Type {
 	isNullable() => false
 	isNullable(generics: AltType[]?) => @isNullable()
 	isObject() => false
-	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary ~~ mode
 	isPlaceholder() => false
 	isPredefined() => @predefined
 	isPrimitive() => false
@@ -1207,6 +1206,7 @@ abstract class Type {
 	isSpecific() => false
 	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
+	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary ~~ mode
 	isStrict() => false
 	isString() => false
 	isStruct() => false

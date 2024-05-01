@@ -969,6 +969,9 @@ export class TypeException extends Exception {
 		throwInvalidCondition(expression, node): Never ~ TypeException { # {{{
 			throw TypeException.new(`The condition \(expression.toQuote(true)) of type \(expression.toTypeQuote(true)) is expected to be of type "Boolean"`, node)
 		} # }}}
+		throwInvalidExpression(expression: AbstractNode, current: Type, expected: Type, node): Never ~ TypeException { # {{{
+			throw TypeException.new(`The expression \(expression.toQuote(true)) of type \(current.toQuote(true)) is expected to be of type \(expected.toQuote(true))`, node)
+		} # }}}
 		throwInvalidForInExpression(node): Never ~ TypeException { # {{{
 			throw TypeException.new(`"for..in" must be used with an array`, node)
 		} # }}}

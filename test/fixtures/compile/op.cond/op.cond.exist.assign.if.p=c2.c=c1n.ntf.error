@@ -1,1 +1,0 @@
-TypeException: The variable "x" of type "ClassB" can't be assigned with a value of type "ClassA" (fixtures/compile/op.cond/op.cond.exist.assign.if.p=c2.c=c1n.ntf.ks:8)

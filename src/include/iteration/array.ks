@@ -155,10 +155,13 @@ class ArrayIteration extends IterationNode {
 
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		@expression.prepare(@scope.reference('Array').setNullable(true))
+		@expression
+			..unflagAssertable()
+			..prepare(@scope.reference('Array').setNullable(true))
 
 		var type = @expression.type()
-		if !(type.isAny() || type.isArray()) {
+
+		unless type.isAny() || type.isArray() {
 			TypeException.throwInvalidForInExpression(this)
 		}
 

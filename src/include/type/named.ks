@@ -687,6 +687,7 @@ class NamedType extends Type {
 		setStandardLibrary
 		toAwareTestFunctionFragments
 		toBlindTestFragments
+		toBlindTestFunctionFragments
 	}
 }
 

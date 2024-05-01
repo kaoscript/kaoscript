@@ -381,7 +381,7 @@ class ArrowFunctionExpression extends Expression {
 			}
 		}
 
-		return @block?.isUsingVariable(name)
+		return @block?.isUsingVariable(name) ?? false
 	} # }}}
 	override makeCallee(generics, node) { # {{{
 		var assessment = @type.assessment(@toQuote(), node)

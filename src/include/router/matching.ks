@@ -19,7 +19,7 @@ namespace Matching {
 		): CallMatchResult { # {{{
 			var combinations = splitArguments(arguments, null, null, indexeds, fitting)
 
-			if combinations.length == 1 {
+			if #combinations == 1 {
 				var context = MatchContext.new(
 					arguments: combinations[0]
 					excludes
@@ -138,6 +138,8 @@ namespace Matching {
 		} # }}}
 
 		func prepare(argument, index, fitting: Boolean, nameds, shorthands, indexeds, invalids, mut namedCount, mut shortCount, assessment: Assessment, node: AbstractNode) { # {{{
+			var type = argument.type()
+
 			match argument {
 				is NamedArgument {
 					var name = argument.name()
@@ -152,7 +154,7 @@ namespace Matching {
 						fitting
 						index
 						name
-						type: argument.type()
+						type
 						strict: true
 					)
 
@@ -171,7 +173,7 @@ namespace Matching {
 						indexeds.push(NamingArgument.new(
 							fitting
 							index
-							type: argument.type()
+							type
 							strict: false
 						))
 					}
@@ -182,7 +184,7 @@ namespace Matching {
 							indexeds.push(shorthands[name], NamingArgument.new(
 								fitting
 								index
-								type: argument.type()
+								type
 								strict: false
 							))
 
@@ -197,7 +199,7 @@ namespace Matching {
 								fitting
 								index
 								name
-								type: argument.type()
+								type
 								strict: false
 							)
 						}
@@ -206,14 +208,12 @@ namespace Matching {
 						indexeds.push(NamingArgument.new(
 							fitting
 							index
-							type: argument.type()
+							type
 							strict: false
 						))
 					}
 				}
 				is UnaryOperatorSpread {
-					var type = argument.type()
-
 					if type.isObject() {
 						if type.isReference() {
 							var rest = type.parameter()
@@ -302,7 +302,7 @@ namespace Matching {
 					indexeds.push(NamingArgument.new(
 						fitting
 						index
-						type: argument.type()
+						type
 						strict: false
 						value: argument
 					))

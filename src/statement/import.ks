@@ -185,7 +185,7 @@ abstract class Importer extends Statement {
 						variable.getDeclaredType().merge(type)
 					}
 					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode.Signature + MatchingMode.Renamed) {
-						var declType = type ?? def.type
+						var declType = type
 							..setStandardLibrary(LibSTDMode.Yes + LibSTDMode.Closed) if variable.isStandardLibrary()
 							..flagAlien() if variable.getDeclaredType().isAlien()
 

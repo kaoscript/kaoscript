@@ -54,20 +54,19 @@ class UnionType extends Type {
 			}
 		}
 
-		if @any {
+		if type.isNull() {
+			if !@explicitNullity {
+				@types.pushUniq(Type.Null)
+
+				@nullable = true
+				@explicitNullity = true
+			}
+		}
+		else if @any {
 			if !@nullable && type.isNullable() {
 				@nullable = true
 				@types = [@types[0].setNullable(false), Type.Null]
 			}
-		}
-		else if type.isNull() {
-			if !@nullable {
-				@types.push(Type.Null)
-
-				@nullable = true
-			}
-
-			@explicitNullity = true
 		}
 		else if type.isAny() {
 			@any = true
@@ -274,11 +273,27 @@ class UnionType extends Type {
 		return 1
 	} # }}}
 	override discardValue() { # {{{
-		var types = [type.discardValue() for var type in @types]
+		if @explicitNullity {
+			var types = [type.discardValue() for var type in @types]
 
-		return Type.union(@scope, ...types)
+			return UnionType.new(@scope, types)
+		}
+		else {
+			var types = [type.discardValue() for var type in @types]
+
+			return Type.union(@scope, ...types)
+		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		if @nullable && #@types == 2 {
+			if @types[0] == Type.Null {
+				return @types[1].setNullable(true).export(references, indexDelta, mode, module)
+			}
+			if @types[1] == Type.Null {
+				return @types[0].setNullable(true).export(references, indexDelta, mode, module)
+			}
+		}
+
 		return {
 			kind: TypeKind.Union
 			nullable: true if @explicitNullity
@@ -387,6 +402,18 @@ class UnionType extends Type {
 		var elements = [type.hashCode() for var type in @types]
 
 		return elements.join('|')
+	} # }}}
+	isAny() { # {{{
+		if @nullable && #@types == 2 {
+			if @types[0] == Type.Null {
+				return @types[1].isAny()
+			}
+			if @types[1] == Type.Null {
+				return @types[0].isAny()
+			}
+		}
+
+		return false
 	} # }}}
 	isArray() { # {{{
 		for var type in @types {
@@ -673,9 +700,17 @@ class UnionType extends Type {
 			return this
 		}
 		else if nullable {
-			return @clone().addType(Type.Null)
+			var that = @clone()
+
+			that._types.push(Type.Null)
+			that._nullable = true
+
+			return that
 		}
-		else if @explicitNullity {
+		else if @any {
+			return @types[0]
+		}
+		else if @types.contains(Type.Null) {
 			var that = @clone()
 
 			that._types:!!!(Array).remove(Type.Null)
@@ -845,7 +880,7 @@ class UnionType extends Type {
 		throw NotImplementedException.new(node)
 	} # }}}
 	toQuote() { # {{{
-		if @nullable && @types.length == 2 {
+		if @nullable && #@types == 2 {
 			if @types[0] == Type.Null {
 				return `\(@types[1].toQuote())?`
 			}
@@ -859,7 +894,7 @@ class UnionType extends Type {
 	toQuote(double: Boolean): String { # {{{
 		var quote = double ? `"` : `'`
 
-		if @nullable && @types.length == 2 {
+		if @nullable && #@types == 2 {
 			if @types[0] == Type.Null {
 				return `\(quote)\(@types[1].toQuote())?\(quote)`
 			}

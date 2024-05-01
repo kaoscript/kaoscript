@@ -17,7 +17,7 @@ type float = Number
 type int = Number
 
 var $spaces = {}
-var $aliases = {}
+var $aliases: Space{} = {}
 var $components = {}
 var $formatters = {}
 
@@ -582,7 +582,7 @@ export class Color {
 			if ?space.alias {
 				for var alias in space.alias {
 					$spaces[space.name].alias[alias] = true
-					$aliases[alias] = Space(space.name)
+					$aliases[alias] = Space(space.name)!?
 				}
 
 				if ?$parsers[space.name] {

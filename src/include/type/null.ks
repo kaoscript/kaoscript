@@ -18,6 +18,7 @@ class NullType extends Type {
 	compareToRef(value: AnyType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) => 1
 	compareToRef(value: DeferredType, equivalences: String[][]? = null) => 1
+	compareToRef(value: FusionType, equivalences: String[][]? = null) => 1
 	compareToRef(value: NullType, equivalences: String[][]? = null) => 0
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => -value.compareToRef(this, equivalences)

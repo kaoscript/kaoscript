@@ -240,7 +240,7 @@ class MatchStatement extends Statement {
 				var { testingType, minmax?, type? } = test
 
 				if testingType && ?minmax && ?type {
-					var conditionHash = `$Array,\(testingType),\(JSON.stringify(minmax ?? '')),`
+					var conditionHash = `$Array,\(testingType),\(JSON.stringify(minmax)),`
 					var bindingHash = `$Array,false,"",\(type?.hashCode() ?? '')`
 
 					if {

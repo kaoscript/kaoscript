@@ -16,7 +16,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		super(AnyType.NullableUnexplicit, TargetMode.Permissive)
 
-		unless @right.isComputedMember() || @right.type().isNullable() {
+		unless @right.isComputedMember() || @right.canBeNull() {
 			TypeException.throwNullableOperand(@right, '?=', this)
 		}
 
@@ -499,99 +499,40 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	override validate(target)
 }
 
-class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
-	private late {
-		@spread: Boolean
-		@type: Type
-	}
-	override prepare(target, targetMode) { # {{{
-		@left.flagNotNull('??')
-
-		super(target, TargetMode.Permissive)
-
-		@left.acquireReusable(true)
-		@left.releaseReusable()
-
-		var leftType = @left.type().setNullable(false)
-
-		if leftType.equals(@right.type()) {
-			@type = leftType
-		}
-		else {
-			@type = Type.union(@scope, leftType, @right.type())
-		}
-
-		@spread = @left.isSpread() || @right.isSpread()
-	} # }}}
-	inferTypes(inferables) => @left.inferTypes(inferables)
-	isSpread() => @spread
-	override isSpreadable() => false
-	toFragments(fragments, mode) { # {{{
-		if @spread {
-			var spread = @left.isSpread()
-
-			fragments
-				.code($runtime.type(this) + '.isValue(')
-				.compileReusable(spread ? @left.argument() : @left)
-				.code(') ? ')
-
-			if spread {
-				@left.toFlatArgumentFragments(true, fragments, Mode.None)
-			}
-			else {
-				fragments.code('[').compile(@left).code(']')
-			}
-
-			fragments.code(' : ')
-
-			if @right.isSpread() {
-				@right.toFlatArgumentFragments(false, fragments, Mode.None)
-			}
-			else {
-				fragments.code('[').compile(@right).code(']')
-			}
-		}
-		else {
-			if @left.isNullable() {
-				fragments.code('(')
-
-				@left.toNullableFragments(fragments)
-
-				fragments
-					.code(' && ' + $runtime.type(this) + '.isValue(')
-					.compileReusable(@left)
-					.code('))')
-			}
-			else {
-				fragments
-					.code($runtime.type(this) + '.isValue(')
-					.compileReusable(@left)
-					.code(')')
-			}
-
-			fragments
-				.code(' ? ')
-				.compile(@left)
-				.code(' : ')
-				.compile(@right)
-		}
-	} # }}}}
-	type() => @type
-}
-
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private late {
+		@asserting: Boolean					= false
+		@assertable: Boolean				= true
 		@spread: Boolean
 		@type: Type
 	}
 	override prepare(target, targetMode) { # {{{
 		var types = []
-		var last = @operands.length - 1
+		var last = #@operands - 1
 
 		for var operand, index in @operands {
-			operand
-				..flagNotNull(@symbol()) if index < last
-				..prepare(target, TargetMode.Permissive)
+			if index < last {
+				if operand is UnaryOperatorSpread {
+					operand
+						..flagNotNull(@symbol())
+						..prepare(target, TargetMode.Permissive)
+
+					unless operand.argument().type().isNullable() {
+						TypeException.throwNullableOperand(operand, '??', this)
+					}
+				}
+				else {
+					operand.prepare(target, TargetMode.Permissive)
+
+					unless operand.isComputedMember() || operand.canBeNull() {
+						TypeException.throwNullableOperand(operand, '??', this)
+					}
+				}
+			}
+			else {
+				operand.prepare(target, TargetMode.Permissive)
+			}
+
 
 			@spread ||= operand.isSpread()
 
@@ -602,8 +543,9 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			var late operandType
 
 			if index < last {
-				operand.acquireReusable(true)
-				operand.releaseReusable()
+				operand
+					..acquireReusable(operand.getTestedType().isNullable())
+					..releaseReusable()
 
 				if operand.type().isNull() {
 					operandType = operand.getDeclaredType().setNullable(false)
@@ -611,9 +553,17 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 				else {
 					operandType = operand.type().setNullable(false)
 				}
+
+				if @assertable {
+					@asserting ||= !operandType.isAssignableToVariable(target, false, false, false)
+				}
 			}
 			else {
 				operandType = operand.type()
+
+				if @assertable {
+					@asserting &&= operandType.isAssignableToVariable(target, false, false, false)
+				}
 			}
 
 			var mut ne = true
@@ -629,11 +579,22 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			}
 		}
 
-		if types.length == 1 {
-			@type = types[0]
+		var union = Type.union(@scope, ...types)
+
+		if @assertable {
+			unless union.isAssignableToVariable(target, true, false, false) {
+				TypeException.throwInvalidExpression(this, union, target, this)
+			}
+
+			if @asserting {
+				@type = target
+			}
+			else {
+				@type = union
+			}
 		}
 		else {
-			@type = Type.union(@scope, ...types)
+			@type = union
 		}
 	} # }}}
 	isSpread() => @spread
@@ -718,16 +679,20 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			fragments.code(']') if opened
 		}
 		else {
-			for var operand in @operands to~ last {
+			for var operand, index in @operands to~ last {
 				if operand.isNullable() {
 					fragments.code('(')
 
 					operand.toNullableFragments(fragments)
 
-					fragments
-						.code(' && ' + $runtime.type(this) + '.isValue(')
-						.compileReusable(operand)
-						.code('))')
+					if operand.getTestedType().isNullable() {
+						fragments
+							.code(' && ' + $runtime.type(this) + '.isValue(')
+							.compileReusable(operand)
+							.code(')')
+					}
+
+					fragments.code(')')
 				}
 				else {
 					fragments
@@ -736,18 +701,38 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 						.code(')')
 				}
 
-				fragments
-					.code(' ? ')
-					.compile(operand)
-					.code(' : ')
+				fragments.code(' ? ')
+
+				if @asserting && index == 0 {
+					@type.toAssertFunctionFragments(operand, false, fragments, this)
+				}
+				else {
+					fragments.compile(operand)
+				}
+
+				fragments.code(' : ')
 			}
 
 			fragments.compile(@operands[last])
 		}
 	} # }}}
 	type() => @type
+	unflagAssertable() { # {{{
+		@assertable = false
+	} # }}}
 }
 
+class BinaryOperatorNullCoalescing extends PolyadicOperatorNullCoalescing {
+	analyse() { # {{{
+		for var data in [@data.left, @data.right] {
+			var operand = $compile.expression(data, this)
+
+			operand.analyse()
+
+			@operands.push(operand)
+		}
+	} # }}}
+}
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private late {

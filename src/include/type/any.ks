@@ -202,6 +202,14 @@ class AnyType extends Type {
 			fragments.code(`\($runtime.type(node)).isValue`)
 		}
 	} # }}}
+	override toBlindTestFragments(_, varname, _, _, _, _, fragments, node) { # {{{
+		if @nullable {
+			fragments.code(`\($runtime.type(node)).any(\(varname))`)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isValue(\(varname))`)
+		}
+	} # }}}
 	toFragments(fragments, node) { # {{{
 		fragments.code(@nullable ? `Any?` : `Any`)
 	} # }}}

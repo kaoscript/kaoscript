@@ -252,6 +252,7 @@ class ThisExpression extends Expression {
 		}
 	} # }}}
 	translate()
+	override canBeNull() => @lateInit || @type.isNullable()
 	caller() => 'this'
 	declaration() { # {{{
 		if var node ?= @parent.getFunctionNode() {

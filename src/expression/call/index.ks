@@ -23,6 +23,7 @@ class CallExpression extends Expression {
 		@reusable: Boolean						= false
 		@reuseName: String?						= null
 		@tested: Boolean						= false
+		@testedType: Type
 		@thisScope
 		@thisType: Type?						= null
 		@translated: Boolean					= false
@@ -167,36 +168,49 @@ class CallExpression extends Expression {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
 
-			@type = @callees[0].type()
+			@testedType = @type = @callees[0].type()
+
+			if @nullableTesting {
+				if @type.isExplicit() {
+					@type = @type.setNullable(true)
+				}
+				else {
+					@type = UnionType.new(@scope(), [@type, Type.Null])
+				}
+			}
 		}
 		else {
-			@nullable = @callees[0].isNullable()
-			@nullableComputed = @callees[0].isNullableComputed()
+			@nullable = false
+			@nullableComputed = false
 			@callees = Type.sort(@callees, callee => callee.getTestType())
 
-			var types = [@callees[0].type()]
+			var types = []
 
-			for var callee in @callees from 1 {
+			for var callee in @callees {
 				var type = callee.type()
 
 				if !types.any((item, _, _) => type.equals(item)) {
 					types.push(type)
 				}
 
-				if callee.isNullable() {
-					@nullable = true
-				}
-				if callee.isNullableComputed() {
-					@nullableComputed = true
-				}
+				@nullable ||= callee.isNullable()
+				@nullableComputed ||= callee.isNullableComputed()
 			}
 
-			@type = Type.union(@scope(), ...types)
+			if @nullableTesting {
+				@testedType = Type.union(@scope(), ...types)
+
+				@type = UnionType.new(@scope(), [...types, Type.Null])
+			}
+			else {
+				@testedType = @type = Type.union(@scope(), ...types)
+			}
 
 		}
 		// echo('-- callees --')
 		// echo(@callees)
 		// echo(@property)
+		// echo(@testedType.hashCode())
 		// echo(@type.hashCode())
 	} # }}}
 	translate() { # {{{
@@ -233,7 +247,6 @@ class CallExpression extends Expression {
 
 			@callees.last().acquireReusable(acquire)
 		}
-		// echo(@callees)
 
 		for var argument in @arguments {
 			argument.acquireReusable(@callees.some((callee, ...) => callee.shouldArgumentUseReusable(argument)))
@@ -267,6 +280,7 @@ class CallExpression extends Expression {
 	getCallScope(): valueof @thisScope
 	getMatchingMode(): valueof @matchingMode
 	getReuseName() => @reuseName
+	override getTestedType() => @testedType
 	inferTypes(inferables) { # {{{
 		if ?@object {
 			@object.inferTypes(inferables)

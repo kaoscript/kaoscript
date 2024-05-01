@@ -7,6 +7,7 @@ class MemberExpression extends Expression {
 		@declaredType: Type?			= null
 		@derivative: Boolean			= false
 		@inferable: Boolean				= false
+		@lateInit: Boolean				= false
 		@liberal: Boolean				= false
 		@nullable: Boolean				= false
 		@object: Expression
@@ -135,6 +136,15 @@ class MemberExpression extends Expression {
 					@type = chunkType
 				}
 			}
+
+			if @nullable {
+				if @type.isExplicit() {
+					@type = @type.setNullable(true)
+				}
+				else {
+					@type = UnionType.new(@scope(), [@type, Type.Null])
+				}
+			}
 		}
 		else {
 			var type = @object.type().discardValue()
@@ -190,6 +200,7 @@ class MemberExpression extends Expression {
 			@object.acquireReusable(@nullable || acquire)
 		}
 	} # }}}
+	override canBeNull() => @lateInit || @type.isNullable()
 	caller() => @object
 	declaration() { # {{{
 		return null if @computed
@@ -575,11 +586,13 @@ class MemberExpression extends Expression {
 		else if var property ?= class.getInstanceVariable(@property) {
 			@type = property.type()
 
-			if property is ClassVariableType && property.isSealed() {
+			if property.isSealed() {
 				@sealed = true
 				@usingGetter = property.hasDefaultValue()
 				@usingSetter = property.hasDefaultValue()
 			}
+
+			@lateInit = !property.isImmutable() && property.isLateInit()
 		}
 		else if type.isExhaustive(this) {
 			if @assignable {
@@ -914,10 +927,14 @@ class MemberExpression extends Expression {
 			else if var property ?= type.getProperty(@property) {
 				var propType = type.discardReference()
 
-				if propType.isClass() && property is ClassVariableType && property.isSealed() {
-					@sealed = true
-					@usingGetter = property.hasDefaultValue()
-					@usingSetter = property.hasDefaultValue()
+				if propType.isClass() && property is ClassVariableType {
+					if property.isSealed() {
+						@sealed = true
+						@usingGetter = property.hasDefaultValue()
+						@usingSetter = property.hasDefaultValue()
+					}
+
+					@lateInit = !property.isImmutable() && property.isLateInit()
 				}
 
 				@type = property.discardVariable()

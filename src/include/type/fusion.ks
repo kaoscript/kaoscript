@@ -75,6 +75,7 @@ class FusionType extends Type {
 
 		return result
 	} # }}}
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		return {
 			kind: TypeKind.Fusion
