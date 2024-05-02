@@ -112,6 +112,9 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 	isAssigningBinding() => true
 	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
+	override isInitializingVariable(name) { # {{{
+		return @left.isUsingVariable(name)
+	} # }}}
 	isIgnorable() => @ignorable
 	releaseReusable() { # {{{
 		(@assertion ?? @right).releaseReusable()

@@ -364,6 +364,21 @@ class ObjectExpression extends Expression {
 			}
 		}
 	} # }}}
+	toQuote() { # {{{
+		var mut fragments = '{'
+
+		for var property, index in @properties {
+				if index != 0 {
+					fragments += ', '
+				}
+
+				fragments += property.toQuote()
+			}
+
+		fragments += '}'
+
+		return fragments
+	} # }}}
 	toReusableFragments(fragments) { # {{{
 		if ?@reuseName {
 			fragments
@@ -472,6 +487,9 @@ class ObjectComputedMember extends Expression {
 		else {
 			@value.toInvertedFragments(fragments, callback)
 		}
+	} # }}}
+	toQuote() { # {{{
+		return `[\(@name.toQuote())]: \(@value.toQuote())`
 	} # }}}
 	value() => @value
 }
@@ -638,6 +656,9 @@ class ObjectLiteralMember extends Expression {
 		line.done()
 	} # }}}
 	toInvertedFragments(fragments, callback) => @value.toInvertedFragments(fragments, callback)
+	toQuote() { # {{{
+		return `\(@name.toQuote()): \(@value.toQuote())`
+	} # }}}
 	type() => @type
 	validateType(type: Type)
 	value() => @value

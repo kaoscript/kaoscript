@@ -1,0 +1,1 @@
+TypeException: The expression "x" is not a boolean variant (fixtures/compile/op.cond/op.cond.variant.assg_n.cd_stm.ae.ks:4)

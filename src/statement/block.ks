@@ -26,6 +26,7 @@ class BlockStatement extends Statement {
 	flagContinuous() { # {{{
 		@continuous = true
 	} # }}}
+	override isInitializingVariableAfter(name, statement) => @body.isInitializingVariableAfter(name, statement)
 	isJumpable() => true
 	override isUsingVariable(name, bleeding) { # {{{
 		return false if bleeding

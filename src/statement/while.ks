@@ -82,6 +82,7 @@ class WhileStatement extends Statement {
 		@body.translate()
 	} # }}}
 	isCascade() => @declared
+	override isInitializingVariableAfter(name, statement) => @body.isInitializingVariableAfter(name, statement)
 	isJumpable() => true
 	isLoop() => true
 	override isUsingVariable(name, bleeding) { # {{{

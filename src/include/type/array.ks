@@ -617,12 +617,12 @@ class ArrayType extends Type {
 		return { fields, functions }
 	} # }}}
 	override makeMemberCallee(property, path, generics, node) { # {{{
-		@reference ??= @reference()
+		@reference ??= @reference(node.scope())
 
 		return @reference.makeMemberCallee(property, path, generics, node)
 	} # }}}
 	override makeMemberCallee(property, path, reference, generics, node) { # {{{
-		@reference ??= @reference()
+		@reference ??= @reference(node.scope())
 
 		return @reference.makeMemberCallee(property, path, generics, node)
 	} # }}}

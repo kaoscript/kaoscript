@@ -1,0 +1,1 @@
+TypeException: The variable "event" of type "Event(false)" has already a known variance (fixtures/compile/op.cond/op.cond.variant.pre.repeat.nassg.ks:18)

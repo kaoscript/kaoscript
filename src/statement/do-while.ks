@@ -34,6 +34,7 @@ class DoWhileStatement extends Statement {
 		@body.translate()
 		@condition.translate()
 	} # }}}
+	override isInitializingVariableAfter(name, statement) => @body.isInitializingVariableAfter(name, statement)
 	isJumpable() => true
 	isLoop() => true
 	override isUsingVariable(name, bleeding) { # {{{

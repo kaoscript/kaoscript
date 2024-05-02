@@ -113,6 +113,7 @@ class ForStatement extends Statement {
 			return @bodyBlock.isExit(mode) || (@else && @elseBlock.isExit(mode))
 		}
 	} # }}}
+	override isInitializingVariableAfter(name, statement) => @bodyBlock.isInitializingVariableAfter(name, statement)
 	override isJumpable() => true
 	override isLoop() => true
 	override setExitLabel(label) { # {{{

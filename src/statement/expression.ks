@@ -65,7 +65,7 @@ class ExpressionStatement extends Statement {
 	} # }}}
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
-			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
+			if variable.immutable && @parent.isInitializingVariable(`this.\(variable.name)`) {
 				ReferenceException.throwImmutableField(`\(variable.name)`, this)
 			}
 
@@ -81,6 +81,9 @@ class ExpressionStatement extends Statement {
 		else {
 			return @parent.initializeVariable(variable, expression, this)
 		}
+	} # }}}
+	override isInitializingVariableAfter(name, statement) { # {{{
+		return @expression.isInitializingVariable(name)
 	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true

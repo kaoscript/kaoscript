@@ -56,6 +56,14 @@ abstract class Statement extends AbstractNode {
 		}
 	} # }}}
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	getLoopAncestorWithoutNew(name: String, before): Statement? { # {{{
+		if @isLoop() {
+			return this
+		}
+		else {
+			return @parent.getLoopAncestorWithoutNew(name, this)
+		}
+	} # }}}
 	hasLoopAncestor() { # {{{
 		var authority = @authority()
 		var mut parent = @parent
@@ -76,10 +84,12 @@ abstract class Statement extends AbstractNode {
 	// isAccessibleAliasType(value: IdentifierLiteral): Boolean => !(value is NamedType && value.type() is AliasType)
 	isAwait() => false
 	isCascade() => false
+	isDeclararingVariable(name: String): Boolean => false
 	isEnhancementExport() => false
 	isExit(mode: ExitMode): Boolean => false
 	isExportable() => false
 	isInitializingInstanceVariable(name: String): Boolean => false
+	isInitializingVariableAfter(name: String, statement: Statement): Boolean => false
 	isJumpable() => false
 	isLateInitializable() => false
 	isLoop() => false

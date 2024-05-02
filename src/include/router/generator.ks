@@ -136,7 +136,7 @@ namespace Generator {
 
 			var mut useAllArgs = allArgs
 
-			if tree.order.length == 0 {
+			if #tree.order == 0 {
 				var line = fragments.newLine()
 
 				var mut comma = buildPath(tree.function, line.code('return '))
@@ -181,11 +181,11 @@ namespace Generator {
 
 				line.code(')').done()
 			}
-			else if tree.order.length == 1 {
+			else if #tree.order == 1 {
 				var column = tree.columns[tree.order[0]]
 
 				if isNeedingTestings(column) {
-					useAllArgs = toTreeFragments(buildPath, args, tree, column, false, helper, fragments, 0, 1, Junction.NONE, continuous, -1, tree.min, node)
+					useAllArgs = toTreeFragments(buildPath, args, tree, column, false, helper, fragments, 0, 1, Junction.NONE, continuous || fallback, -1, tree.min, node)
 				}
 				else {
 					toCallFragments(buildPath, args, tree, column, fragments, node)
@@ -199,7 +199,7 @@ namespace Generator {
 				for var key, index in tree.order {
 					var column = tree.columns[key]
 
-					useAllArgs = toTreeFragments(buildPath, args, tree, column, anyTested, helper, fragments, index, tree.order.length, Junction.NONE, hasAlternative(tree, index), -1, tree.min, node)
+					useAllArgs = toTreeFragments(buildPath, args, tree, column, anyTested, helper, fragments, index, tree.order.length, Junction.NONE, fallback || hasAlternative(tree, index), -1, tree.min, node)
 
 					if !anyTested && column.type.isAny() {
 						anyTested = true

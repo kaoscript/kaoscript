@@ -120,6 +120,15 @@ class Block extends AbstractNode {
 	} # }}}
 	checkExit(target?)
 	getDataStatements() => @data.statements
+	getLoopAncestorWithoutNew(name: String, before): Statement? { # {{{
+		for var statement in @statements while statement != before {
+			if statement.isDeclararingVariable(name) {
+				return null
+			}
+		}
+
+		return @parent.getLoopAncestorWithoutNew(name, this)
+	} # }}}
 	getUnpreparedType() { # {{{
 		var types = []
 
@@ -185,6 +194,44 @@ class Block extends AbstractNode {
 	isInitializingInstanceVariable(name) { # {{{
 		for var statement in @statements {
 			if statement.isInitializingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
+	isInitializingVariableAfter(name: String, statement: Statement): Boolean { # {{{
+		var line = statement.line()
+
+		if @statements[0].line() > line {
+			for var stmt in @statements {
+				if stmt.isDeclararingVariable(name) {
+					return false
+				}
+
+				if stmt.isInitializingVariableAfter(name, statement) {
+					return true
+				}
+			}
+		}
+		else {
+			var last = #@statements - 1
+
+			for var index from 0 to~ last {
+				if @statements[index].isDeclararingVariable(name) {
+					return false
+				}
+
+				if @statements[index + 1].line() > line && @statements[index].isInitializingVariableAfter(name, statement) {
+					return true
+				}
+			}
+
+			if @statements[last].isDeclararingVariable(name) {
+				return false
+			}
+
+			if @statements[last].isInitializingVariableAfter(name, statement) {
 				return true
 			}
 		}
@@ -351,7 +398,8 @@ class FunctionBlock extends Block {
 			}
 		}
 	} # }}}
-	isInitializedVariable(name: String): Boolean => true
+	override getLoopAncestorWithoutNew(_, _) => null
+	isInitializingVariable(name: String): Boolean => true
 }
 
 class ConstructorBlock extends FunctionBlock {
@@ -383,7 +431,7 @@ class ConstructorBlock extends FunctionBlock {
 			}
 		}
 	} # }}}
-	isInitializedVariable(name: String): Boolean => @initializedVariables[name]
+	isInitializingVariable(name: String): Boolean => @initializedVariables[name]
 	isInitializingInstanceVariable(name: String): Boolean { # {{{
 		if @initializedVariables[`this.\(name)`] {
 			return true

@@ -908,7 +908,7 @@ class ObjectType extends Type {
 			return property.makeCallee(propName, generics, node)
 		}
 		else {
-			return @scope.reference('Object').makeMemberCallee(propName, path, generics, node)
+			return node.scope().reference('Object').makeMemberCallee(propName, path, generics, node)
 		}
 	} # }}}
 	override makeMemberCallee(property % propName, path, reference, generics, node) { # {{{

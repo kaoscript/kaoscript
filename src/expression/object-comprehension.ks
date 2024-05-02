@@ -38,7 +38,10 @@ class ObjectComprehension extends Expression {
 		@value.prepare(AnyType.NullableUnexplicit)
 		@name.prepare(AnyType.NullableUnexplicit)
 
-		@type.setRestType(@value.type())
+		@type
+			..setKeyType(@name.type())
+			..setRestType(@value.type())
+			..flagComplete()
 	} # }}}
 	override translate() { # {{{
 		@iteration.translate()

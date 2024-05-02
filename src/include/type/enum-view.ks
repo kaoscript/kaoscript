@@ -57,7 +57,7 @@ class EnumViewType extends Type {
 
 			var elements = []
 
-			for var value of @root.values() {
+			for var value in @root.values() {
 				elements.push(value.name())
 			}
 
@@ -121,7 +121,7 @@ class EnumViewType extends Type {
 
 				var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
 
-				for var value of @root.values() {
+				for var value in @root.values() {
 					var args = [value.index(), value.name(), value.value()]
 
 					for var name in fields from 3 {
@@ -138,7 +138,7 @@ class EnumViewType extends Type {
 
 				var filter = $evaluate($compileTest(source)).__ks_0
 
-				for var value of @root.values() {
+				for var value in @root.values() {
 					var args = [value.index(), value.name(), value.value()]
 
 					for var name in fields from 3 {
@@ -198,6 +198,7 @@ class EnumViewType extends Type {
 		return null
 	} # }}}
 	getTestName() => @testName
+	getTopProperty(name: String): String => @root.getTopProperty(name)
 	hashCode(): String { # {{{
 		var mut hash = `^\(@master.hashCode())(`
 
@@ -282,6 +283,7 @@ class EnumViewType extends Type {
 	override toVariations(variations) { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	values() => @root.values().filter((value, ...) => @elements.contains(value.name()))
 }
 
 func $compileTest(source: String, auxiliary: String = ''): String { # {{{

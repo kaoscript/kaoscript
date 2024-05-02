@@ -595,6 +595,15 @@ class MatchStatement extends Statement {
 		}
 	} # }}}
 	isJumpable() => true
+	override isInitializingVariableAfter(name, statement) { # {{{
+		for var { body } in @clauses {
+			if body.isInitializingVariableAfter(name, statement) {
+				return true
+			}
+		}
+
+		return false
+	} # }}}
 	isInitializingInstanceVariable(name) { # {{{
 		return false unless @hasDefaultClause
 

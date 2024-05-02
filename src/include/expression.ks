@@ -31,6 +31,26 @@ abstract class Expression extends AbstractNode {
 	// isAccessibleAliasType(value: IdentifierLiteral): Boolean => !(value is NamedType && value.type() is AliasType)
 	// if the expression can be an assignment
 	isAssignable(): Boolean => false
+	isAssignedInLoop(value: Expression): Boolean => false
+	assist isAssignedInLoop(value: IdentifierLiteral) { # {{{
+		var name = value.name()
+
+		var mut current = @statement()
+		var mut previous = current
+
+		repeat {
+			var loop = current.getLoopAncestorWithoutNew(name, previous)
+
+			return false if !?loop
+
+			return true if loop.isInitializingVariableAfter(name, previous)
+
+			previous = current
+			current = loop.parent()
+		}
+
+		return false
+	} # }}}
 	// if the expression is an `await` expression
 	isAwait(): Boolean => false
 	// if the expression is awaiting to be resolved
@@ -62,6 +82,7 @@ abstract class Expression extends AbstractNode {
 	isInitializable(): Boolean => false
 	// if the expression is initializing the given instance variable
 	isInitializingInstanceVariable(name: String): Boolean => false
+	isInitializingVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
 	isInferable(): Boolean => false
 	// if the expression is an inline statement which use directly the defined variable

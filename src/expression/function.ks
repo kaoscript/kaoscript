@@ -32,15 +32,9 @@ class AnonymousFunctionExpression extends Expression {
 			}
 
 			for var data in @data.parameters from firstParameter {
-				// TODO!
-				// Parameter.new(data, this)
-				// 	..analyse()
-				// 	|> @parameters.push
-
-				var param = Parameter.new(data, this)
+				Parameter.new(data, this)
 					..analyse()
-
-				@parameters.push(param)
+					|> @parameters.push
 			}
 		}
 

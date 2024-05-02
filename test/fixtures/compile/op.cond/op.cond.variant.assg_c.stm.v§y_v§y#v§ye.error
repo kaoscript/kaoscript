@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "Event(true)" has already a known variance (fixtures/compile/op.cond/op.cond.variant.assg_c.stm.v§y_v§y#v§ye.ks:12)

@@ -29,6 +29,8 @@ class ArrayComprehension extends Expression {
 		else {
 			@type = Type.arrayOf(@value.type(), @scope)
 		}
+
+		@type.flagComplete()
 	} # }}}
 	override translate() { # {{{
 		@iteration.translate()

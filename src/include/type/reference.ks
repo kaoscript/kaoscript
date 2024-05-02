@@ -910,14 +910,10 @@ class ReferenceType extends Type {
 						var mut doTest = false
 
 						for var { name } in @subtypes {
-							// TODO!
-							// if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
-							if var { type } ?= variant.getField(name) {
-								if type.isDeferrable() {
-									doTest = true
+							if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
+								doTest = true
 
-									break
-								}
+								break
 							}
 						}
 
@@ -964,7 +960,9 @@ class ReferenceType extends Type {
 				return true
 			}
 			else if value.isAlias() {
-				return @isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
+				return false unless !@nullable || nullcast || value.isNullable()
+
+				return @isAssignableToVariable(value.discardAlias(), anycast, true, downcast)
 			}
 			else {
 				return @type().isAssignableToVariable(value.type(), anycast, nullcast, downcast)
@@ -1037,7 +1035,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
+			return @setNullable(false).isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
 		}
 		else if value is ObjectType {
 			return false unless @isBroadObject()
@@ -1053,7 +1051,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return @isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
+			return @setNullable(false).isSubsetOf(value, MatchingMode.Exact + MatchingMode.NonNullToNull + MatchingMode.Subclass)
 		}
 		else {
 			return @type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -1445,14 +1443,10 @@ class ReferenceType extends Type {
 						var mut doTest = false
 
 						for var { name } in @subtypes {
-							// TODO!
-							// if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
-							if var { type } ?= variant.getField(name) {
-								if type.isDeferrable() {
-									doTest = true
+							if var { type } ?= variant.getField(name) ;; type.isDeferrable() {
+								doTest = true
 
-									break
-								}
+								break
 							}
 						}
 

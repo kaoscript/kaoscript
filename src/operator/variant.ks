@@ -431,7 +431,7 @@ class UnaryOperatorVariant extends UnaryOperatorExpression {
 			TypeException.throwNotBooleanVariant(@argument, this)
 		}
 
-		unless variant.hasManyValues(type) {
+		unless variant.hasManyValues(type) || @isAssignedInLoop(@argument) {
 			TypeException.throwUnnecessaryVariantChecking(@argument, type, this)
 		}
 

@@ -559,6 +559,11 @@ class IfStatement extends Statement {
 			return false
 		}
 	} # }}}
+	override isInitializingVariableAfter(name, statement) { # {{{
+		// TODO!
+		// return @whenTrueExpression.isInitializingVariableAfter(name, statement) || @whenFalseExpression?.isInitializingVariableAfter(name, statement)
+		return @whenTrueExpression.isInitializingVariableAfter(name, statement) || (@hasWhenFalse && @whenFalseExpression.isInitializingVariableAfter(name, statement))
+	} # }}}
 	isJumpable() => true
 	isLateInitializable() => true
 	override isUsingVariable(name, bleeding) { # {{{

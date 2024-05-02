@@ -96,9 +96,7 @@ class VariableStatement extends Statement {
 
 		return false
 	} # }}}
-	// TODO! error, not new router generated
-	// override isUsingVariableBefore(name, statement: Statement = this) => super(name, statement)
-	assist isUsingVariableBefore(name, statement = this) => super(name, statement)
+	override isUsingVariableBefore(name, statement: Statement = this) => super(name, statement)
 	length()
 	listNonLocalVariables(scope: Scope, variables: Array) { # {{{
 		for var declaration in @declarations {

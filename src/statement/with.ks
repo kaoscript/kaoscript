@@ -266,5 +266,6 @@ class WithStatement extends Statement {
 
 	proxy @body {
 		isExit
+		isInitializingVariableAfter
 	}
 }

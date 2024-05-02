@@ -571,6 +571,7 @@ class TryStatement extends Statement {
 			return false
 		}
 	} # }}}
+	override isInitializingVariableAfter(name, statement) => @body.isInitializingVariableAfter(name, statement)
 	isJumpable() => true
 	isLateInitializable() => true
 	override isUsingVariable(name, bleeding) { # {{{

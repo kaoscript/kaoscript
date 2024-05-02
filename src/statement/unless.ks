@@ -70,6 +70,7 @@ class UnlessStatement extends Statement {
 		@body.translate()
 	} # }}}
 	isJumpable() => true
+	override isInitializingVariableAfter(name, statement) => @body.isInitializingVariableAfter(name, statement)
 	override isUsingVariable(name, bleeding) { # {{{
 		return false if bleeding
 		return @condition.isUsingVariable(name) || @body.isUsingVariable(name)

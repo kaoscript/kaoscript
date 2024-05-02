@@ -1242,8 +1242,6 @@ class MemberExpression extends Expression {
 			}
 			else if @prepareObject && @type.isMethod() && @parent is not ClassProxyDeclaration | ClassProxyGroupDeclaration {
 				var reference = type.reference()
-				// TODO!
-				// var { type % root, generics } = reference.getGenericMapper()
 				var { type % root, generics? } = reference.getGenericMapper()
 				var generic =
 					if root is ClassType {

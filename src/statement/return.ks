@@ -127,7 +127,7 @@ class ReturnStatement extends Statement {
 	getUnpreparedType() => @value.getUnpreparedType()
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
-			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
+			if variable.immutable && @parent.isInitializingVariable(`this.\(variable.name)`) {
 				ReferenceException.throwImmutableField(`\(variable.name)`, this)
 			}
 

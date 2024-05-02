@@ -172,7 +172,6 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 				var mut leftMost = @right
 
 				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
-					// TODO! remove
 					leftMost = leftMost.left()!!
 				}
 
@@ -286,7 +285,6 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 				var mut leftMost = @right
 
 				while leftMost.left() is BinaryOperatorExpression | PolyadicOperatorExpression {
-					// TODO! remove
 					leftMost = leftMost.left()!!
 				}
 

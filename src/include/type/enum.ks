@@ -799,7 +799,7 @@ class EnumType extends Type {
 		}
 	} # }}}
 	type() => @type
-	values() => @values
+	values() => Object.values(@values)
 }
 
 class EnumValueType {

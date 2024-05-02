@@ -13,25 +13,21 @@ abstract class DependencyStatement extends Statement {
 				// TODO! remove newline
 
 				var type =
-					// TODO!
-					// if !module.isStandardLibrary() ;; var variable ?= scope.getVariable(name) {
 					if module.isStandardLibrary() {
 						set ClassType.new(scope)
 					}
-					// TODO!
-					// else if var variable ?= scope.getVariable(name) {
-					else if var oldVariable ?= scope.getVariable(name) {
-						unless oldVariable.isStandardLibrary() || oldVariable.isPredefined() {
+					else if var variable ?= scope.getVariable(name) {
+						unless variable.isStandardLibrary() || variable.isPredefined() {
 							SyntaxException.throwAlreadyDeclared(name, this)
 						}
 
-						var original = oldVariable.getDeclaredType().type()
+						var original = variable.getDeclaredType().type()
 
 						if original is ClassType {
 							var result = original.clone()
 								..setStandardLibrary(.Yes + .Opened) if original.isStandardLibrary(.Yes)
 
-							if oldVariable.isStandardLibrary() {
+							if variable.isStandardLibrary() {
 								exhaustive ??= original.isExhaustive(this)
 							}
 
@@ -161,25 +157,21 @@ abstract class DependencyStatement extends Statement {
 				// TODO! remove newline
 
 				var type =
-					// TODO!
-					// if !module.isStandardLibrary() ;; var variable ?= scope.getVariable(name) {
 					if module.isStandardLibrary() {
 						set NamespaceType.new(scope)
 					}
-					// TODO!
-					// else if var oldVariable ?= scope.getVariable(name) {
-					else if var oldVariable ?= scope.getVariable(name) {
-						unless oldVariable.isStandardLibrary() || oldVariable.isPredefined() {
+					else if var variable ?= scope.getVariable(name) {
+						unless variable.isStandardLibrary() || variable.isPredefined() {
 							SyntaxException.throwAlreadyDeclared(name, this)
 						}
 
-						var original = oldVariable.getDeclaredType().type()
+						var original = variable.getDeclaredType().type()
 
 						if original is NamespaceType {
 							var result = original.clone()
 								..setStandardLibrary(.Yes + .Opened) if original.isStandardLibrary(.Yes)
 
-							if oldVariable.isStandardLibrary() {
+							if variable.isStandardLibrary() {
 								exhaustive ??= original.isExhaustive(this)
 							}
 
@@ -283,16 +275,9 @@ class ExternDeclaration extends Statement {
 	}
 	initiate() { # {{{
 		for var data in @data.declarations {
-			// TODO!
-			// var declarator = ExternDeclarator.new(data, this)
-			// 	|> ..initiate()
-			// 	|> @declarators.push(_)
-
-			var declarator = ExternDeclarator.new(data, this)
-
-			declarator.initiate()
-
-			@declarators.push(declarator)
+			ExternDeclarator.new(data, this)
+				..initiate()
+				|> @declarators.push
 		}
 	} # }}}
 	analyse()

@@ -808,6 +808,7 @@ class ModuleBlock extends AbstractNode {
 	file() => @module.file()
 	override getASTReference(name) => null
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	getLoopAncestorWithoutNew(name: String, before: Statement): Statement? => null
 	getTypeTestVariable(): String { # {{{
 		@typeTestVarCount += 1
 
