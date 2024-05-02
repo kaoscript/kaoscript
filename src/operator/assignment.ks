@@ -59,9 +59,6 @@ abstract class AssignmentOperatorExpression extends Expression {
 			else if target.isAssignableToVariable(@type, true, true, false) {
 				@type = target
 			}
-			else {
-				TypeException.throwUnexpectedExpression(this, target, this)
-			}
 		}
 
 		@right.prepare(@type, targetMode)
@@ -74,6 +71,10 @@ abstract class AssignmentOperatorExpression extends Expression {
 
 		if type.isInoperative() {
 			TypeException.throwUnexpectedInoperative(@right, this)
+		}
+
+		if !target.isVoid() && !type.isAssignableToVariable(target, true, false, false) {
+			TypeException.throwUnexpectedExpression(this, target, this)
 		}
 
 		if @left.isLiberal() {
