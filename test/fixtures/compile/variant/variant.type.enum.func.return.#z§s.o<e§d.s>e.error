@@ -1,0 +1,1 @@
+TypeException: The return type must be "SchoolPerson(Student)" and not "{kind: PersonKind.Director, name: String}" (fixtures/compile/variant/variant.type.enum.func.return.#z§s.o<e§d.s>e.ks:12)

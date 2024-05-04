@@ -1,0 +1,1 @@
+TypeException: The return type must be "DayData(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY)" and not "{kind: Weekday.SUNDAY, message: String}" (fixtures/compile/variant/variant.type.enum.func.return.#z§!ts.o<e§s.s>e.ks:20)

@@ -3,6 +3,7 @@ class NamedType extends Type {
 		@cloned: Boolean 				= false
 		@container: NamedContainerType?	= null
 		@name: String
+		@prettyName: String?			= null
 		@sealedName: String?			= null
 		@type: Type
 	}
@@ -88,6 +89,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
+	override getPrettyName(_) => @prettyName ?? @name
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => @sealedName ?? `__ks_\(@name)`
@@ -554,6 +556,7 @@ class NamedType extends Type {
 	referenceIndex() => @type.referenceIndex()
 	resetReferences() => @type.resetReferences()
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
+	setPrettyName(@prettyName)
 	setTestIndex(index) => @type.setTestIndex(index)
 	setTestName(name) => @type.setTestName(name)
 	split(types: Array) { # {{{
@@ -592,7 +595,7 @@ class NamedType extends Type {
 		fragments.code(@path())
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toMetadata(references, indexDelta, mode, module)
-	toQuote() => @name
+	toQuote() => @prettyName ?? @name
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type.isPredefined() {
 			return @name

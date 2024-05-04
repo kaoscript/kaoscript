@@ -600,6 +600,7 @@ class Parameter extends AbstractNode {
 			declaredType.finalize(@data.type, @generics, this)
 
 			var type = Type.toNamedType(declaredType, false, authority.scope(), this)
+				..setPrettyName(declaredType.toQuote())
 
 			if type.isComplex() {
 				authority.addTypeTest(type.name(), type)

@@ -449,27 +449,59 @@ class ObjectType extends Type {
 
 			var newProperties = {}
 
-			if var prop ?= @properties[object.getVariantName()] ;; prop.isValue() {
-				var propname = prop.value()
+			if var prop ?= @properties[object.getVariantName()] {
+				if prop.isValue() {
+					var propname = prop.value()
 
-				if value.hasSubtypes() {
-					var mut matched = false
+					if value.hasSubtypes() {
+						var mut matched = false
 
-					for var { name } in value.getSubtypes() {
-						var names = variant.explodeVarnames({ name })
+						for var { name } in value.getSubtypes() {
+							var names = variant.explodeVarnames({ name })
 
-						if names.contains(propname) {
-							matched = true
+							if names.contains(propname) {
+								matched = true
 
-							break
+								break
+							}
+						}
+
+						return false unless matched
+					}
+
+					if var field ?= variant.getField(propname) {
+						Object.merge(newProperties, field.type.properties())
+					}
+				}
+				else if prop.isView() {
+					var view = prop.discard()
+					var fields = []
+
+					for var viewValue in view.values() {
+						if var field ?= variant.getField(viewValue.name()) {
+							fields.pushUniq(field)
 						}
 					}
 
-					return false unless matched
+					match #fields {
+						0 {
+							pass
+						}
+						1 {
+							if variant.isValidField(fields[0], subtypes) {
+								Object.merge(newProperties, fields[0].type.properties())
+							}
+							else {
+								return false
+							}
+						}
+						else {
+							NotImplementedException.throw()
+						}
+					}
 				}
-
-				if var field ?= variant.getField(propname) {
-					Object.merge(newProperties, field.type.properties())
+				else {
+					return false
 				}
 			}
 			else {
@@ -608,7 +640,7 @@ class ObjectType extends Type {
 		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
 
 		for var type in value.types() {
-			if !@isSubsetOf(type, mode) {
+			unless @isSubsetOf(type, mode) {
 				return false
 			}
 		}
@@ -674,7 +706,7 @@ class ObjectType extends Type {
 						return false unless prop.isSubsetOf(type, generics, subtypes, mode)
 
 						if type is VariantType {
-							if type == prop || type.isEmpty() {
+							if type == prop {
 								pass
 							}
 							else if prop is ValueType {
@@ -688,9 +720,45 @@ class ObjectType extends Type {
 										return false
 									}
 								}
-								else if !type.hasSubtype(propValue) {
-									NotImplementedException.throw()
+								else {
+									unless type.hasSubtype(propValue) {
+										return false
+									}
+
+									if ?#subtypes && !subtypes.some((subtype, ...) => subtype.name == propValue) {
+										return false
+									}
 								}
+							}
+							else if prop.isView() {
+								var view = prop.discard()
+								var fields = []
+
+								for var viewValue in view.values() {
+									if var field ?= type.getField(viewValue.name()) {
+										fields.pushUniq(field)
+									}
+								}
+
+								match #fields {
+									0 {
+										pass
+									}
+									1 {
+										if type.isValidField(fields[0], subtypes) {
+											Object.merge(newProperties, fields[0].type.properties())
+										}
+										else {
+											return false
+										}
+									}
+									else {
+										NotImplementedException.throw()
+									}
+								}
+							}
+							else if type.isEmpty() {
+								pass
 							}
 							else if mode ~~ MatchingMode.Exact {
 								return false

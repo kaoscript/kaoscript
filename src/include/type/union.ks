@@ -453,7 +453,7 @@ class UnionType extends Type {
 		}
 		else {
 			for var type in @types {
-				if !type.isAssignableToVariable(value, anycast, nullcast, downcast) {
+				unless type.isAssignableToVariable(value, anycast, nullcast, downcast) {
 					return false
 				}
 			}
@@ -601,11 +601,12 @@ class UnionType extends Type {
 	isReducible() => true
 	override isSubsetOf(value: Type, generics, subtypes, mode) { # {{{
 		if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass {
-			if value is not UnionType || @types.length != value.length() {
+			unless value is UnionType && @types.length == value.length() {
 				return false
 			}
 
 			var mut match = 0
+
 			for var aType in @types {
 				for var bType in value.types() {
 					if aType.isSubsetOf(bType, mode) {
@@ -615,11 +616,11 @@ class UnionType extends Type {
 				}
 			}
 
-			return match == @types.length
+			return match == #@types
 		}
 		else {
 			for var type in @types {
-				if !type.isSubsetOf(value, mode) {
+				unless type.isSubsetOf(value, mode) {
 					return false
 				}
 			}

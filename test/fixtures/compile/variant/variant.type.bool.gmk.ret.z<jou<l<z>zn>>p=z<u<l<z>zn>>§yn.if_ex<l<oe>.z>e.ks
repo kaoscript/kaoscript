@@ -16,7 +16,7 @@ type Card = {
 }
 
 type Result = Position & {
-	values: Card[] |  Card | Null
+	values: Card[] | Card | Null
 }
 
 type Event<T> = {

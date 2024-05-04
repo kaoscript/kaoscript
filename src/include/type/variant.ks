@@ -31,31 +31,37 @@ class VariantType extends Type {
 		} # }}}
 	}
 	addField(names: String[], type: Type) { # {{{
-		var mut value = null
-
 		if @kind == .Boolean {
-			if names.contains('false') {
-				unless !names.contains('true') {
+			var value =
+				if names.contains('false') {
+					unless !names.contains('true') {
+						NotImplementedException.throw()
+					}
+
+					set ValueType.new(false, @scope.reference('Boolean'), 'false', @scope)
+				}
+				else if names.contains('true') {
+					unless !names.contains('false') {
+						NotImplementedException.throw()
+					}
+
+					set ValueType.new(false, @scope.reference('Boolean'), 'true', @scope)
+				}
+				else {
 					NotImplementedException.throw()
 				}
 
-				value = ValueType.new(false, @scope.reference('Boolean'), 'false', @scope)
-			}
-			else if names.contains('true') {
-				unless !names.contains('false') {
-					NotImplementedException.throw()
-				}
-
-				value = ValueType.new(false, @scope.reference('Boolean'), 'true', @scope)
-			}
-			else {
-				NotImplementedException.throw()
-			}
+			@addField(names, type, value)
 		}
 		else {
-			value = ValueType.new(@master, `\(@master.path()).\(names[0])`, @scope)
-		}
+			var value = ValueType.new(@master, `\(@master.path()).\(names[0])`, @scope)
 
+			for var name in names {
+				@addField([name], type, value)
+			}
+		}
+	} # }}}
+	addField(names: String[], type: Type, value: ValueType) { # {{{
 		var variant = { names, type, value }
 
 		@fields.push(variant)
@@ -473,7 +479,7 @@ class VariantType extends Type {
 	override toQuote() { # {{{
 		var mut fragments = 'variant { '
 
-		for var name, index in Object.keys(@fields) {
+		for var name, index in Object.keys(@names) {
 			fragments += index == 0 ? name : `, \(name)`
 		}
 

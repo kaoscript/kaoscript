@@ -1425,7 +1425,10 @@ class ReferenceType extends Type {
 				return false
 			}
 
-			if value.scope().isRenamed(value.name(), @name, @scope, mode) {
+			if @type().isView() && !value.type().isView() {
+				return @type.discard().master().isSubsetOf(value, mode)
+			}
+			else if value.scope().isRenamed(value.name(), @name, @scope, mode) {
 				var mut testParameters = true
 
 				if ?#@subtypes {
@@ -1958,7 +1961,14 @@ class ReferenceType extends Type {
 
 		return @referenceIndex
 	} # }}}
-	toQuote() => ReferenceType.toQuote(@name, @explicitlyNull, @parameters, @subtypes)
+	toQuote() { # {{{
+		if @name == 'this' {
+			return ReferenceType.toQuote(@name, @explicitlyNull, @parameters, @subtypes)
+		}
+		else {
+			return ReferenceType.toQuote(@type().getPrettyName(@name), @explicitlyNull, @parameters, @subtypes)
+		}
+	} # }}}
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		@resolve()
 

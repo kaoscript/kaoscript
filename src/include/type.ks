@@ -504,10 +504,34 @@ abstract class Type {
 								}
 								else if root.isVariant() {
 									var type = ReferenceType.new(scope, name, nullable)
-									var master = root.getVariantType().getMaster()
+									var variant = root.getVariantType()
+									var master = variant.getMaster()
 
-									for var subtype in data.typeSubtypes {
-										type.addSubtype(subtype.name, master, node)
+									if $ast.hasModifier(data.typeSubtypes[0], .Exclusion) {
+										var enum = variant.getEnumType()
+
+										unless enum.isComplete() {
+											ReferenceException.throwNotYetDefinedType(name, node)
+										}
+
+										var elements = []
+
+										for var value in enum.values() {
+											elements.push(value.name())
+										}
+
+										for var subtype in data.typeSubtypes {
+											elements.remove(enum.getTopProperty(subtype.name))
+										}
+
+										for var element in elements {
+											type.addSubtype(element, master, node)
+										}
+									}
+									else {
+										for var subtype in data.typeSubtypes {
+											type.addSubtype(subtype.name, master, node)
+										}
 									}
 
 									return type.flagComplete()
@@ -1083,6 +1107,7 @@ abstract class Type {
 	generics(): Generic[] => []
 	getExhaustive() => @exhaustive
 	getGenericMapper(): { type: Type, generics: AltType[]?, subtypes: AltType[]? } => { type: this, generics: null, subtypes: null }
+	getPrettyName(name: String): String => name
 	getProperty(index: Number) => null
 	getProperty(name: String) => null
 	getProperty(name: String, node?) => @getProperty(name)

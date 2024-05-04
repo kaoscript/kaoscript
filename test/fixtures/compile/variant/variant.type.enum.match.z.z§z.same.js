@@ -17,6 +17,9 @@ module.exports = function() {
 			if(variant === CardSuit.Clubs) {
 				return Type.isDexObject(value, 0, 0, {names: value => Type.isArray(value, Type.isString)});
 			}
+			if(variant === CardSuit.Spades) {
+				return Type.isDexObject(value, 0, 0, {names: value => Type.isArray(value, Type.isString)});
+			}
 			return true;
 		}, rank: Type.isNumber})
 	};
