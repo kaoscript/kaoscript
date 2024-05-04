@@ -1425,10 +1425,7 @@ class ReferenceType extends Type {
 				return false
 			}
 
-			if @type().isView() && !value.type().isView() {
-				return @type.discard().master().isSubsetOf(value, mode)
-			}
-			else if value.scope().isRenamed(value.name(), @name, @scope, mode) {
+			if value.scope().isRenamed(value.name(), @name, @scope, mode) {
 				var mut testParameters = true
 
 				if ?#@subtypes {
@@ -1484,6 +1481,9 @@ class ReferenceType extends Type {
 
 				if @isAlias() {
 					return @discardAlias().isSubsetOf(value, null, @subtypes, mode)
+				}
+				else if @isView() {
+					return @type.discard().master().isSubsetOf(value, mode)
 				}
 
 				return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
