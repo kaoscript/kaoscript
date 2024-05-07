@@ -595,18 +595,11 @@ class Parameter extends AbstractNode {
 		var mut declaredType = Type.fromAST(@data.type, @generics, this)
 
 		if declaredType.shallBeNamed() {
-			var authority = @module().authority()
-
 			declaredType.finalize(@data.type, @generics, this)
 
-			var type = Type.toNamedType(declaredType, false, authority.scope(), this)
-				..setPrettyName(declaredType.toQuote())
-
-			if type.isComplex() {
-				authority.addTypeTest(type.name(), type)
+			if declaredType.isComplex() {
+				declaredType = @module().authority().addAnonymousType(declaredType)
 			}
-
-			declaredType = type.reference()
 		}
 
 		@internal.prepare(declaredType)

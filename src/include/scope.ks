@@ -122,6 +122,9 @@ abstract class Scope {
 	line(): Number => 0
 	module(): ModuleScope? => null
 	parent(): Scope? => null
+	reference(value: AliasType): ReferenceType { # {{{
+		return @resolveReference(value.name())
+	} # }}}
 	reference(value: AnyType): ReferenceType => @resolveReference('Any')
 	reference(value: ArrayType): ReferenceType { # {{{
 		if value.hasRest() || value.hasProperties() {

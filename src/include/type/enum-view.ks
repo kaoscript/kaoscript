@@ -224,6 +224,12 @@ class EnumViewType extends Type {
 	override isEnum() => true
 	override isExportable() => true
 	override isExportable(module) => true
+	assist isSubsetOf(value: EnumViewType, generics, subtypes, mode) { # {{{
+		return this == value
+	} # }}}
+	override isSubsetOf(value, generics, subtypes, mode) { # {{{
+		return @master.isSubsetOf(value, generics, subtypes, mode)
+	} # }}}
 	override isView() => true
 	listVarnames(): String[] { # {{{
 		var result = [...@elements]

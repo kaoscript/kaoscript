@@ -22,7 +22,7 @@ module.exports = function() {
 			}
 			return true;
 		}}),
-		is__ks_0: value => value === Weekday.SATURDAY
+		is0: value => value === Weekday.SATURDAY
 	};
 	const Weekday = Helper.enum(Number, 0, "MONDAY", 0, "TUESDAY", 1, "WEDNESDAY", 2, "THURSDAY", 3, "FRIDAY", 4, "SATURDAY", 5, "SUNDAY", 6);
 	function foobar() {
@@ -37,7 +37,7 @@ module.exports = function() {
 		})();
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = __ksType.is__ks_0;
+		const t0 = __ksType.is0;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

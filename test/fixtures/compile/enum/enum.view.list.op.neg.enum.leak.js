@@ -1,4 +1,4 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const __ksType = {
 		is0: value => value === Weekday.MONDAY || value === Weekday.TUESDAY || value === Weekday.WEDNESDAY || value === Weekday.THURSDAY || value === Weekday.FRIDAY
@@ -18,5 +18,25 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0(Weekday.MONDAY);
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(data) {
+		let __ks_0 = data();
+		if(Type.isString(__ks_0)) {
+		}
+		else if(Type.isNumber(__ks_0)) {
+		}
+		else {
+		}
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

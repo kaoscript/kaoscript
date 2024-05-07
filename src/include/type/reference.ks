@@ -1482,9 +1482,6 @@ class ReferenceType extends Type {
 				if @isAlias() {
 					return @discardAlias().isSubsetOf(value, null, @subtypes, mode)
 				}
-				else if @isView() {
-					return @type.discard().master().isSubsetOf(value, mode)
-				}
 
 				return @scope.isMatchingType(@discardReference()!?, value.discardReference()!?, mode)
 			}

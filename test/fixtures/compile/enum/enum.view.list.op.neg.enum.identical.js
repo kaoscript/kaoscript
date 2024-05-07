@@ -18,5 +18,24 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0(Weekday.MONDAY);
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(day) {
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = __ksType.is0;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	return {
+		Weekday,
+		foobar,
+		quxbaz,
+		__ksType: [__ksType.is0]
+	};
 };

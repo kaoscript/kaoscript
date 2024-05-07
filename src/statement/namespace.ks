@@ -1,5 +1,7 @@
 class NamespaceDeclaration extends Statement {
 	private late {
+		@anonymousIndex: Number						= -1
+		@anonymousTypes: ReferenceType{}			= {}
 		@exports									= {}
 		@name: String
 		@statements: Array
@@ -29,7 +31,8 @@ class NamespaceDeclaration extends Statement {
 
 			@statements.push(statement)
 		}
-
+	} # }}}
+	postInitiate() { # {{{
 		for var statement in @statements {
 			statement.postInitiate()
 		}
@@ -75,6 +78,31 @@ class NamespaceDeclaration extends Statement {
 
 			statement.translate()
 		}
+	} # }}}
+	addAnonymousType(type: Type): ReferenceType { # {{{
+		var hash = type.hashCode()
+
+		if var reference ?= @anonymousTypes[hash] {
+			return reference
+		}
+
+		@anonymousIndex += 1
+
+		var name = `\(@anonymousIndex)`
+		var alias = AliasType.new(@scope, type)
+			..flagComplete()
+		var named = NamedType.new(name, alias)
+			..setPrettyName(type.toQuote())
+
+		@scope.define(name, true, named, this)
+
+		@addTypeTest(name, named)
+
+		var reference = @scope.reference(name)
+
+		@anonymousTypes[hash] = reference
+
+		return reference
 	} # }}}
 	addInitializableVariable(variable, node)
 	addTopNode(node) { # {{{
