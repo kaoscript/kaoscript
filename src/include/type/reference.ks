@@ -177,10 +177,10 @@ class ReferenceType extends Type {
 
 		return result
 	} # }}}
-	canBeArray(any = true) => @isUnion() ? @type.canBeArray(any) : super(any)
-	canBeBoolean() => @isUnion() ? @type.canBeBoolean() : super()
-	canBeFunction(any = true) => @isUnion() ? @type.canBeFunction(any) : super(any)
-	canBeNumber(any = true) => @isUnion() ? @type.canBeNumber(any) : super(any)
+	canBeArray(any = true) => if @isUnion() set @type.canBeArray(any) else super(any)
+	canBeBoolean() => if @isUnion() set @type.canBeBoolean() else super()
+	canBeFunction(any = true) => if @isUnion() set @type.canBeFunction(any) else super(any)
+	canBeNumber(any = true) => if @isUnion() set @type.canBeNumber(any) else super(any)
 	canBeObject(any = true) { # {{{
 		if @isUnion() {
 			return @type.canBeObject(any)
@@ -338,7 +338,7 @@ class ReferenceType extends Type {
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) { # {{{
 		if @name == value.name() {
 			if @isNullable() != value.isNullable() {
-				return @nullable ? 1 : -1
+				return if @nullable set 1 else -1
 			}
 
 			if @parameters.length == 0 {
@@ -359,7 +359,7 @@ class ReferenceType extends Type {
 			}
 
 			if @isNullable() != value.isNullable() {
-				return @nullable ? 1 : -1
+				return if @nullable set 1 else -1
 			}
 
 			if value.isTypeOf() {
@@ -388,7 +388,7 @@ class ReferenceType extends Type {
 				}
 			}
 
-			return @isObject() ? 1 : -1
+			return if @isObject() set 1 else -1
 		}
 
 		if value.isTypeOf() {
@@ -397,7 +397,7 @@ class ReferenceType extends Type {
 			}
 
 			if @isNullable() != value.isNullable() {
-				return @nullable ? 1 : -1
+				return if @nullable set 1 else -1
 			}
 
 			if value.hasParameters() {
@@ -422,7 +422,7 @@ class ReferenceType extends Type {
 				return 1
 			}
 			else if @isNullable() != value.isNullable() {
-				return @nullable ? 1 : -1
+				return if @nullable set 1 else -1
 			}
 		}
 
@@ -477,7 +477,7 @@ class ReferenceType extends Type {
 	} # }}}
 	discardReference(): Type? { # {{{
 		if @name == 'Any' {
-			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
+			return if @nullable set AnyType.NullableExplicit else AnyType.Explicit
 		}
 		else if @name == 'this' {
 			return @type()
@@ -510,7 +510,7 @@ class ReferenceType extends Type {
 		if ?#@parameters || ?#@subtypes || (!@native && !@type.isExported()) {
 			var export = {
 				kind: TypeKind.Reference
-				name: @type.isExported() ? @name : @type.toMetadata(references, indexDelta, mode, module)
+				name: if @type.isExported() set @name else @type.toMetadata(references, indexDelta, mode, module)
 			}
 
 			if @explicitlyNull {
@@ -528,7 +528,7 @@ class ReferenceType extends Type {
 			return export
 		}
 		else {
-			return @nullable ? `\(@name)?` : @name
+			return if @nullable set `\(@name)?` else @name
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name) { # {{{
@@ -658,7 +658,7 @@ class ReferenceType extends Type {
 			return @scope.reference('String')
 		}
 	} # }}}
-	getMajorReferenceIndex() => @referenceIndex == -1 ? @type().getMajorReferenceIndex() : @referenceIndex
+	getMajorReferenceIndex() => if @referenceIndex == -1 set @type().getMajorReferenceIndex() else @referenceIndex
 	override getProperty(index): Type { # {{{
 		if @name == 'Array' {
 			if @parameters.length > 0 {
@@ -1491,7 +1491,7 @@ class ReferenceType extends Type {
 		return false if mode ~~ MatchingMode.Exact && mode !~ MatchingMode.Subclass
 		return false if @isNullable() && !value.isNullable()
 
-		var nonNullType = @nullable ? @setNullable(false) : this
+		var nonNullType = if @nullable set @setNullable(false) else this
 
 		for var type in value.types() {
 			if nonNullType.isSubsetOf(type, mode) {
@@ -1904,7 +1904,7 @@ class ReferenceType extends Type {
 	} # }}}
 	override toAssertFunctionFragments(value, nullable, fragments, node) { # {{{
 		if $typeofs[@name] {
-			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(nullable ? '1' : '0'))`)
+			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(if nullable set '1' else '0'))`)
 		}
 		else {
 			super(value, nullable, fragments, node)
@@ -2091,13 +2091,13 @@ class ReferenceType extends Type {
 	} # }}}
 	override toCastFunctionFragments(value, nullable, fragments, node) { # {{{
 		if $typeofs[@name] {
-			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(nullable ? '1' : '0'))`)
+			fragments.code(`\($runtime.helper(node)).assert\(@name)(`).compile(value).code(`, \(if nullable set '1' else '0'))`)
 		}
 		else {
 			var unalias = @discardAlias()
 
 			if unalias.isObject() {
-				fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+				fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(if nullable set '1' else '0'), `)
 
 				unalias.toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, node)
 
@@ -2461,7 +2461,7 @@ class ReferenceType extends Type {
 				var variant: VariantType = @type.discard().getVariantType()
 				var master = variant.getMaster()
 
-				var names = ?#@subtypes ? variant.explodeVarnames(...@subtypes) : variant.listVarnames()
+				var names = if ?#@subtypes set variant.explodeVarnames(...@subtypes) else variant.listVarnames()
 				var offNames = variant.explodeVarnames(...subtypes)
 
 				names.remove(...offNames)
@@ -2482,10 +2482,10 @@ class ReferenceType extends Type {
 			var reduced = @type().trimOff(type)
 
 			if @nullable && !type.isNullable() {
-				return (reduced.isUnion() ? reduced : @scope.reference(reduced)).setNullable(true)
+				return (if reduced.isUnion() set reduced else @scope.reference(reduced)).setNullable(true)
 			}
 			else {
-				return reduced.isUnion() ? reduced : @scope.reference(reduced)
+				return if reduced.isUnion() set reduced else @scope.reference(reduced)
 			}
 		}
 	} # }}}

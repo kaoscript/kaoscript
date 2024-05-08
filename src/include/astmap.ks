@@ -73,7 +73,6 @@ var $expressions = {
 	[NodeKind.AwaitExpression]				: AwaitExpression
 	[NodeKind.CallExpression]				: $callExpression
 	[NodeKind.ComparisonExpression]			: ComparisonExpression
-	[NodeKind.ConditionalExpression]		: ConditionalExpression
 	[NodeKind.CurryExpression]				: CurryExpression
 	[NodeKind.DisruptiveExpression]			: DisruptiveExpression
 	[NodeKind.FunctionExpression]			: AnonymousFunctionExpression

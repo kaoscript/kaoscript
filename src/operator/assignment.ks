@@ -187,7 +187,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		}
 		else {
 			for var operand in [@left, @right] {
-				@tests.push(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+				@tests.push(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 			}
 
 			if @left.type().isNumber() && @right.type().isNumber() {
@@ -334,13 +334,13 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 			}
 
 			if @number {
-				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				@type = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 			}
 			else if @string {
 				@type = @scope.reference('String')
 			}
 			else {
-				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				var numberType = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 
 				@type = UnionType.new(@scope, [numberType, @scope.reference('String')], false)
 			}

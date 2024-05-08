@@ -202,7 +202,7 @@ class NamespaceType extends Type {
 			}
 		}
 
-		var libstd: LibSTDMode = module.isStandardLibrary() && @standardLibrary == .No ? .Yes + .Closed : @standardLibrary
+		var libstd: LibSTDMode = if module.isStandardLibrary() && @standardLibrary == .No set .Yes + .Closed else @standardLibrary
 
 		if exportSuper {
 			var export = {
@@ -395,7 +395,7 @@ class NamespaceType extends Type {
 	override setStandardLibrary(standardLibrary) { # {{{
 		super(standardLibrary)
 
-		var submode: LibSTDMode = @standardLibrary ~~ .Yes ? .Yes + .Closed : .No
+		var submode: LibSTDMode = if @standardLibrary ~~ .Yes set .Yes + .Closed else .No
 
 		for var property of @properties {
 			property.setStandardLibrary(submode)

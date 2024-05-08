@@ -6,4 +6,4 @@ var likes = {
 
 var flag = false
 
-export var spicyHeroes = flag ? [hero for var like, hero of likes when like == 'spice'] : []
+export var spicyHeroes = if flag set [hero for var like, hero of likes when like == 'spice'] else []

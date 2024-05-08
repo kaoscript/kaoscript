@@ -332,7 +332,7 @@ class DisruptiveExpression extends Expression {
 
 		if @rootExpression && !@disruptedExpression.isNullable() {
 			fragments
-				.code(opened ? ', ' : '(')
+				.code(if opened set ', ' else '(')
 				.code(`\(@reuseName) = `)
 
 			if @data.operator.kind == RestrictiveOperatorKind.If {
@@ -359,7 +359,7 @@ class DisruptiveExpression extends Expression {
 			@reusable = true
 		}
 		else {
-			fragments.code(opened ? ', ' : '(')
+			fragments.code(if opened set ', ' else '(')
 
 			if @data.operator.kind == RestrictiveOperatorKind.If {
 				fragments.compileCondition(@condition)

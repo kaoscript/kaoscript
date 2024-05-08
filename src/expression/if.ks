@@ -34,8 +34,15 @@ class IfExpression extends Expression {
 	override analyse() { # {{{
 		@initiate()
 
-		if !@cascade && @data.whenTrue.statements.length == @data.whenFalse.statements?.length == 1 {
-			@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.SetStatement
+		if !@cascade {
+			if @data.whenTrue.kind == NodeKind.Block {
+				if @data.whenTrue.statements.length == @data.whenFalse.statements?.length == 1 {
+					@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.SetStatement
+				}
+			}
+			else {
+				@inline = true
+			}
 		}
 
 		if !@inline {
@@ -86,7 +93,7 @@ class IfExpression extends Expression {
 			}
 		}
 		else {
-			@bindingScope = @newScope(@scope!?, @inline ? ScopeType.Hollow : ScopeType.Bleeding)
+			@bindingScope = @newScope(@scope!?, if @inline set ScopeType.Hollow else ScopeType.Bleeding)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
 			@condition.analyse()
@@ -229,6 +236,7 @@ class IfExpression extends Expression {
 	} # }}}
 	isInline() => @inline
 	isInSituStatement() => @insitu
+	isInverted() => @inline && (@condition.isInverted() || @whenTrueExpression.isInverted() || @whenFalseExpression.isInverted())
 	isUsingVariable(name) => @condition?.isUsingVariable(name) || @whenTrueExpression.isUsingVariable(name) || @whenFalseExpression.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
 		@condition?.listNonLocalVariables(scope, variables)
@@ -298,7 +306,18 @@ class IfExpression extends Expression {
 			fragments.compile(@whenFalseExpression, mode)
 		}
 	} # }}}
-	toQuote() => `if \(@hasDeclaration ? @declaration.toQuote() : @condition.toQuote()) { ... }`
+	toInvertedFragments(fragments, callback) { # {{{
+		if @condition.isInverted() {
+			@condition.toInvertedFragments(fragments, callback)
+		}
+		else if @whenTrueExpression.isInverted() {
+			@whenTrueExpression.toInvertedFragments(fragments, callback)
+		}
+		else {
+			@whenFalseExpression.toInvertedFragments(fragments, callback)
+		}
+	} # }}}
+	toQuote() => `if \(if @hasDeclaration set @declaration.toQuote() else @condition.toQuote()) { ... }`
 	toStatementFragments(fragments, mode) { # {{{
 		if !@inline {
 			var ctrl = fragments.newControl()

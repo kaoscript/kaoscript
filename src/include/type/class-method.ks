@@ -139,7 +139,7 @@ class ClassMethodType extends FunctionType {
 		return clone
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, originalMethods?) { # {{{
-		var libstd: LibSTDMode = @standardLibrary == .No && module.isStandardLibrary() ? .Yes : @standardLibrary
+		var libstd: LibSTDMode = if @standardLibrary == .No && module.isStandardLibrary() set .Yes else @standardLibrary
 
 		var export = {
 			libstd if libstd != .No

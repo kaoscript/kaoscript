@@ -201,7 +201,12 @@ module.exports = function() {
 		if(index === void 0 || index === null) {
 			index = 1;
 		}
-		return (this.length !== 0) ? this[this.length - index] : null;
+		if(this.length !== 0) {
+			return this[this.length - index];
+		}
+		else {
+			return null;
+		}
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(args) {
 		if(args.length === 1) {

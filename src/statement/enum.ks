@@ -608,7 +608,7 @@ class EnumMethodDeclaration extends Statement {
 	} # }}}
 	authority() => this
 	getOverridableVarname() => @parent.name()
-	getParameterOffset() => @instance ? 1 : 0
+	getParameterOffset() => if @instance set 1 else 0
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)

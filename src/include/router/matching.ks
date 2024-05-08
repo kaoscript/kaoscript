@@ -30,7 +30,7 @@ namespace Matching {
 					mode
 					node
 				)
-				var length = getLength(context.arguments) + (assessment.async ? 1 : 0)
+				var length = getLength(context.arguments) + (if assessment.async set 1 else 0)
 
 				for var tree in route.trees {
 					if length != Infinity && (length < tree.min || (!fittingSpread && 0 < tree.max < length)) {
@@ -908,7 +908,7 @@ namespace Matching {
 					var matches = []
 
 					while i < node.min {
-						var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+						var argument = if cursor.spread set getSpreadParameter(cursor.argument) else cursor.argument
 
 						var mut fullType = node.type
 						var mut fullMatch = false
@@ -943,7 +943,7 @@ namespace Matching {
 						if cursor.index <= lastIndex {
 							while cursor.index <= lastIndex {
 								if cursor.argument is not PlaceholderType {
-									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+									var argument = if cursor.spread set getSpreadParameter(cursor.argument) else cursor.argument
 
 									var mut fullType = node.type
 									var mut fullMatch = false
@@ -973,7 +973,7 @@ namespace Matching {
 								var mut matched = true
 
 								if cursor.argument is not PlaceholderType {
-									var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+									var argument = if cursor.spread set getSpreadParameter(cursor.argument) else cursor.argument
 
 									var mut fullType = node.type
 									var mut fullMatch = false
@@ -1024,7 +1024,7 @@ namespace Matching {
 					}
 					else {
 						while i < node.max && cursor?.index <= last {
-							var argument = cursor.spread ? getSpreadParameter(cursor.argument) : cursor.argument
+							var argument = if cursor.spread set getSpreadParameter(cursor.argument) else cursor.argument
 
 							var mut fullType = node.type
 							var mut fullMatch = false
@@ -1394,7 +1394,7 @@ namespace Matching {
 				var mut pMatch = null
 
 				for var type in types when type.parameter == pIndex {
-					var index = type.index >= 0 ? type.index : parameters.length + type.index
+					var index = if type.index >= 0 set type.index else parameters.length + type.index
 
 					if index < argMatches.arguments.length {
 						var arg = argMatches.arguments[index]
@@ -1560,7 +1560,7 @@ namespace Matching {
 			for var function, key of route.functions {
 				for var parameter, index in function.parameters() {
 					var name = parameter.getExternalName()
-					var type = parameter.isVarargs() ? Type.arrayOf(parameter.getArgumentType(), node.scope()) : parameter.getArgumentType()
+					var type = if parameter.isVarargs() set Type.arrayOf(parameter.getArgumentType(), node.scope()) else parameter.getArgumentType()
 					var positional = parameter.isOnlyPositional()
 
 					if var parameters ?= perNames[name] {
@@ -1592,7 +1592,7 @@ namespace Matching {
 
 			for var argument, name of nameds {
 				if var parameters ?= perNames[name] {
-					var argumentType = argument.property ? argumentTypes[argument.index].getProperty(argument.name) : argumentTypes[argument.index]
+					var argumentType = if argument.property set argumentTypes[argument.index].getProperty(argument.name) else argumentTypes[argument.index]
 					var matchedFunctions = []
 
 					for var { function, type, positional } in parameters {

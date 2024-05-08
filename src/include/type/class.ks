@@ -172,8 +172,8 @@ class ClassType extends Type {
 					var first = references[data.originals[0]].discardName()
 					var second = references[data.originals[1]].discardName()
 
-					var [major, minor] = first.origin() ~~ TypeOrigin.Require ? [first, second] : [second, first]
-					var isArgument = alterations[major == first ? data.originals[0] : data.originals[1]]
+					var [major, minor] = if first.origin() ~~ TypeOrigin.Require set [first, second] else [second, first]
+					var isArgument = alterations[if major == first set data.originals[0] else data.originals[1]]
 
 					ClassType.importFromOriginal(data, type, major, isArgument, metadata, references, alterations, queue, scope, node)
 
@@ -712,7 +712,7 @@ class ClassType extends Type {
 			}
 		}
 
-		var libstd: LibSTDMode = module.isStandardLibrary() && @standardLibrary == .No ? .Yes + .Closed : @standardLibrary
+		var libstd: LibSTDMode = if module.isStandardLibrary() && @standardLibrary == .No set .Yes + .Closed else @standardLibrary
 
 		var late export
 
@@ -1269,7 +1269,7 @@ class ClassType extends Type {
 
 		return null
 	} # }}}
-	getMajorReferenceIndex() => @referenceIndex == -1 && ?@majorOriginal ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
+	getMajorReferenceIndex() => if @referenceIndex == -1 && ?@majorOriginal set @majorOriginal.getMajorReferenceIndex() else @referenceIndex
 	getMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { # {{{
 		if @instanceMethods[name] is Array {
 			for var method in @instanceMethods[name] {
@@ -2374,7 +2374,7 @@ class ClassType extends Type {
 	override setStandardLibrary(standardLibrary) { # {{{
 		super(standardLibrary)
 
-		var submode: LibSTDMode = @standardLibrary ~~ .Yes ? .Yes + .Closed : .No
+		var submode: LibSTDMode = if @standardLibrary ~~ .Yes set .Yes + .Closed else .No
 
 		for var variable of @instanceVariables {
 			variable.setStandardLibrary(submode)
@@ -2423,7 +2423,7 @@ class ClassType extends Type {
 					var referenceIndex = references.length + indexDelta
 
 					references.push({
-						originals: @origin ~~ .ExternOrRequire ? [extern, require] : [require, extern]
+						originals: if @origin ~~ .ExternOrRequire set [extern, require] else [require, extern]
 					})
 
 					@referenceIndex = referenceIndex

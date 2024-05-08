@@ -219,8 +219,8 @@ class IfAttribute extends Attribute {
 			return 1
 		}
 		else {
-			ai = as.length == 1 ? 0 : parseInt(as[1])
-			bi = bs.length == 1 ? 0 : parseInt(bs[1])
+			ai = if as.length == 1 set 0 else parseInt(as[1])
+			bi = if bs.length == 1 set 0 else parseInt(bs[1])
 
 			if ai < bi {
 				return -1

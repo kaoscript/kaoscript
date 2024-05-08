@@ -3,5 +3,5 @@ extern {
 }
 
 func getSupervisorId(enteredId: String?): Number? {
-	return (Number.isFinite(_) ? _ : 0) <| parseInt ?<| enteredId
+	return (if Number.isFinite(_) set _ else 0) <| parseInt ?<| enteredId
 }

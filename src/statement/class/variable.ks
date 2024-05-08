@@ -124,7 +124,7 @@ class ClassVariableDeclaration extends AbstractNode {
 	} # }}}
 	translate() { # {{{
 		if @defaultValue {
-			@value = $compile.expression(@data.value, this, @instance ? @parent._instanceVariableScope : null)
+			@value = $compile.expression(@data.value, this, if @instance set @parent._instanceVariableScope else null)
 			@value.analyse()
 			@value.prepare()
 

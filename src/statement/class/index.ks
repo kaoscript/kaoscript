@@ -888,7 +888,7 @@ class ClassDeclaration extends Statement {
 					name
 					@class
 					(node, writer, generic, labelable) => {
-						writer.code(`__ks_func_\(name)_rt(that, proto\(generic ? ', gens' : '')\(labelable ? ', kws' : ''), args)`).step()
+						writer.code(`__ks_func_\(name)_rt(that, proto\(if generic set ', gens' else '')\(if labelable set ', kws' else ''), args)`).step()
 					}
 					(writer) => writer.done()
 				)

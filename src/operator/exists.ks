@@ -650,13 +650,13 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 
 						fragments
 							.code(' && ' + $runtime.type(this) + '.isValue(')
-							.compileReusable(spread ? operand.argument() : operand)
+							.compileReusable(if spread set operand.argument() else operand)
 							.code('))')
 					}
 					else {
 						fragments
 							.code($runtime.type(this) + '.isValue(')
-							.compileReusable(spread ? operand.argument() : operand)
+							.compileReusable(if spread set operand.argument() else operand)
 							.code(')')
 					}
 

@@ -20,7 +20,7 @@ class ClassConstructorDeclaration extends Statement {
 	static toCreatorFragments(class, constructor, fragments) { # {{{
 		var ctrl = fragments.newControl()
 
-		var args = constructor.max() == 0 ? '' : '...args'
+		var args = if constructor.max() == 0 set '' else '...args'
 		var block = ctrl.code(`static __ks_new_\(constructor.index())(\(args))`).step()
 
 		block
@@ -48,9 +48,9 @@ class ClassConstructorDeclaration extends Statement {
 				null
 				assessment
 				fragments.block()
-				variable.type().hasConstructors() ? Router.FooterType.MUST_THROW : Router.FooterType.NO_THROW
+				if variable.type().hasConstructors() set Router.FooterType.MUST_THROW else Router.FooterType.NO_THROW
 				(writer, _) => {
-					var constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons_rt'
+					var constructorName = if variable.type().extends().isSealedAlien() set 'constructor' else '__ks_cons_rt'
 
 					writer.line(`super.\(constructorName).call(null, that, args)`)
 				}
@@ -467,7 +467,7 @@ class ClassConstructorDeclaration extends Statement {
 			}
 
 			if ?method {
-				var type = @override ? method.clone() : @type
+				var type = if @override set method.clone() else @type
 
 				if @override {
 					var parameters = type.parameters()

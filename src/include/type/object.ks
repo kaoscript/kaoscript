@@ -163,7 +163,7 @@ class ObjectType extends Type {
 	} # }}}
 	compareToRef(value: ArrayType, equivalences: String[][]? = null) { # {{{
 		if @nullable != value.isNullable() {
-			return @nullable ? 1 : -1
+			return if @nullable set 1 else -1
 		}
 
 		if @rest {
@@ -228,7 +228,7 @@ class ObjectType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if !@system && !@sealed && @length == 0 && !@rest {
-			return @nullable ? 'Object?' : 'Object'
+			return if @nullable set 'Object?' else 'Object'
 		}
 
 		return {
@@ -1103,7 +1103,7 @@ class ObjectType extends Type {
 			}
 
 			var rest = value.hasRest()
-			var restType = rest ? value.getRestType() : @restType
+			var restType = if rest set value.getRestType() else @restType
 
 			if @rest {
 				result.setRestType(restType)
@@ -1348,7 +1348,7 @@ class ObjectType extends Type {
 
 				if @testCast {
 					if casting {
-						fragments.code(`, \(blind ? 'cast' : 'true')`)
+						fragments.code(`, \(if blind set 'cast' else 'true')`)
 					}
 					else {
 						fragments.code(', 0')
@@ -1385,7 +1385,7 @@ class ObjectType extends Type {
 			else if casting && @testCast {
 				fragments
 					.code('(') if hasDeferred
-					.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
+					.code(`\(varname) => \(@testName)(\(varname), \(if blind set 'cast' else 'true'))`)
 					.code(')') if hasDeferred
 			}
 			else {

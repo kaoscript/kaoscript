@@ -15,7 +15,7 @@ type SchoolPerson = {
 var NO: Event(N) = { ok: false }
 
 func foobar(load) {
-	var result = load ? loadJohn() : NO
+	var result = if load set loadJohn() else NO
 
 	if result.ok {
 		quxbaz(result)

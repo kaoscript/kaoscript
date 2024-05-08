@@ -408,7 +408,7 @@ class ArrowFunctionExpression extends Expression {
 				}
 			}
 			else {
-				var bind = @usingThis ? 'this' : 'null'
+				var bind = if @usingThis set 'this' else 'null'
 
 				fragments.code(`\($runtime.helper(this)).vcurry(\(@name), \(bind)`)
 
@@ -444,7 +444,7 @@ class ArrowFunctionExpression extends Expression {
 
 			var blockRouter = fragments.code(`...args) =>`).newBlock()
 
-			var bind = @usingThis ? 'that' : 'null'
+			var bind = if @usingThis set 'that' else 'null'
 
 			Router.toFragments(
 				(function, line) => {

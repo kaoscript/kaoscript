@@ -92,7 +92,7 @@ class AnyType extends Type {
 		return type
 	} # }}}
 	override getProperty(name) => AnyType.NullableUnexplicit
-	hashCode(fattenNull: Boolean = false): String => @nullable ? fattenNull ? `Any|Null` : `Any?` : `Any`
+	hashCode(fattenNull: Boolean = false): String => if @nullable set if fattenNull set `Any|Null` else `Any?` else `Any`
 	isAny() => true
 	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { # {{{
 		if anycast && !@explicit {
@@ -172,10 +172,10 @@ class AnyType extends Type {
 			return this
 		}
 		else if @explicit {
-			type = nullable ? AnyType.NullableExplicit : AnyType.Explicit
+			type = if nullable set AnyType.NullableExplicit else AnyType.Explicit
 		}
 		else {
-			type = nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+			type = if nullable set AnyType.NullableUnexplicit else AnyType.Unexplicit
 		}
 
 		if @alien {
@@ -186,7 +186,7 @@ class AnyType extends Type {
 		}
 	} # }}}
 	split(types: Array) { # {{{
-		types.pushUniq(@explicit ? AnyType.Explicit : AnyType.Unexplicit)
+		types.pushUniq(if @explicit set AnyType.Explicit else AnyType.Unexplicit)
 
 		if @nullable {
 			types.pushUniq(Type.Null)
@@ -211,16 +211,16 @@ class AnyType extends Type {
 		}
 	} # }}}
 	toFragments(fragments, node) { # {{{
-		fragments.code(@nullable ? `Any?` : `Any`)
+		fragments.code(if @nullable set `Any?` else `Any`)
 	} # }}}
 	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @toReference(references, indexDelta, mode, module)
-	toQuote(): String => @nullable ? `Any?` : `Any`
+	toQuote(): String => if @nullable set `Any?` else `Any`
 	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @explicit {
-			return @nullable ? `Any!?` : `Any!`
+			return if @nullable set `Any!?` else `Any!`
 		}
 		else {
-			return @nullable ? `Any?` : `Any`
+			return if @nullable set `Any?` else `Any`
 		}
 	} # }}}
 	override toNegativeTestFragments(_, _, _, fragments, node) { # {{{

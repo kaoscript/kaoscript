@@ -74,6 +74,9 @@ class ReturnStatement extends Statement {
 			else if target.isVoid() {
 				TypeException.throwUnexpectedReturnedValue(this) unless @type.isVoid()
 			}
+			else if @type.isNever() {
+				TypeException.throwUnexpectedReturnedValue(this)
+			}
 			else if target.isValueOf() && target.isThisReference() {
 				if @value.toQuote() != 'this' {
 					TypeException.throwUnexpectedReturnType(target, @type, this)
@@ -256,6 +259,6 @@ class ReturnStatement extends Statement {
 			}
 		}
 	} # }}}
-	type() => @inline ? Type.Never : @type
+	type() => if @inline set Type.Never else @type
 	value() => @value
 }

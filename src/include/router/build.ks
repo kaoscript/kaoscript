@@ -686,12 +686,12 @@ namespace Build {
 
 			for var { parameter, index, argIndex, argType % type } of parameters {
 				var hash = type.hashCode()
-				var key = `;\(afterRest ? argIndex - argCount : argIndex);\(hash)`
+				var key = `;\(if afterRest set argIndex - argCount else argIndex);\(hash)`
 				var rest = parameter.max() == Infinity
 
 				row.key += key
 				row.types.push(RowType.new(
-					index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+					index: (if afterRest set argIndex - argCount else argIndex):!!!(Number)
 					type: type:!!!(Type)
 					rest
 					parameter: index:!!!(Number)
@@ -724,7 +724,7 @@ namespace Build {
 
 				if index == lastIndex {
 					column.columns[hash] = TreeLeaf.new(
-						index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+						index: (if afterRest set argIndex - argCount else argIndex):!!!(Number)
 						type: type:!!!(Type)
 						min: min:!!!(Number)
 						max: max:!!!(Number)
@@ -747,7 +747,7 @@ namespace Build {
 				}
 				else {
 					column.columns[hash] = TreeBranch.new(
-						index: (afterRest ? argIndex - argCount : argIndex):!!!(Number)
+						index: (if afterRest set argIndex - argCount else argIndex):!!!(Number)
 						type: type:!!!(Type)
 						min: min:!!!(Number)
 						max: max:!!!(Number)
@@ -1831,7 +1831,7 @@ namespace Build {
 				key
 				node
 				type: node.type
-				usage: node.isNode ? node:!!!(TreeBranch).rows.length : 1
+				usage: if node.isNode set node:!!!(TreeBranch).rows.length else 1
 				children: []
 				isAny: node.type.isAny() || node.type.isNull()
 				variadic: node.index < 0 || node.variadic

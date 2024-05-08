@@ -5,7 +5,7 @@ enum FontWeight {
 
 class Style {
 	foobar(bold: Boolean) {
-		@quxbaz(bold ? .Bold : null)
+		@quxbaz(if bold set .Bold else null)
 	}
 	quxbaz(weight: FontWeight?) {
 	}

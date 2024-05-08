@@ -10,5 +10,5 @@ extern {
 func alpha(n? = null, percentage = false): Number {
 	var mut i: Number = Float.parse(n)
 
-	return i == NaN ? 1 : (percentage ? i / 100 : i).limit(0, 1).round(3)
+	return if i == NaN set 1 else (if percentage set i / 100 else i).limit(0, 1).round(3)
 }

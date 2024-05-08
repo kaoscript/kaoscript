@@ -32,7 +32,7 @@ class ArrayBinding extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
+		var subtarget = if target.isArray() set target.parameter() else AnyType.NullableUnexplicit
 
 		@testType = ArrayType.new(@scope)
 		@testType.flagDestructuring()
@@ -461,7 +461,7 @@ class ArrayBindingElement extends Expression {
 		}
 	} # }}}
 	compileVariable(data) => $compile.expression(data, this)
-	export(recipient) => @named ? @name.export(recipient) : null
+	export(recipient) => if @named set @name.export(recipient) else null
 	getExternalType() { # {{{
 		if @hasDefaultValue {
 			return @type.setNullable(true)
@@ -479,15 +479,21 @@ class ArrayBindingElement extends Expression {
 		}
 	} # }}}
 	isImmutable() => @parent.isImmutable()
-	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
+	isDeclararingVariable(name: String) => if @named set @name.isDeclararingVariable(name) else false
 	isAnonymous() => !@named
-	isRedeclared() => @named ? @name.isRedeclared() : false
+	isRedeclared() => if @named set @name.isRedeclared() else false
 	isRequired() => @explicitlyRequired || !(@rest || @hasDefaultValue)
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
-	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @named ? @name.listAssignments(array, ?immutable ? ?@immutable ? immutable || @immutable : immutable : @immutable, ?overwrite ? ?@overwrite ? overwrite || @overwrite : overwrite : @overwrite) : array
-	max(): Number => @rest ? Infinity : 1
-	min(): Number => @rest ? 0 : 1
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
+		if @named {
+			@name.listAssignments(array, if ?immutable set if ?@immutable set immutable || @immutable else immutable else @immutable, overwrite || @overwrite)
+		}
+
+		return array
+	} # }}}
+	max(): Number => if @rest set Infinity else 1
+	min(): Number => if @rest set 0 else 1
 	setAssignment(@assignment)
 	toAssignmentFragments(fragments, value) { # {{{
 		if @named {
@@ -549,7 +555,7 @@ class ArrayBindingElement extends Expression {
 						set '1'
 					}
 					else {
-						set @type.isNullable() ? '0' : '1'
+						set if @type.isNullable() set '0' else '1'
 					}
 				})
 				.code($comma)

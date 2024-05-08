@@ -52,7 +52,7 @@ class DeferredType extends Type {
 			}
 		}
 
-		return @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+		return if @nullable set AnyType.NullableUnexplicit else AnyType.Unexplicit
 	} # }}}
 	override buildGenericMap(position, expressions, decompose, genericMap) { # {{{
 		genericMap[@name] ??= []
@@ -99,7 +99,7 @@ class DeferredType extends Type {
 	compareToRef(value: NullType, equivalences: String[][]? = null) => 1
 	compareToRef(value: ReferenceType, equivalences: String[][]? = null) => 1
 	constraint() => @constraint
-	override discardDeferred() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	override discardDeferred() => if @nullable set AnyType.NullableUnexplicit else AnyType.Unexplicit
 	override export(references, indexDelta, mode, module) { # {{{
 		return {
 			kind: TypeKind.Deferred
@@ -119,10 +119,10 @@ class DeferredType extends Type {
 	} # }}}
 	override hashCode() { # {{{
 		if @constrainted {
-			return `<\(@name) is \(@constraint.hashCode())>\(@nullable ? '?' : '')`
+			return `<\(@name) is \(@constraint.hashCode())>\(if @nullable set '?' else '')`
 		}
 		else {
-			return `<\(@name)>\(@nullable ? '?' : '')`
+			return `<\(@name)>\(if @nullable set '?' else '')`
 		}
 	} # }}}
 	override isAny() => !@constrainted

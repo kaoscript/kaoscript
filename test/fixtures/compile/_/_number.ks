@@ -20,7 +20,7 @@ extern {
 
 impl Number {
 	limit(min: Number, max: Number): Number {
-		return isNaN(this) ? min : Math.min(max, Math.max(min, this))
+		return if isNaN(this) set min else Math.min(max, Math.max(min, this))
 	}
 	mod(max: Number): Number {
 		if isNaN(this) {

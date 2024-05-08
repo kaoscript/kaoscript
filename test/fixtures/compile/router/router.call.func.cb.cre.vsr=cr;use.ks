@@ -17,6 +17,6 @@ func foobar(x: SuperClass) {
 func test() => false
 func make(): SuperClass => SubClassA.new()
 
-var x = test() ? make() : SuperClass.new()
+var x = if test() set make() else SuperClass.new()
 
 foobar(x)

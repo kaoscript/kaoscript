@@ -236,8 +236,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 	} # }}}
 	getOverridableVarname() => @enumName.name()
-	getParameterOffset() => @instance ? 1 : 0
-	getSharedName() => @override ? null : @instance ? `__ks_func_\(@name)` : `__ks_sttc_\(@name)`
+	getParameterOffset() => if @instance set 1 else 0
+	getSharedName() => if @override set null else if @instance set `__ks_func_\(@name)` else `__ks_sttc_\(@name)`
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

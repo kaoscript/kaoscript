@@ -1,3 +1,3 @@
 extern foo
 
-var dyn tt = ?foo ? 'foo' : 'bar'
+var dyn tt = if ?foo set 'foo' else 'bar'

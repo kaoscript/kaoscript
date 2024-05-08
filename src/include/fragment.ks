@@ -23,7 +23,7 @@ func $code(code) { # {{{
 } # }}}
 
 func $const(node) { # {{{
-	return node._options.format.variables == 'es5' ? 'var ' : 'const '
+	return if node._options.format.variables == 'es5' set 'var ' else 'const '
 } # }}}
 
 func $quote(value) { # {{{

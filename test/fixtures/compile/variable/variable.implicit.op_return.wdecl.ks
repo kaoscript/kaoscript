@@ -1,4 +1,4 @@
 var x = 5
 var dyn y, z
 
-y = (z <- x == 5) ? 10 : 20
+y = if z <- x == 5 set 10 else 20

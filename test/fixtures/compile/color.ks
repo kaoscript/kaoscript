@@ -190,7 +190,7 @@ namespace $caster {
 	func alpha(n? = null, #[overwrite] percentage: bool = false): float { # {{{
 		var mut i: Number = Float.parse(n)
 
-		return i == NaN ? 1 : (percentage ? i / 100 : i).limit(0, 1).round(3)
+		return if i == NaN set 1 else (if percentage set i / 100 else i).limit(0, 1).round(3)
 	} # }}}
 
 	func ff(n): int { # {{{
@@ -313,7 +313,7 @@ var $parsers = {
 			else if args[0] is array {
 				that._space = Space.SRGB
 
-				that._alpha = args[0].length == 4 ? $caster.alpha(args[0][3]) : 1
+				that._alpha = if args[0].length == 4 set $caster.alpha(args[0][3]) else 1
 				that._red = $caster.ff(args[0][0])
 				that._green = $caster.ff(args[0][1])
 				that._blue = $caster.ff(args[0][2])
@@ -446,7 +446,7 @@ var $parsers = {
 		}
 		else if args.length >= 3 {
 			that._space = Space.SRGB
-			that._alpha = args.length >= 4 ? $caster.alpha(args[3]) : 1
+			that._alpha = if args.length >= 4 set $caster.alpha(args[3]) else 1
 			that._red = $caster.ff(args[0])
 			that._green = $caster.ff(args[1])
 			that._blue = $caster.ff(args[2])
@@ -460,7 +460,7 @@ var $parsers = {
 			if Number.isFinite(Float.parse(args[0])) {
 				that._space = Space.SRGB
 				that._red = that._green = that._blue = $caster.ff(args[0])
-				that._alpha = args.length >= 2 ? $caster.alpha(args[1]) : 1
+				that._alpha = if args.length >= 2 set $caster.alpha(args[1]) else 1
 				return true
 			}
 			else if args[0] is string {
@@ -655,7 +655,7 @@ export class Color {
 		from(...args): Color | bool { # {{{
 			var color = $from(Color.new(), args)
 
-			return color._dummy ? false : color
+			return if color._dummy set false else color
 		} # }}}
 
 		greyscale(...args): Color | bool { # {{{
@@ -669,19 +669,19 @@ export class Color {
 
 			var color = $from(Color.new(), args)
 
-			return color._dummy ? false : color.greyscale(model)
+			return if color._dummy set false else color.greyscale(model)
 		} # }}}
 
 		hex(...args): String | bool { # {{{
 			var color = $from(Color.new(), args)
 
-			return color._dummy ? false : color.hex()
+			return if color._dummy set false else color.hex()
 		} # }}}
 
 		negative(...args): Color | bool { # {{{
 			var color = $from(Color.new(), args)
 
-			return color._dummy ? false : color.negative()
+			return if color._dummy set false else color.negative()
 		} # }}}
 
 		registerFormatter(format: string, formatter: func): void { # {{{
@@ -840,7 +840,7 @@ export class Color {
 
 	format(name: string = this._space.value) { # {{{
 		if var formatter ?= $formatters[name] {
-			return formatter.formatter(?formatter.space ? this.like(formatter.space) : this)
+			return formatter.formatter(if ?formatter.space set this.like(formatter.space) else this)
 		}
 		else {
 			return false
@@ -965,13 +965,13 @@ export class Color {
 		var that = this.like(Space.SRGB)
 
 		var mut r: float = that._red:!!(float) / 255
-		r = r < 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
+		r = if r < 0.03928 set r / 12.92 else Math.pow((r + 0.055) / 1.055, 2.4)
 
 		var mut g: float = that._green:!!(float) / 255
-		g = g < 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
+		g = if g < 0.03928 set g / 12.92 else Math.pow((g + 0.055) / 1.055, 2.4)
 
 		var mut b: float = that._blue:!!(float) / 255
-		b = b < 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
+		b = if b < 0.03928 set b / 12.92 else Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
 	} # }}}

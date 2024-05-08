@@ -69,7 +69,7 @@ class Parameter extends AbstractNode {
 			var parameters = node.parameters()
 			var signature = node.type()
 
-			var name = (mode == ParameterMode.Default | ParameterMode.OverloadedFunction | ParameterMode.HelperConstructor) ? 'arguments' : '__ks_arguments'
+			var name = if mode == ParameterMode.Default | ParameterMode.OverloadedFunction | ParameterMode.HelperConstructor set 'arguments' else '__ks_arguments'
 
 			var mut {
 				restIndex = -1
@@ -183,7 +183,7 @@ class Parameter extends AbstractNode {
 
 					parameter.toParameterFragments(fragments)
 				}
-				else if parameter.isRequired() || i + 1 == parameters.length || i < (til == -1 ? (til <- Parameter.getUntilDifferentTypeIndex(parameters, i)) : til) {
+				else if parameter.isRequired() || i + 1 == parameters.length || i < (if til == -1 set (til <- Parameter.getUntilDifferentTypeIndex(parameters, i)) else til) {
 					fragments.code($comma) if i + offset > 0
 
 					parameter.toParameterFragments(fragments)
@@ -331,7 +331,7 @@ class Parameter extends AbstractNode {
 								.newLine()
 								.code($runtime.scope(node))
 								.compile(parameter)
-								.code(` = arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
+								.code(` = arguments.length > \(if context.increment set '++__ks_i' else '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
 								.compile(parameter._defaultValue)
 								.done()
 						}
@@ -340,7 +340,7 @@ class Parameter extends AbstractNode {
 								.newLine()
 								.code($runtime.scope(node))
 								.compile(parameter)
-								.code(` = Array.prototype.slice.call(arguments, \(context.increment ? '++__ks_i' : '__ks_i'), __ks_i = arguments.length - \(minAfter))`)
+								.code(` = Array.prototype.slice.call(arguments, \(if context.increment set '++__ks_i' else '__ks_i'), __ks_i = arguments.length - \(minAfter))`)
 								.done()
 						}
 					}
@@ -356,7 +356,7 @@ class Parameter extends AbstractNode {
 								.newLine()
 								.code($runtime.scope(node))
 								.compile(parameter)
-								.code(` = \(name).length > \(context.increment ? '++__ks_i' : '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, \(name).length) : `)
+								.code(` = \(name).length > \(if context.increment set '++__ks_i' else '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, \(name).length) : `)
 								.compile(parameter._defaultValue)
 								.done()
 						}
@@ -365,7 +365,7 @@ class Parameter extends AbstractNode {
 								.newLine()
 								.code($runtime.scope(node))
 								.compile(parameter)
-								.code(` = Array.prototype.slice.call(\(name), \(context.increment ? '++__ks_i' : '__ks_i'), \(name).length)`)
+								.code(` = Array.prototype.slice.call(\(name), \(if context.increment set '++__ks_i' else '__ks_i'), \(name).length)`)
 								.done()
 						}
 					}
@@ -529,7 +529,7 @@ class Parameter extends AbstractNode {
 					if context.async {
 						ctrl
 							.newLine()
-							.code(`return __ks_cb(SyntaxError.new("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.code(`return __ks_cb(SyntaxError.new("The rest parameter must have at least \(min) argument\(if min > 1 set 's' else '') (" + `)
 							.compile(parameter)
 							.code(`.length + ")"))`)
 							.done()
@@ -537,7 +537,7 @@ class Parameter extends AbstractNode {
 					else {
 						ctrl
 							.newLine()
-							.code(`throw SyntaxError.new("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+							.code(`throw SyntaxError.new("The rest parameter must have at least \(min) argument\(if min > 1 set 's' else '') (" + `)
 							.compile(parameter)
 							.code(`.length + ")")`)
 							.done()
@@ -761,7 +761,7 @@ class Parameter extends AbstractNode {
 			type = @type.getVariableType()
 		}
 
-		@internal.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
+		@internal.setDeclaredType(if @rest set Type.arrayOf(type, @scope) else type, true)
 	} # }}}
 	translate() { # {{{
 		@internal.translate()
@@ -894,7 +894,7 @@ class Parameter extends AbstractNode {
 
 		var t = @type.getVariableType()
 
-		@internal.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
+		@internal.setDeclaredType(if @rest set Type.arrayOf(t, @scope) else t, true)
 	} # }}}
 
 	proxy @type {
@@ -950,7 +950,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						.newLine()
 						.code($runtime.scope(that))
 						.compile(that)
-						.code(` = Array.prototype.slice.call(\(context.name), \(context.increment ? '++__ks_i' : '__ks_i'), \(index + 1 == context.length ? '' : '__ks_i = ')__ks_i + \(arity.min + (context.increment ? 1 : 0)))`)
+						.code(` = Array.prototype.slice.call(\(context.name), \(if context.increment set '++__ks_i' else '__ks_i'), \(if index + 1 == context.length set '' else '__ks_i = ')__ks_i + \(arity.min + (if context.increment set 1 else 0)))`)
 						.done()
 
 					context.increment = true
@@ -1081,7 +1081,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							.newLine()
 							.code($runtime.scope(that))
 							.compile(that)
-							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
+							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[\(if context.increment set '++' else '')__ks_i]) !== void 0`)
 
 						if !declaredType.isNullable() {
 							line.code(' && __ks__ !== null')
@@ -1103,7 +1103,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							.newLine()
 							.code($runtime.scope(that))
 							.compile(that)
-							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
+							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[__ks_i\(if context.increment set ' + 1' else '')]) !== void 0 && `)
 
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
@@ -1117,7 +1117,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						}
 
 						line
-							.code(context.increment ? ' ? (++__ks_i, __ks__) : ' : ' ? __ks__ : ')
+							.code(if context.increment set ' ? (++__ks_i, __ks__) : ' else ' ? __ks__ : ')
 							.compile(defaultValue)
 							.done()
 					}
@@ -1130,7 +1130,7 @@ class IdentifierParameter extends IdentifierLiteral {
 					.newLine()
 					.code($runtime.scope(that))
 					.compile(that)
-					.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
+					.code(` = \(context.name)[`, if context.increment set '++' else '', '__ks_i]')
 					.done()
 
 				that.toValidationFragments(fragments, rest, defaultValue, header, async)

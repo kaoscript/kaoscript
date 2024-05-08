@@ -580,7 +580,7 @@ class CallExpression extends Expression {
 				if disrupted {
 					@object.toDisruptedFragments(fragments)
 
-					fragments.code(testing ? ' && ' : ' ? ')
+					fragments.code(if testing set ' && ' else ' ? ')
 				}
 
 				if testing {

@@ -63,9 +63,9 @@ func testIf(x: CardSuit, y: String, z) {
 		results.push(null)
 	}
 
-	results.push(x == CardSuit.Clubs ? 'c' : null)
-	results.push(CardSuit(y) == CardSuit.Clubs ? 'c' : null)
-	results.push(CardSuit(z) == CardSuit.Clubs ? 'c' : null)
+	results.push(if x == CardSuit.Clubs set 'c' else null)
+	results.push(if CardSuit(y) == CardSuit.Clubs set 'c' else null)
+	results.push(if CardSuit(z) == CardSuit.Clubs set 'c' else null)
 
 	return results
 }

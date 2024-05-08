@@ -641,7 +641,7 @@ export class SyntaxException extends Exception {
 				}
 			}
 
-			throw SyntaxException.new(`Class "\(className)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
+			throw SyntaxException.new(`Class "\(className)" doesn't implement the following abstract method\(if fragments.length > 1 set 's' else ''): \(fragments.join(', '))`, node)
 		} # }}}
 		throwMissingAssignmentIfFalse(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The lateinit variable "\(name)" isn't fully initialized when the condition is false`, node)
@@ -674,7 +674,7 @@ export class SyntaxException extends Exception {
 					fragments.push(`"\(fieldName): \(type.toQuote())"`)
 				}
 
-				message += `the following field\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
+				message += `the following field\(if fragments.length > 1 set 's' else ''): \(fragments.join(', '))`
 			}
 
 			if ?#functions {
@@ -688,7 +688,7 @@ export class SyntaxException extends Exception {
 					fragments.push(`"\(functionName)\(type.toQuote())"`)
 				}
 
-				message += `the following method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`
+				message += `the following method\(if fragments.length > 1 set 's' else ''): \(fragments.join(', '))`
 			}
 
 			message += ` of the type \(interface.toQuote())`
@@ -846,7 +846,7 @@ export class SyntaxException extends Exception {
 		throwUnmatchedImportArguments(names, node): Never ~ SyntaxException { # {{{
 			var fragments = [`"\(name)"` for var name in names]
 
-			throw SyntaxException.new(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
+			throw SyntaxException.new(`The import can't match the argument\(if fragments.length > 1 set 's' else ''): \(fragments.join(', '))`, node)
 		} # }}}
 		throwUnmatchVariable(class, interface, varname, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The variable "\(varname)" doesn't match the one of \(interface.toQuote(true))`, node)

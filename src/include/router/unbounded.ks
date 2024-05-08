@@ -24,7 +24,7 @@ namespace Unbounded {
 		return min
 	} # }}}
 	func getMaxMinAfter(tree: TreeLeaf): Number { # {{{
-		return tree.function.isAsync() ? 1 : 0
+		return if tree.function.isAsync() set 1 else 0
 	} # }}}
 
 	func getMaxMinFromIndex(tree: TreeBranch): Number { # {{{
@@ -40,7 +40,7 @@ namespace Unbounded {
 			return -tree.index
 		}
 		else {
-			return tree.function.isAsync() ? 1 : 0
+			return if tree.function.isAsync() set 1 else 0
 		}
 	} # }}}
 
@@ -241,7 +241,7 @@ namespace Unbounded {
 				arguments[tree.index] = {
 					tree
 					variadic: false
-					steps: unbounded ? -1 : tree.min
+					steps: if unbounded set -1 else tree.min
 					parameter
 				}
 			}
@@ -249,7 +249,7 @@ namespace Unbounded {
 				arguments[tree.index] = {
 					tree
 					variadic: tree.variadic
-					steps: tree.variadic ? 0 : tree.min
+					steps: if tree.variadic set 0 else tree.min
 					parameter
 				}
 			}
@@ -278,7 +278,7 @@ namespace Unbounded {
 			arguments[tree.index] = {
 				tree
 				variadic: tree.variadic
-				steps: tree.variadic ? 0 : tree.min
+				steps: if tree.variadic set 0 else tree.min
 				parameter
 			}
 		}

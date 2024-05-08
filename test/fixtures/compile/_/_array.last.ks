@@ -4,7 +4,7 @@ require system class Array
 
 impl Array {
 	last(index: Number = 1) {
-		return this.length != 0 ? this[this.length - index] : null
+		return if this.length != 0 set this[this.length - index] else null
 	}
 }
 

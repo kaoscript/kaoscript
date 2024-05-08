@@ -37,9 +37,9 @@ func testIf(x: Foobar, y: Number, z) {
 		results.push(null)
 	}
 
-	results.push(x ~~ Foobar.foo ? 'c' : null)
-	results.push(y ~~ Foobar.foo ? 'c' : null)
-	results.push(z ~~ Foobar.foo ? 'c' : null)
+	results.push(if x ~~ Foobar.foo set 'c' else null)
+	results.push(if y ~~ Foobar.foo set 'c' else null)
+	results.push(if z ~~ Foobar.foo set 'c' else null)
 
 	return results
 }

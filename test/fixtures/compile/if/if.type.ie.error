@@ -1,1 +1,0 @@
-TypeException: The condition "x" of type "Number" is expected to be of type "Boolean" (fixtures/compile/if/if.type.ie.ks:2)

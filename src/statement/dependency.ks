@@ -8,7 +8,7 @@ abstract class DependencyStatement extends Statement {
 
 		match declaration.kind {
 			NodeKind.ClassDeclaration {
-				var mut exhaustive = options.rules.nonExhaustive ? false : null
+				var mut exhaustive = if options.rules.nonExhaustive set false else null
 				// var mut libstd = false
 				// TODO! remove newline
 
@@ -152,7 +152,7 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind.NamespaceDeclaration {
-				var mut exhaustive = options.rules.nonExhaustive ? false : null
+				var mut exhaustive = if options.rules.nonExhaustive set false else null
 				// var mut libstd = false
 				// TODO! remove newline
 

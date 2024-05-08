@@ -171,7 +171,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		@expression.analyse()
 
 		if !@wildcard {
-			@externalName = ?@data.external ? @data.external.name : @expression.name()
+			@externalName = if ?@data.external set @data.external.name else @expression.name()
 		}
 	} # }}}
 	translate()

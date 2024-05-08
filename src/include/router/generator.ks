@@ -326,8 +326,8 @@ namespace Generator {
 				}
 			}
 
-			var varargs = async && parameter >= parameters.length ? false : parameters[parameter].isVarargs()
-			var type = async && parameter >= parameters.length ? scope.reference('Function') : parameters[parameter].type()
+			var varargs = if async && parameter >= parameters.length set false else parameters[parameter].isVarargs()
+			var type = if async && parameter >= parameters.length set scope.reference('Function') else parameters[parameter].type()
 
 			if !((anyTested || type.isAny()) && type.isNullable()) {
 				if from.variadic || to.variadic || to.index - from.index > 5 {

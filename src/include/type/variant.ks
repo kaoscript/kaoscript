@@ -309,7 +309,7 @@ class VariantType extends Type {
 					.step()
 
 				if @deferrable {
-					ctrl.line(`return __ksType.\(funcname).__1(\(varname)\(@names.true.type.canBeDeferred() ? ', mapper' : ''))`)
+					ctrl.line(`return __ksType.\(funcname).__1(\(varname)\(if @names.true.type.canBeDeferred() set ', mapper' else ''))`)
 				}
 				else {
 					var line = ctrl.newLine().code(`return `)
@@ -327,7 +327,7 @@ class VariantType extends Type {
 				ctrl.step().code('else').step()
 
 				if @deferrable {
-					ctrl.line(`return __ksType.\(funcname).__0(\(varname)\(@names.false.type.canBeDeferred() ? ', mapper' : ''))`)
+					ctrl.line(`return __ksType.\(funcname).__0(\(varname)\(if @names.false.type.canBeDeferred() set ', mapper' else ''))`)
 				}
 				else {
 					var line = ctrl.newLine().code(`return `)
@@ -391,7 +391,7 @@ class VariantType extends Type {
 					.line('return false')
 					.done()
 
-				var root = @enum is EnumType ? @master : @enum
+				var root = if @enum is EnumType set @master else @enum
 
 				for var { names, type }, index in @fields {
 					var fieldCtrl = block
@@ -400,7 +400,7 @@ class VariantType extends Type {
 						.step()
 
 					if @deferrable {
-						fieldCtrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(type.canBeDeferred() ? ', mapper' : ''))`)
+						fieldCtrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(if type.canBeDeferred() set ', mapper' else ''))`)
 					}
 					else {
 						var line = fieldCtrl.newLine().code(`return `)
@@ -480,7 +480,7 @@ class VariantType extends Type {
 		var mut fragments = 'variant { '
 
 		for var name, index in Object.keys(@names) {
-			fragments += index == 0 ? name : `, \(name)`
+			fragments += if index == 0 set name else `, \(name)`
 		}
 
 		fragments += ' }'

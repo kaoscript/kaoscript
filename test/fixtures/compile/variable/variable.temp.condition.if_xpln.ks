@@ -1,0 +1,1 @@
+func foobar(): Number => if (r <- 42) == 0 set r else 0

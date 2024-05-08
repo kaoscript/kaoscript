@@ -201,7 +201,7 @@ export class Module {
 
 		@body.enhance()
 
-		@body.prepare(@binary ? Type.Void : AnyType.NullableUnexplicit)
+		@body.prepare(if @binary set Type.Void else AnyType.NullableUnexplicit)
 
 		@body.translate()
 
@@ -465,7 +465,7 @@ export class Module {
 				}
 
 				if ?#exportingTypes {
-					var typesLine = object.newLine().code(`\(@standardLibrary ? '__ksStd_types' : '__ksType'): [`)
+					var typesLine = object.newLine().code(`\(if @standardLibrary set '__ksStd_types' else '__ksType'): [`)
 
 					for var { type }, index in exportingTypes {
 						typesLine

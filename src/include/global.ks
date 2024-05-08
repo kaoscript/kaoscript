@@ -170,7 +170,7 @@ namespace $compile {
 		var dyn result
 
 		if var clazz ?= $expressions[data.kind] {
-			result = clazz is Class ? clazz.new(data, parent, scope) : clazz(data, parent, scope)
+			result = if clazz is Class set clazz.new(data, parent, scope) else clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind.BinaryExpression {
 			if data.operator.kind == BinaryOperatorKind.Assignment {
@@ -258,7 +258,7 @@ namespace $runtime {
 		return node._options.runtime.helper.alias
 	} # }}}
 	func immutableScope(node) { # {{{
-		return node._options.format.variables == 'es5' ? 'var ' : 'const '
+		return if node._options.format.variables == 'es5' set 'var ' else 'const '
 	} # }}}
 	func initFlag(node) { # {{{
 		node.module?().flag('initFlag')
@@ -276,14 +276,14 @@ namespace $runtime {
 		return node._options.runtime.operator.alias
 	} # }}}
 	func scope(node) { # {{{
-		return node._options.format.variables == 'es5' ? 'var ' : 'let '
+		return if node._options.format.variables == 'es5' set 'var ' else 'let '
 	} # }}}
 	func scope(immutable: Boolean, node) { # {{{
 		if immutable {
-			return node._options.format.variables == 'es5' ? 'var ' : 'const '
+			return if node._options.format.variables == 'es5' set 'var ' else 'const '
 		}
 		else {
-			return node._options.format.variables == 'es5' ? 'var ' : 'let '
+			return if node._options.format.variables == 'es5' set 'var ' else 'let '
 		}
 	} # }}}
 	func type(node) { # {{{

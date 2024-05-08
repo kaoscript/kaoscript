@@ -746,7 +746,7 @@ class UnionType extends Type {
 		return types
 	} # }}}
 	toAssertFunctionFragments(value, nullable, fragments, node) { # {{{
-		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(if nullable set '1' else '0'), `)
 
 		@toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 
@@ -816,14 +816,14 @@ class UnionType extends Type {
 		}
 
 		if !?#casts {
-			fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+			fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(if nullable set '1' else '0'), `)
 
 			@toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, node)
 
 			fragments.code(')')
 		}
 		else {
-			fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), value =>`)
+			fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(@toQuote(true))), \(if nullable set '1' else '0'), value =>`)
 
 			var block = fragments.newBlock()
 
@@ -893,7 +893,7 @@ class UnionType extends Type {
 		return [type.toQuote() for var type in @types].join('|')
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
-		var quote = double ? `"` : `'`
+		var quote = if double set `"` else `'`
 
 		if @nullable && #@types == 2 {
 			if @types[0] == Type.Null {

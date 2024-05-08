@@ -256,7 +256,7 @@ class ModuleScope extends Scope {
 	getLineOffset() => @lineOffset
 	getMacro(name) => @macros[name]
 	getNewName(name: String): String { # {{{
-		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
+		var mut index = if @renamedIndexes[name] is Number set @renamedIndexes[name] + 1 else 1
 		var mut newName = '__ks_' + name + '_' + index
 
 		while @declarations[newName] {
@@ -277,7 +277,7 @@ class ModuleScope extends Scope {
 		}
 	} # }}}
 	getRawLine() => @line - @lineOffset
-	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+	getRenamedIndex(name: String) => if @renamedIndexes[name] is Number set @renamedIndexes[name] else 0
 	getReservedName() { # {{{
 		@reservedIndex += 1
 
@@ -303,7 +303,7 @@ class ModuleScope extends Scope {
 			}
 
 			if ?variable {
-				return variable == false ? null : variable
+				return if variable == false set null else variable
 			}
 		}
 

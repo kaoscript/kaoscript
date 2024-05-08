@@ -149,7 +149,7 @@ class IdentifierLiteral extends Literal {
 		return class.getInstanceVariable(@value)
 	} # }}}
 	getDeclaredType() => @declaredType
-	getSecureName() => @isVariable ? @variable().getSecureName() : @value
+	getSecureName() => if @isVariable set @variable().getSecureName() else @value
 	getUnpreparedType() { # {{{
 		if @isVariable {
 			return @scope.getVariable(@value, @line).getRealType()
@@ -281,7 +281,7 @@ class IdentifierLiteral extends Literal {
 	} # }}}
 	override makeMemberCallee(property, testing, generics, node) { # {{{
 		if @isVariable {
-			var type = testing ? @type.setNullable(false) : @type
+			var type = if testing set @type.setNullable(false) else @type
 
 			if var callback ?= type.makeMemberCallee(property, @value, generics, node) {
 				if @type == @declaredType {

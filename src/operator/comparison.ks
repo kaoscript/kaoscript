@@ -299,7 +299,7 @@ class ComparisonExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				var junction = @junction == JunctionKind.And ? ' && ' : ' || '
+				var junction = if @junction == JunctionKind.And set ' && ' else ' || '
 
 				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, true, false, false)
 

@@ -149,10 +149,10 @@ class ClassMethodDeclaration extends Statement {
 
 					return false
 				}
-				labelable ? 'args' : `arguments`
+				if labelable set 'args' else `arguments`
 				assessment
 				fragments.block()
-				extends.type().hasStaticMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
+				if extends.type().hasStaticMethod(name) set Router.FooterType.NO_THROW else Router.FooterType.MIGHT_THROW
 				(writer, _) => {
 					if extends.type().hasStaticMethod(name) {
 						if labelable {
@@ -190,7 +190,7 @@ class ClassMethodDeclaration extends Statement {
 
 					return false
 				}
-				labelable ? 'args' : `arguments`
+				if labelable set 'args' else `arguments`
 				assessment
 				fragments.block()
 				node
@@ -206,9 +206,9 @@ class ClassMethodDeclaration extends Statement {
 		var generic = class.isGenericInstanceMethod(name)
 
 		if labelable || generic {
-			ctrl.code(`\(name)(\(generic ? `gens\(labelable ? ', kws' : '')` : 'kws'), ...args)`).step()
+			ctrl.code(`\(name)(\(if generic set `gens\(if labelable set ', kws' else '')` else 'kws'), ...args)`).step()
 
-			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this\(generic ? ', gens || {}' : '')\(labelable ? ', kws' : ''), args)`)
+			ctrl.line(`return this.__ks_func_\(name)_rt.call(null, this, this\(if generic set ', gens || {}' else '')\(if labelable set ', kws' else ''), args)`)
 		}
 		else {
 			ctrl.code(`\(name)()`).step()
@@ -232,7 +232,7 @@ class ClassMethodDeclaration extends Statement {
 
 			Router.toFragments(
 				(function, line) => {
-					var index = function.isForked() ? function.getForkedIndex() : function.index()
+					var index = if function.isForked() set function.getForkedIndex() else function.index()
 
 					line.code(`proto.__ks_func_\(name)_\(index).call(that`)
 
@@ -242,7 +242,7 @@ class ClassMethodDeclaration extends Statement {
 				assessment
 				generic
 				fragments.block()
-				extends.type().hasInstanceMethod(name) ? Router.FooterType.NO_THROW : Router.FooterType.MIGHT_THROW
+				if extends.type().hasInstanceMethod(name) set Router.FooterType.NO_THROW else Router.FooterType.MIGHT_THROW
 				(writer, _) => {
 					if extends.type().hasInstanceMethod(name) {
 						if extends.type().isSealedInstanceMethod(name) {
@@ -489,7 +489,7 @@ class ClassMethodDeclaration extends Statement {
 	translate() { # {{{
 		@scope.line(@line())
 
-		var index = @forked || (@overriding && @type.isForked()) ? @type.getForkedIndex() : @type.index()
+		var index = if @forked || (@overriding && @type.isForked()) set @type.getForkedIndex() else @type.index()
 
 		if @instance {
 			@internalName = `__ks_func_\(@name)_\(index)`
@@ -899,7 +899,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 			else if @parent.isExtending() || @parent.isImplementing() {
-				var matcher = @instance ? Method.instance(@parent) : Method.static(@parent)
+				var matcher = if @instance set Method.instance(@parent) else Method.static(@parent)
 
 				if var data ?= @getOveriddenMethod(matcher, @type.isUnknownReturnType()) {
 					@overriding = true

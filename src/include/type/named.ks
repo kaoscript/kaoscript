@@ -33,7 +33,7 @@ class NamedType extends Type {
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
-	discardAlias() => @isAlias() ? @type.discardAlias() : this
+	discardAlias() => if @isAlias() set @type.discardAlias() else this
 	discardName() => @type
 	duplicate() => NamedType.new(@name, @type)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -93,7 +93,7 @@ class NamedType extends Type {
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => @sealedName ?? `__ks_\(@name)`
-	getSealedName(standardLibrary) => standardLibrary ? `__ksStd_\(@name.substr(0, 1).toLowerCase())` : @getSealedName()
+	getSealedName(standardLibrary) => if standardLibrary set `__ksStd_\(@name.substr(0, 1).toLowerCase())` else @getSealedName()
 	getSealedPath() { # {{{
 		if ?@container {
 			return `\(@container.path()).\(@getSealedName())`

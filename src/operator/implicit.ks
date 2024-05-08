@@ -24,7 +24,7 @@ class UnaryOperatorImplicit extends Expression {
 					ReferenceException.throwNotDefinedVariantElement(@property, master.name(), this)
 				}
 
-				@varname = root is EnumViewType ? root.master().path() : master.path()
+				@varname = if root is EnumViewType set root.master().path() else master.path()
 				@path = `\(@varname).\(@property)`
 				@type = ValueType.new(@property, master.setNullable(false), @path, @scope)
 			}
@@ -220,14 +220,6 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 				return type.discardValue().setNullable(false)
 			}
 		}
-		is ConditionalExpression {
-			if target == AnyType.NullableUnexplicit {
-				return findTypeFromParent(parent.parent(), parent, property)
-			}
-			else {
-				return target
-			}
-		}
 		is EnumValueDeclaration {
 			var arguments = parent.arguments()
 			var length = arguments.length
@@ -280,14 +272,25 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 		is ReturnStatement {
 			return target
 		}
+		is SetStatement {
+			if target == AnyType.NullableUnexplicit {
+				return findTypeFromParent(parent.parent(), parent, property)
+			}
+			else {
+				return target
+			}
+		}
 		else {
 			return null
 		}
 	}
 } # }}}
 
-func findTypeFromParent(#parent: Expression, #node: Expression, #property: String): Type? { # {{{
+func findTypeFromParent(#parent: Expression | Block, #node: Expression | SetStatement, #property: String): Type? { # {{{
 	match parent {
+		is Block {
+			return findTypeFromParent(parent.parent(), parent.parent(), property)
+		}
 		is CallExpression {
 			if !?parent.assessment() {
 				return null
@@ -315,6 +318,9 @@ func findTypeFromParent(#parent: Expression, #node: Expression, #property: Strin
 			}
 
 			return Type.union(node.scope(), ...types)
+		}
+		is IfExpression {
+			return findTypeFromParent(parent.parent(), parent, property)
 		}
 		else {
 			echo(parent)

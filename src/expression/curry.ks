@@ -69,7 +69,7 @@ class CurryExpression extends CallExpression {
 					}
 
 					var concat = precise && ?values[0]?.from
-					var first = concat ? 1 : 0
+					var first = if concat set 1 else 0
 
 					if concat {
 						var { passthru, from, to? } = values[0]
@@ -124,7 +124,7 @@ class CurryExpression extends CallExpression {
 					}
 
 					if precise {
-						fragments.code(concat ? ')' : ']')
+						fragments.code(if concat set ')' else ']')
 					}
 				}
 				else {

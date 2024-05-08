@@ -12,7 +12,7 @@ class Greetings {
 	}
 
 	constructor(@message, defaultMessage) {
-		@message = message.length != 0 ? message : defaultMessage
+		@message = if message.length != 0 set message else defaultMessage
 	}
 
 	greet(name) {

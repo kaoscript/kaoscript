@@ -24,7 +24,7 @@ class VariableStatement extends Statement {
 	} # }}}
 	override initiate() { # {{{
 		var modifing = ?#@data.modifiers
-		var modifier = modifing ? @data.modifiers[0].kind : null
+		var modifier = if modifing set @data.modifiers[0].kind else null
 		var overwrite = @hasAttribute('overwrite')
 
 		for var data in @data.declarations {
@@ -855,7 +855,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		}
 
 		if @assert {
-			fragments.code(`, \($quote(@type.toQuote(true))), \(@nullable ? '1' : '0'), `)
+			fragments.code(`, \($quote(@type.toQuote(true))), \(if @nullable set '1' else '0'), `)
 
 			@type.toAwareTestFunctionFragments('value', false, false, true, false, null, null, fragments, this)
 

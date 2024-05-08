@@ -89,7 +89,7 @@ class AssignmentOperatorFinite extends AssignmentOperatorExpression {
 		fragments
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compileReusable(@right)
-			.code(`, \(@assert ? '1' : '0')) ? `)
+			.code(`, \(if @assert set '1' else '0')) ? `)
 
 		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
@@ -104,7 +104,7 @@ class AssignmentOperatorFinite extends AssignmentOperatorExpression {
 		fragments
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compileReusable(@right)
-			.code(`, \(@assert ? '1' : '0')) ? (`)
+			.code(`, \(if @assert set '1' else '0')) ? (`)
 
 		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
@@ -127,7 +127,7 @@ class AssignmentOperatorNonFinite extends AssignmentOperatorFinite {
 		fragments
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compileReusable(@right)
-			.code(`, \(@assert ? '1' : '0')) ? (`)
+			.code(`, \(if @assert set '1' else '0')) ? (`)
 
 		if ?@left.toAssignmentFragments {
 			@left.toAssignmentFragments(fragments, @right)
@@ -167,7 +167,7 @@ class AssignmentOperatorNonFiniteCoalescing extends AssignmentOperatorExpression
 		fragments
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compile(@left)
-			.code(`, \(@assert ? '1' : '0')) ? null : `)
+			.code(`, \(if @assert set '1' else '0')) ? null : `)
 			.compile(@left)
 			.code($equals)
 			.compile(@right)
@@ -179,7 +179,7 @@ class AssignmentOperatorNonFiniteCoalescing extends AssignmentOperatorExpression
 			.code('if(!')
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compile(@left)
-			.code(`, \(@assert ? '1' : '0')))`)
+			.code(`, \(if @assert set '1' else '0')))`)
 			.step()
 			.newLine()
 			.compile(@left)
@@ -254,7 +254,7 @@ class PolyadicOperatorNonFiniteCoalescing extends PolyadicOperatorExpression {
 			fragments
 				.code(`\($runtime.type(this)).isFinite(`)
 				.compileReusable(operand)
-				.code(`, \(@asserts[index] ? '1' : '0')) ? `)
+				.code(`, \(if @asserts[index] set '1' else '0')) ? `)
 				.compile(operand)
 				.code(' : ')
 		}
@@ -315,7 +315,7 @@ class UnaryOperatorFinite extends UnaryOperatorExpression {
 		fragments
 			.code(`\($runtime.type(this)).isFinite(`)
 			.compile(@argument)
-			.code(`, \(@assert ? '1' : '0'))`)
+			.code(`, \(if @assert set '1' else '0'))`)
 	} # }}}
 	type() => @scope.reference('Boolean')
 }

@@ -29,7 +29,7 @@ class ObjectBinding extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var subtarget = target.isObject() ? target.parameter() : AnyType.NullableUnexplicit
+		var subtarget = if target.isObject() set target.parameter() else AnyType.NullableUnexplicit
 
 		@testType = ObjectType.new(@scope)
 		@testType.flagDestructuring()
@@ -512,8 +512,12 @@ class ObjectBindingElement extends Expression {
 	isRest() => @rest
 	isThisAliasing() => @thisAlias
 	// TODO!
-	// listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal?.listAssignments(array, immutable ?||?, overwrite ?||? @overwrite) ?? array
-	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal?.listAssignments(array, ?immutable ? ?@immutable ? immutable || @immutable : immutable : @immutable, ?overwrite ? ?@overwrite ? overwrite || @overwrite : overwrite : @overwrite) ?? array
+	// listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) => @internal?.listAssignments(array, immutable ?||? @immutable, overwrite ?||? @overwrite) ?? array
+	listAssignments(array: Array, immutable: Boolean? = null, overwrite: Boolean? = null) { # {{{
+		@internal?.listAssignments(array, if ?immutable set if ?@immutable set immutable || @immutable else immutable else @immutable, overwrite || @overwrite)
+
+		return array
+	} # }}}
 	name(): String? => @external?.value()
 	setAssignment(@assignment)
 	toFragments(fragments) { # {{{
@@ -589,7 +593,7 @@ class ObjectBindingElement extends Expression {
 				.code($equals, $runtime.helper(this), '.default(')
 				.wrap(value)
 				.code('.')
-				.compile($keywords[@name()] ? @name() : @external)
+				.compile(if $keywords[@name()] set @name() else @external)
 				.code($comma)
 				.code(match @operator {
 					.EmptyCoalescing, .NonEmpty {
@@ -599,7 +603,7 @@ class ObjectBindingElement extends Expression {
 						set '1'
 					}
 					else {
-						set @type.isNullable() ? '0' : '1'
+						set if @type.isNullable() set '0' else '1'
 					}
 				})
 				.code($comma)
@@ -620,7 +624,7 @@ class ObjectBindingElement extends Expression {
 				.code($equals)
 				.wrap(value)
 				.code('.')
-				.compile($keywords[@name()] ? @name() : @external)
+				.compile(if $keywords[@name()] set @name() else @external)
 		}
 	} # }}}
 	toParameterFragments(fragments) { # {{{

@@ -169,7 +169,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@toRouterFragments(fragments)
 	} # }}}
 	toMainFragments(fragments) { # {{{
-		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var namespace = if @namespace.isSealed() set @variable.getSealedName() else @variable.name()
 
 		var line = fragments.newLine()
 
@@ -181,7 +181,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toRouterFragments(fragments) { # {{{
-		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var namespace = if @namespace.isSealed() set @variable.getSealedName() else @variable.name()
 
 		var assessment = @type().assessment(@name, this)
 
@@ -204,7 +204,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
-		var namespace = @namespace.isSealed() ? @variable.getSealedName() : @variable.name()
+		var namespace = if @namespace.isSealed() set @variable.getSealedName() else @variable.name()
 		var line = fragments.newLine()
 
 		line.code(`\(namespace).\(@name).\(@internalName) = function(`)

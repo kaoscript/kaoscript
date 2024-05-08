@@ -58,7 +58,7 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
-			var type = @assignable && @computed ? @object.getDeclaredType().discardValue() : @object.type().discardValue()
+			var type = if @assignable && @computed set @object.getDeclaredType().discardValue() else @object.type().discardValue()
 
 			if @completeObject && !type.isComplete() {
 				ReferenceException.throwUncompleteType(type, this, this)
@@ -149,7 +149,7 @@ class MemberExpression extends Expression {
 		else {
 			var type = @object.type().discardValue()
 
-			@property = @computed ? $compile.expression(@data.property, this) : @data.property.name
+			@property = if @computed set $compile.expression(@data.property, this) else @data.property.name
 
 			if !@nullable && !@isMisfit() {
 				if type.isNull() {
@@ -464,7 +464,7 @@ class MemberExpression extends Expression {
 	isLooseComposite() => @isCallable() || @isNullable()
 	isMacro() => false
 	isNullable() => @nullable || @object.isNullable() || (@computed && !@stringProperty && @property.isNullable())
-	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && !@stringProperty && @property.isNullable() ? 1 : 0) > 1
+	isNullableComputed() => (if @object.isNullable() set 1 else 0) + (if @nullable set 1 else 0) + (if @computed && !@stringProperty && @property.isNullable() set 1 else 0) > 1
 	isReferenced() => @object.isReferenced()
 	isUndisruptivelyNullable() => (@nullable || super.isUndisruptivelyNullable()) && !@object.isReferenced()
 	isUsingSetter() => @usingSetter
@@ -788,14 +788,14 @@ class MemberExpression extends Expression {
 
 					if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 						@liberal = true
-						@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+						@objectType = if type.isReference() set ObjectType.new(@scope).flagComplete() else type
 					}
 
 					return true
 				}
 				else if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 					@liberal = true
-					@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+					@objectType = if type.isReference() set ObjectType.new(@scope).flagComplete() else type
 				}
 				else if type.isExhaustive(this) {
 					if @assignable {
@@ -941,7 +941,7 @@ class MemberExpression extends Expression {
 
 				if @assignable && (propType.isLiberal() || (propType.isReference() && propType.hasRest())) {
 					@liberal = true
-					@objectType = propType.isReference() ? ObjectType.new(@scope).flagComplete() : propType
+					@objectType = if propType.isReference() set ObjectType.new(@scope).flagComplete() else propType
 				}
 
 				if @type.isDeferrable() {
@@ -956,7 +956,7 @@ class MemberExpression extends Expression {
 			}
 			else if @assignable && (type.isLiberal() || (type.isReference() && type.hasRest())) {
 				@liberal = true
-				@objectType = type.isReference() ? ObjectType.new(@scope).flagComplete() : type
+				@objectType = if type.isReference() set ObjectType.new(@scope).flagComplete() else type
 			}
 			else if type.isExhaustive(this) {
 				if @parent is UnaryOperatorExistential {
@@ -1232,7 +1232,7 @@ class MemberExpression extends Expression {
 
 			if @usingGetter {
 				if @sealed {
-					var name = property[0] == '_' ? property.substr(1) : property
+					var name = if property[0] == '_' set property.substr(1) else property
 
 					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
 				}
@@ -1322,7 +1322,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
-	toPropertyQuote() => @computed ? @property.toQuote(true) : $quote(@property)
+	toPropertyQuote() => if @computed set @property.toQuote(true) else $quote(@property)
 	toQuote() { # {{{
 		var mut fragments = @object.toQuote()
 
@@ -1382,7 +1382,7 @@ class MemberExpression extends Expression {
 	} # }}}
 	toSetterFragments(fragments, value) { # {{{
 		if @sealed {
-			var name = @property[0] == '_' ? @property.substr(1) : @property
+			var name = if @property[0] == '_' set @property.substr(1) else @property
 
 			fragments.code(`\(@object.type().type().getSealedName()).__ks_set_\(name)(`).compile(@object).code($comma).compile(value).code(')')
 		}

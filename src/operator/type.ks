@@ -74,7 +74,7 @@ class BinaryOperatorTypeAssertion extends Expression {
 	expression() => @left
 	isLooseComposite() => @toAssert || @toEnum || @toNonNull
 	listAssignments(array) => @left.listAssignments(array)
-	name() => @left is IdentifierLiteral ? @left.name() : null
+	name() => if @left is IdentifierLiteral set @left.name() else null
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
@@ -107,7 +107,7 @@ class BinaryOperatorTypeAssertion extends Expression {
 		}
 	} # }}}
 	override toQuote() { # {{{
-		return `\(@left.toQuote()):&\(@nullable ? '?' : '')(\(@right.toQuote()))`
+		return `\(@left.toQuote()):&\(if @nullable set '?' else '')(\(@right.toQuote()))`
 	} # }}}
 	toReusableFragments(fragments) { # {{{
 		if ?@reuseName {
@@ -219,7 +219,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isUsingVariable(name) => @left.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array: Array) => @left.listAssignments(array)
-	name() => @left is IdentifierLiteral ? @left.name() : null
+	name() => if @left is IdentifierLiteral set @left.name() else null
 	releaseReusable() { # {{{
 		if ?@reuseName {
 			@scope.releaseTempName(@reuseName)
@@ -257,7 +257,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		}
 	} # }}}
 	toQuote() { # {{{
-		return `\(@left.toQuote()):>\(@nullable ? '?' : '')(\(@right.toQuote()))`
+		return `\(@left.toQuote()):>\(if @nullable set '?' else '')(\(@right.toQuote()))`
 	} # }}}
 	toReusableFragments(fragments) { # {{{
 		if ?@reuseName {

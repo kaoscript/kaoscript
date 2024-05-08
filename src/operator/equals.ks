@@ -159,7 +159,7 @@ class AssignmentOperatorEquals extends AssignmentOperatorExpression {
 		}
 	} # }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
-	type() => @parent is AssignmentOperatorEquals ? @type : Type.Void
+	type() => if @parent is AssignmentOperatorEquals set @type else Type.Void
 	validate(target: Type) { # {{{
 		if !target.isVoid() && @parent is not AssignmentOperatorEquals & MatchStatement {
 			SyntaxException.throwNoReturn(this)

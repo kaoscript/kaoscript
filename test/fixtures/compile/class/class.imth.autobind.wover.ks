@@ -6,5 +6,5 @@ class Foobar {
 }
 
 func foobar(f: Foobar, test: Boolean) {
-	var fn = test ? f.foobar : f.quxbaz
+	var fn = if test set f.foobar else f.quxbaz
 }

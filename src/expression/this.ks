@@ -276,12 +276,12 @@ class ThisExpression extends Expression {
 		if ?@variableName {
 			if @instance {
 				if var variable ?= @class.type().getInstanceVariable(@variableName) {
-					return @nonNullable ? variable.type().setNullable(false) : variable.type()
+					return if @nonNullable set variable.type().setNullable(false) else variable.type()
 				}
 			}
 			else {
 				if var variable ?= @class.type().getStaticVariable(@variableName) {
-					return @nonNullable ? variable.type().setNullable(false) : variable.type()
+					return if @nonNullable set variable.type().setNullable(false) else variable.type()
 				}
 			}
 		}

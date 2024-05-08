@@ -3,5 +3,5 @@ type Card = {
 }
 
 func foobar(suits: Number[]?): Card[]? {
-	return ?suits ? [{ suit } for var suit in suits] : null
+	return if ?suits set [{ suit } for var suit in suits] else null
 }

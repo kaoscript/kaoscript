@@ -112,9 +112,9 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 		}
 	} # }}}
 	amendTarget(target: Type): Type { # {{{
-		var type = @parent is ArrayExpression ? Type.arrayOf(target, @scope) : target
+		var type = if @parent is ArrayExpression set Type.arrayOf(target, @scope) else target
 
-		return @canBeNullable ? type.setNullable(true) : type
+		return if @canBeNullable set type.setNullable(true) else type
 	} # }}}
 	override flagNotNull(operator) { # {{{
 		@notNull = true
@@ -123,7 +123,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 	isExpectingType() => true
 	override isFitting() => @fitting
 	isSpread() => true
-	operator() => @canBeNullable ? '...?' : '...'
+	operator() => if @canBeNullable set '...?' else '...'
 	releaseReusable() { # {{{
 		@scope.releaseTempName(@reuseName) if ?@reuseName
 	} # }}}
@@ -135,7 +135,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			fragments
 				.code(`...\($runtime.helper(this)).toArray(`)
 				.compileReusable(this)
-				.code(`, \(@helper ? '1' : '0'))`)
+				.code(`, \(if @helper set '1' else '0'))`)
 		}
 		else if @helper {
 			fragments
@@ -181,7 +181,7 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			fragments
 				.code(`\($runtime.helper(this)).toArray(`)
 				.compile(@argument)
-				.code(`, \(@helper ? '1' : '0'))`)
+				.code(`, \(if @helper set '1' else '0'))`)
 		}
 		else if @helper {
 			fragments

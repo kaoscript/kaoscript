@@ -168,7 +168,7 @@ class ArrayIteration extends IterationNode {
 		@nullable = type.isNullable()
 
 		if ?@value {
-			var parameterType = ?@split ? Type.arrayOf(type.parameter(), @scope) : type.parameter()
+			var parameterType = if ?@split set Type.arrayOf(type.parameter(), @scope) else type.parameter()
 			var valueType = Type.fromAST(@data.type, this)
 
 			unless parameterType.isAssignableToVariable(valueType, true, true, false) {
@@ -248,12 +248,12 @@ class ArrayIteration extends IterationNode {
 						}
 						else if validate {
 							if @step.value() > 0 {
-								unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
+								unless if @fromBallpark || @toBallpark set @from.value() < @to.value() else @from.value() <= @to.value() {
 									SyntaxException.throwForNoMatch('for/in', this)
 								}
 							}
 							else {
-								unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
+								unless if @fromBallpark || @toBallpark set @from.value() > @to.value() else @from.value() >= @to.value() {
 									SyntaxException.throwForNoMatch('for/in', this)
 								}
 
@@ -291,12 +291,12 @@ class ArrayIteration extends IterationNode {
 						@ascending = @order == OrderKind.Ascending
 					}
 					else if @order == OrderKind.Ascending {
-						unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
+						unless if @fromBallpark || @toBallpark set @from.value() < @to.value() else @from.value() <= @to.value() {
 							SyntaxException.throwForNoMatch('for/in', this)
 						}
 					}
 					else {
-						unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
+						unless if @fromBallpark || @toBallpark set @from.value() > @to.value() else @from.value() >= @to.value() {
 							SyntaxException.throwForNoMatch('for/in', this)
 						}
 
@@ -597,7 +597,7 @@ class ArrayIteration extends IterationNode {
 					.code(` + `)
 
 				if @split is NumberLiteral && (!?@step || @step is NumberLiteral) {
-					var value = !?@step ? @split.value() : Math.max(@step.value(), @split.value())
+					var value = if !?@step set @split.value() else Math.max(@step.value(), @split.value())
 
 					line.code(value)
 				}
@@ -673,13 +673,13 @@ class ArrayIteration extends IterationNode {
 							.code('Math.min(')
 							.code(`\($runtime.helper(this)).length(`)
 							.compile(@expressionName ?? @expression)
-							.code(`)\(@toBallpark ? '' : ' - 1'), \(value))`)
+							.code(`)\(if @toBallpark set '' else ' - 1'), \(value))`)
 					}
 					else {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code(`.length\(@toBallpark ? '' : ' - 1'), \(value))`)
+							.code(`.length\(if @toBallpark set '' else ' - 1'), \(value))`)
 					}
 				}
 				else {
@@ -728,7 +728,7 @@ class ArrayIteration extends IterationNode {
 
 			if value >= 0 {
 				if @ascending {
-					fragments.code(@fromBallpark ? value + 1 : value)
+					fragments.code(if @fromBallpark set value + 1 else value)
 				}
 				else {
 					if @nullable {
@@ -736,13 +736,13 @@ class ArrayIteration extends IterationNode {
 							.code('Math.min(')
 							.code(`\($runtime.helper(this)).length(`)
 							.compile(@expressionName ?? @expression)
-							.code(`) - 1, \(@fromBallpark ? value - 1 : value))`)
+							.code(`) - 1, \(if @fromBallpark set value - 1 else value))`)
 					}
 					else {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code(`.length - 1, \(@fromBallpark ? value - 1 : value))`)
+							.code(`.length - 1, \(if @fromBallpark set value - 1 else value))`)
 					}
 				}
 			}
@@ -752,13 +752,13 @@ class ArrayIteration extends IterationNode {
 						.code('Math.max(0, ')
 						.code(`\($runtime.helper(this)).length(`)
 						.compile(@expressionName ?? @expression)
-						.code(`) - \(@fromBallpark ? 1 - value : -value))`)
+						.code(`) - \(if @fromBallpark set 1 - value else -value))`)
 				}
 				else {
 					fragments
 						.code('Math.max(0, ')
 						.compile(@expressionName ?? @expression)
-						.code(`.length - \(@fromBallpark ? 1 - value : -value))`)
+						.code(`.length - \(if @fromBallpark set 1 - value else -value))`)
 				}
 			}
 		}
@@ -813,7 +813,7 @@ class ArrayIteration extends IterationNode {
 					.newLine()
 					.code(`\($runtime.helper(this)).assertLoopBoundsEdge(\(@step.toQuote(true)), `)
 					.compile(@stepName ?? @step)
-					.code(`, \(@order != OrderKind.None || @ascending ? 2 : 1))`)
+					.code(`, \(if @order != OrderKind.None || @ascending set 2 else 1))`)
 					.done()
 			}
 			else {
@@ -862,17 +862,17 @@ class ArrayIteration extends IterationNode {
 
 		var late comparator: String
 		if @toBallpark {
-			comparator = @ascending ? ' < ' : ' > '
+			comparator = if @ascending set ' < ' else ' > '
 		}
 		else {
-			comparator = @ascending ? ' <= ' : ' >= '
+			comparator = if @ascending set ' <= ' else ' >= '
 		}
 
 		var mut elseCtrl = null
 		if @parent.hasElse() {
 			elseCtrl = fragments
 				.newControl()
-				.code(`if(\(@fromName)\(@fromBallpark ? ` + \(@stepName)` : '') \(comparator) \(@toName))`)
+				.code(`if(\(@fromName)\(if @fromBallpark set ` + \(@stepName)` else '') \(comparator) \(@toName))`)
 				.step()
 
 			if @elseTest == .Setter {
@@ -936,10 +936,10 @@ class ArrayIteration extends IterationNode {
 	} # }}}
 	toStaticFragments(fragments) { # {{{
 		var comparator = if @toBallpark {
-			set @ascending ? ' < ' : ' > '
+			set if @ascending set ' < ' else ' > '
 		}
 		else {
-			set @ascending ? ' <= ' : ' >= '
+			set if @ascending set ' <= ' else ' >= '
 		}
 
 		var mut elseCtrl = null
@@ -1052,7 +1052,7 @@ class ArrayIteration extends IterationNode {
 	toStepFragments(fragments) { # {{{
 		if ?@step {
 			if @step is NumberLiteral && (!?@split || @split is NumberLiteral) {
-				var value = !?@split ? @step.value() : Math.max(@step.value(), @split.value())
+				var value = if !?@split set @step.value() else Math.max(@step.value(), @split.value())
 
 				if value == 1 {
 					fragments.code('++').compile(@indexName ?? @index)
@@ -1096,7 +1096,7 @@ class ArrayIteration extends IterationNode {
 		}
 	} # }}}
 	toUnknownFragments(fragments) { # {{{
-		var comparator = @toBallpark ? '<' : '<='
+		var comparator = if @toBallpark set '<' else '<='
 
 		if ?@expressionName {
 			fragments.newLine().code(@expressionName, $equals).compile(@expression).done()
@@ -1104,14 +1104,14 @@ class ArrayIteration extends IterationNode {
 
 		fragments
 			.newLine()
-			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoopBounds(0, \(@fromAssert ? @from.toQuote(true) : '""'), `)
+			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoopBounds(0, \(if @fromAssert set @from.toQuote(true) else '""'), `)
 			.compile(@from ?? 0)
-			.code(`, \(@toAssert ? @to.toQuote(true) : '""'), `)
+			.code(`, \(if @toAssert set @to.toQuote(true) else '""'), `)
 			.compile(@to ?? 'Infinity')
 			.code(`, `)
 			.compile(@expressionName ?? @expression)
-			.code(`.length\(@toBallpark ? '' : ' - 1')`)
-			.code(`, \(@stepAssert ? @step.toQuote(true) : '""'), `)
+			.code(`.length\(if @toBallpark set '' else ' - 1')`)
+			.code(`, \(if @stepAssert set @step.toQuote(true) else '""'), `)
 			.compile(@step ?? 1)
 			.code(')')
 			.done()
@@ -1120,7 +1120,7 @@ class ArrayIteration extends IterationNode {
 		if @parent.hasElse() {
 			elseCtrl = fragments
 				.newControl()
-				.code(`if(\(@fromName)\(@fromBallpark ? ` + \(@stepName)` : '') \(comparator) \(@toName))`)
+				.code(`if(\(@fromName)\(if @fromBallpark set ` + \(@stepName)` else '') \(comparator) \(@toName))`)
 				.step()
 
 			if @elseTest == .Setter {

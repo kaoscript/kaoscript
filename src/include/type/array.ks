@@ -142,7 +142,7 @@ class ArrayType extends Type {
 	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	compareToRef(value: ObjectType, equivalences: String[][]? = null) { # {{{
 		if @nullable != value.isNullable() {
-			return @nullable ? 1 : -1
+			return if @nullable set 1 else -1
 		}
 
 		if @rest {
@@ -192,7 +192,7 @@ class ArrayType extends Type {
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @length == 0 && !@rest {
-			return @nullable ? 'Array?' : 'Array'
+			return if @nullable set 'Array?' else 'Array'
 		}
 
 		return {

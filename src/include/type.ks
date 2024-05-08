@@ -425,7 +425,7 @@ abstract class Type {
 						var name = Type.renameNative(data.typeName.name)
 
 						if name == 'Any' {
-							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
+							return if nullable set AnyType.NullableExplicit else AnyType.Explicit
 						}
 						else if ?#data.typeParameters {
 							match name {
@@ -692,7 +692,7 @@ abstract class Type {
 			return names.length
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
-			var data = index is Number ? metadata[index] : index
+			var data = if index is Number set metadata[index] else index
 
 			// echo('-- import --')
 			// echo(JSON.stringify(data, null, 2))
@@ -710,10 +710,10 @@ abstract class Type {
 
 					if match[1] == 'Any' {
 						if ?match[2] {
-							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
+							return if nullable set AnyType.NullableExplicit else AnyType.Explicit
 						}
 						else {
-							return nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+							return if nullable set AnyType.NullableUnexplicit else AnyType.Unexplicit
 						}
 					}
 					else {
@@ -826,8 +826,8 @@ abstract class Type {
 				var second = references[data.originals[1]]
 
 				var requirement = first.origin() ~~ TypeOrigin.Require
-				var [major, minor] = requirement ? [first, second] : [second, first]
-				var origin = requirement ? TypeOrigin.RequireOrExtern : TypeOrigin.ExternOrRequire
+				var [major, minor] = if requirement set [first, second] else [second, first]
+				var origin = if requirement set TypeOrigin.RequireOrExtern else TypeOrigin.ExternOrRequire
 
 				var type = ClassType.new(scope)
 
@@ -851,7 +851,7 @@ abstract class Type {
 
 			return type
 		} # }}}
-		renameNative(name: String) => $types[name] is String ? $types[name] : name
+		renameNative(name: String) => if $types[name] is String set $types[name] else name
 		setTrueSubtype(mut type: ReferenceType, scope: Scope, node): Type { # {{{
 			if type.isNullable() {
 				type = type.setNullable(false)
@@ -970,7 +970,7 @@ abstract class Type {
 		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { # {{{
 			return type unless type.shallBeNamed()
 
-			var namedType = type is NamespaceType ? NamedContainerType.new(scope.acquireTempName(declare), type) : NamedType.new(scope.acquireTempName(declare), type)
+			var namedType = if type is NamespaceType set NamedContainerType.new(scope.acquireTempName(declare), type) else NamedType.new(scope.acquireTempName(declare), type)
 
 			scope.define(namedType.name(), true, namedType, node)
 
@@ -1293,7 +1293,7 @@ abstract class Type {
 		NotImplementedException.throw()
 	} # }}}
 	merge(value: Type, generics: AltType[]?, subtypes: AltType[]?, ignoreUndefined: Boolean, node): Type { # {{{
-		return @isMorePreciseThan(value) ? this : value
+		return if @isMorePreciseThan(value) set this else value
 	} # }}}
 	minorOriginal() => null
 	origin(): valueof @origin
@@ -1337,14 +1337,14 @@ abstract class Type {
 		@setNullable(false).toAssertFunctionFragments(value, @isNullable(), fragments, node)
 	} # }}}
 	toAssertFunctionFragments(value: Expression, nullable: Boolean, fragments, node) { # {{{
-		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(nullable ? '1' : '0'), `)
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(@toQuote(true))), \(if nullable set '1' else '0'), `)
 
 		@toAwareTestFunctionFragments('value', false, false, false, false, null, null, fragments, node)
 
 		fragments.code(')')
 	} # }}}
 	toAssertFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
-		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
+		fragments.code(`\($runtime.helper(node)).assert(`).compile(value).code(`, \($quote(quote)), \(if nullable set '1' else '0'), \(name))`)
 	} # }}}
 	toAwareTestFunctionFragments(varname: String, nullable: Boolean, hasDeferred: Boolean, casting: Boolean, blind: Boolean, generics: AltType[]?, subtypes: AltType[]?, fragments, node) { # {{{
 		fragments
@@ -1368,7 +1368,7 @@ abstract class Type {
 		@toAssertFunctionFragments(value, nullable, fragments, node)
 	} # }}}
 	toCastFunctionFragments(name: String, quote: String, value: Expression, nullable: Boolean, fragments, node) { # {{{
-		fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(quote)), \(nullable ? '1' : '0'), \(name))`)
+		fragments.code(`\($runtime.helper(node)).cast(`).compile(value).code(`, \($quote(quote)), \(if nullable set '1' else '0'), \(name))`)
 	} # }}}
 	toExportFragment(fragments, name, variable, module: Module) { # {{{
 		if !@isVirtual() && !@isSystem() {

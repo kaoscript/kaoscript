@@ -30,7 +30,7 @@ class ParameterType extends Type {
 		fromAST(data, node: AbstractNode): ParameterType => ParameterType.fromAST(data, false, node.scope(), true, null, node)
 		fromAST(data, overridable: Boolean, scope: Scope, defined: Boolean, generics: Generic[]?, node: AbstractNode): ParameterType { # {{{
 			// TODO remove type
-			var mut type: Type = ?data.type ? Type.fromAST(data.type, scope, defined, generics, node) : AnyType.Unexplicit
+			var mut type: Type = if ?data.type set Type.fromAST(data.type, scope, defined, generics, node) else AnyType.Unexplicit
 
 			var mut default = false
 			var mut min = 1
@@ -84,7 +84,7 @@ class ParameterType extends Type {
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): ParameterType { # {{{
 			var data = index
 			var subtype = Type.import(data.type, metadata, references, alterations, queue, scope, node)
-			var passing = ?data.passing ? PassingMode(data.passing) : PassingMode.BOTH
+			var passing = if ?data.passing set PassingMode(data.passing) else PassingMode.BOTH
 			var type = ParameterType.new(scope, data.external, data.internal, passing, subtype, data.min, data.max, data.default)
 
 			if data.default {
@@ -148,7 +148,7 @@ class ParameterType extends Type {
 			}
 
 			if nf {
-				result._type =  @type.isNullable() ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+				result._type = if @type.isNullable() set AnyType.NullableUnexplicit else AnyType.Unexplicit
 			}
 		}
 		else if @type.isDeferrable() {

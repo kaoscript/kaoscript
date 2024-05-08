@@ -181,7 +181,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			}
 
 			if @number {
-				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				@type = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 			}
 			else if @string {
 				@type = @scope.reference('String')

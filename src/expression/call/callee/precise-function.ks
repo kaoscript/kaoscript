@@ -154,12 +154,12 @@ class PreciseFunctionCallee extends PreciseCallee {
 					ScopeKind.Argument {
 						fragments
 							.compile(@expression)
-							.code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(`)
+							.code(`.__ks_\(if type.index() == -1 set 0 else type.index()).call(`)
 							.compile(@node.getCallScope())
 							.code($comma) if ?#arguments
 					}
 					ScopeKind.This {
-						fragments.compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index())(`)
+						fragments.compile(@expression).code(`.__ks_\(if type.index() == -1 set 0 else type.index())(`)
 					}
 				}
 
@@ -192,7 +192,7 @@ class PreciseFunctionCallee extends PreciseCallee {
 				var arguments = @node.arguments()
 				var line = ctrl.newLine()
 
-				line.code('return ').compile(@expression).code(`.__ks_\(type.index() == -1 ? 0 : type.index()).call(this, `)
+				line.code('return ').compile(@expression).code(`.__ks_\(if type.index() == -1 set 0 else type.index()).call(this, `)
 
 				if useThis {
 					var scope = @node.scope()

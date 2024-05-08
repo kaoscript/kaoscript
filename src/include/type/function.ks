@@ -365,7 +365,7 @@ class FunctionType extends Type {
 	override flagIndirectlyReferenced()
 	functions() => [this]
 	generics() => @generics
-	getCallIndex() => @alien ? 0 : @index
+	getCallIndex() => if @alien set 0 else @index
 	getProperty(name: String) => Type.Any
 	getRestIndex(): valueof @restIndex
 	getRestParameter() => @parameters[@restIndex]
@@ -937,7 +937,7 @@ class FunctionType extends Type {
 		return false
 	} # }}}
 	max(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
-		var key = ?#excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
+		var key = if ?#excludes set `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` else `\(mode)/`
 
 		if var max ?= @maxs[key] {
 			return max
@@ -984,7 +984,7 @@ class FunctionType extends Type {
 		return max
 	} # }}}
 	min(mode: MinMax = MinMax.DEFAULT, mut excludes: String[]? = null) { # {{{
-		var key = ?#excludes ? `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` : `\(mode)/`
+		var key = if ?#excludes set `\(mode)/\(excludes.sort((a, b) => a.localeCompare(b)).join(','))` else `\(mode)/`
 
 		if var min ?= @mins[key] {
 			return min

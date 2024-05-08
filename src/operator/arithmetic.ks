@@ -162,7 +162,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 				}
 			}
 
-			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+			@type = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 		}
 	} # }}}
 	acquireReusable(acquire) { # {{{
@@ -343,7 +343,7 @@ class BinaryOperatorDivisionEuclidean extends NumericBinaryOperatorExpression {
 		for var operand, index in [@left, @right] {
 			fragments
 				.code($comma) if index != 0
-				.code(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+				.code(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 				.code($comma).compile(operand)
 		}
 
@@ -365,7 +365,7 @@ class BinaryOperatorDivisionInteger extends NumericBinaryOperatorExpression {
 			for var operand, index in [@left, @right] {
 				fragments
 					.code($comma) if index != 0
-					.code(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+					.code(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 					.code($comma).compile(operand)
 			}
 
@@ -384,7 +384,7 @@ class PolyadicOperatorDivisionInteger extends NumericPolyadicOperatorExpression 
 		for var operand, index in @operands {
 			fragments
 				.code($comma) if index != 0
-				.code(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+				.code(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 				.code($comma).compile(operand)
 		}
 
@@ -402,7 +402,7 @@ class BinaryOperatorModulus extends NumericBinaryOperatorExpression {
 		for var operand, index in [@left, @right] {
 			fragments
 				.code($comma) if index != 0
-				.code(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+				.code(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 				.code($comma).compile(operand)
 		}
 
@@ -420,7 +420,7 @@ class PolyadicOperatorModulus extends NumericPolyadicOperatorExpression {
 		for var operand, index in @operands {
 			fragments
 				.code($comma) if index != 0
-				.code(operand.type().isNumber() && !operand.type().isNullable() ? '0' : '1')
+				.code(if operand.type().isNumber() && !operand.type().isNullable() set '0' else '1')
 				.code($comma).compile(operand)
 		}
 

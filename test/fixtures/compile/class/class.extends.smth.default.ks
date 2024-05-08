@@ -1,7 +1,7 @@
 class Foobar {
 	static {
 		foobar(index, arr: Array) {
-			var data = index is Number ? arr[index] : index
+			var data = if index is Number set arr[index] else index
 
 			return Quxbaz.foobar(index, data, arr)
 		}

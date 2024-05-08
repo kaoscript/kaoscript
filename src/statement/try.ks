@@ -109,7 +109,7 @@ class TryStatement extends Statement {
 			}
 		}
 
-		var mut maxInferables = 1 + @clauses.length + (@hasDefaultClause ? 1 : 0)
+		var mut maxInferables = 1 + @clauses.length + (if @hasDefaultClause set 1 else 0)
 		var inferables = {}
 
 		for var clause in @clauses {

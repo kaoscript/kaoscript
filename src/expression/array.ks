@@ -26,7 +26,7 @@ class ArrayExpression extends Expression {
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		var subtarget = target.isArray() ? target.parameter() : AnyType.NullableUnexplicit
+		var subtarget = if target.isArray() set target.parameter() else AnyType.NullableUnexplicit
 
 		var mut spread = false
 
@@ -123,7 +123,7 @@ class ArrayExpression extends Expression {
 		}
 		else if @useHelper {
 			if @canConcat {
-				fragments.code(`\($runtime.helper(this)).concatArray(\(@nullableHelper ? '1' : '0')`)
+				fragments.code(`\($runtime.helper(this)).concatArray(\(if @nullableHelper set '1' else '0')`)
 
 				for var value, index in @values {
 					fragments

@@ -333,7 +333,7 @@ class FusionType extends Type {
 
 				if @cast && (casting || ?#generics || (@variant && ?#subtypes)) {
 					if casting {
-						fragments.code(`, \(blind ? 'cast' : 'true')`)
+						fragments.code(`, \(if blind set 'cast' else 'true')`)
 					}
 					else {
 						fragments.code(', 0')
@@ -365,7 +365,7 @@ class FusionType extends Type {
 				}
 			}
 			else if casting && @cast {
-				fragments.code(`\(varname) => \(@testName)(\(varname), \(blind ? 'cast' : 'true'))`)
+				fragments.code(`\(varname) => \(@testName)(\(varname), \(if blind set 'cast' else 'true'))`)
 			}
 			else {
 				fragments.code(@testName)

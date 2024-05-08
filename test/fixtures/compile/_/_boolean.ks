@@ -1,5 +1,5 @@
 impl Boolean {
-	toInt(): Number => this ? 1 : 0
+	toInt(): Number => if this set 1 else 0
 }
 
 export Boolean

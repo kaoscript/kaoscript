@@ -126,12 +126,12 @@ class FromIteration extends IterationNode {
 							SyntaxException.throwForBadStep('for/from', this)
 						}
 						else if @step.value() > 0 {
-							unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
+							unless if @fromBallpark || @toBallpark set @from.value() < @to.value() else @from.value() <= @to.value() {
 								SyntaxException.throwForNoMatch('for/from', this)
 							}
 						}
 						else {
-							unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
+							unless if @fromBallpark || @toBallpark set @from.value() > @to.value() else @from.value() >= @to.value() {
 								SyntaxException.throwForNoMatch('for/from', this)
 							}
 
@@ -150,12 +150,12 @@ class FromIteration extends IterationNode {
 					}
 
 					if @order == OrderKind.Ascending {
-						unless (@fromBallpark || @toBallpark) ? @from.value() < @to.value() : @from.value() <= @to.value() {
+						unless if @fromBallpark || @toBallpark set @from.value() < @to.value() else @from.value() <= @to.value() {
 							SyntaxException.throwForNoMatch('for/from', this)
 						}
 					}
 					else {
-						unless (@fromBallpark || @toBallpark) ? @from.value() > @to.value() : @from.value() >= @to.value() {
+						unless if @fromBallpark || @toBallpark set @from.value() > @to.value() else @from.value() >= @to.value() {
 							SyntaxException.throwForNoMatch('for/from', this)
 						}
 
@@ -362,7 +362,7 @@ class FromIteration extends IterationNode {
 					.newLine()
 					.code(`\($runtime.helper(this)).assertLoopBoundsEdge(\(@step.toQuote(true)), `)
 					.compile(@stepName ?? @step)
-					.code(`, \(@order != OrderKind.None || @ascending ? 2 : 1))`)
+					.code(`, \(if @order != OrderKind.None || @ascending set 2 else 1))`)
 					.done()
 			}
 			else {
@@ -411,10 +411,10 @@ class FromIteration extends IterationNode {
 
 		var late comparator: String
 		if @toBallpark {
-			comparator = @ascending ? ' < ' : ' > '
+			comparator = if @ascending set ' < ' else ' > '
 		}
 		else {
-			comparator = @ascending ? ' <= ' : ' >= '
+			comparator = if @ascending set ' <= ' else ' >= '
 		}
 
 		var mut elseCtrl = null
@@ -438,7 +438,7 @@ class FromIteration extends IterationNode {
 						elseCtrl.code(' + ').compile(@stepName ?? @step)
 					}
 					else {
-						elseCtrl.code(@ascending ? ' + 1' : ' - 1')
+						elseCtrl.code(if @ascending set ' + 1' else ' - 1')
 					}
 				}
 				else {
@@ -478,7 +478,7 @@ class FromIteration extends IterationNode {
 					ctrl.code(' + ').compile(@stepName ?? @step)
 				}
 				else {
-					ctrl.code(@ascending ? ' + 1' : ' - 1')
+					ctrl.code(if @ascending set ' + 1' else ' - 1')
 				}
 			}
 			else {
@@ -509,17 +509,17 @@ class FromIteration extends IterationNode {
 
 		if ?@step {
 			if @data.step.kind == NodeKind.NumericExpression && @data.step.value == 1 {
-				ctrl.code(@order == OrderKind.None || @ascending ? '++' : '--').compile(@variable)
+				ctrl.code(if @order == OrderKind.None || @ascending set '++' else '--').compile(@variable)
 			}
 			else if @data.step.kind == NodeKind.NumericExpression && @data.step.value == -1 {
 				ctrl.code('--').compile(@variable)
 			}
 			else {
-				ctrl.compile(@variable).code(@order == OrderKind.None || @ascending ? ' += ' : ' -= ').compile(@stepName ?? @step)
+				ctrl.compile(@variable).code(if @order == OrderKind.None || @ascending set ' += ' else ' -= ').compile(@stepName ?? @step)
 			}
 		}
 		else {
-			ctrl.code(@ascending ? '++' : '--').compile(@variable)
+			ctrl.code(if @ascending set '++' else '--').compile(@variable)
 		}
 
 		ctrl.code(')').step()
@@ -553,10 +553,10 @@ class FromIteration extends IterationNode {
 		ctrl.code('; ').compile(@variable)
 
 		if @toBallpark {
-			ctrl.code(@ascending ? ' < ' : ' > ')
+			ctrl.code(if @ascending set ' < ' else ' > ')
 		}
 		else {
-			ctrl.code(@ascending ? ' <= ' : ' >= ')
+			ctrl.code(if @ascending set ' <= ' else ' >= ')
 		}
 
 		ctrl.compile(@to)
@@ -596,15 +596,15 @@ class FromIteration extends IterationNode {
 		return @toBodyFragments(ctrl, null)
 	} # }}}
 	toUnknownFragments(fragments) { # {{{
-		var comparator = @toBallpark ? '<' : '<='
+		var comparator = if @toBallpark set '<' else '<='
 
 		fragments
 			.newLine()
-			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoopBounds(0, \(@fromAssert ? @from.toQuote(true) : '""'), `)
+			.code(`[\(@fromName), \(@toName), \(@stepName), \(@unknownTranslator)] = \($runtime.helper(this)).assertLoopBounds(0, \(if @fromAssert set @from.toQuote(true) else '""'), `)
 			.compile(@from)
-			.code(`, \(@toAssert ? @to.toQuote(true) : '""'), `)
+			.code(`, \(if @toAssert set @to.toQuote(true) else '""'), `)
 			.compile(@to)
-			.code(`, \(@to is NumberLiteral ? @to.value() : 'Infinity'), \(@stepAssert ? @step.toQuote(true) : '""'), `)
+			.code(`, \(if @to is NumberLiteral set @to.value() else 'Infinity'), \(if @stepAssert set @step.toQuote(true) else '""'), `)
 			.compile(@step ?? 1)
 			.code(')')
 			.done()
@@ -613,7 +613,7 @@ class FromIteration extends IterationNode {
 		if @parent.hasElse() {
 			elseCtrl = fragments
 				.newControl()
-				.code(`if(\(@fromName)\(@fromBallpark ? ` + \(@stepName)` : '') \(comparator) \(@toName))`)
+				.code(`if(\(@fromName)\(if @fromBallpark set ` + \(@stepName)` else '') \(comparator) \(@toName))`)
 				.step()
 
 			if @elseTest == .Setter {

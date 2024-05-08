@@ -457,7 +457,7 @@ class MatchStatement extends Statement {
 			return null
 		}
 	} # }}}
-	getSubject() => @hasDeclaration ? @declaration : @value
+	getSubject() => if @hasDeclaration set @declaration else @value
 	getValueType() => @valueType
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		var {name, type} = variable
@@ -657,7 +657,7 @@ class MatchStatement extends Statement {
 		}
 	} # }}}
 	throwExpectedType(type: String): Never ~ TypeException { # {{{
-		TypeException.throwExpectedType(@hasDeclaration ? @name : @value.toQuote(), type, this)
+		TypeException.throwExpectedType(if @hasDeclaration set @name else @value.toQuote(), type, this)
 	} # }}}
 	toFallthroughFragments(fragments) { # {{{
 		if @nextClauseIndex < @clauses.length {
@@ -674,7 +674,7 @@ class MatchStatement extends Statement {
 		}
 		else if @reusableValue {
 			fragments.newLine()
-				..code(`\(@declareTemp ? $runtime.scope(this) : '')\(@name) = `)
+				..code(`\(if @declareTemp set $runtime.scope(this) else '')\(@name) = `)
 				..compile(@value)
 				..done()
 		}
@@ -693,10 +693,10 @@ class MatchStatement extends Statement {
 				else if ?minmax {
 					var { min, max } = minmax
 
-					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0), \(min), \(max == Infinity ? 0 : max))`)
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(if testingType set 1 else 0), \(min), \(if max == Infinity set 0 else max))`)
 				}
 				else {
-					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0))`)
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(if testingType set 1 else 0))`)
 				}
 			}
 			else {
@@ -706,7 +706,7 @@ class MatchStatement extends Statement {
 					type.toBlindTestFragments(null, @name, false, testingType, null, null, Junction.NONE, line, this)
 				}
 				else {
-					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
+					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(if testingType set 1 else 0))`)
 				}
 			}
 
@@ -869,7 +869,7 @@ class MatchBindingArray extends AbstractNode {
 		@testingProperties = @binding.type().isTestingProperties()
 
 		if @testingType || @testingLength || @testingProperties {
-			@parent.addArrayTest(@testingType, @minmax, @testingProperties ? @binding.type() : null)
+			@parent.addArrayTest(@testingType, @minmax, if @testingProperties set @binding.type() else null)
 		}
 	} # }}}
 	translate() { # {{{
@@ -893,7 +893,7 @@ class MatchBindingArray extends AbstractNode {
 		var { min, max } = @minmax
 		var type = @binding.type()
 
-		if var tests ?= @parent.getArrayTests(@testingType, @minmax, @testingProperties ? type : null) {
+		if var tests ?= @parent.getArrayTests(@testingType, @minmax, if @testingProperties set type else null) {
 			if junction == Junction.AND {
 				for var test in tests {
 					fragments.code(` && \(test)()`)
@@ -1023,7 +1023,7 @@ class MatchBindingObject extends AbstractNode {
 		}
 
 		if @testingType || @testingProperties {
-			@parent.addObjectTest(@testingType, @testingProperties ? bindingType : null)
+			@parent.addObjectTest(@testingType, if @testingProperties set bindingType else null)
 		}
 	} # }}}
 	translate() { # {{{
@@ -1045,7 +1045,7 @@ class MatchBindingObject extends AbstractNode {
 
 		var type = @binding.type()
 
-		if var tests ?= @parent.getObjectTests(@testingType, @testingProperties ? type : null) {
+		if var tests ?= @parent.getObjectTests(@testingType, if @testingProperties set type else null) {
 			if junction == Junction.AND {
 				for var test in tests {
 					fragments.code(` && \(test)()`)
@@ -1209,7 +1209,7 @@ class MatchConditionArray extends AbstractNode {
 			}
 		}
 		else {
-			fragments.code(`\($runtime.type(this)).isDexArray(\(name), 1, \(min), \(max == Infinity ? 0 : max))`)
+			fragments.code(`\($runtime.type(this)).isDexArray(\(name), 1, \(min), \(if max == Infinity set 0 else max))`)
 		}
 
 		var mut index = 0
@@ -1362,10 +1362,10 @@ class MatchConditionRange extends AbstractNode {
 		fragments.code('(') if junction == Junction.OR
 
 		fragments
-			.code(name, @from ? ' >= ' : '>')
+			.code(name, if @from set ' >= ' else '>')
 			.compile(@left)
 			.code(' && ')
-			.code(name, @to ? ' <= ' : '<')
+			.code(name, if @to set ' <= ' else '<')
 			.compile(@right)
 
 		fragments.code(')') if junction == Junction.OR

@@ -198,12 +198,12 @@ abstract class Expression extends AbstractNode {
 		throw NotSupportedException.new()
 	} # }}}
 	toQuote(double: Boolean): String { # {{{
-		return double ? `"\(@toQuote())"` : `'\(@toQuote())'`
+		return if double set `"\(@toQuote())"` else `'\(@toQuote())'`
 	} # }}}
 	toReusableFragments(fragments) => @toFragments(fragments, Mode.None)
 	toTypeQuote() => @type().toTypeQuote()
 	toTypeQuote(double: Boolean): String { # {{{
-		return double ? `"\(@toTypeQuote())"` : `'\(@toTypeQuote())'`
+		return if double set `"\(@toTypeQuote())"` else `'\(@toTypeQuote())'`
 	} # }}}
 	type() => AnyType.NullableUnexplicit
 	unflagAssertable()
@@ -220,7 +220,6 @@ include {
 	'../expression/await.ks'
 	'../expression/binding/index.ks'
 	'../expression/call/index.ks'
-	'../expression/conditional.ks'
 	'../expression/curry.ks'
 	'../expression/disruptive.ks'
 	'../expression/function.ks'

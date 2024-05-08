@@ -339,7 +339,7 @@ class MatchExpression extends Expression {
 			return null
 		}
 	} # }}}
-	getSubject() => @hasDeclaration ? @declaration : @value
+	getSubject() => if @hasDeclaration set @declaration else @value
 	getValueName() => @valueName
 	getValueType() => @valueType
 	isInline() => false
@@ -377,10 +377,10 @@ class MatchExpression extends Expression {
 				else if ?minmax {
 					var { min, max } = minmax
 
-					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0), \(min), \(max == Infinity ? 0 : max))`)
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(if testingType set 1 else 0), \(min), \(if max == Infinity set 0 else max))`)
 				}
 				else {
-					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(testingType ? 1 : 0))`)
+					line.code(`\($runtime.type(this)).isDexArray(\(@name), \(if testingType set 1 else 0))`)
 				}
 			}
 			else {
@@ -390,7 +390,7 @@ class MatchExpression extends Expression {
 					type.toBlindTestFragments(null, @name, false, testingType, null, null, Junction.NONE, line, this)
 				}
 				else {
-					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(testingType ? 1 : 0))`)
+					line.code(`\($runtime.type(this)).isDexObject(\(@name), \(if testingType set 1 else 0))`)
 				}
 			}
 

@@ -110,7 +110,7 @@ class ObjectExpression extends Expression {
 		if ?#@properties {
 			if root is ObjectType || (root is FusionType && root.isObject()) {
 				var keyed  = root.hasKeyType()
-				var keyType = keyed ? root.getKeyType() : AnyType.NullableUnexplicit
+				var keyType = if keyed set root.getKeyType() else AnyType.NullableUnexplicit
 				var valueType = root.getRestType()
 				var rest: Type[] = []
 
@@ -205,7 +205,7 @@ class ObjectExpression extends Expression {
 				}
 			}
 			else {
-				var type = root.isReference() ? root.parameter() : AnyType.NullableUnexplicit
+				var type = if root.isReference() set root.parameter() else AnyType.NullableUnexplicit
 				var rest: Type[] = []
 
 				for var property in @properties {
@@ -817,16 +817,16 @@ class ObjectSpreadMember extends Expression {
 	amendTarget(target: Type): Type { # {{{
 		var type = Type.objectOf(target, @scope)
 
-		return @canBeNullable ? type.setNullable(true) : type
+		return if @canBeNullable set type.setNullable(true) else type
 	} # }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	isInverted() => @value.isInverted()
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
-	operator() => @canBeNullable ? '...?' : '...'
+	operator() => if @canBeNullable set '...?' else '...'
 	toFragments(fragments, mode) { # {{{
 		fragments
 			.newLine()
-			.code(`\($runtime.helper(this)).concatObject(\(@nullable ? '1' : '0'), \(@parent.varname()), `)
+			.code(`\($runtime.helper(this)).concatObject(\(if @nullable set '1' else '0'), \(@parent.varname()), `)
 			.compile(@value)
 			.code(')')
 			.done()

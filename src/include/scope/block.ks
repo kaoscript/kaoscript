@@ -217,7 +217,7 @@ class BlockScope extends Scope {
 	getLineOffset() => @module.getLineOffset()
 	getMacro(name) => @macros[name] ?? @parent.getMacro(name)
 	getNewName(name: String): String { # {{{
-		var mut index = @renamedIndexes[name] is Number ? @renamedIndexes[name] + 1 : 1
+		var mut index = if @renamedIndexes[name] is Number set @renamedIndexes[name] + 1 else 1
 		var mut newName = '__ks_' + name + '_' + index
 
 		while @declarations[newName] {

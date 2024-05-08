@@ -111,7 +111,7 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	getSharedName() => @defaultValue && @instance ? '__ks_init' : null
+	getSharedName() => if @defaultValue && @instance set '__ks_init' else null
 	isMethod() => false
 	isInstance() => @instance
 	toFragments(fragments, mode) { # {{{
@@ -513,7 +513,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 	} # }}}
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
-	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_sm_\(@name)`
+	getSharedName() => if @override set null else if @instance set `_im_\(@name)` else `_sm_\(@name)`
 	isConstructor() => false
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
@@ -617,7 +617,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 				return false
 			}
-			labelable ? 'args' : 'arguments'
+			if labelable set 'args' else 'arguments'
 			assessment
 			block
 			this
@@ -683,8 +683,8 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			null
 			assessment
 			block
-			exhaustive ? null : Router.FooterType.NO_THROW
-			exhaustive ? null : (writer, _) => {
+			if exhaustive set null else Router.FooterType.NO_THROW
+			if exhaustive set null else (writer, _) => {
 				if !labelable {
 					writer
 						.newControl()
@@ -725,11 +725,11 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 
 				return false
 			}
-			labelable ? 'args' : 'arguments'
+			if labelable set 'args' else 'arguments'
 			assessment
 			block
-			exhaustive ? null : Router.FooterType.NO_THROW
-			exhaustive ? null : (writer, _) => {
+			if exhaustive set null else Router.FooterType.NO_THROW
+			if exhaustive set null else (writer, _) => {
 				if !labelable {
 					writer
 						.newControl()
@@ -827,7 +827,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			}
 
 			if ?method {
-				var type = @override ? method.clone() : @type
+				var type = if @override set method.clone() else @type
 
 				if @override {
 					var parameters = type.parameters()
@@ -1201,8 +1201,8 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 	parameters() => @parameters
 	toCreatorFragments(fragments) { # {{{
 		var classname = @variable.name()
-		var name = @class.isSealed() ? @variable.getSealedName() : @variable.name()
-		var args = @type.max() == 0 ? '' : '...args'
+		var name = if @class.isSealed() set @variable.getSealedName() else @variable.name()
+		var args = if @type.max() == 0 set '' else '...args'
 
 		var line = fragments.newLine()
 		var block = line.code(`\(name).__ks_new_\(@type.index()) = function(\(args))`).newBlock()
@@ -1262,8 +1262,8 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 				'arguments'
 				assessment
 				block
-				exhaustive ? null : Router.FooterType.NO_THROW
-				exhaustive ? null : (writer, _) => {
+				if exhaustive set null else Router.FooterType.NO_THROW
+				if exhaustive set null else (writer, _) => {
 					writer.line(`return new \(classname)(...arguments)`)
 				}
 				this
@@ -1353,7 +1353,7 @@ class CallOverwrittenMethodSubstitude extends Substitude {
 	isSkippable() => false
 	toFragments(fragments, mode) { # {{{
 		if @methods.length == 1 && @methods[0].isSealed() {
-			fragments.code(`\(@class.getSealedName()).__ks_\(@instance ? 'func' : 'sttc')_\(@name)_\(@methods[0].index())`)
+			fragments.code(`\(@class.getSealedName()).__ks_\(if @instance set 'func' else 'sttc')_\(@name)_\(@methods[0].index())`)
 
 			if @arguments.length == 0 {
 				fragments.code(`.apply(this`)

@@ -229,13 +229,13 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			}
 
 			if @number {
-				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				@type = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 			}
 			else if @string {
 				@type = @scope.reference('String')
 			}
 			else {
-				var numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+				var numberType = if nullable set @scope.reference('Number').setNullable(true) else @scope.reference('Number')
 
 				@type = UnionType.new(@scope, [numberType, @scope.reference('String')], false)
 			}

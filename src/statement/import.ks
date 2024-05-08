@@ -28,7 +28,7 @@ func $listNPMModulePaths(mut start) { # {{{
 			set '/'
 		}
 
-	var mut splitRe = process.platform == 'win32' ? /[\/\\]/ : /\/+/
+	var mut splitRe = if process.platform == 'win32' set /[\/\\]/ else /\/+/
 	var mut parts = start.split(splitRe)
 	var mut dirs = []
 
@@ -242,7 +242,7 @@ abstract class Importer extends Statement {
 			}
 
 			if @typeTested {
-				@typeTestName = @standardLibrary ? '__ksStd_types' : @recipient().authority().getTypeTestVariable()
+				@typeTestName = if @standardLibrary set '__ksStd_types' else @recipient().authority().getTypeTestVariable()
 
 				for var { def, type } in types {
 					type
@@ -281,7 +281,7 @@ abstract class Importer extends Statement {
 	addArgument(data, autofill, arguments) { # {{{
 		var argument = {
 			auxiliary: false
-			index: @isKSFile ? null : 0
+			index: if @isKSFile set null else 0
 			isApproved: true
 			isAutofill: autofill
 			isIdentifier: false
@@ -559,7 +559,7 @@ abstract class Importer extends Statement {
 		if $fs.isFile(pkgfile) {
 			if var pkg ?= try JSON.parse($fs.readFile(pkgfile)) {
 				if ?pkg.kaoscript {
-					var metadata = ?pkg.kaoscript.metadata ? $path.join(dir, pkg.kaoscript.metadata) : null
+					var metadata = if ?pkg.kaoscript.metadata set $path.join(dir, pkg.kaoscript.metadata) else null
 
 					if ?pkg.kaoscript.main {
 						if @loadKSFile($path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
@@ -758,7 +758,7 @@ abstract class Importer extends Statement {
 					}
 					NodeKind.NamedSpecifier {
 						var internal = data.internal.name
-						var external = ?data.external ? data.external.name : internal
+						var external = if ?data.external set data.external.name else internal
 
 						@addImport(external, internal, true, null)
 					}

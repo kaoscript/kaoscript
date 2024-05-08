@@ -254,7 +254,7 @@ class BitmaskType extends Type {
 		return type
 	} # }}}
 	createValue(name: String): BitmaskValueType { # {{{
-		var value = `\(@generator.next == 0 ? 0 : Math.pow(2, @generator.next - 1))\(@length > 32 ? 'n' : '')`
+		var value = `\(if @generator.next == 0 set 0 else Math.pow(2, @generator.next - 1))\(if @length > 32 set 'n' else '')`
 		var type = BitmaskValueType.new(name, @nextIndex, value)
 
 		@addValue(type)
@@ -265,7 +265,7 @@ class BitmaskType extends Type {
 		return type
 	} # }}}
 	createValue(name: String, value: Number): BitmaskValueType { # {{{
-		var valueStr = `\(value == 0 ? 0 : Math.pow(2, value - 1))\(@length > 32 ? 'n' : '')`
+		var valueStr = `\(if value == 0 set 0 else Math.pow(2, value - 1))\(if @length > 32 set 'n' else '')`
 		var type = BitmaskValueType.new(name, @nextIndex, valueStr)
 
 		@addValue(type)

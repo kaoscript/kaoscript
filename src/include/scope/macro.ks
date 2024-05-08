@@ -127,7 +127,7 @@ class MacroScope extends Scope {
 			return null
 		}
 	} # }}}
-	getRenamedIndex(name: String) => ?@renamedIndexes[name] ? @renamedIndexes[name] : 0
+	getRenamedIndex(name: String) => if ?@renamedIndexes[name] set @renamedIndexes[name] else 0
 	getVariable(name, line = -1): Variable? { # {{{
 		if @variables[name] is Variable {
 			return @variables[name]

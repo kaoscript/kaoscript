@@ -292,7 +292,7 @@ namespace Router {
 				return td unless td == 0
 			}
 
-			return perLabelA.labels.length < perLabelB.labels.length ? -1 : 1
+			return if perLabelA.labels.length < perLabelB.labels.length set -1 else 1
 		})
 
 		var routes = {}
@@ -759,10 +759,10 @@ namespace Router {
 
 			if nullable {
 				if ?prefill {
-					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(nullable ? '1' : '0'), `).code('[').compile(prefill).code('], ')
+					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(if nullable set '1' else '0'), `).code('[').compile(prefill).code('], ')
 				}
 				else {
-					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(nullable ? '1' : '0'), `)
+					fragments.code(`\($runtime.helper(expressions[0])).concatArray(\(if nullable set '1' else '0'), `)
 				}
 			}
 			else {

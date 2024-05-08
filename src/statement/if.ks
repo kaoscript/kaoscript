@@ -24,8 +24,8 @@ class IfStatement extends Statement {
 			var mut previousScope = @scope!?
 
 			for var data in @data.declarations {
-				var declarationData = data[0].kind == NodeKind.VariableDeclaration ? data[0] : data[1]
-				var conditionData = data[0].kind != NodeKind.VariableDeclaration ? data[0] : ?data[1] && data[1].kind != NodeKind.VariableDeclaration ? data[1] : null
+				var declarationData = if data[0].kind == NodeKind.VariableDeclaration set data[0] else data[1]
+				var conditionData = if data[0].kind != NodeKind.VariableDeclaration set data[0] else if ?data[1] && data[1].kind != NodeKind.VariableDeclaration set data[1] else null
 
 				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 

@@ -5,7 +5,7 @@ enum MacroVariableKind {
 	AutoEvaluated
 }
 
-var $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
+var $target = if parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 set 'ecma-v6' else 'ecma-v5'
 
 func $autoEvaluate(macro, libstd, node, data) { # {{{
 	return $evaluate($compileMacro(KSGeneration.generate(data, {
@@ -124,7 +124,7 @@ func $serialize(macro, data, context) { # {{{
 		context.data += KSGeneration.generate(macro.getMark(data.index))
 	}
 	else if data is Number {
-		context.data += (data == NaN ? 'NaN' : data)
+		context.data += if data == NaN set 'NaN' else data
 	}
 	else if data is RegExp {
 		context.data += data
@@ -201,8 +201,8 @@ func $transformExpression(macro, node, data, writer) { # {{{
 			if name || value {
 				return {
 					kind: NodeKind.ObjectMember
-					name: name ? macro.addPropertyNameMark(data.name) : data.name
-					value: value ? macro.addMark(data.value, NodeKind.ObjectMember) : data.value
+					name: if name set macro.addPropertyNameMark(data.name) else data.name
+					value: if value set  macro.addMark(data.value, NodeKind.ObjectMember) else data.value
 					start: data.start
 					end: data.end
 				}
@@ -269,9 +269,9 @@ class MacroDeclaration extends AbstractNode {
 					}
 				}
 
-				@parameters[data.internal.name] = auto ? MacroVariableKind.AutoEvaluated : MacroVariableKind.AST
+				@parameters[data.internal.name] = if auto set MacroVariableKind.AutoEvaluated else MacroVariableKind.AST
 
-				line.code(`,\(auto ? ' mut' : '') \(rest ? '...' : '')\(data.internal.name)`)
+				line.code(`,\(if auto set ' mut' else '') \(if rest set '...' else '')\(data.internal.name)`)
 
 				if ?data.defaultValue {
 					line.code(' = ').expression(data.defaultValue)
