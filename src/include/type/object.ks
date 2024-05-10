@@ -496,7 +496,21 @@ class ObjectType extends Type {
 							}
 						}
 						else {
-							NotImplementedException.throw()
+							for var field in fields {
+								if variant.isValidField(field, subtypes) {
+									for var fieldType, fieldName of field.type.properties() {
+										if var p ?= @properties[fieldName] {
+											return false unless p.isSubsetOf(fieldType, generics, subtypes, matchingMode)
+										}
+										else {
+											return false unless fieldType.isNullable(generics)
+										}
+									}
+								}
+								else {
+									return false
+								}
+							}
 						}
 					}
 				}
@@ -753,7 +767,21 @@ class ObjectType extends Type {
 										}
 									}
 									else {
-										NotImplementedException.throw()
+										for var field in fields {
+											if type.isValidField(field, subtypes) {
+												for var fieldType, fieldName of field.type.properties() {
+													if var p ?= @properties[fieldName] {
+														return false unless p.isSubsetOf(fieldType, generics, subtypes, mode)
+													}
+													else {
+														return false unless fieldType.isNullable(generics)
+													}
+												}
+											}
+											else {
+												return false
+											}
+										}
 									}
 								}
 							}
