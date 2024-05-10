@@ -51,6 +51,9 @@ class UnaryOperatorImplicit extends Expression {
 					if type is ValueType {
 						@type = type.setNullable(false)
 					}
+					else if type is EnumViewType {
+						@type = ValueType.new(@property, type.master().reference(@scope), @path, @scope)
+					}
 					else {
 						@type = ValueType.new(@property, type.setNullable(false).reference(@scope), @path, @scope)
 					}

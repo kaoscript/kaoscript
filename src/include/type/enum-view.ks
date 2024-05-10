@@ -250,6 +250,7 @@ class EnumViewType extends Type {
 
 		@root = type
 	} # }}}
+	path() => @master.path()
 	root() => @root
 	setTestName(@testName)
 	override shallBeNamed() => true
