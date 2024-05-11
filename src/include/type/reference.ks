@@ -2135,20 +2135,33 @@ class ReferenceType extends Type {
 			type.toAwareTestFunctionFragments(varname, nullable, false, casting, true, mappedGenerics, @subtypes, fragments, node)
 		}
 		else if @type.isBitmask() && ?propname {
-			fragments.code(`() => \($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
+			fragments.code(`() => `)
+
+			if nullable {
+				fragments.code(`\($runtime.type(node)).isNull(\(varname)) || `)
+			}
+
+			fragments.code(`\($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
 		}
 		else if @type.isEnum() && ?propname {
+			fragments.code(`() => `)
+
+			if nullable {
+				fragments.code(`\($runtime.type(node)).isNull(\(varname)) || `)
+			}
+
 			if @type.isView() {
 				var view = @type.discard()
 
-				fragments.code(`() => \($runtime.helper(node)).castEnumView(\(varname), \(propname), `).compile(view).code(`, cast, `)
+				fragments.code(`\($runtime.helper(node)).castEnumView(\(varname), \(propname), `).compile(view).code(`, cast, `)
 
 				view.toAwareTestFunctionFragments(varname, nullable, false, casting, true, null, null, fragments, node)
 
 				fragments.code(')')
 			}
 			else {
-				fragments.code(`() => \($runtime.helper(node)).castEnum(\(varname), \(propname), `).compile(@type).code(`, cast)`)
+
+				fragments.code(`\($runtime.helper(node)).castEnum(\(varname), \(propname), `).compile(@type).code(`, cast)`)
 			}
 		}
 		else {
