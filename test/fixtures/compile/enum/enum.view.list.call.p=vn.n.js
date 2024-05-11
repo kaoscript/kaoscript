@@ -1,8 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isWeekend: value => value === Weekday.SATURDAY || value === Weekday.SUNDAY
-	};
 	const Weekday = Helper.enum(Number, 0, "MONDAY", 0, "TUESDAY", 1, "WEDNESDAY", 2, "THURSDAY", 3, "FRIDAY", 4, "SATURDAY", 5, "SUNDAY", 6);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
@@ -13,7 +10,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isWeekend || Type.isNull(value);
+		const t0 = value =>  || Type.isNull(value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);
@@ -21,5 +18,5 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
-	foobar.__ks_0(Weekday.SUNDAY);
+	foobar.__ks_0(null);
 };

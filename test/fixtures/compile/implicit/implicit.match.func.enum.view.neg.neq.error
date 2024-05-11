@@ -1,0 +1,1 @@
+ReferenceException: The implicit property ".FRIDAY" is mismatched to the type Weekday(WEDNESDAY, THURSDAY, SATURDAY, SUNDAY) (fixtures/compile/implicit/implicit.match.func.enum.view.neg.neq.ks:19)

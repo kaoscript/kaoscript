@@ -145,6 +145,7 @@ class AliasType extends Type {
 		canBeRawCasted
 		extractFunction
 		getStandardLibrary
+		hasInvalidProperty
 		hasProperty
 		hasRest
 		isComplex

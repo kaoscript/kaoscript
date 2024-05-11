@@ -30,9 +30,27 @@ class ValueType extends Type {
 				return view.hasValue(@value)
 			}
 		}
+		else if value is UnionType {
+			for var type in value.types() {
+				if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+					return true
+				}
+			}
+		}
 
 		return @type.isAssignableToVariable(value, anycast, nullcast, downcast, limited)
 	} # }}}
+	// TODO!
+	// assist isAssignableToVariable(value: UnionType, anycast, nullcast, downcast, limited) { # {{{
+	// 	echo('union', value.hashCode())
+	// 	for var type in value.types() {
+	// 		if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+	// 			return true
+	// 		}
+	// 	}
+
+	// 	return false
+	// } # }}}
 	override isMorePreciseThan(value) { # {{{
 		return @type.isSubsetOf(value, MatchingMode.Exact + MatchingMode.Subclass)
 	} # }}}

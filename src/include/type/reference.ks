@@ -814,6 +814,18 @@ class ReferenceType extends Type {
 
 		return hash
 	} # }}}
+	override hasInvalidProperty(name) { # {{{
+		if @isAny() {
+			return false
+		}
+		else if @name == 'Object' {
+			return false
+		}
+
+		@resolve()
+
+		return @type.hasInvalidProperty(name)
+	} # }}}
 	hasParameters() => ?#@parameters
 	hasProperty(index: Number) { # {{{
 		if @name == 'Array' {

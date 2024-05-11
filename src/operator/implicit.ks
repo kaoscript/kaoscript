@@ -12,7 +12,15 @@ class UnaryOperatorImplicit extends Expression {
 		@property = @data.argument.name
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if var type ?= findImplicitType(target, @parent, this, @property) {
+		var result = findImplicitType(target, @parent, this, @property)
+
+		if ?#result.mismatcheds {
+			ReferenceException.throwMismatchedImplicitProperty(@property, result.mismatcheds, this)
+		}
+
+		if result.ok {
+			var { type } = result
+
 			if type.isAny() || type.isUnion() {
 				ReferenceException.throwUnresolvedImplicitProperty(@property, this)
 			}
@@ -129,15 +137,23 @@ class UnaryOperatorImplicit extends Expression {
 	type() => @type
 }
 
-func findImplicitArgument(tree, min: Number, index: Number, property: String, types: Type[]) { # {{{
+func findImplicitArgument(tree, min: Number, index: Number, property: String, types: Type[], mismatcheds: Type[]) { # {{{
+	var type = tree.type.setNullable(false).type()
+
 	if index < min + tree.min {
-		if tree.type.hasProperty(property) {
-			types.pushUniq(tree.type)
+		if type.hasProperty(property) {
+			types.pushUniq(type)
+		}
+		else if type.hasInvalidProperty(property) {
+			mismatcheds.push(type)
 		}
 	}
 	else if tree.rest {
-		if tree.type.hasProperty(property) {
-			types.pushUniq(tree.type)
+		if type.hasProperty(property) {
+			types.pushUniq(type)
+		}
+		else if type.hasInvalidProperty(property) {
+			mismatcheds.push(type)
 		}
 	}
 	else {
@@ -145,15 +161,22 @@ func findImplicitArgument(tree, min: Number, index: Number, property: String, ty
 
 		for var i from tree.min to tree.max {
 			if index < min + i {
-				if addable && tree.type.hasProperty(property) {
-					types.pushUniq(tree.type)
+				if addable {
+					if type.hasProperty(property) {
+						types.pushUniq(type)
 
-					addable = false
+						addable = false
+					}
+					else if type.hasInvalidProperty(property) {
+						mismatcheds.push(type)
+
+						addable = false
+					}
 				}
 			}
 			else if ?tree.columns {
 				for var column of tree.columns {
-					findImplicitArgument(column, min + i, index, property, types)
+					findImplicitArgument(column, min + i, index, property, types, mismatcheds)
 				}
 			}
 		}
@@ -163,26 +186,27 @@ func findImplicitArgument(tree, min: Number, index: Number, property: String, ty
 func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #property: String) { # {{{
 	match parent {
 		is AssignmentOperatorAddition | AssignmentOperatorNullCoalescing | AssignmentOperatorSubtraction | BinaryOperatorSubtraction | PolyadicOperatorSubtraction {
-			return target
+			return { ok: true, type: target }
 		}
 		is AssignmentOperatorEquals | BinaryOperatorNullCoalescing {
-			return target
+			return { ok: true, type: target }
 		}
 		is BinaryOperatorMatch {
-			return parent.subject().type()
+			return { ok: true, type: parent.subject().type() }
 		}
 		is BinaryOperatorAddition | PolyadicOperatorAddition {
 			return findImplicitType(target, parent.parent(), parent, property)
 		}
 		is CallExpression {
 			if !?parent.assessment() {
-				return null
+				return { ok: false }
 			}
 
 			var arguments = parent.arguments()
 			var length = arguments.length
 			var index = arguments.indexOf(node)
 			var types = []
+			var mismatcheds = []
 
 			for var function of parent.assessment().functions {
 				if function.min() <= length <= function.max() {
@@ -193,7 +217,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 
 						for var tree of route.trees when tree.min <= length <= tree.max {
 							for var column of tree.columns {
-								findImplicitArgument(column, 0, index, property, types)
+								findImplicitArgument(column, 0, index, property, types, mismatcheds)
 							}
 						}
 					}
@@ -202,17 +226,18 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 
 			if !?#types {
 				if node.scope().hasImplicitVariable() {
-					return null
+					return { ok: false, mismatcheds }
 				}
 				else {
+					echo(mismatcheds)
 					ReferenceException.throwUnresolvedImplicitProperty(property, node)
 				}
 			}
 
-			return Type.union(node.scope(), ...types)
+			return { ok: true, type: Type.union(node.scope(), ...types) }
 		}
 		is ClassVariableDeclaration {
-			return parent.type().type()
+			return { ok: true, type: parent.type().type() }
 		}
 		is ComparisonExpression {
 			var operands = parent.operands()
@@ -220,7 +245,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			var operand = operands[index - 1] ?? operands[index + 1]
 
 			if var type ?= operand.type() {
-				return type.discardValue().setNullable(false)
+				return { ok: true, type: type.discardValue().setNullable(false) }
 			}
 		}
 		is EnumValueDeclaration {
@@ -228,6 +253,7 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 			var length = arguments.length
 			var index = arguments.indexOf(node)
 			var types = []
+			var mismatcheds = []
 
 			for {
 				var route of parent.assessment().routes
@@ -235,22 +261,22 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 				var column of tree.columns
 			}
 			then {
-				findImplicitArgument(column, 0, index, property, types)
+				findImplicitArgument(column, 0, index, property, types, mismatcheds)
 			}
 
 			if !?#types {
 				if node.scope().hasImplicitVariable() {
-					return null
+					return { ok: false, mismatcheds }
 				}
 				else {
 					ReferenceException.throwUnresolvedImplicitProperty(property, node)
 				}
 			}
 
-			return Type.union(node.scope(), ...types)
+			return { ok: true, type: Type.union(node.scope(), ...types) }
 		}
 		is MatchConditionValue {
-			return parent.parent().getValueType()
+			return { ok: true, type: parent.parent().getValueType() }
 		}
 		is NamedArgument {
 			var name = parent.name()
@@ -264,52 +290,52 @@ func findImplicitType(#target: Type, #parent: AbstractNode, #node: Expression, #
 				}
 			}
 
-			return Type.union(node.scope(), ...types)
+			return { ok: true, type: Type.union(node.scope(), ...types) }
 		}
 		is ClassConstructorDeclaration | ClassMethodDeclaration | FunctionDeclarator | StructFunction | TupleFunction | VariableDeclaration {
-			return target
+			return { ok: true, type: target }
 		}
 		is ObjectComputedMember | ObjectLiteralMember {
-			return target
+			return { ok: true, type: target }
 		}
 		is ReturnStatement {
-			return target
+			return { ok: true, type: target }
 		}
 		is SetStatement {
 			if target == AnyType.NullableUnexplicit {
 				return findTypeFromParent(parent.parent(), parent, property)
 			}
 			else {
-				return target
+				return { ok: true, type: target }
 			}
 		}
-		else {
-			return null
-		}
 	}
+
+	return { ok: false }
 } # }}}
 
-func findTypeFromParent(#parent: Expression | Block, #node: Expression | SetStatement, #property: String): Type? { # {{{
+func findTypeFromParent(#parent: Expression | Block, #node: Expression | SetStatement, #property: String) { # {{{
 	match parent {
 		is Block {
 			return findTypeFromParent(parent.parent(), parent.parent(), property)
 		}
 		is CallExpression {
 			if !?parent.assessment() {
-				return null
+				return { ok: false }
 			}
 
 			var arguments = parent.arguments()
 			var length = arguments.length
 			var index = arguments.indexOf(node)
 			var types = []
+			var mismatcheds = []
 
 			for var function of parent.assessment().functions {
 				if function.min() <= length <= function.max() {
 					for var route of function.assessment('', node).routes {
 						for var tree of route.trees when tree.min <= length <= tree.max {
 							for var column of tree.columns {
-								findImplicitArgument(column, 0, index, property, types)
+								findImplicitArgument(column, 0, index, property, types, mismatcheds)
 							}
 						}
 					}
@@ -320,7 +346,7 @@ func findTypeFromParent(#parent: Expression | Block, #node: Expression | SetStat
 				throw NotImplementedException.new()
 			}
 
-			return Type.union(node.scope(), ...types)
+			return { ok: true, type: Type.union(node.scope(), ...types) }
 		}
 		is IfExpression {
 			return findTypeFromParent(parent.parent(), parent, property)

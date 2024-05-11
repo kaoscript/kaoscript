@@ -230,6 +230,14 @@ export class ReferenceException extends Exception {
 		throwLoopingAlias(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`Alias "@\(name)" is looping on itself`, node)
 		} # }}}
+		throwMismatchedImplicitProperty(name, types, node): Never ~ ReferenceException { # {{{
+			if #types == 1 {
+				throw ReferenceException.new(`The implicit property ".\(name)" is mismatched to the type \(types[0].toTypeQuote())`, node)
+			}
+			else {
+				throw ReferenceException.new(`The implicit property ".\(name)" is mismatched to types \([`\(type.toTypeQuote())` for var type in types].join(', '))`, node)
+			}
+		} # }}}
 		throwMissingThisContext(name, node): Never ~ ReferenceException { # {{{
 			throw ReferenceException.new(`The function "\(name)" is missing the "this" context`, node)
 		} # }}}

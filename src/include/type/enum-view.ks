@@ -2,6 +2,7 @@ class EnumViewType extends Type {
 	private late {
 		@aliases: Object<EnumAliasType>		= {}
 		@elements: String[]					= []
+		@excludeds: String[]?
 		@exclusion: Boolean					= false
 		@master: Type
 		@root: EnumType | EnumViewType
@@ -26,10 +27,13 @@ class EnumViewType extends Type {
 	addElement(name: String) { # {{{
 		@elements.pushUniq(name)
 	} # }}}
+	override canBeNullable() => false
 	override canBeRawCasted() => true
 	override clone() { # {{{
 		NotImplementedException.throw()
 	} # }}}
+	compareToRef(value: AnyType, equivalences: String[][]? = null) => 1
+	compareToRef(value: NullType, equivalences: String[][]? = null) => -1
 	explodeVarnames(...values: { name: String }): String[] { # {{{
 		var result = []
 
@@ -65,6 +69,7 @@ class EnumViewType extends Type {
 				elements.remove(@root.getTopProperty(element))
 			}
 
+			@excludeds = @elements
 			@elements = elements
 		}
 		else {
@@ -211,6 +216,7 @@ class EnumViewType extends Type {
 
 		return hash
 	} # }}}
+	override hasInvalidProperty(name) => @exclusion && @excludeds.contains(name)
 	override hasProperty(name) => @elements.contains(name)
 	hasValue(name: String) => @elements.contains(name)
 	assist isAssignableToVariable(value: NamedType, anycast, nullcast, downcast, limited) { # {{{

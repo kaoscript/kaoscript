@@ -249,8 +249,10 @@ class UnionType extends Type {
 		that._any = @any
 		that._explicit = @explicit
 		that._explicitNullity = @explicitNullity
+		that._never = @never
 		that._nullable = @nullable
 		that._types = [...@types]
+		that._void = @void
 
 		return that
 	} # }}}
@@ -1032,10 +1034,10 @@ class UnionType extends Type {
 
 				if @nullable {
 					if @types[0] == Type.Null {
-						return @types[1].setNullable(true)
+						return @types[1].setNullable(true) if @types[1].canBeNullable()
 					}
 					if @types[1] == Type.Null {
-						return @types[0].setNullable(true)
+						return @types[0].setNullable(true) if @types[0].canBeNullable()
 					}
 				}
 			}

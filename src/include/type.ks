@@ -500,7 +500,14 @@ abstract class Type {
 										}
 									}
 
-									return type.flagComplete()
+									type.flagComplete()
+
+									if nullable {
+										return UnionType.new(scope, [type, Type.Null])
+									}
+									else {
+										return type
+									}
 								}
 								else if root.isVariant() {
 									var type = ReferenceType.new(scope, name, nullable)
@@ -1000,6 +1007,7 @@ abstract class Type {
 	canBeDeferred(): Boolean => false
 	canBeEnum(any: Boolean = true): Boolean => (any && @isAny()) || @isEnum()
 	canBeFunction(any: Boolean = true): Boolean => (any && @isAny()) || @isFunction()
+	canBeNullable(): Boolean => true
 	canBeNumber(any: Boolean = true): Boolean => (any && @isAny()) || @isNumber()
 	canBeObject(any: Boolean = true): Boolean => (any && @isAny()) || @isObject()
 	canBeRawCasted(): Boolean => false
@@ -1117,6 +1125,7 @@ abstract class Type {
 	hashCode(): String => ''
 	hashCode(fattenNull: Boolean) => @hashCode()
 	hasAuxiliary() => @auxiliary
+	hasInvalidProperty(name: String): Boolean => false
 	hasKeyType() => false
 	hasProperty(name: String): Boolean => false
 	hasRest() => false

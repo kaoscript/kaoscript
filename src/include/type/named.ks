@@ -669,6 +669,7 @@ class NamedType extends Type {
 		generics
 		getStandardLibrary
 		hasAuxiliary
+		hasInvalidProperty
 		hasProperty
 		hasRest
 		hasTest
