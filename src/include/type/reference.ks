@@ -2138,7 +2138,7 @@ class ReferenceType extends Type {
 			fragments.code(`() => `)
 
 			if nullable {
-				fragments.code(`\($runtime.type(node)).isNull(\(varname)) || `)
+				fragments.code(`\($runtime.type(node)).isNull(\(varname)[\(propname)]) || `)
 			}
 
 			fragments.code(`\($runtime.helper(node)).castBitmask(\(varname), \(propname), `).compile(@discardAlias()).code(`, cast)`)
@@ -2147,7 +2147,7 @@ class ReferenceType extends Type {
 			fragments.code(`() => `)
 
 			if nullable {
-				fragments.code(`\($runtime.type(node)).isNull(\(varname)) || `)
+				fragments.code(`\($runtime.type(node)).isNull(\(varname)[\(propname)]) || `)
 			}
 
 			if @type.isView() {
