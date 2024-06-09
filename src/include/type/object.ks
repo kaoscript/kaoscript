@@ -322,6 +322,14 @@ class ObjectType extends Type {
 
 		return type
 	} # }}}
+	getInstanceVariable(name: String) { # {{{
+		if var property ?= @getProperty(name) {
+			return VirtualVariableType.new(@scope, property)
+		}
+		else {
+			return null
+		}
+	} # }}}
 	getKeyType(): valueof @keyType
 	getProperty(name: String): Type? { # {{{
 		if var type ?= @properties[name] {

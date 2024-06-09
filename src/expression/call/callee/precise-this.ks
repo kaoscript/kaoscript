@@ -126,7 +126,7 @@ class PreciseThisCallee extends MethodCallee {
 	} # }}}
 	toFragments(fragments, mode, node) { # {{{
 		if @sealed {
-			var name = @objectType.getSealedPath()
+			var name = @objectType.getAuxiliaryPath()
 
 			if @flatten {
 				match node._data.scope.kind {

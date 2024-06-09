@@ -884,6 +884,17 @@ class ModuleBlock extends AbstractNode {
 		@scope.addMacro(name, macro)
 	} # }}}
 	recipient() => @module
+	removeTypeTest(name: String): Type? { # {{{
+		for var test, index in @typeTests {
+			if test.name == name {
+				@typeTests.splice(index, 1)
+
+				return test.type
+			}
+		}
+
+		return null
+	} # }}}
 	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
 	} # }}}

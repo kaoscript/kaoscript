@@ -134,7 +134,7 @@ class ConstructorCallee extends Callee {
 		match @result {
 			is LenientCallMatchResult {
 				if @sealed {
-					fragments.code(`\(@type.type().getSealedName()).new(`)
+					fragments.code(`\(@type.type().getAuxiliaryName()).new(`)
 				}
 				else {
 					fragments.code('new ').compile(@factory).code('(')
@@ -174,7 +174,7 @@ class ConstructorCallee extends Callee {
 
 					if @sealed {
 						if function.isSealed() {
-							fragments.code(`\(@type.type().getSealedName()).__ks_new_\(function.index())`).code('(')
+							fragments.code(`\(@type.type().getAuxiliaryName()).__ks_new_\(function.index())`).code('(')
 						}
 						else {
 							fragments.code('new ').compile(@factory).code('(')
@@ -192,7 +192,7 @@ class ConstructorCallee extends Callee {
 			}
 			else {
 				if @sealed {
-					fragments.code(`\(@type.type().getSealedName()).new(`)
+					fragments.code(`\(@type.type().getAuxiliaryName()).new(`)
 				}
 				else {
 					fragments.code('new ').compile(@factory).code('(')

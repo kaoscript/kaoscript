@@ -65,12 +65,12 @@ class SealedMethodCallee extends Callee {
 				}
 				ScopeKind.This {
 					if @instance {
-						fragments.code(`\(@objectType.getSealedPath())._im_\(@property).apply(null, `)
+						fragments.code(`\(@objectType.getAuxiliaryPath())._im_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments(), @object)
 					}
 					else {
-						fragments.code(`\(@objectType.getSealedPath())._sm_\(@property).apply(null, `)
+						fragments.code(`\(@objectType.getAuxiliaryPath())._sm_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments())
 					}
@@ -85,7 +85,7 @@ class SealedMethodCallee extends Callee {
 				ScopeKind.This {
 					if @instance {
 						fragments
-							.code(`\(@objectType.getSealedPath())._im_\(@property)(`)
+							.code(`\(@objectType.getAuxiliaryPath())._im_\(@property)(`)
 							.compile(@object)
 
 						for var argument in node.arguments() {
@@ -95,7 +95,7 @@ class SealedMethodCallee extends Callee {
 						}
 					}
 					else {
-						fragments.code(`\(@objectType.getSealedPath())._sm_\(@property)(`)
+						fragments.code(`\(@objectType.getAuxiliaryPath())._sm_\(@property)(`)
 
 						for var argument, index in node.arguments() {
 							if index != 0 {

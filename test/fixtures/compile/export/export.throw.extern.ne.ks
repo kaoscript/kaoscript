@@ -1,5 +1,5 @@
-extern class SyntaxError
+extern class EvalError
 
-export func foo() ~ SyntaxError {
+export func foo() ~ EvalError {
 
 }

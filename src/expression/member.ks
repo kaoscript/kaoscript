@@ -1234,7 +1234,7 @@ class MemberExpression extends Expression {
 				if @sealed {
 					var name = if property[0] == '_' set property.substr(1) else property
 
-					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
+					fragments.code(`\(type.type().getAuxiliaryName()).__ks_get_\(name)(`).compile(@object).code(')')
 				}
 				else {
 					NotImplementedException.throw(this)
@@ -1252,7 +1252,7 @@ class MemberExpression extends Expression {
 					}
 
 				if @type.isUsingAuxiliary() {
-					fragments.code(`\($runtime.helper(this)).bindAuxiliaryMethod(\(reference.type().getSealedName()), `)
+					fragments.code(`\($runtime.helper(this)).bindAuxiliaryMethod(\(reference.type().getAuxiliaryName()), `)
 
 					if @computed {
 						fragments.compile(property)
@@ -1270,7 +1270,7 @@ class MemberExpression extends Expression {
 						fragments.compile(@object)
 					}
 					else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
-						fragments.code(type.getSealedName())
+						fragments.code(type.getAuxiliaryName())
 					}
 					else {
 						fragments.compile(@object)
@@ -1307,7 +1307,7 @@ class MemberExpression extends Expression {
 					fragments.code('(').compile(@object).code(')')
 				}
 				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
-					fragments.code(type.getSealedName())
+					fragments.code(type.getAuxiliaryName())
 				}
 				else {
 					fragments.compile(@object)
@@ -1384,7 +1384,7 @@ class MemberExpression extends Expression {
 		if @sealed {
 			var name = if @property[0] == '_' set @property.substr(1) else @property
 
-			fragments.code(`\(@object.type().type().getSealedName()).__ks_set_\(name)(`).compile(@object).code($comma).compile(value).code(')')
+			fragments.code(`\(@object.type().type().getAuxiliaryName()).__ks_set_\(name)(`).compile(@object).code($comma).compile(value).code(')')
 		}
 		else {
 			NotImplementedException.throw(this)

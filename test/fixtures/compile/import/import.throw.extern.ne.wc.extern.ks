@@ -1,11 +1,11 @@
 extern console
-extern class SyntaxError
+extern class EvalError
 
 import '../export/export.throw.extern.ne.ks'
 
 try {
 	foo()
 }
-on SyntaxError catch error {
+on EvalError catch error {
 	console.error(error)
 }

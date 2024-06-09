@@ -614,6 +614,8 @@ class ReferenceType extends Type {
 
 		return type
 	} # }}}
+	getAuxiliaryPath() => @type().getAuxiliaryPath()
+	getAuxiliaryPath(standardLibrary) => @type().getAuxiliaryPath(standardLibrary)
 	override getGenericMapper() { # {{{
 		@resolve()
 
@@ -745,7 +747,7 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			var property = type.getProperty(name)
+			var property = if type.isAlias() set type.getInstantiableProperty(name) else type.getProperty(name)
 
 			if property is DeferredType {
 				return AnyType.NullableUnexplicit if !?#@parameters
@@ -758,8 +760,6 @@ class ReferenceType extends Type {
 			return property
 		}
 	} # }}}
-	getSealedPath() => @type().getSealedPath()
-	getSealedPath(standardLibrary) => @type().getSealedPath(standardLibrary)
 	getSubtypes(): AltType[] => @subtypes
 	getSubtypesCount(): Number => @subtypes.length
 	hashCode(fattenNull: Boolean = false): String { # {{{
@@ -2069,7 +2069,7 @@ class ReferenceType extends Type {
 
 			@discard().toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, @subtypes, fragments, node)
 		}
-		else if ?#generics {
+		else if ?#generics || @type.isSpecter() {
 			@type.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 		}
 		else {

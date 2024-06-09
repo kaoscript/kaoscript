@@ -64,7 +64,7 @@ class DiscloseDeclaration extends Statement {
 				if !type.hasAuxiliary() {
 					type
 						..flagAuxiliary()
-						..useSealedName(@module())
+						..useAuxiliaryName(@module())
 
 					@auxiliary = true
 				}
@@ -78,7 +78,7 @@ class DiscloseDeclaration extends Statement {
 
 		if @auxiliary {
 			var variable = @scope.getVariable(@name)
-			var sealedName = variable.getDeclaredType().getSealedName()
+			var sealedName = variable.getDeclaredType().getAuxiliaryName()
 
 			fragments.line(`\($runtime.immutableScope(this))\(sealedName) = {}`)
 		}
@@ -89,7 +89,7 @@ class DiscloseDeclaration extends Statement {
 	} # }}}
 	toSealedInstanceFragments(name: String, methods: ClassMethodType[], fragments) { # {{{
 		var variable = @scope.getVariable(@name)
-		var sealedName = variable.getDeclaredType().getSealedName()
+		var sealedName = variable.getDeclaredType().getAuxiliaryName()
 		var labelable = @type.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@type.listInstanceMethods(name), name, this)
 

@@ -1,9 +1,10 @@
 class InvertedPreciseMethodCallee extends MethodCallee {
 	private {
+		@auxiliary: Boolean
 		@name: NamedType
 		@property: String
 	}
-	constructor(@data, @name, @property, assessment, match: CallMatch, node) { # {{{
+	constructor(@data, @name, @property, @auxiliary, assessment, match: CallMatch, node) { # {{{
 		super(data, MemberExpression.new(data.callee, node, node.scope(), node._object), false, assessment, match, node)
 	} # }}}
 	override buildHashCode() => null
@@ -13,7 +14,9 @@ class InvertedPreciseMethodCallee extends MethodCallee {
 				throw NotImplementedException.new(node)
 			}
 			ScopeKind.This {
-				fragments.code(`\(@name.name())`)
+				var name = if @auxiliary set @name.getAuxiliaryName() else @name.name()
+
+				fragments.code(`\(name)`)
 
 				if @function.isInstance() {
 					fragments.code(`.__ks_func_\(@property)_\(@function.index())(`)

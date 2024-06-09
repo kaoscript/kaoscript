@@ -5,6 +5,6 @@ import '../export/export.throw.extern.we.default.ks'
 try {
 	foo()
 }
-on SyntaxError catch error {
+on EvalError catch error {
 	console.error(error)
 }

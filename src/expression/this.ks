@@ -47,7 +47,7 @@ class ThisExpression extends Expression {
 				break
 			}
 			else if parent is ImplementDividedClassMethodDeclaration {
-				if !parent.isInstance() {
+				unless parent.isInstance() {
 					SyntaxException.throwUnexpectedAlias(@name, this)
 				}
 
@@ -57,6 +57,15 @@ class ThisExpression extends Expression {
 			}
 			else if parent is ImplementDividedClassConstructorDeclaration {
 				@class = parent.class()
+				@declaration = parent.parent()
+				break
+			}
+			else if parent is ImplementVirtualMethodDeclaration {
+				unless parent.isInstance() {
+					SyntaxException.throwUnexpectedAlias(@name, this)
+				}
+
+				@class = parent.getVirtualName()
 				@declaration = parent.parent()
 				break
 			}
@@ -88,7 +97,7 @@ class ThisExpression extends Expression {
 					@variableName = `_\(@name)`
 
 					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType.Neither {
-						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+						@fragment = `\(@class.getAuxiliaryName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
 						@fragment = `\(name).\(@variableName)`
@@ -133,7 +142,7 @@ class ThisExpression extends Expression {
 
 								if functions.some((fn, ...) => fn.isSealed()) {
 									@sealed = true
-									@fragment = `\(@class.getSealedName()).__ks_get_\(@name)`
+									@fragment = `\(@class.getAuxiliaryName()).__ks_get_\(@name)`
 								}
 								else {
 									@fragment = `\(name).\(@name)`
@@ -169,7 +178,7 @@ class ThisExpression extends Expression {
 					@variableName = `_\(@name)`
 
 					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType.Neither {
-						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+						@fragment = `\(@class.getAuxiliaryName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
 						@fragment = `\(name).\(@variableName)`

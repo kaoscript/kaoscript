@@ -13,6 +13,6 @@ module.exports = function() {
 	};
 	return {
 		foo,
-		__ks_SyntaxError: {}
+		__ks_EvalError: {}
 	};
 };

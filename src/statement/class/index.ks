@@ -1364,7 +1364,7 @@ class ClassDeclaration extends Statement {
 		if !@sealed {
 			for var {class, index}, name of @sharedMethods {
 				var line = fragments.newLine()
-				var block = line.code(`\(class.getSealedName())._im_\(name) = function(that, ...args)`).newBlock()
+				var block = line.code(`\(class.getAuxiliaryName())._im_\(name) = function(that, ...args)`).newBlock()
 
 				block
 					.newControl()
@@ -1372,7 +1372,7 @@ class ClassDeclaration extends Statement {
 					.line(`return that.__ks_func_\(name)_rt.call(null, that, args)`)
 					.done()
 
-				block.line(`return \(class.getSealedName()).__ks_func_\(name)_rt(that, args)`)
+				block.line(`return \(class.getAuxiliaryName()).__ks_func_\(name)_rt(that, args)`)
 
 				block.done()
 				line.done()

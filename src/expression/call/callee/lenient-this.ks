@@ -47,7 +47,7 @@ class LenientThisCallee extends LenientCallee {
 
 		if @flatten {
 			if @sealed {
-				var path = @expression.getClass().getSealedPath()
+				var path = @expression.getClass().getAuxiliaryPath()
 
 				if @instance {
 					fragments.code(`\(path)._im_\(@property)`)
@@ -75,7 +75,7 @@ class LenientThisCallee extends LenientCallee {
 		}
 		else {
 			if @sealed {
-				var path = @expression.getClass().getSealedPath()
+				var path = @expression.getClass().getAuxiliaryPath()
 
 				if @instance {
 					fragments.code(`\(path)._im_\(@property)`)

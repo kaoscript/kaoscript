@@ -7,7 +7,7 @@ class EnumType extends Type {
 	private {
 		@aliases: Object<EnumAliasType>					= {}
 		@alteration: Boolean							= false
-		@alterationReference: ClassType?
+		@alterationReference: EnumType?
 		@exhaustiveness									= {
 			instanceMethods: {}
 			staticMethods: {}
@@ -322,7 +322,7 @@ class EnumType extends Type {
 	dedupInstanceMethod(name: String, type: EnumMethodType): Number? { # {{{
 		var index = type.index()
 
-		if @instanceMethods[name] is Array {
+		if ?@instanceMethods[name] {
 			for var method in @instanceMethods[name] {
 				if method.index() == index {
 					return index
@@ -335,7 +335,7 @@ class EnumType extends Type {
 	dedupStaticMethod(name: String, type: EnumMethodType): Number? { # {{{
 		var index = type.index()
 
-		if @staticMethods[name] is Array {
+		if ?@staticMethods[name] {
 			for var method in @staticMethods[name] {
 				if method.index() == index {
 					return index
@@ -728,7 +728,7 @@ class EnumType extends Type {
 					if matches.length == 1 {
 						var match = matches[0]
 
-						node.addCallee(InvertedPreciseMethodCallee.new(node.data(), reference.discardReference():&(NamedType), property, assessment, match, node))
+						node.addCallee(InvertedPreciseMethodCallee.new(node.data(), reference.discardReference():&(NamedType), property, false, assessment, match, node))
 					}
 					else {
 						var functions = [match.function for var match in matches]

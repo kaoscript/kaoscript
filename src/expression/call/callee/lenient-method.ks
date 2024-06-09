@@ -43,10 +43,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		if @flatten {
 			if @auxiliary {
 				if @instance {
-					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._im_\(@property)`)
+					fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary))._im_\(@property)`)
 				}
 				else {
-					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._sm_\(@property)`)
+					fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary))._sm_\(@property)`)
 				}
 
 				fragments.code('.apply(null')
@@ -69,10 +69,10 @@ class LenientMethodCallee extends LenientFunctionCallee {
 		else {
 			if @auxiliary {
 				if @instance {
-					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._im_\(@property)`)
+					fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary))._im_\(@property)`)
 				}
 				else {
-					fragments.code(`\(@objectType.getSealedPath(@standardLibrary))._sm_\(@property)`)
+					fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary))._sm_\(@property)`)
 				}
 			}
 			else {

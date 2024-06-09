@@ -1,15 +1,15 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ks_SyntaxError = {};
-	__ks_SyntaxError.__ks_func_foo_0 = function() {
+	const __ks_EvalError = {};
+	__ks_EvalError.__ks_func_foo_0 = function() {
 		return "bar";
 	};
-	__ks_SyntaxError._im_foo = function(that, ...args) {
-		return __ks_SyntaxError.__ks_func_foo_rt(that, args);
+	__ks_EvalError._im_foo = function(that, ...args) {
+		return __ks_EvalError.__ks_func_foo_rt(that, args);
 	};
-	__ks_SyntaxError.__ks_func_foo_rt = function(that, args) {
+	__ks_EvalError.__ks_func_foo_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_SyntaxError.__ks_func_foo_0.call(that);
+			return __ks_EvalError.__ks_func_foo_0.call(that);
 		}
 		if(that.foo) {
 			return that.foo(...args);
@@ -29,6 +29,6 @@ module.exports = function() {
 	};
 	return {
 		foo,
-		__ks_SyntaxError
+		__ks_EvalError
 	};
 };

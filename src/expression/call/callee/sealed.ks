@@ -50,12 +50,12 @@ class SealedCallee extends Callee {
 				}
 				ScopeKind.This {
 					if @instance {
-						fragments.code(`\(@variable.getSealedPath())._im_\(@property).apply(null, `)
+						fragments.code(`\(@variable.getAuxiliaryPath())._im_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments(), @object)
 					}
 					else {
-						fragments.code(`\(@variable.getSealedPath())._sm_\(@property).apply(null, `)
+						fragments.code(`\(@variable.getAuxiliaryPath())._sm_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node.arguments())
 					}
@@ -70,7 +70,7 @@ class SealedCallee extends Callee {
 				ScopeKind.This {
 					if @instance {
 						fragments
-							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
+							.code(`\(@variable.getAuxiliaryPath())._im_\(@property)(`)
 							.compile(@object)
 
 						for var argument in node.arguments() {
@@ -80,7 +80,7 @@ class SealedCallee extends Callee {
 						}
 					}
 					else {
-						fragments.code(`\(@variable.getSealedPath())._sm_\(@property)(`)
+						fragments.code(`\(@variable.getAuxiliaryPath())._sm_\(@property)(`)
 
 						for var argument, index in node.arguments() {
 							if index != 0 {

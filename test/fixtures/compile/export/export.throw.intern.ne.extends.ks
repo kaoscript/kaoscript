@@ -1,6 +1,6 @@
-extern sealed class SyntaxError
+extern sealed class EvalError
 
-class MyError extends SyntaxError {
+class MyError extends EvalError {
 
 }
 

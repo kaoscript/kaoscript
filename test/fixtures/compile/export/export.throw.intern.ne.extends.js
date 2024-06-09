@@ -1,6 +1,6 @@
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	class MyError extends SyntaxError {
+	class MyError extends EvalError {
 		constructor() {
 			super(...arguments);
 			this.constructor.prototype.__ks_init();

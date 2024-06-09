@@ -1,11 +1,11 @@
-extern system class SyntaxError
+extern system class EvalError
 
-impl SyntaxError {
+impl EvalError {
 	foo(): string => 'bar'
 }
 
-func foo() ~ SyntaxError {
+func foo() ~ EvalError {
 
 }
 
-export foo, SyntaxError
+export foo, EvalError

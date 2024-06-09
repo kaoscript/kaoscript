@@ -124,13 +124,13 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 				// get()
 				line = fragments.newLine()
 
-				line.code(`\(@variable.getSealedName()).__ks_get_\(@name) = function(that)`)
+				line.code(`\(@variable.getAuxiliaryName()).__ks_get_\(@name) = function(that)`)
 
 				block = line.newBlock()
 
 				ctrl = block.newControl()
 				ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
-				ctrl.line(`\(@variable.getSealedName()).__ks_init(that)`)
+				ctrl.line(`\(@variable.getAuxiliaryName()).__ks_init(that)`)
 				ctrl.done()
 
 				block.line(`return that.\(@internalName)`)
@@ -141,13 +141,13 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 				// set()
 				line = fragments.newLine()
 
-				line.code(`\(@variable.getSealedName()).__ks_set_\(@name) = function(that, value)`)
+				line.code(`\(@variable.getAuxiliaryName()).__ks_set_\(@name) = function(that, value)`)
 
 				block = line.newBlock()
 
 				ctrl = block.newControl()
 				ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
-				ctrl.line(`\(@variable.getSealedName()).__ks_init(that)`)
+				ctrl.line(`\(@variable.getAuxiliaryName()).__ks_init(that)`)
 				ctrl.done()
 
 				block.line(`that.\(@internalName) = value`)
@@ -156,7 +156,7 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 				line.done()
 			}
 			else {
-				fragments.newLine().code(`\(@variable.getSealedName()).\(@internalName) = `).compile(@value).done()
+				fragments.newLine().code(`\(@variable.getAuxiliaryName()).\(@internalName) = `).compile(@value).done()
 			}
 		}
 		else {
@@ -179,17 +179,17 @@ class ImplementDividedClassFieldDeclaration extends Statement {
 		if properties.some((property, _, _) => property.isInstance()) {
 			if @class.isSealed() {
 				if @init > 0 {
-					fragments.line(`\(@variable.getSealedName()).__ks_init_\(@init) = \(@variable.getSealedName()).__ks_init`)
+					fragments.line(`\(@variable.getAuxiliaryName()).__ks_init_\(@init) = \(@variable.getAuxiliaryName()).__ks_init`)
 				}
 
 				var line = fragments.newLine()
 
-				line.code(`\(@variable.getSealedName()).__ks_init = function(that)`)
+				line.code(`\(@variable.getAuxiliaryName()).__ks_init = function(that)`)
 
 				var block = line.newBlock()
 
 				if @init > 0 {
-					block.line(`\(@variable.getSealedName()).__ks_init_\(@init)(that)`)
+					block.line(`\(@variable.getAuxiliaryName()).__ks_init_\(@init)(that)`)
 				}
 
 				for var property in properties {
@@ -528,7 +528,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 			var ctrl = line.newControl(null, false, false)
 
 			if @class.isSealed() {
-				ctrl.code(`\(@variable.getSealedName()).\(name) = function(\(parameters.join(', ')))`).step()
+				ctrl.code(`\(@variable.getAuxiliaryName()).\(name) = function(\(parameters.join(', ')))`).step()
 			}
 			else {
 				ctrl.code(`\(@variable.name()).prototype.\(name) = function(\(parameters.join(', ')))`).step()
@@ -628,7 +628,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 	} # }}}
 	toSealedInstanceFragments(fragments) { # {{{
 		var name = @variable.name()
-		var sealedName = @variable.getSealedName()
+		var sealedName = @variable.getAuxiliaryName()
 		var labelable = @class.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@class.listInstanceMethods(@name), @name, this)
 		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
@@ -703,7 +703,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		line.done()
 	} # }}}
 	toSealedStaticFragments(fragments) { # {{{
-		var name = @variable.getSealedName()
+		var name = @variable.getAuxiliaryName()
 		var labelable = @class.isLabelableStaticMethod(@name)
 		var exhaustive = @class.isExhaustiveInstanceMethod(@name, this)
 		var assessment = Router.assess(@class.listStaticMethods(@name), @name, this)
@@ -771,7 +771,7 @@ class ImplementDividedClassMethodDeclaration extends Statement {
 		var line = fragments.newLine()
 
 		if @class.isSealed() {
-			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
+			line.code(`\(@variable.getAuxiliaryName()).\(@internalName) = function(`)
 		}
 		else {
 			if @instance {
@@ -1201,7 +1201,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 	parameters() => @parameters
 	toCreatorFragments(fragments) { # {{{
 		var classname = @variable.name()
-		var name = if @class.isSealed() set @variable.getSealedName() else @variable.name()
+		var name = if @class.isSealed() set @variable.getAuxiliaryName() else @variable.name()
 		var args = if @type.max() == 0 set '' else '...args'
 
 		var line = fragments.newLine()
@@ -1234,7 +1234,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 		var assessment = Router.assess(@class.listAccessibleConstructors(), 'constructor', this)
 
 		if @class.isSealed() {
-			var sealedName = @variable.getSealedName()
+			var sealedName = @variable.getAuxiliaryName()
 			var exhaustive = @class.isExhaustiveConstructor(this)
 
 			var block = line.code(`\(sealedName).new = function()`).newBlock()
@@ -1297,7 +1297,7 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 		var line = fragments.newLine()
 
 		if @class.isSealed() {
-			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
+			line.code(`\(@variable.getAuxiliaryName()).\(@internalName) = function(`)
 		}
 		else {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
@@ -1353,7 +1353,7 @@ class CallOverwrittenMethodSubstitude extends Substitude {
 	isSkippable() => false
 	toFragments(fragments, mode) { # {{{
 		if @methods.length == 1 && @methods[0].isSealed() {
-			fragments.code(`\(@class.getSealedName()).__ks_\(if @instance set 'func' else 'sttc')_\(@name)_\(@methods[0].index())`)
+			fragments.code(`\(@class.getAuxiliaryName()).__ks_\(if @instance set 'func' else 'sttc')_\(@name)_\(@methods[0].index())`)
 
 			if @arguments.length == 0 {
 				fragments.code(`.apply(this`)
@@ -1396,7 +1396,7 @@ class CallSealedConstructorSubstitude extends Substitude {
 	isNullable() => false
 	isSkippable() => false
 	toFragments(fragments, mode) { # {{{
-		fragments.code(`var that = \(@class.getSealedName()).new(`)
+		fragments.code(`var that = \(@class.getAuxiliaryName()).new(`)
 
 		for var argument, index in @arguments {
 			if index != 0 {
@@ -1444,6 +1444,6 @@ class CallOverwrittenConstructorSubstitude extends Substitude {
 func $callSealedInitializer(fragments, type, node) { # {{{
 	var ctrl = fragments.newControl()
 	ctrl.code(`if(!that[\($runtime.initFlag(node))])`).step()
-	ctrl.line(`\(type.getSealedName()).__ks_init(that)`)
+	ctrl.line(`\(type.getAuxiliaryName()).__ks_init(that)`)
 	ctrl.done()
 } # }}}

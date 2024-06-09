@@ -367,7 +367,7 @@ class ExternDeclarator extends DependencyStatement {
 				if !type.hasAuxiliary() {
 					type
 						..flagAuxiliary()
-						..useSealedName(@module())
+						..useAuxiliaryName(@module())
 
 					@auxiliary = true
 				}
@@ -388,7 +388,7 @@ class ExternDeclarator extends DependencyStatement {
 
 		if @auxiliary {
 			var variable = @scope.getVariable(@name)
-			var sealedName = variable.getDeclaredType().getSealedName()
+			var sealedName = variable.getDeclaredType().getAuxiliaryName()
 
 			fragments.line(`\($runtime.immutableScope(this))\(sealedName) = {}`)
 		}
@@ -399,7 +399,7 @@ class ExternDeclarator extends DependencyStatement {
 	} # }}}
 	toSealedInstanceFragments(name: String, methods: ClassMethodType[], fragments) { # {{{
 		var variable = @scope.getVariable(@name)
-		var sealedName = variable.getDeclaredType().getSealedName()
+		var sealedName = variable.getDeclaredType().getAuxiliaryName()
 		var labelable = @type.isLabelableInstanceMethod(@name)
 		var assessment = Router.assess(@type.listInstanceMethods(name), name, this)
 
@@ -734,7 +734,7 @@ class RequireOrImportDeclarator extends Importer {
 				var ctrl = fragments.newControl()
 
 				if requirement.isSystem() {
-					ctrl.code(`if(!\(requirement.getSealedName()))`).step()
+					ctrl.code(`if(!\(requirement.getAuxiliaryName()))`).step()
 				}
 				else {
 					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
@@ -784,7 +784,7 @@ class RequireOrImportDeclarator extends Importer {
 						ctrl.code(' || ') unless index == 0
 
 						if requirement.isSystem() {
-							ctrl.code(`!\(requirement.getSealedName())`)
+							ctrl.code(`!\(requirement.getAuxiliaryName())`)
 						}
 						else {
 							ctrl.code(`!\(requirement.getTempName())_valuable`)
@@ -805,13 +805,13 @@ class RequireOrImportDeclarator extends Importer {
 
 					for var requirement in notpasseds {
 						if requirement.isSystem() {
-							ctrl.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+							ctrl.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
 						}
 						else {
 							ctrl.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
 
 							if requirement.isSealed() {
-								ctrl.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+								ctrl.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
 							}
 						}
 					}
@@ -819,15 +819,15 @@ class RequireOrImportDeclarator extends Importer {
 					for var requirement in unknowns {
 						if requirement.isSystem() {
 							ctrl.newControl()
-								..code(`if(!\(requirement.getSealedName()))`).step()
-								..line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+								..code(`if(!\(requirement.getAuxiliaryName()))`).step()
+								..line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
 								..done()
 						}
 						else {
 							ctrl.newControl()
 								..code(`if(!\(requirement.getTempName())_valuable)`).step()
 								..line(`\(requirement.name()) = __ks__.\(requirement.name())`)
-								..line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`) if requirement.isSealed()
+								..line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`) if requirement.isSealed()
 								..done()
 						}
 					}
@@ -931,7 +931,7 @@ class ExternOrImportDeclarator extends Importer {
 			var ctrl = fragments.newControl()
 
 			if requirement.isSystem() {
-				ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.getSealedName(), '))').step()
+				ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.getAuxiliaryName(), '))').step()
 			}
 			else {
 				ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
@@ -944,7 +944,7 @@ class ExternOrImportDeclarator extends Importer {
 		else {
 			for var requirement in @requirements {
 				if requirement.isSystem() {
-					fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
+					fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getAuxiliaryName()))`)
 				}
 				else {
 					fragments.line(`var \(requirement.getTempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
@@ -969,13 +969,13 @@ class ExternOrImportDeclarator extends Importer {
 				var control = ctrl.newControl().code(`if(!\(requirement.getTempName())_valuable)`).step()
 
 				if requirement.isSystem() {
-					control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+					control.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
 				}
 				else {
 					control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
 
 					if requirement.isSealed() {
-						control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+						control.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
 					}
 				}
 
@@ -1017,7 +1017,7 @@ abstract class Requirement {
 
 		@alternative = type
 	} # }}}
-	getSealedName() => @type.getSealedName()
+	getAuxiliaryName() => @type.getAuxiliaryName()
 	index() => @index
 	index(@index)
 	isRequired() => @type.isRequired()
@@ -1026,7 +1026,7 @@ abstract class Requirement {
 	name() => @name
 	toNameFragments(fragments) { # {{{
 		if @type.isSealed() {
-			fragments.code(@type.getSealedName())
+			fragments.code(@type.getAuxiliaryName())
 		}
 		else {
 			fragments.code(@name)
@@ -1063,7 +1063,7 @@ class StaticRequirement extends Requirement {
 			fragments.code($comma) if comma
 
 			if @type.isSystem() {
-				fragments.code(@type.getSealedName())
+				fragments.code(@type.getAuxiliaryName())
 			}
 			else {
 				fragments.code(@name)
@@ -1079,13 +1079,13 @@ class StaticRequirement extends Requirement {
 			fragments.code($comma) if comma
 
 			if @type.isSystem() {
-				fragments.code(@type.getSealedName())
+				fragments.code(@type.getAuxiliaryName())
 			}
 			else {
 				fragments.code(@name)
 
 				if @type.isSealed() {
-					fragments.code($comma, @type.getSealedName())
+					fragments.code($comma, @type.getAuxiliaryName())
 				}
 			}
 
@@ -1116,7 +1116,7 @@ abstract class DynamicRequirement extends Requirement {
 			fragments.code($comma) if comma
 
 			if @type.isSystem() {
-				fragments.code(@type.getSealedName())
+				fragments.code(@type.getAuxiliaryName())
 			}
 			else {
 				fragments.code(@parameter)
@@ -1132,13 +1132,13 @@ abstract class DynamicRequirement extends Requirement {
 			fragments.code($comma) if comma
 
 			if @type.isSystem() {
-				fragments.code(@type.getSealedName())
+				fragments.code(@type.getAuxiliaryName())
 			}
 			else {
 				fragments.code(@name)
 
 				if @type.isSealed() {
-					fragments.code($comma, @type.getSealedName())
+					fragments.code($comma, @type.getAuxiliaryName())
 				}
 			}
 
@@ -1164,9 +1164,9 @@ class EORDynamicRequirement extends DynamicRequirement {
 
 		if !?argument {
 			if @type.isSystem() {
-				var ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', this.getSealedName(), '))').step()
+				var ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', this.getAuxiliaryName(), '))').step()
 
-				ctrl.line(`\(this.getSealedName()) = {}`)
+				ctrl.line(`\(this.getAuxiliaryName()) = {}`)
 
 				ctrl.done()
 			}
@@ -1204,8 +1204,8 @@ class ROEDynamicRequirement extends DynamicRequirement {
 		if !?argument {
 			if @type.isSystem() {
 				fragments.newControl()
-					..code(`if(!\(@type.getSealedName()))`).step()
-					..line(`\(@type.getSealedName()) = {}`)
+					..code(`if(!\(@type.getAuxiliaryName()))`).step()
+					..line(`\(@type.getAuxiliaryName()) = {}`)
 					..done()
 			}
 			else {
@@ -1226,7 +1226,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 		}
 		else if argument is Boolean {
 			if @type.isSealed() {
-				fragments.line(`\($runtime.immutableScope(@node))\(@type.getSealedName()) = {}`)
+				fragments.line(`\($runtime.immutableScope(@node))\(@type.getAuxiliaryName()) = {}`)
 			}
 		}
 	} # }}}

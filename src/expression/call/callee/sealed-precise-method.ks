@@ -23,7 +23,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 				}
 				ScopeKind.This {
 					if @function.isInstance() {
-						fragments.code(`\(@objectType.getSealedPath(@standardLibrary)).__ks_func_\(@property)_\(@function.index()).call(`)
+						fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary)).__ks_func_\(@property)_\(@function.index()).call(`)
 
 						if var substitute ?= @getContextSubstitute(@object) {
 							substitute(fragments)
@@ -35,7 +35,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, null, fragments, mode)
 					}
 					else {
-						fragments.code(`\(@objectType.getSealedPath(@standardLibrary)).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
+						fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary)).__ks_sttc_\(@property)_\(@function.index()).apply(null, `)
 
 						Router.Argument.toFlatFragments(@positions, null, node.arguments(), @function, false, true, null, fragments, mode)
 					}
@@ -52,7 +52,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 						throw NotImplementedException.new(node)
 					}
 					else if @function.isInstance() {
-						fragments.code(`\(@objectType.getSealedPath(@standardLibrary)).__ks_func_\(@property)_\(@function.index()).call(`)
+						fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary)).__ks_func_\(@property)_\(@function.index()).call(`)
 
 						if var substitute ?= @getContextSubstitute(@object) {
 							substitute(fragments)
@@ -64,7 +64,7 @@ class SealedPreciseMethodCallee extends MethodCallee {
 						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, true, true, fragments, mode)
 					}
 					else {
-						fragments.code(`\(@objectType.getSealedPath(@standardLibrary)).__ks_sttc_\(@property)_\(@function.index())(`)
+						fragments.code(`\(@objectType.getAuxiliaryPath(@standardLibrary)).__ks_sttc_\(@property)_\(@function.index())(`)
 
 						Router.Argument.toFragments(@positions, null, node.arguments(), @function, false, false, true, fragments, mode)
 					}

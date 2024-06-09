@@ -2,7 +2,7 @@
   {
     "aliens": [
       0,
-      "SyntaxError",
+      "EvalError",
       true
     ],
     "requirements": [],
@@ -35,7 +35,7 @@
       1,
       "foo",
       0,
-      "SyntaxError"
+      "EvalError"
     ],
     "references": [
       {

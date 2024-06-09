@@ -2,7 +2,7 @@
   {
     "aliens": [
       0,
-      "SyntaxError",
+      "EvalError",
       true
     ],
     "requirements": [],
@@ -65,7 +65,7 @@
         "staticMethods": {},
         "extends": [
           0,
-          "SyntaxError"
+          "EvalError"
         ],
         "sequences": [
           -1,

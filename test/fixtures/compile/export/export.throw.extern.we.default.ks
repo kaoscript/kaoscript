@@ -1,7 +1,7 @@
-extern system class SyntaxError
+extern system class EvalError
 
-func foo() ~ SyntaxError {
+func foo() ~ EvalError {
 
 }
 
-export foo, SyntaxError
+export foo, EvalError

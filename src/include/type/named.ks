@@ -1,10 +1,10 @@
 class NamedType extends Type {
 	private {
+		@auxiliaryName: String?			= null
 		@cloned: Boolean 				= false
 		@container: NamedContainerType?	= null
 		@name: String
 		@prettyName: String?			= null
-		@sealedName: String?			= null
 		@type: Type
 	}
 	constructor(@name, @type) { # {{{
@@ -79,6 +79,24 @@ class NamedType extends Type {
 		return this
 	} # }}}
 	getAlterationReference() => @type.getAlterationReference()
+	getAuxiliaryName() => @auxiliaryName ?? `__ks_\(@name)`
+	getAuxiliaryName(standardLibrary) => if standardLibrary set `__ksStd_\(@name.substr(0, 1).toLowerCase())` else @getAuxiliaryName()
+	getAuxiliaryPath() { # {{{
+		if ?@container {
+			return `\(@container.path()).\(@getAuxiliaryName())`
+		}
+		else {
+			return @getAuxiliaryName()
+		}
+	} # }}}
+	getAuxiliaryPath(standardLibrary) { # {{{
+		if ?@container {
+			return `\(@container.path()).\(@getAuxiliaryName(standardLibrary))`
+		}
+		else {
+			return @getAuxiliaryName(standardLibrary)
+		}
+	} # }}}
 	getGenericIndex(name) => @type.getGenericIndex(name)
 	getHierarchy() { # {{{
 		if @type is ClassType {
@@ -92,24 +110,6 @@ class NamedType extends Type {
 	override getPrettyName(_) => @prettyName ?? @name
 	getProperty(index: Number) => @type.getProperty(index)
 	getProperty(name: String) => @type.getProperty(name)
-	getSealedName() => @sealedName ?? `__ks_\(@name)`
-	getSealedName(standardLibrary) => if standardLibrary set `__ksStd_\(@name.substr(0, 1).toLowerCase())` else @getSealedName()
-	getSealedPath() { # {{{
-		if ?@container {
-			return `\(@container.path()).\(@getSealedName())`
-		}
-		else {
-			return @getSealedName()
-		}
-	} # }}}
-	getSealedPath(standardLibrary) { # {{{
-		if ?@container {
-			return `\(@container.path()).\(@getSealedName(standardLibrary))`
-		}
-		else {
-			return @getSealedName(standardLibrary)
-		}
-	} # }}}
 	getTestIndex() => @type.getTestIndex()
 	getTestName() => @type.getTestName()
 	hasContainer() => ?@container
@@ -398,7 +398,7 @@ class NamedType extends Type {
 	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
-	isVirtual() => $virtuals[@name] ?? false
+	isVirtual() => $virtuals[@name] || @type.isVirtual()
 	listFunctions(name: String): Array => @type.listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
 	listMissingProperties(class: ClassType | StructType | TupleType) => @type.listMissingProperties(class)
@@ -572,6 +572,14 @@ class NamedType extends Type {
 
 		return types
 	} # }}}
+	override toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node) { # {{{
+		if @type.isSpecter() {
+			fragments.code(`\(@getAuxiliaryPath()).is`)
+		}
+		else {
+			@type.toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
+		}
+	} # }}}
 	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType {
 			return @type.toAlterationReference(references, indexDelta, mode, module)
@@ -583,7 +591,7 @@ class NamedType extends Type {
 	override toExportFragment(fragments, name, variable, module) { # {{{
 		if @type.isExportingFragment() {
 			if module.isStandardLibrary() {
-				fragments.line(@sealedName)
+				fragments.line(@auxiliaryName)
 			}
 			else {
 				super(fragments, name, variable, module)
@@ -644,12 +652,12 @@ class NamedType extends Type {
 	override unflagAltering() { # {{{
 		@type.unflagAltering()
 	} # }}}
-	useSealedName(module: Module) { # {{{
+	useAuxiliaryName(module: Module) { # {{{
 		if module.isStandardLibrary() {
-			@sealedName = `__ksStd_\(@name.substr(0, 1).toLowerCase())`
+			@auxiliaryName = `__ksStd_\(@name.substr(0, 1).toLowerCase())`
 		}
 		else {
-			@sealedName = `__ks_\(@name)`
+			@auxiliaryName = `__ks_\(@name)`
 		}
 	} # }}}
 	walk(fn) { # {{{
@@ -683,13 +691,13 @@ class NamedType extends Type {
 		isFinite
 		isFunction
 		isInstanceOf
+		isSpecter
 		isStandardLibrary
 		isUsingAuxiliary
 		isVariant
 		isView
 		makeCallee
 		setStandardLibrary
-		toAwareTestFunctionFragments
 		toBlindTestFragments
 		toBlindTestFunctionFragments
 	}

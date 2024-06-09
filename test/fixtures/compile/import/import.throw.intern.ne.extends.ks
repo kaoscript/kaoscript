@@ -1,11 +1,11 @@
 extern console
-extern sealed class SyntaxError
+extern sealed class EvalError
 
 import '../export/export.throw.intern.ne.extends.ks'
 
 try {
 	foo()
 }
-on SyntaxError catch error {
+on EvalError catch error {
 	console.error(error)
 }

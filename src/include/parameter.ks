@@ -927,7 +927,7 @@ class AliasStatement extends Statement {
 	path() => @expression.path()
 	toStatementFragments(fragments, mode) { # {{{
 		if @expression.isSealed() && !@parameter.parent().isConstructor() {
-			fragments.newLine().code(`\(@expression.getClass().getSealedName()).__ks_set_\(@expression.name())(this, `).compile(@variable).code(')').done()
+			fragments.newLine().code(`\(@expression.getClass().getAuxiliaryName()).__ks_set_\(@expression.name())(this, `).compile(@variable).code(')').done()
 		}
 		else {
 			fragments.newLine().code(@expression.fragment(), $equals).compile(@variable).done()

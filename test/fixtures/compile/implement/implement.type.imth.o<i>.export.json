@@ -1,0 +1,38 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Data"
+    ],
+    "references": [
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "object",
+          "properties": {
+            "line": "Number"
+          }
+        },
+        "instanceMethods": {
+          "debug": [
+            {
+              "index": 0,
+              "access": 4,
+              "async": false,
+              "parameters": [],
+              "returns": "Void",
+              "errors": []
+            }
+          ]
+        },
+        "staticMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

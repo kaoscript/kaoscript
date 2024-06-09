@@ -247,6 +247,7 @@ abstract class Type {
 		@requirement: Boolean			= false
 		@scope: Scope?
 		@sealed: Boolean				= false
+		@specter: Boolean				= false
 		@system: Boolean				= false
 		@standardLibrary: LibSTDMode	= .No
 	}
@@ -1107,6 +1108,9 @@ abstract class Type {
 
 		return this
 	} # }}}
+	flagSpecter() { # {{{
+		@specter = true
+	} # }}}
 	flagSystem() { # {{{
 		@system = true
 
@@ -1238,6 +1242,7 @@ abstract class Type {
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isSpecific() => false
+	isSpecter() => @specter
 	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
 	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary ~~ mode
@@ -1395,7 +1400,7 @@ abstract class Type {
 
 		if @isUsingAuxiliary() && libstd ~~ .No | .Opened {
 			if @hasAuxiliary() && libstd ~~ .No | .Augmented {
-				var varname = @getSealedName()
+				var varname = @getAuxiliaryName()
 
 				if `__ks_\(name)` == varname {
 					fragments.line(varname)
@@ -1565,6 +1570,7 @@ include {
 	'./type/value.ks'
 	'./type/valueof.ks'
 	'./type/variant.ks'
+	'./type/virtual.ks'
 	'./type/void.ks'
 	'./type/enum-view.ks'
 }

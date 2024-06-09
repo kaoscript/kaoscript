@@ -246,7 +246,7 @@ class ClassMethodDeclaration extends Statement {
 				(writer, _) => {
 					if extends.type().hasInstanceMethod(name) {
 						if extends.type().isSealedInstanceMethod(name) {
-							writer.line(`return \(extends.getSealedName()).__ks_func_\(name)_rt(that, args)`)
+							writer.line(`return \(extends.getAuxiliaryName()).__ks_func_\(name)_rt(that, args)`)
 						}
 						else if extends.type().isAlien() {
 							writer.line(`return super.\(name).apply(that, args)`)

@@ -50,7 +50,8 @@ func $listNPMModulePaths(mut start) { # {{{
 struct ImportedVariable {
 	name: String
 	sealed: Boolean		= false
-	system: Boolean	= false
+	specter: Boolean	= false
+	system: Boolean		= false
 }
 
 struct Arguments {
@@ -202,7 +203,7 @@ abstract class Importer extends Statement {
 
 					}
 
-					if type.isAlias() {
+					if type.isAlias() && !type.isSpecter() {
 						if type.isExportingType() {
 							@typeTested = true
 
@@ -213,6 +214,7 @@ abstract class Importer extends Statement {
 						var var = ImportedVariable.new(
 							name: def.internal
 							sealed: type.isSealed() && !type.isSystem()
+							specter: type.isSpecter()
 							system: type.isSystem()
 						)
 
@@ -1112,7 +1114,7 @@ abstract class Importer extends Statement {
 					for variable, name of @variables {
 					}
 
-					if variable.system {
+					if variable.system || variable.specter {
 						var line = fragments
 							.newLine()
 							.code(`var __ks_\(variable.name) = `)
@@ -1167,7 +1169,7 @@ abstract class Importer extends Statement {
 								line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
 							}
 							else {
-								if variable.system {
+								if variable.system || variable.specter {
 									line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
 								}
 								else {
@@ -1208,7 +1210,7 @@ abstract class Importer extends Statement {
 								line.code(`__ks_\(name)`)
 							}
 							else {
-								if variable.system {
+								if variable.system || variable.specter {
 									line.code(`__ks_\(name)`)
 								}
 								else {
@@ -1221,7 +1223,7 @@ abstract class Importer extends Statement {
 							}
 						}
 						else {
-							if variable.system {
+							if variable.system || variable.specter {
 								line.code(`__ks_\(name): __ks_\(variable.name)`)
 							}
 							else {

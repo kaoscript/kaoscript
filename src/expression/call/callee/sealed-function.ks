@@ -35,7 +35,7 @@ class SealedFunctionCallee extends Callee {
 					throw NotImplementedException.new(node)
 				}
 				ScopeKind.This {
-					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
+					fragments.code(`\(@variable.getAuxiliaryName()).\(@property)(`)
 
 					for var argument, index in node.arguments() {
 						if index != 0 {

@@ -88,7 +88,7 @@ class PreciseMethodCallee extends MethodCallee {
 
 						if type.isUsingAuxiliary() {
 							fragments
-								.code(`\($runtime.helper(node)).bindAuxiliaryMethod(\(@objectType.type().getSealedName()), `)
+								.code(`\($runtime.helper(node)).bindAuxiliaryMethod(\(@objectType.type().getAuxiliaryName()), `)
 								.code('"').compile(@property).code('"')
 								.code($comma).compile(@object)
 						}

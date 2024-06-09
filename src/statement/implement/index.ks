@@ -1,9 +1,11 @@
 class ImplementDeclaration extends Statement {
 	private late {
-		@auxiliary					= false
+		@auxiliary: Boolean			= false
 		@forkedMethods				= {}
 		@properties					= []
 		@sharingProperties			= {}
+		@specter: Boolean			= false
+		@specterTest: Type?
 		@type: NamedType
 		@useDeclaration: Boolean	= false
 		@variable: Variable
@@ -110,7 +112,7 @@ class ImplementDeclaration extends Statement {
 		}
 
 		if @auxiliary {
-			@type.useSealedName(@module())
+			@type.useAuxiliaryName(@module())
 
 			if @variable.isStandardLibrary(.Closed) {
 				@type.setStandardLibrary(.Yes + .Opened)
@@ -194,6 +196,38 @@ class ImplementDeclaration extends Statement {
 				property.analyse()
 
 				@properties.push(property)
+			}
+		}
+		else if type is AliasType {
+			for var data in @data.properties {
+				var late property
+
+				match data.kind {
+					NodeKind.MethodDeclaration {
+						property = ImplementVirtualMethodDeclaration.new(data, this, @type)
+					}
+					else {
+						throw NotSupportedException.new(`Unexpected kind \(data.kind)`, this)
+					}
+				}
+
+				property.analyse()
+
+				@properties.push(property)
+			}
+
+			@auxiliary = false
+
+			if !@type.isSpecter() {
+				@specter = true
+
+				@type.type().flagSpecter()
+
+				var authority = @recipient().authority()
+
+				if @specterTest ?= authority.removeTypeTest(@type.name()) {
+					@specterTest.setTestName(`\(@type.getAuxiliaryName()).is`)
+				}
 			}
 		}
 		else {
@@ -288,7 +322,20 @@ class ImplementDeclaration extends Statement {
 		return if @useDeclaration
 
 		if @auxiliary {
-			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
+			fragments.line(`\($runtime.immutableScope(this))\(@type.getAuxiliaryName()) = {}`)
+		}
+		else if ?@specterTest {
+			var line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@type.getAuxiliaryName()) = `)
+			var object = line.newObject()
+
+			var funcLine = object.newLine().code(`is: `)
+
+			@specterTest.toBlindTestFunctionFragments('is', 'value', false, true, null, funcLine, this)
+
+			funcLine.done()
+
+			object.done()
+			line.done()
 		}
 
 		for var property in @properties {
@@ -307,4 +354,5 @@ include {
 	'./unified-class.ks'
 	'./enum.ks'
 	'./namespace.ks'
+	'./virtual.ks'
 }

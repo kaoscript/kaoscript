@@ -294,7 +294,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 	isNullable() => false
 	toFragments(fragments, mode) { # {{{
 		if @sealed {
-			fragments.code(`\(@class.type().extends().getSealedPath()).\(@name).call(this`)
+			fragments.code(`\(@class.type().extends().getAuxiliaryPath()).\(@name).call(this`)
 
 			for var argument in @arguments {
 				fragments.code($comma).compile(argument)
@@ -350,10 +350,10 @@ class MemberSealedSuperMethodSubstitude extends Substitude {
 	toFragments(fragments, mode) { # {{{
 		if @sealed {
 			if var index ?= @extendsType.type().getSharedMethodIndex(@name) {
-				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@name)(this`)
+				fragments.code(`\(@extendsType.getAuxiliaryPath())._im_\(index)_\(@name)(this`)
 			}
 			else {
-				fragments.code(`\(@extendsType.getSealedPath())._im_\(@name)(this`)
+				fragments.code(`\(@extendsType.getAuxiliaryPath())._im_\(@name)(this`)
 			}
 
 			for var argument in @arguments {
