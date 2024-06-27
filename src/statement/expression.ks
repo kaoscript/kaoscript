@@ -6,7 +6,8 @@ class ExpressionStatement extends Statement {
 		@variable				= null
 	}
 	analyse() { # {{{
-		@expression = $compile.expression(@data.expression, this)
+		@expression ??= $compile.expression(@data.expression, this)
+
 		@expression.analyse()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -63,6 +64,7 @@ class ExpressionStatement extends Statement {
 			@assignments.push(...assignments)
 		}
 	} # }}}
+	expression(@expression)
 	initializeVariable(variable: VariableBrief, expression: Expression) { # {{{
 		if variable.instance {
 			if variable.immutable && @parent.isInitializingVariable(`this.\(variable.name)`) {

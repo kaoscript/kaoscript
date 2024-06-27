@@ -19,7 +19,7 @@ class ObjectComprehension extends Expression {
 			..initiate()
 			..analyse()
 
-		if @data.name.kind == NodeKind.ComputedPropertyName {
+		if @data.name.kind == AstKind.ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this, @bodyScope)
 		}
 		else {

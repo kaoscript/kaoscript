@@ -21,7 +21,7 @@ class ComparisonExpression extends Expression {
 			var operand1 = @addOperand(@data.values[0])
 			var value = @data.values[2]
 
-			if value.kind == NodeKind.JunctionExpression {
+			if value.kind == AstKind.JunctionExpression {
 				@junctive = true
 
 				for var operand in value.operands {

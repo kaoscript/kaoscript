@@ -51,7 +51,7 @@ class BitmaskDeclaration extends Statement {
 
 		for var data in @data.members {
 			match data.kind {
-				NodeKind.BitmaskValue {
+				AstKind.BitmaskValue {
 					var value = BitmaskValueDeclaration.new(data, @bitmask, this)
 					var name = value.name()
 
@@ -61,13 +61,13 @@ class BitmaskDeclaration extends Statement {
 
 					value.analyse()
 				}
-				NodeKind.CommentBlock {
+				AstKind.CommentBlock {
 					pass
 				}
-				NodeKind.CommentLine {
+				AstKind.CommentLine {
 					pass
 				}
-				NodeKind.MethodDeclaration {
+				AstKind.MethodDeclaration {
 					var method = BitmaskMethodDeclaration.new(data, this)
 					var name = method.name()
 
@@ -298,16 +298,16 @@ class BitmaskValueDeclaration extends AbstractNode {
 
 		if ?value {
 			match value.kind {
-				NodeKind.BinaryExpression when value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
+				AstKind.BinaryExpression when value.operator.kind == BinaryOperatorKind.Addition | BinaryOperatorKind.BitwiseOr {
 					@type = @bitmask.createAlias(@name)
 					@operands = [value.left, value.right]
 				}
-				NodeKind.Identifier {
+				AstKind.Identifier {
 					@type = @bitmask.createAlias(@name)
 
 					@operands = [value]
 				}
-				NodeKind.NumericExpression {
+				AstKind.NumericExpression {
 					if value.radix == 2 {
 						@value = `\(value.value)`
 
@@ -338,7 +338,7 @@ class BitmaskValueDeclaration extends AbstractNode {
 						@value = @type.value()
 					}
 				}
-				NodeKind.PolyadicExpression when value.operator.kind == BinaryOperatorKind.Addition {
+				AstKind.PolyadicExpression when value.operator.kind == BinaryOperatorKind.Addition {
 					@type = @bitmask.createAlias(@name)
 					@operands = value.operands
 				}

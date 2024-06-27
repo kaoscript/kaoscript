@@ -201,9 +201,9 @@ class BleedingScope extends Scope {
 		commitTempVariables
 		declareVariable
 		getChunkType
-		getMacro
 		getPredefinedType
 		getRawLine
+		getSyntimeFunction
 		getTempIndex
 		hasMacro
 		hasPredefinedVariable

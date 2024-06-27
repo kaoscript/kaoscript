@@ -34,6 +34,18 @@ include {
 	'./include/astmap.ks'
 }
 
+export enum TimeMode {
+	Default
+	Syntime
+	Semtime
+}
+
+export type TimeContext = {
+	addMark(data)
+	mode(): TimeMode
+	initiate(compiler: Compiler): Void
+}
+
 export class Compiler {
 	private late {
 		@module: Module
@@ -44,6 +56,7 @@ export class Compiler {
 		@hashes: Object
 		@hierarchy: Array
 		@options: Object
+		@timeContext: TimeContext?
 	}
 	static {
 		registerTarget(target: String, fn: Function) { # {{{
@@ -97,21 +110,25 @@ export class Compiler {
 	}
 	constructor(@file, options? = null, @hashes = {}, @hierarchy = [@file]) { # {{{
 		@options = Object.merge({
-			target: 'ecma-v6'
-			register: true
-			header: true
 			error: {
 				level: 'fatal'
 				ignore: []
 				raise: []
 			}
-			parse: {
-				parameters: 'kaoscript'
-			}
 			format: {}
+			header: true
+			libstd: {
+				enable: true
+				current: false
+				package: 'npm:@kaoscript/runtime/src/libstd/index.ks'
+			}
 			parameters: {
 				retain: false
 			}
+			parse: {
+				parameters: 'kaoscript'
+			}
+			register: true
 			rules: {
 				assertNewStruct: true
 				assertNewTuple: true
@@ -148,11 +165,7 @@ export class Compiler {
 					package: '@kaoscript/runtime'
 				}
 			}
-			libstd: {
-				enable: true
-				current: false
-				package: 'npm:@kaoscript/runtime/src/libstd/index.ks'
-			}
+			target: 'ecma-v6'
 		}, options)
 
 		if @options.target is String {
@@ -176,6 +189,8 @@ export class Compiler {
 	initiate(data: String? = null) { # {{{
 		@module = Module.new(data ?? $fs.readFile(@file), this, @file)
 
+		@timeContext?.initiate(this)
+
 		@module.initiate()
 
 		return this
@@ -195,10 +210,12 @@ export class Compiler {
 
 		return this
 	} # }}}
+	getTimeContext(): TimeContext? => @timeContext
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): valueof @module
 	readFile() => $fs.readFile(@file)
 	setArguments(arguments: Array, module: String? = null, node: AbstractNode? = null) => @module.setArguments(arguments, module, node)
+	setTimeContext(@timeContext)
 	sha256(file, data? = null) { # {{{
 		return @hashes[file] ?? (@hashes[file] <- $fs.sha256(data ?? $fs.readFile(file)))
 	} # }}}
@@ -333,4 +350,4 @@ export func isUpToDate(file, variationId, source) { # {{{
 
 export $extensions => extensions
 
-export AssignmentOperatorKind, BinaryOperatorKind, MacroElementKind, ModifierKind, NodeKind, ReificationKind, ScopeKind, UnaryOperatorKind, FragmentBuilder
+export AssignmentOperatorKind, AstKind, BinaryOperatorKind, ModifierKind, QuoteElementKind, ReificationKind, ScopeKind, UnaryOperatorKind, FragmentBuilder

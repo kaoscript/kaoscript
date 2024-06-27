@@ -44,26 +44,26 @@ namespace $function {
 	} # }}}
 	func useThisVariable(data, node) { # {{{
 		match data.kind {
-			NodeKind.ArrayExpression {
+			AstKind.ArrayExpression {
 				for var value in data.values {
 					if $function.useThisVariable(value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.BinaryExpression {
+			AstKind.BinaryExpression {
 				if $function.useThisVariable(data.left, node) || $function.useThisVariable(data.right, node) {
 					return true
 				}
 			}
-			NodeKind.Block {
+			AstKind.Block {
 				for var statement in data.statements {
 					if $function.useThisVariable(statement, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.CallExpression {
+			AstKind.CallExpression {
 				if $function.useThisVariable(data.callee, node) {
 					return true
 				}
@@ -74,15 +74,15 @@ namespace $function {
 					}
 				}
 			}
-			NodeKind.ComparisonExpression {
+			AstKind.ComparisonExpression {
 				for var operand in data.values step 2 {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.Identifier => return data.name == 'this'
-			NodeKind.IfStatement {
+			AstKind.Identifier => return data.name == 'this'
+			AstKind.IfStatement {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
 					return true
 				}
@@ -91,35 +91,35 @@ namespace $function {
 					return true
 				}
 			}
-			NodeKind.Literal => return false
-			NodeKind.MemberExpression => return $function.useThisVariable(data.object, node)
-			NodeKind.NumericExpression => return false
-			NodeKind.ObjectExpression {
+			AstKind.Literal => return false
+			AstKind.MemberExpression => return $function.useThisVariable(data.object, node)
+			AstKind.NumericExpression => return false
+			AstKind.ObjectExpression {
 				for var property in data.properties {
 					if ?property.value && $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.PolyadicExpression {
+			AstKind.PolyadicExpression {
 				for var operand in data.operands {
 					if $function.useThisVariable(operand, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.ReturnStatement => return $function.useThisVariable(data.value, node)
-			NodeKind.TemplateExpression {
+			AstKind.ReturnStatement => return $function.useThisVariable(data.value, node)
+			AstKind.TemplateExpression {
 				for var element in data.elements {
 					if $function.useThisVariable(element, node) {
 						return true
 					}
 				}
 			}
-			NodeKind.ThisExpression => return true
-			NodeKind.ThrowStatement => return $function.useThisVariable(data.value, node)
-			NodeKind.UnaryExpression => return $function.useThisVariable(data.argument, node)
-			NodeKind.VariableDeclaration {
+			AstKind.ThisExpression => return true
+			AstKind.ThrowStatement => return $function.useThisVariable(data.value, node)
+			AstKind.UnaryExpression => return $function.useThisVariable(data.argument, node)
+			AstKind.VariableDeclaration {
 				return ?data.init && $function.useThisVariable(data.init, node)
 			}
 			else {
@@ -438,7 +438,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@type = FunctionType.new([parameter.type() for var parameter in @parameters], @generics, @data, @index, this)
 
-		@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
+		@returnNull = @data.body.kind == AstKind.IfStatement || @data.body.kind == AstKind.UnlessStatement
 
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()

@@ -80,10 +80,10 @@ class Attribute {
 		get(data, targets) { # {{{
 			var dyn name = null
 
-			if data.kind == NodeKind.AttributeExpression {
+			if data.kind == AstKind.AttributeExpression {
 				name = data.name.name
 			}
-			else if data.kind == NodeKind.Identifier {
+			else if data.kind == AstKind.Identifier {
 				name = data.name
 			}
 
@@ -144,7 +144,7 @@ class ErrorAttribute extends Attribute {
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
 			match arg.kind {
-				NodeKind.AttributeExpression {
+				AstKind.AttributeExpression {
 					if arg.name.name == 'ignore' {
 						for var a in arg.arguments {
 							options.error.ignore.push(a.name)
@@ -156,7 +156,7 @@ class ErrorAttribute extends Attribute {
 						}
 					}
 				}
-				NodeKind.Identifier {
+				AstKind.Identifier {
 					match arg.name {
 						'off' => options.error.level = 'off'
 					}
@@ -187,7 +187,7 @@ class FormatAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			if arg.kind == NodeKind.AttributeOperation {
+			if arg.kind == AstKind.AttributeOperation {
 				options.format[arg.name.name] = arg.value.value
 			}
 		}
@@ -245,7 +245,7 @@ class IfAttribute extends Attribute {
 		return flag
 	} # }}}
 	evaluate(data, target) { # {{{
-		if data.kind == NodeKind.AttributeExpression {
+		if data.kind == AstKind.AttributeExpression {
 			match data.name.name {
 				'all' {
 					for var arg in data.arguments when !@evaluate(arg, target) {
@@ -337,7 +337,7 @@ class IfAttribute extends Attribute {
 				}
 			}
 		}
-		else if data.kind == NodeKind.Identifier {
+		else if data.kind == AstKind.Identifier {
 			if var match ?= $semverRegex.exec(data.name) {
 				if ?match[2] {
 					return target.name == match[1] && target.version == match[2]
@@ -363,7 +363,7 @@ class LibstdAttribute extends Attribute {
 	constructor(@data)
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			match arg.kind:!!!(NodeKind) {
+			match arg.kind:!!!(AstKind) {
 				.AttributeOperation {
 					if arg.name.name == 'package' {
 						if arg.value.value == '.' {
@@ -406,7 +406,7 @@ class ParseAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			if arg.kind == NodeKind.AttributeOperation {
+			if arg.kind == AstKind.AttributeOperation {
 				options.parse[arg.name.name] = arg.value.value
 			}
 		}
@@ -464,7 +464,7 @@ class RulesAttribute extends Attribute {
 	} # }}}
 	configure(options, fileName, lineNumber) { # {{{
 		for var argument in @data.arguments {
-			if argument.kind == NodeKind.Identifier {
+			if argument.kind == AstKind.Identifier {
 				var name = argument.name.toLowerCase()
 
 				if var data ?= $rules[name] {
@@ -490,7 +490,7 @@ class RuntimeAttribute extends Attribute {
 	constructor(@data)
 	configure(options, fileName, lineNumber) { # {{{
 		for var arg in @data.arguments {
-			if arg.kind == NodeKind.AttributeOperation {
+			if arg.kind == AstKind.AttributeOperation {
 				if arg.name.name == 'package' {
 					options.runtime.helper.package = options.runtime.type.package = arg.value.value
 				}
@@ -502,10 +502,10 @@ class RuntimeAttribute extends Attribute {
 					options.runtime.type.alias = prefix + options.runtime.type.alias
 				}
 			}
-			else if arg.kind == NodeKind.AttributeExpression {
+			else if arg.kind == AstKind.AttributeExpression {
 				if arg.name.name == 'helper' {
 					for var argument in arg.arguments {
-						if argument.kind == NodeKind.AttributeOperation {
+						if argument.kind == AstKind.AttributeOperation {
 							match argument.name.name {
 								'alias' => options.runtime.helper.alias = argument.value.value
 								'member' => options.runtime.helper.member = argument.value.value
@@ -516,7 +516,7 @@ class RuntimeAttribute extends Attribute {
 				}
 				else if arg.name.name == 'operator' {
 					for var argument in arg.arguments {
-						if argument.kind == NodeKind.AttributeOperation {
+						if argument.kind == AstKind.AttributeOperation {
 							match argument.name.name {
 								'alias' => options.runtime.operator.alias = argument.value.value
 								'member' => options.runtime.operator.member = argument.value.value
@@ -527,7 +527,7 @@ class RuntimeAttribute extends Attribute {
 				}
 				else if arg.name.name == 'type' {
 					for var argument in arg.arguments {
-						if argument.kind == NodeKind.AttributeOperation {
+						if argument.kind == AstKind.AttributeOperation {
 							match argument.name.name {
 								'alias' => options.runtime.type.alias = argument.value.value
 								'member' => options.runtime.type.member = argument.value.value
@@ -572,7 +572,7 @@ class TargetAttribute extends Attribute {
 	} # }}}
 	configure(mut options, fileName, lineNumber) { # {{{
 		for var argument in @data.arguments {
-			if argument.kind == NodeKind.Identifier {
+			if argument.kind == AstKind.Identifier {
 				var match = $targetRegex.exec(argument.name)
 
 				unless ?match {

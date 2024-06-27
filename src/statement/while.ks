@@ -8,7 +8,7 @@ class WhileStatement extends Statement {
 		@declaration: VariableDeclaration
 	}
 	initiate() { # {{{
-		if @data.condition.kind == NodeKind.VariableDeclaration {
+		if @data.condition.kind == AstKind.VariableDeclaration {
 			@declared = true
 			@bindingScope = @newScope(@scope!?, ScopeType.Bleeding)
 

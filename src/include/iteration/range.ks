@@ -163,7 +163,7 @@ class RangeIteration extends IterationNode {
 		ctrl.code('; ')
 
 		if ?@data.step {
-			if @data.step.kind == NodeKind.NumericExpression {
+			if @data.step.kind == AstKind.NumericExpression {
 				if @data.step.value == 1 {
 					ctrl.code('++').compile(@value)
 				}

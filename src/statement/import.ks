@@ -79,6 +79,7 @@ abstract class Importer extends Statement {
 		@hasArguments: Boolean						= true
 		@imports									= {}
 		@isKSFile: Boolean							= false
+		@macro: Boolean								= false
 		@metaExports
 		@metaRequirements
 		@moduleName: String
@@ -255,7 +256,7 @@ abstract class Importer extends Statement {
 				@count += 1
 			}
 
-			if !@standardLibrary && (@count != 0 || ?@alias) {
+			if !@standardLibrary && !@macro && (@count != 0 || ?@alias) {
 				module.flagRegister()
 			}
 		}
@@ -314,7 +315,7 @@ abstract class Importer extends Statement {
 			arguments.fromLocal[data.value.name] = arguments.values.length
 			arguments.toImport[argument.name] = arguments.values.length
 		}
-		else if data.value.kind == NodeKind.Identifier {
+		else if data.value.kind == AstKind.Identifier {
 
 			argument.isNamed = true
 			argument.name = data.name?.name ?? data.value.name
@@ -424,7 +425,7 @@ abstract class Importer extends Statement {
 							@addArgument({
 								modifiers: []
 								value: {
-									kind: NodeKind.Identifier
+									kind: AstKind.Identifier
 									name: name
 								}
 							}, true, arguments)
@@ -444,7 +445,7 @@ abstract class Importer extends Statement {
 					@addArgument({
 						modifiers: []
 						value: {
-							kind: NodeKind.Identifier
+							kind: AstKind.Identifier
 							name: name
 						}
 					}, true, arguments)
@@ -549,6 +550,9 @@ abstract class Importer extends Statement {
 		}
 
 		return arguments
+	} # }}}
+	flagMacro() { # {{{
+		@macro = true
 	} # }}}
 	flagStandardLibrary() { # {{{
 		@standardLibrary = true
@@ -658,14 +662,14 @@ abstract class Importer extends Statement {
 
 			for var datas, name of macros {
 				for var data in datas {
-					MacroDeclaration.new(data, this, null, name, @standardLibrary)
+					Syntime.SyntimeFunctionDeclaration.new(data, this, null, name, @standardLibrary)
 				}
 			}
 		}
 		else {
 			for var data in @data.specifiers {
 				match data.kind {
-					NodeKind.GroupSpecifier {
+					AstKind.GroupSpecifier {
 						var mut alias = false
 						var mut exclusion = false
 
@@ -681,16 +685,16 @@ abstract class Importer extends Statement {
 						if alias {
 							for var element in data.elements {
 								match element.kind {
-									NodeKind.NamedSpecifier {
+									AstKind.NamedSpecifier {
 										match element.internal.kind {
-											NodeKind.Identifier {
+											AstKind.Identifier {
 												if ?@alias {
 													throw NotSupportedException.new(this)
 												}
 
 												@alias = element.internal.name
 											}
-											NodeKind.ObjectBinding {
+											AstKind.ObjectBinding {
 												for var binding in element.internal.elements {
 													var internal = binding.internal.name
 													var external = binding.external?.name ?? internal
@@ -723,28 +727,28 @@ abstract class Importer extends Statement {
 
 							for var datas, name of macros when exclusions.indexOf(name) == -1 {
 								for var d in datas {
-									MacroDeclaration.new(d, this, null, name, @standardLibrary)
+									Syntime.SyntimeFunctionDeclaration.new(d, this, null, name, @standardLibrary)
 								}
 							}
 						}
 						else {
 							for var element in data.elements {
 								match element.kind {
-									NodeKind.NamedSpecifier {
+									AstKind.NamedSpecifier {
 										var internal = element.internal.name
 										var external = element.external?.name ?? internal
 
 										if ?macros[external] {
 											for var macro in macros[external] {
-												MacroDeclaration.new(macro, this, null, internal, @standardLibrary)
+												Syntime.SyntimeFunctionDeclaration.new(macro, this, null, internal, @standardLibrary)
 											}
 										}
 										else {
 											@addImport(external, internal, false)
 										}
 									}
-									NodeKind.TypedSpecifier {
-										if element.type.kind == NodeKind.TypeAliasDeclaration {
+									AstKind.TypedSpecifier {
+										if element.type.kind == AstKind.TypeAliasDeclaration {
 											var name = element.type.name.name
 											var type = Type.fromAST(element.type.type, this)
 
@@ -758,7 +762,7 @@ abstract class Importer extends Statement {
 							}
 						}
 					}
-					NodeKind.NamedSpecifier {
+					AstKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = if ?data.external set data.external.name else internal
 
@@ -828,6 +832,10 @@ abstract class Importer extends Statement {
 		}
 
 		var compiler = module.compiler().createServant(@filename)
+
+		if @macro {
+			compiler._options.libstd.enable = false
+		}
 
 		compiler.initiate(source)
 
@@ -941,7 +949,7 @@ abstract class Importer extends Statement {
 		else {
 			for var data in @data.specifiers {
 				match data.kind {
-					NodeKind.GroupSpecifier {
+					AstKind.GroupSpecifier {
 						var mut aliasing = false
 
 						for var modifier in data.modifiers {
@@ -956,9 +964,9 @@ abstract class Importer extends Statement {
 						if ?#data.elements {
 							for var element in data.elements {
 								match element.kind {
-									NodeKind.NamedSpecifier {
+									AstKind.NamedSpecifier {
 										match element.internal.kind {
-											NodeKind.Identifier {
+											AstKind.Identifier {
 												var internal = element.internal.name
 												var external = element.external?.name ?? internal
 
@@ -971,7 +979,7 @@ abstract class Importer extends Statement {
 													@addVariable(external, internal, true, null)
 												}
 											}
-											NodeKind.ObjectBinding {
+											AstKind.ObjectBinding {
 												for var binding in element.internal.elements {
 													var internal = binding.internal.name
 													var external = binding.external?.name ?? internal
@@ -999,7 +1007,7 @@ abstract class Importer extends Statement {
 							throw NotImplementedException.new()
 						}
 					}
-					NodeKind.NamedSpecifier {
+					AstKind.NamedSpecifier {
 						var internal = data.internal.name
 						var external = data.external?.name ?? internal
 
@@ -1056,8 +1064,8 @@ abstract class Importer extends Statement {
 			return null
 		}
 	} # }}}
-	registerMacro(name, macro) { # {{{
-		@parent.registerMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@parent.registerSyntimeFunction(name, macro)
 	} # }}}
 	toImportFragments(fragments, destructuring: Boolean = true, roi: Boolean = false) { # {{{
 		if @isKSFile {
@@ -1478,11 +1486,13 @@ abstract class Importer extends Statement {
 class ImportDeclaration extends Statement {
 	private {
 		@declarators = []
+		@macro: Boolean						= false
 		@standardLibrary: Boolean			= false
 	}
 	initiate() { # {{{
 		for var data in @data.declarations {
 			var declarator = ImportDeclarator.new(data, this)
+				..flagMacro() if @macro
 				..flagStandardLibrary() if @standardLibrary
 				..initiate()
 
@@ -1500,11 +1510,14 @@ class ImportDeclaration extends Statement {
 		}
 	} # }}}
 	translate()
+	flagMacro() { # {{{
+		@macro = true
+	} # }}}
 	flagStandardLibrary() { # {{{
 		@standardLibrary = true
 	} # }}}
-	registerMacro(name, macro) { # {{{
-		@parent.registerMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@parent.registerSyntimeFunction(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		return if @standardLibrary

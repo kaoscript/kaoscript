@@ -805,7 +805,7 @@ class MatchBindingArray extends AbstractNode {
 	analyse() { # {{{
 		var mut immutable = true
 
-		if @data.kind == NodeKind.ArrayBinding {
+		if @data.kind == AstKind.ArrayBinding {
 			@binding = $compile.expression(@data, this)
 		}
 		else {
@@ -931,7 +931,7 @@ class MatchBindingObject extends AbstractNode {
 	analyse() { # {{{
 		var mut immutable = true
 
-		if @data.kind == NodeKind.ObjectBinding {
+		if @data.kind == AstKind.ObjectBinding {
 			@binding = $compile.expression(@data, this)
 		}
 		else {
@@ -1155,8 +1155,8 @@ class MatchConditionArray extends AbstractNode {
 	}
 	analyse() { # {{{
 		for var mut value in @data.values {
-			if value.kind != NodeKind.OmittedExpression {
-				if value.kind == NodeKind.MatchConditionRange {
+			if value.kind != AstKind.OmittedExpression {
+				if value.kind == AstKind.MatchConditionRange {
 					value = MatchConditionRange.new(value, this)
 				}
 				else {
@@ -1214,7 +1214,7 @@ class MatchConditionArray extends AbstractNode {
 
 		var mut index = 0
 
-		for var value, i in @data.values when value.kind != NodeKind.OmittedExpression {
+		for var value, i in @data.values when value.kind != AstKind.OmittedExpression {
 			fragments.code(' && ')
 
 			@values[index].toConditionFragments(fragments, `\(name)[\(i)]`, Junction.AND)
@@ -1236,7 +1236,7 @@ class MatchConditionObject extends AbstractNode {
 	analyse() { # {{{
 		for var data in @data.properties {
 			match data.kind {
-				NodeKind.ObjectMember {
+				AstKind.ObjectMember {
 					var property = {
 						name: data.name.name
 					}
@@ -1428,7 +1428,7 @@ class MatchConditionValue extends AbstractNode {
 		@variantName: String?
 	}
 	analyse() { # {{{
-		if @data.kind == NodeKind.JunctionExpression {
+		if @data.kind == AstKind.JunctionExpression {
 			for var operand in @data.operands {
 				var value = $compile.expression(operand, this)
 				value.analyse()
@@ -1624,7 +1624,7 @@ class MatchFilter extends AbstractNode {
 		var scope = @scope()
 
 		if ?@data.binding {
-			if @data.binding.kind == NodeKind.ArrayBinding || @data.binding.name?.kind == NodeKind.ArrayBinding {
+			if @data.binding.kind == AstKind.ArrayBinding || @data.binding.name?.kind == AstKind.ArrayBinding {
 				if @kind == .DEFAULT {
 					@kind = .ARRAY
 				}
@@ -1636,7 +1636,7 @@ class MatchFilter extends AbstractNode {
 
 				@hasTest = true
 			}
-			else if @data.binding.kind == NodeKind.ObjectBinding || @data.binding.name?.kind == NodeKind.ObjectBinding {
+			else if @data.binding.kind == AstKind.ObjectBinding || @data.binding.name?.kind == AstKind.ObjectBinding {
 				if @kind == .DEFAULT {
 					@kind = .OBJECT
 				}
@@ -1662,7 +1662,7 @@ class MatchFilter extends AbstractNode {
 				var late condition
 
 				match data.kind {
-					NodeKind.MatchConditionArray {
+					AstKind.MatchConditionArray {
 						if @kind == .ARRAY {
 							pass
 						}
@@ -1679,7 +1679,7 @@ class MatchFilter extends AbstractNode {
 							..unflagLengthTesting()
 							..unflagTypeTesting()
 					}
-					NodeKind.MatchConditionObject {
+					AstKind.MatchConditionObject {
 						if @kind == .OBJECT {
 							pass
 						}
@@ -1694,7 +1694,7 @@ class MatchFilter extends AbstractNode {
 
 						@binding?.unflagTypeTesting()
 					}
-					NodeKind.MatchConditionRange {
+					AstKind.MatchConditionRange {
 						if @kind == .NUMBER {
 							pass
 						}
@@ -1707,7 +1707,7 @@ class MatchFilter extends AbstractNode {
 
 						condition = MatchConditionRange.new(data, @parent, scope)
 					}
-					NodeKind.MatchConditionType {
+					AstKind.MatchConditionType {
 						condition = MatchConditionType.new(data, @parent, scope)
 
 						@binding?.unflagTypeTesting()

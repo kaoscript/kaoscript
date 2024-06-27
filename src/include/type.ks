@@ -269,8 +269,17 @@ abstract class Type {
 
 			data = data:&(Any)
 
-			match NodeKind(data.kind) {
-				NodeKind.ArrayType {
+			match AstKind(data.kind) {
+				AstKind.ArrayExpression {
+					var type = ArrayType.new(scope)
+
+					for var value in data.values {
+						type.addProperty(Type.fromAST(value, scope, defined, generics, node))
+					}
+
+					return type.flagComplete()
+				}
+				AstKind.ArrayType {
 					var mut type: Type = ArrayType.new(scope)
 
 					for var modifier in data.modifiers {
@@ -281,7 +290,7 @@ abstract class Type {
 						}
 					}
 
-					if ?#data.properties || ?data.rest{
+					if ?#data.properties || ?data.rest {
 						for var property in data.properties {
 							type.addProperty(Type.fromAST(property.type, scope, defined, generics, node))
 						}
@@ -296,7 +305,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind.ClassDeclaration {
+				AstKind.ClassDeclaration {
 					var type = ClassType.new(scope)
 
 					for var modifier in data.modifiers {
@@ -312,10 +321,10 @@ abstract class Type {
 
 					return NamedType.new(data.name.name, type.flagComplete())
 				}
-				NodeKind.ExclusionType {
+				AstKind.ExclusionType {
 					return ExclusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
-				NodeKind.FunctionDeclaration, NodeKind.MethodDeclaration {
+				AstKind.FunctionDeclaration, AstKind.MethodDeclaration {
 					if ?data.parameters {
 						return FunctionType.new([ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters], data, node).flagComplete()
 					}
@@ -323,26 +332,37 @@ abstract class Type {
 						return FunctionType.new([ParameterType.new(scope, AnyType.NullableUnexplicit, 0, Infinity)]:!!!(Array<ParameterType>), data, node).flagComplete()
 					}
 				}
-				NodeKind.FunctionExpression {
+				AstKind.FunctionExpression {
 					var parameters = [ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]
 
 					return FunctionType.new(parameters:!!!(Array<ParameterType>), generics, data, node).flagComplete()
 				}
-				NodeKind.FusionType {
+				AstKind.FusionType {
 					return FusionType.new(scope, [Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
-				NodeKind.Identifier {
+				AstKind.Identifier {
 					if var variable ?= scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
 					else if $runtime.getVariable(data.name, node) != null {
 						return Type.Any
 					}
+					else if scope.isMacro() {
+						return Type.Unknown
+					}
 					else {
 						ReferenceException.throwNotDefinedType(data.name, node)
 					}
 				}
-				NodeKind.MemberExpression {
+				AstKind.LambdaExpression {
+					var parameters = [ParameterType.fromAST(parameter, false, scope, defined, generics, node) for var parameter in data.parameters]
+
+					return FunctionType.new(parameters:!!!(Array<ParameterType>), generics, data, node).flagComplete()
+				}
+				AstKind.Literal {
+					return scope.reference('String')
+				}
+				AstKind.MemberExpression {
 					var object = Type.fromAST(data.object, scope, defined, generics, node)
 
 					if object.isAny() {
@@ -352,10 +372,21 @@ abstract class Type {
 						return object.getProperty(data.property.name)
 					}
 				}
-				NodeKind.NumericExpression {
+				AstKind.NumericExpression {
 					return scope.reference('Number')
 				}
-				NodeKind.ObjectType {
+				AstKind.ObjectExpression {
+					var type = ObjectType.new(scope)
+
+					for var { name, value } in data.properties {
+						if name.kind == AstKind.Literal {
+							type.addProperty(name.name, Type.fromAST(value, scope, defined, generics, node))
+						}
+					}
+
+					return type.flagComplete()
+				}
+				AstKind.ObjectType {
 					var mut type: Type = ObjectType.new(scope)
 
 					for var modifier in data.modifiers {
@@ -402,7 +433,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind.TypeList {
+				AstKind.TypeList {
 					var mut type = NamespaceType.new(scope)
 
 					for var property in data.types {
@@ -411,7 +442,7 @@ abstract class Type {
 
 					return type.flagComplete()
 				}
-				NodeKind.TypeReference {
+				AstKind.TypeReference {
 					var mut nullable = false
 
 					for var modifier in data.modifiers {
@@ -422,7 +453,7 @@ abstract class Type {
 						}
 					}
 
-					if NodeKind(data.typeName.kind) == NodeKind.Identifier {
+					if AstKind(data.typeName.kind) == AstKind.Identifier {
 						var name = Type.renameNative(data.typeName.name)
 
 						if name == 'Any' {
@@ -570,11 +601,14 @@ abstract class Type {
 
 							return scope.reference(name, nullable)
 						}
+						else if scope.isMacro() {
+							return Type.Unknown
+						}
 						else {
 							ReferenceException.throwNotDefinedType(data.typeName.name, node)
 						}
 					}
-					else if NodeKind(data.typeName.kind) == NodeKind.MemberExpression && !data.typeName.computed {
+					else if AstKind(data.typeName.kind) == AstKind.MemberExpression && !data.typeName.computed {
 						var type = Type.fromAST(data.typeName.object, scope, defined, generics, node)
 						var property = data.typeName.property.name
 
@@ -595,13 +629,13 @@ abstract class Type {
 						}
 					}
 				}
-				NodeKind.UnaryTypeExpression {
+				AstKind.UnaryTypeExpression {
 					match UnaryTypeOperatorKind(data.operator.kind) {
 						UnaryTypeOperatorKind.Constant {
 							return Type.fromAST(data.argument, scope, defined, generics, node).flagConstant()
 						}
 						UnaryTypeOperatorKind.TypeOf {
-							if NodeKind(data.argument.kind) == NodeKind.Identifier && data.argument.name == 'this' {
+							if AstKind(data.argument.kind) == AstKind.Identifier && data.argument.name == 'this' {
 								return ReferenceType.new(scope, 'this')
 							}
 							else {
@@ -625,13 +659,13 @@ abstract class Type {
 						}
 					}
 				}
-				NodeKind.UnionType {
+				AstKind.UnionType {
 					return Type.union(scope, ...[Type.fromAST(type, scope, defined, generics, node) for var type in data.types])
 				}
-				NodeKind.VariableDeclarator, NodeKind.FieldDeclaration {
+				AstKind.VariableDeclarator, AstKind.FieldDeclaration {
 					return Type.fromAST(data.type, scope, defined, generics, node)
 				}
-				NodeKind.VariantType {
+				AstKind.VariantType {
 					var type = VariantType.new(scope)
 						..setMaster(Type.fromAST(data.master, scope, defined, generics, node))
 
@@ -643,7 +677,7 @@ abstract class Type {
 			throw NotImplementedException.new(node)
 		} # }}}
 		fromAST(data, type: Type, node: AbstractNode): Type { # {{{
-			if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
+			if data.kind == AstKind.TypeReference && data.typeName.kind == AstKind.UnaryExpression && data.typeName.operator.kind == UnaryOperatorKind.Implicit {
 				var { name } = data.typeName.argument
 
 				if type.isAny() {
@@ -698,6 +732,18 @@ abstract class Type {
 			}
 
 			return names.length
+		} # }}}
+		getASTNode(data, scope: Scope, node: AbstractNode): Type { # {{{
+			match data {
+				is Ast {
+					var type = scope.reference('Ast').clone()
+						..addSubtype(data.kind.name, scope.reference('AstKind'), node)
+
+					return type
+				}
+			}
+
+			NotImplementedException.throw()
 		} # }}}
 		import(index, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): Type { # {{{
 			var data = if index is Number set metadata[index] else index

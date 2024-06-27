@@ -184,13 +184,13 @@ class VariableDeclaration extends AbstractNode {
 
 		for var data in @data.variables {
 			var declarator = match data.name.kind {
-				NodeKind.ArrayBinding {
+				AstKind.ArrayBinding {
 					set VariableBindingDeclarator.new(data, this)
 				}
-				NodeKind.Identifier {
+				AstKind.Identifier {
 					set VariableIdentifierDeclarator.new(data, this)
 				}
-				NodeKind.ObjectBinding {
+				AstKind.ObjectBinding {
 					set VariableBindingDeclarator.new(data, this)
 				}
 				else {

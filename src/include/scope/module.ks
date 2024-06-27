@@ -1,24 +1,26 @@
 class ModuleScope extends Scope {
 	private {
-		@chunkTypes							= {}
-		@declarations						= {}
-		@labelIndex							= -1
-		@lastLine: Boolean					= false
-		@line: Number						= 0
-		@lineOffset: Number					= 0
-		@macros: MacroDeclaration[]{}		= {}
-		@matchingTypes: Object<Array>		= {}
-		@predefined							= {}
-		@references							= {}
-		@renamedIndexes 					= {}
-		@renamedVariables					= {}
-		@reservedIndex		 				= -1
-		@standardLibrary: Boolean			= false
-		@stashes							= {}
-		@tempDeclarations: Array			= []
-		@tempIndex		 					= -1
-		@tempNames							= {}
-		@variables							= {}
+		@chunkTypes														= {}
+		@declarations													= {}
+		@labelIndex														= -1
+		@lastLine: Boolean												= false
+		@line: Number													= 0
+		@lineOffset: Number												= 0
+		@matchingTypes: Object<Array>									= {}
+		@predefined														= {}
+		@references														= {}
+		@renamedIndexes 												= {}
+		@renamedVariables												= {}
+		@reservedIndex					 								= -1
+		@standardLibrary: Boolean										= false
+		@stashes														= {}
+		// TODO!
+		// @syntimeFunctions: Syntime.SyntimeFunctionDeclaration[]{}		= {}
+		@syntimeFunctions: []{}											= {}
+		@tempDeclarations: Array										= []
+		@tempIndex		 												= -1
+		@tempNames														= {}
+		@variables														= {}
 	}
 	constructor(@standardLibrary) { # {{{
 		super()
@@ -85,33 +87,33 @@ class ModuleScope extends Scope {
 
 		return null
 	} # }}}
-	addMacro(name: String, macro: MacroDeclaration) { # {{{
-		if ?@macros[name] {
-			var type = macro.type()
-			var mut notAdded = true
-
-			for var m, index in @macros[name] while notAdded {
-				if type.isSubsetOf(m.type(), MatchingMode.Signature) {
-					@macros[name].splice(index, 0, macro)
-
-					notAdded = false
-				}
-			}
-
-			if notAdded {
-				@macros[name].push(macro)
-			}
-		}
-		else {
-			@macros[name] = [macro]
-		}
-	} # }}}
 	addStash(name, ...fn) { # {{{
 		if ?@stashes[name] {
 			@stashes[name].push(fn)
 		}
 		else {
 			@stashes[name] = [fn]
+		}
+	} # }}}
+	addSyntimeFunction(name: String, macro: Syntime.SyntimeFunctionDeclaration) { # {{{
+		if ?@syntimeFunctions[name] {
+			var type = macro.type()
+			var mut notAdded = true
+
+			for var m, index in @syntimeFunctions[name] while notAdded {
+				if type.isSubsetOf(m.type(), MatchingMode.Signature) {
+					@syntimeFunctions[name].splice(index, 0, macro)
+
+					notAdded = false
+				}
+			}
+
+			if notAdded {
+				@syntimeFunctions[name].push(macro)
+			}
+		}
+		else {
+			@syntimeFunctions[name] = [macro]
 		}
 	} # }}}
 	authority() => this
@@ -254,7 +256,7 @@ class ModuleScope extends Scope {
 		return null
 	} # }}}
 	getLineOffset() => @lineOffset
-	getMacro(name) => @macros[name]
+	getSyntimeFunction(name) => @syntimeFunctions[name]
 	getNewName(name: String): String { # {{{
 		var mut index = if @renamedIndexes[name] is Number set @renamedIndexes[name] + 1 else 1
 		var mut newName = '__ks_' + name + '_' + index
@@ -339,7 +341,7 @@ class ModuleScope extends Scope {
 
 		return false
 	} # }}}
-	hasMacro(name) => ?@macros[name]
+	hasMacro(name) => ?@syntimeFunctions[name]
 	override hasPredefinedVariable(name) { # {{{
 		return @predefined[`__\(name)`] is Variable
 	} # }}}
@@ -409,7 +411,7 @@ class ModuleScope extends Scope {
 		var regex = RegExp.new(`^\(name)\.`)
 		var list = []
 
-		for var m, n of @macros when regex.test(n) {
+		for var m, n of @syntimeFunctions when regex.test(n) {
 			list.push(...m)
 		}
 
@@ -424,8 +426,8 @@ class ModuleScope extends Scope {
 
 		return variables
 	} # }}}
-	listMacros(): MacroDeclaration[] => [...m for var m of @macros]
-	listMacros(name): Array => @macros[name] ?? []
+	listSyntimeFunctions(): Syntime.SyntimeFunctionDeclaration[] => [...m for var m of @syntimeFunctions]
+	listSyntimeFunctions(name): Array => @syntimeFunctions[name] ?? []
 	module() => this
 	processStash(name) { # {{{
 		var stash = @stashes[name]

@@ -44,8 +44,8 @@ abstract class AbstractNode {
 	hasAttribute(name: String): Boolean { # {{{
 		return false unless ?@data.attributes
 
-		for var attribute in @data.attributes when attribute.kind == NodeKind.AttributeDeclaration {
-			if attribute.declaration.kind == NodeKind.Identifier && attribute.declaration.name == name {
+		for var attribute in @data.attributes when attribute.kind == AstKind.AttributeDeclaration {
+			if attribute.declaration.kind == AstKind.Identifier && attribute.declaration.name == name {
 				return true
 			}
 		}
@@ -136,6 +136,6 @@ include {
 	'../statement/struct.ks'
 	'../statement/tuple.ks'
 	'../operator/index.ks'
-	'./macro.ks'
+	'./syntime/index.ks'
 }
 

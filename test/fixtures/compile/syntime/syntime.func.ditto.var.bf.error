@@ -1,0 +1,1 @@
+SyntaxException: A macro, named "foobar", already exists (fixtures/compile/syntime/syntime.func.ditto.var.bf.ks:4)

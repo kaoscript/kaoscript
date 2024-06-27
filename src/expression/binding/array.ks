@@ -376,7 +376,7 @@ class ArrayBindingElement extends Expression {
 			@name.analyse()
 
 			@named = true
-			@thisAlias = @data.internal.kind == NodeKind.ThisExpression
+			@thisAlias = @data.internal.kind == AstKind.ThisExpression
 		}
 
 		if ?@data.defaultValue {
@@ -414,7 +414,7 @@ class ArrayBindingElement extends Expression {
 
 		if @hasDefaultValue {
 			if @explicitlyRequired && @type.isNullable() {
-				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+				if @data.defaultValue.kind == AstKind.Identifier && @data.defaultValue.name == 'null' {
 					pass
 				}
 				else {

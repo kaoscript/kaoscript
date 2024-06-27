@@ -38,7 +38,7 @@ class ClassDestructorDeclaration extends Statement {
 	} # }}}
 	analyse() { # {{{
 		var parameter = Parameter.new({
-			kind: NodeKind.Parameter
+			kind: AstKind.Parameter
 			modifiers: []
 			internal: $ast.identifier('that')
 		}, this)

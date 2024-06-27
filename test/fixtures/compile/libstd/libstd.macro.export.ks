@@ -1,7 +1,7 @@
 #![libstd(package='.')]
 
-macro print(...args) {
-	macro {
+syntime func print(...args) {
+	quote {
 		#[rules(ignore-error)]
 		console.log(#(args))
 	}

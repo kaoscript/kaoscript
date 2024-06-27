@@ -44,7 +44,7 @@ class EnumDeclaration extends Statement {
 			@enum.setGenerator(@initial, @step)
 		}
 
-		for var data in @data.members when data.kind == NodeKind.FieldDeclaration {
+		for var data in @data.members when data.kind == AstKind.FieldDeclaration {
 			EnumFieldDeclaration.new(data, @enum, this).analyse()
 		}
 
@@ -54,7 +54,7 @@ class EnumDeclaration extends Statement {
 
 		for var data in @data.members {
 			match data.kind {
-				NodeKind.EnumValue {
+				AstKind.EnumValue {
 					var value = EnumValueDeclaration.new(data, @enum, this)
 					var name = value.name()
 
@@ -64,10 +64,10 @@ class EnumDeclaration extends Statement {
 
 					value.analyse()
 				}
-				NodeKind.FieldDeclaration {
+				AstKind.FieldDeclaration {
 					pass
 				}
-				NodeKind.MethodDeclaration {
+				AstKind.MethodDeclaration {
 					var method = EnumMethodDeclaration.new(data, this)
 					var name = method.name()
 
@@ -310,21 +310,21 @@ class EnumValueDeclaration extends AbstractNode {
 
 		if ?value {
 			match value.kind {
-				NodeKind.Identifier {
+				AstKind.Identifier {
 					@type = @enum.createAlias(@name)
 						..setAlias(value.name, @enum)
 				}
-				NodeKind.JunctionExpression when value.operator.kind == BinaryOperatorKind.JunctionOr {
+				AstKind.JunctionExpression when value.operator.kind == BinaryOperatorKind.JunctionOr {
 					@type = @enum.createAlias(@name)
 
 					for var { name } in value.operands {
 						@type.addAlias(name, @enum)
 					}
 				}
-				NodeKind.Literal when @enum.kind() == EnumTypeKind.String {
+				AstKind.Literal when @enum.kind() == EnumTypeKind.String {
 					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
-				NodeKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
+				AstKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
 					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
 				else {

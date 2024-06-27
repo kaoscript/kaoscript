@@ -64,22 +64,22 @@ class ClassDeclaration extends Statement {
 		}
 		else {
 			match data.kind {
-				NodeKind.ExpressionStatement {
+				AstKind.ExpressionStatement {
 					var expression = data.expression
 
 					match expression.kind {
-						NodeKind.BinaryExpression {
+						AstKind.BinaryExpression {
 							if expression.operator.kind == BinaryOperatorKind.Assignment && expression.operator.assignment == AssignmentOperatorKind.Equals {
 								if $ast.isThisField(name, expression.left) {
 									return !$ast.some(expression.right, $ast.isThisField^^(name, ^))
 								}
 							}
 						}
-						NodeKind.CallExpression {
-							if constructor && expression.callee.kind == NodeKind.Identifier {
+						AstKind.CallExpression {
+							if constructor && expression.callee.kind == AstKind.Identifier {
 								if expression.callee.name == 'this' || (extending && expression.callee.name == 'super') {
 									for var arg in expression.arguments {
-										if arg.kind == NodeKind.Identifier && arg.name == name {
+										if arg.kind == AstKind.Identifier && arg.name == name {
 											return true
 										}
 									}
@@ -88,7 +88,7 @@ class ClassDeclaration extends Statement {
 						}
 					}
 				}
-				NodeKind.ReturnStatement {
+				AstKind.ReturnStatement {
 					return ClassDeclaration.isAssigningAlias(data.value, name, constructor, extending)
 				}
 			}
@@ -154,9 +154,9 @@ class ClassDeclaration extends Statement {
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		for var data in @data.members when data.kind == NodeKind.MacroDeclaration {
+		for var data in @data.members when data.kind == AstKind.SyntimeFunctionDeclaration {
 			var name = data.name.name
-			var declaration = MacroDeclaration.new(data, this, null)
+			var declaration = Syntime.SyntimeFunctionDeclaration.new(data, this, null)
 
 			if @macros[name] is Array {
 				@macros[name].push(declaration)
@@ -203,18 +203,12 @@ class ClassDeclaration extends Statement {
 
 		for var data in @data.members {
 			match data.kind {
-				NodeKind.CommentBlock {
-				}
-				NodeKind.CommentLine {
-				}
-				NodeKind.FieldDeclaration {
+				AstKind.FieldDeclaration {
 					var declaration = ClassVariableDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind.MacroDeclaration {
-				}
-				NodeKind.MethodDeclaration {
+				AstKind.MethodDeclaration {
 					var declaration = if @class.isConstructor(data.name.name) {
 						set ClassConstructorDeclaration.new(data, this)
 					}
@@ -227,15 +221,21 @@ class ClassDeclaration extends Statement {
 
 					declaration.analyse()
 				}
-				NodeKind.ProxyDeclaration {
+				AstKind.ProxyDeclaration {
 					var declaration = ClassProxyDeclaration.new(data, this)
 
 					declaration.analyse()
 				}
-				NodeKind.ProxyGroupDeclaration {
+				AstKind.ProxyGroupDeclaration {
 					var declaration = ClassProxyGroupDeclaration.new(data, this)
 
 					declaration.analyse()
+				}
+				AstKind.CommentBlock, AstKind.CommentLine {
+					pass
+				}
+				AstKind.SyntimeFunctionDeclaration {
+					pass
 				}
 				else {
 					throw NotSupportedException.new(`Unknow kind \(data.kind)`, this)
@@ -743,10 +743,10 @@ class ClassDeclaration extends Statement {
 
 		return scope
 	} # }}}
-	registerMacro(name, macro) { # {{{
-		@scope.addMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@scope.addSyntimeFunction(name, macro)
 
-		@parent.registerMacro(`\(@name).\(name)`, macro)
+		@parent.registerSyntimeFunction(`\(@name).\(name)`, macro)
 	} # }}}
 	toContinousES6Fragments(fragments) { # {{{
 		var mut root = fragments

@@ -11,7 +11,7 @@ class ArrayExpression extends Expression {
 	analyse() { # {{{
 		for var data in @data.values {
 			var value =
-				if data.kind == NodeKind.RestrictiveExpression {
+				if data.kind == AstKind.RestrictiveExpression {
 					@restrictive = true
 
 					set ArrayRestrictiveMember.new(data, this)

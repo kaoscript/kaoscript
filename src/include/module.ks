@@ -41,7 +41,7 @@ export class Module {
 		@standardLibrary = @options.libstd.current
 
 		for var attr in @data.attributes {
-			if attr.declaration.kind == NodeKind.Identifier &&	attr.declaration.name == 'bin' {
+			if attr.declaration.kind == AstKind.Identifier &&	attr.declaration.name == 'bin' {
 				@binary = true
 			}
 		}
@@ -61,6 +61,8 @@ export class Module {
 		}
 
 		@hashes['.'] = @compiler.sha256(file, data)
+
+		@body = ModuleBlock.new(@data, this)
 	} # }}}
 	addAlien(name: String, type: Type): valueof this { # {{{
 		@aliens[name] = type
@@ -192,7 +194,7 @@ export class Module {
 			@exportedMacros[name] = [data]
 		}
 	} # }}}
-	exportMacro(name: String, macro: MacroDeclaration) { # {{{
+	exportMacro(name: String, macro: Syntime.SyntimeFunctionDeclaration) { # {{{
 		@body.exportMacro(name, macro)
 	} # }}}
 	file() => @file
@@ -229,6 +231,7 @@ export class Module {
 	getAlien(name: String) => @aliens[name]
 	getArgument(index: Number) => @arguments[index]
 	getRequirement(name: String) => @requirementByNames[name]
+	getTimeContext(): TimeContext? => @compiler.getTimeContext()
 	hasInclude(path) { # {{{
 		return @includePaths[path] == true || @includePaths[path] is String
 	} # }}}
@@ -236,8 +239,6 @@ export class Module {
 		@imports[name] = true
 	} # }}}
 	initiate() { # {{{
-		@body = ModuleBlock.new(@data, this)
-
 		@body.initiate()
 	} # }}}
 	isBinary() => @binary
@@ -684,7 +685,7 @@ class ModuleBlock extends AbstractNode {
 
 		var mut start = 0
 
-		if @data.body[0].kind == NodeKind.ShebangDeclaration {
+		if @data.body[0].kind == AstKind.ShebangDeclaration {
 			@module.flagBinary()
 
 			start = 1
@@ -692,9 +693,9 @@ class ModuleBlock extends AbstractNode {
 
 		if @options.libstd.enable {
 			var statement = $compile.statement({
-				kind: NodeKind.ImportDeclaration
+				kind: AstKind.ImportDeclaration
 				declarations: [{
-					kind: NodeKind.ImportDeclarator
+					kind: AstKind.ImportDeclarator
 					source: {
 						value: @options.libstd.package
 					}
@@ -880,8 +881,8 @@ class ModuleBlock extends AbstractNode {
 	} # }}}
 	includePath() => null
 	module() => @module
-	registerMacro(name, macro) { # {{{
-		@scope.addMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@scope.addSyntimeFunction(name, macro)
 	} # }}}
 	recipient() => @module
 	removeTypeTest(name: String): Type? { # {{{

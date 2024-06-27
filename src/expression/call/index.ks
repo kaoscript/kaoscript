@@ -104,7 +104,7 @@ class CallExpression extends Expression {
 			@arguments.push(argument)
 		}
 
-		if @data.callee.kind == NodeKind.MemberExpression {
+		if @data.callee.kind == AstKind.MemberExpression {
 			var mut computed = false
 			var mut nullable = false
 
@@ -395,7 +395,7 @@ class CallExpression extends Expression {
 				return true
 			}
 		}
-		else if @data.callee.kind == NodeKind.Identifier && @data.callee.name == name {
+		else if @data.callee.kind == AstKind.Identifier && @data.callee.name == name {
 			return true
 		}
 
@@ -411,7 +411,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			return true if @object.isUsingNonLocalVariables(scope)
 		}
-		else if @data.callee.kind == NodeKind.Identifier {
+		else if @data.callee.kind == AstKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if !scope.hasDeclaredVariable(variable.name()) {
@@ -446,7 +446,7 @@ class CallExpression extends Expression {
 				return true
 			}
 		}
-		else if @data.callee.kind == NodeKind.Identifier && @data.callee.name == name {
+		else if @data.callee.kind == AstKind.Identifier && @data.callee.name == name {
 			return true
 		}
 
@@ -462,7 +462,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			@object.listLocalVariables(scope, variables)
 		}
-		else if @data.callee.kind == NodeKind.Identifier {
+		else if @data.callee.kind == AstKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if scope.hasDeclaredVariable(variable.name()) {
@@ -480,7 +480,7 @@ class CallExpression extends Expression {
 		if @object != null {
 			@object.listNonLocalVariables(scope, variables)
 		}
-		else if @data.callee.kind == NodeKind.Identifier {
+		else if @data.callee.kind == AstKind.Identifier {
 			var variable = @scope.getVariable(@data.callee.name)
 
 			if !variable.isModule() && !scope.hasDeclaredVariable(variable.name()) {
@@ -717,10 +717,10 @@ class CallExpression extends Expression {
 		if ?@object {
 			fragments += `\(@object.toQuote()).\(@property)`
 		}
-		else if @data.callee.kind == NodeKind.Identifier {
+		else if @data.callee.kind == AstKind.Identifier {
 			fragments += @data.callee.name
 		}
-		else if @data.callee.kind == NodeKind.ThisExpression {
+		else if @data.callee.kind == AstKind.ThisExpression {
 			fragments += `@\(@data.callee.name.name)`
 		}
 		else {

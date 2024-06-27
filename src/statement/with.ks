@@ -21,7 +21,7 @@ class WithStatement extends Statement {
 		@hasFinally = ?@data.finalizer
 
 		for var data in @data.variables {
-			if data.kind == NodeKind.VariableDeclaration {
+			if data.kind == AstKind.VariableDeclaration {
 				var declaration = VariableDeclaration.new(data, this, @scope, @scope, false)
 
 				declaration.initiate()

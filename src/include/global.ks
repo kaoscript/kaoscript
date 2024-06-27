@@ -1,4 +1,4 @@
-extern console, JSON
+extern Buffer, console, JSON, parseInt
 
 var $extensions = { # {{{
 	binary: '.ksb',
@@ -10,12 +10,12 @@ var $extensions = { # {{{
 
 namespace $ast {
 	func block(data) { # {{{
-		if data.kind == NodeKind.Block {
+		if data.kind == AstKind.Block {
 			return data
 		}
 		else {
 			return {
-				kind: NodeKind.Block
+				kind: AstKind.Block
 				statements: [data]
 				start: data.start
 				end: data.end
@@ -25,18 +25,18 @@ namespace $ast {
 	func body(data?) { # {{{
 		if !?data.body {
 			return {
-				kind: NodeKind.Block
+				kind: AstKind.Block
 				statements: []
 				start: data.start
 				end: data.end
 			}
 		}
-		else if data.body.kind == NodeKind.Block || data.body.kind == NodeKind.ReturnStatement {
+		else if data.body.kind == AstKind.Block || data.body.kind == AstKind.ReturnStatement {
 			return data.body
 		}
-		else if data.body.kind == NodeKind.IfStatement || data.body.kind == NodeKind.UnlessStatement {
+		else if data.body.kind == AstKind.IfStatement || data.body.kind == AstKind.UnlessStatement {
 			return {
-				kind: NodeKind.Block
+				kind: AstKind.Block
 				statements: [data.body]
 				start: data.body.start
 				end: data.body.end
@@ -44,7 +44,7 @@ namespace $ast {
 		}
 		else {
 			return {
-				kind: NodeKind.ReturnStatement
+				kind: AstKind.ReturnStatement
 				value: data.body
 				start: data.body.start
 				end: data.body.end
@@ -53,7 +53,7 @@ namespace $ast {
 	} # }}}
 	func call(callee, arguments = []) { # {{{
 		return {
-			kind: NodeKind.CallExpression
+			kind: AstKind.CallExpression
 			modifiers: []
 			scope: { kind: ScopeKind.This }
 			callee
@@ -74,7 +74,7 @@ namespace $ast {
 	func identifier(name) { # {{{
 		if name is String {
 			return {
-				kind: NodeKind.Identifier
+				kind: AstKind.Identifier
 				name: name
 			}
 		}
@@ -84,11 +84,11 @@ namespace $ast {
 	} # }}}
 	func isThisField(name: String, data): Boolean { # {{{
 		match data.kind {
-			NodeKind.ThisExpression {
+			AstKind.ThisExpression {
 				return data.name.name == name
 			}
-			NodeKind.MemberExpression {
-				return data.object.kind == NodeKind.Identifier && data.object.name == 'this' && data.property.kind == NodeKind.Identifier && (data.property.name == name || data.property.name == `_\(name)`)
+			AstKind.MemberExpression {
+				return data.object.kind == AstKind.Identifier && data.object.name == 'this' && data.property.kind == AstKind.Identifier && (data.property.name == name || data.property.name == `_\(name)`)
 			}
 		}
 
@@ -96,18 +96,18 @@ namespace $ast {
 	} # }}}
 	func parameter() { # {{{
 		return {
-			kind: NodeKind.Parameter
+			kind: AstKind.Parameter
 			attributes: []
 			modifiers: []
 		}
 	} # }}}
 	func path(data): String? { # {{{
 		match data.kind {
-			NodeKind.Identifier {
+			AstKind.Identifier {
 				return data.name
 			}
-			NodeKind.MemberExpression {
-				if data.property.kind == NodeKind.Identifier {
+			AstKind.MemberExpression {
+				if data.property.kind == AstKind.Identifier {
 					if var object ?= $ast.path(data.object) {
 						return `\(object).\(data.property.name)`
 					}
@@ -119,19 +119,19 @@ namespace $ast {
 	} # }}}
 	func return(data? = null) { # {{{
 		return {
-			kind: NodeKind.ReturnStatement
+			kind: AstKind.ReturnStatement
 			value: data
 			start: data.start if ?data
 		}
 	} # }}}
 	func some(data, filter): Boolean { # {{{
 		match data.kind {
-			NodeKind.BinaryExpression {
+			AstKind.BinaryExpression {
 				if filter(data.left) || filter(data.right) || $ast.some(data.left, filter) || $ast.some(data.right, filter) {
 					return true
 				}
 			}
-			NodeKind.CallExpression {
+			AstKind.CallExpression {
 				for var argument in data.arguments {
 					if filter(argument) || $ast.some(argument, filter) {
 						return true
@@ -146,7 +146,7 @@ namespace $ast {
 		var mut object = data
 		var mut property = ''
 
-		while object.kind == NodeKind.MemberExpression {
+		while object.kind == AstKind.MemberExpression {
 			property = `.\(object.property.name)\(property)`
 
 			object = object.object
@@ -156,7 +156,7 @@ namespace $ast {
 	} # }}}
 	func topicReference() { # {{{
 		return {
-			kind: NodeKind.TopicReference
+			kind: AstKind.TopicReference
 			modifiers: []
 		}
 	} # }}}
@@ -172,7 +172,7 @@ namespace $compile {
 		if var clazz ?= $expressions[data.kind] {
 			result = if clazz is Class set clazz.new(data, parent, scope) else clazz(data, parent, scope)
 		}
-		else if data.kind == NodeKind.BinaryExpression {
+		else if data.kind == AstKind.BinaryExpression {
 			if data.operator.kind == BinaryOperatorKind.Assignment {
 				if var clazz ?= $assignmentOperators[data.operator.assignment] {
 					result = clazz.new(data, parent, scope)
@@ -188,7 +188,7 @@ namespace $compile {
 				throw NotSupportedException.new(`Unexpected binary operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind.PolyadicExpression {
+		else if data.kind == AstKind.PolyadicExpression {
 			if var clazz ?= $polyadicOperators[data.operator.kind] {
 				result = clazz.new(data, parent, scope)
 			}
@@ -196,7 +196,7 @@ namespace $compile {
 				throw NotSupportedException.new(`Unexpected polyadic operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind.UnaryExpression {
+		else if data.kind == AstKind.UnaryExpression {
 			if var clazz ?= $unaryOperators[data.operator.kind] {
 				result = clazz.new(data, parent, scope)
 			}
@@ -204,7 +204,7 @@ namespace $compile {
 				throw NotSupportedException.new(`Unexpected unary operator \(data.operator.kind)`, parent)
 			}
 		}
-		else if data.kind == NodeKind.JunctionExpression {
+		else if data.kind == AstKind.JunctionExpression {
 			throw NotSupportedException.new(`Unexpected junction expression`, parent)
 		}
 		else {
@@ -216,8 +216,24 @@ namespace $compile {
 	func function(data, parent, scope = parent.scope()) => FunctionBlock.new($ast.block(data), parent, scope)
 	func statement(data, parent, scope = parent.scope()) { # {{{
 		if Attribute.conditional(data, parent) {
-			if var clazz ?= $statements[data.kind] {
-				return clazz.new(data, parent, scope)
+			if data.kind == AstKind.ExpressionStatement {
+				match data.expression.kind {
+					AstKind.CallExpression {
+						return Syntime.callStatement(data, parent, scope)
+					}
+					AstKind.SyntimeCallExpression {
+						return Syntime.callSyntimeExpression(data.expression, parent, scope, true)
+					}
+					AstKind.SyntimeExpression {
+						return Syntime.SyntimeStatement.new(data.expression, parent, scope)
+					}
+					else {
+						return ExpressionStatement.new(data, parent, scope)
+					}
+				}
+			}
+			else if var class ?= $statements[data.kind] {
+				return class.new(data, parent, scope)
 			}
 			else {
 				throw NotSupportedException.new(`Unexpected statement \(data.kind)`, parent)

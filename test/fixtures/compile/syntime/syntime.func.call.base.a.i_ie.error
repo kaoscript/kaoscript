@@ -1,0 +1,1 @@
+ReferenceException: The macro "foobar" can't be matched to given arguments (Number, Number) (fixtures/compile/syntime/syntime.func.call.base.a.i_ie.ks:1)

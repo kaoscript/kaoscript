@@ -1114,18 +1114,18 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind.ExpressionStatement
+					kind: AstKind.ExpressionStatement
 					attributes: []
 					modifiers: []
 					expression: {
-						kind: NodeKind.CallExpression
+						kind: AstKind.CallExpression
 						attributes: []
 						modifiers: []
 						scope: {
 							kind: ScopeKind.This
 						}
 						callee: {
-							kind: NodeKind.Identifier
+							kind: AstKind.Identifier
 							name: 'super'
 							start: @data.start
 							end: @data.start
@@ -1160,16 +1160,16 @@ class ImplementDividedClassConstructorDeclaration extends Statement {
 	class() => @variable
 	private getConstructorIndex(body: Array) { # {{{
 		for var statement, index in body {
-			if statement.kind == NodeKind.ExpressionStatement {
+			if statement.kind == AstKind.ExpressionStatement {
 				var expression = statement.expression
 
-				if expression.kind == NodeKind.CallExpression {
-					if expression.callee.kind == NodeKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super' || (@overwrite && expression.callee.name == 'precursor')) {
+				if expression.kind == AstKind.CallExpression {
+					if expression.callee.kind == AstKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super' || (@overwrite && expression.callee.name == 'precursor')) {
 						return index
 					}
 				}
 			}
-			else if statement.kind == NodeKind.IfStatement {
+			else if statement.kind == AstKind.IfStatement {
 				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}

@@ -24,8 +24,8 @@ class IfStatement extends Statement {
 			var mut previousScope = @scope!?
 
 			for var data in @data.declarations {
-				var declarationData = if data[0].kind == NodeKind.VariableDeclaration set data[0] else data[1]
-				var conditionData = if data[0].kind != NodeKind.VariableDeclaration set data[0] else if ?data[1] && data[1].kind != NodeKind.VariableDeclaration set data[1] else null
+				var declarationData = if data[0].kind == AstKind.VariableDeclaration set data[0] else data[1]
+				var conditionData = if data[0].kind != AstKind.VariableDeclaration set data[0] else if ?data[1] && data[1].kind != AstKind.VariableDeclaration set data[1] else null
 
 				bindingScope = @newScope(bindingScope, ScopeType.Bleeding)
 
@@ -35,7 +35,7 @@ class IfStatement extends Statement {
 				@declarations.push({
 					declaration
 					declarationData
-					declarationFirst: data[0].kind == NodeKind.VariableDeclaration
+					declarationFirst: data[0].kind == AstKind.VariableDeclaration
 					bindingScope
 					operator: declarationData.operator.assignment
 					hasCondition: ?conditionData
@@ -106,7 +106,7 @@ class IfStatement extends Statement {
 
 			@scope.line(@data.whenFalse.start.line)
 
-			if @data.whenFalse.kind == NodeKind.IfStatement {
+			if @data.whenFalse.kind == AstKind.IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
 					..setCascade(true)
 					..initiate()

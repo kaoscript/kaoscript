@@ -1,4 +1,4 @@
-macro foobar(@x: String) {
+syntime func foobar(x: String) {
 	echo(x)
 }
 

@@ -155,10 +155,10 @@ class EnumType extends Type {
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind.EnumValue {
+			AstKind.EnumValue {
 				@createValue(data.name.name)
 			}
-			NodeKind.MethodDeclaration {
+			AstKind.MethodDeclaration {
 				var mut instance = true
 
 				for var i from 0 to~ data.modifiers.length while instance {

@@ -17,9 +17,9 @@ class ObjectExpression extends Expression {
 			var late property
 
 			match data.kind {
-				NodeKind.ObjectMember {
+				AstKind.ObjectMember {
 					match data.name.kind {
-						NodeKind.Identifier, NodeKind.Literal {
+						AstKind.Identifier, AstKind.Literal {
 							property = ObjectLiteralMember.new(data, this)
 							property.analyse()
 
@@ -29,7 +29,7 @@ class ObjectExpression extends Expression {
 
 							names[property.reference()] = true
 						}
-						NodeKind.ThisExpression {
+						AstKind.ThisExpression {
 							property = ObjectThisMember.new(data, this)
 							property.analyse()
 
@@ -45,7 +45,7 @@ class ObjectExpression extends Expression {
 						}
 					}
 				}
-				NodeKind.RestrictiveExpression {
+				AstKind.RestrictiveExpression {
 					property = ObjectRestrictiveMember.new(data, this)
 					property.analyse()
 
@@ -57,9 +57,9 @@ class ObjectExpression extends Expression {
 						names[reference] = true
 					}
 				}
-				NodeKind.ShorthandProperty {
+				AstKind.ShorthandProperty {
 					match data.name.kind {
-						NodeKind.Identifier {
+						AstKind.Identifier {
 							property = ObjectLiteralMember.new(data, this)
 							property.analyse()
 
@@ -69,7 +69,7 @@ class ObjectExpression extends Expression {
 
 							names[property.reference()] = true
 						}
-						NodeKind.ThisExpression {
+						AstKind.ThisExpression {
 							property = ObjectThisMember.new(data, this)
 							property.analyse()
 
@@ -84,11 +84,11 @@ class ObjectExpression extends Expression {
 						}
 					}
 				}
-				NodeKind.SpreadExpression {
+				AstKind.SpreadExpression {
 					property = ObjectFilteredMember.new(data, this)
 					property.analyse()
 				}
-				NodeKind.UnaryExpression {
+				AstKind.UnaryExpression {
 					property = ObjectSpreadMember.new(data, this)
 					property.analyse()
 				}
@@ -423,7 +423,7 @@ class ObjectComputedMember extends Expression {
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
-		if @data.name.kind == NodeKind.ComputedPropertyName {
+		if @data.name.kind == AstKind.ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
 		}
 		else {
@@ -594,7 +594,7 @@ class ObjectLiteralMember extends Expression {
 	analyse() { # {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget.Property, @file())
 
-		if @data.name.kind == NodeKind.Identifier	{
+		if @data.name.kind == AstKind.Identifier	{
 			@name = Literal.new(@data.name, this, @scope:!!!(Scope), @data.name.name)
 
 			this.reference('.' + @data.name.name)
@@ -607,14 +607,14 @@ class ObjectLiteralMember extends Expression {
 			this.reference('[' + $quote(@data.name.value) + ']')
 		}
 
-		if @data.kind == NodeKind.ObjectMember {
+		if @data.kind == AstKind.ObjectMember {
 			@value = $compile.expression(@data.value, this)
 
-			@function = @data.value.kind == NodeKind.FunctionExpression
+			@function = @data.value.kind == AstKind.FunctionExpression
 
 			@shorthand =
-				@data.name.kind == NodeKind.Identifier &&
-				@data.value.kind == NodeKind.Identifier &&
+				@data.name.kind == AstKind.Identifier &&
+				@data.value.kind == AstKind.Identifier &&
 				@data.name.name == @data.value.name
 		}
 		else {
@@ -680,15 +680,15 @@ class ObjectRestrictiveMember extends Expression {
 		@whenTrueScope = @newScope(@bindingScope, ScopeType.InlineBlock)
 
 		match @data.expression.kind {
-			NodeKind.ObjectMember {
+			AstKind.ObjectMember {
 				match @data.expression.name.kind {
-					NodeKind.Identifier, NodeKind.Literal {
+					AstKind.Identifier, AstKind.Literal {
 						@property = ObjectLiteralMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
-					NodeKind.ThisExpression {
+					AstKind.ThisExpression {
 						@property = ObjectThisMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
@@ -700,15 +700,15 @@ class ObjectRestrictiveMember extends Expression {
 					}
 				}
 			}
-			NodeKind.ShorthandProperty {
+			AstKind.ShorthandProperty {
 				match @data.expression.name.kind {
-					NodeKind.Identifier {
+					AstKind.Identifier {
 						@property = ObjectLiteralMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
 						this.reference(@property.reference())
 					}
-					NodeKind.ThisExpression {
+					AstKind.ThisExpression {
 						@property = ObjectThisMember.new(@data.expression, this, @whenTrueScope)
 						@property.analyse()
 
@@ -719,11 +719,11 @@ class ObjectRestrictiveMember extends Expression {
 					}
 				}
 			}
-			NodeKind.SpreadExpression {
+			AstKind.SpreadExpression {
 				@property = ObjectFilteredMember.new(@data.expression, this, @whenTrueScope)
 				@property.analyse()
 			}
-			NodeKind.UnaryExpression {
+			AstKind.UnaryExpression {
 				@property = ObjectSpreadMember.new(@data.expression, this, @whenTrueScope)
 				@property.analyse()
 			}

@@ -74,7 +74,7 @@ class ParameterType extends Type {
 			}
 
 			for var attribute in data.attributes {
-				if attribute.kind == NodeKind.AttributeDeclaration && attribute.declaration.kind == NodeKind.Identifier && attribute.declaration.name == 'retain' {
+				if attribute.kind == AstKind.AttributeDeclaration && attribute.declaration.kind == AstKind.Identifier && attribute.declaration.name == 'retain' {
 					parameter.flagRetained()
 				}
 			}
@@ -314,7 +314,7 @@ class ParameterType extends Type {
 	max(): valueof @max
 	min(): valueof @min
 	setDefaultValue(@defaultValue, @comprehensive = true, @required = false, node) { # {{{
-		if !@variableType.isNullable() && defaultValue.kind == NodeKind.Identifier && defaultValue.name == 'null' {
+		if !@variableType.isNullable() && defaultValue.kind == AstKind.Identifier && defaultValue.name == 'null' {
 			TypeException.throwInvalidAssignment(@internalName, @variableType, Type.Null, node)
 		}
 

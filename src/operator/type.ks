@@ -295,7 +295,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind.JunctionExpression {
+		if @data.right.kind == AstKind.JunctionExpression {
 			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind.JunctionAnd {
@@ -442,7 +442,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind.JunctionExpression {
+		if @data.right.kind == AstKind.JunctionExpression {
 			var late type: Type
 
 			if @data.right.operator.kind == BinaryOperatorKind.JunctionAnd {

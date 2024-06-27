@@ -300,6 +300,9 @@ export class ReferenceException extends Exception {
 				throw ReferenceException.new(`The instance method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for var argument in arguments].join(', ')))`, node)
 			}
 		} # }}}
+		throwNoMatchingMacro(name, node): Never ~ ReferenceException { # {{{
+			throw ReferenceException.new(`The macro "\(name)" can't be matched`, node)
+		} # }}}
 		throwNoMatchingMacro(name, arguments, node): Never ~ ReferenceException { # {{{
 			if arguments.length == 0 {
 				throw ReferenceException.new(`The macro "\(name)" can't be matched to no arguments`, node)

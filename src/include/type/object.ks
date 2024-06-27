@@ -248,9 +248,9 @@ class ObjectType extends Type {
 
 			@variantType.flagComplete()
 
-			for var { kind, type } in data.properties when kind == NodeKind.PropertyType && type.kind == NodeKind.VariantType {
+			for var { kind, type } in data.properties when kind == AstKind.PropertyType && type.kind == AstKind.VariantType {
 				for var property in type.properties {
-					if property.kind == NodeKind.VariantField && ?property.type {
+					if property.kind == AstKind.VariantField && ?property.type {
 						var names = [name for var { name } in property.names]
 
 						@variantType.addField(names, Type.fromAST(property.type, scope, true, generics, node))

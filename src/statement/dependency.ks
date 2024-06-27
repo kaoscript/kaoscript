@@ -7,7 +7,7 @@ abstract class DependencyStatement extends Statement {
 		var name = declaration.name.name
 
 		match declaration.kind {
-			NodeKind.ClassDeclaration {
+			AstKind.ClassDeclaration {
 				var mut exhaustive = if options.rules.nonExhaustive set false else null
 				// var mut libstd = false
 				// TODO! remove newline
@@ -98,7 +98,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind.EnumDeclaration {
+			AstKind.EnumDeclaration {
 				var mut ekind = EnumTypeKind.Number
 
 				if ?declaration.type {
@@ -125,7 +125,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind.FunctionDeclaration {
+			AstKind.FunctionDeclaration {
 				var mut type = null
 				if ?declaration.parameters {
 					var parameters = [ParameterType.fromAST(parameter, this) for var parameter in declaration.parameters]
@@ -151,7 +151,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind.NamespaceDeclaration {
+			AstKind.NamespaceDeclaration {
 				var mut exhaustive = if options.rules.nonExhaustive set false else null
 				// var mut libstd = false
 				// TODO! remove newline
@@ -216,7 +216,7 @@ abstract class DependencyStatement extends Statement {
 
 				return variable
 			}
-			NodeKind.VariableDeclarator {
+			AstKind.VariableDeclarator {
 				var mut type = Type.fromAST(declaration.type, this)
 
 				var instance = type is ClassType
@@ -303,7 +303,7 @@ class ExternDeclarator extends DependencyStatement {
 		var mut variable = @scope.getVariable(@name)
 
 		if ?variable && !variable.isPredefined() {
-			if @data.kind == NodeKind.FunctionDeclaration {
+			if @data.kind == AstKind.FunctionDeclaration {
 				var late parameters
 				if @data.parameters?.length != 0 {
 					parameters = [ParameterType.fromAST(parameter, this) for var parameter in @data.parameters]
@@ -470,7 +470,7 @@ class RequireDeclaration extends DependencyStatement {
 
 		for var declaration in @data.declarations {
 			if var variable ?= @scope.getVariable(declaration.name.name) {
-				if declaration.kind == NodeKind.FunctionDeclaration {
+				if declaration.kind == AstKind.FunctionDeclaration {
 					var requirement = module.getRequirement(declaration.name.name)
 
 					var late parameters

@@ -117,7 +117,7 @@ class ClassConstructorDeclaration extends Statement {
 						is CallExpression {
 							var data = node.data()
 
-							if data.callee.kind == NodeKind.ThisExpression {
+							if data.callee.kind == AstKind.ThisExpression {
 								SyntaxException.throwNotYetDefined(`@\(data.callee.name.name)`, node)
 							}
 						}
@@ -223,18 +223,18 @@ class ClassConstructorDeclaration extends Statement {
 		if extendsType.matchArguments([], this) {
 			if extendsType.hasConstructors() || extendsType.isSealed() {
 				@block.addDataStatement({
-					kind: NodeKind.ExpressionStatement
+					kind: AstKind.ExpressionStatement
 					attributes: []
 					modifiers: []
 					expression: {
-						kind: NodeKind.CallExpression
+						kind: AstKind.CallExpression
 						attributes: []
 						modifiers: []
 						scope: {
 							kind: ScopeKind.This
 						}
 						callee: {
-							kind: NodeKind.Identifier
+							kind: AstKind.Identifier
 							name: 'super'
 							start: @data.start
 							end: @data.start
@@ -280,16 +280,16 @@ class ClassConstructorDeclaration extends Statement {
 	} # }}}
 	private getConstructorIndex(body: Array) { # {{{
 		for var statement, index in body {
-			if statement.kind == NodeKind.ExpressionStatement {
+			if statement.kind == AstKind.ExpressionStatement {
 				var expression = statement.expression
 
-				if expression.kind == NodeKind.CallExpression {
-					if expression.callee.kind == NodeKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super') {
+				if expression.kind == AstKind.CallExpression {
+					if expression.callee.kind == AstKind.Identifier && (expression.callee.name == 'this' || expression.callee.name == 'super') {
 						return index
 					}
 				}
 			}
-			else if statement.kind == NodeKind.IfStatement {
+			else if statement.kind == AstKind.IfStatement {
 				if ?statement.whenFalse && @getConstructorIndex(statement.whenTrue.statements) != -1 && @getConstructorIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}
@@ -303,16 +303,16 @@ class ClassConstructorDeclaration extends Statement {
 	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { # {{{
 		for var statement, index in body {
-			if statement.kind == NodeKind.ExpressionStatement {
+			if statement.kind == AstKind.ExpressionStatement {
 				var expression = statement.expression
 
-				if expression.kind == NodeKind.CallExpression {
-					if expression.callee.kind == NodeKind.Identifier && expression.callee.name == 'super' {
+				if expression.kind == AstKind.CallExpression {
+					if expression.callee.kind == AstKind.Identifier && expression.callee.name == 'super' {
 						return index
 					}
 				}
 			}
-			else if statement.kind == NodeKind.IfStatement {
+			else if statement.kind == AstKind.IfStatement {
 				if ?statement.whenFalse && @getSuperIndex(statement.whenTrue.statements) != -1 && @getSuperIndex(statement.whenFalse.statements) != -1 {
 					return index
 				}

@@ -390,7 +390,6 @@ class AliasType extends Type {
 
 		match var result = node.matchArguments(assessment) {
 			is LenientCallMatchResult {
-				// node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, result.possibilities, node))
 				NotImplementedException.throw(node)
 			}
 			is PreciseCallMatchResult with var { matches } {
@@ -400,9 +399,6 @@ class AliasType extends Type {
 					node.addCallee(InvertedPreciseMethodCallee.new(node.data(), reference.discardReference():&(NamedType), property, true, assessment, match, node))
 				}
 				else {
-					var functions = [match.function for var match in matches]
-
-					// node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, functions, node))
 					NotImplementedException.throw(node)
 				}
 			}
@@ -412,7 +408,6 @@ class AliasType extends Type {
 						ReferenceException.throwNoMatchingEnumMethod(property, reference.name(), node.arguments(), node)
 					}
 					else {
-						// node.addCallee(EnumMethodCallee.new(node.data(), reference.discardReference():!!!(NamedType<EnumType>), `__ks_func_\(property)`, null, node))
 						NotImplementedException.throw(node)
 					}
 				}

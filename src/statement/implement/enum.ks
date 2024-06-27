@@ -25,10 +25,10 @@ class ImplementEnumValueDeclaration extends Statement {
 
 		if ?value {
 			match value.kind {
-				NodeKind.Literal when @enum.kind() == EnumTypeKind.String {
+				AstKind.Literal when @enum.kind() == EnumTypeKind.String {
 					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
-				NodeKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
+				AstKind.NumericExpression when @enum.kind() == EnumTypeKind.Number {
 					{ @type, @value } = @enum.createValue(@name, value.value)
 				}
 				else {

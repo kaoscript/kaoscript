@@ -170,7 +170,7 @@ class IncludeDeclaration extends Statement {
 
 		@declarators.push(declarator)
 	} # }}}
-	registerMacro(name, macro) => @parent.registerMacro(name, macro)
+	registerSyntimeFunction(name, macro) => @parent.registerSyntimeFunction(name, macro)
 	toFragments(fragments, mode) { # {{{
 		for var declarator in @declarators {
 			declarator.toFragments(fragments, mode)
@@ -316,7 +316,7 @@ class IncludeDeclarator extends Statement {
 		return false
 	} # }}}
 	recipient() => @module()
-	registerMacro(name, macro) => @parent.registerMacro(name, macro)
+	registerSyntimeFunction(name, macro) => @parent.registerSyntimeFunction(name, macro)
 	toFragments(fragments, mode) { # {{{
 		for var statement in @statements {
 			statement.toFragments(fragments, mode)

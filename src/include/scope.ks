@@ -101,14 +101,15 @@ abstract class Scope {
 	getImplicitType() => null
 	getImplicitVariable() => null
 	getLineOffset(): Number => 0
-	getMacro(name: String): MacroDeclaration[]? => null
 	getRawLine(): Number => 0
+	getSyntimeFunction(name: String): Syntime.SyntimeFunctionDeclaration[]? => null
 	getTempIndex(): Number => -1
 	hasBleedingVariable(name: String): Boolean => @hasDefinedVariable(name)
 	hasImplicitVariable(): Boolean => false
 	hasMacro(name: String): Boolean => false
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
+	isMacro(): Boolean => false
 	isPredefinedVariable(name: String): Boolean { # {{{
 		if var variable ?= @getVariable(name) {
 			return variable.isPredefined()
@@ -208,9 +209,9 @@ include {
 	'./scope/hollow.ks'
 	'./scope/inline.ks'
 	'./scope/import.ks'
-	'./scope/macro.ks'
 	'./scope/namespace.ks'
 	'./scope/method.ks'
 	'./scope/module.ks'
+	'./scope/macro.ks'
 	'./scope/operation.ks'
 }

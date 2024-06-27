@@ -275,7 +275,7 @@ class TopicReference extends Expression {
 		@usage: Number				= 1
 	}
 	static {
-		hasReference(data: { kind: NodeKind }): Boolean { # {{{
+		hasReference(data: { kind: AstKind }): Boolean { # {{{
 			match data.kind {
 				.MemberExpression {
 					return TopicReference.hasReference(data.object)
@@ -288,7 +288,7 @@ class TopicReference extends Expression {
 				}
 			}
 		} # }}}
-		pushReference(data: { kind: NodeKind }) { # {{{
+		pushReference(data: { kind: AstKind }) { # {{{
 			match data.kind {
 				.AwaitExpression {
 					if !?data.operation {
@@ -301,7 +301,7 @@ class TopicReference extends Expression {
 					return data
 				}
 				.CallExpression {
-					if data.callee.kind == NodeKind.MemberExpression {
+					if data.callee.kind == AstKind.MemberExpression {
 						TopicReference.pushReference(data.callee)
 					}
 
@@ -319,7 +319,7 @@ class TopicReference extends Expression {
 
 						return data
 					}
-					else if data.object.kind == NodeKind.MemberExpression {
+					else if data.object.kind == AstKind.MemberExpression {
 						TopicReference.pushReference(data.object)
 					}
 

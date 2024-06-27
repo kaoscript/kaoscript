@@ -382,7 +382,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		if ?@data.body {
-			@returnNull = @data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement
+			@returnNull = @data.body.kind == AstKind.IfStatement || @data.body.kind == AstKind.UnlessStatement
 		}
 
 		@block = MethodBlock.new($ast.block($ast.body(@data)), this, @scope)

@@ -508,7 +508,7 @@ export class Color {
 		_blue: int = 0
 	}
 
-	macro registerSpace(@space: Object) {
+	syntime func registerSpace(space: Object) {
 		var spaces: Array = [space.name.toUpperCase()]
 
 		if ?space.alias {
@@ -517,7 +517,7 @@ export class Color {
 			}
 		}
 
-		macro {
+		quote {
 			impl Space {
 				#s(spaces)
 			}
@@ -530,15 +530,15 @@ export class Color {
 			for var component, name of space.components {
 				var field = `_\(name)`
 
-				fields.push(macro private #w(field): Number = 0)
+				fields.push(quote private #w(field): Number = 0)
 
-				methods.push(macro {
+				methods.push(quote {
 					override #w(name)() => this.getField(#(name))
 					override #w(name)(value) => this.setField(#(name), value)
 				})
 			}
 
-			macro {
+			quote {
 				#![rules(dont-assert-override)]
 
 				Color.addSpace(#(space))
@@ -550,7 +550,7 @@ export class Color {
 			}
 		}
 		else {
-			macro Color.addSpace(#(space))
+			quote Color.addSpace(#(space))
 		}
 	}
 

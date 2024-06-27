@@ -20,7 +20,7 @@ class TupleDeclaration extends Statement {
 
 			var mut name = ''
 			var mut member = @data.extends
-			while member.kind == NodeKind.MemberExpression {
+			while member.kind == AstKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
 				member = member.object
@@ -302,7 +302,7 @@ class TupleFieldDeclaration extends AbstractNode {
 			if ?@data.defaultValue {
 				@type.flagDefaultValue()
 
-				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+				if @data.defaultValue.kind == AstKind.Identifier && @data.defaultValue.name == 'null' {
 					@type.flagNullable()
 				}
 			}

@@ -432,7 +432,7 @@ class ClassType extends Type {
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind.FieldDeclaration {
+			AstKind.FieldDeclaration {
 				var mut instance = true
 
 				for var modifier in data.modifiers while instance {
@@ -448,7 +448,7 @@ class ClassType extends Type {
 					@addStaticVariable(data.name.name, type)
 				}
 			}
-			NodeKind.MethodDeclaration {
+			AstKind.MethodDeclaration {
 				if @isConstructor(data.name.name) {
 					var type = ClassConstructorType.fromAST(data, node)
 
@@ -2181,14 +2181,14 @@ class ClassType extends Type {
 
 			// TODO!
 			// if {
-			// 	data.callee.object.kind == NodeKind.Identifier ;;
+			// 	data.callee.object.kind == AstKind.Identifier ;;
 			// 	var callee ?= @scope.getVariable(data.callee.object.name)
 			// 	var substitute ?= callee.replaceMemberCall?(property, arguments, node)
 			// }
 			// then {
 			var dyn callee, substitute
 
-			if	data.callee.object.kind == NodeKind.Identifier &&
+			if	data.callee.object.kind == AstKind.Identifier &&
 				(callee ?= @scope.getVariable(data.callee.object.name)) &&
 				(substitute ?= callee.replaceMemberCall?(property, arguments, node))
 			{

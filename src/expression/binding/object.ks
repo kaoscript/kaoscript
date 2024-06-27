@@ -381,7 +381,7 @@ class ObjectBindingElement extends Expression {
 			if ?@data.internal {
 				@internal = @compileVariable(@data.internal)
 
-				if @data.internal.kind == NodeKind.ThisExpression {
+				if @data.internal.kind == AstKind.ThisExpression {
 					@thisAlias = true
 					@sameName = @external is IdentifierLiteral && @external.name() == @data.internal.name.name
 				}
@@ -393,7 +393,7 @@ class ObjectBindingElement extends Expression {
 		}
 		else if ?@data.internal {
 			@internal = @compileVariable(@data.internal)
-			@thisAlias = @data.internal.kind == NodeKind.ThisExpression
+			@thisAlias = @data.internal.kind == AstKind.ThisExpression
 
 			@external = @internal
 			@sameName = true
@@ -444,7 +444,7 @@ class ObjectBindingElement extends Expression {
 
 		if @hasDefaultValue {
 			if @explicitlyRequired && @type.isNullable() {
-				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+				if @data.defaultValue.kind == AstKind.Identifier && @data.defaultValue.name == 'null' {
 					pass
 				}
 				else {

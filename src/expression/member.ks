@@ -1266,7 +1266,7 @@ class MemberExpression extends Expression {
 				else {
 					fragments.code(`\($runtime.helper(this)).bindMethod(`)
 
-					if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
+					if @object.isComputed() || @object._data.kind == AstKind.NumericExpression {
 						fragments.compile(@object)
 					}
 					else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {
@@ -1303,7 +1303,7 @@ class MemberExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				if @object.isComputed() || @object._data.kind == NodeKind.NumericExpression {
+				if @object.isComputed() || @object._data.kind == AstKind.NumericExpression {
 					fragments.code('(').compile(@object).code(')')
 				}
 				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(property) {

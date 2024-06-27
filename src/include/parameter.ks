@@ -34,10 +34,10 @@ class Parameter extends AbstractNode {
 	static {
 		compileExpression(data, node) { # {{{
 			match data.kind {
-				NodeKind.ArrayBinding => return ArrayBindingParameter.new(data, node)
-				NodeKind.Identifier => return IdentifierParameter.new(data, node)
-				NodeKind.ObjectBinding => return ObjectBindingParameter.new(data, node)
-				NodeKind.ThisExpression => return ThisExpressionParameter.new(data, node)
+				AstKind.ArrayBinding => return ArrayBindingParameter.new(data, node)
+				AstKind.Identifier => return IdentifierParameter.new(data, node)
+				AstKind.ObjectBinding => return ObjectBindingParameter.new(data, node)
+				AstKind.ThisExpression => return ThisExpressionParameter.new(data, node)
 			}
 		} # }}}
 		getUntilDifferentTypeIndex(parameters, index) { # {{{
@@ -680,7 +680,7 @@ class Parameter extends AbstractNode {
 
 		if ?@data.defaultValue {
 			if @explicitlyRequired && type.isNullable() {
-				if @data.defaultValue.kind == NodeKind.Identifier && @data.defaultValue.name == 'null' {
+				if @data.defaultValue.kind == AstKind.Identifier && @data.defaultValue.name == 'null' {
 					pass
 				}
 				else if @internal is IdentifierLiteral {

@@ -132,10 +132,10 @@ class BitmaskType extends Type {
 		var options = Attribute.configure(data, null, AttributeTarget.Property, node.file())
 
 		match data.kind {
-			NodeKind.BitmaskValue {
+			AstKind.BitmaskValue {
 				@createValue(data.name.name)
 			}
-			NodeKind.MethodDeclaration {
+			AstKind.MethodDeclaration {
 				var mut instance = true
 
 				for var i from 0 to~ data.modifiers.length while instance {
@@ -605,11 +605,11 @@ class BitmaskType extends Type {
 		var end = { line: 0, column: 0 }
 
 		var node = {
-			kind: NodeKind.BitmaskDeclaration
+			kind: AstKind.BitmaskDeclaration
 			attributes: []
 			modifiers: []
 			name: {
-				kind: NodeKind.Identifier
+				kind: AstKind.Identifier
 				modifiers: []
 				name
 				start
@@ -622,11 +622,11 @@ class BitmaskType extends Type {
 
 		for var value, valName of @values {
 			node.members.push({
-				kind: NodeKind.BitmaskValue
+				kind: AstKind.BitmaskValue
 				attributes: []
 				modifiers: []
 				name: {
-					kind: NodeKind.Identifier
+					kind: AstKind.Identifier
 					modifiers: []
 					name: valName
 					start

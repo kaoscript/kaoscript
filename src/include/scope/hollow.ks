@@ -182,10 +182,10 @@ class HollowScope extends Scope {
 		block
 		commitTempVariables
 		declareVariable
-		getMacro
 		getRawLine
 		getPredefinedType
 		getRenamedIndex
+		getSyntimeFunction
 		getTempIndex
 		hasBleedingVariable
 		hasMacro

@@ -139,7 +139,7 @@ class NamespaceDeclaration extends Statement {
 		@exports[name] = variable
 	} # }}}
 	exportMacro(name, macro) { # {{{
-		@parent.registerMacro(`\(@name).\(name)`, macro)
+		@parent.registerSyntimeFunction(`\(@name).\(name)`, macro)
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} # }}}
 	getTypeTestVariable() => @parent.recipient().authority().getTypeTestVariable()
@@ -153,8 +153,8 @@ class NamespaceDeclaration extends Statement {
 	} # }}}
 	name() => @name
 	recipient() => this
-	registerMacro(name, macro) { # {{{
-		@scope.addMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@scope.addSyntimeFunction(name, macro)
 	} # }}}
 	toExportFragments(fragments) { # {{{
 		var module = @module()

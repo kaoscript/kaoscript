@@ -22,7 +22,7 @@ class StructDeclaration extends Statement {
 
 			var mut name = ''
 			var mut member = @data.extends.typeName
-			while member.kind == NodeKind.MemberExpression {
+			while member.kind == AstKind.MemberExpression {
 				name = `.\(member.property.name)\(name)`
 
 				member = member.object
@@ -344,7 +344,7 @@ class StructFieldDeclaration extends AbstractNode {
 			if ?@data.value {
 				@type.flagDefaultValue()
 
-				if @data.value.kind == NodeKind.Identifier && @data.value.name == 'null' {
+				if @data.value.kind == AstKind.Identifier && @data.value.name == 'null' {
 					@type.flagNullable()
 				}
 			}

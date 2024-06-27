@@ -9,16 +9,16 @@ class ExportDeclaration extends Statement {
 				var late statement
 
 				match declaration.kind {
-					NodeKind.DeclarationSpecifier {
+					AstKind.DeclarationSpecifier {
 						statement = $compile.statement(declaration.declaration, this)
 					}
-					NodeKind.GroupSpecifier {
+					AstKind.GroupSpecifier {
 						statement = ExportGroupSpecifier.new(declaration, this)
 					}
-					NodeKind.NamedSpecifier {
+					AstKind.NamedSpecifier {
 						statement = ExportNamedSpecifier.new(declaration, this)
 					}
-					NodeKind.PropertiesSpecifier {
+					AstKind.PropertiesSpecifier {
 						statement = ExportPropertiesSpecifier.new(declaration, this)
 					}
 					else {
@@ -34,7 +34,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 		else {
-			for var declaration in @data.declarations when declaration.kind == NodeKind.DeclarationSpecifier {
+			for var declaration in @data.declarations when declaration.kind == AstKind.DeclarationSpecifier {
 				var statement = $compile.statement(declaration.declaration, this)
 
 				statement.initiate()
@@ -86,8 +86,8 @@ class ExportDeclaration extends Statement {
 	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(name, macro)
 	} # }}}
-	registerMacro(name, macro) { # {{{
-		@parent.registerMacro(name, macro)
+	registerSyntimeFunction(name, macro) { # {{{
+		@parent.registerSyntimeFunction(name, macro)
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		for var statement in @statements {
@@ -132,7 +132,7 @@ class ExportGroupSpecifier extends AbstractNode {
 				recipient.export(variable.name(), variable)
 			}
 
-			for var macro in @parent.parent().scope().listMacros() when !macro.isStandardLibrary() && @elements.indexOf(macro.name()) == -1 {
+			for var macro in @parent.parent().scope().listSyntimeFunctions() when !macro.isStandardLibrary() && @elements.indexOf(macro.name()) == -1 {
 				recipient.exportMacro(macro.name(), macro)
 			}
 		}
@@ -141,7 +141,7 @@ class ExportGroupSpecifier extends AbstractNode {
 				recipient.export(variable.name(), variable)
 			}
 
-			for var macro in @parent.parent().scope().listMacros() when !macro.isStandardLibrary() {
+			for var macro in @parent.parent().scope().listSyntimeFunctions() when !macro.isStandardLibrary() {
 				recipient.exportMacro(macro.name(), macro)
 			}
 		}
@@ -179,7 +179,7 @@ class ExportNamedSpecifier extends AbstractNode {
 		@expression.prepare()
 
 		if @expression.isMacro() {
-			for var macro in @scope.listMacros(@expression.name()) {
+			for var macro in @scope.listSyntimeFunctions(@expression.name()) {
 				macro.export(recipient, @externalName)
 			}
 		}

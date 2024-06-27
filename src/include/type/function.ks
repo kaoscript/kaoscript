@@ -1067,7 +1067,7 @@ class FunctionType extends Type {
 		if !?data {
 			@returnType = AnyType.NullableUnexplicit
 		}
-		else if data.kind == NodeKind.TypeReference && data.typeName.kind == NodeKind.Identifier && data.typeName.name == 'auto' {
+		else if data.kind == AstKind.TypeReference && data.typeName.kind == AstKind.Identifier && data.typeName.name == 'auto' {
 			@autoTyping = true
 		}
 		else {

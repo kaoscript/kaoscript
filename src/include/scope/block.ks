@@ -1,24 +1,26 @@
 class BlockScope extends Scope {
 	private {
 		@authority: Scope
-		@chunkTypes							= {}
-		@declarations						= {}
-		@implicitType: Type?				= null
-		@implicitVarname: String?			= null
-		@labelIndex							= -1
-		@macros: MacroDeclaration[]{}		= {}
-		@matchingTypes: Object<Array>		= {}
+		@chunkTypes														= {}
+		@declarations													= {}
+		@implicitType: Type?											= null
+		@implicitVarname: String?										= null
+		@labelIndex														= -1
+		@matchingTypes: Object<Array>									= {}
 		@module: ModuleScope
 		@parent: Scope
-		@references							= {}
-		@renamedIndexes 					= {}
-		@renamedVariables					= {}
-		@reservedIndex						= -1
-		@stashes							= {}
-		@tempDeclarations: Array			= []
-		@tempIndex 							= -1
-		@tempNames							= {}
-		@variables							= {}
+		@references														= {}
+		@renamedIndexes 												= {}
+		@renamedVariables												= {}
+		@reservedIndex													= -1
+		@stashes														= {}
+		// TODO!
+		// @syntimeFunctions: Syntime.SyntimeFunctionDeclaration[]{}		= {}
+		@syntimeFunctions: []{}											= {}
+		@tempDeclarations: Array										= []
+		@tempIndex 														= -1
+		@tempNames														= {}
+		@variables														= {}
 	}
 	constructor(@parent) { # {{{
 		super()
@@ -61,33 +63,33 @@ class BlockScope extends Scope {
 
 		return null
 	} # }}}
-	addMacro(name: String, macro: MacroDeclaration) { # {{{
-		if ?@macros[name] {
-			var type = macro.type()
-			var mut notAdded = true
-
-			for var m, index in @macros[name] while notAdded {
-				if m.type().isSubsetOf(type, MatchingMode.Signature) {
-					@macros[name].splice(index, 0, macro)
-
-					notAdded = false
-				}
-			}
-
-			if notAdded {
-				@macros[name].push(macro)
-			}
-		}
-		else {
-			@macros[name] = [macro]
-		}
-	} # }}}
 	addStash(name, ...fn) { # {{{
 		if ?@stashes[name] {
 			@stashes[name].push(fn)
 		}
 		else {
 			@stashes[name] = [fn]
+		}
+	} # }}}
+	addSyntimeFunction(name: String, macro: Syntime.SyntimeFunctionDeclaration) { # {{{
+		if ?@syntimeFunctions[name] {
+			var type = macro.type()
+			var mut notAdded = true
+
+			for var m, index in @syntimeFunctions[name] while notAdded {
+				if m.type().isSubsetOf(type, MatchingMode.Signature) {
+					@syntimeFunctions[name].splice(index, 0, macro)
+
+					notAdded = false
+				}
+			}
+
+			if notAdded {
+				@syntimeFunctions[name].push(macro)
+			}
+		}
+		else {
+			@syntimeFunctions[name] = [macro]
 		}
 	} # }}}
 	authority() => @authority
@@ -215,7 +217,6 @@ class BlockScope extends Scope {
 		}
 	} # }}}
 	getLineOffset() => @module.getLineOffset()
-	getMacro(name) => @macros[name] ?? @parent.getMacro(name)
 	getNewName(name: String): String { # {{{
 		var mut index = if @renamedIndexes[name] is Number set @renamedIndexes[name] + 1 else 1
 		var mut newName = '__ks_' + name + '_' + index
@@ -236,6 +237,7 @@ class BlockScope extends Scope {
 
 		return `__ks_00\(@reservedIndex)`
 	} # }}}
+	getSyntimeFunction(name) => @syntimeFunctions[name] ?? @parent.getSyntimeFunction(name)
 	getTempIndex() => @tempIndex
 	getVariable(name, line: Number = @line()): Variable? { # {{{
 		if @variables[name] is Array {
@@ -285,7 +287,7 @@ class BlockScope extends Scope {
 		return @parent.hasDefinedVariable(name, line)
 	} # }}}
 	override hasImplicitVariable() => ?@implicitVarname || @parent.hasImplicitVariable()
-	hasMacro(name) => ?@macros[name] || @parent.hasMacro(name)
+	hasMacro(name) => ?@syntimeFunctions[name] || @parent.hasMacro(name)
 	hasVariable(name: String, line: Number = @line()) { # {{{
 		if ?@variables[name] {
 			var variables: Array = @variables[name]
@@ -354,7 +356,7 @@ class BlockScope extends Scope {
 		var regex = RegExp.new(`^\(name)\.`)
 		var list = []
 
-		for var m, n of @macros when regex.test(n) {
+		for var m, n of @syntimeFunctions when regex.test(n) {
 			list.push(...m)
 		}
 
@@ -369,8 +371,8 @@ class BlockScope extends Scope {
 
 		return variables
 	} # }}}
-	listMacros(): MacroDeclaration[] => [...m for var m of @macros]
-	listMacros(name): Array => @macros[name] ?? @parent.listMacros(name)
+	listSyntimeFunctions(): Syntime.SyntimeFunctionDeclaration[] => [...m for var m of @syntimeFunctions]
+	listSyntimeFunctions(name): Array => @syntimeFunctions[name] ?? @parent.listSyntimeFunctions(name)
 	module() => @module
 	parent() => @parent
 	processStash(name) { # {{{
@@ -555,5 +557,6 @@ class BlockScope extends Scope {
 	proxy @parent {
 		getPredefinedType
 		hasPredefinedVariable
+		isMacro
 	}
 }

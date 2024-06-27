@@ -306,7 +306,7 @@ class BinaryOperatorMatch extends Expression {
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
 
-		if @data.right.kind == NodeKind.JunctionExpression {
+		if @data.right.kind == AstKind.JunctionExpression {
 			@junctive = true
 
 			for var operand in @data.right.operands {

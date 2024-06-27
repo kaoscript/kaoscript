@@ -27,14 +27,14 @@ class ImplementDeclaration extends Statement {
 
 					for var data in @data.properties {
 						match data.kind {
-							NodeKind.FieldDeclaration {
+							AstKind.FieldDeclaration {
 								var property = ImplementUnifiedClassFieldDeclaration.new(data, declaration, this)
 
 								property.analyse()
 
 								@properties.push(property)
 							}
-							NodeKind.MethodDeclaration {
+							AstKind.MethodDeclaration {
 								var property = if class.isConstructor(data.name.name) {
 									set ImplementUnifiedClassConstructorDeclaration.new(data, declaration, this)
 								}
@@ -132,10 +132,10 @@ class ImplementDeclaration extends Statement {
 			for var data in @data.properties {
 				var property =
 					match data.kind {
-						NodeKind.FieldDeclaration {
+						AstKind.FieldDeclaration {
 							set ImplementDividedClassFieldDeclaration.new(data, this, @type)
 						}
-						NodeKind.MethodDeclaration {
+						AstKind.MethodDeclaration {
 							if type.isConstructor(data.name.name) {
 								set ImplementDividedClassConstructorDeclaration.new(data, this, @type)
 							}
@@ -161,10 +161,10 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind.FieldDeclaration {
+					AstKind.FieldDeclaration {
 						property = ImplementEnumValueDeclaration.new(data, this, @type)
 					}
-					NodeKind.MethodDeclaration {
+					AstKind.MethodDeclaration {
 						property = ImplementEnumMethodDeclaration.new(data, this, @type)
 					}
 					else {
@@ -182,10 +182,10 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind.FieldDeclaration {
+					AstKind.FieldDeclaration {
 						property = ImplementNamespaceVariableDeclaration.new(data, this, @type)
 					}
-					NodeKind.MethodDeclaration {
+					AstKind.MethodDeclaration {
 						property = ImplementNamespaceFunctionDeclaration.new(data, this, @type)
 					}
 					else {
@@ -203,7 +203,7 @@ class ImplementDeclaration extends Statement {
 				var late property
 
 				match data.kind {
-					NodeKind.MethodDeclaration {
+					AstKind.MethodDeclaration {
 						property = ImplementVirtualMethodDeclaration.new(data, this, @type)
 					}
 					else {

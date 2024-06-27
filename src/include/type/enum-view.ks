@@ -124,7 +124,7 @@ class EnumViewType extends Type {
 				source += `return \(KSGeneration.generate(data.typeSubtypes))\n`
 				source += `}`
 
-				var filter = $evaluate($compileTest(source, auxiliary)).__ks_0
+				var filter = Syntime.evaluate($compileTest(@master.name(), source, auxiliary)).__ks_0
 
 				for var value in @root.values() {
 					var args = [value.index(), value.name(), value.value()]
@@ -141,7 +141,7 @@ class EnumViewType extends Type {
 			else {
 				source += ` => \(KSGeneration.generate(data.typeSubtypes))`
 
-				var filter = $evaluate($compileTest(source)).__ks_0
+				var filter = Syntime.evaluate($compileTest(@master.name(), source)).__ks_0
 
 				for var value in @root.values() {
 					var args = [value.index(), value.name(), value.value()]
@@ -299,15 +299,22 @@ class EnumViewType extends Type {
 	values() => @root.values().filter((value, ...) => @elements.contains(value.name()))
 }
 
-func $compileTest(source: String, auxiliary: String = ''): String { # {{{
-	var compiler = Compiler.new('__ks__', {
+func $compileTest(name: String, source: String, auxiliary: String = ''): String { # {{{
+	var compiler = Compiler.new(`_ks_view_\(name)`, {
 		register: false
-		target: $target
+		target: Syntime.target
+		libstd: {
+			enable: false
+		}
 	})
 
-	var data = `extern console, eval, JSON\n\(auxiliary)\nreturn \(source)`
+	compiler.compile(```
+		extern console, eval, JSON
 
-	compiler.compile(data)
+		\(auxiliary)
+
+		return \(source)
+		```)
 
 	return compiler.toSource()
 } # }}}

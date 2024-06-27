@@ -35,9 +35,9 @@ class IfExpression extends Expression {
 		@initiate()
 
 		if !@cascade {
-			if @data.whenTrue.kind == NodeKind.Block {
+			if @data.whenTrue.kind == AstKind.Block {
 				if @data.whenTrue.statements.length == @data.whenFalse.statements?.length == 1 {
-					@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == NodeKind.SetStatement
+					@inline = @data.whenTrue.statements[0].kind == @data.whenFalse.statements[0].kind == AstKind.SetStatement
 				}
 			}
 			else {
@@ -106,7 +106,7 @@ class IfExpression extends Expression {
 
 		@scope.line(@data.whenFalse.start.line)
 
-		if @data.whenFalse.kind == NodeKind.IfExpression {
+		if @data.whenFalse.kind == AstKind.IfExpression {
 			@whenFalseScope = @newScope(@bindingScope, ScopeType.Bleeding)
 
 			@whenFalseExpression = $compile.expression(@data.whenFalse, this, @whenFalseScope)

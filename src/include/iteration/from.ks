@@ -508,10 +508,10 @@ class FromIteration extends IterationNode {
 		ctrl.code('; ')
 
 		if ?@step {
-			if @data.step.kind == NodeKind.NumericExpression && @data.step.value == 1 {
+			if @data.step.kind == AstKind.NumericExpression && @data.step.value == 1 {
 				ctrl.code(if @order == OrderKind.None || @ascending set '++' else '--').compile(@variable)
 			}
-			else if @data.step.kind == NodeKind.NumericExpression && @data.step.value == -1 {
+			else if @data.step.kind == AstKind.NumericExpression && @data.step.value == -1 {
 				ctrl.code('--').compile(@variable)
 			}
 			else {

@@ -1,1 +1,0 @@
-SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (fixtures/compile/macro/macro.color.unreported.ks:25)

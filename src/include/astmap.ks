@@ -66,100 +66,93 @@ var $binaryOperators = {
 }
 
 var $expressions = {
-	[NodeKind.ArrayBinding]					: ArrayBinding
-	[NodeKind.ArrayComprehension]			: ArrayComprehension
-	[NodeKind.ArrayExpression]				: ArrayExpression
-	[NodeKind.ArrayRange]					: ArrayRange
-	[NodeKind.AwaitExpression]				: AwaitExpression
-	[NodeKind.CallExpression]				: $callExpression
-	[NodeKind.ComparisonExpression]			: ComparisonExpression
-	[NodeKind.CurryExpression]				: CurryExpression
-	[NodeKind.DisruptiveExpression]			: DisruptiveExpression
-	[NodeKind.FunctionExpression]			: AnonymousFunctionExpression
-	[NodeKind.Identifier]					: IdentifierLiteral
-	[NodeKind.IfExpression]					: IfExpression
-	[NodeKind.LambdaExpression]				: ArrowFunctionExpression
-	[NodeKind.Literal]						: StringLiteral
-	[NodeKind.MatchExpression]				: MatchExpression
-	[NodeKind.MemberExpression]				: MemberExpression
-	[NodeKind.NamedArgument]				: NamedArgument
-	[NodeKind.NumericExpression]			: NumberLiteral
-	[NodeKind.ObjectBinding]				: ObjectBinding
-	[NodeKind.ObjectComprehension]			: ObjectComprehension
-	[NodeKind.ObjectExpression]				: ObjectExpression
-	[NodeKind.OmittedExpression]			: OmittedExpression
-	[NodeKind.PlaceholderArgument]			: PlaceholderArgument
-	[NodeKind.PositionalArgument]			: PositionalArgument
-	[NodeKind.Reference]					: func(data, parent, scope) {
+	[AstKind.ArrayBinding]					: ArrayBinding
+	[AstKind.ArrayComprehension]			: ArrayComprehension
+	[AstKind.ArrayExpression]				: ArrayExpression
+	[AstKind.ArrayRange]					: ArrayRange
+	[AstKind.AwaitExpression]				: AwaitExpression
+	[AstKind.CallExpression]				: Syntime.callExpression
+	[AstKind.ComparisonExpression]			: ComparisonExpression
+	[AstKind.CurryExpression]				: CurryExpression
+	[AstKind.DisruptiveExpression]			: DisruptiveExpression
+	[AstKind.FunctionExpression]			: AnonymousFunctionExpression
+	[AstKind.Identifier]					: IdentifierLiteral
+	[AstKind.IfExpression]					: IfExpression
+	[AstKind.LambdaExpression]				: ArrowFunctionExpression
+	[AstKind.Literal]						: StringLiteral
+	[AstKind.MatchExpression]				: MatchExpression
+	[AstKind.MemberExpression]				: MemberExpression
+	[AstKind.NamedArgument]					: NamedArgument
+	[AstKind.NumericExpression]				: NumberLiteral
+	[AstKind.ObjectBinding]					: ObjectBinding
+	[AstKind.ObjectComprehension]			: ObjectComprehension
+	[AstKind.ObjectExpression]				: ObjectExpression
+	[AstKind.OmittedExpression]				: OmittedExpression
+	[AstKind.PlaceholderArgument]			: PlaceholderArgument
+	[AstKind.PositionalArgument]			: PositionalArgument
+	[AstKind.Reference]						: func(data, parent, scope) { # {{{
 		if var expression ?= parent.getASTReference(data.name) {
 			return ReferenceExpression.new(expression, data, parent, scope)
 		}
 
 		throw NotSupportedException.new(`Unexpected reference \(data.name)`, parent)
-	}
-	[NodeKind.RegularExpression]			: RegularExpression
-	[NodeKind.RestrictiveExpression]		: RestrictiveExpression
-	[NodeKind.RollingExpression]			: RollingExpression
-	[NodeKind.SequenceExpression]			: SequenceExpression
-	[NodeKind.TemplateExpression]			: TemplateExpression
-	[NodeKind.TopicReference]				: func(data, parent, scope) {
+	} # }}}
+	[AstKind.RegularExpression]				: RegularExpression
+	[AstKind.RestrictiveExpression]			: RestrictiveExpression
+	[AstKind.RollingExpression]				: RollingExpression
+	[AstKind.SequenceExpression]			: SequenceExpression
+	[AstKind.SyntimeCallExpression]			: Syntime.callSyntimeExpression
+	[AstKind.TemplateExpression]			: TemplateExpression
+	[AstKind.TopicReference]				: func(data, parent, scope) { # {{{
 		return parent.getTopicReference(data)
-	}
-	[NodeKind.ThisExpression]				: ThisExpression
-	[NodeKind.TryExpression]				: TryExpression
-	[NodeKind.TypedExpression]				: TypedExpression
+	} # }}}
+	[AstKind.ThisExpression]				: ThisExpression
+	[AstKind.TryExpression]					: TryExpression
+	[AstKind.TypedExpression]				: TypedExpression
 }
 
 var $statements = {
-	[NodeKind.BitmaskDeclaration]			: BitmaskDeclaration
-	[NodeKind.BlockStatement]				: BlockStatement
-	[NodeKind.BreakStatement]				: BreakStatement
-	[NodeKind.ClassDeclaration]				: ClassDeclaration
-	[NodeKind.ContinueStatement]			: ContinueStatement
-	[NodeKind.DiscloseDeclaration]			: DiscloseDeclaration
-	[NodeKind.DoUntilStatement]				: DoUntilStatement
-	[NodeKind.DoWhileStatement]				: DoWhileStatement
-	[NodeKind.EnumDeclaration]				: EnumDeclaration
-	[NodeKind.ExportDeclaration]			: ExportDeclaration
-	[NodeKind.ExpressionStatement]			: func(data, parent, scope) {
-		if data.expression.kind == NodeKind.CallExpression {
-			return $callStatement(data, parent, scope)
-		}
-		else {
-			return ExpressionStatement.new(data, parent, scope)
-		}
-	}
-	[NodeKind.ExternDeclaration]			: ExternDeclaration
-	[NodeKind.ExternOrImportDeclaration]	: ExternOrImportDeclaration
-	[NodeKind.ExternOrRequireDeclaration]	: ExternOrRequireDeclaration
-	[NodeKind.FallthroughStatement]			: FallthroughStatement
-	[NodeKind.ForStatement]					: ForStatement
-	[NodeKind.FunctionDeclaration]			: FunctionDeclaration
-	[NodeKind.IfStatement]					: IfStatement
-	[NodeKind.ImplementDeclaration]			: ImplementDeclaration
-	[NodeKind.ImportDeclaration]			: ImportDeclaration
-	[NodeKind.IncludeDeclaration]			: IncludeDeclaration
-	[NodeKind.IncludeAgainDeclaration]		: IncludeAgainDeclaration
-	[NodeKind.MacroDeclaration]				: MacroDeclaration
-	[NodeKind.MatchStatement]				: MatchStatement
-	[NodeKind.NamespaceDeclaration]			: NamespaceDeclaration
-	[NodeKind.PassStatement]				: PassStatement
-	[NodeKind.RepeatStatement]				: RepeatStatement
-	[NodeKind.RequireDeclaration]			: RequireDeclaration
-	[NodeKind.RequireOrExternDeclaration]	: RequireOrExternDeclaration
-	[NodeKind.RequireOrImportDeclaration]	: RequireOrImportDeclaration
-	[NodeKind.ReturnStatement]				: ReturnStatement
-	[NodeKind.SetStatement]					: SetStatement
-	[NodeKind.StructDeclaration]			: StructDeclaration
-	[NodeKind.ThrowStatement]				: ThrowStatement
-	[NodeKind.TryStatement]					: TryStatement
-	[NodeKind.TupleDeclaration]				: TupleDeclaration
-	[NodeKind.TypeAliasDeclaration]			: TypeAliasDeclaration
-	[NodeKind.UnlessStatement]				: UnlessStatement
-	[NodeKind.UntilStatement]				: UntilStatement
-	[NodeKind.VariableStatement]			: VariableStatement
-	[NodeKind.WhileStatement]				: WhileStatement
-	[NodeKind.WithStatement]				: WithStatement
+	[AstKind.BitmaskDeclaration]			: BitmaskDeclaration
+	[AstKind.BlockStatement]				: BlockStatement
+	[AstKind.BreakStatement]				: BreakStatement
+	[AstKind.ClassDeclaration]				: ClassDeclaration
+	[AstKind.ContinueStatement]				: ContinueStatement
+	[AstKind.DiscloseDeclaration]			: DiscloseDeclaration
+	[AstKind.DoUntilStatement]				: DoUntilStatement
+	[AstKind.DoWhileStatement]				: DoWhileStatement
+	[AstKind.EnumDeclaration]				: EnumDeclaration
+	[AstKind.ExportDeclaration]				: ExportDeclaration
+	[AstKind.ExternDeclaration]				: ExternDeclaration
+	[AstKind.ExternOrImportDeclaration]		: ExternOrImportDeclaration
+	[AstKind.ExternOrRequireDeclaration]	: ExternOrRequireDeclaration
+	[AstKind.FallthroughStatement]			: FallthroughStatement
+	[AstKind.ForStatement]					: ForStatement
+	[AstKind.FunctionDeclaration]			: FunctionDeclaration
+	[AstKind.IfStatement]					: IfStatement
+	[AstKind.ImplementDeclaration]			: ImplementDeclaration
+	[AstKind.ImportDeclaration]				: ImportDeclaration
+	[AstKind.IncludeDeclaration]			: IncludeDeclaration
+	[AstKind.IncludeAgainDeclaration]		: IncludeAgainDeclaration
+	[AstKind.MatchStatement]				: MatchStatement
+	[AstKind.NamespaceDeclaration]			: NamespaceDeclaration
+	[AstKind.PassStatement]					: PassStatement
+	[AstKind.RepeatStatement]				: RepeatStatement
+	[AstKind.RequireDeclaration]			: RequireDeclaration
+	[AstKind.RequireOrExternDeclaration]	: RequireOrExternDeclaration
+	[AstKind.RequireOrImportDeclaration]	: RequireOrImportDeclaration
+	[AstKind.ReturnStatement]				: ReturnStatement
+	[AstKind.SetStatement]					: SetStatement
+	[AstKind.StructDeclaration]				: StructDeclaration
+	[AstKind.SyntimeFunctionDeclaration]	: Syntime.SyntimeFunctionDeclaration
+	[AstKind.ThrowStatement]				: ThrowStatement
+	[AstKind.TryStatement]					: TryStatement
+	[AstKind.TupleDeclaration]				: TupleDeclaration
+	[AstKind.TypeAliasDeclaration]			: TypeAliasDeclaration
+	[AstKind.UnlessStatement]				: UnlessStatement
+	[AstKind.UntilStatement]				: UntilStatement
+	[AstKind.VariableStatement]				: VariableStatement
+	[AstKind.WhileStatement]				: WhileStatement
+	[AstKind.WithStatement]					: WithStatement
 }
 
 var $polyadicOperators = {

@@ -1,0 +1,244 @@
+[
+  {
+    "aliens": [
+      "Any?",
+      "$hex",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Color"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "system": false,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {
+          "_alpha": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_red": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_green": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_blue": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "getField": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "name",
+                  "internal": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "setField": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "name",
+                  "internal": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "red": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "green": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "blue": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {
+          "addSpace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "data",
+                  "internal": "data",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          0,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": [
+      "Color.registerSpace",
+      [
+        "eyJwYXJhbWV0ZXJzIjpbeyJraW5kIjo4MiwiYXR0cmlidXRlcyI6W10sIm1vZGlmaWVycyI6W10sImV4dGVybmFsIjp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoiZXhwcmVzc2lvbiIsInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjI5fSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjM5fX0sImludGVybmFsIjp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoiZXhwcmVzc2lvbiIsInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjI5fSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjM5fX0sInR5cGUiOnsia2luZCI6MTI3LCJtb2RpZmllcnMiOltdLCJ0eXBlTmFtZSI6eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6Ik9iamVjdCIsInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjQ3fX0sInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjQ3fX0sInN0YXJ0Ijp7ImxpbmUiOjEyLCJjb2x1bW4iOjI5fSwiZW5kIjp7ImxpbmUiOjEyLCJjb2x1bW4iOjQ3fX1dLCJzb3VyY2UiOiIvLyBHZW5lcmF0ZWQgYnkga2Fvc2NyaXB0IDAuMTEuMFxuY29uc3Qge0hlbHBlciwgVHlwZX0gPSByZXF1aXJlKFwiQGthb3NjcmlwdC9ydW50aW1lXCIpO1xubW9kdWxlLmV4cG9ydHMgPSBmdW5jdGlvbihfX2tzX01hcmtlciwgX19rc19Bc3RLaW5kKSB7XG5cdHZhciB7TW9kaWZpZXJLaW5kLCBBc3RLaW5kLCBPcGVyYXRvckF0dHJpYnV0ZSwgT3BlcmF0b3JLaW5kLCBJdGVyYXRpb25LaW5kLCBSZXN0cmljdGl2ZU9wZXJhdG9yS2luZCwgVW5hcnlUeXBlT3BlcmF0b3JLaW5kLCBRdW90ZUVsZW1lbnRLaW5kLCBSZWlmaWNhdGlvbktpbmQsIFNjb3BlS2luZCwgX19rc1R5cGU6IF9fa3NUeXBlMH0gPSByZXF1aXJlKFwiQGthb3NjcmlwdC9hc3Qvc3JjLy5pbmRleC5rcy5qNWs4cjkua3NiXCIpKCk7XG5cdHJldHVybiBIZWxwZXIuZnVuY3Rpb24oZnVuY3Rpb24oZXZhbCwgX19rc19yZWlmaWNhdGUsIGV4cHJlc3Npb24pIHtcblx0XHRleHByZXNzaW9uID0gSGVscGVyLmFzc2VydChldmFsKGV4cHJlc3Npb24pLCBcIlxcXCJBbnlcXFwiXCIsIDAsIFR5cGUuaXNWYWx1ZSk7XG5cdFx0bGV0IF9fa3Nfc3JjID0gXCJcIjtcblx0XHRpZihUeXBlLmlzVmFsdWUoZXhwcmVzc2lvbi5jb21wb25lbnRzKSkge1xuXHRcdFx0Y29uc3QgZmllbGRzID0gW107XG5cdFx0XHRjb25zdCBtZXRob2RzID0gW107XG5cdFx0XHRsZXQgZmllbGQ7XG5cdFx0XHRmb3IoY29uc3QgbmFtZSBpbiBleHByZXNzaW9uLmNvbXBvbmVudHMpIHtcblx0XHRcdFx0Y29uc3QgY29tcG9uZW50ID0gZXhwcmVzc2lvbi5jb21wb25lbnRzW25hbWVdO1xuXHRcdFx0XHRmaWVsZCA9IFwiX1wiICsgbmFtZTtcblx0XHRcdFx0ZmllbGRzLnB1c2goSGVscGVyLmNvbmNhdFN0cmluZyhcInByaXZhdGUgXCIsIF9fa3NfcmVpZmljYXRlKGZpZWxkLCBmYWxzZSwgNSksIFwiOiBOdW1iZXIgPSAwXCIpKTtcblx0XHRcdFx0bWV0aG9kcy5wdXNoKEhlbHBlci5jb25jYXRTdHJpbmcoX19rc19yZWlmaWNhdGUobmFtZSwgZmFsc2UsIDUpLCBcIigpID0+IHRoaXMuZ2V0RmllbGQoXCIsIF9fa3NfcmVpZmljYXRlKG5hbWUsIG51bGwsIDIpLCBcIilcIiwgXCJcXG5cIiwgX19rc19yZWlmaWNhdGUobmFtZSwgZmFsc2UsIDUpLCBcIih2YWx1ZSkgPT4gdGhpcy5zZXRGaWVsZChcIiwgX19rc19yZWlmaWNhdGUobmFtZSwgbnVsbCwgMiksIFwiLCB2YWx1ZSlcIiwgXCJcXG5cIikpO1xuXHRcdFx0XHRleHByZXNzaW9uLmNvbXBvbmVudHNbbmFtZV0uZmllbGQgPSBmaWVsZDtcblx0XHRcdH1cblx0XHRcdF9fa3Nfc3JjICs9IEhlbHBlci5jb25jYXRTdHJpbmcoXCJDb2xvci5hZGRTcGFjZShcIiwgX19rc19yZWlmaWNhdGUoZXhwcmVzc2lvbiwgbnVsbCwgMiksIFwiKVwiLCBcIlxcblwiLCBcIlxcblwiLCBcImltcGwgQ29sb3Ige1wiLCBcIlxcblwiLCBfX2tzX3JlaWZpY2F0ZShmaWVsZHMsIGZhbHNlLCA0KSwgXCJcXG5cIiwgX19rc19yZWlmaWNhdGUobWV0aG9kcywgZmFsc2UsIDQpLCBcIlxcblwiLCBcIn1cIiwgXCJcXG5cIik7XG5cdFx0fVxuXHRcdGVsc2Uge1xuXHRcdFx0X19rc19zcmMgKz0gSGVscGVyLmNvbmNhdFN0cmluZyhcIkNvbG9yLmFkZFNwYWNlKFwiLCBfX2tzX3JlaWZpY2F0ZShleHByZXNzaW9uLCBudWxsLCAyKSwgXCIpXCIpO1xuXHRcdH1cblx0XHRyZXR1cm4gX19rc19zcmM7XG5cdH0sICh0aGF0LCBmbiwgLi4uYXJncykgPT4ge1xuXHRcdGNvbnN0IHQwID0gVHlwZS5pc1ZhbHVlO1xuXHRcdGlmKGFyZ3MubGVuZ3RoID09PSAzKSB7XG5cdFx0XHRpZih0MChhcmdzWzBdKSAmJiB0MChhcmdzWzFdKSAmJiB0MChhcmdzWzJdKSkge1xuXHRcdFx0XHRyZXR1cm4gZm4uY2FsbChudWxsLCBhcmdzWzBdLCBhcmdzWzFdLCBhcmdzWzJdKTtcblx0XHRcdH1cblx0XHR9XG5cdFx0dGhyb3cgSGVscGVyLmJhZEFyZ3MoKTtcblx0fSk7XG59OyJ9"
+      ]
+    ]
+  }
+]

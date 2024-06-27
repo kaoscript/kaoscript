@@ -1,0 +1,1849 @@
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "Array",
+      true,
+      2,
+      "parseFloat",
+      true,
+      3,
+      "parseInt",
+      true,
+      4,
+      "Math",
+      true,
+      5,
+      "isNaN",
+      true,
+      6,
+      "Number",
+      true,
+      7,
+      "String",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "concat": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "indexOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "push": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "pop": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any!?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any!?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "splice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "unshift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "generics": [
+          {
+            "name": "T"
+          }
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Number",
+        "errors": []
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Number",
+        "errors": []
+      },
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "properties": {
+          "abs": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "max": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "min": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "random": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "round": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          }
+        }
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Boolean",
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": false,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {
+          "toFixed": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "charAt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "match": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 1,
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "replace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "split": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toLowerCase": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "trim": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "libstd": 6,
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "system": true,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "staticVariables": {},
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      9,
+      "Color"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "system": false,
+        "exhaustive": true,
+        "auxiliary": true,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "parameters": [
+              {
+                "external": "args",
+                "internal": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "errors": []
+          }
+        ],
+        "instanceVariables": {
+          "_dummy": {
+            "access": 2,
+            "type": "Boolean",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_space": {
+            "access": 2,
+            "type": {
+              "reference": 10
+            },
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_alpha": {
+            "access": 2,
+            "type": {
+              "reference": 11
+            },
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_red": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_green": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_blue": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_rouge": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_vert": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "final": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "staticVariables": {},
+        "instanceMethods": {
+          "alpha": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 11
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": [
+                "_alpha"
+              ]
+            }
+          ],
+          "blend": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "color",
+                  "internal": "color",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "percentage",
+                  "internal": "percentage",
+                  "type": {
+                    "reference": 12
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "space",
+                  "internal": "space",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo2NiwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoiU3BhY2UiLCJzdGFydCI6eyJsaW5lIjo3MTAsImNvbHVtbiI6Njh9LCJlbmQiOnsibGluZSI6NzEwLCJjb2x1bW4iOjczfX0sInByb3BlcnR5Ijp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoiU1JHQiIsInN0YXJ0Ijp7ImxpbmUiOjcxMCwiY29sdW1uIjo3NH0sImVuZCI6eyJsaW5lIjo3MTAsImNvbHVtbiI6Nzh9fSwic3RhcnQiOnsibGluZSI6NzEwLCJjb2x1bW4iOjY4fSwiZW5kIjp7ImxpbmUiOjcxMCwiY29sdW1uIjo3OH19"
+                },
+                {
+                  "external": "alpha",
+                  "internal": "alpha",
+                  "type": "Boolean",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NzEwLCJjb2x1bW4iOjk0fSwiZW5kIjp7ImxpbmUiOjcxMCwiY29sdW1uIjo5OX19"
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "clearer": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "clone": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "contrast": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "color",
+                  "internal": "color",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "copy": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "target",
+                  "internal": "target",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "distance": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "color",
+                  "internal": "color",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 12
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "equals": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "color",
+                  "internal": "color",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "format": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "name",
+                  "internal": "name",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo2NiwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjY2LCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NDcsIm1vZGlmaWVycyI6W10sIm5hbWUiOiJ0aGlzIiwic3RhcnQiOnsibGluZSI6ODQxLCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjg0MSwiY29sdW1uIjoyOH19LCJwcm9wZXJ0eSI6eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6Il9zcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjg0MSwiY29sdW1uIjoyOX0sImVuZCI6eyJsaW5lIjo4NDEsImNvbHVtbiI6MzV9fSwic3RhcnQiOnsibGluZSI6ODQxLCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjg0MSwiY29sdW1uIjozNX19LCJwcm9wZXJ0eSI6eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6InZhbHVlIiwic3RhcnQiOnsibGluZSI6ODQxLCJjb2x1bW4iOjM2fSwiZW5kIjp7ImxpbmUiOjg0MSwiY29sdW1uIjo0MX19LCJzdGFydCI6eyJsaW5lIjo4NDEsImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6ODQxLCJjb2x1bW4iOjQxfX0="
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "from": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "args",
+                  "internal": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "getField": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "name",
+                  "internal": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "gradient": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "endColor",
+                  "internal": "endColor",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "length",
+                  "internal": "length",
+                  "type": {
+                    "reference": 11
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "array",
+                "rest": "Color"
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "greyscale": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "model",
+                  "internal": "model",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1OCwibW9kaWZpZXJzIjpbXSwidmFsdWUiOiJCVDcwOSIsInN0YXJ0Ijp7ImxpbmUiOjg5NywiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjo4OTcsImNvbHVtbiI6MzV9fQ=="
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "hex": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isBlack": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isTransparent": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isWhite": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "like": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "space",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "str",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "luminance": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "negative": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "opaquer": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "readable": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "color",
+                  "internal": "color",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "tripleA",
+                  "internal": "tripleA",
+                  "type": "Boolean",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTk4LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk5OCwiY29sdW1uIjo0Nn19"
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "scheme": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "functions",
+                  "internal": "functions",
+                  "type": {
+                    "kind": "array",
+                    "rest": {
+                      "kind": "function",
+                      "async": false,
+                      "exhaustive": true,
+                      "parameters": [
+                        {
+                          "external": "color",
+                          "internal": "color",
+                          "type": {
+                            "reference": 9
+                          },
+                          "min": 1,
+                          "max": 1,
+                          "default": false
+                        }
+                      ],
+                      "returns": "Any?",
+                      "errors": []
+                    }
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Array",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "setField": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "name",
+                  "internal": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shade": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "percentage",
+                  "internal": "percentage",
+                  "type": {
+                    "reference": 12
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "space": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": {
+                "reference": 10
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "space",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 2,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "str",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "tint": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "percentage",
+                  "internal": "percentage",
+                  "type": {
+                    "reference": 12
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "tone": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "percentage",
+                  "internal": "percentage",
+                  "type": {
+                    "reference": 12
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "red": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "green": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "blue": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "rouge": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "vert": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "value",
+                  "internal": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "staticMethods": {
+          "addSpace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "space",
+                  "internal": "space",
+                  "type": "Object",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "from": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "args",
+                  "internal": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 9
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "greyscale": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "args",
+                  "internal": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 9
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "hex": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "args",
+                  "internal": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  "String",
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "negative": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "args",
+                  "internal": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 9
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "registerFormatter": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "format",
+                  "internal": "format",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "formatter",
+                  "internal": "formatter",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Void",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "registerParser": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "parameters": [
+                {
+                  "external": "format",
+                  "internal": "format",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "external": "parser",
+                  "internal": "parser",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Void",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          3,
+          -1,
+          -1
+        ]
+      },
+      {
+        "kind": "enum",
+        "type": "string",
+        "exhaustive": true,
+        "nextIndex": 3,
+        "values": [
+          {
+            "name": "SRGB",
+            "index": 0
+          },
+          {
+            "name": "RGB",
+            "index": 1
+          },
+          {
+            "name": "RVB",
+            "index": 2
+          }
+        ],
+        "aliases": [],
+        "fields": [],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": "Number"
+      },
+      {
+        "kind": "alias",
+        "of": "Number"
+      }
+    ],
+    "macros": [
+      "Color.registerSpace",
+      [
+        "eyJwYXJhbWV0ZXJzIjpbeyJraW5kIjo4MiwiYXR0cmlidXRlcyI6W10sIm1vZGlmaWVycyI6W10sImV4dGVybmFsIjp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoic3BhY2UiLCJzdGFydCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6Mjl9LCJlbmQiOnsibGluZSI6NTExLCJjb2x1bW4iOjM0fX0sImludGVybmFsIjp7ImtpbmQiOjQ3LCJtb2RpZmllcnMiOltdLCJuYW1lIjoic3BhY2UiLCJzdGFydCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6Mjl9LCJlbmQiOnsibGluZSI6NTExLCJjb2x1bW4iOjM0fX0sInR5cGUiOnsia2luZCI6MTI3LCJtb2RpZmllcnMiOltdLCJ0eXBlTmFtZSI6eyJraW5kIjo0NywibW9kaWZpZXJzIjpbXSwibmFtZSI6Ik9iamVjdCIsInN0YXJ0Ijp7ImxpbmUiOjUxMSwiY29sdW1uIjozNn0sImVuZCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6NDJ9fSwic3RhcnQiOnsibGluZSI6NTExLCJjb2x1bW4iOjM2fSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjo0Mn19LCJzdGFydCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6Mjl9LCJlbmQiOnsibGluZSI6NTExLCJjb2x1bW4iOjQyfX1dLCJzb3VyY2UiOiIvLyBHZW5lcmF0ZWQgYnkga2Fvc2NyaXB0IDAuMTEuMFxuY29uc3Qge0hlbHBlciwgVHlwZX0gPSByZXF1aXJlKFwiQGthb3NjcmlwdC9ydW50aW1lXCIpO1xubW9kdWxlLmV4cG9ydHMgPSBmdW5jdGlvbihfX2tzX01hcmtlciwgX19rc19Bc3RLaW5kKSB7XG5cdHZhciB7TW9kaWZpZXJLaW5kLCBBc3RLaW5kLCBPcGVyYXRvckF0dHJpYnV0ZSwgT3BlcmF0b3JLaW5kLCBJdGVyYXRpb25LaW5kLCBSZXN0cmljdGl2ZU9wZXJhdG9yS2luZCwgVW5hcnlUeXBlT3BlcmF0b3JLaW5kLCBRdW90ZUVsZW1lbnRLaW5kLCBSZWlmaWNhdGlvbktpbmQsIFNjb3BlS2luZCwgX19rc1R5cGU6IF9fa3NUeXBlMH0gPSByZXF1aXJlKFwiQGthb3NjcmlwdC9hc3Qvc3JjLy5pbmRleC5rcy5qNWs4cjkua3NiXCIpKCk7XG5cdHJldHVybiBIZWxwZXIuZnVuY3Rpb24oZnVuY3Rpb24oZXZhbCwgX19rc19yZWlmaWNhdGUsIHNwYWNlKSB7XG5cdFx0c3BhY2UgPSBIZWxwZXIuYXNzZXJ0KGV2YWwoc3BhY2UpLCBcIlxcXCJBbnlcXFwiXCIsIDAsIFR5cGUuaXNWYWx1ZSk7XG5cdFx0bGV0IF9fa3Nfc3JjID0gXCJcIjtcblx0XHRjb25zdCBzcGFjZXMgPSBbc3BhY2UubmFtZS50b1VwcGVyQ2FzZSgpXTtcblx0XHRpZihUeXBlLmlzVmFsdWUoc3BhY2UuYWxpYXMpKSB7XG5cdFx0XHRmb3IobGV0IF9fa3NfMSA9IDAsIF9fa3NfMCA9IHNwYWNlLmFsaWFzLmxlbmd0aCwgbmFtZTsgX19rc18xIDwgX19rc18wOyArK19fa3NfMSkge1xuXHRcdFx0XHRuYW1lID0gc3BhY2UuYWxpYXNbX19rc18xXTtcblx0XHRcdFx0c3BhY2VzLnB1c2gobmFtZS50b1VwcGVyQ2FzZSgpKTtcblx0XHRcdH1cblx0XHR9XG5cdFx0X19rc19zcmMgKz0gSGVscGVyLmNvbmNhdFN0cmluZyhcImltcGwgU3BhY2Uge1wiLCBcIlxcblwiLCBfX2tzX3JlaWZpY2F0ZShzcGFjZXMsIGZhbHNlLCA0KSwgXCJcXG5cIiwgXCJ9XCIsIFwiXFxuXCIpO1xuXHRcdGlmKFR5cGUuaXNWYWx1ZShzcGFjZS5jb21wb25lbnRzKSkge1xuXHRcdFx0Y29uc3QgZmllbGRzID0gW107XG5cdFx0XHRjb25zdCBtZXRob2RzID0gW107XG5cdFx0XHRmb3IoY29uc3QgbmFtZSBpbiBzcGFjZS5jb21wb25lbnRzKSB7XG5cdFx0XHRcdGNvbnN0IGNvbXBvbmVudCA9IHNwYWNlLmNvbXBvbmVudHNbbmFtZV07XG5cdFx0XHRcdGNvbnN0IGZpZWxkID0gXCJfXCIgKyBuYW1lO1xuXHRcdFx0XHRmaWVsZHMucHVzaChIZWxwZXIuY29uY2F0U3RyaW5nKFwicHJpdmF0ZSBcIiwgX19rc19yZWlmaWNhdGUoZmllbGQsIGZhbHNlLCA1KSwgXCI6IE51bWJlciA9IDBcIikpO1xuXHRcdFx0XHRtZXRob2RzLnB1c2goSGVscGVyLmNvbmNhdFN0cmluZyhcIm92ZXJyaWRlIFwiLCBfX2tzX3JlaWZpY2F0ZShuYW1lLCBmYWxzZSwgNSksIFwiKCkgPT4gdGhpcy5nZXRGaWVsZChcIiwgX19rc19yZWlmaWNhdGUobmFtZSwgbnVsbCwgMiksIFwiKVwiLCBcIlxcblwiLCBcIm92ZXJyaWRlIFwiLCBfX2tzX3JlaWZpY2F0ZShuYW1lLCBmYWxzZSwgNSksIFwiKHZhbHVlKSA9PiB0aGlzLnNldEZpZWxkKFwiLCBfX2tzX3JlaWZpY2F0ZShuYW1lLCBudWxsLCAyKSwgXCIsIHZhbHVlKVwiLCBcIlxcblwiKSk7XG5cdFx0XHR9XG5cdFx0XHRfX2tzX3NyYyArPSBIZWxwZXIuY29uY2F0U3RyaW5nKFwiIyFbcnVsZXMoZG9udC1hc3NlcnQtb3ZlcnJpZGUpXVwiLCBcIlxcblwiLCBcIlxcblwiLCBcIkNvbG9yLmFkZFNwYWNlKFwiLCBfX2tzX3JlaWZpY2F0ZShzcGFjZSwgbnVsbCwgMiksIFwiKVwiLCBcIlxcblwiLCBcIlxcblwiLCBcImltcGwgQ29sb3Ige1wiLCBcIlxcblwiLCBfX2tzX3JlaWZpY2F0ZShmaWVsZHMsIGZhbHNlLCA0KSwgXCJcXG5cIiwgX19rc19yZWlmaWNhdGUobWV0aG9kcywgZmFsc2UsIDQpLCBcIlxcblwiLCBcIn1cIiwgXCJcXG5cIik7XG5cdFx0fVxuXHRcdGVsc2Uge1xuXHRcdFx0X19rc19zcmMgKz0gSGVscGVyLmNvbmNhdFN0cmluZyhcIkNvbG9yLmFkZFNwYWNlKFwiLCBfX2tzX3JlaWZpY2F0ZShzcGFjZSwgbnVsbCwgMiksIFwiKVwiKTtcblx0XHR9XG5cdFx0cmV0dXJuIF9fa3Nfc3JjO1xuXHR9LCAodGhhdCwgZm4sIC4uLmFyZ3MpID0+IHtcblx0XHRjb25zdCB0MCA9IFR5cGUuaXNWYWx1ZTtcblx0XHRpZihhcmdzLmxlbmd0aCA9PT0gMykge1xuXHRcdFx0aWYodDAoYXJnc1swXSkgJiYgdDAoYXJnc1sxXSkgJiYgdDAoYXJnc1syXSkpIHtcblx0XHRcdFx0cmV0dXJuIGZuLmNhbGwobnVsbCwgYXJnc1swXSwgYXJnc1sxXSwgYXJnc1syXSk7XG5cdFx0XHR9XG5cdFx0fVxuXHRcdHRocm93IEhlbHBlci5iYWRBcmdzKCk7XG5cdH0pO1xufTsifQ=="
+      ]
+    ]
+  }
+]

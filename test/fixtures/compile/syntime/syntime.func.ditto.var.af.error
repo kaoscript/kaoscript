@@ -1,0 +1,1 @@
+SyntaxException: The identifier "foobar" is already used (fixtures/compile/syntime/syntime.func.ditto.var.af.ks:3)

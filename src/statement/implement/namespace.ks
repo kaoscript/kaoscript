@@ -106,7 +106,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		@type = property.type()
 
-		@returnNull = ?@data.body && (@data.body.kind == NodeKind.IfStatement || @data.body.kind == NodeKind.UnlessStatement)
+		@returnNull = ?@data.body && (@data.body.kind == AstKind.IfStatement || @data.body.kind == AstKind.UnlessStatement)
 
 		@main = !@namespace.hasProperty(@name)
 
