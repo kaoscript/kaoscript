@@ -1,9 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isQuxbaz: value => Type.isDexObject(value, 1, 0, {name: Type.isString}),
-		isFoobar: value => Type.isDexObject(value, 1, 0, {name: Type.isString})
-	};
+	const Quxbaz = Helper.alias(value => Type.isDexObject(value, 1, 0, {name: Type.isString}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -16,6 +13,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
+	const Foobar = Helper.alias(value => Type.isDexObject(value, 1, 0, {name: Type.isString}));
 	class Corge {
 		static __ks_new_0(...args) {
 			const o = Object.create(Corge.prototype);
@@ -40,8 +38,8 @@ module.exports = function() {
 			this._quxbazs = quxbazs;
 		}
 		__ks_cons_rt(that, args) {
-			const t0 = value => Type.isArray(value, __ksType.isFoobar) || Type.isNull(value);
-			const t1 = value => Type.isArray(value, __ksType.isQuxbaz) || Type.isNull(value);
+			const t0 = value => Type.isArray(value, Foobar.is) || Type.isNull(value);
+			const t1 = value => Type.isArray(value, Quxbaz.is) || Type.isNull(value);
 			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 			let pts;
 			if(args.length <= 2) {

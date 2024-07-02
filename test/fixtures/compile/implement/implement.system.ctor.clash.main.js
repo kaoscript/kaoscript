@@ -1,14 +1,11 @@
 require("kaoscript/register");
 const {Helper, initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date, __ks_Math) {
-	if(!__ks_Date || !__ks_Math) {
-		var __ks__ = require("./.implement.system.ctor.clash.typing.ks.fpb9zp.ksb")();
-		if(!__ks_Date) {
-			__ks_Date = __ks__.__ks_Date;
-		}
-		if(!__ks_Math) {
-			__ks_Math = __ks__.__ks_Math;
-		}
+	if(!__ks_Date && !__ks_Math) {
+		var {__ks_Date, __ks_Math} = require("./.implement.system.ctor.clash.typing.ks.fpb9zp.ksb")();
+	}
+	else if(!(__ks_Date || __ks_Math)) {
+		throw Helper.badRequirements();
 	}
 	__ks_Date.__ks_get_timezone = function(that) {
 		if(!that[initFlag]) {

@@ -1,9 +1,7 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isCard: value => Type.isDexObject(value, 1, 0, {suit: Type.isNumber}),
-		isResult: value => Type.isDexObject(value, 1, 0, {value: value => Type.isArray(value, __ksType.isCard) || Type.isString(value) || Type.isNull(value)})
-	};
+	const Card = Helper.alias(value => Type.isDexObject(value, 1, 0, {suit: Type.isNumber}));
+	const Result = Helper.alias(value => Type.isDexObject(value, 1, 0, {value: value => Type.isArray(value, Card.is) || Type.isString(value) || Type.isNull(value)}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

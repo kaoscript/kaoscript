@@ -1,14 +1,12 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	const __ksType = {
-		isAnimal: (value, cast) => Type.isDexObject(value, 1, 0, {name: Type.isString, features: () => Helper.castBitmask(value, "features", AnimalFlags, cast)})
-	};
 	const AnimalFlags = Helper.bitmask(Number, ["None", 0, "HasClaws", 1, "CanFly", 2, "EatsFish", 4, "Endangered", 8], ["EndangeredFlyingClawedFishEating", 15, "Predator", 3]);
+	const Animal = Helper.alias((value, cast) => Type.isDexObject(value, 1, 0, {name: Type.isString, features: () => Helper.castBitmask(value, "features", AnimalFlags, cast)}));
 	function restore() {
 		return restore.__ks_rt(this, arguments);
 	};
 	restore.__ks_0 = function(animal) {
-		animal = Helper.assert(animal, "\"Animal\"", 0, value => __ksType.isAnimal(value, true));
+		animal = Helper.assert(animal, "\"Animal\"", 0, value => Animal.is(value, true));
 	};
 	restore.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

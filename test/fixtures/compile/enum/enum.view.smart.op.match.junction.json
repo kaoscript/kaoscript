@@ -114,8 +114,7 @@
             "SATURDAY",
             "SUNDAY"
           ]
-        },
-        "testIndex": 0
+        }
       },
       {
         "kind": "function",

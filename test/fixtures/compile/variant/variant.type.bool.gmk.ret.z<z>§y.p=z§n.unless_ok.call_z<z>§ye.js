@@ -1,24 +1,22 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isEvent: (value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
-			if(!Type.isBoolean(variant)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant) {
-				return __ksType.isEvent.__1(value, mapper);
-			}
-			else {
-				return __ksType.isEvent.__0(value);
-			}
-		}}),
-		isSchoolPerson: value => Type.isDexObject(value, 1, 0, {name: Type.isString})
-	};
-	__ksType.isEvent.__0 = Type.isObject;
-	__ksType.isEvent.__1 = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0]});
+	const Event = Helper.alias((value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
+		if(!Type.isBoolean(variant)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant) {
+			return Event.isTrue(value, mapper);
+		}
+		else {
+			return Event.isFalse(value);
+		}
+	}}));
+	Event.isFalse = Type.isObject;
+	Event.isTrue = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0]});
+	const SchoolPerson = Helper.alias(value => Type.isDexObject(value, 1, 0, {name: Type.isString}));
 	const NO = (() => {
 		const o = new OBJ();
 		o.ok = false;
@@ -31,10 +29,10 @@ module.exports = function() {
 		if(!result.ok) {
 			result = loadJohn.__ks_0();
 		}
-		return Helper.assert(result, "\"Event<SchoolPerson>(true)\"", 0, value => __ksType.isEvent(value, [__ksType.isSchoolPerson], value => value));
+		return Helper.assert(result, "\"Event<SchoolPerson>(true)\"", 0, value => Event.is(value, [SchoolPerson.is], value => value));
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value, [Type.any]);
+		const t0 = value => Event.is(value, [Type.any]);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

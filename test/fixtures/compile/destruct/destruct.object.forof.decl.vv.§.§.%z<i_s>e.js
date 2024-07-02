@@ -1,8 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isFoobar: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, element: Type.isString})
-	};
+	const Foobar = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, element: Type.isString}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -13,7 +11,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isDexObject(value, 1, __ksType.isFoobar);
+		const t0 = value => Type.isDexObject(value, 1, Foobar.is);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

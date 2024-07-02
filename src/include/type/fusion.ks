@@ -260,6 +260,7 @@ class FusionType extends Type {
 
 		return match == @types.length
 	} # }}}
+	override isTestable() => true
 	override isVariant() => @variant
 	listFunctions(name: String): Array { # {{{
 		var result = []
@@ -329,7 +330,7 @@ class FusionType extends Type {
 
 		if ?@testName {
 			if nullable || ?#generics || (@variant && ?#subtypes) {
-				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+				fragments.code(`\(varname) => \(@testName).is(\(varname)`)
 
 				if @cast && (casting || ?#generics || (@variant && ?#subtypes)) {
 					if casting {
@@ -365,10 +366,10 @@ class FusionType extends Type {
 				}
 			}
 			else if casting && @cast {
-				fragments.code(`\(varname) => \(@testName)(\(varname), \(if blind set 'cast' else 'true'))`)
+				fragments.code(`\(varname) => \(@testName).is(\(varname), \(if blind set 'cast' else 'true'))`)
 			}
 			else {
-				fragments.code(@testName)
+				fragments.code(`\(@testName).is`)
 			}
 
 			if @standardLibrary ~~ .Yes {
@@ -386,17 +387,17 @@ class FusionType extends Type {
 
 		if ?@testName {
 			if casting && @cast {
-				fragments.code(`\(varname) => \(@testName)(\(varname), cast)`)
+				fragments.code(`\(varname) => \(@testName).is(\(varname), cast)`)
 
 				if nullable {
 					fragments.code(` || \($runtime.type(node)).isNull(\(varname))`)
 				}
 			}
 			else if nullable {
-				fragments.code(`\(varname) => \(@testName)(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
+				fragments.code(`\(varname) => \(@testName).is(\(varname)) || \($runtime.type(node)).isNull(\(varname))`)
 			}
 			else {
-				fragments.code(@testName)
+				fragments.code(`\(@testName).is`)
 			}
 		}
 		else {
@@ -407,7 +408,7 @@ class FusionType extends Type {
 		@buildFlags()
 
 		if ?@testName {
-			fragments.code(`\(@testName)(\(varname)`)
+			fragments.code(`\(@testName).is(\(varname)`)
 
 			if @cast && (casting || (@variant && ?#subtypes)) {
 				if casting {
@@ -486,7 +487,7 @@ class FusionType extends Type {
 		@buildFlags()
 
 		if ?@testName {
-			fragments.code(`\(@testName)(`).compile(node)
+			fragments.code(`\(@testName).is(`).compile(node)
 
 			if @cast && (?#parameters || ?#subtypes) {
 				fragments.code(', 0')

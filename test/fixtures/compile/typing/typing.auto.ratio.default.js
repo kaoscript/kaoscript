@@ -1,7 +1,8 @@
 require("kaoscript/register");
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	const float = Helper.alias(Type.isNumber);
 	function foo() {
 		return foo.__ks_rt(this, arguments);
 	};

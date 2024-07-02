@@ -1,8 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isRegExpExecArray: value => Type.isArray(value, value => Type.isString(value) || Type.isNull(value)) && Type.isDexObject(value, 1, 0, {index: Type.isNumber, input: Type.isString})
-	};
+	const RegExpExecArray = Helper.alias(value => Type.isArray(value, value => Type.isString(value) || Type.isNull(value)) && Type.isDexObject(value, 1, 0, {index: Type.isNumber, input: Type.isString}));
 	const __ks_String = {};
 	__ks_String.__ks_func_lines_0 = function(emptyLines) {
 		if(emptyLines === void 0 || emptyLines === null) {
@@ -81,7 +79,7 @@ module.exports = function() {
 	};
 	return {
 		__ks_RegExp: {},
-		__ks_String,
-		__ksType: [__ksType.isRegExpExecArray]
+		RegExpExecArray,
+		__ks_String
 	};
 };

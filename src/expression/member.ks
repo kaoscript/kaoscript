@@ -453,6 +453,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} # }}}
+	override isAccessibleAliasType(value) => @parent() is MatchConditionValue
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => @isNullable() && !@tested
 	isComputedMember() => @computed

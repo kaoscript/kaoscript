@@ -1,10 +1,9 @@
-const {Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isResult: value => __ksType.isPosition(value) && Type.isDexObject(value, 1, 0, {value: Type.isString})
-	};
+	const Position = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}));
+	const Result = Helper.alias(value => Position.is(value) && Type.isDexObject(value, 1, 0, {value: Type.isString}));
 	return {
-		__ksType: [__ksType.isPosition, __ksType.isResult]
+		Position,
+		Result
 	};
 };

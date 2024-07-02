@@ -549,11 +549,23 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	const __ks_String = {};
+	__ks_String.__ks_func_capitalize_0 = function() {
+		return Helper.concatString(this.charAt(0).toUpperCase(), this.substring(1).toLowerCase());
+	};
 	__ks_String.__ks_func_dasherize_0 = function() {
 		return this.replace(/([A-Z])/g, "-$1").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase();
 	};
 	__ks_String.__ks_func_toFirstLowerCase_0 = function() {
 		return this.charAt(0).toLowerCase() + this.substring(1);
+	};
+	__ks_String._im_capitalize = function(that, ...args) {
+		return __ks_String.__ks_func_capitalize_rt(that, args);
+	};
+	__ks_String.__ks_func_capitalize_rt = function(that, args) {
+		if(args.length === 0) {
+			return __ks_String.__ks_func_capitalize_0.call(that);
+		}
+		throw Helper.badArgs();
 	};
 	__ks_String._im_dasherize = function(that, ...args) {
 		return __ks_String.__ks_func_dasherize_rt(that, args);

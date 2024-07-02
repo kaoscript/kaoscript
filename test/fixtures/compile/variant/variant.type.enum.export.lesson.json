@@ -73,8 +73,7 @@
               ]
             }
           }
-        },
-        "testIndex": 0
+        }
       },
       {
         "kind": "alias",
@@ -98,8 +97,7 @@
               }
             }
           }
-        },
-        "testIndex": 1
+        }
       },
       {
         "kind": "alias",
@@ -143,8 +141,7 @@
               ]
             }
           }
-        },
-        "testIndex": 2
+        }
       }
     ],
     "macros": []

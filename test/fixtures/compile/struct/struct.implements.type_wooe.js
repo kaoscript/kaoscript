@@ -1,10 +1,8 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isTypeA: value => Type.isDexObject(value, 1, 0, {foobar: Type.isString}),
-		isTypeB: value => Type.isDexObject(value, 1, 0, {quxbaz: Type.isNumber}),
-		isTypeC: value => __ksType.isTypeA(value) && __ksType.isTypeB(value)
-	};
+	const TypeA = Helper.alias(value => Type.isDexObject(value, 1, 0, {foobar: Type.isString}));
+	const TypeB = Helper.alias(value => Type.isDexObject(value, 1, 0, {quxbaz: Type.isNumber}));
+	const TypeC = Helper.alias(value => TypeA.is(value) && TypeB.is(value));
 	const StructA = Helper.struct(function(foobar, quxbaz) {
 		const _ = new OBJ();
 		_.foobar = foobar;

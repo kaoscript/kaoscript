@@ -1,8 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isNamed: value => Type.isDexObject(value, 1, 0, {name: Type.isString})
-	};
+	const Named = Helper.alias(value => Type.isDexObject(value, 1, 0, {name: Type.isString}));
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);
@@ -27,7 +25,7 @@ module.exports = function() {
 			console.log(value.name);
 		}
 		__ks_func_foobar_rt(that, proto, gens, args) {
-			const t0 = gens.T || __ksType.isNamed;
+			const t0 = gens.T || Named.is;
 			if(args.length === 1) {
 				if(t0(args[0])) {
 					return proto.__ks_func_foobar_0.call(that, args[0]);

@@ -448,6 +448,7 @@ class ObjectComputedMember extends Expression {
 		@name.acquireReusable(acquire)
 		@value.acquireReusable(acquire)
 	} # }}}
+	override isAccessibleAliasType(value) => value == @value
 	isInverted() => @name.isInverted() || @value.isInverted()
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) { # {{{
@@ -544,6 +545,7 @@ class ObjectFilteredMember extends Expression {
 	translate() { # {{{
 		@value.translate()
 	} # }}}
+	override isAccessibleAliasType(value) => value == @value
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	isInverted() => @value.isInverted()
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
@@ -636,6 +638,7 @@ class ObjectLiteralMember extends Expression {
 		@value.translate()
 	} # }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
+	override isAccessibleAliasType(value) => value == @value
 	isInverted() => @value.isInverted()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)

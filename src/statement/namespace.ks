@@ -8,9 +8,6 @@ class NamespaceDeclaration extends Statement {
 		@topNodes: Array							= []
 		@type: NamedContainerType<NamespaceType>
 		@variable: Variable
-		@tests										= []
-		@testIndex: Number							= 0
-		@testVariable: String
 	}
 	constructor(data, parent, scope) { # {{{
 		super(data, parent, NamespaceScope.new(scope))
@@ -96,8 +93,6 @@ class NamespaceDeclaration extends Statement {
 
 		@scope.define(name, true, named, this)
 
-		@addTypeTest(name, named)
-
 		var reference = @scope.reference(name)
 
 		@anonymousTypes[hash] = reference
@@ -107,13 +102,6 @@ class NamespaceDeclaration extends Statement {
 	addInitializableVariable(variable, node)
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
-	} # }}}
-	addTypeTest(name: String, type: Type): Void { # {{{
-		@testVariable ??= @getTypeTestVariable()
-
-		@tests.push({ name, type })
-
-		type.setTestName(`\(@testVariable).is\(name)`)
 	} # }}}
 	authority() => this
 	export(recipient) { # {{{
@@ -125,10 +113,7 @@ class NamespaceDeclaration extends Statement {
 		if type.hasTest() {
 			var clone = type.clone()
 
-			clone.setTestName(`\(@name).__ksType[\(@testIndex)]`)
-			clone.setTestIndex(@testIndex)
-
-			@testIndex += 1
+			clone.setTestName(`\(@name).\(type.getTestName())`)
 
 			@type.addProperty(name, clone)
 		}
@@ -167,64 +152,12 @@ class NamespaceDeclaration extends Statement {
 			type.toExportFragment(object, name, variable, module)
 		}
 
-		if @testIndex > 0 {
-			var typesLine = object.newLine().code(`__ksType: [`)
-			var mut index = 0
-
-			for var variable, name of @exports {
-				var type = variable.getDeclaredType()
-
-				if type.hasTest() {
-					typesLine.code($comma) if index > 0
-
-					typesLine.code(type.getTestName())
-
-					index += 1
-				}
-			}
-
-			typesLine.code(']').done()
-		}
-
 		object.done()
 		line.done()
 	} # }}}
 	toStatementFragments(fragments, mode) { # {{{
 		var line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		var block = line.newBlock()
-
-		if ?#@tests {
-			var testsLine = block.newLine().code(`\($runtime.immutableScope(this))\(@testVariable) = `)
-			var object = testsLine.newObject()
-
-			for var { type, name } in @tests {
-				with var funcLine = object.newLine() {
-					var funcName = `is\(name)`
-
-					funcLine.code(`\(funcName): `)
-
-					type.toBlindTestFunctionFragments(funcName, 'value', false, true, null, funcLine, this)
-
-					funcLine.done()
-				}
-
-				if type.isVariant() && type.canBeDeferred() {
-					var generics = type.generics()
-
-					for var { type % subtype }, index in type.discard().getVariantType().getFields() {
-						var funcName = `is\(name)__\(index)`
-						var funcLine = object.newLine().code(`\(funcName): `)
-
-						subtype.toBlindTestFunctionFragments(funcName, 'value', false, false, generics, funcLine, this)
-
-						funcLine.done()
-					}
-				}
-			}
-
-			object.done()
-			testsLine.done()
-		}
 
 		for var node in @topNodes {
 			node.toAuthorityFragments(block)

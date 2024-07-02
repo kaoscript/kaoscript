@@ -1,23 +1,21 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
-		isEvent: (value, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
-			if(!Type.isBoolean(variant)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant) {
-				return Type.isDexObject(value, 0, 0, {value: Type.isValue, start: __ksType.isPosition, end: __ksType.isPosition});
-			}
-			else {
-				return Type.isDexObject(value, 0, 0, {expecteds: value => Type.isArray(value, Type.isString) || Type.isNull(value)});
-			}
-		}})
-	};
+	const Position = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}));
+	const Range = Helper.alias(value => Type.isDexObject(value, 1, 0, {start: Position.is, end: Position.is}));
+	const Event = Helper.alias((value, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
+		if(!Type.isBoolean(variant)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant) {
+			return Type.isDexObject(value, 0, 0, {value: Type.isValue, start: Position.is, end: Position.is});
+		}
+		else {
+			return Type.isDexObject(value, 0, 0, {expecteds: value => Type.isArray(value, Type.isString) || Type.isNull(value)});
+		}
+	}}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -31,7 +29,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isRange(value) || Type.isNull(value);
+		const t0 = value => Range.is(value) || Type.isNull(value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

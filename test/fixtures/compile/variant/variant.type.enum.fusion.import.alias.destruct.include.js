@@ -1,28 +1,26 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
-		isSchoolPerson: (value, cast, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(cast) {
-				if((variant = PersonKind(variant)) === null) {
-					return false;
-				}
-				value["kind"] = variant;
-			}
-			else if(!Type.isEnumInstance(variant, PersonKind)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant === PersonKind.Student) {
-				return Type.isDexObject(value, 0, 0, {name: Type.isString});
-			}
-			return true;
-		}})
-	};
+	const Position = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}));
+	const Range = Helper.alias(value => Type.isDexObject(value, 1, 0, {start: Position.is, end: Position.is}));
 	const PersonKind = Helper.enum(Number, 0, "Director", 1, "Student", 2, "Teacher", 3);
+	const SchoolPerson = Helper.alias((value, cast, filter) => Range.is(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
+		if(cast) {
+			if((variant = PersonKind(variant)) === null) {
+				return false;
+			}
+			value["kind"] = variant;
+		}
+		else if(!Type.isEnumInstance(variant, PersonKind)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant === PersonKind.Student) {
+			return Type.isDexObject(value, 0, 0, {name: Type.isString});
+		}
+		return true;
+	}}));
 	function Director() {
 		return Director.__ks_rt(this, arguments);
 	};
@@ -36,7 +34,7 @@ module.exports = function() {
 		})();
 	};
 	Director.__ks_rt = function(that, args) {
-		const t0 = __ksType.isRange;
+		const t0 = Range.is;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return Director.__ks_0.call(that, args[0]);
@@ -45,8 +43,10 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	return {
+		Position,
+		Range,
 		PersonKind,
-		Director,
-		__ksType: [__ksType.isPosition, __ksType.isRange, __ksType.isSchoolPerson]
+		SchoolPerson,
+		Director
 	};
 };

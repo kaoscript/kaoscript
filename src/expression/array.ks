@@ -72,6 +72,7 @@ class ArrayExpression extends Expression {
 			value.translate()
 		}
 	} # }}}
+	override isAccessibleAliasType(value) => true
 	isInverted() { # {{{
 		for var value in @values {
 			if value.isInverted() {

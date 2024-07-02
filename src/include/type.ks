@@ -137,6 +137,8 @@ bitmask MatchingMode<u48> {
 
 	TypeCasting
 
+	Requirement
+
 	Signature = Similar + MissingParameter + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
 	FunctionSignature = ExactParameter +
 		SubclassParameter +
@@ -247,7 +249,6 @@ abstract class Type {
 		@requirement: Boolean			= false
 		@scope: Scope?
 		@sealed: Boolean				= false
-		@specter: Boolean				= false
 		@system: Boolean				= false
 		@standardLibrary: LibSTDMode	= .No
 	}
@@ -1154,9 +1155,6 @@ abstract class Type {
 
 		return this
 	} # }}}
-	flagSpecter() { # {{{
-		@specter = true
-	} # }}}
 	flagSystem() { # {{{
 		@system = true
 
@@ -1248,8 +1246,6 @@ abstract class Type {
 	isExportable(mode: ExportMode) => mode ~~ ExportMode.Requirement || @isExportable()
 	isExportable(mode: ExportMode, module: Module) => mode ~~ ExportMode.Requirement || @isExportable(module)
 	isExportable(module: Module) => @isExportable() && (module.isStandardLibrary() || @standardLibrary ~~ .No | .Opened)
-	isExportingFragment() => ((!@isVirtual() && !@isSystem()) || (@isSealed() && @isExtendable())) && @standardLibrary ~~ .No | .Opened
-	isExportingType() => false
 	isExported() => @exported
 	isExtendable() => false
 	isFinite() => false
@@ -1288,7 +1284,6 @@ abstract class Type {
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isSpecific() => false
-	isSpecter() => @specter
 	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
 	isStandardLibrary(mode: LibSTDMode): Boolean => @standardLibrary ~~ mode
@@ -1311,6 +1306,7 @@ abstract class Type {
 	// 	return true
 	// } # }}}
 	isSystem() => @system
+	isTestable() => false
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false

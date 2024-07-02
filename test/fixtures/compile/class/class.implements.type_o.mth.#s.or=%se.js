@@ -1,8 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isTypeA: value => Type.isDexObject(value, 1, 0, {foobar: Type.isFunction})
-	};
+	const TypeA = Helper.alias(value => Type.isDexObject(value, 1, 0, {foobar: Type.isFunction}));
 	class ClassA {
 		static __ks_new_0() {
 			const o = Object.create(ClassA.prototype);
@@ -37,6 +35,6 @@ module.exports = function() {
 	console.log(x.__ks_func_foobar_0());
 	return {
 		ClassA,
-		__ksType: [__ksType.isTypeA]
+		TypeA
 	};
 };

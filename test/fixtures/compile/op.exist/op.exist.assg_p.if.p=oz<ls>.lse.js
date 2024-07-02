@@ -1,5 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const Foobar = Helper.alias(value => Type.isArray(value, Type.isString));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

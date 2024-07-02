@@ -309,7 +309,7 @@ class VariantType extends Type {
 					.step()
 
 				if @deferrable {
-					ctrl.line(`return __ksType.\(funcname).__1(\(varname)\(if @names.true.type.canBeDeferred() set ', mapper' else ''))`)
+					ctrl.line(`return \(funcname).isTrue(\(varname)\(if @names.true.type.canBeDeferred() set ', mapper' else ''))`)
 				}
 				else {
 					var line = ctrl.newLine().code(`return `)
@@ -327,7 +327,7 @@ class VariantType extends Type {
 				ctrl.step().code('else').step()
 
 				if @deferrable {
-					ctrl.line(`return __ksType.\(funcname).__0(\(varname)\(if @names.false.type.canBeDeferred() set ', mapper' else ''))`)
+					ctrl.line(`return \(funcname).isFalse(\(varname)\(if @names.false.type.canBeDeferred() set ', mapper' else ''))`)
 				}
 				else {
 					var line = ctrl.newLine().code(`return `)
@@ -360,7 +360,7 @@ class VariantType extends Type {
 					ifCtrl.code(`if((variant = `).compile(@master).code(`(variant)) === null)`)
 				}
 				else {
-					ifCtrl.code(`if((variant = `).compile(@enum).code(`(variant)) === null || !\(@enum.getTestName())(variant))`)
+					ifCtrl.code(`if((variant = `).compile(@enum).code(`(variant)) === null || !\(@enum.getTestName()).is(variant))`)
 				}
 
 				ifCtrl
@@ -376,7 +376,7 @@ class VariantType extends Type {
 					ctrl.code(`else if(!\($runtime.type(node)).isEnumInstance(variant, `).compile(@master).code(`))`)
 				}
 				else {
-					ctrl.code(`else if(!\(@enum.getTestName())(variant))`)
+					ctrl.code(`else if(!\(@enum.getTestName()).is(variant))`)
 				}
 
 				ctrl
@@ -400,7 +400,7 @@ class VariantType extends Type {
 						.step()
 
 					if @deferrable {
-						fieldCtrl.line(`return __ksType.\(funcname).__\(index)(\(varname)\(if type.canBeDeferred() set ', mapper' else ''))`)
+						fieldCtrl.line(`return \(funcname).__\(index)(\(varname)\(if type.canBeDeferred() set ', mapper' else ''))`)
 					}
 					else {
 						var line = fieldCtrl.newLine().code(`return `)

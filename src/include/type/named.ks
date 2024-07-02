@@ -33,7 +33,7 @@ class NamedType extends Type {
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
-	discardAlias() => if @isAlias() set @type.discardAlias() else this
+	discardAlias() => if @type.isAlias() set @type.discardAlias() else this
 	discardName() => @type
 	duplicate() => NamedType.new(@name, @type)
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
@@ -237,7 +237,6 @@ class NamedType extends Type {
 	isExplicit() => true
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExported() => @type.isExported()
-	isExportingFragment() => @type.isExportingFragment()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isFusion() => @type.isFusion()
@@ -372,7 +371,18 @@ class NamedType extends Type {
 			}
 		}
 		else if @isAlias() {
-			return @discardAlias().isSubsetOf(value, mode)
+			if value.isAlias() && mode ~~ .Requirement {
+				// TODO alias' type must be known before passing to import
+				if var type ?= @type.discardAlias():!!!(Type?) {
+					return type.isSubsetOf(value.discardAlias(), mode)
+				}
+				else {
+					return true
+				}
+			}
+			else {
+				return @type.discardAlias().isSubsetOf(value, mode)
+			}
 		}
 		else if value is UnionType {
 			for var type in value.types() {
@@ -557,7 +567,6 @@ class NamedType extends Type {
 	resetReferences() => @type.resetReferences()
 	setAlterationReference(type: Type) => @type.setAlterationReference(type)
 	setPrettyName(@prettyName)
-	setTestIndex(index) => @type.setTestIndex(index)
 	setTestName(name) => @type.setTestName(name)
 	split(types: Array) { # {{{
 		if @type.isAlias() || @type.isUnion() {
@@ -572,14 +581,6 @@ class NamedType extends Type {
 
 		return types
 	} # }}}
-	override toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node) { # {{{
-		if @type.isSpecter() {
-			fragments.code(`\(@getAuxiliaryPath()).is`)
-		}
-		else {
-			@type.toAwareTestFunctionFragments(varname, nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
-		}
-	} # }}}
 	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		if @type is ClassType {
 			return @type.toAlterationReference(references, indexDelta, mode, module)
@@ -589,13 +590,11 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toExportFragment(fragments, name, variable, module) { # {{{
-		if @type.isExportingFragment() {
-			if module.isStandardLibrary() {
-				fragments.line(@auxiliaryName)
-			}
-			else {
-				super(fragments, name, variable, module)
-			}
+		if module.isStandardLibrary() {
+			fragments.line(@auxiliaryName)
+		}
+		else {
+			super(fragments, name, variable, module)
 		}
 	} # }}}
 	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toExportOrIndex(references, indexDelta, mode, module)
@@ -687,17 +686,17 @@ class NamedType extends Type {
 		isComplex
 		isDeferrable
 		isExportable
-		isExportingType
 		isFinite
 		isFunction
 		isInstanceOf
-		isSpecter
 		isStandardLibrary
+		isTestable
 		isUsingAuxiliary
 		isVariant
 		isView
 		makeCallee
 		setStandardLibrary
+		toAwareTestFunctionFragments
 		toBlindTestFragments
 		toBlindTestFunctionFragments
 	}

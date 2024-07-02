@@ -4,6 +4,7 @@ module.exports = function(__ks_Date) {
 	if(!__ks_Date) {
 		var __ks_Date = require("./.require.alt.roi.loop3.genesis.ks.np51g.ksb")().__ks_Date;
 	}
+	const NS = Helper.alias(value => Type.isNumber(value) || Type.isString(value));
 	__ks_Date.__ks_new_1 = function(...args) {
 		return __ks_Date.__ks_cons_1(...args);
 	};
@@ -31,10 +32,11 @@ module.exports = function(__ks_Date) {
 	};
 	__ks_Date.new = function() {
 		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		const t1 = value => Type.isNumber(value) || Type.isString(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
 		let pts;
 		if(arguments.length >= 2 && arguments.length <= 7) {
-			if(t0(arguments[0]) && t0(arguments[1]) && Helper.isVarargs(arguments, 0, 1, t0, pts = [2], 0) && Helper.isVarargs(arguments, 0, 1, t0, pts, 1) && Helper.isVarargs(arguments, 0, 1, t0, pts, 2) && Helper.isVarargs(arguments, 0, 1, t0, pts, 3) && Helper.isVarargs(arguments, 0, 1, t0, pts, 4) && te(pts, 5)) {
+			if(t0(arguments[0]) && t0(arguments[1]) && Helper.isVarargs(arguments, 0, 1, t1, pts = [2], 0) && Helper.isVarargs(arguments, 0, 1, t1, pts, 1) && Helper.isVarargs(arguments, 0, 1, t1, pts, 2) && Helper.isVarargs(arguments, 0, 1, t1, pts, 3) && Helper.isVarargs(arguments, 0, 1, t1, pts, 4) && te(pts, 5)) {
 				return __ks_Date.__ks_cons_1(arguments[0], arguments[1], Helper.getVararg(arguments, 2, pts[1]), Helper.getVararg(arguments, pts[1], pts[2]), Helper.getVararg(arguments, pts[2], pts[3]), Helper.getVararg(arguments, pts[3], pts[4]), Helper.getVararg(arguments, pts[4], pts[5]));
 			}
 		}

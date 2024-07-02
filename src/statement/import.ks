@@ -87,8 +87,6 @@ abstract class Importer extends Statement {
 		@reusable: Boolean							= false
 		@reuseName: String
 		@standardLibrary: Boolean					= false
-		@typeTested: Boolean						= false
-		@typeTestName: String
 		@variables: Object<ImportedVariable>		= {}
 		@variationId: String
 		@worker: ImportWorker
@@ -180,11 +178,15 @@ abstract class Importer extends Statement {
 						variable.getDeclaredType().merge(type)
 					}
 					else if !variable.isPredefined() && !?@arguments.fromLocal[def.internal] {
-						unless variable.isStandardLibrary(.Closed) {
+						if variable.isStandardLibrary(.Closed) {
+							variable.getDeclaredType().merge(type)
+						}
+						else if type.isAlias() && variable.getDeclaredType().isAlias() && variable.getDeclaredType().isSubsetOf(type, MatchingMode.Default) {
+							pass
+						}
+						else {
 							ReferenceException.throwNotPassed(def.internal, @data.source.value, this)
 						}
-
-						variable.getDeclaredType().merge(type)
 					}
 					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode.Signature + MatchingMode.Renamed) {
 						var declType = type
@@ -204,56 +206,38 @@ abstract class Importer extends Statement {
 
 					}
 
-					if type.isAlias() && !type.isSpecter() {
-						if type.isExportingType() {
-							@typeTested = true
+					var var = ImportedVariable.new(
+						name: def.internal
+						sealed: type.isSealed() && !type.isSystem()
+						system: type.isSystem()
+					)
 
-							types.push({ def, type })
-						}
+					if !@standardLibrary && type.isUsingAuxiliary() && !type.hasAuxiliary() {
+						type.flagAuxiliary()
+					}
+
+					@variables[name] = var
+
+					if var.sealed {
+						@count += 2
 					}
 					else {
-						var var = ImportedVariable.new(
-							name: def.internal
-							sealed: type.isSealed() && !type.isSystem()
-							specter: type.isSpecter()
-							system: type.isSystem()
-						)
+						@count += 1
+					}
 
-						if !@standardLibrary && type.isUsingAuxiliary() && !type.hasAuxiliary() {
-							type.flagAuxiliary()
-						}
+					if !@standardLibrary && type.isSystem() && def.internal == 'Object' {
+						module.flag('Object')
+					}
+					else {
+						module.import(def.internal)
+					}
 
-						@variables[name] = var
-
-						if var.sealed {
-							@count += 2
-						}
-						else {
-							@count += 1
-						}
-
-						if !@standardLibrary && type.isSystem() && def.internal == 'Object' {
-							module.flag('Object')
-						}
-						else {
-							module.import(def.internal)
-						}
+					if type.isAlias() {
+						type.setTestName(def.internal)
 					}
 				}
 
 				variable.setComplete(true)
-			}
-
-			if @typeTested {
-				@typeTestName = if @standardLibrary set '__ksStd_types' else @recipient().authority().getTypeTestVariable()
-
-				for var { def, type } in types {
-					type
-						..setTestName(`\(@typeTestName)[\(type.getTestIndex())]`)
-						..setStandardLibrary(LibSTDMode.Yes + LibSTDMode.Closed) if @standardLibrary
-				}
-
-				@count += 1
 			}
 
 			if !@standardLibrary && !@macro && (@count != 0 || ?@alias) {
@@ -536,8 +520,9 @@ abstract class Importer extends Statement {
 
 		for var argument, index in [...arguments.values] when !argument.required {
 			var variable = @scope.getVariable(argument.identifier)
+			var type = variable.getRealType()
 
-			if variable.getRealType().isSubsetOf(argument.type, MatchingMode.Signature) {
+			if type.isSubsetOf(argument.type, MatchingMode.Signature + MatchingMode.Requirement) {
 				argument.type = variable.getRealType()
 				argument.auxiliary = argument.type.hasAuxiliary()
 			}
@@ -1067,29 +1052,29 @@ abstract class Importer extends Statement {
 	registerSyntimeFunction(name, macro) { # {{{
 		@parent.registerSyntimeFunction(name, macro)
 	} # }}}
-	toImportFragments(fragments, destructuring: Boolean = true, roi: Boolean = false) { # {{{
+	toImportFragments(fragments, destructuring: Boolean = true) { # {{{
 		if @isKSFile {
-			@toKSFileFragments(fragments, destructuring, roi)
+			@toKSFileFragments(fragments, destructuring)
 		}
 		else {
-			@toNodeFileFragments(fragments, destructuring, roi)
+			@toNodeFileFragments(fragments, destructuring)
 		}
 	} # }}}
-	toKSFileFragments(fragments, destructuring: Boolean, roi: Boolean) { # {{{
+	toKSFileFragments(fragments, destructuring: Boolean) { # {{{
 		if @count == 0 {
 			if ?@alias {
 				var line = fragments
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.done()
 			}
 			else if @arguments.values.length != 0 {
 				var line = fragments.newLine()
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -1100,163 +1085,54 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.done()
 			}
 
 			if @count == 1 {
-				if @typeTested {
+				var dyn variable, name
+
+				// TODO remove loop to get first element
+				for variable, name of @variables {
+				}
+
+				if variable.system || variable.specter {
 					var line = fragments
 						.newLine()
-						.code(`var \(@typeTestName) = `)
+						.code(`var __ks_\(variable.name) = `)
 
-					@toRequireFragments(line, roi)
+					@toRequireFragments(line)
 
-					line.code(`.__ksType`).done()
+					line.code(`.__ks_\(name)`).done()
 				}
 				else {
-					var dyn variable, name
+					var line = fragments
+						.newLine()
+						.code(`var \(variable.name) = `)
 
-					// TODO remove loop to get first element
-					for variable, name of @variables {
-					}
+					@toRequireFragments(line)
 
-					if variable.system || variable.specter {
-						var line = fragments
-							.newLine()
-							.code(`var __ks_\(variable.name) = `)
-
-						@toRequireFragments(line, roi)
-
-						line.code(`.__ks_\(name)`).done()
-					}
-					else {
-						var line = fragments
-							.newLine()
-							.code(`var \(variable.name) = `)
-
-						@toRequireFragments(line, roi)
-
-						line.code(`.\(name)`).done()
-					}
+					line.code(`.\(name)`).done()
 				}
 			}
+			else if destructuring {
+				@toVariablesFragments((fragments) => @toRequireFragments(fragments), fragments)
+			}
 			else {
-				if !destructuring || @options.format.destructuring == 'es5' {
-					var late varname
+				var late varname
 
-					if @reusable {
-						varname = @reuseName
-					}
-					else {
-						var line = fragments
-							.newLine()
-							.code('var __ks__ = ')
-
-						@toRequireFragments(line, roi)
-
-						line.done()
-
-						varname = '__ks__'
-					}
-
-					if destructuring {
-						var line = fragments.newLine().code('var ')
-
-						var mut nf = false
-						for var variable, name of @variables {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-
-							if variable.name == name && $virtuals[name] {
-								line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
-							}
-							else {
-								if variable.system || variable.specter {
-									line.code(`__ks_\(variable.name) = \(varname).__ks_\(name)`)
-								}
-								else {
-									line.code(`\(variable.name) = \(varname).\(name)`)
-
-									if variable.sealed {
-										line.code(`, __ks_\(variable.name) = \(varname).__ks_\(name)`)
-									}
-								}
-							}
-						}
-
-						if @typeTested {
-							if nf {
-								line.code(', ')
-							}
-
-							line.code(`\(@typeTestName) = \(varname).__ksType`)
-						}
-
-						line.done()
-					}
+				if @reusable {
+					varname = @reuseName
 				}
 				else {
-					var line = fragments.newLine().code('var {')
+					var line = fragments.newLine().code('var __ks__ = ')
 
-					var mut nf = false
-					for var variable, name of @variables {
-						if nf {
-							line.code(', ')
-						}
-						else {
-							nf = true
-						}
-
-						if variable.name == name {
-							if $virtuals[name] {
-								line.code(`__ks_\(name)`)
-							}
-							else {
-								if variable.system || variable.specter {
-									line.code(`__ks_\(name)`)
-								}
-								else {
-									line.code(name)
-
-									if variable.sealed {
-										line.code(`, __ks_\(name)`)
-									}
-								}
-							}
-						}
-						else {
-							if variable.system || variable.specter {
-								line.code(`__ks_\(name): __ks_\(variable.name)`)
-							}
-							else {
-								line.code(`\(name): \(variable.name)`)
-
-								if variable.sealed {
-									line.code(`, __ks_\(name): __ks_\(variable.name)`)
-								}
-							}
-						}
-					}
-
-					if @typeTested {
-						if nf {
-							line.code(', ')
-						}
-
-						line.code(`__ksType: \(@typeTestName)`)
-					}
-
-					line.code('} = ')
-
-					@toRequireFragments(line, roi)
+					@toRequireFragments(line)
 
 					line.done()
+
+					varname = @reuseName = '__ks__'
 				}
 			}
 		}
@@ -1278,18 +1154,18 @@ abstract class Importer extends Statement {
 
 		line.code('} = ')
 
-		@toRequireFragments(line, false)
+		@toRequireFragments(line)
 
 		line.done()
 	} # }}}
-	toNodeFileFragments(fragments, destructuring: Boolean, roi: Boolean) { # {{{
+	toNodeFileFragments(fragments, destructuring: Boolean) { # {{{
 		if @count == 0 {
 			if @alias != null {
 				var line = fragments
 					.newLine()
 					.code('var ', @alias, ' = ')
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -1300,7 +1176,7 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code('var ', @reuseName, ' = ')
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.done()
 			}
@@ -1315,39 +1191,12 @@ abstract class Importer extends Statement {
 					.newLine()
 					.code(`var \(variable.name) = `)
 
-				@toRequireFragments(line, roi)
+				@toRequireFragments(line)
 
 				line.code(`.\(name)`).done()
 			}
 			else if @count > 0 {
-				if !destructuring || @options.format.destructuring == 'es5' {
-					var mut line = fragments
-						.newLine()
-						.code(`var __ks__ = `)
-
-					@toRequireFragments(line, roi)
-
-					line.done()
-
-					if destructuring {
-						line = fragments.newLine().code('var ')
-
-						var mut nf = false
-						for var variable, name of @variables {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-
-							line.code(`\(variable.name) = __ks__.\(name)`)
-						}
-
-						line.done()
-					}
-				}
-				else {
+				if destructuring {
 					var mut line = fragments.newLine().code('var {')
 
 					var mut nf = false
@@ -1369,14 +1218,23 @@ abstract class Importer extends Statement {
 
 					line.code(`} = `)
 
-					@toRequireFragments(line, roi)
+					@toRequireFragments(line)
+
+					line.done()
+				}
+				else {
+					var mut line = fragments
+						.newLine()
+						.code(`var __ks__ = `)
+
+					@toRequireFragments(line)
 
 					line.done()
 				}
 			}
 		}
 	} # }}}
-	toRequireFragments(fragments, roi: Boolean) { # {{{
+	toRequireFragments(fragments) { # {{{
 		if @reusable {
 			fragments.code(@reuseName)
 		}
@@ -1467,6 +1325,55 @@ abstract class Importer extends Statement {
 
 			@reusable = true
 		}
+	} # }}}
+	toVariablesFragments(callback, fragments) { # {{{
+		var line = fragments.newLine().code('var {')
+
+		var mut nf = false
+		for var variable, name of @variables {
+			if nf {
+				line.code(', ')
+			}
+			else {
+				nf = true
+			}
+
+			if variable.name == name {
+				if $virtuals[name] {
+					line.code(`__ks_\(name)`)
+				}
+				else {
+					if variable.system || variable.specter {
+						line.code(`__ks_\(name)`)
+					}
+					else {
+						line.code(name)
+
+						if variable.sealed {
+							line.code(`, __ks_\(name)`)
+						}
+					}
+				}
+			}
+			else {
+				if variable.system || variable.specter {
+					line.code(`__ks_\(name): __ks_\(variable.name)`)
+				}
+				else {
+					line.code(`\(name): \(variable.name)`)
+
+					if variable.sealed {
+						line.code(`, __ks_\(name): __ks_\(variable.name)`)
+					}
+				}
+			}
+		}
+
+		line.code('} = ')
+
+		callback(line)
+
+		line.done()
 	} # }}}
 	private validateRequirement(required: Boolean | Number, name: String, metadata) { # {{{
 		if required {

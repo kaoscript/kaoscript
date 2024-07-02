@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {PersonKind, __ksType: __ksType0} = require("./.variant.type.enum.export.default.ks.j5k8r9.ksb")();
+	var {PersonKind, SchoolPerson} = require("./.variant.type.enum.export.default.ks.j5k8r9.ksb")();
 	function greeting() {
 		return greeting.__ks_rt(this, arguments);
 	};
@@ -22,7 +22,7 @@ module.exports = function() {
 		return __ks_0;
 	};
 	greeting.__ks_rt = function(that, args) {
-		const t0 = __ksType0[0];
+		const t0 = SchoolPerson.is;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return greeting.__ks_0.call(that, args[0]);

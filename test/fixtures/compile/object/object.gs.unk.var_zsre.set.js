@@ -1,8 +1,6 @@
-const {OBJ, Type} = require("@kaoscript/runtime");
+const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isColor: value => Type.isDexObject(value, 1, Type.isValue, {color: Type.isString})
-	};
+	const Color = Helper.alias(value => Type.isDexObject(value, 1, Type.isValue, {color: Type.isString}));
 	const o = (() => {
 		const o = new OBJ();
 		o.color = "red";

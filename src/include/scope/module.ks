@@ -452,6 +452,15 @@ class ModuleScope extends Scope {
 			return false
 		}
 	} # }}}
+	reassignReference(oldName, newName, newScope) { # {{{
+		if var reference ?= @references[oldName] {
+			reference.reassign(newName, newScope)
+		}
+
+		if var reference ?= newScope._references[newName] {
+			reference.reset()
+		}
+	} # }}}
 	releaseTempName(name) { # {{{
 		@tempNames[name] = true
 	} # }}}

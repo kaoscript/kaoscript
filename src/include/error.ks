@@ -706,11 +706,14 @@ export class SyntaxException extends Exception {
 
 			throw SyntaxException.new(message, node)
 		} # }}}
-		throwMissingRequirement(name, node): Never ~ SyntaxException { # {{{
+		throwMissingRequirement(name: String, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`import is missing the argument "\(name)"`, node)
 		} # }}}
-		throwMissingRequirement(argname, modname, node): Never ~ ReferenceException { # {{{
+		throwMissingRequirement(argname: String, modname: String, node): Never ~ ReferenceException { # {{{
 			throw TypeException.new(`The module "\(modname)" is missing the argument "\(argname)"`, node)
+		} # }}}
+		throwMissingRequirements(argnames: String[], modname: String, node): Never ~ ReferenceException { # {{{
+			throw TypeException.new(`The module "\(modname)" is missing the arguments \($joinQuote(argnames))`, node)
 		} # }}}
 		throwMissingStructField(name, node): Never ~ SyntaxException { # {{{
 			throw SyntaxException.new(`The field "\(name)" is missing to create the struct`, node)

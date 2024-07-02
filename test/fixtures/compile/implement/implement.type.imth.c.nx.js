@@ -1,4 +1,4 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		static __ks_new_0() {
@@ -18,6 +18,7 @@ module.exports = function() {
 			}
 		}
 	}
+	const Data = Helper.alias(value => Type.isClassInstance(value, Foobar));
 	__ks_Data.__ks_func_debug_0 = function(that) {
 	};
 	__ks_Data.__ks_func_debug = function(that, ...args) {
@@ -33,7 +34,7 @@ module.exports = function() {
 		__ks_Data.__ks_func_debug_0(data);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = __ks_Data.is;
+		const t0 = value => Type.isClassInstance(value, Foobar);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

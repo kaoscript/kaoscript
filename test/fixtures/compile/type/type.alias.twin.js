@@ -1,5 +1,7 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const float = Helper.alias(Type.isNumber);
+	const int = Helper.alias(Type.isNumber);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

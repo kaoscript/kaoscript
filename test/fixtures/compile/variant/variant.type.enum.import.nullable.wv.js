@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, OBJ} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {PersonKind, __ksType: __ksType0} = require("./.variant.type.enum.export.nullable.ks.j5k8r9.ksb")();
+	var {PersonKind, Room, SchoolPerson} = require("./.variant.type.enum.export.nullable.ks.j5k8r9.ksb")();
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

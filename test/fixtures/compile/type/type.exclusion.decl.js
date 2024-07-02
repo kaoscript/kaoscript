@@ -1,5 +1,6 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const Instance = Helper.alias(value => !Type.isPrimitive(value) && !Type.isArray(value));
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);

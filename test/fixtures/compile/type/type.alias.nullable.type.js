@@ -30,6 +30,7 @@ module.exports = function() {
 			throw Helper.badArgs();
 		}
 	}
+	const FS = Helper.alias(value => Type.isClassInstance(value, Foobar) || Type.isString(value));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

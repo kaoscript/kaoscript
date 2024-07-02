@@ -1,5 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const float = Helper.alias(Type.isNumber);
 	class Person {
 		static __ks_new_0() {
 			const o = Object.create(Person.prototype);

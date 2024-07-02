@@ -1,8 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isCoord: value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber})
-	};
+	const Coord = Helper.alias(value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -13,8 +11,8 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = __ksType.isCoord;
-		const t1 = value => __ksType.isCoord(value) || Type.isNull(value);
+		const t0 = Coord.is;
+		const t1 = value => Coord.is(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length >= 1 && args.length <= 2) {

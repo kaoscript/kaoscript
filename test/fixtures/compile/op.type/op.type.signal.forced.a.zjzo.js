@@ -1,9 +1,7 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPoint: value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}),
-		isPoint3D: value => __ksType.isPoint(value) && Type.isDexObject(value, 1, 0, {z: Type.isNumber})
-	};
+	const Point = Helper.alias(value => Type.isDexObject(value, 1, 0, {x: Type.isNumber, y: Type.isNumber}));
+	const Point3D = Helper.alias(value => Point.is(value) && Type.isDexObject(value, 1, 0, {z: Type.isNumber}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

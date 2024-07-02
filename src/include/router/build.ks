@@ -72,9 +72,10 @@ namespace Build {
 			}
 
 			var trees: Tree[] = []
+			var aliases: Type{} = {}
 
 			for var group of groups when group.functions.length > 0/*  && group.n == 1 */ {
-				var tree = buildTree(group, name, ignoreIndistinguishable, excludes, node)
+				var tree = buildTree(group, aliases, name, ignoreIndistinguishable, excludes, node)
 
 				trees.push(tree)
 			}
@@ -82,6 +83,12 @@ namespace Build {
 			RegroupTree.regroupTrees(trees, node)
 
 			Unbounded.expandUnboundeds(trees, node)
+
+			if ?#aliases {
+				for var tree in trees {
+					replaceAliases(tree, aliases)
+				}
+			}
 
 			var functionMap = {}
 
@@ -350,7 +357,7 @@ namespace Build {
 	}
 
 	namespace Legion {
-		export func expandGroup(group: Group, name: String, ignoreIndistinguishable: Boolean, excludes: String[], node: AbstractNode): Void { # {{{
+		export func expandGroup(group: Group, aliases: Type{}, name: String, ignoreIndistinguishable: Boolean, excludes: String[], node: AbstractNode): Void { # {{{
 			for var function in group.functions {
 				var min = function.min(MinMax.POSITIONAL + MinMax.ASYNC + MinMax.REST, excludes)
 				var minAfter = function.min(MinMax.AFTER_REST + MinMax.ASYNC, excludes)
@@ -362,12 +369,13 @@ namespace Build {
 					parameters = [...parameters, ParameterType.new(scope, scope.reference('Function')).index(parameters.length)]
 				}
 
-				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, group.n, group.n - min, 0, 0, 0, -1, '', [], {})
+				expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, group.n, group.n - min, 0, 0, 0, -1, '', [], {})
 			}
 		} # }}}
 
 		func expandFunction(
 			group: Group
+			aliases: Type{}
 			name: String
 			ignoreIndistinguishable: Boolean
 			node: AbstractNode
@@ -425,43 +433,43 @@ namespace Build {
 
 				if stepIndex == 0 {
 					if stepCount < min {
-						expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, 0, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
+						expandParameter(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, 0, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
 					}
 					else {
 						var rest = max == Infinity
 
 						if paramIndex + 1 < parameters.length {
 							if rest {
-								expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
+								expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
 							}
 							else {
 								if stepCount == max || hasMin(type, paramIndex + 1, parameters, remaining) {
-									expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
+									expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
 								}
 							}
 						}
 
 						if rest {
 							for var i from 1 to getMaxRestExpand(paramIndex, parameters, remaining, function) {
-								expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
+								expandParameter(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
 							}
 						}
 						else {
 							for var i from 1 to Math.min(max - min, remaining) {
-								expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
+								expandParameter(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, i, 1, rest, argIndex + 1, key, types, names, type)
 							}
 						}
 					}
 				}
 				else if stepCount < stepIndex {
-					expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, stepIndex, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
+					expandParameter(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining - 1, paramIndex, stepIndex, stepCount + 1, max == Infinity, argIndex + 1, key, types, names, type)
 				}
 				else {
 					if max == Infinity {
-						expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
+						expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, -remaining - minAfter - 1, key, types, names)
 					}
 					else if remaining == 0 || stepCount + min >= max || hasMin2(type, paramIndex + 1, parameters) {
-						expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
+						expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex + 1, 0, 0, argIndex, key, types, names)
 					}
 				}
 			}
@@ -469,6 +477,7 @@ namespace Build {
 
 		func expandParameter(
 			group: Group
+			aliases: Type{}
 			name: String
 			ignoreIndistinguishable: Boolean
 			node: AbstractNode
@@ -488,8 +497,22 @@ namespace Build {
 			type: Type
 		): Void { # {{{
 			if type.isUnion() {
-				for var value in type.discard():!!!(UnionType).types() {
-					expandParameter(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
+				if type.isAlias() {
+					var notNull = type.setNullable(false)
+					var hash = notNull.discard().hashCode()
+
+					aliases[hash] ??= notNull
+					aliases[`\(hash)|Null`] ??= type.setNullable(true)
+				}
+
+				var mut union = type.discard():!!!(UnionType)
+
+				if type.isNullable() && !union.isNullable() {
+					union = union.setNullable(true)
+				}
+
+				for var value in union.types() {
+					expandParameter(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, rest, argIndex, key, types, names, value)
 				}
 			}
 			else {
@@ -520,7 +543,7 @@ namespace Build {
 					}
 				}
 
-				expandFunction(group, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, argIndex, key, types, names)
+				expandFunction(group, aliases, name, ignoreIndistinguishable, node, function, parameters, minAfter, target, remaining, paramIndex, stepIndex, stepCount, argIndex, key, types, names)
 			}
 		} # }}}
 
@@ -1773,7 +1796,7 @@ namespace Build {
 		} # }}}
 	}
 
-	func buildTree(group: Group, name: String, ignoreIndistinguishable: Boolean, excludes: String[], node: AbstractNode): Tree { # {{{
+	func buildTree(group: Group, aliases: Type{}, name: String, ignoreIndistinguishable: Boolean, excludes: String[], node: AbstractNode): Tree { # {{{
 		if group.n == 0 {
 			return Zero.buildTree(group, name, node)
 		}
@@ -1782,7 +1805,7 @@ namespace Build {
 			One.expandGroup(group, name, ignoreIndistinguishable, excludes, node)
 		}
 		else {
-			Legion.expandGroup(group, name, ignoreIndistinguishable, excludes, node)
+			Legion.expandGroup(group, aliases, name, ignoreIndistinguishable, excludes, node)
 		}
 
 		var perNames = {}
@@ -1820,6 +1843,24 @@ namespace Build {
 			Regroup.regroupBranch_Children_ForkAlike_SiblingsEq(tree, node)
 
 			return tree
+		}
+	} # }}}
+
+	func replaceAliases({ columns: TreeColumn{}, order: String[] }, aliases: Type{}): Void { # {{{
+		for var name, index in order {
+			if var alias ?= aliases[name] {
+				var newName = alias.hashCode()
+
+				order[index] = newName
+				columns[newName] = columns[name]
+				columns[newName].type = alias
+
+				Object.delete(columns, name)
+			}
+
+			for var column of columns when column.isNode {
+				replaceAliases(column, aliases)
+			}
 		}
 	} # }}}
 

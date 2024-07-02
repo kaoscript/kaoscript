@@ -1,5 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const Instance = Helper.alias(value => !Type.isPrimitive(value) && !Type.isArray(value));
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);
@@ -33,4 +34,7 @@ module.exports = function() {
 		throw Helper.badArgs();
 	};
 	foobar.__ks_0(Foobar.__ks_new_0());
+	return {
+		Instance
+	};
 };

@@ -4,8 +4,6 @@ class ImplementDeclaration extends Statement {
 		@forkedMethods				= {}
 		@properties					= []
 		@sharingProperties			= {}
-		@specter: Boolean			= false
-		@specterTest: Type?
 		@type: NamedType
 		@useDeclaration: Boolean	= false
 		@variable: Variable
@@ -217,18 +215,6 @@ class ImplementDeclaration extends Statement {
 			}
 
 			@auxiliary = false
-
-			if !@type.isSpecter() {
-				@specter = true
-
-				@type.type().flagSpecter()
-
-				var authority = @recipient().authority()
-
-				if @specterTest ?= authority.removeTypeTest(@type.name()) {
-					@specterTest.setTestName(`\(@type.getAuxiliaryName()).is`)
-				}
-			}
 		}
 		else {
 			TypeException.throwImplInvalidType(this)
@@ -323,19 +309,6 @@ class ImplementDeclaration extends Statement {
 
 		if @auxiliary {
 			fragments.line(`\($runtime.immutableScope(this))\(@type.getAuxiliaryName()) = {}`)
-		}
-		else if ?@specterTest {
-			var line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@type.getAuxiliaryName()) = `)
-			var object = line.newObject()
-
-			var funcLine = object.newLine().code(`is: `)
-
-			@specterTest.toBlindTestFunctionFragments('is', 'value', false, true, null, funcLine, this)
-
-			funcLine.done()
-
-			object.done()
-			line.done()
 		}
 
 		for var property in @properties {

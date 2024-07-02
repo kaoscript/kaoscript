@@ -65,13 +65,9 @@ class IdentifierLiteral extends Literal {
 					if type.isView() && !type.isReference() {
 						@path = type.discard().master().path()
 					}
-					else if type is NamedType && type.type() is AliasType && !(@parent is ExportDeclaration || (@parent is MemberExpression && @parent.parent() is MatchConditionValue)) {
+					else if type is NamedType && type.type() is AliasType && !@parent.isAccessibleAliasType(this) {
 						ReferenceException.throwAliasTypeVariable(type.name(), this)
 					}
-					// TODO
-					// if @parent.isAccessibleAliasType(this) {
-					// 	ReferenceException.throwAliasTypeVariable(type.name(), this)
-					// }
 				}
 			}
 			else if @scope.hasMacro(@value) {

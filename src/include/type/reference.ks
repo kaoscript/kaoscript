@@ -507,6 +507,8 @@ class ReferenceType extends Type {
 		}
 	} # }}}
 	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
+		@resolve()
+
 		if ?#@parameters || ?#@subtypes || (!@native && !@type.isExported()) {
 			var export = {
 				kind: TypeKind.Reference
@@ -1094,7 +1096,6 @@ class ReferenceType extends Type {
 	override isExportable() => @type().isExportable()
 	override isExportable(module) => @type().isExportable()
 	isExported() => @type().isExported()
-	isExportingFragment() => true
 	isExtendable() => @name == 'Function'
 	isFinite() => @type().isFinite()
 	isFunction() => @name == 'Function' || @type().isFunction()
@@ -2069,7 +2070,7 @@ class ReferenceType extends Type {
 
 			@discard().toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, @subtypes, fragments, node)
 		}
-		else if ?#generics || @type.isSpecter() {
+		else if ?#generics {
 			@type.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 		}
 		else {
@@ -2088,8 +2089,8 @@ class ReferenceType extends Type {
 					fragments.code(`\(tof)`)
 				}
 			}
-			else if unalias.isObject() || unalias.isArray() || unalias.isExclusion() || unalias.isFunction() || unalias.isFusion() || unalias.isUnion() || unalias.isView() {
-				unalias.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
+			else if @type.isAlias() {
+				@type.toAwareTestFunctionFragments(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)
 			}
 			else {
 				super(varname, @nullable, hasDeferred, casting, blind, generics, subtypes, fragments, node)

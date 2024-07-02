@@ -1,5 +1,6 @@
-const {Helper} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const VThunk = Helper.alias(Type.isFunction);
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

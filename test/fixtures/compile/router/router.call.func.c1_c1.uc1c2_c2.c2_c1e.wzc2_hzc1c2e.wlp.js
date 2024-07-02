@@ -38,6 +38,7 @@ module.exports = function() {
 			}
 		}
 	}
+	const Classes = Helper.alias(value => Type.isClassInstance(value, ClassA) || Type.isClassInstance(value, ClassB));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

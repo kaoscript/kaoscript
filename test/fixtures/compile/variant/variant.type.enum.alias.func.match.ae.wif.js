@@ -1,34 +1,32 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isCard: (value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
-			if(cast) {
-				if((variant = CardSuit(variant)) === null) {
-					return false;
-				}
-				value["suit"] = variant;
-			}
-			else if(!Type.isEnumInstance(variant, CardSuit)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			return true;
-		}, rank: Type.isNumber})
-	};
 	const CardSuit = Helper.enum(Number, 0, "Clubs", 1, "Diamonds", 2, "Hearts", 3, "Spades", 4);
 	CardSuit.__ks_eq_Blacks = value => value === CardSuit.Clubs || value === CardSuit.Spades;
 	CardSuit.__ks_eq_Reds = value => value === CardSuit.Diamonds || value === CardSuit.Hearts;
+	const Card = Helper.alias((value, cast, filter) => Type.isDexObject(value, 1, 0, {suit: variant => {
+		if(cast) {
+			if((variant = CardSuit(variant)) === null) {
+				return false;
+			}
+			value["suit"] = variant;
+		}
+		else if(!Type.isEnumInstance(variant, CardSuit)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		return true;
+	}, rank: Type.isNumber}));
 	function greeting() {
 		return greeting.__ks_rt(this, arguments);
 	};
 	greeting.__ks_0 = function(card) {
 		let __ks_0;
-		if(__ksType.isCard(card, 0, CardSuit.__ks_eq_Blacks)) {
+		if(Card.is(card, 0, CardSuit.__ks_eq_Blacks)) {
 			__ks_0 = "black";
 		}
-		else if(__ksType.isCard(card, 0, CardSuit.__ks_eq_Reds)) {
+		else if(Card.is(card, 0, CardSuit.__ks_eq_Reds)) {
 			__ks_0 = "red";
 		}
 		return __ks_0;

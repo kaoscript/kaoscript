@@ -930,6 +930,7 @@ class ObjectType extends Type {
 
 		return false
 	} # }}}
+	override isTestable() => true
 	isTestingProperties() => @buildFlags() && @testProperties
 	isVariant() => @variant
 	length(): valueof @length
@@ -1380,7 +1381,7 @@ class ObjectType extends Type {
 			if nullable || ?#generics || (@variant && ?#subtypes) {
 				fragments
 					.code('(') if hasDeferred
-					.code(`\(varname) => \(@testName)(\(varname)`)
+					.code(`\(varname) => \(@testName).is(\(varname)`)
 
 				if @testCast {
 					if casting {
@@ -1421,11 +1422,11 @@ class ObjectType extends Type {
 			else if casting && @testCast {
 				fragments
 					.code('(') if hasDeferred
-					.code(`\(varname) => \(@testName)(\(varname), \(if blind set 'cast' else 'true'))`)
+					.code(`\(varname) => \(@testName).is(\(varname), \(if blind set 'cast' else 'true'))`)
 					.code(')') if hasDeferred
 			}
 			else {
-				fragments.code(@testName)
+				fragments.code(`\(@testName).is`)
 			}
 
 			if @standardLibrary ~~ .Yes {
@@ -1481,7 +1482,7 @@ class ObjectType extends Type {
 
 		if ?@testName {
 			if @testCast || nullable || ?#generics {
-				fragments.code(`\(varname) => \(@testName)(\(varname)`)
+				fragments.code(`\(varname) => \(@testName).is(\(varname)`)
 
 				if @testCast {
 					fragments.code(', cast')
@@ -1506,7 +1507,7 @@ class ObjectType extends Type {
 				}
 			}
 			else {
-				fragments.code(@testName)
+				fragments.code(`\(@testName).is`)
 			}
 		}
 		else {
@@ -1562,7 +1563,7 @@ class ObjectType extends Type {
 
 		if ?@testName {
 			if @testCast && (casting || (@variant && ?#subtypes)) {
-				fragments.code(`\(@testName)(\(varname)`)
+				fragments.code(`\(@testName).is(\(varname)`)
 
 				if @testCast && (casting || (@variant && ?#subtypes)) {
 					if casting {
@@ -1584,7 +1585,7 @@ class ObjectType extends Type {
 				fragments.code(`)`)
 			}
 			else {
-				fragments.code(`\(@testName)(\(varname))`)
+				fragments.code(`\(@testName).is(\(varname))`)
 			}
 		}
 		else if testingType && !@destructuring && !@testRest && !@testProperties {
@@ -1660,7 +1661,7 @@ class ObjectType extends Type {
 		fragments.code('(') if @nullable && junction == .AND
 
 		if ?@testName {
-			fragments.code(`\(@testName)(`).compileReusable(node)
+			fragments.code(`\(@testName).is(`).compileReusable(node)
 
 			if @testCast {
 				fragments.code(', 0')
@@ -1702,9 +1703,9 @@ class ObjectType extends Type {
 		}
 	} # }}}
 	toVariantTestFragments(name: String, parameters: AltType[], junction: Junction, fragments, node) { # {{{
-		var index = @variantType.getFieldIndex(name)
+		var main = @variantType.getMainName(name)
 
-		fragments.code(`\(@testName).__\(index)(`).compile(node).code(`, [`)
+		fragments.code(`\(@testName).is\(main.capitalize())(`).compile(node).code(`, [`)
 
 		for var { type }, pIndex in parameters {
 			fragments.code($comma) if pIndex > 0

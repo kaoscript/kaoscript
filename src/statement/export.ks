@@ -80,8 +80,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 	} # }}}
-	// TODO
-	// override isAccessibleAliasType(value) => true
+	override isAccessibleAliasType(value) => true
 	isExportable() => true
 	exportMacro(name, macro) { # {{{
 		@parent.exportMacro(name, macro)

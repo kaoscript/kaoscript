@@ -350,8 +350,8 @@ export class Module {
 					}
 				}
 				else if var { name, type } ?= arguments[index] {
-					if type.isSubsetOf(requirement.type(), MatchingMode.Signature) {
-						if !requirement.type().isSubsetOf(type, MatchingMode.Signature) {
+					if type.isSubsetOf(requirement.type(), MatchingMode.Signature + MatchingMode.Requirement) {
+						if !requirement.type().isSubsetOf(type, MatchingMode.Signature + MatchingMode.Requirement) {
 							var refIndex = type.toMetadata(metadata, 0, ExportMode.Requirement, this)
 							var newType = Type.toNamedType(requirement.name(), references[refIndex] ?? Type.import(refIndex, metadata, references, alterations, queue, scope, @body))
 
@@ -432,51 +432,24 @@ export class Module {
 			@body.toFragments(block)
 
 			var mut exportingFragments = {}
-			var mut exportingTypes = []
 
 			if @standardLibrary {
 				for var export, name of @exports {
-					if export.type.isExportingFragment() {
-						if export.type.isStandardLibrary(LibSTDMode.Yes) || export.type.hasAuxiliary() {
-							exportingFragments[name] = export
-						}
-					}
-					else if export.type.isExportingType() {
-						exportingTypes.push(export)
+					if export.type.isStandardLibrary(LibSTDMode.Yes) || export.type.hasAuxiliary() {
+						exportingFragments[name] = export
 					}
 				}
 			}
 			else {
-				for var export, name of @exports {
-					if export.type.isExportingFragment() {
-						exportingFragments[name] = export
-					}
-					else if export.type.isExportingType() {
-						exportingTypes.push(export)
-					}
-				}
+				exportingFragments = @exports
 			}
 
-			if ?#exportingFragments || ?#exportingTypes {
+			if ?#exportingFragments {
 				var returnLine = block.newLine().code('return ')
 				var object = returnLine.newObject()
 
 				for var export, name of exportingFragments {
 					export.type.toExportFragment(object, name, export.variable, this)
-				}
-
-				if ?#exportingTypes {
-					var typesLine = object.newLine().code(`\(if @standardLibrary set '__ksStd_types' else '__ksType'): [`)
-
-					for var { type }, index in exportingTypes {
-						typesLine
-							..code($comma) if index > 0
-							..code(type.getTestName())
-
-						type.setTestIndex(index)
-					}
-
-					typesLine.code(']').done()
 				}
 
 				object.done()
@@ -671,8 +644,6 @@ class ModuleBlock extends AbstractNode {
 		@module: Module
 		@statements: Array					= []
 		@topNodes: Array					= []
-		@typeTests							= []
-		@typeTestVarCount: Number			= -1
 	}
 	constructor(@data, @module) { # {{{
 		super()
@@ -803,7 +774,7 @@ class ModuleBlock extends AbstractNode {
 
 		@anonymousIndex += 1
 
-		var name = `\(@anonymousIndex)`
+		var name = `__ksType\(@anonymousIndex)`
 		var alias = AliasType.new(@scope, type)
 			..flagComplete()
 		var named = NamedType.new(name, alias)
@@ -811,7 +782,7 @@ class ModuleBlock extends AbstractNode {
 
 		@scope.define(name, true, named, this)
 
-		@addTypeTest(name, named)
+		alias.setTestName(name)
 
 		var reference = @scope.reference(name)
 
@@ -823,11 +794,6 @@ class ModuleBlock extends AbstractNode {
 	addTopNode(node) { # {{{
 		@topNodes.push(node)
 	} # }}}
-	addTypeTest(name: String, type: Type): Void { # {{{
-		@typeTests.push({ name, type })
-
-		type.setTestName(`__ksType.is\(name)`)
-	} # }}}
 	authority() => this
 	directory() => @module.directory()
 	exportMacro(name, macro) { # {{{
@@ -837,11 +803,6 @@ class ModuleBlock extends AbstractNode {
 	override getASTReference(name) => null
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	getLoopAncestorWithoutNew(name: String, before: Statement): Statement? => null
-	getTypeTestVariable(): String { # {{{
-		@typeTestVarCount += 1
-
-		return `__ksType\(@typeTestVarCount)`
-	} # }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { # {{{
 		if variable.static {
 			var class = @scope.getVariable(variable.class).declaration()
@@ -885,59 +846,21 @@ class ModuleBlock extends AbstractNode {
 		@scope.addSyntimeFunction(name, macro)
 	} # }}}
 	recipient() => @module
-	removeTypeTest(name: String): Type? { # {{{
-		for var test, index in @typeTests {
-			if test.name == name {
-				@typeTests.splice(index, 1)
-
-				return test.type
-			}
-		}
-
-		return null
-	} # }}}
 	setAttributeData(key: AttributeData, data) { # {{{
 		@attributeDatas[key] = data
 	} # }}}
 	target() => @options.target
 	toFragments(fragments) { # {{{
-		if ?#@typeTests {
-			var line = fragments.newLine().code(`\($runtime.immutableScope(this))__ksType = `)
-			var object = line.newObject()
-			var variants = []
+		for var reference of @anonymousTypes {
+			var name = reference.name()
+			var type = reference.type().type()
+			var line = fragments.newLine()
 
-			for var { type, name } in @typeTests {
-				var funcName = `is\(name)`
-				var funcLine = object.newLine().code(`\(funcName): `)
+			line.code($runtime.immutableScope(this), name, $equals, $runtime.helper(this), '.alias(')
 
-				type.toBlindTestFunctionFragments(funcName, 'value', false, true, null, funcLine, this)
+			type.toBlindTestFunctionFragments(name, 'value', false, true, null, line, this)
 
-				funcLine.done()
-
-				if type.isVariant() && type.canBeDeferred() {
-					variants.push({
-						name
-						variant: type.discard().getVariantType()
-						generics: type.generics()
-					})
-				}
-			}
-
-			object.done()
-			line.done()
-
-			if ?#variants {
-				for var { name, variant, generics } in variants {
-					for var { type }, index in variant.getFields() {
-						var funcName = `is\(name).__\(index)`
-						var funcLine = fragments.newLine().code(`__ksType.\(funcName) = `)
-
-						type.toBlindTestFunctionFragments(funcName, 'value', false, false, generics, funcLine, this)
-
-						funcLine.done()
-					}
-				}
-			}
+			line.code(')').done()
 		}
 
 		for var node in @topNodes {

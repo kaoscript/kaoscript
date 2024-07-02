@@ -73,4 +73,5 @@ module.exports = function() {
 		args[0] = arg;
 		return __ks_new.call(null, args);
 	});
+	const MayResult = Helper.alias(value => Type.isStructInstance(value, Result) || Type.isStructInstance(value, NoResult));
 };

@@ -1,13 +1,11 @@
 require("kaoscript/register");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_String) {
-	if(!__ks_Array || !__ks_String) {
-		var __ks__ = require("./.require.alt.roi.loop4.genesis.ks.fpb9zp.ksb")();
-		if(!__ks_Array) {
-			__ks_Array = __ks__.__ks_Array;
-		}
-		if(!__ks_String) {
-			__ks_String = __ks__.__ks_String;
-		}
+	if(!__ks_Array && !__ks_String) {
+		var {__ks_Array, __ks_String} = require("./.require.alt.roi.loop4.genesis.ks.fpb9zp.ksb")();
+	}
+	else if(!(__ks_Array || __ks_String)) {
+		throw Helper.badRequirements();
 	}
 	return {
 		__ks_Array,

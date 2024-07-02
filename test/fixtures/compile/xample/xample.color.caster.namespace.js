@@ -4,6 +4,7 @@ module.exports = function() {
 	var Float = require("../_/._float.ks.j5k8r9.ksb")().Float;
 	var __ks_Math = require("../_/._math.ks.j5k8r9.ksb")().__ks_Math;
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	const float = Helper.alias(Type.isNumber);
 	let $caster = Helper.namespace(function() {
 		function percentage() {
 			return percentage.__ks_rt(this, arguments);

@@ -24,8 +24,7 @@
             "line": "Number",
             "column": "Number"
           }
-        },
-        "testIndex": 0
+        }
       },
       {
         "kind": "enum",
@@ -117,8 +116,7 @@
               }
             }
           ]
-        },
-        "testIndex": 1
+        }
       },
       {
         "kind": "function",

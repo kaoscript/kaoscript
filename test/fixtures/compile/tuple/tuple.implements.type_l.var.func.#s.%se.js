@@ -1,5 +1,6 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const TypeA = Helper.alias(value => Type.isDexArray(value, 1, 1, 0, 0, [Type.isFunction]));
 	const TupleA = Helper.tuple(function(foobar) {
 		if(foobar === void 0 || foobar === null) {
 			foobar = Helper.function(() => {

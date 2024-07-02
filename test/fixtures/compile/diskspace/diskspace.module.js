@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {__ks_RegExp, __ks_String, __ksType: __ksType0} = require("../_/._string.wstd.ks.j5k8r9.ksb")();
+	var {__ks_RegExp, RegExpExecArray, __ks_String} = require("../_/._string.wstd.ks.j5k8r9.ksb")();
 	var exec = require("child_process").exec;
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks() {

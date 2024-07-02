@@ -1,8 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isNamed: (value, mapper) => Type.isDexObject(value, 1, 0, {name: mapper[0], age: Type.isNumber})
-	};
+	const Named = Helper.alias((value, mapper) => Type.isDexObject(value, 1, 0, {name: () => true, age: Type.isNumber}));
 	class Foobar {
 		static __ks_new_0() {
 			const o = Object.create(Foobar.prototype);

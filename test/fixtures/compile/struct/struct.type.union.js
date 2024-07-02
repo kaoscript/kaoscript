@@ -69,4 +69,5 @@ module.exports = function() {
 		args[2] = arg;
 		return __ks_new.call(null, args);
 	});
+	const Point = Helper.alias(value => Type.isStructInstance(value, Point2D) || Type.isStructInstance(value, Point3D));
 };

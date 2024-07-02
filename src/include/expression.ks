@@ -28,7 +28,7 @@ abstract class Expression extends AbstractNode {
 	// types if the condition is false
 	inferWhenFalseTypes(inferables) => @inferTypes(inferables)
 	initializeVariable(variable: VariableBrief, expression: Expression)
-	// isAccessibleAliasType(value: IdentifierLiteral): Boolean => !(value is NamedType && value.type() is AliasType)
+	isAccessibleAliasType(value: IdentifierLiteral): Boolean => false
 	// if the expression can be an assignment
 	isAssignable(): Boolean => false
 	isAssignedInLoop(value: Expression): Boolean => false

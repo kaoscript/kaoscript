@@ -33,16 +33,41 @@ class TypeAliasDeclaration extends Statement {
 		@alias.flagComplete()
 	} # }}}
 	override prepare(target, targetMode) { # {{{
-		if @alias.isComplex() {
-			var authority = @recipient().authority()
+		// if @alias.isComplex() {
+		// 	var authority = @recipient().authority()
 
-			authority.addTypeTest(@name, @alias)
-		}
+		// 	authority.addTypeTest(@name, @alias)
+		// }
+		// @alias.setTestName(`\(@name).is`)
+		@alias.setTestName(@name)
 	} # }}}
 	translate()
 	export(recipient) { # {{{
 		recipient.export(@name, @variable)
 	} # }}}
 	name() => @name
-	toStatementFragments(fragments, mode)
+	toStatementFragments(fragments, mode) { # {{{
+		var line = fragments.newLine()
+
+		line.code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.alias(')
+
+		// @type.toBlindTestFunctionFragments(`\(@name).is`, 'value', false, true, null, line, this)
+		@type.toBlindTestFunctionFragments(@name, 'value', false, true, null, line, this)
+
+		line.code(')').done()
+
+		if @type.isVariant() && @type.canBeDeferred() {
+			var variant = @alias.discard().getVariantType()
+			var generics = @alias.generics()
+
+			for var { names, type } in variant.getFields() {
+				var funcName = `is\(names[0]:!!(String).capitalize())`
+				var funcLine = fragments.newLine().code(`\(@name).\(funcName) = `)
+
+				type.toBlindTestFunctionFragments(@name, 'value', false, false, generics, funcLine, this)
+
+				funcLine.done()
+			}
+		}
+	} # }}}
 }

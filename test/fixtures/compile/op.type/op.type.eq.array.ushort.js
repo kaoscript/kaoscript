@@ -18,6 +18,7 @@ module.exports = function() {
 		let arg;
 		return __ks_new.call(null, args);
 	});
+	const FoobarArray = Helper.alias(value => Type.isStructInstance(value, Foobar) || Type.isArray(value, value => Type.isStructInstance(value, Foobar)));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

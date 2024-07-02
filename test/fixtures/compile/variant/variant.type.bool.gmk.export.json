@@ -50,7 +50,6 @@
             }
           }
         },
-        "testIndex": 0,
         "generics": [
           {
             "name": "T"

@@ -1,8 +1,5 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isNamed: value => Type.isDexObject(value, 1, 0, {name: Type.isString})
-	};
 	const __ks_Array = {};
 	__ks_Array._im_splice = function(that, gens, ...args) {
 		return __ks_Array.__ks_func_splice_rt(that, gens || {}, args);
@@ -41,6 +38,7 @@ module.exports = function() {
 		}
 		throw Helper.badArgs();
 	};
+	const Named = Helper.alias(value => Type.isDexObject(value, 1, 0, {name: Type.isString}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -48,7 +46,7 @@ module.exports = function() {
 		values.splice(0, 4, values[0]);
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => Type.isArray(value, __ksType.isNamed);
+		const t0 = value => Type.isArray(value, Named.is);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

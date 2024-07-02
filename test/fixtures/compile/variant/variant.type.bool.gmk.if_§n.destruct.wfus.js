@@ -1,48 +1,46 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}),
-		isRange: value => Type.isDexObject(value, 1, 0, {start: __ksType.isPosition, end: __ksType.isPosition}),
-		isNodeData: (value, cast, filter) => __ksType.isRange(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(cast) {
-				if((variant = NodeKind(variant)) === null) {
-					return false;
-				}
-				value["kind"] = variant;
-			}
-			else if(!Type.isEnumInstance(variant, NodeKind)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant === NodeKind.ExpressionStatement) {
-				return Type.isDexObject(value, 0, 0, {expression: value => __ksType.isNodeData(value, cast, value => value === NodeKind.Identifier)});
-			}
-			if(variant === NodeKind.UnlessStatement) {
-				return Type.isDexObject(value, 0, 0, {condition: value => __ksType.isNodeData(value, cast, value => value === NodeKind.Identifier), whenFalse: value => __ksType.isNodeData(value, cast, value => value === NodeKind.Block || value === NodeKind.ExpressionStatement || value === NodeKind.ReturnStatement)});
-			}
-			return true;
-		}}),
-		isEvent: (value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
-			if(!Type.isBoolean(variant)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant) {
-				return __ksType.isEvent.__1(value, mapper);
-			}
-			else {
-				return __ksType.isEvent.__0(value);
-			}
-		}})
-	};
-	__ksType.isEvent.__0 = Type.isObject;
-	__ksType.isEvent.__1 = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0], start: __ksType.isPosition, end: __ksType.isPosition});
+	const Position = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}));
+	const Range = Helper.alias(value => Type.isDexObject(value, 1, 0, {start: Position.is, end: Position.is}));
 	const NodeKind = Helper.enum(Number, 0, "Block", 0, "ExpressionStatement", 1, "Identifier", 2, "ReturnStatement", 3, "UnlessStatement", 4);
 	NodeKind.__ks_eq_Statement = value => value === NodeKind.ExpressionStatement || value === NodeKind.ReturnStatement || value === NodeKind.UnlessStatement;
+	const NodeData = Helper.alias((value, cast, filter) => Range.is(value) && Type.isDexObject(value, 1, 0, {kind: variant => {
+		if(cast) {
+			if((variant = NodeKind(variant)) === null) {
+				return false;
+			}
+			value["kind"] = variant;
+		}
+		else if(!Type.isEnumInstance(variant, NodeKind)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant === NodeKind.ExpressionStatement) {
+			return Type.isDexObject(value, 0, 0, {expression: value => NodeData.is(value, cast, value => value === NodeKind.Identifier)});
+		}
+		if(variant === NodeKind.UnlessStatement) {
+			return Type.isDexObject(value, 0, 0, {condition: value => NodeData.is(value, cast, value => value === NodeKind.Identifier), whenFalse: value => NodeData.is(value, cast, value => value === NodeKind.Block || value === NodeKind.ExpressionStatement || value === NodeKind.ReturnStatement)});
+		}
+		return true;
+	}}));
+	const Event = Helper.alias((value, mapper, filter) => Type.isDexObject(value, 1, 0, {ok: variant => {
+		if(!Type.isBoolean(variant)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant) {
+			return Event.isTrue(value, mapper);
+		}
+		else {
+			return Event.isFalse(value);
+		}
+	}}));
+	Event.isFalse = Type.isObject;
+	Event.isTrue = (value, mapper) => Type.isDexObject(value, 0, 0, {value: mapper[0], start: Position.is, end: Position.is});
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
@@ -52,7 +50,7 @@ module.exports = function() {
 		}
 	};
 	foobar.__ks_rt = function(that, args) {
-		const t0 = value => __ksType.isEvent(value, [__ksType.isNodeData], value => value);
+		const t0 = value => Event.is(value, [NodeData.is], value => value);
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return foobar.__ks_0.call(that, args[0]);

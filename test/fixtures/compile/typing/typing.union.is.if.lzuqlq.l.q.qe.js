@@ -32,6 +32,7 @@ module.exports = function() {
 		args[1] = arg;
 		return __ks_new.call(null, args);
 	});
+	const Foobar = Helper.alias(value => Type.isStructInstance(value, Point) || Type.isArray(value, value => Type.isStructInstance(value, Point)));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

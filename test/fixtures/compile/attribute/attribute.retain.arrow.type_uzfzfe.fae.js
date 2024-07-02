@@ -1,5 +1,7 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	const AsyncFn = Helper.alias(Type.isFunction);
+	const SyncFn = Helper.alias(Type.isFunction);
 	it("print", Helper.function((done) => {
 		done();
 	}, (that, fn, ...args) => {

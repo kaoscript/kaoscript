@@ -1,14 +1,12 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	const __ksType = {
-		isSchoolPerson: (value, cast) => Type.isDexObject(value, 1, 0, {kind: () => Helper.castEnum(value, "kind", PersonKind, cast), name: Type.isString})
-	};
 	const PersonKind = Helper.enum(Number, 0, "Director", 1, "Student", 2, "Teacher", 3);
+	const SchoolPerson = Helper.alias((value, cast) => Type.isDexObject(value, 1, 0, {kind: () => Helper.castEnum(value, "kind", PersonKind, cast), name: Type.isString}));
 	function restore() {
 		return restore.__ks_rt(this, arguments);
 	};
 	restore.__ks_0 = function(student) {
-		student = Helper.assert(student, "\"SchoolPerson\"", 0, value => __ksType.isSchoolPerson(value, true));
+		student = Helper.assert(student, "\"SchoolPerson\"", 0, value => SchoolPerson.is(value, true));
 	};
 	restore.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

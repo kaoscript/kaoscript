@@ -3,6 +3,7 @@ const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
+	var T = require("./.type.alias.export.decl.ks.j5k8r9.ksb")().T;
 	let n = 0;
 	console.log(__ks_Number.__ks_func_toInt_0.call(n));
 	let s = "";

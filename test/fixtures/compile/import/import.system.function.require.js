@@ -4,14 +4,11 @@ module.exports = function(Template, template) {
 	var __ks_Function = require("../_/._function.ks.j5k8r9.ksb")().__ks_Function;
 	var __ks_0_valuable = Type.isValue(Template);
 	var __ks_1_valuable = Type.isValue(template);
-	if(!__ks_0_valuable || !__ks_1_valuable) {
-		var __ks__ = require("./.import.system.function.source.ks.j5k8r9.ksb")();
-		if(!__ks_0_valuable) {
-			Template = __ks__.Template;
-		}
-		if(!__ks_1_valuable) {
-			template = __ks__.template;
-		}
+	if(!__ks_0_valuable && !__ks_1_valuable) {
+		var {Template, template} = require("./.import.system.function.source.ks.j5k8r9.ksb")();
+	}
+	else if(!(__ks_0_valuable || __ks_1_valuable)) {
+		throw Helper.badRequirements();
 	}
 	function foo() {
 		return foo.__ks_rt(this, arguments);

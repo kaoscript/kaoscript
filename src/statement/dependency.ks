@@ -731,18 +731,22 @@ class RequireOrImportDeclarator extends Importer {
 			var argument = module.getArgument(requirement.index())
 
 			if !?argument {
-				var ctrl = fragments.newControl()
-
 				if requirement.isSystem() {
-					ctrl.code(`if(!\(requirement.getAuxiliaryName()))`).step()
+					var ctrl = fragments.newControl()
+						..code(`if(!\(requirement.getAuxiliaryName()))`).step()
+
+					@toImportFragments(ctrl)
+
+					ctrl.done()
 				}
 				else {
-					ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
+					var ctrl = fragments.newControl()
+						..code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
+
+					@toImportFragments(ctrl)
+
+					ctrl.done()
 				}
-
-				@toImportFragments(ctrl)
-
-				ctrl.done()
 			}
 			else if argument is Boolean {
 				@toImportFragments(fragments)
@@ -774,68 +778,47 @@ class RequireOrImportDeclarator extends Importer {
 				}
 			}
 
-			if ?#notpasseds || ?#unknowns {
-				var mut ctrl = fragments
+			if system || (#notpasseds == #@requirements) {
+				@toImportFragments(fragments, true)
+			}
+			else if ?#notpasseds {
+				SyntaxException.throwMissingRequirements([arg.name() for var arg in notpasseds], @getModuleName(), this)
+			}
+			else if ?#unknowns {
+				var ctrl = fragments.newControl().code(`if(`)
 
-				if ?#unknowns {
-					ctrl = fragments.newControl().code(`if(`)
+				for var requirement, index in unknowns {
+					ctrl.code(' && ') unless index == 0
 
-					for var requirement, index in unknowns {
-						ctrl.code(' || ') unless index == 0
-
-						if requirement.isSystem() {
-							ctrl.code(`!\(requirement.getAuxiliaryName())`)
-						}
-						else {
-							ctrl.code(`!\(requirement.getTempName())_valuable`)
-						}
+					if requirement.isSystem() {
+						ctrl.code(`!\(requirement.getAuxiliaryName())`)
 					}
-
-					ctrl.code(')').step()
-				}
-
-				if #notpasseds == #@requirements {
-					@toImportFragments(ctrl, true)
-				}
-				else if system {
-					@toImportFragments(ctrl, true, true)
-				}
-				else {
-					@toImportFragments(ctrl, false, true)
-
-					for var requirement in notpasseds {
-						if requirement.isSystem() {
-							ctrl.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
-						}
-						else {
-							ctrl.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
-
-							if requirement.isSealed() {
-								ctrl.line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
-							}
-						}
-					}
-
-					for var requirement in unknowns {
-						if requirement.isSystem() {
-							ctrl.newControl()
-								..code(`if(!\(requirement.getAuxiliaryName()))`).step()
-								..line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`)
-								..done()
-						}
-						else {
-							ctrl.newControl()
-								..code(`if(!\(requirement.getTempName())_valuable)`).step()
-								..line(`\(requirement.name()) = __ks__.\(requirement.name())`)
-								..line(`\(requirement.getAuxiliaryName()) = __ks__.\(requirement.getAuxiliaryName())`) if requirement.isSealed()
-								..done()
-						}
+					else {
+						ctrl.code(`!\(requirement.getTempName())_valuable`)
 					}
 				}
 
-				if ?#unknowns {
-					ctrl.done()
+				ctrl.code(')').step()
+
+				@toImportFragments(ctrl, true)
+
+				ctrl.step().code('else if(!(')
+
+				for var requirement, index in unknowns {
+					ctrl.code(' || ') unless index == 0
+
+					if requirement.isSystem() {
+						ctrl.code(`\(requirement.getAuxiliaryName())`)
+					}
+					else {
+						ctrl.code(`\(requirement.getTempName())_valuable`)
+					}
 				}
+
+				ctrl
+					..code('))').step()
+					..line(`throw \($runtime.helper(this)).badRequirements()`)
+					..done()
 			}
 		}
 	} # }}}

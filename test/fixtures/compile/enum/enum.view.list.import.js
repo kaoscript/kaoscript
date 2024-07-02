@@ -1,12 +1,12 @@
 require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Weekday, __ksType: __ksType0} = require("./.enum.view.list.export.ks.j5k8r9.ksb")();
+	var {Weekday, Weekend} = require("./.enum.view.list.export.ks.j5k8r9.ksb")();
 	function isWeekend() {
 		return isWeekend.__ks_rt(this, arguments);
 	};
 	isWeekend.__ks_0 = function(day) {
-		return __ksType0[0](day);
+		return Weekend.is(day);
 	};
 	isWeekend.__ks_rt = function(that, args) {
 		const t0 = value => Type.isEnumInstance(value, Weekday);

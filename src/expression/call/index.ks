@@ -120,8 +120,12 @@ class CallExpression extends Expression {
 			}
 
 			if !computed {
+				// TODO!
+				// @object = $compile.expression(@data.callee.object, this)
+				// 	..analyse()
 				@object = $compile.expression(@data.callee.object, this)
-					..analyse()
+
+				@object.analyse()
 
 				@property = @data.callee.property.name
 				@nullableTesting = nullable
@@ -129,7 +133,8 @@ class CallExpression extends Expression {
 		}
 		else {
 			@callee = $compile.expression(@data.callee, this)
-				..analyse()
+
+			@callee.analyse()
 		}
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -299,6 +304,7 @@ class CallExpression extends Expression {
 
 		return inferables
 	} # }}}
+	override isAccessibleAliasType(value) => value != @object && value != @callee
 	isAwait() => @await
 	isAwaiting() { # {{{
 		for var argument in @arguments {

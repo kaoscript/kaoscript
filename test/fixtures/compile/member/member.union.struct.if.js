@@ -124,6 +124,7 @@ module.exports = function() {
 		args[3] = arg;
 		return __ks_new.call(null, args);
 	});
+	const StructCD = Helper.alias(value => Type.isStructInstance(value, StructABC) || Type.isStructInstance(value, StructABD));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};

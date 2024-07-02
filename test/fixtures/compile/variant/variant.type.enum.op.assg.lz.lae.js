@@ -1,34 +1,32 @@
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isSchoolPerson: (value, cast, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
-			if(cast) {
-				if((variant = PersonKind(variant)) === null) {
-					return false;
-				}
-				value["kind"] = variant;
-			}
-			else if(!Type.isEnumInstance(variant, PersonKind)) {
-				return false;
-			}
-			if(filter && !filter(variant)) {
-				return false;
-			}
-			if(variant === PersonKind.Student) {
-				return Type.isDexObject(value, 0, 0, {name: Type.isString});
-			}
-			if(variant === PersonKind.Teacher) {
-				return Type.isDexObject(value, 0, 0, {favorite: value => __ksType.isSchoolPerson(value, cast, value => value === PersonKind.Student)});
-			}
-			return true;
-		}})
-	};
 	const PersonKind = Helper.enum(Number, 0, "Director", 1, "Student", 2, "Teacher", 3);
+	const SchoolPerson = Helper.alias((value, cast, filter) => Type.isDexObject(value, 1, 0, {kind: variant => {
+		if(cast) {
+			if((variant = PersonKind(variant)) === null) {
+				return false;
+			}
+			value["kind"] = variant;
+		}
+		else if(!Type.isEnumInstance(variant, PersonKind)) {
+			return false;
+		}
+		if(filter && !filter(variant)) {
+			return false;
+		}
+		if(variant === PersonKind.Student) {
+			return Type.isDexObject(value, 0, 0, {name: Type.isString});
+		}
+		if(variant === PersonKind.Teacher) {
+			return Type.isDexObject(value, 0, 0, {favorite: value => SchoolPerson.is(value, cast, value => value === PersonKind.Student)});
+		}
+		return true;
+	}}));
 	function foobar() {
 		return foobar.__ks_rt(this, arguments);
 	};
 	foobar.__ks_0 = function(person) {
-		const persons = Helper.assert([person], "\"SchoolPerson[]\"", 0, value => Type.isArray(value, value => __ksType.isSchoolPerson(value, true)));
+		const persons = Helper.assert([person], "\"SchoolPerson[]\"", 0, value => Type.isArray(value, value => SchoolPerson.is(value, true)));
 	};
 	foobar.__ks_rt = function(that, args) {
 		const t0 = Type.isValue;

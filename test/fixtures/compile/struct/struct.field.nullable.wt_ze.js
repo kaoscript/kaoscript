@@ -1,8 +1,6 @@
 const {Helper, OBJ, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ksType = {
-		isPosition: value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber})
-	};
+	const Position = Helper.alias(value => Type.isDexObject(value, 1, 0, {line: Type.isNumber, column: Type.isNumber}));
 	const Event = Helper.struct(function(ok, value = null, start = null, end = null) {
 		const _ = new OBJ();
 		_.ok = ok;
@@ -13,7 +11,7 @@ module.exports = function() {
 	}, function(__ks_new, args) {
 		const t0 = Type.isBoolean;
 		const t1 = Type.any;
-		const t2 = value => __ksType.isPosition(value) || Type.isNull(value);
+		const t2 = value => Position.is(value) || Type.isNull(value);
 		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
 		let pts;
 		if(args.length >= 1 && args.length <= 4) {
@@ -39,11 +37,11 @@ module.exports = function() {
 			return null;
 		}
 		args[1] = arg;
-		if(!__ksType.isPosition(arg = item.start)) {
+		if(!Position.is(arg = item.start)) {
 			return null;
 		}
 		args[2] = arg;
-		if(!__ksType.isPosition(arg = item.end)) {
+		if(!Position.is(arg = item.end)) {
 			return null;
 		}
 		args[3] = arg;

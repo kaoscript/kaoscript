@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {PersonKind, __ksType: __ksType0} = require("./.variant.type.enum.export.lesson.ks.j5k8r9.ksb")();
+	var {PersonKind, SchoolPerson, Group, Lesson} = require("./.variant.type.enum.export.lesson.ks.j5k8r9.ksb")();
 	function start() {
 		return start.__ks_rt(this, arguments);
 	};
@@ -22,7 +22,7 @@ module.exports = function() {
 		}
 	};
 	start.__ks_rt = function(that, args) {
-		const t0 = __ksType0[2];
+		const t0 = Lesson.is;
 		if(args.length === 1) {
 			if(t0(args[0])) {
 				return start.__ks_0.call(that, args[0]);

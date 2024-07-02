@@ -16,15 +16,11 @@ class AliasType extends Type {
 		@staticAssessments: Object			= {}
 		@staticMethods: Object				= {}
 		@type: Type
-		@testIndex: Number?					= null
+		@testName: String
 	}
 	static {
 		import(index, data, metadata: Array, references: Object, alterations: Object, queue: Array, scope: Scope, node: AbstractNode): AliasType { # {{{
 			var type = AliasType.new(scope)
-
-			if ?data.testIndex {
-				type.setTestIndex(data.testIndex)
-			}
 
 			if ?data.generics {
 				type._generics = data.generics
@@ -45,8 +41,6 @@ class AliasType extends Type {
 							type.dedupStaticMethod(name, VirtualMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
-
-					type.flagSpecter()
 				}
 
 				type.flagComplete()
@@ -134,7 +128,7 @@ class AliasType extends Type {
 	clone() { # {{{
 		var clone = AliasType.new(@scope, @type.clone())
 
-		clone._testIndex = @testIndex if ?@testIndex
+		clone._testName = @testName if ?@testName
 
 		return clone
 	} # }}}
@@ -165,49 +159,50 @@ class AliasType extends Type {
 		return @addStaticMethod(name, type)
 	} # }}}
 	discard() => @type?.discard()
-	discardAlias() => @type.discardAlias()
-	discardReference() => @type.discardAlias()
+	discardAlias() => @type
+	discardReference() => @type.discardReference()
 	override export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { # {{{
 		var export = {
 			kind: TypeKind.Alias
 			of: @type.export(references, indexDelta, mode, module)
-			@testIndex if ?@testIndex
 			@generics if ?#@generics
 		}
 
-		if @specter {
-			export.instanceMethods = {}
-			export.staticMethods = {}
+		var instanceMethods = {}
+		var staticMethods = {}
 
-			for var methods, name of @instanceMethods {
-				var exports = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
+		for var methods, name of @instanceMethods {
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
 
-				export.instanceMethods[name] = exports if ?#exports
+			instanceMethods[name] = exports if ?#exports
+		}
+
+		for var methods, name of @staticMethods {
+			var exports = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
+
+			staticMethods[name] = exports if ?#exports
+		}
+
+		if ?#instanceMethods {
+			export.instanceMethods = instanceMethods
+		}
+		if ?#staticMethods {
+			export.staticMethods = staticMethods
+		}
+
+		if @isExhaustive() {
+			var exhaustiveness = {}
+
+			if !Object.isEmpty(@exhaustiveness.staticMethods) {
+				exhaustiveness.staticMethods = @exhaustiveness.staticMethods
 			}
 
-			for var methods, name of @staticMethods {
-				var exports = [method.export(references, indexDelta, mode, module) for var method in methods when method.isExportable(mode, module)]
-
-				export.staticMethods[name] = exports if ?#exports
+			if !Object.isEmpty(@exhaustiveness.instanceMethods) {
+				exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
 			}
 
-			if @isExhaustive() {
-				var exhaustiveness = {}
-				var mut notEmpty = false
-
-				if !Object.isEmpty(@exhaustiveness.staticMethods) {
-					exhaustiveness.staticMethods = @exhaustiveness.staticMethods
-					notEmpty = true
-				}
-
-				if !Object.isEmpty(@exhaustiveness.instanceMethods) {
-					exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
-					notEmpty = true
-				}
-
-				if notEmpty {
-					export.exhaustiveness = exhaustiveness
-				}
+			if ?#exhaustiveness {
+				export.exhaustiveness = exhaustiveness
 			}
 		}
 
@@ -303,8 +298,7 @@ class AliasType extends Type {
 
 		return null
 	} # }}}
-	getTestIndex() => @testIndex
-	getTestName() => @type.getTestName()
+	getTestName() => @testName
 	hasGenerics() => ?#@generics
 	hasInstanceMethod(name) { # {{{
 		if @instanceMethods[name] is Array {
@@ -359,8 +353,6 @@ class AliasType extends Type {
 		}
 	} # }}}
 	isExhaustiveInstanceMethod(name, node) => @isExhaustive(node) && @isExhaustiveInstanceMethod(name)
-	isExportingFragment() => @specter
-	isExportingType() => !@specter && @type.isComplex()
 	isFunction() => @type.isFunction()
 	isFusion() => @type.isFusion()
 	isNamespace() => @type.isNamespace()
@@ -373,10 +365,9 @@ class AliasType extends Type {
 	assist isSubsetOf(value: AliasType, generics, subtypes, mode) { # {{{
 		return this == value
 	} # }}}
+	override isTestable() => true
 	isTuple() => @type.isTuple()
 	isUnion() => @type?.isUnion()
-	isUsingAuxiliary() => true
-	isVirtual() => @specter
 	listFunctions(name: String): Array => @type.listFunctions(name)
 	listFunctions(name: String, type: FunctionType, mode: MatchingMode): Array => @type.listFunctions(name, type, mode)
 	listInstantiableMethods(name: String): VirtualMethodType[] => @instanceMethods[name] ?? []
@@ -428,13 +419,19 @@ class AliasType extends Type {
 	setNullable(nullable: Boolean) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
-	setTestIndex(@testIndex)
-	setTestName(testName) => @type.setTestName(testName)
+	setTestName(@testName) { # {{{
+		if @type?.isTestable() {
+			@type.setTestName(testName)
+		}
+	} # }}}
 	shallBeNamed() => true
 	override split(types) => @type.split(types)
 	trimOff(type: Type) => @type.trimOff(type)
 	type() => @type
 	type(@type) => this
+	override toBlindTestFragments(funcname, varname, casting, generics, subtypes, junction, fragments, node) { # {{{
+		@type.toBlindTestFragments(funcname, varname, casting, @generics, subtypes, junction, fragments, node)
+	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, casting, testingType, generics, fragments, node) { # {{{
 		@type.toBlindTestFunctionFragments(funcname, varname, casting, testingType, @generics, fragments, node)
 	} # }}}
@@ -445,7 +442,7 @@ class AliasType extends Type {
 	override toVariations(variations) { # {{{
 		variations.push('alias')
 
-		@type.toVariations(variations)
+		@type?.toVariations(variations)
 	} # }}}
 
 	proxy @type {

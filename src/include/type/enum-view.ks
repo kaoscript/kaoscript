@@ -236,6 +236,7 @@ class EnumViewType extends Type {
 	override isSubsetOf(value, generics, subtypes, mode) { # {{{
 		return @master.isSubsetOf(value, generics, subtypes, mode)
 	} # }}}
+	override isTestable() => true
 	override isView() => true
 	listVarnames(): String[] { # {{{
 		var result = [...@elements]
@@ -261,10 +262,10 @@ class EnumViewType extends Type {
 	setTestName(@testName)
 	override shallBeNamed() => true
 	override toAwareTestFunctionFragments(varname, mut nullable, _, _, _, generics, subtypes, fragments, node) { # {{{
-		fragments.code(`\(@testName)`)
+		fragments.code(`\(@testName).is`)
 	} # }}}
 	override toBlindTestFragments(_, _, _, _, _, _, fragments, node) { # {{{
-		fragments.code(`\(@testName)`)
+		fragments.code(`\(@testName).is`)
 	} # }}}
 	override toBlindTestFunctionFragments(funcname, varname, _, testingType, generics, fragments, node) { # {{{
 		fragments.code(`\(varname) => `)
@@ -291,7 +292,7 @@ class EnumViewType extends Type {
 		return fragments
 	} # }}}
 	override toPositiveTestFragments(parameters, subtypes, junction, fragments, node) { # {{{
-		fragments.code(`\(@testName)(`).compile(node).code(')')
+		fragments.code(`\(@testName).is(`).compile(node).code(')')
 	} # }}}
 	override toVariations(variations) { # {{{
 		NotImplementedException.throw()
