@@ -86,6 +86,7 @@ class SyntimeStatement extends Statement {
 				return context.data
 			}
 		}]
+		//}, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData]
 
 		var result = fn(...args!?)
 		// echo(result)
@@ -279,10 +280,12 @@ class SyntimeStatement extends Statement {
 					func __ks_unquote(data, reification: ReificationKind? = null): String
 				}
 
+				// require|import 'npm:@kaoscript/ast'
+
 				\(body)
 				```
-			// echo('--> ', source)
 
+			// echo('--> ', source)
 			compiler
 				..setTimeContext(this)
 				..compile(source)

@@ -561,10 +561,11 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 							ctrl = fragments.newControl()
 
 							for var ast, index in asts {
+								var type = Type.fromAST(ast, @scope, this)
+
 								ctrl
 									..code('else ') if index > 0
-									..code(`if \(varname).kind == __ks_AstKind.\(ast.typeSubtypes[0].name)`).step()
-									// ..code(`if \(varname).kind == AstKind.\(ast.typeSubtypes[0].name)`).step()
+									..code(`if \(varname) is \(type.hashCode())`).step()
 									..line(`\(resname) = \(varname)`).step()
 							}
 
@@ -704,14 +705,12 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 				// echo(@source)
 			}
 
-			@fn = Syntime.evaluate(@source, Marker, AstKind)
-			// @fn = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData)
+			@fn = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData)
 		} # }}}
 		buildTest(data: Ast, varname: String, fragments) { # {{{
 			match data.kind {
 				.ArrayType {
-					fragments.code(`if \(varname).kind == __ks_AstKind.ArrayExpression`).step()
-					// fragments.code(`if \(varname).kind == AstKind.ArrayExpression`).step()
+					fragments.code(`if \(varname) is Ast(ArrayExpression)`).step()
 				}
 				else {
 					NotImplementedException.throw()
@@ -728,29 +727,18 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			})
 
 			var source = ```
-				import 'npm:@kaoscript/ast'
-
 				extern console, JSON
 
 				require {
 					class __ks_Marker
-					enum __ks_AstKind
 				}
+
+				require|import 'npm:@kaoscript/ast'
 
 				\(body)
 				```
-			// var source = ```
-			// 	extern console, JSON
 
-			// 	require {
-			// 		class __ks_Marker
-			// 	}
-
-			// 	require|import 'npm:@kaoscript/ast'
-
-			// 	\(body)
-			// 	```
-
+			// echo('--> ', source)
 			compiler.compile(source)
 			// echo('=- ', compiler.toSource())
 
