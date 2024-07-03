@@ -718,8 +718,6 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			}
 		} # }}}
 		compile(body: String): String { # {{{
-			// echo('compile.function --> ', body)
-
 			var compiler = Compiler.new(`_ks_macro_\(@name)`, {
 				libstd: @options.libstd
 				register: false
@@ -738,7 +736,7 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 				\(body)
 				```
 
-			// echo('--> ', source)
+			// echo('func --> ', body)
 			compiler.compile(source)
 			// echo('=- ', compiler.toSource())
 

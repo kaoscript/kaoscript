@@ -72,7 +72,7 @@ class SyntimeStatement extends Statement {
 
 		var fn = eval(compiled)
 
-		var args = [this, (data, reification? = null) => {
+		var args = [Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, this, (data, reification? = null) => {
 			if data is Ast {
 				return $generate(this, this, data)
 			}
@@ -86,10 +86,8 @@ class SyntimeStatement extends Statement {
 				return context.data
 			}
 		}]
-		//}, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData]
 
 		var result = fn(...args!?)
-		// echo(result)
 
 		if ?#result {
 			try {
@@ -260,8 +258,6 @@ class SyntimeStatement extends Statement {
 	} # }}}
 	private {
 		compile(body: String): String { # {{{
-			// echo('compile.statement --> ', body)
-
 			var compiler = Compiler.new(`__ks__`, {
 				libstd: @options.libstd
 				register: false
@@ -269,7 +265,7 @@ class SyntimeStatement extends Statement {
 			})
 
 			var source = ```
-				import 'npm:@kaoscript/ast'
+				require|import 'npm:@kaoscript/ast'
 
 				extern class Context {
 					getMark(index: Number): Ast
@@ -280,12 +276,10 @@ class SyntimeStatement extends Statement {
 					func __ks_unquote(data, reification: ReificationKind? = null): String
 				}
 
-				// require|import 'npm:@kaoscript/ast'
-
 				\(body)
 				```
 
-			// echo('--> ', source)
+			// echo('stmt --> ', source)
 			compiler
 				..setTimeContext(this)
 				..compile(source)
