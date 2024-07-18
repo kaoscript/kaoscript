@@ -294,6 +294,7 @@ class Block extends AbstractNode {
 
 		return variables
 	} # }}}
+	recipient() => null
 	setExitLabel(label: String) { # {{{
 		if @parent is Expression {
 			for var statement in @statements to~ -1 {

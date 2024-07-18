@@ -123,6 +123,9 @@ class IncludeDeclaration extends Statement {
 			declarator.export(recipient, enhancement)
 		}
 	} # }}}
+	exportMacro(name, macro) { # {{{
+		@parent.exportMacro(name, macro)
+	} # }}}
 	isExportable() => true
 	loadLocalFile(declaration, path) { # {{{
 		var module = @module()
@@ -290,6 +293,9 @@ class IncludeDeclarator extends Statement {
 		for var statement in @statements when statement.isExportable() {
 			statement.export(recipient, enhancement)
 		}
+	} # }}}
+	exportMacro(name, macro) { # {{{
+		@parent.exportMacro(name, macro)
 	} # }}}
 	file() => @file
 	includePath() => @includePath

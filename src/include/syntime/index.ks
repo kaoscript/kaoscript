@@ -87,7 +87,6 @@ namespace Syntime {
 			// 	}
 			// }
 			match data.kind {
-
 				.ArrayType {
 					// TODO!
 					// var mut result = .Evaluated
@@ -118,6 +117,9 @@ namespace Syntime {
 					else {
 						return .AST
 					}
+				}
+				.PropertyType {
+					return ParameterKind.detect(data.type)
 				}
 				.TypeReference {
 					if data.typeName?.name == 'Ast' {
@@ -173,12 +175,12 @@ namespace Syntime {
 	export {
 		func callExpression(data, parent, scope) { # {{{
 			if var path ?= $ast.path(data.callee) {
-				if var macros ?= scope.getSyntimeFunction(path) {
-					var arguments = MacroArgument.build(data.arguments, macros[0].scope(), parent)
+				if var functions ?= scope.getSyntimeFunction(path) {
+					var arguments = MacroArgument.build(data.arguments, functions[0].scope(), parent)
 
-					for var macro in macros {
-						if macro.matchArguments(arguments) {
-							var result = macro.execute(data.arguments, parent, false)
+					for var function in functions {
+						if function.matchArguments(arguments) {
+							var result = function.execute(data.arguments, parent, false)
 
 							match #result.body {
 								1 when result.body[0].kind == AstKind.ExpressionStatement {
@@ -204,12 +206,12 @@ namespace Syntime {
 
 		func callStatement(data, parent, scope) { # {{{
 			if var path ?= $ast.path(data.expression.callee) {
-				if var macros ?= scope.getSyntimeFunction(path) {
-					var arguments = MacroArgument.build(data.expression.arguments, macros[0].scope(), parent)
+				if var functions ?= scope.getSyntimeFunction(path) {
+					var arguments = MacroArgument.build(data.expression.arguments, functions[0].scope(), parent)
 
-					for var macro in macros {
-						if macro.matchArguments(arguments) {
-							return CallStatement.new(data, parent, scope, macro)
+					for var function in functions {
+						if function.matchArguments(arguments) {
+							return CallStatement.new(data, parent, scope, function)
 						}
 					}
 
@@ -222,55 +224,65 @@ namespace Syntime {
 
 		func callSyntimeExpression(data, parent, scope, isStatement: Boolean = false) { # {{{
 			if var path ?= $ast.path(data.callee) {
-				if var macros ?= scope.getSyntimeFunction(path) {
-					var arguments = MacroArgument.build(data.arguments, macros[0].scope(), parent)
+				if var functions ?= scope.getSyntimeFunction(path) {
+					var arguments = MacroArgument.build(data.arguments, functions[0].scope(), parent)
 					var context = parent.module().getTimeContext()
 
-					for var macro in macros {
-						if macro.matchArguments(arguments) {
+					for var function in functions {
+						if function.matchArguments(arguments) {
 							if !isStatement && context?.mode() == TimeMode.Syntime {
 								var type = $resolveSyntimeType(parent)
 
 								if type.isString() {
-									var result = macro.execute(data.arguments, parent, true)
+									var result = function.execute(data.arguments, parent, true)
 
 									return StringLiteral.new({ value: result }, parent)
 								}
 								else {
 									// TODO!
-									// var result = macro.execute(data.arguments, parent, false)
-									var r = macro.execute(data.arguments, parent, false)
+									// var result = function.execute(data.arguments, parent, false)
+									var r = function.execute(data.arguments, parent, false)
 
 									return $compile.expression(context.addMark(r), parent)
 								}
 							}
 
-							var result = macro.execute(data.arguments, parent, false)
+							var result = function.execute(data.arguments, parent, false)
 
-							if #result.body == 1 {
-								var body = result.body[0]
+							var node =
+								if #result.body == 1 {
+									var body = result.body[0]
 
-								match body.kind {
-									AstKind.ExpressionStatement {
-										if isStatement {
-											return $compile.statement(body, parent)
+									match body.kind {
+										AstKind.ExpressionStatement {
+											if isStatement {
+												set $compile.statement(body, parent)
+											}
+											else {
+												var expression = $compile.expression(body.expression, parent)
+
+												expression.setAttributes(body.attributes)
+
+												set expression
+											}
 										}
 										else {
-											var expression = $compile.expression(body.expression, parent)
-
-											expression.setAttributes(body.attributes)
-
-											return expression
+											throw NotImplementedException.new(parent)
 										}
 									}
-									else {
-										throw NotImplementedException.new(parent)
-									}
 								}
-							}
-							else {
-								throw NotImplementedException.new(parent)
-							}
+								else {
+									throw NotImplementedException.new(parent)
+								}
+
+							var nScope = node.scope()
+							var offset = nScope.line()
+
+							nScope
+								..setLineOffset(offset)
+								..line(1)
+
+							return node
 						}
 					}
 				}

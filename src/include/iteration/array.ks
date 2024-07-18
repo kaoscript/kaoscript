@@ -421,6 +421,10 @@ class ArrayIteration extends IterationNode {
 
 		if ?@value {
 			@bindingValue.acquireReusable(@value.isSplitAssignment())
+
+			var parameterType = if ?@split set Type.arrayOf(type.parameter(), @scope) else type.parameter()
+
+			@bindingValue.type(parameterType)
 		}
 
 		@assignTempVariables(@scope!?)

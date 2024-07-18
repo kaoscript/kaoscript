@@ -184,6 +184,38 @@ class EnumDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} # }}}
 	name() => @name
+	prepareSyntimeType(scope) { # {{{
+		var valueType = Type.fromAST(@data.type, scope, this)
+		var enumType = EnumType.new(scope, if valueType.isString() set EnumTypeKind.String else null)
+		var namedType = NamedType.new(@name, enumType)
+
+		scope.define(@name, true, namedType, this)
+
+		enumType.fillProperties(@name, this)
+
+		if ?@data.initial {
+			enumType.setGeneratorData(@data.initial, @data.step)
+		}
+
+		for var data in @data.members {
+			match data.kind {
+				AstKind.EnumValue {
+					EnumValueDeclaration.prepareSyntimeType(data, enumType)
+				}
+				AstKind.FieldDeclaration {
+					EnumFieldDeclaration.prepareSyntimeType(data, enumType, this)
+				}
+				AstKind.MethodDeclaration {
+					pass
+				}
+				else {
+					throw NotSupportedException.new(`Unknow kind \(data.kind)`, this)
+				}
+			}
+		}
+
+		return namedType
+	} # }}}
 	toMainTypeFragments(fragments) { # {{{
 		if @enum.type().isString() {
 			fragments.code('String')
@@ -298,6 +330,21 @@ class EnumValueDeclaration extends AbstractNode {
 	private {
 		@name: String
 	}
+	static {
+		prepareSyntimeType(data, enum: EnumType) { # {{{
+			var { type } =
+				if ?data.value {
+					NotImplementedException.throw()
+				}
+				else {
+					set enum.createValue(data.name.name)
+				}
+
+			if ?data.arguments {
+				type.setArgumentData(data.arguments)
+			}
+		} # }}}
+	}
 	constructor(data, @enum, parent) { # {{{
 		super(data, parent)
 
@@ -374,7 +421,7 @@ class EnumValueDeclaration extends AbstractNode {
 							var { index?, element? } = position
 
 							if !?index {
-								@type.setArgument(names[@arguments.length + 3], 'null')
+								@type.argument(names[@arguments.length + 3], 'null')
 
 								@arguments.push('void 0')
 							}
@@ -430,6 +477,17 @@ class EnumFieldDeclaration extends AbstractNode {
 	}
 	private {
 		@name: String
+	}
+	static {
+		prepareSyntimeType(data, enum: EnumType, node: AbstractNode) { # {{{
+			var type = EnumFieldType.fromAST(data, node)
+
+			enum.addField(type)
+
+			if ?data.type {
+				type.setTypeData(data.type)
+			}
+		} # }}}
 	}
 	constructor(data, @enum, parent) { # {{{
 		super(data, parent)

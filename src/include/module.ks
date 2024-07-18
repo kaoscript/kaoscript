@@ -4,6 +4,7 @@ export class Module {
 		@arguments: Array				= []
 		@binary: Boolean				= false
 		@body
+		@buildingSyntime: Boolean		= false
 		@compiler: Compiler
 		@data
 		@directory
@@ -39,6 +40,7 @@ export class Module {
 		@directory = $path.dirname(file)
 		@options = Attribute.configure(@data, @compiler._options, AttributeTarget.Global, file, true)
 		@standardLibrary = @options.libstd.current
+		@buildingSyntime = @compiler.hasMacroScope()
 
 		for var attr in @data.attributes {
 			if attr.declaration.kind == AstKind.Identifier &&	attr.declaration.name == 'bin' {
@@ -433,7 +435,7 @@ export class Module {
 
 			var mut exportingFragments = {}
 
-			if @standardLibrary {
+			if @standardLibrary && !@buildingSyntime {
 				for var export, name of @exports {
 					if export.type.isStandardLibrary(LibSTDMode.Yes) || export.type.hasAuxiliary() {
 						exportingFragments[name] = export

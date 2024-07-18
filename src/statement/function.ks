@@ -502,6 +502,7 @@ class FunctionDeclarator extends AbstractNode {
 	isJumpable() => false
 	isOverridableFunction() => false
 	parameters() => @parameters
+	recipient() => @parent.recipient()
 	toAwaitExpressionFragments(fragments, parameters, statements) { # {{{
 		fragments.code('(__ks_e')
 

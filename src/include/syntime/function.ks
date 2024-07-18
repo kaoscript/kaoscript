@@ -78,9 +78,14 @@ func $unquote(data, macro): NEResult { # {{{
 			return {ok: true, value: data.value}
 		}
 		is Ast(MemberExpression) {
-			var mark = macro.addMark(data)
+			if var object ?= macro.getEvalReference(data.object.name) {
+				return { ok: true, value: object[data.property.name] }
+			}
+			else {
+				var mark = macro.addMark(data)
 
-			return {ok: true, value: Marker.new(mark.arguments[0].value)}
+				return {ok: true, value: Marker.new(mark.arguments[0].value)}
+			}
 		}
 		is Ast(NumericExpression) {
 			return {ok: true, value: data.value}
@@ -130,9 +135,7 @@ func $generate(macro, node, data) { # {{{
 	return KSGeneration.generate(data)
 } # }}}
 
-func $reificate(macro, node, data, mut ast? = null, reification? = null, separator? = null) { # {{{
-	ast ??= data is Ast
-
+func $reificate(macro, node, data, ast: Boolean = data is Ast, reification: ReificationKind? = null, separator: String? = null) { # {{{
 	if ast {
 		if data is Array {
 			var result = [$generate(macro, node, item) for var item in data]
@@ -144,8 +147,8 @@ func $reificate(macro, node, data, mut ast? = null, reification? = null, separat
 		}
 	}
 	else {
-		match ReificationKind(reification) {
-			ReificationKind.Argument {
+		match reification {
+			.Argument {
 				if data is Array {
 					return data.join(', ')
 				}
@@ -153,7 +156,7 @@ func $reificate(macro, node, data, mut ast? = null, reification? = null, separat
 					return data
 				}
 			}
-			ReificationKind.Expression {
+			.Expression {
 				var context = {
 					data: ''
 				}
@@ -162,7 +165,7 @@ func $reificate(macro, node, data, mut ast? = null, reification? = null, separat
 
 				return context.data
 			}
-			ReificationKind.Join {
+			.Join {
 				if data is Array {
 					return data.join(separator)
 				}
@@ -170,7 +173,7 @@ func $reificate(macro, node, data, mut ast? = null, reification? = null, separat
 					return data
 				}
 			}
-			ReificationKind.Statement {
+			.Statement {
 				if data is Array {
 					return data.join('\n') + '\n'
 				}
@@ -178,7 +181,7 @@ func $reificate(macro, node, data, mut ast? = null, reification? = null, separat
 					return data
 				}
 			}
-			ReificationKind.Write {
+			.Write {
 				return data
 			}
 		}
@@ -308,14 +311,17 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 		@line: Number
 		@marks: Array							= []
 		@name: String
+		@newReferences: Type{}					= {}
 		@parameters: Object						= {}
+		@passedReferences						= {}
+		@preparedParameters: Boolean			= false
 		@referenceIndex: Number					= -1
 		@source: String?
 		@standardLibrary: Boolean
 		@type: SyntimeFunctionType
 	}
 	constructor(@data, @parent, _: Scope?, @name = data.name.name, @standardLibrary = false) { # {{{
-		super(data, parent, MacroScope.create(parent))
+		super(data, parent, MacroScope.createBlock(parent))
 
 		if @parent.scope().hasDefinedVariable(@name) {
 			SyntaxException.throwIdenticalIdentifier(@name, this)
@@ -429,6 +435,7 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			return data
 		}
 	} # }}}
+	getEvalReference(name: String) => @scope.parent().getEvalReference(name)
 	getMark(index) => @marks[index]
 	isEnhancementExport() => false
 	isExportable() => false
@@ -436,7 +443,11 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 	isStandardLibrary(): valueof @standardLibrary
 	isUsingVariable(name) => false
 	line() => @line
-	matchArguments(arguments: Array) => @type.matchArguments(arguments, this)
+	matchArguments(arguments: Array) { # {{{
+		@prepareParameters()
+
+		return @type.matchArguments(arguments, this)
+	} # }}}
 	name() => @name
 	statement() => this
 	toFragments(fragments, mode)
@@ -624,6 +635,10 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			}
 		} # }}}
 		buildFunction() { # {{{
+			@prepareParameters()
+
+			var references = []
+
 			if ?@data.source {
 				@source = @data.source
 			}
@@ -635,26 +650,44 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 					}
 				})
 
+				for var type, name of @newReferences {
+					var line = builder.newLine().code('export ')
+
+					type.toSyntimeFragments(name, line)
+
+					line.done()
+				}
+
+				if ?#@passedReferences {
+					var line = builder.newLine().code('require')
+					var block = line.newBlock()
+
+					for var reference, name of @passedReferences {
+						block.line(name)
+
+						references.push(reference)
+					}
+
+					block.done()
+					line.done()
+				}
+
 				var autoMark = builder.mark()
-				var line = builder.newLine().code('return func(eval, __ks_reificate')
+				var line = builder.newLine().code('export func __ksMain(eval: Evaluator, __ks_reificate: Reificator')
 				var argsMark = line.mark()
 				var block = line.code(')').newBlock()
 
-				for var data in @data.parameters {
-					var kind = ParameterKind.detect(data)
-					var name = data.internal.name
-					var rest = $ast.hasModifier(data, .Rest)
-
+				for var {kind, rest, data}, name of @parameters {
 					match kind {
-						.AST {
+						ParameterKind.AST {
 							argsMark.code(`, \(if rest set '...' else '')\(name)`)
 						}
-						.Evaluated {
+						ParameterKind.Evaluated {
 							argsMark.code(`, mut \(if rest set '...' else '')\(name)`)
 
 							block.line(`\(name) = eval(\(name))`)
 						}
-						.Mixed {
+						ParameterKind.Mixed {
 							argsMark.code(`, mut \(if rest set '...' else '')\(name)`)
 
 							block.line(`\(name) = __ks_auto_\(name)(eval, \(name))`)
@@ -666,8 +699,6 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 					if ?data.defaultValue {
 						argsMark.code(' = ').expression(data.defaultValue)
 					}
-
-					@parameters[name] = kind
 				}
 
 				block.line('var mut __ks_src = ""')
@@ -705,7 +736,20 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 				// echo(@source)
 			}
 
-			@fn = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData)
+			var result = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, ...references)
+
+			if ?result.__ksMain {
+				@fn = result.__ksMain
+
+				var scope = @scope.parent()
+
+				for var _, name of @newReferences {
+					scope.addEvalReference(name, result[name])
+				}
+			}
+			else {
+				@fn = result
+			}
 		} # }}}
 		buildTest(data: Ast, varname: String, fragments) { # {{{
 			match data.kind {
@@ -718,11 +762,17 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			}
 		} # }}}
 		compile(body: String): String { # {{{
-			var compiler = Compiler.new(`_ks_macro_\(@name)`, {
-				libstd: @options.libstd
-				register: false
-				target: $target
-			})
+			var compiler = Compiler.new(
+				`_ks_macro_\(@name)`
+				{
+					libstd: @options.libstd
+					register: false
+					target: $target
+				}
+				null
+				null
+				@module().compiler().getMacroScope(this)
+			)
 
 			var source = ```
 				extern console, JSON
@@ -733,30 +783,34 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 
 				require|import 'npm:@kaoscript/ast'
 
+				type Evaluator = func(data: Ast): Any?
+				type Reificator = func(data: Any, ast: Boolean? = null, reification: ReificationKind? = null, separator: String? = null): String
+
 				\(body)
 				```
 
-			// echo('func --> ', body)
+			// echo('func --> ', source)
 			compiler.compile(source)
 			// echo('=- ', compiler.toSource())
 
 			return compiler.toSource()
 		} # }}}
 		filter(statement, data, mut fragments) { # {{{
-			var elements = if statement {
-				unless data.kind == AstKind.ExpressionStatement && data.expression.kind == AstKind.QuoteExpression {
-					return false
-				}
+			var elements =
+				if statement {
+					unless data.kind == AstKind.ExpressionStatement && data.expression.kind == AstKind.QuoteExpression {
+						return false
+					}
 
-				set data.expression.elements
-			}
-			else {
-				unless data.kind == AstKind.QuoteExpression {
-					return false
+					set data.expression.elements
 				}
+				else {
+					unless data.kind == AstKind.QuoteExpression {
+						return false
+					}
 
-				set data.elements
-			}
+					set data.elements
+				}
 
 			if statement {
 				fragments = fragments.newLine().code('__ks_src += ')
@@ -769,7 +823,7 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 
 				match element.kind {
 					QuoteElementKind.Expression {
-						if element.expression.kind == AstKind.Identifier && @parameters[element.expression.name] == ParameterKind.AST {
+						if element.expression.kind == AstKind.Identifier && @parameters[element.expression.name]?.kind == ParameterKind.AST {
 							unless !?element.reification {
 								SyntaxException.throwInvalidASTReification(this)
 							}
@@ -777,13 +831,13 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
 						}
 						else if !?element.reification {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, null, \(ReificationKind.Expression))`)
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, null, ReificationKind.Expression)`)
 						}
 						else if element.reification.kind == ReificationKind.Join {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, ReificationKind.\(element.reification.kind.name), `).expression(element.separator).code(')')
 						}
 						else {
-							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, ReificationKind.\(element.reification.kind.name))`)
 						}
 					}
 					QuoteElementKind.Literal {
@@ -806,6 +860,84 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 
 			return true
 		} # }}}
+		prepareParameters() { # {{{
+			return if @preparedParameters
+
+			for var data in @data.parameters {
+				var kind = ParameterKind.detect(data:>(Ast))
+				var name = data.internal.name
+				var rest = $ast.hasModifier(data, .Rest)
+
+				if kind != .AST {
+					@prepareType(data.type)
+				}
+
+				@parameters[name] = {
+					kind
+					rest
+					data
+				}
+			}
+
+			@preparedParameters = true
+		} # }}}
+		prepareType(data: Ast) { # {{{
+			match data.kind {
+				.ArrayType {
+					for var property in data.properties {
+						if ParameterKind.detect(property) != .AST {
+							@prepareType(property)
+						}
+					}
+				}
+				.ObjectType {
+					for var property in data.properties {
+						if ParameterKind.detect(property) != .AST {
+							@prepareType(property)
+						}
+					}
+				}
+				.PropertyType {
+					@prepareType(data.type)
+				}
+				.TypeReference {
+					var name = data.typeName.name
+
+					return if ?@newReferences[name]
+
+					var scope = @scope.parent()
+
+					if var reference ?= scope.getEvalReference(name) {
+						@passedReferences[name] = reference
+					}
+					else if var variable ?= @parent.scope().getVariable(name, -1) {
+						if variable.isPredefined() || variable.isStandardLibrary() {
+							pass
+						}
+						else if var type ?= variable.declaration().prepareSyntimeType(scope) {
+							@newReferences[name] = type
+						}
+						else {
+							NotSupportedException.throw()
+						}
+					}
+					else {
+						ReferenceException.throwNotDefined(name, this)
+					}
+				}
+				.UnionType {
+					for var type in data.types {
+						if ParameterKind.detect(type) != .AST {
+							@prepareType(type)
+						}
+					}
+				}
+				else {
+					echo(data)
+					NotImplementedException.throw()
+				}
+			}
+		} # }}}
 	}
 }
 
@@ -825,7 +957,7 @@ class SyntimeFunctionType extends FunctionType {
 		return type
 	} # }}}
 	assessment(name: String, node: AbstractNode) { # {{{
-		if @assessment == null {
+		if !?@assessment {
 			@assessment = Router.assess([this], name, node)
 
 			@assessment.macro = true
@@ -877,17 +1009,20 @@ class MacroArgument extends Type {
 		@evalType: Type?
 		@node: AbstractNode
 		@rawType: Type?
+		@update?
 	}
 	static build(arguments: [], scope: Scope, node: AbstractNode) { # {{{
 		var result = []
 
-		for var argument in arguments {
-			result.push(MacroArgument.new(argument, scope, node))
+		for var argument, index in arguments {
+			result.push(MacroArgument.new(argument, scope, node, (data) => {
+				arguments[index] = data
+			}))
 		}
 
 		return result
 	} # }}}
-	constructor(@data, @scope, @node) { # {{{
+	constructor(@data, @scope, @node, @update = null) { # {{{
 		super(scope)
 
 		@ast = @data.kind != AstKind.Operator
@@ -942,9 +1077,40 @@ class MacroArgument extends Type {
 				return @rawType.isAssignableToVariable(value, anycast, nullcast, downcast, limited)
 			}
 			else {
-				@evalType ??= Type.fromAST(@data, @scope, @node)
+				match @data.kind {
+					AstKind.UnaryExpression when @data.operator.kind == OperatorKind.Implicit {
+						@evalType ??= value.discardReference().getProperty(@data.argument.name)
 
-				return @evalType.isAssignableToVariable(value, anycast, nullcast, downcast, limited)
+						if ?@evalType {
+							var data = {
+								kind: AstKind.MemberExpression
+								modifiers: []
+								object: {
+									kind: AstKind.Identifier
+									modifiers: []
+									name: value.name()
+									start: @data.operator.start
+									end: @data.operator.end
+								}
+								property: @data.argument
+								start: @data.start
+								end: @data.end
+							}
+
+							@update(data)
+
+							return true
+						}
+						else {
+							return false
+						}
+					}
+					else {
+						@evalType ??= Type.fromAST(@data, @scope, @node)
+
+						return @evalType.isAssignableToVariable(value, anycast, nullcast, downcast, limited)
+					}
+				}
 			}
 		}
 	} # }}}
@@ -1013,9 +1179,7 @@ class CallStatement extends Statement {
 		super(data, parent, scope)
 	} # }}}
 	initiate() { # {{{
-		// echo(@data)
 		var data = @macro.execute(@data.expression.arguments, this, false)
-		// echo(data)
 
 		var offset = @scope.getLineOffset()
 
@@ -1035,6 +1199,10 @@ class CallStatement extends Statement {
 
 				statement.initiate()
 			}
+		}
+
+		for var statement in @statements {
+			statement.postInitiate()
 		}
 
 		@scope.line(data.end.line)
@@ -1062,6 +1230,14 @@ class CallStatement extends Statement {
 			statement.enhance()
 		}
 
+		if var recipient ?= @recipient() {
+			for var statement in @statements when statement.isExportable() {
+				@scope.line(statement.line())
+
+				statement.export(recipient, true)
+			}
+		}
+
 		@scope.setLineOffset(@offsetEnd)
 	} # }}}
 	override prepare(target, targetMode) { # {{{
@@ -1071,6 +1247,14 @@ class CallStatement extends Statement {
 			@scope.line(statement.line())
 
 			statement.prepare(target)
+		}
+
+		if var recipient ?= @recipient() {
+			for var statement in @statements when statement.isExportable() {
+				@scope.line(statement.line())
+
+				statement.export(recipient, false)
+			}
 		}
 
 		@scope.setLineOffset(@offsetEnd)

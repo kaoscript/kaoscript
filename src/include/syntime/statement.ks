@@ -2,13 +2,18 @@ class SyntimeStatement extends Statement {
 	private {
 		@marks: Array								= []
 		@macros: SyntimeFunctionDeclaration[]{}		= {}
+		@macroScope: MacroScope
 		@newData: Ast(StatementList)?				= null
+		@newReferences: Type{}						= {}
 		@offsetEnd: Number							= 0
 		@offsetStart: Number						= 0
+		@passedReferences							= {}
 		@statements									= []
 	}
 	override constructor(@data, @parent, @scope) { # {{{
 		super(data, parent, scope)
+
+		@macroScope = @module().compiler().getMacroScope(this)
 
 		var builder = KSGeneration.KSWriter.new({
 			filters: {
@@ -16,6 +21,8 @@ class SyntimeStatement extends Statement {
 				statement: @filterStatement
 			}
 		})
+
+		var refMark = builder.mark()
 
 		builder.line('var mut __ks_src = ""')
 
@@ -60,34 +67,39 @@ class SyntimeStatement extends Statement {
 
 		builder.line('return __ks_src')
 
+		for var type, name of @newReferences {
+			var line = refMark.newLine().code('export ')
+
+			type.toSyntimeFragments(name, line)
+
+			line.done()
+		}
+
+		var references = []
+
+		if ?#@passedReferences {
+			var line = refMark.newLine().code('require')
+			var block = line.newBlock()
+
+			for var reference, name of @passedReferences {
+				block.line(name)
+
+				references.push(reference)
+			}
+
+			block.done()
+			line.done()
+		}
+
 		var mut source = ''
 
 		for var fragment in builder.toArray() {
 			source += fragment.code
 		}
-		// echo(source)
 
 		var compiled = @compile(source)
-		// echo(compiled)
 
-		var fn = eval(compiled)
-
-		var args = [Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, this, (data, reification? = null) => {
-			if data is Ast {
-				return $generate(this, this, data)
-			}
-			else {
-				var context = {
-					data: ''
-				}
-
-				$serialize(this, data, context)
-
-				return context.data
-			}
-		}]
-
-		var result = fn(...args!?)
+		var result = Syntime.evaluate(compiled, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, this, @unquote, ...references)
 
 		if ?#result {
 			try {
@@ -258,11 +270,17 @@ class SyntimeStatement extends Statement {
 	} # }}}
 	private {
 		compile(body: String): String { # {{{
-			var compiler = Compiler.new(`__ks__`, {
-				libstd: @options.libstd
-				register: false
-				target: $target
-			})
+			var compiler = Compiler.new(
+				`__ks__`
+				{
+					libstd: @options.libstd
+					register: false
+					target: $target
+				}
+				null
+				null
+				@macroScope
+			)
 
 			var source = ```
 				require|import 'npm:@kaoscript/ast'
@@ -352,6 +370,29 @@ class SyntimeStatement extends Statement {
 				}
 			}
 		} # }}}
+		filterReference(data) { # {{{
+			match data.kind {
+				AstKind.Identifier {
+					var name = data.name
+
+					return if ?@newReferences[name]
+
+					if var reference ?= @macroScope.getEvalReference(name) {
+						@passedReferences[name] = reference
+					}
+					else if {
+						var variable ?= @scope.getVariable(name, -1)
+						var type ?= variable.declaration().prepareSyntimeType(@macroScope)
+					}
+					then {
+						@newReferences[name] = type
+					}
+				}
+				AstKind.MemberExpression {
+					@filterReference(data.object)
+				}
+			}
+		} # }}}
 		filterStatement(data, fragments): Boolean { # {{{
 			match data.kind {
 				AstKind.ExpressionStatement when data.expression.kind == AstKind.QuoteExpression {
@@ -363,12 +404,34 @@ class SyntimeStatement extends Statement {
 
 					return true
 				}
+				AstKind.ExpressionStatement {
+					@filterExpression(data.expression, fragments)
+				}
+				AstKind.ForStatement {
+					for var iteration in data.iterations {
+						@filterReference(iteration.expression)
+					}
+				}
 			}
 
 			return false
 		} # }}}
 		isASTVariable(name: String): Boolean { # {{{
 			return false
+		} # }}}
+		unquote(data, reification? = null) { # {{{
+			if data is Ast {
+				return $generate(this, this, data)
+			}
+			else {
+				var context = {
+					data: ''
+				}
+
+				$serialize(this, data, context)
+
+				return context.data
+			}
 		} # }}}
 	}
 }

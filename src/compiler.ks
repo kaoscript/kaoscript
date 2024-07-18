@@ -55,6 +55,7 @@ export class Compiler {
 		@fragments
 		@hashes: Object
 		@hierarchy: Array
+		@macroScope: MacroScope?
 		@options: Object
 		@timeContext: TimeContext?
 	}
@@ -108,7 +109,7 @@ export class Compiler {
 			}
 		} # }}}
 	}
-	constructor(@file, options? = null, @hashes = {}, @hierarchy = [@file]) { # {{{
+	constructor(@file, options? = null, @hashes = {}, @hierarchy = [@file], @macroScope = null) { # {{{
 		@options = Object.merge({
 			error: {
 				level: 'fatal'
@@ -210,7 +211,16 @@ export class Compiler {
 
 		return this
 	} # }}}
+	getMacroScope(node: AbstractNode): MacroScope { # {{{
+		if !?@macroScope {
+			@macroScope = MacroScope.new(node)
+		}
+
+		// TODO!
+		return @macroScope!?
+	} # }}}
 	getTimeContext(): TimeContext? => @timeContext
+	hasMacroScope(): Boolean => ?@macroScope
 	isInHierarchy(file) => @hierarchy.contains(file)
 	module(): valueof @module
 	readFile() => $fs.readFile(@file)

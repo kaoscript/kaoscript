@@ -224,7 +224,7 @@ class ObjectBinding extends Expression {
 		fragments.code('}')
 	} # }}}
 	toAssertFragments(fragments, value, inline) { # {{{
-		if !@tested && !value.type().isBroadObject() {
+		if !@tested && !(value.type().isBroadObject() || value.type().isEnum()) {
 			if inline {
 				@testType.toAssertFragments(value, true, fragments, this)
 

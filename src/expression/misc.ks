@@ -48,6 +48,7 @@ class TempMemberExpression extends Expression {
 		@property
 		@reusable: Boolean		= false
 		@reuseName: String?		= null
+		@type: Type				= AnyType.NullableUnexplicit
 	}
 	constructor(@object, @property, @computed, @parent, @scope) { # {{{
 		super({}, parent, scope)
@@ -101,6 +102,8 @@ class TempMemberExpression extends Expression {
 
 		@reusable = true
 	} # }}}
+	type() => @type
+	type(@type)
 }
 
 class TempReusableExpression extends Expression {

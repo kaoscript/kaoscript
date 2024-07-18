@@ -1,0 +1,3 @@
+import './syntime.xtype.enum.func.export.ks'
+
+myMacro(Weekday.MONDAY)

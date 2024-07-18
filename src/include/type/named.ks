@@ -109,7 +109,17 @@ class NamedType extends Type {
 	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
 	override getPrettyName(_) => @prettyName ?? @name
 	getProperty(index: Number) => @type.getProperty(index)
-	getProperty(name: String) => @type.getProperty(name)
+	override getProperty(name) { # {{{
+		if @type.isEnum() {
+			if @type.discard().hasValue(name) {
+				return @reference()
+			}
+
+			return null
+		}
+
+		return @type.getProperty(name)
+	} # }}}
 	getTestIndex() => @type.getTestIndex()
 	getTestName() => @type.getTestName()
 	hasContainer() => ?@container
@@ -634,6 +644,7 @@ class NamedType extends Type {
 		}
 	} # }}}
 	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)
+	toSyntimeFragments(name: String, fragments) => @type.toSyntimeFragments(name, fragments)
 	override toVariations(variations) { # {{{
 		variations.push('named', @name)
 

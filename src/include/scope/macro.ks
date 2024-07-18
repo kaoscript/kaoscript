@@ -1,19 +1,13 @@
 class MacroScope extends ModuleScope {
-	static create(node: AbstractNode): BlockScope {
-		var instance = MacroScope.instance(node)
-
-		return BlockScope.new(instance)
+	private {
+		@evalReferences					= {}
 	}
-	private static instance(node: AbstractNode): MacroScope {
-		if !?MacroScope._instance {
-			MacroScope._instance = MacroScope.new(node)
-		}
+	static createBlock(node: AbstractNode): BlockScope { # {{{
+		var macro = node.module().compiler().getMacroScope(node)
 
-		// TODO
-		return MacroScope._instance!?
-	}
-	private static _instance: MacroScope?
-	private constructor(node: AbstractNode) {
+		return BlockScope.new(macro)
+	} # }}}
+	constructor(node: AbstractNode) { # {{{
 		super(true)
 
 		ImportDeclaration.new({
@@ -37,6 +31,10 @@ class MacroScope extends ModuleScope {
 			..initiate()
 			..analyse()
 			..prepare(Type.Void, TargetMode.Permissive)
-	}
+	} # }}}
+	addEvalReference(name: String, reference) { # {{{
+		@evalReferences[name] = reference
+	} # }}}
+	getEvalReference(name: String) => @evalReferences[name]
 	override isMacro() => true
 }

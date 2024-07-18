@@ -787,6 +787,19 @@ class EnumType extends Type {
 	toFragments(fragments, node) { # {{{
 		throw NotImplementedException.new()
 	} # }}}
+	toSyntimeFragments(name: String, fragments) { # {{{
+		var body = fragments.code(`enum \(name)`).newBlock()
+
+		for var value of @values {
+			value.toSyntimeFragments(body)
+		}
+
+		for var field of @fields when !field.isInbuilt() {
+			field.toSyntimeFragments(body)
+		}
+
+		body.done()
+	} # }}}
 	override toVariations(variations) { # {{{
 		variations.push('enum', @sequences.defaults)
 
@@ -805,6 +818,7 @@ class EnumType extends Type {
 class EnumValueType {
 	private {
 		@alteration: Boolean	= false
+		@argumentData?			= null
 		@arguments: String{}	= {}
 		@index: Number?			= null
 		@name: String
@@ -832,6 +846,26 @@ class EnumValueType {
 	isAlteration() => @alteration
 	isTopDerivative() => false
 	name() => @name
+	setArgumentData(@argumentData)
+	toSyntimeFragments(fragments) { # {{{
+		var line = fragments.newLine()
+
+		line.code(@name)
+
+		if ?@argumentData {
+			line.code(' = (')
+
+			for var argument, index in @argumentData {
+				line
+					..code(', ') if index > 0
+					..expression(argument)
+			}
+
+			line.code(')')
+		}
+
+		line.done()
+	} # }}}
 	unflagAlteration() { # {{{
 		@alteration = false
 
@@ -901,6 +935,7 @@ class EnumFieldType extends Type {
 		@inbuilt: Boolean		= false
 		@name: String
 		@type: Type
+		@typeData?				= null
 	}
 	static {
 		fromAST(data, node: AbstractNode): EnumFieldType { # {{{
@@ -971,7 +1006,19 @@ class EnumFieldType extends Type {
 	} # }}}
 	isInbuilt() => @inbuilt
 	name() => @name
+	setTypeData(@typeData)
 	override toFragments(fragments, node)
+	toSyntimeFragments(fragments) { # {{{
+		var line = fragments.newLine()
+
+		line.code(`const \(@name)`)
+
+		if ?@typeData {
+			line.code(': ').expression(@typeData)
+		}
+
+		line.done()
+	} # }}}
 	override toVariations(variations)
 	type(): valueof @type
 	type(@type): valueof this

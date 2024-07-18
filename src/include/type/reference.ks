@@ -1833,12 +1833,13 @@ class ReferenceType extends Type {
 			}
 		}
 		else {
-			@resolve()
-
 			if @nullable == nullable {
 				return this
 			}
-			else if @type.isUnion() {
+
+			@resolve()
+
+			if @type.isUnion() {
 				if nullable {
 					if @type.isAlias() {
 						return @scope.reference(@name, true, [...@parameters], [...@subtypes])
