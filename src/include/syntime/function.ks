@@ -311,10 +311,10 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 		@line: Number
 		@marks: Array							= []
 		@name: String
-		@newReferences: Type{}					= {}
+		// @newReferences: Type{}					= {}
 		@parameters: Object						= {}
-		@passedReferences						= {}
-		@preparedParameters: Boolean			= false
+		// @passedReferences						= {}
+		@passedReferences: String[]				= []
 		@referenceIndex: Number					= -1
 		@source: String?
 		@standardLibrary: Boolean
@@ -326,6 +326,8 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 		if @parent.scope().hasDefinedVariable(@name) {
 			SyntaxException.throwIdenticalIdentifier(@name, this)
 		}
+
+		@prepareParameters()
 
 		@type = SyntimeFunctionType.fromAST(data!?, this)
 		@line = data.start?.line ?? -1
@@ -444,8 +446,6 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 	isUsingVariable(name) => false
 	line() => @line
 	matchArguments(arguments: Array) { # {{{
-		@prepareParameters()
-
 		return @type.matchArguments(arguments, this)
 	} # }}}
 	name() => @name
@@ -635,9 +635,9 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			}
 		} # }}}
 		buildFunction() { # {{{
-			@prepareParameters()
-
-			var references = []
+			var inReferences = []
+			var outReferences = []
+			var scope = @scope.parent()
 
 			if ?@data.source {
 				@source = @data.source
@@ -650,26 +650,24 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 					}
 				})
 
-				for var type, name of @newReferences {
-					var line = builder.newLine().code('export ')
-
-					type.toSyntimeFragments(name, line)
-
-					line.done()
-				}
-
 				if ?#@passedReferences {
-					var line = builder.newLine().code('require')
-					var block = line.newBlock()
+					for var name in @passedReferences {
+						if var reference ?= scope.getEvalReference(name) {
+							builder.line(`require \(name)`)
 
-					for var reference, name of @passedReferences {
-						block.line(name)
+							inReferences.push(reference)
+						}
+						else {
+							var line = builder.newLine().code('export ')
+							var type = scope.getVariable(name, -1).getDeclaredType()
 
-						references.push(reference)
+							type.toSyntimeFragments(name, line)
+
+							line.done()
+
+							outReferences.push(name)
+						}
 					}
-
-					block.done()
-					line.done()
 				}
 
 				var autoMark = builder.mark()
@@ -736,14 +734,12 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 				// echo(@source)
 			}
 
-			var result = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, ...references)
+			var result = Syntime.evaluate(@source, Marker, Position, Range, VersionData, ModifierKind, ModifierData, AstKind, Ast, OperatorAttribute, OperatorKind, IterationKind, RestrictiveOperatorKind, UnaryTypeOperatorKind, AssignmentOperatorKind, BinaryOperatorKind, UnaryOperatorKind, BinaryOperatorData, IterationData, RestrictiveOperatorData, UnaryOperatorData, UnaryTypeOperatorData, QuoteElementKind, ReificationKind, QuoteElementData, ReificationData, ScopeKind, ScopeData, ...inReferences)
 
 			if ?result.__ksMain {
 				@fn = result.__ksMain
 
-				var scope = @scope.parent()
-
-				for var _, name of @newReferences {
+				for var name in outReferences {
 					scope.addEvalReference(name, result[name])
 				}
 			}
@@ -861,8 +857,6 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 			return true
 		} # }}}
 		prepareParameters() { # {{{
-			return if @preparedParameters
-
 			for var data in @data.parameters {
 				var kind = ParameterKind.detect(data:>(Ast))
 				var name = data.internal.name
@@ -878,8 +872,6 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 					data
 				}
 			}
-
-			@preparedParameters = true
 		} # }}}
 		prepareType(data: Ast) { # {{{
 			match data.kind {
@@ -903,19 +895,17 @@ class SyntimeFunctionDeclaration extends AbstractNode {
 				.TypeReference {
 					var name = data.typeName.name
 
-					return if ?@newReferences[name]
-
 					var scope = @scope.parent()
 
-					if var reference ?= scope.getEvalReference(name) {
-						@passedReferences[name] = reference
-					}
-					else if var variable ?= @parent.scope().getVariable(name, -1) {
+					if var variable ?= @parent.scope().getVariable(name, -1) {
 						if variable.isPredefined() || variable.isStandardLibrary() {
 							pass
 						}
+						else if scope.hasEvalReference(name) {
+							@passedReferences.pushUniq(name)
+						}
 						else if var type ?= variable.declaration().prepareSyntimeType(scope) {
-							@newReferences[name] = type
+							@passedReferences.pushUniq(name)
 						}
 						else {
 							NotSupportedException.throw()

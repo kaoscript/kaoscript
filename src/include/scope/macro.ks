@@ -1,6 +1,7 @@
 class MacroScope extends ModuleScope {
 	private {
 		@evalReferences					= {}
+		@newReferences: String[]		= []
 	}
 	static createBlock(node: AbstractNode): BlockScope { # {{{
 		var macro = node.module().compiler().getMacroScope(node)
@@ -35,6 +36,14 @@ class MacroScope extends ModuleScope {
 	addEvalReference(name: String, reference) { # {{{
 		@evalReferences[name] = reference
 	} # }}}
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
+		var variable = super(name, immutable, type, initialized, overwrite, node)
+
+		@newReferences.push(name)
+
+		return variable
+	} # }}}
 	getEvalReference(name: String) => @evalReferences[name]
+	hasEvalReference(name: String): Boolean => @newReferences.contains(name)
 	override isMacro() => true
 }
