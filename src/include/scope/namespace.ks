@@ -5,6 +5,15 @@ class NamespaceScope extends BlockScope {
 		@parent = parent.authority()
 		@authority = this
 	} # }}}
+	override define(name, immutable, type, initialized, overwrite, node) { # {{{
+		var variable = super(name, immutable, type, initialized, overwrite, node)
+
+		if node is Statement {
+			variable.declaration(node)
+		}
+
+		return variable
+	} # }}}
 }
 
 class NamespaceTypeScope extends BlockScope {
